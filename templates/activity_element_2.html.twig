@@ -1,0 +1,708 @@
+{% extends "layout.html.twig" %}
+
+
+{% set elmtType = app.request_stack.currentrequest.get('elmtType') %}
+{% set elmtId = app.request_stack.currentrequest.get('elmtId') %}
+
+{% macro visibility_icon(v) %}
+  {% if v == 1 %}
+    <i class="material-icons">public</i>
+  {% elseif v == 2 %}
+    <i class="material-icons">vpn_lock</i>
+  {% endif %}
+{% endmacro %}
+
+{% macro visibility_label(v) %}
+  {% if v == 1 %}
+    {{ 'stages.stage.visibility.public'|trans }}
+  {% elseif v == 2 %}
+    {{ 'stages.stage.visibility.unlisted'|trans }}
+  {% endif %}
+{% endmacro %}
+
+{% macro render_cn_icon(icon) %}
+  {% if not icon %}
+    <i class="fa fa-cube"></i>
+  {% elseif icon.type != "m" %}
+    <i class="{{ icon.type }} fa-{{ icon.name }}"></i>
+  {% else %}
+    <i class="material-icons">{{ icon.name }}</i>
+  {% endif %}
+{% endmacro %}
+
+{% set elmt = app.request_stack.currentrequest.get('elmtType') %}
+{% set colors = ["purple", "green", "orange", "blue-grey", "light-blue", "pink", "teal", "deep-purple", "lime", "grey", "light-green","red"] %}
+
+
+
+{% block title %}
+  {{ 'criteria.page_title'|trans }}
+{% endblock %}
+
+{% block css %}
+  <link rel="stylesheet" href="{{ asset('css/activity.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/nouislider.css') }}">
+{% endblock %}
+
+{% block content %}
+<main>
+    {{ form_start(form, { attr: { autocomplete: "off" } }) }}
+    <header id="main-header">
+      {% if elmtType == 'activity' %}
+        <a class="waves-effect waves-green btn back-btn" href="{{ url('myActivities')}}">{{ 'activity_elements.go_back_activities'|trans }}</a>
+      {% elseif elmtType == 'iprocess' %}
+      <a class="waves-effect waves-green btn back-btn" href="{{ url('manageProcesses',{orgId: currentuser.id}) }}">{{ 'activity_elements.go_back_processes'|trans }}</a>
+      {% endif %}
+      <div class="flex-center" style="flex-direction: column">
+        <div>
+          <div class="activity-name showedit">
+            <div class="show">
+              {{ form.vars.data.name }}
+            </div>
+            <div class="edit">
+              {{ form_widget(form.name, { attr: { hidden: 'hidden' } }) }}
+              <div class="custom-input" contenteditable spellcheck="false">
+                {{ form.vars.data.name }}
+              </div>
+            </div>
+            <button type="button" class="btn-flat btn-edit mat-icon"></button>
+          </div>
+          <div class="actions">
+          </div>
+        </div>
+        {% if elmtType == 'iprocess' %}
+        <div>
+          <a class="btn-flat iprocess-name flex-center">
+            <i class="material-icons">layers</i>
+            <span>{{'activity_elements.iprocess'|trans}}</span>
+          </a>
+        </div>
+        {% endif %}
+
+      </div>
+    </header>
+
+    {% if elmtType == 'iprocess' or elmtType == 'process' %}
+      <div>
+        {{ form_widget(form.approvable) }}
+        {{ form_label(form.approvable) }}
+      </div>
+    {% endif %}
+
+
+    <ol id="{{ form.activeModifiableStages.vars.id }}" class="stages">
+
+      {% if elmtType == 'activity' %}
+
+      {% set completedStages = form.vars.data.oCompletedStages %}
+      {% if completedStages|length > 0 %}
+            <li class="stage-element completed-stages-element">
+              <div class="stage-item-name">
+                <div class="meta">
+                  <div class="stage-dates">
+                    <i class="fa fa-calendar"></i>
+                  </div>
+                </div>
+                <div class="name">
+                  <span class="stage-name-field">{{'activity_elements.evaluated_stages'|trans}}</span>
+                </div>
+                <div class="meta">
+                  <div class="grading-dates">
+                    <i class="fa fa-paper-plane"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="stage-item-button completed-stages">
+                <i class="material-icons">layers</i>
+                <div class="nb-completed-stages">{{ completedStages|length }}</div>
+              </div>
+              <section class="stage-container completed-stages-container"></section>
+            </li>
+
+        {% endif %}
+        {% endif %}
+
+
+
+      {% set stages = form.activeModifiableStages %}
+      {% for s, stage in stages %}
+
+        {% set visibility = stage.vars.data.visibility %}
+        {% set definite_dates = stage.vars.data.definiteDates %}
+
+        {% if stage.vars.data.progress == -5 %}
+          {% set progressMsg = 'stages.stage.progress.stopped'|trans %}
+          {% set progressIcon = 'cancel' %}
+        {% elseif stage.vars.data.progress == -4 %}
+          {% set progressMsg = 'stages.stage.progress.postponed'|trans %}
+          {% set progressIcon = 'more_horiz' %}
+        {% elseif stage.vars.data.progress == -3 %}
+          {% set progressMsg = 'stages.stage.progress.suspended'|trans %}
+          {% set progressIcon = 'pause' %}
+        {% elseif stage.vars.data.progress == -2 %}
+          {% set progressMsg = 'stages.stage.progress.reopened'|trans %}
+          {% set progressIcon = 'replay' %}
+        {% elseif stage.vars.data.progress == -1 %}
+          {% set progressMsg = 'stages.stage.progress.unstarted'|trans %}
+          {% set progressIcon = 'call_missed_outgoing' %}
+        {% elseif stage.vars.data.progress is same as(0) %}
+          {% set progressMsg = 'stages.stage.progress.upcoming'|trans %}
+          {% set progressIcon = 'forward' %}
+        {% elseif stage.vars.data.progress == 1 or stage.vars.data.progress is null %}
+          {% set progressMsg = 'stages.stage.progress.ongoing'|trans %}
+          {% set progressIcon = 'play_arrow' %}
+        {% elseif stage.vars.data.progress == 2 %}
+          {% set progressMsg = 'stages.stage.progress.completed'|trans %}
+          {% set progressIcon = 'done' %}
+        {% elseif stage.vars.data.progress == 3 %}
+          {% set progressMsg = 'stages.stage.progress.finalized'|trans %}
+          {% set progressIcon = 'done_all' %}
+        {% endif %}
+
+
+
+        <li id="{{ stage.vars.id }}" class="stage-element stage" data-id="{{ stage.vars.data.id }}">
+          {% include "modals/stage_settings.html.twig" with { elmtType: elmtType, s: s, sNb: s + 1, stage: stage, progressMsg: progressMsg is defined ? progressMsg : null } %}
+
+          <div class="stage-item-name">
+            <div class="meta">
+              {% if definite_dates or elmtType == 'activity' %}
+
+                <div class="stage-dates">
+                  <i class="fa fa-calendar"></i>
+                  {{ stage.vars.data.startdate|localizeddate('short', 'none', null, null, 'dd/MM') }}
+                  {% if stage.vars.data.startdate != stage.vars.data.enddate %}
+                    -
+                    {{ stage.vars.data.enddate|localizeddate('short', 'none', null, null, 'dd/MM') }}
+                  {% endif %}
+
+                </div>
+
+              {% else %}
+                <div class="stage-period-freq">
+                  <i class="fa fa-clock"></i>
+                  {{ stage.vars.data.dperiod }}
+                  {{ stage.vars.data.dfrequency }}
+                </div>
+              {% endif %}
+            </div>
+            <div class="name">
+              <span class="visibility">{{ _self.visibility_icon(visibility) }}</span>
+              <div class="name-and-progress">
+                <span class="stage-name-field">{{ stage.vars.data.name }}</span>
+                <span class="s-weighting">({{ (stage.vars.data.activeWeight * 100)|round }} %)</span>
+                {% if elmtType == 'activity' %}
+                  <span class="stage-progress-status tooltipped" data-position="top" data-tooltip="{{ progressMsg }}">
+                      <i class="material-icons">{{progressIcon}}</i>
+                  </span>
+                {% endif %}
+              </div>
+            </div>
+            <div class="meta">
+              <div class="grading-dates">
+                <i class="fa fa-paper-plane"></i>
+                {{ stage.vars.data.gstartdate|localizeddate('short', 'none', null, null, 'dd/MM') }}
+                {% if stage.vars.data.gstartdate != stage.vars.data.genddate %}
+                  -
+                  {{ stage.vars.data.genddate|localizeddate('short', 'none', null, null, 'dd/MM') }}
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          <div class="stage-item-button"></div>
+
+          <section class="stage-container">
+            <div class="stage-container--main">
+              <div class="stage-weight">
+                <a href="#" class="btn-flat">
+                  <span>{{ "weight"|trans}} :</span>
+                  <span class="s-weighting">{{ (stage.vars.data.activeWeight * 100)|round }} %</span>
+                </a>
+              </div>
+              {% if elmtType == 'activity' %}
+                <div class="stage-progress-status">
+                  <a href="#" class="btn-flat">
+                    <span>{{ 'stages.stage.progress.title'|trans}} :</span>
+                    <span class="stage-progress-msg">{{ progressMsg }}</span>
+                  </a>
+                </div>
+              {% endif %}
+              <div class="stage-actions">
+                <a href="#stage_{{s}}" class="btn-flat modal-trigger">
+                  <i class="material-icons right">edit</i> {{'activity_elements.modify_stage_btn'|trans}}
+                </a>
+              </div>
+
+              <section class="criteria">
+                <template class="criteria-list--item__proto">
+                  {%
+                    include "components/activity_page__criterion_item.html.twig"
+                    with { s: s, c: "__crtNb__", criterion: stage.criteria.vars.prototype }
+                  %}
+                </template>
+                <header>
+                  <ul class="tabs output-tabs tabs-fixed-width">
+                    <li class="tab criteria-tab">
+                      <a href="#stage-{{s}}-type--criteria">{{ 'activity_elements.criteria'|trans }}</a>
+                    </li>
+                    <li class="tab survey-tab">
+                      <a href="#stage-{{s}}-type--survey">{{ 'activity_elements.survey'|trans }}</a>
+                    </li>
+                  </ul>
+                </header>
+                <div id="stage-{{s}}-type--criteria">
+                  <ul class="criteria-list">
+                    <template class="criteria-list--item__proto">
+                      {% include "modals/stage_criterion.html.twig" with { s: '__stgNb__', c: '__crtNb__', criterion: stage.criteria.vars.prototype } %}
+                    </template>
+                    {% for c, criterion in stage.criteria %}
+                      {% include "components/activity_page__criterion_item.html.twig" with { s: s, c: c, criterion: criterion } %}
+                    {% endfor %}
+                    {#
+                      This item only displays when not preceeded with any element,
+                      through CSS direct sibling selector.
+                    #}
+                    <li class="no-items-placeholder">
+                      <p>
+                        {{ 'process_stages.no_criteria'|trans }}
+                      </p>
+                      <p>
+                        {{ 'process_stages.tooltip_no_criteria'|trans }}
+                      </p>
+                    </li>
+                  </ul>
+                  <footer>
+                    <button class="btn-flat btn-add-criterion">
+                      <i class="material-icons left">add</i>
+                      {{ 'criteria.add_btn_internal'|trans }}
+                    </button>
+                  </footer>
+                </div>
+                <div id="stage-{{s}}-type--survey">
+                  {% if stage.vars.data.survey|length != null %}
+                    <h6>Gérer le sondage</h6>
+                    <div class="action-buttons flex-center-sb">
+
+                        {% if stage.vars.data.isFinalized == false %}
+                          <a
+                            href="{{ url('surveyRequest',{'stgId' : stage.vars.data.id}) }}?redirect={{ url(route,routeParams)|e('url') }}"
+                            class="btn waves-effect waves-light tooltipped"
+                            data-tooltip="{% trans %}process_stages.editSurvey{% endtrans %}">
+                            <i class="fa fa-pencil-alt"></i>
+                          </a>
+                        {% endif %}
+
+                        {% if stage.vars.data.survey.answers|length != null %}
+                          <a
+                            href="{{ url('answerShow',{'surId':stage.vars.data.survey.id}) }}"
+                            class="modal-trigger btn waves-effect waves-light tooltipped"
+                            data-tooltip="{% trans %}process_stages.checkAnswers{% endtrans %}">
+                            <i class="fas fa-eye"></i>
+                          </a>
+                        {% endif %}
+
+
+                        <a
+                          href="#deleteSurveyModal" class="modal-trigger btn waves-effect waves-light tooltipped"
+                          data-tooltip="{% trans %}process_stages.delete{% endtrans %}">
+                          <i class="fas fa-trash"></i>
+                        </a>
+
+                    </div>
+
+
+                    <div id="deleteSurveyModal" class="modal">
+                      <div class="modal-title">
+                        <h5>{% trans %}process_stages.validate_delete{% endtrans %}</h5>
+                      </div>
+                      <div class="modal-footer">
+                        <a
+                          class="modal-close btn red cancel-btn">{% trans %}criteria.diffToSimilar.cancel{% endtrans %}</a>
+                        <a
+                          href="{{ url('surveyDelete',{surId : stage.vars.data.survey.id}) }}?redirect={{ url(route,routeParams)|e('url') }}"
+                          class="btn modal-close">
+                          {% trans %}criteria.diffToSimilar.accept{% endtrans %}
+                        </a>
+                      </div>
+                    </div>
+                  {% else %}
+                    <h6 class="no-participants">
+                      <span>{{ 'process_stages.no_survey'|trans }}</span>
+                      <i class="fa fa-question-circle tooltipped" data-position="top"></i>
+                    </h6>
+
+                    <a
+                      href="{{ url('surveyRequest',{'stgId' : stage.vars.data.id}) }}?redirect={{ url(route,routeParams)|e('url') }}"
+                      class="btn insert-survey-btn">
+                      <span>{% trans %}survey.add_btn_internal{% endtrans %}</span>
+                    </a>
+                  {% endif %}
+                </div>
+              </section>
+              <section class="participants">
+                <template class="participants-list--item__proto-i">
+                  {% include "components/activity_page__participant_item.html.twig" with { participant: stage.independantUniqueIntParticipations.vars.prototype, leadingOption: true, entity: 'user' } %}
+                </template>
+                <template class="participants-list--item__proto-t">
+                  {% include "components/activity_page__participant_item.html.twig" with { participant: stage.independantUniqueTeamParticipations.vars.prototype, leadingOption: true, entity: 'team' } %}
+                </template>
+                <template class="participants-list--item__proto-e">
+                  {% include "components/activity_page__participant_item.html.twig" with { participant: stage.independantUniqueExtParticipations.vars.prototype, leadingOption: false, entity: 'user' } %}
+                </template>
+                <header>{{ 'activity_elements.participants'|trans }}</header>
+                <ul class="participants-list">
+                  {% for participant in stage.independantUniqueIntParticipations %}
+                    {% include "components/activity_page__participant_item.html.twig" with { participant: participant, leadingOption: true, mode: 'i', entity: 'user' } %}
+                  {% endfor %}
+                  {% for participant in stage.independantUniqueTeamParticipations %}
+                    {% include "components/activity_page__participant_item.html.twig" with { participant: participant, leadingOption: true, mode: 't', entity: 'team' } %}
+                  {% endfor %}
+                  {% for participant in stage.independantUniqueExtParticipations %}
+                    {% include "components/activity_page__participant_item.html.twig" with { participant: participant, leadingOption: false, mode: 'e', entity: 'user' } %}
+                  {% endfor %}
+                </ul>
+                <footer class="action-buttons" style="justify-content: space-between;padding-bottom:0">
+                  {% if form.vars.data.organization.externalUsers|length > 0 %}
+                    <button type="button" class="btn-flat btn-add-participant-e no-padding">
+                      <i class="material-icons left">add</i>
+                      {{ 'participants.add_btn_partner'|trans }}
+                    </button>
+                  {% endif %}
+                  {% if form.vars.data.organization.teams|length > 0 %}
+                    <button type="button" class="btn-flat btn-add-participant-t no-padding">
+                      <i class="material-icons left">add</i>
+                      {{ 'participants.add_btn_team'|trans }}
+                    </button>
+                  {% endif %}
+                  <button type="button" class="btn-flat btn-add-participant-i no-padding">
+                    <i class="material-icons left">add</i>
+                    {{ 'participants.add_btn_collab'|trans }}
+                  </button>
+                </footer>
+              </section>
+            </div>
+          </section>
+        </li>
+      {% endfor %}
+      <li class="stage-add">
+        <div class="stage-item-name">{{ "help.activities.add_stage"|trans }}</div>
+        <div class="fixed-action-btn modified-fixed-btn">
+          <a class="stage-item-button"></a>
+          <ul>
+            <li>
+              {% if form.vars.data.activeModifiableStages|length > 1 %}
+                <a class="btn-floating btn-large modal-trigger tooltipped" data-position="left" data-tooltip="{{ 'activity_elements.create_duplicate_stage'|trans }}" href="#duplicateStage">
+              {% else %}
+                <a class="btn-floating btn-large tooltipped duplicate-btn" data-position="left" data-tooltip="{{ 'activity_elements.create_duplicate_stage'|trans }}" data-sid="{{ form.vars.data.activeModifiableStages.first.id }}">
+              {% endif %}
+                  <i class="material-icons">control_point_duplicate</i>
+                </a>
+            <li><a class="btn-floating btn-large stage-fresh-new-btn">
+              <i class="material-icons tooltipped" data-position="left" data-tooltip="{{ 'activity_elements.create_fresh_new_stage'|trans }}">control_point</i>
+            </a></li>
+          </ul>
+        </div>
+
+        </div>
+      </li>
+    </ol>
+
+    <div class="action-buttons">
+      {% if form.save is defined %}
+        <div class="button-field">
+          {{ form_row(form.save) }}
+        </div>
+      {% endif %}
+      <div class="button-field">
+        {{ form.update is defined ? form_row(form.update) }}
+      </div>
+    </div>
+
+
+    <div id="duplicateStage" class="modal">
+      <div class="modal-content">
+        <h5>{% trans %}activity_elements.stage_duplication_modal.title_msg{% endtrans %}</h5>
+        <div style="margin-top: 2Opx;">
+          <div id="stageSelector">
+            <div style="margin-bottom: 20px">{% trans %}activity_elements.stage_duplication_modal.main_msg{% endtrans %}</div>
+            <select id="stageSelect">
+              {% for s,stage in form.vars.data.activeModifiableStages %}
+                <option value="{{stage.id}}">{{stage.name}}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer action-buttons">
+        <div class="button-field">
+          <a class="waves-effect waves-green btn duplicate-btn">{% trans %}activity_elements.stage_duplication_modal.btn_msg{% endtrans %}</a>
+        </div>
+      </div>
+    </div>
+    <template class="stages-list--item__proto">{% include "prototype/stage_item.html.twig" with { elmtType: elmtType, stage: form.activeModifiableStages.vars.prototype } %}</template>
+    <input type="hidden" name="clicked-btn" value="">
+
+      {% if not form.vars.valid %}
+      <div id="errors" class="modal">
+        <div class="modal-title">
+          <h5>{{ 'activities.modal_error_creation_title'|trans }}</h5>
+        </div>
+        <div class="modal-content">
+          {{ form_errors(form) }}
+          {{ form_errors(form.activeModifiableStages) }}
+
+          {% if not form.activeModifiableStages.vars.valid %}
+            {% for s, stage in form.activeModifiableStages %}
+              {% if not stage.vars.valid %}
+
+                {{ form_errors(stage)}}
+
+                <div>
+                  Phase {{ s + 1 }} ({{stage.vars.data.name }}) :
+                  {% for child in stage.children %}
+                    {% if not child.vars.valid %}
+                      <div>
+                        {{ form_label(child) }}
+                        {{ form_errors(child) }}
+                      </div>
+                    {% endif %}
+                  {% endfor %}
+
+                  {% if not stage.criteria.vars.valid %}
+                    <div>
+                      Critères :
+                      {% for ckey, criterion in stage.criteria %}
+                        {{ form_errors(stage.criteria)}}
+                        {% if not criterion.vars.valid %}
+                          {{ ckey }} - {{ criterion.vars.data.cname.name }}:
+                          {% for child in criterion.children %}
+                            {% if not child.vars.valid %}
+                              <div>
+                                {{ form_label(child) }}
+                                {{ form_errors(child) }}
+                              </div>
+                            {% endif %}
+                          {% endfor %}
+                        {% endif %}
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                </div>
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+        </div>
+        <div class="modal-footer">
+          <a class="modal-action modal-close btn notifyModalClose">Ok</a>
+        </div>
+      </div>
+    {% endif %}
+
+    {{ form_end(form) }}
+
+    <div class="s-form" style="display: none;">
+      {{ form_start(stageElementForm) }}
+      {{ form_rest(stageElementForm) }}
+      {{ form_end(stageElementForm) }}
+    </div>
+
+    <div class="c-form" style="display: none;">
+      {{ form_start(criterionElementForm) }}
+      {{ form_rest(criterionElementForm) }}
+      {{ form_end(criterionElementForm) }}
+    </div>
+
+    <div id="deleteStage" class="modal">
+      <div class="modal-title">
+        <h5>{{ 'stages.deleteStage.modal_title'|trans }}</h5>
+      </div>
+      <div class="modal-content">
+        {{ 'stages.deleteStage.modal_content'|trans }}
+      </div>
+      <div class="modal-footer">
+        <a class="btn modal-close remove-stage">{{ 'stages.deleteStage.accept'|trans }}</a>
+        <a class="modal-close btn-flat red-text">{{ 'stages.deleteStage.cancel'|trans }}</a>
+      </div>
+    </div>
+
+    <div id="deleteParticipant" class="modal">
+      <div class="modal-content">
+        <h4>{% trans with {'%element%': 'participant'} %}organization_elements.delete_modal.title{% endtrans %}</h4>
+        <p>{% trans with {'%conj_element%': 'participant'} %}organization_elements.delete_modal.content_1{% endtrans %}</p>
+      </div>
+      <div class="modal-footer">
+        <a class=" modal-action modal-close submit-button waves-effect waves-green btn remove-participant-btn">{{ 'organization_elements.delete_modal.confirm'|trans }}</a>
+        <a class=" modal-action modal-close waves-effect waves-green btn-flat red-text">{{ 'organization_elements.delete_modal.decline'|trans }}</a>
+      </div>
+    </div>
+
+    <div id="deleteCriterion" class="modal">
+      <div class="modal-title">
+        <h5>{{ 'criteria.deleteCriterion.modal_title'|trans }}</h5>
+      </div>
+      <div class="modal-content">
+        {{ 'criteria.deleteCriterion.modal_content'|trans }}
+      </div>
+      <div class="modal-footer">
+        <a class="btn modal-close remove-criterion">{{ 'criteria.deleteCriterion.accept'|trans }}</a>
+        <a class="modal-close btn-flat red-text">{{ 'criteria.deleteCriterion.cancel'|trans }}</a>
+      </div>
+    </div>
+
+    <div id="changeOutputType" class="modal">
+      <div class="modal-title">
+        <p><h5>{% trans %}stages.output_type.change.modal_title{% endtrans %}</h5></p>
+      </div>
+      <div class="modal-content">
+        <p>{% trans %}stages.output_type.change.modal_content{% endtrans %}</p>
+      </div>
+      <div class="modal-footer">
+        <a
+          class="btn waves-effect waves-light modal-close change-output-btn">{% trans %}criteria.deleteCriterion.accept{% endtrans %}</a>
+        <a
+          class="waves-effect waves-light modal-close btn-flat red-text">{% trans %}criteria.deleteCriterion.cancel{% endtrans %}</a>
+      </div>
+    </div>
+
+  </main>
+
+  <div id="setOwnershipLoseSetup" class="modal">
+    <div class="modal-content">
+      <h4>{{ 'activities.modal_error_creation_title'|trans }}</h4>
+      <p>{{ 'activity_elements.stage_losing_setup_msg'|trans }}</p>
+    </div>
+    <div class="modal-footer">
+      <a class="waves-effect waves-green btn modal-close add-owner-lose-setup">Ok</a>
+      <a class="waves-effect waves-green btn-flat red-text modal-close">Cancel</a>
+      <div class="button-field">
+      </div>
+      <div class="button-field">
+      </div>
+    </div>
+  </div>
+
+  <div id="unvalidatingOutput" class="modal">
+    <div class="modal-content">
+      <h4>{{ 'activities.modal_error_creation_title'|trans }}</h4>
+      <p>{{ 'activity_elements.unvalidating_output_msg'|trans }}</p>
+    </div>
+    <div class="modal-footer">
+      <a class="waves-effect waves-green btn unvalidate-btn modal-close">Ok</a>
+      <a class="waves-effect waves-green btn-flat red-text modal-close">Cancel</a>
+      <div class="button-field">
+      </div>
+      <div class="button-field">
+      </div>
+    </div>
+  </div>
+
+  <div id="changeOwner" class="modal">
+      <div class="modal-content">
+          <h4>{% trans %}participants.change_leader.modal_title{% endtrans %}</h4>
+          <p> {% trans %}participants.change_leader.msg_1{% endtrans %} <span class="sName" style="font-style: italic;"></span> {% trans %}participants.change_leader.msg_2{% endtrans %} </p>
+          <p> {% trans %}participants.change_leader.msg_3{% endtrans %} <span id="newLeader"></span> {% trans %}participants.change_leader.msg_4{% endtrans %} <span id="oldLeader"></span> ?</p>
+
+      </div>
+      <div class="modal-footer action-buttons">
+          <div class="modal-footer">
+              <a class="modal-action modal-close submit-button waves-effect waves-green btn change-owner-button">{% trans %}organization_elements.delete_modal.confirm{% endtrans %}</a>
+              <a class="modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}organization_elements.delete_modal.decline{% endtrans %}</a>
+          </div>
+      </div>
+  </div>
+
+  <div id="duplicateElementName" class="modal">
+    <div class="modal-content">
+      <h4>{{ 'activities.modal_error_creation_title'|trans }}</h4>
+      <p>{{ 'activity_elements.duplicate_element_name_msg'|trans }}</p>
+    </div>
+    <div class="modal-footer action-buttons">
+        <div class="button-field">
+            <a class="waves-effect waves-green btn-large modal-close">Ok</a>
+        </div>
+    </div>
+  </div>
+
+  <div id="noRemainingParticipant" class="modal">
+    <div class="modal-content">
+      <h4>{{ 'activities.modal_error_creation_title'|trans }}</h4>
+      <p>{{ 'activity_elements.no_remaining_participant_msg'|trans }}</p>
+    </div>
+    <div class="modal-footer action-buttons">
+        <div class="button-field">
+            <a class="waves-effect waves-green btn-large modal-close">Ok</a>
+        </div>
+    </div>
+  </div>
+
+  <div id="supHundredPct" class="modal">
+    <h4 class="modal-title">{{ 'criteria.supHundredPct.modal_title'|trans }}</h4>
+    <div class="modal-content">
+      {{ 'criteria.supHundredPct.modal_msg_begin'|trans }}
+      {{ 'criteria.supHundredPct.modal_msg_interm'|trans }}
+      {{ 'criteria.supHundredPct.modal_msg_end'|trans }}
+    </div>
+    <div class="modal-footer action-buttons">
+      <div class="button-field">
+        <a class="waves-effect waves-green btn modal-close">Ok</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="duplicateParticipant" class="modal">
+    <div class="modal-content">
+      <h4 class="modal-title">{{ 'activities.modal_error_creation_title'|trans }}</h4>
+      <p class="duplicate-with-team">
+        {{ 'activity_elements.duplicate_participant.with_team_begin'|trans }}
+        <span class="duplicate-user-with-team"></span>
+        {{ 'activity_elements.duplicate_participant.with_team_end'|trans }}
+        <span class="duplicate-team"></span>
+      </p>
+      <p class="duplicate-with-user">
+        {{ 'activity_elements.duplicate_participant.with_user_begin'|trans }}
+        <span class="duplicate-team-with-user"></span>
+        {{ 'activity_elements.duplicate_participant.with_user_mid'|trans }}
+        <span class="duplicate-user"></span><br><br>
+        {{ 'activity_elements.duplicate_participant.with_user_end'|trans }}
+      </p>
+    </div>
+    <div class="modal-footer action-buttons">
+      <div class="button-field">
+        <a class="waves-effect waves-green btn modal-close">Ok</a>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block javascripts %}
+  <script src="{{ asset('js/nouislider.js') }}"></script>
+  <script src="{{ asset('js/activity_stages.js') }}"></script>
+  <script src="{{ asset('js/login.js') }}"></script>
+  <script>
+    window.lg = '{{ "curr_language"|trans }}';
+    window.curl = '{{ url("addCriterionName") }}';
+    window.modalSetMsg = '{{ "create_parameters.define_objective.modal_trigger_btn"|trans }}';
+    window.modalModifyMsg = '{{ "create_parameters.define_objective.modify_trigger_btn"|trans }}';
+    window.forceCommentMsg_0 = '{{ "criteria.criterion.forceCommentCompare"|trans }}';
+    window.forceCommentMsg_1 = '{{ "criteria.criterion.force_comments_pure_comment"|trans }}';
+    window.forceCommentMsg_2 = '{{ "criteria.criterion.force_comments_binary_label"|trans }}';
+    window.precommentCreationMsg = '{{ "participants.guidelines.create"|trans }}';
+    window.precommentUpdateMsg = '{{ "participants.guidelines.modify"|trans }}';
+    window.precommentNoneMsg = '{{ "participants.guidelines.no_guidelines"|trans }}';
+    window.mp = 1;
+    window.usrId = '{{ currentuser.id }}';
+    window.usrRole = '{{ currentuser.role }}';
+
+    const validateParticipantUrl = '{{ url("validateParticipant", { elmtType: elmtType, stgId: "__stgId__", elmtId: "__elmtId__" }) }}';    //const removeCriterionUrl = '{{ url("ajaxCriterionDelete", { elmtType: elmtType, criId: "__criId__" }) }}';
+    const removeParticipantUrl = '{{ url("deleteParticipant", { elmtType: elmtType, stgId: "__stgId__", elmtId: "__elmtId__" }) }}';
+    const courl = "{{ url('clearStageOutput', {'elmtType' : elmtType, 'stgId' : 0}) }}"
+    var dcurl = "{{ url('ajaxCriterionDelete',{'elmtType' : elmtType, 'criId' : 0}) }}";
+    var dsurl = "{{ url('ajaxStageDelete',{'elmtType' : elmtType, 'stgId' : 0}) }}";
+    var dpsurl = "{{ url('duplicateStage',{'elmtType' : elmtType, 'elmtId' : 0}) }}";
+    var vcurl = "{{ url('validateCriterionElement',{'elmtType' : elmtType, 'elmtId': elmtId, 'stgId' : 0, 'crtId' : 0}) }}";
+    var vsurl = "{{ url('validateStageElement',{'elmtType' : elmtType, 'elmtId': elmtId, 'stgId' : 0}) }}";
+    var vnurl = "{{ url('validateElementName',{'elmtType' : elmtType, 'elmtId': elmtId}) }}";
+
+  </script>
+{% endblock %}

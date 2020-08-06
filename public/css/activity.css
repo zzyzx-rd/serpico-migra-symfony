@@ -1,0 +1,645 @@
+:root {
+  --simple-shadow:
+    0 2px 2px 0 rgba(0, 0, 0, 0.14),
+    0 1px 5px 0 rgba(0, 0, 0, 0.12),
+    0 3px 1px -2px rgba(0, 0, 0, 0.2);
+  --stage-interspace: 80px;
+  --stage-container-height: max(calc(100vh - 600px), 500px);
+  --stage-container-min-height: 200px;
+}
+
+.input-field.weight {
+  font-size: 0;
+}
+
+.input-field.weight > * {
+  font-size: 1rem;
+}
+
+.modal {
+  transform: none !important;
+  max-height: none;
+  visibility: visible;
+}
+
+.elmt-select{
+  min-width: 200px;
+}
+
+.material-icons {
+  line-height: inherit;
+  user-select: none;
+  vertical-align: text-bottom;
+}
+
+.showedit:not(.edit) > .edit, .showedit.edit > .show {
+  display: none;
+}
+
+.select-wrapper input.select-dropdown {
+  margin: 0;
+}
+
+
+form[name="add_stage_form"] {
+  display: flex;
+  flex-flow: column;
+  flex-grow: 1;
+}
+
+form[name="add_stage_form"] > .row {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.mode > div {
+  display: flex;
+  flex-flow: row;
+}
+
+.mode > div > label {
+  width: 100%;
+}
+
+.participants-list--item:not(.edit-mode) > .user-edit,
+.participants-list--item:not(.edit-mode) > .user-actions .edit {
+  display: none;
+}
+
+.participants-list--item.edit-mode > .user-info,
+.participants-list--item.edit-mode > .user-actions .material-icons:not(.edit) {
+  display: none;
+}
+
+.participants-list--item > .user-edit > :not(.leader) label {
+  display: none;
+}
+
+.criterion-modal {
+  width: 900px;
+  min-height: 0;
+  overflow: visible;
+}
+
+.elmt-name{
+  margin-left: 0.5em;
+}
+
+.elmt-select{
+  min-width: 250px;
+}
+
+.cname.cn-icon{
+  margin-right: 5px;
+}
+
+form>div:last-of-type{
+  display: none;
+}
+
+.cn-icon::before {
+  content: attr(data-icon);
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  margin-right: .25em;
+}
+
+.cn-icon[data-icon-type="m"]::before {
+  font-family: "Material Icons";
+  font-weight: normal;
+}
+.cn-icon[data-icon-type="fa"]::before {
+  font-family: "Font Awesome 5 Free";
+}
+
+li + li.no-items-placeholder {
+  display: none;
+}
+
+.custom-input {
+  border-bottom: thin solid;
+}
+
+
+
+
+#main-header {
+  --actions-width: 200px;
+  --padding: 16px;
+
+  display: flex;
+  justify-content: center;
+  padding: 1em;
+  margin-bottom: 2em;
+  position: relative;
+}
+
+.back-btn{
+  position: absolute;
+  left: 40px;
+}
+
+#main-header .activity-name, #main-header > .team-name {
+  font-size: 1.8em;
+  display: flex;
+  align-items: center;
+  margin: 0 auto;
+  padding-left: var(--padding);
+}
+
+.activity-name.showedit > .btn-edit, .team-name.showedit > .btn-edit  {
+  font-size: .75em;
+  padding: 0 var(--padding);
+  height: 100%;
+  margin-left: .25em;
+}
+
+.activity-name.showedit > .btn-edit::before, .team-name.showedit > .btn-edit::before {
+  content: "edit";
+}
+
+.activity-name.showedit.edit > .btn-edit::before, .team-name.showedit.edit > .btn-edit::before {
+  content: "check";
+}
+
+/*#main-header::before,*/
+#main-header > .actions {
+  content: "";
+  width: var(--actions-width);
+}
+
+#activity_element_form_submit {
+  display: block;
+  width: 100%;
+}
+
+ol.stages {
+  --strike-width: .6em;
+  --button-size: 4em;
+  --bgcolor: #e0f7fa;
+
+  position: relative;
+  display: flex;
+  margin: 0 0 var(--stage-container-height);
+  padding: 0;
+  list-style: none;
+  counter-set: stageCounter;
+}
+
+
+#serpicoapp ol.stages * {
+  transition: none;
+}
+
+.terminal-btn {
+  padding: 0 0.5rem;
+}
+
+ol.stages::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+  height: var(--strike-width);
+  background-color: #5CD08F;
+}
+
+ol.stages ::before,
+ol.stages ::after {
+  pointer-events: none;
+  vertical-align: top;
+}
+
+ol.stages > li {
+  width: 100%;
+}
+
+ol.stages > li:not(.completed-stages-element) {
+  counter-increment: stageCounter;
+}
+
+
+.stage-item-button {
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--button-size);
+  width: var(--button-size);
+  overflow: hidden;
+  border: var(--strike-width) solid #16AFB7;
+  border-radius: 9999px;
+  background-color: #fff;
+}
+
+.stage-item-button:not(.completed-stages):hover,
+li.stage.active .stage-item-button:not(.completed-stages) {
+  color: #fff;
+  background-color: #16AFB7;
+}
+
+ol.stages > li > .stage-item-button {
+  cursor: pointer;
+}
+
+.stage-item-button:not(.completed-stages)::before {
+  font-size: 2em;
+  content: counter(stageCounter);
+}
+
+.stage-item-button.completed-stages{
+  border: var(--strike-width) solid darkgrey;
+  position: relative;
+}
+
+.stage-item-button.completed-stages > i{
+  font-size: 2.5em;
+}
+
+.nb-completed-stages{
+  color: #fff;
+  position: absolute;
+  top:11%;
+}
+
+.stage-item-button.completed-stages:hover .nb-completed-stages, li.completed-stages-element.active .nb-completed-stages{
+  color: darkgrey;
+}
+
+.stage-item-button.completed-stages:hover,
+li.completed-stages-element.active .stage-item-button.completed-stages {
+  color: #fff;
+  background-color: darkgrey;
+}
+
+.stage-add .stage-item-button::before {
+  content: "add";
+  font-family: "Material Icons";
+}
+
+.stage-item-name {
+  font-size: 1.2em;
+  font-weight: 300;
+  height: var(--stage-interspace);
+  text-align: center;
+  overflow: hidden;
+}
+
+.stage-add > .stage-item-name {
+  line-height: var(--stage-interspace);
+}
+
+.stage-item-name .visibility > .material-icons {
+  font-size: 1.2em;
+  line-height: 1;
+}
+
+.stage-item-name > .meta {
+  font-size: .8em;
+}
+
+.stage-item-name > .name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+li.stage-element::after {
+  --size: .8;
+  --margin: calc(1 - var(--size));
+  --width: calc(var(--stage-interspace) * var(--size));
+
+  content: "";
+  position: relative;
+  z-index: -1;
+  display: block;
+  height: 0;
+  width: 0;
+  margin: calc(var(--stage-interspace) * var(--margin)) auto 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: var(--width);
+  border-top-width: 0;
+  border-bottom-width: var(--width);
+  border-bottom-color: var(--bgcolor);
+}
+
+.stage-container {
+  --margin: calc(var(--stage-interspace) / 2);
+
+  position: absolute;
+  top: calc(100% - var(--margin));
+  left: var(--margin);
+  right: var(--margin);
+  height: var(--stage-container-height);
+  background-color: var(--bgcolor);
+  border-radius: 2px;
+  box-shadow: var(--simple-shadow);
+  padding: 0;
+}
+
+.completed-stages-container {
+  background-color: #f6f6f6;
+}
+
+.stage-item-name .s-weighting{
+  display: none;
+}
+
+.stage-item-name .stage-progress-status>i{
+  line-height: 24px;
+}
+
+.name .name-and-progress{
+  display: inline-block;
+}
+
+
+.modified-fixed-btn{
+  position: relative;
+  color:black!important;
+  padding-top: 0px;
+  right: 0;
+  bottom: 0;
+}
+
+.modified-fixed-btn >a{
+  color:black!important;
+  padding-top: 0px;
+}
+
+.btn-floating>i{
+  font-size: 2rem;
+}
+
+li.stage-element:not(.active)::after,
+li.stage-element:not(.active) > .stage-container {
+  visibility: hidden;
+}
+
+li.stage-element.active > .stage-item-button,
+li.stage-element.active > .stage-item-name > .name {
+  font-weight: bold;
+}
+
+.stage-container--main {
+  display: flex;
+  height: 100%;
+  padding: 4rem 0 2rem 0;
+}
+
+.stage-container--main > section {
+  flex: 1;
+  overflow: auto;
+  padding: 0 2rem;
+}
+
+.stage-container--main > section:not(:last-of-type) {
+  border-right: thin solid #0002;
+}
+
+.criteria-list > li, .participants-list > li {
+  height: 50px;
+}
+
+section li.no-items-placeholder {
+  height: auto;
+}
+
+.stage-weight {
+  position: absolute;
+  top: 1rem;
+  left: 0rem;
+  font-size: .8em;
+}
+
+.stage-progress i {
+  line-height: 24px;
+  font-size: 0.8rem;
+}
+.stage-container .stage-progress-status {
+  position: absolute;
+  top: 1rem;
+  left: 10rem;
+  font-size: .8em;
+}
+
+.stage-p-status{
+  margin: 0 5px;
+}
+
+.stage-actions {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: .8em;
+}
+
+.stage-actions > a {
+  font-size: 1em;
+  padding: 0 8px;
+}
+
+.stage-actions > a > .material-icons {
+  font-size: 2em;
+}
+
+.stage-container--main > section > header {
+  display: flex;
+  font-size: 1.6em;
+  font-weight: 300;
+  border-bottom: thin solid #0002;
+  margin-bottom: .5em;
+  height: 50px;
+}
+
+.criteria, .participants {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.criteria > header > .tabs {
+  background: none;
+  color: inherit;
+  font: inherit;
+  height: 100%;
+}
+
+.criteria > header > .tabs .tab {
+  height: 100%;
+  line-height: inherit;
+  text-transform: none;
+  flex: 1;
+}
+
+.criteria > header > .tabs .tab a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+  font: inherit;
+}
+
+.criteria > header > .tabs .indicator {
+  background-color: #5CD08F;
+}
+
+.criteria > div {
+  display: flex;
+  flex-flow: column;
+  flex-grow: 1;
+}
+
+.stage-container--main > section footer {
+  margin-top: auto;
+}
+
+.criteria-list--item {
+  display: flex;
+  align-items: center;
+}
+
+.criteria-list--item > .bounds,
+.criteria-list--item > .stepping,
+.criteria-list--item > .comment-container {
+  margin-right: 1em;
+}
+
+.criteria-list--item > .c-weighting {
+  margin-right: auto;
+}
+
+.criteria-list--item > .bounds::before {
+  font-family: "Material Icons";
+  content: "straighten";
+}
+
+.comment-icon::before{
+  font-family: "Material Icons";
+  content: "mode_comment";
+}
+
+.comment-icon{
+  transform: rotateZ(180deg) rotateX(180deg) scaleX(1.5);
+  font-size: 1.5rem;
+}
+
+.comment-container{
+  position: relative;
+}
+
+.comment-value{
+  position: absolute;
+  top:10%;
+  left:10%;
+  color: white;
+}
+
+.criteria-list--item > .stepping::before {
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  content: "\f337";
+}
+
+.criteria-list--item > .btn-edit-criterion {
+  padding: 0 .25em;
+  margin-left: .25em;
+}
+
+.participants > header {
+  display: flex;
+  align-items: center;
+}
+
+.participants-list--item {
+  display: flex;
+  align-items: center;
+}
+
+.participants-list--item > div {
+  display: flex;
+  align-items: center;
+  gap: .5em;
+}
+
+.participants-list--item .user-picture {
+  height: 1.8em;
+}
+
+.participants-list--item .badge-container {
+  --size: 1.4em;
+  color: #fff;
+  text-align: center;
+  line-height: var(--size);
+  height: var(--size);
+  width: var(--size);
+  border-radius: var(--size);
+  margin: 0 0.25em;
+  overflow: hidden;
+  user-select: none;
+}
+
+.user-actions {
+  margin-left: auto;
+}
+
+.user-actions > button {
+  padding: 0 .25em;
+}
+
+.user-edit > div {
+  margin-right: .5em;
+}
+
+.user-edit > .type {
+  width: 60px;
+}
+
+.action-buttons {
+  padding: calc(var(--stage-interspace) / 2);
+  padding-top: 0;
+}
+
+.badges {
+  display: flex;
+}
+/*
+.badge-container {
+  display: none;
+}
+*/
+.participants-list--item[participation-type="p"] .badge-participation-p,
+.participants-list--item[participation-type="t"] .badge-participation-t {
+  display: block;
+}
+
+.switch.date-switch, .switch.output-switch {
+  position: relative;
+}
+
+.switch.date-switch label:first-child {
+  position: absolute;
+  top: -120%;
+}
+
+.switch.date-switch label > * {
+  font-size: 14.5px;
+  color: black;
+}
+
+.switch.output-switch label > * {
+  font-size: 1.64rem;
+  color: black;
+}
+
+.iprocess-name{
+    color: #bb8d04;
+}
+
+.iprocess-name > i{
+    margin-right: 5px;
+}

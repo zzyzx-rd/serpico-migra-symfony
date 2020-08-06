@@ -1,0 +1,47 @@
+{% extends "layout.html.twig" %}
+
+{% block pagename %}
+Activity list
+{% endblock %}
+{% block username %}
+    {{ currentuser.firstname }} {{ currentuser.lastname }}
+{% endblock %}
+
+{% block content %}
+  <section class="col s10">
+
+
+    {% for activity in organization_activities %}
+      <ul class="collapsible" data-collapsible="accordion">
+        <li>
+          <div class="collapsible-header">
+            <i class="material-icons">expand_more</i>
+            {{ activity['name']  }}
+            <button type="submit" class="validate">JOIN</button>
+            <span class="new badge"> 5 grades </span>
+
+              <div class="collapsible-body">autres infos
+                {# {{  activity['objectives']  }} #}
+                <br>
+                {{ activity.name  }} - {{ activity.deadline  }}
+                <br>
+                {{ activity.gradetype  }}{{ activity.lowerbound  }}{{ activity.upperbound  }}{{ activity.step  }}
+                {# {{ activity['weight']  }}#}
+                    <div class="button-field col s5">
+                     <button type="submit" class="validate">GRADE</button>
+                    </div>
+                    <div class="button-field col s5">
+                     <button type="submit" class="validate">SUBMIT GRADES</button>
+                    </div>
+              </div>
+        </li>
+    </ul>
+{% endfor %}
+<div class="row">
+<div class="button-field col s10">
+<button type="submit" class="validate">ADD ACTIVITIES</button>
+</div>
+</div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,188 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+    {% trans %}test{% endtrans %}
+{% endblock %}
+
+
+  {% block css %}
+      <!-- Dropify -->
+      <link href="{{ asset('css/dropify.min.css') }}" rel="stylesheet" type="text/css">
+      <script>
+          {% if orgId is defined %}
+            var durl = "{{ url('deleteOrganization',{'orgId' : orgId}) }}";
+          {% endif %}
+          var ourl = "{{ url('manageOrganizations') }}";
+          var surl = "{{ path('dynamicSearchParentFirm')}}";
+          var curl = "{{ path('createWorkerFirm')}}";
+      </script>
+      <style>
+            .firm-option-logo{
+                float: left!important;
+            }
+            .firm-input-logo{
+                position: absolute;
+                height: 20px;
+                margin: auto 0;
+                top: 0;
+                left: 0;
+                bottom: 0;
+            }
+
+            /*.w-firm .select-dropdown{
+                width: 90%!important;
+                padding-left: 25px!important; 
+            }*/
+
+            .dropdown-content{
+                opacity: 1!important;
+                display: block!important;
+            }
+
+            .select-wrapper input, .select-wrapper .caret{
+                display: none!important;
+            }
+      </style>
+  {% endblock %}
+
+
+{% block pagename %}
+    {% trans %}create_user.mobile_header_title{% endtrans %}
+{% endblock %}
+
+{% block username %}
+    {{ currentuser.firstname }}
+    {{ currentuser.lastname }}
+{% endblock %}
+
+{% block content %}
+
+
+
+    <div class="container">
+
+        {% if addFromUser is defined %}
+        <h4>{% trans %}header.register.description{% endtrans %}</h4>
+        {% elseif toValidate is defined %}
+        <h4>{% trans %}create_organization.validate_title{% endtrans %}</h4>
+        {% endif %}
+
+        {{ form_start(form) }}
+        {#
+        {{ form_label(form.legalName) }}
+        {{ form_widget(form.legalName) }}
+        <div class="errorMessage">
+            {{ form_errors(form.legalName) }}
+        </div>
+        #}
+        {{ form_label(form.workerFirm) }}
+        {{ form_widget(form.workerFirm) }}
+        <select name="firmSelector" style="margin-top:45px"></select>
+        
+        {#
+        {{ form_row(form.isFirm) }}
+        #}
+        {% if update is not defined %}
+            <div>
+                {{ form_label(form.firstname) }}
+                {{ form_widget(form.firstname) }}
+            </div>
+            <div class="errorMessage">
+                {{ form_errors(form.firstname) }}
+            </div>
+
+            {{ form_label(form.lastname) }}
+            {{ form_widget(form.lastname) }}
+            <div class="errorMessage">
+                {{ form_errors(form.lastname) }}
+            </div>
+
+            {{ form_label(form.email) }}
+            {{ form_widget(form.email) }}
+            <div class="errorMessage">
+                {{ form_errors(form.email) }}
+            </div>
+            {{ form_label(form.position) }}
+            {{ form_widget(form.position) }}
+            <div class="errorMessage">
+                {{ form_errors(form.position) }}
+            </div>
+            {{ form_label(form.department) }}
+            {{ form_widget(form.department) }}
+            <div class="errorMessage">
+                {{ form_errors(form.department) }}
+            </div>
+        {#
+        <div class="button-field">
+            {{ form_row(form.genLanguage) }}
+        </div>
+        #}
+        {% else %}
+        {{ form_row(form.masterUser) }}
+        {% endif %}
+
+        {% if not toValidate is defined %}
+        <div class="row action-buttons">
+            <div class="button-field">
+                {{ form_row(form.submit) }}
+            </div>
+            {% if orgId is defined %}
+            <div class="button-field">
+                <a class="waves-effect waves-light btn-large red modal-trigger" href="#deleteOrganization">{% trans %}create_organization.delete{% endtrans %}</a>
+            </div>
+            {% endif %}
+        {% else %}
+        <div class="row action-buttons">
+            <div class="button-field">
+                {{ form_row(form.reject) }}
+            </div>
+            <div class="button-field">
+                {{ form_row(form.validate) }}
+            </div>
+        </div>
+        {% endif %}
+        {{ form_rest(form) }}
+        {{ form_end(form) }}
+    </div>
+</div>
+
+{% if not form.vars.valid %}
+	<div id="errors" class="modal open">
+		<div class="modal-title">
+			<h5>{% trans %}user_list.comments.modal_title{% endtrans %}</h5>
+		</div>
+		<div class="modal-content">
+            {{form_errors(form)}}
+		</div>
+		<div class="modal-footer">
+			<a class=" modal-action modal-close waves-effect waves-green btn-large notifyModalClose">Ok</a>
+		</div>
+	</div>
+{% endif %}
+
+{% if orgId is defined %}
+<div id="deleteOrganization" class="modal">
+    <div class="modal-content">
+        {#{% if user_activities[k].stages|length > 1 %}#}
+        <h4>{% trans %}create_organization.delete_modal.title{% endtrans %}</h4>
+        <p>{% trans %}create_organization.delete_modal.content{% endtrans %}</p>
+        {#{% else %}
+            <p>{% trans %}activities.delete_activity_msg{% endtrans %}Are you sure you want to delete this activity ?</p>
+        {% endif %}#}
+    </div>
+    <div class="modal-footer">
+        <a class="modal-action modal-close waves-effect waves-green btn-large delete-button" data-oid="{{ orgId }}">{% trans %}create_organization.delete_modal.confirm{% endtrans %}</a>
+        <a class="modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}create_organization.delete_modal.cancel{% endtrans %}</a>
+    </div>
+</div>
+    {% endif %}
+
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('js/login.js') }}"></script>
+    <script src="{{ asset('js/dropify.min.js') }}"></script>
+    <script src="{{ asset('js/organization_create.js') }}"></script>
+
+
+{% endblock %}

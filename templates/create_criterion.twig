@@ -1,0 +1,83 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+Create Activity
+{% endblock %}
+
+{% block pagename %}
+Create Activity
+{% endblock %}
+{% block username %}
+    {{ currentuser.firstname }} {{ currentuser.lastname }}
+{% endblock %}
+
+{% block content %}
+
+  <img id="logoMain" src="{{ asset('lib/img/Serpico.png') }}" alt="logo Serpico">
+  <div id="'criteriaForm">
+  {{ form_start(form) }}
+
+  <!--<form class="col s10"> -->
+
+      <div class="row">
+          <div class="button-field col s10">
+              {{ form_label(form.gradetype) }}
+              {{ form_widget(form.gradetype) }}
+              <div class="errorMessage">
+                  {{ form_errors(form.gradetype) }}
+              </div>
+          </div>
+      </div>
+
+      <div  class="row">
+        <div class="input-field col s10 ">
+            {{ form_label(form.name) }}
+            {{ form_widget(form.name) }}
+            {{ form_errors(form.name) }}
+        </div>
+      </div>
+      <div class="row abc" id="criterionBoundRowCreate">
+          <div class="button-field col s5 m3">
+              {{ form_label(form.lowerbound) }}
+              {{ form_widget(form.lowerbound) }}
+              {{ form_errors(form.lowerbound) }}
+
+          </div>
+          <div class="button-field col s5 m3">
+              {{ form_label(form.upperbound) }}
+              {{ form_widget(form.upperbound) }}
+              {{ form_errors(form.upperbound) }}
+          </div>
+          <div class="button-field col s5 m3">
+              {{ form_label(form.step) }}
+              {{ form_widget(form.step) }}
+              {{ form_errors(form.step) }}
+          </div>
+      </div>
+
+      <div class="row">
+        <div class="button-field col s3 m3">
+            {{ form_label(form.weight) }}
+            {{ form_widget(form.weight) }}
+            {{ form_errors(form.weight) }}
+        </div>
+      </div>
+
+
+
+      <div class="row">
+        <div class="button-field col s10">
+            {{ form_row(form.submit) }}
+        </div>
+      </div>
+      <!--</form> -->
+        {{ form_rest(form) }}
+        {{ form_end(form)}}
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+  <script src="{{ asset('js/login.js') }}"></script>
+  <script src="{{ asset('js/activity_definition.js') }}"></script>
+{% endblock %}

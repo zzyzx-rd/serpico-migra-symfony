@@ -1,0 +1,36 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+    {% trans %}error_403.page_title{% endtrans %}
+{% endblock %}
+
+{% block css %}
+{% endblock %}
+
+{% set returnRoute = returnRoute is defined and returnRoute ? returnRoute : 'home' %}
+
+{% block content %}
+    <div class="container">
+        <div class="row center">
+            <img src="{{ asset('lib/img/missing-target.png') }}" alt="">
+            <h5>{% trans %}error_403.title{% endtrans %}</h5>
+
+            <p>
+            {% if errorMsg is defined %}
+                {{ errorMsg }}
+            {% else %}
+                {% trans %}error_403.description{% endtrans %}
+            {% endif %}
+            </p>
+
+        </div>
+        <div class="center">
+            <div class="button-field">
+                <a class="btn btn-large waves-effect waves-light" href="{{ url(returnRoute) }}">
+                    <i class="fa fa-home" aria-hidden="true"></i>
+                    {% trans %}user_no_token.home_button_title{% endtrans %}
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

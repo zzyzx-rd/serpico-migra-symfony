@@ -1,0 +1,36 @@
+
+    <li class="experience" style="width:95%">
+        <div class="row flex-center">
+            <span class="stage-title">
+                <h4 style="display:inline-block">Experience __nb__</h4>
+            </span>
+            <a class="delete-btn btn-flat" style="margin-left: auto;">
+                <i class="fa fa-trash"></i>
+            </a>
+        </div>
+        <div class="row">
+            <div class="input-field col s12 m4">
+                {{ form_row(item.position) }}
+            </div>
+            <div class="input-field w-firm col s12 m4">
+                {{ form_row(item.firm,{attr:{class:"no-margin"}}) }}
+                <select name="firmSelector" id="parentSelector" style="display: none;margin-top:45px"></select>
+            </div>
+            <div class="col s12 m4">
+                {{ form_widget(item.active) }}
+                {{ form_label(item.active) }}
+            </div>
+        </div>
+        <div class="row">
+            <div class="input-field col s12 m4">
+                {{ form_row(item.location) }}
+            </div>
+            <div class="col s12 m4">
+                {{ form_row(item.startdate) }}
+            </div>
+    
+            <div class="col s12 m4">
+                {{ form_row(item.enddate) }}
+            </div>
+        </div>
+    </li>

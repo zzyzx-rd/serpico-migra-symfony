@@ -1,0 +1,307 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+  {{ 'stages.page_title'|trans }}
+{% endblock %}
+
+{% set elmt = app.request_stack.currentrequest.get('elmt') %}
+
+{% block css %}
+  <link rel="stylesheet" href="{{ asset('css/nouislider.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/activity.css') }}">
+
+  <script>
+    window.url = '{{ url("saveActivityStages", { elmt: elmt, elmtId: activity.id, actionType: "fwd" }) }}';
+    window.durl = '{{ url("ajaxStageDelete",{ elmt: elmt, stgId: 0 }) }}';
+    window.sturl = '{{ url("saveTemplate", { actStep: "stages", elmtId: activity.id }) }}';
+  </script>
+{% endblock %}
+
+
+{% block pagename %}
+  <span>{{ activity.name|slice(0, 13) ~ '...' }}</span>
+  <span>{{ 'stages.mobile_header_description'|trans }}</span>
+{% endblock %}
+{% block username %}
+  {{ currentuser.firstname }}
+  {{ currentuser.lastname }}
+{% endblock %}
+
+{% set nbCompletedStages = 0 %}
+
+{% block content %}
+
+  <section>
+    <div style="position:relative;min-height:50px">
+      <div class="progress" style="margin-bottom:0px">
+        <div class="determinate col s10 m10" style="width: 25%; left:25%"></div>
+      </div>
+      <div class="col s12 activity-elements">
+        <a class="btn btn-flat activity-element-unselected parameter-button" href="{{ url('oldActivityDefinition',{'elmt' : elmt, 'elmtId' : activity.id}) }}" style="position: absolute; width: 25%; left: 0%; color: #26a69a">1 -
+          {{ 'activity_elements.parameters'|trans }}
+        </a>
+        <a class="btn stage-button" href="{{ url('activityStages',{'elmt' : elmt, 'elmtId' : activity.id}) }}" style="position: absolute; width: 25%; left: 25%">2 -
+          {{ 'activity_elements.stages'|trans }}
+        </a>
+        <a class="btn btn-flat activity-element-unselected criterion-button" href="{{ url('activityCriteria',{'elmt' : elmt, 'elmtId' : activity.id}) }}" style="position: absolute; width: 25%; left: 50%; color: #26a69a">3 -
+          {{ 'activity_elements.criteria'|trans }}
+        </a>
+        <a class="btn btn-flat activity-element-unselected participant-button" href="{{ url('activityParticipants',{'elmt' : elmt, 'elmtId' : activity.id}) }}" style="position: absolute; width: 25%; left: 75%; color: #26a69a">4 -
+          {{ 'activity_elements.participants'|trans }}
+        </a>
+      </div>
+    </div>
+    {% if elmt == 'template' %}
+      <div>
+        <ul class="flex-center orange-text" style="justify-content:center;font-size: 1.4rem">
+          <i class="material-icons tooltipped" data-position="left" data-delay="50" data-tooltip="{{ 'tooltip.activity.save_template'|trans }}">restore_page</i>
+          <span>{{ 'activity_elements.template_edition_mode'|trans }}</span>
+        </ul>
+      </div>
+    {% endif %}
+
+    <h4>{{ activity.name }}</h4>
+
+    {% if elmt == 'activity' %}
+      {% set completedStages = activity.completedStages %}
+
+      {% if completedStages is not null %}
+        {% set nbCompletedStages = activity.completedStages|length %}
+        {% set completedStagesWeight = 0 %}
+        {% for completedStage in completedStages %}
+          {% set completedStagesWeight = completedStagesWeight + completedStage.weight %}
+        {% endfor %}
+
+        <div class="row center" style="margin:15px 0px 15px 0px;">
+          {% if activity.completedStages|length == 1 %}
+            <i class="far fa-2x fa-calendar-check"></i>
+            <span style="margin-left:8px;">
+              <span id="nbCompletedStages">{{ nbCompletedStages }}</span>
+              {{ 'stages.graded_single_stage_msg'|trans }}
+              <span id="totalCompletedWeight">{{ (100 * completedStagesWeight)|round(0) }}</span>
+              %</span>
+          {% elseif activity.completedStages|length > 1 %}
+            <i class="far fa-2x fa-calendar-check"></i>
+            <span style="margin-left:8px;">
+              <span id="nbCompletedStages">{{ nbCompletedStages }}</span>
+              {{ 'stages.graded_multiple_stages_msg'|trans }}
+              <span id="totalCompletedWeight">{{ (100 * completedStagesWeight)|round(0) }}<span>
+                  %</span>
+              {% endif %}
+            </div>
+          {% endif %}
+
+          {% set nbUnmodifiableStages = activity.activeStages|length - activity.activeModifiableStages|length %}
+
+          {% if nbUnmodifiableStages > 0 %}
+            {% set multiple_stages = nbUnmodifiableStages > 1 %}
+
+            <div class="row center" style="margin:15px 0px 15px 0px;">
+              <i class="fa fa-2x fa-info-circle"></i>
+              <span id="nbCompletedStages">{{ nbUnmodifiableStages }}</span>
+              {% set str = multiple_stages ? 'stages.unmodifiable_multiple_stages_msg' : 'stages.unmodifiable_single_stage_msg' %}
+              {{ str|trans }}
+              {% if activity.activeModifiableStages|length > 1 %}
+                <div>{{ 'stages.sum_modifiable_stages_explanation'|trans }}</div>
+              {% endif %}
+            </div>
+          {% endif %}
+        {% endif %}
+
+        {{ form_start(form) }}
+        <ol class="stages" data-prototype="{% filter escape %}{% include 'prototype_stage.twig' with { stage: form.activeModifiableStages.vars.prototype } %}{% endfilter %}">
+          {% for key, stage in form.activeModifiableStages %}
+            <li class="stage">
+              <div class="stage-item-name">{{ stage.vars.data.name }}</div>
+              <div class="stage-item-button"></div>
+              <div class="stage-container">
+                {% if form.activeModifiableStages|length > 1 %}
+                  <a href="#deleteStage" class="red accent-4 btn white-text modal-trigger" data-sid="{{ activity.activeStages[key].id }}">{{ 'stages.delete_stage_btn'|trans }}</a>
+                {% endif %}
+                <div class="row">
+                  <div class="input-field col s8">
+                    {{ form_label(stage.name) }}
+                    {{ form_widget(stage.name) }}
+                    {{ form_errors(stage.name) }}
+                  </div>
+                  <div class="input-field col s4 weight">
+                    {{ form_label(stage.weight) }}
+                    <div class="grade-slider" style="margin-top:10px;"></div>
+                    <div class="grade-slider-range-value center" style="font-size:1.2rem;padding-top: 5px"></div>
+                    {{ form_widget(stage.weight, { value: 100 * (stage.vars.data.weight / sumWeightModifiableStages) }) }}
+                    {{ form_errors(stage.weight) }}
+                  </div>
+                  <div class="mode col s12 m12">
+                    {{ form_label(stage.mode) }}
+                    {{ form_widget(stage.mode) }}
+                    {{ form_errors(stage.mode) }}
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="input-field col s6">
+                    {{ form_label(stage.startdate) }}
+                    {{ form_widget(stage.startdate) }}
+                    {{ form_errors(stage.startdate) }}
+                  </div>
+                  <div class="input-field col s6">
+                    {{ form_label(stage.enddate) }}
+                    {{ form_widget(stage.enddate) }}
+                    {{ form_errors(stage.enddate) }}
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="input-field col s6">
+                    {{ form_label(stage.gstartdate) }}
+                    {{ form_widget(stage.gstartdate) }}
+                    {{ form_errors(stage.gstartdate) }}
+                  </div>
+                  <div class="input-field col s6">
+                    {{ form_label(stage.genddate) }}
+                    {{ form_widget(stage.genddate) }}
+                    {{ form_errors(stage.genddate) }}
+                  </div>
+                </div>
+              </div>
+            </li>
+          {% endfor %}
+          <li class="stage-add">
+            <div class="stage-item-name">Ajouter une phase</div>
+            <div class="stage-item-button"></div>
+          </li>
+        </ol>
+
+        <div class="row action-buttons">
+          <div class="button-field btn-act-left">
+            {{ form_row(form.previous) }}
+          </div>
+          <div class="button-field btn-act-center">
+            {{ form_row(form.back) }}
+          </div>
+          <div class="button-field btn-act-right">
+            {{ form_row(form.next) }}
+          </div>
+        </div>
+        {{ form_end(form) }}
+      </section>
+
+
+      {% if elmt == 'activity' and activity.template is null %}
+        <div id="addTemplate" class="modal">
+          {{ form_start(createTemplateForm) }}
+          <div class="modal-content">
+            <h5>{{ 'templates.modal_create.title_msg'|trans }}</h5>
+            <p>{{ 'templates.modal_create.main_msg'|trans }}</p>
+            {{ form_label(createTemplateForm.name) }}
+            {{ form_widget(createTemplateForm.name) }}
+            {{ form_errors(createTemplateForm.name) }}
+          </div>
+
+          <div class="modal-footer action-buttons">
+            <div class="button-field">
+              <a class="modal-action modal-close submit-button red btn-large">{{ 'activities.create.delegate_back_btn_msg'|trans }}</a>
+            </div>
+            <div class="button-field">
+              {{ form_row(createTemplateForm.submit) }}
+            </div>
+          </div>
+          {{ form_rest(createTemplateForm) }}
+          {{ form_end(createTemplateForm) }}
+        </div>
+        <div id="templateCreationSuccess" class="modal">
+          <div class="modal-content">
+            <h4>{{ 'participants.createTemplate.modal_title'|trans }}</h4>
+            <p>
+              {{ 'participants.createTemplate.modal_msg'|trans }}
+              <span></span>
+            </p>
+          </div>
+          <div class="modal-footer action-buttons">
+            <div class="button-field">
+              <a class="waves-effect waves-green btn-large modal-close">{{ 'participants.missing_leader.btn_msg'|trans }}</a>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      {% if activity.activeModifiableStages|length > 1 %}
+        <div id="deleteStage" class="modal">
+          <div class="modal-title">
+            <h5>{{ 'stages.deleteStage.modal_title'|trans }}</h5>
+          </div>
+          <div class="modal-content">
+            <p>{{ 'stages.deleteStage.modal_content'|trans }}</p>
+          </div>
+          <div class="modal-footer">
+            <a class="btn waves-effect waves-light modal-close remove-stage">{{ 'stages.deleteStage.accept'|trans }}</a>
+            <a class="waves-effect waves-light modal-close btn-flat red-text">{{ 'stages.deleteStage.cancel'|trans }}</a>
+          </div>
+        </div>
+      {% endif %}
+
+      <div class="modal" id="errorModal">
+        <div class="modal-content">
+          <h4>{{ 'stages.error_modal.title'|trans }}</h4>
+          <p class="error-msg"></p>
+        </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close submit-button waves-effect waves-green btn-large" href="#!">
+            OK
+          </a>
+        </div>
+      </div>
+
+      {% include "modals/stages_have_invalid_genddate.html.twig" with { inParametersPage: false } %}
+    {% endblock %}
+
+
+    {% block javascripts %}
+      <script src="{{ asset('js/nouislider.js') }}"></script>
+      <script src="{{ asset('js/login.js') }}"></script>
+      <script src="{{ asset('js/activity_stage.js') }}"></script>
+      <script src="{{ asset('build/activity_stages.js') }}"></script>
+
+      {% if elmt == 'activity' and activity.template is null %}
+        <script>
+          $(function () {
+            $('.add-template').on('click', function (e) {
+              e.preventDefault();
+              var tmp = $('form[name="add_stage_form"]').serialize().split('&');
+              var shift = $('.stage').length > 1;
+              for (var i = 0; i < $('.stage').length; i++) {
+                tmp[1 + shift + 6 * i] = tmp[1 + shift + 6 * i].split('=');
+                tmp[2 + shift + 6 * i] = tmp[2 + shift + 6 * i].split('=');
+                tmp[3 + shift + 6 * i] = tmp[3 + shift + 6 * i].split('=');
+                tmp[4 + shift + 6 * i] = tmp[4 + shift + 6 * i].split('=');
+                tmp[1 + shift + 6 * i][1] = $($("#" + $('.dp-start')[i].id)).pickadate('picker').get('select', 'dd/mm/yyyy');
+                tmp[2 + shift + 6 * i][1] = $($("#" + $('.dp-end')[i].id)).pickadate('picker').get('select', 'dd/mm/yyyy');
+                tmp[3 + shift + 6 * i][1] = $($("#" + $('.dp-gstart')[i].id)).pickadate('picker').get('select', 'dd/mm/yyyy');
+                tmp[4 + shift + 6 * i][1] = $($("#" + $('.dp-gend')[i].id)).pickadate('picker').get('select', 'dd/mm/yyyy');
+                tmp[1 + shift + 6 * i] = tmp[1 + shift + 6 * i].join('=');
+                tmp[2 + shift + 6 * i] = tmp[2 + shift + 6 * i].join('=');
+                tmp[3 + shift + 6 * i] = tmp[3 + shift + 6 * i].join('=');
+                tmp[4 + shift + 6 * i] = tmp[4 + shift + 6 * i].join('=');
+              }
+              tmp = tmp.join('&');
+
+              $.post(sturl, tmp + '&' + $(this).closest('form').serialize()).done(data => {
+                try {
+                  data = JSON.parse(data);
+                } catch (err) {}
+
+                $('.red-text').remove();
+
+                if (data.hasOwnProperty('name')) {
+                  $('#addTemplate').find('input[type="text"]').after('<div class="red-text"><strong>' + data.name + '</strong></div>');
+                }
+
+                if ($('.red-text').length == 0) {
+                  $('#addTemplate').modal('close');
+                  $('#templateCreationSuccess').modal('open');
+                  $('.tsave-button').removeClass('cyan darken-2').addClass('orange darken-4').attr('data-tooltip', '{{ "tooltip.activity.saved_template"|trans }}(' + data.tName + ")").tooltip().find('i').text('playlist_add_check');
+                }
+              });
+            });
+          });
+        </script>
+      {% endif %}
+    {% endblock %}

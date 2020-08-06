@@ -1,0 +1,475 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+    {% trans %}grade.page_title{% endtrans %}
+{% endblock %}
+
+{% block css %}
+    <!-- CSS NoUISlider-->
+    <link rel="stylesheet" href="{{ asset('css/nouislider.css') }}">
+    <script type="text/javascript">
+        var lg = '{% trans %}curr_language{% endtrans %}';
+        var forceCommentValuesByCriteria = [];
+        let forceCommentSignValue;
+        {% for criteria in stage.getCriteria %}
+            {% if criteria.isForceCommentcompare == true %}
+                forceCommentSignValue ="{{criteria.getForceCommentSign}}";
+                criteriaBounds = {
+                    id: {{criteria}},
+                    forceCommentSign: "{{criteria.getForceCommentSign}}",
+                    forceCommentValue: {% if  criteria.getForceCommentValue is empty %} null {% else %} {{criteria.getForceCommentValue}} {% endif %}
+                }
+                forceCommentValuesByCriteria.push(criteriaBounds);
+            {% endif %}
+        {% endfor %}
+    </script>
+{% endblock %}
+
+
+{%  block pagename %}
+    <span>{{ stage.activity.name }}</span>
+    <span>{% trans %}grade.mobile_header_title{% endtrans %}</span>
+{% endblock %}
+
+{% block username %}
+    {{ currentuser.firstname }} {{ currentuser.lastname }}
+{% endblock %}
+
+{% set currentUserParticipations = [] %}
+{% for participant in stage.participants %}
+    {% if participant.usrId == currentuser.id %}
+        {% set currentUserParticipations = currentUserParticipations|merge([participant]) %}
+    {% endif %}
+{% endfor %}
+
+{% block content %}
+    <form id="gradeForm" action="" method="post">
+
+                <div class="center"><h4>{{ stage.name }} <span>{{stage.gradableUsers(currentuser)|length}}</span></h4></div>
+
+            {# as each criterion has the same participants, we identity gradingParticipant once and for all #}
+            <ul>
+                {% for gradableUser in stage.gradableUsers %}
+                <li>
+                    <ul class="user-content collection" style="justify-content:space-between">
+
+                        <li style="margin-left: 20px;width:20vw">
+                            <ul class="flex-center" style="flex-direction:row">
+                                <li>
+                                    <img class="user-picture" style="height: 50px;" src="{{ (gradableUser.picture != "") ? asset('lib/img/' ~ gradableUser.picture) : asset('lib/img/no-picture.png') }}" alt="">
+                                </li>
+                                <li style="margin-left: 5px;">
+                                    <span>{{gradableUser.fullname}}</span>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <ul class="flex-center" style="flex-direction:column;min-width:50%">
+                            {% for key, grade in gradableUser.grades(stage,currentuser) %}
+                                {% set criterion = grade.criterion %}
+                                {% set gradingParticipant = grade.participant %}
+                                    <ul style="width: 100%;" class="flex-center">
+                                        <li style="width: 30%">
+                                            <ul class="flex-center-sb">
+                                                <li><i class="fa fa-{{criterion.cName.icon.name}}" style="margin-left: 10px;"></i></li>
+                                                <li>{{criterion.cName.name}}</li>
+                                            </ul>
+                                        </li>
+
+                                        <li style="width:100%; text-align: center;">
+
+                                            <div style="display:inline-block;width:70%" class="grade-slider grade-slider-{{ key }}" id="{% if grade.gradedUsrId is not null and grade.gradedTeaId is null %}slider_{{ criterion.id }}_{{ gradingParticipant.id }}_comment_{{ grade.gradedUser(app).id }}{% elseif grade.gradedTeaId is not null %}slider_{{ criterion.id }}_{{ gradingParticipant.id }}_tcomment_{{ grade.gradedTeam(app).id }}{% if grade.gradedUser(app) is not null %}_{{ grade.gradedUser(app).id }}{% endif %}{% else %}slider_{{ criterion.id }}_{{ gradingParticipant.id }}_scomment{% endif %}"
+                                                    data-lb="{{ criterion.lowerbound }}" data-ub="{{ criterion.upperbound }}" data-step="{{ criterion.step }}"
+                                                    data-value="{% if grade.value != NULL %}{{ grade.value }}{% else %}{% if criterion.type == 1 %}{{ 70*(criterion.upperbound - criterion.lowerbound)/100 }}{% elseif criterion.type == 0 %}{{(100 / (criterion.participants|length - nbTP))|round(0) }}{% endif %}{% endif %}">
+                                            </div>
+                                                <div class="grade-slider-range-value center" style="font-size:1.2rem;margin-left: 20px;display:inline-block"></div>
+                                            <input type="text"{% if gradingParticipant.status == 3 %} disabled="disabled"{% endif %}
+                                                name="{% if grade.gradedUsrId is not null and grade.gradedTeaId is null %}{{ criterion.id }}_{{ gradingParticipant.id }}_value_{{ grade.gradedUser(app).id }}{% elseif grade.gradedTeaId is not null %}{{ criterion.id }}_{{ gradingParticipant.id }}_tvalue_{{ grade.gradedTeam(app).id }}{% if grade.gradedUser(app) is not null %}_{{ grade.gradedUser(app).id }}{% endif %}{% else %}{{ criterion.id }}_{{ gradingParticipant.id }}_svalue{% endif %}"
+                                                class="grade-input"
+                                                value="{% if grade.value != NULL %}{{ grade.value }}{% else %}{% if criterion.type == 1 %}{{ 70*(criterion.upperbound - criterion.lowerbound)/100 }}{% elseif criterion.type == 0 %}{{(100 / (criterion.participants|length - nbTP))|round(0) }}{% endif %}{% endif %}">
+                                        </li>
+                                    </ul>
+                            {% endfor %}
+
+                        </ul>
+                        {% set grade = gradableUser.grades(stage,currentuser).first %}
+                        {% set gradingParticipant = grade.participant %}
+                        {% set criterion = grade.criterion %}
+                        <li class="comment-element" style="margin-right: 20px">
+                            {% if gradingParticipant.status != 3 %}
+                                {% if grade.comment == "" %}
+                                    <a class="btn waves-effect waves-light blue lighten-2 comment-button modal-trigger"
+                                        href="{% if grade.gradedUsrId is not null and grade.gradedTeaId is null %}#{{ criterion.id }}_{{ gradingParticipant.id }}_comment_{{ grade.gradedUser(app).id }}{% elseif grade.gradedTeaId is not null %}#{{ criterion.id }}_{{ gradingParticipant.id }}_tcomment_{{ grade.gradedTeam(app).id }}{% if grade.gradedUser(app) is not null %}_{{ grade.gradedUser(app).id }}{% endif %}{% else %}#{{ criterion.id }}_{{ gradingParticipant.id }}_scomment{% endif %}">
+                                        <i class="far fa-comment"></i>
+                                        <span>{% trans %}grade.comment.title_button{% endtrans %}</span>
+                                    </a>
+                                    <i class="fa fa-2x fa-comment mobile-element modal-trigger"
+                                        href="{% if grade.gradedUsrId is not null and grade.gradedTeaId is null %}#{{ criterion.id }}_{{ gradingParticipant.id }}_comment_{{ grade.gradedUser(app).id }}{% elseif grade.gradedTeaId is not null %}#{{ criterion.id }}_{{ gradingParticipant.id }}_tcomment_{% if grade.gradedUser(app) is not null %}{{ grade.gradedUser(app).id }}{% else %}{{ grade.gradedTeam(app).id }}{% endif %}{% else %}#{{ criterion.id }}_{{ gradingParticipant.id }}_scomment{% endif %}"><i class="fa fa-plus"></i></i>
+                                {% else %}
+                                    <a class="btn waves-effect waves-light blue darken-4 comment-button modal-trigger"
+                                        href="{% if grade.gradedUsrId is not null and grade.gradedTeaId is null %}#{{ criterion.id }}_{{ gradingParticipant.id }}_comment_{{ grade.gradedUser(app).id }}{% elseif grade.gradedTeaId is not null %}#{{ criterion.id }}_{{ gradingParticipant.id }}_tcomment_{{ grade.gradedTeam(app).id }}{% if grade.gradedUser(app) is not null %}_{{ grade.gradedUser(app).id }}{% endif %}{% else %}#{{ criterion.id }}_{{ gradingParticipant.id }}_scomment{% endif %}">
+                                        <i class="fas fa-comment-dots"></i>
+                                        <span>{% trans %}grade.comment.modify_button{% endtrans %}</span>
+                                    </a>
+                                    <i class="fas fa-2x fa-comment-dots mobile-element modal-trigger"
+                                        href="{% if grade.gradedUsrId is not null and grade.gradedTeaId is null %}#{{ criterion.id }}_{{ gradingParticipant.id }}_comment_{{ grade.gradedUser(app).id }}{% elseif grade.gradedTeaId is not null %}#{{ criterion.id }}_{{ gradingParticipant.id }}_tcomment_{{ grade.gradedTeam(app).id }}{% if grade.gradedUser(app) is not null %}_{{ grade.gradedUser(app).id }}{% endif %}{% else %}#{{ criterion.id }}_{{ gradingParticipant.id }}_scomment{% endif %}"><div class="white-panel"></div></i>
+                                {% endif %}
+                            {% else %}
+                                {% if grade.comment != "" %}
+                                    <a class="btn-flat waves-effect waves-light comment-button blue darken-4 modal-trigger"
+                                        href="{% if grade.gradedUsrId is not null and grade.gradedTeaId is null %}#{{ criterion.id }}_{{ gradingParticipant.id }}_comment_{{ grade.gradedUser(app).id }}{% elseif grade.gradedTeaId is not null %}#{{ criterion.id }}_{{ gradingParticipant.id }}_tcomment_{{ grade.gradedTeam(app).id }}{% if grade.gradedUser(app) is not null %}_{{ grade.gradedUser(app).id }}{% endif %}{% else %}#{{ criterion.id }}_{{ gradingParticipant.id }}_scomment{% endif %}">
+                                        <span>{% trans %}grade.comment.review_button{% endtrans %}</span>
+                                    </a>
+                                    <i class="fas fa-2x fa-comment-dots mobile-element modal-trigger"
+                                        href="{% if grade.gradedUsrId is not null and grade.gradedTeaId is null %}#{{ criterion.id }}_{{ gradingParticipant.id }}_comment_{{ grade.gradedUser(app).id }}{% elseif grade.gradedTeaId is not null %}#{{ criterion.id }}_{{ gradingParticipant.id }}_tcomment_{{ grade.gradedTeam(app).id }}{% if grade.gradedUser(app) is not null %}_{{ grade.gradedUser(app).id }}{% endif %}{% else %}#{{ criterion.id }}_{{ gradingParticipant.id }}_scomment{% endif %}"><div class="white-panel"></div></i>
+                                {% else %}
+                                    <a class="btn-flat comment-button" disabled="disabled">
+                                        <span>{% trans %}grade.comment.review_button{% endtrans %}</span>
+                                    </a>
+                                    <i class="far fa-2x fa-comment mobile-element"></i>
+                                {% endif %}
+                            {% endif %}
+                        </li>
+
+                        <div id="{% if grade.gradedUsrId is not null and grade.gradedTeaId is null %}{{ criterion.id }}_{{ gradingParticipant.id }}_comment_{{ grade.gradedUser(app).id }}{% elseif grade.gradedTeaId is not null %}{{ criterion.id }}_{{ gradingParticipant.id }}_tcomment_{{ grade.gradedTeam(app).id }}{% if grade.gradedUser(app) is not null %}_{{ grade.gradedUser(app).id }}{% endif %}{% else %}{{ criterion.id }}_{{ gradingParticipant.id }}_scomment{% endif %}" class="modal">
+                            <div class="modal-title">
+                                <h5>{% trans %}grade.comment.modal_title_1{% endtrans %}
+                                    {% if grade.gradedUsrId is not null and grade.gradedUsrId is not null %}
+                                        {{ gradableUser.firstname }}
+                                    {% elseif grade.gradedTeaId is not null %}
+                                        {{ grade.gradedTeam(app).name }}
+                                    {% else %}
+                                        {{ stage.name }}
+                                    {% endif %}
+                                    {% trans %}grade.comment.modal_title_2{% endtrans %}
+                                </h5>
+                            </div>
+                            <div class="modal-content">
+                                <textarea class="textarea-broaden"
+                                    name="{% if grade.gradedParticipant(app) is not null and grade.gradedParticipant(app).type == 0 %}{{ criterion.id }}_{{ gradingParticipant.id }}_tp{% endif %}{% if grade.gradedUsrId is not null and grade.gradedTeaId is null %}{{ criterion.id }}_{{ gradingParticipant.id }}_comment_{{ grade.gradedUser(app).id }}{% elseif grade.gradedTeaId is not null %}{{ criterion.id }}_{{ gradingParticipant.id }}_tcomment_{{ grade.gradedTeam(app).id }}{% if grade.gradedUser(app) is not null %}_{{ grade.gradedUser(app).id }}{% endif %}{% else %}{{ criterion.id }}_{{ gradingParticipant.id }}_scomment{% endif %}"
+                                        {% if gradingParticipant.status == "3" %}
+                                            disabled="disabled"
+                                        {% endif %}
+                                >{{ grade.comment }}</textarea>
+                            </div>
+                            <div class="modal-footer">
+                                <a class="btn waves-effect waves-light modal-close submit-comment">{% trans %}grade.comment.saveButton{% endtrans %}</a>
+                            </div>
+                        </div>
+                    </ul>
+                </li>
+                {% endfor %}
+
+            </ul>
+
+
+            {#
+            <ul>
+
+            {% set gradingParticipant = currentUserParticipation %}
+
+            {% for grade in currentUserParticipation.grades %}
+
+                {% set criterion = grade.criterion %}
+                    <li>
+                        <ul class="user-content collection">
+                            <li class="user-element">
+                                <ul>
+                                    <li>
+                                        {% if grade.gradedUsrId is not null and grade.gradedTeaId is null %}
+                                            {% if grade.gradedUser(app).firstname is null %}
+                                                {% if grade.gradedUser(app).organization(app).type == 'T' %}
+                                                    {% if grade.gradedUser(app).picture is not null and grade.gradedUser(app).picture != "" %}
+                                                        <img class="user-picture" style="height: 75px;" src="{{asset('lib/img/' ~ grade.gradedUser(app).picture)}}" alt="">
+
+                                                    {% else %}
+                                                        <div class="picture-frame flex-center" style="background-color: #b3b3b3; border-radius: 100%; height: 50px; justify-content: center">
+                                                            <i class="fa fa-users" style="color: white; font-size: 1.5rem; margin: 0px;"></i>
+                                                        </div>
+                                                    {% endif %}
+                                                {% elseif grade.gradedUser(app).organization(app).type == 'F' %}
+                                                    {% if grade.gradedUser(app).picture is not null and grade.gradedUser(app).picture != "" %}
+                                                        <img class="user-picture" style="height: 50px;" src="{{ (grade.gradedUser(app).picture != "") ? asset('lib/img/' ~ grade.gradedUser(app).picture) : asset('lib/img/no-picture.png') }}" alt="">
+                                                    {% else %}
+                                                        <div class="picture-frame flex-center" style="background-color: #b3b3b3; border-radius: 100%; height: 50px; justify-content: center">
+                                                            <i class="fa fa-industry" style="color: white; font-size: 1.5rem; margin: 0px;"></i>
+                                                        </div>
+                                                    {% endif %}
+                                                {% elseif grade.gradedUser(app).organization(app).type == 'I' %}
+                                                    <img class="user-picture" style="height: 50px;" src="{{ (grade.gradedUser(app).picture != "") ? asset('lib/img/' ~ grade.gradedUser(app).picture) : asset('lib/img/no-picture.png') }}" alt="">
+                                                {% endif %}
+                                            {% else %}
+                                                <img class="user-picture" style="height: 50px;" src="{{ (grade.gradedUser(app).picture != "") ? asset('lib/img/' ~ grade.gradedUser(app).picture) : asset('lib/img/no-picture.png') }}" alt="">
+                                            {% endif %}
+                                        {% elseif grade.gradedTeaId is not null %}
+                                            {% if grade.gradedUsrId is not null %}
+                                                <img class="user-picture" style="height: 50px;" src="{{ (grade.gradedUser(app).picture != "") ? asset('lib/img/' ~ grade.gradedUser(app).picture) : asset('lib/img/no-picture.png') }}" alt="">
+                                            {% else %}
+                                                {% if grade.gradedTeam(app).picture is not null and grade.gradedTeam(app).picture != "" %}
+                                                    <img class="user-picture" style="height: 50px;" src="{{ asset('lib/img/' ~ grade.gradedTeam(app).picture)  }}" alt="">
+                                                {% else %}
+                                                    <div class="picture-frame flex-center" style="background-color: #b3b3b3; border-radius: 100%; height: 50px; justify-content: center">
+                                                        <i class="fa fa-users" style="color: white; font-size: 1.5rem; margin: 0px;"></i>
+                                                    </div>
+                                                {% endif %}
+                                            {% endif %}
+                                        {% else %}
+                                            <div class="picture-frame flex-center" style="background-color: #b3b3b3; border-radius: 100%; height: 50px; justify-content: center">
+                                                <i class="fa fa-cubes" style="color: white; font-size: 1.5rem; margin: 0px;"></i>
+                                            </div>
+                                        {% endif %}
+                                    </li>
+                                    <li>
+                                        <div class="participant-name">
+                                            <span>
+                                                {% if grade.gradedUsrId == currentuser.id %}
+                                                {% trans %}grade.me{% endtrans %}
+                                                {% else %}
+                                                    {% if grade.gradedUsrId is not null %}
+                                                        {% if grade.gradedUser(app).firstname != null %}
+                                                            {{ grade.gradedUser(app).firstname }}
+                                                        {% else %}
+                                                            {{ grade.gradedUser(app).organization(app).commname }}
+                                                        {% endif %}
+                                                    {% elseif grade.gradedTeaId is not null %}
+                                                        {{ grade.gradedTeam(app).name }}
+                                                    {% endif %}
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </li>
+
+                            <li>
+                                <i class="fa fa-{{criterion.cName.icon.name}}"></i>
+                            </li>
+
+                            {% if criterion.type == 0 or criterion.type == 1 %}
+                            <li style="min-width:30%; padding-top: 25px; text-align: center;">
+                                {% if gradingParticipant.status != 3 %}
+                                    {% if grade.gradedParticipant(app) is null or grade.gradedParticipant(app) is defined and grade.gradedParticipant(app).type is defined %}
+                                        {% if grade.gradedParticipant(app) is null or grade.gradedParticipant(app).type != 0 %}
+
+                                            <div class="grade-slider" id="{% if grade.gradedUsrId is not null and grade.gradedTeaId is null %}slider_{{ criterion.id }}_{{ gradingParticipant.id }}_comment_{{ grade.gradedUser(app).id }}{% elseif grade.gradedTeaId is not null %}slider_{{ criterion.id }}_{{ gradingParticipant.id }}_tcomment_{{ grade.gradedTeam(app).id }}{% if grade.gradedUser(app) is not null %}_{{ grade.gradedUser(app).id }}{% endif %}{% else %}slider_{{ criterion.id }}_{{ gradingParticipant.id }}_scomment{% endif %}"
+                                                data-lb="{{ criterion.lowerbound }}" data-ub="{{ criterion.upperbound }}" data-step="{{ criterion.step }}"
+                                                data-value="{% if grade.value != NULL %}{{ grade.value }}{% else %}{% if criterion.type == 1 %}{{ 70*(criterion.upperbound - criterion.lowerbound)/100 }}{% elseif criterion.type == 0 %}{{(100 / (criterion.participants|length - nbTP))|round(0) }}{% endif %}{% endif %}">
+                                            </div>
+                                            <div class="grade-slider-range-value center" style="font-size:1.2rem;padding-top: 5px"></div>
+                                            <input type="text"{% if gradingParticipant.status == 3 %} disabled="disabled"{% endif %}
+                                                name="{% if grade.gradedUsrId is not null and grade.gradedTeaId is null %}{{ criterion.id }}_{{ gradingParticipant.id }}_value_{{ grade.gradedUser(app).id }}{% elseif grade.gradedTeaId is not null %}{{ criterion.id }}_{{ gradingParticipant.id }}_tvalue_{{ grade.gradedTeam(app).id }}{% if grade.gradedUser(app) is not null %}_{{ grade.gradedUser(app).id }}{% endif %}{% else %}{{ criterion.id }}_{{ gradingParticipant.id }}_svalue{% endif %}"
+                                                class="grade-input"
+                                                value="{% if grade.value != NULL %}{{ grade.value }}{% else %}{% if criterion.type == 1 %}{{ 70*(criterion.upperbound - criterion.lowerbound)/100 }}{% elseif criterion.type == 0 %}{{(100 / (criterion.participants|length - nbTP))|round(0) }}{% endif %}{% endif %}">
+                                        {% else %}
+                                            <a class="btn-flat disabled no-grade"><i class="fa fa-pencil-alt"><i class="fa fa-minus"></i></i></a>
+                                        {% endif %}
+                                    {% else %}
+                                        {{ grade.id }}
+                                    {% endif %}
+                                {% else %}
+                                    <div class="validated-grade" {% if grade.participant.type == 0 %} style="background-color: grey" {% endif %}>
+                                        {% if grade.gradedParticipant(app).type != 0 %}
+                                            {{ grade.value }}
+                                        {% else %} - {% endif %}
+                                    </div>
+                                {% endif %}
+                            </li>
+
+                            {% elseif criterion.type == 3 %}
+                                <li style="min-width:30%">
+                                    {% if gradingParticipant.status != 3 %}
+                                        {% if grade.gradedParticipant(app).type is defined %}
+                                            {% if grade.gradedParticipant(app).type != 0 %}
+
+                                            <div id="{% if grade.gradedUsrId is not null and grade.gradedTeaId is null %}{{ criterion.id }}_{{ gradingParticipant.id }}_value_{{ grade.gradedUser(app).id }}{% elseif grade.gradedTeaId is not null %}{{ criterion.id }}_{{ gradingParticipant.id }}_tvalue_{{ grade.gradedTeam(app).id }}{% if grade.gradedUser(app) is not null %}_{{ grade.gradedUser(app).id }}{% endif %}{% else %}{{ criterion.id }}_{{ gradingParticipant.id }}_svalue{% endif %}">
+                                                    <input type="radio"
+                                                        id="{% if grade.gradedUsrId is not null and grade.gradedTeaId is null %}binarychoice_{{ criterion.id }}_{{ gradingParticipant.id }}_checkbox_{{ grade.gradedUser(app).id }}_0{% elseif grade.gradedTeaId is not null %}binarychoice_{{ criterion.id }}_{{ gradingParticipant.id }}_tcheckbox_{{ grade.gradedTeam(app).id }}{% if grade.gradedUser(app) is not null %}_{{ grade.gradedUser(app).id }}{% endif %}_0{% else %}binarychoice_{{ criterion.id }}_{{ gradingParticipant.id }}_scheckbox_0{% endif %}"
+                                                        name="{% if grade.gradedUsrId is not null and grade.gradedTeaId is null %}{{ criterion.id }}_{{ gradingParticipant.id }}_value_{{ grade.gradedUser(app).id }}{% elseif grade.gradedTeaId is not null %}{{ criterion.id }}_{{ gradingParticipant.id }}_tvalue_{{ grade.gradedTeam(app).id }}{% if grade.gradedUser(app) is not null %}_{{ grade.gradedUser(app).id }}{% endif %}{% else %}{{ criterion.id }}_{{ gradingParticipant.id }}_svalue{% endif %}"
+                                                        required="required" value="0"
+                                                        {{ not grade.value ? 'checked' }}>
+                                                    <label
+                                                        for="{% if grade.gradedUsrId is not null and grade.gradedTeaId is null %}binarychoice_{{ criterion.id }}_{{ gradingParticipant.id }}_checkbox_{{ grade.gradedUser(app).id }}_0{% elseif grade.gradedTeaId is not null %}binarychoice_{{ criterion.id }}_{{ gradingParticipant.id }}_tcheckbox_{{ grade.gradedTeam(app).id }}{% if grade.gradedUser(app) is not null %}_{{ grade.gradedUser(app).id }}{% endif %}_0{% else %}binarychoice_{{ criterion.id }}_{{ gradingParticipant.id }}_scheckbox_0{% endif %}"
+                                                        class="required">No / NOK</label>
+                                                    <input type="radio"
+                                                        id="binarychoice_{{ criterion.id }}_{{ gradingParticipant.id }}{% if grade.gradedUsrId is not null and grade.gradedTeaId is null %}_checkbox_{{ grade.gradedUser(app).id }}{% elseif grade.gradedTeaId is not null %}_tcheckbox_{{ grade.gradedTeam(app).id }}{% if grade.gradedUser(app) is not null %}_{{ grade.gradedUser(app).id }}{% endif %}{% else %}_scheckbox{% endif %}_1"
+                                                        name="{{ criterion.id }}_{{ gradingParticipant.id }}{% if grade.gradedUsrId is not null and grade.gradedTeaId is null %}_value_{{ grade.gradedUser(app).id }}{% elseif grade.gradedTeaId is not null %}_tvalue_{{ grade.gradedTeam(app).id }}{% if grade.gradedUser(app) is not null %}_{{ grade.gradedUser(app).id }}{% endif %}{% else %}_svalue{% endif %}"
+                                                        required="required" value="1"
+                                                        {{ grade.value ? 'checked' }}>
+                                                    <label
+                                                        for="binarychoice_{{ criterion.id }}_{{ gradingParticipant.id }}{% if grade.gradedUsrId is not null and grade.gradedTeaId is null %}_checkbox_{{ grade.gradedUser(app).id }}{% elseif grade.gradedTeaId is not null %}_tcheckbox_{{ grade.gradedTeam(app).id }}{% if grade.gradedUser(app) is not null %}_{{ grade.gradedUser(app).id }}{% endif %}{% else %}_scheckbox{% endif %}_1" class="required">Yes / OK</label>
+                                                </div>
+                                            {% else %}
+                                                <a class="btn-flat disabled no-grade"><i class="fa fa-pencil-alt"><i class="fa fa-minus"></i></i></a>
+                                            {% endif %}
+                                        {% else %}
+                                            {{ grade.id }}
+                                        {% endif %}
+                                    {% else %}
+                                        <div class="validated-grade" {% if grade.participant.type == 0 %} style="background-color: grey" {% endif %}>
+                                            {% if grade.gradedParticipant(app).type != 0 %}
+                                                {{ grade.value }}
+                                            {% else %} - {% endif %}
+                                        </div>
+                                    {% endif %}
+                                </li>
+                            {% endif %}
+
+                            <li>
+                                <a class="btn waves-effect waves-light purple {% if grade.gradedParticipant(app) is not null and grade.gradedParticipant(app).precomment == "" or grade.gradedParticipant(app) is null and stage.description == "" %}lighten-2 {% else %}darken-4 {% endif %} precomment-button modal-trigger"
+                                    href="{% if grade.gradedUsrId is not null and grade.gradedTeaId is null %}#{{ criterion.id }}_precomment_{{ grade.gradedUser(app).id }}{% elseif grade.gradedTeaId is not null %}#{{ criterion.id }}_tprecomment_{{ grade.gradedTeam(app).id }}{% else %}#{{ criterion.id }}_sprecomment{% endif %}"
+                                    {% if grade.gradedParticipant(app) is not null and grade.gradedParticipant(app).precomment == "" or grade.gradedParticipant(app) is null and stage.description == "" %}
+                                        disabled="disabled"
+                                    {% endif %}
+                                >
+                                    <i class="fa {% if grade.gradedParticipant(app) is not null and grade.gradedParticipant(app).precomment == "" or grade.gradedParticipant(app) is null and stage.description == "" %}fa-flag-o{% else %}fa-flag{% endif %}"
+                                    ></i>
+                                    <span>{% trans %}grade.precomment.button_existing_title{% endtrans %}</span>
+                                </a>
+                                {% if grade.gradedParticipant(app) is not null and grade.gradedParticipant(app).precomment == "" or grade.gradedParticipant(app) is null and stage.description == "" %}
+                                    <i class="far fa-2x fa-flag mobile-element"></i>
+                                {% else %}
+                                    <i class="fa fa-2x fa-flag mobile-element modal-trigger" href="{% if grade.gradedUsrId is not null and grade.gradedTeaId is null %}#{{ criterion.id }}_precomment_{{ grade.gradedUser(app).id }}{% elseif grade.gradedTeaId is not null %}#{{ criterion.id }}_tprecomment_{{ grade.gradedTeam(app).id }}{% else %}#{{ criterion.id }}_sprecomment{% endif %}"></i>
+                                {% endif %}
+                            </li>
+
+                            <li class="comment-element">
+                            {% if gradingParticipant.status != 3 %}
+                                {% if grade.comment == "" %}
+                                    <a class="btn waves-effect waves-light blue lighten-2 comment-button modal-trigger"
+                                        href="{% if grade.gradedUsrId is not null and grade.gradedTeaId is null %}#{{ criterion.id }}_{{ gradingParticipant.id }}_comment_{{ grade.gradedUser(app).id }}{% elseif grade.gradedTeaId is not null %}#{{ criterion.id }}_{{ gradingParticipant.id }}_tcomment_{{ grade.gradedTeam(app).id }}{% if grade.gradedUser(app) is not null %}_{{ grade.gradedUser(app).id }}{% endif %}{% else %}#{{ criterion.id }}_{{ gradingParticipant.id }}_scomment{% endif %}">
+                                        <i class="far fa-comment"></i>
+                                        <span>{% trans %}grade.comment.title_button{% endtrans %}</span>
+                                    </a>
+                                    <i class="fa fa-2x fa-comment mobile-element modal-trigger"
+                                        href="{% if grade.gradedUsrId is not null and grade.gradedTeaId is null %}#{{ criterion.id }}_{{ gradingParticipant.id }}_comment_{{ grade.gradedUser(app).id }}{% elseif grade.gradedTeaId is not null %}#{{ criterion.id }}_{{ gradingParticipant.id }}_tcomment_{% if grade.gradedUser(app) is not null %}{{ grade.gradedUser(app).id }}{% else %}{{ grade.gradedTeam(app).id }}{% endif %}{% else %}#{{ criterion.id }}_{{ gradingParticipant.id }}_scomment{% endif %}"><i class="fa fa-plus"></i></i>
+                                {% else %}
+                                    <a class="btn waves-effect waves-light blue darken-4 comment-button modal-trigger"
+                                        href="{% if grade.gradedUsrId is not null and grade.gradedTeaId is null %}#{{ criterion.id }}_{{ gradingParticipant.id }}_comment_{{ grade.gradedUser(app).id }}{% elseif grade.gradedTeaId is not null %}#{{ criterion.id }}_{{ gradingParticipant.id }}_tcomment_{{ grade.gradedTeam(app).id }}{% if grade.gradedUser(app) is not null %}_{{ grade.gradedUser(app).id }}{% endif %}{% else %}#{{ criterion.id }}_{{ gradingParticipant.id }}_scomment{% endif %}">
+                                        <i class="fas fa-comment-dots"></i>
+                                        <span>{% trans %}grade.comment.modify_button{% endtrans %}</span>
+                                    </a>
+                                    <i class="fas fa-2x fa-comment-dots mobile-element modal-trigger"
+                                        href="{% if grade.gradedUsrId is not null and grade.gradedTeaId is null %}#{{ criterion.id }}_{{ gradingParticipant.id }}_comment_{{ grade.gradedUser(app).id }}{% elseif grade.gradedTeaId is not null %}#{{ criterion.id }}_{{ gradingParticipant.id }}_tcomment_{{ grade.gradedTeam(app).id }}{% if grade.gradedUser(app) is not null %}_{{ grade.gradedUser(app).id }}{% endif %}{% else %}#{{ criterion.id }}_{{ gradingParticipant.id }}_scomment{% endif %}"><div class="white-panel"></div></i>
+                                {% endif %}
+                            {% else %}
+                                {% if grade.comment != "" %}
+                                    <a class="btn-flat waves-effect waves-light comment-button blue darken-4 modal-trigger"
+                                        href="{% if grade.gradedUsrId is not null and grade.gradedTeaId is null %}#{{ criterion.id }}_{{ gradingParticipant.id }}_comment_{{ grade.gradedUser(app).id }}{% elseif grade.gradedTeaId is not null %}#{{ criterion.id }}_{{ gradingParticipant.id }}_tcomment_{{ grade.gradedTeam(app).id }}{% if grade.gradedUser(app) is not null %}_{{ grade.gradedUser(app).id }}{% endif %}{% else %}#{{ criterion.id }}_{{ gradingParticipant.id }}_scomment{% endif %}">
+                                        <span>{% trans %}grade.comment.review_button{% endtrans %}</span>
+                                    </a>
+                                    <i class="fas fa-2x fa-comment-dots mobile-element modal-trigger"
+                                        href="{% if grade.gradedUsrId is not null and grade.gradedTeaId is null %}#{{ criterion.id }}_{{ gradingParticipant.id }}_comment_{{ grade.gradedUser(app).id }}{% elseif grade.gradedTeaId is not null %}#{{ criterion.id }}_{{ gradingParticipant.id }}_tcomment_{{ grade.gradedTeam(app).id }}{% if grade.gradedUser(app) is not null %}_{{ grade.gradedUser(app).id }}{% endif %}{% else %}#{{ criterion.id }}_{{ gradingParticipant.id }}_scomment{% endif %}"><div class="white-panel"></div></i>
+                                {% else %}
+                                    <a class="btn-flat comment-button" disabled="disabled">
+                                        <span>{% trans %}grade.comment.review_button{% endtrans %}</span>
+                                    </a>
+                                    <i class="far fa-2x fa-comment mobile-element"></i>
+                                {% endif %}
+                            {% endif %}
+                            </li>
+                        </ul>
+                    </li>
+
+                    <div id="{% if grade.gradedUsrId is not null and grade.gradedTeaId is null %}{{ criterion.id }}_precomment_{{ grade.gradedUser(app).id }}{% elseif grade.gradedTeaId is not null %}{{ criterion.id }}_tprecomment_{{ grade.gradedTeam(app).id }}{% if grade.gradedUser(app) is not null %}_{{ grade.gradedUser(app).id }}{% endif %}{% else %}{{ criterion.id }}_scomment{% endif %}" class="modal">
+                        <div class="modal-title">
+                            <h5>{% trans %}grade.precomment.modal_title_1{% endtrans %}
+                                {% if grade.gradedUsrId is not null and grade.gradedUsrId is not null %}
+                                    {{ grade.gradedUser(app).firstname }}
+                                {% elseif grade.gradedTeaId is not null %}
+                                    {{ grade.gradedTeam(app).name }}
+                                {% else %}
+                                    {{ stage.name }}
+                                {% endif %}
+                                {% trans %}grade.precomment.modal_title_2{% endtrans %}
+                            </h5>
+                        </div>
+                        <div class="modal-content">
+                            <div class="textarea-broaden comment-text">
+                                {% if grade.gradedParticipant(app) is not null %}
+                                    {{ grade.gradedParticipant(app).precomment }}
+                                {% else %}
+                                    {{ stage.description }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <a class="btn waves-effect waves-light modal-close">{% trans %}grade.precomment.button_ok_title{% endtrans %}</a>
+                        </div>
+                    </div>
+                    <div id="{% if grade.gradedUsrId is not null and grade.gradedTeaId is null %}{{ criterion.id }}_{{ gradingParticipant.id }}_comment_{{ grade.gradedUser(app).id }}{% elseif grade.gradedTeaId is not null %}{{ criterion.id }}_{{ gradingParticipant.id }}_tcomment_{{ grade.gradedTeam(app).id }}{% if grade.gradedUser(app) is not null %}_{{ grade.gradedUser(app).id }}{% endif %}{% else %}{{ criterion.id }}_{{ gradingParticipant.id }}_scomment{% endif %}" class="modal">
+                        <div class="modal-title">
+                            <h5>{% trans %}grade.comment.modal_title_1{% endtrans %}
+                                {% if grade.gradedUsrId is not null and grade.gradedUsrId is not null %}
+                                    {{ grade.gradedUser(app).firstname }}
+                                {% elseif grade.gradedTeaId is not null %}
+                                    {{ grade.gradedTeam(app).name }}
+                                {% else %}
+                                    {{ stage.name }}
+                                {% endif %}
+                                {% trans %}grade.comment.modal_title_2{% endtrans %}
+                            </h5>
+                        </div>
+                        <div class="modal-content">
+                            <textarea class="textarea-broaden"
+                                name="{% if grade.gradedParticipant(app) is not null and grade.gradedParticipant(app).type == 0 %}{{ criterion.id }}_{{ gradingParticipant.id }}_tp{% endif %}{% if grade.gradedUsrId is not null and grade.gradedTeaId is null %}{{ criterion.id }}_{{ gradingParticipant.id }}_comment_{{ grade.gradedUser(app).id }}{% elseif grade.gradedTeaId is not null %}{{ criterion.id }}_{{ gradingParticipant.id }}_tcomment_{{ grade.gradedTeam(app).id }}{% if grade.gradedUser(app) is not null %}_{{ grade.gradedUser(app).id }}{% endif %}{% else %}{{ criterion.id }}_{{ gradingParticipant.id }}_scomment{% endif %}"
+                                    {% if gradingParticipant.status == "3" %}
+                                        disabled="disabled"
+                                    {% endif %}
+                            >{{ grade.comment }}</textarea>
+                        </div>
+                        <div class="modal-footer">
+                            <a class="btn waves-effect waves-light modal-close submit-comment">{% trans %}grade.comment.saveButton{% endtrans %}</a>
+                        </div>
+                    </div>
+            {% endfor %}
+            </ul>
+
+
+        {% endfor %}
+        #}
+
+                    <div class="row action-buttons">
+                        {% if currentUserParticipations[0].status != 3 %}
+                        <div class="button-field btn-act-left">
+                            <a class="waves-effect waves-light btn-large blue darken-2 save-button"><ul style="display: flex;align-items: center;margin:auto;"><i class="fa fa-save" style="margin-right: 5px"></i><span>{% trans %}grade.save_button{% endtrans %}</span></ul></a>
+                        </div>
+                        {% endif %}
+                        <div class="button-field btn-act-center">
+                            <a class="waves-effect waves-light btn-large return-button" href="{{ path('myActivities') }}">{% trans %}grade.submit.return_button_title{% endtrans %}</a>
+                        </div>
+                        {% if currentUserParticipations[0].status != 3 %}
+                        <div class="button-field btn-act-right">
+                            <a class="waves-effect waves-light btn-large modal-trigger blue darken-4 validate-button" href="#validateGrades"><ul style="display: flex;align-items: center;margin:auto;"><i class="fa fa-gavel" style="margin-right: 5px"></i><span>{% trans %}grade.submit.modal_button_title{% endtrans %}</span></ul></a>
+                        </div>
+                        {% endif %}
+                    </div>
+        </form>
+
+    <!-- Modal Structure -->
+    <div id="validateGrades" class="modal">
+        <div class="modal-content">
+            <h4>{% trans %}grade.submit.modal_title{% endtrans %}</h4>
+            <p>{% trans %}grade.submit.modal_message{% endtrans %}</p>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class=" modal-action modal-close submit-button waves-effect waves-green btn-large">{% trans %}grade.submit.confirm_button_title{% endtrans %}</a>
+            <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}grade.submit.discard_button_title{% endtrans %}</a>
+        </div>
+    </div>
+
+    <div id="notifyUncompleteForm" class="modal">
+        <div class="modal-content">
+            <h4>{% trans %}grade.submit.modal_title{% endtrans %}</h4>
+            <p>{% trans %}grade.force_comment_modal_begin{% endtrans %}<span class="crtName" style="margin-left: 3px; margin-right: 3px;"></span>{% trans %} grade.force_comment_modal_end{% endtrans %}<span class="crtSign" style="margin-left: 3px; margin-right: 3px;"></span><span class="crtThreshold" style="margin-left: 3px;"></span></p>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-large notifyModalClose">Ok</a>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('js/nouislider.js') }}"></script>
+    <script src="{{ asset('js/grades.js') }}"></script>
+{% endblock %}

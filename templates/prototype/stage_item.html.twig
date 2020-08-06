@@ -1,0 +1,135 @@
+<li id="{{ stage.vars.id }}" class="stage stage-element {{stage.vars.data is empty ? "new" }} active" data-id="0">
+  {% include "modals/stage_settings.html.twig" with { s: '__stgNb__', sNb: '__realStgNb__', stage: stage } %}
+  <div class="stage-item-name">
+    <div class="meta">
+        <div class="stage-dates">
+          <i class="fa fa-calendar"></i>TBD
+        </div>
+        <div class="stage-period-freq" style="display:none">
+          <i class="fa fa-clock"></i>
+        </div>
+    </div>
+    <div class="name">
+      <span class="visibility">
+      </span>
+      <span class="stage-name-field">
+        {% trans %}stages.stage.title{% endtrans %} __realStgNb__
+      </span>
+      <span class="s-weighting"></span>
+    </div>
+    <div class="meta">
+      <div class="grading-dates">
+        <i class="fa fa-paper-plane"></i>TBD
+      </div>
+    </div>
+  </div>
+  <div class="stage-item-button"></div>
+
+  <section class="stage-container">
+    <div class="stage-container--main">
+      <div class="stage-weight">
+        <a href="#" class="btn-flat">
+          <span>Poids :</span>
+          <span class="s-weighting"></span>
+        </a>
+      </div>
+      <div class="stage-actions">
+        <a href="#stage___stgNb__" class="btn-flat modal-trigger">
+          <i class="material-icons right">edit</i> Modifier la phase
+        </a>
+      </div>
+
+      <section class="criteria">
+        <template class="criteria-list--item__proto">
+          {%
+            include "components/activity_page__criterion_item.html.twig"
+            with { s: "__stgNb__", c: "__crtNb__", criterion: stage.criteria.vars.prototype }
+          %}
+        </template>
+        <header>
+          <ul class="tabs output-tabs tabs-fixed-width">
+            <li class="tab criteria-tab">
+              <a href="#stage-__stgNb__-type--criteria">{{ 'activity_elements.criteria'|trans }}</a>
+            </li>
+            <li class="tab survey-tab">
+              <a href="#stage-__stgNb__-type--survey">{{ 'activity_elements.survey'|trans }}</a>
+            </li>
+          </ul>
+        </header>
+        <div id="stage-__stgNb__-type--criteria">
+          <ul class="criteria-list">
+            <template class="criteria-list--item__proto">
+              {% include "modals/stage_criterion.html.twig" with { s: '__stgNb__', c: '__crtNb__', criterion: stage.criteria.vars.prototype } %}
+            </template>
+            {#
+              This item only displays when not preceeded with any element,
+              through CSS direct sibling selector.
+            #}
+            <li class="no-items-placeholder">
+              <p>
+                {{ 'process_stages.no_criteria'|trans }}
+              </p>
+              <p>
+                {{ 'process_stages.tooltip_no_criteria'|trans }}
+              </p>
+            </li>
+          </ul>
+          <footer>
+            <button class="btn-flat btn-add-criterion">
+              <i class="material-icons left">add</i>
+              {{ 'criteria.add_btn_internal'|trans }}
+            </button>
+          </footer>
+        </div>
+        <div id="stage-__stgNb__-type--survey">
+
+            <h6 class="no-participants">
+              <span>{{ 'process_stages.no_survey'|trans }}</span>
+              <i class="fa fa-question-circle tooltipped" data-position="top"></i>
+            </h6>
+
+            <a
+              href="{{ url('surveyRequest',{'stgId' : 0}) }}?redirect={{ url(route,routeParams)|e('url') }}"
+              class="btn insert-survey-btn">
+              <span>{% trans %}survey.add_btn_internal{% endtrans %}</span>
+            </a>
+
+        </div>
+      </section>
+      <section class="participants">
+        <template class="participants-list--item__proto-i">
+          {% include "components/activity_page__participant_item.html.twig" with { participant: stage.independantUniqueIntParticipations.vars.prototype, leadingOption: true, mode: 'i', entity: 'user' } %}
+        </template>
+        <template class="participants-list--item__proto-t">
+          {% include "components/activity_page__participant_item.html.twig" with { participant: stage.independantUniqueTeamParticipations.vars.prototype, leadingOption: true, mode: 't', entity: 'team' } %}
+        </template>
+        <template class="participants-list--item__proto-e">
+          {% include "components/activity_page__participant_item.html.twig" with { participant: stage.independantUniqueExtParticipations.vars.prototype, leadingOption: false, mode: 'e', entity: 'user' } %}
+        </template>
+        <header>{{ 'activity_elements.participants'|trans }}</header>
+
+        <ul class="participants-list">
+        </ul>
+
+        <footer class="action-buttons" style="justify-content: space-between;padding-bottom:0">
+          <button type="button" class="btn-flat btn-add-participant-i">
+            <i class="material-icons left">add</i>
+            {{ 'participants.add_btn_partner'|trans }}
+          </button>
+          {% if form.vars.data.organization.teams|length > 0 %}
+            <button type="button" class="btn-flat btn-add-participant-t">
+              <i class="material-icons left">add</i>
+              {{ 'participants.add_btn_team'|trans }}
+            </button>
+          {% endif %}
+          {% if form.vars.data.organization.externalUsers|length > 0 %}
+            <button type="button" class="btn-flat btn-add-participant-e">
+              <i class="material-icons left">add</i>
+              {{ 'participants.add_btn_collab'|trans }}
+            </button>
+          {% endif %}
+        </footer>
+      </section>
+    </div>
+  </section>
+</li>

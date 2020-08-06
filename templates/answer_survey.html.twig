@@ -1,0 +1,246 @@
+{% block css %}
+	<link rel="icon" type="image/png" sizes="32x32" href="{{ asset('lib/img/favicon/favicon-32x32.png') }}">
+	<link rel="icon" type="image/png" sizes="16x16" href="{{ asset('lib/img/favicon/favicon-16x16.png') }}">
+	<link rel="shortcut icon" type="image/x-icon" href="{{ asset('lib/img/favicon/favicon.ico') }}">
+	<link rel="mask-icon" href="{{ asset('lib/img/favicon/safari-pinned-tab.svg') }}" color="#5bbad5">
+	<meta content="Serpico Application. Evaluation Tool for businesses. Home." name="description">
+	<link rel="manifest" href="{{ asset('lib/img/favicon/site.webmanifest') }}">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.js"></script>
+	<link rel="stylesheet" href="{{ asset('lib/materialize/css/materialize.css') }}">
+	<link rel="stylesheet" href="{{ asset('css/answer.css') }}">
+	<link rel="stylesheet" href="{{ asset('css/nouislider.css') }}">
+
+{% endblock %}
+
+{% block content %}
+
+	{{ form_start(form) }}
+	<ul class="answers elements row center">
+    {% if not form.vars.valid %}
+      <div id="errorModal" class="modal">
+        <div class="modal-title">
+          <h5><h5> {{ "processes.error_message_answer"|trans }}</h5>
+        </div>
+        <div class="modal-content">
+
+
+
+      <ul class="alert alert-danger">
+        {% set formErrors = form.vars.errors.form.getErrors(true) %}
+
+        {% for child in form.Useranswers %}
+            {% for answer in child.children %}
+                {% if not answer.vars.valid %}
+
+           <div class="row">
+           {{ child.desc.vars.label }}
+           {{ form_errors(child.desc) }}
+           </div>
+
+
+
+
+
+
+           {% endif %}
+       {% endfor %}
+        {% endfor %}
+
+      </ul>
+      <div class="button-field">
+        <a class="waves-effect waves-light btn  modal-close">{% trans %}processes.submit{% endtrans %}</a>
+    </div>
+        </div>
+      </div>
+    {% endif %}
+		{% set k =0 %}
+    {% if edition %}
+
+		{% for key,item in form.Useranswers %}
+
+			<li class="element-input textFieldAnswer center" id="{{ item.vars.data.field.type }}">
+				<ul class="row no-margin flex-center " style="justify-content: space-between;">
+					<div class="answer center" id="{{ key }}">
+            <h3> {{ item.vars.data.field.title }}</h3>
+            <h6>{{ item.vars.data.field.description }}</h6>
+
+						{% if item.vars.data.field.type in ["LS"] %}
+
+							{% for param in item.vars.data.field.parameters %}
+
+								<div class="label-slider" id="[ {{ param.lowerbound }} , {{ param.upperbound  }}]" style="font-size:1.2rem;margin-left: 20px;display:none ;">{{ param.value  }}</div>
+							{% endfor %}
+              <div class=" center" style="font-size:1.2rem;margin-left: 20px;display:inline-block">{{ item.vars.data.field.lowerbound}}</div>
+							<div style="display:inline-block;width:70%" class="grade-slider grade-slider-{{ k }}" data-lb="0" data-ub="10" data-step="1" data-value="1"></div>
+              <div class=" center" style="font-size:1.2rem;margin-left: 20px;display:inline-block">{{ item.vars.data.field.upperbound}}</div>
+              <div class="grade-slider-range-value center" style="font-size:1.2rem;margin-left: 20px;"></div>
+
+
+
+
+							{% set k =k+1 %}
+
+              {{ form_widget(item.desc , { 'attr' :{'style': 'display : none'}})  }}
+              {{ form_errors(item.desc, { 'attr' :{ 'class':'errors'}}) }}
+            {% elseif item.vars.data.field.type in ["UC"] %}
+              {% for param in item.vars.data.field.parameters %}
+
+              <div class="label-uc" style="font-size:1.2rem;margin-left: 20px;display:none ;">{{ param.value  }}</div>
+            {% endfor %}
+
+              {{ form_widget(item.desc) }}
+              {{ form_errors(item.desc, { 'attr' :{ 'class':'errors'}}) }}
+            {% elseif item.vars.data.field.type in ["ST" ,"LT"] %}
+              <div class="center">
+              {{ form_widget(item.desc , { 'attr' :{'style': 'width : 50%' , 'margin-left' : 'auto' , 'margin-right' : 'auto' }})  }}
+              {{ form_errors(item.desc, { 'attr' :{ 'class':'errors'}}) }}
+              </div>
+              {%  else %}
+                <div class="center">
+                  {{ form_widget(item.desc)  }}
+                  {{ form_errors(item.desc, { 'attr' :{ 'class':'errors'}}) }}
+                </div>
+
+						{% endif %}
+
+
+					</div>
+				</ul>
+
+			</li>
+		{% endfor %}
+{% else %}
+{% for key,item in form.Useranswers %}
+
+  <li class="element-input textFieldAnswer center" id="{{ item.vars.data.field.type }}">
+    <ul class="row no-margin flex-center " style="justify-content: space-between;">
+      <div class="answer center" id="{{ key }}">
+        <h3> {{ item.vars.data.field.title }}</h3>
+        <h6>{{ item.vars.data.field.description }}</h6>
+
+        {% if item.vars.data.field.type in ["LS"] %}
+
+          {% for param in item.vars.data.field.parameters %}
+
+            <div class="label-slider" id="[ {{ param.lowerbound }} , {{ param.upperbound  }}]" style="font-size:1.2rem;margin-left: 20px;display:none ;">{{ param.value  }}</div>
+          {% endfor %}
+          <div class="grade-slider-range-value center"  style="font-size:1.2rem;margin-right: 20px;display:inline-block">{{ item.vars.data.field.lowerbound }}</div>
+          <div style="display:inline-block;width:70%"  class="grade-slider disable-slider grade-slider-{{ k }}" data-lb="0" data-ub="10" data-step="1" data-value="1"></div>
+          <div class="grade-slider-range-value center"  style="font-size:1.2rem;margin-left: 20px;display:inline-block">{{ item.vars.data.field.upperbound }}</div>
+          <div class="grade-slider-range-value center"  style="font-size:1.2rem;margin-left: 20px;">{{ item.vars.data.desc }}</div>
+
+
+
+
+          {% set k =k+1 %}
+
+          {{ form_widget(item.desc , { 'attr' :{'disabled':'disabled' ,'style': 'display : none'}})  }}
+          {{ form_errors(item.desc) }}
+        {% elseif item.vars.data.field.type in ["UC"] %}
+          {% for param in item.vars.data.field.parameters %}
+
+          <div class="label-uc" style="font-size:1.2rem;margin-left: 20px;display:none ;">{{ param.value  }}</div>
+        {% endfor %}
+
+          {{ form_widget(item.desc , { 'disabled':'disabled' }) }}
+
+        {% elseif item.vars.data.field.type in ["ST" ,"LT"] %}
+          <div class="center">
+          {{ form_widget(item.desc  , { 'attr' :{ 'disabled':'disabled' , 'style': 'width : 50%' , 'margin-left' : 'auto' , 'margin-right' : 'auto' }  })  }}
+          </div>
+          {%  else %}
+            <div class="center disable-other">
+              {{ form_widget(item.desc)  }}
+            </div>
+
+        {% endif %}
+
+
+      </div>
+    </ul>
+
+  </li>
+{% endfor %}
+
+
+
+
+
+{% endif %}
+
+  <div class="center in-footer">
+    <div>
+    <div class="progress" >
+      <div class="determinate" style="width: 0%"></div>
+    </div>
+    <div class=" navBtn">
+      <div>
+      <p class="rank">1/1</p>
+      <a class="btn prec">
+        <i class="fas fa-angle-up"></i>
+      </a>
+      <a class="btn suiv">
+        <i class="fas fa-angle-down"></i>
+      </a>
+      </div>
+
+    </div>
+    </div>
+    {% if edition == true %}
+
+    <a href='#saveDataModal' class="modal-trigger btn waves-effect waves-light">{% trans %}processes.saveAnswers{% endtrans %}</a>
+    <a href='#finalizeModal' class="modal-trigger btn waves-effect waves-light">{% trans %}processes.sendAnswers{% endtrans %}</a>
+
+    {% else %}
+
+    <a href="{{ url('myActivities')}}" class=" btn waves-effect waves-light">{% trans %}processes.backToMyActivity{% endtrans %}</a>
+
+
+    {% endif %}
+  </div>
+
+
+  </ul>
+
+
+
+	<div id="saveDataModal" class="modal">
+		<div class="modal-title">
+			<h5> {{ "activities.do_you_want_continue"|trans }}</h5>
+		</div>
+		<div class="modal-content">
+			<p> {{"process_stages.save_survey"|trans}}</p>
+		</div>
+		<div class="modal-footer">
+			<input type="submit" value={{"processes.confirm"|trans  }} name="save" class="btn waves-effect waves-light modal-close remove-criterion">
+			<a class="waves-effect waves-light modal-close btn-flat red-text">{{ "processes.cancel"|trans }}</a>
+		</div>
+	</div>
+  <div id="finalizeModal" class="modal">
+    <div class="modal-title">
+      <h5>{{ "processes.want_send_answer" |trans}}</h5>
+    </div>
+    <div class="modal-content">
+      <p>{{ "processes.cant_modify_answer"|trans }}</p>
+    </div>
+    <div class="modal-footer">
+      <input type="submit" value={{ "activity_elements.finalize"|trans}} name="finish" class="btn waves-effect waves-light modal-close remove-criterion">
+      <a class="waves-effect waves-light modal-close btn-flat red-text">{{ "processes.cancel"|trans }}</a>
+    </div>
+  </div>
+
+
+	<div>
+		{{ form_end(form)}}
+	</div>
+
+{% endblock %}
+
+{% block javascripts %}
+	<script src="{{ asset('js/nouislider.js') }}"></script>
+	<script src="{{ asset('js/answer.js') }}"></script>
+{% endblock %}

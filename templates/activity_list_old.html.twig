@@ -1,0 +1,854 @@
+ {% extends "layout.html.twig" %}
+
+{% block title %}
+    {% trans %}activities.page_title{% endtrans %}
+{% endblock %}
+
+{% block css %}
+    <script type="text/javascript">
+        var deleteUrl = "{{ url('ajaxStageDelete',{'stgId' : 0}) }}";
+        var adeleteUrl = "{{ url('ajaxActivityDelete',{'actId' : 0}) }}";
+        var rdeleteUrl = "{{ url('ajaxRecurringDelete',{'rctId' : 0}) }}";
+        var archiveUrl = "{{ url('ajaxActivityArchive',{'actId' : 0}) }}";
+        var delegateUrl = "{{ url('activityDelegate') }}";
+        var requestUrl = "{{ url('activityRequest') }}";
+        var resolveRequestUrl = "{{ url('activityResolveRequest',{'actId' : 0, 'action' : 'undefined'}) }}";
+    </script>
+{% endblock %}
+
+{% block pagename %}
+    {% trans %}activities.mobile_header_title{% endtrans %}
+{% endblock %}
+
+{% block username %}
+{{ currentuser.firstname }} {{ currentuser.lastname }}
+{% endblock %}
+
+{% block content %}
+
+      {% if currentuser.role == 1 or currentuser.role == 4 and orgName is not defined %}
+          <div class="action-buttons">
+              <div class="button-field flex-center" style="flex-direction: column">
+                  {% if orgMode %}
+                      <a href="{{ url('myActivities') }}" class="btn-large waves-effect waves-light teal lighten-1" style="margin:20px 0px 0px 0px">{% trans %}activities.my_activities{% endtrans %}</a>
+                  {% else %}
+                      <a href="{{ url('firmActivities') }}" class="btn-large waves-effect waves-light teal lighten-1" style="margin:20px 0px 0px 0px">{% trans %}activities.firm_activities{% endtrans %}</a>
+                  {% endif %}
+                  {% if currentuser.role != 3 %}
+                      <a class="waves-effect waves-light btn-large green accent-4 modal-trigger" href="#createActivity" style="margin:20px 0px">{% trans %}activities.create.modal_trg_msg{% endtrans %}</a>
+                  {% endif %}
+              </div>
+          </div>
+      {% endif %}
+      {% if orgName is defined %}
+        <h4 style="text-align: center">{{ orgName }}</h4>
+      {% endif %}
+
+      <div class="row">
+          <div class="col s12" style="padding:0!important">
+              <ul class="tabs" {% if nbCategories > 4 %}style="display: flex;justify-content: space-between"{% endif %}>
+                  {% if completedActivities|length > 0 %} <li class="tab{% if nbCategories < 5 %} col s{{ max(3,12/nbCategories) }}{% endif %}"><a href="#completed"><i class="fa fa-hourglass-3 fa-tabs" ></i><span class="activity-status">{% trans %}activities.completed{% endtrans %}</span><span>({{ completedActivities|length }})</span></a></li> {% endif %}
+                  {% if cancelledActivities|length > 0 %} <li class="tab{% if nbCategories < 5 %} col s{{ max(3,12/nbCategories) }}{% endif %}"><a href="#cancelled"><i class="far fa-hand-point-up"></i><span class="activity-status">{% trans %}activities.cancelled{% endtrans %}</span><span>({{ cancelledActivities|length }})</span></a></li> {% endif %}
+                  {% if discardedActivities|length > 0 %} <li class="tab{% if nbCategories < 5 %} col s{{ max(3,12/nbCategories) }}{% endif %}"><a href="#discarded"><i class="fa fa-exclamation-triangle"></i><span class="activity-status">{% trans %}activities.discarded{% endtrans %}</span><span>({{ discardedActivities|length }})</span></a></li> {% endif %}
+                  {% if requestedActivities|length > 0 %} <li class="tab{% if nbCategories < 5 %} col s{{ max(3,12/nbCategories) }}{% endif %}"><a href="#requested"><i class="fa fa-gavel"></i><span class="activity-status">{% trans %}activities.requested{% endtrans %}</span><span>({{ requestedActivities|length }})</span></a></li> {% endif %}
+                  {% if attributedActivities|length > 0 %} <li class="tab{% if nbCategories < 5 %} col s{{ max(3,12/nbCategories) }}{% endif %}"><a href="#attributed"><i class="far fa-flag"></i><span class="activity-status">{% trans %}activities.attributed{% endtrans %}</span><span>({{ attributedActivities|length }})</span></a></li> {% endif %}
+                  {% if incompleteActivities|length > 0 %} <li class="tab{% if nbCategories < 5 %} col s{{ max(3,12/nbCategories) }}{% endif %}"><a href="#incomplete"><i class="far fa-edit"></i><span class="activity-status">{% trans %}activities.incomplete{% endtrans %}</span><span>({{ incompleteActivities|length }})</span></a></li> {% endif %}
+                  {% if currentActivities|length > 0 %} <li class="tab{% if nbCategories < 5 %} col s{{ max(3,12/nbCategories) }}{% endif %} active"><a href="#current"><i class="fa fa-hourglass-2"></i><span class="activity-status">{% trans %}activities.current{% endtrans %}</span><span>({{ currentActivities|length }})</span></a></li> {% endif %}
+                  {% if futureActivities|length > 0 %} <li class="tab{% if nbCategories < 5 %} col s{{ max(3,12/nbCategories) }}{% endif %}"><a href="#future"><i class="fa fa-hourglass-1"></i><span class="activity-status">{% trans %}activities.future{% endtrans %}</span><span>({{ futureActivities|length }})</span></a></li> {% endif %}
+              </ul>
+          </div>
+      </div>
+      {#
+      <div class="row">
+          <div class="col s12">
+              <ul class="tabs">
+
+              </ul>
+          </div>
+      </div>
+      #}
+  {# get current date to compare it after #}
+  {% set now = "now"|date("Y/m/d") %}
+
+  {% if user_activities|length > 0 %}
+
+      {# Workaround to insert separations between different activity statuses (recall act are already sorted) #}
+      {% set break_cancelled = false %}
+      {% set break_discarded = false %}
+      {% set break_requested = false %}
+      {% set break_attributed = false %}
+      {% set break_incomplete = false %}
+      {% set break_future = false %}
+      {% set break_current = false %}
+      {% set break_completed = false %}
+
+        {% for k in 0..user_activities|length - 1 %}
+          {# as we remove some elements from activity collection (the future recurring activities except the first) we need tp do this #}
+          {% if user_activities[k] is defined %}
+
+             {% if user_activities[k].archived is null %}
+
+                {% if user_activities[k].status == -5 and not break_cancelled %}
+                    <div id="cancelled" class="col s12">
+                    <div class="c-align p-tb-10">
+                        <i class="far fa-2x fa-hand-point-up activity-status"></i><h4>{% trans %}activities.cancelled_title{% endtrans %}</h4>
+                    </div>
+                    {% set break_cancelled = true %}
+                {% endif %}
+
+                {% if user_activities[k].status == -4 and not break_discarded %}
+                    {% if break_cancelled == true %}
+                        </div>
+                    {% endif %}
+                    <div id="discarded" class="col s12">
+                    <div class="c-align p-tb-10">
+                        <i class="fa fa-2x fa-exclamation-triangle activity-status"></i><h4>{% trans %}activities.discarded_title{% endtrans %}</h4>
+                    </div>
+                    {% set break_discarded = true %}
+                {% endif %}
+
+                {% if user_activities[k].status == -3 and not break_requested %}
+                    {% if break_discarded == true or break_discarded == false and break_cancelled == true %}
+                        </div>
+                    {% endif %}
+                    <div id="requested" class="col s12">
+                    <div class="c-align p-tb-10">
+                        <i class="fa fa-2x fa-gavel activity-status"></i><h4>{% trans %}activities.requested_title{% endtrans %}</h4>
+                    </div>
+                    {% set break_requested = true %}
+                {% endif %}
+
+                {% if user_activities[k].status == -2 and not break_attributed %}
+                    {% if break_requested == true or break_requested == false and break_discarded == true or break_requested == false and break_discarded == false and break_cancelled == true %}
+                        </div>
+                    {% endif %}
+                    <div id="attributed" class="col s12">
+                    <div class="c-align p-tb-10">
+                        <i class="far fa-2x fa-flag activity-status"></i><h4>{% trans %}activities.attributed_title{% endtrans %}</h4>
+                    </div>
+                    {% set break_attributed = true %}
+                {% endif %}
+
+                {% if user_activities[k].status == -1 and not break_incomplete %}
+                    {% if break_attributed == true or break_attributed == false and break_requested == true or break_attributed == false and break_requested == false and break_discarded == true or break_attributed == false and break_requested == false and break_discarded == false and break_cancelled == true %}
+                        </div>
+                    {% endif %}
+                    <div id="incomplete" class="col s12">
+                    <div class="c-align p-tb-10">
+                        <i class="fas fa-2x fa-edit activity-status"></i><h4>{% trans %}activities.incomplete_title{% endtrans %}</h4>
+                    </div>
+                    {% set break_incomplete = true %}
+                {% endif %}
+
+
+                {% if user_activities[k].status == 0 and not break_future %}
+                    {% if break_incomplete == true or break_incomplete == false and break_attributed == true or break_incomplete == false and break_attributed == false and break_requested == true or break_incomplete == false and break_attributed == false and break_requested == false and break_discarded == true or break_incomplete == false and break_attributed == false and break_requested == false and break_discarded == false and break_cancelled == true %}
+                        </div>
+                    {% endif %}
+                    <div id="future" class="col s12">
+                    <div class="c-align p-tb-10">
+                        <i class="fa fa-2x fa-hourglass-1 activity-status"></i><h4>{% trans %}activities.future_title{% endtrans %}</h4>
+                    </div>
+                    {% set break_future = true %}
+                {% endif %}
+
+                {% if user_activities[k].status == 1 and not break_current %}
+                    {% if break_future == true or break_future == false and break_incomplete == true or break_future == false and break_incomplete == false and break_attributed == true or break_future == false and break_incomplete == false and break_attributed == false and break_requested == true or break_future == false and break_incomplete == false and break_attributed == false and break_requested == false and break_discarded == true or break_future == false and break_incomplete == false and break_attributed == false and break_requested == false and break_discarded == false and break_cancelled == true %}
+                        </div>
+                    {% endif %}
+                    <div id="current" class="col s12">
+                    <div class="c-align p-tb-10">
+                        <i class="fa fa-2x fa-hourglass-2 activity-status"></i><h4>{% trans %}activities.current_title{% endtrans %}</h4>
+                    </div>
+                    {% set break_current = true %}
+                {% endif %}
+
+                {% if user_activities[k].status == 2 and not break_completed %}
+                    {% if break_current == true or break_current == false and break_future == true or break_current == false and break_future == false and break_incomplete == true or break_current == false and break_future == false and break_incomplete == false and break_attributed == true or break_current == false and break_future == false and break_incomplete == false and break_attributed == false and break_requested == true or break_current == false and break_future == false and break_incomplete == false and break_attributed == false and break_requested == false and break_discarded == true or break_current == false and break_future == false and break_incomplete == false and break_attributed == false and break_requested == false and break_discarded == false and break_cancelled == true %}
+                        </div>
+                    {% endif %}
+                    <div id="completed" class="col s12">
+                    <div class="c-align p-tb-10">
+                        <i class="fa fa-2x fa-hourglass-3 activity-status"></i><h4>{% trans %}activities.completed_title{% endtrans %}</h4>
+                    </div>
+                    {% set break_completed = true %}
+                {% endif %}
+
+                <ul id="activityList{{ user_activities[k].id }}" class="collapsible expandMore expandLess" data-collapsible="accordion">
+                    <li>
+                      <div class="collapsible-header flex-center{% if user_activities|length == 1 %} active {% endif %}
+                        {% if user_activities[k].status == -3 %}pink{% elseif user_activities[k].status == -2 %}purple{% elseif user_activities[k].status == -1 %}blue{% elseif user_activities[k].status == 0 %}cyan{% elseif user_activities[k].status == 1 %}cyan{% elseif user_activities[k].status == 2 %}orange{% endif %} lighten-5">
+                          <i class="fa fa-fw fa-chevron-down"></i>
+                          <i class="fa fa-fw fa-chevron-right"></i>
+                        <!-- just giving the name an absolute position because it was interfering ith the button position -->
+                        <div class="activity-banner">
+                          <div class="activity-title"> {{ user_activities[k].name }} {% if user_activities[k].recurring %}<i class="far fa-2x fa-circle-notch fa-recurring tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.recurring{% endtrans %}" data-delay="50" style="margin-left:10px;"></i>{% endif %}</div>
+                            {% if user_activities[k].status != -3 %}
+                          <div class="activity-description"> {{ user_activities[k].objectives  }}</div>
+                            {% endif %}
+                        </div>
+                          {% if user_activities[k].status >= 0 %}
+                              {% set activityMixed = false %}
+                              {% if user_activities[k].stages[0] is defined %}
+                                  {% if user_activities[k].stages[0].startdate is defined and user_activities[k].stages[0].startdate is not null %}
+                                      {% set activityType = user_activities[k].stages[0].criteria[0].type %}
+                                      {% set diffGradingDays = null %}
+                                      {% set diffStageDays = -1 %}
+                                      {% set oldestStageStartDate = user_activities[k].stages[0].startdate|date("Y/m/d") %}
+                                      {% set newestStageEndDate = user_activities[k].stages[0].enddate|date("Y/m/d") %}
+                                      {% for stage in user_activities[k].stages if not activityMixed %}
+
+                                          {% set diffStageDateInterval = stage.genddate.diff(date(now)) %}
+
+                                          {% set diffGradingDays = diffStageDateInterval.days %}
+                                          {% if stage.genddate|date("Y/m/d") < now %}
+                                              {% set diffGradingDays = -diffGradingDays %}
+                                          {% endif %}
+
+                                          {% if stage.startdate|date("Y/m/d") < oldestStageStartDate %}
+                                              {% set oldestStageStartDate = stage.startdate|date("Y/m/d") %}
+                                          {% endif %}
+                                          {% if stage.enddate|date("Y/m/d") < newestStageEndDate %}
+                                              {% set newestStageEndDate = stage.enddate|date("Y/m/d") %}
+                                          {% endif %}
+
+
+                                          {% if diffGradingDays > diffStageDays %}
+                                                {% set diffStageDays = diffGradingDays %}
+                                          {% endif %}
+                                          {% for criterion in stage.criteria if not activityMixed %}
+                                               {% if criterion.type != activityType %}
+                                                    {% set activityMixed = true %}
+                                               {% endif %}
+                                          {% endfor %}
+                                      {% endfor %}
+                                  {% endif %}
+                              {% else %}
+                                  {{ user_activities[k].id }}
+                              {% endif %}
+
+
+                              <div style="margin-left:auto;">
+                              <ul style="display:flex;align-items:center;">
+
+                              {% if user_activities[k].status == 1 %}
+                                  <li>
+                                      <ul style="display: flex;align-items: center;flex-direction:column-reverse; margin-right:5px;" class="tooltipped" data-position="top" data-tooltip="{% if diffStageDays is defined %}{% if diffStageDays >= 0 %}{% trans %}tooltip.activity.grading_deadline.start_msg{% endtrans %} {{ diffStageDays }} {% trans %}tooltip.activity.grading_deadline.end_msg{% endtrans %}{% else %}{% trans %}tooltip.activity.grading_deadline.expired{% endtrans %}{% endif %}{% endif %}">
+                                          {% if diffStageDays is defined %}
+                                              {% if diffStageDays >= 0 %}<li>{{ diffStageDays }}</li>{% endif %}
+                                              <li><i class="far fa-2x fa-clock {% if diffStageDays < 0 %}red-text{% endif %}" style="margin:0!important;"></i></li>
+                                          {% endif %}
+                                      </ul>
+                                  </li>
+                              {% elseif user_activities[k].status == 0 %}
+                                  <li>
+                                      <ul style="display: flex;align-items: center; flex-direction:column-reverse; margin-right:5px;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.grading_startdate.start_msg{% endtrans %}{% if oldestStageStartDate is defined %} {{ date(oldestStageStartDate).diff(date(now)).days}} {% else %} #N/A {% endif %}{% trans %}tooltip.activity.grading_startdate.end_msg{% endtrans %}">
+                                          <li><span style="font-size:0.9rem">{% if oldestStageStartDate is defined %}{{ date(oldestStageStartDate).diff(date(now)).days }}{% else %}#N/A{% endif %}</span></li>
+                                          <li><i class="far fa-2x fa-clock" style="margin:0!important;"></i></li>
+                                      </ul>
+                                  </li>
+                              {% endif %}
+
+                              {% if user_activities[k].status == 1 %}
+                                  {% set activityProgress = 0 %}
+                                  {% set nbFinalizedStages = 0 %}
+                                  {% for stage in user_activities[k].stages %}
+                                      {% set activityProgress = activityProgress + stage.progress %}
+                                  {% endfor %}
+                                  {% if user_activities[k].stages|length > 0 %}
+                                      {% set activityProgress = activityProgress / user_activities[k].stages|length %}
+                                  {% else %}
+                                      <ul style="display:flex;flex-direction: column";>
+                                          <ul style="display:flex;flex-direction: row;align-items: center;margin: 0px 0px 10px 0px;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.activity_progress{% endtrans %}: {{ min(100, (100 * date(oldestStageStartDate).diff(date(now)).days / max(1, date(oldestStageStartDate).diff(date(newestStageEndDate)).days))|round(0)) }} %" data-delay="50">
+                                              <li><i class="far fa-calendar-alt" style="margin: 0;font-size: 1.3rem"></i></li>
+                                              <li class="progress" style="width:30px;margin:0px 10px 0px 0px;background-color:#b7bbbb;">
+                                                  <div class="determinate"
+                                                       style="width: {{ min(100, (100 * date(oldestStageStartDate).diff(date(now)).days / max(1,date(oldestStageStartDate).diff(date(newestStageEndDate)).days))|round(0)) }}%;background-color: black;"></div>
+                                              </li>
+                                          </ul>
+                                          <ul style="display:flex;flex-direction: row;align-items: center" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.grading_progress{% endtrans %}: {{ activityProgress|round(0) }} %" data-delay="50">
+                                              <li><i class="fa fa-pencil-alt" style="margin: 0;font-size: 1.3rem"></i></li>
+                                              <li class="progress" style="width:30px;margin:0px 10px 0px 0px;background-color:#b7bbbb;">
+                                                  <div class="determinate"
+                                                       style="width: {{ activityProgress|round(0) }}%;background-color: black;"></div>
+                                              </li>
+                                          </ul>
+                                      </ul>
+                                  {% endif %}
+
+                                  {% if activityMixed %}
+                                      <li><i class="fa fa-2x fa-map-signs tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.mixed{% endtrans %}" data-delay="50"></i></li>
+                                  {% else %}
+                                      {% if activityType is defined %}
+                                          {% if activityType == 0 %}
+                                              <li><i class="fa fa-2x fa-pie-chart tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.contrib{% endtrans %}" data-delay="50"></i></li>
+                                          {% elseif activityType == 1 %}
+                                              <li><i class="fas fa-2x fa-tachometer-alt tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.eval{% endtrans %}" data-delay="50"></i></li>
+                                          {% elseif activityType == 2 %}
+                                              <li><i class="fas fa-2x fa-comment-dots tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.pureFeedback{% endtrans %}" data-delay="50"></i></li>
+                                          {% endif %}
+                                      {% else %}
+                                          <li></li>
+                                      {% endif %}
+                                  {% endif %}
+                              {% endif %}
+                              </ul>
+                              </div>
+                          {% endif %}
+
+
+                        {# if user has a requested Activity, we need to determine whether he is the Requester or Decider #}
+                        {% if user_activities[k].status == -3 %}
+                                  {% set break = false %}
+                                  {% set isDecider = false %}
+                                  {% for decision in user_activities[k].decisions if not break %}
+                                      {% if decision.decider == currentuser.id %}
+                                          {% set break = true %}
+                                          {% set isDecider = true %}
+                                      {% endif %}
+                                  {% endfor %}
+                        {% endif %}
+              </div>
+
+                  <div class="collapsible-body">
+                      <div class="collapse" id="details">
+                          <ul class="flex-center row" style="justify-content: space-between;">
+                              <li><h4 class="department-name">{% trans %}activities.details{% endtrans %}</h4></li>
+                                {# Suppress element is only possible : if activity is not requested/attributed/, user is not a collaborator and stage has not been fully graded #}
+                                {% if user_activities[k].status != -2 and user_activities[k].status != -4 and user_activities[k].status != -3 and user_activities[k].stages|length == 1 and user_activities[k].stages[0].status < 2 and currentuser.role != 3 %}
+                                    <li style="margin-left:auto;"><a href="#deleteAModal" class="waves-effect waves-light red accent-4 btn white-text modal-trigger" data-aid="{{ user_activities[k].id }}">{% trans %}activities.delete_activity_btn{% endtrans %}</a></li>
+                                {% endif %}
+                          </ul>
+                          {#
+                          <div class="row">
+                              <div class="col s12 m12 details-title">
+                                  {% trans %}activities.details{% endtrans %}
+                              </div>
+                          </div>
+                          #}
+                      </div>
+                      <ul class="collection">
+
+                      {% set activityHasResults = false %}
+                      {% set nbParticipatingReleases = 0 %}
+                      {% for stage in user_activities[k].stages %}
+
+                          <li class="collection-item">
+
+                              {{ user_activities[k].gEnddate|localizeddate('long', 'none') }}
+
+                              {# display is different whether the activity is a requested one or not #}
+
+                                {% if user_activities[k].status == -3 %}
+
+                                    <div class="row">
+                                        <div class="col s6 m4">
+                                            <i class="far fa-comments" aria-hidden="true"></i> {% trans %}activities.request.comments{% endtrans %}
+                                        </div>
+                                        <div class="col s6 m4">{{ user_activities[k].objectives  }}</div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col s10 m4">
+                                            <i class="fa fa-users" aria-hidden="true"></i>{% if not isDecider %} {% trans %}activities.request.validators{% endtrans %}{% else %}{% trans %}activities.request.requester{% endtrans %}{% endif %}
+                                        </div>
+                                        <div class="col s2 m4">
+                                            {% if not isDecider %}
+                                                {{ user_activities[k].decisions|length }}
+                                            {% else %}
+                                                {% if not user_activities[k].decisions[0].anonymousRequest %}
+                                                    {{ user_activities[k].decisions[0].requesterUser.firstname }} {{ user_activities[k].decisions[0].requesterUser.lastname }}
+                                                {% else %}
+                                                    {% trans %}activities.request.anonymous_requester{% endtrans %}
+                                                {% endif %}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    {% if not isDecider %}
+                                        <div class="row">
+                                            <ul class="participants">
+                                                {% for decision in user_activities[k].decisions %}
+                                                    <li class="participant">
+
+                                                        <img class="user-picture" src="{{ (decision.deciderUser.picture != "") ? asset('lib/img/' ~ decision.deciderUser.picture) : asset('lib/img/no-picture.png') }}" alt="">
+                                                        <div class="participant-name">
+                                                            <span>{{ decision.deciderUser.firstname }}</span>
+                                                        </div>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    {% endif %}
+                                {% elseif user_activities[k].status == -2 %}
+
+                                    <div class="row">
+                                        <div class="col s6 m4">
+                                            <i class="far fa-comments" aria-hidden="true"></i> {% trans %}activities.request.comments{% endtrans %}
+                                        </div>
+                                        <div class="col s6 m4">{{ user_activities[k].objectives  }}</div>
+                                    </div>
+
+                                {% else %}
+                                    {% if user_activities[k].stages|length > 1 %}
+                                        <ul class="flex-center row" style="justify-content: space-between;">
+                                            <li><h4 class="department-name">{{ stage.name }}</h4></li>
+                                            {% if stage.status < 2 and currentuser.role != 3 %}
+                                            <li style="margin-left:auto;"><a href="#deleteASModal" class="waves-effect waves-light red accent-4 btn white-text modal-trigger" data-sid="{{ stage.id }}">{% trans %}activities.delete_stage_btn{% endtrans %}</a></li>
+                                            {% endif %}
+                                        </ul>
+                                        {#
+                                        <div class="row">
+
+                                            <div class="col s12 m12"><h5>{{ stage.name }}</h5></div>
+                                        </div>
+                                        #}
+                                    {% endif %}
+                                    {#<div class="collapse" id="details">
+                                        <div class="row">
+                                            <div class="col s12 m12 details-title">
+                                                {% trans %}activities.details{% endtrans %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    #}
+                                    <div class="row">
+                                        <div class="col s6 m4">
+                                            <i class="far fa-clock" aria-hidden="true"></i> {% trans %}activities.activity_period{% endtrans %}
+                                        </div>
+                                        <div class="col s6 m4 desktop-dates">{{ stage.startdate|localizeddate('long', 'none') }} - {{ stage.enddate|localizeddate('long', 'none') }}</div>
+                                        <div class="col s6 m4 mobile-dates">{{ stage.startdate|localizeddate('short', 'none', null, null, 'dd/MM') }} - {{ stage.enddate|localizeddate('short', 'none', null, null, 'dd/MM') }}</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col s6 m4">
+                                            <i class="far fa-clock" aria-hidden="true"></i> {% trans %}activities.grading_period{% endtrans %}
+                                        </div>
+                                        <div class="col s6 m4 desktop-dates">{{ stage.gstartdate|localizeddate('long', 'none') }} - {{ stage.genddate|localizeddate('long', 'none') }}</div>
+                                        <div class="col s6 m4 mobile-dates">{{ stage.gstartdate|localizeddate('short', 'none', null, null, 'dd/MM') }} - {{ stage.genddate|localizeddate('short', 'none', null, null, 'dd/MM') }}</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col s12 m4">
+                                            <i class="fa fa-tasks" aria-hidden="true"></i> {% trans %}activities.progress{% endtrans %}
+                                        </div>
+                                        <div class="col s9 m4">
+                                            <div class="progress">
+                                                <div class="determinate" style="width: {{ stage.progress }}%"></div>
+                                            </div>
+                                        </div>
+                                        <div class="col s3 m3">
+                                            {{ stage.progress }}%
+                                        </div>
+                                    </div>
+                                    {% if stage.criteria[0] is defined %}
+                                        <div class="row">
+                                            <div class="col s10 m4">
+                                                <i class="fa fa-users" aria-hidden="true"></i>{% trans %}activities.participants{% endtrans %}
+                                            </div>
+                                            <div class="col s2 m4">
+                                                {{ stage.criteria[0].participants|length }}
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <ul class="participants">
+                                                {%  for participant in stage.criteria[0].participants %}
+                                                    <li class="participant" style="position: relative">
+                                                        {% if participant.user is not null %}
+                                                            <ul class="flex-center" style="flex-direction: column">
+                                                                <li>
+                                                                    <div class="picture-frame">
+                                                                        <img class="user-picture" src="{{ (participant.user.picture != "") ? asset('lib/img/' ~ participant.user.picture) : asset('lib/img/no-picture.png') }}" alt="">
+                                                                        {% if participant.leader %}<i class="fa fa-star" style="color:#15a6ae" title="Leader"></i>{% endif %}
+                                                                    </div>
+                                                                </li>
+                                                                <li>
+                                                                    <div class="participant-name">
+                                                                        <span>{{ participant.user.firstname }}</span>
+                                                                    </div>
+                                                                </li>
+                                                            </ul>
+
+                                                        {% elseif participant.team is not null %}
+                                                            <img class="user-picture" src="{{ (participant.team.picture != "") ? asset('lib/img/' ~ participant.team.picture) : asset('lib/img/no-picture.png') }}" alt="">
+                                                            <div class="participant-name">
+                                                                <span>{{ participant.team.name }}</span>{% if participant.leader %}<i class="fa fa-star" title="Leader"></i>{% endif %}
+                                                            </div>
+                                                        {% endif %}
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    {% endif %}
+                                {% endif %}
+                              <br>
+                              <div class="row action-buttons">
+
+                                  {# If the activity is requested, then only validate or discard options are available #}
+                                  {% if user_activities[k].status == -4 %}
+                                      <div class="button-field">
+                                          <a class="btn-large waves-effect waves-light teal lighten-1 modal-trigger" href="#restoreModal-{{ user_activities[k].id }}"> {% trans %}activities.request_restore{% endtrans %} </a>
+
+                                      </div>
+                                      <div class="button-field">
+                                          <a class="btn-large waves-effect waves-light teal lighten-1 submit-button archive" data-id="{{ user_activities[k].id }}"> {% trans %}activities.request_archive{% endtrans %} </a>
+                                      </div>
+                                  {% elseif user_activities[k].status == -3 %}
+                                      <div class="button-field">
+                                          {% if currentuser.role == 3 and isDecider == false %}
+                                                <a class="btn-large waves-effect waves-light red accent-4 modal-trigger" data-aid="{{ user_activities[k].id }}" href="#cancelModal"> {% trans %}activities.request_delete{% endtrans %} </a>
+                                          {% else %}
+                                                <a class="btn-large waves-effect waves-light red accent-4 modal-trigger" data-aid="{{ user_activities[k].id }}" href="#discardModal"> {% trans %}activities.request_discard{% endtrans %} </a>
+                                            </div>
+                                            <div class="button-field">
+                                                <a class="btn-large waves-effect waves-light teal lighten-1 modal-trigger" data-aid="{{ user_activities[k].id }}" data-aname="{{ user_activities[k].name }}" href="#validateModal"> {% trans %}activities.request_validate{% endtrans %} </a>
+                                          {% endif %}
+                                      </div>
+                                  {% elseif user_activities[k].status == -2 %}
+                                      <div class="button-field">
+                                          <a class="btn-large waves-effect waves-light teal lighten-1" href="{{ url('oldActivityDefinition',{'actId' : user_activities[k].id}) }}"> {% trans %}activities.define{% endtrans %} </a>
+                                      </div>
+                                  {% else %}
+                                      {# Permettre le delete seulement aux RH, AM et AL, manque la condition AL #}
+                                      {#
+                                      {% if stage.status < 2 and currentuser.role != 3 %}
+                                          <div class="button-field">
+                                              <button class="waves-effect waves-light btn-large red accent-4 modal-trigger" data-sid="{{ stage.id }}" {% if user_activities[k].recurring is not null %} data-rid="{{ user_activities[k].recurring.id }}" href="#deleteRModal"{% else %}href="#deleteASModal"{% endif %}>{% trans %}activities.delete_btn{% endtrans %}</button>
+                                          </div>
+                                      {% endif %}
+                                      #}
+                                      {% if stage.status < 2 or stage.status == 2 and currentuser.role == 3 %}
+
+                                          {% if stage.status == 2 %}
+                                              {% set activityHasResults = true %}
+                                          {% endif %}
+
+                                          {% if currentuser.role == 1 or currentuser.role == 4 or stage.masterUserId == currentuser.id %}
+                                              <div class="button-field">
+                                                  <a class="btn-large waves-effect waves-light teal lighten-1 modify-btn" href="{{ url('oldActivityDefinition',{'actId' : user_activities[k].id}) }}"> {% trans %}activities.modify{% endtrans %} </a>
+                                              </div>
+                                          {% endif %}
+
+
+
+                                          {% set break = false %}
+                                          {% for participant in stage.participants if not break %}
+                                              {% if participant.usrId == currentuser.id and now >= stage.gstartdate|date("Y/m/d") %}
+                                                  {% if participant.status >=3 or currentuser.role == 3 or participant.status < 3 and now <= stage.genddate|date("Y/m/d") %}
+                                                      {% if currentuser.role == 3 and participant.status == 4 %}
+                                                            {% set nbParticipatingReleases = nbParticipatingReleases + 1 %}
+                                                      {% else %}
+                                                          <div class="button-field">
+                                                            <a class="btn-large waves-effect waves-light teal lighten-1 grade-btn" href="{{ url('newStageGrade',{'stgId' : stage.id})}}"> {% if participant.status == 3 %}{% trans %} activities.see_grades {% endtrans %}{% elseif participant.status == 2 or participant.status == 1 %}{% trans %} activities.finalize_grades {% endtrans %}{% else %}{% trans %}activities.grade{% endtrans %}{% endif %} </a>
+                                                          </div>
+                                                      {% endif %}
+
+                                                  {% endif %}
+                                                {% set break = true %}
+                                              {% endif %}
+                                          {% endfor %}
+
+
+                                          {# result button displayed at the bottom of activity #}
+                                          {% if stage == user_activities[k].stages|last and (nbParticipatingReleases > 0 and currentuser.role == 3 or activityHasResults == true and currentuser.role != 3) %}
+                                              <div class="button-field">
+                                                  <a class="btn-large waves-effect waves-light blue darken-4 results-btn" href="{{ url('activityResults',{'actId' : stage.activity.id}) }}" style="color: white;"><span>{% trans %}activities.results{% endtrans %}</span></a>
+                                              </div>
+                                          {% endif %}
+
+                                      {% else %}
+                                          {#
+                                          <div class="button-field">
+                                              <a class="btn-large waves-effect waves-light teal lighten-1" href="{{ url('activityStages',{'actId' : user_activities[k].id}) }}" style="color: white;"> {% trans %}activities.create_new_stage{% endtrans %}</a>
+                                          </div>
+                                          #}
+                                            {% if stage.status == 2 %}
+                                                {% set activityHasResults = true %}
+                                            {% endif %}
+                                            {% if stage == user_activities[k].stages|last and activityHasResults == true %}
+                                              <div class="button-field">
+                                                  <a class="btn-large waves-effect waves-light blue darken-4 results-btn" href="{{ url('activityResults',{'actId' : stage.activity.id}) }}" style="color: white;"> {% trans %}activities.results{% endtrans %}</a>
+                                              </div>
+                                            {% endif %}
+                                          {#
+                                          <div class="button-field">
+                                              <a class="btn-large waves-effect waves-light teal lighten-1 archive submit-button" data-id="{{ user_activities[k].id }}"> {% trans %}activities.request_archive{% endtrans %} </a>
+                                          </div>
+                                          #}
+                                      {% endif %}
+                                  {% endif %}
+                              </div>
+                          </li>
+                      {% endfor %}
+                      </ul>
+                  </div>
+                </li>
+                </ul>
+
+                {% if user_activities[k].status == -3 %}
+
+                {% elseif user_activities[k].status == -4 %}
+                    <div id="discardModal" class="modal">
+                        <div class="modal-content">
+                            <p>{% trans %}activities.request.discard_msg{% endtrans %}</p>
+                        </div>
+                        <div class="modal-footer">
+                            <a class="modal-action modal-close submit-button waves-effect waves-green btn-large discard-button">{% trans %}activities.request.confirm_btn_msg{% endtrans %}</a>
+                            <a class="modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}activities.request.cancel_btn_msg{% endtrans %}</a>
+                        </div>
+                    </div>
+                {% endif %}
+          {% endif %}
+        {% endif %}
+        {% endfor %}
+      {% if break_completed == true or break_completed == false and break_current == true or break_completed == false and break_current == false and break_future == true or break_completed == false and break_current == false and break_future == false and break_incomplete == true or break_completed == false and break_current == false and break_future == false and break_incomplete == false and break_attributed == true or break_completed == false and break_current == false and break_future == false and break_incomplete == false and break_attributed == false and break_requested == true or break_completed == false and break_current == false and break_future == false and break_incomplete == false and break_attributed == false and break_requested == false and break_discarded == true or break_completed == false and break_current == false and break_future == false and break_incomplete == false and break_attributed == false and break_requested == false and break_discarded == false and break_cancelled == true %}
+          </div>
+      {% endif %}
+  {% else %}
+      <div class="container">
+          <div class="center">
+              <i class="fa fa-clipboard fa-3x"></i>
+              <h4>{% trans %}activities.no_activities_title{% endtrans %}</h4>
+              <p>{% if currentuser.role == 3 %}{% trans %}activities.no_activities_msg_collaborator{% endtrans %}{% else %}{% trans %}activities.no_activities_msg_activity_manager{% endtrans %}{% endif %}</p>
+          </div>
+      </div>
+  {% endif %}
+
+      {#{% if is_granted('ROLE_ADMIN') or is_granted('ROLE_ACTIVITY_MANAGER') %}#}
+    {% if currentuser.role != 3 %}
+
+          {#<div class="button-field center-button">
+              <a class="waves-effect waves-light btn-large green accent-4 modal-trigger" href="#createActivity">{% trans %}activities.create.modal_trg_msg{% endtrans %}</a>
+          </div>#}
+          <div id="createActivity" class="modal">
+              <i class="fa fa-2x fa-window-close modal-close dismiss-modal"></i>
+              <div class="modal-content">
+                  <h4>{% trans %}activities.create.delegate_choice_title_msg{% endtrans %}</h4>
+                  <p>{% trans %}activities.create.delegate_choice_msg{% endtrans %}</p>
+              </div>
+              <div class="modal-footer action-buttons">
+                  <div class="button-field">
+                    <a class="waves-effect waves-green btn-large" href="{{ path('activityInitialisation') }}">{% trans %}activities.create.nodelegate_btn_msg{% endtrans %}</a>
+                  </div>
+                  <div class="button-field">
+                      <a class="waves-effect waves-green btn-large modal-trigger" href="#delegateActivity">{% trans %}activities.create.delegate_btn_msg{% endtrans %}</a>
+                  </div>
+              </div>
+
+          </div>
+            <div id="deleteAModal" class="modal">
+                <div class="modal-content">
+                    {#{% if user_activities[k].stages|length > 1 %}#}
+                    <p>{% trans %}activities.delete_activity_msg{% endtrans %}</p>
+                    {#{% else %}
+                        <p>{% trans %}activities.delete_activity_msg{% endtrans %}Are you sure you want to delete this activity ?</p>
+                    {% endif %}#}
+                </div>
+                <div class="modal-footer">
+                    <a class=" modal-action modal-close waves-effect waves-green btn-large delete-button">{% trans %}user_update.delete_modal.confirm{% endtrans %}</a>
+                    <a class=" modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+                </div>
+            </div>
+          <div id="deleteASModal" class="modal">
+              <div class="modal-content">
+                  {#{% if user_activities[k].stages|length > 1 %}#}
+                      <p>{% trans %}activities.delete_stage_msg{% endtrans %}</p>
+                  {#{% else %}
+                      <p>{% trans %}activities.delete_activity_msg{% endtrans %}Are you sure you want to delete this activity ?</p>
+                  {% endif %}#}
+              </div>
+              <div class="modal-footer">
+                  <a class=" modal-action modal-close waves-effect waves-green btn-large delete-button">{% trans %}user_update.delete_modal.confirm{% endtrans %}</a>
+                  <a class=" modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+              </div>
+          </div>
+          <div id="deleteRModal" class="modal">
+              <div class="modal-content">
+                  {#{% if user_activities[k].stages|length > 1 %}#}
+                  <p>{% trans %}activities.delete_recurring_msg{% endtrans %}</p>
+                  {#{% else %}
+                      <p>{% trans %}activities.delete_activity_msg{% endtrans %}Are you sure you want to delete this activity ?</p>
+                  {% endif %}#}
+              </div>
+              <div class="modal-footer action-buttons" style="justify-content:space-around;align-items:center;">
+                  <a class=" modal-action modal-close waves-effect waves-green btn-large rdelete-button">{% trans %}activities.delete_rec_all_confirm{% endtrans %}</a>
+                  <a class=" modal-action modal-close waves-effect waves-green btn-large adelete-button">{% trans %}activities.delete_rec_single_confirm{% endtrans %}</a>
+                  <a class=" modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}activities.delete_cancel{% endtrans %}</a>
+              </div>
+          </div>
+        {% if validateRequestForm is defined %}
+            <div id="validateModal" class="modal">
+                {{ form_start(validateRequestForm) }}
+                <div class="modal-content">
+                    <h5>{% trans %}activities.create.validate_title_msg{% endtrans %}</h5>
+                    <p>{% trans %}activities.create.validate_content_msg{% endtrans %}</p>
+                    {{ form_row(validateRequestForm.activityName) }}
+
+                    {{ form_widget(validateRequestForm.ownCreation) }}
+                    {{ form_label(validateRequestForm.ownCreation) }}
+
+                    {{ form_widget(validateRequestForm.activityLeader) }}
+                    {{ form_label(validateRequestForm.activityLeader) }}
+
+                </div>
+
+                <div class="modal-footer action-buttons">
+                    <div class="button-field">
+                        <a class=" modal-action modal-close submit-button waves-effect waves-red red btn-large">{% trans %}activities.create.delegate_back_btn_msg{% endtrans %}</a>
+                    </div>
+                    <div class="button-field">
+                        {{ form_row(validateRequestForm.submit) }}
+                    </div>
+                </div>
+                {{ form_rest(validateRequestForm) }}
+                {{ form_end(validateRequestForm) }}
+            </div>
+        {% endif %}
+          <div id="cancelModal" class="modal">
+              <div class="modal-content">
+                  <p>Are you sure you want to delete your request ?</p>
+              </div>
+              <div class="modal-footer">
+                  <a class=" modal-action modal-close submit-button waves-effect waves-green btn-large cancel-button">{% trans %}user_update.delete_modal.confirm{% endtrans %}</a>
+                  <a class=" modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+              </div>
+          </div>
+          <div id="discardModal" class="modal">
+              <div class="modal-content">
+                  <p>{% trans %}activities.reject_request_msg{% endtrans %}</p>
+              </div>
+              <div class="modal-footer">
+                  <a class=" modal-action modal-close submit-button waves-effect waves-green btn-large discard-button">{% trans %}user_update.delete_modal.confirm{% endtrans %}</a>
+                  <a class=" modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+              </div>
+          </div>
+          <div id="delegateActivity" class="modal">
+              {{ form_start(delegateForm) }}
+              <div class="modal-content">
+                  <h5>{% trans %}activities.create.delegate_title_msg{% endtrans %}</h5>
+                  <p>{% trans %}activities.create.delegate_content_msg{% endtrans %}</p>
+                  {{ form_row(delegateForm.activityName) }}
+                  {{ form_row(delegateForm.activityDescription) }}
+                  {{ form_label(delegateForm.activityLeader) }}
+                  {{ form_widget(delegateForm.activityLeader) }}
+              </div>
+
+              <div class="modal-footer action-buttons">
+                  <div class="button-field">
+                      <a class=" modal-action modal-close submit-button waves-effect waves-red red btn-large">{% trans %}activities.create.delegate_back_btn_msg{% endtrans %}</a>
+                  </div>
+                  <div class="button-field">
+                      {{ form_row(delegateForm.submit) }}
+                  </div>
+              </div>
+              {{ form_rest(delegateForm) }}
+              {{ form_end(delegateForm) }}
+          </div>
+          <div id="delegateSuccess" class="modal">
+              <div class="modal-content">
+                  <p>{% trans %}activities.create.delegate_success_msg{% endtrans %}</p>
+              </div>
+              <div class="modal-footer">
+                  <div class="button-field">
+                      <a class="modal-close submit-button waves-effect waves-green btn-large">{% trans %}activities.create.delegate_success_close_btn_msg{% endtrans %}</a>
+                  </div>
+              </div>
+          </div>
+          <div id="cancelSuccess" class="modal">
+              <div class="modal-content">
+                  <p>{% trans %}activities.request.cancel_success_msg{% endtrans %}</p>
+              </div>
+              <div class="modal-footer">
+                  <div class="button-field">
+                      <a class="modal-close submit-button waves-effect waves-green btn-large">{% trans %}activities.request.cancel_success_btn_msg{% endtrans %}</a>
+                  </div>
+              </div>
+          </div>
+          <div id="discardSuccess" class="modal">
+              <div class="modal-content">
+                  <p>{% trans %}activities.reject_request_success_msg{% endtrans %}</p>
+              </div>
+              <div class="modal-footer">
+                  <div class="button-field">
+                      <a class="modal-close submit-button waves-effect waves-green btn-large">{% trans %}activities.reject_request_success_close_btn_msg{% endtrans %}</a>
+                  </div>
+              </div>
+          </div>
+          <div id="validateSuccess" class="modal">
+              <div class="modal-content">
+                  <p>{% trans %}activities.validate.success_msg{% endtrans %}</p>
+              </div>
+              <div class="modal-footer">
+                  <div class="button-field">
+                      <a class="modal-close submit-button waves-effect waves-green btn-large">{% trans %}activities.validate.success_close_btn_msg{% endtrans %}</a>
+                  </div>
+              </div>
+          </div>
+      {% endif %}
+      {% if currentuser.role == 3 %}
+          <div class="action-buttons">
+              <div class="button-field">
+                  <a class="waves-effect waves-green btn-large modal-trigger" href="#requestActivity" >{% trans %}activities.request.modal_btn_msg{% endtrans %}</a>
+              </div>
+              <div id="requestActivity" class="modal">
+                  {{ form_start(requestForm) }}
+                  <div class="modal-content">
+                      <h5>{% trans %}activities.request.title_msg{% endtrans %}</h5>
+                      <p>{% trans %}activities.request.content_msg{% endtrans %}</p>
+                      {{ form_row(requestForm.activityName) }}
+                      {{ form_row(requestForm.activityDescription) }}
+                      {{ form_row(requestForm.requestType) }}
+                      {{ form_row(requestForm.specificRecipients) }}
+                      {{ form_widget(requestForm.discloseRequester) }}
+                      {{ form_label(requestForm.discloseRequester) }}
+                  </div>
+                  <div class="modal-footer action-buttons">
+                      <div class="button-field">
+                          <a class=" modal-action modal-close submit-button waves-effect waves-red red btn-large">{% trans %}activities.request.cancel_btn_msg{% endtrans %}</a>
+                      </div>
+                      <div class="button-field">
+                          {{ form_row(requestForm.submit) }}
+                      </div>
+                  </div>
+                  {{ form_rest(requestForm) }}
+                  {{ form_end(requestForm) }}
+              </div>
+              <div id="requestSuccess" class="modal">
+                  <div class="modal-content">
+                      <p>{% trans %}activities.request.success_msg{% endtrans %}</p>
+                  </div>
+                  <div class="modal-footer action-buttons">
+                      <div class="button-field">
+                          <a class="modal-close waves-effect waves-green btn-large">{% trans %}activities.request.success_close_btn_msg{% endtrans %}</a>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      {% endif %}
+
+      <div id="archiveSuccess" class="modal">
+          <div class="modal-content">
+              <p>{% trans %}activities.archive.success_msg{% endtrans %}</p>
+          </div>
+          <div class="modal-footer action-buttons">
+              <div class="button-field">
+                  <a class="modal-close waves-effect waves-green btn-large">{% trans %}activities.archive.success_close_btn_msg{% endtrans %}</a>
+              </div>
+          </div>
+      </div>
+      <div id="restoreSuccess" class="modal">
+          <div class="modal-content">
+              <p>{% trans %}activities.restore.success_msg{% endtrans %}</p>
+          </div>
+          <div class="modal-footer action-buttons">
+              <div class="button-field">
+                  <a class="modal-close waves-effect waves-green btn-large">{% trans %}activities.restore.success_close_btn_msg{% endtrans %}</a>
+              </div>
+          </div>
+      </div>
+    </section>
+
+
+{% endblock %}
+
+ {% block javascripts %}
+     <script src="{{ asset('js/activities_list.js') }}"></script>
+ {% endblock %}

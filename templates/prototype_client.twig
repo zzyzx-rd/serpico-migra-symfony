@@ -1,0 +1,85 @@
+
+    <li class="client collection-item">
+      
+        <div class="row">
+
+            <div class="element-data" style="display: none;">
+              <ul class="flex-center">
+                <li style="margin-right: 20px;position:relative">
+                  <img class="client-logo-zone" src="{{ asset('lib/img/org/no-picture.png') }}">
+                </li>
+                <li style="width: 100%;">
+                  <ul class="flex-center-sb">
+                    <h4 style="display: inline-block;" class="client-name">
+                    </h4>
+                    {#<a href="#deleteClient" class="waves-effect waves-light accent-4 btn-flat modal-trigger" style="margin-left: auto;"><i class="fa fa-times"></i></a>#}
+                    <a class="modify-client-btn btn-flat"><i class="fa fa-pencil-alt"></i></a>
+                  </ul>
+                  {#}
+                  <div>
+                    Adresse générique : <span class="client-email"></span>
+                  </div>
+                  #}
+                </li>
+              </ul>
+            </div>
+
+          
+
+            <div class="element-input">
+              <ul class="flex-center-sb">
+                <h4 style="display:inline-block">{{'create_client.partner.prototype_title'|trans}} __clientNb__</h4>
+                <div class="client-type">
+                  <a class="btn-flat client-info-type flex-center">
+                    <i class="fa fa-industry m-right"></i>
+                    <span class="m-right">{{'create_client.type.firm'|trans}}</span>
+                    <i class="fa fa-pencil-alt"></i>
+                  </a>
+                  <div class="client-select-type" style="display: none;">
+                    {{ form_label(item.type) }}
+                    {{ form_widget(item.type) }}
+                  </div>
+                </div>
+                <a href="#deleteClient" class="waves-effect waves-light accent-4 btn-flat modal-trigger" data-cid="0" style="margin-left: auto;"><i class="fa fa-trash"></i></a>
+                <a class="validate-client-btn waves-effect waves-light btn blue darken-2 tooltip" data-cid="0"><i class="fa fa-check"></i></a>
+              </ul>
+              <div class="row">
+                <div class="col s12 m2" style="position:relative;">
+                  <img class="client-logo-zone" src="{{ asset('lib/img/org/no-picture.png') }}">
+                  <a class="btn-floating add-photo-btn" style="position: absolute; top: 84%; left: 22%;"><i class="fa fa-pencil-alt"></i></a>
+                </div>
+                <div class="col s12 m9">
+                  <div class="col s12 m12 w-firm">
+                    {{ form_label(item.commname) }}
+                    {{ form_widget(item.commname) }}
+                    <select name="firmSelector" style="margin-top:  45px"></select>
+                  </div>
+                  {#}
+                  <div class="col s12 m6">
+                      {{ form_label(item.type) }}
+                      {{ form_widget(item.type) }}
+                  </div>
+                  
+                  <div class="col s12 m12">
+                    {{ form_label(item.email) }}
+                    <i class="fa fa-question-circle tooltipped" data-position="bottom" data-delay="50" data-tooltip="{% trans %}create_client.emailClientSmallText{% endtrans %}"></i>
+                    {{ form_widget(item.email) }}
+                  </div>
+                  #}
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        <ul class="individuals" data-prototype="{% filter escape %}{% include 'prototype_client_individual.twig' with { 'item': item.aliveExternalUsers.vars.prototype, 'cliId' : 0 } %}{% endfilter %}">
+           
+        </ul>
+
+        <div class="button-field add-members">
+            <a class="btn waves-effect waves-light insert-individual-btn" disabled><i class="fa fa-user-plus"></i>
+                <span>{% trans %}create_client.individual.add_button{% endtrans %}</span>
+            </a>
+        </div>
+
+    </li>

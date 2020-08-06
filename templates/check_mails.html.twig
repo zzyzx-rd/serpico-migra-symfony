@@ -1,0 +1,208 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+    {% trans %}check_mails.page_title{% endtrans %}
+{% endblock %}
+
+{% block css %}
+    <link href="https://cdn.jsdelivr.net/combine/npm/chart.js@2.8.0/dist/Chart.min.css,npm/chart.js@2.8.0/dist/Chart.min.css" rel="stylesheet">
+    <script>
+        var vmurl = "{{ url('validateMailSent',{'mid' : 0}) }}";
+        var rmurl = "{{ url('deleteMailSent',{'mid' : 0}) }}";
+        var dmurl = "{{ url('deactivateMail',{'mid' : 0})}}";
+    </script>
+{% endblock %}
+
+{%  block pagename %}
+    <span>{{ activity.name }}</span>
+    <span>{% trans %}check_mails.mobile_header_title{% endtrans %}</span>
+{% endblock %}
+
+{% block username %}
+    {{ currentuser.firstname }} {{ currentuser.lastname }}
+{% endblock %}
+
+{% block content %}
+
+{% set counter = 0 %}
+
+<div class="row action-buttons" style="margin-top:15px">
+    <div class="button-field">
+        <a class="btn-large waves-effect waves-light teal" href="{{ path('manageOrganizations') }}">Retour aux entreprises/users</a>
+    </div>
+</div>
+
+<div style="width:95%;margin:auto">
+    <table class="striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>{% trans %}check_mails.type{% endtrans %}</th>
+                <th>{% trans %}check_mails.persona{% endtrans %}</th>
+                <th>{% trans %}check_mails.language{% endtrans %}</th>
+                <th>{% trans %}check_mails.utype{% endtrans %}</th>
+                <th>{% trans %}check_mails.lk{% endtrans %}</th>
+                <th>{% trans %}check_mails.user{% endtrans %}</th>
+                <th>{% trans %}check_mails.position{% endtrans %}</th>
+                <th>{% trans %}check_mails.firm{% endtrans %}</th>
+                <th>{% trans %}check_mails.sent{% endtrans %}</th>
+                <th>{% trans %}check_mails.read{% endtrans %}</th>
+                <th>{% trans %}check_mails.actions{% endtrans %}</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            {% for mail in mails %}
+
+                {% set counter = counter + 1 %}
+                <tr {% if mail.workerIndividual is not null and mail.workerIndividual.GDPR is not null %} class="orange lighten-3" {% endif %}>
+                    <td>{{ counter }}</td>
+                    <td>{{ mail.type }}</td>
+                    <td>
+                        {% if mail.persona is not null %}
+                            {{ mail.persona }}
+                        {% else %}
+                            {% if mail.user is not null %}
+                                {% if mail.user.role == 1 %}
+                                    A
+                                {% elseif mail.user.role == 2 %}
+                                    M
+                                {% elseif mail.user.role == 3 %}
+                                    U
+                                {% elseif mail.user.role == 4 %}
+                                    R
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                    <td>{{ mail.language }}</td>
+                    <td>
+                     {% if mail.user is not null %}
+
+                            <div class="admin-badge" style="margin-bottom:5px;margin-right: 5px;display:inline-flex">
+                                <span class="badge-letter">U</span>
+                            </div>
+                        {% else %}
+
+                            <div class="collaborator-badge" style="margin-bottom:5px;margin-right: 5px;display:inline-flex">
+                                <span class="badge-letter">P</span>
+                            </div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if mail.workerIndividual is not null %}
+                            <a href="https://lu.linkedin.com/in/{{mail.workerIndividual.url}}?trk=full-click" target="_blank"><img src="{{ asset('lib/img/lk-logo.ico') }}" alt="" height="21px"></a>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if mail.user is not null %}
+                            {{ mail.user.fullName }}
+
+                        {% else %}
+                            {{ mail.workerIndividual.firstname }} {{ mail.workerIndividual.lastname }}
+
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if mail.user is not null %}
+                            {% set posName = mail.user.position(app).name %}
+                        {% else %}
+                            {% set posName = mail.workerIndividual.experiences.first.position %}
+                        {% endif %}
+                        {{ posName|length > 30 ? posName|slice(0,30) ~ '...' : posName }}
+                    </td>
+                    <td>
+                        {% if mail.user is not null %}
+                            {{ mail.organization.commname }}
+                        {% else %}
+                            {% if mail.workerFirm.commonName is not null %}
+                                {{ mail.workerFirm.commonName }}
+                            {% else %}
+                                {{ mail.workerFirm.name }}
+                            {% endif %}
+
+                        {% endif %}
+                    </td>
+                    <td>{{ mail.inserted|localizeddate('long', 'short') }}</td>
+                    <td>
+                        {% if mail.read is not null %}
+                            {{ mail.read|localizeddate('long', 'short') }}
+                        {% else %}
+                            ?
+                        {% endif %}
+                    </td>
+                    <td>
+                        <ul class="flex-center no-margin">
+                            {% if mail.read is null %}
+                                <a href="#validateMail" data-mid="{{mail.id}}" class="modal-trigger"><i class="material-icons green-text" style="font-size:16px">check_circle</i></a>
+                            {% endif %}
+                            <a href="#deleteMail" data-mid="{{mail.id}}" class="modal-trigger"><i class="fa fa-window-close"></i></a>
+                            {% if mail.workerIndividual is not null and mail.workerIndividual.GDPR is null %}
+                                <a href="#deactivateMail" data-mid="{{mail.id}}" class="modal-trigger"><i class="fa fa-ban"></i></a>
+                            {% endif %}
+                        </ul>
+                    </td>
+                </tr>
+
+
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div id="validateMail" class="modal">
+    <div class="modal-content">
+        <h4>Mail validation</h4>
+        <p>Are you sure you want to validate this email ?</p>
+    </div>
+    <div class="modal-footer">
+        <a class="waves-effect waves-green btn-large red modal-close">Cancel</a>
+        <a class="waves-effect waves-green btn-large validate-btn">Ok</a>
+    </div>
+</div>
+<div id="validateMailSucess" class="modal">
+    <div class="modal-content">
+        <p>Mail validé, rafraichissez la page pour voir l'heure de validation système</p>
+    </div>
+    <div class="modal-footer">
+        <a class="waves-effect waves-green btn-large validate-btn">Ok</a>
+    </div>
+</div>
+
+<div id="deleteMail" class="modal">
+    <div class="modal-content">
+        <h4>Mail deletion</h4>
+        <p>Are you sure you want to delete this email ?</p>
+    </div>
+    <div class="modal-footer">
+        <a class="waves-effect waves-green btn-large red modal-close">Cancel</a>
+        <a class="waves-effect waves-green btn-large delete-btn">Ok</a>
+    </div>
+</div>
+<div id="deactivateMail" class="modal">
+    <div class="modal-content">
+        <h4>Mail deletion</h4>
+        <p>Are you sure you want to prevent this user from receiving mails ?</p>
+    </div>
+    <div class="modal-footer">
+        <a class="waves-effect waves-green btn-large red modal-close">Cancel</a>
+        <a class="waves-effect waves-green btn-large deactivate-btn">Ok</a>
+    </div>
+</div>
+<div id="deactivateMailSuccess" class="modal">
+    <div class="modal-content">
+        Related user email address has been deactivated ! You cannot mails to this person any longer
+    </div>
+    <div class="modal-footer">
+        <div class="button-field">
+            <a class="waves-effect waves-green btn-large modal-close">Ok</a>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('js/check_mails.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,66 @@
+.response{
+    display: none;
+}
+
+.contentDiv{
+    margin-left: 2rem;
+}
+
+.btn{
+  margin-bottom: 20px;
+}
+
+#master-footer{
+    display: none;
+}
+
+.displayMacro{
+    text-align: center;
+}
+
+a.btn.param-btn.modal-trigger{
+  margin-left: 30%;
+}
+
+.card-panel{
+    text-align: left;
+}
+
+.container .row{
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.page-container>#nav+ :not(.menu):not(.action-buttons):not(.tabs), .page-container>#nav+.action-buttons+ :not(.tabs)+*, .page-container>#nav+.action-buttons+.tabs+*{
+    flex-grow: 0;
+}
+
+.textField{
+    background-color: #15a6ae0d;
+    margin-bottom: 10px;
+}
+
+.indicator{
+    display: none;
+}
+
+.tabs{
+    cursor: default;
+}
+
+h3{
+    text-align: center;
+}
+
+body{
+    margin: none;
+}
+
+td{
+  text-align: center;
+  margin: 0;
+}
+
+.container{
+  width: 45%;
+}

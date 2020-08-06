@@ -1,0 +1,4 @@
+# jpg files are considered to always be user pictures
+*.jpg
+org/*
+!org/no-picture.png

@@ -1,0 +1,307 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+  {{ 'institutions.page_title'|trans }}
+{% endblock %}
+
+{% block css %}
+  <style>
+    :root {
+      --title-size: 2em;
+    }
+
+    main {
+      margin: 1rem auto;
+      max-width: 1200px;
+    }
+
+    a {
+      line-height: 1;
+    }
+
+    .modal {
+      overflow: visible;
+    }
+
+    .select-wrapper input.select-dropdown {
+      margin: 0;
+    }
+
+    #serpicoapp .collection-item {
+      padding: 1em 1.2em;
+    }
+
+    .institution-name {
+      font-size: var(--title-size);
+      font-weight: 300;
+      line-height: 1;
+    }
+
+    #serpicoapp .badge {
+      height: var(--title-size);
+      line-height: var(--title-size);
+      user-select: none;
+    }
+
+    .btn-flat.secondary-content {
+      height: var(--title-size);
+      line-height: var(--title-size);
+    }
+
+    .material-icons {
+      vertical-align: bottom;
+      line-height: inherit;
+    }
+
+    .institutions-info {
+      margin-top: 1em;
+    }
+
+    .process-child {
+      margin-left: 20px;
+    }
+
+    .process-subchild {
+      margin-left: 40px;
+    }
+
+    .option-child {
+      padding-left: 15px;
+    }
+    .option-subchild {
+      padding-left: 30px;
+    }
+
+  </style>
+{% endblock %}
+
+{% block javascripts %}
+  <script>
+    const ipurl = "{{ url('getAllProcessesFromInstitution', { orgId: 0 }) }}";
+    const aurl = "{{ url('createUserProcessActivity', { inpId: 0 }) }}";
+    const cprurl = "{{ url('createProcessRequest', { orgId: 0 }) }}";
+    const $institutionProcessesModal = $('#institution-processes');
+    const $requestNewProcessModal = $('#request-new-process');
+    const $addUserProcessActivitySuccessModal = $('#add-user-process-activity-success');
+    const $processSelect = $('#process-select');
+    let institutionId;
+
+    function onInstitutionSelect() {
+      const $this = $(this);
+      var institutionVal = $this.closest('.modal').find('select').prop('value');
+      urlToPieces = dupliUrl.split('/');
+      urlToPieces[urlToPieces.length-2] = institutionVal;
+      var durl = urlToPieces.join('/');
+      window.location = durl;
+    }
+
+    async function onAddProcessClick(_institutionId) {
+      const url = ipurl.replace(0, _institutionId);
+      institutionId = _institutionId;
+
+      $('.red-text').remove();
+      const response = await fetch(url);
+      const json = await response.json();
+      newOptions = [];
+      $.each(json.processes, function(key, process){
+          newOptions.push(`<option value="${process.key}" ${process.disabled}>${process.value}</option>`);  
+          $.each(process.children, function(key, child){
+              newOptions.push(`<option class="option-child" value="${child.key}" ${child.disabled}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${child.value}</option>`);
+              $.each(child.children, function(key, subchild){
+                  newOptions.push(`<option class="option-subchild" value="${subchild.key}" ${subchild.disabled}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${subchild.value}</option>`);
+              })
+          })
+      })
+
+      /** @type {[]} */
+      const options = json.processes.map(
+        process => /*html*/`<option value="${process.key}">${process.value}</option>`,
+      );
+
+      $processSelect.html(newOptions.join(''));
+
+      $institutionProcessesModal.find('select').material_select();
+      $institutionProcessesModal.modal('open');
+    }
+
+    async function onAddProcessConfirm() {
+      const $activityName = $('#activity_name');
+      const activityName = $activityName.val();
+      const processId = $processSelect.prop('value');
+      const url = aurl.replace(0, processId);
+
+      $('.red-text').remove();
+
+      const response = await fetch(url, {
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: $.map({ fi: 0, n: activityName }, (v, k) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join('&')
+      });
+
+      if (response.status >= 400) {
+        const err = await response.json();
+        $activityName.after(/*html*/`
+          <strong class="red-text">${err}</strong>
+        `);
+      } else {
+        $addUserProcessActivitySuccessModal.modal('open');
+        $institutionProcessesModal.modal('close');
+        location.reload();
+      }
+    }
+
+    /**
+     * @param {HTMLFormElement} form
+     * @param {Event} ev
+     */
+    async function onNewProcessSubmit(form, ev) {
+      ev.preventDefault();
+
+      const url = cprurl.replace(0, institutionId);
+
+      const response = await fetch(url, {
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: $(form).serialize()
+      });
+
+      if (response.status >= 400) {
+        console.error(await response.json());
+      } else {
+        location.reload();
+      }
+    }
+  </script>
+{% endblock %}
+
+{% block content %}
+  <main>
+    <ul class="collection">
+      {% for institution in institutions %}
+        {% set external_activities = currentuser.externalActivities(institution) %}
+
+        <li class="collection-item">
+          <span class="institution-name">
+            {{ institution.commName }}
+          </span>
+          <button type="button" class="btn-flat secondary-content" onclick="onAddProcessClick('{{ institution.id }}')">
+            <i class="material-icons">add</i> {{ 'institutions.add_process.btn_modal'|trans }}
+          </button>
+          <span class="my-activities-count badge tooltipped" data-tooltip="{{ 'tooltip.institutions.my_actions'|trans }}">
+            {{ external_activities.count }} <i class="material-icons">bookmark</i>
+          </span>
+          <div class="institutions-info">
+            <ul class="linked-activities">
+              {% for iprocess in institution.parentValidatedInstitutionProcesses %}
+                <li>{{ iprocess.name }}</li>
+                {% for iprocessChild in iprocess.children %}
+                  {% if iprocessChild.gradable %}
+                    <li class="process-child">{{ iprocessChild.name }}</li>
+                  {% endif %}
+                  {% for iprocessSubChild in iprocessChild.children %}
+                    {% if iprocessChild.gradable %}
+                      <li class="process-subchild">{{ iprocessSubChild.name }}</li>
+                    {% endif %}
+                  {% endfor %}
+                {% endfor %}
+              {% endfor %}
+              <li class="no-items-placeholder">
+                <em>(aucun process)</em>
+              </li>
+            </ul>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  </main>
+
+  {% if currentuser is not null and currentuser.role == 4 %}
+    <div class="fixed-action-btn">
+      <a class="btn-floating btn-large blue darken-2"><i class="material-icons">add</i></a>
+      <ul>
+        <li>
+          <a
+            href="#duplicate-organization" class="btn-floating btn-large cyan darken-2 tooltipped modal-trigger"
+            data-position="left" data-tooltip="{{ 'tooltip.institution.duplicate'|trans }}">
+            <i class="material-icons">content_copy</i>
+          </a>
+        </li>
+        <li>
+          <a
+            href="{{ url('createOrganization') }}" class="btn-floating btn-large teal accent-4 tooltipped"
+            data-position="left" data-tooltip="{{ 'tooltip.institution.create_account'|trans }}">
+            <i class="material-icons">create</i>
+          </a>
+        </li>
+      </ul>
+    </div>
+  {% endif %}
+
+  <div id="request-new-process" class="modal">
+    {{ form_start(processForm, { attr: { onsubmit: 'onNewProcessSubmit(this, event)' } })}}
+    <div class="modal-content">
+      <h4>{{ 'institutions.add_modal_process.modal_add_title'|trans }}</h4>
+      {{ form_row(processForm.name) }}
+    </div>
+    <div class="modal-footer">
+      {{ form_row(
+        processForm.submit,
+        { attr: { class: 'btn modal-close' } }
+      ) }}
+    </div>
+    {{ form_end(processForm) }}
+  </div>
+
+  <div id="institution-processes" class="modal">
+    <div class="modal-content">
+      <h4>{{ 'institutions.add_process.modal_title'|trans }}</h4>
+      <div class="input-field">
+        <label for="activity_name">{{ 'activities.request.name_label'|trans }}</label>
+        <input type="text" id="activity_name" name="activity_name" required="required">
+      </div>
+      <div>
+        <div class="input-field">
+          <select id="process-select"></select>
+          <label for="process-select">{{ 'institutions.add_process.available_processes'|trans }}</label>
+        </div>
+        <a class="modal-trigger modal-close" href="#request-new-process">
+          <i class="material-icons">add</i> {{ 'institutions.add_process.modal_add_btn'|trans }}
+        </a>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a class="btn" onclick="onAddProcessConfirm()">ok</a>
+    </div>
+  </div>
+
+  <div id="add-user-process-activity-success" class="modal">
+    <div class="modal-content">
+      {{ 'institutions.add_user_process_activity_success_msg'|trans }}
+    </div>
+    <div class="modal-footer">
+      <a class="modal-close btn-flat">ok</a>
+    </div>
+  </div>
+
+
+  <div id="duplicate-organization" class="modal">
+    <div class="modal-content">
+      {{ 'institutions.duplicate.modal_title'|trans }}
+
+      <select id="institution-select">
+        {% for institution in institutions %}
+          <option value="{{ institution.id }}" class="cli_option">{{ institution.commName }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="modal-footer">
+      <div class="button-field">
+        <button type="button" id="institution-select" class="btn" onclick="onInstitutionSelect()">ok</button>
+      </div>
+    </div>
+  </div>
+{% endblock %}

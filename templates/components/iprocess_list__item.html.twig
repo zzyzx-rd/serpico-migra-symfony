@@ -1,0 +1,20 @@
+<div class="gray-line">
+<li class="process-list--item hierarchized-item">
+  <div class="row">
+    <div class="col s3 center">
+      <i class="material-icons">layers</i></br><span> {{ process_name }}</span>
+    </div>
+
+    <div class="col s9 no-padding">
+  <div class="item-body">
+    <ul class=" activity-list">
+      {% for activity in activities %}
+      {% if activity.getStartdate() <  date() %}
+        {% endif %}
+        {% include "components/activity2_list__item.html.twig" with { activity: activity } %}
+      {% endfor %}
+    </ul>
+  </div>
+  </div>
+  </div>
+</li>

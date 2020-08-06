@@ -1,0 +1,671 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+    {% trans %}create_client.page_title{% endtrans %}
+{% endblock %}
+
+
+  {% block css %}
+    <!-- Dropify -->
+    <link href="{{ asset('css/dropify.min.css') }}" rel="stylesheet" type="text/css">
+    <script>
+        var url = "{{ url('ajaxClientUserAdd') }}";
+        var dcurl = "{{ url('clientDelete', {cliId : app.request_stack.currentrequest.get('cliId') ?: 0 }) }}";
+        var diurl = "{{ url('clientUserDelete', {extId : 0}) }}";
+        var vcurl = "{{ url('validateClient', {cliId : app.request_stack.currentrequest.get('cliId') ?: 0 }) }}";
+        var viurl = "{{ url('validateClientUser', {cliId : app.request_stack.currentrequest.get('cliId') ?: 0, extId : 0}) }}";
+        var surl = "{{ path('dynamicSearchParentFirm')}}";
+        var noFirm = "{{ 'create_client.partner.unexisting_worker_firm'|trans }}";
+        var multCreation = "{{ app.request_stack.currentrequest.get('cliId') ? 0 : 1 }}";
+    </script>
+    <style>
+
+
+      #main-header{
+        --actions-width: 200px;
+        --padding: 16px;
+        display: flex;
+        justify-content: center;
+        padding: 1em;
+        margin-bottom: 2em;
+        position: relative;
+      }
+
+      header .page-title{
+          display: inline-block;
+          text-align: center;
+      }
+
+      footer{
+      padding-bottom: 40px;
+      }
+
+      .collection{
+        overflow: unset;
+      }
+
+      .client-type{
+        display: inline-block;
+        min-width: 250px;
+      }
+      .client-info-type{
+        color: grey;
+      }
+
+      .client-info-type .fa-pencil-alt{
+        color: black;
+        font-size: 15px;
+      }
+
+      .client-select-type{
+        padding: 0 2rem;
+      }
+
+      .fa-slash{
+        transform: rotate(87deg);
+      }
+
+      .add-individual-btn-row{
+        display: flex;
+        justify-content:flex-end;
+        margin-top: 1em;
+      }
+
+      .firm-option-logo{
+          float: left!important;
+      }
+      .firm-input-logo{
+          position: absolute;
+          height: 20px;
+          margin: auto 0;
+          top: 0;
+          left: 0;
+          bottom: 0;
+      }
+
+      .w-firm .dropdown-content{
+        opacity: 1!important;
+        display: block!important;
+      }
+
+      .w-firm .select-wrapper input, .w-firm .select-wrapper .caret{
+          display: none!important;
+      }
+
+      .add-members{
+        display: flex;
+        justify-content: flex-end;
+        padding: 1em;
+      }
+
+      .add-partner-zone{
+        margin-top: 20px;
+      }
+
+      .client-logo-zone{
+        width: 75px;
+        height: 75px;
+        border-radius: 9999px;
+      }
+
+      .back-btn{
+        position: absolute;
+        left: 40px;
+      }
+
+      .clients-zone{
+        margin: 0 auto;
+        width: 90%;
+      }
+
+      .page-title{
+        font-size: 30px;
+      }
+
+      .client{
+        overflow-y: unset;
+      }
+
+    </style>
+  {% endblock %}
+
+
+{% block pagename %}
+    {% trans %}create_client.mobile_header_title{% endtrans %}
+{% endblock %}
+
+{% block username %}
+  {{ currentuser.firstname }}
+  {{ currentuser.lastname }}
+{% endblock %}
+
+{% block content %}
+    <main>
+
+      <header id="main-header">
+        <a class="waves-effect waves-green btn back-btn" href="{{ url('manageUsers')}}">{{ 'team.go_back_users'|trans }}</a>
+        {% if multipleClientCreation %}
+          <span class="page-title">{{ 'create_client.page_title'|trans }}</span>
+        {% endif %}
+      </header>
+
+
+        <div class="clients-zone">
+      
+            {{ form_start(form, {attr:{style:"display:contents"}}) }}
+    
+          {#
+          <h5>{% trans %}create_client.csv_description{% endtrans %}</h5>
+          <div class="row">
+            <div class="button-field">
+                {{ form_widget(form.usersCSV) }}
+    
+              <div class="errorMessage">
+                  {{ form_errors(form.usersCSV) }}
+              </div>
+            </div>
+          </div>
+          #}
+    
+          {% if multipleClientCreation %}
+    
+              <ul class="clients collection" data-prototype="{% filter escape %}{% include 'prototype_client.twig' with { 'item': form.clients.vars.prototype } %}{% endfilter %}">
+                
+                {% for ckey, client in form.clients %}
+    
+    
+    
+                    <li class="client collection-item">
+    
+    
+                      <div class="row">
+    
+                        <div class="element-data">
+                          <ul class="flex-center">
+                            <li style="margin-right: 20px;position:relative">
+                              <img class="client-logo-zone" src="{{ asset(client_logo_url(client.vars.data)) }}">
+                            </li>
+                            <li style="width: 100%;">
+                              <ul class="flex-center-sb">
+                                <h4 style="display: inline-block;" class="client-name">
+                                  {% if client.vars.data.commname is not empty %}
+                                    {{ client.vars.data.commname }}
+                                  {% else %}
+                                    {% trans %}create_client.partner.prototype_title{% endtrans %} {{ ckey }}
+                                  {% endif %}
+                                </h4>
+                                {#<a href="#deleteClient" class="waves-effect waves-light accent-4 btn-flat modal-trigger" style="margin-left: auto;"><i class="fa fa-times"></i></a>#}
+                                <a class="modify-client-btn btn-flat"><i class="fa fa-pencil-alt"></i></a>
+                              </ul>
+                              {#
+                              <div>
+                                Adresse générique : <span class="client-email"> {{ client.vars.data.email }} </span>
+                              </div>
+                              #}
+                            </li>
+                          </ul>
+                        </div>
+    
+                      
+    
+                        <div class="element-input" style="display: none;">
+                          <ul class="flex-center-sb">
+                            <h4 style="display:inline-block">Données client</h4>
+                            <div class="client-type">
+                              <a class="btn-flat client-info-type flex-center">
+                                <i class="fa fa-industry m-right"></i>
+                                <span class="m-right">{{'create_client.type.firm'|trans}}</span>
+                                <i class="fa fa-pencil-alt"></i>
+                              </a>
+                              <div class="client-select-type" style="display: none;">
+                                {{ form_label(client.type) }}
+                                {{ form_widget(client.type) }}
+                              </div>
+                            </div>
+                            <a href="#deleteClient" class="waves-effect waves-light accent-4 btn-flat modal-trigger" data-cid="{{client.vars.data.id}}" style="margin-left: auto;"><i class="fa fa-trash"></i></a>
+                            <a class="validate-client-btn waves-effect waves-light btn blue darken-2 tooltip" data-cid="{{client.vars.data.id}}"><i class="fa fa-check"></i></a>
+                          </ul>
+                          <div class="row">
+                            <div class="col s12 m2" style="position:relative;">
+                              <img class="client-logo-zone" src="{{ asset(client_logo_url(client.vars.data)) }}">
+                              <a class="btn-floating add-photo-btn" style="position: absolute; top: 84%; left: 22%;"><i class="fa fa-pencil-alt"></i></a>
+                            </div>
+                            <div class="col s12 m9">
+                              <div class="input-field col s12 m6 w-firm">
+                                {{ form_label(client.commname) }}
+                                {{ form_widget(client.commname) }}
+                                <select name="firmSelector" style="margin-top: 45px"></select>
+                              </div>
+                              {#}
+                              <div class="col s12 m6">
+                                  {{ form_row(client.type) }}
+                              </div>
+                              <div class="col s12 m12">
+                                {{ form_label(client.email) }}
+                                <i class="fa fa-question-circle tooltipped" data-position="bottom" data-delay="50" data-tooltip="{% trans %}create_client.emailSmallText{% endtrans %}"></i>
+                                {{ form_widget(client.email) }}
+                              </div>
+                              #}
+                            </div>
+                          </div>
+                        </div>
+    
+                      </div>
+              
+                      <ul class="individuals" data-prototype="{% filter escape %}{% include 'prototype_client_individual.twig' with { 'item': client.aliveExternalUsers.vars.prototype, 'client': client.vars.data } %}{% endfilter %}">
+                          {% for ikey, individual in client.aliveExternalUsers %}
+    
+                              <li class="individual">
+    
+                                <div class="row" style="display: flex;align-items: center;justify-content: space-between">
+                                    <div class="external-user-title">
+                                        <h4>{% trans %}create_client.individual.prototype_title{% endtrans %} {{ ikey }}</h4>
+                                    </div>
+                                    <a class="delete-ext-user-btn waves-effect waves-light btn-flat modal-trigger" href="#deleteExternalUser" data-eid="{{individual.vars.data.id}}" style="margin-left: auto;"><i class="fa fa-trash"></i></a>
+                                    <a class="validate-ext-user-btn waves-effect waves-light btn blue darken-2 tooltip" data-cid="{{ client.vars.data.id }}" data-eid="{{individual.vars.data.id}}"><i class="fa fa-check"></i></a>
+                                </div>
+                            
+                                <div class="row no-margin" style="margin-bottom:none">
+                                    <div class="input-field col s12 m6">
+                                        {{ form_label(individual.firstname) }}
+                                        {{ form_widget(individual.firstname) }}
+                                    </div>
+                                    <div class="input-field col s12 m6">
+                                        {{ form_label(individual.lastname) }}
+                                        {{ form_widget(individual.lastname) }}
+                                    </div>
+                                </div>
+                                <div class="row no-margin flex-center">
+                                    {#
+                                    <div class="col s12 m6">
+                                        {{ form_row(individual.orgId) }}
+                                        <a href="#addClient" class="add-external-org-group modal-trigger"><i class="fa fa-plus"></i> {% trans %}create_client.create_organization.open_modal_msg{% endtrans %}</a>
+                                    </div>
+                                    #}
+                                  <div class="input-field col s12 m6">
+                                      {{ form_label(individual.positionName) }}
+                                      {{ form_widget(individual.positionName) }}
+                                  </div>
+                                  <div class="col s12 m6">
+                                    {{ form_widget(individual.owner) }}
+                                    {{ form_label(individual.owner) }}
+                                    <i class="fa fa-question-circle tooltipped" data-position="bottom" data-delay="50" data-tooltip="{% trans %}create_client.owner_tooltip{% endtrans %}"></i>
+                                  </div>
+                                  
+                                </div>
+                                <div class="row no-margin">
+                                    <div class="input-field col s12 m6">
+                                      {{ form_label(individual.email) }}
+                                      {{ form_widget(individual.email) }}
+                                      <small>{% trans %}create_client.emailSmallText{% endtrans %}</small>
+                                    </div>
+                                    <div class="input-field col s12 m6">
+                                        {{ form_label(individual.weightValue) }}
+                                        {{ form_widget(individual.weightValue) }}
+                                        <small>{% trans %}create_client.weightSmallText{% endtrans %}</small>
+                                    </div>
+                                </div>
+                            
+                            </li>
+                            
+                          {% endfor %}
+                      </ul>
+              
+                      <div class="add-members button-field">
+                          <a class="btn waves-effect waves-light insert-individual-btn"><i class="fa fa-user-plus"></i>
+                              <span>{% trans %}create_client.individual.add_button{% endtrans %}</span>
+                          </a>
+                      </div>
+              
+                  </li>
+    
+                {% endfor %}
+                
+              </ul>
+    
+              <div class="add-partner-zone">
+                <div class="button-field">
+                  <a class="btn waves-effect waves-light insert-client-btn"><i class="fa fa-industry"></i><i class="fa fa-slash"></i><i class="fa fa-users"></i>
+                    <span>{% trans %}create_client.partner.add_button{% endtrans %}</span>
+                  </a>
+                </div>
+              </div>
+          
+          {% else %}
+    
+            {% set client = form %}
+            {% set clientHasActiveAdmin = client.vars.data.clientOrganization.hasActiveAdmin %}
+    
+            <div class="row" style="display: contents;">
+    
+              <div class="element-data" {% if not form.vars.valid %}style="display: none;"{% endif %}>
+                <ul class="flex-center">
+                  <li style="margin-right: 20px;position:relative">
+                    <img class="user-profile-picture" src="{{ asset(client_logo_url(client.vars.data)) }}" width="100px" height="100px" style="border-radius: 100%">
+                  </li>
+                  <li style="width: 100%;">
+                    <ul class="flex-center-sb">
+                      <h4 style="display: inline-block;" class="client-name">
+                        {{ client.vars.data.commname }}
+                      </h4>
+                      {#<a href="#deleteClient" class="waves-effect waves-light accent-4 btn-flat modal-trigger" style="margin-left: auto;"><i class="fa fa-times"></i></a>#}
+                      <a class="modify-client-btn btn-flat"><i class="fa fa-pencil-alt"></i></a>
+                    </ul>
+                    {#
+                    <div>
+                      Adresse générique : <span class="client-email">{{ client.vars.data.email }}</span>
+                    </div>
+                    #}
+                  </li>
+                </ul>
+              </div>
+    
+              <div class="element-input" {% if form.vars.valid %} style="display: none;" {% endif %}>
+    
+                <ul class="flex-center-sb">
+                  <h4 style="display:inline-block">Données client</h4>
+                  <div class="client-type">
+                    <a class="btn-flat client-info-type flex-center">
+                      <i class="fa fa-industry m-right"></i>
+                      <span class="m-right">{{'create_client.type.firm'|trans}}</span>
+                      <i class="fa fa-pencil-alt"></i>
+                    </a>
+                    <div class="client-select-type" style="display: none;">
+                      {{ form_label(client.type) }}
+                      {{ form_widget(client.type) }}
+                    </div>
+                  </div>
+                  <a href="#deleteClient" class="waves-effect waves-light accent-4 btn-flat modal-trigger" data-cid="{{client.vars.data.id}}" style="margin-left: auto;"><i class="fa fa-trash"></i></a>
+                  <a class="validate-client-btn waves-effect waves-light btn blue darken-2 tooltip" data-cid="{{client.vars.data.id}}"><i class="fa fa-check"></i></a>
+                </ul>
+              
+                <div class="row">
+                  <div class="col s12 m2" style="position:relative;">
+                    <img class="user-profile-picture" src="{{ asset(client_logo_url(client.vars.data)) }}" width="100px" height="100px" style="border-radius: 100%">
+                    <a class="btn-floating add-photo-btn" style="position: absolute; top: 84%; left: 22%;"><i class="fa fa-pencil-alt"></i></a>
+                  </div>
+                  <div class="col s12 m9">
+                    <div class="input-field col s12 m12 w-firm">
+                      {{ form_label(client.commname) }}
+                      {{ form_widget(client.commname,{attr:{'data-id': client.vars.data.clientOrganization.workerFirm.id}}) }}
+                      <select name="firmSelector" style="margin-top: 45px;;display:none"></select>
+                    </div>
+                    {#
+                    <div class="col s12 m6">
+                        {{ form_row(client.type) }}
+                    </div>
+                    
+                    <div class="col s12 m12">
+                      {{ form_row(client.email) }}
+                    </div>
+                    #}
+                  </div>
+                </div>
+                
+                
+              </div>
+            </div>
+            
+            <div class="client">
+    
+              <ul class="individuals" style="margin-left: 30px;" data-prototype="{% filter escape %}{% include 'prototype_client_individual.twig' with { 'item': client.aliveExternalUsers.vars.prototype, 'client': client.vars.data } %}{% endfilter %}">
+                {% for ikey, individual in client.aliveExternalUsers %}
+    
+                  <li class="row element-data" {% if not form.vars.valid %} style="display: none;" {% endif %}>
+                    <ul class="flex-center-sb">
+                      <li>
+                        <ul class="flex-center">
+                          {#
+                          <li style="margin-right: 20px;">
+                            <img class="user-profile-picture" src="{{ asset(user_picture_url(individual.vars.data.user)) }}" width="50px" height="50px" style="border-radius: 100%">
+                          </li>
+                          #}
+                          <li>
+                            <div style="font-size:17px" class="user-ext-fullname">{{individual.vars.data.fullname}}</div>
+                            <div class="user-ext-position-name">{{individual.vars.data.positionName}}</div>
+                          </li>
+                        </ul>
+    
+                      </li>
+                      <li>
+                        {#<a href="#deleteExternalUser" class="waves-effect waves-light accent-4 btn-flat modal-trigger" data-eid="{{ individual.vars.data.id }}" style="margin-left: auto;"><i class="fa fa-times"></i></a>#}
+                        <a class="modify-ext-user-btn btn-flat">
+                          <i class="fa fa-pencil-alt"></i>
+                        </a>
+                      </li>
+                    </ul>
+                  </li>
+    
+                  <li class="individual element-input" {% if form.vars.valid %} style="display: none;" {% endif %}>
+                    <div class="row flex-center-sb">
+                        <div class="external-user-title">
+                            <h4>{% trans %}create_client.individual.prototype_title{% endtrans %} {{ ikey + 1 }}</h4>
+                        </div>
+                        <a class="delete-ext-user-btn waves-effect waves-light btn-flat modal-trigger" href="#deleteExternalUser" data-eid="{{ individual.vars.data.id }}" style="margin-left: auto;"><i class="fa fa-trash"></i></a>
+                        <a class="validate-ext-user-btn waves-effect waves-light btn blue darken-2 tooltip" data-cid="{{ client.vars.data.id }}" data-eid="{{ individual.vars.data.id }}"><i class="fa fa-check"></i></a>
+                    </div>
+                    <div class="row no-margin" style="margin-bottom:none">
+                        <div class="input-field col s12 m6">
+                            {{ form_label(individual.firstname) }}
+                            {{ form_widget(individual.firstname) }}
+                        </div>
+                        <div class="input-field col s12 m6">
+                            {{ form_label(individual.lastname) }}
+                            {{ form_widget(individual.lastname) }}
+                        </div>
+                    </div>
+                    <div class="row no-margin flex-center">
+                      <div class="input-field col s12 m{{clientHasActiveAdmin ? 12 : 6}}">
+                          {{ form_label(individual.positionName) }}
+                          {{ form_widget(individual.positionName) }}
+                      </div>
+                      {% if not clientHasActiveAdmin %} 
+                        <div class="col s12 m6">
+                          {{ form_widget(individual.owner) }}
+                          {{ form_label(individual.owner) }}
+                          <i class="fa fa-question-circle tooltipped" data-position="bottom" data-delay="50" data-tooltip="{% trans %}create_client.owner_tooltip{% endtrans %}"></i>
+                        </div>
+                      {% endif %}
+                    </div>
+                    <div class="row no-margin">
+                        <div class="input-field col s12 m6">
+                          {{ form_label(individual.email) }}
+                          {{ form_widget(individual.email) }}
+                          <small>{% trans %}create_client.emailSmallText{% endtrans %}</small>
+                        </div>
+                        <div class="input-field col s12 m6">
+                            {{ form_label(individual.weightValue) }}
+                            {{ form_widget(individual.weightValue) }}
+                            <small>{% trans %}create_client.weightSmallText{% endtrans %}</small>
+                        </div>
+                    </div>
+                </li>              
+                {% endfor %}
+              </ul>
+      
+              <div class="button-field add-members">
+                <a class="btn waves-effect waves-light insert-individual-btn"><i class="fa fa-user-plus"></i>
+                    <span>{% trans %}create_client.individual.add_button{% endtrans %}</span>
+                </a>
+              </div>
+              
+            </div>
+    
+          {% endif %}
+    
+    
+          
+          
+          {#
+          <div id="addClient" class="modal">
+              {{ form_start(clientsForm) }}
+            <div class="modal-content">
+              <h5>{% trans %}create_client.create_organization.modal_title_msg{% endtrans %}</h5>
+              <p>{% trans %}create_client.create_organization.modal_main_msg{% endtrans %}</p>
+                {{ form_label(clientsForm.commname) }}
+                {{ form_widget(clientsForm.commname) }}
+                {{ form_errors(clientsForm.commname) }}
+            </div>
+    
+            <div class="modal-footer action-buttons">
+              <div class="button-field">
+                <a class=" modal-action modal-close submit-button waves-effect waves-red red btn-large">{% trans %}activities.create.delegate_back_btn_msg{% endtrans %}</a>
+              </div>
+              <div class="button-field">
+                  {{ form_row(clientsForm.submit) }}
+              </div>
+            </div>
+              {{ form_rest(clientsForm) }}
+              {{ form_end(clientsForm) }}
+          </div>
+          #}
+        </div>
+      </div>
+
+      <footer>
+        <div class="button-field center-button">
+            {{ form_widget(form.submit) }}
+        </div>
+      </footer>
+        {{ form_rest(form) }}
+        {{ form_end(form)}}
+    </main>
+
+
+  <div class="c-form" style="display: none;">
+    {{ form_start(clientForm) }}
+    {{ form_rest(clientForm) }}
+    {{ form_end(clientForm) }}
+  </div>
+
+  <div class="i-form" style="display: none;">
+    {{ form_start(individualForm) }}
+    {{ form_rest(individualForm) }}
+    {{ form_end(individualForm) }}
+  </div>
+
+  <div id="deleteExternalUser" class="modal">
+    <div class="modal-title">
+      <h5 style="margin-left: 20px;">{% trans %}client.delete_external_user.modal_title{% endtrans %}</h5>
+    </div>
+    <div class="modal-content">
+      <p>{% trans %}client.delete_external_user.modal_content{% endtrans %}</p>
+    </div>
+    <div class="modal-footer">
+      <a
+        class="btn waves-effect waves-light modal-close remove-client-user">{% trans %}stages.deleteStage.accept{% endtrans %}</a>
+      <a
+        class="waves-effect waves-light modal-close btn-flat red-text">{% trans %}stages.deleteStage.cancel{% endtrans %}</a>
+    </div>
+  </div>
+
+  <div id="deleteClient" class="modal">
+    <div class="modal-title">
+      <h5 style="margin-left: 20px;">{% trans %}client.delete.modal_title{% endtrans %}</h5>
+    </div>
+    <div class="modal-content">
+      <p>{% trans %}client.delete.modal_content{% endtrans %}</p>
+    </div>
+    <div class="modal-footer">
+      <a
+        class="btn waves-effect waves-light modal-close remove-client">{% trans %}stages.deleteStage.accept{% endtrans %}</a>
+      <a
+        class="waves-effect waves-light modal-close btn-flat red-text">{% trans %}stages.deleteStage.cancel{% endtrans %}</a>
+    </div>
+  </div>
+  
+  <div id="addClientSuccess" class="modal">
+    <div class="modal-content">
+      <p>{% trans %}create_client.create_organization.success_msg{% endtrans %}</p>
+    </div>
+
+    <div class="modal-footer">
+      <div class="button-field">
+        <a class=" modal-action modal-close waves-effect btn btn-large">Ok</a>
+      </div>
+    </div>
+  </div>
+
+  {% if not form.vars.valid %}
+
+
+
+
+	<div id="errors" class="modal">
+		<div class="modal-content">
+      <h5>{{ 'activities.modal_error_creation_title'|trans }}</h5>
+
+      {% if multipleClientCreation %}
+
+        {{form_errors(form)}}
+
+        {% for ckey, client in form.clients %}
+          {% if not client.vars.valid %}
+          <div>Client {{ ckey }} ({{client.vars.data.commname}}) :
+            {% for child in client.children %}
+              {% if not child.vars.valid %}
+                {% if child != client.aliveExternalUsers %}
+                  <div style="margin-left: 20px;">{{form_label(child)}}<span style="display:inline-block;width: 30%;"></span> {{ form_errors(child) }}</div>
+                {% else %}
+                  <div style="padding: 15px 0px">
+                    {% for ikey, externalUser in client.aliveExternalUsers %}
+                      <div> User {{ ikey }} ({{externalUser.vars.data.firstname}} {{externalUser.vars.data.lastname}}) :
+                        {% for child in externalUser.children %}
+                          {% if not child.vars.valid %}
+                            <div style="margin-left: 20px;">{{form_label(child)}}<span style="display:inline-block;width: 30%;"></span> {{ form_errors(child) }}</div>
+                          {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                  </div>
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+          </div>
+          {% endif %}
+        {% endfor %}     
+
+      {% else %}      
+          
+        {% for child in form.children %}
+          {% if child.vars.valid is defined and not child.vars.valid %}
+
+            {% if child != client.aliveExternalUsers %}
+              <div style="margin-left: 20px;">{{form_label(child)}}<span style="display:inline-block;width: 30%;"></span> {{ form_errors(child) }}</div>
+            {% else %}
+              <div style="padding: 15px 0px">
+                {% for ikey, externalUser in client.aliveExternalUsers %}
+                  <div> User {{ ikey }} ({{externalUser.vars.data.firstname}} {{externalUser.vars.data.lastname}}) :
+                    {% for child in externalUser.children %}
+                      {% if not child.vars.valid %}
+                        <div style="margin-left: 20px;">{{form_label(child)}}<span style="display:inline-block;width: 30%;"></span> {{ form_errors(child) }}</div>
+                      {% endif %}
+                    {% endfor %}
+                {% endfor %}
+              </div>
+            {% endif %}
+
+          {% endif %}
+        {% endfor %}
+
+        <div style="margin-left: 20px;">
+          {{form_errors(form)}}
+        </div>
+        
+              
+      {% endif %}
+		</div>
+		<div class="modal-footer">
+			<a class=" modal-action modal-close waves-effect waves-green btn notifyModalClose">Ok</a>
+		</div>
+	</div>
+	{% endif %}
+
+    {% endblock %}
+
+{% block javascripts %}
+  <script src="{{ asset('js/login.js') }}"></script>
+  <script src="{{ asset('js/dropify.min.js') }}"></script>
+  <script src="{{ asset('js/client_user_create.js') }}"></script>
+
+
+{% endblock %}

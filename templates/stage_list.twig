@@ -1,0 +1,58 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+Create Activity
+{% endblock %}
+
+{% block pagename %}
+Create Activity
+{% endblock %}
+{% block username %}
+    {{ currentuser.firstname }} {{ currentuser.lastname }}
+{% endblock %}
+
+{% block content %}
+
+  <img id="logoMain" src="{{ asset('lib/img/Serpico.png') }}" alt="logo Serpico">
+  <div id="'criteriaForm">
+  {{ form_start(form) }}
+
+  <!--<form class="col s10"> -->
+
+
+      {{ form_label(form.emails) }}
+      {{ form_errors(form.emails) }}
+
+      <ul>
+          {% for stage in form.stages %}
+              <li>
+                  {{ form_errors(emailField) }}
+                  {{ form_widget(emailField) }}
+              </li>
+          {% endfor %}
+      </ul>
+
+      <div  class="row">
+        <div class="input-field col s10 ">
+            {{ form_label(form.name) }}
+            {{ form_widget(form.name) }}
+            {{ form_errors(form.name) }}
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="button-field col s10">
+            {{ form_row(form.submit) }}
+        </div>
+      </div>
+      <!--</form> -->
+        {{ form_rest(form) }}
+        {{ form_end(form)}}
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+  <script src="{{ asset('js/login.js') }}"></script>
+  <script src="{{ asset('js/activity_definition.js') }}"></script>
+{% endblock %}

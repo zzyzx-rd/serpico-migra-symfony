@@ -1,0 +1,37 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+    {% trans %}users_settings.page_title{% endtrans %}
+{% endblock %}
+
+{% block css %}
+{% endblock %}
+
+{% block pagename %}
+    {% trans %}users_list.mobile_header_title {% endtrans %}
+{% endblock %}
+
+{% block username %}
+    {{ currentuser.firstname }} {{ currentuser.lastname }}
+{% endblock %}
+
+{% block content %}
+  <section>
+      <ul style="display: flex;align-items: center;justify-content: center;min-height: 450px">
+          <div class="center">
+              <i class="fa fa-2x fa-cog"></i>
+              <h4>{% trans %}page_under_work{% endtrans %}</h4>
+              <div class="row action-buttons">
+                  <div class="button-field">
+                      <a class="waves-effect waves-light btn-large" href="{{ url('home') }}">{% trans %}back_to_home{% endtrans %}</a>
+                  </div>
+              </div>
+          </div>
+      </ul>
+
+  </section>
+
+{% endblock %}
+
+{% block javascripts %}
+{% endblock %}

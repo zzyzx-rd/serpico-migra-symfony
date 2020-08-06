@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html id="serpicoapp" {% block data_params %}{% endblock %}>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <title>
+      {% block title '' %}
+      - Serpico Public
+    </title>
+    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('lib/img/favicon/favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('lib/img/favicon/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('lib/img/favicon/favicon-16x16.png') }}">
+    <link rel="manifest" href="{{ asset('lib/img/favicon/site.webmanifest') }}">
+    <link rel="mask-icon" href="{{ asset('lib/img/favicon/safari-pinned-tab.svg') }}" color="#5bbad5">
+    <meta name="theme-color" content="#000000">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta content="Serpico Application. Evaluation Tool for businesses. Home." name="description">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css">
+    <link rel="stylesheet" href="{{ asset('lib/materialize/css/materialize.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    {% block css %}{##}{% endblock %}
+
+    <script>
+      window.lg = '{% trans %}curr_language   {% endtrans %}';
+    </script>
+  </head>
+
+{#  {% if currentuser != null %}#}
+{#    {% set orgName = currentuser.organization.commname %}#}
+{#  {% else %}#}
+{#    {% set orgName = '' %}#}
+{#  {% endif %}#}
+
+  <body>
+    <div class="page-container">
+      <nav id="nav" class="black">
+        <div class="nav-wrapper">
+          <ul>
+            {% if is_granted('IS_AUTHENTICATED_REMEMBERED') and currentuser is not null %}
+              <li class="logo">
+                <a href="/"><img src="{{ asset('lib/img/logo_l.svg') }}"></a>
+              </li>
+              <li>
+                <a href="{{ path('help') }}">
+                  <i class="fa fa-question-circle" aria-hidden="true"></i>
+                  <span>{% trans %}header.help{% endtrans %}</span>
+                </a>
+              </li>
+              {% if is_root %}
+                <li class="firm">
+                  <a href="{{ path('rootManagement') }}">
+                    <i class="fa fa-cogs" aria-hidden="true"></i>
+                    <span>{% trans %}header.root_mgt{% endtrans %}</span>
+                  </a>
+                </li>
+              {% endif %}
+              {% if is_admin %}
+                <li class="firm">
+                  <a href="{{ path('firmSettings') }}">
+                    <i class="fa fa-cog" aria-hidden="true"></i>
+                    <span>{% trans %}header.settings{% endtrans %}</span>
+                  </a>
+                </li>
+              {% endif %}
+              {# admins (1) can see processes for their institution, everyone else will see all institutions instead #}
+              {#
+              {% set sees_processes = userrole == 1 %}
+              {% if not sees_processes %}
+                <li>
+                  <a href="{{ path('displayAllInstitutions') }}">
+                    <i class="fa fa-hotel" aria-hidden="true"></i>
+                    {% set str = 'header.institutions' %}
+                    {{ str|trans }}
+                  </a>
+                </li>
+              {% endif %}
+              #}
+              {% if orgName != "Public" %}
+                <li>
+                  <a href="{{ path(is_admin ? 'manageUsers' : 'seeColleaguesTeams') }}">
+                    <i class="fa fa-users" aria-hidden="true"></i>
+                    {% set str = 'header.' ~ (is_admin ? 'users' : 'community') %}
+                    {{ str|trans }}
+                  </a>
+                </li>
+              {% endif %}
+              <li class="firm">
+                <a href="{{ path('myActivities') }}">
+                  <i class="fa fa-briefcase" aria-hidden="true"></i>
+                  <span>
+                    {% if orgName != "Public" %}
+                      {% trans %}header.firmActivities{% endtrans %}
+                    {% else %}
+                      {% trans %}header.my_actions{% endtrans %}
+                    {% endif %}
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a href="{{ path('home') }}">
+                  <img class="user-profile-picture" src="{{ asset(userpicture) }}">
+                  {# username is only defined for user being citizen (public), otherwise fullname #}
+                  {{ currentuser.selfUsername != "" ? currentuser.selfUsername : currentuser.fullname }}
+                </a>
+              </li>
+              <li class="logout">
+                <a href="{{ path('admin_logout') }}">
+                  <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+                  {% trans %}header.logout{% endtrans %}
+                </a>
+              </li>
+            {% else %}
+              {% if global.routeParams|length == 1 and path(global.route) in freeAccessRoutes %}
+                <li class="logo">
+                  <a href="https://www.serpicoapp.com">
+                    <img src="{{ asset('lib/img/logo_s.png') }}">
+                  </a>
+                  {% trans %}landing.serpico_alt_motto{% endtrans %}
+                </li>
+              {% endif %}
+              {% if global.route == "about" %}
+                <li>
+                  <a href="https://www.serpicoapp.com">
+                    <i class="fa fa-home"></i>
+                    {% trans %}header.home{% endtrans %}
+                  </a>
+                </li>
+              {% endif %}
+              <li>
+                {% if global.route == "solution" %}
+                  <a href="https://www.serpicoapp.com">
+                    <i class="fa fa-home"></i>
+                    {% trans %}header.home{% endtrans %}
+                  </a>
+                {% else %}
+                  <a class="product" href="https://www.serpicoapp.com/solution">{% trans %}header.product{% endtrans %}</a>
+                {% endif %}
+              </li>
+              {% if global.route != "about" %}
+                <li>
+                  <a href="https://www.serpicoapp.com/about">{% trans %}header.about{% endtrans %}</a>
+                </li>
+              {% endif %}
+              <li>
+                <a class="modal-trigger" href="#login">{% trans %}header.login{% endtrans %}</a>
+              </li>
+            {% endif %}
+            <li class="lg-icon">
+              <div class="collapsible" data-collapsible="accordion">
+                <div class="collapsible-header">
+                  {% set currentlocale = global.request.get('_locale') %}
+                  {% set locales = ["en", "fr"] %}
+                  <div class="flag locale-flag {{ currentlocale }}"></div>
+                  <span class="country">{{ global.request.get('_locale')|upper }}</span>
+                </div>
+                <ul class="collapsible-body lang-menu">
+                  {% for locale in locales %}
+                    {% if locale != currentlocale %}
+                      <li>
+                        <a href="{{ path(global.route, global.routeParams|merge({ _locale: locale })) }}">
+                          <div class="flag {{ locale }}"></div>
+                          <span class="country">{{ locale|upper }}</span>
+                        </a>
+                      </li>
+                    {% endif %}
+                  {% endfor %}
+                </ul>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </nav>
+      {% block content %}{% endblock %}
+      <div id="waitingSpinner" class="modal">
+        <div class="modal-content">
+          <div class="spinninAround"></div>
+          <p>{% trans %}please_wait{% endtrans %}</p>
+        </div>
+      </div>
+    </div>
+{#    <footer id="master-footer">#}
+{#      {% if null is null %}#}
+{#        {% include "not_authenticated_footer.html.twig" %}#}
+{#      {% endif %}#}
+{#    </footer>#}
+    <script src="{{ asset('build/runtime.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.js"></script>
+    <script src="{{ asset('js/header.js') }}"></script>
+    {% block javascripts %}{% endblock %}
+  </body>
+</html>

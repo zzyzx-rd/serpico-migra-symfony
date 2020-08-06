@@ -1,0 +1,45 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+    {% trans %}user_no_token.title{% endtrans %}
+{% endblock %}
+
+
+  {% block css %}
+  {% endblock %}
+
+
+{% block pagename %}
+    {% trans %}user_no_token.mobile_header_title{% endtrans %}
+{% endblock %}
+
+{% block username %}
+  {{ currentuser.firstname }}
+  {{ currentuser.lastname }}
+{% endblock %}
+
+{% block content %}
+
+    <div class="container">
+      <div class="row center">
+        <img src="{{ asset('lib/img/missing-target.png') }}" alt="">
+        <h5>{% trans %}user_no_token.title{% endtrans %}</h5>
+        <p>{% trans %}user_no_token.description{% endtrans %}</p>
+      </div>
+      <div class="row">
+        <form id="retrievePwdForm" action="" method="post">
+          <input type="email" name="email" required="required">
+          <button type="submit" name="" value="home" class="btn waves-effect waves-light modal-close">{% trans %}landing.retrieve_pwd.submit{% endtrans %}</button>
+        </form>
+      </div>
+      <div class="row col center">
+        <div class="button-field">
+          <a class="btn btn-large waves-effect waves-light" href="{{ url('login') }}"><i class="fa fa-home" aria-hidden="true"></i>{% trans %}user_no_token.home_button_title{% endtrans %}</a>
+        </div>
+      </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+  <script src="{{ asset('js/user_no_token.js') }}"></script>
+{% endblock %}

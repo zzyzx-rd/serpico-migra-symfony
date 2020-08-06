@@ -1,0 +1,47 @@
+{% macro render_badge(badge_class, badge_letter, badge_text) %}
+  <div class="badge-container">
+    <div class="{{ badge_class }}">
+      {{ badge_letter }}
+    </div>
+    {% if badge_text %}
+      <span class="badge-text">
+        {{ badge_text }}
+      </span>
+    {% endif %}
+  </div>
+{% endmacro %}
+
+{% macro render_tile(header, icon_class, text, mat_icon) %}
+  <div class="tile-header">
+    {{ header }}
+  </div>
+  <div class="tile-body">
+    <i class="{{ icon_class }}">
+      {{ icon_class == 'material-icons' ? mat_icon }}
+    </i>
+    <strong>{{ text }}</strong>
+  </div>
+{% endmacro %}
+
+{% macro user_role_badge(user) %}
+  {% if user.role == 1 %}
+    {% set role = 'admin' %}
+    {% set badge_class = 'admin-badge' %}
+    {% set badge_letter = 'A' %}
+  {% elseif user.role == 2 %}
+    {% set role = 'activity_manager' %}
+    {% set badge_class = 'am-badge' %}
+    {% set badge_letter = 'M' %}
+  {% elseif user.role == 3 %}
+    {% set role = 'collaborator' %}
+    {% set badge_class = 'collaborator-badge' %}
+    {% set badge_letter = 'C' %}
+  {% else %}
+    {% set role = 'root' %}
+    {% set badge_class = 'am-badge' %}
+    {% set badge_letter = 'R' %}
+  {% endif %}
+
+  {% set badge_text = 'tooltip.user.role.' ~ role %}
+  {{ _self.render_badge(badge_class, badge_letter) }}
+{% endmacro %}

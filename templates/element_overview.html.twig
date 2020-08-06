@@ -1,0 +1,828 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+    {% if elmtType == 'user' %}
+        {% trans %}overview.user_page_title{% endtrans %} - {{ username }}
+    {% else %}
+        {% trans %}overview.team_page_title{% endtrans %} - {{ username }}
+    {% endif %}
+{% endblock %}
+
+{% block css %}
+    <!-- CSS Materialize -->
+    <script> var lg = '{% trans %}curr_language{% endtrans %}';
+    var surl = "{{ url('saveImageElementReport',{'elmtType' : elmtType, 'elmtId' :  elmtId, 'type' : 2, 'cName': 0}) }}";
+    var speUrl = "{{ url('getElementGraph',{'mode' : 1, 'elmtType' : elmtType, 'actElmt' : 'criterion', 'participationType' : 1, 'elmtId' : elmtId, 'cName' : 0}) }}";
+    </script>
+
+{% endblock %}
+
+{%  block pagename %}
+    <span>{% trans %}results.mobile_header_title{% endtrans %}</span>
+    <span>{{ username }}</span>
+{% endblock %}
+
+{% block username %}
+    {{ currentuser.firstname }} {{ currentuser.lastname }}
+{% endblock %}
+
+{% block content %}
+    <input type="hidden" id="elmt-type" value="{{ elmtType }}">
+
+    <div class="row col center">
+        <h3>{{ username }}</h3>
+    </div>
+    <div class="row col center">
+        <h5>{% if elmtType == 'user' %}{% trans %}overview.member_since{% endtrans %}{% else %}{% trans %}overview.team_created_on{% endtrans %}{% endif %} {{ memberSince|localizeddate('long', 'none') }}</h5>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js/dist/Chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <script>
+        Chart.defaults.global.defaultFontFamily = 'Roboto';
+        Chart.defaults.global.defaultFontColor = '#000';
+
+        function resetCriterionSelect() {
+            const actElmt = $('a[href="#rindiv"]').hasClass('active') ? 'i' : 'p';
+            $(`#${actElmt}CriterionSelect`).val(0);
+        }
+
+        function initGraph(canvas, graphData) {
+            const chartData = {
+                labels: graphData.labels,
+                datasets: [
+                {
+                    label: 'Performance',
+                    data: graphData.datasets.performance,
+                    borderColor: 'rgb(32, 32, 255)',
+                    backgroundColor: 'transparent'
+                },
+                {
+                    label: 'Mean performance',
+                    data: graphData.datasets.meanPerformance,
+                    borderColor: 'rgb(255, 32, 32)',
+                    backgroundColor: 'transparent',
+                    hidden: true
+                },
+                {
+                    label: 'Grading distance',
+                    data: graphData.datasets.gradingDistance,
+                    borderColor: 'rgb(255, 192, 0)',
+                    backgroundColor: 'transparent',
+                    hidden: true
+                },
+                {
+                    label: 'Mean grading distance',
+                    data: graphData.datasets.meanGradingDistance,
+                    borderColor: 'rgb(0, 192, 0)',
+                    backgroundColor: 'transparent',
+                    hidden: true
+                }
+                ]
+            };
+
+            return new Chart(canvas, {
+                type: 'line',
+                data: chartData,
+                options: {
+                    elements: {
+                        line: {
+                            tension: 0
+                        }
+                    },
+                    plugins: {
+                        datalabels: {
+                            labels: {
+                                title: null
+                            }
+                        }
+                    },
+                    scales: {
+                        yAxes: [
+                        {
+                            ticks: {
+                                min: 0,
+                                max: 100
+                            }
+                        }
+                        ]
+                    }
+                }
+            });
+        }
+
+        function updateGraph(graphObj, data) {
+            const graphData = graphObj.data;
+            if (!graphData) return;
+
+            /*
+                0: Performance
+                1: Mean performance
+                2: Grading distance
+                3: Mean grading distance
+            */
+
+            graphData.labels = data.labels;
+            graphData.datasets[0].data = data.datasets.performance;
+            graphData.datasets[1].data = data.datasets.meanPerformance;
+            graphData.datasets[2].data = data.datasets.gradingDistance;
+            graphData.datasets[3].data = data.datasets.meanGradingDistance;
+
+            graphObj.update();
+        }
+
+        function drawElement(mode, actElmt, type, cName) {
+            var urlToPieces = speUrl.split('/');
+            urlToPieces[urlToPieces.length - 5] = mode;
+            urlToPieces[urlToPieces.length - 4] = actElmt;
+            urlToPieces[urlToPieces.length - 2] = type;
+            urlToPieces[urlToPieces.length - 1] = cName;
+            speUrl = urlToPieces.join('/');
+
+            $.post(speUrl)
+                .done(data => {
+                  if (!data.elementGraphData) return;
+
+                    let modeLetter = mode == 1 ? 'i' : 'p';
+                    let currentChartObj = window[`${actElmt}Graph`];
+
+                    const elementTableContainer = (actElmt == 'activity') ? $('#'+modeLetter+'Activities .container') : ((actElmt == 'stage') ? $('#'+modeLetter+'Stages .container') : $('#'+modeLetter+'Criteria .container'));
+                    elementTableContainer.empty();
+
+                    if (currentChartObj) {
+                        updateGraph(currentChartObj, data.elementGraphData);
+                    } else {
+                        window[`${modeLetter}${actElmt}Graph`] = initGraph($(`#${modeLetter}${actElmt}-graph`), data.elementGraphData);
+                    }
+
+                    if (data.elementGraphData !== null) {
+
+                    //     var elementGraphData = data.elementGraphData;
+                    //     var elementData = google.visualization.arrayToDataTable(elementGraphData);
+                    //     var elementChart = new google.visualization.AreaChart(elementChartContainer);
+                    //     google.visualization.events.addListener(elementChart, 'ready', function () {
+                    //         urlToPieces = surl.split('/');
+                    //         urlToPieces[urlToPieces.length - 1] = cName;
+                    //         urlToPieces[urlToPieces.length - 2] = 0;
+                    //         url = urlToPieces.join('/');
+                    //         $.post(url,{URI_value : elementChart.getImageURI()})
+                    //             .done(function(data){
+                    //             })
+                    //             .fail(function (data){
+                    //                 console.log(data)
+                    //             });
+                    //     });
+
+                    //     elementOptions = {
+                    //         title: 'Performance et écart de notation',
+                    //         hAxis: {title: '{% trans %}overview.hAxis_caption_criteria{% endtrans %}',  titleTextStyle: {color: '#333'}, textStyle: {fontSize: 14}},
+                    //         vAxis: {format: 'percent', ticks:[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1]},
+                    //         chartArea : {
+                    //             top:5,
+                    //             height:'80%',
+                    //             width:'75%'
+                    //         },
+                    //         legend: {position: 'bottom', maxLines: 3},
+                    //     }
+
+
+                    //     elementChart.draw(elementData, elementOptions);
+
+                        var tHeadSecondRow = (actElmt == 'criterion') ?
+                            '<th>{% trans %}report.user.table.name_title{% endtrans %}</th>' :
+                            ((actElmt == 'stage') ?
+                                '<th>{% trans %}report.user.table.stage_title{% endtrans %} ({% trans %}report.user.table.activity_title{% endtrans %})</th>' :
+                                '<th>{% trans %}report.user.table.activity_title{% endtrans %}</th>');
+                        var tHeadThirdRow = (actElmt == 'criterion') ? '<th>{% trans %}report.user.table.stage_title{% endtrans %} ({% trans %}report.user.table.activity_title{% endtrans %})</th>' : '';
+
+                        var table = $('<table class="striped"></table>');
+                        var tableContent = $(
+                                '<thead>'+
+                                '    <tr>'+
+                                '        <th>#</th>'+
+                                tHeadSecondRow +
+                                tHeadThirdRow +
+                                '        <th>{% trans %}report.user.table.date_title{% endtrans %}</th>'+
+                                '        <th>{% trans %}report.user.table.perf_title{% endtrans %}</th>'+
+                                '        <th>{% trans %}report.user.table.mperf_title{% endtrans %}</th>'+
+                                '        <th>{% trans %}report.user.table.dev_title{% endtrans %}</th>'+
+                                '        <th>{% trans %}report.user.table.mdev_title{% endtrans %}</th>'+
+                                '    </tr>'+
+                                '</thead>'
+                        );
+
+                        var elementTableData = data.elementTableData;
+                        var tableBody = $('<tbody></tbody>');
+                        $.each(elementTableData,function(key,elementTableRow){
+                            var tableRow = $('<tr></tr>');
+                            $.each(elementTableRow,function(key,elementTableCellData){
+
+                                if(key >= elementTableRow.length - 4){
+
+                                    if(key == elementTableRow.length - 4 && elementTableCellData !== null){
+                                        var classSuffix = (elementTableCellData < elementTableRow[key + 1]) ? 'red-text' :
+                                            ((elementTableCellData > elementTableRow[key + 1]) ? 'green-text' : '');
+                                        if(classSuffix != ''){classSuffix = 'class ='+classSuffix;}
+                                    }
+
+                                    if(key == elementTableRow.length - 2 && elementTableCellData !== null){
+                                        var classSuffix = (elementTableCellData < elementTableRow[key + 1]) ? 'green-text' :
+                                            ((elementTableCellData > elementTableRow[key + 1]) ? 'red-text' : '');
+                                        if(classSuffix != ''){classSuffix = 'class =' + classSuffix;}
+                                    }
+
+                                    cellValue = (elementTableCellData !== null) ? (100 * elementTableCellData).toFixed(1) : '-';
+
+                                } else {
+                                    if(key != elementTableRow.length - 5){
+                                        cellValue = elementTableCellData;
+                                    } else {
+                                        valueDate = new Date(elementTableCellData.date);
+                                        cellValue = valueDate.getDate()+'/'+(valueDate.getMonth()+1);
+                                    }
+                                }
+                                cellData = $('<td '+ classSuffix +'>'+ cellValue +'</td>');
+                                tableRow.append(cellData);
+                            })
+                            tableBody.append(tableRow);
+                        })
+                        tableContent = tableContent.add(tableBody);
+                        table.append(tableContent);
+                        elementTableContainer.append(table);
+                    } else {
+                        $(elementChartContainer).append($('<div class="container"><ul class="flex-center" style="flex-direction: column; padding:100px 0px;"><i class="material-icons" style="font-size:5rem">directions</i><span style="font-size : 1.8rem">{% trans %}overview.no_results{% endtrans %}</span><ul></div>'));
+                    }
+                })
+                .fail(function(data){
+                    console.log(data);
+                })
+        }
+
+        function drawPhases(mode,type)
+        {
+            let letterMode = mode == 1 ? 'i' : 'p';
+            drawElement(mode, type, $('#'+letterMode+'TypeSelect').val(), 0);
+        };
+    </script>
+
+    {% if nbGradedIndivCriteria > 0 and nbGradedIndivCriteria > 0 %}
+        {% set colDivider = 2 %}
+    {% else %}
+        {% set colDivider = 1 %}
+    {% endif %}
+
+    <div class="row">
+        <div class="col s12">
+            <ul class="tabs" style="margin-bottom: 10px;">
+                {% if nbGradedIndivCriteria != 0 %}
+                    <li class="tab col s{{ 12 / colDivider }}"><a href="#rindiv" onclick="drawPhases(1,'activity');document.getElementById('iCriterionSelector').style.display = 'none';" style="color:#31b0b7"><i class="fa fa-users"></i><i class="fa fa-arrow-right" style="margin: 0px 5px"></i><i class="fa fa-user"></i> {% trans %}overview.indiv_mode{% endtrans %} </a></li>
+                {% endif %}
+                {% if nbGradedProjectCriteria != 0 %}
+                    <li class="tab col s{{ 12 / colDivider }}"><a href="#rprojects" onclick="drawPhases(2,'activity');document.getElementById('pCriterionSelector').style.display = 'none';" style="color:#31b0b7">
+                        <i class="fa fa-user"></i>
+                        <i class="fa fa-arrow-right" style="margin: 0px 5px"></i>
+                        <i class="fa fa-cube"></i> {% trans %}overview.project_mode{% endtrans %} </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+
+    <div id="rindiv">
+    {% if nbGradedIndivCriteria != 0 %}
+        <div class="row">
+            <div class="col s12">
+                <ul class="tabs" style="margin-bottom: 10px;">
+                    <li class="tab col s4">
+                        <a href="#iActivities" {% if nbGradedIndivActivities == 0 %}class="disabled"{% endif %}
+                        onclick="drawPhases(1,'activity');document.getElementById('iCriterionSelector').style.display = 'none';" style="color:#31b0b7"><i class="fa fa-cubes"></i> {% trans %}overview.view_by_activity{% endtrans %} ({{ nbGradedIndivActivities }})</a></li>
+                    <li class="tab col s4">
+                        <a href="#iStages" {% if nbGradedIndivStages == 0 %}class="disabled"{% endif %}
+                        onclick="drawPhases(1,'stage');document.getElementById('iCriterionSelector').style.display = 'none';" style="color:#31b0b7"><ul style="display: inline-flex;"><li><i class="fa fa-cube" style="position: relative;top: -6%;left: 0%;font-size: 0.85rem;"></i></li><li><i class="fa fa-cube" style="position: relative;top: 6%;left: -41%;font-size: 0.85rem;"></i></li></ul>{% trans %}overview.view_by_stage{% endtrans %} ({{ nbGradedIndivStages }})</a></li>
+                    <li class="tab col s4">
+                        <a href="#iCriteria" class="active"
+                        onclick="drawPhases(1,'criterion');document.getElementById('iCriterionSelector').style.display = 'block'; resetCriterionSelect()" style="color:#31b0b7"><i class="fa fa-cube"></i> {% trans %}overview.view_by_criterion{% endtrans %} ({{ nbGradedIndivCriteria }})</a></li>
+                </ul>
+            </div>
+            <div id="iCriterionSelector" style="text-align: center;">
+                    <label for="iCriterionSelect" class="required" style="font-size: 1rem; color: black">{% trans %}overview.criterion_type{% endtrans %}</label>
+                    <select id="iCriterionSelect" style="display: block!important; font-family: Roboto, FontAwesome; margin: auto; width: 65%">
+                        <option value="0" class="cli_option">({% trans %}overview.all_criteria{% endtrans %})</option>
+                        <optgroup label="Hard skills">
+                            {% for criterionName in criterionIndivNames %}
+                                {% if criterionName.type == 2 %}
+                                    <option value="{{ criterionName.id }}" class="cli_option">{{ criterionName.name }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </optgroup>
+                        <optgroup label="Soft skills">
+                            {% for criterionName in criterionIndivNames %}
+                                {% if criterionName.type == 1 %}
+                                    <option value="{{ criterionName.id }}" class="cli_option">{{ criterionName.name }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </optgroup>
+                    </select>
+            </div>
+            <input type="hidden" id="iTypeSelect" value="1">
+            <div id="iCriteria" class="col s12">
+
+                <div class="result-chart">
+                    <canvas id="icriterion-graph"></canvas>
+                </div>
+
+                <div class="container" style="min-width:80%;margin:auto;">
+                </div>
+                {#
+                <h5 style="margin-left:9%">{% trans %}overview.contributive_activities{% endtrans %}</h5>
+                {% if hasContribActivities %}
+
+                    <div class="result-chart">
+                        <div id="chart_contrib_crt" style="min-height:450px;"></div>
+                    </div>
+
+                {% else %}
+                    <div style="margin-left:9%;">{% trans %}overview.no_contributive_activities_msg{% endtrans %}</div>
+                {% endif %}
+                #}
+            </div>
+
+            <div id="iStages" class="col s12">
+
+                <div class="result-chart">
+                    <canvas id="istage-graph"></canvas>
+                </div>
+
+                <div class="container" style="min-width:80%;margin:auto;">
+                </div>
+                {#
+                <h5 style="margin-left:9%">{% trans %}overview.contributive_activities{% endtrans %}</h5>
+                {% if hasContribActivities %}
+
+                    <div class="result-chart">
+                        <div id="chart_contrib_stg" style="min-height:450px;"></div>
+                    </div>
+
+                {% else %}
+                    <div style="margin-left:9%;">{% trans %}overview.no_contributive_activities_msg{% endtrans %}</div>
+                {% endif %}
+                #}
+            </div>
+            <div id="iActivities" class="col s12">
+
+                <div class="result-chart">
+                    <canvas id="iactivity-graph"></canvas>
+                </div>
+
+                <div class="container" style="min-width:80%;margin:auto;">
+                </div>
+                {#
+                <h5 style="margin-left:9%">{% trans %}overview.contributive_activities{% endtrans %}</h5>
+                {% if hasContribActivities %}
+
+                    <div class="result-chart">
+                        <div id="chart_contrib_act" style="min-height:450px;"></div>
+                    </div>
+
+                {% else %}
+                    <div style="margin-left:9%;">{% trans %}overview.no_contributive_activities_msg{% endtrans %}</div>
+                {% endif %}
+                #}
+            </div>
+        </div>
+
+        {% if elmtType == 'team' %}
+
+            <h5 style="margin-left:9%">{% trans %}overview.team_members{% endtrans %}</h5>
+
+            <div class="container">
+                <table class="striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>{% trans %}report.team.participant{% endtrans %}</th>
+                            <th>{% trans %}report.team.member_from_to{% endtrans %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% set c = 1 %}
+
+                    {% for teamuser in elmt.teamusers %}
+                        <tr>
+                            <td>{{ c }}</td>
+                            <td>{{ teamuser.user(app).firstname }} {{ teamuser.user(app).lastname }}</td>
+                            <td>{{ teamuser.inserted|localizeddate('short', 'none', null, null, 'dd/MM') }}</td>
+                        </tr>
+                    {% set c = c + 1 %}
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        {% endif %}
+
+        <h5 style="margin-left:10%; margin-bottom: 20px">Feedbacks</h5>
+
+        <div class="container">
+            <table class="striped" style="margin-bottom: 30px;">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>{% trans %}report.user.table.criterion_title{% endtrans %}</th>
+                    <th>{% trans %}report.user.table.stage_title{% endtrans %} ({% trans %}report.user.table.activity_title{% endtrans %})</th>
+                    <th>{% trans %}report.user.table.date_title{% endtrans %}</th>
+                    {% if currentuser.role != 3 or currentuser.role != 2 %}
+                    <th>{% trans %}report.user.table.from{% endtrans %}</th>
+                    {% endif %}
+                    <th>{% trans %}report.user.table.comment_title{% endtrans %}</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% set c = 1 %}
+                {% set prevKey = 0 %}
+                {% for key, grade in indivGrades %}
+                    <tr>
+                        <td>{{ c }}</td>
+                        <td>{% if grade != indivGrades|first and indivGrades[prevKey].criterion.cName == grade.criterion.cName %}"" {% else %}{{ grade.criterion.cName.name }}{% endif %}</td>
+                        <td>{% if grade != indivGrades|first and indivGrades[prevKey].criterion.stage == grade.criterion.stage %}""{% else %}{% if grade.criterion.stage.name == grade.criterion.stage.activity.name %} {{ grade.criterion.stage.name }} {% else %} {{ grade.criterion.stage.name }} ({{ grade.criterion.stage.activity.name }}){% endif %}{% endif %}</td>
+                        <td>{% if grade != indivGrades|first and indivGrades[prevKey].criterion.stage == grade.criterion.stage %}""{% else %}{{ grade.criterion.stage.endDate|localizeddate('short', 'none', null, null, 'dd/MM') }}{% endif %}</td>
+                        {% if currentuser.role != 3 or currentuser.role != 2 %}
+                                <td>{{ grade.participant.user(app).firstname|first }}{{ grade.participant.user(app).lastname|first }}</td>
+                                {% endif %}
+                        <td> {{ grade.comment }}</td>
+                    </tr>
+                    {% set c = c + 1 %}
+
+                    {% set prevKey = key %}
+
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="row action-buttons">
+            <div class="button-field">
+                <a class="waves-effect waves-light btn-large" href="{{ url('myActivities') }}">{% trans %}results.release.go_back{% endtrans %}</a>
+            </div>
+            {#
+            <div class="button-field">
+                <a class="waves-effect waves-light btn-large modal-trigger" href="#printingChoices">{% trans %}results.generate_report{% endtrans %}</a>
+            </div>
+            #}
+        </div>
+
+        <div id="printingChoices" class="modal">
+            <form action="{{ url('generateElementReport',{'elmtType' : elmtType, 'elmtId' : elmtId}) }}" method="post">
+                <div class="modal-content">
+                    <h4>{% trans %}results.printing.modal_title{% endtrans %}</h4>
+                    <h5>{% trans %}results.printing.content{% endtrans %}</h5>
+
+                    <input type="checkbox" id="print_-1" name="print_-1" class="filled-in" checked>
+                    <label for="print_-1">{% trans %}results.printing.print_all_element{% endtrans %}{% if elmtType == 'user' %} {{username}} {% else %} {{elmt.name}} {% endif %}
+                    </label>
+
+                    <div style="margin-top:5px">
+                        <p style="display: inline;">{% trans %}results.printing.selective_choice{% endtrans %}</p>
+                    </div>
+
+                    <ul>
+                        {% if nbGradedIndivActivities > 0 %}
+                            <li>
+                                <input type="checkbox" id="print_0" name="print_0" class="filled-in checkbox-activity">
+                                <label for="print_0"><i class="fa fa-cubes" style="color: #ee6e73"></i><span style="margin-left:6px">{% trans %}results.printing.activities{% endtrans %}</span></label>
+                            </li>
+                        {% endif %}
+                    <li>
+                        <input type="checkbox" id="print_1" name="print_1" class="filled-in checkbox-stage">
+                        <label for="print_1"><ul style="display: inline-flex; color: #2196F3"><li><i class="fa fa-cube" style="position: relative;top: -6%;left: 0%;font-size: 0.85rem;"></i></li><li><i class="fa fa-cube" style="position: relative;top: 6%;left: -41%;font-size: 0.85rem;"></i></li></ul><span>{% trans %}results.printing.stages{% endtrans %}</span></label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="print_2" name="print_2" class="filled-in checkbox-activity">
+                        <label for="print_2"><i class="fa fa-cube" style="color: #4CAF50; margin-left: 2px"></i><span style="margin-left:8px">{% trans %}results.printing.criteria{% endtrans %}</span></label>
+                    </li>
+
+
+                    <h5>{% trans %}results.printing.parameters{% endtrans %}</h5>
+
+                    <ul>
+                        <li>
+                            <input type="checkbox" id="settings_graphs" name="settings_graphs" class="filled-in" checked>
+                            <label for="settings_graphs">{% trans %}results.printing.print_graphs{% endtrans %}</label>
+                        </li>
+                        <li>
+                            <input type="checkbox" id="settings_results_tables" name="settings_results_tables" class="filled-in" checked>
+                            <label for="settings_results_tables">{% trans %}results.printing.print_results_tables{% endtrans %}</label>
+                        </li>
+                        <li>
+                            <input type="checkbox" id="settings_comments" name="settings_comments" class="filled-in" checked>
+                            <label for="settings_comments">{% trans %}results.printing.print_comments{% endtrans %}</label>
+                        </li>
+                    </ul>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn waves-effect waves-light create-report">{% trans %}results.printing.generate_report{% endtrans %}</button>
+                </div>
+            </form>
+        </div>
+
+
+    {% elseif nbGradedProjectCriteria == 0 %}
+        <div class="row col s12 m12">
+            <div id="chart_res"> {% trans %}results.no_results{% endtrans %} </div>
+        </div>
+    {% endif %}
+    </div>
+
+    {% if nbGradedProjectCriteria > 0 %}
+    <div id="rprojects">
+        <div class="row">
+            <div class="col s12">
+                <ul class="tabs" style="margin-bottom: 10px;">
+                    <li class="tab col s4"><a href="#pActivities" class={% if nbGradedProjectActivities == 0 %}"disabled"{% else %}"active"{% endif %} onclick="drawPhases(2,'activity');document.getElementById('pCriterionSelector').style.display = 'none';" style="color:#5CD08F"><i class="fa fa-cubes"></i> {% trans %}overview.view_by_activity{% endtrans %} ({{ nbGradedProjectActivities }})</a></li>
+                    <li class="tab col s4"><a href="#pStages" {% if nbGradedProjectStages == 0 %}class="disabled"{% endif %} onclick="drawPhases(2,'stage');document.getElementById('pCriterionSelector').style.display = 'none';" style="color:#5CD08F"><ul style="display: inline-flex;"><li><i class="fa fa-cube" style="position: relative;top: -6%;left: 0%;font-size: 0.85rem;"></i></li><li><i class="fa fa-cube" style="position: relative;top: 6%;left: -41%;font-size: 0.85rem;"></i></li></ul>{% trans %}overview.view_by_stage{% endtrans %} ({{ nbGradedProjectStages }})</a></li>
+                    <li class="tab col s4"><a href="#pCriteria" {% if nbGradedProjectActivities == 0 %}class="active"{% endif %}onclick="drawPhases(2,'criterion');document.getElementById('pCriterionSelector').style.display = 'block';" style="color:#5CD08F"><i class="fa fa-cube"></i> {% trans %}overview.view_by_criterion{% endtrans %} ({{ nbGradedProjectCriteria }})</a></li>
+                </ul>
+            </div>
+            <div id="pCriterionSelector" style="text-align: center">
+                    <label for="pCriterionSelect" class="required" style="font-size: 1rem; color: black">{% trans %}overview.criterion_type{% endtrans %}</label>
+                    <select id="pCriterionSelect" style="display: block!important; font-family: Roboto, FontAwesome; margin: auto; width: 65%">
+                        <option value="0" class="cli_option">({% trans %}overview.all_criteria{% endtrans %})</option>
+                        <optgroup label="Hard skills">
+                            {% for criterionName in criterionProjectNames %}
+                                {% if criterionName.type == 2 %}
+                                    <option value="{{ criterionName.id }}" class="cli_option">{{ criterionName.name }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </optgroup>
+                        <optgroup label="Soft skills">
+                            {% for criterionName in criterionProjectNames %}
+                                {% if criterionName.type == 1 %}
+                                    <option value="{{ criterionName.id }}" class="cli_option">{{ criterionName.name }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </optgroup>
+                    </select>
+            </div>
+            <div id="pTypeSelector" style="text-align: center">
+                    <label for="pTypeSelect" class="required" style="font-size: 1rem; color: black">{% trans %}overview.participation_type{% endtrans %}</label>
+                    <select id="pTypeSelect" style="display: block!important; margin: auto; width: 65%">
+                        <option value="1" class="cli_option">{% trans %}overview.active_passive_option{% endtrans %}</option>
+                        <option value="0" class="cli_option">{% trans %}overview.third_party_option{% endtrans %}</option>
+                        <option value="-1" class="cli_option">{% trans %}overview.all_types_option{% endtrans %}</option>
+
+
+                    </select>
+            </div>
+            <div id="pCriteria" class="col s12">
+
+                <div class="result-chart">
+                    <canvas id="pcriterion-graph"></canvas>
+                </div>
+
+                <div class="container" style="min-width:80%;margin:auto;">
+                </div>
+                {#
+                <h5 style="margin-left:9%">{% trans %}overview.contributive_activities{% endtrans %}</h5>
+                {% if hasContribActivities %}
+
+                    <div class="result-chart">
+                        <div id="chart_contrib_crt" style="min-height:450px;"></div>
+                    </div>
+
+                {% else %}
+                    <div style="margin-left:9%;">{% trans %}overview.no_contributive_activities_msg{% endtrans %}</div>
+                {% endif %}
+                #}
+            </div>
+
+            <div id="pStages" class="col s12">
+
+                <div class="result-chart">
+                    <canvas id="pstage-graph"></canvas>
+                </div>
+
+                <div class="container" style="min-width:80%;margin:auto;">
+                </div>
+                {#
+                <h5 style="margin-left:9%">{% trans %}overview.contributive_activities{% endtrans %}</h5>
+                {% if hasContribActivities %}
+
+                    <div class="result-chart">
+                        <div id="chart_contrib_stg" style="min-height:450px;"></div>
+                    </div>
+
+                {% else %}
+                    <div style="margin-left:9%;">{% trans %}overview.no_contributive_activities_msg{% endtrans %}</div>
+                {% endif %}
+                #}
+            </div>
+            <div id="pActivities" class="col s12">
+
+                <div class="result-chart">
+                    <canvas id="pactivity-graph"></canvas>
+                </div>
+
+                <div class="container" style="min-width:80%;margin:auto;">
+                </div>
+                {#
+                <h5 style="margin-left:9%">{% trans %}overview.contributive_activities{% endtrans %}</h5>
+                {% if hasContribActivities %}
+
+                    <div class="result-chart">
+                        <div id="chart_contrib_act" style="min-height:450px;"></div>
+                    </div>
+
+                {% else %}
+                    <div style="margin-left:9%;">{% trans %}overview.no_contributive_activities_msg{% endtrans %}</div>
+                {% endif %}
+                #}
+            </div>
+        </div>
+
+        {% if elmtType == 'team' %}
+
+            <h5 style="margin-left:9%">{% trans %}overview.team_members{% endtrans %}</h5>
+
+            <div class="container">
+                <table class="striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>{% trans %}report.team.participant{% endtrans %}</th>
+                            <th>{% trans %}report.team.member_from_to{% endtrans %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% set c = 1 %}
+
+                    {% for teamuser in elmt.teamusers %}
+                        <tr>
+                            <td>{{ c }}</td>
+                            <td>{{ teamuser.user(app).firstname }} {{ teamuser.user(app).lastname }}</td>
+                            <td>{{ teamuser.inserted|localizeddate('short', 'none', null, null, 'dd/MM') }}</td>
+                        </tr>
+                    {% set c = c + 1 %}
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        {% endif %}
+
+        <h5 style="margin-left:10%; margin-bottom: 20px">Feedbacks</h5>
+
+        <div class="container">
+            <table class="striped" style="margin-bottom: 30px;">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>{% trans %}report.user.table.criterion_title{% endtrans %}</th>
+                    <th>{% trans %}report.user.table.stage_title{% endtrans %} ({% trans %}report.user.table.activity_title{% endtrans %})</th>
+                    <th>{% trans %}report.user.table.date_title{% endtrans %}</th>
+                    {% if currentuser.role != 3 or currentuser.role != 2 %}
+                    <th>{% trans %}report.user.table.from{% endtrans %}</th>
+                    {% endif %}
+                    <th>{% trans %}report.user.table.comment_title{% endtrans %}</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% set c = 1 %}
+                {% set prevKey = 0 %}
+                {% for key, grade in projectGrades %}
+                    <tr>
+                        <td>{{ c }}</td>
+                        <td>{% if grade != projectGrades|first and projectGrades[prevKey].criterion.cName == grade.criterion.cName %}"" {% else %}{{ grade.criterion.cName.name }}{% endif %}</td>
+                        <td>{% if grade != projectGrades|first and projectGrades[prevKey].criterion.stage == grade.criterion.stage %}""{% else %}{% if grade.criterion.stage.name == grade.criterion.stage.activity.name %} {{ grade.criterion.stage.name }} {% else %} {{ grade.criterion.stage.name }} ({{ grade.criterion.stage.activity.name }}){% endif %}{% endif %}</td>
+                        <td>{% if grade != projectGrades|first and projectGrades[prevKey].criterion.stage == grade.criterion.stage %}""{% else %}{{ grade.criterion.stage.endDate|localizeddate('short', 'none', null, null, 'dd/MM') }}{% endif %}</td>
+                        {% if currentuser.role != 3 or currentuser.role != 2 %}
+                                <td>{{ grade.participant.user(app).firstname|first }}{{ grade.participant.user(app).lastname|first }}</td>
+                                {% endif %}
+                        <td> {{ grade.comment }}</td>
+                    </tr>
+                    {% set c = c + 1 %}
+
+                    {% set prevKey = key %}
+
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="row action-buttons">
+            <div class="button-field">
+                <a class="waves-effect waves-light btn-large" href="{{ url('myActivities') }}">{% trans %}results.release.go_back{% endtrans %}</a>
+            </div>
+            {#
+            <div class="button-field">
+                <a class="waves-effect waves-light btn-large modal-trigger" href="#printingChoices">{% trans %}results.generate_report{% endtrans %}</a>
+            </div>
+            #}
+        </div>
+
+        <div id="printingChoices" class="modal">
+            <form action="{{ url('generateElementReport',{'elmtType' : elmtType, 'elmtId' : elmtId}) }}" method="post">
+                <div class="modal-content">
+                    <h4>{% trans %}results.printing.modal_title{% endtrans %}</h4>
+                    <h5>{% trans %}results.printing.content{% endtrans %}</h5>
+
+                    <input type="checkbox" id="print_-1" name="print_-1" class="filled-in" checked>
+                    <label for="print_-1">{% trans %}results.printing.print_all_element{% endtrans %}{% if elmtType == 'user' %} {{username}} {% else %} {{elmt.name}} {% endif %}
+                    </label>
+
+                    <div style="margin-top:5px">
+                        <p style="display: inline;">{% trans %}results.printing.selective_choice{% endtrans %}</p>
+                    </div>
+
+                    <ul>
+                        {% if nbGradedIndivActivities > 0 %}
+                            <li>
+                                <input type="checkbox" id="print_0" name="print_0" class="filled-in checkbox-activity">
+                                <label for="print_0"><i class="fa fa-cubes" style="color: #ee6e73"></i><span style="margin-left:6px">{% trans %}results.printing.activities{% endtrans %}</span></label>
+                            </li>
+                        {% endif %}
+                    <li>
+                        <input type="checkbox" id="print_1" name="print_1" class="filled-in checkbox-stage">
+                        <label for="print_1"><ul style="display: inline-flex; color: #2196F3"><li><i class="fa fa-cube" style="position: relative;top: -6%;left: 0%;font-size: 0.85rem;"></i></li><li><i class="fa fa-cube" style="position: relative;top: 6%;left: -41%;font-size: 0.85rem;"></i></li></ul><span>{% trans %}results.printing.stages{% endtrans %}</span></label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="print_2" name="print_2" class="filled-in checkbox-activity">
+                        <label for="print_2"><i class="fa fa-cube" style="color: #4CAF50; margin-left: 2px"></i><span style="margin-left:8px">{% trans %}results.printing.criteria{% endtrans %}</span></label>
+                    </li>
+
+
+                    <h5>{% trans %}results.printing.parameters{% endtrans %}</h5>
+
+                    <ul>
+                        <li>
+                            <input type="checkbox" id="settings_graphs" name="settings_graphs" class="filled-in" checked>
+                            <label for="settings_graphs">{% trans %}results.printing.print_graphs{% endtrans %}</label>
+                        </li>
+                        <li>
+                            <input type="checkbox" id="settings_results_tables" name="settings_results_tables" class="filled-in" checked>
+                            <label for="settings_results_tables">{% trans %}results.printing.print_results_tables{% endtrans %}</label>
+                        </li>
+                        <li>
+                            <input type="checkbox" id="settings_comments" name="settings_comments" class="filled-in" checked>
+                            <label for="settings_comments">{% trans %}results.printing.print_comments{% endtrans %}</label>
+                        </li>
+                    </ul>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn waves-effect waves-light create-report">{% trans %}results.printing.generate_report{% endtrans %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+
+
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ absolute_url(asset('js/user_overview.js')) }}"></script>
+
+    {% if nbGradedIndivCriteria is not null %}
+    <script>
+        // // Load the Visualization API and the corechart package.
+        // google.charts.load('current', {'packages':['corechart']});
+
+        // // Set a callback to run when the Google Visualization API is loaded.
+        // google.charts.setOnLoadCallback(drawChart);
+
+        // // Callback that creates and populates a data table,
+        // // instantiates the pie chart, passes in the data and
+        // // draws it.
+        // function drawChart() {
+            {% if nbGradedIndivCriteria > 0 %}
+                drawPhases(1, 'criterion');
+            {% else %}
+                drawPhases(0, 'criterion');
+            {% endif %}
+        // }
+
+        $('#iCriterionSelect, #iTypeSelect, #pCriterionSelect, #pTypeSelect').on('change', function(e) {
+            let tabLinks = $('.tab a');
+            let mode = $('a[href="#rindiv"]').hasClass('active') ? 1 : 2;
+            let actElmt;
+            if($('a[href="#iCriteria"]').hasClass('active')) {
+                actElmt = "criterion";
+            } else if($('a[href="#iStages"]').hasClass('active')) {
+                actElmt = "stage";
+            } else {
+                actElmt = "activity"
+            }
+            // var actElmt = (tabLinks.index($('.tab a.active')) == 0) ? 'activity' : (tabLinks.index($('.tab a.active')) == 1) ? 'stage' : 'criterion';
+            e.preventDefault();
+            let letterMode = mode == 1 ? 'i' : 'p';
+            $('#chart_'+ letterMode +'res_crt').empty();
+            drawElement(mode, actElmt, parseInt($('#'+letterMode+'TypeSelect').val()), parseInt($('#'+letterMode+'CriterionSelect').val()));
+        });
+    </script>
+    {# <script src="{{ asset('js/element_overview.js') }}"></script> #}
+    {% endif %}
+{% endblock %}

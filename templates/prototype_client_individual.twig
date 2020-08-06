@@ -1,0 +1,78 @@
+
+    <li class="row element-data" style="display: none;">
+        <ul class="flex-center-sb">
+            <li>
+            <ul class="flex-center">
+                <li style="margin-right: 20px;">
+                <img class="user-profile-picture" src="{{ asset('lib/img/no-picture.png') }}" width="50px" height="50px" style="border-radius: 100%">
+                </li>
+                <li>
+                <div style="font-size:17px" class="user-ext-fullname"></div>
+                <div class="user-ext-position-name"></div>
+                </li>
+            </ul>
+
+            </li>
+            <li>
+            <a class="modify-ext-user-btn btn-flat" style="margin-left: auto;">
+                <i class="fa fa-pencil-alt"></i>
+            </a>
+            </li>
+        </ul>
+    </li>
+    
+    <li class="individual element-input">
+
+        <div class="row" style="display: flex;align-items: center;justify-content: space-between">
+            <div class="external-user-title">
+                <h4>{% trans %}create_client.individual.prototype_title{% endtrans %} __indivNb__</h4>
+            </div>
+            <a class="delete-ext-user-btn waves-effect waves-light btn-flat modal-trigger" href="#deleteExternalUser" data-eid="0" style="margin-left: auto;"><i class="fa fa-trash"></i></a>
+            <a class="validate-ext-user-btn waves-effect waves-light btn blue darken-2 tooltip" data-cid="{{ client is defined ? client.id : 0 }}" data-eid="0"><i class="fa fa-check"></i></a>
+        </div>
+    
+        <div class="row no-margin" style="margin-bottom:none">
+            <div class="input-field col s12 m6">
+                {{ form_label(item.firstname) }}
+                {{ form_widget(item.firstname) }}
+            </div>
+            <div class="input-field col s12 m6">
+                {{ form_label(item.lastname) }}
+                {{ form_widget(item.lastname) }}
+            </div>
+        </div>
+        <div class="row no-margin flex-center">
+            {#
+            <div class="col s12 m6">
+                {{ form_row(item.orgId) }}
+                <a href="#addClient" class="add-external-org-group modal-trigger"><i class="fa fa-plus"></i> {% trans %}create_client.create_organization.open_modal_msg{% endtrans %}</a>
+            </div>
+            #}
+            <div class="input-field col s12 m6">
+                {{ form_label(item.positionName) }}
+                {{ form_widget(item.positionName) }}
+            </div>
+            {% if client is not defined or client.clientOrganization is null or not client.clientOrganization.hasActiveAdmin %}
+                <div class="col s12 m6">
+                    {{ form_widget(item.owner) }}
+                    {{ form_label(item.owner) }}
+                    <i class="fa fa-question-circle tooltipped" data-position="bottom" data-delay="50" data-tooltip="{% trans %}create_client.owner_tooltip{% endtrans %}"></i>
+                </div>
+            {% endif %}
+                
+            
+        </div>
+        <div class="row no-margin">
+            <div class="input-field col s12 m6">
+                {{ form_label(item.email) }}
+                {{ form_widget(item.email) }}
+                <small>{% trans %}create_client.emailSmallText{% endtrans %}</small>
+            </div>
+            <div class="input-field col s12 m6">
+                {{ form_label(item.weightValue) }}
+                {{ form_widget(item.weightValue) }}
+                <small>{% trans %}create_client.weightSmallText{% endtrans %}</small>
+            </div>
+        </div>
+    
+    </li>

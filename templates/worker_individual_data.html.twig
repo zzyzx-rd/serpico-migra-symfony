@@ -1,0 +1,289 @@
+
+
+{% extends "layout.html.twig" %}
+
+{% block title %}
+    {% trans %}worker_search.page_title{% endtrans %}
+{% endblock %}
+
+{% block pagename %}
+    {% trans %}worker_search.mobile_header_title{% endtrans %}
+{% endblock %}
+
+{% block css %}
+    <script>
+            var surl = "{{ path('dynamicSearchParentFirm')}}";
+            var gurl = "{{ path('getFirmFromId',{'wfiId' : 0})}}";
+            var smurl = "{{ path('sendProspectMail',{'winId' : 0})}}";
+        {% if workerIndividual is defined %}
+            var murl = "{{ url('validateWorkerEmailFromSelfPage', {'wiId' : workerIndividual.id, 'firstname': 'a', 'lastname': 'b', 'male' : 1, 'wiEmail' : 'a'}) }}";
+        {% else %}
+            var murl = "{{ url('validateWorkerEmailFromSelfPage', {'wiId' : 0, 'firstname': 'a', 'lastname': 'b', 'male' : 1, 'wiEmail' : 'a'}) }}";
+        {% endif %}
+
+    </script>
+    <style>
+        .firm-option-logo{
+            float: left!important;
+        }
+        .firm-input-logo{
+            position: absolute;
+            height: 20px;
+            margin: auto 0;
+            top: 0;
+            left: 0;
+            bottom: 0;
+        }
+
+        /*.w-firm .select-dropdown{
+            width: 90%!important;
+            padding-left: 25px!important; 
+        }*/
+
+        .dropdown-content{
+            opacity: 1!important;
+            display: block!important;
+        }
+
+        .select-wrapper input, .select-wrapper .caret{
+            display: none!important;
+        }
+    
+    </style>
+{% endblock %}
+
+{% block content %}
+    {% set now = "now"|date("Y/m/d") %}
+        <div class="" style="width: 85%;margin:auto">
+            
+
+
+
+            {{ form_start(form) }}
+            
+
+            <div class="">
+                <ul class="flex-center">
+                    <div>
+                        <a href="{{ path('home') }}" class="btn">
+                            Retour
+                        </a>
+                    </div>
+                    <div class="col s12 m3" style="margin-left: 60px; margin-right: 30px;position: relative">
+                        {% if currentuser.picture is null %}
+                        <img class="user-profile-picture clickable-image" src="{{ asset('lib/img/no-picture.png') }}" width="150px" height="150px" style="border-radius: 100%">
+                        <a class="btn-floating add-photo-btn clickable-image" style="position: absolute; top: 84%; left: 35%;"><i class="fa fa-camera"></i></a>
+                        {% else %}
+                        <img class="user-profile-picture" src="{{ asset('lib/img/' ~ currentuser.picture) }}" width="150px" height="150px" style="border-radius: 100%">
+                        <a class="btn-floating add-photo-btn" style="position: absolute; top: 84%; left: 35%;"><i class="fa fa-pencil-alt"></i></a>
+                        {% endif %}
+                    </div>
+        
+                    <div class="col s12 m5 element-data flex-center" style="flex-grow: 1;">
+                        <ul>
+                            <h3 class="header flex-center" style="margin: 0;">
+                                <span>
+                                {#
+                                {% if currentuser.nickname != null %}
+                                      {{ currentuser.nickname }}
+                                {% else %}
+                                #}
+                                    {{ currentuser.fullname }}
+                                {#{% endif %}#}
+                                </span>
+                            </h3>
+                            <div>
+                                {{ currentuser.email }}
+                            </div>
+                        </ul>
+                        <li style="margin-left: auto;margin-right:2.5%">
+                            <a class="modify-profile-info-btn btn-flat">
+                                <i class="fa fa-pencil-alt"></i>
+                            </a>
+                        </li>
+                    </div>
+                    <ul class="element-input flex-center" style="display: none;justify-content:space-between;flex-grow:1">
+                        <li>
+                            <ul class="flex" style="flex-direction: column;">
+                                <li>
+                                    <div class="" style="display: inline-block;">
+                                        {{ form_row(form.male) }}
+                                    </div>
+                                    <div class="input-field" style="display: inline-block;">
+                                        {{ form_label(form.firstname) }}
+                                        {{ form_widget(form.firstname, {attr:{style: "margin:0"}}) }}
+                                    </div>
+                                    <div class="input-field" style="display: inline-block;">
+                                        {{ form_label(form.lastname) }}
+                                        {{ form_widget(form.lastname, {attr:{style: "margin:0"}}) }}
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="">
+                                        {{ form_row(form.email) }}
+                                    </div>
+                                </li>
+                            </ul>
+                        </li>
+                        <li style=""><a class="validate-profile-info-btn waves-effect waves-light btn blue darken-2 tooltip"><i class="fa fa-check"></i></a></li>
+                    </ul>
+                </ul>
+            </div>
+
+            <ul class="experiences" style="margin-top:3em" data-prototype="{% filter escape %}{% include 'prototype_experience.twig' with { 'item': form.experiences.vars.prototype } %}{% endfilter %}">
+                {% set k = 0 %}
+                {% for key, experience in form.experiences %}
+                    {% set k = k + 1 %}
+                    
+
+                    <li class="row element-data" style="width:95%;">
+                        <ul class="flex-center" style="justify-content:space-between">
+                            <li>
+                                <div style="font-size:17px">{{experience.vars.data.position}}</div>
+                                <div>{{experience.vars.data.firm.name}}</div>
+                            </li>
+                            <li style="margin-left: auto;">
+                                {% set startdate = experience.vars.data.startdate %}
+                                {% set enddate = experience.vars.data.enddate %}
+
+                                {% if startdate is not null and enddate is not null %}
+                                    <span>
+                                        {{ experience.vars.data.startdate|localizeddate('short', 'none', null, null, 'MM/yy') }} -
+                                        {{ experience.vars.data.enddate|localizeddate('short', 'none', null, null, 'MM/yy') }}
+                                    </span>
+                                {% elseif enddate is null %}
+                                    <span>
+                                        {{ experience.vars.data.startdate|localizeddate('short', 'none', null, null, 'MM/yy') }} -
+                                        Present
+                                    </span>
+                                {% elseif startdate is null and enddate is null %}
+                                    <span> Dates non précisées </span>
+                                {% endif %}
+                            </li>
+                            <li>
+                                <a class="modify-experience-btn btn-flat" style="margin-left: auto;">
+                                    <i class="fa fa-pencil-alt"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                                    
+                    <li class="experience element-input" style="width:95%;display:none">
+                        <ul class="flex-center row" style="justify-content: space-between;">
+                            <li class="stage-title">
+                                <h4> {% trans %} worker_individual_data.experience.title {% endtrans %} {{ k }}</h4>
+                            </li>
+                            <li style="margin-left:auto;margin-right:10px"><a class="validate-experience-btn waves-effect waves-light btn blue darken-2 tooltip"><i class="fa fa-check"></i></a></li>
+                        </ul>
+                        <div class="row">
+                            <div class="input-field col s12 m4">
+                                {{ form_row(experience.position) }}
+                            </div>
+                             <div class="input-field w-firm col s12 m4">
+                                {{ form_row(experience.firm,{attr:{class:"no-margin"}}) }}
+                                <select name="firmSelector" style="margin-top:45px"></select>
+                            </div>
+                            <div class="col s12 m4">
+                                {{ form_widget(experience.active) }}
+                                {{ form_label(experience.active) }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="input-field col s12 m4">
+                                {{ form_row(experience.location) }}
+                            </div>
+                            <div class="col s12 m4">
+                                {{ form_row(experience.startdate) }}
+                            </div>
+                            <div class="col s12 m4">
+                                {{ form_row(experience.enddate) }}
+                            </div>
+                        </div>
+                    </li>
+                {% endfor %}
+                <a href="#" class="waves-effect waves-light btn insert-experience-btn"><i class="fa fa-plus" style="margin-right: 10px;"></i><span>Ajouter une expérience</span></a>
+            </ul>
+
+            <div class="row action-buttons">
+                <div class="button-field">
+                    {{ form_row(form.submit) }}
+                </div>
+            </div>
+            {{ form_rest(form) }}
+            {{ form_end(form) }}
+    </div>
+
+    <div style="display: none">
+        {{ form_start(pictureForm) }}
+        {{ form_label(pictureForm.pictureFile) }}
+        {{ form_widget(pictureForm.pictureFile) }}
+        {{ form_errors(pictureForm.pictureFile) }}
+        {{ form_rest(pictureForm) }}
+        {{ form_end(pictureForm) }}
+    </div>
+   
+
+{% endblock %}
+
+{% block javascripts %}
+        <script>
+            $(function(){
+                $(document).on('click','.validate-btn',function(e){
+                    e.preventDefault();
+                    urlToPieces = $('.validate-btn').attr('href').split('/');
+                    urlToPieces[urlToPieces.length - 4] = $("input[name*='firstname']").val();
+                    urlToPieces[urlToPieces.length - 3] = $("input[name*='lastname']").val();
+                    urlToPieces[urlToPieces.length - 2] = $("select[name*='male']").val();
+                    urlToPieces[urlToPieces.length - 1] = $("input[name*='email']").val();
+                    var murl = urlToPieces.join('/');
+                    $('.mailMsg').empty();
+                    $.post(murl,null)
+                        .done(function(data){
+                            $('.mailMsg').append(data.message);
+                            $('#validateEmailSuccess').modal('open');
+                            $('.validate-btn').text('validated').removeClass('validate-btn').removeClass('btn').addClass('btn-flat grey lighten-3').attr("href","");
+                            $('.write-btn').removeClass('btn-flat grey lighten-3').addClass('btn modal-trigger').attr("href", "#writeMailModal");
+                        })
+                        .fail(function(data){
+                            $('.mailMsg').append(data.message);
+                            $('#validateEmailSuccess').modal('open');
+                        })
+                })
+                $('input[type="checkbox"]').on('change',function(){
+                    row = $(this).closest('.row').next();
+                    lastChild = row.children().last();
+                    if($(this).is(':checked')){
+                        lastChild.find('input').attr("disabled",true);
+                        lastChild.hide();
+                        row.children().first().removeClass('m4').addClass('m8');
+
+                    } else {
+                        lastChild.find('input').attr("disabled",false);
+                        lastChild.show();
+                        row.children().first().removeClass('m8').addClass('m4');
+
+                    }
+                })
+                $('input[type="checkbox"]').each(function(key,elmt){
+                    if($(this).is(':checked')){
+                        var row = $('.experience').eq(key).find('input[name*="enddate"]').closest('.row');
+                        row.children().last().hide();
+                        row.children().first().removeClass('m4').addClass('m8');
+                    }
+                });
+                $('input[name*="email"]').on('change',function(){
+                    actionBtns = $('.validation-btn').parent();
+                    if($('.validation-btn').hasClass('grey')){
+                        $('.validation-btn').remove();
+                        {% if workerIndividual is defined %}
+                            actionBtns.prepend($('<a class="waves-effect waves-light btn validate-btn" href="{{ url('validateWorkerEmailFromSelfPage',{'wiId' : workerIndividual.id, 'firstname' :'a', 'lastname' : 'b', 'male' : 1, 'wiEmail' : 'a'}) }}">Validate</a>'))
+                        {% else %}
+                            actionBtns.prepend($('<a class="waves-effect waves-light btn validate-btn" href="{{ url('validateWorkerEmailFromSelfPage',{'wiId' : 0, 'firstname' :'a', 'lastname' : 'b', 'male' : 1, 'wiEmail' : 'a'}) }}">Validate</a>'))
+                        {% endif %}
+                    }
+                })
+
+            })
+        </script>
+        <script src="{{ absolute_url(asset('js/worker_individual_update.js')) }}"></script>
+{% endblock %}

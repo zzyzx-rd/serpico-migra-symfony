@@ -1,0 +1,39 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Un Email Responsive</title>
+    <style type="text/css">
+        body {margin: 0; padding: 0; min-width: 100%!important;}
+        .content {width: 100%; max-width: 800px;}
+    </style>
+</head>
+<body bgcolor="white">
+<table width="100%" bgcolor="white" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td>
+            <table class="content" align="left" cellpadding="0" cellspacing="0" border="0">
+                <td>
+                    <p>{% trans %}create_activity_mail.intro {% endtrans %} {{ currentuser.firstname }},</p>
+                    <p>{% trans %}create_activity_mail.message1{% endtrans %}{% trans %}create_activity_mail.message2{% endtrans %}</p>
+                    <p style="text-align: center"><button style="background-color: #26a69a; height: 40px; ine-height: 40px; text-decoration: none; color: #fff; text-align: center; border: none;">{% trans %}create_activity_mail.button_text{% endtrans %}</button> </p>
+                    <p>{% trans %}create_activity_mail.message3{% endtrans %}</p>
+                    <p>{% trans %}create_activity_mail.outro{% endtrans %}</p>
+                </td>
+                </tr>
+                <tr>
+                    <td>
+                        <a href="http://www.serpicoapp.com" style="width: 100px"><img src="{{ image_src }}" alt="logo Serpico" style="width: 100px"></a>
+                        <p>SERPICO</p>
+                        <p>9, rue du laboratoir</p>
+                        <p>L-1911 Luxembourg</p>
+                        <a href="http://www.host.lu/"><img src="{{ image_src2 }}" alt="logo House of startups" style="width: 150px"></a>
+                        <p>{% trans %}create_activity_mail.team{% endtrans %}</p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

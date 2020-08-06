@@ -1,0 +1,1050 @@
+{% extends "layout.html.twig" %}
+
+{% if rootDisplay %}
+  {% set orgId = app.request_stack.currentrequest.get('orgId') %}
+{% endif %}
+
+{% block title %}
+  {% trans %}user_list.page_title{% endtrans %}
+{% endblock %}
+
+{% block css %}
+  <script>
+    const ddurl = "{{ url('deleteDepartment', {dptId : 0}) }}";
+    const dsurl = "{{ url('defineSuperior', {usrId : 0, superior: 0}) }}";
+  </script>
+  <style>
+    html {
+      overflow-y: scroll;
+    }
+  </style>
+{% endblock %}
+
+{% block pagename %}
+  {% trans %}user_list.mobile_header_title
+  {% endtrans %}
+{% endblock %}
+
+{% block username %}
+  {{ currentuser.firstname }}
+  {{ currentuser.lastname }}
+{% endblock %}
+
+{% set colors = ["red", "pink", "purple", "indigo", "blue", "cyan", "teal", "lime", "yellow", "amber", "orange","brown"] %}
+
+{# get current date to compare it after #}
+{% set now = "now"|date("Y/m/d") %}
+{% set foundManagerbreak = false %}
+
+{% block content %}
+  <section>
+    {% if currentuser.role == 1 or currentuser.role == 4 %}
+      <div class="center">
+        <h5>{% trans %}user_list.page_title{% endtrans %}</h5>
+      </div>
+    {% endif %}
+
+    <div>
+      <div>
+        <ul class="tabs tabs-fixed-width">
+          <li class="tab">
+            <a href="#internalUsers">
+              <i class="fa fa-user fa-tabs"></i>
+              <span class="activity-status">{% trans %}user_list.internal_users_tab{% endtrans %}</span>
+              {% if currentuser.role == 1 or currentuser.role == 4 %}
+                <span>
+                  ({{ nbViewableInternalUsers }})
+                </span>
+              {% endif %}
+            </a>
+          </li>
+          {% if clientFirms|length + clientTeams|length + clientIndividuals|length > 0 %}
+            <li class="tab">
+              <a href="#externalUsers">
+                <i class="far fa-user fa-tabs"></i>
+                <span class="activity-status">{% trans %}user_list.external_users_tab{% endtrans %}</span>
+                {% if currentuser.role == 1 or currentuser.role == 4 %}
+                  <span>
+                    ({{ totalClientUsers }})
+                  </span>
+                {% endif %}
+              </a>
+            </li>
+          {% endif %}
+        </ul>
+      </div>
+
+
+      <div id="internalUsers">
+
+        {% if organization.teams|length > 0 %}
+          <ul class="collapsible expandMore expandLess" data-collapsible="accordion">
+            <li>
+              <div class="collapsible-header reduced-padding active teal lighten-5">
+                <ul class="flex-center">
+                  <li>
+                    <i class="fa fa-fw fa-chevron-down"></i>
+                  </li>
+                  <li>
+                    <i class="fa fa-fw fa-chevron-right"></i>
+                  </li>
+                  <li>
+                  {% endif %}
+                  <div {% if organization.teams|length > 0 %} class="activity-banner" {% else %} style="text-align: center; padding: 15px 0px;" {% endif %}>
+                    <div class="activity-title">
+                      <h5>{% trans %}user_list.users{% endtrans %}</h5>
+                    </div>
+                  </div>
+                  {% if organization.teams|length > 0 %}
+                  </li>
+                </ul>
+              </div>
+              <div class="collapsible-body sub-collapsible">
+              {% endif %}
+
+              {% set k = 0 %}
+              {% for department in viewableDepartments %}
+
+                {% if department.viewableUsers(orgEnabledUserSeeAllUsers)|length != 0 %}
+                  <ul class="flex-center-sb">
+                    <li>
+                      {% if department.id == currentuser.dptId %}
+                        <h5 class="department-name">
+                          {% trans %}user_list.my_department{% endtrans %}
+                          ({{ department.name }})</h5>
+                      {% else %}
+                        <h5 class="department-name">{{ department.name }}</h5>
+                      {% endif %}
+                    </li>
+                  </ul>
+
+
+                  <div class="department-shift">
+
+                    {% set break = false %}
+                    {% if department is not null %}
+                      {% for key,user in department.viewableUsers(orgEnabledUserSeeAllUsers) if not break %}
+
+                        {#{% if user.dptId == department.id %}#}
+                        {% if user is not null and user.deleted is null %}
+
+                          <ul class="collapsible users-list" data-collapsible="accordion">
+                            <li>
+                              <div class="{% if currentuser.role == 1 or currentuser.role == 4 or (enabledSuperiorOverviewSubResults or enabledSuperiorSettingTargets or enabledSuperiorModifySubordinate) and user.superior == currentuser.id %}collapsible-header{% endif %} collapsible-user reduced-padding user-single-element {% if user == currentuser %} teal white-text {% else %}{% if not user.internal or user.lastConnected is null %} blue-grey {% else %} {{ colors[k+2] }} {% endif %}{% if user.lastConnected is null %}lighten-4{% else %}lighten-5{% endif %}{% endif %}">
+                                {% if currentuser.role == 1 or currentuser.role == 4 or (enabledSuperiorOverviewSubResults or enabledSuperiorSettingTargets or enabledSuperiorModifySubordinate) and user.superior == currentuser.id %}
+                                  <i class="fa fa-fw fa-chevron-down no-margin"></i>
+                                  <i class="fa fa-fw fa-chevron-right no-margin"></i>
+                                {% endif %}
+                                <!-- if pour la photo du user  pour un : if user['picture'] != null -->
+                                <ul class="user-content collection">
+                                  <li class="username-element">
+                                    <ul class="flex-center">
+
+                                      <li>
+                                        <div class="picture-frame">
+                                          <img class="user-picture" src="{{ (user.picture != "") ? asset('lib/img/' ~ user.picture) : asset('lib/img/no-picture.png') }}"/>
+                                        </div>
+                                      </li>
+                                      {% if user.position(app) != null %}
+                                        {% set positionName = user.position(app).name %}
+                                      {% else %}
+                                        {% set positionName = null %}
+                                      {% endif %}
+                                      <li style="margin-left: 10px;">
+                                        <div class="user-title">
+                                          {% if user != currentuser %}
+                                            {{ user.firstname }}
+                                            {{ user.lastname|upper }}
+                                          {% else %}
+                                            {% trans %}user_list.myself{% endtrans %}
+                                          {% endif %}
+                                          {% if not user.internal %}
+                                            <span style="font-size: 18px; display: inline-block">(EXT)</span>
+                                          {% endif %}
+                                          {% if currentuser.role == 1 or currentuser.role == 4 and user.superior == null %}
+                                            <div style="display:none;" class="missing-superior-badge tooltipped modal-trigger not-collapse" href="#defineSuperior" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.user.set_superior{% endtrans %}" data-uid="{{user.id}}">
+                                              <i class="fa fa-user-plus missing-superior-badge-logo"></i>
+                                            </div>
+                                          {% endif %}
+                                        </div>
+                                        {#{% if position.users(app)|length == 1 %}#}
+                                        <ul class="user-position flex-center">
+                                          <li class="tooltipped" style="padding-right: 10px" data-position="top" data-tooltip="{{ positionName }}">
+                                            {% if positionName|length > 20 %}
+                                              {{ positionName|slice(0, 30) ~ '...' }}
+                                            {% else %}
+                                              {{ positionName }}
+                                            {% endif %}
+                                          </li>
+                                          <li style="display: flex;">
+                                            <ul>
+                                              {% if user.lastConnected is null %}
+                                                <div class="virtual-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.user.role.virtual{% endtrans %}" style="margin-bottom:5px;margin-right: 5px">
+                                                  <span class="badge-letter">V</span>
+                                                </div>
+                                              {% endif %}
+                                            </ul>
+
+                                            {% if user.role == 4 %}
+                                              <div class="am-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.user.role.root{% endtrans %}">
+                                                <span class="badge-letter">R</span>
+                                              </div>
+                                            {% elseif user.role == 2 %}
+                                              <div class="am-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.user.role.activity_manager{% endtrans %}">
+                                                <span class="badge-letter">M</span>
+                                              </div>
+                                            {% elseif user.role == 3 %}
+                                              <div class="collaborator-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.user.role.collaborator{% endtrans %}">
+                                                <span class="badge-letter">C</span>
+                                              </div>
+                                            {% elseif user.role == 1 %}
+                                              <div class="admin-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.user.role.admin{% endtrans %}">
+                                                <span class="badge-letter">A</span>
+                                              </div>
+                                            {% endif %}
+
+                                            {% if department.masterUser == user %}
+                                              <div style="margin-left:5px" class="user-creator-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.user.department_manager{% endtrans %}">
+                                                <i class="fas fa-chess-king" style="font-size:1.2rem;"></i>
+                                              </div>
+                                            {% endif %}
+                                          </li>
+                                          {% if orgEnabledUserCreatingUser and user.enabledCreatingUser == true %}
+                                            <li style="display: flex;margin-left:5px">
+                                              <div class="user-creator-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.user.enabledCreatingUser{% endtrans %}">
+                                                <i class="fa fa-user" style="font-size:1.2rem;"></i>
+                                              </div>
+                                            </li>
+                                          {% endif %}
+                                          {% if not foundManagerbreak %}
+                                            {% if currentuser.superior is null %}
+                                              {% set foundManagerbreak = true %}
+                                            {% else %}
+                                              {% if currentuser.superior == user.id %}
+                                                <li style="display: flex;margin-left:5px">
+                                                  <div class="user-department-responsible-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.user.boss{% endtrans %}">
+                                                    <i class="fa fa-star" style="font-size:1.2rem;"></i>
+                                                  </div>
+                                                </li>
+                                                {% set foundManagerbreak = true %}
+                                              {% endif %}
+                                            {% endif %}
+                                          {% endif %}
+                                        </ul>
+                                        {#{% endif %}#}
+                                      </li>
+
+
+                                    </ul>
+                                  </li>
+
+                                  <li>
+                                    <ul class="flex-center" style="flex-direction:column;">
+                                      <i class="fa fa-briefcase tooltipped" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.user.activity{% endtrans %}"></i>
+                                      <span class="user-activities tooltipped" data-position="down" data-tooltip="{% trans %}tooltip.user.activity_ongoing_futur{% endtrans %}">{{ user.nbCompletedActivities(app) }}
+                                        ({{ user.nbScheduledActivities(app) }})</span>
+                                    </ul>
+                                  </li>
+
+                                  {% if currentuser.role == 1 or currentuser.role == 4 or department.masterUser == currentuser or user.superior == currentuser.id or currentuser.superiorUser(app) is not null and orgEnabledUserSeePeersResults and user in currentuser.superiorUser(app).subordinates(app) or enabledUserSeeSnapshotSupResults and currentuser.superior == user.id %}
+                                    <li style="width: 15%;margin-left:0">
+                                      <ul class="flex-center user-stats">
+                                        <li>
+                                          <ul>
+                                            <li>
+                                              <ul class="flex-center">
+                                                <li>
+                                                  <i class="fa fa-chart-line tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.user.performance{% endtrans %}"></i>
+                                                </li>
+                                                <li>
+                                                  <span>
+                                                    {% if user.ranking('A','P','W', true) is null or user.ranking('A','P','W', true) is empty %}
+                                                      -
+                                                    {% else %}
+                                                      {{ (100 * user.ranking('A','P','W', true)[0].value)|round(0) }}<span>%</span>
+                                                    {% endif %}
+                                                  </span>
+                                                </li>
+                                              </ul>
+                                            </li>
+                                            <li class="spread">
+                                              <ul class="flex-center">
+                                                <li>
+                                                  <i class="fa fa-arrows-alt-h tooltipped" data-position="down" data-tooltip="{% trans %}tooltip.user.distance{% endtrans %}"></i>
+                                                </li>
+                                                <li>
+                                                  <span>
+                                                    {% if user.ranking('A','D','W', true) is null or user.ranking('A','D','W', true) is empty %}
+                                                      -
+                                                    {% else %}
+                                                      {{ (100 * user.ranking('A','D','W', true)[0].value)|round(0) }}<span>%</span>
+                                                    {% endif %}
+                                                  </span>
+                                                </li>
+                                              </ul>
+                                            </li>
+                                          </ul>
+                                        </li>
+                                      </ul>
+                                    </li>
+                                  {% else %}
+                                    <li style="width:15%;margin-left:0"></li>
+                                  {% endif %}
+
+                                  {% if orgEnabledUserSeeRanking or currentuser.role == 4 %}
+                                    <li style="margin-left: 0!important;padding: 0!important;">
+                                      <ul class="flex-center" style="flex-direction: row">
+                                        <li class="ranking-star">
+                                          <i class="fa fa-star" style="display: flex; align-items: center;justify-content: center;font-size:2.7rem;color: {% if user.ranking('A','P','W', true) is not null %}#15a6ae{% else %}grey{% endif %}" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.user.role.virtual{% endtrans %}" style="margin-bottom:5px;">
+                                            <span style="position: absolute;color: white;font-size:14px;font-weight: 800">
+                                              {% if user.ranking('A','P','W', true) is not null and user.ranking('A','P','W', true) is not empty %}
+                                                {{ user.ranking('A','P','W', true)[0].absResult }}{% else %}-
+                                              {% endif %}
+                                            </span>
+                                          </i>
+                                        </li>
+                                      </ul>
+                                    </li>
+                                  {% endif %}
+                                  {% if currentuser.role == 4 %}
+                                    <li style="margin: 0!important;padding: 0!important;">
+                                      {% if user.lastConnected is not null %}
+                                        <ul style="display: flex;align-items: center;flex-direction:column-reverse; margin-right:5px;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.user.last_connection_days_begin{% endtrans %} {{ user.lastConnected.diff(date(now)).days }} {% trans %}tooltip.user.last_connection_days_end{% endtrans %} ({{ user.lastConnected|localizeddate('short', 'none', null, null, 'dd/MM') }})">
+                                          <li>{{ user.lastConnected.diff(date(now)).days }}</li>
+                                        {% else %}
+                                          <ul style="display: flex;align-items: center;flex-direction:column-reverse; margin-right:5px;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.user.no_connection{% endtrans %}">
+                                            <li>x</li>
+                                          {% endif %}
+                                          <li>
+                                            <i class="material-icons" style="margin:0!important;">wifi</i>
+                                          </li>
+                                        </ul>
+                                      </li>
+                                    {% endif %}
+
+                                    <!-- fin du if pour le role du user -->
+                                  </ul>
+                                </div>
+                                <div id="ListButtons" class="collapsible-body">
+                                  <div class="row">
+                                    Autres infos
+                                    <br>
+                                    Poids :
+                                    {{ user.weight ? user.weight.value : '-' }}
+                                  </div>
+                                  <div class="row action-buttons">
+                                    {% if currentuser.role == 1 or currentuser.role == 4 or user.createdBy == currentuser.id or enabledSuperiorModifySubordinate and user.superior == currentuser.id %}
+                                      <div class="button-field">
+                                        <a class="validate waves-effect waves-light btn-large modify-button" href="{% if app.request_stack.currentrequest.attributes.get('orgId') != "" %}{{ url('rootUpdateUser',{'orgId' : app.request_stack.currentrequest.attributes.get('orgId'), 'usrId' : user.id}) }}{% else %}{{ url('updateUser',{'usrId' : user.id}) }}{% endif %}">{% trans %}user_list.modify{% endtrans %}</a>
+                                      </div>
+                                    {% endif %}
+                                    {% if currentuser.role == 1 or currentuser.role == 4 or enabledSuperiorOverviewSubResults and user.superior == currentuser.id %}
+                                      {% if user.nbCompletedActivities(app) > 0 %}
+                                        <div class="button-field">
+                                          <a class="validate waves-effect waves-light btn-large" href="{{ url('elementOverview',{'elmtType': 'user', 'elmtId' : user.id}) }}">{% trans %}user_list.overview{% endtrans %}</a>
+                                        </div>
+                                      {% endif %}
+                                    {% endif %}
+                                    {% if currentuser.role == 1 or currentuser.role == 4 or enabledSuperiorSettingTargets and user.superior == currentuser.id %}
+                                      {% set canUpdateIndivTarget = false %}
+                                      {% if currentuser.role == 1 or currentuser.role == 4 %}
+                                        {% set canUpdateIndivTarget = true %}
+                                      {% else %}
+                                        {% set targetBreak = false %}
+                                        {% for orgOption in currentuser.organization(app).options if not targetBreak %}
+                                          {% if orgOption.oName.name == 'enabledSuperiorSettingTargets' %}
+                                            {% if orgOption.optionTrue == true %}
+                                              {% set canUpdateIndivTarget = true %}
+                                            {% endif %}
+                                            {% set targetBreak = true %}
+                                          {% endif %}
+                                        {% endfor %}
+                                      {% endif %}
+                                      {% if canUpdateIndivTarget == true %}
+                                        <div class="button-field">
+                                          <a class="validate waves-effect waves-light btn-large" href="{{ url('updateElementTargets',{'elmtType' : 'user', 'elmtId' : user.id}) }}">{% trans %}user_list.targets{% endtrans %}</a>
+                                        </div>
+                                      {% endif %}
+                                    {% endif %}
+
+                                  </div>
+                                </div>
+                              </li>
+                            </li>
+                          </ul>
+                        {% endif %}
+                        {#
+                                                                        												{% else %}
+                                                                        													{% if usersInDpt == true %}
+                                                                        														{% set break = true %}
+                                                                        													{% endif %}
+                                                                        												{% endif %}
+                                                                        												#}
+                      {% endfor %}
+                    {% endif %}
+                  </div>
+                  {% if k == colors|length - 3 %}
+                    {% set k = - 2 %}
+                  {% else %}
+                    {% set k = k + 1 %}
+                  {% endif %}
+                {% endif %}
+              {% endfor %}
+
+              {% if usersWithoutDpt is not empty %}
+
+                <ul class="flex-center-sb">
+                  <li>
+                    <h5 class="department-name">({% trans %}user_list.no_attributed_department_title{% endtrans %})</h5>
+                  </li>
+                </ul>
+                <div class="department-shift">
+                  {% for user in usersWithoutDpt %}
+
+                    <ul class="collapsible users-list" data-collapsible="accordion" style="margin:0.5rem 0">
+                      <li>
+                        <div class="collapsible-header reduced-padding user-single-element {% if not user.internal or user.lastConnected is null %} blue-grey {% else %} amber {% endif %}{% if user.lastConnected is null %}lighten-4{% else %}lighten-5{% endif %}">
+                          <i class="fa fa-fw fa-chevron-down no-margin"></i>
+                          <i class="fa fa-fw fa-chevron-right no-margin"></i>
+                          <!-- if pour la photo du user  pour un : if user['picture'] != null -->
+                          <ul class="user-content collection">
+                            <li class="username-element">
+                              <ul class="flex-center">
+                                <li>
+                                  <div class="picture-frame">
+                                    <img class="user-picture" src="{{ (user.picture != "") ? asset('lib/img/' ~ user.picture) : asset('lib/img/no-picture.png') }}"/>
+                                  </div>
+                                </li>
+                                {% if user.position(app) is not null %}
+                                  {% set positionName = user.position(app).name %}
+                                {% else %}
+                                  {% set positionName = null %}
+                                {% endif %}
+                                <li style="margin-left: 10px;">
+
+                                  <div class="user-title flex-center">
+                                    {% if user != currentuser %}
+                                      {{ user.firstname }}
+                                      {{ user.lastname|upper }}
+                                    {% else %}
+                                      {% trans %}user_list.myself{% endtrans %}
+                                    {% endif %}
+                                    {% if not user.internal %}
+                                      <span style="font-size: 18px; display: inline-block">(EXT)</span>
+                                    {% endif %}
+                                    {% if currentuser.role == 1 or currentuser.role == 4 and user.superior == null %}
+                                      <div style="display:none;" class="missing-superior-badge tooltipped modal-trigger not-collapse" href="#defineSuperior" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.user.set_superior{% endtrans %}" data-uid="{{user.id}}">
+                                        <i class="fa fa-user-plus missing-superior-badge-logo"></i>
+                                      </div>
+                                    {% endif %}
+                                  </div>
+                                  {#{% if position.users(app)|length == 1 %}#}
+                                  <ul class="user-position flex-center">
+                                    <li class="tooltipped" style="padding-right: 10px" data-position="top" data-tooltip="{{ positionName }}">
+                                      {% if positionName is not null and positionName|length > 20 %}
+                                        {{ positionName|slice(0, 30) ~ '...' }}
+                                      {% else %}
+                                        {{ positionName }}
+                                      {% endif %}
+                                    </li>
+                                    <li style="display: flex;">
+                                      <ul>
+                                        {% if user.lastConnected is null %}
+                                          <div class="virtual-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.user.role.virtual{% endtrans %}" style="margin-bottom:5px;margin-right: 5px">
+                                            <span class="badge-letter">V</span>
+                                          </div>
+                                        {% endif %}
+                                      </ul>
+                                      <!-- if pour le role du user pour determiner ses droits -->
+
+
+                                      {% if user.role == 4 %}
+                                        <div class="am-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.user.role.root{% endtrans %}">
+                                          <span class="badge-letter">R</span>
+                                        </div>
+                                      {% elseif user.role == 2 %}
+                                        <div class="am-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.user.role.activity_manager{% endtrans %}">
+                                          <span class="badge-letter">M</span>
+                                        </div>
+                                      {% elseif user.role == 3 %}
+                                        <div class="collaborator-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.user.role.collaborator{% endtrans %}">
+                                          <span class="badge-letter">C</span>
+                                        </div>
+                                      {% elseif user.role == 1 %}
+                                        <div class="admin-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.user.role.admin{% endtrans %}">
+                                          <span class="badge-letter">A</span>
+                                        </div>
+                                      {% endif %}
+                                    </li>
+                                    {% if orgEnabledUserCreatingUser and user.enabledCreatingUser == true %}
+                                      <li style="display: flex;margin-left:5px">
+                                        <div class="user-creator-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.user.enabledCreatingUser{% endtrans %}">
+                                          <i class="fa fa-user" style="font-size:1.2rem;"></i>
+                                        </div>
+                                      </li>
+                                    {% endif %}
+
+                                  </ul>
+                                </li>
+                              </ul>
+
+
+                              {#{% endif %}#}
+                            </li>
+                            <li>
+                              <i class="fa fa-briefcase tooltipped" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.user.activity{% endtrans %}"></i>
+                              <span class="user-activities tooltipped" data-position="down" data-tooltip="{% trans %}tooltip.user.activity_ongoing_futur{% endtrans %}">{{ user.nbCompletedActivities(app) }}
+                                ({{ user.nbScheduledActivities(app) }})</span>
+                            </li>
+
+                            <li style="width: 15%;margin-left:0">
+                              <ul class="flex-center user-stats">
+                                <li>
+                                  <ul>
+                                    <li>
+                                      <ul class="flex-center">
+                                        <li>
+                                          <i class="fa fa-chart-line tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.user.performance{% endtrans %}"></i>
+                                        </li>
+                                        <li>
+                                          <span>
+                                            {% if user.ranking('A','P','W', true) is null or user.ranking('A','P','W', true) is empty %}
+                                              -
+                                            {% else %}
+                                              {{ (100 * user.ranking('A','P','W', true)[0].value)|round(0) }}<span>%</span>
+                                            {% endif %}
+                                          </span>
+                                        </li>
+                                      </ul>
+                                    </li>
+                                    <li class="spread">
+                                      <ul class="flex-center">
+                                        <li>
+                                          <i class="fa fa-arrows-alt-h tooltipped" data-position="down" data-tooltip="{% trans %}tooltip.user.distance{% endtrans %}"></i>
+                                        </li>
+                                        <li>
+                                          <span>
+                                            {% if user.ranking('A','D','W', true) is null or user.ranking('A','D','W', true) is empty %}
+                                              -
+                                            {% else %}
+                                              {{ (100 * user.ranking('A','D','W', true)[0].value)|round(0) }}<span>%</span>
+                                            {% endif %}
+                                          </span>
+                                        </li>
+                                      </ul>
+                                    </li>
+                                  </ul>
+                                </li>
+                              </ul>
+                            </li>
+                            {% if orgEnabledUserSeeRanking or currentuser.role == 4 %}
+                              <li style="margin-left: 0!important;padding: 0!important;">
+                                <ul class="flex-center" style="flex-direction: row">
+                                  <li class="ranking-star">
+                                    <i class="fa fa-star" style="display: flex; align-items: center;justify-content: center;font-size:2.7rem;color: {% if user.ranking('A','P','W', true) is not null %}#15a6ae{% else %}grey{% endif %}" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.user.role.virtual{% endtrans %}" style="margin-bottom:5px;">
+                                      <span style="position: absolute;color: white;font-size:14px;font-weight: 800">
+                                        {% if user.ranking('A','P','W', true) is not null and user.ranking('A','P','W', true) is not empty %}
+                                          {{ user.ranking('A','P','W', true)[0].absResult }}{% else %}-
+                                        {% endif %}
+                                      </span>
+                                    </i>
+                                  </li>
+                                </ul>
+                              </li>
+                            {% endif %}
+                            {% if currentuser.role == 4 and user.lastConnected is not null %}
+                              <li>
+                                <ul style="display: flex;align-items: center;flex-direction:column-reverse; margin-right:5px;" class="tooltipped" data-position="top" data-tooltip="{% if diffStageDays is defined %}{% if diffStageDays >= 0 %}{% trans %}tooltip.activity.grading_deadline.start_msg{% endtrans %} {{ diffStageDays }} {% trans %}tooltip.activity.grading_deadline.end_msg{% endtrans %}{% else %}{% trans %}tooltip.activity.grading_deadline.expired{% endtrans %}{% endif %}{% endif %}">
+                                  <li>{{ user.lastConnected.diff(date(now)).days }}</li>
+                                  <li>
+                                    <i class="far fa-2x fa-clock" style="margin:0!important;"></i>
+                                  </li>
+                                </ul>
+                              </li>
+                            {% endif %}
+                            <!-- fin du if pour le role du user -->
+                          </ul>
+                        </div>
+                        <div id="ListButtons" class="collapsible-body">
+                          <div class="row">
+                            Autres infos
+                            <br>
+                            {% if user.weight(app) != null %}
+                              Poids :
+                              {{ user.weight(app).value }}
+                            {% endif %}
+                          </div>
+                          <div class="row action-buttons">
+                            {% if currentuser.role == 1 or currentuser.role == 4 or user.createdBy == currentuser.id %}
+                              <div class="button-field">
+                                <a class="validate waves-effect waves-light btn-large modify-button" href="{% if app.request_stack.currentrequest.attributes.get('orgId') != "" %}{{ url('rootUpdateUser',{'orgId' : app.request_stack.currentrequest.attributes.get('orgId'), 'usrId' : user.id}) }}{% else %}{{ url('updateUser',{'usrId' : user.id}) }}{% endif %}">{% trans %}user_list.modify{% endtrans %}</a>
+                              </div>
+                            {% endif %}
+                            {% if user.nbCompletedActivities(app) > 0 %}
+                              <div class="button-field">
+                                <a class="validate waves-effect waves-light btn-large" href="{{ url('elementOverview',{'elmtType': 'user', 'elmtId' : user.id}) }}">{% trans %}user_list.overview{% endtrans %}</a>
+                              </div>
+                            {% endif %}
+                            <div class="button-field">
+                              <a class="validate waves-effect waves-light btn-large" href="{{ url('updateElementTargets',{'elmtType' : 'user', 'elmtId' : user.id}) }}">{% trans %}user_list.targets{% endtrans %}</a>
+                            </div>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+
+                  {% endfor %}
+                </div>
+
+              {% endif %}
+            </li>
+          </ul>
+
+          {% if viewableTeams|length > 0 %}
+          </li>
+        {% endif %}
+
+        {% if viewableTeams|length > 0 %}
+          <ul class="collapsible expandMore expandLess" data-collapsible="accordion">
+            <li>
+              <div class="collapsible-header reduced-padding active teal lighten-5">
+                <ul class="flex-center">
+                  <li>
+                    <i class="fa fa-fw fa-chevron-down"></i>
+                  </li>
+                  <li>
+                    <i class="fa fa-fw fa-chevron-right"></i>
+                  </li>
+                  <li>
+                    <div class="activity-banner">
+                      <div class="activity-title">
+                        <h5>{% trans %}user_list.teams{% endtrans %}</h5>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+              <div class="collapsible-body sub-collapsible">
+
+                {% set k = 0 %}
+
+                <div class="department-shift">
+
+                  {% for team in viewableTeams %}
+
+                    {% if team.deleted is null %}
+
+                      <ul class="collapsible users-list" data-collapsible="accordion" style="margin:0.5rem 0">
+                        <li>
+                          <div class="collapsible-header reduced-padding user-single-element {{ colors[k+2] }} lighten-5">
+                            <i class="fa fa-fw fa-chevron-down no-margin"></i>
+                            <i class="fa fa-fw fa-chevron-right no-margin"></i>
+                            <!-- if pour la photo du user  pour un : if user['picture'] != null -->
+                            <ul class="user-content collection">
+                              <li class="team-element">
+                                <ul class="flex-center">
+
+                                  <li>
+                                    {% if team.picture != "" %}
+                                      <div class="picture-frame">
+                                        <img class="user-picture" src="{{ asset('lib/img/' ~ team.picture) }}"/>
+                                      </div>
+                                    {% else %}
+                                      <div class="picture-frame flex-center" style="background-color: #b3b3b3; border-radius: 100%; height: 50px; justify-content: center">
+                                        <i class="fa fa-users" style="color: white; font-size: 1.5rem"></i>
+                                      </div>
+                                    {% endif %}
+
+                                  </li>
+                                  <li style="margin-left: 10px;">
+                                    <div class="user-title">{{ team.name }}</div>
+                                    <ul class="user-position flex-center">
+                                      {% for teamUser in team.teamUsers %}
+
+                                        {% if teamUser.isDeleted == 0 %}
+
+                                          <li style="display: flex;">
+                                            <div class="tooltipped" data-position="top" data-delay="50" data-tooltip="{{ teamUser.user(app).firstname }} {{ teamUser.user(app).lastname }}" style="margin-right: 5px;">
+                                              <span class="badge-letter">
+                                                <img class="am-badge" style="background-color: transparent" src="{{ (teamUser.user(app).picture != "") ? asset('lib/img/' ~ teamUser.user(app).picture) : asset('lib/img/no-picture.png') }}" alt="">
+                                              </span>
+                                            </div>
+                                          </li>
+                                        {% endif %}
+
+                                      {% endfor %}
+                                    </ul>
+                                  </li>
+
+                                </ul>
+
+                              </li>
+
+
+                              <li>
+                                <i class="fa fa-briefcase tooltipped" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.user.activity{% endtrans %}"></i>
+                                <span class="user-activities tooltipped" data-position="down" data-tooltip="{% trans %}tooltip.user.activity_ongoing_futur{% endtrans %}">{{ team.nbCompletedActivities(app) }}
+                                  ({{ team.nbScheduledActivities(app) }})</span>
+                              </li>
+
+                              <li style="width: 15%;margin-left:0">
+                                <ul class="flex-center user-stats">
+                                  <li>
+                                    <ul>
+                                      <li>
+                                        <ul class="flex-center">
+                                          <li>
+                                            <i class="fa fa-chart-line tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.team.performance{% endtrans %}"></i>
+                                          </li>
+                                          <li>
+                                            <span>
+                                              {% if team.ranking(app,'A','P','W', true) is null or team.ranking(app,'A','P','W', true) is empty %}
+                                                -
+                                              {% else %}
+                                                {{ (100 * team.ranking(app,'A','P','W', true)[0].value)|round(0) }}<span>%</span>
+                                              {% endif %}
+                                            </span>
+                                          </li>
+                                        </ul>
+                                      </li>
+                                      <li class="spread">
+                                        <ul class="flex-center">
+                                          <li>
+                                            <i class="fa fa-arrows-alt-h tooltipped" data-position="down" data-tooltip="{% trans %}tooltip.team.distance{% endtrans %}"></i>
+                                          </li>
+                                          <li>
+                                            <span>
+                                              {% if team.ranking(app,'A','D','W', true) is null or team.ranking(app,'A','D','W', true) is empty %}
+                                                -
+                                              {% else %}
+                                                {{ (100 * team.ranking(app,'A','D','W', true)[0].value)|round(0) }}<span>%</span>
+                                              {% endif %}
+                                            </span>
+                                          </li>
+                                        </ul>
+                                      </li>
+                                    </ul>
+                                  </li>
+                                </ul>
+                              </li>
+                              {# Ranking display disabled #}
+                              {% if orgEnabledUserSeeRanking or currentuser.role == 4 %}
+                                <li style="margin: 0!important;padding: 0!important;">
+                                  <ul class="flex-center" style="flex-direction: row">
+                                    <li class="ranking-star">
+                                      <i class="fa fa-star" style="display: flex; align-items: center;justify-content: center;font-size:2.7rem;color: {% if team.ranking(app,'A','P','W', true) is not null %}#bb4913{% else %}grey{% endif %}" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.team.role.virtual{% endtrans %}" style="margin-bottom:5px;">
+                                        <span style="position: absolute;color: white;font-size:14px;font-weight: 800">
+                                          {% if team.ranking(app,'A','P','W', true) is not null and team.ranking(app,'A','P','W', true) is not empty %}
+                                            {{ team.ranking(app,'A','P','W', true)[0].absResult }}{% else %}-
+                                          {% endif %}
+                                        </span>
+                                      </i>
+                                    </li>
+                                  </ul>
+                                </li>
+                              {% endif %}
+                            </ul>
+                          </div>
+                          <div id="ListButtons" class="collapsible-body">
+                            <div class="row action-buttons">
+                              <div class="button-field">
+                                <a class="validate waves-effect waves-light btn-large modify-button" href="{{ url('updateTeam',{'teaId' : team.id}) }}">{% trans %}user_list.modify{% endtrans %}</a>
+                              </div>
+                              {% if team.nbCompletedActivities(app) > 0 %}
+                                <div class="button-field">
+                                  <a class="validate waves-effect waves-light btn-large" href="{{ url('elementOverview',{'elmtType': 'team', 'elmtId' : team.id}) }}">{% trans %}user_list.overview{% endtrans %}</a>
+                                </div>
+                              {% endif %}
+                            </div>
+                          </div>
+                        </li>
+                      </ul>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+                {% if k == colors|length - 3 %}
+                  {% set k = - 2 %}
+                {% else %}
+                  {% set k = k + 1 %}
+                {% endif %}
+              </div>
+            </li>
+          </ul>
+        {% endif %}
+
+      </div>
+
+      {% if clientFirms|length + clientTeams|length + clientIndividuals|length > 0 %}
+
+        <div id="externalUsers">
+
+          {% set clientTypes = [clientFirms, clientTeams, clientIndividuals] %}
+          {% set nonNullElmts = 0 %}
+
+          {# in order to display clientType name only once in case there is only one clientType in the system #}
+          {% set j = 0 %}
+
+          {% for clientType in clientTypes %}
+
+            {% if clientType is not empty %}
+              {% set nonNullElmts = nonNullElmts + 1 %}
+            {% endif %}
+          {% endfor %}
+
+          {% for clientType in clientTypes %}
+
+            {% if nonNullElmts >= 1 %}
+              <ul class="collapsible expandMore expandLess" data-collapsible="accordion">
+                <li>
+                  <div class="collapsible-header reduced-padding {% if nonNullElmts < 2 %} active {% endif %} teal lighten-5
+                                                                  											                                                                                                                                                                                                {#{% if stage.status == 0 %}cyan{% elseif stage.status == 1 %}cyan{% elseif stage.status == 2 %}orange{% endif %} lighten-5#}">
+                    <ul class="flex-center">
+                      <li>
+                        <i class="fa fa-fw fa-chevron-down"></i>
+                      </li>
+                      <li>
+                        <i class="fa fa-fw fa-chevron-right"></i>
+                      </li>
+                      <li>
+                      {% endif %}
+                      {% if nonNullElmts < 2 and j == 0 or nonNullElmts >= 2 %}
+                        <div {% if nonNullElmts >= 2 %} class="activity-banner" {% else %} style="text-align: center; padding: 15px 0px;" {% endif %}>
+                          <div class="activity-title">
+                            <h5>
+                              {% if clientType == clientFirms %}
+                                {% trans %}user_list.firms{% endtrans %}
+                              {% elseif clientType == clientTeams %}
+                                {% trans %}user_list.ext_teams{% endtrans %}
+                              {% elseif clientType == clientIndividuals %}
+                                {% trans %}user_list.individuals{% endtrans %}
+                              {% endif %}
+                            </h5>
+                          </div>
+                        </div>
+                      {% endif %}
+                      {% set j = j + 1 %}
+
+                      {% if nonNullElmts >= 1 %}
+                      </li>
+                    </ul>
+                  </div>
+                  <div class="collapsible-body sub-collapsible">
+                  {% endif %}
+
+                  {% for clientEntity in clientType %}
+
+                    {% set k = 0 %}
+                    <div>
+                      {% if clientType != clientIndividuals %}
+                        <ul class="flex-center-sb">
+                          <li>
+                            <h5 class="department-name">{{ clientEntity.clientOrganization.commname }}</h5>
+                          </li>
+                          <li>
+                            <a class="btn-flat waves-light waves-green right-btn" href={{ url('createClientUser', {cliId : clientEntity.id}) }}>
+                              <i class="fa fa-user-plus"></i>
+                            </a>
+                          </li>
+                        </ul>
+                      {% endif %}
+
+                      {% if clientEntity.aliveExternalUsers|length > 0 %}
+
+
+                        {% for externalUser in clientEntity.aliveExternalUsers %}
+                      
+                          <ul class="collapsible users-list" data-collapsible="accordion" style="margin:0.5rem 0">
+                            <li>
+                              <div class="collapsible-header reduced-padding user-single-element {% if externalUser.lastConnected is null %} blue-grey {% else %} blue {% endif %}{% if externalUser.lastConnected is null %}lighten-2 white-text{% else %}lighten-5{% endif %}">
+                                <i class="fa fa-fw fa-chevron-down no-margin"></i>
+                                <i class="fa fa-fw fa-chevron-right no-margin"></i>
+                                <!-- if pour la photo du user  pour un : if user['picture'] != null -->
+                                <ul class="user-content collection">
+                                  <li>
+                                      <div class="picture-frame">
+                                        <img class="user-picture" src="{{ (externalUser.user.picture != "") ? asset('lib/img/' ~ externalUser.user.picture) : asset('lib/img/no-picture.png') }}"/>
+                                      </div>
+                                  </li>
+                                  <li class="username-element">
+                                      <div class="user-title">{{ externalUser.fullname }}</div>
+                                      <ul class="user-position flex-center">
+                                        <li style="padding-right: 10px">{{ externalUser.positionName }}
+                                        </li>
+                                        <ul>
+                                          {% if externalUser.lastConnected is null %}
+                                            <div class="virtual-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.user.role.virtual{% endtrans %}" style="margin-bottom:5px;margin-right: 5px">
+                                              <span class="badge-letter">V</span>
+                                            </div>
+                                          {% endif %}
+                                        </ul>
+                                      </ul>
+                                  </li>
+                                  <li style="margin-left: 40%!important;">
+                                    <i class="fa fa-briefcase tooltipped" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.user.activity{% endtrans %}"></i>
+                                    <span class="user-activities tooltipped" data-position="down" data-tooltip="{% trans %}tooltip.user.activity_ongoing_futur{% endtrans %}">{{ externalUser.user.nbCompletedActivities(app) }}
+                                      ({{ externalUser.user.nbScheduledActivities(app) }})</span>
+                                  </li>
+                                  <!-- fin du if pour le role du user -->
+                                </ul>
+                              </div>
+                              <div id="ListButtons" class="collapsible-body">
+                                <div class="row">
+                                  Autres infos
+                                  <br>
+                                  Poids :
+                                  {{ externalUser.weightValue }}
+                                </div>
+                                <div class="row action-buttons">
+                                  {#
+                                  <div class="button-field">
+                                      <a class="validate waves-effect waves-light btn-large modify-button" href="{% if app.request_stack.currentrequest.attributes.get('orgId') != "" %}{{ url('rootUpdateUser',{'orgId' : app.request_stack.currentrequest.attributes.get('orgId'), 'usrId' : user.id}) }}{% else %}{{ url('updateExternalUser',{'extId' : externalUser.id}) }}{% endif %}">{% trans %}user_list.modify{% endtrans %}</a>
+                                  </div>
+                                  {% if externalUser.user.nbCompletedActivities(app) > 0 %}
+                                    <div class="button-field">
+                                      <a class="validate waves-effect waves-light btn-large" href="{{ url('elementOverview',{'elmtType' : 'user', 'elmtId' : user.id }) }}">{% trans %}user_list.overview{% endtrans %}</a>
+                                    </div>
+                                  {% endif %}
+                                  #}
+                                </div>
+                              </div>
+                            </li>
+                          </ul>
+
+                          {% endfor %}
+              
+                      {% else %}
+
+                          {% set synthUser = clientEntity.externalUsers|first %}
+
+                        <ul class="collapsible users-list" data-collapsible="accordion" style="margin:0.5rem 0">
+                          <li>
+                            <div class="collapsible-header reduced-padding user-single-element blue-grey lighten-2 white-text">
+                              <i class="fa fa-fw fa-chevron-down no-margin"></i>
+                              <i class="fa fa-fw fa-chevron-right no-margin"></i>
+                              <!-- if pour la photo du user  pour un : if user['picture'] != null -->
+                              <ul class="user-content collection">
+                                <li>
+                                    <div class="picture-frame flex-center" style="background-color: #b3b3b3; border-radius: 100%; height: 50px; justify-content: center">
+                                      <i class="fa fa-industry" style="color: white; font-size: 1.5rem; margin: 0px;"></i>
+                                    </div>
+                                </li>
+                                <li class="username-element">
+                                    <div class="user-title">({% trans %}user_list.no_defined_user{% endtrans %})</div>
+                                </li>
+                                <li style="margin-left: 40%!important;">
+                                  <i class="fa fa-briefcase tooltipped" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.user.activity{% endtrans %}"></i>
+                                  <span class="user-activities tooltipped" data-position="down" data-tooltip="{% trans %}tooltip.user.activity_ongoing_futur{% endtrans %}">{#{{ synthUser.nbCompletedActivities(app) }}#}0
+                                    (0{#{{ synthUser.nbScheduledActivities(app) }}#})</span>
+                                </li>
+                              </ul>
+                            </div>
+                          </li>
+                        </ul>
+
+                      {% endif %}
+                     
+                    </div>
+                    {% if k == colors|length - 3 %}
+                      {% set k = - 2 %}
+                    {% else %}
+                      {% set k = k + 1 %}
+                    {% endif %}
+                    {% if nonNullElmts >= 2 %}{% endif %}
+                  {% endfor %}
+                </li>
+              </ul>
+            </li>
+          </ul>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if currentuser.role == 1 or currentuser.role == 4 or currentuser.enabledCreatingUser == true %}
+      <ul id="hiddenul" class="collection">
+        <li class="collection-item"></li>
+        <br><br>
+        <!-- empt ul to make space for fixed add button -->
+      </ul>
+      <div
+        id="fixedButton" class="fixed-action-btn">
+        {#<button type="submit" class="waves-effect waves-light btn-large green accent-4">{% trans %}user_list.add_users_button{% endtrans %}</button>#}
+        <a class="btn-floating blue darken-2">
+          <i class="material-icons">add</i>
+        </a>
+        <ul>
+          {% if not rootDisplay %}
+            <li>
+              <a class="btn-floating cyan darken-2 tooltipped" data-position="left" data-delay="50" data-tooltip="{% trans %}tooltip.user.create_external{% endtrans %}" href="{{ url('createClient') }}">
+                <i class="material-icons">perm_identity</i>
+              </a>
+            </li>
+            <li>
+              <a class="btn-floating teal accent-4 grey tooltipped" data-position="left" data-delay="50" data-tooltip="{% trans %}tooltip.user.create_int_team{% endtrans %}" href="{{ url('createTeam') }}">
+                <i class="material-icons">people</i>
+              </a>
+            </li>
+            <li>
+              <a class="btn-floating teal accent-4 tooltipped" data-position="left" data-delay="50" data-tooltip="{% trans %}tooltip.user.create_internal{% endtrans %}" href="{{ url('createUser') }}">
+                <i class="material-icons">person</i>
+              </a>
+            </li>
+          {% else %}
+            <li>
+              <a class="btn-floating cyan darken-2 tooltipped" data-position="left" data-delay="50" data-tooltip="{% trans %}tooltip.user.create_external{% endtrans %}" href="{{ url('createClient') }}">
+                <i class="material-icons">perm_identity</i>
+              </a>
+            </li>
+            <li>
+              <a class="btn-floating teal accent-4 grey tooltipped" data-position="left" data-delay="50" data-tooltip="{% trans %}tooltip.user.create_int_team{% endtrans %}" href="{{ url('createTeam') }}">
+                <i class="material-icons">people</i>
+              </a>
+            </li>
+            <li>
+              <a class="btn-floating teal accent-4 tooltipped" data-position="left" data-delay="50" data-tooltip="{% trans %}tooltip.user.create_internal{% endtrans %}" href="{{ url('rootCreateUser',{orgId : orgId}) }}">
+                <i class="material-icons">person</i>
+              </a>
+            </li>
+          {% endif %}
+        </ul>
+      </div>
+      <div id="defineSuperior" class="modal">
+        <div class="modal-content">
+          <h4>{% trans %}user_list.define_superior.modal_title{% endtrans %}
+            :</h4>
+
+          <div
+            id="superiorSelector" style="text-align: center">
+            {#<label for="templateSelect" class="required" style="font-size: 1rem; color: black">{% trans %}overview.criterion_type{% endtrans %}</label>#}
+            <select id="superiorSelect" style="display: block!important; font-family: Roboto, FontAwesome; margin: auto; width: 65%">
+              <option value="0" class="cli_option">({% trans %}user_list.define_superior.no_superior_option{% endtrans %})</option>
+              {% for orgUser in organization.activeUsers(app) %}
+                <option value="{{ orgUser.id }}" class="cli_option">{{ orgUser.fullName }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+        </div>
+        <div class="modal-footer action-buttons">
+          <div class="button-field">
+            <a class="waves-effect waves-light modal-close btn-large red cancel-btn">{% trans %}user_list.define_superior.cancel{% endtrans %}</a>
+            <a class="modal-close waves-effect waves-green btn-large define-sup-btn">{% trans %}Ok{% endtrans %}</a>
+          </div>
+        </div>
+      </div>
+      <div id="defineSuperiorSuccess" class="modal">
+        <div class="modal-content">
+          <p>{% trans %}user_list.define_superior.modal_success_title{% endtrans %}</p>
+        </div>
+
+        <div class="modal-footer">
+          <div class="button-field">
+            <a class=" modal-action modal-close waves-effect btn btn-large">Ok</a>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </section>
+{% endblock %}
+{% block javascripts %}
+  <script src="{{ asset('js/users.js') }}"></script>
+{% endblock %}

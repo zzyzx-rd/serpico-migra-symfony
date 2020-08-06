@@ -1,0 +1,849 @@
+
+
+{% extends "layout.html.twig" %}
+
+{% block title %}
+    {% trans %}worker_search.page_title{% endtrans %}
+{% endblock %}
+
+{% block pagename %}
+    {% trans %}worker_search.mobile_header_title{% endtrans %}
+{% endblock %}
+
+{% block css %}
+    <script type="text/javascript">
+        var uUrl = "{{ url('updateNbExpsInAllFirms',{'from' : 0, 'to': 0}) }}";
+        var mUrl = "{{ url('createMostPossibleMails',{'from' : 0, 'to': 0}) }}";
+        var vfmurl = "{{ url('validateFirm',{'wfId' : 0}) }}";
+        {% if searchByLocation == false %}
+            var mvfurl = "{{ url('validateMassFirm',{'isSearchByLocation' : 0, 'wfIdsSeq' : wfIdsSeq}) }}";
+        {% else %}
+            var mvfurl = "{{ url('validateMassFirm',{'isSearchByLocation' : 1, 'wfIdsSeq' : wfIdsSeq}) }}";
+        {% endif %}
+        var vmurl = "{{ url('validateWorkerEmail',{'wiId' : 0}) }}";
+        var smurl = "{{ path('sendProspectMail',{'winId' : 0})}}";
+        var gmurl = "{{ url('getMailableIndividualsFromFirm',{'wfId' : 0})}}";
+        var csurl = "{{ path('getStatesFromCountry',{'couId' : 0})}}";
+        var scurl = "{{ path('getCitiesFromState',{'staId' : 0})}}";
+        var dfurl = "{{ url('deleteWorkerFirm',{'wfId' : 0})}}";
+    </script>
+{% endblock %}
+
+{% block content %}
+    {% set now = "1 July 2019"|date("Y/m/d") %}
+    <div class="">
+        <div class="row flex-center">
+            <div class="input-field col s12 m3">
+                <label for="from">From</label>
+                <input type="text" name="from" id="from" style="display:block">
+            </div>
+            <div class="input-field col s12 m3">
+                <label for="to">To</label>
+                <input type="text" name="to" id="to" style="display:block">
+            </div>
+            <div class="button-field col s12 m6">
+                <a class="btn waves-effect waves-light teal lighten-1 create-mails-btn"href="">Create mails</a>
+                <a class="btn waves-effect waves-light teal lighten-1 update-exp-btn" href=""> Update firms Nb exp </a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="action-buttons">
+                {% if searchedWorkerFirms is not null %}
+                    <a class="waves-effect waves-light btn modal-trigger" href="#validateMassFirm">Validate Mass Firm</a>
+                {% endif %}
+                <a style="margin-right:10px" class="waves-effect waves-light btn" href="{{ url('updateWorkerFirm',{'wfId' : 0}) }}">Add firm</a>
+                <a class="waves-effect waves-light btn" href="{{ url('addWorkerIndividual') }}">Add user</a>
+            </div>
+        </div>
+
+        {{ form_start(form) }}
+        <div>
+            <h4>Individus</h4>
+        </div>
+        <div class="row">
+            <div class="input-field col s12 m6">
+                {{ form_row(form.fullName) }}
+            </div>
+            <div class="input-field col s12 m6">
+                {{ form_row(form.position) }}
+            </div>
+            <div class="col s12 m6">
+                {{ form_widget(form.currentOnly) }}
+                {{ form_label(form.currentOnly) }}
+            </div>
+        </div>
+        <div>
+            <h4>Entreprises</h4>
+        </div>
+        <div class="row">
+
+            <div class="input-field col s12 m6">
+                {{ form_row(form.firmName) }}
+            </div>
+
+            <div class="col s12 m6">
+                {{ form_row(form.fSector) }}
+            </div>
+
+            <div class="col s6 m3">
+                {{ form_row(form.fSizeFrom) }}
+            </div>
+
+             <div class="col s6 m3">
+                {{ form_row(form.fSizeTo) }}
+            </div>
+
+             <div class="col s12 m6">
+                {{ form_row(form.fType) }}
+            </div>
+
+        </div>
+        <div>
+            <h4>Localisation</h4>
+        </div>
+
+        <div class="row">
+
+            <div class="input-field col s12 m6">
+                {{ form_row(form.HQLocation) }}
+            </div>
+            <div class="col s12 m6">
+                {{ form_row(form.country) }}
+            </div>
+            <div class="col s12 m6">
+                {{ form_row(form.state) }}
+            </div>
+            <div class="col s12 m6">
+                {{ form_row(form.city) }}
+            </div>
+
+        </div>
+        <div class="row action-buttons">
+            <div class="button-field">
+                {{ form_row(form.submit) }}
+            </div>
+        </div>
+        {{ form_rest(form) }}
+        {{ form_end(form) }}
+
+
+        {% if searchedWorkerIndividuals is not null %}
+            <div id="searchedUsers">
+                {% for searchedWorkerIndividual in searchedWorkerIndividuals %}
+                    {% set hasIndividualExp = (searchedWorkerIndividual.experiences|length > 0) %}
+                    {% if hasIndividualExp %}
+                        {% set individualCurrentExp = searchedWorkerIndividual.experiences.first %}
+                        {% set individualFirstExp = searchedWorkerIndividual.experiences.last %}
+                        {% set hasFirmActiveUsers = (individualCurrentExp.firm.nbActiveExperiences|length > 0) %}
+                    {% endif %}
+
+
+                    <ul class="collapsible users-list" data-collapsible="accordion">
+                        <li>
+                            <div class="collapsible-header reduced-padding user-single-element cyan lighten-4">
+                                <i class="fa fa-fw fa-chevron-down no-margin"></i>
+                                <i class="fa fa-fw fa-chevron-right no-margin"></i>
+                                <!-- if pour la photo du user  pour un : if user['picture'] != null -->
+                                <ul class="user-content collection">
+                                    <li style="margin-right:auto;">
+                                        <ul class="flex-center">
+                                            <li style="margin-right:10px">
+                                                <div class="picture-frame">
+                                                    <img class="user-picture" src="{{ asset('lib/img/no-picture.png') }}"/>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="user-title">
+                                                <span>{{ searchedWorkerIndividual.fullName }}</span>
+                                                <a href="https://lu.linkedin.com/in/{{searchedWorkerIndividual.url}}?trk=full-click" target="_blank"><img src="{{ asset('lib/img/lk-logo.ico') }}" alt="" height="21px"></a>
+                                                {% set indivActualWorkerFirm = searchedWorkerIndividual.experiences.first.firm %}
+                                                {% if indivActualWorkerFirm.mailSuffix is not null %}
+
+                                                    {% if indivActualWorkerFirm.email is not null %}
+                                                        <a href="#writeMail" data-email="{{indivActualWorkerFirm.email}}" class="modal-trigger"><i class="fa fa-send"></i></a>
+                                                        {% if indivActualWorkerFirm.mails|length > 0 %}
+                                                            <a class="waves-effect waves-light btn-flat yellow lighten-3" href=""><i class="far fa-send"></i> {{ searchedWorkerIndividual.mails|length }}</a>
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <a href="#validateMail" data-wid="{{searchedWorkerIndividual.id}}" data-male="1" data-fullName="{{ searchedWorkerIndividual.fullname}}" class="modal-trigger"><i class="far fa-send"></i></a>
+                                                    {% endif %}
+
+                                                {% else %}
+
+                                                        <a href="#validateFirm" data-fid="{{indivActualWorkerFirm.id}}" data-wid="{{ searchedWorkerIndividual.id }}" data-prefix="{{ indivActualWorkerFirm.mailPrefix }}" data-suffix="{{ indivActualWorkerFirm.mailSuffix }}" data-city="{{ indivActualWorkerFirm.HQCity}}" data-state="{{ indivActualWorkerFirm.HQState}}" data-country="{{ indivActualWorkerFirm.HQCountry}}"
+                                                            {% if indivActualWorkerFirm.commonName is not null %}
+                                                                data-cname="{{ indivActualWorkerFirm.commonName }}"
+                                                            {% else %}
+                                                                data-cname="{{ indivActualWorkerFirm.name }}"
+                                                            {% endif %}
+                                                            class="modal-trigger">
+                                                            <i class="far fa-send"></i>
+                                                        </a>
+
+                                                {% endif %}
+                                                </div>
+                                                    <ul class="user-position flex-center">
+                                                        {% if hasIndividualExp %}
+                                                            <li style="padding-right: 10px">{{ individualCurrentExp.position}} -
+                                                                {% if hasFirmActiveUsers %}<a href="{{url('displayWorkerFirm',{'wfId' : individualCurrentExp.firm.id}) }}">{% endif %}
+                                                                    {{individualCurrentExp.firm.name}}
+                                                                {% if hasFirmActiveUsers %}</a>{% endif %}
+                                                            </li>
+                                                        {% endif %}
+                                                    </ul>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    {% if hasIndividualExp %}
+                                        <li>
+                                            <span class="user-activities">{{ individualCurrentExp.startdate|localizeddate('short', 'none', null, null, 'MM/yy') }}</span>
+                                        </li>
+                                        <li style="margin:0px 5px">
+                                            <ul style="display:flex;flex-direction: column";>
+                                                <ul style="display:flex;flex-direction: row;align-items: center;margin: 0;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.activity_progress{% endtrans %}" data-delay="50">
+                                                    <li><i class="fa fa-users" style="margin: 0;font-size: 1.3rem"></i></li>
+                                                    <li><span class="user-activities tooltipped" data-position="down" data-tooltip="{% trans %}tooltip.user.activity_ongoing_futur{% endtrans %}">{{ searchedWorkerIndividual.nbConnections }}</span></li>
+                                                </ul>
+                                                <ul style="display:flex;flex-direction: row;align-items: center" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.grading_progress{% endtrans %}" data-delay="50">
+                                                    <li><i class="fa fa-briefcase" style="margin: 0;font-size: 1.3rem"></i></li>
+                                                    <li><span class="user-activities tooltipped" data-position="down" data-tooltip="{% trans %}tooltip.user.activity_ongoing_futur{% endtrans %}">{{ searchedWorkerIndividual.experiences|length }}</span></li>
+                                                </ul>
+                                            </ul>
+                                        </li>
+                                        <li style="margin-left:0">
+                                            <ul style="display:flex;flex-direction: column";>
+                                                    {% set durationLastExpToTotalExpPct = min(100, (100 * date(now).diff(date(individualCurrentExp.startdate)).days / date(now).diff(date(individualFirstExp.startdate)).days)|round(0)) %}
+                                                <ul style="display:flex;flex-direction: row;align-items: center;margin: 0;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.activity_progress{% endtrans %}: {{ durationLastExpToTotalExpPct }} %" data-delay="50">
+                                                    <li><i class="far fa-calendar-alt" style="margin: 0;font-size: 1.3rem"></i></li>
+                                                    <li class="progress" style="width:30px;margin:0px 10px 0px 0px;background-color:#b7bbbb;">
+                                                        <div class="determinate"
+                                                            style="width: {{ durationLastExpToTotalExpPct }}%;background-color: black;"></div>
+                                                    </li>
+                                                </ul>
+                                                <ul style="display:flex;flex-direction: row;align-items: center" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.grading_progress{% endtrans %}: {{ (date(individualFirstExp.startdate).diff(date(now)).days / 365)|round(1) }}" data-delay="50">
+                                                    <li><i class="fa fa-pencil-alt" style="margin: 0;font-size: 1.3rem"></i></li>
+                                                    <li class="progress" style="width:30px;margin:0px 10px 0px 0px;background-color:#b7bbbb;">
+                                                        <div class="determinate"
+                                                            style="width: {{ min(100, (100 * date(individualFirstExp.startdate).diff(date(now)).days / 12775) |round(0)) }}%;background-color: black;"></div>
+                                                    </li>
+                                                </ul>
+                                            </ul>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                            {% if hasIndividualExp %}
+                            <div id="ListButtons" class="collapsible-body">
+                                {% for indivExp in searchedWorkerIndividual.experiences %}
+
+                                    {% if indivExp != individualCurrentExp %}
+
+                                    <div class="row">
+                                        <ul class="flex-center" style="justify-content:space-between">
+                                            <li>
+                                                <div style="font-size:17px">{{indivExp.position}}</div>
+                                                <div>{{indivExp.firm.name}}</div>
+                                            </li>
+                                            <li>
+                                                <span>
+                                                {{ indivExp.startdate|localizeddate('short', 'none', null, null, 'MM/yy') }} -
+                                                {{ indivExp.enddate|localizeddate('short', 'none', null, null, 'MM/yy') }}
+                                                </span>
+                                            </li>
+                                        </ul>
+
+                                    </div>
+
+                                    {% endif %}
+
+
+                                {% endfor %}
+
+                            </div>
+                            {% endif %}
+                        </li>
+                    </ul>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if searchedWorkerExperiences is not null %}
+            <div id="searchedUsers">
+                {% for searchedWorkerExperience in searchedWorkerExperiences %}
+                    {% set hasFirmActiveUsers = (searchedWorkerExperience.firm.nbActiveExperiences|length > 0) %}
+                    <ul class="collapsible users-list" data-collapsible="accordion">
+                        <li>
+                            <div class="collapsible-header reduced-padding user-single-element cyan lighten-4">
+                                <i class="fa fa-fw fa-chevron-down no-margin"></i>
+                                <i class="fa fa-fw fa-chevron-right no-margin"></i>
+                                <!-- if pour la photo du user  pour un : if user['picture'] != null -->
+                                <ul class="user-content collection">
+                                    <li style="margin-right:auto;">
+                                        <ul class="flex-center">
+                                            <li style="margin-right:10px">
+                                                <div class="picture-frame">
+                                                    <img class="user-picture" src="{{ asset('lib/img/no-picture.png') }}"/>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="user-title">
+                                                <span>{{ searchedWorkerExperience.individual.fullName }}</span>
+                                                <a href="https://lu.linkedin.com/in/{{searchedWorkerExperience.individual.url}}?trk=full-click" target="_blank"><img src="{{ asset('lib/img/lk-logo.ico') }}" alt="" height="21px"></a>
+                                                {% if searchedWorkerExperience.firm.mailSuffix is not null %}
+
+                                                    {% if searchedFirmIndividual.email is not null %}
+                                                        <a href="#writeMail" data-email="{{searchedFirmIndividual.email}}" class="modal-trigger"><i class="fa fa-send"></i></a>
+                                                        {% if searchedFirmIndividual.mails|length > 0 %}
+                                                            <a class="waves-effect waves-light btn-flat yellow lighten-3" href=""><i class="far fa-send"></i> {{ searchedWorkerExperience.individual.mails|length }}</a>
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <a href="#validateMail" data-wid="{{searchedWorkerExperience.individual.id}}" data-male="1" data-fullName="{{searchedWorkerExperience.individual.fullname}}" class="modal-trigger"><i class="far fa-send"></i></a>
+                                                    {% endif %}
+
+                                                {% else %}
+
+                                                        <a href="#validateFirm" data-fid="{{searchedWorkerExperience.firm.id}}" data-wid="{{ searchedWorkerExperience.individual.id }}" data-prefix="{{ searchedWorkerExperience.firm.mailPrefix }}" data-suffix="{{ searchedWorkerExperience.firm.mailSuffix }}" data-city="{{searchedWorkerExperience.firm.HQCity}}" data-state="{{searchedWorkerExperience.firm.HQState}}" data-country="{{searchedWorkerExperience.firm.HQCountry}}"
+                                                            {% if searchedWorkerExperience.firm.commonName is not null %}
+                                                                data-cname="{{searchedWorkerExperience.firm.commonName}}"
+                                                            {% else %}
+                                                                data-cname="{{searchedWorkerExperience.firm.name}}"
+                                                            {% endif %}
+                                                            class="modal-trigger">
+                                                            <i class="far fa-send"></i>
+                                                        </a>
+
+                                                {% endif %}
+
+
+                                                </div>
+                                                    <ul class="user-position flex-center">
+                                                        <li style="padding-right: 10px">{{searchedWorkerExperience.position}} -
+                                                            {% if hasFirmActiveUsers %}<a href="{{url('displayWorkerFirm',{'wfId' : searchedWorkerExperience.firm.id}) }}">{% endif %}
+                                                                {{searchedWorkerExperience.firm.name}}
+                                                            {% if hasFirmActiveUsers %}</a>{% endif %}
+                                                        </li>
+                                                    </ul>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                         <span class="user-activities">{{ searchedWorkerExperience.startdate|localizeddate('short', 'none', null, null, 'MM/yy') }}</span>
+                                    </li>
+                                    <li style="margin:0px 5px">
+                                        <ul style="display:flex;flex-direction: column";>
+                                            <ul style="display:flex;flex-direction: row;align-items: center;margin: 0;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.activity_progress{% endtrans %}" data-delay="50">
+                                                <li><i class="fa fa-users" style="margin: 0;font-size: 1.3rem"></i></li>
+                                                <li><span class="user-activities tooltipped" data-position="down" data-tooltip="{% trans %}tooltip.user.activity_ongoing_futur{% endtrans %}">{{ searchedWorkerExperience.individual.nbConnections }}</span></li>
+                                            </ul>
+                                            <ul style="display:flex;flex-direction: row;align-items: center" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.grading_progress{% endtrans %}" data-delay="50">
+                                                <li><i class="fa fa-briefcase" style="margin: 0;font-size: 1.3rem"></i></li>
+                                                <li><span class="user-activities tooltipped" data-position="down" data-tooltip="{% trans %}tooltip.user.activity_ongoing_futur{% endtrans %}">{{ searchedWorkerExperience.individual.experiences|length }}</span></li>
+                                            </ul>
+                                        </ul>
+                                    </li>
+                                    <li style="margin-left:0">
+                                        <ul style="display:flex;flex-direction: column";>
+                                                {% set durationLastExpToTotalExpPct = min(100, (100 * date(now).diff(date(searchedWorkerExperience.individual.experiences.first.startdate)).days / date(now).diff(date(searchedWorkerExperience.individual.experiences.last.startdate)).days)|round(0)) %}
+                                            <ul style="display:flex;flex-direction: row;align-items: center;margin: 0;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.activity_progress{% endtrans %}: {{ durationLastExpToTotalExpPct }} %" data-delay="50">
+                                                <li><i class="far fa-calendar-alt" style="margin: 0;font-size: 1.3rem"></i></li>
+                                                <li class="progress" style="width:30px;margin:0px 10px 0px 0px;background-color:#b7bbbb;">
+                                                    <div class="determinate"
+                                                        style="width: {{ durationLastExpToTotalExpPct }}%;background-color: black;"></div>
+                                                </li>
+                                            </ul>
+                                            <ul style="display:flex;flex-direction: row;align-items: center" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.grading_progress{% endtrans %}: {{ (date(searchedWorkerExperience.individual.experiences.last.startdate).diff(date(now)).days / 365)|round(1) }}" data-delay="50">
+                                                <li><i class="fa fa-pencil-alt" style="margin: 0;font-size: 1.3rem"></i></li>
+                                                <li class="progress" style="width:30px;margin:0px 10px 0px 0px;background-color:#b7bbbb;">
+                                                    <div class="determinate"
+                                                        style="width: {{ min(100, (100 * date(searchedWorkerExperience.individual.experiences.last.startdate).diff(date(now)).days / 12775) |round(0)) }}%;background-color: black;"></div>
+                                                </li>
+                                            </ul>
+                                        </ul>
+                                    </li>
+
+                                </ul>
+                            </div>
+                            <div id="ListButtons" class="collapsible-body">
+                                {% for indivExp in searchedWorkerExperience.individual.experiences %}
+
+                                    {% if indivExp != searchedWorkerExperience %}
+
+                                    <div class="row">
+                                        <ul class="flex-center" style="justify-content:space-between">
+                                            <li>
+                                                <div style="font-size:17px">{{indivExp.position}}</div>
+                                                <div>{{indivExp.firm.name}}</div>
+                                            </li>
+                                            <li>
+                                                <span>
+                                                {{ indivExp.startdate|localizeddate('short', 'none', null, null, 'MM/yy') }} -
+                                                {{ indivExp.enddate|localizeddate('short', 'none', null, null, 'MM/yy') }}
+                                                </span>
+                                            </li>
+                                        </ul>
+
+                                    </div>
+
+                                    {% endif %}
+
+
+                                {% endfor %}
+
+                            </div>
+                        </li>
+                    </ul>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if searchedWorkerFirms is not null %}
+            <div id="searchedFirms">
+                {% for searchedWorkerFirm in searchedWorkerFirms %}
+                    <ul class="collapsible users-list wFirm" data-collapsible="accordion">
+                        <li>
+                            <div class="collapsible-header reduced-padding user-single-element {% if searchedWorkerFirm.created == 1 %}purple{% else %}{% if searchedWorkerFirm.nbActiveExperiences|length > 0 %} cyan {% else %} grey {% endif %}{% endif %} lighten-4">
+                                <i class="fa fa-fw fa-chevron-down no-margin"></i>
+                                <i class="fa fa-fw fa-chevron-right no-margin"></i>
+                                <!-- if pour la photo du user  pour un : if user['picture'] != null -->
+                                <ul class="user-content collection">
+                                    <li style="margin-right:auto;">
+                                        <ul class="flex-center">
+                                            </li style="margin-right:10px">
+                                                <div class="picture-frame flex-center" style="background-color: #b3b3b3; border-radius: 100%; height: 50px; justify-content: center">
+                                                    <i class="fa fa-industry" style="color: white; font-size: 1.5rem; margin: 0px;"></i>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="user-title">
+                                                    <span>{{ searchedWorkerFirm.name }}</span>
+                                                    <ul style="display:inline-flex">
+
+                                                            {% if searchedWorkerFirm.mainSector is not null and searchedWorkerFirm.mainSector.icon is not null %}
+                                                                <li>
+                                                                    {% if searchedWorkerFirm.mainSector.icon.type == 'fa' %}
+                                                                    <i class="fa fa-{{ searchedWorkerFirm.mainSector.icon.name }}"></i>
+                                                                    {% else %}
+                                                                    <i class="material-icons">{{ searchedWorkerFirm.mainSector.icon.name }}</i>
+                                                                    {% endif %}
+                                                                </li>
+                                                            {% endif %}
+
+                                                        {% if searchedWorkerFirm.url is not null and searchedWorkerFirm.url is not empty %}
+                                                            <li><a href="https://lu.linkedin.com/company/{{searchedWorkerFirm.url}}?trk=full-click" target="_blank"><img src="{{ asset('lib/img/lk-logo.ico') }}" alt="" height="21px"></a></li>
+                                                        {% endif %}
+                                                        {% if searchedWorkerFirm.website is not null %}
+                                                            <li><a href="{{searchedWorkerFirm.website}}" target="_blank"><i class="fa fa-globe no-margin"></i></a></li>
+                                                        {% endif %}
+                                                        {% if searchedWorkerFirm.size is not null %}
+                                                            <li>
+                                                            {% if searchedWorkerFirm.size == 0 %}
+                                                                <div class="collaborator-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.user.role.activity_manager{% endtrans %}">
+                                                                    <span class="badge-letter-s">1</span>
+                                                                </div>
+                                                            {% elseif searchedWorkerFirm.size == 1 %}
+                                                            <div class="admin-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.user.role.activity_manager{% endtrans %}">
+                                                                    <span class="badge-letter-s">10</span>
+                                                                </div>
+                                                            {% elseif searchedWorkerFirm.size == 2 %}
+                                                            <div class="am-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.user.role.activity_manager{% endtrans %}">
+                                                                    <span class="badge-letter-s">50</span>
+                                                                </div>
+                                                            {% elseif searchedWorkerFirm.size == 3 %}
+                                                            <div class="collaborator-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.user.role.activity_manager{% endtrans %}">
+                                                                    <span class="badge-letter-s">200</span>
+                                                                </div>
+                                                            {% elseif searchedWorkerFirm.size == 4 %}
+                                                            <div class="admin-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.user.role.activity_manager{% endtrans %}">
+                                                                    <span class="badge-letter-s">500</span>
+                                                                </div>
+                                                            {% elseif searchedWorkerFirm.size == 5 %}
+                                                            <div class="collaborator-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.user.role.activity_manager{% endtrans %}">
+                                                                    <span class="badge-letter-s">1k</span>
+                                                                </div>
+                                                            {% elseif searchedWorkerFirm.size == 6 %}
+                                                            <div class="collaborator-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.user.role.activity_manager{% endtrans %}">
+                                                                    <span class="badge-letter-s">5k</span>
+                                                                </div>
+                                                            {% elseif searchedWorkerFirm.size == 7 %}
+                                                            <div class="am-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.user.role.activity_manager{% endtrans %}">
+                                                                    <span class="badge-letter-s">10k</span>
+                                                                </div>
+                                                            {% endif %}
+                                                            </li>
+                                                        {% endif %}
+                                                        {% if searchedWorkerFirm.mailSuffix is not null %}
+                                                            <li>
+                                                            <a href="#writeMail" data-fid="{{searchedWorkerFirm.id}}" data-wid="" data-location="{{ searchedWorkerFirm.HQLocation }}"
+                                                                {% if searchedWorkerFirm.commonName is not null %}
+                                                                    data-cname="{{searchedWorkerFirm.commonName}}"
+                                                                {% else %}
+                                                                    data-cname="{{searchedWorkerFirm.name}}"
+                                                                {% endif %}
+                                                            class="modal-trigger firm-data"><i class="fa fa-send"></i></a>
+                                                            </li>
+                                                        {% else %}
+                                                        <li>
+                                                            <a href="#validateFirm" data-fid="{{ searchedWorkerFirm.id }}" data-wid="" data-location="{{ searchedWorkerFirm.HQLocation }}" data-prefix="{{ searchedWorkerFirm.mailPrefix }}" data-suffix="{{ searchedWorkerFirm.mailSuffix }}" data-city="{{ searchedWorkerFirm.HQCity }}" data-state="{{ searchedWorkerFirm.HQState }}" data-country="{{ searchedWorkerFirm.HQCountry }}"
+                                                                {% if searchedWorkerFirm.commonName is not null %}
+                                                                    data-cname="{{searchedWorkerFirm.commonName}}"
+                                                                {% else %}
+                                                                    data-cname="{{searchedWorkerFirm.name}}"
+                                                                {% endif %}
+                                                                class="modal-trigger firm-data">
+                                                                <i class="far fa-send"></i>
+                                                            </a>
+                                                            </li>
+                                                        {% endif %}
+                                                        {% if searchedWorkerFirm.HQCountry is not null %}
+                                                        <li>
+                                                            <div class="flag {{ searchedWorkerFirm.HQCountry|lower }}" style="transform:scale(1.5);margin-top:5px"></div>
+                                                        </li>
+                                                        {% endif %}
+                                                        {% if searchedWorkerFirm.mails|length > 0 %}
+                                                            <li>
+                                                                <a class="waves-effect waves-light btn-flat yellow lighten-3" href=""><i class="far fa-send"></i> {{ searchedWorkerFirm.mails|length }}</a>
+                                                            </li>
+                                                        {% endif %}
+                                                    </ul>
+
+
+                                                </div>
+                                                <ul class="user-position flex-center">
+                                                    <li style="padding-right: 10px">{% if searchedWorkerFirm.nbActiveExperiences is not null %}{{searchedWorkerFirm.nbActiveExperiences}} / {{searchedWorkerFirm.nbLKEmployees}} profils actifs {% else %} {{searchedWorkerFirm.nbOldExperiences}} ont travaillé ici {% endif %}</li>
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    {% if searchedWorkerFirm.created > 0 %}
+                                        <li>
+                                            <li><i href="#deleteFirm" class="fa fa-trash modal-trigger not-collapse" data-wfi="{{ searchedWorkerFirm.id }}"></i></li>
+                                        </li>
+                                    {% endif %}
+                                    <li style="margin-right:10px">
+                                        <a class="waves-effect waves-light btn" href="{{ url('updateWorkerFirm',{'wfId' : searchedWorkerFirm.id}) }}">Modify</a>
+                                    </li>
+                                    <li style="margin:0">
+                                        <a class="waves-effect waves-light btn" href="{{ url('displayWorkerFirm',{'wfId' : searchedWorkerFirm.id}) }}">Explore</a>
+                                    </li>
+
+                                </ul>
+                            </div>
+
+                            <div id="ListButtons" class="collapsible-body">
+                                {% for indivExp in searchedWorkerFirm.nbActiveExperiences %}
+
+                                    <div class="row">
+                                        <ul class="flex-center" style="justify-content:space-between">
+                                            <li>
+                                                <div style="font-size:17px">{{indivExp.individual.fullName}}</div>
+                                                <div>{{indivExp.position}}</div>
+                                            </li>
+                                            <li>
+                                                <span>
+                                                {{ indivExp.startdate|localizeddate('short', 'none', null, null, 'MM/yy') }} -
+                                                {{ indivExp.enddate|localizeddate('short', 'none', null, null, 'MM/yy') }}
+                                                </span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </li>
+                    </ul>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div id="writeMail" class="modal" data-wid="">
+                {{ form_start(sendMailProspectForm) }}
+                <div class="modal-content">
+                    <h4>Send mail to prospect :</h4>
+                    <div id="send_mail_form_type" class="user-role">
+                        <input type="radio" id="template" name="mail_type" required="required" value="1" checked="checked">
+                        <label for="template" class="required">From template</label>
+                        <input type="radio" id="specific" name="mail_type" required="required" value="2">
+                        <label for="specific" class="required">New message</label>
+                    </div>
+                    <div class="row">
+                        <div class="col s12 m12">
+                            <div id="individualSelector"></div>
+                        </div>
+                        <div class="col s12 m12">
+                            {{ form_row(sendMailProspectForm.pType) }}
+                        </div>
+                        <div class="col s12 m12">
+                            {{ form_row(sendMailProspectForm.language) }}
+                        </div>
+                        <div class="col s12 m12">
+                            {{ form_widget(sendMailProspectForm.addPresentationFR) }}
+                            {{ form_label(sendMailProspectForm.addPresentationFR) }}
+                        </div>
+                         <div class="col s12 m12">
+                            {{ form_widget(sendMailProspectForm.addPresentationEN) }}
+                            {{ form_label(sendMailProspectForm.addPresentationEN) }}
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    {{ form_row(sendMailProspectForm.submit) }}
+                </div>
+                {{ form_rest(sendMailProspectForm) }}
+                {{ form_end(sendMailProspectForm) }}
+            </div>
+             <div id="writeMailSuccess" class="modal">
+                <div class="modal-content">
+                    Mail sent !
+                </div>
+                <div class="modal-footer">
+                    <div class="button-field">
+                        <a class="waves-effect waves-green btn-large modal-close">Ok</a>
+                    </div>
+                </div>
+            </div>
+
+
+            <div id="validateFirm" class="modal" data-fid="" data-wid="">
+                {{ form_start(validateFirmForm) }}
+                <div class="modal-content">
+                    <h4>First, validate firm mail data :</h4>
+                    <div class="row">
+                        <div class="input-field col s12 m6">
+                            {{ form_row(validateFirmForm.commonName) }}
+                        </div>
+                        <div class="col s12 m6">
+                            {{ form_row(validateFirmForm.mailPrefix) }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col s12 m6">
+                            {{ form_row(validateFirmForm.mailSuffix) }}
+                        </div>
+                        <div class="input-field col s12 m6">
+                            {{ form_row(validateFirmForm.HQCity) }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col s12 m6">
+                            {{ form_row(validateFirmForm.HQState) }}
+                        </div>
+                        <div class="col s12 m6">
+                            {{ form_row(validateFirmForm.HQCountry) }}
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    {{ form_row(validateFirmForm.submit) }}
+                </div>
+                {{ form_rest(validateFirmForm) }}
+                {{ form_end(validateFirmForm) }}
+            </div>
+
+            <div id="validateMail" class="modal" data-wid="">
+                {{ form_start(validateMailForm) }}
+                <div class="modal-content">
+                    <h4>Validate individual mail data :</h4>
+                    <div class="row">
+                        <div class="col s12 m2">
+                            {{ form_row(validateMailForm.male) }}
+                        </div>
+                        <div class="input-field col s12 m5">
+                            {{ form_row(validateMailForm.firstname) }}
+                        </div>
+                        <div class="input-field col s12 m5">
+                            {{ form_row(validateMailForm.lastname) }}
+                        </div>
+                    </div>
+                    <div class="row flex-center">
+                        <div class="col s12 m12">
+                            {{ form_row(validateMailForm.email) }}
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    {{ form_row(validateMailForm.submit) }}
+                </div>
+                {{ form_rest(validateMailForm) }}
+                {{ form_end(validateMailForm) }}
+            </div>
+            <div id="validateMailSuccess" class="modal" data-wid="">
+                <div class="modal-content">
+                    Related user has now a valid email address you can send to !
+                </div>
+                <div class="modal-footer">
+                    <div class="button-field">
+                        <a class="waves-effect waves-green btn-large modal-close">Ok</a>
+                    </div>
+                </div>
+            </div>
+             <div id="validateMassFirm" class="modal">
+             <div class="modal-content">
+                <h4>Validate mass firm data :</h4>
+                {{ form_start(validateMassFirmForm) }}
+                {% for firmForm in validateMassFirmForm.firms %}
+                    <div class="workerFirm indigo lighten-5">
+                        <div class="row">
+                            <div class="input-field col s12 m6">
+                                {{ form_row(firmForm.commonName) }}
+                            </div>
+                            <div class="col s12 m6">
+                                {{ form_row(firmForm.mailPrefix) }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="input-field col s12 m6">
+                                {{ form_row(firmForm.mailSuffix) }}
+                            </div>
+                            <div class="input-field col s12 m6">
+                                {{ form_row(firmForm.HQCity) }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="input-field col s12 m6">
+                                {{ form_row(firmForm.HQState) }}
+                            </div>
+                            <div class="col s12 m6">
+                                {{ form_row(firmForm.HQCountry) }}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                </div>
+                {% if searchByLocation == false %}
+                    <div class="row">
+                        <div class="col s12 m12">
+                            {{ form_widget(validateMassFirmForm.createLocOtherFirms) }}
+                            {{ form_label(validateMassFirmForm.createLocOtherFirms) }}
+                        </div>
+                    </div>
+                {% endif %}
+                <div class="modal-footer">
+                    <div class="button-field">
+                        {{ form_row(validateMassFirmForm.submit) }}
+                    </div>
+                </div>
+                {{ form_rest(validateMassFirmForm) }}
+                {{ form_end(validateMassFirmForm) }}
+            </div>
+            <div id="validateMassFirmSuccess" class="modal">
+                <div class="modal-content">
+                    Related firms have now some data filled !
+                </div>
+                <div class="modal-footer">
+                    <div class="button-field">
+                        <a class="waves-effect waves-green btn-large modal-close">Ok</a>
+                    </div>
+                </div>
+            </div>
+            <div id="deleteIndividual" class="modal">
+                <div class="modal-content">
+                    <p>{% trans %}worker_search.delete_individual.msg{% endtrans %}</p>
+                </div>
+                <div class="modal-footer">
+                    <a class=" modal-action modal-close waves-effect waves-green btn-large delete-button">{% trans %}worker_search.delete_individual.confirm{% endtrans %}</a>
+                    <a class=" modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}worker_search.delete_individual.decline{% endtrans %}</a>
+                </div>
+            </div>
+            <div id="deleteFirm" class="modal">
+                <div class="modal-content">
+                    <p>{% trans %}worker_search.delete_firm.msg{% endtrans %}</p>
+                </div>
+                <div class="modal-footer">
+                    <a class=" modal-action modal-close waves-effect waves-green btn-large fdelete-button">{% trans %}worker_search.delete_firm.confirm{% endtrans %}</a>
+                    <a class=" modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}worker_search.delete_firm.decline{% endtrans %}</a>
+                </div>
+            </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('js/worker_search.js') }}"></script>
+    <script>
+        $(function(){
+
+            console.save = function (data, filename) {
+                if (!data) {
+                    console.error('Console.save: No data')
+                    return;
+                }
+
+                if (!filename) filename = 'story.json'
+
+                if (typeof data === "object") {
+                    data = JSON.stringify(data, undefined, 4)
+                }
+
+
+                var blob = new Blob([data], {
+                        type: 'text/json'
+                    }),
+                    e = document.createEvent('MouseEvents'),
+                    a = document.createElement('a')
+
+                a.download = filename
+                a.href = window.URL.createObjectURL(blob)
+                a.dataset.downloadurl = ['text/json', a.download, a.href].join(':')
+                e.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
+                a.dispatchEvent(e)
+            }
+
+            $('.update-exp-btn').on('click',function(e){
+                e.preventDefault();
+                urlToPieces =  uUrl.split('/');
+                urlToPieces[urlToPieces.length-4] = $('#from').val();
+                urlToPieces[urlToPieces.length-3] = $('#to').val();
+                uUrl = urlToPieces.join('/');
+                $.post(uUrl,null)
+                    .done(function(data){
+                        var firms = JSON.parse(data.firms);
+                        console.log(firms);
+                    })
+                    .fail(function(data){
+                    console.log(data);
+                    })
+            })
+            $('.create-mails-btn').on('click',function(e){
+                e.preventDefault();
+                urlToPieces =  mUrl.split('/');
+                urlToPieces[urlToPieces.length-4] = $('#from').val();
+                urlToPieces[urlToPieces.length-3] = $('#to').val();
+                mUrl = urlToPieces.join('/');
+                $.post(mUrl,null)
+                    .done(function(data){
+                        console.log(data);
+                    })
+                    .fail(function(data){
+                        console.log(data);
+                    })
+            })
+
+            $('[href="#deleteFirm"]').on('click',function(){
+                $('#deleteFirm').find('.fdelete-button').data('wfi',$(this).data('wfi'));
+            });
+
+             $('.fdelete-button').on('click',function(e){
+                var id = $(this).data("wfi");
+                var clickedBtn = $('[data-wfi="'+ id +'"]');
+                var removableElmt = clickedBtn.closest('.collapsible');
+                var urlToPieces = dfurl.split('/');
+                urlToPieces[urlToPieces.length-1] =  id;
+                dfurl = urlToPieces.join('/');
+                e.preventDefault();
+                $.ajax({
+                    url : dfurl,
+                    type : 'DELETE',
+                    success: function(jsonData){
+                        removableElmt.remove();
+                    },
+                    fail: function(data){
+                        console.log(data);
+                    },
+                })
+            });
+        });
+    </script>
+{% endblock %}

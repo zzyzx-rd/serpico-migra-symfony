@@ -1,0 +1,28 @@
+<ul class="flex-center-sb">
+
+	<div class="flex-center type-save row">
+
+    __Type__
+
+    <li class="input-field col s6 element-edit" style="width: 250px">
+
+      {{ form_row(item.value , { 'attr' :{'class': 'param-value'}}) }}
+    </li>
+      <li class="input-field element-data" style=" width: 250px">
+
+      </li>
+    </div>
+          <li class="input-field element-data" style=" width: 250px">
+
+      </li>
+    <div class="input-field element-linear row col s4" style="display:none ;">
+      {{ form_row(item.lowerbound , { 'attr' :{'class': 'param-lowerbound'}}) }}
+      {{ form_row(item.upperbound , { 'attr' :{'class': 'param-upperbound'}}) }}
+    </div>
+    <div class="col s2 delete">    __DeleButton__</div>
+
+
+  </div>
+
+
+</ul>

@@ -1,0 +1,231 @@
+{% extends "layout.html.twig" %}
+
+{% if elmtType == 'department' %}
+  {% set elmtName = "organization_elements.department"|trans %}
+  {% set elmtNameConj = "organization_elements.department_conj"|trans %}
+  {% set nbFields = 2 %}
+{% elseif elmtType == 'position' %}
+  {% set elmtName = "organization_elements.position"|trans  %}
+  {% set elmtNameConj = "organization_elements.position_conj"|trans  %}
+  {% set nbFields = 1 %}
+{% else %}
+  {% set elmtName = "organization_elements.title"|trans  %}
+  {% set elmtNameConj = "organization_elements.title_conj"|trans  %}
+  {% set nbFields = 1 %}
+{% endif %}
+{% set orgId = app.request_stack.currentrequest.get('orgId') %}
+
+
+
+
+{% block title %}
+    {% trans with {'%element%' : elmtName} %} organization_elements.page_title {% endtrans %}
+{% endblock %}
+
+
+  {% block css %}
+    <!-- Dropify -->
+    <link href="{{ asset('css/dropify.min.css') }}" rel="stylesheet" type="text/css">
+    <script>
+        //var vurl = "{{ url('validateOrganizationElement',{'orgId': orgId,'elmtType': elmtType,'elmtId': 0}) }}"
+    </script>
+  {% endblock %}
+
+
+{% block pagename %}
+    {%trans %}organization_elements.mobile_header_title{% endtrans %}
+{% endblock %}
+
+{% block username %}
+  {{ currentuser.firstname }}
+  {{ currentuser.lastname }}
+{% endblock %}
+
+{% block content %}
+
+  <div class="container" style="width: auto;max-width: none;margin: 0 5vw;">
+    {{ form_start(form) }}
+
+    {% if form.departments is defined %}
+    {% set elements = form.departments %}
+    {% elseif form.positions is defined %}
+    {% set elements = form.positions %}
+    {% else %}
+    {% set elements = form.titles %}  
+    {% endif %}
+
+    <div style="position:relative;padding-top:20px">
+      <a href="{{ path('firmSettings') }}" class="btn" style="position:absolute;top: 50%;">
+        Retour
+      </a>
+      <h4 style="text-align:center;font-size: 1.8rem">{% trans with {'%element%' : elmtName} %} organization_elements.page_title {% endtrans %}</h4>
+    </div>
+
+
+    <ul class="elements" data-prototype="{% filter escape %}{% include 'prototype_organization_element.twig' with { 'item': elements.vars.prototype, 'elmtType' : elmtType, 'nbFields' : nbFields } %}{% endfilter %}" style="margin-top:50px">
+
+        {% if currentuser.organization.usersWithoutOrgElement(elmtType) %}
+        <li class="element">
+          <div class="row">
+              <div class="col element-data element-name s12 m{{ 12/(nbFields + 1) }}" style="font-size: 17px;font-style:italic">
+                  ({% if elmtType == 'department' %}{% trans %}organization_elements.without_department{% endtrans %}{% else %}{% trans %}organization_elements.without_position{% endtrans %}{% endif %})
+              </div>
+
+              {% if elmtType == 'department' %}
+                <div class="col element-data element-master-user s12 m{{ 12/(nbFields + 1) }}" style="font-size: 17px;font-style:italic">
+                  -
+                </div>
+              {% endif %}
+
+              <div class="col s12 m{{ 12/(nbFields + 1) }}">
+                <ul class="flex-center">
+                  <li style="margin-left:auto;margin-right:10px"><a class="waves-effect waves-light btn-flat white-text" style="cursor: initial;"><i class="fa fa-pencil-alt"></i></a></li>
+
+                  <li style="margin-right:10px">
+                    {% set nbUsers = currentuser.organization.usersWithoutOrgElement(elmtType)|length %}
+                    {% if nbUsers == 0 %}
+                      <a class="waves-effect waves-light btn-flat tooltipped" data-position="top" data-tooltip="{% trans with {'%conj_element%' : elmtNameConj} %}organization_elements.no_users{% endtrans %}" style="width:75px">
+                        {#<i class="fa fa-users"></i>#}
+                          <div style="position:relative;display:inline-block">
+                              <i class="fa fa-users"></i>
+                              <div class="bar"></div>
+                          </div>
+                          <span>0</span>
+                      </a>
+                    {% else %}
+                      <a class="waves-effect waves-light btn tooltipped" href="#showUsers" data-position="top" data-tooltip="{% trans %}organization_elements.users{% endtrans %}" style="padding:0px 14px;display:flex;justify-content:center;width:75px">
+                          <i class="fa fa-users"></i>
+                          <span style="margin-left:3px">{{ nbUsers }}</span>
+                      </a>
+                    {% endif %}
+                  </li>
+
+                  <li style="margin-right:10px"><a class="waves-effect waves-light btn-flat white-text" style="padding:0px 14px;display:flex;justify-content:center;width:75px;cursor:initial"><i class="fa fa-bullseye"></i></a></li>
+                  <li><a class="waves-effect waves-light btn-flat white-text" style="cursor: initial;"><i class="fa fa-trash"></i></a></li>
+
+                </ul>
+              </div>
+          </div>
+        </li>
+      {% endif %}
+
+
+      {% for key, element in elements %}
+        <li class="element">
+          {#
+          <ul class="flex-center row" style="justify-content: space-between;">
+              <li class="department-title">
+                  <h5>{{elmtName|capitalize}} {{ key + 1}}</h5>
+              </li>
+              <li style="margin-left:auto;margin-right:10px"><a class="validate waves-effect waves-light btn-flat"><i class="fa fa-pencil-alt"></i></a></li>
+              <li style="margin-right:10px"><a class="validate waves-effect waves-light btn" href="{{ url('updateElementTargets',{'elmtType' : elmtType, 'elmtId' : element.vars.value.id}) }}" data-tooltip="{% trans %}organization_elements.targets{% endtrans %}"><i class="fa fa-bullseye"></i></a></li>
+              <li><a href="#deleteDepartment" class="waves-effect waves-light accent-4 btn-flat red-text modal-trigger tooltip" data-did="{{ element.vars.id }}" data-tooltip="{% trans %}organization_elements.delete_btn{% endtrans %}"><i class="fa fa-trash"></i></a></li>
+          </ul>
+          #}
+          <div class="row">
+              <div class="col element-data element-name s12 m{{ 12/(nbFields + 1) }}" style="font-size: 17px">
+                  {{ element.vars.data.name }}
+              </div>
+              <div class="input-field element-input col s12 m{{ 12/(nbFields + 1) }}" style="display: none;">
+                  {{ form_widget(element.name) }}
+              </div>
+              {% if elmtType == 'department' %}
+
+              <div class="col element-data element-master-user s12 m{{ 12/(nbFields + 1) }}" style="font-size: 17px{% if element.vars.data.masterUser == null %};font-style:italic{% endif %}">
+                {% if element.vars.data.masterUser == null %}
+                  ({% trans %}organization_elements.no_master_user{% endtrans %})
+                {% else %}
+                  {{ element.vars.data.masterUser.fullname }}
+                {% endif %}
+              </div>
+              <div class="col element-input s12 m{{ 12/(nbFields + 1) }}" style="display: none;">
+                  {{ form_row(element.masterUser) }}
+              </div>
+              {% endif %}
+              <div class="col s12 m{{ 12/(nbFields + 1) }}">
+                <ul class="flex-center">
+                  <li style="margin-left:auto;margin-right:10px"><a class="modify waves-effect waves-light btn-flat tooltipped" data-position="top" data-tooltip="{% trans %}organization_elements.update{% endtrans %}" data-delay="50"><i class="fa fa-pencil-alt"></i></a></li>
+                  {#<li style="display:none" class="individual-btn">
+                    {{ form_row(element.submit) }}
+                    <button type="submit" name="{{ element.vars.full_name }}" id="{{ element.vars.id }}" class="validate waves-effect waves-light blue darken-2 white-text btn"><i class="fa fa-check"></i></button>
+                  </li>
+                  #}
+                  <li style="margin-right:10px">
+                    {% set nbUsers = element.vars.data.users(app)|length %}
+                    {% if nbUsers == 0 %}
+                      <a class="waves-effect waves-light btn-flat tooltipped" data-position="top" data-tooltip="{% trans with {'%conj_element%' : elmtNameConj} %}organization_elements.no_users{% endtrans %}" style="width:75px">
+                        {#<i class="fa fa-users"></i>#}
+                          <div style="position:relative;display:inline-block">
+                              <i class="fa fa-users"></i>
+                              <div class="bar"></div>
+                          </div>
+                          <span>0</span>
+                      </a>
+                    {% else %}
+                      <a class="waves-effect waves-light btn tooltipped" href="#showUsers" data-position="top" data-tooltip="{% trans %}organization_elements.users{% endtrans %}" style="padding:0px 14px;display:flex;justify-content:center;width:75px">
+                          <i class="fa fa-users"></i>
+                          <span style="margin-left:3px">{{ element.vars.data.users(app)|length }}</span>
+                      </a>
+                    {% endif %}
+                  </li>
+                  <li style="margin-right:10px"><a class="validate waves-effect waves-light btn tooltipped" href="{{ url('updateElementTargets',{'elmtType' : elmtType, 'elmtId' : element.vars.data.id}) }}" data-position="top" data-tooltip="{% trans %}organization_elements.targets{% endtrans %}" style="padding:0px 14px;display:flex;justify-content:center;width:75px"><i class="fa fa-bullseye"></i>{% if element.vars.data.targets|length > 0 %}<span style="margin-left:3px">{{ element.vars.data.targets|length }}</span>{% endif %}</a></li>
+                  <li><a href="#deleteElement" class="waves-effect waves-light accent-4 btn-flat modal-trigger tooltipped" data-eid="{{ element.vars.data.id }}" data-position="top" data-tooltip="{% trans %}organization_elements.delete_btn{% endtrans %} {{elmtName}}"><i class="fa fa-trash"></i></a></li>
+                </ul>
+              </div>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+    <a class="btn waves-effect waves-light insert-btn center-button" style="margin-left:20px"><i class="fa fa-plus-circle"></i>
+      <span>{% trans with {'%element%' : elmtName} %}organization_elements.add_button{% endtrans %}</span>
+    </a>
+
+    <div class="fixed-action-btn">
+      <label
+        class="btn-floating btn-large tooltipped blue darken-3"
+        data-tooltip="{{ 'organization_criteriongroups.tooltips.save_form'|trans }}"
+        data-position="left">
+        {{ form_widget(form.submit, { attr: { hidden: '' } }) }}
+        <i class="large material-icons">save</i>
+      </label>
+    </div>
+
+    {#}
+    <div class="row" style="margin-top: 20px">
+      <div class="button-field center-button">
+          {{ form_row(form.submit) }}
+      </div>
+    </div>
+    #}
+      {{ form_rest(form) }}
+      {{ form_end(form)}}
+      {#
+      {{ form_start(elementForm) }}
+        <div>
+            {{ form_row(elementForm.name) }}
+        </div>
+        {% if elmtType == 'department' %}
+          <div>
+              {{ form_row(elementForm.masterUser) }}
+          </div>
+        {% endif %}
+      {{ form_rest(elementForm)}}
+      {{ form_end(elementForm)}}
+      #}
+
+      <div id="deleteElement" class="modal">
+          <div class="modal-content">
+              <h4>{% trans with {'%element%' : elmtName} %}organization_elements.delete_modal.title{% endtrans %}</h4>
+              <p>{% trans with {'%conj_element%' : elmtNameConj} %}organization_elements.delete_modal.content_1{% endtrans %}</p>
+          </div>
+          <div class="modal-footer">
+              <a class=" modal-action modal-close submit-button waves-effect waves-green btn-large delete-button">{% trans %}organization_elements.delete_modal.confirm{% endtrans %}</a>
+              <a class=" modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}organization_elements.delete_modal.decline{% endtrans %}</a>
+          </div>
+      </div>
+  {% endblock %}
+
+{% block javascripts %}
+  <script src="{{ asset('js/login.js') }}"></script>
+  <script src="{{ asset('js/organization_elements.js') }}"></script>
+{% endblock %}

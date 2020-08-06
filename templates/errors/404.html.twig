@@ -1,0 +1,22 @@
+
+{% block title %}
+    {% trans %}error_404.page_title{% endtrans %}
+{% endblock %}
+
+{% block css %}
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row center">
+            <img id=snakeQuestionMark src="{{ asset('lib/img/missing-target.png') }}" alt="">
+            <h5>{% trans %}error_404.title{% endtrans %}</h5>
+            <p>{% trans %}error_404.description{% endtrans %}</p>
+        </div>
+        <div class="row col center">
+            <div class="button-field">
+                <a class="btn btn-large waves-effect waves-light" href="{{ url('login') }}"><i class="fa fa-home" aria-hidden="true"></i>{% trans %}user_no_token.home_button_title{% endtrans %}</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

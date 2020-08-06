@@ -1,0 +1,157 @@
+{% import "macros/user_list__macros.html.twig" as macros %}
+
+{% set settings = settings is defined ? settings : true %}
+{% set stats = stats is defined ? stats : true %}
+{% set roles = roles is defined ? roles : true %}
+{% set displayOrg = displayOrg is defined ? orgName : false %}
+{#{% set myself = user == currentuser %}
+{% set perf = user.ranking('A','P','W', true) %}
+{% set dev = user.ranking('A','D','W', true) %}
+{% set weight = user.weight %}#}
+
+{% set user = externalUser.user ?? null %}
+{% set picture_url = user ? asset(user_picture_url(user)) : '/lib/img/no-picture.png' %}
+
+{#}
+{% set hasCompletedActivities = user.nbCompletedActivities > 0 %}
+#}
+
+
+<li class="users-list--item hierarchized-item {{ not stats ? 'no-stats' }}">
+  <header>
+    <img src="{{ picture_url }}" alt="" class="user-picture">
+
+    <div class="user-name">
+      {{ externalUser.fullname }}
+    </div>
+
+    {% if user %}
+      {% if roles %}
+        {{ macros.user_role_badge(user) }}
+      {% else %}
+        {% if not stats %}
+          {#
+          {% if not user.lastConnected %}
+            {{ macros.render_badge('virtual-badge', 'V') }}
+          {% endif %}
+          #}
+        {% endif %}
+      {% endif %}
+    {% else %}
+      {{ macros.render_badge('virtual-badge', 'V', 'tooltip.user.external_user_virtual'|trans) }}
+    {% endif %}
+
+    {% if settings %}
+    
+      <div class="user-actions">
+        
+        {% if roles %}
+
+          {% if is_admin or user.createdBy == currentuser.id %}
+            {% set path = is_root ? 'rootUpdateUser' : 'updateUser' %}
+            <a class="material-icons"
+                href="{{ url(path, { usrId: user.id, orgId: user.orgId }) }}"
+                tooltip="{{ 'user_list.modify'|trans }}">settings</a>
+          {% endif %}
+        
+          <a class="fa fa-bullseye"
+              href="{{ url('updateElementTargets', { elmtType: 'user', elmtId: user.id }) }}"
+              tooltip="{{ 'user_list.targets'|trans }}">
+          </a>
+          
+        {% endif %}
+
+        <a class="material-icons {{ not hasCompletedActivities ? 'disabled' }}"
+            href="{{ url('elementOverview', { elmtType: 'user', elmtId: user.id }) }}"
+            tooltip="{{ 'user_list.overview'|trans }}">show_chart</a>
+      </div>
+    
+    {% endif %}
+
+  </header>
+
+  {% if stats %}
+    <div class="item-body">
+      <div class="badges">
+        {% if not user.lastConnected %}
+          {{ macros.render_badge(
+            'virtual-badge', 'V', 'tooltip.user.role.virtual'|trans
+          ) }}
+        {% endif %}
+        {% if orgEnabledUserCreatingUser and user.enabledCreatingUser %}
+          {{ macros.render_badge(
+            'user-creator-badge', user_icon, 'tooltip.user.enabledCreatingUser'|trans
+          ) }}
+        {% endif %}
+      </div>
+
+      <div class="user-info tiles-container">
+        <div class="tile activity-count">
+          {% set text %}
+            {{ user.nbCompletedActivities(app) }} + {{ user.nbScheduledActivities(app) }}
+          {% endset %}
+          {{ macros.render_tile(
+            'tooltip.user.activity_ongoing_futur'|trans, 'fa fa-briefcase', text
+          ) }}
+        </div>
+
+        <div class="tile performance">
+          {% set text %}
+            {% if not perf %}
+              -
+            {% else %}
+              {{ (100 * perf[0].value)|round }} %
+            {% endif %}
+          {% endset %}
+          {{ macros.render_tile(
+            'tooltip.user.performance'|trans, 'fa fa-chart-line', text
+          ) }}
+        </div>
+
+        <div class="tile deviation">
+          {% set text %}
+            {% if not dev %}
+              -
+            {% else %}
+              {{ (100 * dev[0].value)|round }} %
+            {% endif %}
+          {% endset %}
+          {{ macros.render_tile(
+            'tooltip.user.distance'|trans, 'fa fa-arrows-alt-h', text
+          ) }}
+        </div>
+
+        <div class="tile weight">
+          {{ macros.render_tile(
+            'poids', 'material-icons', weight ? weight.value : '?', 'how_to_vote'
+          ) }}
+        </div>
+
+        {% if orgEnabledUserSeeRanking or is_root %}
+          <div class="tile ranking">
+            {% set text %}
+              {% if not perf %}
+                -
+              {% else %}
+                {{ perf[0].absResult }}
+              {% endif %}
+            {% endset %}
+            {{ macros.render_tile(
+              'ranking', 'fa fa-star', text
+            ) }}
+          </div>
+        {% endif %}
+
+        {% if is_root and user.lastConnected %}
+          <div class="tile last-connected">
+            {{ macros.render_tile(
+              'dernière connexion', 'material-icons',
+              'j + ' ~ user.lastConnected.diff(date('now')).days, 'wifi'
+            ) }}
+          </div>
+        {% endif %}
+
+      </div>
+    </div>
+  {% endif %}
+</li>

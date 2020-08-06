@@ -1,0 +1,917 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+    {% trans %}results.page_title{% endtrans %}
+{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.css" integrity="sha256-aa0xaJgmK/X74WM224KMQeNQC2xYKwlAt08oZqjeF0E=" crossorigin="anonymous">
+    <script>
+        var rurl = "{{ url('releaseStage',{'stgId' : -1}) }}";
+        var lg = '{% trans %}curr_language{% endtrans %}';
+        var gurl = "{{ url('generateNewActivityReport',{ 'isPDFVersion': 0}) }}";
+        var surl = "{{ url('saveImageActivityReport',{'actId' :  -1, 'stgId' : -1, 'crtId' : -1, 'type': 0, 'overview': 0, 'equalEntries': 0}) }}";
+        var durl = "{{ url('provideGraphData',{'actId': activity.id, 'stgIndex' : -1, 'crtIndex' : -1, 'equalEntries' : 0}) }}";
+        var globalClimateMsg = '{% trans %}results.global_climate{% endtrans %}';
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js" integrity="sha256-R4pqcOYV8lt7snxMQO/HSbVCFRPMdrhAFMH+vr9giYI=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@0.7.0/dist/chartjs-plugin-datalabels.min.js" integrity="sha256-3kSXcicezu2sKkkqQae/hgspQC+t6zkOA0rS7QtlSyE=" crossorigin="anonymous"></script>
+    <script src="{{ asset('js/activity_results_2.js') }}"></script>
+
+    <link rel="stylesheet" href="{{ asset('css/activity_results.css') }}">
+
+    {# weathers is a global defined in app.php #}
+    {% for w in weathers %}
+        <link rel="preload" href="{{ asset('lib/img/weather/' ~ w ~ '.png') }}" as="image" data-weather="{{ w }}">
+    {% endfor %}
+{% endblock %}
+
+{% block pagename %}
+    <span>{{ activity.name }}</span>
+    <span>{% trans %}results.mobile_header_title{% endtrans %}</span>
+{% endblock %}
+
+{% block username %}
+    {{ currentuser.firstname }} {{ currentuser.lastname }}
+{% endblock %}
+
+{# Finding aggregated view to draw when accessing results %}
+{# We draw the activity aggregated view if it has been completed, otherwise in case of user participation the last aggregated of stage where he participated, the last aggregated view of completed stage #}
+
+{% set drawingCriteriaIndex = -2 %}
+{% if activity.status >= 2 %}
+    {% set drawingStageIndex = -1 %}
+{% else %}
+    {# is viewer a participant in the activity... #}
+    {% set break = false %}
+    {% set lastParticipatedStage = 0 %}
+    {% for key, stage in activity.completedStages %}
+        {% for uniqueParticipation in stage.uniqueParticipations %}
+            {% if uniqueParticipation.usrId == currentuser.id %}
+                {% set break = true %}
+                {% set lastParticipatedStage = key %}
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+
+    {% if not break %}
+        {% set drawingStageIndex = activity.completedStages|length - 1 %}
+    {% else %}
+        {% set drawingStageIndex = lastParticipatedStage %}
+    {% endif %}
+{% endif %}
+
+
+
+{% block content %}
+<input type="hidden" id="currentuser-role" value="{{ currentuser.role }}">
+<input type="hidden" id="activity-id" value="{{ activity.id }}">
+<input type="hidden" id="drawing-values" value="{{ drawingStageIndex }}-{{ drawingCriteriaIndex }}">
+<script>
+    let myself = '{% trans %}user_list.myself{% endtrans %}';
+    let saveS;
+    let saveC;
+
+    function redrawPhases() {
+        drawPhases(saveS, saveC);
+    }
+
+    function drawPhases(s, c) {
+        const publishingBtn = $('#publishingBtn');
+        $('#resultTypeCheckbox').empty();
+        publishingBtn.empty();
+
+        saveS = s;
+        saveC = c;
+        $('.results-data').prev().show();
+
+        urlToPieces = durl.split('/');
+        urlToPieces[urlToPieces.length-3] = s;
+        urlToPieces[urlToPieces.length-2] = c;
+        if (document.getElementById('changeGraphData') && document.getElementById('changeGraphData').checked) {
+            urlToPieces[urlToPieces.length-1] = 1;
+        }
+        else {
+            urlToPieces[urlToPieces.length-1] = 0;
+        }
+
+        url = urlToPieces.join('/');
+
+        $.post(url).done(data => {
+            const currentUserRole = $('#currentuser-role').val();
+            window.currentUserRole = currentUserRole;
+            window.activityId = $('#activity-id').val();
+            var dataElmts = JSON.parse(data);
+
+            let noResultsMsg = '';
+            const noResMsgsPerGrade = {
+                0: "{% trans %}results.unstarted{% endtrans %}",
+                1: "{% trans %}results.ongoing{% endtrans %}",
+                2: "{% trans %}results.unpublished{% endtrans %}"
+            };
+            if (!dataElmts.displayablePerfGraph) {
+                noResultsMsg = "{% trans %}results.unconcerned{% endtrans %}";
+            } else if (dataElmts.stageStatus !== null) {
+                noResultsMsg = noResMsgsPerGrade[dataElmts.stageStatus];
+            }
+
+            if (dataElmts.isViewable) {
+                isVisibleStageCommentColumn = false;
+                isVisibleCriterionCommentColumn = true;
+
+                if (c == -2 || c == -1) {
+                    isVisibleStageCommentColumn = (s == -1 && $('a[href^="s0_c"]').length > 0);
+                } else {
+                    isVisibleCriterionCommentColumn = false;
+                }
+
+                tableHeaderStage = (isVisibleStageCommentColumn) ? '<th>Stage</th>' : '';
+                tableHeaderCriterion = (isVisibleCriterionCommentColumn) ? '<th>Criterion</th>' : '';
+                tableHeaderGrader = (dataElmts.canSeeGrader) ? '<th>{% trans %}overview.feedbacks_from{% endtrans %}</th>' : '';
+                tableHeaderGrades = (dataElmts.canSeeGrades) ? '<th>{% trans %}overview.grade{% endtrans %}</th>' : '';
+
+
+                var perfChartTable = [];
+                var distChartTable = [];
+
+                if (dataElmts.participantObjectives) {
+                    if (dataElmts.participantObjectives.length > 0) {
+                        var containerObjectivesElmt = $(/*html*/`<div class="container"></div>`);
+                        var tableElmt = $(/*html*/`<table class="striped"></table>`)
+                        const tableHeadElmt = $(/*html*/`
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>{% trans %}activity_elements.participants{% endtrans %}</th>
+                                    <th>{% trans %}results.precomments{% endtrans %}</th>
+                                </tr>
+                            </thead>
+                        `);
+                        var tableBodyElmt = $('<tbody></tbody>');
+                        var allRows = $('');
+                        var commentNb = 1;
+                        var participantName ='';
+                        var precommentNb = 1;
+                        $.each(dataElmts.participantObjectives, function(key, value) {
+                            var rowElmt = $('<tr></tr>');
+                            if (value) {
+                                if (participantName != value.fullName) {
+                                    participantName = value.fullName;
+                                    var IdPrecommentElmt = $('<td>'+precommentNb+'</td>');
+                                    var participantNameElmt = $('<td>'+value.fullName+'</td>')
+                                    var objectiveElmt = $('<td>'+value.precomment+'</td>');
+                                    var rowContent = IdPrecommentElmt.add(participantNameElmt).add(objectiveElmt);
+                                    commentNb++;
+                                    if (key + 1.0 <= Math.sqrt(dataElmts.participantObjectives.length)) {
+                                        rowElmt.append(rowContent);
+                                        allRows = allRows.add(rowElmt);
+                                    }
+                                }
+                            }
+                        });
+                        tableBodyElmt.append(allRows);
+                        tableElmt.append(tableHeadElmt.add(tableBodyElmt));
+                        containerObjectivesElmt.append(tableElmt);
+                    } else {
+                        var containerObjectivesElmt = $('<div class="container"><h6>{% trans %}results.no_given_precomments{% endtrans %}</h6></div>');
+                    }
+                }
+
+                if (dataElmts.feedbacks) {
+                    if (dataElmts.feedbacks.length > 0) {
+                        var containerFeedbacksElmt = $('<div class="container"></div>');
+                        var tableElmt = $('<table class="striped"></table>');
+                        var tableHeadElmt = $(' <thead>\
+                                                    <tr>\
+                                                        <th>#</th>'+
+                                                        '{% if currentuser.role != 3 %}<th>{% trans %}overview.feedbacks_to{% endtrans %}</th>{% endif %}' +
+                                                        tableHeaderStage +
+                                                        tableHeaderCriterion +
+                                                        tableHeaderGrader +
+                                                        tableHeaderGrades +
+                                                        '<th>{% trans %}report.user.table.comment_title{% endtrans %}</th>\
+                                                    </tr>\
+                                                        </thead>\
+                                                        ');
+                        var tableBodyElmt = $('<tbody></tbody>');
+                        var allRows = $('');
+                        var commentNb = 1;
+                        $.each(dataElmts.feedbacks, function(key, value) {
+                            var graded = value.graded;
+                            var criterionName = value.criterion;
+                            var stageName = value.stage;
+                            var selfGrade = value.selfGrade;
+                            var receivedGrade = value.receivedGrade;
+
+                            $.each(value.comments, function(key, subvalue) {
+                                var attrRow = (selfGrade) ? (receivedGrade ? 'style="font-style:italic;text-decoration: underline"' : 'style="font-style:italic"') : receivedGrade ? 'style="text-decoration: underline"' : '';
+
+                                var rowElmt = $('<tr '+attrRow+'></tr>');
+                                //if (subvalue) {
+                                    var comment = (subvalue) ? subvalue : '';
+                                    var IdCommentElmt = $('<td>'+commentNb+'</td>');
+                                    let stageElmt = tableHeaderStage != ''
+                                                    ? $(`<td>${stageName}</td>`)
+                                                    : '';
+                                    let criterionElmt = tableHeaderCriterion != ''
+                                    ? $(`<td>${criterionName}</td>`)
+                                    : '';
+                                    let gradedElmt = window.currentUserRole != 3
+                                                    ? $(`<td>${receivedGrade ? myself : graded}</td>`)
+                                                    : '';
+                                    let graderElmt = (dataElmts.canSeeGrader) ? $(`<td>${selfGrade ? myself : key}</td>`): '';
+                                    let gradeElmt = (dataElmts.canSeeGrades) ? (value.grades ? $('<td>'+value.grades[key]+'</td>') : $('<td></td>')) : '';
+                                    let commentElmt = $('<td>'+comment+'</td>');
+                                    let rowContent = IdCommentElmt.add(gradedElmt).add(stageElmt).add(criterionElmt).add(graderElmt).add(gradeElmt).add(commentElmt);
+                                    rowElmt.append(rowContent);
+                                    allRows = allRows.add(rowElmt);
+                                    ++commentNb;
+                                //}
+                            });
+                        });
+
+                        tableBodyElmt.append(allRows);
+                        tableElmt.append(tableHeadElmt.add(tableBodyElmt));
+                        containerFeedbacksElmt.append(tableElmt);
+                    } else {
+                        var containerFeedbacksElmt = $('<div class="container"><h6>{% trans %}results.no_given_comments{% endtrans %}</h6></div>');
+                    }
+                }
+
+                publishingBtn.empty();
+                if (!dataElmts.isPublished) {
+                    const dataStageId = dataElmts.stgId || window.activityId;
+                    const isPublishable = dataElmts.isPublishable;
+
+                    if (isPublishable) {
+                        // stage or activity ID?
+                        const e = dataElmts.stgId ? 's' : 'a';
+
+                        publishingBtn.append(/*html*/`
+                            <a class="waves-effect waves-light btn modal-trigger modal-publish" href="#result-release" data-${e}id="${dataStageId}">
+                                {{ 'results.release.modal_button_title'|trans }}
+                            </a>
+                        `);
+                    }
+                } else {
+                    publishingBtn.append($('<a class="waves-effect waves-light btn" disabled>{% trans %}results.release.released_button_title{% endtrans %}</a>'));
+                }
+
+                if (dataElmts.perfGraphData.length != 0) {
+                    if (dataElmts.crtType != 3) {
+                        // Tooltip shift criterion/gen view
+                        var d = (c == -2) ? 1 : (s == -1) ? 1 : 0;
+
+                        dataElmts.perfGraphData[0][dataElmts.perfGraphData[0].length - 3 - d] = (c != -2) ? '{% trans %}report.stage.table.user_result{% endtrans %}' : (dataElmts.displayedElmts == 'stages') ? '{% trans %}results.mean_stages{% endtrans %}' : '{% trans %}results.mean_criteria{% endtrans %}';
+                        dataElmts.perfGraphData[0][dataElmts.perfGraphData[0].length - 1] = '{% trans %}report.stage.table.result{% endtrans %} ('+ dataElmts.perfAvgResult +')';
+
+                        if (dataElmts.distGraphData) {
+
+                            dataElmts.distGraphData[0][dataElmts.distGraphData[0].length - 3 - d] = (c != -2) ? '{% trans %}report.stage.table.user_result{% endtrans %}' : (dataElmts.displayedElmts == 'stages') ? '{% trans %}results.mean_stages{% endtrans %}' : '{% trans %}results.mean_criteria{% endtrans %}';
+                            dataElmts.distGraphData[0][dataElmts.distGraphData[0].length - 1] = '{% trans %}report.stage.table.result{% endtrans %} ('+ dataElmts.distAvgResult +')';
+
+                            var objectDistDataCharts = {
+                                type: 'horizontalBar',
+                                labels: [],
+                                data: {
+                                    datasets: [],
+                                },
+                            };
+                            $.each(dataElmts.distGraphData, function(key, value) {
+                                if (key === 0) {
+                                    objectDistDataCharts.data.datasets.push({
+                                        label: value[1],
+                                        data: [],
+                                    });
+                                    objectDistDataCharts.data.datasets.push({
+                                        label: value[value.length - 1],
+                                        type: 'line',
+                                        data: [],
+                                    });
+                                } else {
+                                    objectDistDataCharts.labels.push(value[0]);
+                                    objectDistDataCharts.data.datasets[0].data.push(value[1]);
+                                    objectDistDataCharts.data.datasets[1].data.push(value[value.length - 1]);
+                                }
+                                distChartTable.push(value)
+                            });
+                        }
+                    } else if (window.currentUserRole === 1 || window.currentUserRole === 4) {
+                        if (dataElmts.binaryResults) {
+                            var containerBinaryResElmt = $('<div class="container"></div>');
+                            var tableElmt = $('<table class="striped"></table>');
+                            var tableHeadElmt = $(' <thead>\n' +
+                                '                               <tr>\n' +
+                                '                                   <th>#</th>\n' +
+                                '                                   <th>{% trans %}overview.feedbacks_to{% endtrans %}</th>\n'+
+                                '                                   <th><h6 style="display:flex;" class="no-margin"><i class="material-icons green-text">check</i>{% trans %}results.binary_yes_title{% endtrans %}</h6></th>\n'+
+                                '                                   <th><h6 style="display:flex;"  class="no-margin"><i class="material-icons red-text">close</i>{% trans %}results.binary_no_title{% endtrans %}</h6></th>\n'+
+                                '                               </tr>' +
+                                '                           </thead>' +
+                                '                           ');
+                            var tableBodyElmt = $('<tbody></tbody>');
+                            var allRows = $('');
+                            var binaryParticipantsNb = 1;
+                            var gradedParticipantName = '';
+
+                            $.each(dataElmts.binaryResults, function(key,participant) {
+                                if (gradedParticipantName != participant.graded) {
+                                    if (gradedParticipantName != '') {
+                                        var rowContent = IdBinaryParticipant.add(gradedElmt).add(yesElmt).add(noElmt);
+                                        rowElmt.append(rowContent);
+                                        allRows = allRows.add(rowElmt);
+                                    }
+                                    rowElmt = $('<tr></tr>');
+                                    gradedParticipantName = participant.graded;
+                                    IdBinaryParticipant = $('<td>'+binaryParticipantsNb+'</td>');
+                                    gradedElmt = $('<td>'+gradedParticipantName+'</td>');
+                                    if (participant.value == 1) {
+                                        yesElmt = $('<td>'+participant.name+'</td>');
+                                        noElmt = $('<td></td>');
+                                    } else {
+                                        yesElmt = $('<td></td>')
+                                        noElmt = $('<td>'+participant.name+'</td>');
+                                    }
+                                    binaryParticipantsNb++;
+                                } else {
+                                    if (participant.value == 1) {
+                                        (yesElmt.text() == "") ? yesElmt.append($('<span>'+participant.name+'</span>')) : yesElmt.append($('<br><span>'+participant.name+'</span>'));
+                                        noElmt.append($('<br>'));
+                                    } else {
+                                        (noElmt.text() == "") ? noElmt.append($('<span>'+participant.name+'</span>')) : noElmt.append($('<br><span>'+participant.name+'</span>'));
+                                        yesElmt.append($('<br>'));
+                                    }
+                                }
+                            });
+
+                            var rowContent = IdBinaryParticipant.add(gradedElmt).add(yesElmt).add(noElmt);
+                            rowElmt.append(rowContent);
+                            allRows = allRows.add(rowElmt);
+
+                            tableBodyElmt.append(allRows);
+                            tableElmt.append(tableHeadElmt.add(tableBodyElmt));
+                            containerBinaryResElmt.append(tableElmt);
+                        }
+                    }
+
+
+                    $('#dataTitle').empty();
+                    if (dataElmts.crtName) {
+                        $('#dataTitle').append($('<h5>'+dataElmts.crtName+' - {% trans %}overview.performance{% endtrans %}</h5>'));
+
+                    } else {
+                        $('#dataTitle').append($('<h5>{% trans %}overview.performance{% endtrans %}</h5>'));
+                    };
+
+                    setTimeout(function () {
+
+                        if(dataElmts.displayablePerfGraph){
+
+                            $('.results-data').html(`
+                                <div class="chart-canvas">
+                                    <canvas id="performance-chart" height="1" width="3"></canvas>
+                                </div>
+                            `);
+
+                            window.perfChart = generatePerfChart(
+                                dataElmts.perfGraphData, dataElmts.crtType,
+                                dataElmts.lowerbound, dataElmts.upperbound,
+                                [ c, s ],
+                                {
+                                    yAxis: `{{ 'results.grade_absolute_msg_1'|trans }} ${dataElmts.lowerbound} {{ 'results.grade_absolute_msg_2'|trans }} ${dataElmts.upperbound}`
+                                }
+                            );
+                        } else {
+                            $('.results-data').empty().append('<ul class="center" style="display: flex;align-items: center;height: 300px;flex-direction: column;justify-content: center"><li><i class="far fa-2x fa-file"></i></li><li><h5>'+noResultsMsg+'</h5></li></ul>');
+                        }
+
+                        if (dataElmts.distGraphData) {
+                            if (dataElmts.crtType != 3) {
+                                var distTitle = $('<div class="container"><h5>{% trans %}results.std_dev_msg{% endtrans %}<i class="fa fa-question-circle tooltipped" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.activity.distance{% endtrans %}" style="font-size:75%;margin-left:5px;"></i></h5></div>');
+                                distTitle.find('.tooltipped').tooltip();
+
+                                /**
+                                    * <div class="dist-section">
+                                    *   <div class="dist-weather row">
+                                    *     <div class="col s12 m6">
+                                    *
+                                    *     </div>
+                                    *   </div>
+                                    * </div>
+                                    */
+
+
+                                const $distSection = $('<div class="dist-section dist-section__hidden">');
+                                const $weatherSubsection = $('<div class="container row dist-weather-container">');
+                                const $distSectionContainer = $('<div class="dist-section-container">');
+                                const $buttonField = $('<div class="button-field">');
+                                const $toggleDistSectionButton = $(`
+                                    <button id="toggle-dist-section" class="btn">
+                                        <span class="display-text">{% trans %}results.graphic_representation{% endtrans %}</span>
+                                        <span class="hide-text">{% trans %}results.climate_representation{% endtrans %}</span>
+                                    </button>
+                                `);
+                                $toggleDistSectionButton.click(() => {
+                                    if ($distSection.hasClass('dist-section__hidden')) {
+                                        $distSection
+                                            .removeClass('dist-section__hidden')
+                                            .addClass('dist-section__displayed');
+                                    } else {
+                                        $distSection
+                                            .removeClass('dist-section__displayed')
+                                            .addClass('dist-section__hidden');
+                                    }
+                                });
+
+                                $buttonField.append($toggleDistSectionButton);
+                                $distSectionContainer.append(`
+                                    <div class="chart-canvas">
+                                        <canvas id="distribution-chart" height="1" width="4"></canvas>
+                                    </div>
+                                `);
+
+                                $distSection.append(distTitle, $buttonField, $weatherSubsection, $distSectionContainer);
+                                $('.results-data').append($distSection);
+
+                                window.distChartAndWeather = generateDistChart(dataElmts.distGraphData, dataElmts.crtType, dataElmts.distAvgResult, dataElmts.crtIndex);
+                                $weatherSubsection.html(distChartAndWeather && distChartAndWeather.distWeather.html);
+                                // Inserting global climate title :
+                                $('.global-weather--title').append(globalClimateMsg);
+                            }
+                        }
+
+                        if (window.currentUserRole === 1 || window.currentUserRole === 4) {
+                            if (dataElmts.crtType == 3) {
+                                $('.results-data').append(containerBinaryResElmt);
+                            }
+                        }
+                    }, 500);
+
+                    $('.results-data').nextAll().remove();
+
+                    if (dataElmts.feedbacks) {
+                        containerFeedbacksElmt.prepend('<h5>{% trans %}overview.feedbacks{% endtrans %}</h5>');
+                        $('.results-data').after(containerFeedbacksElmt);
+                    }
+
+                    if (dataElmts.participantObjectives) {
+                        containerObjectivesElmt.prepend('<h5>{% trans %}results.precomments{% endtrans %}</h5>');
+                        $('.results-data').after(containerObjectivesElmt);
+                    }
+
+                    $('#resultTypeCheckbox, .results-zone ul, .chart-canvas, .dist-section, .results-zone .container').show();
+                } else {
+
+                    $('.results-data').nextAll().remove();
+                    $('.results-data').empty().append('<ul class="center" style="display: flex;align-items: center;height: 300px;flex-direction: column;justify-content: center"><li><i class="far fa-2x fa-file"></i></li><li><h5>'+noResultsMsg+'</h5></li></ul>');
+
+                    if (dataElmts.feedbacks) {
+                        containerFeedbacksElmt.prepend('<h5>{% trans %}overview.feedbacks{% endtrans %}</h5>');
+                        $('.results-data').after(containerFeedbacksElmt);
+                    } else {
+                        // Nothing to display (stage/activity publishable but without any provided data... (strange case)
+                        $('.results-data').append('<ul class="center" style=" \
+                                display: flex; \
+                                align-items: center; \
+                                height: 300px; \
+                                flex-direction: column; \
+                                justify-content: center; \
+                            ">\
+                                <li> \
+                                    <i class="far fa-2x fa-file"></i> \
+                                </li> \
+                                <li> \
+                                    <h5>'+noResultsMsg+'</h5> \
+                                </li> \
+                            </ul> \
+                        ');
+                    }
+
+                    if (dataElmts.participantObjectives) {
+                        containerObjectivesElmt.prepend('<h5>{% trans %}results.precomments{% endtrans %}</h5>');
+                        $('.results-data').after(containerObjectivesElmt);
+                    }
+
+
+
+                }
+                $('#resultTypeCheckbox, .results-zone ul, .results-zone h5, .results-zone .container').show();
+
+            } else {
+
+                $('#resultTypeCheckbox, .results-zone ul, .chart-canvas, .dist-section, .results-zone .container').hide();
+                // $('.results-data').empty();
+                $('.results-data').append('<ul class="center" style="display: flex;align-items: center;height: 300px;flex-direction: column;justify-content: center"><li><i class="far fa-2x fa-file"></i></li><li><h5>'+noResultsMsg+'</h5></li></ul>');
+            }
+        })
+        .fail(function (data) {
+            console.log(data);
+        });
+    };
+</script>
+
+
+<div class="row" style="margin-top: 20px">
+    <div class="col s12 action-buttons">
+        <div class="button-field">
+            <a class="waves-effect waves-light btn-large" href="{{ url('myActivities') }}">{% trans %}results.release.go_back{% endtrans %}</a>
+        </div>
+    </div>
+</div>
+
+{# computing nb of missing stages to adapt stages tab width and weights #}
+{# firstComputingStage is computed to know which graph to compute (in priority, the first one where current user is participating, otherwise first stage graph to display) #}
+
+{% set nbNonParticipatingStages = 0 %}
+{% set totalNonParticipatingStagesWeight = 0 %}
+{% set firstParticipatingStage = -1 %}
+
+
+{% set break = false %}
+
+{% for key, status in participantStatus if not break %}
+    {% if status is null %}
+        {% set nbNonParticipatingStages = nbNonParticipatingStages + 1 %}
+        {% set totalNonParticipatingStagesWeight = totalNonParticipatingStagesWeight + activity.stages[key].weight %}
+    {% else %}
+        {% set firstParticipatingStage = key %}
+        {% set break = true %}
+    {% endif %}
+{% endfor %}
+
+{% if activity.stages|length == 1 %}
+    {% if activity.stages[0].criteria|length == 1 %}
+        <div class="center">
+            <h3>{{ activity.name }}</h3>
+        </div>
+    {% else %}
+
+        {% if stagesSumEvaluationWeights is not null %}
+            {% set sumEvaluationWeights = stagesSumEvaluationWeights[0] %}
+        {% else %}
+            {% set sumEvaluationWeights = 0 %}
+        {% endif %}
+
+        {% if stagesSumBinaryWeights is not null %}
+            {% set sumBinaryWeights = stagesSumBinaryWeights[0] %}
+        {% else %}
+            {% set sumBinaryWeights = 0 %}
+        {% endif %}
+
+    <div class="row">
+        <div class="col s12">
+            <ul class="tabs tabs-fixed-width">
+                <li class="tab"><a href="#s_c" onclick="drawPhases(-1, -1);"> {{ activity.name }} </a></li>
+            </ul>
+        </div>
+        <div class="col s12">
+            <ul class="tabs tabs-fixed-width">
+                {% set nbNonFBCriteria = 0 %}
+                {% for criterion in activity.stages[0].criteria if not (nbNonFBCriteria > 1) %}
+                    {% if criterion.type != 2 %}
+                        {% set nbNonFBCriteria = nbNonFBCriteria + 1 %}
+                    {% endif %}
+                {% endfor %}
+                {% if nbNonFBCriteria > 1 %}
+                    {% set tabWidth = activity.stages[0].criteria|length + 1 %}
+                    <li class="tab">
+                        <span tooltip="{{ 'results.overview'|trans }}"></span>
+                        <a href="#s_c-2" class="active green-selected-tab" onclick="drawPhases(-1, -2)">
+                            <i class="fa fa-cube"></i>
+                            {% trans %}results.overview{% endtrans %}
+                        </a>
+                    </li>
+                {% else %}
+                    {% set tabWidth = activity.stages[0].criteria|length %}
+                {% endif %}
+
+                {% for c in 0..activity.stages[0].criteria|length - 1 %}
+                    {% set criterion_name = activity.stages[0].criteria[c].cName.name %}
+                    {% if activity.stages[0].criteria[c].type in [1, 3] %}
+                        {% set percentage = ' (' ~ (activity.stages[0].criteria[c].weight / (sumBinaryWeights + sumEvaluationWeights) * 100)|round(0) ~ ' %)' %}
+                    {% elseif (activity.stages[0].criteria[c].type == 0) %}
+                        {% set percentage = ' (' ~ (activity.stages[0].criteria[c].weight / stagesSumContributiveWeights[0] * 100)|round(0) ~ ' %)' %}
+                    {% else %}
+                        {% set percentage = '' %}
+                    {% endif %}
+                    {% set name = criterion_name ~ percentage %}
+                    <li class="tab">
+                        <span tooltip="{{ name }}"></span>
+                        <a href="#s_c{{ c }}" class="green-text" onclick="drawPhases(-1, '{{ c }}');">
+                            {% if activity.stages[0].criteria[c].type == 0 %}
+                                <i class="fa fa-pie-chart"></i>
+                            {% elseif activity.stages[0].criteria[c].type == 1 %}
+                                <i class="fas fa-tachometer-alt"></i>
+                            {% elseif activity.stages[0].criteria[c].type == 2 %}
+                                <i class="fas fa-comment-dots"></i>
+                            {% elseif activity.stages[0].criteria[c].type == 3 %}
+                                <i class="material-icons">check_box</i>
+                            {% endif %}
+                            {{ name }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+{% else %}
+    <ul class="row">
+        <div class="col s12">
+            <ul class="tabs tabs-fixed-width">
+                <li class="tab"><a href="#s_c" onclick="drawPhases(-1, -1);"><i class="fa fa-cubes"></i> {{ activity.name }}</a></li>
+            </ul>
+        </div>
+        <div class="col s12">
+            <ul class="tabs tabs-fixed-width">
+                {% set nbUndisplayedStages = 0 %}
+                {% for s in 0..activity.stages|length - 1 %}
+                   {% if participantStatus[s] is null and currentuser.role == 3 %}
+                        {% set nbUndisplayedStages = nbUndisplayedStages + 1 %}
+                    {% endif %}
+                {% endfor %}
+
+
+                {% set tabWidth = activity.stages|length + 1 - nbUndisplayedStages %}
+
+                <li class="tab">
+                    <span tooltip="{{ 'results.overview'|trans }}"></span>
+                    <a href="#s_c-2" class="active blue-selected-tab" onclick="drawPhases(-1, -2)">
+                        <i class="fa fa-cubes"></i>
+                        {% trans %}results.overview{% endtrans %}
+                    </a>
+                </li>
+
+                {% set firstSelectedStage = null %}
+
+                {% for s in 0..activity.stages|length - 1 %}
+                    {% if not(participantStatus[s] is null and currentuser.role == 3) %}
+                        {% set stage_name = activity.stages[s].name %}
+                        {% set percentage = (activity.stages|length != nbNonParticipatingStages and participantStatus[s] is not null)
+                                    ? (100 * (activity.stages[s].weight / (1 - totalNonParticipatingStagesWeight)))|round(0)
+                                    : (100 * activity.stages[s].weight)|round(0)
+                        %}
+                        {% set name = stage_name ~ ' (' ~ percentage ~ ' %)' %}
+                        <li class="tab">
+                            <a href="#s{{ s }}_c" class="blue-text {% if firstSelectedStage is null %}active{% endif %}" {% if not(participantStatus[s] is null and currentuser.role == 3) %}onclick="drawPhases({{ s }},-1);"{% endif %}>
+                                <ul style="display: inline-flex;">
+                                    <li>
+                                        <i class="fa fa-cube" style="position: relative;top: -6%;left: 0%;font-size: 0.85rem;"></i>
+                                    </li>
+                                    <li>
+                                        <i class="fa fa-cube" style="position: relative;top: 6%;left: -41%;font-size: 0.85rem;"></i>
+                                    </li>
+                                </ul>
+                                {{ name }}
+                            </a>
+                            <span tooltip="{{ name }}"></span>
+                        </li>
+                        {% set firstSelectedStage = s %}
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+
+        {% for s in 0..activity.stages|length - 1 %}
+            {% if not(participantStatus[s] is null and currentuser.role == 3) %}
+                {% if activity.stages[s].criteria|length > 1 %}
+
+                    {# we hide criteria tabs in case drawable graph when users goes to the page is the stage aggregated view #}
+                    <div class="col s12" {% if drawingStageIndex == -1 and drawingCriteriaIndex == -2 %}style="display: none"{% endif %}>
+                        <ul class="tabs tabs-fixed-width">
+                            {% set nbNonFBCriteria = 0 %}
+                            {% for criterion in activity.stages[s].criteria if not (nbNonFBCriteria > 1) %}
+                                {% if criterion.type != 2 %}
+                                    {% set nbNonFBCriteria = nbNonFBCriteria + 1 %}
+                                {% endif %}
+                            {% endfor %}
+                            {% if nbNonFBCriteria > 1 %}
+                                {% set tabWidth = activity.stages[s].criteria|length + 1 %}
+                                <li class="tab">
+                                    <span tooltip="{{ 'results.overview'|trans }}"></span>
+                                    <a href="#s{{ s }}_c-2" class="green-text" onclick="drawPhases('{{ s }}', -2)">
+                                        <i class="fa fa-cube"></i>
+                                        {% trans %}results.overview{% endtrans %}
+                                    </a>
+                                </li>
+                            {% else %}
+                                {% set tabWidth = activity.stages[s].criteria|length %}
+                            {% endif %}
+
+                            {% for c in 0..activity.stages[s].criteria|length - 1 %}
+                                {% set criterion_name = activity.stages[s].criteria[c].cName.name %}
+                                {% set percentage =
+                                    activity.stages[s].criteria[c].type != 2
+                                    ? ' (' ~ (100 * activity.stages[s].criteria[c].weight)|round(0) ~ ' %)'
+                                    : ''
+                                %}
+                                {% set name = criterion_name ~ percentage %}
+                                <li class="tab {% if participantStatus[s] is null and currentuser.role == 3 %}disabled{% endif %}">
+                                    <span tooltip="{{ name }}"></span>
+                                    <a href="#s{{ s }}_c{{ c }}" class="green-text" {% if not(participantStatus[s] is null and currentuser.role == 3) %}onclick="drawPhases({{ s }},{{ c }});"{% endif %}>
+                                        <i class="fa fa-cube"></i>
+                                        {{ name }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+    </ul>
+{% endif %}
+
+    <div class="col s12 results-zone">
+        <ul style="display: flex;align-items: center;justify-content: space-between;list-style: none;margin-bottom: 15px;" class="container">
+            <li id="dataTitle"></li>
+            <li id="publishingBtn"></li>
+        </ul>
+        <div class="results-data"></div>
+    </div>
+
+    {# we look whether it is relevant to let user choose report elements (if too many, like 1 stage 1 criterion no need to display act for instance #}
+    {% set enablingSelectivity = false %}
+    {% set nbSelectableResults = 0 %}
+    {% set break = false %}
+    {% if activity.stages|length > 1 or activity.stages[0].criteria|length > 1 %}
+        {% for stage in activity.stages if not break %}
+            {% if stage.status >= 2 and currentuser.role !=3 or stage.status == 3 and currentuser.role == 3 %}
+                {% set nbSelectableResults = nbSelectableResults + 1 %}
+                {% if nbSelectableResults > 1 %}
+                    {% set enablingSelectivity = true %}
+                    {% set break = true %}
+                {% endif %}
+
+                {% if stage.criteria|length > 1 %}
+                    {% set enablingSelectivity = true %}
+                    {% set break = true %}
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+    <div id="printingChoices" class="modal">
+        <form action="{{ url('generateNewActivityReport',{ 'isPDFVersion': 0}) }}" method="post">
+            <div class="modal-content">
+                <h4>{% trans %}results.printing.modal_title{% endtrans %}</h4>
+                <h5>{% trans %}results.printing.content{% endtrans %}</h5>
+                <input type="hidden" name="aid" value="{{activity.id}}">
+
+                <input type="checkbox" id="print_-2_-2" name="print_-2_-2" class="filled-in" checked>
+                <label for="print_-2_-2">{% trans %}results.printing.print_all{% endtrans %}</label>
+
+
+                {% if enablingSelectivity == true %}
+
+                    <div style="margin-top:5px">
+                        <p style="display: inline;">{% trans %}results.printing.selective_choice{% endtrans %} (
+                            <i class="fa fa-cubes" style="color: #ee6e73; margin-right:7px"></i>{% trans %}results.printing.activity{% endtrans %},
+                            <ul style="display: inline-flex; color: #2196F3; margin-right:3px"><li><i class="fa fa-cube" style="position: relative;top: -6%;left: 0%;font-size: 0.85rem;"></i></li><li><i class="fa fa-cube" style="position: relative;top: 6%;left: -41%;font-size: 0.85rem;"></i></li></ul>{% trans %}results.printing.stage{% endtrans %},
+                            <i class="fa fa-cube" style="color: #4CAF50; margin-right:7px"></i>{% trans %}results.printing.criterion{% endtrans %}
+                            ) :
+                        </p>
+                    </div>
+
+                    {% if activity.status >= 2 %}
+                        {# if activity is completed, we display activity report choice only if all stages have been released for collabrators #}
+                        {% if not (currentuser.role == 3 and activity.status == 2) %}
+                            <input type="checkbox" id="print_-1_-1" name="print_-1_-1" class="filled-in checkbox-activity">
+                            <label for="print_-1_-1"><i class="fa fa-cubes" style="color: #ee6e73"></i> {{ activity.name }}</label>
+                        {% endif %}
+                    {% endif %}
+
+                    <div style="margin-left: 15px; display: flex; flex-direction: column;">
+
+                    {% if activity.stages|length > 1 %}
+                            <input type="checkbox" id="print_-1_-2" name="print_-1_-2" class="filled-in checkbox-stage">
+                            <label for="print_-1_-2"><ul style="display:flex;"><li style="margin-left:-2px;margin-right:6px;"><i class="material-icons" style="color: #2196F3">layers</i></li><li>{% trans %}results.overview{% endtrans %}</li></ul></label>
+                    {% endif %}
+
+                    {% for s in 0..activity.stages|length - 1 %}
+
+                        {% if activity.stages[s].status >= 2 %}
+
+                            {# if activity is completed, we display choices of stages which are released for collabrators #}
+                            {% if not (currentuser.role == 3 and activity.stages[s].status == 2) %}
+                                {% if activity.stages|length > 1 %}
+
+                                        <input type="checkbox" id="print_{{ s }}_-1" name="print_{{ s }}_-1" class="filled-in checkbox-stage">
+                                        <label for="print_{{ s }}_-1"><ul style="display: inline-flex; color: #2196F3"><li><i class="fa fa-cube" style="position: relative;top: -6%;left: 0%;font-size: 0.85rem;"></i></li><li><i class="fa fa-cube" style="position: relative;top: 6%;left: -41%;font-size: 0.85rem;"></i></li></ul> {{ activity.stages[s].name }}</label>
+
+                                {% endif %}
+
+                                {% if activity.stages[s].criteria|length > 1 %}
+
+                                    <div style="margin-left: 15px; display: flex; flex-direction: column;">
+                                        <input type="checkbox" id="print_{{ s }}_-2" name="print_{{ s }}_-2" class="filled-in checkbox-criterion">
+                                        <label for="print_{{ s }}_-2"><ul style="display:flex;"><li style="margin-left:-4px;margin-right:7px;"><i class="material-icons" style="color: #4CAF50">layers</i></li><li>{% trans %}results.overview{% endtrans %}</li></ul></label>
+                                    {% for c in 0..activity.stages[s].criteria|length - 1 %}
+                                        <input type="checkbox" id="print_{{ s }}_{{ c }}" name="print_{{ s }}_{{ c }}" class="filled-in checkbox-criterion">
+                                        <label for="print_{{ s }}_{{ c }}"><i class="fa fa-cube" style="color: #4CAF50;margin-right:7px;"></i> {{ activity.stages[s].name}} - {{ activity.stages[s].criteria[c].cName.name }}</label>
+                                    {% endfor %}
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                    </div>
+
+                {% endif %}
+
+                <h5>{% trans %}results.printing.parameters{% endtrans %}</h5>
+
+                <ul>
+                    <li>
+                        <input type="checkbox" id="settings_perf" name="settings_perf" class="filled-in" checked>
+                        <label for="settings_perf">{% trans %}results.printing.print_perf_graphs{% endtrans %}</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="settings_dist" name="settings_dist" class="filled-in" checked>
+                        <label for="settings_dist">{% trans %}results.printing.print_dist_graphs{% endtrans %}</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="settings_objectives" name="settings_objectives" class="filled-in" checked>
+                        <label for="settings_objectives">{% trans %}results.printing.print_objectives{% endtrans %}</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="settings_comments" name="settings_comments" class="filled-in" checked>
+                        <label for="settings_comments">{% trans %}results.printing.print_comments{% endtrans %}</label>
+                    </li>
+                </ul>
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="submit" class="btn waves-effect waves-light create-report">{% trans %}results.printing.generate_report{% endtrans %}</button>
+            </div>
+        </form>
+    </div>
+
+
+    <div id="result-release" class="modal">
+        <div class="modal-title">
+            <p><h5>{% trans %}results.release.modal_title{% endtrans %}</h5></p>
+        </div>
+        <div class="modal-content">
+            <p>{% trans %}results.release.modal_content{% endtrans %}</p>
+        </div>
+        <div class="modal-footer">
+            <a class="btn waves-effect waves-light modal-close red">{% trans %}results.release.modal_discard{% endtrans %}</a>
+            <a class="btn waves-effect waves-light modal-close publish-btn">{% trans %}results.release.modal_submit{% endtrans %}</a>
+        </div>
+    </div>
+    <div id="release-success" class="modal">
+        <div class="modal-content">
+            <p>{% trans %}results.release.success_msg{% endtrans %}</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn waves-effect waves-light modal-close">{% trans %}results.release.success_ok_button{% endtrans %}</button>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('js/activity_results.js') }}"></script>
+
+    <!--Load the AJAX API-->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+    <script type="text/javascript">
+
+        // Load the Visualization API and the corechart package.
+        google.charts.load('current', {'packages':['corechart']});
+
+        // Set a callback to run when the Google Visualization API is loaded.
+        google.charts.setOnLoadCallback(drawChart);
+
+        // Callback that creates and populates a data table,
+        // instantiates the pie chart, passes in the data and
+        // draws it.
+
+        function drawChart() {
+            drawPhases('{{drawingStageIndex}}', '{{drawingCriteriaIndex}}');
+        }
+
+        $(document).on('click', '.publish-btn', function (e) {
+            e.preventDefault();
+
+            urlToPieces = rurl.split('/');
+            if ($(this).data("sid")) {
+                urlToPieces[urlToPieces.length - 2] = $(this).data('sid');
+                var publishingButton = $('.modal-publish[data-sid="'+$(this).data("sid")+'"]');
+            } else {
+                urlToPieces[urlToPieces.length - 2] = $(this).data('aid');
+                urlToPieces[urlToPieces.length - 3] = 'activity';
+                var publishingButton = $('.modal-publish[data-aid="'+$(this).data("aid")+'"]');
+            }
+            url = urlToPieces.join('/');
+
+            $.post(url).done(data => {
+                $('.modal').modal('close');
+                $('#release-success').modal('open');
+                $('#publishingBtn').html('<a class="waves-effect waves-light btn" disabled="disabled">{% trans %}results.release.released_button_title{% endtrans %}</a>');
+            }).fail(data => console.log(data));
+        });
+    </script>
+{% endblock %}

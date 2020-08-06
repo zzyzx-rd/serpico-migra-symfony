@@ -1,0 +1,56 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+  {% trans %}organizations.page_title{% endtrans %}
+{% endblock %}
+
+{% block pagename %}
+  {% trans %}organizations.mobile_header_title{% endtrans %}
+{% endblock %}
+
+{% block username %}
+  {{ currentuser.firstname }}
+  {{ currentuser.lastname }}
+{% endblock %}
+
+{% block css %}
+  <style>
+    section {
+      align-items: center;
+    }
+
+    section > .btn-large {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      max-width: 500px;
+      margin-bottom: 1em;
+      line-height: inherit;
+    }
+
+    section > .btn-large i {
+      font-size: 1.2em;
+      padding-bottom: .1em;
+      padding-right: .3em;
+    }
+  </style>
+{% endblock css %}
+
+{% set manage_procs = path('manageProcesses', { orgId: currentuser.orgId }) %}
+{% set manage_orgs = path('manageOrganizations') %}
+
+{% block content %}
+  <section>
+    <a class="btn-large waves-effect waves-light teal" href="{{ manage_procs }}">
+      <i class="fa fa-bookmark"></i>
+      {% trans %}root_management.manage_processes{% endtrans %}
+    </a>
+    <a class="btn-large waves-effect waves-light teal" href="{{ manage_orgs }}">
+      <i class="fa fa-hotel"></i>
+      <span>{% trans %}root_management.manage_organizations{% endtrans %}</span>
+    </a>
+  </section>
+{% endblock %}
+
+{% block javascripts %}{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+    {% trans %}error_500.page_name{% endtrans %}
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        {% trans %}error_500.description{% endtrans %}
+    </div>
+{% endblock %}

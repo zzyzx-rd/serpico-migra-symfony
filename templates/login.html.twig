@@ -1,0 +1,149 @@
+{% extends "layout.html.twig" %}
+
+{# Login page for migration #}
+
+{% block title %}
+    {% trans %}landing.page_name{% endtrans %}
+{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.5.9/slick.min.css">
+
+    <style>
+        .old-times:before {
+            content: "";
+            background-image: url('/lib/img/place_paris.png');
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0.25;
+            background-repeat: no-repeat;
+            background-size: cover;
+            z-index: -1;
+        }
+
+        .old-times {
+            position: relative;
+        }
+
+        #formLogin input {
+            background-color: #ffffffbd;
+        }
+
+        #formLogin input::placeholder {
+            color: black;
+        }
+
+        #formLogin [type="checkbox"] + label {
+            color: black;
+        }
+    </style>
+{% endblock %}
+
+
+{#{% block username %}#}
+{#    {% if currentuser is not null %}#}
+{#        {{ currentuser.firstname }}#}
+{#        {{ currentuser.lastname }}#}
+{#    {% endif %}#}
+{#{% endblock %}#}
+
+
+{% block pagename %}
+    Login
+{% endblock %}
+
+{% block content %}
+    <div id="login" class="old-times">
+        <h4 style="text-align: center; padding: 30px 0px">{% trans %}landing.page_name{% endtrans %}</h4>
+
+        <div class="row" style="text-align: center; align-items: center">
+            <div class="col s12"><img src="{{ absolute_url(asset('lib/img/logo_l.svg')) }}" width="250px" style="margin-top: 10px"></div>
+        </div>
+
+
+        <form id="formLogin" action="{{ path('login') }}" method="post" class="container" style="margin-bottom:50px;">
+
+            <div class="row">
+                <h4>Login</h4>
+                {% if error%}
+                    {{ error.message }}
+                    <div class="=alert alert-danger">
+                        {{ error.messageKey |trans(error.messageData, 'security') }}
+                    </div>
+                {% endif %}
+                <div class="input-field">
+                    <input type="text" name="_username" placeholder="{% trans %}landing.login_section.username{% endtrans %}" value="{{ lastUserName }}" required="required"/>
+                </div>
+                <div class="input-field">
+                    <input type="password" name="_password" placeholder="{% trans %}landing.login_section.password{% endtrans %}" value="" required="required"/>
+                </div>
+{#                <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">#}
+                <div>
+                    <input type="checkbox" class="filled-in" id="remember_me" name="_remember_me" checked/>
+                    <label for="remember_me">{% trans %}landing.keep_me_logged_in{% endtrans %}</label>
+                </div>
+            </div>
+            <div class="row flex-center" style="justify-content: center">
+                <button class="btn btn-large waves-effect waves-light" type="submit" name="_target_path" value="test">{% trans %}landing.login_section.button_text{% endtrans %}</button>
+            </div>
+            <div style="text-align: center">
+                <a class="modal-trigger" href="#retrievePwd">{% trans %}landing.retrieve_pwd.link_msg{% endtrans %}</a>
+            </div>
+        </form>
+
+        <div class="row" style="text-align: center; align-items: center">
+            <span>{% trans %}landing.login_section.no_account_question{% endtrans %}</span>
+            <a class="btn waves-effect waves-light" href="{{ url('signup') }}" style="margin-left: 15px;">{% trans %}landing.login_section.subscribe{% endtrans %}</a>
+        </div>
+
+
+    </div>
+
+    <div id="retrievePwd" class="modal">
+        <div class="container">
+            <div class="modal-content">
+                <p>{% trans %}landing.retrieve_pwd.msg{% endtrans %}</p>
+                <p>{% trans %}landing.retrieve_pwd.msg_2{% endtrans %}</p>
+            </div>
+            <form id="retrievePwdForm" action="" method="post">
+                <input type="email" name="email" required="required"/>
+                <div class="modal-footer">
+                    <button type="submit" name="" value="home" class="btn waves-effect waves-light modal-close">{% trans %}landing.retrieve_pwd.submit{% endtrans %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="retrievePwdSuccess" class="modal">
+        <div class="modal-content">
+            <p>{% trans %}landing.retrieve_pwd.success_msg{% endtrans %}</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn waves-effect waves-light modal-close">{% trans %}Ok{% endtrans %}</button>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block javascripts %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.5.9/slick.min.js" type="text/javascript"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $(".banner-title").not('.slick-initialized').slick({
+                vertical: true,
+                autoplay: true,
+                autoplaySpeed: 3300,
+                speed: 700,
+                arrows: false,
+                useTransform: true,
+                cssEase: "cubic-bezier(0.695, -0.445, 0.265, 1.550)"
+            })
+        });
+    </script>
+
+    <script src="{{ absolute_url(asset('js/home.js')) }}"></script>
+    <script src="{{ absolute_url(asset('js/landing.js')) }}"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flexslider/2.7.0/jquery.flexslider.min.js"></script>
+{% endblock %}

@@ -1,0 +1,1125 @@
+{% extends "layout.html.twig" %}
+
+{% form_theme form _self %}
+
+{% block choice_widget_options %}
+  {% for group_label, choice in options %}
+    {% if choice is iterable %}
+      <optgroup
+        label="{{ choice_translation_domain is same as(false) ? group_label : group_label|trans({}, choice_translation_domain) }}">
+        {% set options = choice %}
+        {{ block('choice_widget_options') }}
+      </optgroup>
+    {% else %}
+
+      {# this line has been overwritten, see {{- block('choice_option_label') -}} to end #}
+      <option
+        value="{{ choice.value }}"{% if choice.attr %} {% set attr = choice.attr %}{{ block('attributes') }}{% endif %}{% if choice is selectedchoice(value) %} selected="selected"{% endif %}>{{ block('choice_option_label') }}</option>
+
+    {% endif %}
+  {% endfor %}
+{% endblock choice_widget_options %}
+
+{% block choice_option_label %}
+  {# this block has been called from choice_widget_options block #}
+
+  {% if raw_label|default(false) %}
+    {# the label is rendered as raw when IconChoiceType is used #}
+    {{ choice_translation_domain is same as(false) ? choice.label|raw : choice.label|trans({}, choice_translation_domain)|raw }}
+  {% else -%}
+    {{ choice_translation_domain is same as(false) ? choice.label : choice.label|trans({}, choice_translation_domain) }}
+  {% endif %}
+{% endblock %}
+
+{% set elmtType = app.request_stack.currentrequest.get('elmtType') %}
+{% set colors = ["purple", "green", "orange", "blue-grey", "light-blue", "pink", "teal", "deep-purple", "lime", "grey", "light-green","red"] %}
+
+
+{% block title %}
+  {% trans %}criteria.page_title{% endtrans %}
+{% endblock %}
+
+{% block css %}
+  <!-- CSS NoUISlider-->
+  <link rel="stylesheet" href="{{ asset('css/nouislider.css') }}">
+
+  <style>
+    #hiddenul {
+      display: none;
+    }
+
+    form {
+      display: flex;
+      flex-flow: column;
+      flex-grow: 1;
+    }
+
+    form > .row {
+      margin-left: 0;
+      margin-right: 0;
+    }
+
+    .action-buttons {
+      margin-top: auto;
+    }
+
+    .criterion.collection {
+      overflow: visible;
+    }
+
+    /*
+    ul.criteria > .criterion:not(:first-child) {
+        margin-top: 4em;
+    }*/
+
+    ul.criteria {
+      margin-top: 2em;
+      margin-bottom: 4em;
+    }
+
+    ul.stage-participants {
+      margin-top: 2em;
+      margin-bottom: 4em;
+    }
+
+    .stage-banner {
+      margin-left: 3vw;
+      font-size: 20px;
+      width: 100%;
+    }
+
+    .switch.date-switch, .switch.output-switch {
+      position: relative;
+    }
+
+    .switch.date-switch label:first-child {
+      position: absolute;
+      top: -120%;
+    }
+
+    .switch.date-switch label > * {
+      font-size: 14.5px;
+      color: black;
+    }
+
+    .switch.output-switch label > * {
+      font-size: 1.64rem;
+      color: black;
+    }
+
+    .stage .collapsible-body > .row {
+      position: relative;
+    }
+
+    .insert-criterion-btn, .insert-survey-btn, .insert-participant-btn {
+      position: absolute;
+      bottom: -0%;
+    }
+
+    .element-data ul > li:first-child {
+      margin-right: auto;
+    }
+
+    .element-data .btn-flat, .element-input:not(.criterion) .btn-flat {
+      padding: 0;
+      padding-left: 1.3rem;
+    }
+
+    .element-data ul > :not(:last-child):not(:first-child) {
+      padding: 0 0.6rem;
+    }
+
+    .scale-data ul *, .step-data ul *, .participant-info ul > :not(:first-child) {
+      padding: 0 0.3rem;
+    }
+
+    .collapsible-header .fa {
+      margin: 0;
+    }
+
+    .stage-participant .btn {
+      padding: 0 1.5rem;
+    }
+
+    .stage-name, .activity-name {
+      display: inline;
+    }
+
+    label[for="output_type"] {
+      position: absolute;
+      top: -25%;
+    }
+
+
+  </style>
+
+  <script type="text/javascript">
+    var lg = '{% trans %}curr_language{% endtrans %}';
+    var curl = "{{ url('addCriterionName') }}";
+    let modalSetMsg = '{% trans %}create_parameters.define_objective.modal_trigger_btn{% endtrans %}';
+    let modalModifyMsg = '{% trans %}create_parameters.define_objective.modify_trigger_btn{% endtrans %}';
+    let forceCommentMsg_0 = '{% trans %}criteria.criterion.forceCommentCompare{% endtrans %}';
+    let forceCommentMsg_1 = '{% trans %}criteria.criterion.force_comments_pure_comment{% endtrans %}';
+    let forceCommentMsg_2 = '{% trans %}criteria.criterion.force_comments_binary_label{% endtrans %}';
+    var precommentCreationMsg = '{% trans %}participants.guidelines.create{% endtrans %}';
+    var precommentUpdateMsg = '{% trans %}participants.guidelines.modify{% endtrans %}';
+    var precommentNoneMsg = '{% trans %}participants.guidelines.no_guidelines{% endtrans %}';
+    var mp = 1;
+    var dcurl = "{{ url('ajaxCriterionDelete',{'elmtType' : elmtType, 'criId' : 0}) }}";
+    var dsurl = "{{ url('ajaxStageDelete',{'elmtType' : elmtType, 'stgId' : 0}) }}";
+    var courl = "{{ url('clearStageOutput', {'elmtType' : elmtType, 'stgId' : 0}) }}"
+
+  </script>
+{% endblock %}
+
+{% block pagename %}
+  <span>{{ activity.name|slice(0, 13) ~ '...' }}</span>
+  <span>{% trans %}criteria.mobile_header_description{% endtrans %}</span>
+{% endblock %}
+{% block username %}
+  {{ currentuser.firstname }} {{ currentuser.lastname }}
+{% endblock %}
+
+{% block content %}
+
+  <section class="col s10">
+
+    {{ form_start(form) }}
+
+    <div class="center activity-title">
+      <div class="element-data flex-center" style="justify-content: center;">
+        <h4 class="activity-name">{{ form.vars.data.name }}</h4>
+
+        <a class="waves-effect waves-light btn-flat tooltipped" data-position="top"
+           data-tooltip="{% trans %}organization_elements.update{% endtrans %}" data-delay="50"><i
+            class="fa fa-pencil-alt"></i></a>
+      </div>
+
+      <div class="element-input" style="display: none;">
+        <ul class="flex-center" style="justify-content: center;">
+          <li>
+            <div class="input-field">
+              {{ form_widget(form.name) }}
+            </div>
+          </li>
+          <li>
+            <a class="validate waves-effect waves-light btn blue darken-2 tooltipped" data-position="top"
+               data-tooltip="{% trans %} criteria.tooltip.validate {% endtrans %}"><i class="fa fa-check"></i></a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    {% if currentuser.role != 4 and elmtType in ['iprocess','process'] %}
+      <div>
+        {{ form_widget(form.approvable) }}
+        {{ form_label(form.approvable) }}
+      </div>
+    {% endif %}
+
+    <ul class="stages"
+        data-prototype="{% filter escape %}{% include 'prototype_process_stage.twig' with {elmtType : elmtType, 'item': form.stages.vars.prototype ,activity : form.vars.data.id  } %}{% endfilter %}">
+      {% for s, stage in form.stages %}
+      {% set isFeedbackTypeSettled = stage.vars.data.isFeedbackTypeSettled %}
+        <li class="stage">
+          <ul class="collapsible expandMore expandLess" data-collapsible="accordion">
+            <li>
+              <div class="collapsible-header flex-center
+                                {% if form.stages|length == 1 %} active {% endif %}
+                                {#{% if elmt == 'activity' %}
+                                    {% if activity.activeStages[k].status == 0 %}cyan{% elseif activity.activeStages[k].status == 1 %}cyan{% elseif activity.stages[k].status == 2 %}orange{% endif %}
+                                {% endif %}#}
+                        cyan lighten-5">
+                <i class="fa fa-fw fa-chevron-down"></i>
+                <i class="fa fa-fw fa-chevron-right"></i>
+                <!-- just giving the name an absolute position because it was interfering ith the button position -->
+                <div class="stage-banner">
+                  <ul class="flex-center">
+                    <ul style="width:100%">
+                      <li class="element-data">
+                        <ul class="flex-center-sb">
+                          <li class="stage-banner-element">
+                            <ul class="flex-center">
+                              <li class="stage-visibility stage-banner-element">
+                                {% if stage.vars.data.visibility == 1 %}
+                                  <i class="fa fa-lock-open"></i>
+                                {% elseif stage.vars.data.visibility == 2 %}
+                                  <i class="fa fa-unlock"></i>
+                                {% else %}
+                                  <i class="fa fa-lock"></i>
+                                {% endif %}
+                              </li>
+                              <li>
+                                <h5 class="stage-name">{{ stage.vars.data.name }}</h5>
+                                <span
+                                  class="stage-weight">{% if form.stages|length > 1 %}( {{ (stage.vars.data.weight * 100)|round }} % ){% endif %}</span>
+                              </li>
+
+                              {% if elmtType != "activity" %}
+                                <li class="stage-period-freq stage-banner-element" {% if stage.vars.data.definiteDates %}style="display:none" {% endif %}>
+                                  <ul class="flex-center">
+                                    <li>
+                                      <i class="fa fa-clock no-margin"></i>
+                                      <span>{{ stage.vars.data.dPeriod }} {{ stage.vars.data.dFrequency }}</span>
+                                    </li>
+                                    <li> - </li>
+                                    <li>
+                                      <i class="fa fa-pencil-ruler no-margin"></i>
+                                      <span>{{ stage.vars.data.fPeriod }} {{ stage.vars.data.fFrequency }}</span>
+                                    </li>
+                                  </ul>
+                                </li>
+                              {% endif %}
+
+                              <li class="stage-dates"
+                                  {% if not stage.vars.data.definiteDates and elmtType != "activity" %}style="display:none" {% endif %}>
+                                <i class="fa fa-calendar"></i>
+                                <span>{{ stage.vars.data.startdate|localizeddate('short', 'none', null, null, 'dd/MM') }} - {{ stage.vars.data.enddate|localizeddate('short', 'none', null, null, 'dd/MM') }}</span>
+                              </li>
+
+
+                            </ul>
+                          </li>
+
+                          <li>
+
+                            <a class="waves-effect waves-light btn-flat tooltipped not-collapse modal-trigger"
+                               href="#stage_{{ s }}" data-position="top"
+                               data-tooltip="{% trans %}organization_elements.update{% endtrans %}" data-delay="50"><i
+                                class="fa fa-pencil-alt no-margin"></i></a>
+
+                          </li>
+                        </ul>
+                      </li>
+
+                      <div id="stage_{{ s }}" class="element-input modal" style="width: 80%;height:70%">
+                        <div class="modal-content">
+                          <ul class="flex-center" style="justify-content:space-between;">
+                            <li class="stage-title"><h4>{% trans %} stages.stage.title {% endtrans %} {{ s + 1 }}</h4>
+                            </li>
+
+
+                            <li class="input-field weight" style="width: 20%;">
+                              {{ form_label(stage.weight) }}
+                              <div class="weight-stage-slider" style="margin-top:10px;"></div>
+                              <div class="weight-stage-slider-range-value center"
+                                   style="font-size:1.2rem;padding-top: 5px"></div>
+                              {{ form_widget(stage.weight) }}
+                              {{ form_errors(stage.weight) }}
+                            </li>
+
+                            <li>
+                              <a href="#deleteStage"
+                                  class="waves-effect waves-light accent-4 btn-flat modal-trigger tooltipped"
+                                  data-sid="{{ stage.vars.data.id }}" data-position="top"
+                                  data-tooltip="{% trans %}criteria.delete_criterion_btn{% endtrans %}"><i
+                                  class="fa fa-trash no-margin"></i></a>
+                            </li>
+
+                          </ul>
+                          <div class="row">
+                            <li class="input-field">
+                              {{ form_label(stage.name) }}
+                              {{ form_widget(stage.name) }}
+                            </li>
+                          </div>
+                          <div class="row">
+                            <ul class="flex-center" style="justify-content:space-between;width:100%">
+
+                              {% if elmtType != 'activity' %}
+
+                                <li class="switch date-switch">
+                                  {{ form_label(stage.definiteDates) }}
+                                  <label style="display: flex;">
+                                    <span>{% trans %}process_stages.dates_definition.defined_duration.title{% endtrans %}</span>
+                                    {{ form_widget(stage.definiteDates) }}
+                                    <span class="lever"></span>
+                                    <span>{% trans %}process_stages.dates_definition.defined_dates{% endtrans %}</span>
+                                  </label>
+                                </li>
+
+                                <li class="flex-center period-freq-input" {% if stage.vars.data.definiteDates %}style="display:none"{% endif %}>
+                                    <ul class="flex-center" style="flex-direction: column;">
+                                      <li class="flex-center" style="justify-content: space-between;width:100%">
+                                        <label style="max-width: 20%;">{% trans %}process_stages.dates_definition.defined_duration.timespan{% endtrans %}</label>
+                                        <div class="input-field no-margin" style="margin-left: auto!important;">
+                                          {{ form_widget(stage.dPeriod) }}
+                                        </div>
+                                        <div class="input-field no-margin">
+                                          {{ form_widget(stage.dFrequency) }}
+                                        </div>
+                                        <label style="margin: 0 15px">{% trans %}process_stages.dates_definition.defined_duration.origin{% endtrans %}</label>
+                                        <div class="input-field no-margin">
+                                          {{ form_widget(stage.dOrigin) }}
+                                        </div>
+                                      </li>
+                                      <li class="flex-center" style="justify-content: space-between;width:100%">
+                                        <label style="max-width: 20%;">{% trans %}process_stages.dates_definition.defined_duration.feedback{% endtrans %}</label>
+                                        <div class="input-field no-margin" style="margin-left: auto!important;">
+                                          {{ form_widget(stage.fPeriod) }}
+                                        </div>
+                                        <div class="input-field no-margin">
+                                          {{ form_widget(stage.fFrequency) }}
+                                        </div>
+                                        <label style="margin: 0 15px">{% trans %}process_stages.dates_definition.defined_duration.origin{% endtrans %}</label>
+                                        <div class="input-field no-margin">
+                                          {{ form_widget(stage.fOrigin) }}
+                                        </div>
+                                      </li>
+                                    </ul>
+                                </li>
+
+                              {% endif %}
+
+                              <li class="flex-center dates-input"
+                                {% if not stage.vars.data.definiteDates and elmtType != 'activity' %}style="display:none"{% endif %}
+                                {% if elmtType == 'activity' %}style="justify-content:space-between;width:100%"{% endif %}
+                              >
+                                <div class="input-field">
+                                  {{ form_label(stage.startdate) }}
+                                  {{ form_widget(stage.startdate) }}
+                                </div>
+                                <div class="input-field">
+                                  {{ form_label(stage.enddate) }}
+                                  {{ form_widget(stage.enddate) }}
+                                </div>
+                                <div class="input-field">
+                                  {{ form_label(stage.gstartdate) }}
+                                  {{ form_widget(stage.gstartdate) }}
+                                </div>
+                                <div class="input-field">
+                                  {{ form_label(stage.genddate) }}
+                                  {{ form_widget(stage.genddate) }}
+                                </div>
+                              </li>
+                            </ul>
+                          </div>
+                          <div class="row">
+                            {{ form_label(stage.mode) }}
+                            <div>
+                              {{ form_widget(stage.mode) }}
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="input-field">
+                              {{ form_widget(stage.visibility) }}
+                              {{ form_label(stage.visibility) }}
+                            </div>
+                          </div>
+                          <div class="action-buttons" style="justify-content: flex-end;">
+                            <a class="s-validate waves-effect waves-light btn blue darken-2 tooltipped modal-close"
+                               data-position="top" data-tooltip="{% trans %} criteria.tooltip.validate {% endtrans %}"
+                               data-sid="{{ stage.vars.data.id }}"><i class="fa fa-check no-margin"></i></a>
+                          </div>
+                        </div>
+                      </div>
+                    </ul>
+                  </ul>
+
+                  {#<div class="activity-description"> {{ activity.activeStages[k].description }}</div>#}
+                </div>
+              </div>
+              {#<ul class="collapsible" data-collapsible="accordion">
+                  <li>
+
+                      {% if key == 0 %}
+                          <div class="collapsible-header active">
+                      {% else %}
+                          <div class="collapsible-header">
+                      {% endif %}
+                          <i class="material-icons">expand_more</i>
+                          <div class="stage-title">
+                              <h4> {{ attribute(stagenames, key) }} (stage {{ key + 1 }})</h4>
+                          </div>
+                      </div>#}
+
+              <div class="collapsible-body">
+
+                <div class="row">
+
+                  <div class="col s12 m{% if elmtType != "process" %}6{% else %}12{% endif %}">
+
+                    <div class="switch output-switch">
+                      <label for="output_type"></label>
+                      <label class="flex-center">
+                        <h5 style="margin-bottom: 0;">
+                          <span class="output-type">{% trans %}activity_elements.survey{% endtrans %}</span>
+                          <input type="checkbox" id="output_type" class="filled-in"
+                            {{ isFeedbackTypeSettled ? 'disabled' }} {% if stage.vars.data.criteria|length > 0 %} checked="checked" {% endif %}
+                          >
+                          <span class="lever"></span>
+                          <span class="output-type">{% trans %}activity_elements.criteria{% endtrans %}</span>
+                        </h5>
+                      </label>
+                    </div>
+
+
+                    <div class="survey-element" {{ (stage.vars.data.criteria|length > 0) ? 'style="display: none;"' }}>
+                      {% if stage.vars.data.survey|length != null %} <h6>Gérer le sondage</h6>
+
+                        {% if stage.vars.data.isFinalized == false %}
+                            <a href="{{ url('surveyRequest',{'stgId' : stage.vars.data.id}) }}?redirect={{ url(route,routeParams)|e('url') }}" class="btn waves-effect waves-light tooltipped"
+                               data-tooltip="{% trans %}process_stages.editSurvey{% endtrans %}"> <i class="fa fa-pencil-alt"></i>
+                            </a>
+
+                        {% endif %}
+                        {% if stage.vars.data.survey.answers|length != null %}
+                          <a href="{{ url('answerShow',{'surId':stage.vars.data.survey.id}) }}"
+                             class="modal-trigger btn waves-effect waves-light tooltipped"
+                             data-tooltip="{% trans %}process_stages.checkAnswers{% endtrans %}"><i
+                              class="fas fa-eye"></i> </a>
+                        {% endif %}
+                        <a href="{{ url('answerShow',{'surId':stage.vars.data.survey.id}) }}"
+                          class="modal-trigger btn waves-effect waves-light tooltipped"
+                          data-tooltip="{% trans %}process_stages.checkAnswers{% endtrans %}"><i
+                            class="fas fa-eye"></i> </a>
+                        <a href="#deleteSurveyModal" class="modal-trigger btn waves-effect waves-light tooltipped"
+                           data-tooltip="{% trans %}process_stages.delete{% endtrans %}"><i class="fas fa-trash"></i>
+                        </a>
+
+                        <div id="deleteSurveyModal" class="modal">
+                          <div class="modal-title">
+                            <h5>{% trans %}process_stages.validate_delete{% endtrans %}</h5>
+                          </div>
+                          <div class="modal-footer">
+                            <a
+                              class="waves-effect waves-light modal-close btn red cancel-btn">{% trans %}criteria.diffToSimilar.cancel{% endtrans %}</a>
+                            <a
+                              href="{{ url('surveyDelete',{surId : stage.vars.data.survey.id}) }}?redirect={{ url(route,routeParams)|e("url") }}"
+                              class="btn waves-effect waves-light modal-close">{% trans %}criteria.diffToSimilar.accept{% endtrans %}</a>
+                          </div>
+                        </div>
+                      {% else %}
+                        <h6 class="no-participants">
+                          <span>{{ 'process_stages.no_survey'|trans }}</span>
+                          <i class="fa fa-question-circle tooltipped" data-position="top"></i>
+                        </h6>
+
+                        <a
+                          href="{{ url('surveyRequest',{'stgId' : stage.vars.data.id}) }}?redirect={{ url(route,routeParams)|e('url') }}"
+                          class="btn waves-effect waves-light insert-survey-btn" style="margin-top:5%">
+                          <span>{% trans %}survey.add_btn_internal{% endtrans %}</span>
+                        </a>
+                      {% endif %}
+                    </div>
+
+                    <div class="criteria-elements" {{ (not isFeedbackTypeSettled) ? 'style="display: none;"' }}>
+
+                      {% if stage.criteria|length == 0 %}
+                        <h6 class="no-criteria">
+                          <span>{{ 'process_stages.no_criteria'|trans }}</span>
+                          <i class="fa fa-question-circle tooltipped" data-position="top"
+                            data-tooltip="{{ 'process_stages.tooltip_no_criteria'|trans }}"></i>
+                        </h6>
+                      {% endif %}
+
+                      <ul class="criteria"
+                          data-prototype="{% filter escape %}{% include 'prototype_criterion.twig' with { 'item': stage.criteria.vars.prototype } %}{% endfilter %}">
+
+                        {% for key, criterion in stage.criteria %}
+                          <li class="criterion">
+                            <ul>
+                              <li class="element-data">
+                                <ul class="flex-center-sb">
+                                  <li>
+                                    <span class="ci">
+                                        {% set crtIcon = criterion.vars.data.cName.icon %}
+                                      {% if crtIcon is not null %}
+                                        {% if crtIcon.type != "m" %}
+                                          <i
+                                            class="{{ crtIcon.type }} fa-{{ crtIcon.name }}"></i>
+                                            {% else %}
+                                          <i
+                                            class="material-icons">{{ crtIcon.name }}</i>
+                                        {% endif %}
+                                        {% else %}
+                                        <i class="fa fa-cube"></i>
+                                      {% endif %}
+                                    </span>
+                                    <div style="display:inline-block">
+                                      <span class="cn">{{ criterion.vars.data.cName.name }}</span>
+                                      {% if criterion.vars.data.type != 2 %}
+                                        (<span class="cw">{{ criterion.vars.data.weight * 100 }}</span>%)
+                                      {% endif %}
+                                    </div>
+                                  </li>
+
+                                  <li
+                                    style="{% if not (criterion.vars.data.type == 2 or criterion.vars.data.forceCommentCompare and criterion.vars.data.forceCommentValue) %}display:none;{% endif %}text-align:center;">
+                                    <span class="tooltipped" data-position="top" data-tooltip="{% trans %}criteria.tooltip.required_comment{% endtrans %}">
+                                      <i class="fa fa-comment" style="margin-right:0;font-size:1.6rem;position:relative">
+                                        {# We put sign/value of force comment within symbol only if it is a evaluation criterion #}
+                                        {% if criterion.vars.data.type == 1 %}
+                                          <div
+                                            style="position: absolute;display:inline-flex;font-size:1rem;top:15%;left:10%"
+                                            class="white-text">
+                                            <span class="ccsi">
+                                              {% if criterion.vars.data.forceCommentSign == 'smaller' %}<{% else %}≤{% endif %}
+                                            </span>
+                                            <span
+                                              class="ccv">{{ criterion.vars.data.forceCommentValue }}</span>
+                                          </div>
+                                        {% endif %}
+                                      </i>
+                                    </span>
+                                  </li>
+                                  <li {% if criterion.vars.data.type != 1 %}style="display:none;"{% endif %}
+                                      class="scale-data tooltipped" data-position="top"
+                                      data-tooltip="{% trans %}criteria.tooltip.scale{% endtrans %}">
+                                    <ul class="flex-center-sb">
+                                      <i class="fas fa-ruler" style="margin:0;font-size:1rem; width: 10%"></i>
+                                      <span
+                                        class="csc">[{{ criterion.vars.data.lowerbound }}-{{ criterion.vars.data.upperbound }}]</span>
+                                    </ul>
+                                  </li>
+                                  <li {% if criterion.vars.data.type != 1 %}style="display:none;"{% endif %}
+                                      class="step-data tooltipped" data-position="top"
+                                      data-tooltip="{% trans %}criteria.tooltip.step{% endtrans %}">
+                                    <ul class="flex-center-sb">
+                                      <i class="fas fa-arrows-alt-h" style="margin:0;font-size:1rem"></i>
+                                      <span class="cst">{{ criterion.vars.data.step }}</span>
+                                    </ul>
+                                  </li>
+                                  <li>
+                                    <a class="modify waves-effect waves-light btn-flat tooltipped modal-trigger"
+                                      href="#criterion_{{ s }}_{{ key }}" data-position="top"
+                                      data-tooltip="{% trans %}organization_elements.update{% endtrans %}"
+                                      data-delay="50"><i class="fa fa-pencil-alt"></i></a>
+                                  </li>
+                                </ul>
+
+                              </li>
+
+                              <div id="criterion_{{ s }}_{{ key }}" class="modal element-input"
+                                  style="width: 80%;height:70%">
+
+                                <div class="modal-content">
+
+                                  <ul class="flex-center-sb">
+                                    <li class="criterion-title">
+                                      <h4>{% trans %} criteria.criterion.title {% endtrans %} {{ key + 1 }}</h4>
+                                    </li>
+                                    <li style="width: 25%;">
+                                      <div class="input-field weight">
+                                        {{ form_label(criterion.weight) }}
+                                        <div class="weight-criterion-slider" style="margin-top:10px;"></div>
+                                        <div class="weight-criterion-slider-range-value center"
+                                            style="font-size:1.2rem;padding-top: 5px"></div>
+                                        {{ form_widget(criterion.weight) }}
+                                        {{ form_errors(criterion.weight) }}
+                                      </div>
+                                    </li>
+                                    <li>
+                                      <a class="waves-effect waves-light btn modal-trigger"
+                                        href="#criterionTarget_{{ s }}_{{ key }}"
+                                        style="display:none;margin-right:20px">
+                                        <ul
+                                          class="flex-center no-margin">{% trans %}create_parameters.define_objective.modal_trigger_btn{% endtrans %}
+                                          <i class="far fa-dot-circle" style="margin-left:10px"></i> <i
+                                            class="far fa-comment" style="margin-left:10px"></i></ul>
+                                      </a>
+                                      <a href="#deleteCriterion"
+                                        class="waves-effect waves-light accent-4 btn-flat modal-trigger tooltipped"
+                                        data-cid="{{ criterion.vars.data.id }}" data-position="top"
+                                        data-tooltip="{% trans %}criteria.delete_criterion_btn{% endtrans %}"><i
+                                          class="fa fa-trash"></i></a>
+                                    </li>
+                                  </ul>
+                                  <div class="row">
+                                    <div class="col s12">
+                                      <div class="input-field criterion-name">
+                                        {{ form_widget(criterion.cName) }}
+                                        {{ form_label(criterion.cName) }}
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div class="row">
+                                    <div class="col s12">
+                                      {{ form_label(criterion.type) }}
+                                      {{ form_widget(criterion.type) }}
+                                      {{ form_errors(criterion.type) }}
+                                    </div>
+                                  </div>
+                                  <div class="row flex-center force-comments">
+                                    <div class="col m5 s12 force-choice" style="margin-left: 0">
+                                      {{ form_widget(criterion.forceCommentCompare) }}
+                                      {{ form_label(criterion.forceCommentCompare) }}
+                                      {{ form_errors(criterion.forceCommentCompare) }}
+                                    </div>
+                                    <div class="input-field col m4 s6 force-sign" style="margin-top: 0">
+                                      {{ form_widget(criterion.forceCommentSign) }}
+                                      {{ form_errors(criterion.forceCommentSign) }}
+                                    </div>
+                                    <div class="input-field col m3 s6 force-value" style="margin-top: 0">
+                                      {{ form_label(criterion.forceCommentValue) }}
+                                      {{ form_widget(criterion.forceCommentValue) }}
+                                      {{ form_errors(criterion.forceCommentValue) }}
+                                    </div>
+                                  </div>
+                                  <div class="row scale">
+                                    <div class="input-field col s6 m4">
+                                      {{ form_label(criterion.lowerbound) }}
+                                      {{ form_widget(criterion.lowerbound) }}
+                                      {{ form_errors(criterion.lowerbound) }}
+                                    </div>
+                                    <div class="input-field col s6 m4">
+                                      {{ form_label(criterion.upperbound) }}
+                                      {{ form_widget(criterion.upperbound) }}
+                                      {{ form_errors(criterion.upperbound) }}
+                                    </div>
+                                    <div class="input-field col s6 m4">
+                                      {{ form_label(criterion.step) }}
+                                      {{ form_widget(criterion.step) }}
+                                      {{ form_errors(criterion.step) }}
+                                    </div>
+                                  </div>
+                                  <div class="action-buttons" style="justify-content: flex-end;">
+                                    <a
+                                      class="c-validate waves-effect waves-light btn blue darken-2 tooltipped modal-close"
+                                      data-position="top"
+                                      data-tooltip="{% trans %} criteria.tooltip.validate {% endtrans %}"
+                                      data-cid="{{ criterion.vars.data.id }}"><i class="fa fa-check"></i></a>
+                                  </div>
+
+                                </div>
+
+                              </div>
+
+                              <div id="criterionTarget_{{ s }}_{{ key }}" class="modal">
+                                <div class="modal-title">
+                                  <p>
+                                  <h5>{% trans %}create_parameters.define_objective.modal_title{% endtrans %}</h5></p>
+                                </div>
+                                <div class="modal-content">
+                                  <div style="display:none;">
+                                    <input type="checkbox" id="defineCriterionTarget_{{ s }}_{{ key }}"
+                                          class="filled-in" {% if criterion.vars.data.target != null %} checked="checked" {% endif %}>
+                                    <label
+                                      for="defineCriterionTarget_{{ s }}_{{ key }}">{% trans %}create_parameters.define_objective.define_target_label{% endtrans %}</label>
+                                  </div>
+
+                                  <div class="target">
+                                    {{ form_label(criterion.targetValue) }}
+                                    <div class="target-slider" style="margin-top:10px;"></div>
+                                    <div class="taret-slider-range-value center"
+                                        style="font-size:1.2rem;padding-top: 5px"></div>
+                                    {{ form_widget(criterion.targetValue) }}
+                                    {{ form_errors(criterion.targetValue) }}
+                                  </div>
+
+                                  {{ form_label(criterion.comment) }}
+                                  {{ form_widget(criterion.comment) }}
+                                  {{ form_errors(criterion.comment) }}
+                                </div>
+
+                                <div class="modal-footer">
+                                  <a
+                                    class="waves-effect waves-light modal-close btn red cancel-btn">{% trans %}criteria.diffToSimilar.cancel{% endtrans %}</a>
+                                  <a
+                                    class="btn waves-effect waves-light modal-close">{% trans %}criteria.diffToSimilar.accept{% endtrans %}</a>
+                                </div>
+                              </div>
+                            </ul>
+
+                          </li>
+                        {% endfor %}
+                      </ul>
+                      <a class="btn waves-effect waves-light insert-criterion-btn">
+                        <span>{% trans %}criteria.add_btn_internal{% endtrans %}</span>
+                      </a>
+
+                    </div>
+
+
+
+                  </div>
+
+                  {% if elmtType != "process" %}
+
+                    <div class="col s12 m6">
+                      <h5>{% trans %}activity_elements.participants{% endtrans %}</h5>
+
+                      {% if stage.vars.data.uniqueParticipations|length == 0 %}
+                        <h6 class="no-participants">
+                          <span>{{ 'process_stages.no_participants'|trans }}</span>
+                          <i class="fa fa-question-circle tooltipped" data-position="top"
+                             data-tooltip="{{ 'process_stages.tooltip_no_participants'|trans }}"></i>
+                        </h6>
+                      {% endif %}
+
+                      <ul class="stage-participants" data-sid="{{ stage.vars.data.id }}"
+                          data-iprototype="{% filter escape %}{% include 'prototype_participant.twig' with { item: stage.uniqueIntParticipations.vars.prototype, leadingOption: true } %}{% endfilter %}"
+                          data-tprototype="{% filter escape %}{% include 'prototype_participant.twig' with { item: stage.uniqueTeamParticipations.vars.prototype, leadingOption: true } %}{% endfilter %}"
+                          data-eprototype="{% filter escape %}{% include 'prototype_participant.twig' with { item: stage.uniqueExtParticipations.vars.prototype, leadingOption: false } %}{% endfilter %}"
+
+                      >
+
+                        {% set l = 0 %}
+                        {% for p, participant in stage.uniqueIntParticipations|merge(stage.uniqueExtParticipations)|merge(stage.uniqueTeamParticipations) %}
+                          {% set userPicture = participant.vars.data.directUser.picture is not empty
+                            ? asset('lib/img/' ~ participant.vars.data.directUser.picture)
+                            : asset('lib/img/no-picture.png') %}
+                          {% if participant in stage.uniqueExtParticipations %}
+                            {% if participant.vars.data.directUser.lastname == 'ZZ' %}
+                              {% set directUserFullname = participant.vars.data.directUser.organization.commname %}
+                            {% else %}
+                              {% set directUserFullname = participant.vars.data.directUser.fullname ~ ' (' ~ participant.vars.data.directUser.organization.commname ~ ')' %}
+                            {% endif %}
+                          {% elseif participant in stage.uniqueTeamParticipations %}
+                            {% set directUserFullname = participant.vars.data.team.name %}
+                          {% else %}
+                            {% set directUserFullname = participant.vars.data.directUser.fullname %}
+                          {% endif %}
+
+                          <li class="stage-participant">
+                            <ul>
+                              <li class="element-data">
+                                <ul class="flex-center-sb">
+                                  <li class="participant-info">
+                                    <ul class="flex-center">
+                                      <li class="picture-frame-s" style="display: inline-block;">
+                                        <img class="user-picture-s" src="{{ userPicture }}"
+                                             alt="{{ directUserFullname }}" style="border-radius: 100%;">
+                                      </li>
+                                      <li>
+                                        <span class="element-name">{{ directUserFullname }}</span>
+                                      </li>
+                                      <li class="element-type">
+                                        <ul>
+                                          {% if participant.vars.data.leader == true %}
+                                            <li>
+                                              <i class="fa fa-star tooltipped" data-position="top"
+                                                 data-tooltip="{% trans %}participants.leader{% endtrans %}"></i>
+                                            </li>
+                                          {% endif %}
+                                          <li class="element-type">
+                                            {% if participant.vars.data.type == 0 %}
+                                              <span
+                                                style="background-color: purple;color: white;padding: 0px 5px;border-radius: 100%;"
+                                                class="tooltipped" data-position="top"
+                                                data-tooltip="{% trans %}tooltip.activity.tp_participant_msg{% endtrans %}"
+                                                data-delay="50">T</span>
+                                            {% elseif participant.vars.data.type == -1 %}
+                                              <span
+                                                style="background-color: orange;color: white;padding: 0px 5px;border-radius: 100%;"
+                                                class="tooltipped" data-position="top"
+                                                data-tooltip="{% trans %}tooltip.activity.passive_participant_msg{% endtrans %}"
+                                                data-delay="50">P</span>
+                                            {% endif %}
+                                          </li>
+                                          {% if elmtType == 'activity' and participant.vars.data.isMailed %}
+                                            <li>
+                                              <i class="fa fa-envelope tooltipped" data-position="top"
+                                                 data-tooltip="{% trans %}participants.mailed{% endtrans %}"></i>
+                                            </li>
+                                          {% endif %}
+                                        </ul>
+                                      </li>
+                                    </ul>
+                                  </li>
+                                  <li style="margin-right: 10px;" class="element-precomment">
+                                    {% if participant.vars.data.precomment is not null %}
+                                      <a class="waves-effect waves-light btn-flat tooltipped" data-position="top"
+                                         data-tooltip="Guidelines : {{ participant.vars.data.precomment }}"
+                                         data-delay="50"><i class="fa fa-flag"></i></a>
+                                    {% else %}
+                                      <a class="waves-effect waves-light btn-flat tooltipped" data-position="top"
+                                         data-tooltip="{% trans %}participants.guidelines.no_guidelines{% endtrans %}"
+                                         data-delay="50"><i class="far fa-flag"></i></a>
+                                    {% endif %}
+                                  </li>
+                                  <li>
+                                    <a
+                                      class="p-validate modify waves-effect waves-light btn-flat tooltipped {{ isFinalized is defined and isFinalized == true ? 'modal-trigger' }}"
+                                      data-position="top"
+                                      data-tooltip="{% trans %}organization_elements.update{% endtrans %}"
+                                      data-delay="50"><i class="fa fa-pencil-alt"></i></a>
+                                  </li>
+                                </ul>
+                              </li>
+                              <li class="element-input" style="display: none;">
+                                <ul class="flex-center-sb">
+                                  <li class="input-field participant-name">
+                                    {{ form_widget(participant.directUser) }}
+                                    {{ form_label(participant.directUser) }}
+                                  </li>
+                                  {% if participant not in stage.uniqueExtParticipations %}
+                                    <li>
+                                      {{ form_widget(participant.leader) }}
+                                      {{ form_label(participant.leader) }}
+                                      {{ form_errors(participant.leader) }}
+                                    </li>
+                                  {% endif %}
+                                  <li class="input-field" style="width: 50px;">
+                                    {{ form_widget(participant.type) }}
+                                    {{ form_label(participant.type) }}
+                                  </li>
+                                  <li>
+                                    {% if participant.vars.data.precomment is not null %}
+                                      <a
+                                        class="validate waves-effect waves-light btn lime darken-4 tooltipped modal-trigger element-input white-text"
+                                        href="#precomment_{{ s }}_{{ p }}" data-position="top" data-alternate-tooltip=""
+                                        data-tooltip="{% trans %}participants.guidelines.modify{% endtrans %}"><i
+                                          class="fa fa-flag"></i></a>
+                                    {% else %}
+                                      <a
+                                        class="validate waves-effect waves-light btn tooltipped modal-trigger element-input"
+                                        href="#precomment_{{ s }}_{{ p }}" data-position="top"
+                                        data-alternate-tooltip="{% trans %}participants.guidelines.modify{% endtrans %}"
+                                        data-tooltip="{% trans %}participants.guidelines.create{% endtrans %}"><i
+                                          class="far fa-flag"></i></a>
+                                    {% endif %}
+                                  </li>
+
+                                  <li>
+                                    <a
+                                      class="p-validate modify waves-effect waves-light btn blue darken-2 tooltipped {{ isFinalized is defined and isFinalized == true ? 'modal-trigger' }}"
+                                      data-position="top"
+                                      data-tooltip="{% trans %}organization_elements.update{% endtrans %}"
+                                      data-delay="50"><i class="fa fa-check"></i></a>
+                                  </li>
+
+                                  <li>
+                                    <a href="#deleteParticipant"
+                                       class="waves-effect waves-light accent-4 btn-flat modal-trigger tooltipped"
+                                       data-eid="{{ participant.vars.data.id }}" data-position="top"
+                                       data-tooltip="{% trans %}participants.delete{% endtrans %}"><i
+                                        class="fa fa-times"></i></a>
+                                  </li>
+                                </ul>
+                              </li>
+                            </ul>
+
+
+                            <div id="precomment_{{ s }}_{{ p }}" class="modal">
+                              <div class="modal-title">
+                                <h5>{% trans %}participants.guidelines.modal_title{% endtrans %} <span
+                                    class="participant-fullname">{{ participant.vars.data.directUser.fullname }}</span>
+                                </h5>
+                              </div>
+                              <div class="modal-content">
+                                {{ form_widget(participant.precomment) }}
+                              </div>
+                              <div class="modal-footer">
+                                <a
+                                  class="btn btn-clear red waves-effect waves-light">{% trans %}participants.guidelines.clear_button{% endtrans %}</a>
+                                <a
+                                  class="btn waves-effect waves-light modal-close validate-precomment">{% trans %}participants.guidelines.save_button{% endtrans %}</a>
+                              </div>
+                            </div>
+                          </li>
+
+                        {% endfor %}
+
+                      </ul>
+
+                      {% set btnClass = form.vars.data.organization.orgUsers|length - 1 == stage.vars.data.uniqueParticipations|length ? 'grey btn disabled' : 'btn' %}
+
+                      <div class="action-buttons" style="justify-content: space-between;">
+                        <a class="{{ btnClass }} waves-effect waves-light insert-participant-btn-i">
+                          <i class="fa fa-user"></i><i class="fa fa-plus"></i>
+                        </a>
+                        {% if form.vars.data.organization.teams|length > 0 %}
+                          <a class="{{ btnClass }} waves-effect waves-light insert-participant-btn-t">
+                            <i class="fa fa-users"></i><i class="fa fa-plus"></i>
+                          </a>
+                        {% endif %}
+                        {% if form.vars.data.organization.externalUsers|length > 0 %}
+                          <a class="{{ btnClass }} waves-effect waves-light insert-participant-btn-e">
+                            <i class="far fa-user"></i><i class="fa fa-plus"></i>
+                          </a>
+                        {% endif %}
+                      </div>
+
+                    </div>
+                  {% endif %}
+
+                </div>
+              </div>
+            </li>
+          </ul>
+        </li>
+      {% endfor %}
+
+      <a href="#" class="waves-effect waves-light btn-flat insert-stage-btn flex-center"><i class="fa fa-plus"
+                                                                                            style="margin-right: 10px;"></i><span>Ajouter une étape</span></a>
+
+    </ul>
+
+    <div class="row action-buttons">
+      {% if elmtType == 'activity' and form.vars.data.isFinalized == false %}
+        <div class="button-field">
+          {{ form_row(form.save) }}
+        </div>
+      {% endif %}
+
+      {% set disabled = false %}
+
+      {% if elmtType == 'activity' %}
+        {% set disabled = true %}
+        {% set break = false %}
+        {% for stage in form.vars.data.stages if not break %}
+          {% if stage.distinctParticipations|length > 0 and (stage.criteria|length > 0 or stage.survey|length > 0) %}
+            {% set disabled = false %}
+            {% set break = true %}
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+
+      {% if disabled %}
+        <div class="button-field tooltipped" data-position="top"
+             data-tooltip="{% trans %}activity_elements.finalize_disabled_tooltip{% endtrans %}" data-tooltip="50">
+          {{ form_row(form.update, {'disabled' : disabled}) }}
+        </div>
+      {% else %}
+        <div class="button-field">
+          {{ form_row(form.update) }}
+        </div>
+      {% endif %}
+    </div>
+    <ul id="hiddenul" class="collection">
+      <li class="collection-item"></li>
+      <br><br>
+    </ul>
+    <input type="hidden" name="clicked-btn" value="">
+    {% if not form.vars.valid %}
+      <div id="errors" class="modal">
+        <div class="modal-title">
+          <h5>{% trans %}user_list.comments.modal_title{% endtrans %}</h5>
+        </div>
+
+
+        <div class="modal-content">
+          {#{{ form_errors(form)}}#}
+          {{ form_errors(form.stages) }}
+
+          {% if not form.stages.vars.valid %}
+
+
+            {% for s, stage in form.stages %}
+              {% if not stage.vars.valid %}
+
+                <div> Phase {{ s + 1 }} ({{ stage.vars.data.name }}) :
+
+                  {% for child in stage.children %}
+                    {% if not child.vars.valid %}
+                      <div style="margin-left: 20px;">{{ form_label(child) }}<span
+                          style="display:inline-block;width: 30%;"></span> {{ form_errors(child) }}</div>
+                    {% endif %}
+                  {% endfor %}
+
+                  {% for ckey, criterion in stage.criteria %}
+                    <div style="padding: 15px 0px">
+                      {% if not criterion.vars.valid %}
+                        Critère {{ ckey }} - {{ criterion.vars.data.cname.name }} :
+
+                        {% for child in criterion.children %}
+                          {% if not child.vars.valid %}
+                            <div style="margin-left: 40px;">{{ form_label(child) }}<span
+                                style="display:inline-block;width: 30%;"></span> {{ form_errors(child) }}</div>
+                          {% endif %}
+                        {% endfor %}
+                      {% endif %}
+                    </div>
+                  {% endfor %}
+
+                </div>
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+           
+        </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-green btn-large notifyModalClose">Ok</a>
+        </div>
+      </div>
+    {% endif %}
+
+    {{ form_rest(form) }}
+    {{ form_end(form) }}
+
+    <div class="s-form" style="display: none;">
+      {{ form_start(stageElementForm) }}
+      {{ form_rest(stageElementForm) }}
+      {{ form_end(stageElementForm) }}
+    </div>
+
+    <div class="c-form" style="display: none;">
+      {{ form_start(criterionElementForm) }}
+      {{ form_rest(criterionElementForm) }}
+      {{ form_end(criterionElementForm) }}
+    </div>
+
+
+    <div id="deleteStage" class="modal">
+      <div class="modal-title">
+        <p><h5>{% trans %}stages.deleteStage.modal_title{% endtrans %}</h5></p>
+      </div>
+      <div class="modal-content">
+        <p>{% trans %}stages.deleteStage.modal_content{% endtrans %}</p>
+      </div>
+      <div class="modal-footer">
+        <a
+          class="btn waves-effect waves-light modal-close remove-stage">{% trans %}stages.deleteStage.accept{% endtrans %}</a>
+        <a
+          class="waves-effect waves-light modal-close btn-flat red-text">{% trans %}stages.deleteStage.cancel{% endtrans %}</a>
+      </div>
+    </div>
+
+    <div id="deleteParticipant" class="modal">
+      <div class="modal-content">
+        <h4>{% trans with {'%element%' : 'participant'} %}organization_elements.delete_modal.title{% endtrans %}</h4>
+        <p>{% trans with {'%conj_element%' : 'participant'} %}organization_elements.delete_modal.content_1{% endtrans %}</p>
+      </div>
+      <div class="modal-footer">
+        <a
+          class=" modal-action modal-close submit-button waves-effect waves-green btn-large delete-button">{% trans %}organization_elements.delete_modal.confirm{% endtrans %}</a>
+        <a
+          class=" modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}organization_elements.delete_modal.decline{% endtrans %}</a>
+      </div>
+    </div>
+
+    <div id="deleteCriterion" class="modal">
+      <div class="modal-title">
+        <p><h5>{% trans %}criteria.deleteCriterion.modal_title{% endtrans %}</h5></p>
+      </div>
+      <div class="modal-content">
+        <p>{% trans %}criteria.deleteCriterion.modal_content{% endtrans %}</p>
+      </div>
+      <div class="modal-footer">
+        <a
+          class="btn waves-effect waves-light modal-close remove-criterion">{% trans %}criteria.deleteCriterion.accept{% endtrans %}</a>
+        <a
+          class="waves-effect waves-light modal-close btn-flat red-text">{% trans %}criteria.deleteCriterion.cancel{% endtrans %}</a>
+      </div>
+    </div>
+
+    <div id="changeOutputType" class="modal">
+      <div class="modal-title">
+        <p><h5>{% trans %}stages.output_type.change.modal_title{% endtrans %}</h5></p>
+      </div>
+      <div class="modal-content">
+        <p>{% trans %}stages.output_type.change.modal_content{% endtrans %}</p>
+      </div>
+      <div class="modal-footer">
+        <a
+          class="btn waves-effect waves-light modal-close change-output-btn">{% trans %}criteria.deleteCriterion.accept{% endtrans %}</a>
+        <a
+          class="waves-effect waves-light modal-close btn-flat red-text">{% trans %}criteria.deleteCriterion.cancel{% endtrans %}</a>
+      </div>
+    </div>
+
+  </section>
+
+
+  {% set break = false %}
+
+{% endblock %}
+
+{% block javascripts %}
+  {#<div id="user-pics" hidden>{{ userPics }}</div>#}
+  <script src="{{ asset('js/nouislider.js') }}"></script>
+  <script src="{{ asset('js/login.js') }}"></script>
+  <script src="{{ asset('js/process_stages.js') }}"></script>
+  <script src="{{ asset('js/activity_participants.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% set perf = team.ranking('A','P','W', true) %}
+{% set dev = team.ranking('A','D','W', true) %}
+
+{% import "macros/user_list__macros.html.twig" as macros %}
+
+<li class="teams-list--item hierarchized-item">
+  <header>
+    <div class="team-name">
+      {{ team.name }}
+    </div>
+  </header>
+  <div class="item-body">
+    <div class="team-actions">
+      {% if team.modifiable %}
+        <a class="btn-flat" href="{{ url('manageTeam', { teaId: team.id }) }}">
+          <i class="material-icons left">settings</i>
+          {{ 'user_list.modify'|trans }}
+        </a> 
+      {% endif %}
+      {% if team.overviewable %}
+      <a class="btn-flat" href="{{ url('elementOverview', { elmtId: team.id, elmtType: 'team' }) }}">
+        <i class="material-icons left">show_chart</i>
+        {{ 'user_list.overview'|trans }}
+      </a>
+      {% endif %}
+    </div>
+    <div class="team-info tiles-container">
+      <div class="tile performance">
+        {% set text %}
+          {% if not perf %}
+            -
+          {% else %}
+            {{ (100 * perf[0].value)|round }} %
+          {% endif %}
+        {% endset %}
+        {{ macros.render_tile(
+          'tooltip.team.performance'|trans, 'fa fa-chart-line', text
+        ) }}
+      </div>
+
+      <div class="tile deviation">
+        {% set text %}
+          {% if not dev %}
+            -
+          {% else %}
+            {{ (100 * dev[0].value)|round }} %
+          {% endif %}
+        {% endset %}
+        {{ macros.render_tile(
+          'tooltip.team.distance'|trans, 'fa fa-arrows-alt-h', text
+        ) }}
+      </div>
+
+      {% if orgEnabledUserSeeRanking or is_root %}
+        <div class="tile ranking">
+          {% set text %}
+            {% if not perf %}
+              -
+            {% else %}
+              {{ perf[0].absResult }}
+            {% endif %}
+          {% endset %}
+          {{ macros.render_tile(
+            'ranking', 'fa fa-star', text
+          ) }}
+        </div>
+      {% endif %}
+    </div>
+    <ul class="users-list">
+      {% for teamUser in team.currentTeamUsers %}
+        {% set user = teamUser.user %}
+        {% set tleader = teamUser.leader %}
+        {% include "components/user_list__item.html.twig" with { user: user, tleader: tleader, roles: false, settings: false, stats: false, displayOrg: true } %}
+      {% endfor %}
+      {# placeholder for no user in list #}
+      <li class="no-items-placeholder">
+        {{ 'user_list.no_defined_user'|trans }}
+      </li>
+    </ul>
+  </div>
+</li>

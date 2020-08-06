@@ -1,0 +1,90 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>Un Email Responsive</title>
+        <style type="text/css">
+            body {margin: 0; padding: 0; min-width: 100%!important;}
+            .content {width: 100%; max-width: 800px;}
+        </style>
+    </head>
+
+    {% block subject %}
+        {% if participant is defined %}
+            {% if activity is defined %}
+                {% trans %}mails.resultsReleased.subject_participant_activity_results{% endtrans %} "{{ activity.name|raw }}"
+            {% else %}
+                {% trans %}mails.resultsReleased.subject_participant_stage_results{% endtrans %} "{{ stage.name|raw }}" ({{ stage.activity.name|raw }})
+            {% endif %}
+        {% elseif releaser is defined %}
+            {% if activity is defined %}
+                {% trans %}mails.resultsReleased.subject_releaser_activity_results{% endtrans %} "{{ activity.name|raw }}"
+            {% else %}
+                {% trans %}mails.resultsReleased.subject_releaser_stage_results{% endtrans %} "{{ stage.name|raw }}" ({{ stage.activity.name|raw }})
+            {% endif %}
+        {% elseif amdinistrator is defined %}
+            {% if activity is defined %}
+                {% trans %}mails.resultsReleased.subject_administrator_activity_results{% endtrans %} "{{ activity.name|raw }}"
+            {% else %}
+                {% trans %}mails.resultsReleased.subject_administrator_stage_results{% endtrans %} "{{ stage.name|raw }}" ({{ stage.activity.name|raw }})
+            {% endif %}
+        {% endif %}
+    {% endblock %}
+
+    {% block body %}
+    <body bgcolor="white">
+        <table width="100%" bgcolor="white" border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td>
+                    <table class="content" align="left" cellpadding="0" cellspacing="0" border="0">
+                        <td>
+                            <p>{% trans %}mails.hello{% endtrans %} {{ recipient.firstname }},</p>
+                            {% if participant is defined %}
+
+                                {% if activity is defined %}
+                                    <p>{% trans %}mails.resultsReleased.message_1_participant_activity{% endtrans %} "{{ activity.name|raw }}" {% trans %}mails.resultsReleased.message_2_participant{% endtrans %}</p>
+                                    <p style="text-align: center"><a href="{{ url('trackMLinkClick',{'trkToken' : trkToken}) }}" target="_blank"><button style="background-color: #26a69a; height: 40px; line-height: 40px; text-decoration: none; color: #fff; text-align: center; border: none;">{% trans %}mails.resultsReleased.button_text{% endtrans %}</button></a></p>
+                                {% else %}
+                                    <p>{% trans %}mails.resultsReleased.message_1a_participant_stage{% endtrans %} "{{ stage.name|raw }}" {% trans %}mails.resultsReleased.message_1b_participant_stage{% endtrans %} "{{ stage.activity.name|raw }}" {% trans %}mails.resultsReleased.message_2_participant{% endtrans %}</p>
+                                    <p style="text-align: center"><a href="{{ url('trackMLinkClick',{'trkToken' : trkToken}) }}" target="_blank"><button style="background-color: #26a69a; height: 40px; line-height: 40px; text-decoration: none; color: #fff; text-align: center; border: none;">{% trans %}mails.resultsReleased.button_text{% endtrans %}</button></a></p>
+                                {% endif %}
+                                <p>{% trans %}mails.resultsReleased.message_3{% endtrans %}</p>
+
+                            {% elseif releaser is defined %}
+
+                                {% if activity is defined %}
+                                    <p>{% trans %}mails.resultsReleased.message_1_releaser_activity{% endtrans %} "{{ activity.name|raw }}" {% trans %}mails.resultsReleased.message_2_releaser{% endtrans %}</p>
+                                {% else %}
+                                    <p>{% trans %}mails.resultsReleased.message_1a_releaser_stage{% endtrans %} "{{ stage.name|raw }}" {% trans %}mails.resultsReleased.message_1b_releaser_stage{% endtrans %} "{{ stage.activity.name|raw }}" {% trans %}mails.resultsReleased.message_2_releaser{% endtrans %}</p>
+                                {% endif %}
+
+                            {% elseif administrator is defined %}
+
+                                {% if activity is defined %}
+                                    <p>{% trans %}mails.resultsReleased.message_1_releaser_activity{% endtrans %} "{{ activity.name|raw }}" {% trans %}mails.resultsReleased.message_2_administrator{% endtrans %}</p>
+                                    <p style="text-align: center"><a href="{{ url('trackMLinkClick',{'trkToken' : trkToken}) }}" target="_blank"><button style="background-color: #26a69a; height: 40px; line-height: 40px; text-decoration: none; color: #fff; text-align: center; border: none;">{% trans %}mails.resultsReleased.button_text{% endtrans %}</button></a></p>
+                                {% else %}
+                                    <p>{% trans %}mails.resultsReleased.message_1a_releaser_stage{% endtrans %} "{{ stage.name|raw }}" {% trans %}mails.resultsReleased.message_1b_releaser_stage{% endtrans %} "{{ stage.activity.name|raw }}" {% trans %}mails.resultsReleased.message_2_administrator{% endtrans %}</p>
+                                    <p style="text-align: center"><a href="{{ url('trackMLinkClick',{'trkToken' : trkToken}) }}" target="_blank"><button style="background-color: #26a69a; height: 40px; line-height: 40px; text-decoration: none; color: #fff; text-align: center; border: none;">{% trans %}mails.resultsReleased.button_text{% endtrans %}</button></a></p>
+                                {% endif %}
+
+                            {% endif %}
+                            <p>{% trans %}mails.see_you_soon{% endtrans %}</p><br>
+                        </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                {% if company_name == 'Serpico' %}<p>{% trans %}mails.signature_team{% endtrans %}{#{% else %}{% trans %}mails.signature_team_for_client{% endtrans %}#}</p>{% endif %}
+                                {% if company_name == 'Serpico' %}<a href="{{ company_website }}" style="width: 60px">{% endif %}<img src="{{ logo_img }}" alt="logo {{ company_name }}" style="width: {{ logo_width_px }}px">{% if company_name == 'Serpico' %}</a>{% endif %}
+                                <p><strong>{% if company_name == 'Serpico' %}{% trans %}mails.serpico_motto{% endtrans %}{% else %}{{ company_name }}{% endif %}</strong><br>{{ address }} | {{ zipcode_city }}</p>
+                                {% if company_name == 'Serpico' %}<p>{{ phone }}</p>{% endif %}
+                                {% if company_name == 'Serpico' %}<img src="{{ incubator_logo }}" alt="logo Lux Future Lab" style="width: 80px">{% endif %}
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
+    {% endblock %}
+</html>

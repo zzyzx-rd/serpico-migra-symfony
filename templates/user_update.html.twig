@@ -1,0 +1,218 @@
+
+
+{% extends "layout.html.twig" %}
+
+{% block title %}
+    {% trans %}user_update.page_title{% endtrans %}
+{% endblock %}
+
+{% block pagename %}
+    {% trans %}user_update.mobile_header_title{% endtrans %}
+{% endblock %}
+
+{% block css %}
+    <script type="text/javascript">
+    {% if app.request_stack.currentrequest.attributes.get('orgId') != "" %}
+        {% set orgId = app.request_stack.currentrequest.attributes.get('orgId') %}
+        {% if orgId == user.orgId %}
+            var deleteUrl="{{ url('rootAjaxUserDelete',{'orgId' : orgId, 'usrId' : user.id}) }}";
+        {% else %}
+            var deleteUrl="{{ url('rootAjaxClientUserDelete',{'orgId' : orgId, 'usrId' : user.id}) }}";
+        {% endif %}
+    {% else %}
+        {% if currentuser.orgId == user.orgId %}
+            var deleteUrl="{{ url('ajaxUserDelete',{'usrId' : user.id}) }}";
+        {% else %}
+            var deleteUrl="{{ url('ajaxClientUserDelete',{'usrId' : user.id}) }}";
+        {% endif %}
+    {% endif %}
+        var durl = "{{ url('addDepartment',{'orgId': orgId}) }}";
+        var rpurl = "{{ url('retrievePosFromDpt',{'dptId': 0}) }}";
+        var purl = "{{ url('addPosition',{'dptId' : 0, 'orgId': orgId}) }}";
+        var wurl = "{{ url('addWeight',{'posId': 0,'usrId':0, 'orgId' : orgId}) }}";
+        var rwurl = "{{ url('retrieveWgtFromPos',{'posId': 0}) }}";
+    </script>
+{% endblock %}
+
+{% block content %}
+
+
+    {% if modifyIntern == true %}
+
+        <div class="container user-update">
+            {{ form_start(form) }}
+            <div class="row">
+                <div class="input-field col s12 m6">
+                    {{ form_row(form.firstname) }}
+                </div>
+                <div class="input-field col s12 m6">
+                    {{ form_row(form.lastname) }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col s12 m4">
+                    {{ form_row(form.email) }}
+                </div>
+                <div class="col s12 m4">
+                    {{ form_row(form.dptId) }}
+                    <a href="#addElement" class="modal-trigger" {#data-did="{{form.vars.data.dptId.id}}"#}><i class="fa fa-plus"></i> {% trans %}create_department.open_modal_msg{% endtrans %}</a>
+                </div>
+                <div class="col s12 m4">
+                    {{ form_row(form.posId) }}
+                    <a href="#addElement" class="modal-trigger" {#data-pid="{{form.vars.data.posId.id}}"#}><i class="fa fa-plus"></i> {% trans %}create_position.open_modal_msg{% endtrans %}</a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col s12 m8">
+                    <div>
+                        {{ form_label(form.role) }}
+                        <i class="far fa-question-circle tooltipped" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.user.userRole{% endtrans %}" onload="this.tooltip()"></i>
+                    </div>
+                    {{ form_widget(form.role) }}
+                </div>
+                <div class="col s12 m4">
+                  {{ form_row(form.titId) }}
+                  <a href="#addElement" class="modal-trigger" {#data-tid="{{form.vars.data.titId.id}}"#}><i class="fa fa-plus"></i> {% trans %}create_title.open_modal_msg{% endtrans %}</a>
+                </div>
+            </div>
+            <div class="row internal">
+                <div class="col s12 m6">
+                    {{ form_row(form.wgtId) }}
+                    <a href="#addElement" class="modal-trigger"><i class="fa fa-plus"></i> {% trans %}create_weight.open_modal_msg{% endtrans %}</a>
+
+                </div>
+                <div class="col s12 m6">
+                    {{ form_widget(form.internal) }}
+                    {{ form_label(form.internal) }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col s12 m12">
+                    {{ form_row(form.superior) }}
+                </div>
+            </div>
+
+            {% if enabledCreatingUser is defined and enabledCreatingUser == true %}
+                <div class="row">
+                    <div class="col s12 m12">
+                        {{ form_widget(form.enabledCreatingUser) }}
+                        {{ form_label(form.enabledCreatingUser) }}
+                    </div>
+                </div>
+            {% endif %}
+            <div class="row action-buttons">
+                <div class="button-field">
+                    {{ form_row(form.submit) }}
+                </div>
+                <div class="button-field">
+                    <button class="waves-effect waves-light btn-large red accent-4 modal-trigger" href="#deleteModal">{% trans %}user_update.delete_button{% endtrans %}</button>
+                </div>
+            </div>
+            {{ form_rest(form) }}
+            {{ form_end(form) }}
+        </div>
+
+    {% else %}
+
+        <div class="container user-update">
+            {{ form_start(form) }}
+            <div class="row">
+                <div class="input-field col s12 m6">
+                    {{ form_row(form.firstname) }}
+                </div>
+                <div class="input-field col s12 m6">
+                    {{ form_row(form.lastname) }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col s12 m6">
+                    {{ form_row(form.type) }}
+                </div>
+                <div class="col s12 m6">
+                    {{ form_row(form.orgId) }}
+                    <a href="#addClient" class="add-external-org-group modal-trigger"><i class="fa fa-plus"></i> {% trans %}create_client.create_organization.open_modal_msg{% endtrans %}</a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="input-field col s12 m12">
+                    {{ form_row(form.email) }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="input-field col s12 m6">
+                    {{ form_row(form.positionName) }}
+                </div>
+                <div class="input-field col s12 m6">
+                    {{ form_row(form.weightValue) }}
+                </div>
+            </div>
+            <div class="row action-buttons">
+                <div class="button-field">
+                    {{ form_row(form.submit) }}
+                </div>
+                <div class="button-field">
+                    <button class="waves-effect waves-light btn-large red accent-4 modal-trigger" href="#deleteModal">{% trans %}user_update.delete_button{% endtrans %}</button>
+                </div>
+            </div>
+            {{ form_rest(form) }}
+            {{ form_end(form) }}
+        </div>
+
+        <div id="addClient" class="modal">
+            {{ form_start(clientForm) }}
+            <div class="modal-content">
+                <h5>{% trans %}create_client.create_organization.modal_title_msg{% endtrans %}</h5>
+                <p>{% trans %}create_client.create_organization.modal_main_msg{% endtrans %}</p>
+                {{ form_label(clientForm.commname) }}
+                {{ form_widget(clientForm.commname) }}
+                {{ form_errors(clientForm.commname) }}
+            </div>
+
+            <div class="modal-footer action-buttons">
+                <div class="button-field">
+                    <a class=" modal-action modal-close submit-button waves-effect waves-red red btn-large">{% trans %}activities.create.delegate_back_btn_msg{% endtrans %}</a>
+                </div>
+                <div class="button-field">
+                    {{ form_row(clientForm.submit) }}
+                </div>
+            </div>
+            {{ form_rest(clientForm) }}
+            {{ form_end(clientForm) }}
+        </div>
+
+        <div id="addClientSuccess" class="modal">
+            <div class="modal-content">
+                <p>{% trans %}create_client.create_organization.success_msg{% endtrans %}</p>
+            </div>
+            <div class="modal-footer">
+                <div class="button-field">
+                    <a class=" modal-action modal-close waves-effect btn btn-large">Ok</a>
+                </div>
+            </div>
+        </div>
+
+    {% endif %}
+
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <h4>{% trans %}user_update.delete_modal.title{% endtrans %}</h4>
+            <p>{% trans %}user_update.delete_modal.content_1{% endtrans %} {{ user.firstname }} {{ user.lastname }}{% if currentuser.orgId == user.orgId or currentuser.role == 4 %} {% trans %}user_update.delete_modal.content_2{% endtrans %}{% else %} {% trans %}user_update.delete_modal.content_ext_user{% endtrans %}{% endif %}</p>
+        </div>
+        <div class="modal-footer">
+            <a class=" modal-action modal-close submit-button waves-effect waves-green btn-large delete-button">{% trans %}user_update.delete_modal.confirm{% endtrans %}</a>
+            <a class=" modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('js/user_modify.js') }}"></script>
+    <script>
+        $(function(){
+            $('select[name*="posId"]').val("{{ user.posId }}");
+            $('select[name*="dptId"]').val("{{ user.dptId }}");
+            $('select[name*="titId"]').val("{{ user.titId }}");
+            $('select[name*="wgtId"]').val("{{ user.wgtId }}");
+        })
+    </script>
+{% endblock %}

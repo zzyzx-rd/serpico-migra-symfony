@@ -1,0 +1,100 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+    {% trans %}terms_conditions.page_name{% endtrans %}
+{% endblock %}
+
+{% block css %}
+
+
+{% endblock %}
+
+{% block username %}
+    {{ currentuser.firstname }} {{ currentuser.lastname }}
+{% endblock %}
+
+{% block pagename %}
+    {% trans %}terms_conditions.header_title{% endtrans %}
+{% endblock %}
+
+{% block content %}
+<main>
+    <div class="container" style="width: 90%">
+
+
+        <section style="padding-bottom: 0px;">
+            <h4 style="padding-bottom: 20px;">{% trans %}terms_conditions.page_title{% endtrans %}</h4>
+            <p>{% trans %}terms_conditions.edited_website{% endtrans %}</p>
+            <p>{% trans %}terms_conditions.rcs_number{% endtrans %}</p>
+            <p>{% trans %}terms_conditions.vat_number{% endtrans %}</p>
+            <p>{% trans %}terms_conditions.address{% endtrans %}</p>
+            <p>{% trans %}terms_conditions.phone_number{% endtrans %}</p>
+            <p>{% trans %}terms_conditions.country{% endtrans %}</p>
+        </section>
+        <section style="padding-bottom: 0px;">
+            <h5>{% trans %}terms_conditions.article_1.title{% endtrans %}</h5>
+            <h5 style="margin-left: 20px;font-size: 1.3rem">{% trans %}terms_conditions.article_1.subtitle_1{% endtrans %}</h5>
+            <p>{% trans %}terms_conditions.article_1.subcontent_1{% endtrans %}</p>
+            <h5 style="margin-left: 20px;font-size: 1.3rem">{% trans %}terms_conditions.article_1.subtitle_2{% endtrans %}</h5>
+            <p>{% trans %}terms_conditions.article_1.subcontent_2{% endtrans %}</p>
+            <h5 style="margin-left: 20px;font-size: 1.3rem">{% trans %}terms_conditions.article_1.subtitle_3{% endtrans %}</h5>
+            <p>{% trans %}terms_conditions.article_1.subcontent_3{% endtrans %}</p>
+            <h5 style="margin-left: 20px;font-size: 1.3rem">{% trans %}terms_conditions.article_1.subtitle_4{% endtrans %}</h5>
+            <p>{% trans %}terms_conditions.article_1.subcontent_4{% endtrans %}</p>
+        </section>
+        <section style="padding-bottom: 0px;">
+            <h5>{% trans %}terms_conditions.article_2.title{% endtrans %}</h5>
+            <p>{% trans %}terms_conditions.article_2.content{% endtrans %}</p>
+        </section>
+        <section>
+            <h5 style="padding-bottom: 20px">{% trans %}terms_conditions.article_3.title{% endtrans %}</h5>
+            <h5 style="margin-left: 20px;font-size: 1.3rem">{% trans %}terms_conditions.article_3.subtitle_1{% endtrans %}</h5>
+            <p>{% trans %}terms_conditions.article_3.subcontent_1{% endtrans %}</p>
+            <h5 style="margin-left: 20px;font-size: 1.3rem">{% trans %}terms_conditions.article_3.subtitle_2{% endtrans %}</h5>
+            <p>{% trans %}terms_conditions.article_3.subcontent_2{% endtrans %}</p>
+        </section>
+        <section  style="padding-bottom: 0px;">
+            <h5>{% trans %}terms_conditions.article_4.title{% endtrans %}</h5>
+            <p>{% trans %}terms_conditions.article_4.content{% endtrans %}</p>
+            <h5 style="margin-left: 20px;font-size: 1.3rem">{% trans %}terms_conditions.article_4.subtitle_1{% endtrans %}</h5>
+            <p>{% trans %}terms_conditions.article_4.subcontent_1{% endtrans %}</p>
+            <h5 style="margin-left: 20px;font-size: 1.3rem">{% trans %}terms_conditions.article_4.subtitle_2{% endtrans %}</h5>
+            <p>{% trans %}terms_conditions.article_4.subcontent_2{% endtrans %}</p>
+            <h5 style="margin-left: 20px;font-size: 1.3rem">{% trans %}terms_conditions.article_4.subtitle_3{% endtrans %}</h5>
+            <p>{% trans %}terms_conditions.article_4.subcontent_3{% endtrans %}</p>
+            <h5 style="margin-left: 20px;font-size: 1.3rem">{% trans %}terms_conditions.article_4.subtitle_4{% endtrans %}</h5>
+            <p>{% trans %}terms_conditions.article_4.subcontent_4{% endtrans %}</p>
+        </section>
+        <section style="padding-bottom: 0px;">
+            <h5>{% trans %}terms_conditions.article_5.title{% endtrans %}</h5>
+            <h5 style="margin-left: 20px;font-size: 1.3rem">{% trans %}terms_conditions.article_5.subtitle_1{% endtrans %}</h5>
+            <p>{% trans %}terms_conditions.article_5.subcontent_1{% endtrans %}</p>
+            <p>{% trans %}terms_conditions.article_5.subcontent_2{% endtrans %}</p>
+            <p>{% trans %}terms_conditions.article_5.subcontent_3{% endtrans %}</p>
+            <p>{% trans %}terms_conditions.article_5.subcontent_4{% endtrans %}</p>
+            <p>{% trans %}terms_conditions.article_5.subcontent_5{% endtrans %}</p>
+            <p>{% trans %}terms_conditions.article_5.subcontent_6{% endtrans %}</p>
+            {#<p>{% trans %}terms_conditions.article_5.subcontent_7{% endtrans %}</p>#}
+            <h5 style="margin-left: 20px;font-size: 1.3rem">{% trans %}terms_conditions.article_5.subtitle_2{% endtrans %}</h5>
+            <p>{% trans %}terms_conditions.article_5.subcontent_8{% endtrans %}</p>
+            <p>{% trans %}terms_conditions.article_5.subcontent_9{% endtrans %}</p>
+            <p>{% trans %}terms_conditions.article_5.subcontent_10{% endtrans %}</p>
+        </section>
+        <section style="padding-bottom: 0px;">
+            <h5>{% trans %}terms_conditions.article_6.title{% endtrans %}</h5>
+            <p>{% trans %}terms_conditions.article_6.content{% endtrans %}</p>
+        </section>
+        <section>
+            <h5>{% trans %}terms_conditions.article_7.title{% endtrans %}</h5>
+            <p>{% trans %}terms_conditions.article_7.content{% endtrans %}</p>
+        </section>
+        <section>
+            <h5>{% trans %}terms_conditions.article_8.title{% endtrans %}</h5>
+            <p style="padding-bottom: 20px;">{% trans %}terms_conditions.article_8.content{% endtrans %}</p>
+            <p>{% trans %}terms_conditions.updated_date{% endtrans %}</p>
+        </section>
+
+       {#<iframe src="{{ absolute_url(asset('lib/pdf/201812_Serpico_TC_FR.pdf'))}}" frameborder="0"></iframe>#}
+    </div>
+</main>
+{% endblock %}

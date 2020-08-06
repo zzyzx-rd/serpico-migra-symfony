@@ -1,0 +1,264 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+  {% trans %}use_cases.page_name{% endtrans %}
+{% endblock %}
+
+{% block css %}
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.5.9/slick.min.css">
+{% endblock %}
+
+{% block username %}
+  {% if currentuser is not null %}
+    {{ currentuser.firstname }}
+    {{ currentuser.lastname }}
+  {% endif %}
+{% endblock %}
+
+{% block pagename %}
+  {% trans %}use_cases.mobile_header_title{% endtrans %}
+{% endblock %}
+
+{% block content %}
+
+  <section style="font-size:17px">
+    <div class="center">
+      <h3>{% trans %}use_cases.global_title{% endtrans %}</h3>
+      <p>{% trans %}use_cases.first_explaining_paragraph{% endtrans %}</p>
+    </div>
+    <div class="row">
+      <div class="col s12" style="padding:0!important">
+        <ul class="tabs use-cases-tabs">
+          <li class="tab col s4">
+            <a href="#clevel">
+              <div class="flex-center" style="justify-content:center">
+                <div style="position: relative;display: inline-flex">
+                  <img src="{{ absolute_url(asset('lib/img/decider.png')) }}" width="25px" height="25px">
+                  <div class="reduced-user-filter" style="background-color:green"></div>
+                </div>
+                <span class="activity-status">{% trans %}solution.decider{% endtrans %}</span>
+              </div>
+            </a>
+          </li>
+          <li class="tab col s4">
+            <a href="#manager" class="active">
+              <div class="flex-center" style="justify-content:center">
+                <div style="position: relative;display: inline-flex">
+                  <img src="{{ absolute_url(asset('lib/img/manager.png')) }}" width="25px" height="25px">
+                  <div class="reduced-user-filter" style="background-color:green"></div>
+                </div>
+                <span class="activity-status">{% trans %}solution.manager{% endtrans %}</span>
+              </div>
+            </a>
+          </li>
+          <li class="tab col s4">
+            <a href="#hr">
+              <div class="flex-center" style="justify-content:center">
+                <div style="position: relative;display: inline-flex">
+                  <img src="{{ absolute_url(asset('lib/img/hr.png')) }}" width="25px" height="25px">
+                  <div class="reduced-user-filter" style="background-color:green"></div>
+                </div>
+                <span class="activity-status">{% trans %}solution.hr{% endtrans %}</span>
+              </div>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div id="clevel" style="width:85%;margin:50px auto">
+
+      <div class="row valign-wrapper" style="flex-wrap:wrap;margin:50px auto">
+        <div class="col m6 s12">
+          <div style="width:90%">
+            <img src="{{ absolute_url(asset('lib/img/performance-measurement.png')) }}" alt="Performance measurement" style="width:100%">
+          </div>
+        </div>
+        <div class="col m6 s12">
+          <h5>{% trans %}use_cases.clevel.title_1{% endtrans %}</h5>
+          <p>{% trans %}use_cases.clevel.paragraph_1{% endtrans %}</p>
+          <p>{% trans %}use_cases.clevel.paragraph_2{% endtrans %}</p>
+          <p>{% trans %}use_cases.clevel.paragraph_3{% endtrans %}</p>
+        </div>
+      </div>
+
+      <div class="row valign-wrapper" style="flex-wrap:wrap-reverse;margin:50px auto">
+        <div class="col m6 s12">
+          <h5>{% trans %}use_cases.clevel.title_2{% endtrans %}</h5>
+          <p>{% trans %}use_cases.clevel.paragraph_4{% endtrans %}</p>
+        </div>
+        <div class="col m6 s12">
+          <div style="width:90%">
+            <img src="{{ absolute_url(asset('lib/img/ranking-criterion.png')) }}" alt="Ranking per criterion" style="width:100%">
+          </div>
+        </div>
+      </div>
+
+      <div class="row valign-wrapper" style="flex-wrap:wrap;margin:50px auto">
+        <div class="col m6 s12">
+          <div style="width:90%">
+            <img src="{{ absolute_url(asset('lib/img/client-manager-communication.png')) }}" alt="Client manager communication" style="width:inherit">
+          </div>
+        </div>
+        <div class="col m6 s12">
+          <h5>{% trans %}use_cases.clevel.title_3{% endtrans %}</h5>
+          <p>{% trans %}use_cases.clevel.paragraph_5{% endtrans %}</p>
+          <p>{% trans %}use_cases.clevel.paragraph_6{% endtrans %}</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="manager" style="width:85%;margin:auto">
+      <div class="row valign-wrapper" style="flex-wrap:wrap;margin:50px auto">
+        <div class="col m6 s12">
+          <div style="width:90%">
+            <img src="{{ absolute_url(asset('lib/img/individual-target.png')) }}" alt="Ranking per criterion" style="width:100%">
+          </div>
+        </div>
+        <div class="col m6 s12">
+          <h5>{% trans %}use_cases.manager.title_1{% endtrans %}</h5>
+          <p>{% trans %}use_cases.manager.paragraph_1{% endtrans %}</p>
+          <p>{% trans %}use_cases.manager.paragraph_2{% endtrans %}</p>
+
+          <ul>
+            <li style="margin-bottom : 10px">
+              <i class="far fa-dot-circle" style="margin-right: 10px"></i>
+              {% trans %}use_cases.manager.bullet_point_1{% endtrans %}</li>
+            <li>
+              <i class="fa fa-users" style="margin-right: 10px"></i>
+              {% trans %}use_cases.manager.bullet_point_2{% endtrans %}</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <div class="row">
+        <div class="row valign-wrapper" style="flex-wrap:wrap-reverse;margin:50px auto">
+          <div class="col m6 s12">
+            <h5>{% trans %}use_cases.manager.title_2{% endtrans %}</h5>
+            <p>{% trans %}use_cases.manager.paragraph_3{% endtrans %}</p>
+            <p>{% trans %}use_cases.manager.paragraph_4{% endtrans %}</p>
+            <p>{% trans %}use_cases.manager.paragraph_5{% endtrans %}</p>
+          </div>
+          <div class="col m6 s12">
+            <div>
+              <img src="{{ absolute_url(asset('lib/img/analytics-followup.png')) }}" alt="Ranking per criterion" style="width:100%">
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="row">
+        <div class="row valign-wrapper" style="flex-wrap:wrap;margin:0px auto 50px auto">
+          <div class="col m6 s12">
+            <div style="width:90%">
+              <img src="{{ absolute_url(asset('lib/img/activity-results.png')) }}" alt="Ranking per criterion" style="width:100%">
+            </div>
+          </div>
+          <div class="col m6 s12">
+            <h5>{% trans %}use_cases.manager.title_3{% endtrans %}</h5>
+            <p>{% trans %}use_cases.manager.paragraph_6{% endtrans %}</p>
+            <p>{% trans %}use_cases.manager.paragraph_7{% endtrans %}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="hr" style="width:85%;margin: 50px auto">
+      <div class="row">
+        <div class="row valign-wrapper" style="flex-wrap:wrap-reverse;margin:0px auto 50px auto">
+          <div class="col m6 s12">
+            <h5>{% trans %}use_cases.hr.title_1{% endtrans %}</h5>
+            <p>{% trans %}use_cases.hr.paragraph_1{% endtrans %}</p>
+            <p>{% trans %}use_cases.hr.paragraph_2{% endtrans %}</p>
+          </div>
+          <div class="col m6 s12">
+            <div style="width:90%">
+              <img src="{{ absolute_url(asset('lib/img/monitor-performance.png')) }}" alt="User continuous performance" style="width:inherit">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="row valign-wrapper" style="flex-wrap:wrap;margin:0px auto 50px auto">
+          <div class="col m6 s12">
+            <div style="width:90%">
+              <img src="{{ absolute_url(asset('lib/img/onboarding-serpico.png')) }}" alt="User continuous performance" style="width:100%">
+            </div>
+          </div>
+          <div class="col m6 s12">
+            <h5>{% trans %}use_cases.hr.title_2{% endtrans %}</h5>
+            <p>{% trans %}use_cases.hr.paragraph_3{% endtrans %}</p>
+            <p>{% trans %}use_cases.hr.paragraph_4{% endtrans %}</p>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row valign-wrapper" style="flex-wrap:wrap-reverse;margin:0px auto 50px auto">
+          <div class="col m6 s12">
+            <h5>{% trans %}use_cases.hr.title_3{% endtrans %}</h5>
+            <p>{% trans %}use_cases.hr.paragraph_5{% endtrans %}</p>
+          </div>
+          <div class="col m6 s12">
+            <div style="width:90%">
+              <img src="{{ absolute_url(asset('lib/img/target.png')) }}" alt="User continuous performance" style="width:inherit">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div id="login" class="modal {% if error %}error{% endif %}">
+    <form id="formLogin" action="{{ path('admin_login_check') }}" method="post" class="container">
+      <div class="modal-content row">
+        <h4>Login</h4>
+        {{ error }}
+        <div class="input-field">
+          <input type="text" name="_username" placeholder="{% trans %}landing.login_section.username{% endtrans %}" value="{{ last_username }}" required="required"/>
+        </div>
+        <div class="input-field">
+          <input type="password" name="_password" placeholder="{% trans %}landing.login_section.password{% endtrans %}" value="" required="required"/>
+        </div>
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+        <div>
+          <input type="checkbox" class="filled-in" id="remember_me" name="_remember_me" checked/>
+          <label for="remember_me">{% trans %}landing.keep_me_logged_in{% endtrans %}</label>
+        </div>
+      </div>
+      <div class="modal-footer row">
+        <a class="modal-trigger" href="#retrievePwd">{% trans %}landing.retrieve_pwd.link_msg{% endtrans %}</a>
+        <button class="btn waves-effect waves-light" type="submit" name="_target_path" value="home">{% trans %}landing.login_section.button_text{% endtrans %}</button>
+      </div>
+    </form>
+  </div>
+  <div id="retrievePwd" class="modal">
+    <div class="container">
+      <div class="modal-content">
+        <p>{% trans %}landing.retrieve_pwd.msg{% endtrans %}</p>
+        <p>{% trans %}landing.retrieve_pwd.msg_2{% endtrans %}</p>
+      </div>
+      <form id="retrievePwdForm" action="" method="post">
+        <input type="email" name="email" required="required"/>
+        <div class="modal-footer">
+          <button type="submit" name="" value="home" class="btn waves-effect waves-light modal-close">{% trans %}landing.retrieve_pwd.submit{% endtrans %}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div id="retrievePwdSuccess" class="modal">
+    <div class="modal-content">
+      <p>{% trans %}landing.retrieve_pwd.success_msg{% endtrans %}</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn waves-effect waves-light modal-close">{% trans %}Ok{% endtrans %}</button>
+    </div>
+  </div>
+
+{% endblock %}
+
+
+{% block javascripts %}
+  <script src="{{ absolute_url(asset('js/home.js')) }}"></script>
+  <script src="{{ absolute_url(asset('js/landing.js')) }}"></script>
+{% endblock %}

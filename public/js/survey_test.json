@@ -1,0 +1,137 @@
+{
+  "pages": [
+    {
+      "name": "page1",
+      "elements": [
+        {
+          "type": "text",
+          "name": "title_survey",
+          "title": "Titre du survey",
+          "isRequired": true
+        },
+        {
+          "type": "paneldynamic",
+          "name": "question",
+          "title": "Question ",
+          "isRequired": true,
+          "templateElements": [
+            {
+              "type": "dropdown",
+              "name": "question_type",
+              "title": "Type de question",
+              "defaultValue": "item2",
+              "isRequired": true,
+              "hasOther": true,
+              "choices": [
+                {
+                  "value": "item2",
+                  "text": "Basic question"
+                },
+                {
+                  "value": "item3",
+                  "text": "Checkbox"
+                },
+                {
+                  "value": "item4",
+                  "text": "Radiogroup"
+                },
+                {
+                  "value": "item5",
+                  "text": "Boolean"
+                }
+              ],
+              "otherText": "Dropdown"
+            },
+            {
+              "type": "text",
+              "name": "question_title",
+              "title": "Titre de la question",
+              "isRequired": true
+            },
+            {
+              "type": "text",
+              "name": "question_description",
+              "title": "Description ",
+              "isRequired": true
+            },
+            {
+              "type": "boolean",
+              "name": "question_ismandatory",
+              "title": "Est t'il obligatoire",
+              "isRequired": true,
+              "labelTrue": "Oui",
+              "labelFalse": "Non"
+            },
+            {
+              "type": "paneldynamic",
+              "name": "parameter",
+              "visible": false,
+              "visibleIf": "{panel.question_type} = 'item3' or {panel.question_type} = 'item4' or {panel.question_type} = 'other' and {panel.question_type} = 'item3'",
+              "title": "Paramètres",
+              "defaultValue": [
+                {}
+              ],
+              "isRequired": true,
+              "validators": [
+                {
+                  "type": "expression",
+                  "text": "Ajouter un parametre a votre question"
+                }
+              ],
+              "templateElements": [
+                {
+                  "type": "text",
+                  "name": "variable",
+                  "title": "Paramètres"
+                }
+              ],
+              "panelCount": 1
+            }
+          ],
+          "panelCount": 1
+        }
+      ]
+    }
+  ],
+  "triggers": [
+    {
+      "type": "setvalue",
+      "setToName": "question",
+      "setValue": [
+        {
+          "question_type": "item3",
+          "parameter": [
+            {}
+          ]
+        }
+      ]
+    },
+    {
+      "type": "setvalue",
+      "setToName": "question",
+      "setValue": [
+        {
+          "question_type": "item2"
+        }
+      ]
+    },
+    {
+      "type": "setvalue",
+      "setToName": "question",
+      "setValue": [
+        {
+          "question_title": "q"
+        }
+      ]
+    },
+    {
+      "type": "setvalue",
+      "setToName": "question",
+      "setValue": [
+        {
+          "question_type": "item3"
+        }
+      ]
+    }
+  ]
+}

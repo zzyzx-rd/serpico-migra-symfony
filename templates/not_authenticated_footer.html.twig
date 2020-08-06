@@ -1,0 +1,104 @@
+<style>
+  .links-footer {
+    margin: 0 100px;
+    height: 100%;
+  }
+
+  .links-footer > ul {
+    display: flex;
+    height: 100%;
+    margin: 0;
+  }
+
+  .links-footer .serpinfo,
+  .links-footer .legal-stuff {
+    flex-flow: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .links-footer .legal-stuff {
+    align-items: flex-end;
+    text-align: right;
+  }
+
+  .links-footer .serpico {
+    margin-bottom: .5rem;
+  }
+
+  .links-footer .serpico > img {
+    display: block;
+    height: 2rem;
+    margin: 0 auto;
+  }
+
+  .links-footer .social-and-co li {
+    display: flex;
+    width: 100%;
+  }
+
+  .links-footer .social-and-co li a {
+    display: block;
+    height: 4rem;
+    margin: auto;
+  }
+
+  .links-footer .social-and-co img {
+    height: 100%;
+  }
+
+  .links-footer li.made-in-luxembourg a {
+    height: 3.8rem;
+    padding-bottom: .4rem;
+  }
+
+  .links-footer li.lux-future-lab {
+    margin-left: .5rem;
+    margin-right: 2rem;
+  }
+
+  .links-footer li.lux-future-lab a {
+    height: 4.4rem;
+    padding-bottom: .6rem;
+  }
+</style>
+
+<div class="links-footer row">
+  <ul class="col s12 m3 serpinfo">
+    <li class="serpico">
+      <img src="{{ asset('lib/img/txt_logo_l_white.png') }}" alt="Serpico">
+    </li>
+    <li>59, boulevard Royal</li>
+    <li>L-2449 Luxembourg</li>
+  </ul>
+  <ul class="col s12 m6 social-and-co">
+    <li class="linkedin">
+      <a href="https://www.linkedin.com/company/serpicoapp/" target="_blank">
+        <img src="{{ asset('lib/img/linkedin.png') }}" alt="LinkedIn">
+      </a>
+    </li>
+    <li class="youtube">
+      <a href="https://www.youtube.com/channel/UCMVASckl068rgTEsHC4dKsw" target="_blank">
+        <img src="{{ asset('lib/img/yt.svg') }}" alt="Youtube">
+      </a>
+    </li>
+    <li class="made-in-luxembourg">
+      <a href="http://www.made-in-luxembourg.lu/" target="_blank">
+        <img src="{{ asset('lib/img/made_in_white.png') }}" alt="Made in Luxembourg">
+      </a>
+    </li>
+    <li class="lux-future-lab">
+      <a href="http://www.luxfuturelab.lu/" target="_blank">
+        <img src="{{ asset('lib/img/lfl.png') }}" alt="Lux Future Lab">
+      </a>
+    </li>
+  </ul>
+  <ul class="col s12 m3 legal-stuff">
+    <li class="copyright">
+      © {{ "now" | date("Y") }} ZZYZX Rd.
+    </li>
+    <li class="terms-and-conditions">
+      <a href="{{ path('displayTC') }}">{{ 'footer.tc'|trans }}</a>
+    </li>
+  </ul>
+</div>

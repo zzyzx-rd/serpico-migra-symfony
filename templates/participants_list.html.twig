@@ -1,0 +1,909 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+    {% trans %}participants.page_title{% endtrans %}
+{% endblock %}
+
+
+{% block pagename %}
+    <span>{{ actName|slice(0, 13) ~ '...' }}</span>
+    <span>{% trans %}participants.mobile_header_description{% endtrans %}</span>
+{% endblock %}
+{% block username %}
+    {{ currentuser.firstname }}
+    {{ currentuser.lastname }}
+{% endblock %}
+
+{% block css %}
+
+    <script>
+        window.url = '{{ url("ajaxParticipantsAdd", { elmt: elmt, elmtId: activity.id, actionType: "fwd" }) }}';
+        window.activitiesUrl = '{{ url("myActivities") }}';
+        window.usrId = '{{ currentuser.id }}';
+        window.curl = '{{ url("activityComplexify", { actId: activity.id }) }}';
+        window.btnAddOTPText = '{{ "activity_elements.complexify"|trans }}';
+    </script>
+    {% if elmt == 'activity' and activity.template is null %}
+    <script>
+        window.sturl = '{{ url("saveTemplate", { actStep: "participants", elmtId: activity.id }) }}';
+    </script>
+    {% endif %}
+{% endblock %}
+
+
+{% block content %}
+    <section class="col s10">
+        {% if activity.stages|length > 1 or activity.stages.first.criteria|length > 1 %}
+            <div class="col s10 m4">
+                <div class="progress">
+                    <div class="determinate col s10 m10" style="width: 25%; left:0%"></div>
+                </div>
+            </div>
+            <div class="col s12 activity-elements">
+                <a href="{{ url('oldActivityDefinition',{'elmt' : elmt, 'elmtId' : activity.id}) }}">1. {% trans %} activity_elements.parameters {% endtrans %}</a>
+                <a href="{{ url('activityStages',{'elmt' : elmt, 'elmtId' : activity.id}) }}">2. {% trans %} activity_elements.stages {% endtrans %}</a>
+                <a href="{{ url('activityCriteria',{'elmt' : elmt, 'elmtId' : activity.id}) }}">3. {% trans %} activity_elements.criteria {% endtrans %}</a>
+                <a href="{{ url('activityParticipants',{'elmt' : elmt, 'elmtId' : activity.id}) }}">4. {% trans %} activity_elements.participants {% endtrans %}</a>
+            </div>
+        {% else %}
+            <div class="col s10 m4">
+                <div class="progress">
+                    <div class="determinate col s10 m10" style="width: 50%; left:50%"></div>
+                </div>
+            </div>
+            <ul class="flex-center activity-elements">
+                <a href="{{ url('oldActivityDefinition',{'elmt' : elmt, 'elmtId' : activity.id}) }}">1. {% trans %} activity_elements.parameters {% endtrans %}</a>
+                <a class="enrich-button" href="" style="width:30%;text-align: center">
+                    <i class="fa fa-plus"></i>
+                    <span>{% trans %} activity_elements.complexify {% endtrans %}</span>
+                </a>
+                <a href="{{ url('activityParticipants',{'elmt' : elmt, 'elmtId' : activity.id}) }}">2. {% trans %} activity_elements.participants {% endtrans %}</a>
+            </ul>
+        {% endif %}
+
+        {% if elmt == 'template' %}
+            <div>
+                <ul class="flex-center orange-text" style="justify-content:center;font-size: 1.4rem">
+                    <i class="material-icons tooltipped" data-position="left" data-delay="50" data-tooltip="{% trans %}tooltip.activity.save_template{% endtrans %}">restore_page</i>
+                    <span>{% trans %}activity_elements.template_edition_mode{% endtrans %}</span>
+                </ul>
+            </div>
+        {% endif %}
+
+        <div class="center activity-title">
+            <h4>{{ activity.name }}</h4>
+        </div>
+
+        {% if elmt == 'activity' %}
+            {% set completedStages = activity.completedStages %}
+
+            {% if completedStages is not null %}
+                {% set nbCompletedStages = activity.completedStages|length %}
+                {% set completedStagesWeight = 0 %}
+                {% for completedStage in completedStages %}
+                    {% set completedStagesWeight = completedStagesWeight + completedStage.weight %}
+                {% endfor %}
+
+                <div class="row center" style="margin:15px 0px 15px 0px;">
+                    {% if activity.completedStages|length == 1 %}
+                        <i class="far fa-2x fa-calendar-check"></i>
+                        <span style="margin-left:8px;">
+                            <span id="nbCompletedStages">{{ nbCompletedStages }}</span>
+                            {% trans %}
+                            stages.graded_single_stage_msg{% endtrans %}
+                            <span id="totalCompletedWeight">{{ (100 * completedStagesWeight)|round(0) }}</span>
+                            %</span>
+                    {% elseif activity.completedStages|length > 1 %}
+                        <i class="far fa-2x fa-calendar-check"></i>
+                        <span style="margin-left:8px;">
+                            <span id="nbCompletedStages">{{ nbCompletedStages }}</span>
+                            {% trans %}
+                            stages.graded_multiple_stages_msg{% endtrans %}
+                            <span id="totalCompletedWeight">{{ (100 * completedStagesWeight)|round(0) }}<span>
+                                    %</span>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    {% set nbUnmodifiableStages = activity.activeStages|length - activity.activeModifiableStages|length %}
+
+                    {% if nbUnmodifiableStages > 0 %}
+                        <div class="row center" style="margin:15px 0px 15px 0px;">
+                            {% if nbUnmodifiableStages == 1 %}
+                                <i class="fa fa-2x fa-info-circle"></i>
+                                <span style="margin-left:8px;">
+                                    <span id="nbCompletedStages">{{ nbUnmodifiableStages }}</span>
+                                    {% trans %}
+                                    stages.unmodifiable_single_stage_msg{% endtrans %}</span>
+                            {% elseif nbUnmodifiableStages > 1 %}
+                                <i class="fa fa-2x fa-info-circle"></i>
+                                <span style="margin-left:8px;">
+                                    <span id="nbCompletedStages">{{ nbUnmodifiableStages }}</span>
+                                    {% trans %}
+                                    stages.unmodifiable_multiple_stages_msg{% endtrans %}</span>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                {% endif %}
+
+
+                <form action="" method="post">
+
+                    {% if activity.recurring is not null %}
+                        <div class="center" style="margin: 45px 0px">
+                            <input type="checkbox" id="repeatParticipants" name="replicate" class="filled-in" {% if activity.recurring.replicatePart is defined %} {% if not activity.recurring.replicatePart %} checked="" {% else %} checked="checked" {% endif %} {% else %} checked="checked" {% endif %}></input>
+                        <label for="repeatParticipants" class="black-text" style="font-size:1.2rem">{% trans %}participants.replicate{% endtrans %}</label>
+                    </div>
+                {% endif %}
+
+                <ul class="collection">
+                    {% for stage in stages %}
+
+
+                        {% set nbIntUsers = 0 %}
+                        {% set nbTeams = 0 %}
+                        {% set nbExtUsers = 0 %}
+                        {% for user in stage.internalUsers %}
+                            {% if user.participant == 1 %}
+                                {% set nbIntUsers = nbIntUsers + 1 %}
+                            {% endif %}
+                        {% endfor %}
+                        {% for team in stage.teams %}
+                            {% if team.participant == 1 %}
+                                {% set nbTeams = nbTeams + 1 %}
+                            {% endif %}
+                        {% endfor %}
+                        {% for user in stage.externalUsers %}
+                            {% if user.participant == 1 %}
+                                {% set nbExtUsers = nbExtUsers + 1 %}
+                            {% endif %}
+                        {% endfor %}
+
+
+                        <div class="stage" data-mode="{{ stage.mode }}" data-sid="{{ stage.id }}">
+                            <ul class="collapsible expandMore expandLess no-margin" data-collapsible="accordion" style="margin: 0!important;">
+                                <li>
+                                    <div class="collapsible-header reduced-padding flex-center {% if stages|length == 1 %}active{% endif %}
+                                                                        {#{% if stage.status == 0 %}cyan{% elseif stage.status == 1 %}cyan{% elseif stage.status == 2 %}orange{% endif %} lighten-5#}">
+                                        <i class="fa fa-fw fa-chevron-down"></i>
+                                        <i class="fa fa-fw fa-chevron-right"></i>
+                                        <!-- just giving the name an absolute position because it was interfering ith the button position -->
+                                        <div class="activity-banner">
+                                            <h5 class="attending-participants">{{ stage.name }}
+                                                <span>
+                                                    {% if nbIntUsers + nbTeams + nbExtUsers > 0 %}
+                                                        ({{ nbIntUsers + nbTeams + nbExtUsers }})
+                                                    {% endif %}
+                                                </span>
+                                            </h5>
+                                            {#<div class="activity-description"> {{ stage.description }}</div>#}
+                                        </div>
+                                    </div>
+
+                                    <div class="collapsible-body sub-collapsible">
+
+                                        <ul class="collapsible expandMore expandLess no-margin" data-collapsible="accordion">
+                                            <li>
+                                                <div class="collapsible-header reduced-padding cyan lighten-5 flex-center {% if stages|length == 1 %}active{% endif %}">
+                                                    <i class="fa fa-fw fa-chevron-down"></i>
+                                                    <i class="fa fa-fw fa-chevron-right"></i>
+                                                    <div class="activity-banner">
+                                                        <h5 class="attending-participants">
+                                                            <i class="fa fa-user"></i>
+                                                            {% trans %}participants.internal_participants{% endtrans %}
+                                                            <span>
+                                                                {% if nbIntUsers + nbTeams > 0 %}
+                                                                    ({{ nbIntUsers + nbTeams }})
+                                                                {% endif %}
+                                                            </span>
+                                                        </h5>
+                                                        {#<div class="activity-description"> {{ stage.description }}</div>#}
+                                                    </div>
+                                                </div>
+
+                                                <div class="collapsible-body reduced-padding">
+                                                    <div class="users-set">
+
+                                                        <ul class="collapsible expandMore expandLess no-margin" data-collapsible="accordion" data-stage-id="{{ stage.id }}">
+                                                            <li>
+                                                                <div class="collapsible-header reduced-padding cyan lighten-2 flex-center {% if stages|length == 1 %}active{% endif %}">
+                                                                    <i class="fa fa-fw fa-chevron-down"></i>
+                                                                    <i class="fa fa-fw fa-chevron-right"></i>
+                                                                    <!-- just giving the name an absolute position because it was interfering ith the button position -->
+                                                                    <div class="activity-banner">
+
+                                                                        <h5 class="attending-participants">
+                                                                            {% trans %}participants.participants{% endtrans %}
+                                                                            <span>
+                                                                                {% if nbIntUsers > 0 %}
+                                                                                    ({{ nbIntUsers }})
+                                                                                {% endif %}
+                                                                            </span>
+                                                                        </h5>
+                                                                        {#<div class="activity-description"> {{ stage.description }}</div>#}
+                                                                    </div>
+                                                                </div>
+
+
+                                                                <div class="collapsible-body reduced-padding">
+
+                                                                    {% if orgEnabledCreatingUser and currentuser.enabledCreatingUser == true %}
+
+                                                                        <div class="row action-buttons" style="margin-top: 15px">
+                                                                            <div class="button-field">
+                                                                                <a class="btn waves-effect waves-light blue darken-4" href="{{ url('createUser') }}">{% trans %}tooltip.user.create_internal{% endtrans %}</a>
+                                                                            </div>
+                                                                        </div>
+                                                                    {% endif %}
+
+
+                                                                    <input type="checkbox" id="allParticipants-{{ stage.id }}" class="filled-in">
+                                                                    <label for="allParticipants-{{ stage.id }}">{% trans %}
+                                                                        participants.select_unselect_all{% endtrans %}</label>
+
+                                                                    {% for user in stage.internalUsers %}
+
+
+                                                                        <ul class="user-content collection smoothened-borders {% if user.leader == 1 %}cyan darken-4{% elseif user.participant == 1 %}blue darken-4{% endif %}">
+                                                                            {% if user.participant == 1 %}
+                                                                                <li class="participant-picture">
+                                                                                    <div class="button-field">
+                                                                                        <i class="fa fa-2x fa-window-close" data-uid="{{ user.id }}" aria-hidden="true" style="font-size: 1.3rem; margin-left: 10px">
+                                                                                            <div class="white-panel"></div>
+                                                                                        </i>
+                                                                                    </div>
+                                                                                </li>
+                                                                            {% endif %}
+                                                                            <li class="participant-picture">
+                                                                                <div class="picture-frame">
+                                                                                    {%
+                                                                                        set userPicture = user.picture is not empty
+                                                                                                        ? asset('lib/img/' ~ user.picture)
+                                                                                                        : asset('lib/img/no-picture.png')
+                                                                                    %}
+                                                                                    <img class="user-picture" src="{{ userPicture }}" alt="User picture">
+                                                                                </div>
+                                                                            </li>
+                                                                            <li class="participant-details">
+                                                                                <div class="user-title">
+                                                                                    {% if user.id == currentuser.id %}
+                                                                                        {% trans %}grade.me{% endtrans %}
+                                                                                    {% else %}
+                                                                                        {{ user['firstname'] }}
+                                                                                        {{ user['lastname'] | upper }}
+                                                                                    {% endif %}
+                                                                                </div>
+                                                                                <div class="user-position">{{ user['position'] }}</div>
+                                                                            </li>
+                                                                            <li class="participant-buttons">
+                                                                                <div class="button-field">
+                                                                                    {% if user.participant == 1 %}
+                                                                                        {#<i class="fa fa-2x fa-window-close" data-uid="{{ user.id }}" aria-hidden="true" style="font-size: 1.3rem"><div class="white-panel"></div></i>#}
+                                                                                        <a class="action-button waves-effect waves-light btn red added" data-uid={{ user.id }}>{% trans %}
+                                                                                            participants.remove_button{% endtrans %}</a>
+                                                                                        <div class="participant-desktop">
+                                                                                            <input id="uleader-{{ stage.id }}-{{ user.id }}" data-uid="{{ user.id }}" type="checkbox" class="filled-in" {% if user.leader == 1 %} checked="checked" {% endif %}/>
+                                                                                            <label for="uleader-{{ stage.id }}-{{ user.id }}">{% trans %}
+                                                                                                participants.leader_checkbox_msg{% endtrans %}
+                                                                                                <i class="fa fa-question-circle tooltipped white-text" data-position="top" data-tooltip="{% trans %}tooltip.activity.leader{% endtrans %}"></i>
+                                                                                            </label>
+                                                                                            {# Type of participant cannot be set if participants are purely grading the phase #}
+                                                                                            {% if stage.mode != 0 %}
+                                                                                                <label for="utype-{{ stage.id }}-{{ user.id }}" style="font-size:1rem;position:relative;display:inline-block;margin-right:5px;margin-top:auto;margin-bottom:auto;height:min-content">Type
+                                                                                                    <i class="fa fa-question-circle tooltipped white-text" data-position="top" data-tooltip="{% trans %}tooltip.activity.participant_type{% endtrans %}"></i>
+                                                                                                </label>
+                                                                                                <select id="utype-{{ stage.id }}-{{ user.id }}" class="black-text" style="display:block;position:relative;height:2rem;width:inherit;margin:auto;">
+                                                                                                    {% if user.email == 1 %}
+                                                                                                        <option value="1" {% if user.type == 1 %} selected="selected" {% endif %}>A</option>
+                                                                                                        <option value="0" {% if user.type == 0 %} selected="selected" {% endif %}>T</option>
+                                                                                                    {% endif %}
+                                                                                                    <option value="-1" {% if user.type == -1 %} selected="selected" {% endif %}>P</option>
+                                                                                                </select>
+                                                                                            {% endif %}
+
+
+                                                                                            {#}
+                                                                                                                                                                          <input id="utype-{{ stage.id }}-{{ user.id }}"
+                                                                                                                                                                                 data-uid="{{ user.id }}"
+                                                                                                                                                                                 type="checkbox" class="filled-in"
+                                                                                                                                                                                 {% if user.type == 1 %}checked="checked"{% endif %}/>
+                                                                                                                                                                          <label for="utype-{{ stage.id }}-{{ user.id }}">{% trans %}
+                                                                                                                                                                              participants.type_checkbox_msg{% endtrans %}
+                                                                                                                                                                              <i class="fa fa-question-circle tooltipped white-text"
+                                                                                                                                                                                 data-position="top"
+                                                                                                                                                                                 data-tooltip="{% trans %}tooltip.activity.graded{% endtrans %}"></i></label>
+                                                                                                                                                                            #}
+                                                                                        </div>
+                                                                                        {% if stage.mode != 0 %}
+                                                                                            {% if user.precomment != "" %}
+                                                                                                <i class="fa fa-2x fa-map lime-text text-darken-3 modal-trigger" href="#uprecomment-{{ stage.id }}-{{ user.id }}" style="margin: 0px 2px">
+                                                                                                    <div class="white-panel"></div>
+                                                                                                </i>
+                                                                                                <a class="precomment-button waves-effect waves-light btn modal-trigger lime darken-3 smoothened-right-borders" href="#uprecomment-{{ stage.id }}-{{ user.id }}">{% trans %}
+                                                                                                    participants.precommented_button{% endtrans %}</a>
+                                                                                            {% else %}
+                                                                                                <i class="far fa-2x fa-map modal-trigger" href="#uprecomment-{{ stage.id }}-{{ user.id }}"></i>
+                                                                                                <a class="precomment-button waves-effect waves-light btn modal-trigger smoothened-right-borders" href="#uprecomment-{{ stage.id }}-{{ user.id }}">{% trans %}
+                                                                                                    participants.precomment_button{% endtrans %}</a>
+                                                                                            {% endif %}
+                                                                                        {% endif %}
+                                                                                    {% else %}
+                                                                                        <i class="fa fa-2x fa-plus" data-uid="{{ user.id }}" data-email="{{ user.email }}" aria-hidden="true"></i>
+                                                                                        <a class="action-button waves-effect waves-light btn" data-uid="{{ user.id }}" data-email="{{ user.email }}">{% trans %}
+                                                                                            participants.add_button{% endtrans %}</a>
+                                                                                    {% endif %}
+                                                                                </div>
+                                                                            </li>
+                                                                        </ul>
+
+                                                                    {% endfor %}
+                                                                </div>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+
+                                                    <div class="teams-set">
+
+                                                        <ul class="collapsible expandMore expandLess no-margin" data-collapsible="accordion" data-stage-id="{{ stage.id }}">
+                                                            <li>
+                                                                <div class="collapsible-header reduced-padding cyan lighten-2 flex-center">
+                                                                    <i class="fa fa-fw fa-chevron-down"></i>
+                                                                    <i class="fa fa-fw fa-chevron-right"></i>
+                                                                    <!-- just giving the name an absolute position because it was interfering ith the button position -->
+                                                                    <div class="activity-banner">
+                                                                        <h5 class="attending-participants">
+                                                                            {% trans %}participants.teams{% endtrans %}
+                                                                            <span>
+                                                                                {% if nbTeams > 0 %}
+                                                                                    ({{ nbTeams }})
+                                                                                {% endif %}
+                                                                            </span>
+                                                                        </h5>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="collapsible-body reduced-padding">
+
+                                                                    {% if orgEnabledCreatingUser and currentuser.enabledCreatingUser == true %}
+
+                                                                        <div class="row action-buttons" style="margin-top: 15px">
+                                                                            <div class="button-field">
+                                                                                <a class="btn waves-effect waves-light blue darken-4" href="{{ url('createTeam') }}">{% trans %}tooltip.user.create_int_team{% endtrans %}</a>
+                                                                            </div>
+                                                                        </div>
+                                                                    {% endif %}
+
+                                                                    {% if stage.teams|length == 0 %}
+                                                                        <div>{% trans %}users_list.no_teams_msg{% endtrans %}</div>
+                                                                    {% else %}
+                                                                        <input type="checkbox" id="allTeams-{{ stage.id }}" class="filled-in">
+                                                                        <label for="allTeams-{{ stage.id }}">{% trans %}
+                                                                            participants.select_unselect_all{% endtrans %}</label>
+
+                                                                        {% for team in stage.teams %}
+                                                                            <ul class="team-content collection {% if team.leader == 1 %}cyan darken-4{% elseif team.participant == 1 %}blue darken-4{% endif %}">
+                                                                                <li class="participant-picture">
+                                                                                    {% if team.picture is not empty %}
+                                                                                        <div class="picture-frame">
+                                                                                            <img class="user-picture" src="{{ asset('lib/img/' ~ team.picture) }}" alt="">
+                                                                                        </div>
+                                                                                    {% else %}
+                                                                                        <div class="picture-frame flex-center" style="background-color: #b3b3b3; border-radius: 100%; height: 50px!important; justify-content: center">
+                                                                                            <i class="fa fa-users" style="color: white; font-size: 2rem"></i>
+                                                                                        </div>
+                                                                                    {% endif %}
+                                                                                </li>
+                                                                                <li class="participant-details">
+                                                                                    <div class="user-title">{{ team.name }}</div>
+                                                                                    <div class="user-position">{{ team.firstnames }}
+                                                                                        {% if team.nbRemaining > 0 %}
+                                                                                            {% trans %}participants.teams_remaining_and{% endtrans %}
+                                                                                            {{ team.nbRemaining }}
+                                                                                            {% trans %}participants.teams_remaining_end_msg{% endtrans %}
+                                                                                        {% endif %}
+                                                                                    </div>
+                                                                                </li>
+                                                                                <li class="participant-buttons">
+                                                                                    <div class="button-field">
+                                                                                        {% if team.participant == 1 %}
+                                                                                            {#<i class="fa fa-2x fa-window-close" data-tid="{{ team.id }}" aria-hidden="true" style="font-size: 1.3rem"><div class="white-panel"></div></i>#}
+                                                                                            <a class="action-button waves-effect waves-light btn red added" data-tid={{ team.id }}>{% trans %}
+                                                                                                participants.remove_button{% endtrans %}</a>
+                                                                                            <div class="participant-desktop">
+                                                                                                <input id="tleader-{{ stage.id }}-{{ team.id }}" data-tid="{{ team.id }}" type="checkbox" class="filled-in" {% if team.leader == 1 %} checked="checked" {% endif %}/>
+                                                                                                <label for="tleader-{{ stage.id }}-{{ team.id }}">{% trans %}
+                                                                                                    participants.leader_checkbox_msg{% endtrans %}
+                                                                                                    <i class="fa fa-question-circle tooltipped white-text" data-position="top" data-tooltip="{% trans %}tooltip.activity.leader{% endtrans %}"></i>
+                                                                                                </label>
+                                                                                                {% if stage.mode != 0 %}
+                                                                                                    <label for="ttype-{{ stage.id }}-{{ team.id }}" style="font-size:1rem;position:relative;display:inline-block;margin-right:5px;margin-top:auto;margin-bottom:auto;height:min-content">Type
+                                                                                                        <i class="fa fa-question-circle tooltipped white-text" data-position="top" data-tooltip="{% trans %}tooltip.activity.participant_type{% endtrans %}"></i>
+                                                                                                    </label>
+                                                                                                    <select id="ttype-{{ stage.id }}-{{ team.id }}" class="black-text" style="display:block;position:relative;height:2rem;width:inherit;margin:auto;">
+                                                                                                        <option value="1" {% if team.type == 1 %} selected="selected" {% endif %}>A</option>
+                                                                                                        <option value="0" {% if team.type == 0 %} selected="selected" {% endif %}>T</option>
+                                                                                                        <option value="-1" {% if team.type == -1 %} selected="selected" {% endif %}>P</option>
+                                                                                                    </select>
+                                                                                                {% endif %}
+                                                                                            </div>
+                                                                                            {% if stage.mode != 0 %}
+                                                                                                {% if team.precomment != "" %}
+                                                                                                    <i class="fa fa-2x fa-map lime-text text-darken-3 modal-trigger" href="#tprecomment-{{ stage.id }}-{{ team.id }}" style="margin: 0px 2px">
+                                                                                                        <div class="white-panel"></div>
+                                                                                                    </i>
+                                                                                                    <a class="precomment-button waves-effect waves-light btn modal-trigger lime darken-3 smoothened-right-borders" href="#tprecomment-{{ stage.id }}-{{ team.id }}">{% trans %}
+                                                                                                        participants.precommented_button{% endtrans %}</a>
+                                                                                                {% else %}
+                                                                                                    <i class="far fa-2x fa-map modal-trigger" href="#tprecomment-{{ stage.id }}-{{ team.id }}"></i>
+                                                                                                    <a class="precomment-button waves-effect waves-light btn modal-trigger smoothened-right-borders" href="#tprecomment-{{ stage.id }}-{{ team.id }}">{% trans %}
+                                                                                                        participants.precomment_button{% endtrans %}</a>
+                                                                                                {% endif %}
+                                                                                            {% endif %}
+                                                                                        {% else %}
+                                                                                            <i class="fa fa-2x fa-plus" data-tid="{{ team.id }}" aria-hidden="true"></i>
+                                                                                            <a class="action-button waves-effect waves-light btn" data-tid={{ team.id }}>{% trans %}
+                                                                                                participants.add_button{% endtrans %}</a>
+                                                                                        {% endif %}
+                                                                                    </div>
+                                                                                </li>
+                                                                            </ul>
+                                                                        {% endfor %}
+
+                                                                    {% endif %}
+                                                                </div>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        </ul>
+
+                                        <ul class="collapsible expandMore expandLess no-margin" id="externalParticipants" data-collapsible="accordion">
+                                            <li>
+                                                <div class="collapsible-header reduced-padding cyan lighten-5 flex-center">
+                                                    <i class="fa fa-fw fa-chevron-down"></i>
+                                                    <i class="fa fa-fw fa-chevron-right"></i>
+                                                    <div class="activity-banner">
+                                                        <h5 class="attending-participants">
+                                                            <i class="far fa-user"></i>
+                                                            {% trans %}participants.external_participants{% endtrans %}<span style="margin-left: 5px">
+                                                                {% if nbExtUsers > 0 %}
+                                                                    ({{ nbExtUsers }})
+                                                                {% endif %}
+                                                            </span>
+                                                        </h5>
+                                                    </div>
+                                                </div>
+
+                                                <div class="collapsible-body sub-collapsible">
+
+                                                    {% if orgEnabledCreatingUser and currentuser.enabledCreatingUser == true %}
+
+                                                        <div class="row action-buttons" style="margin-top: 15px">
+                                                            <div class="button-field">
+                                                                <a class="btn waves-effect waves-light blue darken-4" href="{{ url('createClient') }}">{% trans %}tooltip.user.create_external{% endtrans %}</a>
+                                                            </div>
+                                                        </div>
+                                                    {% endif %}
+
+                                                    <input type="checkbox" id="allExtParticipants-{{ stage.id }}" class="filled-in">
+                                                    <label for="allExtParticipants-{{ stage.id }}">{% trans %}
+                                                        participants.select_unselect_all{% endtrans %}</label>
+
+                                                    {% for user in stage.externalUsers %}
+
+                                                        {% if user == stage.externalUsers|first or prevUser is defined and prevUser.orgId != user.orgId %}
+                                                            <h5>{{ user.organization.commname }}</h5>
+                                                        {% endif %}
+
+                                                        <ul class="user-content collection {% if user.leader == 1 %}cyan darken-4{% elseif user.participant == 1 %}blue darken-4{% endif %}">
+                                                            {% if user.participant == 1 %}
+                                                                <li class="participant-picture">
+                                                                    <div class="button-field">
+                                                                        <i class="fa fa-2x fa-window-close" data-uid="{{ user.id }}" aria-hidden="true" style="font-size: 1.3rem; margin-left: 10px">
+                                                                            <div class="white-panel"></div>
+                                                                        </i>
+                                                                    </div>
+                                                                </li>
+                                                            {% endif %}
+                                                            <li class="participant-picture">
+                                                                <div class="picture-frame">
+                                                                    {%
+                                                                        set userPicture = user.picture is not empty
+                                                                                        ? asset('lib/img/' ~ user.picture)
+                                                                                        : asset('lib/img/no-picture.png')
+                                                                    %}
+                                                                    <img class="user-picture" src="{{ userPicture }}" alt="User picture">
+                                                                </div>
+                                                            </li>
+                                                            <li class="participant-details">
+                                                                <div class="user-title">
+                                                                    {% if user.id == currentuser.id %}
+                                                                        {% trans %}grade.me{% endtrans %}
+                                                                    {% else %}
+                                                                        {{ user['firstname'] }}
+                                                                        {{ user['lastname'] | upper }}
+                                                                    {% endif %}
+                                                                </div>
+                                                                <div class="user-position">{{ user['position'] }}</div>
+                                                            </li>
+                                                            <li class="participant-buttons">
+                                                                <div class="button-field">
+                                                                    {% if user.participant == 1 %}
+                                                                        {#<i class="fa fa-2x fa-window-close" data-uid="{{ user.id }}" aria-hidden="true" style="font-size: 1.3rem"><div class="white-panel"></div></i>#}
+                                                                        <a class="action-button waves-effect waves-light btn red added" data-uid={{ user.id }}>{% trans %}
+                                                                            participants.remove_button{% endtrans %}</a>
+                                                                        <div class="participant-desktop">
+                                                                            <input id="uleader-{{ stage.id }}-{{ user.id }}" data-uid="{{ user.id }}" type="checkbox" class="filled-in" {% if user.leader == 1 %} checked="checked" {% endif %}/>
+                                                                            <label for="uleader-{{ stage.id }}-{{ user.id }}">{% trans %}
+                                                                                participants.leader_checkbox_msg{% endtrans %}
+                                                                                <i class="fa fa-question-circle tooltipped white-text" data-position="top" data-tooltip="{% trans %}tooltip.activity.leader{% endtrans %}"></i>
+                                                                            </label>
+                                                                            <label for="utype-{{ stage.id }}-{{ user.id }}" style="font-size:1rem;position:relative;display:inline-block;margin-right:5px;margin-top:auto;margin-bottom:auto;height:min-content">Type
+                                                                                <i class="fa fa-question-circle tooltipped white-text" data-position="top" data-tooltip="{% trans %}tooltip.activity.participant_type{% endtrans %}"></i>
+                                                                            </label>
+                                                                            <select id="utype-{{ stage.id }}-{{ user.id }}" class="black-text" style="display:block;position:relative;height:2rem;width:inherit;margin:auto;">
+                                                                                {% if user.email == 1 and user.weight != null %}
+                                                                                    <option value="1" {% if user.type == 1 %} selected="selected" {% endif %}>A</option>
+                                                                                    <option value="0" {% if user.type == 0 %} selected="selected" {% endif %}>T</option>
+                                                                                {% endif %}
+                                                                                <option value="-1" {% if user.type == -1 %} selected="selected" {% endif %}>P</option>
+                                                                            </select>
+                                                                        </div>
+
+                                                                        {% if user.precomment != "" %}
+                                                                            <i class="fa fa-2x fa-map lime-text text-darken-3 modal-trigger" href="#uprecomment-{{ stage.id }}-{{ user.id }}" style="margin: 0px 2px">
+                                                                                <div class="white-panel"></div>
+                                                                            </i>
+                                                                            <a class="precomment-button waves-effect waves-light btn modal-trigger lime darken-3" href="#uprecomment-{{ stage.id }}-{{ user.id }}">{% trans %}
+                                                                                participants.precommented_button{% endtrans %}</a>
+                                                                        {% else %}
+                                                                            <i class="far fa-2x fa-map modal-trigger" href="#uprecomment-{{ stage.id }}-{{ user.id }}"></i>
+                                                                            <a class="precomment-button waves-effect waves-light btn modal-trigger" href="#uprecomment-{{ stage.id }}-{{ user.id }}">{% trans %}
+                                                                                participants.precomment_button{% endtrans %}</a>
+                                                                        {% endif %}
+                                                                    {% else %}
+                                                                        <i class="fa fa-2x fa-plus" data-uid="{{ user.id }}" data-email="{{ user.email }}" data-weight="{{ user.weight }}" aria-hidden="true"></i>
+                                                                        <a class="action-button waves-effect waves-light btn" data-uid="{{ user.id }}" data-email="{{ user.email }}" data-weight="{{ user.weight }}">{% trans %}
+                                                                            participants.add_button{% endtrans %}</a>
+                                                                    {% endif %}
+                                                                </div>
+                                                            </li>
+                                                        </ul>
+
+                                                        {% set prevUser = user %}
+
+                                                    {% endfor %}
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                    {% for user in stage.internalUsers %}
+                                        {% if user.participant == 1 %}
+                                            <div id="uprecomment-{{ stage.id }}-{{ user.id }}" class="modal">
+                                                <div class="modal-title">
+                                                    <h5>{% trans %}participants.precomment.modal_title{% endtrans %}
+                                                        {{ user['firstname'] }}</h5>
+                                                </div>
+                                                <div class="modal-content">
+                                                    <textarea class="textarea-broaden" name="uprecomment-{{ stage.id }}-{{ user.id }}">{{ user.precomment }}</textarea>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <a class="btn btn-clear red waves-effect waves-light">{% trans %}participants.precomment.clear_button{% endtrans %}</a>
+                                                    <a class="btn waves-effect waves-light modal-close">{% trans %}participants.precomment.save_button{% endtrans %}</a>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    {% for user in stage.externalUsers %}
+                                        {% if user.participant == 1 %}
+                                            <div id="uprecomment-{{ stage.id }}-{{ user.id }}" class="modal">
+                                                <div class="modal-title">
+                                                    <h5>{% trans %}participants.precomment.modal_title{% endtrans %}
+                                                        {{ user['firstname'] }}</h5>
+                                                </div>
+                                                <div class="modal-content">
+                                                    <textarea class="textarea-broaden" name="uprecomment-{{ stage.id }}-{{ user.id }}">{{ user.precomment }}</textarea>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <a class="btn btn-clear red waves-effect waves-light">{% trans %}participants.precomment.clear_button{% endtrans %}</a>
+                                                    <a class="btn waves-effect waves-light modal-close">{% trans %}participants.precomment.save_button{% endtrans %}</a>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+
+
+                                    {% for team in stage.teams %}
+                                        {% if team.participant == 1 %}
+                                            <div id="tprecomment-{{ stage.id }}-{{ team.id }}" class="modal">
+                                                <div class="modal-title">
+                                                    <h5>{% trans %}participants.precomment.modal_title{% endtrans %}
+                                                        {{ team.name }}</h5>
+                                                </div>
+                                                <div class="modal-content">
+                                                    <textarea class="textarea-broaden" name="tprecomment-{{ stage.id }}-{{ team.id }}">{{ team.precomment }}</textarea>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <a class="btn btn-clear red waves-effect waves-light">{% trans %}participants.precomment.clear_button{% endtrans %}</a>
+                                                    <a class="btn waves-effect waves-light modal-close">{% trans %}participants.precomment.save_button{% endtrans %}</a>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+
+                                </li>
+                            </ul>
+                        </div>
+                    {% endfor %}
+
+                </ul>
+
+                <div class="row action-buttons" style="margin-top: 15px">
+                    <div class="button-field btn-act-left">
+                        <a class="btn-large waves-effect waves-light blue darken-4 prev-button">{% trans %}participants.previous{% endtrans %}</a>
+                    </div>
+                    <div class="button-field btn-act-center">
+                        <a class="waves-effect waves-light btn-large teal lighten-1 back-button" href="{{ url('myActivities') }}">{% trans %}participants.back{% endtrans %}</a>
+                    </div>
+                    <div class="button-field btn-act-right">
+                        <a class="waves-effect waves-light btn-large green darken-4 {% if elmt == 'activity' %}next-button{% else %}save-button{% endif %}">
+                            {% if elmt == 'activity' %}
+                                {% set activityAlreadyFinalized = false %}
+                                {% set break = false %}
+                                {% for stage in activity.activeModifiableStages if not break %}
+                                    {% if stage.isFinalized == true %}
+                                        {% set activityAlreadyFinalized = true %}
+                                        {% set break = true %}
+                                    {% endif %}
+                                {% endfor %}
+                                {% if activityAlreadyFinalized == false %}
+                                    {% trans %}participants.next{% endtrans %}
+                                {% else %}
+                                    {% trans %}participants.update{% endtrans %}
+                                {% endif %}
+                            {% else %}
+                                {% trans %}participants.save{% endtrans %}
+                            {% endif %}
+                        </a>
+                    </div>
+                </div>
+
+            </form>
+
+            <ul id="hiddenul" class="collection">
+                <li class="collection-item"></li>
+                <br><br>
+                <!-- empty ul to make space for fixed add button -->
+            </ul>
+            <div
+                id="fixedButton" class="fixed-action-btn">
+                {#<button type="submit" class="waves-effect waves-light btn green accent-4">{% trans %}users_list.add_users_button{% endtrans %}</button>#}
+                <a class="btn-floating blue darken-2">
+                    <i class="material-icons">save</i>
+                </a>
+                {% if elmt == 'activity' %}
+                    <ul>
+                        <li><a class="btn-floating {% if activity.template is null %}cyan darken-2{% else %}orange darken-4{% endif %} tooltipped tsave-button modal-trigger" href="#addTemplate" data-position="left" data-delay="50"data-tooltip="{% if activity.template is null %}{% trans %}tooltip.activity.save_template{% endtrans %}{% else %}{% trans %}tooltip.activity.saved_template{% endtrans %} ({{ activity.template.name }}){% endif %}"><i class="material-icons">{% if activity.template is null %}restore_page{% else %}playlist_add_check{% endif %}</i></a></li>
+                        <li><a class="btn-floating teal accent-4 tooltipped save-button" data-position="left" data-delay="50"data-tooltip="{% trans %}tooltip.activity.save{% endtrans %}"><i class="material-icons">sd_card</i></a></li>
+                    </ul>
+                {% endif %}
+            </div>
+        </section>
+
+        <div id="missingLeader" class="modal">
+            <div class="modal-content">
+                <h4>{% trans %}participants.missing_leader.title{% endtrans %}</h4>
+                <p>{% trans %}participants.missing_leader.msg{% endtrans %}</p>
+            </div>
+            <div class="modal-footer action-buttons">
+                <div class="button-field">
+                    <a class="waves-effect waves-green btn modal-close">{% trans %}participants.missing_leader.btn_msg{% endtrans %}</a>
+                </div>
+            </div>
+
+        </div>
+        <div id="duplicitySelection" class="modal">
+            <div class="modal-content">
+                <h4>{% trans %}participants.duplicity.modal_title{% endtrans %}</h4>
+                <p>
+                    {% trans %}participants.stage{% endtrans %}
+                    "<span id="sname"></span>" :
+                    <span id="dname"></span>
+                    {% trans %}participants.duplicity.modal_msg{% endtrans %}
+                </p>
+            </div>
+            <div class="modal-footer action-buttons">
+                <div class="button-field">
+                    <a class="waves-effect waves-green btn modal-close">{% trans %}participants.missing_leader.btn_msg{% endtrans %}</a>
+                </div>
+            </div>
+
+        </div>
+        <div id="duplicityTeamSelection" class="modal">
+            <div class="modal-content">
+                <h4>{% trans %}participants.duplicityTeam.modal_title{% endtrans %}</h4>
+                <p>
+                    {% trans %}participants.stage{% endtrans %}
+                    "<span id="sname"></span>" :
+                    <span id="dname"></span>
+                    {% trans %}participants.duplicityTeam.modal_msg_begin{% endtrans %}
+                    "<span id="t1"></span>"
+                    {% trans %}participants.duplicityTeam.modal_msg_middle{% endtrans %}
+                    "<span id="t2"></span>"
+                    {% trans %}participants.duplicityTeam.modal_msg_end{% endtrans %}
+                </p>
+            </div>
+            <div class="modal-footer action-buttons">
+                <div class="button-field">
+                    <a class="waves-effect waves-green btn modal-close">{% trans %}participants.missing_leader.btn_msg{% endtrans %}</a>
+                </div>
+            </div>
+        </div>
+        <div id="missingGradingParticipants" class="modal">
+            <div class="modal-content">
+                <h4>{% trans %}participants.missingGradingParticipants.title{% endtrans %}</h4>
+                <p>{% trans %}participants.missingGradingParticipants.begin_msg{% endtrans %}
+                    "<span></span>".
+                    {% trans %}participants.missingGradingParticipants.end_msg{% endtrans %}</p>
+            </div>
+            <div class="modal-footer action-buttons">
+                <div class="button-field">
+                    <a class="waves-effect waves-green btn modal-close">{% trans %}participants.missing_leader.btn_msg{% endtrans %}</a>
+                </div>
+            </div>
+        </div>
+        <div id="missingParticipants" class="modal">
+            <div class="modal-content">
+                <h4>{% trans %}participants.missingParticipants.title{% endtrans %}</h4>
+                <p>{% trans %}participants.missingParticipants.begin_msg{% endtrans %}
+                    "<span></span>".
+                    {% trans %}participants.missingParticipants.end_msg{% endtrans %}</p>
+            </div>
+            <div class="modal-footer action-buttons">
+                <div class="button-field">
+                    <a class="waves-effect waves-green btn modal-close">{% trans %}participants.missing_leader.btn_msg{% endtrans %}</a>
+                </div>
+            </div>
+        </div>
+        {% if elmt == 'activity' and activity.finalized is null %}
+            <div id="savedAsIncomplete" class="modal">
+                <div class="modal-content">
+                    <p>{% trans %}participants.savedAsIncomplete.modal_msg{% endtrans %}
+                        <span></span>
+                    </p>
+                </div>
+                <div class="modal-footer action-buttons">
+                    <div class="button-field">
+                        <a class="waves-effect waves-green btn modal-close">{% trans %}participants.missing_leader.btn_msg{% endtrans %}</a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+
+        {% if elmt =='activity' and activity.template is null %}
+            <div id="addTemplate" class="modal">
+                {{ form_start(createTemplateForm) }}
+                <div class="modal-content">
+                    <h5>{% trans %}templates.modal_create.title_msg{% endtrans %}</h5>
+                    <p>{% trans %}templates.modal_create.main_msg{% endtrans %}</p>
+                    {{ form_label(createTemplateForm.name) }}
+                    {{ form_widget(createTemplateForm.name) }}
+                    {{ form_errors(createTemplateForm.name) }}
+                </div>
+
+                <div class="modal-footer action-buttons">
+                    <div class="button-field">
+                        <a class=" modal-action modal-close submit-button waves-effect waves-red red btn">{% trans %}activities.create.delegate_back_btn_msg{% endtrans %}</a>
+                    </div>
+                    <div class="button-field">
+                        {{ form_row(createTemplateForm.submit) }}
+                    </div>
+                </div>
+                {{ form_rest(createTemplateForm) }}
+                {{ form_end(createTemplateForm) }}
+            </div>
+            <div id="templateCreationSuccess" class="modal">
+                <div class="modal-content">
+                    <h4>{% trans %}participants.createTemplate.modal_title{% endtrans %}</h4>
+                    <p>{% trans %}participants.createTemplate.modal_msg{% endtrans %}
+                        <span></span>
+                    </p>
+                </div>
+                <div class="modal-footer action-buttons">
+                    <div class="button-field">
+                        <a class="waves-effect waves-green btn modal-close">{% trans %}participants.missing_leader.btn_msg{% endtrans %}</a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+    {% endblock %}
+
+    {% block javascripts %}
+
+        <script src="{{ asset('js/participants.js') }}"></script>
+
+        {% if elmt == 'activity' and activity.template is null %}
+            <script>
+                $(function () {
+                    $('.add-template').on('click', function (e) {
+                        e.preventDefault();
+                        // Creating Json
+                        var actElmts = {};
+                        var stages = [];
+                        $('.stage').each(function () {
+                            var stgId = $(this).children(":first").data("stage-id");
+                            var stgElmts = {};
+                            var participants = [];
+                            // var parElmts = {};
+                            var teams = [];
+                            var users = [];
+                            $(this).find('.added').each(function () {
+                                if ($(this).data("uid")) {
+                                    var usrElmts = {};
+                                    usrElmts.usrId = $(this).data("uid");
+                                    usrElmts.uprecomment = $('textarea[name="uprecomment-' + stgId + '-' + $(this).data("uid") + '"]').val();
+                                    usrElmts.uleader = $(this).parent().find('input[id^="uleader"]').is(':checked') ? true : false;
+                                    usrElmts.utype = $(this).parent().find('select[id^="utype"]').val();
+                                    users.push(JSON.stringify(usrElmts));
+                                } else {
+                                    var teaElmts = {};
+                                    teaElmts.teaId = $(this).data("tid");
+                                    teaElmts.tprecomment = $('textarea[name="tprecomment-' + stgId + '-' + $(this).data("tid") + '"]').val();
+                                    teaElmts.tleader = $(this).parent().find('input[id^="tleader"]').is(':checked') ? true : false;
+                                    teaElmts.ttype = $(this).parent().find('select[id^="ttype"]').val();
+                                    teams.push(JSON.stringify(teaElmts));
+                                }
+                            });
+                            participants.push(users);
+                            participants.push(teams);
+                            stgElmts.stgId = stgId;
+                            stgElmts.participants = participants;
+                            stages.push(JSON.stringify(stgElmts));
+                        });
+
+                        actElmts.stages = stages;
+                        activity = JSON.stringify(actElmts);
+                        replicate = $('[name="replicate"]').is(':checked');
+                        name = $("#addTemplate").find("form").serializeArray()[0].value;
+                        CSRFToken = $("#addTemplate").find("form").serializeArray()[1].value;
+
+                        $.ajax({
+                            url: sturl,
+                            data: {
+                                activity: activity,
+                                replicate: replicate,
+                                "add_template_form[name]": name,
+                                "add_template_form[_token]": CSRFToken
+                            },
+                            method: 'POST',
+                            success: function (data) {
+
+                                $.each($('.red-text'), function () {
+                                    $(this).remove();
+                                });
+
+                                if (data.hasOwnProperty("name")) {
+                                    $('#addTemplate').find('input[type="text"]').after('<div class="red-text"><strong>' + data.name + '</strong></div>');
+                                }
+
+                                if ($('.red-text').length == 0) {
+                                    $('#addTemplate').modal('close');
+                                    $('#templateCreationSuccess').modal('open');
+                                    $('.tsave-button').removeClass('cyan darken-2').addClass('orange darken-4').attr('data-tooltip', "{% trans %}tooltip.activity.saved_template {% endtrans %}(" + data.tName + ")").tooltip().find('i').text('playlist_add_check');
+                                }
+                            },
+                            fail: function (data) {
+                                console.log(data);
+                            }
+                        })
+                    });
+                });
+            </script>
+        {% endif %}
+
+    {% endblock %}

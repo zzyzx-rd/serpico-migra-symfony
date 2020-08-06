@@ -1,0 +1,84 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+Create Activity
+{% endblock %}
+{% block css %}
+{% endblock %}
+{% block pagename %}
+Create Activity
+{% endblock %}
+{% block username %}
+    {{ currentuser.firstname }} {{ currentuser.lastname }}
+{% endblock %}
+
+{% block content %}
+
+  <img id="logoMain" src="{{ asset('lib/img/Serpico.png') }}" alt="logo Serpico">
+
+  {{ form_start(form) }}
+  <!--<form class="col s10"> -->
+      <div class="row title-desktop">
+          <h4> Create Activity </h4>
+      </div>
+
+      <div  class="row">
+        <div class="input-field col s10 ">
+            {{ form_label(form.name) }}
+            {{ form_widget(form.name) }}
+            {{ form_errors(form.name) }}
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="button-field col s10">
+            {{ form_label(form.visibility) }}
+            {{ form_widget(form.visibility) }}
+            <div class="errorMessage">
+                {{ form_errors(form.visibility) }}
+            </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="input-field col s5 m5">
+            {{ form_label(form.startdate) }}
+            {{ form_widget(form.startdate) }}
+            <div class="errorMessage">
+            {{ form_errors(form.startdate) }}
+            </div>
+        </div>
+        <div class="input-field col s5 m5">
+            {{ form_label(form.enddate) }}
+            {{ form_widget(form.enddate) }}
+          <div class="errorMessage">
+              {{ form_errors(form.enddate) }}
+          </div>
+        </div>
+      </div>
+
+
+      <div class="row">
+        <div class="button-field col s10">
+            {{ form_label(form.objectives) }}
+            {{ form_widget(form.objectives) }}
+            {{ form_errors(form.objectives) }}
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="button-field col s10">
+            {{ form_row(form.submit) }}
+        </div>
+      </div>
+
+    {{ form_rest(form) }}
+    {{ form_end(form)}}
+
+
+{% endblock %}
+
+{% block javascripts %}
+  <script src="{{ asset('js/login.js') }}"></script>
+  <script src="{{ asset('js/activity_definition.js') }}"></script>
+{% endblock %}

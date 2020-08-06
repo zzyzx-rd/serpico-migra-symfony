@@ -1,0 +1,161 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>Un Email Responsive</title>
+        <style type="text/css">
+            body {margin: 0; padding: 0; min-width: 100%!important;}
+            .content {width: 100%; max-width: 800px;}
+        </style>
+    </head>
+
+    {% block subject %}
+        {% if pType == 1 %}
+            {% trans %}mails.prospecting_1.ceo.subject{% endtrans %}
+        {% elseif pType == 2 %}
+            {% trans %}mails.prospecting_1.pm.subject{% endtrans %}
+        {% elseif pType == 3 %}
+            {% trans %}mails.prospecting_1.mnpm.subject{% endtrans %}
+        {% elseif pType == 4 %}
+            {% trans %}mails.prospecting_1.hr.subject{% endtrans %}
+        {% elseif pType == 5 %}
+            {% trans %}mails.prospecting_1.worker.subject{% endtrans %}
+        {% endif %}
+    {% endblock %}
+
+    {% block body %}
+    <body bgcolor="white">
+        <table width="100%" bgcolor="white" border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td>
+                    <table class="content" align="left" cellpadding="0" cellspacing="0" border="0">
+                        <tr>
+                            <td>
+                                <p>{% trans %}mails.hello{% endtrans %} {% if recipient.male == true %} {% trans %}mails.sir{% endtrans %} {% else %} {% trans %}mails.madam{% endtrans %}{% endif %} {{ recipient.lastname }},</p>
+                                
+                                {% if pType == 1 %}
+                                        <p>{% trans %}mails.prospecting_1.ceo.pres_sentence{% endtrans %} </p>
+                                        <p><strong>  {% trans %}mails.prospecting_1.ceo.bp_1.title{% endtrans %} </strong></p>
+                                        <ul>
+                                            <li> {% trans %}mails.prospecting_1.ceo.bp_1.arg_1{% endtrans %}</li>
+                                            <li>{% trans %}mails.prospecting_1.ceo.bp_1.arg_2{% endtrans %}</li>
+                                            <li>{% trans %}mails.prospecting_1.ceo.bp_1.arg_3{% endtrans %}</li>
+                                        </ul>
+                                        <p><strong> {% trans %}mails.prospecting_1.ceo.bp_2.title{% endtrans %} </strong></p>
+                                        <ul>
+                                            <li>{% trans %}mails.prospecting_1.ceo.bp_2.arg_1{% endtrans %}</li>
+                                            <li>{% trans %}mails.prospecting_1.ceo.bp_2.arg_2{% endtrans %}</li>
+                                        </ul>
+                                {% elseif pType == 2 %}
+                                        <p> {% trans %}mails.prospecting_1.pm.pres_sentence{% endtrans %} </p>
+                                        <p><strong> {% trans %}mails.prospecting_1.pm.bp_1.title{% endtrans %} </strong></p>
+                                        <ul>
+                                            <li style="list-style:none">{% trans %}mails.prospecting_1.pm.bp_1.arg_1{% endtrans %}</li>
+                                        </ul>
+                                        <p><strong> {% trans %}mails.prospecting_1.pm.bp_2.title{% endtrans %} </strong></p>
+                                        <ul>
+                                            <li style="list-style:none">{% trans %}mails.prospecting_1.pm.bp_2.arg_1{% endtrans %}</li>
+                                        </ul>
+                                {% elseif pType == 3 %}
+                                        <p> {% trans %}mails.prospecting_1.mnpm.pres_sentence{% endtrans %} </p>
+                                        <p><strong> {% trans %}mails.prospecting_1.mnpm.bp_1.title{% endtrans %} </strong></p>
+                                        <ul>
+                                            <li style="list-style:none">{% trans %}mails.prospecting_1.mnpm.bp_1.arg_1{% endtrans %}</li>
+                                        </ul>
+                                        <p><strong> {% trans %}mails.prospecting_1.mnpm.bp_2.title{% endtrans %} </strong></p>
+                                        <ul>
+                                            <li style="list-style:none">{% trans %}mails.prospecting_1.mnpm.bp_2.arg_1{% endtrans %}</li>
+                                        </ul>
+                                {% elseif pType == 4 %}
+                                        <p> {% trans %}mails.prospecting_1.hr.pres_sentence{% endtrans %} </p>
+                                        <p><strong> {% trans %}mails.prospecting_1.hr.bp_1.title{% endtrans %} </strong></p>
+                                        <ul>
+                                            <li style="list-style:none">{% trans %}mails.prospecting_1.hr.bp_1.arg_1{% endtrans %}</li>
+                                        </ul>
+                                        <p><strong> {% trans %}mails.prospecting_1.hr.bp_2.title{% endtrans %} </strong></p>
+                                        <ul>
+                                            <li style="list-style:none">{% trans %}mails.prospecting_1.hr.bp_2.arg_1{% endtrans %}</li>
+                                        </ul>
+                                {% elseif pType == 5 %}
+                                        <p> {% trans %}mails.prospecting_1.worker.pres_sentence{% endtrans %} </p>
+                                        <p><strong> {% trans %}mails.prospecting_1.worker.bp_1.title{% endtrans %} </strong></p>
+                                        <ul>
+                                            <li style="list-style:none">{% trans %}mails.prospecting_1.worker.bp_1.arg_1{% endtrans %}</li>
+                                        </ul>
+                                        <p><strong> {% trans %}mails.prospecting_1.worker.bp_2.title{% endtrans %} </strong></p>
+                                        <ul>
+                                            <li style="list-style:none">{% trans %}mails.prospecting_1.worker.bp_2.arg_1{% endtrans %}</li>
+                                        </ul>
+                                {% endif %}
+                                </p>
+                                 
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <img src="{{ people_working_logo }}" alt="people-working" style="height: 250px">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <p style="text-align: center"><a href="{{ url('trackMLinkClick',{'trkToken' : trkToken}) }}" target="_blank"><button style="background-color: #26a69a; height: 40px; line-height: 40px; text-decoration: none; color: #fff; text-align: center; border: none;">{% trans %}mails.prospecting_1.button_text{% endtrans %}</button></a></p>
+                                <p> 
+                                    {% if pType == 1 %}
+                                       <p><strong> {% trans %}mails.prospecting_1.ceo.bp_3.title{% endtrans %} </strong></p>
+                                        <ul>
+                                            <li>{% trans %}mails.prospecting_1.ceo.bp_3.arg_1{% endtrans %}</li>
+                                            <li>{% trans %}mails.prospecting_1.ceo.bp_3.arg_2{% endtrans %}</li>
+                                        </ul>
+                                    {% elseif pType == 2 %}
+                                         <p><strong> {% trans %}mails.prospecting_1.pm.bp_3.title{% endtrans %} </strong></p>
+                                        <ul>
+                                            <li style="list-style:none">{% trans %}mails.prospecting_1.pm.bp_3.arg_1{% endtrans %}</li>
+                                        </ul>
+                                    {% elseif pType == 3 %}
+                                        <p><strong> {% trans %}mails.prospecting_1.mnpm.bp_3.title{% endtrans %} </strong></p>
+                                        <ul>
+                                            <li style="list-style:none">{% trans %}mails.prospecting_1.mnpm.bp_3.arg_1{% endtrans %}</li>
+                                        </ul>
+                                    {% elseif pType == 4 %}
+                                        <p><strong> {% trans %}mails.prospecting_1.hr.bp_3.title{% endtrans %} </strong></p>
+                                        <ul>
+                                            <li style="list-style:none">{% trans %}mails.prospecting_1.hr.bp_3.arg_1{% endtrans %}</li>
+                                        </ul>
+                                    {% elseif pType == 5 %}
+                                        <p><strong> {% trans %}mails.prospecting_1.worker.bp_3.title{% endtrans %} </strong></p>
+                                        <ul>
+                                            <li style="list-style:none">{% trans %}mails.prospecting_1.worker.bp_3.arg_1{% endtrans %}</li>
+                                        </ul>
+                                    {% endif %}
+                                </p>
+                                <p>
+                                    {% if pType == 1 %}
+                                        {% trans %}mails.prospecting_1.ceo.finale{% endtrans %}
+                                    {% elseif pType == 2 %}
+                                        {% trans %}mails.prospecting_1.pm.finale{% endtrans %}
+                                    {% elseif pType == 3 %}
+                                        {% trans %}mails.prospecting_1.mnpm.finale{% endtrans %}
+                                    {% elseif pType == 4 %}
+                                        {% trans %}mails.prospecting_1.hr.finale{% endtrans %}
+                                    {% elseif pType == 5 %}
+                                        {% trans %}mails.prospecting_1.worker.finale{% endtrans %}
+                                    {% endif %}
+                                </p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                {% if company_name == 'Serpico' %}<p>{% trans %}mails.signature_team{% endtrans %}{#{% else %}{% trans %}mails.signature_team_for_client{% endtrans %}#}</p>{% endif %}
+                                {% if company_name == 'Serpico' %}<a href="{{ company_website }}" style="width: 60px">{% endif %}<img src="{{ logo_img }}" alt="logo {{ company_name }}" style="width: {{ logo_width_px }}px">{% if company_name == 'Serpico' %}</a>{% endif %}
+                                <p><strong>{% if company_name == 'Serpico' %}{% trans %}mails.serpico_motto{% endtrans %}{% else %}{{ company_name }}{% endif %}</strong><br>{{ address }} | {{ zipcode_city }}</p>
+                                {% if company_name == 'Serpico' %}<p>{{ phone }}</p>{% endif %}
+                                {% if company_name == 'Serpico' %}<img src="{{ incubator_logo }}" alt="logo Lux Future Lab" style="width: 80px">{% endif %}
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
+    {% endblock %}
+</html>

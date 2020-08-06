@@ -1,0 +1,252 @@
+ {% extends "layout.html.twig" %}
+
+{% block title %}
+    {% trans %}organizations.page_title{% endtrans %}
+{% endblock %}
+
+{% block css %}
+    <script type="text/javascript">
+        var iurl = "{{ url('insertLKJSONData') }}";
+        var dupliUrl = "{{ url('duplicateOrganization',{'orgId' : 0}) }}";
+    </script>
+{% endblock %}
+
+{% block pagename %}
+    {% trans %}organizations.mobile_header_title{% endtrans %}
+{% endblock %}
+
+{% block username %}
+{{ currentuser.firstname }} {{ currentuser.lastname }}
+{% endblock %}
+
+{% block content %}
+  <section>
+
+    <h4 style="text-align: center;">{% trans %}organizations.page_title{% endtrans %}</h4>
+
+    {% for organization in organizations %}
+      <ul id="activityList" class="collapsible expandMore expandLess" data-collapsible="accordion">
+        <li>
+          <div class="collapsible-header{% if organizations|length == 1 %} active{% endif %}{% if organization.validated is null %} blue lighten-2{% endif %}">
+              <i id="activity-expand" class="fa fa-fw fa-chevron-down"></i>
+              <i id="activity-expanded" class="fa fa-fw fa-chevron-right"></i>
+            <!-- just giving the name an absolute position because it was interfering ith the button position -->
+            <div class="activity-banner">
+              <div class="activity-title"> {{ organization.commName }} </div>
+
+              <div class="activity-description"> {{ organization.legalName }} </div>
+            </div>
+
+                {# if user is not a simple collaborator #}
+                <!-- i had to make a div to contain the buttons because of marginalise and did the style inside
+                 it to override the important aspects of all the classes -->
+
+
+          </div>
+
+          <div class="collapsible-body">
+              <div class="row">
+                  <div class="col s12 m12 details-title">
+                      {% trans %}organizations.details{% endtrans %}
+                  </div>
+              </div>
+            <div class="row">
+                <div class="col s6 m4">
+                    <i class="fa fa-briefcase" aria-hidden="true"></i> {% trans %}organizations.nb_activities{% endtrans %}
+                </div>
+                <div class="col s6 m4">{{ organization.nbCompletedActivities }} ({{ organization.nbScheduledActivities }})</div>
+            </div>
+            <div class="row">
+                  <div class="col s6 m4">
+                      <i class="fa fa-users" aria-hidden="true"></i> {% trans %}organizations.nb_users{% endtrans %}
+                  </div>
+                  <div class="col s6 m4">{{ organization.nbActiveUsers }} ({{ organization.nbTotalUsers }})</div>
+              </div>
+              <div class="row">
+                  <div class="col s6 m4">
+                      <i class="far fa-clock" aria-hidden="true"></i> {% trans %}organizations.member_since{% endtrans %}
+                  </div>
+                  <div class="col s6 m4">{{ organization.inserted|localizeddate('long', 'none') }}</div>
+              </div>
+            <div class="row center-sb">
+                <div class="col s6 m4">
+                    <i class="fas fa-crown" aria-hidden="true"></i> {% trans %}organizations.master_user{% endtrans %}
+                </div>
+                {% if organization.masterUser is not null %}
+                <div class="col s1 m1"><img class="mini-user-picture"  src="{{ (organization.masterUser.picture != "") ? asset('lib/img/' ~ organization.masterUser.picture) : asset('lib/img/no-picture.png') }}" alt=""></div>
+                <div class="col s5 m7">{{ organization.masterUser.firstname }} {{ organization.masterUser.lastname }}</div>
+                {% else %}
+                    {{ organization.id }}
+                {% endif %}
+            </div>
+            <div class="row">
+                  <div class="col s6 m4">
+                      <i class="far fa-clock" aria-hidden="true"></i> {% trans %}organizations.last_connection{% endtrans %}
+                  </div>
+                  <div class="col s6 m4">{% if organization.lastConnectedDateTime is not null %}{{ organization.lastConnectedDateTime|localizeddate('long', 'short') }} ({{ organization.lastConnectedUsername }}){% else %}No connection{% endif %}</div>
+            </div>
+            <br>
+
+              {#
+              As there is only one criterion, weight is not worth displaying. Other parameters which are not that relevant are stored here
+               from {{ activity['cri_lowerbound']  }} to {{ activity['cri_upperbound']  }} (increment : {{ activity['cri_step']  }})
+              {{ activity['weight']  }}
+              #}
+
+            <div class="row action-buttons">
+                {% if organization.validated is not null %}
+                <div class="button-field">
+                    <a class="btn-large waves-effect waves-light teal lighten-1" href="{{ url('rootManageUsers',{'orgId' : organization.id}) }}"> {% trans %}organizations.see_users{% endtrans %} </a>
+                 </div>
+                <div class="button-field">
+                    <a class="btn-large waves-effect waves-light teal lighten-1" href="{{ url('organizationActivities',{'orgId' : organization.id}) }}"> {% trans %}organizations.see_activities{% endtrans %} </a>
+                </div>
+                <div class="button-field">
+                    <a class="btn-large waves-effect waves-light teal lighten-1" href="{#{{ url('oldActivityDefinition',{'actId' : activity['act_id']}) }}#}"> {% trans %}organizations.settings{% endtrans %} </a>
+                </div>
+                <div class="button-field">
+                    <a class="btn-large waves-effect waves-light teal lighten-1" href="{{ url('massiveUpdateOrganization',{'orgId' : organization.id}) }}"> {% trans %}organizations.update{% endtrans %} </a>
+                </div>
+                    {% if organization.nbStages == 0 %}
+                        <div class="button-field">
+                            <a class="btn-large waves-effect waves-light teal lighten-1" href="{{ url('setOrganizationToCriteriaAndStages',{'orgId' : organization.id}) }}">Set org to crit</a>
+                        </div>
+                    {% endif %}
+                {% else %}
+                <div class="button-field">
+                    <a class="btn-large waves-effect waves-light teal lighten-1" href="{{ url('validateOrganization',{'orgId' : organization.id}) }}"> {% trans %}organizations.decide{% endtrans %} </a>
+                </div>
+                {% endif %}
+            </div>
+          </div>
+        </li>
+      </ul>
+    {% endfor %}
+      <div id="fixedButton" class="fixed-action-btn">
+            {#<button type="submit" class="waves-effect waves-light btn-large green accent-4">{% trans %}users_list.add_users_button{% endtrans %}</button>#}
+            <a class="btn-floating blue darken-2"><i class="material-icons">add</i></a>
+            <ul>
+                <li><a class="btn-floating cyan darken-2 tooltipped modal-trigger" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.organization.duplicate{% endtrans %}" href="#duplicateOrganization"><i class="material-icons">content_copy</i></a></li>
+                <li><a class="btn-floating teal accent-4 tooltipped" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.organization.create_account{% endtrans %}" href="{{ url('createOrganization') }}"><i class="material-icons">create</i></a></li>
+            </ul>
+      </div>
+
+      {#<div class="button-field center-button">
+          <a href="{{ path('createOrganization') }}" class="waves-effect waves-light btn-large green accent-4">{% trans %}organizations.create{% endtrans %}</a>
+      </div>#}
+  </section>
+
+    <div id="duplicateOrganization" class="modal">
+        <div class="modal-content">
+            <h4>{% trans %}organizations.duplicate.modal_title{% endtrans %} :</h4>
+
+            <div id="organizationSelector" style="text-align: center">
+                {#<label for="templateSelect" class="required" style="font-size: 1rem; color: black">{% trans %}overview.criterion_type{% endtrans %}</label>#}
+                <select id="organizationSelect" style="display: block!important; font-family: Roboto, FontAwesome; margin: auto; width: 65%">
+                    {% for organization in organizations %}
+                        <option value="{{ organization.id }}" class="cli_option">{{ organization.commName }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+        </div>
+        <div class="modal-footer action-buttons">
+            <div class="button-field">
+                <a class="modal-close waves-effect waves-green btn-large organization-select">{% trans %}Ok{% endtrans %}</a>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        $(function(){
+
+            if ($(window).width() >= 700) {
+                $('.fixed-action-btn a').css({'height': '60px', 'width': '60px'});
+                $('.btn-floating i').css({'line-height': '60px', 'font-size': '2.5rem'});
+            }
+
+            $('.organization-select').on('click',function(e){
+                e.preventDefault();
+                var organizationVal = $(this).closest('.modal').find('select').val();
+                urlToPieces =  dupliUrl.split('/');
+                urlToPieces[urlToPieces.length-2] = organizationVal;
+                var durl = urlToPieces.join('/');
+                window.location = durl;
+            });
+
+            $('.insert-btn').on('click',function(){
+                var JSONName = $('#json-name').val();
+
+                /*$.getJSON("http://localhost:8888/linkedin/LU/"+JSONName+".json", null)
+                    .done(function(json){
+                        var individuals = [];
+                        $.each(json.responseText,function(key,value){
+                            individuals.push(value);
+                        })
+                        console.log(individuals);
+                    })
+                    .fail(function(json){
+                        var individuals = [];
+                        $.each(json.responseText,function(key,value){
+                            individuals.push(value);
+                        })
+                        console.log(individuals);
+                    })*/
+
+
+
+                $.getJSON("{{ lkPath }}"+JSONName+".json", null)
+                    .done(function(json){
+                        //$.each(json,function(key,value){
+                          //  if(key <1){
+                                jsonLength = json.length;
+                                nbIt = Math.trunc(jsonLength / 20);
+                                var i = 0;
+                                var interval = setInterval(function(){
+                                    sentJSON = json.slice(i * 20, (i + 1) * 20);
+
+                                    var LKData = (JSONName.indexOf('firms') != -1) ? {firms : sentJSON} : {individuals : sentJSON}
+
+                                        $.post(iurl, LKData)
+                                            .done(function(data){
+                                                console.log("success");
+                                            })
+                                            .fail(function(data){
+                                                console.log(data);
+                                            })
+                                        if(i == nbIt){
+                                            clearInterval(interval);
+                                        }
+                                        i++;
+                                }, 700);
+
+
+
+
+                            //}
+
+                        //})
+
+                    })
+                    .fail(function(data){
+                        console.log(data);
+                        console.log("{{ lkPath }}");
+                    })
+
+                 /*   console.log(json);
+
+
+                })*/
+
+
+
+
+            })
+        });
+
+
+    </script>
+{% endblock %}

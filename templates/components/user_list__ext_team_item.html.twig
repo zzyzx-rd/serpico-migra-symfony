@@ -1,0 +1,25 @@
+<li class="client-type-list--item client-firms hierarchized-item">
+  <header>{{ 'user_list.ext_teams'|trans }}</header>
+  <div class="item-body">
+    <ul class="firms-list">
+      {% for firm in firms %}
+        <li class="firms-list--item hierarchized-item" data-id="{{ firm.id }}">
+          <header>{{ firm.clientOrganization.commname }}</header>
+          <div class="item-body">
+            <div class="ext-team-actions">
+              <a class="btn-flat" href="{{ url('createClientUser', { cliId: firm.id }) }}">
+                <i class="material-icons left">person_add</i>
+                {{ 'user_list.add_users_button'|trans }}
+              </a>
+            </div>
+            <ul class="user-list">
+              {% for externalUser in firm.aliveExternalUsers %}
+                {% include "components/user_list__item.html.twig" with { user: externalUser.user } %}
+              {% endfor %}
+            </ul>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+</li>

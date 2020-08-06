@@ -1,0 +1,657 @@
+{% extends "layout.html.twig" %}
+
+{% form_theme form 'form/errors.html.twig' %}
+
+{% set elmt = app.request_stack.currentrequest.get('elmt') %}
+{% set elmtIsComplex = activity.stages|length > 1 or activity.stages.first.criteria|length > 1 %}
+
+{% block title %}
+{% if activity.simplified %}
+{% trans %}create_parameters.page_title{% endtrans %}
+{% else %}
+{% trans %}create_parameters.page_complex_title{% endtrans %}
+{% endif %}
+
+{% endblock %}
+{% block css %}
+    <!-- CSS NoUISlider-->
+    <link rel="stylesheet" href="{{ asset('css/nouislider.css') }}">
+
+    <style>
+        #criteriaForm > form {
+            display: flex;
+            flex-flow: column;
+            flex-grow: 1;
+        }
+
+        #criteriaForm > form > .row {
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        #criteriaForm .validation-buttons {
+            margin-top: auto;
+        }
+    </style>
+
+    {% if activity.recurring %}
+        <script>
+            window.rurl = '{{ url("saveRecurring", { actId: activity.id }) }}';
+        </script>
+    {% endif %}
+    {% if elmt == 'activity' and activity.template is null %}
+        <script>
+            window.sturl = '{{ url("saveTemplate", { actStep: "parameters", elmtId: activity.id }) }}';
+        </script>
+    {% endif %}
+    <script>
+        window.url = '{{ url("oldActivityDefinitionAJAX", { elmt: elmt, elmtId: activity.id, actionType: "fwd" }) }}';
+        window.curl = '{{ url("activityComplexify", { actId: activity.id }) }}';
+        window.cNameUrl = '{{ url("addCriterionName") }}';
+        window.lg = '{% trans %}curr_language{% endtrans %}';
+        window.modalSetMsg = '{% trans %}create_parameters.define_objective.modal_trigger_btn{% endtrans %}';
+        window.modalModifyMsg = '{% trans %}create_parameters.define_objective.modify_trigger_btn{% endtrans %}';
+        let forceCommentMsg_0 = '{% trans %}criteria.criterion.forceCommentCompare{% endtrans %}';
+        let forceCommentMsg_1 = '{% trans %}criteria.criterion.force_comments_pure_comment{% endtrans %}';
+        let forceCommentMsg_2 = '{% trans %}criteria.criterion.force_comments_binary_label{% endtrans %}';
+    </script>
+{% endblock %}
+
+{% block pagename %}
+    <span>{% if activity.name is not null %} <span>{{ activity.name|slice(0, 13) ~ '...' }}</span> {% else %}{% trans %}create_parameters.mobile_header_title{% endtrans %}{% endif %}</span>
+    <span>{% trans %}create_parameters.mobile_header_description{% endtrans %}</span>
+{% endblock %}
+
+{% block username %}
+    {{ currentuser.firstname }} {{ currentuser.lastname }}
+{% endblock %}
+
+{% block content %}
+
+  <div id="criteriaForm" style="width:95%;margin:auto">
+
+        {% if elmtIsComplex %}
+            <div style="position:relative;min-height:50px">
+                <div class="progress" style="margin-bottom:0px">
+                    <div class="determinate col s10 m10" style="width: 25%; left:0%"></div>
+                </div>
+                <div class="col s12 activity-elements">
+                    <a class="btn parameter-button" href="{{ url('oldActivityDefinition',{'elmt' : elmt, 'elmtId' : activity.id}) }}" style="position: absolute; width: 25%; left: 0%;">1 - {% trans %} activity_elements.parameters {% endtrans %}</a>
+                    <a class="btn btn-flat activity-element-unselected stage-button" href="{{ url('activityStages',{'elmt' : elmt, 'elmtId' : activity.id}) }}" style="position: absolute; width: 25%; left: 25%; color: #26a69a">2 - {% trans %} activity_elements.stages {% endtrans %}</a>
+                    <a class="btn btn-flat activity-element-unselected criterion-button" href="{{ url('activityCriteria',{'elmt' : elmt, 'elmtId' : activity.id}) }}" style="position: absolute; width: 25%; left: 50%; color: #26a69a">3 - {% trans %} activity_elements.criteria {% endtrans %}</a>
+                    <a class="btn btn-flat activity-element-unselected participant-button" href="{{ url('activityParticipants',{'elmt' : elmt, 'elmtId' : activity.id}) }}" style="position: absolute; width: 25%; left: 75%; color: #26a69a">4 - {% trans %} activity_elements.participants {% endtrans %}</a>
+                </div>
+            </div>
+        {% else %}
+            <div style="position:relative;min-height:50px">
+                <div class="progress" style="margin-bottom:0px">
+                    <div class="determinate col s10 m10" style="width: 33%; left:0%"></div>
+                </div>
+                <div class="col s12 activity-elements">
+                    <a class="btn parameter-button" href="{{ url('oldActivityDefinition',{'elmt' : elmt, 'elmtId' : activity.id}) }}" style="position: absolute; width: 33%; left: 0%;">1 - {% trans %} activity_elements.parameters {% endtrans %}</a>
+                    <a class="btn btn-flat activity-element-unselected enrich-button" href="" style="position: absolute; width: 34%; left: 33%; color: #26a69a">
+                        <i class="fa fa-plus"></i>
+                        <span>{% trans %} activity_elements.complexify {% endtrans %}</span>
+                    </a>
+                    <a class="btn btn-flat participant-button activity-element-unselected" href="{{ url('activityParticipants',{'elmt' : elmt, 'elmtId' : activity.id}) }}" style="position: absolute; width: 33%; left: 67%; color: #26a69a">2 - {% trans %} activity_elements.participants {% endtrans %}</a>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if elmt == 'template' %}
+        <div>
+            <ul class="flex-center orange-text" style="justify-content:center;font-size: 1.4rem">
+                <i class="material-icons tooltipped" data-position="left" data-delay="50" data-tooltip="{% trans %}tooltip.activity.save_template{% endtrans %}">restore_page</i>
+                <span>{% trans %}activity_elements.template_edition_mode{% endtrans %}</span>
+            </ul>
+        </div>
+        {% endif %}
+      {% if activity.recurring %}
+          <div class="center blue darken-4" style="color: white; padding: 10px 0 10px 0; margin-top:20px";>
+              <div class="recurring-msg">{% trans %}create_parameters.recurring_p_msg{% endtrans %} "{{ activity.recurring.name }}" {% trans %}create_parameters.recurring_m_msg{% endtrans %} {% if activity.recurring.frequency > 1 %}{{ activity.recurring.frequency }}{% endif %}{% if activity.recurring.frequency == 1 %}{% if activity.recurring.timeframe == 'Y' %} {% trans %}create_parameters.recurring_freq_Ys{% endtrans %}{% elseif activity.recurring.timeframe == 'M'%}{% trans %}create_parameters.recurring_freq_Ms{% endtrans %}{% elseif activity.recurring.timeframe == 'W' %}{% trans %}create_parameters.recurring_freq_Ws{% endtrans %}{% else %}{% trans %}create_parameters.recurring_freq_Ds{% endtrans %}{% endif %}{% else %}{% if activity.recurring.timeframe == 'Y' %} {% trans %}create_parameters.recurring_freq_Y{% endtrans %}{% elseif activity.recurring.timeframe == 'M'%}{% trans %}create_parameters.recurring_freq_M{% endtrans %}{% elseif activity.recurring.timeframe == 'W' %}{% trans %}create_parameters.recurring_freq_W{% endtrans %}{% else %}{% trans %}create_parameters.recurring_freq_D{% endtrans %}{% endif %}{% endif %} {% trans %}create_parameters.recurring_from{% endtrans %} {{ activity.recurring.startdate|date("j F, Y") }} {% trans %}create_parameters.recurring_to{% endtrans %} {{ activity.recurring.enddate|date("j F, Y") }}</div>
+            <div class="action-buttons">
+                <div class="button-field">
+                    <a class="btn lime darken-3 modify-recurring" style="margin: 10px 0 10px 0;">{% trans %}create_parameters.recurring_modify_btn{% endtrans %}</a>
+                </div>
+            </div>
+
+          </div>
+      {% endif %}
+  {{ form_start(form) }}
+  {% if activity.recurring %}
+  <div class="recurring-elmts" style="border: 2px solid #0D47A1; padding: 0px 2px 0px 2px; margin-bottom:20px">
+      <div  class="row name" style="margin-top: 30px;">
+        <div class="input-field col s12">
+            {{ form_label(form.recurringName) }}
+            {{ form_widget(form.recurringName) }}
+            {{ form_errors(form.recurringName) }}
+        </div>
+      </div>
+      <div class="row type">
+          <div class="button-field col s12">
+              {{ form_label(form.recurringType) }}
+              {{ form_widget(form.recurringType) }}
+              {{ form_errors(form.recurringType) }}
+          </div>
+      </div>
+      <div class="row">
+      </div>
+        <div class="row rscale">
+            <div class="button-field col s6 m4">
+                {{ form_label(form.recurringLowerbound) }}
+                {{ form_widget(form.recurringLowerbound) }}
+                {{ form_errors(form.recurringLowerbound) }}
+            </div>
+            <div class="button-field col s6 m4">
+                {{ form_label(form.recurringUpperbound) }}
+                {{ form_widget(form.recurringUpperbound) }}
+                {{ form_errors(form.recurringUpperbound) }}
+            </div>
+            <div class="button-field col s5 m4">
+                {{ form_label(form.recurringStep) }}
+                {{ form_widget(form.recurringStep) }}
+                {{ form_errors(form.recurringStep) }}
+            </div>
+        </div>
+        <div class="recurring">
+          <div class="row">
+              <div class="input-field col s6">
+                  {{ form_label(form.recurringStartDate) }}
+                  {{ form_widget(form.recurringStartDate) }}
+                  {{ form_errors(form.recurringStartDate) }}
+              </div>
+              <div class="input-field col s6">
+                  {{ form_label(form.recurringEndDate) }}
+                  {{ form_widget(form.recurringEndDate) }}
+                  {{ form_errors(form.recurringEndDate) }}
+              </div>
+          </div>
+          <div class="row" style="display:flex;align-items: center;">
+              <div class="col s3">
+                  {% trans %}create_parameters.frequency_msg{% endtrans %}
+              </div>
+              <div class="number-input col s3">
+                  {#{{ form_label(form.recurringFrequency) }}#}
+                  <a onclick="this.parentNode.querySelector('input[type=number]').stepDown()" ></a>
+                  {{ form_widget(form.recurringFrequency) }}
+                  <a onclick="this.parentNode.querySelector('input[type=number]').stepUp()" class="plus" ></a>
+
+                  {#{{ form_errors(form.recurringFrequency) }}#}
+              </div>
+              <div class="input-field col s6">
+                  {{ form_row(form.recurringTimeFrame) }}
+              </div>
+          </div>
+          <label for="recurringGSDElmts">{% trans %}create_parameters.recurring_gsd_label{% endtrans %}</label>
+          <div class="row" id="recurringGSDElmts" style="display:flex;align-items: center;">
+              <div class="number-input col s6" style="justify-content:center;">
+                  {#{{ form_label(form.recurringFrequency) }}#}
+                  <a onclick="this.parentNode.querySelector('input[type=number]').stepDown()" ></a>
+                  {{ form_widget(form.recurringGStartDateInterval) }}
+                  <a onclick="this.parentNode.querySelector('input[type=number]').stepUp()" class="plus" ></a>
+
+                  {#{{ form_errors(form.recurringFrequency) }}#}
+              </div>
+              <div class="input-field col s6">
+                  {{ form_row(form.recurringGStartDateTimeFrame) }}
+              </div>
+          </div>
+          <label for="#recurringGEDElmts">{% trans %}create_parameters.recurring_ged_label{% endtrans %}</label>
+          <div class="row" id="recurringGEDElmts" style="display:flex;align-items: center;">
+              <div class="number-input col s6" style="justify-content:center;">
+                  {#{{ form_label(form.recurringFrequency) }}#}
+                  <a onclick="this.parentNode.querySelector('input[type=number]').stepDown()" ></a>
+                  {{ form_widget(form.recurringGEndDateInterval) }}
+                  <a onclick="this.parentNode.querySelector('input[type=number]').stepUp()" class="plus" ></a>
+
+                  {#{{ form_errors(form.recurringFrequency) }}#}
+              </div>
+              <div class="input-field col s6">
+                  {{ form_row(form.recurringGEndDateTimeFrame) }}
+              </div>
+          </div>
+      </div>
+      <div class="row visibility">
+          <div class="button-field col s12">
+              {{ form_label(form.visibility) }}
+              {{ form_widget(form.visibility) }}
+              {{ form_errors(form.visibility) }}
+          </div>
+      </div>
+    <div class="action-buttons">
+        <div class="button-field">
+            <a class="btn teal lighten-1 save-recurring" style="margin: 10px 0 10px 0;">{% trans %}create_parameters.recurring_save_btn{% endtrans %}</a>
+        </div>
+    </div>
+  </div>
+ {% endif %}
+    {% if not elmtIsComplex %}
+        {% if elmt == 'activity' %}
+            <h5>{% trans %}create_parameters.general_activity_definition_section{% endtrans %}</h5>
+        {% else %}
+            <h5>{% trans %}create_parameters.general_template_definition_section{% endtrans %}</h5>
+        {% endif %}
+    {% endif %}
+    <div class="row" style="margin-top: 30px;">
+        <div class="input-field col s12 m8">
+            {{ form_label(form.name) }}
+            {{ form_widget(form.name) }}
+            {{ form_errors(form.name) }}
+        </div>
+        <div class="col s12 m4 magnitude">
+                {{form_label(form.magnitude)}}
+                <i class="fa fa-question-circle tooltipped" data-position="bottom" data-delay="50" data-tooltip="{% trans %}tooltip.activity.magnitude_expl{% endtrans %}"></i>
+            <ul class="flex-center">
+                <div style="margin-right: 20px;font-size:20px">ƒ</div>
+                <div style="display:inline-block;width:70%" class="grade-slider magnitude-slider"
+                data-lb="0" data-ub="100" data-step="1"
+                data-value="{{ 2 }}">
+                </div>
+                <div class="grade-slider-range-value center" style="font-size:1.2rem;margin-left: 25px;display:inline-block"></div>
+                {{form_widget(form.magnitude)}}
+            </ul>
+        </div>
+    </div>
+
+
+    {% if not elmtIsComplex %}
+        <div class="row">
+            <div class="mode col s12 m12">
+                {{ form_label(form.mode) }}
+                {{ form_widget(form.mode) }}
+                {{ form_errors(form.mode) }}
+            </div>
+        </div>
+        <h5>{% trans %}create_parameters.feedback_settings_section{% endtrans %}</h5>
+        <div class="row">
+            <div class="col s12">
+                <div class="input-field has-select select-with-fa">
+                    {{ form_widget(form.cName) }}
+                    {{ form_label(form.cName) }}
+                    {{ form_errors(form.cName) }}
+                </div>
+            </div>
+        </div>
+        <div class="row type">
+            <div class="button-field col s12">
+                <div>
+                    {{ form_label(form.type) }}
+                    <i class="fa fa-question-circle tooltipped" data-position="bottom" data-delay="50" data-tooltip="{% trans %}tooltip.activity.grading_type{% endtrans %}"></i>
+                </div>
+                {{ form_widget(form.type) }}
+                {{ form_errors(form.type) }}
+            </div>
+        </div>
+        <div class="row scale flex-center">
+            <div class="button-field col s6 m2">
+                {{ form_label(form.lowerbound) }}
+                {{ form_widget(form.lowerbound) }}
+                {{ form_errors(form.lowerbound) }}
+            </div>
+            <div class="button-field col s6 m2">
+                {{ form_label(form.upperbound) }}
+                {{ form_widget(form.upperbound) }}
+                {{ form_errors(form.upperbound) }}
+            </div>
+            <div class="button-field col s12 m4">
+                {{ form_label(form.step) }}
+                {{ form_widget(form.step) }}
+                {{ form_errors(form.step) }}
+            </div>
+            <div class="button-field col s12 m4">
+                {% if activity.stages.first.criteria.first.target == null and activity.stages.first.criteria.first.comment == null %}
+                <a class="waves-effect waves-light btn modal-trigger" href="#criterionTarget"><ul class="flex-center no-margin"><i class="far fa-dot-circle" style="margin-right:10px"></i> {% trans %}create_parameters.define_objective.modal_trigger_btn{% endtrans %} <i class="far fa-comment" style="margin-left:10px"></i></ul></a>
+                {% else %}
+                <a class="waves-effect waves-light lime darken-3 btn modal-trigger" href="#criterionTarget"><ul class="flex-center no-margin"><i class="far fa-dot-circle" style="margin-right:10px"></i> {% trans %}create_parameters.define_objective.modify_trigger_btn{% endtrans %} <i class="far fa-comment" style="margin-left:10px"></i></ul></a>
+                {% endif %}
+            </div>
+
+        </div>
+        <div class="forceComment row flex-center">
+            <div class="col m5 s12 force-choice" style="margin-left: 0">
+                {{ form_widget(form.forceCommentCompare) }}
+                {{ form_label(form.forceCommentCompare) }}
+                {{ form_errors(form.forceCommentCompare) }}
+            </div>
+            <div class="input-field col m4 s6 force-sign">
+                {{ form_label(form.forceCommentSign) }}
+                {{ form_widget(form.forceCommentSign) }}
+                {{ form_errors(form.forceCommentSign) }}
+            </div>
+            <div class="input-field col m3 s6 force-value">
+                {{ form_label(form.forceCommentValue) }}
+                {{ form_widget(form.forceCommentValue) }}
+                {{ form_errors(form.forceCommentValue) }}
+            </div>
+        </div>
+
+        <div id="criterionTarget" class="modal">
+            <div class="modal-title">
+                <p><h5>{% trans %}create_parameters.define_objective.modal_title{% endtrans %}</h5></p>
+            </div>
+            <div class="modal-content">
+
+                <div style="display:none;">
+                    <input type="checkbox" id="defineCriterionTarget" class="filled-in" {% if activity.stages.first.criteria.first.target != null %} checked="checked" {% endif %}>
+                    <label for="defineCriterionTarget">{% trans %}create_parameters.define_objective.define_target_label{% endtrans %}</label>
+                </div>
+
+                <div class="target">
+                    {{ form_label(form.target) }}
+                    <div class="grade-slider" style="margin-top:10px;"></div>
+                    <div class="grade-slider-range-value center" style="font-size:1.2rem;padding-top: 5px"></div>
+                    {{ form_widget(form.target) }}
+                    {{ form_errors(form.target) }}
+                </div>
+
+                {{ form_label(form.comment) }}
+                {{ form_widget(form.comment) }}
+                {{ form_errors(form.comment) }}
+            </div>
+
+            <div class="modal-footer">
+                <a class="waves-effect waves-light modal-close btn red cancel-btn">{% trans %}criteria.diffToSimilar.cancel{% endtrans %}</a>
+                <a class="btn waves-effect waves-light modal-close">{% trans %}criteria.diffToSimilar.accept{% endtrans %}</a>
+            </div>
+        </div>
+    {% endif %}
+    {% if 0 == 1 %}
+        <div class="recurring">
+            <div class="row">
+                <div class="input-field col s6">
+                    {{ form_label(form.recurringStartDate) }}
+                    {{ form_widget(form.recurringStartDate) }}
+                    {{ form_errors(form.recurringStartDate) }}
+                </div>
+                <div class="input-field col s6">
+                    {{ form_label(form.recurringEndDate) }}
+                    {{ form_widget(form.recurringEndDate) }}
+                    {{ form_errors(form.recurringEndDate) }}
+                </div>
+            </div>
+            <div class="row" style="display:flex;align-items: center;">
+                <div class="col s3">
+                    {% trans %}create_parameters.frequency_msg{% endtrans %}
+                </div>
+                <div class="number-input col s3">
+                    {#{{ form_label(form.recurringFrequency) }}#}
+                    <a onclick="this.parentNode.querySelector('input[type=number]').stepDown()" ></a>
+                    {{ form_widget(form.recurringFrequency) }}
+                    <a onclick="this.parentNode.querySelector('input[type=number]').stepUp()" class="plus" ></a>
+
+                    {#{{ form_errors(form.recurringFrequency) }}#}
+                </div>
+                <div class="input-field col s6">
+                    {{ form_row(form.recurringTimeFrame) }}
+                </div>
+            </div>
+            <label for="recurringGSDElmts">{% trans %}create_parameters.recurring_gsd_label{% endtrans %}</label>
+            <div class="row" id="recurringGSDElmts" style="display:flex;align-items: center;">
+                <div class="number-input col s6" style="justify-content:center;">
+                    {#{{ form_label(form.recurringFrequency) }}#}
+                    <a onclick="this.parentNode.querySelector('input[type=number]').stepDown()" ></a>
+                    {{ form_widget(form.recurringGStartDateInterval) }}
+                    <a onclick="this.parentNode.querySelector('input[type=number]').stepUp()" class="plus" ></a>
+
+                    {#{{ form_errors(form.recurringFrequency) }}#}
+                </div>
+                <div class="input-field col s6">
+                    {{ form_row(form.recurringGStartDateTimeFrame) }}
+                </div>
+            </div>
+            <label for="#recurringGEDElmts">{% trans %}create_parameters.recurring_ged_label{% endtrans %}</label>
+            <div class="row" id="recurringGEDElmts" style="display:flex;align-items: center;">
+                <div class="number-input col s6" style="justify-content:center;">
+                    {#{{ form_label(form.recurringFrequency) }}#}
+                    <a onclick="this.parentNode.querySelector('input[type=number]').stepDown()" ></a>
+                    {{ form_widget(form.recurringGEndDateInterval) }}
+                    <a onclick="this.parentNode.querySelector('input[type=number]').stepUp()" class="plus" ></a>
+
+                    {#{{ form_errors(form.recurringFrequency) }}#}
+                </div>
+                <div class="input-field col s6">
+                    {{ form_row(form.recurringGEndDateTimeFrame) }}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+      {% if not elmtIsComplex %}
+          <h5>{% trans %}create_parameters.time_schedule_section{% endtrans %}</h5>
+          <div class="row activity-calendar">
+              <div class="input-field col s6 m6">
+                  {{ form_label(form.startdate) }}
+                  {{ form_widget(form.startdate) }}
+                  {{ form_errors(form.startdate) }}
+              </div>
+              <div class="input-field col s6 m6">
+                  {{ form_label(form.enddate) }}
+                  {{ form_widget(form.enddate) }}
+                  {{ form_errors(form.enddate) }}
+              </div>
+          </div>
+          <div class="row grading-calendar">
+              <div class="input-field col s6 m6">
+                  {{ form_label(form.gstartdate) }}
+                  {{ form_widget(form.gstartdate) }}
+                  {{ form_errors(form.gstartdate) }}
+              </div>
+                <div class="input-field col s6 m6">
+                    {{ form_label(form.genddate) }}
+                    {{ form_widget(form.genddate) }}
+                    {{ form_errors(form.genddate) }}
+                </div>
+          </div>
+      {% endif %}
+      {% if not activity.recurring %}
+        <div class="row visibility">
+            <div class="button-field col s12">
+                {{ form_label(form.visibility) }}
+                {{ form_widget(form.visibility) }}
+                {{ form_errors(form.visibility) }}
+            </div>
+        </div>
+      {% endif %}
+      <div class="row comment-row">
+        <div class="button-field center-button">
+            <button class="btn-flat waves-effect waves-light comment blue darken-4 modal-trigger" href="#general-comment">
+                <i class="fa fa-plus-circle" style="margin-right: 5px"></i>{% trans %}create_parameters.general_comment_button{% endtrans %}
+            </button>
+        </div>
+          <div id="general-comment" class="modal">
+              <div class="modal-title">
+                  <h5>{{ form_label(form.objectives) }}</h5>
+              </div>
+              <div class="modal-content">
+                  {{ form_widget(form.objectives) }}
+              </div>
+              <div class="modal-footer">
+                  <a class="btn waves-effect waves-light modal-close">Ok</a>
+              </div>
+          </div>
+      </div>
+      <div class="row validation-buttons">
+        <div class="button-field btn-act-left-1">
+            {{ form_row(form.back) }}
+        </div>
+        <div class="button-field btn-act-right-1">
+            {{ form_row(form.next) }}
+        </div>
+      </div>
+
+    {{ form_rest(form)}}
+    {{ form_end(form)}}
+
+    {% if elmt == 'activity' and activity.template is null %}
+        <div id="addTemplate" class="modal">
+            {{ form_start(createTemplateForm) }}
+            <div class="modal-content">
+                <h5>{% trans %}templates.modal_create.title_msg{% endtrans %}</h5>
+                <p>{% trans %}templates.modal_create.main_msg{% endtrans %}</p>
+                {{ form_label(createTemplateForm.name) }}
+                {{ form_widget(createTemplateForm.name) }}
+                {{ form_errors(createTemplateForm.name) }}
+            </div>
+
+            <div class="modal-footer action-buttons">
+                <div class="button-field">
+                    <a class=" modal-action modal-close submit-button waves-effect waves-red red btn-large">{% trans %}activities.create.delegate_back_btn_msg{% endtrans %}</a>
+                </div>
+                <div class="button-field">
+                    {{ form_row(createTemplateForm.submit) }}
+                </div>
+            </div>
+            {{ form_rest(createTemplateForm) }}
+            {{ form_end(createTemplateForm) }}
+        </div>
+        <div id="templateCreationSuccess" class="modal">
+            <div class="modal-content">
+                <h4>{% trans %}participants.createTemplate.modal_title{% endtrans %}</h4>
+                <p>{% trans %}participants.createTemplate.modal_msg{% endtrans %} <span></span></p>
+            </div>
+            <div class="modal-footer action-buttons">
+                <div class="button-field">
+                    <a class="waves-effect waves-green btn-large modal-close">{% trans %}participants.missing_leader.btn_msg{% endtrans %}</a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    {% include "modals/stages_have_invalid_genddate.html.twig" with { inParametersPage: true } %}
+{% endblock %}
+
+{% block javascripts %}
+  <script src="{{ asset('js/nouislider.js') }}"></script>
+  <script src="{{ asset('js/login.js') }}"></script>
+  <script src="{{ asset('js/activity_parameters.js') }}"></script>
+    {% if elmt == 'activity' and activity.template is null %}
+        <script>
+            $(function(){
+                $('.add-template').on('click',function(e){
+                    e.preventDefault();
+                    var tmp = $('form[name="add_activity_criteria_form"]').serialize().split('&');
+                    if(tmp.length > 6){
+                        var j = (tmp[6].indexOf('forceCommentCompare') > 0) ? 0 : 1;
+                        if (tmp[10 - j] !== undefined) {
+                            tmp[9 - j] = tmp[9- j].split('=');
+                            tmp[10 -j] = tmp[10 -j].split('=');
+                            tmp[11-j] = tmp[11-j].split('=');
+                            tmp[12-j] = tmp[12-j].split('=');
+                            tmp[9-j][1] = $('.dp-start').pickadate('picker').get('select', 'dd/mm/yyyy');
+                            tmp[10-j][1] = $('.dp-end').pickadate('picker').get('select', 'dd/mm/yyyy');
+                            tmp[11-j][1] = $('.dp-gstart').pickadate('picker').get('select', 'dd/mm/yyyy');
+                            tmp[12-j][1] = $('.dp-gend').pickadate('picker').get('select', 'dd/mm/yyyy');
+                            tmp[9-j] = tmp[9-j].join('=');
+                            tmp[10-j] = tmp[10-j].join('=');
+                            tmp[11-j] = tmp[11-j].join('=');
+                            tmp[12-j] = tmp[12-j].join('=');
+                        }
+                    }
+                    tmp = tmp.join('&');
+                    $.post(sturl, tmp + '&' + $(this).closest('form').serialize())
+                        .done(function(data){
+                            try{
+                                data = JSON.parse(data);
+                            }catch(err){
+
+                            }
+                            $.each($('.red-text'),function(){
+                                $(this).remove();
+                            });
+
+                            if(data.hasOwnProperty("name")){
+                                $('#addTemplate').find('input[type="text"]').after('<div class="red-text"><strong>' + data.name + '</strong></div>');
+                            }
+
+                            if($('.red-text').length == 0) {
+                                $('#addTemplate').modal('close');
+                                $('#templateCreationSuccess').modal('open');
+                                $('.tsave-button').removeClass('cyan darken-2').addClass('orange darken-4').attr('data-tooltip', "{% trans %}tooltip.activity.saved_template{% endtrans %} ("+data.tName+")").tooltip().find('i').text('playlist_add_check');
+                            }
+                        })
+                        .fail(function(data){
+                            console.log(data);
+                        })
+                });
+            });
+        </script>
+    {% endif %}
+    {% if activity.simplified == true %}
+        <script>
+            $('#add_activity_criteria_form_forceCommentCompare').change(e => {
+                const checked = e.target.checked;
+                $('#add_activity_criteria_form_forceCommentSign, #add_activity_criteria_form_forceCommentValue')
+                    .prop('disabled', !checked);
+            }).change();
+
+            $('.criterion-submit').on('click',function(e){
+                e.preventDefault();
+                var iconName = null;
+                var serializedForm = $(this).closest('form').serialize();
+                var iconClasses = $('.criterion-icons .blue-text').attr('class').split(' ');
+                $.each(iconClasses,function(index,item){
+                    if(item.indexOf("fa-") == 0){
+                        iconName = item;
+                        return;
+                    }
+                })
+                serializedForm += "&icon=" + iconName;
+                $.post(cNameUrl,serializedForm)
+                    .done(function(data){
+                        $.each($('.red-text'),function(){
+                            $(this).remove();
+                        });
+                        data = JSON.parse(data);
+                        if(data.hasOwnProperty("name")){
+                            $('#addCriterion').find('input[type="text"]').after('<div class="red-text"><strong>' + data.cnaId + '</strong></div>');
+                            return false;
+                        } else {
+                            //$('[id$="department"]:eq('+$("#addDepartment").find("button").data("selectedNb")+')').append('<option value="'+data.dptId+'">'+data.dptName+'</option>');
+
+                            (data.cnaType == 2) ? $('optgroup[label^="Hard"]').append('<option value="'+data.cnaId+'">'+data.cnaName+'</option>') : $('optgroup[label^="Soft"]').append('<option value="'+data.cnaId+'">'+data.cnaName+'</option>');
+
+                            $('select[id^="cnaId"]').eq($("#addCriterion").find("button").data("selectedNb")).val(data.cnaId);
+                        }
+                        if($('.red-text').length == 0) {
+                            $('.modal').modal('close');
+                            $('#addCriterionNameSuccess').modal('open');
+                        }
+                    })
+                    .fail(function (data) {
+                        console.log(data)
+                    });
+            });
+        </script>
+    {% endif %}
+    <script>
+        function initCNIcons() {
+            const $stylizableSelects = $('.input-field.has-select select');
+            $stylizableSelects.find('option').each(function(_i, e) {
+                e.innerHTML = e.innerHTML.trim();
+            });
+            $stylizableSelects.material_select();
+            const regExp = /~(.+)~/;
+            $('.select-with-fa .select-dropdown:not(.stylized)').each(function(_i, e) {
+                const $this = $(e);
+                if ($this.is('input')) {
+                    const match = $this.val().match(regExp);
+                    if (!match) return;
+                    let icon = match[1];
+                    icon = String.fromCodePoint
+                        ? String.fromCodePoint('0x'+icon)
+                        : '';
+                    $this.val($this.val().replace(regExp, icon));
+                } else if ($this.is('ul')) {
+                    $this.find('li > span').each(function(_i, e) {
+                        e.innerHTML = e.innerHTML.trim().replace(
+                        regExp,
+                        '<span class="cn-icon">&#x$1;</span>'
+                        );
+                    });
+                }
+
+                $this.addClass('stylized');
+            });
+        }
+        initCNIcons();
+    </script>
+{% endblock %}

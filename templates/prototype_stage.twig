@@ -1,0 +1,39 @@
+
+    <div class="flex-center row" style="justify-content: space-between;">
+        <li><h4>{% trans %} stages.stage.title {% endtrans %} __nb__</h4></li>
+        <li style="margin-left:auto;"><a class="waves-effect waves-light red accent-4 btn white-text remove-stage">{% trans %}stages.delete_stage_btn{% endtrans %}</a></li>
+    </div>
+    <div class="row">
+        <div class="input-field col s8">
+            {{ form_row(item.name) }}
+        </div>
+        <div class="input-field col s4 weight">
+            {{ form_label(item.weight) }}
+            <div class="grade-slider" style="margin-top:10px;"></div>
+            <div class="grade-slider-range-value center" style="font-size:1.2rem;padding-top: 5px"></div>
+            {{ form_widget(item.weight) }}
+            {{ form_errors(item.weight) }}
+        </div>
+        <div class="mode col s12 m12">
+            {{ form_label(item.mode) }}
+            {{ form_widget(item.mode) }}
+            {{ form_errors(item.mode) }}
+        </div>    
+    </div>
+    <div class="row">
+        <div class="input-field col s6">
+            {{ form_row(item.startdate) }}
+        </div>
+        <div class="input-field col s6">
+            {{ form_row(item.enddate) }}
+        </div>
+    </div>
+    <div class="row">
+        <div class="input-field col s6">
+            {{ form_row(item.gstartdate) }}
+        </div>
+        <div class="input-field col s6">
+            {{ form_row(item.genddate) }}
+        </div>
+    </div>
+

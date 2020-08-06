@@ -1,0 +1,307 @@
+{% extends "layout.html.twig" %}
+
+
+{% block css %}
+  <link rel="stylesheet" href="{{ asset('css/survey.css') }}">
+  <script type="text/javascript">
+    var url = "{{ url('createFieldAjax',{'surId' : surId}) }}";
+    var urlremove = "{{ url('deleteFieldAjax',{'surId' : surId}) }}";
+    var urlparamdelete = "{{ url('deleteParametersAjax',{'surId' : surId}) }}";
+    var urlparaminsert = "{{ url('insertParametersAjax',{'surId' : surId}) }}";
+    var urlremoveallparm = "{{ url('deleteAllParametersAjax',{'surId' : surId}) }}"
+    var urlupdate = "{{ url('surveyRequest',{'stgId' : survey.stage}) }}";
+    var urlcopy ="{{ url('copyFieldAjax',{'surId' : surId}) }}";
+    var urlSaveField ="{{ url('saveFieldAjax',{'surId' : surId}) }}";
+
+    var surId ="{{ surId }}";
+
+
+	</script>
+	<link href="{{ asset('css/dropify.min.css') }}" rel="stylesheet" type="text/css">
+	<style>
+		select {
+			display: block !important;
+			width: 25%;
+		}
+
+    .col.s12.element-data.title {
+      width: 60%;
+      margin-left: 0;
+    }
+
+    .col.s12.element-edit{
+      width: 60%;
+      margin-left: 0;
+    }
+
+    td{
+      padding-left: 50px;
+    }
+
+    .error{
+      color: #D8000C;
+      background-color: #FFBABA;
+    }
+    .dropdown-content {
+      background-color: #FFFFFF;
+      margin: 0;
+      display: none;
+      min-width: 300px; /* Changed this to accomodate content width */
+      max-height: auto;
+      margin-left: -1px; /* Add this to keep dropdown in line with edge of navbar */
+      overflow: hidden; /* Changed this from overflow-y:auto; to overflow:hidden; */
+      opacity: 0;
+      position: absolute;
+      white-space: nowrap;
+      z-index: 1;
+      will-change: width, height;
+    }
+	</style>
+
+{% endblock %}
+
+{% block content %}
+
+	<li class="container" style="width: auto;max-width: none;margin: 0 5vw;">
+		{{ form_start(form) }}
+
+		<div class="row">
+			<div class="col element-data element-master-user s12 " style="font-size: 17px;font-style:italic">
+				{{ form_label(form.name) }}
+        {% if form.vars.data.name == null%}
+        {% set title = "process_stages.survey_name"|trans %}
+        {{ form_widget(form.name , { 'attr' :{'value': title }} ) }}
+        {% else %}
+        {{ form_widget(form.name) }}
+
+        {% endif %}
+			</div>
+		</div>
+
+
+
+		<ul class="fields elements" data-prototype="{% filter escape %}{% include 'prototype_question.twig' with { 'item': form.fields.vars.prototype } %}{% endfilter %}" style="margin-top:50px">
+			{% for key,item in form.fields %}
+				<li class="element-input  darken-1 card-panel" id="{{ key  }}">
+          <ul class="row container-css no-margin flex-center " style="justify-content: space-between;">
+
+						<div class="col s12 element-edit"  style="display:none ;">
+
+              <h5><div class="col s12 m4">{{ form_row(item.title  , { 'attr' :{'class': 'field-title'}}) }}
+                 </div></h5>
+              <div class="col s12 m8 type">{{ form_row(item.type , { 'attr' :{'class': 'select-type'}}) }}{{ form_widget(item.type) }}</div>
+            </div>
+
+            <div class="col s12 element-data title">
+              <h5 class="header">{{ item.vars.data.title}}</h5>
+            </div>
+
+            <li class="switch date-switch element-edit" style="display:none ;">
+              {{ form_label(item.isMandatory) }}
+              <label style="display: flex;">
+                <span>{% trans %}process_stages.required{% endtrans %}</span>
+                {{ form_widget(item.isMandatory, { 'attr' :{'class': 'field-Is'}}) }}
+                <span class="lever"></span>
+              </label>
+            </li>
+						<li class="switch date-switch element-data">
+							{{ form_label(item.isMandatory) }}
+              <table>
+                <tr>
+                  <td class="update-labels">
+                    {% if item.vars.data.type == "ST" %}
+                      {{ "survey.short_answer"|trans }}
+                    {% elseif item.vars.data.type == "LT" %}
+                      {{ "survey.paragraph"|trans }}
+                    {% elseif item.vars.data.type == "UC" %}
+                      {{ "survey.binary_choice"|trans }}
+                    {% elseif item.vars.data.type == "MC" %}
+                      {{ "survey.check_case"|trans }}
+                    {% elseif item.vars.data.type == "SC" %}
+                      {{ "survey.multiple_choice"|trans }}
+                    {% elseif item.vars.data.type == "LS" %}
+                      {{"survey.linear_scale"|trans}}
+                    {% endif %}
+                  </td>
+                  <td class="required-label" {% if item.vars.data.isMandatory %}style="display: block"
+                      {% else %}style="display: none"{% endif %}><b>{% trans %}process_stages.required{% endtrans %}</b>
+                  </td>
+                </tr>
+              </table>
+						</li>
+            <li class="switch date-switch element-data">
+            </li>
+
+            <a class="modify confirm-question-btn waves-effect waves-light btn-flat tooltipped" data-tooltip="{% trans %}process_stages.edit{% endtrans %}">
+              <i class="fa fa-pencil-alt  "></i>
+            </a>
+
+            <a class="waves-effect waves-light accent-4 btn-flat remove-field remove-element tooltipped" data-tooltip="{% trans %}process_stages.questionDelete{% endtrans %}"  id="{{ key  }}">
+              <i class="fa fa-trash" id="{{ key }}"></i>
+            </a>
+
+            <a class="dropdown-button btn waves-effect waves-light accent-4 btn-flat tooltip"  data-activates="dropdown-{{ key }}" data-beloworigin="true">	<i class="fas fa-ellipsis-v "></i></a>
+            <ul id="dropdown-{{ key }}" class="dropdown-content collection" style="text-align: center">
+              {% if item.vars.data.description is  null %}
+              <li ><a  class="secondary-content description"> Description</a></li>
+              {% endif %}
+              <li ><a  class="secondary-content copy-field"> {{ "process_stages.questionCopy"|trans }}</a></li>
+
+            </ul>
+
+
+					</ul>
+          <div class="desc">
+          {% if item.vars.data.description is not null %}
+          <div class="col s12  element-data "  >
+            <h7><div class="col s12 m4 description-val">{{ item.vars.data.description }}</div>
+              </h7>
+          </div>
+            <div class="col s12 element-desc display" style="display:none" >
+              <h5><div class="col s12 m4">{{ form_row(item.description  , { 'attr' :{'class': 'field-desc'}}) }}
+                </div></h5>
+            </div>
+            {% else %}
+              <div class="col s12 element-desc " style="display:none" >
+                <h5><div class="col s12 m4">{{ form_row(item.description  , { 'attr' :{'class': 'field-desc'}}) }}
+                  </div></h5>
+              </div>
+          {% endif %}
+
+          </div>
+          <div class="row  element-type">
+
+          </div>
+
+              <div class=" element-linear row" style="display:none ">
+
+
+                <div class="col s6 row"> <div class="col s3 row"><p>min</p></div>{{ form_widget(item.lowerbound, { 'attr' :{'class': 'field-low'}}) }}
+                  </div>
+                <div class="col s6 row"><div class="col s3 row"><p>max</p></div>{{ form_widget(item.upperbound, { 'attr' :{'class': 'field-upp'}}) }}</div>
+
+              </div>
+
+
+
+
+
+					{# A faire apparaître quand le check description est coché#}
+					{# <div class="row">
+															<div class="col s3 m3">{{ form_row(item.description) }}</div>
+														</div> #}
+      {% if  item.vars.data.type == "LS"%}
+        <ul class="param" data-prototype="{% filter escape %}{% include 'prototype_parametre.twig' with { 'item': item.parameters.vars.prototype } %}{% endfilter %}" style="margin-top:50px">
+          {% for i,param in item.parameters %}
+
+            <li class="param">
+              <ul class="flex-center-sb">
+
+                <div class="flex-center row type-save">
+
+                  <li class="input-field element-linear element-edit" style="display:none ;width: 250px">
+                    {{ form_row(param.lowerbound) }}
+                    {{ form_row(param.upperbound) }}
+                    {{ form_row(param.value) }}
+                  </li>
+                  <li class="input-field element-data" style=" width: 250px">
+                    {{ param.vars.data.value }}
+                    [{{ param.vars.data.lowerbound }},{{ param.vars.data.upperbound }}]
+                  </li>
+
+                  <div class="waves-effect waves-light accent-4 btn-flat tooltip delete-btn delete-parameter " id="{{ key }}">
+                    <a class="remove-parameter delete-parameter" id="{{ i }}">
+                      <i class="fas fa-times-circle delete-parameter " id="{{ i }}"></i></a>
+                  </div>
+                </div>
+              </ul>
+
+
+            </li>
+
+
+        {% endfor %}
+        </ul>
+
+
+          {% elseif  item.vars.data.type == "UC"%}
+            <ul class="param" data-prototype="{% filter escape %}{% include 'prototype_parametre.twig' with { 'item': item.parameters.vars.prototype } %}{% endfilter %}" style="margin-top:50px">
+              {% for i,param in item.parameters %}
+
+                <li class="param" id="{{ i }}">
+                  <ul class="flex-center-sb">
+
+                    <div class="flex-center row type-save">
+
+                      <li class="input-field element-choice element-edit" style="display:none ;width: 250px">
+
+                        {{ form_row(param.value, { 'attr' :{'class': 'param-choice','id':i}}) }}
+                      </li>
+
+
+
+                    </div>
+                  </ul>
+
+
+                </li>
+
+
+              {% endfor %}
+            </ul>
+          {% else %}
+					<ul class="param" data-prototype="{% filter escape %}{% include 'prototype_parametre.twig' with { 'item': item.parameters.vars.prototype } %}{% endfilter %}" style="margin-top:50px">
+            {% for i,param in item.parameters %}
+              <li class="param">
+              <ul class="flex-center-sb">
+
+                <div class="flex-center row type-save">
+                  <li class="input-field element-edit" style="display:none ;width: 250px">
+                    {{ form_widget(param.value, { 'attr' :{'class': 'param-value'}}) }}
+                    {{ form_label(param.value) }}
+                  </li>
+                  <li class="input-field element-data" style=" width: 250px">
+                    {{ param.vars.data.value }}
+                  </li>
+
+
+                  <div class="waves-effect waves-light accent-4 btn-flat tooltip delete-btn delete-parameter " id="{{ key }}">
+                    <a class="remove-parameter delete-parameter" id="{{ i }}">
+                      <i class="fas fa-times-circle delete-parameter " id="{{ i }}"></i></a>
+                  </div>
+                </div>
+              </ul>
+
+
+              </li>
+            {% endfor %}
+          </ul>
+            {% endif %}
+          <a style="display: none" class="btn param-btn insert-parameter">{% trans %}process_stages.questionAddOption{% endtrans %}
+            <i class="fa fa-plus-circle"></i>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+
+    <a class="btn waves-effect waves-light insert-btn insert">{% trans %}
+      process_stages.questionAdd{% endtrans %} <i class="fa fa-plus-circle"></i>
+    </a>
+    <br><br>
+	<!---	<div class="fixed-action-btn">
+			<button class="btn-floating btn-large tooltipped blue darken-3 " id="test" data-tooltip="Sauvegarder" data-position="left" type="submit">
+				<i class="large material-icons">save</i>
+			</button>
+		</div> --->
+
+    {{ form_row(form.submit)}}
+		<div>
+			{{ form_end(form, {'render_rest': false})}}
+		</div>
+    <br>
+	{% endblock %}
+	{% block javascripts %}
+    <script src="{{ asset('js/nouislider.js') }}"></script>
+		<script src="{{ asset('js/survey_question.js') }}"></script>
+		<script src="{{ asset('js/survey_update.js') }}"></script>
+	{% endblock %}

@@ -1,0 +1,122 @@
+{% set serpicoappHome = "https://app.serpicoapp.com/fr" %}
+{% set serpicoappSignup = "https://app.serpicoapp.com/fr/organizations/new" %}
+{% set atHome = current_path == '/' %}
+{% set locale = app.request.getLocale() in ['fr','en'] ? app.request.getLocale() : en %}
+<body>
+<header id="header" {% if atHome %}class="home"{% endif %} style="z-index: 1;">
+  <nav id="nav">
+    <div class="nav-wrapper">
+      <a href="/" class="brand-logo">
+        <img src="{{ asset('lib/img/logo_l_white.png') }}" alt="Serpico">
+      </a>
+      <a href="#" data-activates="mobile-menu" class="button-collapse">
+        <i class="material-icons">menu</i>
+      </a>
+      <ul class="right hide-on-med-and-down flex-center">
+        <li>
+          <a class="product" href="{{ path('solution') }}">
+            {% trans %}header.product{% endtrans %}
+          </a>
+        </li>
+        <li>
+          <a href="{{ path('about') }}">{% trans %}header.about{% endtrans %}</a>
+        </li>
+        <li>
+          <a class="modal-trigger" href="{{ path('login') }}">
+            {% trans %}header.login{% endtrans %}
+          </a>
+        </li>
+        
+        <li>
+          <a class="btn waves-effect waves-light privileged" href="{{ serpicoappSignup }}">
+            {% trans %}header.register.start{% endtrans %}
+          </a>
+        </li>
+        
+        <li>
+          <ul class="collapsible flags" data-collapsible="accordion">
+            <li>
+              <div class="collapsible-header">
+                <ul class="flex-center">
+                  <li>
+                    <div class="flag {{ locale }}"></div>
+                  </li>
+                  <li>
+                    <span class="country">{{ locale|upper }}</span>
+                  </li>
+                </ul>
+              </div>
+              <div class="collapsible-body language-collapsible-body">
+                <ul class="lang-menu">
+                  {% if locale != 'en' %}
+                    <li>
+                      <ul class="flex-center">
+                        <a href="{{ path('change_locale', {'locale': 'en'}) }}" class="flex-center">
+                          <li>
+                            <div class="flag en"></div>
+                          </li>
+                          <li>
+                            <span class="country">EN</span>
+                          </li>
+                        </a>
+                      </ul>
+                    </li>
+                  {% endif %}
+                  {% if locale != 'fr' %}
+                  <li>
+                    <ul class="flex-center">
+                      <a href="{{ path('change_locale', {'locale': 'fr'}) }}" class="flex-center">
+                        <li>
+                          <div class="flag fr"></div>
+                        </li>
+                        <li>
+                          <span class="country">FR</span>
+                        </li>
+                      </a>
+                    </ul>
+                  </li>
+                  {% endif %}
+                </ul>
+              </div>
+            </li>
+          </ul>
+        </li>
+      </ul>
+      
+      
+      
+      
+      
+      <ul class="side-nav" id="mobile-menu">
+        <li>
+          <a class="product" href="{{ path('solution') }}">
+            {% trans %}header.product{% endtrans %}
+          </a>
+        </li>
+        <li>
+          <a href="{{ path('about') }}">
+            {% trans %}header.about{% endtrans %}
+          </a>
+        </li>
+        <li>
+          <a class="modal-trigger" href="{{ serpicoappHome }}">
+            {% trans %}header.login{% endtrans %}
+          </a>
+        </li>
+        {#
+        <li>
+          <a class="btn waves-effect waves-light privileged" href="{{ serpicoappSignup }}">
+            {% trans %}header.register.public_evaluations{% endtrans %}
+          </a>
+        </li>
+        #}
+        <li>
+          <a class="waves-effect waves-light modal-trigger btn-small" id="language" href='#languageModal'>
+            {% trans %}language.selection{% endtrans %}
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+</header>
+</body>

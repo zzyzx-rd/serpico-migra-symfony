@@ -1,0 +1,52 @@
+<li class="collection-item criteria-list--item editing">
+  <div class="collection-hidden-index">
+    {{ form_label(criterion) }}
+  </div>
+  <div class="view v-e">
+    <button type="button" tabindex="-1" class="btn-flat set-icon-btn modal-trigger cn-icon"
+            data-target="set-icon-modal"
+            data-id="" data-icon="" data-placeholder="Sélectionner icône"></button>
+    <span class="criterionname"></span>
+    <div class="criterion-actions">
+      <button type="button" tabindex="-1" class="btn-flat edit-criterionname-btn material-icons">edit</button>
+      <button type="button" tabindex="-1" class="btn red delete-criterion-btn">
+        <i class="material-icons">delete</i>
+      </button>
+    </div>
+  </div> {# .view #}
+  <div class="edit v-e">
+    <div class="input-field">
+      {{
+        form_widget(criterion.name, {
+          attr: {
+            required: '',
+            class: 'criterionname-input new'
+          }
+        })
+      }}
+      <label for="{{ criterion.name.vars.id }}">
+        {{ 'organization_criteriongroups.labels.criteria_name'|trans }}
+      </label>
+    </div>
+    <div class="input-field">
+      {{
+        form_widget(criterion.unit, {
+          attr: {
+            required: '',
+            class: 'criterionname-input new'
+          }
+        })
+      }}
+      <label for="{{ criterion.unit.vars.id }}">
+        {{ 'organization_criteriongroups.labels.criteria_name'|trans }}
+      </label>
+    </div>
+    <div class="criterion-actions">
+      <button type="button" tabindex="-1" class="btn confirm-add-criterion-btn material-icons">check</button>
+      <button type="button" tabindex="-1" class="btn red delete-criterion-btn">
+        <i class="material-icons">delete</i>
+      </button>
+    </div>
+    <a class="add-new-criterionname-label modal-trigger" href="#new-criterionname-label-modal">Ajouter un nouveau nom de critère</a>
+  </div> {# .edit #}
+</li>

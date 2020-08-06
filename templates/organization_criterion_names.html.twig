@@ -1,0 +1,121 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+    {% trans %}organization_criterionNames.page_title{% endtrans %}
+{% endblock %}
+
+
+  {% block css %}
+    <!-- Dropify -->
+    <link href="{{ asset('css/dropify.min.css') }}" rel="stylesheet" type="text/css">
+    <script>
+        //var wurl = "{{ url('addWeight',{'posId': 0,'usrId':0}) }}"
+    </script>
+  {% endblock %}
+
+
+{% block pagename %}
+    {% trans %}organization_criterionNames.mobile_header_title{% endtrans %}
+{% endblock %}
+
+{% block username %}
+  {{ currentuser.firstname }}
+  {{ currentuser.lastname }}
+{% endblock %}
+
+{% block content %}
+
+  <div class="container">
+
+    {{ form_start(form) }}
+    <ul class="criterionNames" data-prototype="{% filter escape %}{% include 'prototype_criterion_name.twig' with { 'item': form.criterionNames.vars.prototype } %}{% endfilter %}">
+
+      {% set crtCount = 1 %}
+
+      {% for criterionName in form.criterionNames %}
+        {% if criterionName.vars.data.id|number_format in unremovableCriterionNameIds %}
+          <li class="criterionName">
+            <ul class="flex-center row" style="justify-content: space-between;">
+                <li class="criterionName-title">
+                    <h4>Criterion {{ crtCount }}</h4>
+                </li>
+            </ul>
+            <div class="row flex-center">
+                <div class="col s12 m4">
+                    {{ form_row(criterionName.type) }}
+                </div>
+                <div class="input-field col s12 m4">
+                    {{ form_row(criterionName.name) }}
+                </div>
+                <div class="button-field col s12 m4" style="display:none;">
+                    <a href="#changeIcon" class="waves-effect waves-light btn modal-trigger" data-cid="{{ criterionName.vars.id }}" style="float:right">
+                      {% if criterionName.vars.data.icon is not null %}
+                        <i class="fa fa-{{ criterionName.vars.data.icon.name }}" style="margin-right:10px"></i>Change logo
+                      {% else %}
+                        <i class="fa fa-plus" style="margin-right:10px"></i>Add logo
+                      {% endif %}
+                    </a>
+                </div>
+            </div>
+          </li>
+        {% set crtCount = crtCount + 1 %}
+        {% endif %}
+      {% endfor %}
+
+      {% for criterionName in form.criterionNames %}
+        {% if not(criterionName.vars.data.id|number_format in unremovableCriterionNameIds) %}
+          <li class="criterionName">
+            <ul class="flex-center row" style="justify-content: space-between;">
+                <li class="criterionName-title">
+                    <h4>Criterion {{ crtCount }}</h4>
+                </li>
+
+                <li style="margin-left:auto;display:none;"><a href="#deleteCriterionName" class="waves-effect waves-light red accent-4 btn white-text modal-trigger" data-cid="{{ criterionName.vars.id }}">{% trans %}organization_criterion_names.delete_btn{% endtrans %}</a></li>
+            </ul>
+            <div class="row flex-center">
+                <div class="col s12 m4">
+                    {{ form_row(criterionName.type) }}
+                </div>
+                <div class="input-field col s12 m4">
+                    {{ form_row(criterionName.name) }}
+                </div>
+                <div class="button-field col s12 m4" style="display: none;">
+                    <a href="#changeIcon" class="waves-effect waves-light btn modal-trigger" data-cid="{{ criterionName.vars.id }}" style="float:right">
+                      {% if criterionName.vars.data.icon is not null %}
+                        <i class="fa fa-{{ criterionName.vars.data.icon.name }}" style="margin-right:10px"></i>Change logo
+                      {% else %}
+                        <i class="fa fa-plus" style="margin-right:10px"></i>Add logo
+                      {% endif %}
+                    </a>
+                </div>
+            </div>
+          </li>
+        {% set crtCount = crtCount + 1 %}
+        {% endif %}
+      {% endfor %}
+    </ul>
+
+    <div class="row">
+      <div class="button-field center-button">
+          {{ form_row(form.submit) }}
+      </div>
+    </div>
+      {{ form_rest(form) }}
+      {{ form_end(form)}}
+
+      <div id="deleteCriterionName" class="modal">
+          <div class="modal-content">
+              <h4>{% trans %}organization.criterion_names.delete_modal.title{% endtrans %}</h4>
+              <p>{% trans %}organization.criterion_names.delete_modal.content_1{% endtrans %}</p>
+          </div>
+          <div class="modal-footer">
+              <a class=" modal-action modal-close submit-button waves-effect waves-green btn-large delete-button">{% trans %}organization.criterion_names.delete_modal.confirm{% endtrans %}</a>
+              <a class=" modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}organization.criterion_names.delete_modal.decline{% endtrans %}</a>
+          </div>
+      </div>
+  {% endblock %}
+
+{% block javascripts %}
+  <script src="{{ asset('js/login.js') }}"></script>
+  <script src="{{ asset('js/organization_criterionNames.js') }}"></script>
+{% endblock %}

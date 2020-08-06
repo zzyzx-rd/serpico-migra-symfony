@@ -1,0 +1,164 @@
+{% macro badge(letter,participation) %}
+  {% set colors = { A: 'lightseagreen', T: 'purple', P: 'orange', 'E': 'darkcyan' } %}
+  {% set tooltipMsg = { 
+      L: 'participants.leader', 
+      A: 'tooltip.activity.active_participant_msg', 
+      T: 'tooltip.activity.tp_participant_msg', 
+      P: 'tooltip.activity.passive_participant_msg', 
+      E: 'tooltip.activity.external_user_msg',
+      V: 'tooltip.activity.validated_grades',
+  } %}
+
+    {% if participation %}
+    
+        {% if letter == 'L' %}
+              <div class="badge-container black-text badge-participation-{{ letter|lower }}" {% if not participation.isLeader %}style="display: none"{% endif %}>
+                <i class="fa fa-star tooltipped" data-position="top" data-tooltip="{{ tooltipMsg[letter]|trans }}"></i>
+              </div>
+        {% elseif letter != 'V' %}
+            {% if letter == 'A' and participation.type == 1 or
+                  letter == 'T' and participation.type == 0 or 
+                  letter == 'P' and participation.type == -1 or 
+                  letter == 'E' and participation.user.orgId != currentuser.orgId 
+            %}
+              <div class="badge-container badge-participation-{{ letter|lower }} tooltipped" data-position="top" data-tooltip="{{ tooltipMsg[letter]|trans }}">
+                <div {{ 'style' }}="background: {{ colors[letter] }}">
+                  {{ letter }}
+                </div>
+              </div>
+            {% else %}
+              <div class="badge-container badge-participation-{{ letter|lower }} tooltipped" data-position="top" data-tooltip="{{ tooltipMsg[letter]|trans }}" style="display: none;">
+                <div {{ 'style' }}="background: {{ colors[letter] }}">
+                  {{ letter }}
+                </div>
+              </div>
+            {% endif %}
+        {% else %}
+            {% if participation.status == 3 %}
+                <div class="badge-container badge-participation-validated green-text tooltipped" data-position="top" data-tooltip="{{ tooltipMsg[letter]|trans }}">
+                  <i class="material-icons">check_circle</i>
+                </div>
+            {% endif %}
+        {% endif %}
+    
+    {% else %}
+        {% if letter == 'L' %}
+        <div class="badge-container black-text badge-participation-{{ letter|lower }}" style="display: none;">
+          <i class="fa fa-star tooltipped" data-position="top" data-tooltip="{% trans %}participants.leader{% endtrans %}"></i>
+        </div>
+        {% elseif letter != 'V' %}
+          <div class="badge-container badge-participation-{{ letter|lower }} tooltipped" data-position="top" data-tooltip="{{ tooltipMsg[letter]|trans }}" style="display: none;">
+            <div {{ 'style' }}="background: {{ colors[letter] }}">
+              {{ letter }}
+            </div>
+          </div>
+        {% endif %}
+
+    {% endif %}
+
+{% endmacro %}
+
+{% macro badges(ptype) %}
+  <div class="badges">
+      {{ _self.badge('L',ptype) }}
+      {{ _self.badge('A',ptype) }}
+      {{ _self.badge('T',ptype) }}
+      {{ _self.badge('P',ptype) }}
+      {{ _self.badge('E',ptype) }}
+      {{ _self.badge('V',ptype) }}
+  </div>
+{% endmacro %}
+
+
+{% set participation_types = { '-1': 'p', '0': 't', '1': 'a' } %}
+
+{% set participation = participant.vars.data %}
+{% set participation_type = participation ? participation.type : null %}
+{% if entity == 'user' %}
+  {% set element = participant.directUser.vars.data %}
+{% else %}
+  {% set element = participant.team.vars.data %}
+{% endif %}
+
+{% if element %}
+    {% if entity == 'user' %}
+      {% set elmtName = element.firstname == 'ZZ' ? element.organization.commname : element.fullname %}
+    {% else %}
+      {% set elmtName = element.name %}
+    {% endif %}
+{% else %}
+    {% set elmtName = '__elmt.name__' %}
+{% endif %}
+
+{% set participation_type_class = participation_type
+  ? 'participation-type-' ~ participation_types[participation_type]
+  : ''
+%}
+
+
+
+<li
+  class="participants-list--item {{ participation_type_class }} {{ not participation ? 'edit-mode new' }}"
+  {% if participation %}
+    data-id="{{ participation.id }}"
+    is-leader="{{ participation.isLeader }}"
+    participation-type="{{ participation.type }}"
+    mode="{{ mode }}"
+  {% endif %}>
+
+  <div class="user-info">
+    <img class="user-picture" src="{{ element ? (entity == 'user' ? asset(user_picture_url(element)) : asset(team_picture_url(element))) }}" alt="{{ elmtName }}">
+    <span class="elmt-name">{{ elmtName }}</span>
+    {{ _self.badges(participation) }}
+  </div>
+
+  <div class="user-edit">
+    {% if entity == 'user'%}
+      <div class="user">
+        {{ form_label(participant.directUser) }}
+        {{ form_widget(participant.directUser, { attr: { class: 'elmt-select' } }) }}
+      </div>
+    {% else %}
+      <div class="team">
+        {{ form_label(participant.team) }}
+        {{ form_widget(participant.team, { attr: { class: 'elmt-select' } }) }}
+      </div>
+    {% endif %}
+    {% if leadingOption %}
+      <div class="leader">
+        {{ form_widget(participant.leader) }}
+        {{ form_label(participant.leader) }}
+        {# <input type="radio" name="{{ participant.leader.vars.full_name }}" id="{{ participant.leader.vars.id }}">
+        {{ form_label(participant.leader) }} #}
+      </div>
+    {% endif %}
+    <div class="type">
+      {{ form_label(participant.type) }}
+      {{ form_widget(participant.type, { attr: { class: 'user-participant-type' } }) }}
+    </div>
+    <div class="precomment" hidden>
+      {{ form_row(participant.precomment) }}
+    </div>
+  </div>
+  <div class="user-actions">
+    
+    {% if not participation %}
+      <a class="btn-flat remove-participant-btn waves-effect waves-light accent-4 btn-flat tooltipped edit" 
+      data-position="top"
+      data-tooltip="{% trans %}participants.delete{% endtrans %}">
+        <i class="fa fa-times"></i>
+      </a>
+    {% else %}
+      <a class="btn-flat waves-effect waves-light accent-4 btn-flat tooltipped edit modal-trigger" href="#deleteParticipant" 
+      data-position="top"
+      data-tooltip="{% trans %}participants.delete{% endtrans %}">
+        <i class="fa fa-times"></i>
+      </a>
+    {% endif %}
+  
+    <a class="waves-effect waves-light btn-flat edit-user-btn terminal-btn">
+      <span class="material-icons">edit</span>
+      <span class="material-icons edit">done</span>
+    </a>
+  </div>
+</li>

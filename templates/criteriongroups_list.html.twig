@@ -1,0 +1,330 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+  {% trans %}organization_criteriongroups.page_title{% endtrans %}
+{% endblock %}
+
+{% block css %}
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css">
+  <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/criteriongroups_list.css') }}">
+{% endblock %}
+
+{% block username %}
+  {{ currentuser.firstname }} {{ currentuser.lastname }}
+{% endblock %}
+
+{% block content %}
+  <div class="container">
+    <header>
+      <a href="{{ path('firmSettings') }}" class="btn back-button">Retour</a>
+      <h1>{% trans %}organization_criteriongroups.page_header{% endtrans %}</h1>
+    </header>
+
+    {{ form_start(form, { attr: { autocomplete: 'off' } }) }}
+    {% set criterionGroups = form.criterionGroups %}
+    {% set cgLength = criterionGroups.vars.data.count %}
+
+    <ul id="criterion-groups-list" class="collapsible popout" data-collapsible="accordion">
+      {# criterion group prototype #}
+      <template id="criterion0-proto">
+        {%
+          include 'prototype/criteriongroupcriterion_item.html.twig'
+          with { 'criterion': form.criterionGroups.vars.prototype.criteria.vars.prototype }
+        %}
+      </template>
+      <template class="proto">
+        {%
+          include 'prototype/criteriongroup_item.html.twig'
+          with { 'criterionGroup': form.criterionGroups.vars.prototype }
+        %}
+      </template>
+      {% set hasSingleItem = cgLength == 1 %}
+      {% for criterionGroup in criterionGroups %}
+        {% set cgpId = criterionGroup.vars.data.id %}
+        {% set cgpDepartment = criterionGroup.vars.data.department %}
+        {% set criteria = criterionGroup.criteria %}
+        {% set departmentModalId = 'cgp-' ~ cgpId ~ '-dpt-modal' %}
+        {% set active = hasSingleItem %}
+
+        <li data-id="{{ cgpId }}" class="criterion-groups--item {{ cgpDepartment ? 'dpt-linked' }} {{ active ? 'active' }}">
+          {% set criterionGroupDpt = criterionGroup.department %}
+          {% set criterionGroupName = criterionGroup.name %}
+          <div class="collection-hidden-index">
+            {{ form_label(criterionGroup) }}
+          </div>
+          <div id="{{ departmentModalId }}" class="criteriongroup-department-modal modal bottom-sheet">
+            <div class="modal-content">
+              <h4>{% trans %}organization_criteriongroups.cgp_department_header{% endtrans %}</h4>
+              <div class="input-field">
+                {{
+                  form_widget(criterionGroupDpt, {
+                    attr: {
+                      class: 'criteriongroup-department-select'
+                    }
+                  })
+                }}
+                {{ form_label(criterionGroupDpt) }}
+                {{ form_errors(criterionGroupDpt) }}
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" tabindex="-1" class="btn-large modal-action modal-close">OK</button>
+            </div>
+          </div>
+          <div class="collapsible-header criteriongroupname grey lighten-4 {{ active ? 'active' }}">
+            <div class="chevron-container">
+              <i class="fa fa-fw fa-chevron-right"></i>
+              <i class="fa fa-fw fa-chevron-down"></i>
+            </div>
+            <div class="criteriongroupname-wrapper">
+              <div class="edit">
+                <div class="input-field criteriongroupname-item">
+                  {{ form_label(criterionGroupName) }}
+                  {{
+                    form_widget(criterionGroupName, {
+                      attr: {
+                        class: 'criteriongroupname-input',
+                        tabindex: '-1',
+                        disabled: '',
+                        value: criterionGroup.vars.data.name
+                      }
+                    })
+                  }}
+                </div>
+                <div class="criteriongroup-buttons">
+                  <button type="button" tabindex="-1" class="btn confirm-edit-criteriongroupname-btn material-icons">check</button>
+                </div>
+              </div>
+              <div class="view">
+                <h3 class="criteriongroupname-item">{{ criterionGroup.vars.data.name }}</h3>
+                <div class="criteriongroup-buttons">
+                  <button type="button" tabindex="-1"
+                          class="btn link-to-department-btn modal-trigger {{ cgpDepartment ? 'lime darken-3' }}"
+                          data-target="{{ departmentModalId }}">
+                    <div class="no-link">
+                      <i class="material-icons">link_off</i>
+                    </div>
+                    <div class="link">
+                      <i class="material-icons">link</i>
+                      <span class="department-name">{{ cgpDepartment ? cgpDepartment.name }}</span>
+                    </div>
+                  </button>
+                  <button type="button" tabindex="-1"
+                          class="btn edit-criteriongroupname-btn material-icons tooltipped"
+                          data-tooltip="{{ 'organization_criteriongroups.tooltips.edit_cgp_name'|trans }}"
+                          data-position="top">edit</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="collapsible-body" {{ active ? 'style="display: block;"' }}>
+            <ul class="collection with-header criteria-list {{ criteria is empty ? 'no-criteria' }}">
+              <li class="collection-header">
+                <h4>
+                  {% trans %}organization_criteriongroups.criterialist_header{% endtrans %}
+                </h4>
+                <button type="button" tabindex="-1"
+                        class="btn red material-icons tooltipped delete-cgp-trigger modal-trigger"
+                        data-target="delete-criteriongroup-modal"
+                        data-tooltip="{{ 'organization_criteriongroups.buttons.delete_criteriongroup'|trans }}"
+                        data-position="left">delete</button>
+              </li>
+              <li class="collection-item no-criteria-item">
+                {{ 'organization_criteriongroups.no_criteria'|trans }}
+              </li>
+              {# criterion group item prototype #}
+              <template class="proto">
+                {%
+                  include 'prototype/criteriongroupcriterion_item.html.twig'
+                  with { 'criterion': criteria.vars.prototype }
+                %}
+              </template>
+              {% for criterion in criteria %}
+                {% set criterion_name = criterion.vars.data %}
+                {% set cn_id = criterion_name.id %}
+                {% set cn_name = criterion_name.name %}
+                {% set cn_icon = criterion_name.icon %}
+                {% set is_being_used = used_criterion_names[cn_id] is defined %}
+
+                <li class="collection-item criteria-list--item" {% if cn_id %} data-id="{{ cn_id }}" {% endif %}>
+                  <div class="collection-hidden-index">
+                    {{ form_label(criterion) }}
+                  </div>
+
+                  <div class="view v-e">
+                    <button type="button" tabindex="-1" class="btn-flat set-icon-btn modal-trigger cn-icon"
+                            data-target="set-icon-modal" data-placeholder="Sélectionner icône"
+                            data-id="{{ cn_icon ? cn_icon.id }}" data-icon="{{ cn_icon }}" data-icon-type="{{ cn_icon ? cn_icon.type }}"></button>
+                    <span class="criterionname">{{ cn_name }}</span>
+                    <div class="criterion-actions">
+                      <button type="button" tabindex="-1" class="btn-flat edit-criterionname-btn material-icons">edit</button>
+                      {# Concerning deleting criterion, we cannot erase the first criteria which are defined by default. For all subsequent skills matrices with associated criterion name, we can delete them if they were not used in grading #}
+                      <button type="button" tabindex="-1" class="btn red delete-criterion-btn {{ is_being_used or criterion == criteria|first and criterion.vars.data.organization is null ? 'disabled' }}">
+                        {% if is_being_used %}
+                          <i class="material-icons">work</i>
+                          <span class="criterion-usage-count">{{ used_criterion_names[cn_id] }}</span>
+                        {% else %}
+                          <i class="material-icons">delete</i>
+                        {% endif %}
+                      </button>
+                    </div>
+                  </div> {# .view #}
+
+                  <div class="edit v-e">
+                    <div class="input-field">
+                      {{
+                        form_widget(criterion.name, {
+                          attr: {
+                            required: '',
+                            class: 'criterionname-input'
+                          }
+                        })
+                      }}
+                      <label for="{{ criterion.name.vars.id }}">
+                        {{ 'organization_criteriongroups.labels.criteria_name'|trans }}
+                      </label>
+                    </div>
+                    <div class="input-field">
+                      {{
+                        form_widget(criterion.unit, {
+                          attr: {
+                            required: '',
+                            class: 'criterionname-unit'
+                          }
+                        })
+                      }}
+                      <label for="{{ criterion.unit.vars.id }}">
+                        {{ 'organization_criteriongroups.labels.criteria_name'|trans }}
+                      </label>
+                    </div>
+                    <div class="criterion-actions">
+                      <button type="button" tabindex="-1"
+                              class="btn confirm-edit-criterionname-btn material-icons">check</button>
+                    </div>
+                    <a class="add-new-criterionname-label modal-trigger" href="#new-criterionname-label-modal">Ajouter un nouveau nom de critère</a>
+                  </div> {# .edit #}
+                </li>
+              {% endfor %}
+              <li class="collection-item criterialist-actions">
+                <button type="button" class="btn add-criterion-btn" tabindex="-1">
+                  <i class="material-icons left">add</i>
+                  {% trans %}organization_criteriongroups.buttons.add_criterion{% endtrans %}
+                </button>
+              </li>
+            </ul>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+    <div class="criterion-groups-actions">
+      <button type="button" id="add-criteriongroup-btn" class="btn">
+        <i class="material-icons left">add</i>
+        {% trans %}organization_criteriongroups.buttons.add_criteriongroup{% endtrans %}
+      </button>
+    </div>
+    {{ form_end(form) }}
+  </div>
+
+
+
+  <input type="hidden"
+         id="removeCriterionRoute"
+         value="{{ path('removeCriterion') }}">
+  <input type="hidden"
+         id="addCriterionRoute"
+         value="{{ path('addCriterion', { cgpId: '000' }) }}">
+  <input type="hidden"
+         id="updateCriterionNameRoute"
+         value="{{ path('updateCriterionName', { id: '000' }) }}">
+  <input type="hidden"
+         id="setCriterionIconRoute"
+         value="{{ path('setCriterionIcon', { cnId: '000' }) }}">
+  <input type="hidden"
+         id="updateCriterionGroupNameRoute"
+         value="{{ path('updateCriterionGroupName', { id: '000' }) }}">
+  <input type="hidden"
+         id="createCriterionGroupRoute"
+         value="{{ path('createCriterionGroup') }}">
+  <input type="hidden"
+         id="setCgpDepartmentRoute"
+         value="{{ path('setCgpDepartment', { cgpId: '000' }) }}">
+  <input type="hidden"
+         id="removeCriterionGroupRoute"
+         value="{{ path('deleteCriterionGroup', { id: '000' }) }}">
+  <input type="hidden"
+         id="cgp_department__trans"
+         value="{{ 'organization_criteriongroups.tooltips.cgp_department'|trans }}__dpt__">
+  <input type="hidden"
+         id="cgp_department_none__trans"
+         value="{{ 'organization_criteriongroups.tooltips.cgp_department_none'|trans }}">
+  <input type="hidden"
+         id="cgp_deletion_confirmation__trans"
+         value="{{ 'organization_criteriongroups.deletion_confirmation_msg'|trans }}">
+
+  <div id="delete-criteriongroup-modal" class="modal">
+    <div class="modal-content"></div>
+    <div class="modal-footer">
+      <button type="button" class="btn-flat red-text modal-action modal-close">
+        {{ 'organization_criteriongroups.buttons.cancel'|trans }}
+      </button>
+      <button type="button" class="btn modal-action modal-close delete-criteriongroup-btn">
+        {{ 'organization_criteriongroups.buttons.confirm'|trans }}
+      </button>
+    </div>
+  </div>
+
+  <form id="set-icon-modal" class="modal bottom-sheet" action="#" method="patch" autocomplete="off">
+    <div class="modal-content">
+      <ul id="cn-icon-list">
+        {% for icon in icons %}
+          {% set ico_id = icon.id %}
+          {% set id = 'cn-icon-input-' ~ ico_id %}
+          <li class="cn-icon-list--item">
+            <input type="radio" id="{{ id }}" name="cn-icon" value="{{ ico_id }}" hidden>
+            <label class="btn-flat cn-icon" for="{{ id }}"
+                   data-id="{{ ico_id }}"
+                   data-icon-type="{{ icon.type }}"
+                   data-icon="{{ icon }}"></label>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="modal-footer">
+      <button type="reset" class="btn-flat">Aucune icône</button>
+      <button type="button" class="btn-large modal-action modal-close">OK</button>
+    </div>
+  </form>
+
+  {# <div id="new-criterionname-label-modal" class="modal">
+    {{ form_start(criterionNameType, { attr: { autocomplete: 'off' } }) }}
+      <div class="modal-content">
+        {{ form_label(criterionNameType.name) }}
+        {{ form_widget(criterionNameType.name) }}
+        {{ form_errors(criterionNameType.name) }}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-flat modal-action modal-close">Annuler</button>
+        {{ form_row(criterionNameType.submit, { attr: { class: 'modal-action modal-close' } }) }}
+      </div>
+    {{ form_end(criterionNameType) }}
+  </div> #}
+
+  <form id="new-criterionname-label-modal" class="modal" autocomplete="off">
+    <div class="modal-content">
+      <header>Ajouter un nouveau nom de critère</header>
+      <div class="input-field">
+        <input type="text" id="new-criterionname-label-input" name="name">
+        <label for="new-criterionname-label-input" data-error="Ce nom est déjà présent dans la liste">Nouveau nom</label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-flat modal-action modal-close">Annuler</button>
+      <button type="submit" class="btn">OK</button>
+    </div>
+  </form>
+{% endblock %}
+
+{% block javascripts %}
+  <script src="{{ asset('js/criteriongroups_list.js') }}" defer></script>
+{% endblock %}

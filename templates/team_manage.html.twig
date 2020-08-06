@@ -1,0 +1,283 @@
+{% extends "layout.html.twig" %}
+
+{% set teaId = app.request_stack.currentrequest.get('teaId') ?: 0 %}
+{% set hasPastTeamUsers = form.vars.data.pastTeamIntUsers|length > 0 or form.vars.data.pastTeamExtUsers|length > 0 %}
+
+{% block title %}
+    {% if teamUsersId is defined %}{% trans %}team_manage.page_title_modify{% endtrans %}{% else %}{% trans %}team_manage.page_title_create{% endtrans %}{% endif %}
+{% endblock %}
+{% block css %}
+<link rel="stylesheet" href="{{ asset('css/activity.css') }}">
+<style>
+    form{
+        display: contents;
+    }
+    footer{
+        margin-top: auto;
+    }
+
+    .teamusers-list{
+        background-color: #e0f7fa;
+        height: max(calc(100vh - 600px), 500px);
+        padding: 1em!important;
+        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 
+            0 1px 5px 0 rgba(0, 0, 0, 0.12), 
+            0 3px 1px -2px rgba(0, 0, 0, 0.2);
+    }
+
+    .teamusers-list--item:not(.edit-mode) > .user-edit,
+    .teamusers-list--item:not(.edit-mode) > .user-actions .edit {
+        display: none;
+    }
+
+    .teamusers-list--item.edit-mode > .user-info,
+    .teamusers-list--item.edit-mode > .user-actions .material-icons:not(.edit) {
+        display: none;
+    }
+
+    .teamusers-list--item > .user-edit > :not(.leader) label {
+        display: none;
+    }
+
+    .teamusers-list--item {
+        display: flex;
+        align-items: center;
+    }
+
+    .teamusers-list--item > div {
+        display: flex;
+        align-items: center;
+        gap: .5em;
+    }
+
+    .teamusers-list--item .user-picture {
+        height: 1.8em;
+    }
+
+    .teamusers-list--item .badge-container {
+        --size: 1.4em;
+        color: #fff;
+        text-align: center;
+        line-height: var(--size);
+        height: var(--size);
+        width: var(--size);
+        border-radius: var(--size);
+        margin: 0 0.25em;
+        overflow: hidden;
+        user-select: none;
+    }
+
+    .user-select{
+        min-width: 250px;
+    }
+
+    .section-header{
+        justify-content: center;
+    }
+
+    .section-header>.btn-flat, .past-team-members i{
+        color : #26a69a;
+    }
+
+    .past-team-members{
+        margin-left: 1em;
+    }
+
+    .past-teamusers{
+        margin-top: 25px;
+    }
+
+    .user-name{
+        margin-left: 0.5em;
+    }
+
+
+
+</style>
+{% endblock %}
+
+{% block pagename %}
+    <span>{% if teamUsersId is defined %}{% trans %}team_manage.mobile_header_description_modify{% endtrans %}{% else %}{% trans %}team_manage.mobile_header_description_create{% endtrans %}{% endif %}</span>
+{% endblock %}
+
+{% block username %}
+    {{ currentuser.firstname }} {{ currentuser.lastname }}
+{% endblock %}
+
+{% set colors = ["red", "pink", "purple", "indigo", "blue", "cyan", "teal", "lime", "yellow", "amber", "orange","brown"] %}
+
+
+{% block content %}
+
+    <main>
+        {{ form_start(form) }}
+        <header id="main-header">
+            <a class="waves-effect waves-green btn back-btn" href="{{ url('manageUsers')}}">{{ 'team.go_back_users'|trans }}</a>
+            <div class="team-name showedit">
+              <div class="show">
+                {{ form.vars.data ? form.vars.data.name : 'team.entity_name'|trans ~ ' ' ~ form.vars.data.name }}
+              </div>
+              <div class="edit">
+                {{ form_widget(form.name, { attr: { hidden: 'hidden' } }) }}
+                <div class="custom-input" contenteditable spellcheck="false">
+                  {{ form.vars.data ? form.vars.data.name : 'team.entity_name'|trans ~ ' ' ~ form.vars.data.name }}
+                </div>
+              </div>
+              <button type="button" class="btn-flat btn-edit mat-icon"></button>
+            </div>
+            <div class="actions">
+            </div>
+        </header>
+        <section data-id="{{ teaId }}">
+
+            <div class="flex-center section-header">
+                <span>{% trans %}team.add_msg{% endtrans %}</span>
+                <button type="button" class="btn-flat btn-add-user-i">
+                    <i class="material-icons left">add</i>
+                    {{ 'team.add_btn_internal'|trans }}
+                </button>
+            
+                {% if form.vars.data.organization.externalUsers|length > 0 %}
+                    <button type="button" class="btn-flat btn-add-user-e">
+                    <i class="material-icons left">add</i>
+                    {{ 'team.add_btn_external'|trans }}
+                    </button>
+                {% endif %}
+            </div>
+
+            <ul class="teamusers-list">
+                {% for tu, teamIntUser in form.currentTeamIntUsers %}
+                    {% include "components/team_user__item.html.twig" with { teamUser: teamIntUser, type : 'i' } %}
+                {% endfor %}
+    
+                {% for tu, teamExtUser in form.currentTeamExtUsers %}
+                    {% include "components/team_user__item.html.twig" with { teamUser: teamExtUser, type : 'e' } %}
+                {% endfor %}
+            </ul>
+            
+            {% if hasPastTeamUsers %}
+            <div class="past-team-members flex-center">
+                <span>{{'team.past_members_msg'|trans}}</span>
+                <a href="#pastTeamUsers" class="modal-trigger btn-flat">
+                    <i class="material-icons">remove_red_eye</i>
+                </a>
+            </div>
+            {% endif %}
+
+        </section>
+        
+        <footer class="action-buttons">
+            <div class="button-field">
+                {{ form_row(form.submit) }}
+            </div>
+            <div class="button-field">
+                <button class="waves-effect waves-light btn-large red accent-4 modal-trigger" href="#deleteTeam">{{'delete'|trans}}</button>
+            </div>
+        </footer>
+
+        <template class="teamusers-list--item__proto-i">
+            {% include "components/team_user__item.html.twig" with { teamUser: form.currentTeamIntUsers.vars.prototype, type : 'i' } %}
+        </template>
+        <template class="teamusers-list--item__proto-e">
+            {% include "components/team_user__item.html.twig" with { teamUser: form.currentTeamExtUsers.vars.prototype, type : 'e' } %}
+        </template>
+
+    {{ form_rest(form)}}
+    {{ form_end(form)}}
+
+
+    </main>
+
+    {% if hasPastTeamUsers %}
+    
+        <div id="pastTeamUsers" class="modal">
+            <div class="modal-content">
+                <h5>{{ 'team.past_members_modal_title'|trans }}</h4>
+
+                <ul class="past-teamusers">
+                    {% for teamUser in form.vars.data.pastTeamIntUsers %}
+                        <li class="flex-center-sb">
+                            <span>{{ teamUser.user.fullname }}</span>
+                            <span>{{ 'team.team_user_from'|trans ~ ' ' ~ teamUser.inserted|localizeddate('long','none') ~ ' ' ~ 'team.team_user_to'|trans ~ ' ' ~ teamUser.deleted|localizeddate('long','none') }}</span>    
+                        </li>
+                    {% endfor %}
+                    {% for teamUser in form.vars.data.pastTeamExtUsers %}
+                        <li class="flex-center-sb">
+                            <span>{{ teamUser.user.fullname }}</span>
+                            <span>{{ 'team.team_user_from'|trans ~ ' ' ~ teamUser.inserted|localizeddate('long','none') ~ ' ' ~ 'team.team_user_to'|trans ~ ' ' ~ teamUser.deleted|localizeddate('long','none') }}</span>    
+                        </li>
+                    {% endfor %}
+                </ul>
+                
+            </div>
+            <div class="modal-footer action-buttons">
+                <div class="button-field">
+                    <a class="waves-effect waves-green btn modal-close">Ok</a>
+                </div>
+            </div>
+        </div>
+
+    {% endif %}
+
+    <div id="duplicateElementName" class="modal">
+        <div class="modal-content">
+            <h4>{{ 'activities.modal_error_creation_title'|trans }}</h4>
+            <p>{{ 'activity_elements.duplicate_element_name_msg'|trans }}</p>
+        </div>
+        <div class="modal-footer action-buttons">
+            <div class="button-field">
+                <a class="waves-effect waves-green btn-large modal-close">Ok</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="deleteTeamUser" class="modal">
+        <div class="modal-content">
+          <h4>{% trans with {'%element%': 'participant'} %}organization_elements.delete_modal.title{% endtrans %}</h4>
+          <p>{% trans with {'%conj_element%': 'participant'} %}organization_elements.delete_modal.content_1{% endtrans %}</p>
+        </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close submit-button waves-effect waves-green btn remove-team-user-btn">{{ 'organization_elements.delete_modal.confirm'|trans }}</a>
+          <a class=" modal-action modal-close waves-effect waves-green btn-flat red-text">{{ 'organization_elements.delete_modal.decline'|trans }}</a>
+        </div>
+      </div>
+
+    <div id="changeOwner" class="modal">
+        <div class="modal-content">
+            <h4>{% trans %}participants.change_leader.modal_title{% endtrans %}</h4>
+            <p> {% trans %}participants.change_leader.msg_1{% endtrans %} <span class="sName" style="font-style: italic;"></span> {% trans %}participants.change_leader.msg_2{% endtrans %} </p>
+            <p> {% trans %}participants.change_leader.msg_3{% endtrans %} <span id="newLeader"></span> {% trans %}participants.change_leader.msg_4{% endtrans %} <span id="oldLeader"></span> ?</p>
+  
+        </div>
+        <div class="modal-footer action-buttons">
+            <div class="modal-footer">
+                <a class="modal-action modal-close submit-button waves-effect waves-green btn change-owner-button">{% trans %}organization_elements.delete_modal.confirm{% endtrans %}</a>
+                <a class="modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}organization_elements.delete_modal.decline{% endtrans %}</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="deleteTeam">
+        <div class="modal-content">
+            <h4>{% trans %}team_manage.delete_modal.title{% endtrans %}</h4>
+            <p>{% trans %}team_manage.delete_modal.msg{% endtrans %}</p>
+        </div>
+        <div class="modal-footer">
+            <a class=" modal-action modal-close waves-effect waves-green btn-large delete-btn">{% trans %}team_manage.delete_modal.confirm{% endtrans %}</a>
+            <a class=" modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('js/team_manage.js') }}"></script>
+    <script>
+        var vnurl = "{{ url('validateElementName',{elmtType: 'team', elmtId: teaId}) }}";
+        const validateTeamUserUrl = '{{ url("validateTeamUser", { teaId: teaId != 0 ? teaId : "__teaId__", tusId: "__tusId__" }) }}'; 
+        const deleteTeamUserUrl = '{{ url("deleteTeamUser", { tusId: 0}) }}'; 
+        const deleteTeamUrl = '{{ url("deleteTeam", {teaId: teaId}) }}'; 
+        const manageUsersUrl = '{{ url("manageUsers")}}';
+        window.usrRole = '{{ currentuser.role }}';
+    </script>
+{% endblock %}

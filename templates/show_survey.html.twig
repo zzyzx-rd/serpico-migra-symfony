@@ -1,0 +1,20 @@
+{% extends "layout.html.twig" %}
+{% block css %}
+  <style>
+    select{
+      display: block !important;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <h1 style="text-align: center">Survey</h1>
+  <div id="surveyElement" style="display:inline-block;width:100%;"></div>
+  <div id="surveyResult"></div>
+  <script src="{{ asset('build/show_survey.js') }}">
+  </script>
+  <script type="text/javascript">
+    var url = "{{url('getSurvey',{'surId': surId}) }}";
+  </script>
+{% endblock %}
+

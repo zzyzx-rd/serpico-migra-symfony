@@ -1,0 +1,21 @@
+h3 {
+  text-align: center;
+  margin-bottom: 1em;
+}
+
+#serpicoapp .container {
+  width: auto;
+  max-width: none;
+  margin: 0 1rem;
+}
+
+.graph-container {
+  max-width: 1280px;
+  margin: auto;
+  padding: 3em;
+}
+
+#criterion-selector {
+  margin: 0 auto;
+  max-width: 600px;
+}

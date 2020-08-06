@@ -1,0 +1,44 @@
+{% set criterion_model = criterion.vars.data %}
+{% set cname = criterion_model ? criterion_model.cName : null %}
+{% set lowerbound = criterion_model ? criterion_model.lowerbound : "__lowerbound__" %}
+{% set upperbound = criterion_model ? criterion_model.upperbound : "__upperbound__" %}
+{% set type = criterion_model ? criterion_model.type : "__type__" %}
+{% set commentCompare = criterion_model ? criterion_model.forceCommentCompare  : false %}
+{% set commentSign = criterion_model ? (criterion_model.forceCommentSign == "smaller" ? '<' : '≤') : "__commentSign__" %}
+{% set commentVal = criterion_model ? criterion_model.forceCommentValue : "__commentValue__" %}
+{% set step = criterion_model ? criterion_model.step : "__step__" %}
+{% set weight = criterion_model ? (criterion_model.weight * 100)|round : "__weight__" %}
+{% set icon = cname ? cname.icon : null %}
+
+
+<li
+  class="criteria-list--item {{ not criterion_model ? 'new' }}"
+  {% if criterion_model %}
+    data-id="{{ criterion_model.id }}"
+  {% else %}
+    style="visibility: hidden;"
+  {% endif %}>
+
+  {% include "modals/stage_criterion.html.twig" with { s: s, c: c, criterion: criterion } %}
+  {% include "modals/stage_criterion_target.html.twig" with { s: s, c: c, criterion: criterion } %}
+
+  <div class="cname cn-icon" data-icon="{{ icon }}" data-icon-type="{{ icon ? icon.type }}" data-uc="{{icon ? icon.unicode }}">
+    {% if cname %}
+        {{ cname.name }}
+    {% endif %}
+  </div>
+  <div class="c-weighting">
+    ({{ weight }} %)
+  </div>
+  <div class="comment-container tooltipped" data-position="top" data-tooltip="{{criterion_model and type == 2 ? 'criteria.tooltip.required_comment'|trans : 'criteria.tooltip.required_comment_grade'|trans}}" {% if not commentCompare %}style="display:none"{% endif %}>
+    <div class="comment-icon"></div>
+    <span class="comment-value">{{commentSign}}{{commentVal}}</span>
+  </div>
+  <div class="bounds">
+    [{{ lowerbound }}-{{ upperbound }}]
+  </div>
+  <div class="stepping">
+    {{ step }}
+  </div>
+  <a class="btn-flat btn-edit-criterion modal-trigger material-icons" href="#criterion_{{s}}_{{c}}">edit</a>
+</li>

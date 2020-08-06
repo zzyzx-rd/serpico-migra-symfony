@@ -1,0 +1,101 @@
+{% set departmentModalId = 'cgp-__name__-dpt-modal' %}
+
+<li class="criterion-groups--item active">
+  {% set criterionGroupDpt = criterionGroup.department %}
+  {% set criterionGroupName = criterionGroup.name %}
+  <div class="collection-hidden-index">
+    {{ form_label(criterionGroup) }}
+  </div>
+  <div id="{{ departmentModalId }}" class="criteriongroup-department-modal modal bottom-sheet new-modal">
+    <div class="modal-content">
+      <h4>{% trans %}organization_criteriongroups.cgp_department_header{% endtrans %}</h4>
+      <div class="input-field">
+        {{ form_widget(
+          criterionGroupDpt,
+          { attr: { class: 'criteriongroup-department-select new-select' } })
+        }}
+        {{ form_label(criterionGroupDpt) }}
+        {{ form_errors(criterionGroupDpt) }}
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button"
+              class="btn-large modal-action modal-close"
+              tabindex="-1">OK</button>
+    </div>
+  </div>
+  <div class="collapsible-header criteriongroupname grey lighten-4 editing">
+    <div class="chevron-container">
+      <i class="fa fa-fw fa-chevron-right"></i>
+      <i class="fa fa-fw fa-chevron-down"></i>
+    </div>
+    <div class="criteriongroupname-wrapper">
+      <div class="edit">
+        <div class="input-field criteriongroupname-item attention">
+          {{ form_label(criterionGroupName) }}
+          {{ form_widget(
+            criterionGroupName, {
+            attr: {
+              class: 'criteriongroupname-input new',
+            }
+          }) }}
+        </div>
+        <div class="criteriongroup-buttons">
+          <button type="button" tabindex="-1"
+                  class="btn material-icons create-criteriongroup-btn"
+                  data-class-aftercreate="confirm-edit-criteriongroupname-btn">check</button>
+        </div>
+      </div>
+      <div class="view">
+        <h3 class="criteriongroupname-item"></h3>
+        <div class="criteriongroup-buttons">
+          <button type="button" tabindex="-1"
+            class="btn link-to-department-btn modal-trigger"
+            data-target="{{ departmentModalId }}">
+            <div class="no-link">
+              <i class="material-icons">link_off</i>
+            </div>
+            <div class="link">
+              <i class="material-icons">link</i>
+              <span class="department-name"></span>
+            </div>
+          </button>
+          <button type="button" tabindex="-1"
+            class="btn edit-criteriongroupname-btn material-icons tooltipped"
+            data-tooltip="{{ 'organization_criteriongroups.tooltips.edit_cgp_name'|trans }}"
+            data-position="top">edit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="collapsible-body" style="display: block;">
+    <ul class="collection with-header criteria-list no-criteria">
+      <li class="collection-header">
+        <h4>
+          {% trans %}organization_criteriongroups.criterialist_header{% endtrans %}
+        </h4>
+        <button
+          type="button" tabindex="-1"
+          class="btn red delete-criteriongroup-btn material-icons tooltipped new-tooltip new-cgp"
+          data-target="delete-criteriongroup-modal"
+          data-tooltip="{{ 'organization_criteriongroups.buttons.delete_criteriongroup'|trans }}"
+          data-position="left">delete</button>
+      </li>
+      <li class="collection-item no-criteria-item">
+        {{ 'organization_criteriongroups.no_criteria'|trans }}
+      </li>
+      {# criterion group item prototype #}
+      <template class="proto">__criterialist_item__</template>
+      <li class="collection-item criterialist-actions">
+        <button type="button" class="btn add-criterion-btn" tabindex="-1" disabled>
+          <i class="material-icons left">add</i>
+          {% trans %}organization_criteriongroups.buttons.add_criterion{% endtrans %}
+        </button>
+      </li>
+    </ul>
+    {# <div class="criteriongroup-actions">
+      <button type="button"
+              class="btn create-criteriongroup-btn">OK</button>
+    </div> #}
+  </div>
+</li>

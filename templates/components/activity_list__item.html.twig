@@ -1,0 +1,124 @@
+{% set approvable = s == -3 and activity.decisions is not empty and activity.decisions|first.deciderUser == currentuser %}
+
+<li class="collection-item activity-list--item">
+  <span class="activity-name-title">{{ activity.name }}</span>
+
+  {% set activityClients =  activity.independantUniqueParticipatingClients %}
+  {% if activityClients|length != 0 %}
+
+  <div class="activity-clients">
+
+    {% if activity.organization != currentuser.organization %}
+
+      <small> - {{ 'from'|trans }}</small>
+
+      <span class="activity-client-name">{{ activity.organization.commname }}</span>
+
+      {% set activityClients = activityClients|filter((v,k) => v.clientOrganization != currentuser.organization) %}
+
+    {% endif %}
+
+    {% if activityClients|length != 0 %}
+
+        <small> - {{ 'with'|trans }}</small>
+
+        {% set k = 0 %}
+        {% for client in activityClients if k < 2 %}
+
+            {% if currentuser.role == 1 %}
+              <a class="activity-client-name" href="{{ path('createClientUser',{cliId: client.id}) }}">
+                {{ k != activityClients|length - 1 ? client.commname ~', ' : client.commname }}
+              </a>
+            {% else %}
+              <span class="activity-client-name">
+                {{ k != activityClients|length - 1 ? client.commname ~' ,' : client.commname }}
+              </span>
+            {% endif %}
+
+            {% set k = k + 1 %}
+        {% endfor %}
+
+        {% if activityClients|length - k > 0 %}
+              {{'and '|trans }}
+              <span class="activity-client-name tooltipped" data-position="top" data-html="true" data-tooltip="
+              {% for c, client in activityClients if c >= k %}
+                  {{ activityClients[c].commname }} <br>
+              {% endfor %}
+              "
+              >{{ (activityClients|length - k) ~ ' other'|trans ~ (activityClients|length - k > 1 ? 's' : '')}}</span>
+        {% endif %}
+    {% endif %}
+    </div>
+  {% endif %}
+
+  <div class="activity-actions">
+    {% if approvable %}
+      <a class="material-icons" href="">gavel</a>
+    {% endif %}
+
+
+    {% if activity.status == -1 %}
+      {% set hasFeedbackExpired = activity.hasFeedbackExpired %}
+      {% set hasMinParticipants = activity.hasMinimumParticipationConfig %}
+      {% set hasOutput = activity.hasMinimumOutputConfig %}
+      {% if hasFeedbackExpired %}
+        <ul class="has-barred tooltipped" data-tooltip="{{'activities.feedback_has_expired'|trans}}">
+          <i class="material-icons {% if not hasMinParticipants or not hasOutput %}m-right{% endif %}" style="font-size:20px!important">edit</i>
+          <i class="fa fa-minus barred fb-barred"></i>
+        </ul>
+      {% endif %}
+      {% if not hasMinParticipants %}
+        <ul class="has-barred tooltipped" data-tooltip="{{'activities.no_min_participation_config'|trans}}">
+          <i class="fa fa-users {% if not hasOutput %}m-right{% endif %}"></i>
+          <i class="fa fa-minus barred users-barred"></i>
+        </ul>
+      {% endif %}
+      {% if not activity.hasMinimumOutputConfig %}
+        <ul class="has-barred tooltipped" data-tooltip="{{'activities.no_min_output_config'|trans}}">
+          <i class="fa fa-clipboard"></i>
+          <i class="fa fa-minus barred output-barred"></i>
+        </ul>
+      {% endif %}
+    {% endif %}
+
+
+    {% if activity.userCanGiveOutput(currentuser) %}
+      {% set userActiveGradableStages = activity.userActiveGradableStages(currentuser) %}
+      {% if userActiveGradableStages %}
+        {% if userActiveGradableStages|length > 1 %}
+          <a class="material-icons tooltipped modal-trigger" data-tooltip={{ "activities.grade"|trans}} data-position="bottom" data-aid="{{activity.id}}" href="#chooseGradableStage">edit</a>
+        {% else %}
+
+            {% if userActiveGradableStages.first.survey is not null %}
+                <a class="material-icons tooltipped" data-tooltip={{ "activities.grade"|trans}} data-position="bottom" href="{{ path('answerSurvey', { stgId: userActiveGradableStages.first.id }) }}">edit</a>
+            {% else %}
+              <a class="material-icons tooltipped" data-tooltip={{ "activities.grade"|trans}} data-position="bottom" href="{{ path('newStageGrade', { stgId: userActiveGradableStages.first.id }) }}">edit</a>
+            {% endif %}
+
+        {% endif %}
+      {% endif %}
+    {% endif %}
+
+    {% if activity.userCanSeeOutput(currentuser) %}
+    {% if activity.getCompletedStagesWithSurvey() is null %}
+        <a class="material-icons tooltipped" data-tooltip="{% trans %}activities.see_input{% endtrans %}" data-position="bottom" href="{{ path('newStageGrade', { stgId: activity.stages.first.id }) }}">remove_red_eye</a>
+    {% else %}
+      <a class="material-icons tooltipped" data-tooltip="{% trans %}activities.see_input{% endtrans %}" data-position="bottom" href="{{ path('answerSurvey', { stgId: activity.stages.first.id }) }}">remove_red_eye</a>
+
+    {%  endif %}
+    {% endif %}
+
+    {# if finalized or published #}
+    {% if activity.userCanViewResults(currentuser) %}
+      <a class="material-icons tooltipped" data-tooltip={{ "result"|trans}} data-position="bottom" href="{{ path('activityResults', { actId: activity.id  }) }}">show_chart</a>
+    {% endif %}
+
+    {% if activity.userCanEdit(currentuser) %}
+      <a class="material-icons tooltipped modal-trigger" data-tooltip={{ "activities.modify" |trans}} href="#activityInfo" data-eid="{{activity.id}}" data-position="bottom">settings</a>
+    {% else %}
+      {% if activity.userCanAccessInfo(currentuser) %}
+        <a class="material-icons tooltipped modal-trigger" href="#activityInfo" data-eid="{{activity.id}}" data-tooltip="{% trans %}activity_elements.access_activity_details{% endtrans %}" data-position="bottom">info_outline</a>
+      {% endif %}
+    {% endif %}
+  </div>
+</li>

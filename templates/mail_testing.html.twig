@@ -1,0 +1,33 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+    {% trans %}activities.page_title{% endtrans %}
+{% endblock %}
+
+{% block css %}
+    <script type="text/javascript">
+        var url="{{ url('sendTestingMails') }}";
+    </script>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h5>{% trans %}mails.testing.page_title{% endtrans %}</h5>
+    {{ form_start(form) }}
+        {{ form_row(form.emailType) }}
+        {{ form_row(form.lang) }}
+        {{ form_row(form.emailAddress) }}
+        <ul class="parameters" data-prototype="{% filter escape %}{% include 'prototype_mailParameter.twig' with { 'item': form.emailParameters.vars.prototype } %}{% endfilter %}"></ul>
+        <div class="row action-buttons">
+            <div class="button-field" style="margin-top: 30px">
+                {{ form_row(form.submit) }}
+            </div>
+        </div>
+        {{ form_rest(form) }}
+    {{ form_end(form) }}
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('js/mail_testing.js') }}"></script>
+{% endblock %}

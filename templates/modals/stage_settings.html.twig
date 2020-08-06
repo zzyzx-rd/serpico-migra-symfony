@@ -1,0 +1,142 @@
+{% if stage.vars.data is not null %}
+  {% if elmtType == 'process' %}
+    {% set element = stage.vars.data.process %}
+  {% elseif elmtType == 'iprocess' %}
+    {% set element = stage.vars.data.institutionProcess %}
+  {% else %}
+    {% set element = stage.vars.data.activity %}
+  {% endif %}
+{% endif %}
+
+<div id="stage_{{s}}" class="modal stage-modal">
+  <div class="modal-content">
+    <div class="first-data-row flex-center-sb">
+      <div class="stage-label">
+        <h4>{% trans %}stages.stage.title{% endtrans %} {{ sNb }}</h4>
+      </div>
+      <div class="stage-progress">
+        <div class="stage-progress btn-flat no-padding flex-center">
+          {% trans %}stages.stage.progress.title{% endtrans %} : 
+            <span class="stage-p-status">
+              {% if not stage.vars.data %}
+                {{'stages.stage.progress.upcoming'|trans}}
+              {% else %}
+                  {{ progressMsg }}
+              {% endif %}
+            </span>
+            <span><i class="material-icons tooltipped" data-position="top" data-tooltip="{{ 'stages.stage.progress.tooltip_msg'|trans }}">info_outline</i></span>
+        </div>
+      </div>
+      <div>
+        <div class="input-field weight" {% if stage.vars.data is not null and element.stages|length == 1 %}style="display:none"{% endif %}>
+          {{ form_label(stage.activeWeight) }}
+          <div class="weight-stage-slider"></div>
+          <div class="weight-stage-slider-range-value center"></div>
+          {{ form_widget(stage.activeWeight, { attr: { hidden: '' } }) }}
+          {{ form_errors(stage.activeWeight) }}
+        </div>
+      </div>
+      <div>
+        {% if not stage.vars.data %}
+          <a class="btn-flat right remove-stage-btn" data-sid="0">
+            <i class="material-icons left">delete</i>
+          </a>
+        {% else %}
+          <a href="#deleteStage" class="btn-flat modal-trigger right" data-sid="{{ stage.vars.data.id }}">
+            <i class="material-icons left">delete</i>
+          </a>
+        {% endif %}
+      </div>
+    </div>
+    <div class="row">
+      <div class="input-field">
+        {{ form_label(stage.name) }}
+        {{ form_widget(stage.name, { attr: { class: "stage-name-input" } }) }}
+      </div>
+    </div>
+    <div class="row">
+      <ul class="flex-center">
+        {% if elmtType != 'activity' %}
+          <li class="switch date-switch">
+            {{ form_label(stage.definiteDates) }}
+            <label style="display: flex;">
+              <span>{{ 'process_stages.dates_definition.defined_duration.title'|trans }}</span>
+              {{ form_widget(stage.definiteDates) }}
+              <span class="lever"></span>
+              <span>{{ 'process_stages.dates_definition.defined_dates'|trans }}</span>
+            </label>
+          </li>
+          <li class="flex-center period-freq-input" {% if stage.vars.data is not null and stage.vars.data.definiteDates %} style="display:none" {% endif %}>
+            <ul class="flex-center" style="flex-direction: column;">
+              <li class="flex-center" style="justify-content: space-between;width:100%">
+                <label style="max-width: 20%;">{% trans %}process_stages.dates_definition.defined_duration.timespan{% endtrans %}</label>
+                <div class="input-field no-margin" style="margin-left: auto!important;">
+                  {{ form_widget(stage.dPeriod) }}
+                </div>
+                <div class="input-field no-margin">
+                  {{ form_widget(stage.dFrequency) }}
+                </div>
+                <label style="margin: 0 15px">{% trans %}process_stages.dates_definition.defined_duration.origin{% endtrans %}</label>
+                <div class="input-field no-margin">
+                  {{ form_widget(stage.dOrigin) }}
+                </div>
+              </li>
+              <li class="flex-center" style="justify-content: space-between;width:100%">
+                <label style="max-width: 20%;">{% trans %}process_stages.dates_definition.defined_duration.feedback{% endtrans %}</label>
+                <div class="input-field no-margin" style="margin-left: auto!important;">
+                  {{ form_widget(stage.fPeriod) }}
+                </div>
+                <div class="input-field no-margin">
+                  {{ form_widget(stage.fFrequency) }}
+                </div>
+                <label style="margin: 0 15px">{% trans %}process_stages.dates_definition.defined_duration.origin{% endtrans %}</label>
+                <div class="input-field no-margin">
+                  {{ form_widget(stage.fOrigin) }}
+                </div>
+              </li>
+            </ul>
+          </li>
+        {% endif %}
+        <li class="flex-center dates-input" 
+          {% if elmtType != 'activity' and (stage.vars.data is empty or stage.vars.data is not empty and not stage.vars.data.definiteDates) %}style="display:none"{% endif %}
+          {% if elmtType == 'activity' %}style="justify-content:space-between;width:100%"{% endif %}
+        >
+          <div>
+            <div class="input-field">
+              {{ form_label(stage.startdate) }}
+              {{ form_widget(stage.startdate) }}
+            </div>
+            <div class="input-field">
+              {{ form_label(stage.gstartdate) }}
+              {{ form_widget(stage.gstartdate) }}
+            </div>
+          </div>
+          <div>
+            <div class="input-field">
+              {{ form_label(stage.enddate) }}
+              {{ form_widget(stage.enddate) }}
+            </div>
+            <div class="input-field">
+              {{ form_label(stage.genddate) }}
+              {{ form_widget(stage.genddate) }}
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <div class="row">
+      {{ form_row(stage.mode) }}
+    </div>
+    <div class="row">
+      <div class="input-field">
+        {{ form_widget(stage.visibility) }}
+        {{ form_label(stage.visibility) }}
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="s-validate btn blue darken-2" data-sid="{{stage.vars.data ? stage.vars.data.id : 0}}">
+      <i class="material-icons left">done</i> {{ 'criteria.tooltip.validate'|trans }}
+    </button>
+  </div>
+</div>

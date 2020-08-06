@@ -1,0 +1,40 @@
+#activities-access-and-results-view {
+  padding: 0;
+  line-height: normal;
+}
+
+#activities-access-and-results-view select {
+  display: block;
+  line-height: normal;
+  padding: .2em;
+}
+
+#activities-access-and-results-view > header {
+  font-size: 1.64rem;
+}
+
+#activities-access-and-results-view > header > .fa {
+  margin-right: .3334em;
+}
+
+#activities-access-and-results-view > ul > li {
+  display: flex;
+  flex-flow: row wrap;
+  padding-top: .5em;
+}
+
+#activities-access-and-results-view > ul > li > :not(:last-child) {
+  padding-right: .5em;
+}
+
+#activities-access-and-results-view > ul > li > div {
+  display: flex;
+  align-items: center;
+  padding-top: .5em;
+}
+
+#activities-access-and-results-view .role-badge {
+  display: inline-flex;
+  flex-shrink: 0;
+  margin-right: .5em;
+}

@@ -1,0 +1,11 @@
+{
+  "build/activity_stages.js": "/build/activity_stages.js",
+  "build/edit_survey.css": "/build/edit_survey.css",
+  "build/edit_survey.js": "/build/edit_survey.js",
+  "build/runtime.js": "/build/runtime.js",
+  "build/show_survey.js": "/build/show_survey.js",
+  "build/survey.css": "/build/survey.css",
+  "build/survey.js": "/build/survey.js",
+  "build/user_list.css": "/build/user_list.css",
+  "build/user_list.js": "/build/user_list.js"
+}

@@ -1,0 +1,178 @@
+.results-zone {
+  margin-top: 2em;
+}
+
+
+
+.chart-canvas {
+  margin: 0 auto;
+  width: 75%;
+}
+
+.chart-canvas canvas {
+  display: block;
+}
+
+.page-container > .row {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+
+
+
+.dist-section__displayed #dist-weather {
+  display: none;
+}
+
+#dist-weather {
+  display: flex;
+  flex-flow: row;
+  color: #fff;
+}
+
+#global-weather {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #323232;
+  min-height: 100px;
+}
+
+#global-weather .global-weather--title {
+  margin-top: calc((70px - 48px) / 2);
+}
+
+#global-weather .global-weather--item {
+  display: flex;
+  align-items: center;
+}
+
+#global-weather .global-weather--item .dist-weather-value {
+  text-align: right;
+  width: 48px;
+}
+
+#global-weather .dist-weather-img {
+  width: 48px;
+  height: 48px;
+  margin-left: calc((70px - 48px) / 2);
+}
+
+#dist-weather > .dist-weather--item {
+  width: 100%;
+}
+
+#indiv-weather {
+  background-color: hsl(0, 0%, 0%);
+  min-height: 100px;
+}
+
+#indiv-weather tr {
+  height: 58px;
+  border-top-right-radius: 2px;
+  border-bottom-right-radius: 2px;
+}
+
+#indiv-weather tr:nth-child(odd) {
+  background-color: #16AFB7a0;
+}
+
+#indiv-weather tr:nth-child(even) {
+  background-color: #5CD08Fa0;
+}
+
+#indiv-weather td {
+  padding: 0 22px;
+}
+
+#indiv-weather td.dist-weather-value {
+  padding: 0;
+  text-align: right;
+}
+
+#indiv-weather td.dist-weather-img {
+  position: relative;
+  width: 70px;
+}
+
+.dist-weather-img {
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+
+
+
+.dist-section {
+  margin-top: 4em;
+  margin-bottom: 2em;
+}
+
+.dist-section .button-field {
+  text-align: center;
+  margin-top: 4em;
+  margin-bottom: 2em;
+}
+
+.dist-section .button-field > button {
+  vertical-align: bottom;
+}
+
+.dist-section.dist-section__hidden .dist-section-container,
+.dist-section.dist-section__displayed #toggle-dist-section .display-text,
+.dist-section.dist-section__hidden #toggle-dist-section .hide-text,
+.dist-weather.dist-weather__hidden .weather-container,
+.dist-weather.dist-weather__displayed .global-weather-button .display-text,
+.dist-weather.dist-weather__hidden .global-weather-button .hide-text {
+  display: none;
+}
+
+
+
+.tabs .indicator {
+  display: none;
+}
+
+.tabs.tabs-fixed-width .tab {
+  width: 0;
+}
+
+.tabs {
+  overflow: visible;
+}
+
+.tabs .tab {
+  position: relative;
+}
+
+.tabs .tab [tooltip] {
+  display: flex;
+  justify-content: center;
+}
+
+.tabs .tab [tooltip]::after {
+  content: attr(tooltip);
+  position: absolute;
+  margin: 0 auto;
+  top: 100%;
+  font-size: 1rem;
+  padding: 1em 2em;
+  line-height: 1;
+  border-radius: 2px;
+  background-color: #323232;
+  color: #fff;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-1em);
+  transition-property: opacity, transform;
+  transition-duration: .25s;
+  z-index: 2;
+}
+
+.tabs .tab:hover [tooltip]::after {
+  opacity: 1;
+  transform: none;
+}

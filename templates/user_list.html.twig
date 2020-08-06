@@ -1,0 +1,158 @@
+{% extends "layout.html.twig" %}
+
+{% import "macros/user_list__macros.html.twig" as macros %}
+
+
+{% block data_params %}
+  {{ html_data_params({
+    'set-client-icon': url('setClientIcon', { clientId: 0 })|raw
+  }) }}
+{% endblock %}
+
+{% block title %}
+  {{ 'user_list.page_title'|trans }}
+{% endblock %}
+
+{% block css %}
+  <link rel="stylesheet" href="{{ asset('build/user_list.css') }}">
+{% endblock %}
+
+{% set user_icon %}
+  <i class="fa fa-user"></i>
+{% endset %}
+
+{% block content %}
+  <main>
+    <div class="user-search-container">
+      <input type="text" id="user-search" class="browser-default"
+        spellcheck="false" placeholder="Recherche rapide" autocomplete="off">
+      <i class="material-icons">search</i>
+    </div>
+    <section id="main-tabs-container">
+      <ul class="tabs tabs-fixed-width">
+        <li class="tab">
+          <a href="#clients">{{ 'user_list.external_users_tab'|trans }}</a>
+        </li>
+        <li class="tab">
+          <a href="#teams">{{ 'user_list.teams_tab'|trans }}</a>
+        </li>
+        <li class="tab">
+          <a href="#users">{{ 'user_list.internal_users_tab'|trans }}</a>
+        </li>
+      </ul>
+
+      <section id="users">
+        <ul class="departments-list">
+          {% for dpt in viewableDepartments %}
+            {% set my_dpt = dpt == currentuser.department %}
+
+            <li class="department-list--item hierarchized-item">
+              <header class="{{ my_dpt ? 'my-dpt' }}">
+                {{ dpt.name }}
+                {% if my_dpt %}
+                  ({{ 'user_list.my_department'|trans }})
+                {% endif %}
+              </header>
+              <div class="item-body">
+                <ul class="users-list">
+                  {% for user in dpt.viewableUsers(orgEnabledUserSeeAllUsers) %}
+                    {% include "components/user_list__item.html.twig" with { user: user } %}
+                  {% endfor %}
+                  {# placeholder for no user in list #}
+                  <li class="no-items-placeholder">
+                    (aucun utilisateur)
+                  </li>
+                </ul>
+              </div>
+            </li>
+          {% endfor %}
+
+          <li class="department-list--item hierarchized-item">
+            <header class="{{ not currentuser.department ? 'my-dpt' }}">
+              <em>({{ 'user_list.no_attributed_department_title'|trans }})</em>
+            </header>
+            <div class="item-body">
+              <ul class="users-list">
+                {% for user in usersWithoutDpt %}
+                  {% include "components/user_list__item.html.twig" with { user: user, stats: currentuser.role == 1 or currentuser.role == 4, roles: currentuser.role == 1 or currentuser.role == 4 } %}
+                {% endfor %}
+              </ul>
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <section id="teams">
+        <ul class="teams-list">
+          {% for team in viewableTeams|merge(dealingTeams) %}
+            {% include "components/user_list__teams_item.html.twig" with { team: team } %}
+          {% endfor %}
+        </ul>
+      </section>
+
+      <section id="clients">
+        <ul class="client-type-list">
+          {% include "components/user_list__firms_item.html.twig" with { firms: clientFirms|merge(dealingFirms) } %}
+        </ul>
+        <ul class="client-type-list">
+          {% include "components/user_list__ext_team_item.html.twig" with { firms: clientTeams } %}
+        </ul>
+        <ul class="client-type-list">
+          {% include "components/user_list__individuals_item.html.twig" with { firms: clientIndividuals } %}
+        </ul>
+      </section>
+    </section>
+
+    {% set user_create_route = is_root ? 'rootCreateUser' : 'createUser' %}
+
+    <div class="fixed-action-btn">
+      <a class="btn-floating btn-large teal">
+        <i class="large material-icons">add</i>
+      </a>
+      <ul>
+        <li>
+          <a href="{{ url(user_create_route, { orgId: currentuser.organization }) }}"
+            class="btn-floating btn-large blue tooltipped"
+            data-position="left"
+            data-tooltip="{{ 'tooltip.user.create_internal'|trans }}">
+            <i class="material-icons">person</i>
+          </a>
+        </li>
+        <li>
+          <a href="{{ url('createTeam') }}"
+          class="btn-floating btn-large blue tooltipped"
+          data-position="left"
+          data-tooltip="{{ 'tooltip.user.create_int_team'|trans }}">
+            <i class="material-icons">people</i>
+          </a>
+        </li>
+        <li>
+          <a href="{{ url('createClient') }}"
+            class="btn-floating btn-large cyan tooltipped"
+            data-position="left"
+            data-tooltip="{{ 'tooltip.user.create_external'|trans }}">
+            <i class="material-icons">perm_identity</i>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <a id="scrolltop" href="#serpicoapp" class="btn-floating btn-large blue">
+      <i class="material-icons">arrow_upward</i>
+    </a>
+
+
+    <div id="client-icon-modal" class="modal">
+      <div class="modal-content">
+        <div id="client-icon-dropzone" class="dropzone"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="client-icon-upload-btn" type="button" class="btn">ok</button>
+      </div>
+    </div>
+  </main>
+{% endblock %}
+
+{% block javascripts %}
+  <script defer src="{{ asset('build/user_list.js') }}"></script>
+{% endblock %}

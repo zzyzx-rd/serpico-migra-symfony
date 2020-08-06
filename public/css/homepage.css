@@ -1,0 +1,46 @@
+#hero {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+
+
+.landing-section-steps-elements {
+  --size: 40px;
+  position: relative;
+  display: block;
+  top: auto;
+  left: auto;
+  height: auto;
+  margin: 0;
+  max-width: none;
+}
+
+.landing-section-steps-elements::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--size) / 2);
+  box-shadow: 0 0 0 4px #58ce8c;
+}
+
+.landing-section-steps-elements li {
+  position: relative;
+  display: flex;
+  flex-flow: row;
+  align-items: center;
+  padding: calc(var(--size) / 3) 0;
+}
+
+.landing-section-steps-elements li::before {
+  content: "";
+  height: var(--size);
+  width: var(--size);
+  margin-right: var(--size);
+  border: 7px solid #2ba9b3;
+  border-radius: 9999px;
+  background-color: #fff;
+}

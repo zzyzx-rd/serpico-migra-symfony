@@ -1,0 +1,416 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+    {% trans %}help.page_title{% endtrans %}
+{% endblock %}
+
+{% block css %}
+    <!-- CSS custom -->
+    <link href="{{ asset('css/style.css') }}" rel="stylesheet" type="text/css"/>
+    <!-- CSS Materialize -->
+    <link rel="stylesheet" href="{{ asset('lib/materialize/css/materialize.css') }}">
+    <!-- Font awesome-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css">
+{% endblock %}
+
+{%  block pagename %}
+   {% trans %}help.mobile_header_title{% endtrans %}
+{% endblock %}
+
+{% block username %}
+    {{ currentuser.firstname }} {{ currentuser.lastname }}
+{% endblock %}
+{% block content %}
+    {% set currentlocale = request.get('_locale') %}
+    <main>
+        <div class="container" style="width:85%!important">
+            <div class="row">
+                <div class="col s12 m9 l10">
+                    <h1 class="flow-text">{% trans %}help.page_title{% endtrans %}</h1>
+
+                    <div id="vp" class="scrollspy">
+                        <ul class="collapsible expandMore expandLess" data-collapsible="accordion" style="box-shadow:none!important;border:none!important;margin:0!important">
+                            <li>
+                                <div class="collapsible-header flex-center" style="border:none!important;">
+                                    <i style="font-size: 30px" class="fa fa-fw fa-chevron-down"></i>
+                                    <i style="font-size: 30px" class="fa fa-fw fa-chevron-right"></i>
+                                    <h5>{% trans %}help.vp.title{% endtrans %}</h5>
+                                </div>
+                                <div class="collapsible-body flex-center" style="border:none!important;padding-top:0!important">
+                                    <p>{% trans %}help.vp.intro{% endtrans %}</p>
+
+                                    <h6><i class="fa fa-cubes red-text" style="font-size:1.6rem;margin-right:5px"></i>{% trans %}help.vp.project_approach.title{% endtrans %}</h6>
+                                    <p>{% trans %}help.vp.project_approach.first_paragraph{% endtrans %}</p>
+                                    <p>{% trans %}help.vp.project_approach.second_paragraph{% endtrans %}</p>
+                                    <ul>
+                                        <li style="margin-left: 10px;"> <span>🧯🤖</span> <b><span style="text-decoration:underline">{{'help.vp.project_approach.no_ai_guarantee.title'|trans }}</span></b>
+                                            <p style="margin-left: 20px;">{{'help.vp.project_approach.no_ai_guarantee.first_paragraph'|trans }}</p>
+                                        </li>
+                                        <li style="margin-left: 10px;">     <spa>🔐🤫</span> <b><span style="text-decoration:underline">{{'help.vp.project_approach.confidentiality_assured.title'|trans }}</span></b>
+                                            <p style="margin-left: 20px;">{{'help.vp.project_approach.confidentiality_assured.first_paragraph'|trans }}</p>
+                                        </li>
+                                    </ul>
+
+                                    <h6><i class="fa fa-cogs blue-text" style="font-size:1.6rem;margin-right:5px"></i>{{'help.vp.customization.title'|trans}}</h6>
+                                    <p>{{'help.vp.customization.first_paragraph'|trans}}</p>
+                                    <ul style="margin-left: 20px;">
+                                        <li><b><span style="text-decoration:underline">{{'help.vp.customization.grading_type.intro'|trans}}</span></b> : {{'help.vp.customization.grading_type.first_paragraph'|trans}}</li>
+                                        <li><b><span style="text-decoration:underline">{{'help.vp.customization.criterion_type.intro'|trans}}</span></b> : {{'help.vp.customization.criterion_type.first_paragraph'|trans}}</li>
+                                        <li><b><span style="text-decoration:underline">{{'help.vp.customization.participation_type.intro'|trans}}</span></b> : {{'help.vp.customization.participation_type.first_paragraph'|trans}}</li>
+                                    </ul>
+
+                                    <h6><i class="fab fa-buffer green-text" style="font-size:1.6rem;margin-right:5px"></i>{{'help.vp.continuous_performance.title'|trans}}</h6>
+                                    <p>{{'help.vp.continuous_performance.first_paragraph'|trans}}</p>
+                                <div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div id="myProfile" class="scrollspy">
+
+                        <ul class="collapsible expandMore expandLess" data-collapsible="accordion" style="box-shadow:none!important;border:none!important;margin:0!important">
+                            <li>
+                                <div class="collapsible-header flex-center active" style="border:none!important;">
+                                    <i style="font-size: 30px" class="fa fa-fw fa-chevron-down"></i>
+                                    <i style="font-size: 30px" class="fa fa-fw fa-chevron-right"></i>
+                                    <h5>{% trans %}help.my_profile.title{% endtrans %}</h5>
+                                </div>
+                                <div class="collapsible-body flex-center" style="border:none!important;padding-top:0!important">
+
+                                    <img src="{{ asset('lib/img/my-profile-'~ currentlocale ~'.png') }}" alt="" class="help-img">
+
+                                    <p>{% trans %}help.my_profile.screen_elements.first_paragraph{% endtrans %}</p>
+                                    <ul style="margin-left: 20px;">
+                                        <li style="list-style-type: initial;"><p>{% trans %}help.my_profile.screen_elements.performance_top_indicators{% endtrans %}</p></li>
+                                        <li style="list-style-type: initial;"><p>{% trans %}help.my_profile.screen_elements.kpis{% endtrans %}</p></li>
+                                        <li style="list-style-type: initial;"><p>{% trans %}help.my_profile.screen_elements.other_elements{% endtrans %}</p></li>
+                                    </ul>
+                                    <p>
+                                        <ul class="flex-center">
+                                            <li>
+                                                {% trans %}help.my_profile.my_results.intro{% endtrans %}
+                                            </li>
+                                            <li style="margin-left: 10px;">
+                                                <a class="btn white-text waves-effect waves-light teal lighten-1" style="padding: 0px 10px; display: flex; align-items: center; justify-content: center; cursor: initial">
+                                                    <ul class="flex-center" style="margin: 0;justify-content:center;">
+                                                        <i class="fa fa-chart-bar" style="margin-right: 17px;"></i><span>{% trans %}profile.my_results{% endtrans %}</span>
+                                                    </ul>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </p>
+
+                                    <img src="{{ asset('lib/img/continuous-results-per-crt-'~ currentlocale ~'.png') }}" alt="" class="help-img">
+                                    <p>{% trans %}help.my_profile.my_results.first_paragraph{% endtrans %}</p>
+                                    <p>{% trans %}help.my_profile.my_results.second_paragraph{% endtrans %}</p>
+                                <div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div id="activityDashboard" class="scrollspy">
+                        <ul class="collapsible expandMore expandLess" data-collapsible="accordion" style="box-shadow:none!important;border:none!important;margin:0!important">
+                            <li>
+                                <div class="collapsible-header flex-center" style="border:none!important;">
+                                    <i style="font-size: 30px" class="fa fa-fw fa-chevron-down"></i>
+                                    <i style="font-size: 30px" class="fa fa-fw fa-chevron-right"></i>
+                                    <h5>{% trans %}help.activity_dashboard.title{% endtrans %}</h5>
+                                </div>
+                                <div class="collapsible-body flex-center" style="border:none!important;padding-top:0!important">
+                                    <img src="{{ asset('lib/img/activity-dashboard-'~ currentlocale ~'.png') }}" alt="" class="help-img">
+
+                                    <p>{% trans %}help.activity_dashboard.first_paragraph{% endtrans %}</p>
+                                    <p>{% trans %}help.activity_dashboard.exemple{% endtrans %}</p>
+                                    <p>{% trans %}help.activity_dashboard.second_paragraph{% endtrans %}</p>
+                                <div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div id="gradingOverviewRes" class="scrollspy">
+                        <ul class="collapsible expandMore expandLess" data-collapsible="accordion" style="box-shadow:none!important;border:none!important;margin:0!important">
+                            <li>
+                                <div class="collapsible-header flex-center" style="border:none!important;">
+                                    <i style="font-size: 30px" class="fa fa-fw fa-chevron-down"></i>
+                                    <i style="font-size: 30px" class="fa fa-fw fa-chevron-right"></i>
+                                    <h5>{% trans %}help.grading_overview_results.title{% endtrans %}</h5>
+                                </div>
+                                <div class="collapsible-body flex-center" style="border:none!important;padding-top:0!important">
+                                    <img src="{{ asset('lib/img/grading-'~ currentlocale ~'.png') }}" alt="" class="help-img">
+
+                                    <p>{% trans %}help.grading_overview_results.first_paragraph{% endtrans %}</p>
+                                    <p>{% trans %}help.grading_overview_results.validating_results.intro{% endtrans %}</p>
+                                    <ul style="margin-left: 20px;">
+                                        <li style="list-style-type: initial;"><p>{% trans %}help.grading_overview_results.validating_results.saving{% endtrans %}</p></li>
+                                        <li style="list-style-type: initial;"><p>{% trans %}help.grading_overview_results.validating_results.validating{% endtrans %}</p></li>
+                                    </ul>
+
+                                    <img src="{{ asset('lib/img/activity-results-'~ currentlocale ~'.png') }}" alt="" class="help-img">
+
+                                    <p>{% trans %}help.grading_overview_results.second_paragraph{% endtrans %}</p>
+                                <div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    {#
+                    <div id="setup" class="section scrollspy">
+                        <h5>{% trans %}help.setup.title{% endtrans %}</h5>
+                        <h6>{% trans %}help.setup.create_users.title{% endtrans %}</h6>
+                        <p>{% trans %}help.setup.create_users.first_paragraph{% endtrans %}</p>
+                        <img src="{{ asset('lib/img/create-users.png') }}" alt="" class="help-img">
+                        <p>{% trans %}help.setup.create_users.second_paragraph{% endtrans %}</p>
+
+                            <ul class="flex-center tip-paragraph">
+                                <li><i class="fa fa-lightbulb-o help-icons" ></i></li>
+                                <p>{% trans %}help.setup.create_users.tip{% endtrans %}</p>
+                            </ul>
+
+                        <ul class="warning-paragraph">
+                            <li><i class="fa fa-warning warning-icons" style="color: orange"></i></li>
+                            <li><p>{% trans %}help.setup.create_users.warning{% endtrans %}</p></li>
+                        </ul>
+                        <h6>{% trans %}help.setup.roles.title{% endtrans %}</h6>
+                        <p>{% trans %}help.setup.roles.first_paragraph{% endtrans %}</p>
+                        <ul>
+                            <li>
+                                <ul class="flex-center">
+                                    <li style="margin-right: 15px;margin-bottom: auto;">
+                                        <div class="admin-badge">
+                                            <span>A</span>
+                                        </div>
+                                    <li>{% trans %}help.setup.roles.administrator{% endtrans %}</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <ul class="flex-center">
+                                    <li style="margin-right: 15px;margin-bottom: auto;">
+                                        <div class="am-badge">
+                                            <span>AM</span>
+                                        </div>
+                                    </li>
+                                    <li>{% trans %}help.setup.roles.activity_manager{% endtrans %}</li>
+                                </ul>
+                            <li>
+                                <ul class="flex-center">
+                                    <li style="margin-right: 15px;margin-bottom: auto;">
+                                        <div class="collaborator-badge">
+                                            <span>C</span>
+                                        </div>
+                                    </li>
+                                    <li>{% trans %}help.setup.roles.collaborator{% endtrans %}</li>
+                                </ul>
+                            </li>
+                        </ul>
+                        <p>{% trans %}help.setup.roles.second_paragraph{% endtrans %}</p>
+                    </div>
+
+                    <div id="activities" class="section scrollspy">
+                        <h5>{% trans %}help.activities.title{% endtrans %} </h5>
+                        {% if currentuser.role != 3 %}
+                        <p>{% trans %}help.activities.create_activity.first_paragraph{% endtrans %}</p>
+                        <img src="{{ asset('lib/img/activity-first-screen-'~ currentlocale ~'.png') }}" alt="" class="help-img">
+
+                        <ul id="simplified" class="collapsible expandMore expandLess" data-collapsible="accordion">
+                            <li>
+                                <div class="collapsible-header flex-center blue lighten-3">
+                                    <i style="font-size: 30px" class="fa fa-fw fa-chevron-down"></i>
+                                    <i style="font-size: 30px" class="fa fa-fw fa-chevron-right"></i>
+                                    <h6>{% trans %}help.activities.create_activity.simplified.title{% endtrans %}</h6>
+                                </div>
+                                <div class="collapsible-body flex-center">
+                                    <p>{% trans %}help.activities.create_activity.simplified.parameters.first_paragraph{% endtrans %}</p>
+                                    <ul>
+                                        <ul class="flex-center">
+                                            <li class="criteria-icons"><i class="fas fa-comment-dots"></i></li>
+                                            <li>{% trans %}help.activities.create_activity.simplified.parameters.pure_feedback{% endtrans %}</li>
+                                        </ul>
+                                        <ul class="flex-center">
+                                            <li class="criteria-icons"><i class="fas fa-tachometer-alt"></i></li>
+                                            <li>{% trans %}help.activities.create_activity.simplified.parameters.evaluation{% endtrans %}</li>
+
+                                        </ul>
+                                        <ul class="flex-center">
+                                            <li class="criteria-icons"><i class="fa fa-pie-chart"></i></li>
+                                            <li>{% trans %}help.activities.create_activity.simplified.parameters.contribution{% endtrans %}</li>
+                                        </ul>
+                                    </ul>
+                                    <p>{% trans %}help.activities.create_activity.simplified.parameters.second_paragraph{% endtrans %}</p>
+                                    <ul class="tip-paragraph flex-center">
+                                        <li><i class="fa fa-lightbulb-o help-icons"></i></li>
+                                        <li><p>{% trans %}help.activities.create_activity.simplified.parameters.tip{% endtrans %}</p></li>
+                                    </ul>
+                                    <ul class="warning-paragraph flex-center">
+                                        <li><i class="fa fa-warning warning-icons" style="color: orange"></i></li>
+                                        <li><p>{% trans %}help.activities.create_activity.simplified.parameters.warning{% endtrans %}</p></li>
+                                    </ul>
+                                    <h6>{% trans %}help.activities.create_activity.simplified.participants.title{% endtrans %}</h6>
+                                    <p>{% trans %}help.activities.create_activity.simplified.participants.first_paragraph{% endtrans %}</p>
+                                    <ul class="tip-paragraph flex-center">
+                                        <li><i class="fa fa-lightbulb-o help-icons"></i></li>
+                                        <li><p>{% trans %}help.activities.create_activity.simplified.participants.tip{% endtrans %}</p></li>
+                                    </ul>
+                                    <ul class="warning-paragraph flex-center">
+                                        <li><i class="fa fa-warning warning-icons" style="color: orange"></i></li>
+                                        <li><p>{% trans %}help.activities.create_activity.simplified.participants.warning{% endtrans %}</p></li>
+                                    </ul>
+                                    <p>{% trans %}help.activities.create_activity.simplified.participants.graded_tickbox{% endtrans %}</p>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="collapsible-header flex-center blue darken-3" style="color:white;">
+                                    <i style="font-size: 30px" class="fa fa-fw fa-chevron-down"></i>
+                                    <i style="font-size: 30px" class="fa fa-fw fa-chevron-right"></i>
+                                    <h6>{% trans %}help.activities.create_activity.detailed.title{% endtrans %}</h6>
+                                </div>
+                                <div class="collapsible-body flex-center">
+                                    <h6>{% trans %}help.activities.create_activity.detailed.parameters.title{% endtrans %}</h6>
+                                    <p>{% trans %}help.activities.create_activity.detailed.parameters.first_paragraph{% endtrans %}</p>
+
+                                    <h6>{% trans %}help.activities.create_activity.detailed.stages.title{% endtrans %}</h6>
+                                    <p>{% trans %}help.activities.create_activity.detailed.stages.first_paragraph{% endtrans %}</p>
+                                    <ul class="tip-paragraph">
+                                        <li><i class="fa fa-lightbulb-o help-icons"></i></li>
+                                        <li><p>{% trans %}help.activities.create_activity.detailed.stages.first_tip{% endtrans %}</p></li>
+                                    </ul>
+                                    <ul class="tip-paragraph flex-center">
+                                        <li><i class="fa fa-lightbulb-o help-icons"></i></li>
+                                        <li><p>{% trans %}help.activities.create_activity.detailed.stages.second_tip{% endtrans %}</p></li>
+                                    </ul>
+                                    <ul class="tip-paragraph flex-center">
+                                        <li><i class="fa fa-lightbulb-o help-icons"></i></li>
+                                        <li><p>{% trans %}help.activities.create_activity.detailed.stages.third_tip{% endtrans %}</p></li>
+                                    </ul>
+                                    <ul class="warning-paragraph flex-center">
+                                        <li><i class="fa fa-warning warning-icons" style="color: orange"></i></li>
+                                        <li><p>{% trans %}help.activities.create_activity.detailed.stages.warning{% endtrans %}</p></li>
+                                    </ul>
+                                    <h6>{% trans %}help.activities.create_activity.detailed.criteria.title{% endtrans %}</h6>
+                                    <p>{% trans %}help.activities.create_activity.detailed.criteria.first_paragraph{% endtrans %}</p>
+                                    <ul>
+                                        <ul class="flex-center">
+                                            <li class="criteria-icons"><i class="fas fa-comment-dots"></i></li>
+                                            <li>{% trans %}help.activities.create_activity.detailed.criteria.pure_feedback{% endtrans %}</li>
+                                        </ul>
+                                        <ul class="flex-center">
+                                            <li class="criteria-icons"><i class="fas fa-tachometer-alt"></i></li>
+                                            <li>{% trans %}help.activities.create_activity.detailed.criteria.evaluation{% endtrans %}</li>
+
+                                        </ul>
+                                        <ul class="flex-center">
+                                            <li class="criteria-icons"><i class="fa fa-pie-chart"></i></li>
+                                            <li>{% trans %}help.activities.create_activity.detailed.criteria.contribution{% endtrans %}</li>
+                                        </ul>
+                                    </ul>
+                                    <p>{% trans %}help.activities.create_activity.detailed.criteria.second_paragraph{% endtrans %}</p>
+                                    <ul class="tip-paragraph">
+                                        <li><i class="fa fa-lightbulb-o help-icons"></i></li>
+                                        <li><p>{% trans %}help.activities.create_activity.detailed.criteria.tip{% endtrans %}</p></li>
+                                    </ul>
+                                    <h6>{% trans %}help.activities.create_activity.detailed.participants.title{% endtrans %}</h6>
+                                    <p>{% trans %}help.activities.create_activity.detailed.participants.first_paragraph{% endtrans %}</p>
+                                    <ul class="tip-paragraph flex-center">
+                                        <li><i class="fa fa-lightbulb-o help-icons"></i></li>
+                                        <li><p>{% trans %}help.activities.create_activity.detailed.participants.tip{% endtrans %}</p></li>
+                                    </ul>
+                                    <ul class="warning-paragraph flex-center">
+                                        <li><i class="fa fa-warning help-icons" style="color: orange"></i></li>
+                                        <li><p>{% trans %}help.activities.create_activity.detailed.participants.warning{% endtrans %}</p></li>
+                                    </ul>
+                                    <p>{% trans %}help.activities.create_activity.detailed.participants.graded_tickbox{% endtrans %}</p>
+                                </div>
+                            </li>
+                        </ul>
+
+                        <ul class="tip-paragraph flex-center">
+                            <li><i class="fa fa-lightbulb-o help-icons"></i></li>
+                            <li><p>{% trans %}help.activities.create_activity.incomplete_warning{% endtrans %}</p></li>
+                        </ul>
+                        <h6>{% trans %}help.activities.create_activity.delegation.title{% endtrans %}</h6>
+                        <p>{% trans %}help.activities.create_activity.delegation.first_paragraph{% endtrans %}</p>
+                        <img src="{{ asset('lib/img/activity-delegate-'~ currentlocale ~'.png') }}" alt="" class="help-img">
+                        <p>{% trans %}help.activities.create_activity.delegation.second_paragraph{% endtrans %}</p>
+
+                        <h6>{% trans %}help.activities.create_activity.request.title{% endtrans %}</h6>
+                        <p>{% trans %}help.activities.create_activity.request.first_paragraph{% endtrans %}</p>
+
+                        <h6>{% trans %}help.activities.create_activity.evaluate.title{% endtrans %}</h6>
+                        <p>{% trans %}help.activities.create_activity.evaluate.first_paragraph{% endtrans %}</p>
+                        <img src="{{ asset('lib/img/activity-grade-'~ currentlocale ~'.png') }}" alt="" class="help-img">
+                        <p>{% trans %}help.activities.create_activity.evaluate.second_paragraph{% endtrans %}</p>
+                        <ul>
+                            <li>{% trans %}help.activities.create_activity.evaluate.save{% endtrans %}</li>
+                            <br>
+                            <li>{% trans %}help.activities.create_activity.evaluate.validate{% endtrans %}</li>
+                        </ul>
+
+
+
+                        {% endif %}
+                    </div>
+
+
+
+                    <div id="users" class="section scrollspy">
+                        <h5>{% trans %}help.users.title{% endtrans %} </h5>
+                        <h6>{% trans %}help.users.create.title{% endtrans %}</h6>
+                        <p>{% trans %}help.users.create.first_paragraph{% endtrans %}</p>
+                        <h6>{% trans %}help.users.manage.title{% endtrans %}</h6>
+                        <p>{% trans %}help.users.manage.first_paragraph{% endtrans %}</p>
+                        <img src="{{ asset('lib/img/users-manage-'~ currentlocale ~'.png') }}" alt="" class="help-img">
+                        <h6>{% trans %}help.users.performance.title{% endtrans %}</h6>
+                        <p>{% trans %}help.users.performance.first_paragraph{% endtrans %}</p>
+                        <img src="{{ asset('lib/img/user-overview-1-'~ currentlocale ~'.png') }}" alt="" class="help-img">
+                        <p>{% trans %}help.users.performance.second_paragraph{% endtrans %}</p>
+
+
+                    </div>
+
+                    <div id="mySettings" class="section scrollspy">
+                        <h5>{% trans %}help.user_settings.title{% endtrans %}</h5>
+                        <p>{% trans %}help.user_settings.first_paragraph{% endtrans %}</p>
+                    </div>
+
+                    <div id="firmSettings" class="section scrollspy">
+                        <h5>{% trans %}help.firm_settings.title{% endtrans %}</h5>
+                        <p>{% trans %}help.firm_settings.first_paragraph{% endtrans %}</p>
+                    </div>
+                    #}
+                    <div id="activityDashboard" class="scrollspy">
+                        <h1 class="flow-text">{% trans %}help.demo_video.title{% endtrans %}</h1>
+                        <div style="padding: 30px;">
+                            <iframe style="height:450px!important" width="853" src="//www.youtube.com/embed/slZo8M7BmGA?rel=0" frameborder="0" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col hide-on-small-only m3 l2">
+                    <ul class="section table-of-contents" style="position: fixed">
+                        <li><a href="#vp">{% trans %}help.vp.title{% endtrans %}</a></li>
+                        <li><a href="#myProfile">{% trans %}help.my_profile.title{% endtrans %}</a></li>
+                        <li><a href="#activityDashboard">{% trans %}help.activity_dashboard.title{% endtrans %}</a></li>
+                        <li><a href="#gradingOverviewRes">{% trans %}help.grading_overview_results.title{% endtrans %}</a></li>
+                        <li><a href="#demoVideo">{% trans %}help.demo_video.title{% endtrans %}</a></li>
+                        {#}
+                        {% if currentuser.role == 1 or currentuser.role == 4 %}
+                        <li><a href="#setup">{% trans %}help.setup.title{% endtrans %}</a></li>
+                        {% endif %}
+                        <li><a href="#activities">{% trans %}help.activities.title{% endtrans %}</a></li>
+                        <li><a href="#users">{% trans %}help.users.title{% endtrans %}</a></li>
+                        {% if currentuser.role == 1 or currentuser.role == 4 %}
+                        <li><a href="#mySettings">{% trans %}help.user_settings.title{% endtrans %}</a></li>
+                        <li><a href="#firmSettings">{% trans %}help.firm_settings.title{% endtrans %}</a></li>
+                        {% endif %}
+                        #}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+
+{% endblock %}
+
+ {% block javascripts %}
+     <script src="{{ asset('js/help.js') }}"></script>
+ {% endblock %}

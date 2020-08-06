@@ -1,0 +1,147 @@
+<li class="criterion">
+    <ul>
+        <li class="element-data">
+            <ul class="flex-center-sb">
+                <li>
+                    <span class="ci">
+                            <i class="fa fa-cube"></i>
+                    </span>
+                    <div style="display:inline-block"><span class="cn"></span> (<span class="cw"></span>%)</li>
+                </li>
+                
+                <li style="text-align:center;display:none">
+                    <span class="tooltipped" data-position="top" data-tooltip="{% trans %}criteria.tooltip.required_comment{% endtrans %}">
+                        <i class="fa fa-comment" style="margin-right:0;font-size:1.6rem;position:relative">
+                            {# We put sign/value of force comment within symbol only if it is a evaluation criterion #}
+                            <div style="position: absolute;display:inline-flex;font-size:1rem;top:15%;left:10%" class="white-text">
+                                <span class="ccsi"></span>
+                                <span class="ccv"></span>
+                            </div>
+                        </i>
+                    </span>
+                </li>
+                
+                <li class="scale-data tooltipped" data-position="top" data-tooltip="{% trans %}criteria.tooltip.scale{% endtrans %}">
+                    <ul class="flex-center-sb">
+                        <i class="fas fa-ruler" style="margin:0;font-size:1rem; width: 10%"></i>
+                        <span class="csc"></span>
+                    </ul>
+                </li>
+                <li class="step-data tooltipped" data-position="top" data-tooltip="{% trans %}criteria.tooltip.step{% endtrans %}">
+                    <ul class="flex-center-sb">
+                        <i class="fas fa-arrows-alt-h" style="margin:0;font-size:1rem"></i>
+                        <span class="cst"></span>
+                    </ul>
+                </li>
+                <li>
+                    <a class="modify waves-effect waves-light btn-flat modal-trigger tooltipped" href="#criterion___stgNb_____crtNb__" data-position="top" data-tooltip="{% trans %}organization_elements.update{% endtrans %}" data-delay="50"><i class="fa fa-pencil-alt"></i></a></li>
+                </li>
+            </ul>
+        </li>
+        
+        <div id="criterion___stgNb_____crtNb__" class="modal data-modal element-input" style="width: 80%;height:70%">
+            <div class="modal-content">
+    
+                <ul class="flex-center-sb">
+                    <li class="criterion-title"><h4>{% trans %}criteria.criterion.title{% endtrans %} __nb__</h4></li>
+                    <li style="width: 25%;">
+                        <div class="input-field weight">
+                            {{ form_label(item.weight) }}
+                            <div class="weight-criterion-slider" style="margin-top:10px;"></div>
+                            <div class="weight-criterion-slider-range-value center" style="font-size:1.2rem;padding-top: 5px"></div>
+                            {{ form_widget(item.weight) }}
+                            {{ form_errors(item.weight) }}
+                        </div>
+                    </li>
+                    <li>
+                        <a class="waves-effect waves-light btn modal-trigger" href="#criterionTarget___stgNb_____crtNb__" style="display:none;margin-right:20px"><ul class="flex-center no-margin">{% trans %}create_parameters.define_objective.modal_trigger_btn{% endtrans %} <i class="far fa-dot-circle" style="margin-left:10px"></i> <i class="far fa-comment" style="margin-left:10px"></i></ul></a>
+                        <a class="waves-effect waves-light accent-4 btn-flat tooltipped remove-criterion modal-close" data-cid="0" data-position="top" data-tooltip="{% trans %}criteria.delete_criterion_btn{% endtrans %}"><i class="fa fa-trash"></i></a>
+                    </li>
+                </ul>
+                <div class="row">
+                    <div class="col s12">
+                        <div class="input-field criterion-name">
+                            {{ form_widget(item.cName) }}
+                            {{ form_label(item.cName) }}
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col s12 type">
+                        {{ form_label(item.type) }}
+                        {{ form_widget(item.type) }}
+                        {{ form_errors(item.type) }}
+                    </div>
+                </div>
+                <div class="row flex-center force-comments">
+                    <div class="col m5 s12 force-choice" style="margin-left:0">
+                        {{ form_widget(item.forceCommentCompare) }}
+                        {{ form_label(item.forceCommentCompare) }}
+                        {{ form_errors(item.forceCommentCompare) }}
+                    </div>
+                    <div class="input-field col m4 s6 force-sign" style="margin-top: 0">
+                        {{ form_widget(item.forceCommentSign) }}
+                        {{ form_errors(item.forceCommentSign) }}
+                    </div>
+                    <div class="input-field col m3 s6 force-value" style="margin-top: 0">
+                        {{ form_label(item.forceCommentValue) }}
+                        {{ form_widget(item.forceCommentValue) }}
+                        {{ form_errors(item.forceCommentValue) }}
+                    </div>
+                </div>
+                <div class="row scale">
+                    <div class="input-field col s6 m4">
+                        {{ form_label(item.lowerbound) }}
+                        {{ form_widget(item.lowerbound) }}
+                        {{ form_errors(item.lowerbound) }}
+                    </div>
+                    <div class="input-field col s6 m4">
+                        {{ form_label(item.upperbound) }}
+                        {{ form_widget(item.upperbound) }}
+                        {{ form_errors(item.upperbound) }}
+                    </div>
+                    <div class="input-field col s6 m4">
+                        {{ form_label(item.step) }}
+                        {{ form_widget(item.step) }}
+                        {{ form_errors(item.step) }}
+                    </div>
+                </div>
+                <div class="action-buttons" style="justify-content:flex-end">
+                    <a class="c-validate waves-effect waves-light btn blue darken-2 tooltipped modal-close" data-position="top" data-tooltip="{% trans %} criteria.tooltip.validate {% endtrans %}" data-cid="0"><i class="fa fa-check"></i></a>
+                </div>
+    
+            </div>
+            
+        </div>
+        
+        <div id="criterionTarget___stgNb_____crtNb__" class="modal">
+            <div class="modal-title">
+                <p><h5>{% trans %}create_parameters.define_objective.modal_title{% endtrans %}</h5></p>
+            </div>
+            <div class="modal-content">
+    
+                <input type="checkbox" id="defineCriterionTarget___stgNb_____crtNb__" class="filled-in">
+                <label for="defineCriterionTarget___stgNb_____crtNb__">{% trans %}create_parameters.define_objective.modal_title{% endtrans %}</label>
+    
+                <div class="target">
+                    {{ form_label(item.targetValue) }}
+                    <div class="target-slider" style="margin-top:10px;"></div>
+                    <div class="target-slider-range-value center" style="font-size:1.2rem;padding-top: 5px"></div>
+                    {{ form_widget(item.targetValue) }}
+                    {{ form_errors(item.targetValue) }}
+                </div>
+    
+                {{ form_label(item.comment) }}
+                {{ form_widget(item.comment) }}
+                {{ form_errors(item.comment) }}
+            </div>
+    
+            <div class="modal-footer">
+                <a class="waves-effect waves-light modal-close btn red cancel-btn">{% trans %}criteria.diffToSimilar.cancel{% endtrans %}</a>
+                <a class="btn waves-effect waves-light modal-close">{% trans %}criteria.diffToSimilar.accept{% endtrans %}</a>
+            </div>
+        </div>
+    </ul>
+</li>
+    
+

@@ -1,0 +1,92 @@
+
+
+{% extends "layout.html.twig" %}
+
+{% block title %}
+    {% trans %}worker_firm_data.page_title{% endtrans %}
+{% endblock %}
+
+{% block pagename %}
+    {% trans %}worker_firm_data.mobile_header_title{% endtrans %}
+{% endblock %}
+
+{% set request = app.request_stack.currentrequest %}
+{% set wfId = request.get('wfId') %}
+
+{% block css %}
+    <script>
+        var surl = "{{ path('dynamicSearchParentFirm',{'parentName' :'a'})}}";
+        var gurl = "{{ path('getFirmFromId',{'wfiId' : 0})}}";
+    </script>
+{% endblock %}
+
+{% block content %}
+    {% set now = "now"|date("Y/m/d") %}
+    <div class="">
+            {% if wfId != 0 %}
+                <h4>{{wFirm.name}} ({{wFirm.nbActiveExperiences}})</h4>
+            {% endif %}
+            {{ form_start(form) }}
+            <div class="row">
+                <div class="input-field col s12 m6">
+                    {{ form_row(form.commonName) }}
+                </div>
+                <div class="input-field col s12 m6">
+                    {{ form_row(form.firmParent) }}
+                    <select name="firmSelector" style="display: none;margin-top:45px"></select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col s12 m6">
+                    {{ form_row(form.mainSector) }}
+                </div>
+                <div class="input-field col s12 m6">
+                    {{ form_row(form.website) }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col s12 m6">
+                    {{ form_row(form.size) }}
+                </div>
+                <div class="col s12 m6">
+                    {{ form_row(form.url) }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col s12 m6">
+                    {{ form_row(form.mailPrefix) }}
+                </div>
+                <div class="col s12 m6">
+                    {{ form_row(form.mailSuffix) }}
+                </div>
+            </div>
+             <div class="row">
+                <div class="input-field col s12 m6">
+                    {{ form_row(form.creationDate) }}
+                </div>
+                <div class="input-field col s12 m6">
+                    {{ form_row(form.HQCity) }}
+                </div>
+            </div>
+             <div class="row">
+                <div class="input-field col s12 m6">
+                    {{ form_row(form.HQState) }}
+                </div>
+                <div class="col s12 m6">
+                    {{ form_row(form.HQCountry) }}
+                </div>
+            </div>
+            <div class="row action-buttons">
+                <div class="button-field">
+                    {{ form_row(form.submit) }}
+                </div>
+            </div>
+            {{ form_rest(form) }}
+            {{ form_end(form) }}
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+        <script src="{{ absolute_url(asset('js/worker_firm_update.js')) }}"></script>
+{% endblock %}

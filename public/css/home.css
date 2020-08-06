@@ -1,0 +1,190 @@
+.menu > .container > .btn {
+    position: absolute;
+    bottom: -85px;
+    right: 0;
+    width: 250px;
+}
+
+.container.data-container {
+    position: relative;
+    margin-top: -320px;
+    height: 320px;
+    color: #fff;
+}
+
+.container.data-container > ul {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 40px;
+}
+
+.container.data-container > ul > .m4 > ul {
+    width: 250px;
+    justify-content: space-evenly;
+}
+
+#kpis {
+    line-height: 1;
+}
+
+th {
+    font-weight: 500;
+}
+
+#kpis .count {
+    width: 3em;
+    padding-right: .6em;
+    text-align: center;
+}
+
+#toggle-hidden-rows:not(:checked) + #kpis .hidden-unless-shown {
+    display: none;
+}
+
+#toggle-hidden-rows-label {
+    display: block;
+    max-width: 20em;
+    margin: 1em auto 0;
+}
+
+#toggle-hidden-rows:checked ~ #toggle-hidden-rows-label .show-more,
+#toggle-hidden-rows:not(:checked) ~ #toggle-hidden-rows-label .show-less {
+    display: none;
+}
+
+#kpis .criterion,
+#kpis .targets {
+    width: 12em;
+}
+
+#kpis .target {
+    position: relative;
+    width: 6em;
+}
+
+#kpis tbody tr {
+    height: 3em;
+}
+
+td .performance-container {
+    display: flex;
+    align-items: center;
+    padding-right: 2em;
+}
+
+td .performance-container > .criterion-bars {
+    flex-grow: 1;
+}
+
+td .performance-container > .criterion-bars > .progress {
+    margin: .2em 0;
+}
+
+td .performance-container > .percentage {
+    width: 4em;
+    text-align: right;
+}
+
+.targets-container {
+    display: flex;
+}
+
+.targets-container .target {
+    display: flex;
+    align-items: center;
+}
+
+.targets-container .target::before {
+    font-family: Material Icons;
+    font-size: 2em;
+    margin-right: .2em;
+    text-indent: -.1em;
+}
+
+.dpt-target::before {
+    content: "supervised_user_circle";
+}
+
+.org-target::before {
+    content: "apartment";
+}
+
+.pos-target::before {
+    content: "perm_contact_calendar";
+}
+
+.indiv-target::before {
+    content: "account_circle";
+}
+
+.progress {
+    color: #26a69a;
+}
+
+.dpt-progress,
+.dpt-target {
+    color: #F44336;
+}
+
+.org-progress,
+.org-target {
+    color: #2196F3;
+}
+
+.pos-progress,
+.pos-target {
+    color: #f9a825;
+}
+
+.indiv-progress,
+.indiv-target {
+    color: #ff9800;
+}
+
+.dpt-progress {
+    background-color: #FFCDD2;
+}
+
+.org-progress {
+    background-color: #BBDEFB;
+}
+
+.pos-progress {
+    background-color: #fff59d;
+}
+
+.indiv-progress {
+    background-color: #ffe0b2;
+}
+
+#kpis .progress .determinate {
+    background-color: currentcolor;
+}
+
+
+
+/* full-CSS tooltips in #kpis targets */
+#kpis .target[tooltip]::after {
+    content: attr(tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    white-space: nowrap;
+    padding: .5em 1em;
+    line-height: normal;
+    border-radius: 2px;
+    background-color: #323232;
+    color: #fff;
+    pointer-events: none;
+    opacity: 0;
+    transform: translate(-50%, 0);
+    transition-property: opacity, transform;
+    transition-duration: .2s;
+}
+
+#kpis .target[tooltip]:hover::after {
+    opacity: 1;
+    transform: translate(-50%, -.5em);
+}

@@ -1,0 +1,449 @@
+:root {
+  overflow-y: scroll;
+}
+
+.btn, .btn-large,
+.collection-header,
+.criteriongroupname,
+.criterionname {
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+}
+
+.modal {
+  overflow: visible;
+}
+
+.container > header {
+  position: relative;
+}
+
+.container > header > .back-button {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+}
+
+.cn-icon-list--item > input:checked + label.cn-icon {
+  background-color: currentcolor;
+}
+
+.cn-icon-list--item > input:checked + label.cn-icon::before {
+  color: #fff;
+}
+
+.cn-icon[data-icon-type="m"]::before {
+  font-family: "Material Icons";
+  font-weight: normal;
+}
+.cn-icon[data-icon-type="fa"]::before {
+  font-family: "Font Awesome 5 Free";
+}
+
+#set-icon-modal {
+  min-height: 33.3334vh;
+  max-height: 80vh;
+}
+
+#set-icon-modal .modal-footer {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#set-icon-modal .modal-footer > button {
+  width: calc(50% - 1em);
+  min-width: 200px;
+}
+
+#cn-icon-list {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
+  margin: auto;
+  max-width: calc(96px * 8);
+}
+
+.cn-icon-list--item > .btn-flat.cn-icon {
+  margin: 0;
+  height: 96px;
+  width: 96px;
+  font-size: 48px;
+}
+
+.btn-flat.cn-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  font: inherit;
+  font-size: 25px;
+  text-transform: inherit;
+  padding: 0;
+  width: 36px;
+  margin-right: 1em;
+}
+
+.btn-flat.cn-icon:not([data-icon]),
+.btn-flat.cn-icon[data-icon=""],
+.btn-flat.cn-icon:hover {
+  box-shadow: inset 0 0 0 .9999px rgba(0, 0, 0, .2);
+}
+
+.cn-icon::before {
+  content: attr(data-icon);
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+}
+
+.btn-flat.cn-icon[data-placeholder]::after {
+  content: attr(data-placeholder);
+  position: absolute;
+  top: 0;
+  left: 100%;
+  bottom: 0;
+  padding: 0 1em;
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+  border-radius: inherit;
+  background-color: #323232;
+  color: #fff;
+  white-space: nowrap;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition-property: visibility, opacity, transform;
+  transition-duration: 0s, .25s, .25s;
+  transition-delay: .25s, 0s, 0s;
+}
+
+.btn-flat.cn-icon[data-placeholder]:hover::after {
+  visibility: visible;
+  opacity: 1;
+  transform: translateX(1em);
+  transition-delay: 0s;
+}
+
+.input-field label {
+  right: 0;
+}
+
+button > * {
+  pointer-events: none;
+}
+
+#delete-criteriongroup-modal {
+  min-height: 0;
+}
+
+#serpicoapp .container {
+  width: auto;
+  max-width: none;
+  margin: 0 1rem 2rem;
+}
+
+h1 {
+  text-align: center;
+  font-size: 1.6em;
+}
+
+.edit {
+  visibility: hidden;
+}
+
+.editing .edit {
+  visibility: visible;
+}
+
+.editing .view {
+  visibility: hidden;
+}
+
+.faded {
+  opacity: .2;
+  pointer-events: none;
+}
+
+#manage_criteria_form_criterionGroups,
+.collection-hidden-index {
+  display: none;
+}
+
+a.btn {
+  display: inline-flex;
+  align-items: center;
+}
+
+.material-icons * {
+  display: block;
+  font-family: inherit;
+}
+
+.criterion-groups--item.dpt-linked .no-link,
+.criterion-groups--item:not(.dpt-linked) .link {
+  display: none;
+}
+
+.btn * {
+  line-height: normal;
+  vertical-align: middle;
+}
+
+.link-to-department-btn i {
+  margin: 0;
+}
+
+.criterion-actions {
+  text-align: center;
+}
+
+.action-buttons,
+.criterion-groups-actions {
+  margin: 0 24px;
+}
+
+.action-buttons {
+  margin-bottom: 2rem;
+}
+
+.chevron-container {
+  position: relative;
+  width: 3em;
+}
+
+.chevron-container i {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  margin: auto;
+  font-size: 1.6em;
+  width: 1em;
+  height: 1em;
+}
+
+.criteriongroupname {
+  flex-flow: row;
+  padding: .2em 1em;
+}
+
+.criteriongroupname-wrapper {
+  position: relative;
+  flex: 1;
+}
+
+#serpicoapp .criteriongroupname input {
+  margin-bottom: 0;
+}
+
+.criteriongroupname * {
+  transition: none !important;
+}
+
+.criteriongroupname-wrapper > div {
+  display: flex;
+  align-items: center;
+}
+
+.criteriongroupname-item {
+  flex-grow: 1;
+}
+
+.criteriongroup-buttons {
+  margin-left: 2em;
+}
+
+.criteriongroupname .view {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.criterion-groups--item h3 {
+  margin: 0;
+  font-size: 1.6em;
+}
+
+.criteriongroup-actions {
+  display: flex;
+}
+
+.delete-cgp-trigger {
+  visibility: hidden;
+}
+
+.criteria-list.no-criteria .delete-cgp-trigger {
+  visibility: visible;
+}
+
+.delete-criteriongroup-btn,
+.delete-cgp-trigger {
+  margin-left: auto;
+}
+
+.collection-header {
+  display: flex;
+  flex-flow: row;
+  align-items: center;
+}
+
+.collection-header > .criteria-actions {
+  margin-left: auto;
+}
+
+.collection-header > h4 {
+  font-size: 1.6em;
+  margin: 0;
+}
+
+.criteria-list {
+  overflow: visible;
+}
+
+.criteria-list.no-criteria > .collection-header {
+  border: none;
+}
+
+.criteria-list.no-criteria .no-criteria-item {
+  display: block;
+}
+
+.collection-item.no-criteria-item {
+  display: none;
+  border: none;
+  padding-bottom: 0;
+}
+
+.criteria-list--item {
+  position: relative;
+  font-size: 1.2em;
+}
+
+.criteria-list--item.editing > .v-e.view,
+.criteria-list--item:not(.editing) > .v-e.edit {
+  visibility: visible;
+  display: none;
+}
+
+.criteria-list--item > .v-e {
+  position: relative;
+  display: flex;
+  flex-flow: row;
+  align-items: center;
+}
+
+.criteria-list--item > .view > .criterion-actions {
+  display: flex;
+  flex-flow: row;
+  align-items: center;
+  margin-left: auto;
+}
+
+.criteria-list--item > .edit > .add-new-criterionname-label {
+  position: absolute;
+  bottom: 0;
+  left: 1em;
+  line-height: normal;
+  font-size: .6667em;
+}
+
+.criteria-list--item > .edit > .add-new-criterionname-label::before {
+  content: "add";
+  font-family: "Material Icons";
+  margin-right: .5em;
+  vertical-align: middle;
+}
+
+.criteria-list--item > .edit > .input-field {
+  flex-grow: 1;
+}
+
+.criteria-list--item > .edit > .criterion-actions {
+  margin-left: 1em;
+}
+
+.collection.with-header .collection-item {
+  padding-right: 30px;
+}
+
+.criteria-list--item > .input-field {
+  flex: 1;
+}
+
+.criteria-list--item > .input-field label {
+  right: 0;
+}
+
+.delete-criterion-btn {
+  padding: 0;
+  width: 6em;
+}
+
+
+
+.modal.criteriongroup-department-modal {
+  max-height: 80vh;
+  height: 66.6667vh;
+  padding: 2em;
+}
+
+.modal.bottom-sheet h4 {
+  margin-bottom: 1em;
+}
+
+.criteriongroup-department-modal .btn-large.modal-close {
+  display: block;
+  margin: auto;
+  min-width: 240px;
+}
+
+
+#new-criterionname-label-modal header {
+  font-size: 1.6em;
+}
+
+
+
+
+
+.attention.input-field label {
+  color: #e65100;
+}
+
+.warning-box {
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+  padding: .3333em .5em;
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 1px #0002;
+}
+
+.warning-box::before {
+  content: "";
+  padding: 50%;
+  height: 0;
+  width: 0;
+  position: absolute;
+  top: -9999px;
+  bottom: -9999px;
+  left: -9999px;
+  right: -9999px;
+  margin: auto;
+  transform: rotate(-45deg);
+  background-color: #a99700;
+  background-image: linear-gradient(#000a 50%, transparent 50%);
+  background-size: 20px 20px;
+  z-index: -1;
+  opacity: .2;
+}

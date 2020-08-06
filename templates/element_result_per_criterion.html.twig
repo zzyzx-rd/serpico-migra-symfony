@@ -1,0 +1,46 @@
+{% extends "layout.html.twig" %}
+
+{% set elmtType = app.request_stack.currentrequest.get('elmtType') %}
+
+{% block title %}
+    {{ ('results_per_criterion.title_' ~ elmtType)|trans }}
+{% endblock %}
+
+{% block css %}
+    <link href="{{ asset('css/results_per_criterion.css') }}" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{%  block pagename %}
+    <span>{% trans %}results.mobile_header_title{% endtrans %}</span>
+{% endblock %}
+
+{% block username %}
+    {{ currentuser.firstname }} {{ currentuser.lastname }}
+{% endblock %}
+
+{% block content %}
+    <input type="hidden" id="elmt-type" value="{{ elmtType }}">
+    <input type="hidden" id="graph-url" value="{{ url('getElementResPerCrtGraph', { elmtType: elmtType, participationType: '-1', cName: '000' }) }}">
+
+    <div class="container">
+        <h3>Results per criterion</h3>
+
+        <div id="criterion-selector" class="input-field">
+            <select id="criterion-select" autocomplete="off">
+                {% for key, value in criterionChoices %}
+                    <option value="{{ key }}" {{ key == 0 ? 'selected' }}>{{ value }}</option>
+                {% endfor %}
+            </select>
+            <label>{{ 'overview.criterion_type'|trans }}</label>
+        </div>
+        <div class="graph-container">
+            <canvas id="graph"></canvas>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2/dist/Chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <script src="{{ asset('js/results_per_criterion.js') }}"></script>
+{% endblock %}

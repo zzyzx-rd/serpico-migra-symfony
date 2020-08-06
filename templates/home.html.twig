@@ -1,0 +1,123 @@
+<body>
+{% extends "layout.html.twig" %}
+{% block title %}
+    {% trans %}home.page_title{% endtrans %}
+{% endblock %}
+
+{% block css %}
+{% endblock %}
+
+{%  block pagename %}
+   {% trans %}home.mobile_header_title{% endtrans %}
+{% endblock %}
+
+{% block username %}
+    {{ currentuser.firstname }} {{ currentuser.lastname }}
+{% endblock %}
+{% block content %}
+    <main>
+        {#<div class="menu">
+        <img class="menu-icon" src="{{ asset('lib/img/logo.png') }}"/>
+            <span>Serpico</span>
+            <div id="homelist">
+                <ul>
+                    <li><i class="fa fa-user" aria-hidden="true"></i><a href="{{ path('profile') }}">{% trans %}home.my_profile{% endtrans %}</a></li>
+                    <li><i class="fa fa-briefcase" aria-hidden="true"></i><a href="{{ path('myActivities') }}">{% trans %}home.activities{% endtrans %}</a></li>
+                    {% if currentuser.role ==4 %}
+                        <li><i class="fa fa-cubes" aria-hidden="true"></i><a href="{{ path('manageOrganizations') }}">{% trans %}home.organizations{% endtrans %}</a></li>
+                    {% endif %}
+                    <li><i class="fa fa-cog" aria-hidden="true"></i><a href="{{ path('manageUsers') }}">{% trans %}home.settings{% endtrans %}</a></li>
+                </ul>
+            </div>
+        </div>#}
+        <div class="menu">
+            <img class="menu-icon" src="{{ asset('lib/img/logo.png') }}"/>
+            <span>Serpico</span>
+
+        </div>
+        <div class="container">
+            <h1 class="flow-text">{% trans %}home.page_title{% endtrans %}</h1>
+            <div class="row">
+
+                <a href="{{ path('profile') }}">
+                    <div class="col s12 m12 l4 homeCard">
+                            <div class="card-panel hoverable small teal lighten-1" >
+                                <div class="card-panel-header">
+                                    <span class="card-panel-icon"><i class="fa fa-user" aria-hidden="true"></i></span>
+                                    <span class="card-panel-caption">{% trans %}home.my_profile_title{% endtrans %}</span>
+                                    <p class="card-panel-content">
+                                        {% trans %}home.my_profile_description{% endtrans %}
+                                    </p>
+                                    {#<p class="card-panel-content">
+                                        <a href="{{ path('profile') }}" class="waves-effect waves-light btn">Go !</a>
+                                    </p>#}
+                                </div>
+                            </div>
+                    </div>
+                </a>
+
+                <a href="{{ path('myActivities') }}">
+                    <div class="col s12 m6 l4 homeCard">
+                        <div class="card-panel hoverable small teal lighten-2">
+                            <div class="card-panel-header">
+                                <span class="card-panel-icon"><i class="fa fa-briefcase" aria-hidden="true"></i></span>
+                                <span class="card-panel-caption">{% trans %}home.activities{% endtrans %}</span>
+                                <p class="card-panel-content">
+                                    {% trans %} home.activities_description{% endtrans %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="{{ path('mySettings') }}">
+                    <div class="col s12 m6 l4 homeCard">
+                        <div class="card-panel hoverable small teal lighten-4">
+                            <div class="card-panel-header">
+                                <span class="card-panel-icon"><i class="fa fa-cog" aria-hidden="true"></i></span>
+                                <span class="card-panel-caption">{% trans %}home.my_settings_title{% endtrans %}</span>
+                                <p class="card-panel-content">
+                                    {% trans %} home.my_settings_description{% endtrans %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                {% if currentuser.role == 1 or currentuser.role == 4 %}
+                <a href="{{ path('manageUsers') }}">
+                    <div class="col s12 m6 l12 homeCard">
+                         <div class="card-panel hoverable small teal lighten-4">
+                             <div class="card-panel-header">
+                                 <span class="card-panel-icon"><i class="fa fa-users" aria-hidden="true"></i></span>
+                                 <span class="card-panel-caption">{% trans %}home.organization_settings_title{% endtrans %}</span>
+                                 <p class="card-panel-content">
+                                     {% trans %} home.organization_settings_description{% endtrans %}
+                                 </p>
+                             </div>
+                         </div>
+                    </div>
+                </a>
+                {% endif %}
+                {% if currentuser.role == 4 %}
+                    <a href="{{ path('manageOrganizations') }}">
+                        <div class="col s12 m12 l12 homeCard">
+                            <div class="card-panel hoverable small teal lighten-3">
+                                <div class="card-panel-header">
+                                    <span class="card-panel-icon"><i class="fa fa-cubes" aria-hidden="true"></i></span>
+                                    <span class="card-panel-caption">{% trans %}home.manage_organizations_title{% endtrans %}</span>
+                                    <p class="card-panel-content">
+                                        {% trans %}home.manage_organizations_description{% endtrans %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+    </main>
+
+
+{% endblock %}
+</body>

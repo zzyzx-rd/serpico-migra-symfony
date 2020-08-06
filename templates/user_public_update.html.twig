@@ -1,0 +1,78 @@
+
+
+{% extends "layout.html.twig" %}
+
+{% block title %}
+    {% trans %}user_update.page_title{% endtrans %}
+{% endblock %}
+
+{% block pagename %}
+    {% trans %}user_update.mobile_header_title{% endtrans %}
+{% endblock %}
+
+{% block css %}
+    <script type="text/javascript">
+    </script>
+{% endblock %}
+
+{% block content %}
+
+        <div class="container user-update">
+            {{ form_start(form) }}
+            <div class="row">
+                <div class="input-field col s12 m6">
+                    {{ form_row(form.firstname) }}
+                </div>
+                <div class="input-field col s12 m6">
+                    {{ form_row(form.lastname) }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col s12 m6">
+                    {{ form_row(form.selfUsername) }}
+                    <a href="#addElement" class="modal-trigger" {#data-did="{{form.vars.data.dptId.id}}"#}><i class="fa fa-plus"></i> {% trans %}create_department.open_modal_msg{% endtrans %}</a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col s12 m6">
+                    {{ form_row(form.email) }}
+                </div>
+                <div class="input-field col s12 m6">
+                    {{ form_row(form.firm) }}
+                    <a href="#addElement" class="modal-trigger" {#data-pid="{{form.vars.data.posId.id}}"#}><i class="fa fa-plus"></i> {% trans %}create_position.open_modal_msg{% endtrans %}</a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col s12 m6">
+                  {{ form_row(form.titId) }}
+                  <a href="#addElement" class="modal-trigger" {#data-tid="{{form.vars.data.titId.id}}"#}><i class="fa fa-plus"></i> {% trans %}create_title.open_modal_msg{% endtrans %}</a>
+                </div>
+                <div class="col s12 m6">
+                    {{ form_row(form.posId) }}
+                    <a href="#addElement" class="modal-trigger" {#data-pid="{{form.vars.data.posId.id}}"#}><i class="fa fa-plus"></i> {% trans %}create_position.open_modal_msg{% endtrans %}</a>
+                </div>
+            </div>
+            <div class="row action-buttons">
+                <div class="button-field">
+                    {{ form_row(form.submit) }}
+                </div>
+                <div class="button-field">
+                    <button class="waves-effect waves-light btn-large red accent-4 modal-trigger" href="#deleteModal">{% trans %}user_update.delete_button{% endtrans %}</button>
+                </div>
+            </div>
+            {{ form_rest(form) }}
+            {{ form_end(form) }}
+        </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('js/user_modify.js') }}"></script>
+    <script>
+        $(function(){
+            $('select[name*="posId"]').val("{{ user.posId }}");
+            $('select[name*="dptId"]').val("{{ user.dptId }}");
+            $('select[name*="titId"]').val("{{ user.titId }}");
+            $('select[name*="wgtId"]').val("{{ user.wgtId }}");
+        })
+    </script>
+{% endblock %}

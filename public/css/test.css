@@ -1,0 +1,44 @@
+main{
+    height: 800px;
+    margin-bottom: 1vh;
+}
+#section{
+    text-align: center;
+}
+
+#section p{
+    font-size: 2vh;
+}
+
+#donot{
+    background-image:  url("../lib/img/tea.jpg");
+    background-size: 100% 800px;
+    color: white;
+    height: 400px;
+    text-align: center;
+    font-size: 4vh;
+    padding-top: 2.5vh;
+}
+
+.footer-copyright{
+    background-color: #0b0b0b;
+    text-align: center;
+    color: white;
+    /*top: 100%;*/
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+}
+
+#team img{
+    width: 150px;
+}
+
+#teampage{
+    height: 1300px;
+}
+
+#aboutpage{
+    height: 1300px;
+}

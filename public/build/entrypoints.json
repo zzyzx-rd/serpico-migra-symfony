@@ -1,0 +1,43 @@
+{
+  "entrypoints": {
+    "activity_stages": {
+      "js": [
+        "/build/runtime.js",
+        "/build/activity_stages.js"
+      ]
+    },
+    "user_list": {
+      "js": [
+        "/build/runtime.js",
+        "/build/user_list.js"
+      ],
+      "css": [
+        "/build/user_list.css"
+      ]
+    },
+    "survey": {
+      "js": [
+        "/build/runtime.js",
+        "/build/survey.js"
+      ],
+      "css": [
+        "/build/survey.css"
+      ]
+    },
+    "show_survey": {
+      "js": [
+        "/build/runtime.js",
+        "/build/show_survey.js"
+      ]
+    },
+    "edit_survey": {
+      "js": [
+        "/build/runtime.js",
+        "/build/edit_survey.js"
+      ],
+      "css": [
+        "/build/edit_survey.css"
+      ]
+    }
+  }
+}

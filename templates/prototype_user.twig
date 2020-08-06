@@ -1,0 +1,143 @@
+
+<li class="user collection-item">
+    <div class="row">
+        <div class="col s12 m4">
+            <div class="user-role">
+                <a class="btn user-btn user-info-role flex-center">
+                    <i class="fa fa-user-cog m-right"></i>
+                    <span class="m-right">{{'create_user.role'|trans}} : {{'create_user.contributor'|trans}}</span>
+                </a>
+                <div class="user-select-role" style="display: none;">
+                    {{ form_label(item.role) }}
+                    {{ form_widget(item.role) }}
+                </div>
+            </div>
+        </div>
+        <div class="col s12 m4">
+            <div class="user-weight">
+                <a class="btn user-btn user-info-weight flex-center">
+                    <i class="fa fa-vote-yea m-right"></i>
+                    <span class="m-right">{{'create_user.influence'|trans}} : 100</span>
+                </a>
+                <div class="user-select-weight" style="display: none;">
+                    {{ form_label(item.wgtId) }}
+                    {{ form_widget(item.wgtId) }}
+                    <a href="#addElement" class="add-weight modal-trigger" data-wid="0"><i class="fa fa-plus"></i> {% trans %}create_weight.open_modal_msg{% endtrans %}</a>
+                </div>
+            </div>
+        </div>
+        <div class="col s12 m4">
+            <div class="user-superior">
+                <a class="btn user-btn user-info-superior flex-center">
+                    <i class="fa fa-user-circle m-right"></i>
+                    <span class="m-right">{{'create_user.define_superior'|trans}}</span>
+                </a>
+                <div class="user-select-superior" style="display: none;">
+                    {{ form_row(item.superiorUser) }}
+                </div>
+            </div>
+        </div>
+        <div class="delete-btn" style="margin-left: auto;">
+            <a class="btn-flat no-padding">
+                <i class="fa fa-trash"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="row no-margin">
+        <div class="user-title">
+            <h4 class="no-margin">{{ 'create_user.user'|trans }} __nb__</h4>
+        </div>
+    </div>
+    <div class="row">
+        <div class="input-field col s12 m4">
+            {{ form_row(item.firstname) }}
+        </div>
+        <div class="input-field col s12 m4">
+            {{ form_row(item.lastname) }}
+        </div>
+        <div class="input-field col s12 m4">
+            {{ form_row(item.email) }}
+        </div>
+    </div>
+    <div class="row no-margin">
+        <div class="col s12 m4">
+            <div class="user-department">
+                <a class="btn user-btn user-info-department flex-center">
+                    <i class="fa fa-bezier-curve m-right"></i>
+                    <span class="m-right">{{'create_user.link_to_department'|trans}}</span>
+                </a>
+                <div class="user-select-department" style="display: none;">
+                    {{ form_row(item.dptId) }}
+                    <a href="#addElement" class="add-department modal-trigger" data-did="0"><i class="fa fa-plus"></i> {% trans %}create_department.open_modal_msg{% endtrans %}</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col s12 m4">
+            <div class="user-position">
+                <a class="btn user-btn user-info-position flex-center">
+                    <i class="fa fa-bezier-curve m-right"></i>
+                    <span class="m-right">{{'create_user.link_to_position'|trans}}</span>
+                </a>
+                <div class="user-select-position" style="display: none;">
+                    {{ form_row(item.posId) }}
+                    <a href="#addElement" class="add-position modal-trigger" data-pid="0"><i class="fa fa-plus"></i> {% trans %}create_position.open_modal_msg{% endtrans %}</a>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col s12 m4">
+            <div class="user-utitle">
+                <a class="btn user-btn user-info-utitle flex-center">
+                    <i class="fa fa-bezier-curve m-right"></i>
+                    <span class="m-right">{{'create_user.link_to_title'|trans}}</span>
+                </a>
+                <div class="user-select-utitle" style="display: none;">
+                    {{ form_row(item.titId) }}
+                    <a href="#addElement" class="add-utitle modal-trigger" data-tid="0"><i class="fa fa-plus"></i> {% trans %}create_title.open_modal_msg{% endtrans %}</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    {#}
+    <div class="row">
+        <div class="col s12 m8">
+            <div>
+                {{ form_label(item.role) }}
+                <i class="far fa-question-circle tooltipped" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.user.userRole{% endtrans %}" onload="this.tooltip()"></i>
+            </div>
+            {{ form_widget(item.role) }}
+            {{ form_errors(item.role) }}
+        </div>
+       
+    </div>
+    <div class="row internal">
+        <div class="col s12 m6">
+            {{ form_row(item.wgtId) }}
+            <a href="#addElement" class="add-weight modal-trigger" data-wid="0"><i class="fa fa-plus"></i> {% trans %}create_weight.open_modal_msg{% endtrans %}</a>
+        </div>
+        
+        <div class="col s12 m6">
+            {{ form_widget(item.internal) }}
+            {{ form_label(item.internal) }}
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col s12 m12">
+            {{ form_row(item.superiorUser) }}
+        </div>
+    </div>
+    #}
+    {% if enabledCreatingUser is defined and enabledCreatingUser == true and currentuser.role != 2 and currentuser.role != 3 %}
+        <div class="row">
+            <div class="col s12 m12">
+                {{ form_widget(item.enabledCreatingUser) }}
+                {{ form_label(item.enabledCreatingUser) }}
+            </div>
+        </div>
+    {% endif %}
+</li>

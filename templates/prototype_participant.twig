@@ -1,0 +1,69 @@
+    <ul>
+        <li class="element-data" style="display: none;">
+            <ul class="flex-center-sb">
+                <li class="participant-info">
+                    <ul class="flex-center">
+                        <li class="picture-frame-s" style="display: inline-block;">
+                            <img class="user-picture-s" src="{{ asset('lib/img/no-picture.png') }}" alt="" style="border-radius: 100%;">
+                        </li>
+                        <li>
+                            <span class="element-name"></span>
+                        </li>
+                        <li class="element-type">
+                            <ul>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li style="margin-right: 10px;" class="element-precomment">
+                    <a class="waves-effect waves-light btn-flat tooltipped" data-position="top" data-tooltip="{% trans %}participants.guidelines.no_guidelines{% endtrans %}" data-delay="50"><i class="far fa-flag"></i></a>
+                </li> 
+                <li>
+                    <a class="p-validate modify waves-effect waves-light btn-flat tooltipped" data-position="top" data-tooltip="{% trans %}organization_elements.update{% endtrans %}" data-delay="50"><i class="fa fa-pencil-alt"></i></a>
+                </li>
+            </ul>
+        </li>
+        <li class="element-input">
+            <ul class="flex-center-sb">
+                <li class="input-field participant-name" {% if not leadingOption %} style="width: 250px"{% endif %}>
+                    {{ form_widget(item.directUser) }}
+                    {{ form_label(item.directUser) }}
+                </li>
+                {% if leadingOption %}
+                <li>
+                    {{ form_widget(item.leader) }}
+                    {{ form_label(item.leader) }}
+                    {{ form_errors(item.leader) }}
+                </li>
+                {% endif %}
+                <li class="input-field" style="width: 50px;">
+                    {{ form_widget(item.type) }}
+                    {{ form_label(item.type) }}
+                </li>
+                <li>
+                    <a class="validate waves-effect waves-light btn tooltipped modal-trigger" href="#precomment___stgNb___parNb" data-position="top" data-alternate-tooltip="{% trans %}participants.guidelines.modify{% endtrans %}" data-tooltip="{% trans %}participants.guidelines.create{% endtrans %}"><i class="far fa-flag"></i></a>
+                </li>
+                <li>
+                    <a class="p-validate waves-effect waves-light btn blue darken-2 tooltipped" data-position="top" data-tooltip="{% trans %}participants.update{% endtrans %}" data-delay="50"><i class="fa fa-check"></i></a>
+                </li>
+                <li>
+                    <a class="waves-effect waves-light accent-4 btn-flat tooltipped remove-element" data-eid="0" data-position="top" data-tooltip="{% trans %}participants.delete{% endtrans %}"><i class="fa fa-times"></i></a>
+                </li>
+            </ul> 
+        </li>
+    </ul>
+       
+    <div id="precomment___stgNb___parNb" class="modal">
+        <div class="modal-title">
+            <h5>{% trans %}participants.guidelines.modal_title{% endtrans %} <span class="participant-fullname"></span></h5>
+        </div>
+        <div class="modal-content">
+            {{ form_widget(item.precomment) }}
+        </div>
+        <div class="modal-footer">
+            <a class="btn btn-clear red waves-effect waves-light">{% trans %}participants.guidelines.clear_button{% endtrans %}</a>
+            <a class="btn waves-effect waves-light modal-close validate-precomment">{% trans %}participants.guidelines.save_button{% endtrans %}</a>
+        </div>
+    </div>
+
+

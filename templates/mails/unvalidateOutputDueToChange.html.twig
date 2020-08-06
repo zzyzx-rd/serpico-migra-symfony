@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Un Email Responsive</title>
+    <style type="text/css">
+      body {
+        margin: 0;
+        padding: 0;
+        min-width: 100%;
+      }
+      .content {
+        width: 100%;
+        max-width: 800px;
+      }
+
+      .btn {
+        background-color: #26a69a;
+        height: 40px;
+        line-height: 40px;
+        text-decoration: none;
+        color: #fff;
+        text-align: center;
+        border: none;
+      }
+    </style>
+  </head>
+
+  {% block subject %}
+    {% if stage.activity.stages|length > 1 %}
+      {% trans with {'%stg_name%': stage.name, '%act_name': stage.activity.name} %}mails.unvalidateOutputDueToChange.stg_subject{% endtrans %}
+    {% else %}
+      {{ 'mails.unvalidateOutputDueToChange.act_subject'|trans }} {{stage.activity.name}}
+    {% endif %}
+  {% endblock %}
+
+  {% block body %}
+  <body bgcolor="white">
+    <table width="100%" bgcolor="white" border="0" cellpadding="0" cellspacing="0">
+      <tr>
+        <td>
+          <table class="content" align="left" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td>
+                <p>{{ 'mails.hello'|trans }} {{ recipient.firstname }},</p>
+                <p>
+                {% if stage.activity.stages|length > 1 %}
+                  {{ actElmt == 'criterion' ? 'mails.unvalidateOutputDueToChange.criterion.message_1_stg'|trans({'%elmt_name%': stage.name}) : 'mails.unvalidateOutputDueToChange.participant.message_1_stg'|trans({'%elmt_name%': stage.name}) }}
+                {% else %}
+                  {{ actElmt == 'criterion' ? 'mails.unvalidateOutputDueToChange.criterion.message_1_act'|trans({'%elmt_name%': stage.activity.name}) : 'mails.unvalidateOutputDueToChange.stage.message_1_act'|trans({'%elmt_name%': stage.activity.name}) }}
+                {% endif %}
+                </p>
+                <p>{{ actElmt == 'criterion' ? 'mails.unvalidateOutputDueToChange.criterion.message_2'|trans : 'mails.unvalidateOutputDueToChange.participant.message_2'|trans }}</p>
+                <p style="text-align: center">
+                  <a class="btn" href="{{ url('newStageGrade', { stgId: stage.id }) }}" target="_blank">
+                    {{ 'mails.registration.button_text'|trans }}
+                  </a>
+                </p>
+                <p>{{ 'mails.unvalidateOutputDueToChange.message_3'|trans }}</p>
+                <p>{{ 'mails.see_you_soon'|trans }}</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                {% if company_name == 'Serpico' %}<p>{{ 'mails.signature_team'|trans }}</p>{% endif %}
+                {% if company_name == 'Serpico' %}<a href="{{ company_website }}" style="width: 60px">{% endif %}<img src="{{ logo_img }}" alt="logo {{ company_name }}" style="width: {{ logo_width_px }}px">{% if company_name == 'Serpico' %}</a>{% endif %}
+                <p><strong>{% if company_name == 'Serpico' %}{{ 'mails.serpico_motto'|trans }}{% else %}{{ company_name }}{% endif %}</strong><br>{{ address }} | {{ zipcode_city }}</p>
+                {% if company_name == 'Serpico' %}<p>{{ phone }}</p>{% endif %}
+                {% if company_name == 'Serpico' %}<img src="{{ incubator_logo }}" alt="logo Lux Future Lab" style="width: 80px">{% endif %}
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+  {% endblock %}
+</html>

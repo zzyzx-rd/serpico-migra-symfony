@@ -1,0 +1,96 @@
+<style>
+	select {
+		display: block !important;
+		width: 25%;
+	}
+  .error{
+    color: #D8000C;
+    background-color: #FFBABA;
+  }
+</style>
+
+<ul class="row container-css no-margin flex-center-sb">
+  <div class="col s12 element-edit"  >
+    <h5><div class="col s12 m4 ">{{ form_row(item.title , { 'attr' :{'class': 'field-title'}}) }}
+        </div></h5>
+    <div class="col s12 m8 type">{{ form_row(item.type , { 'attr' :{'class': 'select-type'}}) }}{{ form_widget(item.type) }}</div>
+
+  </div>
+
+  <div class="col s12 element-data title" style="display:none ;">
+
+    <h5 class="header">Question </h5>
+  </div>
+  <li class="switch date-switch">
+    {{ form_label(item.isMandatory) }}
+  <li class="switch date-switch element-edit" >
+    {{ form_label(item.isMandatory) }}
+    <label style="display: flex;">
+      <span>{% trans %}process_stages.required{% endtrans %}</span>
+      {{ form_widget(item.isMandatory, { 'attr' :{'class': 'field-Is','checked':true}}) }}
+      <span class="lever"></span>
+    </label>
+  </li>
+  <li class="switch date-switch element-data " style="display:none ;">
+    {{ form_label(item.isMandatory) }}
+    <table>
+      <tr>
+        <td class="update-labels">
+          Réponse Courte
+        </td>
+        <td class="required-label" {% if item.isMandatory %}style="display: block"
+            {% else %}style="display: none"{% endif %}><b>{% trans %}process_stages.required{% endtrans %}</b>
+        </td>
+      </tr>
+    </table>
+  </li>
+  <label style="display: flex;">
+    <span class="lever"></span>
+  </label>
+  </li>
+
+  <a class="modify confirm-question-btn waves-effect waves-light blue darken-2 white-text btn tooltipped field " data-tooltip="{% trans %}process_stages.questionValidEdit{% endtrans %}" type="submit" >
+    <i class="fa fa-check "></i>
+  </a>
+
+  <a class="waves-effect waves-light accent-4 btn-flat remove-field remove-element tooltip tooltipped" data-tooltip="{% trans %}process_stages.questionDelete{% endtrans %}">
+    <i class="fa fa-trash"></i>
+  </a>
+  <a class="dropdown-button btn waves-effect waves-light accent-4 btn-flat tooltip"  data-activates="dropdown-__qnb__" data-beloworigin="true" >	<i class="fas fa-ellipsis-v "></i></a>
+  <ul id="dropdown-__qnb__" class="dropdown-content collection" style="text-align: center">
+
+    <li ><a  class="secondary-content description"> Description</a></li>
+    <li ><a  class="secondary-content copy-field"> Copier</a></li>
+
+  </ul>
+
+</ul>
+<div class="desc">
+  <div class="col s12 element-desc " style="display:none" >
+    <h5><div class="col s12 m4">{{ form_row(item.description  , { 'attr' :{'class': 'field-desc'}}) }}
+      </div></h5>
+  </div>
+</div>
+<div class="row element-edit" >
+
+</div>
+<div class="row element-type">
+
+
+</div>
+
+<div class="input-field element-linear row" style="display:none ">
+  <div class="col s6 row"> <div class="col s3 row"><p>min</p></div>{{ form_widget(item.lowerbound) }}
+  </div>
+  <div class="col s6 row"><div class="col s3 row"><p>max</p></div>{{ form_widget(item.upperbound) }}</div>
+
+</div>
+{# A faire apparaître quand le check description est coché#}
+{# <div class="row">
+	<div class="col s3 m3">{{ form_row(item.description) }}</div>
+</div> #}
+
+<ul class="param" data-prototype="{% filter escape %}{% include 'prototype_parametre.twig' with { 'item': item.parameters.vars.prototype } %}{% endfilter %}" style="margin-top:50px"></ul>
+<a style="display: none" class="btn param-btn insert-parameter">{% trans %}process_stages.questionAddOption{% endtrans %}
+  <i class="fa fa-plus-circle"></i>
+</a>

@@ -1,0 +1,102 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+{% trans %}contact.page_title{% endtrans %}
+{% endblock %}
+
+{% block css %}
+<!-- CSS JQuery UI-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css">
+<!-- Flexslider -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flexslider/2.7.0/flexslider.min.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+{% endblock %}
+
+{% block pagename %}
+    Contact
+{% endblock %}
+
+{% block content %}
+
+    <!-- map contact -->
+      <div class="container">
+        <div class="section" id="contact">
+            <h4 class="center">{% trans %}landing.contact_section.title{% endtrans %}</h4>
+            <div class="row center">
+                <a class="btn-large waves-effect waves-light teal lighten-1 modal-trigger" href="#contactModal" onclick="ga('send','pageview','/{% trans %}curr_language{% endtrans %}/contact');">{% trans %}landing.contact_section.send_mail{% endtrans %}</a>
+            </div>
+            <h4 class="center">{% trans %}landing.contact_section.location{% endtrans %}</h4>
+            <div class="row center map-responsive">
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2585.649458734062!2d6.134451115700896!3d49.60435957936744!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x479548ce66a88d57%3A0xf66509b7a650fb98!2s9+Rue+du+Laboratoire%2C+1911+Luxembourg!5e0!3m2!1sfr!2slu!4v1531307903011" width="600" height="450" frameborder="0" style="border:0" allowfullscreen></iframe>
+                <!--<h5 class="header col s12 light">A modern responsive front-end framework based on Material Design</h5>-->
+            </div>
+        </div>
+      </div>
+
+    <!-- modal contact-->
+    <div id="contactModal" class="modal">
+        <h4 class="center">{% trans %}landing.contact_section.send_mail{% endtrans %}</h4>
+        <form id=contactForm action="" method="post">
+            {{ error }}
+            <div class="input-field col m7 s12">
+                <label for="full_name">{% trans %}landing.contact_section.label_name{% endtrans %}</label>
+                <input type="text" name="full_name" required="required"/>
+            </div>
+            <div class="input-field col m5 s12">
+                <label for="company">{% trans %}landing.contact_section.label_company{% endtrans %}</label>
+                <input type="text" name="company"/>
+            </div>
+            <div class="input-field col m8 s12">
+                <label for="email" data-error="The email address is not correct">{% trans %}landing.contact_section.label_email{% endtrans %}</label>
+                <input type="email" name="email" required="required"/>
+            </div>
+            <div class="input-field col m4 s12">
+                <label for="mail_title">{% trans %}landing.contact_section.label_mail_title{% endtrans %}</label>
+                <input type="text" name="mail_title"/>
+            </div>
+            <div class="input-field col m12 s12">
+                <label for="mail_content">{% trans %}landing.contact_section.label_mail_content{% endtrans %}</label>
+                <textarea class=materialize-textarea name="mail_content" required="required"></textarea>
+            </div>
+            <button class="btn waves-effect waves-light" name="" value="home">{% trans %}landing.contact_section.button_text{% endtrans %}</button>
+        </form>
+    </div>
+
+    <div id="login" class="modal {% if error %}error{% endif %}">
+        <form id="formLogin" action="{{ path('admin_login_check') }}" method="post" class="container">
+            <div class="modal-content row">
+                <h4>Login</h4>
+                {{ error }}
+                <div class="input-field">
+                    <input type="text" name="_username" placeholder="{% trans %}landing.login_section.username{% endtrans %}" value="{{ last_username }}" required="required"/>
+                </div>
+                <div class="input-field">
+                    <input type="password" name="_password" placeholder="{% trans %}landing.login_section.password{% endtrans %}" value="" required="required"/>
+                </div>
+                <input type="checkbox" class="filled-in" id="remember_me" name="_remember_me" checked />
+                <label for="remember_me">{% trans %}landing.keep_me_logged_in{% endtrans %}</label>
+            </div>
+            <div class="modal-footer row">
+                <a class=modal-trigger href="#retrievePwd">{% trans %}landing.retrieve_pwd.link_msg{% endtrans %}</a>
+                <button class="btn waves-effect waves-light" type="submit" name="_target_path" value="home">{% trans %}landing.login_section.button_text{% endtrans %}</button>
+            </div>
+        </form>
+    </div>
+
+
+
+{% endblock %}
+
+
+
+
+
+
+      {% block javascripts %}
+          <script src="{{ asset('js/home.js') }}"></script>
+          <script src="{{ asset('js/landing.js') }}"></script>
+
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/flexslider/2.7.0/jquery.flexslider.min.js"></script>
+      {% endblock %}

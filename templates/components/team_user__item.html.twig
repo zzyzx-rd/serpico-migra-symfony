@@ -1,0 +1,62 @@
+{% set existingTeamUser = teamUser.vars.data %}
+{% set existingUser = existingTeamUser ? existingTeamUser.user : null %}
+
+  <li class="teamusers-list--item {{ not existingTeamUser ? 'edit-mode new' }}"
+      {% if existingTeamUser %}
+        data-id="{{ existingTeamUser.id }}"
+        type="{{ type }}"
+        is-leader="{{ existingTeamUser.isLeader }}"
+      {% endif %}
+  >
+  
+  <div class="user-info">
+    <img
+      class="user-picture" src="{{ existingUser ? asset(user_picture_url(existingUser)) }}"
+      alt="{{ existingUser ? existingUser.fullname }}">
+    <span class="user-name">{{ existingUser ? existingUser.fullname : '__user.fullname__' }}</span>
+    <div class="badges">
+      <div class="badge-container black-text badge-team-user-l" data-position="top" data-tooltip="{{ 'participants.leader'|trans }}" {% if not existingTeamUser or not existingTeamUser.isLeader %}style="display: none"{% endif %}>
+        <i class="fa fa-star"></i>
+      </div>
+      <div class="badge-container badge-team-user-e tooltipped" data-position="top" data-tooltip="{{ 'tooltip.activity.external_user_msg'|trans }}" {% if not existingTeamUser or existingTeamUser.user.orgId == currentuser.orgId %}style="display: none;"{% endif %}>
+        <div style="background: darkcyan">
+          E
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="user-edit">
+    <div class="user">
+      {{ form_label(teamUser.user) }}
+      {{ form_widget(teamUser.user, { attr: { class: 'user-select' } }) }}
+    </div>
+    <div class="leader">
+      {{ form_widget(teamUser.leader) }}
+      {{ form_label(teamUser.leader) }}
+    </div>
+  </div>
+
+  <div class="user-actions">
+    
+    {% if not existingTeamUser %}
+      <a class="btn-flat remove-team-user-btn waves-effect waves-light accent-4 btn-flat tooltipped edit" 
+      data-position="top"
+      data-tooltip="{% trans %}participants.delete{% endtrans %}">
+        <i class="fa fa-times"></i>
+      </a>
+    {% else %}
+      <a class="btn-flat waves-effect waves-light accent-4 btn-flat tooltipped edit modal-trigger" href="#deleteTeamUser" 
+      data-position="top"
+      data-tooltip="{% trans %}participants.delete{% endtrans %}">
+        <i class="fa fa-times"></i>
+      </a>
+    {% endif %}
+  
+    <a class="waves-effect waves-light btn-flat edit-user-btn terminal-btn">
+      <span class="material-icons">edit</span>
+      <span class="material-icons edit">done</span>
+    </a>
+  </div>
+
+
+</li>

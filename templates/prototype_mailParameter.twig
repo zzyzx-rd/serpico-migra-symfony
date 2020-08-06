@@ -1,0 +1,14 @@
+
+    <div class="flex-center row" style="justify-content: space-between;">
+        <li><h4>{% trans %} mails.testing.parameter {% endtrans %} __nb__</h4></li>
+        <li style="margin-left:auto;"><a class="waves-effect waves-light red accent-4 btn white-text remove-parameter">{% trans %}stages.delete_stage_btn{% endtrans %}</a></li>
+    </div>
+    <div class="row">
+        <div class="input-field col s6">
+            {{ form_row(item.parameterKey) }}
+        </div>
+        <div class="input-field col s6">
+            {{ form_row(item.parameterValue) }}
+        </div>
+    </div>
+

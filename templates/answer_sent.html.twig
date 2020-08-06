@@ -1,0 +1,439 @@
+{% extends "layout.html.twig" %}
+
+{% block css %}
+	<link rel="icon" type="image/png" sizes="32x32" href="{{ asset('lib/img/favicon/favicon-32x32.png') }}">
+	<link rel="icon" type="image/png" sizes="16x16" href="{{ asset('lib/img/favicon/favicon-16x16.png') }}">
+	<link rel="shortcut icon" type="image/x-icon" href="{{ asset('lib/img/favicon/favicon.ico') }}">
+	<link rel="mask-icon" href="{{ asset('lib/img/favicon/safari-pinned-tab.svg') }}" color="#5bbad5">
+	<meta content="Serpico Application. Evaluation Tool for businesses. Home." name="description">
+	<link rel="manifest" href="{{ asset('lib/img/favicon/site.webmanifest') }}">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="theme-color" content="#000000">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+	<link rel="stylesheet" href="{{ asset('lib/materialize/css/materialize.css') }}">
+	<link rel="stylesheet" href="{{ asset('css/answer_sent.css') }}">
+	<link rel="stylesheet" href="{{ asset('css/nouislider.css') }}">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
+
+{% endblock %}
+
+{% block content %}
+	<h3>{{ survey.name }}</h3>
+
+  <div class="center">
+    <a class=" btn param-btn modal-trigger" href='#saveDataModal'>{% trans %}process_stages.publish{% endtrans %}</a>
+  </div>
+
+	<div class="container">
+		<div class="row">
+			<div class="col s12">
+				<ul class="tabs">
+					<li class="tab col s4">
+						<a class="active byAll">{% trans %}process_stages.summary{% endtrans %}</a>
+					</li>
+					<li class="tab col s4">
+						<a class="active byQ">{% trans %}process_stages.byquestion{% endtrans %}</a>
+					</li>
+					<li class="tab col s4">
+						<a class="active byS">{% trans %}process_stages.bysurvey{% endtrans %}</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+
+
+
+    <div class="displayMacro">
+      <div class="graph">
+        {% for i,field in survey.fields %}
+        <div class="field-id" id="{{ field.id }}">
+          <div class="field-div" id="{{ i }}">
+            <div class="field-type row card-panel" id="{{ field.type }}">
+              <h4 class="header">{{ field.title }}</h4>
+              {% set nb =0 %}
+              {% if field.type in ["SC" ,"UC"] %}
+
+                {% for i,answer in field.answers %}
+
+                {% if not answer.desc is empty  %}
+                  {% set nb=nb+1 %}
+                  {% endif %}
+                {% endfor %}
+              {% if nb != 0 %}
+                <canvas class="pie"></canvas>
+                {% if nb == 1 %}
+                  <p>
+                    {{ nb }}
+                    {% trans %}process_stages.numberAnsweredOne{% endtrans %}</p>
+                  <br>
+                {% else %}
+                  <p>
+                    {{ nb }}
+                    {% trans %}process_stages.numberAnsweredSeveral{% endtrans %}</p>
+                {% endif %}
+              {% else %}
+
+                <p>{% trans %}process_stages.numberAnsweredNone{% endtrans %}</p>
+              {% endif %}
+                <br>
+
+
+              {% elseif field.type in ["ST","LT"] %}
+
+                <ul class="text">
+                  {% for i,answer in field.answers %}
+                    <li class="textField">
+                      {{ answer.desc }}</li>
+                      {% if not answer.desc is empty  %}
+                        {% set nb=nb+1 %}
+                        {% endif %}
+                  {% endfor %}
+
+                  {% if nb == 1 %}
+                    <p>
+                      {{ nb }}
+                      {% trans %}process_stages.numberAnsweredOne{% endtrans %}</p>
+                    <br>
+                  {% elseif nb == 0 %}
+                    <p>{% trans %}process_stages.numberAnsweredNone{% endtrans %}</p>
+
+                  {% else %}
+                    <p>
+                      {{ nb }}
+                      {% trans %}process_stages.numberAnsweredSeveral{% endtrans %}</p>
+                  {% endif %}
+                </ul>
+
+              {% elseif field.type in ["MC" , "LS"] %}
+
+                {% for i,answer in field.answers %}
+                {% if not answer.desc is empty  %}
+                  {% set nb=nb+1 %}
+                  {% endif %}
+                {% endfor %}
+                {% if nb != 0 %}
+                  <canvas class="histo"></canvas>
+                  {% if nb == 1 %}
+                    <p>
+                      {{ nb }}
+                      {% trans %}process_stages.numberAnsweredOne{% endtrans %}</p>
+                    <br>
+                  {% else %}
+                    <p>
+                      {{ nb }}
+                      {% trans %}process_stages.numberAnsweredSeveral{% endtrans %}</p>
+                  {% endif %}
+                {% else %}
+
+                  <p>{% trans %}process_stages.numberAnsweredNone{% endtrans %}</p>
+                {% endif %}
+
+              {% endif %}
+            </div>
+          </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+
+    <div class="row byquestions" style="display: none">
+      {% for i,field in survey.fields %}
+        {% set first = true %}
+        {% set nbLS = 1 %}
+        <div class="answer-div" id="{{ i }}">
+          <div class="field-type card-panel" id="{{ field.type }}">
+            <div class="row">
+              <div class="col s12">
+                <ul class="tabs tabs-question">
+                  <li class="tab col s3">
+                    <a class="btnanswerprec" style="display:none">{% trans %}process_stages.previous{% endtrans %}</a>
+                  </li>
+                  <li class="tab col s3">
+                    <a class="btnanswer">{% trans %}process_stages.next{% endtrans %}</a>
+                  </li>
+
+
+
+                </ul>
+              </div>
+            </div>
+            <h4 class="header">{{ field.title }}</h4>
+
+             {% for key,item in field.answers %}
+              {% if item.field.type in ["MC","SC"] %}
+                <div class="textField">
+                {% for param in item.field.parameters %}
+
+
+                  <div class="field flex-center row ">
+                    {% if item.field.type == 'SC' %}
+                      {% if param.value in item.desc %}
+                        <div class="align col s12 ">
+                          <input type="radio" class="filled-in" checked="checked">
+                          <label class="radio-answer">{{ param.value }}</label>
+                        </div>
+                      {% else %}
+                        <div class="align col s12">
+                          <input type="radio" id="check">
+                          <label class="param">{{ param.value }}</label>
+                        </div>
+                      {% endif %}
+                    {% elseif item.field.type == 'MC' %}
+
+                      {% if param.value in item.desc %}
+                        <div class="align col s12 ">
+                          <input type="checkbox" class="filled-in" checked="checked">
+                          <label class="checkbox-answer">{{ param.value }}</label>
+                        </div>
+                      {% else %}
+                        <div class="align col s12 ">
+                          <input type="checkbox" id="check">
+                          <label class="param">{{ param.value }}</label>
+                        </div>
+                      {% endif %}
+                    {% endif %}
+                  </div>
+                {% endfor %}
+                </div>
+
+              {% endif %}
+              {% if item.field.type == 'LS' %}
+                <table>
+                  {% if first == true %}
+                    <tr>
+                      <td></td>
+                      {% for i in range(item.field.lowerbound,item.field.upperbound) %}
+                        <td>{{ i }}</td>
+                      {% endfor %}
+                    </tr>
+                    {% set first = false %}
+                  {% endif %}
+                  <tr>
+                    <td>Réponse {{ nbLS }}</td>
+                    {% set nbLS = nbLS+1 %}
+                    {% for i in range(item.field.lowerbound,item.field.upperbound) %}
+                      {% if i == item.desc %}
+                        <td>
+                          <input type="radio" id="{{ i }}" class="filled-in field-answer field-radio" checked>
+                          <label></label>
+                        </td>
+                      {% else %}
+                        <td>
+                          <input type="radio" id="{{ i }}" class="filled-in field-radio">
+                          <label></label>
+                        </td>
+                      {% endif %}
+                    {% endfor %}
+                  </tr>
+                </table>
+              {% endif %}
+
+
+              {% if item.field.type == 'UC' %}
+                <div class="uniquechoice">
+                  {% set first = true %}
+                  {% if item.desc == '1' %}
+                    <div class="switch textField">
+                      <label >
+                        {% for  field in  item.field.parameters%}
+                          <label class="label-switch"> {{field.value}}</label>
+                          {% if first %}
+                            <input class="field-answer" checked disabled type="checkbox">
+                            <span class="lever"></span>
+                            {%  set first = false %}
+                          {% endif %}
+                        {% endfor %}
+                      </label>
+                    </div>
+                  {% else %}
+                    <div class="switch textField">
+                      <label>
+                        {% for  field in  item.field.parameters%}
+                          <label class="label-switch"> {{field.value}}</label>
+                          {% if first %}
+                            <input class="field-answer"  disabled type="checkbox">
+                            <span class="lever"></span>
+                            {%  set first = false %}
+                          {% endif %}
+                        {% endfor %}
+                      </label>
+                    </div>
+                  {% endif %}
+                </div>
+            {%  endif %}
+            {%  endfor %}
+
+
+            {% if field.type in ["ST","LT"] %}
+              <ul class="text">
+                {% for i,answer in field.answers %}
+                  <li class="textField"> {{ answer.desc }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div>
+      {% set userprec =0 %}
+      {% set surveyanswer = 0 %}
+      {% for key,item in answer %}
+      {% set user =item.createdby %}
+      {% if user != userprec %}
+    </div>
+
+      <div class="row card-panel byanswers surveyAnswer" style="display: none" id="{{ surveyanswer }}">
+        <div class="row">
+          <div class="col s12 next">
+            <ul class="tabs">
+              <li class="tab col s3">
+                <a class="btnprec" style="display:none">{% trans %}process_stages.previous{% endtrans %}</a>
+              </li>
+              <li class="tab col s3">
+                <a class="btnsurvey">{% trans %}process_stages.next{% endtrans %}</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {% set surveyanswer = surveyanswer+1 %}
+        {% endif %}
+        <div class="res">
+          <ul class="row no-margin flex-center type" id='{{ item.field.type }}'>
+            <div class="col s12 element-edit">
+              <h4 class="header">{{ item.field.title }}</h4>
+              <h6 class="header">{{ item.field.description }}</h6>
+            </div>
+          </ul>
+          <div class="answer" id="{{ item.field.type }}">
+            <div class="answer-id" id="{{ item.field.id }}">
+            {% if item.field.type in ["MC","SC"] %}
+              <div class="textField">
+              {% for param in item.field.parameters %}
+                <div class="field flex-center row ">
+
+                  {% if item.field.type == 'SC' %}
+                    {% if param.value in item.desc %}
+                      <div class="align col s12">
+                        <input type="radio" class="filled-in" checked="checked">
+                        <label class="field-answer">{{ param.value }}</label>
+                      </div>
+                    {% else %}
+                      <div class="align col s12">
+                        <input type="radio" id="check">
+                        <label class="param">{{ param.value }}</label>
+                      </div>
+                    {% endif %}
+
+                  {% elseif item.field.type == 'MC' %}
+                    {% if param.value in item.desc %}
+                      <div class="align col s12">
+                        <input type="checkbox" class="filled-in" checked="checked">
+                        <label class="field-answer">{{ param.value }}</label>
+                      </div>
+                    {% else %}
+                      <div class="align col s12">
+                        <input type="checkbox" id="check">
+                        <label class="param">{{ param.value }}</label>
+                      </div>
+                    {% endif %}
+                  {% endif %}
+                </div>
+              {% endfor %}
+              </div>
+              {% for desc in  item.desc %}
+                <p class="field-answer" style="display: none">{{ desc }}</p>
+              {% endfor %}
+            {% else %}
+              <div class="textField">
+              {% if item.field.type == 'LS' %}
+                <table>
+                  <tr>
+                    {% for i in range(item.field.lowerbound,item.field.upperbound) %}
+                      <td>{{ i }}</td>
+                    {% endfor %}
+                  </tr>
+                  <tr>
+                    {% for i in range(item.field.lowerbound,item.field.upperbound) %}
+                      {% if i == item.desc %}
+                        <td>
+                          <input type="radio" id="{{ i }}" class="filled-in field-answer field-radio" checked>
+                          <label></label>
+                        </td>
+                      {% else %}
+                        <td>
+                          <input type="radio" id="{{ i }}" class="filled-in field-radio">
+                          <label></label>
+                        </td>
+                      {% endif %}
+                    {% endfor %}
+                  </tr>
+                </table>
+              {% elseif item.field.type == 'UC' %}
+                {% set first = true %}
+                {% if item.desc == '1' %}
+                  <div class="switch textField">
+                    <label >
+                      {% for  field in  item.field.parameters%}
+                      <label class="label-switch"> {{field.value}}</label>
+                        {% if first %}
+                          <input class="field-answer" checked disabled type="checkbox">
+                          <span class="lever"></span>
+                          {%  set first = false %}
+                        {% endif %}
+                  {% endfor %}
+                    </label>
+                  </div>
+                {% else %}
+                  <div class="switch textField">
+                    <label>
+                      {% for  field in  item.field.parameters%}
+                        <label class="label-switch"> {{field.value}}</label>
+                        {% if first %}
+                          <input class="field-answer"  disabled type="checkbox">
+                          <span class="lever"></span>
+                          {%  set first = false %}
+                        {% endif %}
+                      {% endfor %}
+                    </label>
+                  </div>
+                {% endif %}
+              {% else %}
+                <p class="field-answer">{{ item.desc }}</p>
+              {% endif %}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+        </div>
+        {% set userprec =item.createdby %}
+        {% endfor %}
+      </div>
+
+    <div id="saveDataModal" class="modal">
+      <div class="modal-title">
+        <h5>Voulez-vous continuer ?</h5>
+      </div>
+      <div class="modal-content">
+        <p>Vos réponse vont être publié  , Confirmer votre choix.</p>
+      </div>
+      <div class="modal-footer">
+        <a value="Confirmer" href="{{ path('sendResult', { surId: survey.id }) }}?redirect={{ url(route,routeParams)|e('url') }}" class="btn waves-effect waves-light modal-close remove-criterion">Confirmer</a>
+        <a class="waves-effect waves-light modal-close btn-flat red-text">Annuler</a>
+      </div>
+    </div>
+
+	</div>
+{% endblock %}
+
+{% block javascripts %}
+	<script src="{{ asset('js/answer_sent.js') }}"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@2/dist/Chart.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+{% endblock %}

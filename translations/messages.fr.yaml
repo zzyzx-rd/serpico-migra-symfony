@@ -1,0 +1,3072 @@
+weight: Poids
+long_locale: fr-FR
+and: et
+Ok: OK
+with: avec
+or: ou
+from: de
+other: autre
+all: Tous
+back: Retour
+next: Suivant
+delete: Supprimer
+save: Sauvegarder
+update: Mettre à jour
+pending_validation: En attente de validation
+show_less: Afficher moins
+show_more: Afficher __count__ de plus
+show_all: Tout afficher
+curr_language: fr
+page_under_work: Page en construction
+back_to_home: Retour a l'accueil
+please_wait: Traitement en cours
+users_list.no_teams_msg: Aucune équipe
+result: Résultats
+help:
+  page_title: Serpico, pour une performance collaborative et porteuse de sens
+  mobile_header_title: Aide
+  vp:
+    title: Nos valeurs et engagements
+    intro: Serpico est une solution qui permet à chacun de s'emparer continûment, et rigoureusement du principe d'évaluation. Il devient moteur, dans le but de tirer soi-même et l'entreprise vers le haut.
+    project_approach:
+      title: Une approche continue, où chaque élément de travail (activité) contribue à la performance en entreprise
+      first_paragraph: "La rigueur commence par la définition de ce qui est mesuré. Il n'y a priori aucune raison de délaisser des éléments de travail réalisés par chacun, et encore moins d'ignorer ceux qui y ont contribué. Chaque collaborateur peut ainsi dès qu'il le juge utile, insérer un élément de travail dans lequel il renseigne les participants afin par la suite de donner des feedbacks. Les bienfaits sont multiples : outre le fait de se sentir impliqué car acteur, cela objective la perception de l'évaluation. Elle est basée sur des tâches concrètes, et se démarque de jugements personnels sans véritable fondement."
+      second_paragraph: "Chez Serpico, nous n'oublions pas que c'est toutefois vous, en tant que personne, qui portez le jugement et qu'il vous appartient en propre. Nous vous garantissons :"
+      no_ai_guarantee:
+        title: Aucune analyse de vos retours faite par des robots, AI ou tout autre chose de ce genre
+        first_paragraph: Il est de la compétence des personnes en charge des activités de faire la revue des résultats. Ce n'est pas en provoquant des jugements péremptoires ni en créeant des formes d'auto-censure que l'entreprise s'en trouvera améliorée !
+
+      confidentiality_assured:
+        title: Une visibilité de vos retours strictement limitée aux parties prenantes et un petit nombre dadministrateurs
+        first_paragraph: "Votre entreprise peut favoriser les feedbacks totalement ouverts, mais nous souhaitons que vous restiez libre de votre appréciation : à priori vos collègues n'ont ni à savoir ce que vous avez fait dans une activité qui ne les concerne pas, ni à savoir quand cela les concerne que c'est vous qui leur avez fait tel ou tel retour"
+
+
+    customization:
+      title: Un paramétrage prenant en compte la diversité des activités et des participants
+      first_paragraph: "Évaluer des activités n'a jamais été une mince affaire. Outre la perception propre à chacun, les tâches et le retour demandés peuvent être de différents niveaux. Nous avons réfléchi à cela et proposons une plateforme qui s'adapte aux besoins, et pose la question de savoir :"
+      grading_type:
+        intro: Qui est évalué
+        first_paragraph: ce peut être les collaborateurs, l'activité en tant que tel ou un mélange des 2,
+
+      criterion_type:
+        intro: Quel feedback est attendu
+        first_paragraph: des commentaires et une note, ou de simples commentaires
+
+      participation_type:
+        intro: Comment on évalue
+        first_paragraph: on peut noter, et être noté (actif), on peut noter sans être noté en retour (tiers), enfin on peut être évalué sans en être informé (passif)
+
+
+    continuous_performance:
+      title: Plus de retour flou tous les ans ou 6 mois, place aux retours structurés et continus
+      first_paragraph: Dès lors qu'une tâche récurrente ou ponctuelle, seule ou en équipe, doit être réalisée, les participants sont identifiés et ajoutés à l'activité afin qu'ils apportent leur contribution et permettent un retour continu et fluide. Activité par activité, cela construit un indicateur de suivi qui porte beaucoup plus de sens qu'un instantané imparfait réalisé une fois par période.
+
+
+  my_profile:
+    title: Mon profil
+    screen_elements:
+      first_paragraph: "Chaque utilisateur a accès à son profil, dans lequel il retrouve ses indicateurs de performance et participations du moment :"
+      performance_top_indicators: En haut à droite, <b><span style=text-decoration:underline>sa performance et son écart-type</span></b> (écart à la moyenne des résultats perçus par les autres participants). Ces résultats sont la moyenne des résultats obtenus des activités réalisées
+      kpis: En dessous, se trouvent les <b><span style=text-decoration:underline>indicateurs de performance </span></b>propres à chacun. On peut les mettre en regard de cibles d'atteinte, qui peuvent être fixées à l'échelle de l'<b>entreprise</b>, à celle du <b>département</b> ou <b>propre</b> à l'utilisateur
+      other_elements: Et enfin en dessous on retrouve ses participations du moment, celles qui ont eu lieu et ses autres performances
+
+    my_results:
+      intro: L'évolution de ses résultats est visible via le bouton
+      first_paragraph: 'On peut voir leur évolution selon différents niveaux de précision : par <b><span style=text-decoration:underline>activité</span></b> (vue la plus large), <b><span style=text-decoration:underline>phase</b></span> (vue intermédiaire) ou <b><span style=text-decoration:underline>critère</span></b> (vue la plus précise). On peut dans la vue par critère, isoler un critère spécifique (ici, le critère \Méthode\) afin de voir son évolution. Les résultats sont classés chronologiquement et on peut voir la performance, performance moyenne, écart-type et écart-type moyen de chaque élément.'
+      second_paragraph: En dessous, on retrouve l'ensemble des feedbacks écrits qui nous ont été attribués dans le cadre de ces activités.
+
+    update:
+      title: Modifier votre profil
+      first_paragraph: "Retrouvez vos infos de profil (comme votre poste ou département) en cliquant sur votre profil ou lors de votre connexion. N'hésitez pas à insérer une photo de profil en glissant-déposant une image ou en cliquant afin d'en choisir une depuis votre espace de fichiers.<br><br> Si vous voulez accéder à votre espace d'évolution de notes/feedbacks cliquer sur <span style=color: #2196F3>Mes retours et performance</span>"
+      tip: Essayer d'insérer une photo centrée de vous, ni trop large ni trop lourde, l'image de profil étant limitée à 2 Mo et étant affichée sous le format de 150 x 150 pixels
+
+
+  activity_dashboard:
+    title: Le dashboard d'activités
+    first_paragraph: On y retrouve l'ensemble de ses activités, classées par <b><span style=text-decoration:underline>statut</span></b> (des activités à venir, à celles finalisées). Une activité peut se décomposer en phases, pouvant intégrer des participants et/ou des critères différents d'évaluation.
+    exemple: "<span style=font-style:italic;text-decoration:underline>Exemple</span> : ci-dessus, la review du stagiaire Pierre Clément est une activité à part entière, se décomposant en 2 phases, une évaluation de mi-parcours, et une évaluation à la fin de son stage. Michel, son tuteur, prend part à l'évaluation intermédiaire et Pierre pourra aussi s'auto-évaluer, ce qui donne une phase à 2 participants, pour laquelle Pierre sera noté selon 4 critères différents, dont l'un d'entre eux est le leadership."
+    second_paragraph: 'Pour chaque phase, le participant peut alors évaluer ceux pour lequel il est possible de laisser une note, pour cela il suffit de cliquer sur le bouton <a class=\btn white-text waves-effect waves-light teal lighten-1\ style=\padding: 0px 10px; cursor: \>Noter</a> qui permet d''accéder à la notation (voir section suivante)'
+
+  grading_overview_results:
+    title: "Activité : notation et visualisation des résultats"
+    first_paragraph: "Si vous participez à l'activité, vous pouvez noter les autres participants selon les critères et échelles de notes prédéfinis. Vous pouvez aussi insérer un <b><span style=text-decoration:underline>commentaire</span></b> relatif au critère, qui selon les cas, peut être obligatoire selon la note attribuée. Enfin, vous accéderez via le drapeau aux <b><span style=text-decoration:underline>guidelines</span></b> de chaque participant : cela vous permettra de savoir ce qui est attendu de celui-ci dans le cadre de l'activité."
+    validating_results:
+      intro: "Une fois vos retours insérés, 2 choix soffrent à vous :"
+      saving: <b><span style=text-decoration:underline>Si vous choisissez de sauvegarder</span></b>, vous pourrez toujours revenir affiner ou modifier votre jugement; toutefois, votre retour n'est pas considéré comme finalisé et empêchera le calcul et la récupération des résultats, vous devrez finaliser vos retours.
+      validating: "<b><span style=text-decoration:underline>Si vous validez vos retours</span></b>, un écran vous demandera confirmation de votre action et vos notes seront alors enregistrées définitivement. Vous pourrez toujours voir ce que vous avez inséré comme retours, mais dès ce moment vous n'aurez plus rien à faire. Le processus de validation suit son cours, et se termine quand tout le monde a validé : les résultats sont alors calculés"
+
+    second_paragraph: Selon votre rôle, vous pourrez accéder à vos résultats propres ou à ceux de tous les participants. Vous accéderez ainsi aux résultats globaux, par phase et par critère et ainsi voir où vous vous situez. En dessous se trouve l'ensemble des commentaires écrits qui vous ont été laissés
+
+  demo_video:
+    title: Vidéo de présentation de l'outil
+
+  setup:
+    title: Pour bien démarrer
+    create_users:
+      title: l'évaluation ne pourrait pas exister ... sans collaborateurs !
+      first_paragraph: "Allez sur la section <span style=color: #2196F3>Collaborateurs</span> (en haut du menu, ou sur votre page d'accueil) <br>Puis cliquez sur le bouton <span style=color: #2196F3>Ajouter</span> en bas à droite pour créer un nouveau collaborateur :"
+      second_paragraph: 'Vous pouvez créer autant de collaborateur que vous souhaitez en cliquant sur le bouton vert \ Ajouter un utilisateur \. Pour chaque utilisateur, insérez ses qualifications et son adresse email. <br><br> Vous devez obligatoirement choisir un département, un poste et lui affecter un poids hiérarchique pour finaliser l''inscription. Dans le cas où un de ces champs n''existerait pas, un clic sur la ligne bleue sous chaque champ vous permettra de créer un nouveau département/poste/poids.<br>'
+      tip: Le poids hiérarchique permet de tenir compte des rapports hiérarchiques au sein de l'organisation. Par example, si un utilisateur A avec un poids de 70, est évalué dans une activité incluant deux participants, et que l'utilisateur B possède un poids de 100, alors l'utilisateur A aura un poids égale à 70/170 = 41 %
+      warning: Assurez-vous d'entrer correctement l'adresse mail d'un nouvel utilisateur, en cas derreur il ne recevra pas le lien de connection vers Serpico
+
+    roles:
+      title: Les différents rôles dans Serpico
+      first_paragraph: "Les utilisateurs peuvent avoir l'un des rôles suivants :"
+      administrator: "<span style=color: #2196F3>Administrateur</span> : généralement un responsable de ressources humaines, ou un directeur, cet utilisateur peut ajouter des collaborateurs dans Serpico, créer et gérer des activités, gérer les paramètres de son organisation et donner un accès aux résultats complets (résultats individuels et/ou feedbacks, ainsi que les résultats globaux)"
+      activity_manager: "<span style=color: #2196F3>Manager d'activité</span> : généralement un manager déquipe, cet utilisateur peut ajouter des collaborateurs et gérer des activités, et donner un accès à une partie de résultats (feedbacks anonymes et résultats globaux individuels)"
+      collaborator: "<span style=color: #2196F3>Collaborateur</span> : tous les autres membres de l'organisation, ils peuvent être ajoutés dans une activité ou demandé la création d'une activité. Ils ont accès à leurs feedbacks individuels anonymisés, leurs résultats globaux et à la note moyenne de l'activité"
+      second_paragraph: "Ces rôles peuvent être changés à tout moement (voir la section <span style=color: #2196F3>Collaborateur</span>) <br><br> Les utilisateurs peuvent être distingués comme étant internes ou externes à l'organisation (par défaut, ils sont considérés comme internes). <br><br> Une fois terminé, cliquez sur le bouton \ Créer un utilisateur \ pour valider la création"
+
+
+
+  activities:
+    add_stage: Ajouter une phase
+    title: Activités
+    create_activity:
+
+      first_paragraph: 'Allez sur la section <span style=color: #2196F3>Activités</span> (en haut du menu, ou sur votre page d''accueil)<br>Puis cliquez sur le bouton <span style=color: #2196F3>Créer une activité</span>, vous serez dirigé vers la page de création d''activité. <br> Vous pouvez soit créer une activité simple, soit créer une activité plus détaillée en cliquant sur \ Ajouter des phases/critères \.'
+      admin_paragraph: Entant qu'administrateur, vous avez accès à vos activités et à toutes les activités de votre organisation
+      am_paragraph: Entant que manager d'activité, vous pouvez voir toutes les activités de votre équipes
+      create_paragraph:
+      incomplete_warning: S'il manque certains paramètres d'une activité à créer, elle sera ajoutée à la liste \Activités incomplètes\
+      simplified:
+        title: Créer une activité (mode simplifié)
+        parameters:
+          title: Paramètres dacivités
+          first_paragraph: "Vous devez lui donner un nom et un type :"
+          pure_feedback: "<span style=color: #2196F3>Pur feedback</span> : Les utilisateurs peuvent seulement donner un feedback aux autres participants, sans pouvoir les évaluer"
+          evaluation: "<span style=color: #2196F3>Evaluation</span> : Les utilisateurs peuvent s'évaluer, évaluer les autres participants et laisser un feedback"
+          contribution: "<span style=color: #2196F3>Contribution (en développement)</span> : Les utilisateurs évaluent leur contribution (en %) sur la réalisation d'une activité, la somme de toutes les contributions est égale à 100%. Idéal dans le cas d'un partage de prime en participants"
+          second_paragraph: "Dans le cas d'une activité de type évaluation, la note la plus basse, la note plus élevée ainsi que l'intervalle de notation doivent être indiqués.<br><br> L'activité doit avoir une date de début et de fin, tout comme la période de notation<br><br> Chaque activité est unique, ou fait partie d'une série d'activité. Dans ce dernier cas, choisissez <span style=color: #2196F3>Activité récurrente</span>, et définissez les paramètres (fréquence, période de notation...). Tous ces paramètres peuvent être modifiés par la suite"
+          tip: l'activité sera visible mais ne pourra pas être évaluée avant le début de la période de notation. Dans le cas où des participants n'auraient pas donné de feedbacks ou d'évaluation avant une date avancée de la période de notation, un rappel sera envoyé 1 jour avant la fin de la période d'évaluation. Dans le cas où d'un oubli, Il ne sera plus possible de noter ou de donner un feedback, les résultats seront alors calculés sur les données existantes.
+          warning: La modification d'activité est possible durant toute la durée de l'activité, à moins que tous les participants aient donné leurs notes, cela inclut les nouveux participants qui auraient été oubliés. Cependant il est fortement recommandé de changer les paramètres avant le début de l'évaluation
+
+        participants:
+          title: Ajouter des participants
+          first_paragraph: Vous pouvez ajouter autant de participants que vous le souhaitez. Une fois selectionné, un participant peut recevoir un pré-commentaire (par example pour définir ses objectifs ou plus généralement toute info qui pourrait aider le participant à évaluer plus précisement) <br>
+          tip: l'activité doit avoir un owner qui aura pour role de manager l'activité et les participants. Par défaut, l'utilisateur qui aura créé l'activité sera owner.
+          warning: Il ne peut y avoir qu'un seul owner par activité
+          graded_tickbox: "Tous les participants sont supposés recevoir une note ou feedback, mais dans le cas où la<span style=color: #2196F3> case évaluée</span> n'est pas cochée, cet utilisateur ne pourra pas être noté par les autres (il pourra néanmoins toujours noter les participants restants)<br><br> Cliquez sur le bouton finaliser pour créer l'activité. Tous les participants ajoutés recevront un mail de confirmation"
+
+
+      detailed:
+        title: Créer une activité (mode détaillé)
+        parameters:
+          title: Paramètres d'activité
+          first_paragraph: "Vous devez donner un nom à l'activité, et définir si c'est une activité simple ou si elle appartient à une série d'activités. Dans ce dernier cas, sélectionnez <span style=color: #2196F3>Activité récurrente</span>, et définissez les différents critères (fréquence, période de notation...). Tous ces paramètres peuvent être modifiés par la suite"
+
+        stages:
+          title: Gérer les phases
+          first_paragraph: Dans cette seconde étape vous pouvez gérer les phases. Ajoutez le nom, les dates de début et de fin, ainsi que la période de notation de chaque phase.<br><br>
+          first_tip: Pour chaque phase vous devrez lier des participants; d'ailleurs si un utilisateur participe à plusieurs activités d'évaluation, alors son résultat final sera la moyenne pondérée de ces phases, utilisant les poids des phases.
+          second_tip: Une phase peut aussi être vue comme une sous-activité, si tous les utilisateurs sont différents entre les phases
+
+
+        criteria:
+          title: Gérer les critères d'une phase
+          first_paragraph: "Chaque phase peut avoir les types suivants :"
+          pure_feedback: "<span style=color: #2196F3>Pur feedback</span> : Les utilisateurs peuvent seulement donner un feedback aux autres participants, sans pouvoir les évaluer"
+          evaluation: "<span style=color: #2196F3>Evaluation</span> : Les utilisateurs peuvent s'évaluer, évaluer les autres participants et laisser un feedback"
+          contribution: "<span style=color: #2196F3>Contribution (en développement)</span> : Les utilisateurs évaluent leur contribution (en %) sur la réalisation d'une activité, la somme de toutes les contributions est égale à 100%. Idéal dans le cas d'un partage de prime entre participants"
+          second_paragraph: Dans le cas d'une phase de type évaluation, la note la plus basse, la note plus élevée ainsi que l'intervalle de notation doivent être indiqués.
+
+        participants:
+          title: Ajouter des participants à une phase
+          first_paragraph: Vous pouvez ajouter autant de participants que vous le souhaitez. Une fois selectionné, un participant peut recevoir un pré-commentaire (par example pour définir ses objectifs ou plus généralement toute information qui pourrait aider le participant à évaluer plus précisement) <br>
+          tip: La phase sera visible mais ne pourra pas être évaluée avant le début de la période de notation. Dans le cas où des participants n'auraient pas donné de feedbacks ou d\évaluation avant une date avancéé de la période de notation, un rappel sera envoyé 1 jour avant la fin de la période d'évaluation. Dans le cas où d'un oubli, Il ne sera plus possible de noter ou de donner un feedback, les résultats seront alors calculés sur les données existantes.
+          warning: Il ne peut y avoir qu'un seul leader par phase
+          graded_tickbox: "Tous les participants sont supposés recevoir une note ou feedback, mais dans le cas où la<span style=color: #2196F3> case évalué</span> n'est pas coché, cet utilisateur ne pourra pas être noté par les autres (il pourra néanmoins toujours noter les participants restants)<br><br> Cliquez sur le bouton finaliser pour créer la phase. Tous les participants ajoutés recevront un mail de confirmation"
+
+
+
+
+      delegation:
+        title: Déléguer la création d'une activité
+        first_paragraph: "Dans le cas où vous souhaitez créer une activité, mais qu'un autre utilisateur renseigne les paramètres et participants, choisissez de la <span style=color: #2196F3>Déléguer</span>."
+        second_paragraph: "Vous devez alors renseigner quelques informations, comme le nom de l'activité, la personne en charge de sa création et un text explicatif qui pourra laider à la créer. Cliquez alors sur le bouton <span style=color: #2196F3>Valider</span> : cela enverra un email à la personne concernée, et affichera cette activité dans sa liste des activités à créer."
+
+      request:
+        title: Demander une création d'activité (uniquement pour les collaborateurs)
+        first_paragraph: "Dans le cas où vous demandez la création d'une activité, vous devez renseigner quelques paramètres comme le nom de l'activité, ses objectifs et qui sera en charge de la valider. Possibilité vous est laissée de faire apparaître ou pas votre nom en tant que personne à l'origine de la demande au validateur; il ne reste plus qu'à cliquer sur le bouton <span style=color: #2196F3>Valider</span> pour soumettre votre demande, qui enverra un mail au validateur, mettra cette activité dans sa liste des activités à valider et dans votre liste en tant qu'activité en attente de décision"
+
+      evaluate:
+        title: Evaluer une activité
+        first_paragraph: "Lorsqu'une activité est ouverte aux retours, chaque participant peut les insérer en cliquant sur le bouton <span style=color: #2196F3>Noter</span> pour accéder à l'écran suivant :"
+        second_paragraph: "Dans le cas où l'activité/phase fait l'objet d'une évaluation, vous pouvez bouger le curseur entre les notes minimales et maximales pour fixer la note donnée. A droite se trouve tous les objectifs et renseignements données préalablement à chaque participant, afin que chaque évaluateur en prenne connaissance et ajuste au mieux sa notation. Tout à droite, on peut rajouter des commentaires et suggestions à chaque participant.<br><br> Vous pouvez enfin soit :"
+        save: "<i class=fa fa-save style=margin-right: 10px;></i><span style=color: #2196F3>Sauvegarder vos retours</span> : tous ceux-ci seront conservés, mais pourront toujours être modifiés par vos soins à l'avenir. Ceci est particulièrement intéressant si vous n'avez aucune idée ou une idée partielle sur ce qu'un ou plusieurs participants ont fait."
+        validate: "<i class=fa fa-gavel style=margin-right: 10px;></i><span style=color: #2196F3>Valider (confirmer) vos retours</span> : tous vos feedbacks et/ou notes seront définitivement enregistrées sans possibilité de modification ultérieure. Cela a un sens, notamment lorsque certains participants peuvent en influencer d'autres et leur faire changer leur point de vue initial. Ne dit-on pas d'ailleurs que les premières impressions sont souvent les bonnes ?"
+
+  users:
+    title: Gestion des utilisateurs
+    create:
+      title: Ajouter des utilisateurs
+      first_paragraph: "Voir la section <a href=#setup><span style=color: #2196F3>Pour bien démarrer</span></a>"
+
+    manage:
+      title: Modifier les utilisateurs
+      first_paragraph: "Les informations relatives aux utilisateurs sont visibles en cliquant sur l'onglet <span style=color: #2196F3>Collaborateur</span> en haut du menu. Pour chaque utilisateur, en dehors de son nom et poste vous pouvez trouvez ses activités réalisées et en cours, sa performance moyenne en % et son écart moyen de vote en %. Son rôle dans l'application est visible tout à droite, et si vous souhaitez modifier une donnée de l'utilisateur, cliquez sur son profil, puis sur son bouton <span style=color: #2196F3>Modifier</span>. On peut changer son rôle ou département, ainsi que son poids hiérarchique."
+
+    performance:
+      title: Vue d'ensemble et rapport d'utilisateur
+      first_paragraph: "Depuis le menu des <span style=color: #2196F3>Collaborators</span>, on peut accéder à la performance d'un collaborateur en cliquant sur son bouton <span style=color: #2196F3>Vue d'ensemble</span>. Vous pourrez accéder à sa performance par critère, phase et activité."
+      second_paragraph: "Vous avez aussi accès à l'ensemble des feedbacks qui lui ont été donnés, ainsi que la possibilité de <span style=color: #2196F3>générer des rapports PDF </span> à tout moment en cliquant sur le bouton correspondant."
+
+
+  user_settings:
+    title: Mes paramètres
+    first_paragraph: A venir !
+
+  firm_settings:
+    title: Paramètres d'entreprise
+    first_paragraph: A venir !
+
+#header:
+#  processes: Processus
+#  product: La solution
+#  about: A propos
+#  services: Nos services
+#  login: Connexion
+#  register:
+#    free_signup: Essai gratuit
+#    title: Inscrivez-vous
+#    description: Inscrivez-vous dès à présent pour bénéficier de l'offre essai !
+#    label_full_name: Votre nom complet
+#    label_company: Entreprise/Institution
+#    label_position: Fonction
+#    tip_position: Dans la mesure ou vous pourrez créer des activités et utilisateurs, nous aimerions connaitre votre poste actuel
+#    email_error: Merci de renseigner une adresse mail correcte
+#    email_label: Votre adresse mail
+#    label_newsletter: Tenez-moi informé du lancement de Serpico et des actualités via une newsletter
+#    label_doc: Envoyez-moi de la documentation
+#    submit: OK
+#    success_msg: Votre inscription a bien été prise en compte ! Vous serez rapidement tenu au courant par notre équipe ;)
+#
+#  firmSettings: "Entreprise :"
+#  my_actions: Mes actions et démarches
+#  firmActivities: Activités
+#  firmConfig: Paramètres groupe
+#  firms: Entreprises
+#  root_mgt: Gestion avancée
+#  profile: Mon profil
+#  add_activity: Créer une activité
+#  convert: Utiliser en interne
+#  users: Utilisateurs
+#  community: Communauté
+#  institutions: Institutions
+#  colleagues_teams: Collègues & équipes
+#  settings: Paramètres
+#  help: Aide
+#  home: Accueil
+#  logout:
+#  discover: Know more
+
+footer:
+  title: Une marque de ZZYZX Road
+  tc: Conditions générales dutilisation
+  data_gdpr: Politique de données
+
+layout:
+  create_account:
+    modal_title: Démarrez lexpérience dès à présent
+    modal_checkbox_label: Créer le compte moi-même
+    modal_email_label: Adresse email
+    modal_message: Vous pourrez créer gratuitement (jusque 5 utilisateurs) vos propres activités, afin de permettre à chaque membre de votre organisation de devenir acteur de son évaluation. Avec Serpico, s'évaluer n'a jamais été aussi simple... et précis !
+    validate: c'est parti !
+
+
+#landing:
+#  page_name: La solution d'évaluation collaborative
+#  serpico_motto: La solution d'évaluation et de rétribution collaborative
+#  serpico_alt_motto: Collaborative metrics
+#  contact:
+#    title_msg_1: Profitez-en, on vient vous rencontrer !
+#    content_msg_1: Sélectionnez un créneau qui vous arrange
+#    title_msg_2: Quelques infos quand même
+#    content_msg_2: Insérez les coordonnées de votre entreprise ainsi que votre email afin de confirmer votre id'entité
+#    title_msg_3: Un message à nous transmettre ?
+#    content_msg_3: Nous sommes preneurs de toute information (cadre de la rencontre, votre fonction, politique de l'entreprise sur le sujet...tout ce qui vous vient en tête et pourrait nous aider 😇 !)
+#    fullName: Votre nom complet
+#    meetingDate: Date souhaitée de meeting
+#    meetingTime: Créneau horaire
+#    company: Nom de l'entreprise
+#    mail: Adresse email entreprise
+#    address: Adresse de l'entreprise
+#    zipcode: Code postal
+#    city: Ville
+#    country: Pays
+#    message: Infos complémentaires
+#    next: Suivant
+#    get_back: Revenir
+#    finalize: Finaliser
+#    submit: Valider
+#    success_msg: Votre demande a bien été prise en compte. N'hésitez pas à valider votre mail pour finaliser le rendez-vous; a très vite !
+#
+#  main_message:
+#    title: Une solution innovante tournée vers le management participatif
+#    additional_elmt: Une plateforme digitale et collaborative qui mesure la performance à tous les niveaux de l'entreprise
+#    discover_solution: En savoir plus
+#
+#  section_1:
+#    title: Les fonctionnalités offertes par Serpico
+#    paragraph_1: "Notre outil s'adapte à tout type d'entreprise, allant de la simple digitalisation du processus d'évaluation, au pilotage fin et stratégie niveau groupe. Il permet:"
+#    item_1: Des retours par <b>feedback</b> et/ou <b>notation</b>, avec pour cible le <b>projet</b> et/ou ses <b>participants</b>
+#    item_2: "D'évaluer dans toutes les configurations : <b>actif, tiers ou passif</b>"
+#    item_3: L'analyse des résultats par activité, et par collaborateur
+#    item_4: La communication éventuelle des résultats au client
+#
+#  section_2:
+#    title: Une application en phase avec ses clients
+#    paragraph_1: Conscient de l'importance de l'ergonomie (user experience), nous avons travaillé avec nos clients à proposer la meilleure expérience pour leurs utilisateurs, afin de simplifier et rendre ludique l'évaluation de performance par les équipes
+#    paragraph_2: "Sans déploiement facilité ou formation dispensée aux salariés, difficile d'emporter leur adhésion. Nous oeuvrons à un processus facilité : passer des fichiers éparpillés à une solution digitale centralisée se fait très simplement"
+#    step_1: Formation au sein des équipes
+#    step_2: Définition des skills/critères
+#    step_3: Intégration des projets
+#    step_4: Analyse & diffusion des résultats par projet
+#    step_5: Analyse des résultats au cours du temps
+#
+#
+#  section_3:
+#    title: Des données sécurisées et intégrables dans vos systèmes existants
+#    paragraph_1: Les données d'évaluation peuvent être sensibles, non seulement pour l'environnement extérieur, mais aussi pour les salariés. Nous accordons le plus grand soin à compartimenter l'accès aux résultats, de sorte que chaque utilisateur accède aux résultats liés à son rôle.
+#    paragraph_2: Serpico se doit d'être compliant et sécurisé. Si le client ne souhaite pas que ses données soient stockées sur nos serveurs, une installation sur site peut être effectuée à se demande.<br><br> Nous documentons le traitement des données, notamment ce qu'il en est fait et où celles-ci sont stockées selon la directive RGPD. Les données sont anonymisées dès lors qu'un salarié quitte l'entreprise
+#
+
+#  bullet_point_1:
+#    title: Contrôlez au plus près votre stratégie
+#    elmt_1: Planifiez et vérifiez lexécution sans besoin de consolidation
+#    elmt_2: Restez concentrés sur la définition des orientations et la gestion du business
+#
+#  bullet_point_2:
+#    title: Laissez vos salariés évaluer les projets !
+#    elmt_1: Le suivi sinscrit dans le temps, il simplifie la gestion de performance
+#    elmt_2: "Libérez-vous du temps : en dirigeant 5 personnes, économisez 2 jours de travail/an"
+#
+#  bullet_point_4:
+#    title: Prenez les bonnes décisions
+#    elmt_1: Réduisez le sentiment d'arbitraire grâce aux retours communs
+#    elmt_2: Anticipez des points d'accroc et de cohésion
+#
+#  description_section:
+#    title_1: Des données précises avec les outils de reporting
+#    description_1: Revenez au plus près des préoccupations de vos équipes avec les données de note et d'homogénéité entre collaborateurs
+#    title_2: Donnez un véritable pouvoir à vos salariés
+#    description_2: Le fait de devoir noter chaque collègue participant à une activité (projet) rend le collaborateur plus responsable, et focalisé sur ses objectifs celui-ci étant assuré de la confidentialité des notes qu'il attribue
+#    title_3: Rendez l'évaluation légère et ludique
+#    description_3: "Le temps où le collaborateur devait donner son feedback au manager entre quatre murs est révolu : Serpico rend l'évaluation décomplexée en proposant une solution accessible depuis son téléphone"
+#
+#  services_section:
+#    video_yt_uuid: IGdvZMzEaoo
+#
+#  team_section:
+#    title: L'équipe
+#    position_gc: Fondateur
+#    quote_gc: "Ayant travaillé dans de nombreux départements d'entreprise, j'ai remarqué que le processus d'évaluation était rarement réalisé par projets, et manquait parfois de pertinence d'autant qu'ils ne mesurent souvent pas lavis des autres membres du projet. c'est ce qui ma amené à réfléchir à un modèle collaboratif de partage de valeur, et ensuite à le décliner comme service avec Serpico : je suis convaincu que cela débouchera sur une situation où tout le monde ressortira gagnant !"
+#    position_am: Co-designer
+#    quote_am: j'ai travaillé de concert avec Guillaume sur la réalisation de la première version de la plateforme, qui a été testée avec succès auprès délèves dans un environnement dapprentissage. /*c'est un outil que j'ai ensuite promu dans mon entreprise, et tous les collègues ont rapidement adopté Serpico pour sa facilité dutilisation et sa pertinence même à l'échelle d’une petite entreprise*/
+#
+#  partners_section:
+#    title: Nos références
+#    title_fse: Fond Social Européen
+#
+#
+#
+#solution:
+#  page_name: La solution
+#  mobile_header_title: La solution
+#  global_title: Une solution à valeur ajoutée pour l'ensemble des acteurs
+#  first_explaining_paragraph: Retrouvez les différentes manières dutiliser Serpico ci-dessous (glissez sur les icones pour savoir à qui cela bénéficie) :
+#  clevel: Codir
+#  manager: Manager
+#  pm: Managers
+#  collaborator: Collaborateur
+#  hr: RH
+#  decider: Décideur
+#  ease_team_mgt:
+#    title: Facilitez la gestion de vos équipes
+#    p_1:
+#      content_beginning: Suivre l'ensemble des collaborateurs, cela peut vite devenir un casse-tête, notamment si :
+#      reason_1: - Si vous avez des personnes qui sont autonomes et amenées à travailler avec plusieurs départements ou clients
+#      reason_2: - Ou bien plus simplement si la taille de votre entreprise est importante
+#      content_end: Sans compter le temps de préparation pour les entretiens d'évaluation, cela peut être clairement simplifié et optimisé avec une solution utilisé de tous.
+#
+#
+#
+#  empower_workforce:
+#    title: La culture du feedback factuel et bienveillant entre salariés, booster essentiel pour leur engagement
+#    p_1:
+#      content_beginning: Si vous adoptez la technique de l
+#      empowerment: empowerment
+#      content_middle: ce fameux concept initié par l'entreprise libérée, vous avez de fortes chances dimpliquer fortement vos équipes. Mais attention
+#      content_middle_underlined: pas nimporte comment !!
+#      content_end: Notre solution permet à chaque partie prenante de faire un retour dexpérience sur sa performance et celle des autres membres impliqués dans leur projet commun, ceci afin didentifier les points forts et axes damélioration.
+#
+#    p_2:
+#      content: Demander le feedback de ses salariés, a fortiori quand il est qualitatif, permet un total engagement des salariés. Cela réduit le turnover en évitant que lindifférence, puis la frustration prennent le pas sur leur implication
+#
+#
+#  secure_business:
+#    title: Renforcez le business existant et découvrez de nouveaux gisements de croissance
+#    p_1:
+#      content_beginning: Parce qu'un chiffre vaut mieux qu'un long discours : savez-vous quel est le pourcentage d'entreprises qui pensent proposer un service de qualité à leur client ?
+#      content_pct_1=> 80 %
+#      content_middle: Vu coté client, à combien se monte ce pourcentage ?
+#      content_pct_2: 8 %
+#      content_end: Et pourtant bon nombre d'entreprises semblent s'en accomoder. Ne faites pas partie de ce groupe là. Si vous vous tirez pleinement profit de la valeur de vos clients, N'hésitez pas à les mettre dans la boucle du suivi de performance. Ca peut paraître risqué au premier abord, mais ils vous le rendront au centuple.
+#      content_stud'y_source: Etude menée par le cabinet Bain & Company, Closing The Delivery Gap menée sur 362 entreprises
+#
+#
+#  target_pilot:
+#    title: Permettez à vos objectifs d'être efficacement pilotés
+#    p_1:
+#      content_beginning: Vos équipes sont certainement dotées d'objectifs chaque année. Serpico agit comme un outil de suivi régulier d'atteinte des objectifs clients et interne. Sappuyant sur les méthodes de méthodologie de projet type Agile, il permet en plus de réaliser des feedbacks en insérant des points davancement, ce qui vous permet de suivre au mieux la feuille de route (roadmap) fixée en début dexercice
+#      content_middle: Cette approche permet aux managers et directeurs de prendre des décisions et dapprécier la situation plus rapidement et efficacement, et ce à nimporte quel moment de lannée sans besoin de consolider ou faire un bilan. Notre plateforme permet une vue par collaborateur ou par équipe en 1 clic
+#
+#
+#
+#  table_of_contents:
+#    ease_team_mgt: Simplifiez la gestion des équipes
+#    secure_business: Accélerez le business
+#    target_pilot: Pilotage des objectifs
+#    empower_workforce: Engagement des salariés
+landing:
+  page_name: La solution d'évaluation collaborative
+  serpico_alt_motto: Collaborative metrics
+  main_message:
+    title: Une solution innovante tournée vers le management participatif
+    additional_elmt: Une plateforme digitale et collaborative qui mesure la performance à tous les niveaux de l'entreprise
+    discover_solution: Découvrez là
+  section_1:
+    title: Les fonctionnalités offertes par Serpico
+    paragraph_1: "Serpico est pertinent pour chaque type d'entreprise quelque soit le secteur d'activité et le nombre d'employé. La solution est entièrement personnalisable et s'adapte à chaque exigence, depuis le besoin de digitalisation du processus d'évaluation jusqu'au pilotage stratégie de l'ensemble des projets au niveau du groupe. Il permet:"
+    item_1: "- D'évaluer l'<strong>humain</strong> mais également les <strong>projets</strong> de chaque service"
+    item_2: "- Des retours par <strong>feedback</strong> et/ou <strong>notation</strong>, avec pour cible le <strong>projet</strong> et/ou ses <strong>participants</strong>"
+    item_3: "- L'analyse des résultats par <strong>activité</strong>, et par <strong>collaborateur</strong>"
+    item_4: "- D'inclure la <strong>satisfaction</strong> des clients de l'entreprise et la <strong>communication</strong> éventuelle des résultats aux clients"
+  section_2:
+    title: "Une application en phase avec ses clients"
+    paragraph_1: "Conscient de l'importance de l'ergonomie (user experience), nous avons travaillé à proposer la <strong>meilleure expérience</strong> pour nos utilisateurs, afin de <strong>simplifier</strong> et rendre <strong>ludique</strong> l'évaluation de performance par les équipes. La personnalisation et la prise en main de la solution Serpico est très <strong>intuitive</strong>."
+    paragraph_2: "Le déploiement de Serpico s'effectue <strong>à vos cotés</strong>, via des formations dispensées à l'ensemble des équipes afin d'emporter l'adhésion de la direction et des salariés.</br></br>Nous oeuvrons à un <strong>processus facilité</strong> pour l'intégration de Serpico dans le quotidien de votre entreprise via une équipe de suivi dédiée. "
+    step_1: "<strong>Formation</strong> au sein des équipes"
+    step_2: "<strong>Définition</strong> des skills/critères"
+    step_3: "<strong>Intégration</strong> des projets"
+    step_4: "<strong>Analyse & diffusion</strong> des résultats par projet"
+    step_5: "<strong>Analyse des résultats</strong> au cours du temps"
+  section_3:
+    title: "Des données sécurisées et intégrables dans vos systèmes existants"
+    paragraph_1: "Les données d'évaluation peuvent être sensibles, non seulement pour l'environnement extérieur, mais également pour les salariés. Nous accordons le plus grand soin à <strong>compartimenter l'accès aux résultats</strong>, de sorte que chaque utilisateur accède aux résultats liés à son rôle."
+    paragraph_2: "Serpico est <strong>compliant et sécurisé</strong>. Si votre entreprise souhaite que ses données ne soient pas stockées sur nos serveurs, une installation sur site peut être effectuée."
+    paragraph_3: "Nous garantissons un <strong>traitement sécurisé</strong> de l'ensemble de vos données via l'application des techniques de <strong>sécurité</strong> et de chiffrement en conformité avec la législation récente incluant les éxigences de la directive <strong>RGPD</strong>. "
+  section_4:
+    title: Une approche collaborative et flexible
+    paragraph_1: Serpico représente une extension des outils actuels de suivi de performance
+    paragraph_2: Les rôles et influences de chacun peuvent être paramétrés selon leur expérience et leur fonction.
+    prospectus_button: Voir la brochure
+  team_section:
+    title: "L'équipe"
+    position_gc: "Fondateur et CEO"
+    quote_gc: "Ayant travaillé dans de nombreux départements d'entreprise, j'ai remarqué que le processus d'évaluation était rarement réalisé par projets, et manquait parfois de pertinence d'autant qu'ils ne mesurent souvent pas l'avis des autres membres du projet. C'est ce qui m'a amené à réfléchir à un modèle collaboratif de partage de valeur, et ensuite à le décliner comme service avec Serpico : je suis convaincu que cela débouchera sur une situation où tout le monde ressortira gagnant !"
+    position_am: "Co-designer"
+    quote_am: "J'ai travaillé de concert avec Guillaume sur la réalisation de la première version de la plateforme, qui a été testée avec succès auprès d'élèves dans un environnement d'apprentissage."
+  contact_section:
+    location: "Nos bureaux"
+  login_section:
+    username: Adresse email
+    password: Mot de passe
+    button_text: Connexion
+    no_account_question: Vous n'avez pas de compte ?
+    subscribe: Inscrivez-vous
+  keep_me_logged_in: Gardez-moi connecté(e)
+
+  retrieve_pwd:
+    link_msg: Mot de passe oublié ?
+    msg: Insérez votre adresse email
+    msg_2: Nous vous enverrons un lien de modification à cette adresse fin de redéfinir votre mot de passe
+    submit: Envoyez
+    success_msg: Message envoyé ! Consultez votre messagerie afin de vous connecter à nouveau
+
+language:
+  selection: Language
+  choose: Choix de la langue
+
+header:
+  register:
+    public_evaluations: Evaluations publiques
+    start: Démarrer
+  product: La solution
+  about: A propos
+  login: Connexion
+
+#footer:
+#  tc: Conditions générales d'utilisation
+
+solution:
+  hr: RH
+  pm: Managers
+  clevel: CODIR
+  manager: Manager
+  decider: décideur
+
+use_cases:
+  page_name: "La solution"
+  global_title: Le suivi collaboratif a vraiment du bon !
+  first_explaining_paragraph: "Retrouvez ci-dessous les nombreux cas d'application :"
+  clevel:
+    title_1: "Fixez des objectifs stratégiques et suivez leur atteinte"
+    paragraph_1: "Là où aujourd'hui existent encore des suivis et retours non consignés - dans des documents Word, Excel éparpillés - notre solution Serpico <strong>digitalise</strong> et <strong>centralise</strong> les données. Utilisé comme seul point d'entrée du suivi en entreprise il permettra un état des lieux exhaustif de l'avancement des projets stratégiques."
+    paragraph_2: "Ce suivi minutieux et en <strong>temps réel</strong> des indicateurs de performance (KPIs) à atteindre, permettra de mesurer <strong>instantanément</strong> la réussite ou non de ces objectifs afin de réagir au plus tôt et de modifier la trajectoire si besoin."
+    paragraph_3: "Il permettra également de comprendre les <strong>axes d'amélioration</strong> et les <strong>points clés de réussite</strong> en intégrant les avis/notations de toutes les parties prenantes."
+    title_2: "Démocratisez et unifiez la notion de performance au sein de votre entreprise"
+    paragraph_4: "Serpico permet avec sa méthodologie inspirée de la méthode Agile (tâches segmentées en phases, avec contrôle et retours sur le travail rendu) d'appliquer, à l'ensemble des services de l'entreprise, une seule et même <strong>méthode de suivi</strong> d'activité et de performance afin d'<strong>unifier</strong> les évaluations. <br><br>Les salariés sont évalués par critère (définis en amont de chaque projet), au sein d'activités qui s'implémentent au fil de l'année et des nouvelles missions."
+    title_3: "L'intégration du client dans la performance, facteur de différenciation dans le futur"
+    paragraph_5: "Dans un univers toujours plus concurrentiel, où le client est toujours plus exigeant, Serpico offre le moyen que ce dernier puisse participer à l'évaluation de la performance de la prestation réalisée.<br><br>Donnez ainsi la parole à vos clients et tirez partis des feedbacks sur votre travail. Montrez ainsi votre <strong>transparence</strong> et votre <strong>fiabilité</strong>. Faites entrer un regard extérieur sur votre activité et <strong>valorisez-la</strong> auprès des prospects."
+    paragraph_6: "Cette fonctionnalité <strong>unique</strong> de Serpico, sera à coup sûr, un facteur qui vous <strong>démarquera</strong> des autres concurrents réticents à s'ouvrir à l'instrospection."
+
+  manager:
+    title_1: "Fixez les KPIs de vos équipes et objectivez les évaluations"
+    paragraph_1: "Afin d'obtenir une évaluation <strong>plus juste</strong> et qui reflète la <strong>réalité du terrain</strong> Serpico révolutionne l'évaluation des collaborateurs en permettant d'intégrer les retours des collègues et responsables qui ont suivi un même projet."
+    paragraph_2: "Serpico <strong>dépassionne</strong> ce moment de l'évaluation, en:"
+    bullet_point_1: "Fixant des critères de performances (soft et/ou hard skills), qui permettront de situer la performance du salarié et son <strong>évolution</strong> en fonction de son ancienneté."
+    bullet_point_2: "Permettant une évaluation <strong>collaborative</strong> via la sollicitation des collègues ayant participé au projet ainsi qu'un auto-positionnement du collaborateur évalué."
+    title_2: "Suivez les projets de vos équipes en temps réel et gagnez du temps"
+    paragraph_3: "Serpico offre une <strong>nouvelle vision</strong> du suivi du travail des collaborateurs."
+    paragraph_4: "<strong>Simplifiez</strong> et <strong>digitalisez</strong> votre rôle de manager. L'application permet de diminuer drastiquement les feedbacks oraux et de s'assurer en temps réel de l'avancement des projets confiés à vos équipes."
+    paragraph_5: "Grâce à Serpico, c'est aux collaborateurs de fournir des indications quotidiennes/hebdomadaires de son avancement selon des critères que <strong>vous aurez fixés</strong>. Vous vous dégagerez ainsi du temps pour d'autres actions managériales orienté business, par exemple."
+    title_3: "Confortez votre business model et la satisfaction client"
+    paragraph_6: "Serpico, par son approche collaborative, permet également d'obtenir une vision holistique du travail de vos équipes en permettant à chacun de noter son travail ainsi que d'intégrer le <strong>retour de vos clients</strong>."
+    paragraph_7: "Cette approche participe grandement à la <strong>responsabilisation</strong> et l'<strong>implication</strong> de l'ensemble des membres ayant participé au projet. Il <strong>légitime</strong> votre travail, par vos pairs et vos clients."
+  hr:
+    title_1: "(Re)mettez un pied au sein de chaque équipe en accédant aux feedbacks de chaque projet"
+    paragraph_1: "Grâce à votre <strong>vue d'ensemble</strong>, accédez aux retours et feedbacks de chaque activité et <strong>observez</strong> la performance, les points de consensus ou de friction au sein des équipes et des projets."
+    paragraph_2: "Serpico permet d'<strong>accompagner</strong> la mutation des ressources humaines et de regagner le coeur des fonctions métier et de direction. En effet, cela permet de vous <strong>implanter</strong> - au moins de manière virtuelle - au sein des équipes, de pouvoir <strong>analyser la donnée</strong>, l'<strong>interpréter</strong> et émettre des <strong>recommandations</strong> à la direction et aux managers."
+    title_2: "Améliorez l'intégration (onboarding) des nouveaux collaborateurs dans l'entreprise"
+    paragraph_3: "Le processus de recrutement peut être <strong>long</strong> et <strong>incertain</strong> pour trouver le candidat idéal. Une embauche ratée coûte extrêmement cher en temps (jusqu'à une centaine d'heures) et en argent (de 2000 à 15000 euros) aux entreprises, selon les profils."
+    paragraph_4: "Une fois le candidat sélectionné, Serpico <strong>accompagne</strong> l'entreprise mais également le nouveau salarié lors de son <strong>intégration</strong>. Via l'application il devient plus rapidement <strong>opérationnel</strong> notamment par le fait qu'il est co-responsable de son suivi et voit rapidement s'il est en ligne avec les objectifs. <br><br>Les points de rencontre entre l'entreprise, le manager et le collaborateur sont ainsi <strong>multipliés</strong> par rapport à un recrutement classique."
+    title_3: "Suivez la progression par objectifs (OKR) des salariés et déclenchez des actions de formation ajustées"
+    paragraph_5: "Le suivi individuel mais également <strong>collectif</strong> des collaborateurs via les objectifs que vous aurez fixés en accord avec la <strong>stratégie de développement</strong> de l'entreprise permettra des recommandations de formation adaptées aux besoins réels de chaque salarié.<br><br>Serpico permet de fixer des objectifs <strong>collectifs</strong> à l'ensemble des salariés, et <strong>spécifiques</strong> par rapport à certains postes."
+
+terms_conditions:
+  page_name: "Conditions générales d'utilisation"
+  page_title: "Conditions générales d'utilisation"
+  edited_website: "Ce site est édité par : ZZYZX Road SARL-S"
+  rcs_number: "Numéro d’immatriculation au Registre de Commerce de Luxembourg B221941"
+  vat_number: "Numéro de TVA intracommunautaire : LU30069957"
+  address: "Adresse : 46, rue des Trévires L-2628 Luxembourg"
+  phone_number: "Numéro de téléphone : (+352) 42 42 38 77"
+  country: "Pays : Grand-Duché de Luxembourg"
+  article_1:
+    title: "1 – Définitions"
+    subtitle_1: "ExternalUser"
+    subcontent_1: "Désigne toute personne physique ou morale, souscriptrice directe du Service,"
+    subtitle_2: "Serpico"
+    subcontent_2: "Désigne la marque déposée par ZZYZX Road SARL-S, et le nom commercial sous lesquels sont opérés le Service,"
+    subtitle_3: "Service"
+    subcontent_3: "Désigne de manière générale l’ensemble des prestations proposées en ligne par Serpico,"
+    subtitle_4: "Utilisateur"
+    subcontent_4: "Désigne toute personne physique, ayant préalablement été invitée par un ExternalUser et/ou l'un de ses représentants et bénéficiant de tout ou partie du Service de Serpico."
+  article_2:
+    title: "2 – Champ d'application"
+    content: "Les conditions générales présentes s’appliquent à l’ensemble des prestations proposées en ligne par le site."
+  article_3:
+    title: "3 – Conditions d'utilisation"
+    subtitle_1: "3.1 - Accès au site"
+    subcontent_1: "Par l’accès au site, et de ce seul fait, l’utilisateur accepte les présentes conditions générales d’utilisation ainsi que la licence d’utilisation décrite ci-après."
+    subtitle_2: "3.2 - Accès au service"
+    subcontent_2: "L’accès au service est possible 7 jours sur 7, et 24 heures sur 24 sauf en cas de force majeure ou d’évènements hors du contrôle et sous réserve des éventuelles interventions de maintenance nécessaires au bon fonctionnement du service ou du matériel. La responsabilité de Serpico ne saurait en aucun cas être engagée en cas d’impossibilité d’accès au site et/ou d’utilisation de ses services. La présente licence d’utilisation confère à l’utilisateur un droit d’accès personnel, réservé à un usage exclusif et non collectif."
+  article_4:
+    title: "4 - Propriété intellectuelle"
+    content: "Conformément aux dispositions en matière de Propriété Intellectuelle, les différents éléments du site ainsi que son contenu, tels que, entre autres, textes, images, logos, commentaires, bases de données restent la propriété de Serpico ou de leurs auteurs et/ou titulaires respectifs et ce pour la durée légale de protection et pour le monde entier. La licence d’utilisation conférée à l’Utilisateur comprend uniquement le droit de reproduire le contenu du site dont les œuvres consultées pour stockage aux fins de représentation sur écran monoposte et les copies ou reproductions strictement réservées à l’usage privé de l’utilisateur et non destinées à une utilisation collective ou commerciale. En dehors de cette licence d’utilisation, toute reproduction, même partielle, toute représentation, diffusion, vente ou exploitation sous quelque forme que ce soit, électronique ou non, est strictement interdite sans le consentement préalable de Serpico et constitue un acte de contrefaçon engageant la responsabilité civile et pénale de l’auteur de la contrefaçon."
+    subtitle_1: "4.1 - Charte graphique"
+    subcontent_1: "La charte graphique du site et les éléments qui la composent sont la propriété de Serpico."
+    subtitle_2: "4.2 - Bases de données"
+    subcontent_2: "Les bases de données indexant les différents contenus du site sont la propriété de Serpico. La consultation et l’utilisation de ces bases de données n’entraînent en aucune façon la transmission de droits de propriété sur les bases de données à l’utilisateur. Il est rappelé, conformément à l’article 67 de la loi du 18 avril 2001 sur les droits d’auteur, les droits voisins et les bases de données que sont interdites « l’extraction ou la réutilisation de la totalité ou d’une partie substantielle, évaluée de façon qualitative ou quantitative, du contenu d’une base de données [sans l’accord du producteur] », ainsi que « l’extraction ou la réutilisation répétées et systématiques de parties non substantielles du contenu d’une base de données, qui seraient contraires à l’exploitation normale de cette base de données ou qui causeraient un préjudice injustifié aux intérêts légitimes du producteur de la base »."
+    subtitle_3: "4.3 - Textes"
+    subcontent_3: "Les textes présents sur le site sont la propriété de leurs auteurs respectifs."
+    subtitle_4: "4.4 - Liens hypertexte"
+    subcontent_4: "Serpico autorise la mise en place d’un lien hypertexte pointant vers son contenu, sous réserve de ne pas utiliser la technique du lien profond ou du lien encadré (« deep linking » ou « inline linking »), c’est-à-dire que les pages du site ne doivent pas être imbriquées à l’intérieur des pages d’un autre site, mais accessible par l’ouverture d’une fenêtre, et de mentionner la source qui pointera grâce à un lien hypertexte directement sur le contenu visé. Les informations utilisées ne doivent l’être qu’à des fins personnelles, associatives ou professionnelles, toute utilisation à des fins commerciales ou publicitaires est exclue. Cette autorisation ne s’applique pas aux sites internet diffusant des informations à caractère polémique, pornographique, xénophobe ou pouvant, dans une plus large mesure porter atteinte à la sensibilité du plus grand nombre."
+  article_5:
+    title: "5 - Protection des données, respect du ExternalUser et de l’Utilisateur"
+    subtitle_1: "5.1 – Cadre général"
+    subcontent_1: "L’adhésion aux présentes conditions vaut consentement de l’Utilisateur au traitement des données personnelles le concernant décrit au présent alinéa, certaines de ces données revêtant un caractère essentiel pour le bon fonctionnement du Service, puisqu’elles permettent l’établissement de rapports et résultats globaux bénéficiant aux autres Utilisateurs."
+    subcontent_2: "L’Utilisateur concerné par ces traitements dispose d’un droit d’accès, de rectification et de suppressions des données à caractère personnel le concernant, ainsi que celui de demander à ce que soient rectifiées, mises à jour ou supprimées les données inexactes, incomplètes ou périmées et de s’opposer, sous réserve de justifier d’un motif légitime, à ce que des données personnelles le concernant fassent l’objet d’un traitement ; il pourra le demander par écrit ou l’adresse contact@serpicoapp.com."
+    subcontent_3: "Conformément au Règlement (UE) N°611/2013, Serpico s’engage à avertir la Commission Nationale pour la Protection des Données du Grand-Duché du Luxembourg d’une violation de sécurité et de la confidentialité de données à caractère personnel dans un délai de 24 heures suivant son constat. "
+    subcontent_4: "Serpico s’engage aussi à informer les Clients desdits incidents, dès lors qu’ils sont susceptibles d’affecter défavorablement leurs données ou le niveau de la protection de vie privée de ses Utilisateurs."
+    subcontent_5: "Des données électroniques peuvent également être collectées et/ou déposées sur le système informatique de l’Utilisateur à des fins de gestion de sa connexion et de sa navigation sur le Site Internet. L’Utilisateur peut refuser l’utilisation de ces fichiers (aussi appelés « cookies ») via la configuration de son navigateur internet, et cette action n’entravera pas la navigation de l’Utilisateur sur le Site Internet."
+    subcontent_6: "Le ExternalUser et l'Utilisateur reconnaissent et acceptent que Serpico ne pourra en aucun cas être tenu responsable d’une violation de la sécurité entraînant accidentellement ou de manière illicite la destruction, la perte, l’altération, la divulgation ou l’accès non autorisé de données à caractère personnel transmises, stockées ou traitées en relation avec le Site Internet."
+    subtitle_2: "5.2 – Suppression d'un compte Utilisateur"
+    subcontent_8: "Les données de l’Utilisateur sont conservées aussi longtemps que son Compte est actif. Elles le seront encore quinze (15) jours à compter de la fermeture du compte Utilisateur."
+    subcontent_9: "Pendant ce délai, l’Utilisateur pourra demander au ExternalUser s’il peut conserver ces données à titre personnel. Le ExternalUser se réserve le droit d’accepter une telle demande, ainsi que la manière dont ces données lui seront reversées. De son côté, Serpico ne saurait être responsable du contenu de ces données reversées à l’Utilisateur, notamment si ces dernières ressortent tronquées, incomplètes et/ou anonymisées."
+    subcontent_10: "Passé ce délai et sans action de l’Utilisateur, les données sont anonymisées et pourront servir à un traitement statistique tel que défini par la loi du 1er août 2018 relative à la protection des données."
+  article_6:
+    title: "6 – Responsabilité de Serpico"
+    content: "Serpico s’efforce de publier et éditer des informations correctes et fiables. Toutefois, des inexactitudes techniques ou typographiques ne sauraient être exclues. Serpico se réserve le droit de modifier ou corriger le contenu du site à tout moment. L’utilisation des informations disponibles sur le site se fait sous l’entière responsabilité de l’utilisateur. Serpico ne pourra en aucun cas être tenu responsable de tout dommage de quelque nature que ce soit résultant de l’utilisation ou interprétation des informations disponibles sur le site."
+  article_7:
+    title: "7 - Droit applicable"
+    content: "Le site ainsi que ces conditions générales d’utilisation sont soumis au droit luxembourgeois. Toute contestation qui en résulte est soumise à la compétence des juridictions luxembourgeoises. En cas de litige, l’utilisateur s’adressera en priorité à Serpico pour trouver une solution amiable."
+  article_8:
+    title: "8 - Modifications et mises à jour"
+    content: "Serpico se réserve le droit de procéder à des modifications des présentes conditions générales d’utilisation et s’engage à publier en ligne la nouvelle version dès qu’elle est applicable."
+  updated_date: "Date de la dernière mise à jour : 22/12/2018"
+
+#################@
+about:
+  page_name: A propos
+  mobile_header_title: A propos
+
+#use_cases:
+#  page_name: Quelques cas
+#  page_title: Cas dutilisation
+#  mobile_header_title: Cas dutilisation
+#  global_title: Le suivi collaboratif a vraiment du bon !
+#  first_explaining_paragraph: Retrouvez ci-dessous les nombreux cas dapplication :
+#  onboarding:
+#    title: Améliorer lonboarding de vos nouveaux collaborateurs
+#    download_brochure: Accéder à notre brochure dédiée
+#
+#  clevel:
+#    title_1: Fixez des objectifs stratégiques et suivez leur atteinte
+#    paragraph_1: Là où aujourdhui existe encore des suivis et retours non consignés - dans des documents Word, Excel éparpillés - notre solution Serpico digitalise et centralise les données. Utilisé comme seul point dentrée du suivi en entreprise il permettra un état des lieux exhaustif de lavancement des projets stratégiques.
+#    paragraph_2: Ce suivi minutieux et en temps réel des indicateurs de performance (KPIs) à atteindre, permettra de mesurer instantanément la réussite ou non de ces objectifs afin de réagir au plus tôt et de modifier la trajectoire si besoin.
+#    paragraph_3: Il permettra également de comprendre les axes damélioration et les points clés de réussite en intégrant les avis/notations de toutes les parties prenantes.
+#    tab_columns:
+#      title: Méthode
+#      target: Cible
+#      audience: Public
+#      time_intensity: Temps / Intensité
+#      cost: Coût
+#
+#    tab_rows:
+#      classic_eval:
+#        title: Evaluation classique
+#        target: Individu
+#        audience: Tous collaborateurs
+#        time_intensity: Elevé / Faible
+#        cost: Interne, abordable (200€)
+#
+#      360:
+#        title: 360 °
+#        target: Individu
+#        audience: Collaborateurs spécifiques
+#        time_intensity: Court / Intense
+#        cost: Externe, coûteux (de 1k à 3k€/pers)
+#
+#      serpico:
+#        title: Serpico
+#        target: Individu
+#        add_target: équipe et projets
+#        audience: Tous collaborateurs
+#        add_audience: et les clients
+#        time_intensity: Court / Faible
+#        cost: Externe, <b>économique</b> (100-150€/pers)
+#
+#
+#    title_2: Démocratisez et unifiez la notion de performance au sein de votre entreprise
+#    paragraph_4: Serpico permet avec sa méthodologie inspirée de la méthode Agile (tâches segmentées en phases, avec contrôle et retours sur le travail rendu) dappliquer, à l'ensemble des services de l'entreprise, une seule et même méthode de suivi d'activité et de performance afin dunifier les évaluations.
+#      <br><br>Les salariés sont évalués par critère (définis en amont de chaque projet), au sein d'activités qui simplémentent au fil de lannée et des nouvelles missions. 
+#
+#
+#    title_3: Lintégration du client dans la performance, facteur de différenciation dans le futur
+#    paragraph_5: Dans un univers toujours plus concurrentiel, où le client est toujours plus exigeant, Serpico offre le moyen que ce dernier puisse participer à l'évaluation de la performance de la prestation réalisée.
+#      <br><br>Donnez ainsi la parole à vos clients et tirez parti des feedbacks sur votre travail. Montrez ainsi votre transparence et votre fiabilité. Faites entrer un regard extérieur sur votre activité et valorisez-la auprès des prospects.
+#    paragraph_6: Cette fonctionnalité <strong>unique</strong> de SERPICO, sera à coup sûr, un facteur qui vous démarquera des autres concurrents réticents à souvrir à linstrospection.
+#
+#  manager:
+#    title_1: Fixez les KPIs de vos équipes et objectivez les évaluations
+#    paragraph_1: Afin dobtenir une évaluation plus juste et qui reflète la réalité du terrain Serpico révolutionne l'évaluation des collaborateurs en permettant dintégrer les retours des collègues et responsables qui ont suivi un même projet.
+#    paragraph_2: Serpico <b>dépassionne</b> ce moment de l'évaluation, en :
+#    bullet_point_1: Fixant des critères de performances (soft et/ou hard skills), qui permettront de situer la performance du salarié et son évolution en fonction de son ancienneté.
+#    bullet_point_2: Permettant une évaluation collaborative via la sollicitation des collègues ayant participé au projet ainsi qu'un auto-positionnement du collaborateur évalué.
+#    title_2: Suivez les projets de vos équipes en temps réel et gagnez du temps
+#    paragraph_3: Serpico offre une nouvelle vision du suivi du travail des collaborateurs.
+#    paragraph_4: Simplifiez et digitalisez votre rôle de manager. l'application permet de diminuer drastiquement les feedbacks oraux et de sassurer en temps réel de lavancement des projets confiés à vos équipes.
+#    paragraph_5: Grâce à Serpico, c'est aux collaborateurs de fournir des indications quotidiennes/hebdomadaires de son avancement selon des critères que vous aurez fixés. Vous vous dégagerez ainsi du temps pour d'autres actions managériales orienté business, par exemple.
+#    title_3: Confortez votre business model et la satisfaction client
+#    paragraph_6: Serpico, par son approche collaborative, permet également dobtenir une vision holistique du travail de vos équipes en permettant à chacun de noter son travail ainsi que dintégrer le retour de vos clients.
+#    paragraph_7: Cette approche participe grandement à la responsabilisation et limplication de l'ensemble des membres ayant participé au projet. Il légitime votre travail, par vos pairs et vos clients.
+#
+#  hr:
+#    title_1: (Re)mettez un pied au sein de chaque équipe en accédant aux feedbacks de chaque projet
+#    paragraph_1: Grâce à votre vue d'ensemble, accédez aux retours et feedbacks de chaque activité et observez la performance, les points de consensus ou de friction au sein des équipes et des projets.
+#    paragraph_2: Serpico permet daccompagner la mutation des ressources humaines et de regagner le coeur des fonctions métier et de direction. En effet, cela permet de vous implanter - au moins de manière virtuelle - au sein des équipes, de pouvoir analyser la donnée, linterpréter et émettre des recommandations à la direction et aux managers.
+#    title_2: Améliorez lintégration (onboarding) des nouveaux collaborateurs dans l'entreprise
+#    paragraph_3: Le processus de recrutement peut être long pour trouver le candidat idéal et incertain. Une embauche ratée coûte extrêmement cher en temps (jusqu'à une centaine dheures*) et en argent (de 2000 à 15000 euros) aux entreprises, selon les profils.
+#    paragraph_4: Une fois le candidat sélectionné, Serpico accompagne l'entreprise mais également le nouveau salarié lors de son intégration. Via l'application il devient plus rapidement opérationnel notamment par le fait qu'il est co-responsable de son suivi et voit rapidement sil est en ligne avec les objectifs. <br><br>Les points de rencontre entre l'entreprise, le manager et le collaborateur sont ainsi multipliés par rapport à un recrutement classique. 
+#    title_3: Suivez la progression par objectifs (OKR) des salariés et déclenchez des actions de formation ajustées
+#    paragraph_5: Le suivi individuel mais également collectif des collaborateurs via les objectifs que vous aurez fixés en accord avec la stratégie de développement de l'entreprise permettra des recommandations de formation adaptées aux besoin réel de chaque salarié.<br><br>Serpico permet de fixer des objectifs collectifs à l'ensemble des salariés, et spécifiques par rapport à certains postes. 
+
+
+contact:
+  page_title: Contact
+
+settings:
+  page_title: Mes paramètres
+  mobile_header_title: Mes paramètres
+
+root_management:
+  manage_processes: Gestion des processus
+  manage_organizations: Gestion des entreprises & institutions
+
+processes:
+  backToMyActivity: Retour
+  no_master_user: aucun resp.
+  page_title: Gestion des catégories
+  masterUser: Responsable
+  parent: Appartient à (catégorie parent)
+  process: Famille de catégories
+  name: Nom
+  go_back_root: Retour aux paramètres root
+  go_back: Paramètres avancés
+  add_button: Ajouter une catégorie
+  approvable: Fait l'objet d'une validation avant d'être évalué par les requérants
+  gradable: Permettre création de template
+  followup_settings: Gérer le template
+  unrelated: Non liée à une catégorie
+  non_gradable: Création de template non permis
+  saveAnswers: Sauvegarder mes réponses
+  sendAnswers: Envoyer mes réponses
+  error_message_answer: Vous avez un ou plusieurs champs pas validés veuillez le ou les compléter
+  grade: Noter
+  results: Résultats
+  confirmAnswers: Vous êtes sur le point denvoyer vos réponses, vous ne pourrez plus les modifier après confirmation.
+  want_send_answer: Voulez-vous envoyer vos réponses ?
+  cant_modify_answer: Vos choix vont être envoyés. Vous
+  titleconfirmAnswers: Finaliser les réponses
+  confirm: Confirmer
+  submit: Ok
+  cancel: Annuler
+  unset_process: Process non configuré
+  modify_prior_launching_act: Configurer le process avant de lancer l'activité
+  request_btn: Je ne trouve pas la famille souhaitée
+  update: Modifier la catégorie
+  process_request_msg: Demandez à rajouter une nouvelle famille aux administrateurs de Serpico, qui répondront à votre demande
+  new_family: Nouvelle famille
+  no_parent_category: Aucune catégorie
+  delete_modal:
+    title: Suppression de catégorie
+    content: Etes-vous sûr de supprimer cette catégorie, sans la rattacher à une autre ? Toutes les catégories et activités liées en seront détachées, mais seront préservées
+    confirm: Supprimer
+    decline: Annuler
+
+
+process_stages:
+  save_survey: Vos choix seront sauvegardés, vous devrez les valider par la suite pour qu'ils soient pris en compte.
+  submit: Sauvegarder
+  approvable: Ce process doit être validé avant que les requérants puissent accéder aux feedbacks / évaluations
+  no_participants: Pas de participant sélectionné
+  no_survey: Aucun sondage créé
+  tooltip_no_participants: Si ce processus est public et qu'aucun collaborateur n'est sélectionné, les personnes externes pourront toujours évaluer l'institution en général sur ce processus
+  no_criteria: Pas de critère sélectionné
+  tooltip_no_criteria: Si ce processus est public et qu'aucun critère n'est sélectionné, les personnes externes pourront toujours évaluer l'institution, sur des critères prédéterminés et en rapport avec le processus
+  editSurvey: Modifier le sondage
+  edit: Modifier
+  questionCopy: Copier
+  questionDelete: Supprimer
+  surveySaveButton: Enregistrer le sondage
+  questionValidEdit: Valider la modification
+  questionAdd: Ajouter une question
+  questionAddOption: Ajouter une option
+  required: Obligatoire
+  survey_name: Nouveau Questionnaire
+  delete: Supprimer le sondage
+  checkAnswers: Voir les retours
+  validate_delete: Etes-vous sûr de vouloir supprimer le sondage ?
+  publish: Publier
+  summary: Résumé
+  byquestion: Par question
+  bysurvey: Par sondage
+  next: Suivant
+  previous: Précédent
+  numberAnsweredNone: Il n'y a pas de réponse pour cette question
+  numberAnsweredOne:  personne a répondu à la question
+  numberAnsweredSeveral:  personnes ont répondu à la question
+  dates_definition:
+    label_title: Période de déroulement et d'évaluation
+    defined_dates: A dates définies
+    defined_duration:
+      title: A durée définie
+      origin: à compter de
+      timespan: Déroulement
+      feedback: Feedback
+
+
+
+institutions:
+  add_process:
+    btn_modal: Ajouter une démarche
+    modal_title: Ajout d'une démarche
+    modal_add_btn: Je ne trouve pas la démarche souhaitée
+    available_processes: et associez-là à une des démarches existantes de l'institution
+    name: Nom de la catégorie
+    parent: Famille de catégorie
+    submit: OK
+
+  add_user_process_activity_success_msg: La catégorie a bien été ajoutée. Elle fera l'objet d'une validation en interne mais vous pouvez dès à présent créer une activité liée à celle-ci !
+  add_family_process_activity_success_msg: La famille de catégorie a bien été ajoutée. Elle sera validée par les administrateurs de Serpico mais vous pouvez dès à présenter configurer et créer des activités basées sur cette famille de catégorie !
+  add_modal_process:
+    modal_add_title: Ajout de catégorie
+    link_to_process: Saisissez le nom de cette catégorie et liez-la à une famille de catégories
+
+  validate_modal_process:
+    title: Requête en création de catégorie
+    reject_option: Rejeter la demande
+    validate_option: Valider la demande, et lordonner dans la structure existante de vos catégories
+    requester_arrangement: "Proposition initiale du requérant :"
+
+
+iprocesses:
+  title: Activités
+
+firm_settings:
+  page_title: Paramètres d'entreprise
+  activities:
+    title: Activités
+    templates:
+      section_title: Templates
+      manage_btn: Gérer les templates
+
+    parameters:
+      section_title: Paramètres d'activités
+
+
+  users:
+    title: Utilisateurs
+    structure:
+      title: Organisation hiérarchique
+
+    criterion:
+      title: Indicateurs de performance
+      avg_results: Performance par collaborateur
+      organization_targets: Gestion des objectifs groupe
+
+    privileges:
+      title: Gestion des droits daccès
+      line_managers: Supérieurs hiérarchiques
+      internal_users: Utilisateurs internes
+      external_users: Utilisateurs externes
+      enabled_superior_sub_rights: Permettre aux supérieurs hiérarchiques d'accéder à la gestion et visualisation des résultats de leurs subordonnés
+      enabled_superior_setting_targets: Permettre aux supérieurs hiérarchiques de fixer les objectifs de performance (KPIs) de leurs subordonnés
+      enabled_superior_modify_subordinate: Permettre aux supérieurs hiérarchiques de modifier les informations concernant leurs subordonnés (role, fonction, poids...)
+      enabled_superior_overview_sub_results: Permettre aux supérieurs hiérarchiques d'accéder aux résultats détaillés de leurs subordonnés
+      enabled_user_see_all_users: Permettre aux utilisateurs de visualiser tous leurs collègues d'entreprise depuis leur onglet Collègues & Equipes (par défaut, ils ne voient que leur département)
+      enabled_user_creating_user: Permettre à certains utilisateurs d'en créer d'autres (en plus des administrateurs)
+      enabled_user_see_snapshot_peers_results: Permettre aux utilisateurs d'accéder aux résultats instantanés de leurs pairs (collègues dans le même département de même niveau hiérarchique)
+      enabled_user_see_ranking: Permettre aux utilisateurs d'accéder à leur classement
+      enabled_user_see_snapshot_sup_results: Permettre aux utilisateurs d'accéder aux résultats instantanés de leur supérieur hiérarchique direct
+      enabled_c_names_outside_c_groups: Permettre aux owner d'activité d'ajouter des critères de notation n'appartenant pas à des matrices de compétence
+      activities_access_and_results_view:
+        title: Accès aux activités et à leurs résultats
+        administrators: Les administrateurs
+        managers: Les managers
+        collaborators: Les collaborateurs
+        external_users: Les utilisateurs externes
+        activity_access_msg: peuvent accéder
+        activity_access:
+          firm: aux activités de l'entreprise
+          department: quaux activités de leur département
+          own: qu'à leurs propres activités
+
+        scope_msg: et visualiser
+        scope:
+          all_participations: tous les résultats
+          own_participations: leurs propres résultats
+
+        results_access_msg: dès lors que
+        results_access:
+          live: ils le veulent
+          incomplete: la deadline est passée
+          unpublished: les retours sont complets
+          published: les retours sont publiés
+
+        detail_msg: de manière
+        results_details:
+          detailed: detaillée
+          consolidated: consolidée
+
+        participation_condition:
+          none: sans condition
+          owner: à condition qu'ils en soient owners
+          participant: à condition qu'ils y participent
+
+
+
+
+  other:
+    title: Général
+    mails:
+      mail_deadline_nb_days: Nombre de jours avant lesquels les participants qui n'ont pas validé leur retour sont avertis de la date de fin d'évaluation
+
+    processes:
+      section_title: catégories des activités
+      manage_btn: Gérer
+
+    positions:
+      section_title: Postes & Fonctions
+      manage_btn: Gérer
+
+    titles:
+      section_title: Titres
+      manage_btn: Gérer
+
+    departments:
+      section_title: Départements & Responsables
+      manage_btn: Gérer
+
+    criterion_names:
+      section_title: Critères & Matrices de Compétences
+
+
+  submit: Sauvegarder
+  submit_saved: Enregistré
+
+criterion_groups:
+  criterion_name:
+    no_unit: (Pas dunité)
+
+
+template_manage:
+  page_title: Gestion des templates
+  delete_btn: Supprimer
+  modify_btn: Modifier
+  delete:
+    msg: Etes-vous sûr de vouloir supprimer ce template ? Les activités créées depuis ce template, ainsi que celle constitutive du template seront conservées
+    confirm: Oui
+    decline: Annuler
+
+  no_templates_msg: Pas de templates existants
+  create_btn: Créer un template
+
+password_definition:
+  welcome_msg: Bienvenue sur Serpico
+  description: Inscrivez-vous pour pouvoir évaluer les institutions publiques dans votre quotidien
+  username: Nom complet
+  nickname: Nom d'utilisateur
+  email: Adresse email
+  password_description: Créez votre mot de passe afin d'accéder de manière sécurisée à la plateforme
+  password_rules: Il doit contenir au moins une majuscule, un chiffre et avoir une longueur dau moins 8 caratères
+  success_modal:
+    msg: Votre mot de passe a bien été créé. Vous allez être redirigé vers la page d'accueil et pourrez vous connecter
+    button_msg: Ok
+
+  password: Mot de passe
+  password_repeat: Repétition du mot de passe
+  disclaimer: En vous inscrivant, vous acceptez nos
+  submit: Enregistrer
+
+home:
+  page_title: Accueil
+  mobile_header_title: Accueil
+  my_profile_title: Mon profil
+  my_profile_description: Voir mon profil et mes feedbacks / performances
+  activities: Activités & Projets
+  activities_description: Accédez à vos activités et résultats
+  my_settings_title: Mes paramètres
+  my_settings_description: Gérez et modifier mes informations et paramètres
+  organization_settings_title: Paramètres généraux
+  organization_settings_description: Gérez les utilisateurs et accéder aux paramètres généraux
+  manage_organizations_title: Gestion des organisations
+  manage_organizations_description: Observez, modifiez et ajoutez des organisations
+
+
+welcome_mail:
+  intro: Bonjour
+  message1: Merci de vous être inscrit à Serpico, qui porte haut et fort l'évaluation collaborative !
+  button_text: Accédez à Serpico
+  message2: Nous vous tiendrons informés du lancement de l'application et reprendrons contact avec vous à ce moment-là !
+  outro: A très bientôt,
+  team: L'équipe Serpico
+
+create_activity_mail:
+  intro: Bonjour
+  message1: Vous venez de créer l'activité
+  message2: dans votre organisation.
+  button_text: Accédez à Serpico
+  message3: En tant que Manager d'activité, vous pouvez en modifier les paramètres en cours de vie, prendre part à la notation, puis enfin visualiser les résultats tant individuels que collectifs. Nous vous souhaitons un agréable usage de Serpico pour votre activité
+  outro: A très bientôt,
+  team: l'équipe de Serpico
+
+#create_organization:
+#  legalName: Nom complet/juridique
+#  commercialName: Nom de l'entité
+#  genLanguage: Langue de préférence
+#  isFirm: Type d'entité
+#  firstname: Prénom
+#  lastname: Nom
+#  email: Email
+#  position: Fonction
+#  department: Département
+#  recurringChoice: Créer une activité récurrente
+#  recurringStartDate: Date de début
+#  recurringEndDate: Date de fin
+#  recurringFrequency: Fréquence
+#  recurringTimeFrame: Durée
+#  masterUser: Administrateur principal
+#  create: Créer
+#  start_now: Démarrez maintenant
+#  validate_title: Validation de la création d'entité
+#  validate: Valider
+#  reject: Rejeter
+#  update_btn: Modifier
+#  add_btn: Ajouter
+#  delete: Supprimer
+#  delete_modal:
+#    title: Supression d'une entité
+#    content: Etes-vous sûr de vouloir supprimer ce compte entreprise ? Tous les utilisateurs, données et activités associées seront supprimés
+#    confirm: Confirmer
+#    cancel: Annuler
+#
+#  type:
+#    client: Entreprise
+#    team_projet: Equipe / groupe dindividus
+#    individual: Indépendant
+
+
+signup_mail:
+  intro: Bonjour
+  message1: Merci de vous être inscrit à Serpico, qui porte haut et fort l'évaluation collaborative !
+  button_text: Accédez à Serpico
+  message2: Nous vous tiendrons informés du lancement de l'application et reprendrons contact avec vous à ce moment-là !
+  outro: A très bientôt,
+  team: L'équipe Serpico
+
+contact_mail:
+  intro: Bonjour
+  message1: Merci de nous avoir écrit !
+  message2: "Voici votre message :"
+  message3: Nous tâcherons de vous répondre au plus vite !
+  button_text: Accédez à Serpico
+  outro: A très bientôt,
+  team: L'équipe Serpico
+
+targets:
+  page_title: Fixation d'objectifs
+  mobile_header_title: Fixation d'objectifs
+  strictly_lower_than: strictement inférieur à
+  lower_than_or_equal_to: inférieur ou égal à
+  equal_to: égal à
+  superior_or_equal_to: supérieur ou égal à
+  strictly_superior_to: strictement supérieur à
+  submit: Sauvegarder
+  delete_target_msg: Etes-vous sûr de vouloir supprimer cet objectif ?
+  add_button: Ajouter un objectif
+  no_targets_title: Pas d'objectif défini
+  no_targets_msg: Prenez le temps d'en insérer en cliquant sur le bouton Ajouter
+
+client:
+  delete_external_user:
+    modal_title: Suppression d'un membre du client
+    modal_content: Etes-vous certain de supprimer l'utilisateur en question ? Ses éventuels retours et résultats passés seront anonymisés, et ses participations à venir supprimées.
+
+  delete:
+    modal_title: Supression du client
+    modal_content: Etes-vous certain de supprimer complètement le client ? Ses utilisateurs, participations et résultats passés seront anonymisés, et toutes ses participations à venir supprimées.
+
+
+organization_elements:
+  update: Modifier
+  position: fonction
+  department: département
+  title: titre
+  without_department: Sans département
+  without_position: Sans position
+  without_title: Sans titre
+  position_conj: cette fonction
+  department_conj: ce départment
+  title_conj: ce titre
+  page_title: Gestion des %element%s
+  name: Nom
+  masterUser: Responsable
+  delete_modal:
+    title: Suppression de %element%
+    content_1: Etes-vous sûr de vouloir supprimer %conj_element% ?
+    confirm: Confirmer
+    decline: Annuler
+
+  confirm_add_modal:
+    title: Ajout d'un participant (__name__)
+    content: Cette activité a été finalisée. Si vous confirmez lajout de ce participant, il sera <strong>immédiatement</strong> informé - par mail - de sa participation. Si vous êtes sûr de vouloir ajouter <strong>__name__</strong>, cliquez sur \confirmer\.
+
+  delete_btn: Supprimer
+  users: Utilisateurs
+  no_users: Pas d'utilisateur(s) pour %conj_element%
+  no_master_user: Pas de responsable
+  submit: Sauvegarder
+  add_button: Ajouter %element%
+  targets: Objectifs
+
+organization_criterion_names:
+  criterion_name:
+    name: Nom
+
+  delete_btn: Supprimer
+  submit: Sauvegarder
+
+mails:
+  serpico_HQ_street: 59, boulevard Royal
+  serpico_HQ_zipcode: L-2449
+  serpico_HQ_city: Luxembourg
+  serpico_HQ_phone: +352 42 42 38 77
+  serpico_motto: Collaborative metrics
+  signature_team: L'équipe Serpico
+  signature_team_for_client: L'équipe de Serpico, la solution d'évaluation collaborative de
+  hello: Bonjour
+  sir: M.
+  madam: Mme
+  see_you_soon: A très vite,
+  signup:
+    subject: Bienvenue dans Serpico, la plateforme d'évaluation collaborative
+    button_text: Accéder aux notations
+    message_2: Nous vous souhaitons une agréable évaluation. Nous afficherons les résultats sur notre page publique à chaque fois qu'une activité prendra fin
+
+  unvalidateOutputDueToChange:
+    act_subject: Vous devez à nouveau confirmer tout ou partie des notes de l'activité
+    stg_subject: Vous devez à nouveau confirmer tout ou partie des notes de la phase %stg_name% de l'activité %act_name%
+    criterion:
+      message_1_stg: Un ou plusieurs critères ont été ajoutés ou modifiés, et doivent faire l'objet d'un retour de votre part pour la phase %elmt_name% à laquelle vous participez.
+      message_1_act: Un ou plusieurs critères ont été ajoutés ou modifiés, et doivent faire l'objet d'un retour de votre part pour l'activité %elmt_name% à laquelle vous participez.
+      message_2: Dans la mesure où vous aviez déjà validé des retours précédemment, vous êtes invité à les confirmer à nouveau, ceci notamment afin d'évaluer sur ce ou ces nouveau(x) critère(s).
+
+    participant:
+      message_1_stg: Un ou plusieurs participants ont été ajoutés ou modifiés, et doivent faire l'objet d'un retour de votre part pour la phase %elmt_name% à laquelle vous participez.
+      message_1_act: Un ou plusieurs critères ont été ajoutés ou modifiés, et doivent être évalués pour l'activité %elmt_name% à laquelle vous participez.
+      message_2: Dans la mesure où vous aviez déjà validé des retours précédemment, vous êtes invité à les confirmer à nouveau, ceci notamment afin d'évaluer sur ce ou ces nouveau(x) participant(s).
+
+
+    button_text: Reprendre la notation
+    message_3: Noubliez pas de finaliser vos retours !
+
+  prospecting_1:
+    ceo:
+      subject: Serpico - suivi collaboratif de performance en interne et avec vos clients
+      pres_sentence: Avez-vous déjà entendu parler de Serpico, la solution accélératrice de business qui renforce les liens avec vos clients ? Avec elle,
+      bp_1:
+        title: Accédez instantanément à limplémentation de votre stratégie
+        arg_1: En 1 clic, accédez à tous vos projets stratégiques, en plus de ceux ajoutés par vos managers
+        arg_2: Contrôlez leur exécution, et affinez le tir grâce à nos rapports instantanés
+        arg_3: "Gardez le focus sur ce que vous savez faire de mieux: définir les orientations, générer du business, représenter votre entreprise. Nous gérons le coté rébarbatif du suivi de projet qui n'est pas votre plus-value et faisons ressortir les informations essentielles à la prise de décision."
+
+      bp_2:
+        title: Maximisez votre approche client en leur permettant d'exprimer clairement leurs attentes
+        arg_1: Prenez les devants vis à vis de vos clients en leur demandant leurs avis sur vos services et prestations, et en leur offrant un accès sécurisé dans lequel ils évaluent les équipes impliquées. Vous renforcerez votre réputation en rendant votre client acteur et bénéficiaire de l'évaluation
+        arg_2: Vous anticiperez mieux les besoins de vos clients, et réaliserez le désir de chaque décideur, acquérir de nouvelles parts de marché et sécuriser le business existant.
+
+      bp_3:
+        title: Uniformisez la manière daborder les projets au sein de votre firme
+        arg_1: Même à petite échelle, chaque manager peut avoir sa manière dorganiser ses projets et tâches ponctuelles ou récurrentes au sein de son unité. Serpico permet à chaque manager dappliquer une même approche, ce qui améliore le suivi et réduit drastiquement les risques de dépassement de délai et/ou de budget
+        arg_2: "Gagnez en comparabilité, et tirez le meilleur de vos équipes en rendant votre entreprise Agile : activité découpée en phases, et en critères d'évaluation"
+
+      finale: Nous espérons vous accompagner dans vos collaborations futures; bloquez un rendez-vous sur notre site (lien ci-dessus) et nous viendrons à vous ! Bien cordialement,
+
+    pm:
+      subject: Serpico - suivi collaboratif de projets
+      pres_sentence: Avez-vous déjà entendu de parler de Serpico, la solution agile qui simplifie votre pilotage de projet ?
+      bp_1:
+        title: Laissez vos salariés évaluer les projets entre eux et libérez-vous du temps
+        arg_1: Serpico est une startup permettant à l'ensemble des salariés D'évaluer les indicateurs de performance d'un projet. Etablir un bilan peut être chronophage, sans parler du manque de suivi dans le temps qui caractérise de nombreuses entreprises. Economisez 2 jours de travail par an (calcul basé sur une équipe de 5 personnes)
+
+      bp_2:
+        title: Fini larbitraire lors des entretiens de performance
+        arg_1: En nous centrant sur les activités réellement entreprises par les salariés, leurs assessments sont perçus en adéquation avec les processus et tâches de chacun
+
+      bp_3:
+        title: Maintenez votre légimité au plus haut en améliorant le personal branding de chacun
+        arg_1: Puisque la note du collaborateur dépend de lui-même et des collègues avec lesquels il a travaillé sur les projets concrets, il vous sera reconnaissant d'être passé sur un système plus transversal. Plus engagé et reconnu dans son travail, cela renforcera sa productivité et augmentera son engagement
+
+      finale: Nous espérons vous accompagner dans vos collaborations futures; bloquez un rendez-vous sur notre site (lien ci-dessus) et nous viendrons à vous ! Bien cordialement,
+
+    mnpm:
+      subject: Serpico - suivi collaboratif de performance déquipe
+      pres_sentence: Avez-vous déjà entendu de parler de Serpico, la solution qui tire l'ensemble de votre équipe vers le haut ?
+      bp_1:
+        title: Enfin un outil digital ergonomique qui vous libère du temps pour évaluer la performance de vos salariés
+        arg_1: Serpico est une startup permettant à l'ensemble des salariés de savoir où ils en sont d'un point de vue compétences et performance. Etablir un bilan est très chronophage, sans parler du manque de suivi dans le temps qui caractérise de nombreuses entreprises. Economisez 2 jours de travail par an (calcul basé sur une équipe de 5 personnes)
+
+      bp_2:
+        title: Fini larbitraire lors des entretiens de performance
+        arg_1: En nous centrant sur les activités réellement entreprises par les salariés, leurs assessments réellement en adéquation avec les processus et tâches de chacun
+
+      bp_3:
+        title: Maintenez votre légimité au plus haut en améliorant le personal branding de chacun
+        arg_1: Puisque la note du collaborateur dépend de lui-même et des collègues avec lesquels il a travaillé sur les projets concrets, il vous sera reconnaissant d'être passé sur un système plus transversal. Plus engagé et reconnu dans son travail, cela renforcera sa productivité et augmentera son engagement
+
+      finale: Nous espérons vous accompagner dans vos collaborations futures; bloquez un rendez-vous sur notre site (lien ci-dessus) et nous viendrons à vous ! Bien cordialement,
+
+    hr:
+      subject: Serpico - suivi collaboratif de compétence et accélérateur de marque employeur
+      pres_sentence: Avez-vous déjà entendu de parler de Serpico, la solution qui permet l'évaluation de compétences des salariés sur leurs activités du quotidien ?
+      bp_1:
+        title: Faites de la collaboration un véhicule déterminant de la marque employeur pour vos salariés
+        arg_1: Prendre le temps de demander aux équipes, mais aussi à vos clients de participer aux retours est un formidable outil de communication pour votre entreprise, dépassant de loin les solutions de type \greatwashing\ pour votre entreprise. c'est une source principale dattractivité et de rétention de vos talents daujourdhui et de demain !
+
+      bp_2:
+        title: Pas de surveys hebdomadaires peu qualificatifs, place à ce qui y est réellement entrepris par les équipes
+        arg_1: La tendance est à la donnée de masse au détriment de la qualité. Serpico redonne du sens au suivi de performance et de bien-être en recentrant lapproche sur les tâches du quotidien, principale matrice de compréhension pour un salarié
+
+      bp_3:
+        title: Une solution idéale d'assessment pour vos salariés
+        arg_1: Que ce soit vos managers qui doivent procéder à la tâche rébarbative d'évaluation de leur équipe, ou du salarié qui doit bénéficier du retour sans forcément prendre part à la construction de la performance, Serpico permet une approche transversale du processus d'évaluation
+
+      finale: Nous espérons vous accompagner dans vos collaborations futures; bloquez un rendez-vous sur notre site et nous viendrons à vous ! Bien cordialement,
+
+    worker:
+      subject: Serpico - faites-vous entendre et soyez pleinement acteur de votre évaluation
+      pres_sentence: Avez-vous déjà entendu parler de Serpico, la solution qui vous permet d'évaluer vos compétences en plus de vos managers ?
+      bp_1:
+        title: Navons-vous jamais eu à défendre votre bilan ?
+        arg_1: Justifiez vos demandes davancement de manière imparable. Serpico, c'est lassurance d'un retour objectif partagé par la communauté
+
+      bp_2:
+        title: Soyez acteurs de votre évaluation
+        arg_1: Savez-vous combien d'entreprises prennent réellement en compte lavis des salariés avant détablir leur évaluation ? 8%. Il est vraiment temps davoir plus de transversalité dans lassessment, tout en ne remettant pas tout en cause, c'est ce que permet la solution collaborative de Serpico.
+
+      bp_3:
+        title: Identifiez vos points forts/faibles, et confrontez-les à votre perception
+        arg_1: Lécart entre notre point de vue et celui des autres peut parfois être important. La meilleure manière d'en prendre conscience est de confronter sa vision à celle des autres, et danalyser les résultats. Serpico permet d'accéder en 1 clic à votre performance, dès la réalisation d'une tâche seule ou en commun.
+
+      finale: Parlez-en à vos collègues, il est temps de sauter le pas ! Bien à vous,
+
+    button_text: Accéder à Serpico
+
+  meetingProposition:
+    subject: Demande de prise de rendez-vous
+    message1: "Un utilisateur a cherché à vous rencontrer, voici ces coordonnées :"
+    message2: Il souhaite vous rencontrer le
+    message3: "Il vous a laissé le message suivant :"
+    message4: Prenez vite contact avec lui
+
+  meetingValidation:
+    subject: Serpico - Votre demande de prise de rendez-vous le
+    message1: Merci davoir demandé à nous rencontrer le
+    message2: Voici les informations que vous avez saisies
+    message3: "Ainsi que le message que vous nous avez laissé :"
+    message4: Si vous avez besoin de prendre contact avec nous/modifier une information n'hésitez pas à nous contacter sur contact@serpicoapp.com !
+
+  registration:
+    subject: Bienvenue sur Serpico, la solution de suivi client collaborative
+    rootCreation:
+      message: "Bienvenue dans Serpico, la plateforme de suivi collaborative avec vos partenaires ! Votre compte a été créé en tant que %role% dans votre entreprise. Cliquez dès à présent sur ce lien afin d'y définir votre mot de passe et remplir votre profil :"
+
+    additionalCreatedOrgUsers:
+      message1: Bienvenue sur Serpico, la plateforme de suivi collaborative avec vos partenaires ! Un responsable de votre organisation,
+      message2:  "vous y a convié. Cliquez dès à présent sur ce lien afin d'y définir votre mot de passe et remplir votre profil :"
+
+    button_text: Accédez à Serpico
+    message3: Vous pourrez prendre part aux activités avec vos partenaires, afin de recueillir leurs avis et les satisfaire au mieux ! Si vous avez des questions, n'hésitez pas à en référer à votre responsable ou en nous contactant via contact@serpicoapp.com, nous tâcherons d'y répondre dans les meilleurs délais. Nous vous souhaitons tout cas une agréable expérience sur notre plateforme de suivi collaboratif !
+
+  externalInvitation:
+    subject_begin: Invitation de
+    subject_end: Bienvenue sur Serpico, la solution de suivi relation client collaborative
+    message1: Bienvenue sur Serpico, qui porte haut et fort les valeurs déchange pour augmenter la satisfaction entre partenaires !
+    message2: "vous y a convié afin de pouvoir donner votre retour lors d'une de ses prochaines activités. Cliquez dès à présent sur ce lien afin d'y définir votre mot de passe et remplir votre profil :"
+    button_text: Accédez à Serpico
+    message3: Créez à votre tour vos activités et invitez vos partenaires à vous rejoindre afin de leur faire des retours, et optimiser votre relation avec eux ! Si vous avez des questions, N'hésitez pas à en référer à votre responsable ou en nous contactant via contact@serpicoapp.com, nous tâcherons d'y répondre dans les meilleurs délais. Nous vous souhaitons tout cas une agréable expérience sur notre plateforme de suivi collaboratif !
+
+  subscriptionConfirmation:
+    subject: Bienvenue sur Serpico, la solution de suivi client collaborative
+    message1: Vous avez rejoint lunivers de Serpico, la plateforme collaborative qui relie votre équipe à vos partenaires 💪 !
+    message2: "Cliquez dès à présent sur ce lien afin d'y définir votre mot de passe et remplir votre profil :"
+    button_text: Accédez à Serpico
+    message3: Votre compte a été créé en tant qu'administrateur de votre entreprise. Vous pourrez ajouter des utilisateurs et rajoutez des projets et process en cours de réalisation avec vos partenaires, afin d'optimiser le suivi et d'assurer le meilleur service envers eux. <br><br> Si vous avez des questions, n'hésitez pas à en référer à votre responsable ou sinon par mail en nous contactant via l'adresse contact@serpicoapp.com, nous tâcherons d'y répondre dans les meilleurs délais. Nous vous souhaitons une agréable expérience sur notre plateforme de suivi collaboratif !
+
+  subscriptionAcknowledgmentReceipt:
+    subject: Demande de création de compte
+    message1: Vous avez demandé à créer votre compte entreprise et bien vous en a pris 😉 ! Notre équipe a été notifiée de votre demande, vous devriez recevoir sous peu une confirmation de votre compte afin de démarrer votre expérience d'évaluation collaborative !
+
+  firstMailReminderTPeriod:
+    subject_admin: Profitez de la période dessai pour créez vos projets et permettre à vos salariés de s'évaluer en commun
+    subject_non_admin: Demandez aux managers de pouvoir évaluer votre performance ainsi que celles de vos collègues
+    message1_admin: Votre entreprise bénéficie d'un accès sans engagement à Serpico, c'est l'occasion d'enfin suivre les objectifs de vos salariés beaucoup plus facilement et leur permettre d'être des contributeurs actifs de leur évaluation
+    message1_non_admin: Serpico est l'outil qui vous permet d'accéder à votre performance instantanée, et où vous avez votre mot à dire sur votre appréciation ainsi que sur les personnes avec qui vous travaillez
+    button_text: Accédez à Serpico
+    message2: Profitez de votre test avant le
+
+  emailChangeNotif:
+    subject: Confirmation de votre adresse mail
+    message: "Vous recevez cet email car votre adresse email a été modifiée par un administrateur. Vous serez amené à saisir un nouveau mot de passe afin de vous connecter via le lien suivant :"
+
+  passwordModify:
+    subject: Modification de votre mot de passe
+    message_1: "Vous recevez cet email car vous avez demandé à changer de mot de passe.  Cliquez sur ce lien afin de le modifier :"
+    button_text: Modifier mot de passe
+
+  teamCreation:
+    subject: Vous venez d'être rajouté à l'équipe
+    message1: Vous avez été rajouté à l'équipe
+    message2:  par un membre de votre organisation. Vous pourrez toujours évaluer et être évalué par vos pairs comme dhabitude, mais vous pourrez également être noté de manière globale comme membre du groupe.
+    button_text: Accédez à mon compte
+    message3: Si tel est le cas lors d'une activité, chaque membre du groupe recevra le même retour ou évaluation; plutôt qu'un retour individualisé de chacun cela pourra permettre dans certains cas une évaluation plus fluide et globale !
+
+  teamUserRemoval:
+    subject: Vous venez d'être enlevé de l'équipe
+    message1: Vous avez été enlevé de l'équipe
+    message2:  par un membre de votre organisation. Vous conserverez toutefois tous les résultats hérités de vos participations en tant qu'ancien membre de l'équipe
+    button_text: Accédez à mon compte
+
+  request:
+    subject: Demande de création de l'activité
+    message1:  vous demande la création de l'activité
+    button_text: Accédez à vos activités
+    message2: Cliquez sur le bouton afin d'accéder à votre profil et validez ou non la création de cette activité ; vous pourrez aussi l'affecter à un autre membre de votre organisation
+
+  requestProcess:
+    subject: Demande de création de catégorie d'activité
+    message1:  vous demande la création de la catégorie
+    button_text: Accédez aux paramètres
+    message2: Cliquez sur le bouton afin de valider ou non la création de cette catégorie; vous pourrez aussi l'affecter à un autre membre de votre organisation
+
+  validateProcess:
+    subject: Validation de catégorie d'activité
+    message1: Votre demande de création de catégorie a été acceptée
+    message_changed_name: Elle a été renommée
+    message_changed_primary_parent: Elle a été définie comme famille primaire
+    message_changed_parent: Elle a été rattachée à la famille d'activité
+    message_previous_choice: votre proposition initiale étant
+    button_text: Accédez à mon compte
+    message2: N'hésitez pas à vous rendre sur votre compte afin de voir les changements effectifs, et gérer les activités liées à la catégorie
+
+  delegate:
+    subject: Vous avez été chargé de créer l'activité
+    message1: vous a désigné leader de l'activité
+    message_description: "et y a laissé cette description :"
+    message2: En tant qu'activity owner, vous pouvez notamment rajouter les participants et indiquer les dates de l'activité et la période de notation.
+    button_text: Accédez à l'activité
+
+  activityCreation:
+    activity_subject: Création de l'activité
+    stage_subject: Création de la phase
+    administrator:
+      creator:
+        self:
+          message1: Vous venez de créer l'activité
+
+        others:
+          message1: Un administrateur vient de créer
+
+        message2: "au sein de votre organisation. Retrouvez l'ensemble de cette activité, gérez son déroulé jusqu'à l'évaluation via ce lien :"
+
+      non_creator:
+        message1a: Le manager d'activité
+        message1b: vient de créer l'activité
+        message2: "au sein de votre organisation. Vous pouvez la retrouver via ce lien direct ou la partie activités du groupe :"
+
+      final_msg: En tant qu'administrateur, vous pouvez en suivre le déroulement, puis prendre connaissance des résultats individuels et globaux, et plus des notes attribuées par chacun. Nous vous préviendrons dès les résultats calculés.
+
+    creator:
+      message1: Vous venez de créer l'activité
+      message2: "dans votre organisation. Retrouvez l'ensemble de de cette activité, et gérez son déroulé jusqu'à l'évaluation via ce lien :"
+      message3: En tant que Manager d'activité, vous pouvez en modifier les paramètres en cours de vie, prendre part à la notation, puis enfin visualiser les résultats tant individuels que collectifs.
+
+    button_text: Accédez à l'activité
+
+  activityParticipation:
+    activity_subject: Participation à l'activité
+    stage_subject_message_1: Participation à la phase
+    stage_subject_message_2: de l'activité
+    subject_team_suffix: (en tant que groupe)
+    message_act_begin: Vous venez d'être ajouté à l'activité
+    message_stg_begin: Vous venez d'être ajouté à la phase
+    message_stg_mid: de l'activité
+    message_end: "par un membre de votre organisation. Retrouvez cette activité depuis votre espace personnel :"
+    button_text: Accéder à mes activités
+    message3_participant: En tant que participant, vous prendrez part à l'évaluation une fois la période de notation démarrée
+    message3_teamParticipant: En tant que participant faisant partie d'une équipe, vous prendrez part à l'évaluation une fois la période de notation démarrée. Sachez que vous noterez chaque personne de votre équipe individuellement, alors que les participants extérieurs à l'équipe vous noteront en tant quéquipe
+    message4: . Bonne activité et évaluation !
+
+  activityAssignation:
+    activity_subject: Vous avez été désigné owner de l'activité
+    stage_subject_message_1: Vous avez été désigné owner de la phase
+    stage_subject_message_2: de l'activité
+    message_act_begin: Vous venez d'être désigné owner de l'activité
+    message_stg_begin: Vous venez d'être désigné owner de la phase
+    message_stg_mid: de l'activité
+    message_end: "par un membre de votre organisation. Retrouvez cette activité depuis votre espace personnel :"
+    button_text: Accédez à mes activités
+    message3_participant: En tant que leader, vous pouvez accéder à la configuration de celle-ci, notamment rajouter les participants et indiquer les dates de déroulé et la période de notation
+    message4: . Bonne activité et évaluation !
+
+  activityCancellation:
+    subject: Annulation de la demande pour l'activité
+    message: Vous aviez suggéré la création de cette activité, mais vous venez d'annuler votre requête. Aucun validateur ne verra plus s'afficher cette demande de votre part.
+
+  activityValidation:
+    subject: Validation de l'activité
+    message_begin: l'activité
+    message_mid: dont vous aviez suggéré la création a été validée
+    message_mid_opt: par
+    message_end: Retrouvez celle-ci sur votre fil d'activités
+    button_text: Accéder à mes activités
+
+  activityRefusal:
+    subject_begin: l'activité
+    subject_end: a été refusée
+    message_begin: l'activité
+    message_mid: dont vous aviez suggéré la création n'a pas été retenue
+    message_mid_opt: par
+
+  unvalidatedGradesStageJoiner:
+    activity_subject: Vous devez à nouveau confirmer vos notes pour l'activité
+    stage_subject_message_1: Nouvelle notation d'utilisateur pour la phase
+    stage_subject_message_2: de l'activité
+    subject_team_suffix: (rajout à une team)
+    message_act_begin: Vous devez saisir les notes du/des nouveau(x) utilisateur(s) à l'activité
+    message_stg_begin: Vous devez saisir les notes du/des nouveau(x) utilisateur(s) à la phase
+    message_stg_mid: de l'activité
+    message_end: Vous serez à nouveau amené à confirmer vos notes pour les nouveaux participants, vos notes aux participants jusque là existants ayant été déjà validées.
+    button_text: Reprendre la notation
+    message3: Pour rappel, vous devrez noter pendant la période de notation
+    message4: . Bonne activité et évaluation !
+
+  unvalidatedGradesTeamJoiner:
+    subject: Vous devez à nouveau confirmer tout ou partie des notes de l'activité
+    message_1: En effet, un ou plusieurs nouveau(x) membre(s) à votre équipe
+    message_2: "ont été rajoutés :"
+    message_3: Dans la mesure où vous aviez déjà validé des notes précédemment, vous êtes invité à les confirmer à nouveau, ceci notamment afin d'évaluer ce(s) nouveau(x) membre(s).
+    message_4: Pour information, les notes validées par les participants qui ne font pas partie de votre équipe restent quant à elles valides et ils ne seront pas amenés à les reconfirmer
+    button_text: Reprendre la notation
+    message_5: Noubliez pas de les confirmer dans le temps imparti !
+
+  resultsReleasable:
+    subject_stage_results: Résultats publiables pour la phase
+    subject_activity_results: Résultats publiables pour l'activité
+    message1a_stage: l'ensemble des participants à la phase
+    message1b_stage: de l'activité
+    message1_activity: l'ensemble des participants à l'activité
+    message2: "a procédé à l'évaluation. ce qui vous permet d'en publier les résultats afin qu'ils en prennent connaissance ! Pour ce faire, il suffit de cliquer sur le lien suivant :"
+    button_text: Accédez aux résultats
+    message3: Avant vous aurez l'occasion de voir les résultats globaux et les retours sur chacun, allez vite y jeter un coup doeil, la communauté vous attend !
+
+  resultsReleased:
+    subject_participant_stage_results: Résultats disponibles pour la phase
+    subject_participant_activity_results: Résultats disponibles pour l'activité
+    subject_releaser_stage_results: Vous venez de publier les résultats de la phase
+    subject_releaser_activity_results: Vous venez de publier les résultats de l'activité
+    subject_administrator_stage_results: Publication des résultats de la phase
+    subject_administrator_activity_results: Publication des résultats de l'activité
+    message_1a_participant_stage: Ca y est, vos résultats pour la phase
+    message_1b_participant_stage: de l'activité
+    message_1_participant_activity: Ca y est, vos résultats pour l'activité
+    message_2_participant: "sont maintenant disponibles et consultables sur votre espace utilisateur :"
+    message_1a_releaser_stage: l'ensemble des participants de la phase
+    message_1b_releaser_stage: de l'activité
+    message_1_releaser_activity: l'ensemble des participants de l'activité
+    message_2_releaser: peut dorénavant consulter les résultats grâce à votre publication !
+    message_2_administrator: "peut dorénavant consulter ses résultats, dont vous pouvez aussi prendre connaissance via ce lien :"
+    button_text: Accédez aux résultats
+    message_3: Retrouvez votre note moyenne et les feedbacks qu'on vous a laissé dès à présent !
+
+  gradingDeadlineReminder:
+    subject_stage_results: Vos retours sont attendus pour la phase
+    subject_activity_results: Vos retours sont attendus pour l'activité
+    message1a_stage: Vous n'avez toujours pas donné vos retours pour la phase
+    message1b_stage: de l'activité
+    message1_activity: Vous n'avez toujours pas donné vos retours pour l'activité
+    message2a: . Il vous reste
+    message2b: "jours avant que nous puissiez les transmettre. Passé ce délai, les résultats pourront être calculés sans vos contributions, ce qui n'est pas forcément dans votre avantage ! Rendez-vous dès à présent sur la page des retours afin de les soumettre :"
+    button_text: Donner mes retours
+    message3: La communauté vous attend, ne tardez pas !
+
+  updateProgressStatus:
+    subject_stage: Avez-vous pu avancer pour la phase
+    subject_activity: Avez-vous pu avancer pour l'activité
+    message_activity_unstarted: Cette activité comme peut-être d'autres a été mise en non débutée depuis quelques jours, mais ses dates de déroulement indiquent qu'elle a problablement débutée. N'hésitez pas à renseigner et à mettre à jour son statut sur votre panel d'activités
+    message_stage_unstarted: Cette phase a été mise en non débutée depuis quelques jours, mais ses dates de déroulement indiquent qu'elle a problablement débutée. N'hésitez pas à renseigner et à mettre à jour son statut sur votre panel d'activités !
+    message_activity_uncompleted: Cette activité comme peut-être d'autres a été suspendue depuis quelques jours, mais ses dates de déroulement indiquent qu'elle a problablement été finalisée. N'hésitez pas à renseigner et à mettre à jour son statut sur votre panel d'activités
+    message_stage_uncompleted: Cette phase a été suspendue depuis quelques jours, mais ses dates de déroulement indiquent qu'elle a problablement été finalisée. N'hésitez pas à renseigner et à mettre à jour son statut sur votre panel d'activités !
+    message_activity_unfinished: Cette activité comme peut-être d'autres a été suspendue depuis quelques jours, car même si elle a été réouverte ses dates de déroulement indiquent qu'elle a problablement débutée. N'hésitez pas à renseigner et à mettre à jour son statut sur votre panel d'activités
+    message_stage_unfinished: Cette phase a été suspendue depuis quelques jours, car même si elle a été réouverte ses dates de déroulement indiquent qu'elle a problablement été finalisée. N'hésitez pas à renseigner et à mettre à jour son statut sur votre panel d'activités !
+    button_text: Mettre à jour le statut
+
+  orgMasterUserChange:
+    subject: Vous êtes le nouvel administrateur au sein de votre organisation
+    message: Vous venez d'être nommé responsable de la gestion de votre organisation en remplacement du précédent. Cela vous permettra de créer des users, accéder aux résultats les plus étendus, et configurer les paramètres d'entreprise si vous n'aviez pas déjà ce rôle.
+
+  testing:
+    page_title: Testeur d'envoi de mail
+    parameterKey: Clé
+    parameterValue: Value
+    parameter: Paramètre
+
+  validateOrgSubscription:
+    subject: Validation du compte
+    message1: l'entreprise
+    message2: a demandé à rejoindre la plateforme. Cette demande émane de
+    message3: dans le département
+    message4: adresse mail
+    message5: Cliquez sur le lien suivant afin de valider son compte
+    button_text: Valider le compte
+    message6: Merci pour votre rapidité !
+    message7: L'équipe de Serpico à elle-même
+
+
+#terms_conditions:
+#  page_name: Conditions générales dutilisation
+#  page_title: Conditions générales dutilisation
+#  edited_website: Ce site est édité par : ZZYZX Road SARL-S
+#  rcs_number: Numéro d’immatriculation au Registre de Commerce de Luxembourg B221941
+#  vat_number: Numéro de TVA intracommunautaire : LU30069957
+#  address: Adresse : 46, rue des Trévires L-2628 Luxembourg
+#  phone_number: Numéro de téléphone : (+352) 28 81 00 01
+#  country: Pays : Grand-Duché de Luxembourg
+#  article_1:
+#    title: 1 – Définitions
+#    subtitle_1: ExternalUser
+#    subcontent_1: Désigne toute personne physique ou morale, souscriptrice directe du Service,
+#    subtitle_2: Serpico
+#    subcontent_2: Désigne la marque déposée par ZZYZX Road SARL-S, et le nom commercial sous lesquels sont opérés le Service,
+#    subtitle_3: Service
+#    subcontent_3: Désigne de manière générale l’ensemble des prestations proposées en ligne par Serpico,
+#    subtitle_4: Utilisateur
+#    subcontent_4: Désigne toute personne physique, ayant préalablement été invitée par un ExternalUser et/ou l'un de ses représentants et bénéficiant de tout ou partie du Service de Serpico.
+#
+#  article_2:
+#    title: 2 – Champ dapplication
+#    content: Les conditions générales présentes s’appliquent à l’ensemble des prestations proposées en ligne par le site.
+#
+#  article_3:
+#    title: 3 – Conditions dutilisation
+#    subtitle_1: 3.1 - Accès au site
+#    subcontent_1: Par l’accès au site, et de ce seul fait, l’utilisateur accepte les présentes conditions générales d’utilisation ainsi que la licence d’utilisation décrite ci-après.
+#    subtitle_2: 3.2 - Accès au service
+#    subcontent_2: L’accès au service est possible 7 jours sur 7, et 24 heures sur 24 sauf en cas de force majeure ou d’évènements hors du contrôle et sous réserve des éventuelles interventions de maintenance nécessaires au bon fonctionnement du service ou du matériel. La responsabilité de Serpico ne saurait en aucun cas être engagée en cas d’impossibilité d’accès au site et/ou d’utilisation de ses services. La présente licence d’utilisation confère à l’utilisateur un droit d’accès personnel, réservé à un usage exclusif et non collectif.
+#
+#  article_4:
+#    title: 4 - Propriété intellectuelle
+#    content: Conformément aux dispositions en matière de Propriété Intellectuelle, les différents éléments du site ainsi que son contenu, tels que, entre autres, textes, images, logos, commentaires, bases de données restent la propriété de Serpico ou de leurs auteurs et/ou titulaires respectifs et ce pour la durée légale de protection et pour le monde entier. La licence d’utilisation conférée à l’Utilisateur comprend uniquement le droit de reproduire le contenu du site dont les œuvres consultées pour stockage aux fins de représentation sur écran monoposte et les copies ou reproductions strictement réservées à l’usage privé de l’utilisateur et non destinées à une utilisation collective ou commerciale. En dehors de cette licence d’utilisation, toute reproduction, même partielle, toute représentation, diffusion, vente ou exploitation sous quelque forme que ce soit, électronique ou non, est strictement interdite sans le consentement préalable de Serpico et constitue un acte de contrefaçon engageant la responsabilité civile et pénale de l’auteur de la contrefaçon.
+#    subtitle_1: 4.1 - Charte graphique
+#    subcontent_1: La charte graphique du site et les éléments qui la composent sont la propriété de Serpico.
+#    subtitle_2: 4.2 - Bases de données
+#    subcontent_2: Les bases de données indexant les différents contenus du site sont la propriété de Serpico. La consultation et l’utilisation de ces bases de données n’entraînent en aucune façon la transmission de droits de propriété sur les bases de données à l’utilisateur. Il est rappelé, conformément à l’article 67 de la loi du 18 avril 2001 sur les droits d’auteur, les droits voisins et les bases de données que sont interdites « l’extraction ou la réutilisation de la totalité ou d’une partie substantielle, évaluée de façon qualitative ou quantitative, du contenu d’une base de données sans l’accord du producteur », ainsi que « l’extraction ou la réutilisation répétées et systématiques de parties non substantielles du contenu d’une base de données, qui seraient contraires à l’exploitation normale de cette base de données ou qui causeraient un préjudice injustifié aux intérêts légitimes du producteur de la base ».
+#    subtitle_3: 4.3 - Textes
+#    subcontent_3: Les textes présents sur le site sont la propriété de leurs auteurs respectifs.
+#    subtitle_4: 4.4 - Liens hypertexte
+#    subcontent_4: Serpico autorise la mise en place d’un lien hypertexte pointant vers son contenu, sous réserve de ne pas utiliser la technique du lien profond ou du lien encadré (« deep linking » ou « inline linking »), c’est-à-dire que les pages du site ne doivent pas être imbriquées à l’intérieur des pages d’un autre site, mais accessible par l’ouverture d’une fenêtre, et de mentionner la source qui pointera grâce à un lien hypertexte directement sur le contenu visé. Les informations utilisées ne doivent l’être qu’à des fins personnelles, associatives ou professionnelles, toute utilisation à des fins commerciales ou publicitaires est exclue. Cette autorisation ne s’applique pas aux sites internet diffusant des informations à caractère polémique, pornographique, xénophobe ou pouvant, dans une plus large mesure porter atteinte à la sensibilité du plus grand nombre.
+#
+#  article_5:
+#    title: 5 - Protection des données, respect du ExternalUser et de l’Utilisateur
+#    subtitle_1: 5.1 – Cadre général
+#    subcontent_1: L’adhésion aux présentes conditions vaut consentement de l’Utilisateur au traitement des données personnelles le concernant décrit au présent alinéa, certaines de ces données revêtant un caractère essentiel pour le bon fonctionnement du Service, puisqu’elles permettent l’établissement de rapports et résultats globaux bénéficiant aux autres Utilisateurs.
+#    subcontent_2: L’Utilisateur concerné par ces traitements dispose d’un droit d’accès, de rectification et de suppressions des données à caractère personnel le concernant, ainsi que celui de demander à ce que soient rectifiées, mises à jour ou supprimées les données inexactes, incomplètes ou périmées et de s’opposer, sous réserve de justifier d’un motif légitime, à ce que des données personnelles le concernant fassent l’objet d’un traitement ; il pourra le demander par écrit ou l’adresse contact@serpicoapp.com.
+#    subcontent_3: Conformément au Règlement (UE) N°611/2013, Serpico s’engage à avertir la Commission Nationale pour la Protection des Données du Grand-Duché du Luxembourg d’une violation de sécurité et de la confidentialité de données à caractère personnel dans un délai de 24 heures suivant son constat.
+#    subcontent_4: Serpico s’engage aussi à informer les Clients desdits incidents, dès lors qu’ils sont susceptibles d’affecter défavorablement leurs données ou le niveau de la protection de vie privée de ses Utilisateurs.
+#    subcontent_5: Des données électroniques peuvent également être collectées et/ou déposées sur le système informatique de l’Utilisateur à des fins de gestion de sa connexion et de sa navigation sur le Site Internet. L’Utilisateur peut refuser l’utilisation de ces fichiers (aussi appelés « cookies ») via la configuration de son navigateur internet, et cette action n’entravera pas la navigation de l’Utilisateur sur le Site Internet.
+#    subcontent_6: Le ExternalUser et l'utilisateur reconnaissent et acceptent que Serpico ne pourra en aucun cas être tenu responsable d’une violation de la sécurité entraînant accidentellement ou de manière illicite la destruction, la perte, l’altération, la divulgation ou l’accès non autorisé de données à caractère personnel transmises, stockées ou traitées en relation avec le Site Internet.
+#    subtitle_2: 5.2 – Suppression d'un compte Utilisateur
+#    subcontent_8: Les données de l’Utilisateur sont conservées aussi longtemps que son Compte est actif. Elles le seront encore quinze (15) jours à compter de la fermeture du compte Utilisateur.
+#    subcontent_9: Pendant ce délai, l’Utilisateur pourra demander au ExternalUser s’il peut conserver ces données à titre personnel. Le ExternalUser se réserve le droit d’accepter une telle demande, ainsi que la manière dont ces données lui seront reversées. De son côté, Serpico ne saurait être responsable du contenu de ces données reversées à l’Utilisateur, notamment si ces dernières ressortent tronquées, incomplètes et/ou anonymisées.
+#    subcontent_10: Passé ce délai et sans action de l’Utilisateur, les données sont anonymisées et pourront servir à un traitement statistique tel que défini par la loi du 1er août 2018 relative à la protection des données.
+#
+#  article_6:
+#    title: 6 – Responsabilité de Serpico
+#    content: Serpico s’efforce de publier et éditer des informations correctes et fiables. Toutefois, des inexactitudes techniques ou typographiques ne sauraient être exclues. Serpico se réserve le droit de modifier ou corriger le contenu du site à tout moment. L’utilisation des informations disponibles sur le site se fait sous l’entière responsabilité de l’utilisateur. Serpico ne pourra en aucun cas être tenu responsable de tout dommage de quelque nature que ce soit résultant de l’utilisation ou interprétation des informations disponibles sur le site.
+#
+#  article_7:
+#    title: 7 - Droit applicable
+#    content: Le site ainsi que ces conditions générales d’utilisation sont soumis au droit luxembourgeois. Toute contestation qui en résulte est soumise à la compétence des juridictions luxembourgeoises. En cas de litige, l’utilisateur s’adressera en priorité à Serpico pour trouver une solution amiable.
+#
+#  article_8:
+#    title: 8 - Modifications et mises à jour
+#    content: Serpico se réserve le droit de procéder à des modifications des présentes conditions générales d’utilisation et s’engage à publier en ligne la nouvelle version dès qu’elle est applicable.
+#
+#  updated_date: Date de la dernière mise à jour : 22/12/2018
+
+worker_search:
+  page_title: Recherche d'une entreprise/salarié
+  mobile_header_title: Recherche d'une entreprise/salarié
+  fullName: Nom / Prénom
+  firmName: Nom
+  position: Fonction / Rôle
+  currentOnly: Uniquement expériences en cours
+  fSector: Secteur d'activité
+  fSizeFrom: Taille (de)
+  fSizeTo: Taille (à)
+  fType: Type
+  HQLocation: Lieu du siège
+  country: Pays
+  state: Etat/Région
+  city: Ville
+  submit: Rechercher
+  delete_firm:
+    msg: Etes-vous sûr de vouloir supprimer cette entreprise ? Toutes ses expériences seront aussi supprimées
+    confirm: Oui
+    decline: Annuler
+
+
+worker_firm_data:
+  commonName: Nom de l'entreprise
+  firmParent: Maison mère
+  mainSector: Secteur d'activité principal
+  website: Site web
+  url: LinkedIn url
+  size: Taille de l'entreprise
+  mailPrefix: Préfixe de l'adresse mail
+  mailSuffix: Suffixe de l'adresse mail
+  creationDate: Date de création
+  HQCity: Ville - Siège social
+  HQState: Etat/Département - Siège social
+  HQCountry: Pays - Siège social
+  page_title: Données de l'entreprise
+  mobile_header_title: Worker/Firm research
+  fullName: Lastname / Firstname
+  firmName: Firm
+  position: Position
+  currentOnly: Seulement les expériences en cours
+  submit: Search
+  delete_individual:
+    msg: Etes-vous sûr de vouloir supprimer cet utilisateur ? Toutes ses expériences seront aussi supprimées
+    confirm: Oui
+    decline: Annuler
+
+
+worker_individual_data:
+  male: Sexe
+  firstname: Prénom
+  lastname: Nom
+  email: Email
+  url: LinkedIn Url
+  experience:
+    title: Expérience
+    position: Position
+    location: Localisation
+    startdate: Date de début
+    enddate: Date de fin
+    firm: Entreprise
+    active: En cours
+    experience: Expérience
+
+
+validate_mass_mail:
+  submit: Valider
+
+validate_mass_firm:
+  createLocOtherFirms: Insérer les mêmes villes, états, pays aux entreprises dont la localisation est similaire
+  submit: Valider
+
+worker_firm_elements:
+  deactivated_user: Mail désactivé
+
+prospecting_mail_subject:
+  1_FR: Serpico - suivi collaboratif de performance avec les clients
+  1_EN: Serpico - quality monitoring solution hands in hands with your clients
+  2_FR: Serpico - suivi collaboratif de projets
+  2_EN: Serpico - collaborative project performance metrics
+  3_FR: Serpico - suivi collaboratif de performance déquipe
+  3_EN: Serpico - collaborative team performance metrics
+  4_FR: Serpico - suivi collaboratif de compétence et accélérateur de marque employeur
+  4_EN: Serpico - collaborative solution for competencies metrics which boosts your employer brand
+
+check_mails:
+  page_title: Suivi des mails
+  mobile_header_title: Suivi des mails
+  type: Type
+  persona: Role
+  position: Fonction
+  language: Lang
+  utype: UType
+  user: Nom
+  firm: Entreprise
+  sent: Envoyé le
+  read: Lu le
+  actions: Actions
+  lk: LK
+
+tooltip:
+  create_account_delegate_administration: En choisissant un autre utilisateur, vous lui conférerez les droits dadministration du compte de l'organisation, vous les conserverez sinon (vos droits seront toujours modifiables par la suite, et vous pourrez créer d'autres administrateurs
+  institutions:
+    my_actions: Mes actions en cours (totales)
+
+  activity:
+    magnitude_expl: Définit l'importance d'une activité. Plus le nombre est élevé, plus l'activité est considérée comme complexe. l'échelle varie comme une suite de Fibonacci
+    magnitude: Importance de l'activité
+    recurring: Activité récurrente
+    participant_type: "A : actif (évalue et est évalué), T : tiers (évalue sans être évalué), P : passif (est évalué sans prendre part à l'évaluation)"
+    grading_type: "Partage d'une prime collective (et feedback) : Evaluation de la contribution de chacun en %, le total des contributions faisant 100%, Evaluation (et feedback) : Mesure de notation sur une échelle définie par le manager,  Simple feedback : Commentaires/feedbacks sans notation"
+    grading_stype: "Personnes / équipes de l'organisation : porte sur des actions réalisées par des membres de l'organisation, personnes en dehors : particulièrement pertinent s'il s'agit de noter dans un con"
+    weight: Le poids influe dans le calcul final de la notation
+    leader: En cochant cette case, vous permettez à l'utilisateur de modifier les paramètres de l'activité
+    graded: Si vous décochez cette case, l'utilisateur pourra noter mais ne sera pas noté par les autres membres
+    distance: Ecart de notation de l utilisateur à la moyenne des notes (écart-type),  rapporté à l écart maximal de notation possible. La valeur est donc comprise entre 0 et 100% pour chaque participant
+    activity_progress: Avancement de l'activité
+    grading_progress: Avancement de la notation
+    contrib: Evaluation de performance
+    eval: Evaluation de contribution
+    pureFeedback: Evaluation de purs feedback
+    binary: Evaluation binaire (Oui/Non)
+    mixed: Evaluation multi-types
+    grading_deadline:
+      start_msg: Il reste
+      end_msg: jours avant la fin de période de commentaire/feedback
+      expired: Date butoir de commentaire/feedback dépassée
+
+    grading_startdate:
+      start_msg: Il reste
+      end_msg: jours avant le début de l'activité
+
+    create_from_scratch: Créer une toute nouvelle activité
+    create_from_template: Créer depuis un template existant
+    missing_participants: Pas de participants
+    save: Sauvegarder l'activité
+    save_template: Sauvegarder le modèle d'activité
+    saved_template: Issue d'un modèle d'activité
+    not_finalized: Doit être finalisée
+    released: Résultats publiés
+    active_participant_msg: Actif - Donne et reçoit des feedbacks
+    tp_participant_msg: Tiers - Donne uniquement des feedbacks
+    passive_participant_msg: Passif - Recoit uniquement des feedbacks
+    unique_participant_msg: Participant unique
+    external_user_msg: Utilisateur externe
+    external: Activité externe
+    deleted_user: Utilisateur supprimé
+    validated_grades: Retours validés
+
+  template:
+    create_from_scratch: Créer un template
+
+  organization:
+    create_account: Créer un compte live
+    duplicate: Dupliquer une entreprise
+    departments:
+      delete_modal:
+        title: "Confirmation de la suppression du département :"
+        content_1: Voulez vous supprimer ce département ?
+        confirm: Confirmer
+        decline: Annuler
+
+
+
+  user:
+    role:
+      activity_manager: Manager d'activité
+      collaborator: Collaborateur
+      admin: Admin
+      root: Root
+      virtual: Virtuel (ne s'est jamais connecté)
+
+    performance: Performance
+    distance: Ecart de notation
+    activity: Activité(s)
+    activity_ongoing_futur: Activités réalisées + à venir
+    userRole: "Administrateur : possède les droits les plus étendus, gère notamment les utilisateurs, paramètres d'entreprise et accède au reporting, Manager d'activité : peut créer des activités, et accéder aux résultats globaux des participants, Collaborateur : est rajouté dans les activités, peut en demander la création"
+    create_internal: Créer un utilisateur interne
+    create_external: Créer un utilisateur externe (client...)
+    create_int_team: Constituer un groupe d'utilisateurs
+#    last_connection_days_begin: Connecté pour la dernière fois il y a
+    last_connection_days_begin: jours
+    no_connection: Pas de connexion
+    enabledCreatingUser: Peut créer des utilisateurs
+    department_manager: Responsable du département
+    boss: Mon responsable
+    external_user_virtual: Virtuel (adresse email non renseignée)
+
+
+profile:
+  page_title: Mon profil
+  mobile_header_title: Mon profil
+  my_results: Mes résultats
+  total_activities: Activités totales
+  total_activities_with_results: Avec résultats
+  insert_photo: Ajouter une photo
+  update_photo: Modifier la photo
+  position_in: chez
+  performance_feedbacks: Voir performance et retours
+  targets_goals: Mes objectifs
+  performance_indicators: Mes indicateurs de performance
+  criterion: Critère
+  perf: Performance
+  no_perf: Aucun critère de performance
+  target:
+    title: Objectif(s)
+    organization: Mon objectif d'entreprise
+    department: Mon objectif de département
+    position: Mon objectif de poste
+    individual: Mon objectif individuel
+    all_unset: Pas d'objectif associé
+
+  hotStages:
+    title: Mes activités du moment
+    public_title: Mes démarches en cours
+    grading_not_started_yet: A venir
+    grading_ongoing: En cours
+    grading_to_finalize: A valider
+    grading_exceeded_deadline: Délai dépassé
+    awaiting_results: En attente de résultats
+    unpublished_results: En attente de publication
+    published_results: Résultats publiés
+    multi_criteria: Multi-critères
+    pure_feedback: Pur feedback
+    evaluation: Eval
+    contribution: Contribution
+    status: Statut
+    participants: Participants
+    days_remaining: Jours restants
+    no_stages: Aucune répertoriée, créez ou demandez-en une si besoin !
+
+  teams:
+    title: Mes résultats déquipe
+    no_belongings: Vous nêtes membre daucune équipe pour linstant
+    table:
+      team_title: Equipe
+      nbParticipants_title: Nombre de participants
+      mean_perf_title: Perf moyenne
+      mean_dist_title: Distance moyenne
+      results_title: Résultats
+
+
+  file:
+    unsupported_type:
+      modal_title: Format non supporté
+      modal_content: l'image doit être soit de format png, jpeg ou bmp
+
+    unsupported_size:
+      modal_title: Dépassement de taille
+      modal_content: Merci d'insérer une photo inférieure à 1Mo
+
+    success:
+      modal_content: Votre photo a bien  été ajoutée dans votre librairie de photos de profil. Vous pouvez la changer via le bouton modifier à n'importe quel moment.
+
+
+  participations:
+    no_participations: Vous n'avez pas encore participé à une activité. Créez ou demandez-en une si besoin !
+    title: Mes participations
+    total_activities: Total
+    total_results: Avec résultats
+    total_unreleased_msg: A publier
+    activities_title: Activités
+    stages_title: Phases
+    criteria_title: Critères
+    upcoming: A venir
+    ongoing: En cours
+    computed: Terminées
+
+  finalizeUserCreation:
+    modal_title: Bienvenue sur Serpico ! Prenez juste le temps de valider les informations ci-dessous
+    validate_btn: Ok
+    modal_success_msg: Vos informations ont été mises à jour, nous vous souhaitons une agréable expérience d'évaluation avec Serpico !
+
+  first_connection:
+    add_first_admin:
+      modal_trigger_btn: Ajouter un administrateur
+      modal_title: Renseignez ces quelques infos, afin qu'un administrateur soit ajouté dans votre entreprise
+      modal_msg: Etant l'un des premiers utilisateurs de votre groupe, vous avez été désigné administrateur par défaut. Que souhaitez-vous faire ?
+      self_keeping_option: Conserver les droits dadministration
+      give_ownership_option: Octroyer les droits dadministration à d'autres personnes
+
+    finalize_btn: c'est parti !
+
+
+team:
+  entity_name: Equipe
+  add_msg: "Ajoutez des membres à l'équipe :"
+  team_user_since: Depuis le
+  team_user_from: Du
+  team_user_to: Au
+  past_members_modal_title: Liste des anciens membres de l'équipe
+  past_members_msg: Anciens membres
+  add_btn_internal: Interne
+  add_btn_external: Externe
+  go_back_users: Retour aux utilisateurs
+  owner: Owner de l'équipe
+
+organizations:
+  page_title: Organisations
+  mobile_header_title: Liste des organisations
+  details: Détails
+  nb_users: Nombre d'utilisateurs
+  nb_activities: Nombre d'activités
+  member_since: Membre depuis
+  master_user: Responsable
+  see_users: Utilisateurs
+  see_activities: Activités
+  update: Modifier
+  settings: Paramètres
+  create: Créer une organisation
+  decide: Statuer
+  last_connection: Dernière connexion
+  duplicate:
+    modal_title: Sélectionnez l'entreprise à dupliquer
+
+
+activities:
+  with: avec
+  modal_error_creation_title: Avant de continuer...
+  do_you_want_continue: Voulez vous continuer ?
+  see_input: Voir mes contributions
+  orphans: Orphelines
+  my_activities_page_title: Mes activités
+  firm_activities_page_title: Activités de l'entité
+  mobile_header_title: Activités
+  my_activities: Voir mes activités
+  firm_activities: Voir les activités de l'entité
+  cancelled_title: Activités annulées
+  discarded_title: Activités rejetées
+  requested_title: Activités en attente de validation
+  attributed_title: Activités attribuées
+  incomplete_title: Activités incomplètes
+  future_title: Activités à venir
+  current_title: Activités en cours
+  completed_title: Activités finalisées
+  output_sorting_type: Tri par statut de retour
+  progress_sorting_type: Tri par statut davancement
+  timeframe_view_type: Vue temporelle
+  status_view_type: Vue par statut
+  o_status:
+    cancelled: Annulées
+    discarded: Rejetées
+    requested: Demandées
+    attributed: A créer
+    incomplete: Incomplètes
+    future: Futures
+    current: En cours
+    completed: Finalisées
+    published: Publiées
+
+  p_status:
+    stopped: Annulé
+    postponed: Reporté
+    suspended: Suspendu
+    reopened: Rouvert
+    unstarted: Non débuté
+    upcoming: A venir
+    ongoing: En cours
+    completed: Réalisé
+    finalized: Finalisé
+
+  feedback_has_expired: La période de feedbacks a expiré sans que tout le monde ait donné son retour
+  no_min_output_config: Le type de retour attendu des participants doit être défini
+  no_min_participation_config: Il doit y avoir au moins un participant donnant des feedbacks, et un participant en recevant
+  cancel_request_msg: Etes-vous sûr de vouloir supprimer votre requête ?
+  participant_grading_status_0: A venir
+  participant_grading_status_1: A évaluer
+  participant_grading_status_2: Non finalisé
+  participant_grading_status_3: A valider
+  participant_grading_status_4: Validé
+  details: Détails
+  criteria: "Critères :"
+  activity_period: "Période estimée :"
+  grading_period: "Période de notation :"
+  progress: "Avancement :"
+  participants: "Participants :"
+  define: Définir
+  modify: Modifier
+  grade: Noter
+  nb_o_completed_stages_sing: phase déjà évaluée
+  nb_o_completed_stages_plur: phases déjà évaluées
+  select_graded_stage:
+    choice_title_msg: Notation d'activité
+    available_grading_stages: "Il y a plusieurs phases à évaluer. Veuillez en sélectionner une :"
+
+  select_stage_status:
+    choice_title_msg: Mise à jour du statut
+    available_grading_stages: Sélectionner le statut de la phase/activité courante afin de le mettre à jour
+
+  delete_btn: Supprimer
+  delete_stage_btn: Supprimer
+  delete_activity_btn: Supprimer
+  delete_stage_msg: Etes-vous sûr de vouloir supprimer cette phase d'activité ? Toutes les données éventuellement saisies par les participants seront effacées
+  delete_activity_msg: Etes-vous sûr de vouloir supprimer cette activité ? Toutes les données éventuellement saisies par les participants seront effacées
+  delete_recurring_msg: Cette activité fait partie d'une série d'activités récurrentes. Voulez-vous supprimer toutes ces activités ou simplement celle-ci ? Les données liées aux participants seront effacées
+  delete_rec_all_confirm: Supprimer la série
+  delete_rec_single_confirm: Supprimer cette activité
+  delete_cancel: Annuler
+  reject_request_msg: Etes-vous sûr de rejeter cette demande d'activité ?
+  reject_request_success_msg: l'activité a été placée dans la liste des activités rejetées
+  reject_request_success_close_btn_msg: Ok
+  finalize_grades: Finaliser
+  see_grades: Voir mes retours
+  request_results: Demander les résultats
+  results: Résultats
+  request_delete: Supprimer
+  request_discard: Refuser
+  request_validate: Valider
+  available_processes: "Vous pouvez la lier à une catégorie :"
+  request_process: Rajouter une catégorie
+  create_from_template:
+    modal_title: "Créer une activité depuis un modèle :"
+
+  create:
+    initialize_title: Création d'une activité
+    uninitialize_title: Création d'une toute nouvelle activité
+    modal_trg_msg: Créer une activité
+    delegate_choice_title_msg: Création d'activité
+    delegate_choice_msg: Vous pouvez soit la créer et la paramétrer vous-même, soit définir un leader qui le fera pour vous
+    nodelegate_btn_msg: La créer et configurer moi-meme
+    delegate_btn_msg: Déléguer
+    delegate_title_msg: Déléguer une nouvelle activité
+    delegate_content_msg: Renseignez quelques informations minimales
+    delegate_back_btn_msg: Annuler
+    delegate_success_msg: l'activité a été créée et un mail a été envoyé à l'activity owner afin qu'il complète l'activité
+    delegate_success_close_btn_msg: Ok
+    validate_title_msg: Validation de l'activité
+    validate_content_msg: Vous pouvez changer le nom de l'activité suggéré et affecter une autre personne que vous-même à la création de l'activité
+    ownCreation: Créer l'activité moi-même
+    activityName: Nom de l'activité
+    activityLeader: Leader d'activité
+    submit: Ok
+    next: Suivant
+
+  request:
+    modal_btn_msg: Demander la création d'une activité
+    initialize_title: Création d'une activité
+    title_msg: Demande de création d'activité
+    name_label: Entrer le nom de l'activité à ajouter
+    initialize_modify_content: Le processus a déjà été paramétré. Voulez-vous lancer une activité immédiatement ou la configurer préalablement ?
+    ask_for_add: Voulez-vous créer une activité from scratch ?
+    content_msg: Définissez les personnes à qui faire remonter votre demander et donnez-leur quelques éléments afin qu'ils la traitent au mieux
+    cancel_btn_msg: Annuler
+    launch_btn_msg: Lancer directement
+    modify_btn_msg: Modifier prélablement
+    informing_mail: Informer par mail les participants de la création d'activité
+    creation_success: l'activité a bien été créée, vous allez être redigéré afin de la configurer/finaliser
+    discard_msg: Etes-vous sûr de rejeter cette création d'activité ?
+    confirm_btn_msg: Oui
+    success_msg: Les personnes indiquées ont été prévenues de votre demande, vous pouvez suivre son statut dans votre fil d'activités
+    success_close_btn_msg: Ok
+    activityName: Nom de l'activité souhaitée
+    activityDescription: Description de l'activité (optionnel)
+    comments: Commentaires
+    anonymous_requester: Anonyme
+    requester: Demandeur
+    validators: Décideurs
+    requestType: Type de destinataire(s)
+    general_recipients_option: Nimporte quelle personne administratrice dans le système
+    specific_recipients_option: Destinataire(s) spécifique(s) (maintenez Ctrl ou Cmd pour en sélectionnez plusieurs)
+    specificRecipients: Destinataires
+    discloseRequester: Afficher mon nom aux destinataires
+    submit: Envoyer
+    cancel_success_msg: Votre demande de création d'activité a bien été annulée
+    cancel_success_btn_msg: Ok
+
+  validate:
+    success_msg: l'activité a bien été créée et a été rajoutée dans votre fil d'activités
+    success_close_btn_msg: Ok
+
+  no_activities_title: Pas encore d'activité créée !
+  no_activities_msg_collaborator: Attendez d'être ajouté à une activité ou demandez à ce qu'une activité soit créée afin de prendre part à une évaluation
+  no_activities_msg_activity_manager: Créez une activité afin de prendre part à une évaluation
+  no_registered_activities_title: Pas encore de démarche ajoutée !
+  no_registered_activities_msg: Inscrivez-vous à une démarche existante afin de suivre et renseigner son évolution !
+
+
+activity_elements:
+  parameters: Paramètres
+  stages: Phases
+  criteria: Critères
+  participants: Participants
+  iprocess: Process
+  complexify: Ajouter phases/critères
+  template_edition_mode: Mode édition de template
+  survey: Sondage
+  save: Sauvegarder
+  update: Mettre à jour
+  finalize: Finaliser
+  finalize_disabled_tooltip: Afin de finaliser l'activité, vous devez ajouter un critère ou sondage, ainsi qu'un participant qui puisse noter (actif)
+  creation_from_process: Depuis le process
+  access_activity_details: Voir l'activité en détail
+  to_configure: A configurer
+  owner: Owner
+  stage_losing_setup_msg: Etes-vous sûr de donner l'ownership à ce participant ? Nétant pas owner de lune des phases, vous ne pourrez plus configurer cette phase (à moins que votre rôle vous le permette)
+  activity_losing_setup_msg: Etes-vous sûr de donner l'ownership à ce participant ? Nétant pas owner de lune des phases, vous ne pourrez plus configurer cette activité (à moins que votre rôle vous le permette)
+  unvalidating_output_msg: Un ou plusieurs participants ont déjà validé leur retour. La modification que vous souhaitez réaliser fera qu'ils devront à nouveau finaliser leur retour; voulez-vous continuer ?
+  duplicate_element_name_msg: Vous devez changer ce nom car un élément existant possède déjà un nom similaire
+  no_remaining_participant_msg: Vous devez créer plus de participants de ce type dans votre base d'utilisateurs, car vous les avez déjà tous sélectionnés !
+  duplicate_participant:
+    with_team_begin: Vous ne pouvez pas rajouter l'utilisateur
+    with_team_end: pour cette phase, car il est déjà présent dans l'équipe participante
+    with_user_begin: Vous ne pouvez pas rajouter l'équipe
+    with_user_mid: pour cette phase, car un de ses membres participe déjà à cette phase
+    with_user_end: Si vous voulez quand même rajouter l'équipe, retirez dabord le participant, et il sera à nouveau invité à donner ses retours
+
+  evaluated_stages: Phases évaluées
+  create_duplicate_stage: Dupliquer une phase existante
+  create_fresh_new_stage: Créer une toute nouvelle phase
+  stage_duplication_modal:
+    title_msg: Duplication de phase
+    main_msg: " Choisissez parmi toutes les phases celle que vous souhaitez copier :"
+    btn_msg: Dupliquer
+
+  go_back_activities: Retour aux activités
+  go_back_processes: Retour aux processes
+  modify_stage_btn: Modifier la phase
+
+
+create_parameters:
+  comment:
+  page_title: Paramètres de l'activité
+  page_complex_title: Nom de l'activité
+  mobile_header_title: Nouvelle activité
+  mobile_header_description: Paramètres
+  general_activity_definition_section: Définition de l'activité
+  general_template_definition_section: Définition du template
+  feedback_settings_section: Paramétrage des feedbacks
+  time_schedule_section: Déroulé
+  define_objective:
+    modal_trigger_btn: Objectif
+    modify_trigger_btn: Objectif
+    modal_title: "Définissez une cible et des commentaires éventuels associés au critère :"
+    define_target_label: Définir une valeur cible d'atteinte
+
+  activity_name: Nom de l'activité
+  template_name: Nom du template
+  magnitude: Magnitude
+  isSurvey: Output should be in a survey ?
+  visibility: Visibilité
+  single_activity_option: Activité simple
+  recurring_p_msg: Fait partie de la série d'activités
+  recurring_m_msg: se déroulant généralement chaque
+  recurring_from: du
+  recurring_to: au
+  recurring_freq_Ds: jour
+  recurring_freq_Ws: semaine
+  recurring_freq_Ms: mois
+  recurring_freq_Ys: année
+  recurring_freq_D: jours
+  recurring_freq_W: semaines
+  recurring_freq_M: mois
+  recurring_freq_Y: ans
+  recurring_gsd_label: Date de début du feedback/évaluation par rapport à chaque début d'activité
+  recurring_ged_label: Date de fin du feedback/évaluation par rapport à chaque fin d'activité
+  recurring_modify_btn: Modifier paramètres globaux
+  recurring_save_btn: Sauvegarder les modifications
+  recurring_activity_option: Activité répétée
+  recurringChoice: Récurrence de l'activité
+  recurringFrequency: Fréquence de répétition
+  recurringType: Type d'activité répétée
+  recurringStartDate: A partir de
+  recurringEndDate: Jusque (optionnel)
+  forceCommentCompare: Forcer commentaires quand la note est
+  forceCommentSign: Signe
+  forceCommentValue: Insérer seuil
+  force_comments_strictly_lower_than: strictement inférieure à
+  force_comments_lower_than_equal: inférieure ou égale à
+  cName: Critère d'évaluation
+  frequency_msg: Se répète tou(te)s les
+  recurringTimeframe_day_option: jour(s)
+  recurringTimeframe_week_option: semaine(s)
+  recurringTimeframe_month_option: mois
+  recurringTimeframe_year_option: année(s)
+  recurringName: Nom de l'activité récurrente globale
+  visibility_public_option: Publique
+  visibility_private_option: Privée
+  startdate: Date de début
+  enddate: Date de fin
+  gstartdate: Début de l'évaluation
+  genddate: Fin de l'évaluation
+  mode: Cible
+  graded_activity_mode: Activité
+  graded_participant_mode: Participants de l'activité
+  graded_activity_and_participant_mode: Activité et participants à celle-ci
+  type: Type de notation
+  type_absval_option: Evaluation (et commentaire)
+  type_relval_option: Partage d'une prime collective (et feedback)
+  type_feedback_option: Simple commentaire
+  type_binary_option: Choix binaire (Y/N, OK/NOK)
+  recurringLowerbound: Note min
+  recurringUpperbound: Note max
+  recurringStep: Intervalle de notation (optionnel)
+  lowerbound: Note min
+  upperbound: Note max
+  step: Intervalle de notation (optionnel)
+  objectives: Remarques et objectifs généraux
+  weight: Poids
+  next: Suivant
+  save: Sauvegarder
+  back: Quitter
+  general_comment_button: Ajouter description générale
+  incomplete_modal:
+    msg: Il manque des participants à l'activité. Souhaitez-vous quand même revenir au menu des activités ?
+    confirm: Oui
+    decline: Annuler
+
+
+stages:
+  page_title: Phases de l'activité
+  mobile_header_description: Phases de l'activité
+  next: Suivant
+  save: Sauvegarder
+  back: Quitter
+  previous: Précédent
+  delete_stage_btn: Supprimer
+  submit: Sauver & Continuer
+  error_modal:
+    title: Erreur
+
+  missing_name: La phase doit être nommée
+  stage:
+    title: Phase
+    name: Nom
+    startdate: Date de début
+    enddate: Date de fin
+    gstartdate: Date de début d'évaluation
+    genddate: Date de fin d'évaluation
+    weight: Poids
+    activeWeight: Poids
+    error_date:  La date de fin d'évaluation ne peut être antérieure à J+1 (demain, le
+    error_message: "Celle-ci est incorrecte sur cette ou ces phases :"
+    progress:
+      tooltip_msg: Si vous souhaitez changer le statut, faites-le depuis le dashboard d'activités. Par défaut, il est lié aux dates de déroulement de la phase
+      title: Statut
+      stopped: Annulé
+      postponed: Reporté
+      suspended: Suspendu
+      reopened: Rouvert
+      unstarted: Non débuté
+      upcoming: A venir
+      ongoing: En cours
+      completed: Réalisé
+      finalized: Finalisé
+
+    period: Periode
+    frequency:
+      label_title: Fréquence
+      minutes: Minutes
+      hours: Heures
+      business_days: Jours ouvrables
+      days: Jours
+      weeks: Semaines
+      months: Mois
+      years: Années
+
+    origin:
+      creation: date de création
+      validation: date de validation
+      start: date de début effective
+      end: date de fin effective
+
+    visibility:
+      label_title: Visibilité
+      public: Public
+      unlisted: Non-répertorié
+      private: Privé
+
+    mode: Objet de la notation
+    graded_stage_mode: Phase
+    graded_participant_mode: Participants de la phase
+    graded_stage_and_participant_mode: Phase et participants à celle-ci
+
+  output_type:
+    title: Type de retour
+    grade_feedback_option: Feedback et évalution éventuelle
+    survey_option: Questionnaire
+    change:
+      modal_title: Modification du type de retour
+      modal_content: Voulez-vous vraiment changer le type de retour attendu pour les participants ? Toutes les données de retour préalablement sauvegardées ainsi que les éventuels retours des participants seront effacés
+
+
+  deleteStage:
+    modal_title: Suppression de phase
+    modal_content: Etes-vous sûr de vouloir supprimer cette phase d'activité ? Toutes ses données associées (critères, participants) seront supprimées
+    accept: Oui
+    cancel: Annuler
+
+  graded_single_stage_msg: phase déjà commentée / évaluée, comptant pour
+  graded_multiple_stages_msg: phases déjà commentées / évaluées, comptant pour
+  unmodifiable_single_stage_msg: autre phase active gérée par d'autres utlisateurs
+  unmodifiable_multiple_stages_msg: autres phases actives, gérées par d'autres utilisateurs
+  sum_modifiable_stages_explanation: La pondération des phases ci-dessous est rapportée au poids total des phases que vous pouvez modifier
+
+survey:
+  add_btn_internal: Ajouter un survey
+  short_answer: Réponse courte
+  paragraph: Paragraphe
+  binary_choice: Choix binaire
+  check_case: Cases à cocher
+  multiple_choice: Choix multiples
+  linear_scale: Échelle linéaire
+
+
+criteria:
+  hard_group_name: Hard skills
+  soft_group_name: Soft skills
+  page_title: Critères de l'activité
+  mobile_header_description: Critères de l'activité
+  main_msg: "Définissez vos critères :"
+  same_option: Mêmes critères pour toutes les phases
+  different_option: Les critères varient selon les phases du projet
+  delete_criterion_btn: Supprimer
+  next: Suivant
+  save: Sauvegarder
+  back: Quitter
+  previous: Précédent
+  add_btn_internal: Ajouter un critère
+  create_criterion:
+    name: Nom
+    type: Catégorie
+    open_modal_msg: Nouveau critère
+    title_msg: Ajout d'un critère
+    main_msg: Entrez son nom afin de lassocier à votre organisation
+    success_msg: Le critère a bien été ajouté à votre organisation !
+    hard_skills_option: Hard skills
+    soft_skills_option: Soft skills
+    submit: Valider
+    icon_label: Associez un logo au critère
+
+  tooltip:
+    required_comment: Commentaires requis
+    required_comment_grade: Commentaires requis sous une certaine note
+    scale_step: Echelle et intervalle minimal des notes
+    scale: Echelle de notes
+    step: Intervalle minimal
+    validate: Valider
+
+  criterion:
+    title: Critère
+    diffCriteria:
+    cName: Nom
+    name:
+      option_1: (Non spécifié)
+      option_2: (Non spécifié)
+      option_3: Méthode
+      option_4: Leadership
+      option_5: Diplomatie
+      option_6: Souci du détail
+      option_7: Emotivité
+      option_8: Enthousiasme
+      option_9: Travail en groupe
+      option_10: Adaptabilité
+      option_11: A l'écoute du groupe
+      option_12: Gestion du stress
+      option_13: Créativité
+      option_14: Qualité du rendu
+      option_15: Gestion des délais
+      option_16: Autonomie
+      option_17: Confiance en soi
+      option_18: Proactivité
+
+    type: Type
+    gradetype_absolute_option: Evaluation
+    gradetype_relative_option: Contribution en %
+    lowerbound: Note minimale
+    upperbound: Note maximale
+    step: Intervalle de notation
+    weight: Poids
+    comment: Commentaire (optionnel)
+    forceCommentCompare: Forcer commentaires quand la note est
+    forceCommentSign: Signe
+    forceCommentValue: Insérer seuil
+    force_comments_strictly_lower_than: strictement inférieure à
+    force_comments_lower_than_equal: inférieure ou égale à
+    force_comments_binary_label: Forcer commentaires quand le choix est Non/NOK
+    force_comments_pure_comment: Forcer commentaires
+
+  deleteCriterion:
+    modal_title: Suppression de critère
+    modal_content: Etes-vous sûr de vouloir supprimer ce critère ? Toutes les données saisies par les participants éventuels seront supprimées
+    accept: Oui
+    cancel: Annuler
+
+  diffToSimilar:
+    modal_title: Uniformisation des critères
+    modal_content: Si vous souhaitez que les critères soient les mêmes pour chaque phase, notez que les critères déjà créés qui différeraient de ceux que vous allez définir seront supprimés
+    accept: Ok
+    cancel: Annuler
+
+  supHundredPct:
+    modal_title: Attention
+    modal_msg_begin: Pour la phase
+    modal_msg_interm:  "l'ensemble des poids des critères doit être égal à 100% (actuellement :"
+    modal_msg_end: "%)"
+
+
+participants:
+  stage: Phase
+  page_title: Participants de l'activité
+  mobile_header_description: Participants
+  participants: Participants
+  internal_participants: Participants internes
+  external_participants: Participants externes
+  teams: Equipes
+  previous: Précédent
+  save: Sauvegarder
+  back: Quitter
+  finalize: Finaliser
+  update: Mettre à jour
+  replicate: Les participants sont les mêmes pour chaque future activité de l'activité récurrente
+  directUser: Participant
+  active: Actif
+  third_party: Tiers
+  passive: Passif
+  leader: Owner
+  create: Créer
+  delete: Retirer participant
+  select_unselect_all: Sélectionner/Déselectionner tous
+  add_btn_collab: Collaborateur
+  add_btn_partner: Partenaire
+  add_btn_team: Equipe
+  guidelines:
+    see: Voir guidelines
+    no_guidelines: Pas de guidelines insérées
+    create:  Créer guidelines
+    modify: Modifier guidelines
+    modal_title: Guidelines de
+    save_button: OK
+    clear_button: Effacer
+
+  comments:
+    modal_title: Commentaires pour
+    save_button: OK
+    clear_button: Effacer
+
+  one_time_participant:
+    fullname: Nom complet
+    type:
+      title: Type du participant
+      project: Idée/projet
+      team: Equipe
+      organization: Entreprise
+      physical_person: Personne
+
+    tips: Commentaires (optionnel)
+
+  type_checkbox_msg: Evalué
+  leader_checkbox_msg: Leader
+  precomment_button: Précommenter
+  precommented_button: Précommenté
+  missing_leader:
+    title: Leader manquant
+    msg: Vous devez définir au moins un leader pour la phase
+    btn_msg: Ok
+
+  change_leader:
+    modal_title: Changement de leader
+    msg_1: Vous souhaitez donner la gestion de la phase
+    msg_2: à un nouveau participant, alors qu'un autre en avait la charge.
+    msg_3: Voulez-vous en attribuer la gestion à
+    msg_4: et en décharger
+    btn_msg: Ok
+
+  duplicity:
+    modal_title: Doublon d'un participant
+    modal_msg: a été sélectionné en tant que participant ou membre déquipe, mais fait aussi partie d'une autre équipe que vous avez sélectionnée. Cela n'est pas possible; assurez-vous de le sélectionner une unique fois avant de finaliser l'activité
+
+  duplicityTeam:
+    modal_title: Utilisateur dans 2 équipes
+    modal_msg_begin: est à la fois dans l'équipe
+    modal_msg_middle: et
+    modal_msg_end: . Vous devez soit changer la composition de l'équipe soit en déselectionner une, car pour être évalué au sein d'une même phase un participant ne peut appartenir à deux équipes distinctes
+
+  missingGradingParticipants:
+    title: Manque de participants prenant part à l'évaluation
+    begin_msg: Afin de finaliser/updater l'activité, il faut au moins un participant actif ou tiers-évaluateur qui participe à la phase
+    end_msg: Si vous voulez rajouter les participants plus tard, sauvegardez plutôt l'activité en cliquant sur le bouton en bas à droite.
+
+  missingParticipants:
+    title: Participants manquants
+    begin_msg: Afin de finaliser/updater l'activité, vous devez sélectionner au moins 1 participant à la phase
+    end_msg: Si vous voulez rajouter les participants plus tard, sauvegardez plutôt l'activité en cliquant sur le bouton en bas à droite.
+
+
+  savedAsIncomplete:
+    modal_msg: l'activité est sauvegardée en tant qu'activité incomplète, afin de changer son statut vous devrez appuyer sur finaliser afin de notifier aux utilisateurs leur participation à l'activité
+
+  createTemplate:
+    modal_title: Modèle d'activité sauvegardé
+    modal_msg: Le modèle d'activité a été sauvée dans vos templates. Vous pourrez dorénavant créer une activité similaire à celle-ci très facilement en choissisant le modèle à l'avenir
+
+  add_button: Ajouter
+  remove_button: Retirer
+  teams_remaining_and: et
+  teams_remaining_end_msg: en plus
+
+grades:
+  comments:
+    create: Insérer commentaires
+    update: Modifier commentaires
+    modify: Modifier commentaires
+
+  binary:
+    yes: Oui
+    no: Non
+
+  save: Sauvegarder
+  finalize: Finaliser
+  precomment:
+    no_guidelines: Pas de guidelines insérées
+    guidelines: Voir guidelines
+
+  back: Retour
+
+grade:
+  page_title: Notes et feedback de l'activité
+  mobile_header_title: Notes et feedback
+  general_criterion: Notes générales
+  me: Moi
+  comment:
+    title_button: Commenter
+    modify_button: Modifier
+    review_button: Commentaires
+    modal_title_1: Commentaire sur
+    modal_title_2:
+    saveButton: OK
+    no_comment: Pas de commentaire associé
+
+  precomment:
+    modal_title_1: Objectifs/commentaires sur
+    modal_title_2:
+    button_existing_title: Objectifs/remarques
+    button_null_title: Pas de remarque
+    button_ok_title: Ok
+
+  grade_placeholder: Insérez votre note
+  save_button: Sauvegarder
+  submit:
+    modal_button_title: Valider
+    modal_title: Attention
+    modal_message: Vous ne pourrez plus changer vos notes et/ou avis après les avoir validés. Souhaitez-vous les valider ? Sinon, cliquez sur le bouton Sauvegarder
+    confirm_button_title: Oui
+    discard_button_title: Annuler
+    return_button_title: Retour
+
+  pure_feedback_title: Feedback et commentaires
+  total_contributions: Contributions totales
+  force_comment_modal_begin: Vous ne pouvez pas encore valider vos résultats. Vous devez préalablement, pour le critère
+  force_comment_modal_end: commenter chaque note
+
+results:
+  page_title: Résultats de l'activité
+  activity_abbr: A
+  stage_abbr: P
+  criterion_abbr: C
+  mobile_header_title: Résultats
+  no_comments_msg: Pas de commentaires donnés aux participants
+  grade_absolute_msg_1: Notes de
+  grade_absolute_msg_2: à
+  grade_relative_msg_1: Notes de
+  grade_relative_msg_2: à
+  grade_relative_msg_3: la somme devant valoir 100 %
+  grade_relative_gen_msg: Somme des contributions égale à 100%
+  generate_report: Generer un rapport
+  equal_weight: Calculer les graphiques avec les poids égaux
+  equal_weight_report: Imprimer les graphiques avec les poids égaux
+  std_dev_msg: Ecart de notation
+  precomments: Objectifs
+  no_given_precomments: Pas de précommentaires/objectifs attribués
+  no_given_comments: Aucun retour commenté
+  comments_to: A
+  in_detail: Dans le détail
+  binary_yes_title: Oui / OK
+  binary_no_title: Non / NOK
+  graphic_representation: Représentation graphique
+  climate_representation: Représentation climatique
+  global_climate: Climat général
+  release:
+    modal_button_title: Publier
+    modal_title: Important
+    modal_content: En publiant ces résultats, vous informerez l'ensemble des participants de leur feedback et évaluation. Cette opération ne peut être annulée, en êtes-vous certain ?
+    modal_discard: Annuler
+    modal_submit: Ok
+    released_button_title: Résultats publiés
+    success_ok_button: Ok
+    success_msg: Les résultats ont bien été communiqués aux participants !
+    go_back: Retour aux activités
+
+  printing:
+    modal_title: Personnaliser le rapport
+    select_results: "Définissez le contenu du rapport :"
+    selective_choice: Ou bien par élément de résultat
+    activity: Activité
+    activities: Activités
+    stage: Phase
+    stages: Phases
+    criterion: Critère
+    criteria: Critères
+    print_all: Tous les résultats disponibles pour l'activité
+    print_all_element: Tous les résultats disponibles pour
+    generate_report: Générer le rapport
+    no_output: (Aucun)
+    objectives: Objectifs attribués
+    feedbacks: Commentaires afférents
+    results_by_activity: Résultat d'activité
+    results_general: Résultat général
+    results_by_stage: Résultats de phase
+    results_by_criterion: Résultats par critère
+    phases_aggregated_view: Phases agrégées
+    criteria_aggregated_view: Critères agrégés
+    results_average_criteria: Moyenne des critères
+    content: Contenu
+    parameters: Paramètres dimpression
+    print_perf_graphs: Imprimer les graphiques de performance
+    print_dist_graphs: Imprimer les graphiques de décart de notation
+    print_graphs: Imprimer les graphiques de résultats
+    print_objectives: Imprimer les objectifs prédéfinis
+    print_comments: Imprimer les feeedbacks des participants
+    print_results_tables: Imprimer les tableaux détaillés de résultats
+
+  unstarted: Evaluation / retours non débutés
+  ongoing: Evaluation / retours en cours
+  unpublished: Résultats non publiés
+  unconcerned: Vous n'avez pas accès à la performance <br>des participants autres que vous-même
+  overview: Vue agrégée
+  mean_stages: Moy phases
+  mean_criteria: Moy crit.
+
+
+report:
+  page: Page
+  detailed_data: Données détaillées
+  activity_view: Activité
+  stages_view: Phase(s)
+  criteria_view: Critère(s)
+  team:
+    participant: Participant
+    member_from_to: Membre depuis le (plus membre depuis le)
+
+  user:
+    header_begin_msg: Rapport individuel
+    header_end_msg: Généré le
+    table:
+      name_title: Nom
+      criterion_title: Critère
+      stage_title: Phase
+      activity_title: Activité
+      date_title: Date
+      perf_title: Perf %
+      mperf_title: Perf moy %
+      dev_title: Dist %
+      mdev_title: Dist moy %
+      comment_title: Commentaire
+      from: De
+
+    no_feedbacks: Aucun
+
+
+  stage:
+    header_begin_msg: Rapport d'activité
+    header_end_msg: Généré le
+    table:
+      participant_title: Nom
+      weighted_result_title: Notes poids hiér.
+      equal_result_title: Notes poids égaux
+      weighted_stddev_title: Ecart poids hiér.
+      stage_title: Phase
+      criterion_title: Critère
+      equal_stddev_title: Ecart poids égaux
+      grades_title: Notes attribuées
+      comments_title: Commentaires
+      mean_row_title: Moyenne
+      mean_abbr: Moy
+      result: Res global
+      user_result: Res indiv
+
+
+
+
+overview:
+  user_page_title: Vue d'ensemble
+  team_page_title: Vue d'ensemble équipe
+  project_mode: Perf de projets
+  indiv_mode: Perf individuelle
+  performance_activities: Evaluations de performance
+  contributive_activities: Evaluations de contribution
+  no_contributive_activities_msg: Pas de résultats liés à des activités contributives
+  view_by_criterion: Par critère
+  view_by_stage: Par phase
+  view_by_activity: Par activité
+  participation_type: Type de participation
+  active_passive_option: Evalué
+  third_party_option: Tiers-évaluateur
+  all_types_option: Toutes
+  hAxis_caption_criteria: Critères
+  hAxis_caption_stages: Phases
+  hAxis_caption_activities: Activités
+  grading_distance: Ecart de notation
+  grading_distance_mean: Ecart de notation moyen
+  performance: Performance
+  performance_mean: Performance moyenne
+  member_since: Membre depuis le
+  team_created_on: Créée le
+  team_members: Membres de l'équipe
+  feedbacks: Feedbacks
+  feedbacks_from: De
+  feedbacks_to: A
+  no_feedbacks: Pas de feedbacks associé à ce critère
+  no_results: Pas de résultats
+  equal_weights_page_title: Avec poids égaux
+  all_criteria: Tous les critères
+  criterion_type: Type de critère
+  grade: Note
+  participants:
+    title: Participants
+    name: Nom complet
+    participations: Participe à
+    abbreviation: Abréviation
+    fullParticipation:
+      begin_msg: Tout comme
+      thirdParty: tiers évaluateur (T)
+      evaluated: évaluateur évalué
+
+    participation_type: Type
+    thirdParty: Tiers évaluateur
+    evaluated: Evaluateur évalué
+
+
+
+create_user:
+  page_title: Création d'utilisateurs
+  mobile_header_title: Création d'utilisateurs
+  main_title: "Choisissez un des modes dajout :"
+  csv_input_title: Via fichier CSV
+  manual_input_title: Via insertion manuelle
+  csv_sub_error: Le document CSV est mal formaté. Vérifiez si lerreur ne provient pas des noms de colonnes
+  csv:
+    modal_title: Insertion du fichier CSV
+    file_rules: 'Cliquez ou glissez-déposez un fichier CSV (max. 1 Mo) contenant : <br><br>Champs nécessaires : first_name, last_name, email <br><br>Champs optionnels : position (ex : Senior Officer), department (ex : Marketing), superior (nom et prénom du resp. hiérarchique en une seule cellule), role (dans la solution, par défault \Collaborateur\ autres choix \Administrateur\ ou \Activity_Manager\) & weight (poids de vote dans la solution, si non précisé, sera égal à 100)'
+    replace: Cliquez ou glissez-déposez un fichier pour le remplacer
+    remove: Supprimer
+    error: Oops, une erreur est survenue
+    back: Retour
+    table_intro: Merci de vérifier que les labels des champs ont bien été renseignés (si besoin modifiez-les)
+    rules: "Quelques remarques : <br><br> Les doublons ne seront pas pris en compte <br><br> S'il manque une donnée nécessaire pour un utilisateur (ex. prénom ou email), celui-ci ne sera pas créé <br><br> Si vous avez inséré des supérieurs hiérarchiques aux utilisateurs, vérifiez que le format de leur colonne est de type \Prénom Nom\ afin d'être reconnu dans le système"
+    validate: Ok
+
+  file:
+  firstname: Prénom
+  lastname: Nom
+  role: Role
+  email: Adresse email
+  email_short: Mail
+  weight_label: Valeur
+  non_weight_label: Nom
+  positionName: Poste/Fonction
+  influence: Influence
+  weightIni: Poids hiérarchique
+  submit: Créer les utilisateurs
+  administrator: Administrateur
+  activity_manager: Activity Manager
+  contributor: Contributeur
+  collaborator: Collaborateur
+  internal: Interne
+  link_to_department: Lier à un département
+  link_to_position: Lier à un poste
+  link_to_title: Lier à un titre
+  define_superior: Définir un manager
+  department: Département
+  department_short: Dpt
+  position: Poste
+  dptId: Département (optionnel)
+  posId: Fonction / poste (optionnel)
+  title: Titre
+  titId: Titre (optionnel)
+  weight: Poids hiérarchique
+  superiorUser: Supérieur hiérarchique (optionnel)
+  superior: Supérieur
+  superior_short: Mgr
+  enabledCreatingUser: Peut créer des utilisateurs
+  add_button: Ajouter un utilisateur
+  user: Utilisateur
+  fullname: Nom complet
+
+team_manage:
+  page_title_create: Création déquipe
+  mobile_header_description_create: Création déquipe
+  page_title_modify: Modification déquipe
+  mobile_header_description_modify: Modification déquipe
+  name: Nom
+  select_users_msg: "Sélectionnez des utilisateurs de votre organisation :"
+  submit: Valider
+  incomplete_team_msg: Vous devez sélectionner au moins 2 utilisateurs pour constituer une équipe
+  missing_name_msg: Vous devez donner un nom à votre équipe
+  duplicate_team_name_msg: Il existe déjà une équipe sous ce nom dans votre organisation, merci d'en choisir un autre
+  delete: Supprimer
+  delete_modal:
+    title: Suppression d'une équipe
+    msg: Etes-vous sûr de vouloir supprimer cette équipe ? Tous les résultats obtenus collectivement seront supprimés, mais chaque utilisateur conservera les résultats hérités de l'équipe
+    confirm: Valider
+    decline: Annuler
+
+create_client:
+  page_title: Nouveaux partenaires
+#  partner: Partenaire
+  add_button: Ajouter un utilisateur externe
+  prototype_form_title: Utilisateur externe
+  mobile_header_title: Ajout de partenaires
+  csv_description: Importer plusieurs utilisateurs via un fichier...
+  manual_description: "Ajouter un ou plusieurs partenaires ci-dessous :"
+  firstname: Prénom
+  lastname: Nom
+  workerFirm: Nom du partenaire
+  commname: Nom du partenaire
+  role: Role
+  positionName: Poste/Fonction
+  commName: Nom du client
+  weightValue: Poids de vote
+  administrator: Administrateur
+  activity_manager: Activity Manager
+  collaborator: Collaborateur
+  internal: Interne
+  department: Département
+  position: Fonction / poste
+  wgtValue: Poids de vote
+  email: Adresse email (optionnel)
+  owner: Owner
+  owner_tooltip: Définissez qui aura un droit initial de configuration coté partenaire. Cela ne vous sera demandé qu'une fois, votre partenaire s'en chargeant par la suite
+  emailClientSmallText: Si l'adresse mail n'est pas renseignée ainsi que pour aucun de ses utilisateurs, le partenaire ne pourra pas participer ni accéder à un échange d'informations/d'évaluation
+  emailSmallText: En laissant ce champ vide, l'utilisateur pourra être évalué mais ne pourra participer à aucune évaluation
+  weightSmallText: Par défaut l'utilisateur héritera d'un poids de vote de 100
+  partner:
+    add_button: Ajouter partenaire
+    prototype_title: Partenaire
+    un'existing_worker_firm: Aucune de celles-ci
+
+  individual:
+    add_button: Ajouter des membres
+    prototype_title: Membre
+
+  type:
+    label: Représente un(e)...
+    firm: Entreprise
+    team_project: Groupe (non-entreprise)
+    individual: Lui-même en tant quindividu
+    institution: Institution
+
+  orgId:
+    label: Nom du groupe / entité
+
+  extOrgId: Nom du groupe / client
+  create_organization:
+    open_modal_msg: Nouveau groupe / client
+    modal_title_msg: Ajout d'un nouveau groupe / client externe
+    modal_main_msg: Renseignez son nom afin de le créer et d'y ajouter des membres
+    commname: Nom
+    submit: Ok
+    success_msg: Le groupe / client a bien été créé au sein de votre organisation !
+
+  submit: Rajouter les partenaires
+
+create_organization:
+  workerFirm: Nom de l'entité
+  legalName: Nom complet
+  commercialName: Nom de l'entité
+  genLanguage: Preferred language
+  isFirm: Type d'entité
+  firstname: Prénom
+  lastname: Nom
+  email: Email
+  position: Position
+  department: Département
+  masterUser: Master user
+  validate_title: Valider la création de l'entité
+  validate: Valider
+  reject: Rejeter
+  create: Créer
+  start_now: Démarrer maintenant !
+  update_btn: Modify
+  delete: Delete
+  delete_modal:
+    title: Supprimer l'organisation
+    content: Are you sure you want to delete the organization ? All users, data and related activities will be erased from the database
+    confirm: Confirm
+    cancel: Cancel
+
+  type:
+    label: Type de client
+    client: Entreprise
+    team_project: Equipe/groupe dindividus
+    individual: Indépendant
+    institution: Institution
+
+
+create_department:
+  name: Nom du nouveau département
+  submit: Créer
+  open_modal_msg: Nouveau département
+  title_msg: Ajout d'un département
+  content_msg: Entrez son nom afin de le créer et d'y ajouter des membres
+  success_msg: Le département a bien été créé au sein de votre organisation !
+
+create_title:
+  name: Nom du nouveau titre
+  submit: Créer
+  open_modal_msg: Nouveau titre
+  title_msg: Ajout d'un titre
+  content_msg: Entrez son nom afin de le créer et d'y ajouter des membres
+  success_msg: Le titre a bien été créé au sein de votre organisation !
+
+department_update:
+  page_title: Modifier le département
+  mobile_header_title: Modifier département
+  main_msg: Vue du département
+  name: Nom du département
+  submit: Sauver
+  back: Retour
+
+create_position:
+  name: Nom de la nouvelle fonction
+  submit: Créer
+  open_modal_msg: Nouvelle fonction / poste
+  title_msg: Ajout d'une fonction
+  content_msg: Entrez son nom afin de le créer et d'y ajouter des membres
+  success_msg: La fonction / poste a bien été créé au sein du département !
+
+create_weight:
+  name: Valeur du nouveau poids
+  submit: Créer
+  open_modal_msg: Nouvelle valeur
+  title_msg: Ajout d'un nouveau poids
+  content_msg: Entrez un nouveau poids
+  success_msg: Le poids a bien été associé à l'utilisateur !
+
+create_template:
+  name: Nom du nouveau template
+
+prototype_users:
+  firstname: Prénom
+
+user_list:
+  page_title: Liste des utilisateurs
+  mobile_header_title: Utilisateurs
+  modify: Modifier
+  internal_users_tab: Collaborateurs
+  teams_tab: Équipes
+  external_users_tab: Partenaires
+  firms: Entreprises
+  ext_teams: Groupes ou projets
+  individuals: Indépendants & Freelances
+  overview: Vue d'ensemble
+  delete: Supprimer
+  add_users_button: Ajouter
+  users: Collaborateurs
+  teams: Equipes
+  targets: Objectifs
+  department_delete_btn: Supprimer
+  department_update_btn: Modifier
+  department_delete_modal_msg: Voulez-vous vraiment supprimer ce département ?
+  department_delete_modal_validate_btn: Oui
+  department_delete_modal_cancel_btn: Annuler
+  no_teams_msg: Pas déquipe encore créée
+  no_attributed_department_title: Pas de département attribué
+  no_defined_user: Pas d'utilisateur défini
+  myself: Moi-même
+  my_department: Mon département
+  define_superior:
+    modal_title: Définion d'un supérieur
+    no_superior_option: n'a pas de manager
+    success_title: Le supérieur hiérarchique a bien été défini pour l'utilisateur sélectionné !
+    cancel: Annuler
+    undefined: (Non défini)
+
+
+user_update:
+  page_title: Modification utilisateur
+  mobile_header_title: Modifier l'utilisateur
+  delete_button: Supprimer
+  submit: Soumettre
+  delete_modal:
+    title: Attention
+    content_1: Etes-vous sûr de vouloir supprimer
+    content_2: de votre entreprise ?
+    content_ext_user: comme utilisateur externe de votre entreprise ?
+    confirm: Oui
+    decline: Retour
+
+
+templates:
+  modal_create:
+    title_msg: Création de template
+    main_msg: Donnez un nom à ce template. Une fois utilisé il vous permettra de dupliquer cette activité si vous voulez en créer une similaire
+
+
+user_no_token:
+  title: Oops - Page non trouvée
+  mobile_header_title: Page non trouvée
+  description: Cette page n'existe plus car vous avez certainement déjà créé votre mot de passe. Si vous ne vous en souvenez plus, renseignez votre mail et nous vous enverrons un lien pour le redéfinir
+  home_button_title: Retour à la page principale
+
+password_modify:
+  page_title: Modification du mot de passe
+  mobile_header_title: Modifier mot de passe
+  welcome_msg: vous souhaitez modifier votre mot de passe
+  password_description: Tapez-en un nouveau et confirmez-le
+  password_rules: Il doit contenir au moins une majuscule, un chiffre et avoir une longueur dau moins 8 caratères
+
+error_500:
+  page_title: Oops - Erreur
+  title: Oops - Une erreur est survenue
+  description: Nous avons rencontré un petit problème. Rafraîchissez la page ou rendez-vous à l'accueil !
+
+error_404:
+  page_title: Oops - Page non trouvée
+  title: Oops - Page non trouvée
+  description: Cette page n'existe pas !
+
+error_403:
+  page_title: Oops - Accès non autorisé
+  title: Oops
+  description: Vous ne pouvez pas accéder à cette page !
+
+modal:
+  logout: Êtes-vous sûr de vouloir vous déconnecter ?
+
+organization_criteriongroups:
+  page_title: Gestion des critères
+  page_header: Matrices de compétences
+  criterialist_header: Critères
+  cgp_department_header: Lier le groupe à un département
+  no_criteria: Aucun critère
+  deletion_confirmation_msg: Confirmez-vous la suppression du groupe de critères __cgpName__ ? Cette action est irréversible.
+  no_linked_dpt_placeholder: (lié à aucun département)
+  buttons:
+    add_criterion: Ajouter un critère
+    add_criteriongroup: Ajouter un groupe
+    delete_criteriongroup: Supprimer le groupe
+    delete: Supprimer
+    confirm: Confirmer
+    cancel: Annuler
+
+  labels:
+    criteriongroup_name: Nom
+    criteriongroup_name_new: Donnez un nom au nouveau groupe
+    criteriongroup_name_discardable: Nom (laisser vide pour ne pas modifier)
+    cgp_department: Département (facultatif)
+    criteria_name: Nom du critère
+
+  tooltips:
+    cgp_department: "Lié au département :"
+    cgp_department_none: Lié à aucun département
+    edit_cgp_name: Renommer
+    save_form: Sauvegarder
+
+  errors:
+    criteria_duplicate: Il existe déjà un critère portant ce nom dans ce groupe
+
+
+validators:
+  password_definition:
+    unmatching_msg: Les mots de passe ne correspondent pas
+
+  activity_elements:
+    stages:
+      sum_weight_equal_to_hundred_pct: La somme des poids des phases doit être égale à 100%
+      unique_stage_name: Il existe déjà une phase qui porte le même nom
+      missing_owners: Assurez-vous quau moins une phase configurée ait un participant owner, en droit de la configurer
+      min_config: Assurez-vous quau moins une phase possède au minimum un participant qui donne ses retours et un participant qui en reçoit, sur base d'un sondage ou d'un ou plusieurs critères d'évaluation
+
+    criteria:
+      sum_weight_equal_to_hundred_pct: La somme des poids des critères doit être égale à 100%
+
+
+  create_client:
+    missing_owner: Assurez-vous que le partenaire ait au moins un owner avec une adresse mail renseignée afin qu'il puisse configurer son compte
+
+  create_parameters:
+    step: l'intervalle de notation doit être un diviseur de l'échelle de notes
+    ub_greater_than_lb: La note maximale doit être supérieure à la note minimale
+    sum_weight_equal_to_hundred_pct: La somme des poids des phases doit être égale à 100%
+    doublon_activity_name: Il y a déjà eu une activité créée avec ce nom, choisissez-en un autre
+    doublon_department: Il y a déjà eu un départment créé avec ce nom, choisissez-en un autre
+    doublon_position: Il y a déjà eu une position créée avec ce nom, choisissez-en un autre
+    doublon_title: Il y a déjà eu un titre créé avec ce nom, choisissez-en un autre
+
+
+  stage:
+    period_positive: Vous devez rentrer une valeur positive pour la période de déroulement
+
+
+  signup:
+    password: Le mot de passe doit contenir au moins 8 caractères dont au moins une majuscule et un chiffre
+    email: "Votre adresse email doit être valide (exemple : toto@tutu.com)"
+
+  create_user:
+    email: Oops... cet email existe déjà, l'utilisateur a certainement déjà un compte !
+
+  #worker_search:
+  #  ub_greater_than_lb: Le nombre maximal demployés doit être supérieur au nombre minimal
+
+  grades:
+    force_comment: Vous devez commenter ce critère

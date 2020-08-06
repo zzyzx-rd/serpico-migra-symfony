@@ -1,0 +1,5 @@
+$(function() {
+
+    $('.scrollspy').scrollSpy();
+
+});

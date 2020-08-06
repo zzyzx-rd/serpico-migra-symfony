@@ -1,0 +1,1511 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+    {% trans %}test{% endtrans %}
+{% endblock %}
+
+
+  {% block css %}
+      <!-- Dropify -->
+      <link href="{{ asset('css/dropify.min.css') }}" rel="stylesheet" type="text/css">
+      <script>
+          var dourl = "{{ url('deleteOrganization',{'orgId' : organization.id}) }}";
+          var duurl = "{{ url('rootAjaxUserDelete',{'orgId' : organization.id, 'usrId' : 0}) }}";
+          var daurl = "{{ url('ajaxActivityDelete',{'actId' : 0}) }}";
+          var ourl = "{{ url('manageOrganizations') }}";
+      </script>
+  {% endblock %}
+
+
+{% block pagename %}
+    {% trans %}create_user.mobile_header_title{% endtrans %}
+{% endblock %}
+
+{% block username %}
+    {{ currentuser.firstname }}
+    {{ currentuser.lastname }}
+{% endblock %}
+
+{% block content %}
+
+{% set now = "now"|date("Y/m/d") %}
+
+    <div class="container">
+
+        {% if addFromUser is defined %}
+        <h4>{% trans %}header.register.description{% endtrans %}</h4>
+        {% elseif toValidate is defined %}
+        <h4>{% trans %}create_organization.validate_title{% endtrans %}</h4>
+        {% endif %}
+        {{ form_start(form) }}
+
+            <div class="row no-margin">
+                <div class="input-field col s12 m12">
+                    {{ form_row(form.commName) }}
+                </div>
+            </div>
+             <div class="row">
+                <div class="col s12 m12">
+                    {{ form_row(form.type) }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col s12 m12">
+                    {{ form_row(form.masterUserId) }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="input-field col s12 m12">
+                    {{ form_row(form.expired) }}
+                </div>
+            </div>
+
+
+            <ul class="collapsible users-list" data-collapsible="accordion">
+                <li>
+                    <div class="collapsible-header reduced-padding user-single-element cyan lighten-4">
+                        <i class="fa fa-fw fa-chevron-down no-margin"></i>
+                        <i class="fa fa-fw fa-chevron-right no-margin"></i>
+                        <!-- if pour la photo du user  pour un : if user['picture'] != null -->
+                        <ul class="collection">
+                            <li style="font-size:1.6rem">Users</li>
+                        </ul>
+                    </div>
+                    <div id="ListButtons" class="collapsible-body">
+                        <ul>
+                        {% for key, user in form.orgUsers %}
+                            <li class="user">
+                                <ul class="flex-center row" style="justify-content: space-between;">
+                                    <li class="stage-title">
+                                        <h4> {% trans %} User {% endtrans %} {{ key + 1 }}</h4>
+                                    </li>
+                                    <li style="margin-left:auto;"><a href="#deleteUser" class="waves-effect waves-light red accent-4 btn white-text modal-trigger" data-uid="{{ organization.orgUsers[key].id }}">{% trans %}stages.delete_stage_btn{% endtrans %}</a></li>
+                                </ul>
+                                <div class="row">
+                                    <div class="input-field col s12 m4">
+                                        {{ form_row(user.firstname) }}
+                                    </div>
+                                    <div class="input-field col s12 m4">
+                                        {{ form_row(user.lastname) }}
+                                    </div>
+                                    <div class="input-field col s12 m4">
+                                        {{ form_row(user.password) }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="input-field col s12 m4">
+                                        {{ form_row(user.email) }}
+                                    </div>
+                                    <div class="col s12 m4">
+                                        {{ form_row(user.dptId) }}
+                                        <a href="#addDepartment" class="add-department modal-trigger"><i class="fa fa-plus"></i> {% trans %}create_department.open_modal_msg{% endtrans %}</a>
+                                    </div>
+
+                                    <div class="col s12 m4">
+                                        {{ form_row(user.posId) }}
+                                        <a href="#addPosition" class="add-position modal-trigger"><i class="fa fa-plus"></i> {% trans %}create_position.open_modal_msg{% endtrans %}</a>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col s12 m8">
+                                        <div>
+                                            {{ form_label(user.role) }}
+                                            <i class="far fa-question-circle tooltipped" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.user.userRole{% endtrans %}" onload="this.tooltip()"></i>
+                                        </div>
+                                        {{ form_widget(user.role) }}
+                                        {{ form_errors(user.role) }}
+                                    </div>
+                                    <div class="col s12 m4">
+                                        {{ form_row(user.titId) }}
+                                        <a href="#addDepartment" class="add-department modal-trigger"><i class="fa fa-plus"></i> {% trans %}create_department.open_modal_msg{% endtrans %}</a>
+                                    </div>
+                                </div>
+                                <div class="row internal">
+                                    <div class="col s12 m6">
+                                        {{ form_row(user.wgtId) }}
+                                        <a href="#addWeight" class="add-weight modal-trigger"><i class="fa fa-plus"></i> {% trans %}create_weight.open_modal_msg{% endtrans %}</a>
+                                    </div>
+                                    <div class="col s12 m6">
+                                        {{ form_widget(user.internal) }}
+                                        {{ form_label(user.internal) }}
+                                    </div>
+                                </div>
+                            </li>
+                        {% endfor %}
+                        </ul>
+                    </div>
+                </li>
+            </ul>
+
+            <ul class="collapsible users-list" data-collapsible="accordion">
+                <li>
+                    <div class="collapsible-header reduced-padding user-single-element cyan lighten-4">
+                        <i class="fa fa-fw fa-chevron-down no-margin"></i>
+                        <i class="fa fa-fw fa-chevron-right no-margin"></i>
+                        <!-- if pour la photo du user  pour un : if user['picture'] != null -->
+                        <ul class="collection">
+                            <li style="font-size:1.6rem">External Users</li>
+                        </ul>
+                    </div>
+                    <div id="ListButtons" class="collapsible-body">
+                        <ul>
+                        {% for key, user in form.externalUsers %}
+                            <li class="user">
+                                <ul class="flex-center row" style="justify-content: space-between;">
+                                    <li class="stage-title">
+                                        <h4> {% trans %} User {% endtrans %} {{ key + 1 }}</h4>
+                                    </li>
+                                    <li style="margin-left:auto;"><a href="#deleteUser" class="waves-effect waves-light red accent-4 btn white-text modal-trigger" data-uid="{{ organization.orgUsers[key].id }}">{% trans %}stages.delete_stage_btn{% endtrans %}</a></li>
+                                </ul>
+                                <div class="row">
+                                    <div class="input-field col s12 m6">
+                                        {{ form_row(user.firstname) }}
+                                    </div>
+                                    <div class="input-field col s12 m6">
+                                        {{ form_row(user.lastname) }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="input-field col s12 m4">
+                                        {{ form_row(user.email) }}
+                                    </div>
+                                    <div class="input-field col s12 m4">
+                                        {{ form_row(user.positionName) }}
+                                    </div>
+
+                                    <div class="input-field col s12 m4">
+                                        {{ form_row(user.weightValue) }}
+                                    </div>
+                                </div>
+                            </li>
+                        {% endfor %}
+                        </ul>
+                    </div>
+                </li>
+            </ul>
+
+            <ul class="collapsible users-list" data-collapsible="accordion">
+                <li>
+                    <div class="collapsible-header reduced-padding user-single-element cyan lighten-4">
+                        <i class="fa fa-fw fa-chevron-down no-margin"></i>
+                        <i class="fa fa-fw fa-chevron-right no-margin"></i>
+                        <!-- if pour la photo du user  pour un : if user['picture'] != null -->
+                        <ul class="collection">
+                            <li style="font-size:1.6rem">Activities</li>
+                        </ul>
+                    </div>
+                    <div id="ListButtons" class="collapsible-body">
+                        <ul>
+                        {% for key, mactivity in form.activities %}
+
+                            {% set activity = organization.activities[key] %}
+
+                            {% if activity.status >= -1 %}
+
+                                {% set activityMixed = false %}
+                                {% set activityType = activity.stages[0].criteria[0].type %}
+                                {% set diffGradingDays = null %}
+                                {% set diffStageDays = -1 %}
+                                {% set oldestStageStartDate = activity.stages[0].startdate|date("Y/m/d") %}
+                                {% set newestStageEndDate = activity.stages[0].enddate|date("Y/m/d") %}
+                                {% for key, stage in activity.stages if not activityMixed %}
+
+                                    {% set diffStageDateInterval = stage.genddate.diff(date(now)) %}
+
+                                    {% set diffGradingDays = diffStageDateInterval.days %}
+                                    {% if stage.genddate|date("Y/m/d") < now %}
+                                        {% set diffGradingDays = -diffGradingDays %}
+                                    {% endif %}
+
+                                    {% if stage.startdate|date("Y/m/d") < oldestStageStartDate %}
+                                        {% set oldestStageStartDate = stage.startdate|date("Y/m/d") %}
+                                    {% endif %}
+                                    {% if stage.enddate|date("Y/m/d") < newestStageEndDate %}
+                                        {% set newestStageEndDate = stage.enddate|date("Y/m/d") %}
+                                    {% endif %}
+
+
+                                    {% if diffGradingDays > diffStageDays %}
+                                        {% set diffStageDays = diffGradingDays %}
+                                    {% endif %}
+                                    {% for criterion in stage.criteria if not activityMixed %}
+                                        {% if criterion.type != activityType %}
+                                            {% set activityMixed = true %}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endfor %}
+
+                            {% endif %}
+
+
+                            {% if activity.status == -1 %}
+
+                                <ul id="activityList{{ activity.id }}" class="collapsible expandMore expandLess" data-collapsible="accordion">
+                                    <li>
+                                        <div class="collapsible-header flex-center blue lighten-5">
+                                            <i class="fa fa-fw fa-chevron-down"></i>
+                                            <i class="fa fa-fw fa-chevron-right"></i>
+                                            <div class="activity-banner">
+                                                <div class="activity-title"> {{ form_row(mactivity.name) }} {% if activity.recurring %}<i class="far fa-2x fa-circle-notch fa-recurring tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.recurring{% endtrans %}" data-delay="50" style="margin-left:10px;"></i>{% endif %}</div>
+                                                {#<div class="activity-description"> {{ activity.objectives  }}</div>#}
+                                            </div>
+
+
+                                            <div style="margin-left:auto;">
+                                                <ul style="display:flex;align-items:center;">
+
+                                                    <li>
+                                                        <ul style="display: flex;align-items: center;flex-direction:column-reverse; margin-right:5px;" class="tooltipped" data-position="top" data-tooltip="{% if diffStageDays is defined %}{% if diffStageDays >= 0 %}{% trans %}tooltip.activity.grading_deadline.start_msg{% endtrans %} {{ diffStageDays }} {% trans %}tooltip.activity.grading_deadline.end_msg{% endtrans %}{% else %}{% trans %}tooltip.activity.grading_deadline.expired{% endtrans %}{% endif %}{% endif %}">
+                                                            {% if diffStageDays >= 0 %}<li>{{ diffStageDays }}</li>{% endif %}
+                                                            <li><i class="far fa-2x fa-clock {% if diffStageDays < 0 %}red-text{% endif %}" style="margin:0!important;"></i></li>
+                                                        </ul>
+                                                    </li>
+
+                                                    {% set activityProgress = 0 %}
+                                                    {% set nbFinalizedStages = 0 %}
+                                                    {% for stage in activity.stages %}
+                                                        {% set activityProgress = activityProgress + stage.gradingProgress * 100 %}
+                                                    {% endfor %}
+                                                    {% if activity.stages|length > 0 %}
+                                                        {% set activityProgress = activityProgress / activity.stages|length %}
+                                                    {% endif %}
+
+                                                        <ul style="display:flex;flex-direction: column";>
+                                                            <ul style="display:flex;flex-direction: row;align-items: center;margin: 0;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.activity_progress{% endtrans %}: {{ min(100, (100 * date(activity.startdate).diff(date(now)).days / max(1, date(activity.startdate).diff(date(activity.enddate)).days))|round(0)) }} %" data-delay="50">
+                                                                <li><i class="far fa-calendar-alt" style="margin: 0;font-size: 1.3rem"></i></li>
+                                                                <li class="progress" style="width:30px;margin:0px 10px 0px 0px;background-color:#b7bbbb;">
+                                                                    <div class="determinate"
+                                                                        style="width: {{ min(100, (100 * date(activity.startdate).diff(date(now)).days / max(1,date(activity.startdate).diff(date(activity.enddate)).days))|round(0)) }}%;background-color: black;"></div>
+                                                                </li>
+                                                            </ul>
+                                                            <ul style="display:flex;flex-direction: row;align-items: center" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.grading_progress{% endtrans %}: {{ activityProgress|round(0) }} %" data-delay="50">
+                                                                <li><i class="fa fa-pencil-alt" style="margin: 0;font-size: 1.3rem"></i></li>
+                                                                <li class="progress" style="width:30px;margin:0px 10px 0px 0px;background-color:#b7bbbb;">
+                                                                    <div class="determinate"
+                                                                        style="width: {{ activityProgress|round(0) }}%;background-color: black;"></div>
+                                                                </li>
+                                                            </ul>
+                                                        </ul>
+
+
+                                                    {% if activityMixed %}
+                                                        <li><i class="fa fa-2x fa-map-signs tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.mixed{% endtrans %}" data-delay="50"></i></li>
+                                                    {% else %}
+                                                        {% if activityType is defined %}
+                                                            {% if activityType == 0 %}
+                                                                <li><i class="fa fa-2x fa-pie-chart tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.contrib{% endtrans %}" data-delay="50"></i></li>
+                                                            {% elseif activityType == 1 %}
+                                                                <li><i class="fas fa-2x fa-tachometer-alt tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.eval{% endtrans %}" data-delay="50"></i></li>
+                                                            {% elseif activityType == 2 %}
+                                                                <li><i class="fas fa-2x fa-comment-dots tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.pureFeedback{% endtrans %}" data-delay="50"></i></li>
+                                                            {% endif %}
+                                                        {% else %}
+                                                            <li></li>
+                                                        {% endif %}
+                                                    {% endif %}
+
+                                                    {% if activity.hasParticipants == false %}
+                                                        <li style="position:relative"><i class="fa fa-2x fa-users tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.missing_participants{% endtrans %}" data-delay="50"></i><div class="bar"></div></li>
+                                                    {% elseif activity.isFinalized == false %}
+                                                        <li><i class="far fa-2x  fa-send tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.not_finalized{% endtrans %}" data-delay="50"></i></li>
+                                                    {% endif %}
+                                                </ul>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="collapsible-body">
+                                            <div class="collapse" id="details">
+                                                <ul class="flex-center row" style="justify-content: space-between;">
+                                                    <li><h4 class="department-name no-margin">{% trans %}activities.details{% endtrans %}</h4></li>
+                                                    {# Suppress element is only possible : if activity is not requested/attributed/, user is not a collaborator and stage has not been fully graded, and if user... has root privileges :p #}
+                                                    {% if activity.status != -2 and activity.status != -4 and activity.status != -3 and activity.stages|length == 1 and activity.stages[0].status < 2 and currentuser.role != 3 or currentuser.role == 4 %}
+                                                        <li style="margin-left:auto;"><a href="#deleteAModal" class="waves-effect waves-light red accent-4 btn white-text modal-trigger" data-aid="{{ activity.id }}">{% trans %}activities.delete_activity_btn{% endtrans %}</a></li>
+                                                    {% endif %}
+                                                </ul>
+                                            </div>
+                                            <ul class="collection">
+
+                                                {% set activityHasResults = false %}
+                                                {% set nbParticipatingReleases = 0 %}
+                                                {% for key, mstage in mactivity.stages %}
+
+                                                    {% set stage = activity.stages[key] %}
+
+                                                        {% set selectedTeam = null %}
+                                                    <li class="collection-item">
+
+                                                        {#{% if activity.stages|length > 1 %}#}
+                                                            <ul class="flex-center row" style="justify-content: space-between;">
+                                                                <li><h4 class="department-name no-margin">{{ form_row(mstage.name) }}</h4></li>
+                                                                {% if stage.status < 2 and currentuser.role != 3 or currentuser.role == 4 %}
+                                                                    <li style="margin-left:auto;"><a href="#deleteASModal" class="waves-effect waves-light red accent-4 btn white-text modal-trigger" data-sid="{{ stage.id }}">{% trans %}activities.delete_stage_btn{% endtrans %}</a></li>
+                                                                {% endif %}
+                                                            </ul>
+
+                                                        {#{% endif %}#}
+                                                        <div class="row">
+                                                            <div class="col s6 m4">
+                                                                <i class="fa fa-cube" aria-hidden="true"></i> {% trans %}activities.criteria{% endtrans %}
+                                                            </div>
+                                                            <div class="col s6 m8">
+                                                                <ul class="flex-center">
+                                                                {% for criterion in stage.criteria %}
+                                                                    <li>
+                                                                        <i class="fa fa-{% if criterion.cName.icon is null %}cube{% else %}{{ criterion.cName.icon.name }}{% endif %} tooltipped" data-position="top"
+                                                                        data-tooltip="{{ criterion.cName.name }}" style="font-size:1.3rem!important;margin-right: 10px;">
+                                                                        </i>
+                                                                    </li>
+                                                                {% endfor %}
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col s6 m4">
+                                                                <i class="far fa-clock" aria-hidden="true"></i> {% trans %}activities.activity_period{% endtrans %}
+                                                            </div>
+                                                            <div class="col s6 m4 desktop-dates">{{ stage.startdate|localizeddate('long', 'none') }} - {{ stage.enddate|localizeddate('long', 'none') }}</div>
+                                                            <div class="col s6 m4 mobile-dates">{{ stage.startdate|localizeddate('short', 'none', null, null, 'dd/MM') }} - {{ stage.enddate|localizeddate('short', 'none', null, null, 'dd/MM') }}</div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col s6 m4">
+                                                                <i class="far fa-clock" aria-hidden="true"></i> {% trans %}activities.grading_period{% endtrans %}
+                                                            </div>
+                                                            <div class="col s6 m4 desktop-dates">{{ stage.gstartdate|localizeddate('long', 'none') }} - {{ stage.genddate|localizeddate('long', 'none') }}</div>
+                                                            <div class="col s6 m4 mobile-dates">{{ stage.gstartdate|localizeddate('short', 'none', null, null, 'dd/MM') }} - {{ stage.genddate|localizeddate('short', 'none', null, null, 'dd/MM') }}</div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col s12 m4">
+                                                                <i class="fa fa-tasks" aria-hidden="true"></i> {% trans %}activities.progress{% endtrans %}
+                                                            </div>
+                                                            <div class="col s9 m4">
+                                                                <div class="progress">
+                                                                    <div class="determinate" style="width: {{ (stage.gradingProgress * 100)|round(0) }}%"></div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col s3 m3">
+                                                                {{ (stage.gradingProgress * 100)|round(0) }}%
+                                                            </div>
+                                                        </div>
+                                                        {% if stage.criteria[0] is defined %}
+                                                            <div class="row">
+                                                                <div class="col s10 m4">
+                                                                    <i class="fa fa-users" aria-hidden="true"></i>{% trans %}activities.participants{% endtrans %}
+                                                                </div>
+                                                                <div class="col s2 m4">
+                                                                    {{ stage.criteria[0].participants|length }}
+                                                                </div>
+                                                            </div>
+                                                            <div class="row no-margin">
+                                                                <ul class="participants">
+                                                                    {% set allMembersHaveValidatedGrades = null %}
+                                                                    {% for participant in stage.criteria[0].participants %}
+                                                                            {% set user = participant.user(app) %}
+                                                                            {% set isExternal = false %}
+                                                                            {% set extUser = null %}
+
+
+                                                                            {% if currentuser.orgId != user.orgId %}
+                                                                                {% set isExternal = true %}
+                                                                                {% set break = false %}
+                                                                                {% for externalUser in user.externalUsers if not break %}
+                                                                                    {% if externalUser.organization.id == currentuser.orgId %}
+                                                                                        {% set break = true %}
+                                                                                        {% set extUser = externalUser %}
+                                                                                    {% endif %}
+                                                                                {% endfor %}
+                                                                            {% endif %}
+                                                                            {% if participant.team is null %}
+                                                                            <li class="participant" style="position: relative">
+                                                                                <ul class="flex-center" style="flex-direction: column">
+                                                                                    <li>
+                                                                                        <div class="picture-frame">
+                                                                                            <img class="user-picture" src="{{ (user.picture != "") ? asset('lib/img/' ~ user.picture) : asset('lib/img/no-picture.png') }}" alt="">
+                                                                                        </div>
+                                                                                    </li>
+                                                                                    <li>
+                                                                                        <div class="participant-name">
+                                                                                            <span>
+                                                                                                {% if isExternal == true and extUser is not null %}
+                                                                                                    {% if extUser.firstname != null %}
+                                                                                                        {{ extUser.firstname }}
+                                                                                                        {% if extUser.deleted != null %}
+                                                                                                            <span style="color: black;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.deleted_user{% endtrans %}" data-delay="50">†</span>
+                                                                                                        {% endif %}
+                                                                                                    {% else %}
+                                                                                                        {{ user.organization(app).commname }}
+                                                                                                    {% endif %}
+                                                                                                {% else %}
+                                                                                                    {% if user.deleted != null %}
+                                                                                                            <span style="color: black;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.deleted_user{% endtrans %}" data-delay="50">†</span>
+                                                                                                    {% endif %}
+                                                                                                    {{ user.firstname }}
+                                                                                                {% endif %}
+                                                                                                </span>
+                                                                                                {% if isExternal == true and extUser is not null %}
+                                                                                                    <span style="background-color: #26A69A;color: white;padding: 0px 5px;border-radius: 100%;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.external_user_msg{% endtrans %}" data-delay="50">E</span>
+                                                                                                {% endif %}
+                                                                                            {% if participant.type == 0 %}
+                                                                                                <span style="background-color: purple;color: white;padding: 0px 5px;border-radius: 100%;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.tp_participant_msg{% endtrans %}" data-delay="50">T</span>
+                                                                                            {% elseif participant.type == -1 %}
+                                                                                                <span style="background-color: orange;color: white;padding: 0px 5px;border-radius: 100%;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.passive_participant_msg{% endtrans %}" data-delay="50">P</span>
+                                                                                            {% endif %}
+                                                                                            {% if participant.precomment is not null and participant.precomment != "" %}
+                                                                                                <i class="fa fa-flag tooltipped" data-position="top" data-tooltip="{{ participant.precomment }}" data-delay="50" style="color:#15a6ae;" title="{% trans %}grade.precomment.button_existing_title{% endtrans %}"></i>
+                                                                                            {% endif %}
+                                                                                            {% if participant.status == 3 and stage.status < 2 %}
+                                                                                                <i class="material-icons green-text tooltipped" style="font-size:16px" data-position="top" data-tooltip="{% trans %}tooltip.activity.validated_grades{% endtrans %}" data-delay="50">check_circle</i>
+                                                                                            {% endif %}
+                                                                                        </div>
+                                                                                    </li>
+                                                                                </ul>
+                                                                            </li>
+                                                                        {% else %}
+                                                                            {% if selectedTeam is null or selectedTeam != participant.team %}
+                                                                                    {% set selectedTeam = participant.team %}
+
+                                                                                    {% if stage.status < 2 and allMembersHaveValidatedGrades == null %}
+
+                                                                                        {% set break = false %}
+                                                                                        {% for teamParticipant in stage.criteria[0].participants if not break %}
+                                                                                            {% if teamParticipant.team is not null and teamParticipant.status < 3 %}
+                                                                                                {% set break = true %}
+                                                                                                {% set allMembersHaveValidatedGrades = false %}
+                                                                                            {% endif %}
+                                                                                        {% endfor %}
+                                                                                        {% if break == false %}
+                                                                                            {% set allMembersHaveValidatedGrades = true %}
+                                                                                        {% endif %}
+
+                                                                                    {% endif %}
+
+
+                                                                                <li class="participant" style="position: relative">
+                                                                                    <ul class="flex-center" style="flex-direction: column">
+                                                                                        <li>
+                                                                                            {% if participant.team.picture != "" and participant.team.picture is not null %}
+                                                                                                <div class="picture-frame">
+                                                                                                    <img class="user-picture" src="{{ participant.team.picture }}" alt="">
+                                                                                                </div>
+                                                                                            {% else %}
+                                                                                                <div class="picture-frame flex-center" style="background-color: #b3b3b3; border-radius: 100%; height: 50px; justify-content: center">
+                                                                                                    <i class="fa fa-users" style="color: white; font-size: 1.5rem; margin: 0px;"></i>
+                                                                                                </div>
+                                                                                            {% endif %}
+                                                                                        </li>
+                                                                                        <li>
+                                                                                            <div class="participant-name">
+                                                                                                <span>{{ participant.team.name }}</span>
+                                                                                                {% if participant.type == 0 %}
+                                                                                                    <span style="background-color: purple;color: white;padding: 0px 5px;border-radius: 100%;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.tp_participant_msg{% endtrans %}" data-delay="50">T</span>
+                                                                                                {% elseif participant.type == -1 %}
+                                                                                                    <span style="background-color: orange;color: white;padding: 0px 5px;border-radius: 100%;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.passive_participant_msg{% endtrans %}" data-delay="50">P</span>
+                                                                                                {% endif %}
+                                                                                                {% if participant.precomment is not null and participant.precomment != "" %}
+                                                                                                    <i class="fa fa-flag tooltipped" data-position="top" data-tooltip="{{ participant.precomment }}" data-delay="50" style="color:#15a6ae;" title="{% trans %}grade.precomment.button_existing_title{% endtrans %}"></i>
+                                                                                                {% endif %}
+                                                                                                {% if allMembersHaveValidatedGrades == true %}
+                                                                                                    <i class="material-icons green-text tooltipped" style="font-size:16px" data-position="top" data-tooltip="{% trans %}tooltip.activity.validated_grades{% endtrans %}" data-delay="50">check_circle</i>
+                                                                                                {% endif %}
+                                                                                            </div>
+                                                                                        </li>
+                                                                                    </ul>
+                                                                                </li>
+                                                                            {% endif %}
+                                                                        {% endif %}
+                                                                    {% endfor %}
+                                                                </ul>
+                                                            </div>
+                                                        {% endif %}
+
+                                                        <br>
+                                                        <div class="row action-buttons">
+
+                                                            {% if stage.status < 2 or stage.status == 2 and currentuser.role == 3 %}
+
+                                                                {% if stage.status == 2 %}
+                                                                    {% set activityHasResults = true %}
+                                                                {% endif %}
+
+                                                                {% if currentuser.role == 1 or currentuser.role == 4 or stage.masterUserId == currentuser.id %}
+                                                                    <div class="button-field">
+                                                                        <a class="btn-large waves-effect waves-light teal lighten-1 modify-btn" href="{{ url('oldActivityDefinition',{'elmt': 'activity', 'elmtId' : activity.id}) }}"> {% trans %}activities.modify{% endtrans %} </a>
+                                                                    </div>
+                                                                {% endif %}
+
+
+
+                                                                {% set break = false %}
+                                                                {% for participant in stage.participants if not break %}
+                                                                    {% if participant.usrId == currentuser.id and participant.type != -1 and now >= stage.gstartdate|date("Y/m/d") %}
+                                                                        {% if participant.isMailed == true and (participant.status >=3 or currentuser.role == 3 or participant.status < 3 and now <= stage.genddate|date("Y/m/d")) %}
+                                                                            {% if currentuser.role == 3 and participant.status == 4 %}
+                                                                                {% set nbParticipatingReleases = nbParticipatingReleases + 1 %}
+                                                                            {% else %}
+                                                                                <div class="button-field">
+                                                                                    <a class="btn-large waves-effect waves-light teal lighten-1 grade-btn" href="{{ url('newStageGrade',{'stgId' : stage.id})}}"> {% if participant.status == 3 %}{% trans %} activities.see_grades {% endtrans %}{% elseif participant.status == 2 or participant.status == 1 %}{% trans %} activities.finalize_grades {% endtrans %}{% else %}{% trans %}activities.grade{% endtrans %}{% endif %} </a>
+                                                                                </div>
+                                                                            {% endif %}
+
+                                                                        {% endif %}
+                                                                        {% set break = true %}
+                                                                    {% endif %}
+                                                                {% endfor %}
+
+
+                                                                {# result button displayed at the bottom of activity #}
+                                                                {% if stage == activity.stages|last and (nbParticipatingReleases > 0 and currentuser.role == 3 or activityHasResults == true and currentuser.role != 3) %}
+                                                                    <div class="button-field">
+                                                                        <a class="btn-large waves-effect waves-light blue darken-4 results-btn" href="{{ url('activityResults',{'actId' : stage.activity.id}) }}" style="color: white;"><span>{% trans %}activities.results{% endtrans %}</span></a>
+                                                                    </div>
+                                                                {% endif %}
+
+                                                            {% else %}
+
+                                                                {% if stage.status == 2 %}
+                                                                    {% set activityHasResults = true %}
+                                                                {% endif %}
+                                                                {% if stage == activity.stages|last and activityHasResults == true %}
+                                                                    <div class="button-field">
+                                                                        <a class="btn-large waves-effect waves-light blue darken-4 results-btn" href="{{ url('activityResults',{'actId' : stage.activity.id}) }}" style="color: white;"> {% trans %}activities.results{% endtrans %}</a>
+                                                                    </div>
+                                                                {% endif %}
+                                                            {% endif %}
+                                                        </div>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    </li>
+                                </ul>
+
+                            {% elseif activity.status == 0 %}
+
+                                <ul id="activityList{{ activity.id }}" class="collapsible expandMore expandLess" data-collapsible="accordion">
+                                    <li>
+                                        <div class="collapsible-header flex-center cyan lighten-5">
+                                            <i class="fa fa-fw fa-chevron-down"></i>
+                                            <i class="fa fa-fw fa-chevron-right"></i>
+                                            <!-- just giving the name an absolute position because it was interfering ith the button position -->
+                                            <div class="activity-banner">
+                                                <div class="activity-title"> {{ form_row(mactivity.name) }} {% if activity.recurring %}<i class="far fa-2x fa-circle-notch fa-recurring tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.recurring{% endtrans %}" data-delay="50" style="margin-left:10px;"></i>{% endif %}</div>
+                                                {#<div class="activity-description"> {{ activity.objectives }}</div>#}
+                                            </div>
+
+                                            <div style="margin-left:auto;">
+                                                <ul style="display:flex;align-items:center;">
+                                                    <li>
+                                                        <ul style="display: flex;align-items: center; flex-direction:column-reverse; margin-right:5px;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.grading_startdate.start_msg{% endtrans %}{% if activity.startdate is defined %} {{ date(activity.startdate).diff(date(now)).days}} {% else %} #N/A {% endif %}{% trans %}tooltip.activity.grading_startdate.end_msg{% endtrans %}">
+                                                            <li><span style="font-size:0.9rem">{% if activity.startdate is defined %}{{ date(activity.startdate).diff(date(now)).days }}{% else %}#N/A{% endif %}</span></li>
+                                                            <li><i class="far fa-2x fa-clock" style="margin:0!important;"></i></li>
+                                                        </ul>
+                                                    </li>
+                                                    {% if activity.finalized is null %}
+                                                        <li><i class="material-icons tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.not_finalized{% endtrans %}" data-delay="50">pause_circle_outline</i></li>
+                                                    {% endif %}
+                                                        {# in case there is a user grading an activity belongs to another firm (external to this activity), do not apply for root user #}
+                                                        {% if activity.organization.id != currentuser.orgId and currentuser.role != 4 %}
+                                                            <li>
+                                                                <i class="material-icons green-text tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.external{% endtrans %}" data-delay="50">call_made</i>
+                                                            </li>
+                                                    {% endif %}
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        <div class="collapsible-body">
+                                            <div class="collapse" id="details">
+                                                <ul class="flex-center row" style="justify-content: space-between;">
+                                                    <li><h4 class="department-name no-margin">{% trans %}activities.details{% endtrans %}</h4></li>
+                                                    {# Suppress element is only possible : if activity is not requested/attributed/, user is not a collaborator and stage has not been fully graded or if user has root privileges #}
+                                                    {% if activity.status != -2 and activity.status != -4 and activity.status != -3 and activity.stages|length == 1 and activity.stages[0].status < 2 and currentuser.role != 3 or currentuser.role == 4 %}
+                                                        <li style="margin-left:auto;"><a href="#deleteAModal" class="waves-effect waves-light red accent-4 btn white-text modal-trigger" data-aid="{{ activity.id }}">{% trans %}activities.delete_activity_btn{% endtrans %}</a></li>
+                                                    {% endif %}
+                                                </ul>
+                                            </div>
+                                            <ul class="collection">
+
+                                                {% set activityHasResults = false %}
+                                                {% set nbParticipatingReleases = 0 %}
+                                                {% for key,mstage in mactivity.stages %}
+
+                                                    {% set stage = activity.stages[key] %}
+
+                                                        {% set selectedTeam = null %}
+
+                                                    <li class="collection-item">
+
+                                                        {#{% if activity.stages|length > 1 %}#}
+                                                            <ul class="flex-center row" style="justify-content: space-between;">
+                                                                <li><h4 class="department-name no-margin">{{ form_row(mstage.name) }}</h4></li>
+                                                                {% if stage.status < 2 and currentuser.role != 3 or currentuser.role == 4 %}
+                                                                    <li style="margin-left:auto;"><a href="#deleteASModal" class="waves-effect waves-light red accent-4 btn white-text modal-trigger" data-sid="{{ stage.id }}">{% trans %}activities.delete_stage_btn{% endtrans %}</a></li>
+                                                                {% endif %}
+                                                            </ul>
+                                                        {#{% endif %}#}
+
+                                                        <div class="row">
+                                                            <div class="col s6 m4">
+                                                                <i class="fa fa-cube" aria-hidden="true"></i> {% trans %}activities.criteria{% endtrans %}
+                                                            </div>
+                                                            <div class="col s6 m8">
+                                                                <ul class="flex-center">
+                                                                {% for criterion in stage.criteria %}
+                                                                    <li>
+                                                                        <i class="fa fa-{% if criterion.cName.icon is null %}cube{% else %}{{ criterion.cName.icon.name }}{% endif %} tooltipped" data-position="top"
+                                                                        data-tooltip="{{ criterion.cName.name }}" style="font-size:1.3rem!important;margin-right: 10px;">
+                                                                        </i>
+                                                                    </li>
+                                                                {% endfor %}
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col s6 m4">
+                                                                <i class="far fa-clock" aria-hidden="true"></i> {% trans %}activities.activity_period{% endtrans %}
+                                                            </div>
+                                                            <div class="col s6 m4 desktop-dates">{{ stage.startdate|localizeddate('long', 'none') }} - {{ stage.enddate|localizeddate('long', 'none') }}</div>
+                                                            <div class="col s6 m4 mobile-dates">{{ stage.startdate|localizeddate('short', 'none', null, null, 'dd/MM') }} - {{ stage.enddate|localizeddate('short', 'none', null, null, 'dd/MM') }}</div>
+                                                        </div>
+
+                                                        <div class="row">
+                                                            <div class="col s6 m4">
+                                                                <i class="far fa-clock" aria-hidden="true"></i> {% trans %}activities.grading_period{% endtrans %}
+                                                            </div>
+                                                            <div class="col s6 m4 desktop-dates">{{ stage.gstartdate|localizeddate('long', 'none') }} - {{ stage.genddate|localizeddate('long', 'none') }}</div>
+                                                            <div class="col s6 m4 mobile-dates">{{ stage.gstartdate|localizeddate('short', 'none', null, null, 'dd/MM') }} - {{ stage.genddate|localizeddate('short', 'none', null, null, 'dd/MM') }}</div>
+                                                        </div>
+
+                                                        <div class="row">
+                                                            <div class="col s12 m4">
+                                                                <i class="fa fa-tasks" aria-hidden="true"></i> {% trans %}activities.progress{% endtrans %}
+                                                            </div>
+                                                            <div class="col s9 m4">
+                                                                <div class="progress">
+                                                                    <div class="determinate" style="width: {{ (stage.gradingProgress * 100)|round(0) }}%"></div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col s3 m3">
+                                                                {{ (stage.gradingProgress * 100)|round(0) }}%
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="row">
+                                                            <div class="col s10 m4">
+                                                                <i class="fa fa-users" aria-hidden="true"></i>{% trans %}activities.participants{% endtrans %}
+                                                            </div>
+                                                            <div class="col s2 m4">
+                                                                {{ stage.criteria[0].participants|length }}
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="row no-margin">
+                                                            <ul class="participants">
+                                                                {% for participant in stage.criteria[0].participants %}
+                                                                        {% set user = participant.user(app) %}
+                                                                        {% set isExternal = false %}
+                                                                        {% set extUser = null %}
+
+
+                                                                        {% if currentuser.orgId != user.orgId %}
+                                                                            {% set isExternal = true %}
+                                                                            {% set break = false %}
+                                                                            {% for externalUser in user.externalUsers if not break %}
+                                                                                {% if externalUser.organization.id == currentuser.orgId %}
+                                                                                    {% set break = true %}
+                                                                                    {% set extUser = externalUser %}
+                                                                                {% endif %}
+                                                                            {% endfor %}
+                                                                        {% endif %}
+                                                                    {% if participant.team is null %}
+                                                                        <li class="participant" style="position: relative">
+                                                                            <ul class="flex-center" style="flex-direction: column">
+                                                                                <li>
+                                                                                    <div class="picture-frame">
+                                                                                        <img class="user-picture" src="{{ (user.picture != "") ? asset('lib/img/' ~ user.picture) : asset('lib/img/no-picture.png') }}" alt="">
+                                                                                    </div>
+                                                                                </li>
+                                                                                <li>
+                                                                                    <div class="participant-name">
+                                                                                            <span>
+                                                                                                {% if isExternal == true and extUser is not null %}
+                                                                                                    {% if extUser.firstname != null %}
+                                                                                                        {{ extUser.firstname }}
+                                                                                                        {% if extUser.deleted != null %}
+                                                                                                            <span style="color: black;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.deleted_user{% endtrans %}" data-delay="50">†</span>
+                                                                                                        {% endif %}
+                                                                                                    {% else %}
+                                                                                                        {{ user.organization(app).commname }}
+                                                                                                    {% endif %}
+                                                                                                {% else %}
+                                                                                                    {% if user.deleted != null %}
+                                                                                                            <span style="color: black;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.deleted_user{% endtrans %}" data-delay="50">†</span>
+                                                                                                    {% endif %}
+                                                                                                    {{ user.firstname }}
+                                                                                                {% endif %}
+                                                                                            </span>
+                                                                                            {% if isExternal == true and extUser is not null %}
+                                                                                                <span style="background-color: #26A69A;color: white;padding: 0px 5px;border-radius: 100%;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.external_user_msg{% endtrans %}" data-delay="50">E</span>
+                                                                                            {% endif %}
+                                                                                            {% if participant.type == 0 %}
+                                                                                                <span style="background-color: purple;color: white;padding: 0px 5px;border-radius: 100%;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.tp_participant_msg{% endtrans %}" data-delay="50">T</span>
+                                                                                            {% elseif participant.type == -1 %}
+                                                                                                <span style="background-color: orange;color: white;padding: 0px 5px;border-radius: 100%;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.passive_participant_msg{% endtrans %}" data-delay="50">P</span>
+                                                                                            {% endif %}
+                                                                                            {% if participant.precomment is not null and participant.precomment != "" %}
+                                                                                                <i class="fa fa-flag tooltipped" data-position="top" data-tooltip="{{ participant.precomment }}" data-delay="50" style="color:#15a6ae;" title="{% trans %}grade.precomment.button_existing_title{% endtrans %}"></i>
+                                                                                            {% endif %}
+                                                                                    </div>
+                                                                                </li>
+                                                                            </ul>
+                                                                        </li>
+                                                                    {% else %}
+                                                                        {% if selectedTeam is null or selectedTeam != participant.team %}
+                                                                            <li class="participant" style="position: relative">
+                                                                                    <ul class="flex-center" style="flex-direction: column">
+                                                                                        <li>
+                                                                                            {% if participant.team.picture != "" and participant.team.picture is not null %}
+                                                                                            <div class="picture-frame">
+                                                                                                <img class="user-picture" src="{{ participant.team.picture }}" alt="">
+                                                                                            </div>
+                                                                                            {% else %}
+                                                                                                <div class="picture-frame flex-center" style="background-color: #b3b3b3; border-radius: 100%; height: 50px; justify-content: center">
+                                                                                                    <i class="fa fa-users" style="color: white; font-size: 2rem; margin: 0px;"></i>
+                                                                                                </div>
+                                                                                            {% endif %}
+                                                                                        </li>
+                                                                                        <li>
+                                                                                            <div class="participant-name">
+                                                                                                <span>{{ participant.team.name }}</span>
+                                                                                                {% if participant.type == 0 %}
+                                                                                                    <span style="background-color: purple;color: white;padding: 0px 5px;border-radius: 100%;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.tp_participant_msg{% endtrans %}" data-delay="50">T</span>
+                                                                                                {% elseif participant.type == -1 %}
+                                                                                                    <span style="background-color: orange;color: white;padding: 0px 5px;border-radius: 100%;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.passive_participant_msg{% endtrans %}" data-delay="50">P</span>
+                                                                                                {% endif %}
+                                                                                                {% if participant.precomment is not null and participant.precomment != "" %}
+                                                                                                    <i class="fa fa-flag tooltipped" data-position="top" data-tooltip="{{ participant.precomment }}" data-delay="50" style="color:#15a6ae;" title="{% trans %}grade.precomment.button_existing_title{% endtrans %}"></i>
+                                                                                                {% endif %}
+                                                                                            </div>
+                                                                                        </li>
+                                                                                    </ul>
+                                                                                </li>
+                                                                                {% set selectedTeam = participant.team %}
+                                                                        {% endif %}
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            </ul>
+                                                        </div>
+                                                        <br>
+                                                        {% if currentuser.role == 1 or currentuser.role == 4 or stage.masterUserId == currentuser.id %}
+                                                            <div class="row action-buttons">
+                                                                <div class="button-field">
+                                                                    <a class="btn-large waves-effect waves-light teal lighten-1 modify-btn" href="{{ url('oldActivityDefinition',{'elmt' : 'activity',  'elmtId' : activity.id}) }}"> {% trans %}activities.modify{% endtrans %} </a>
+                                                                </div>
+                                                            </div>
+                                                        {% endif %}
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    </li>
+                                </ul>
+
+
+                            {% elseif activity.status == 1 %}
+
+                                <ul id="activityList{{ activity.id }}" class="collapsible expandMore expandLess" data-collapsible="accordion">
+                                    <li>
+                                        <div class="collapsible-header flex-center cyan lighten-5">
+                                            <i class="fa fa-fw fa-chevron-down"></i>
+                                            <i class="fa fa-fw fa-chevron-right"></i>
+
+                                            <div class="activity-banner">
+                                                <div class="activity-title"> {{ form_row(mactivity.name) }} {% if activity.recurring %}<i class="far fa-2x fa-circle-notch fa-recurring tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.recurring{% endtrans %}" data-delay="50" style="margin-left:10px;"></i>{% endif %}</div>
+                                                {#<div class="activity-description"> {{ activity.objectives }}</div>#}
+                                            </div>
+
+                                            <div style="margin-left:auto;">
+                                                <ul style="display:flex;align-items:center;">
+
+                                                    <li>
+                                                        <ul style="display: flex;align-items: center;flex-direction:column-reverse; margin-right:5px;" class="tooltipped" data-position="top" data-tooltip="{% if diffStageDays is defined %}{% if diffStageDays >= 0 %}{% trans %}tooltip.activity.grading_deadline.start_msg{% endtrans %} {{ diffStageDays }} {% trans %}tooltip.activity.grading_deadline.end_msg{% endtrans %}{% else %}{% trans %}tooltip.activity.grading_deadline.expired{% endtrans %}{% endif %}{% endif %}">
+                                                            {% if diffStageDays >= 0 %}<li>{{ diffStageDays }}</li>{% endif %}
+                                                            <li><i class="far fa-2x fa-clock {% if diffStageDays < 0 %}red-text{% endif %}" style="margin:0!important;"></i></li>
+                                                        </ul>
+                                                    </li>
+
+                                                    {% set activityProgress = 0 %}
+                                                    {% set nbFinalizedStages = 0 %}
+                                                    {% for stage in activity.stages %}
+                                                        {% set activityProgress = activityProgress + stage.gradingProgress * 100 %}
+                                                    {% endfor %}
+                                                    {% if activity.stages|length > 0 %}
+                                                        {% set activityProgress = activityProgress / activity.stages|length %}
+                                                    {% endif %}
+                                                        <ul style="display:flex;flex-direction: column";>
+                                                            <ul style="display:flex;flex-direction: row;align-items: center;margin: 0;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.activity_progress{% endtrans %}: {{ min(100, (100 * date(activity.startdate).diff(date(now)).days / max(1, date(activity.startdate).diff(date(activity.enddate)).days))|round(0)) }} %" data-delay="50">
+                                                                <li><i class="far fa-calendar-alt" style="margin: 0;font-size: 1.3rem"></i></li>
+                                                                <li class="progress" style="width:30px;margin:0px 10px 0px 0px;background-color:#b7bbbb;">
+                                                                    <div class="determinate"
+                                                                        style="width: {{ min(100, (100 * date(activity.startdate).diff(date(now)).days / max(1,date(activity.startdate).diff(date(activity.enddate)).days))|round(0)) }}%;background-color: black;"></div>
+                                                                </li>
+                                                            </ul>
+                                                            <ul style="display:flex;flex-direction: row;align-items: center" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.grading_progress{% endtrans %}: {{ activityProgress|round(0) }} %" data-delay="50">
+                                                                <li><i class="fa fa-pencil-alt" style="margin: 0;font-size: 1.3rem"></i></li>
+                                                                <li class="progress" style="width:30px;margin:0px 10px 0px 0px;background-color:#b7bbbb;">
+                                                                    <div class="determinate"
+                                                                        style="width: {{ activityProgress|round(0) }}%;background-color: black;"></div>
+                                                                </li>
+                                                            </ul>
+                                                        </ul>
+
+
+                                                    {% if activityMixed %}
+                                                        <li><i class="fa fa-2x fa-map-signs tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.mixed{% endtrans %}" data-delay="50"></i></li>
+                                                    {% else %}
+                                                        {% if activityType is defined %}
+                                                            {% if activityType == 0 %}
+                                                                <li><i class="fa fa-2x fa-pie-chart tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.contrib{% endtrans %}" data-delay="50"></i></li>
+                                                            {% elseif activityType == 1 %}
+                                                                <li><i class="fas fa-2x fa-tachometer-alt tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.eval{% endtrans %}" data-delay="50"></i></li>
+                                                            {% elseif activityType == 2 %}
+                                                                <li><i class="fas fa-2x fa-comment-dots tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.pureFeedback{% endtrans %}" data-delay="50"></i></li>
+                                                            {% endif %}
+                                                        {% else %}
+                                                            <li></li>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                    {% if activity.finalized is null %}
+                                                            <li><i class="material-icons tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.not_finalized{% endtrans %}" data-delay="50">pause_circle_outline</i></li>
+                                                    {% endif %}
+                                                    {# in case there is a user grading an activity belongs to another firm (external to this activity), do not apply for root user #}
+                                                    {% if activity.organization.id != currentuser.orgId and currentuser.role != 4 %}
+                                                            <li>
+                                                                <i class="material-icons green-text tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.external{% endtrans %}" data-delay="50">call_made</i>
+                                                            </li>
+                                                    {% endif %}
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        <div class="collapsible-body">
+                                            <div class="collapse" id="details">
+                                                <ul class="flex-center row" style="justify-content: space-between;">
+                                                    <li><h4 class="department-name no-margin">{% trans %}activities.details{% endtrans %}</h4></li>
+                                                    {# Suppress element is only possible : if activity is not requested/attributed/, user is not a collaborator and stage has not been fully graded or if user has root privileges #}
+                                                    {% if activity.status != -2 and activity.status != -4 and activity.status != -3 and activity.stages|length == 1 and activity.stages[0].status < 2 and currentuser.role != 3 or currentuser.role == 4 %}
+                                                        <li style="margin-left:auto;"><a href="#deleteAModal" class="waves-effect waves-light red accent-4 btn white-text modal-trigger" data-aid="{{ activity.id }}">{% trans %}activities.delete_activity_btn{% endtrans %}</a></li>
+                                                    {% endif %}
+                                                </ul>
+                                            </div>
+                                            <ul class="collection">
+
+                                                {% set activityHasResults = false %}
+                                                {% set nbReleasedStages = 0 %}
+                                                {% set nbUnreleasedStages = 0 %}
+                                                {% for key, mstage in mactivity.stages %}
+
+                                                    {% set stage = activity.stages[key] %}
+
+                                                    {% set releasedStage = false %}
+                                                    {% set selectedTeam = null %}
+
+                                                    <li class="collection-item">
+
+                                                        {# display is different whether the activity is a requested one or not #}
+
+                                                        {#{% if activity.stages|length > 1 %}#}
+                                                            <ul class="flex-center row" style="justify-content: space-between;">
+                                                                <li><h4 class="department-name no-margin">{{ form_row(mstage.name) }}</h4></li>
+                                                                {% if stage.status < 2 and currentuser.role != 3 or currentuser.role == 4 %}
+                                                                    <li style="margin-left:auto;"><a href="#deleteASModal" class="waves-effect waves-light red accent-4 btn white-text modal-trigger" data-sid="{{ stage.id }}">{% trans %}activities.delete_stage_btn{% endtrans %}</a></li>
+                                                                {% endif %}
+                                                            </ul>
+
+                                                        {#{% endif %}#}
+                                                        <div class="row">
+                                                            <div class="col s6 m4">
+                                                                <i class="fa fa-cube" aria-hidden="true"></i> {% trans %}activities.criteria{% endtrans %}
+                                                            </div>
+                                                            <div class="col s6 m8">
+                                                                <ul class="flex-center">
+                                                                {% for criterion in stage.criteria %}
+                                                                    <li>
+                                                                        <i class="fa fa-{% if criterion.cName.icon is null %}cube{% else %}{{ criterion.cName.icon.name }}{% endif %} tooltipped" data-position="top"
+                                                                        data-tooltip="{{ criterion.cName.name }}" style="font-size:1.3rem!important;margin-right: 10px;">
+                                                                        </i>
+                                                                    </li>
+                                                                {% endfor %}
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col s6 m4">
+                                                                <i class="far fa-clock" aria-hidden="true"></i> {% trans %}activities.activity_period{% endtrans %}
+                                                            </div>
+                                                            <div class="col s6 m4 desktop-dates">{{ stage.startdate|localizeddate('long', 'none') }} - {{ stage.enddate|localizeddate('long', 'none') }}</div>
+                                                            <div class="col s6 m4 mobile-dates">{{ stage.startdate|localizeddate('short', 'none', null, null, 'dd/MM') }} - {{ stage.enddate|localizeddate('short', 'none', null, null, 'dd/MM') }}</div>
+                                                        </div>
+
+                                                        <div class="row">
+                                                            <div class="col s6 m4">
+                                                                <i class="far fa-clock" aria-hidden="true"></i> {% trans %}activities.grading_period{% endtrans %}
+                                                            </div>
+                                                            <div class="col s6 m4 desktop-dates">{{ stage.gstartdate|localizeddate('long', 'none') }} - {{ stage.genddate|localizeddate('long', 'none') }}</div>
+                                                            <div class="col s6 m4 mobile-dates">{{ stage.gstartdate|localizeddate('short', 'none', null, null, 'dd/MM') }} - {{ stage.genddate|localizeddate('short', 'none', null, null, 'dd/MM') }}</div>
+                                                        </div>
+
+                                                        <div class="row">
+                                                            <div class="col s12 m4">
+                                                                <i class="fa fa-tasks" aria-hidden="true"></i> {% trans %}activities.progress{% endtrans %}
+                                                            </div>
+                                                            <div class="col s9 m4">
+                                                                <div class="progress">
+                                                                    <div class="determinate" style="width: {{ stage.gradingProgress * 100 }}%"></div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col s3 m3">
+                                                                {{ (stage.gradingProgress * 100)|round(0) }}%
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="row">
+                                                            <div class="col s10 m4">
+                                                                <i class="fa fa-users" aria-hidden="true"></i>{% trans %}activities.participants{% endtrans %}
+                                                            </div>
+                                                            <div class="col s2 m4">
+                                                                {{ stage.criteria[0].participants|length }}
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="row no-margin">
+                                                            <ul class="participants">
+                                                                {% set allMembersHaveValidatedGrades = null %}
+                                                                {% for participant in stage.criteria[0].participants %}
+
+                                                                        {% set user = participant.user(app) %}
+                                                                        {% set isExternal = false %}
+                                                                        {% set extUser = null %}
+
+
+                                                                        {% if currentuser.orgId != user.orgId %}
+                                                                            {% set isExternal = true %}
+                                                                            {% set break = false %}
+                                                                            {% for externalUser in user.externalUsers if not break %}
+                                                                                {% if externalUser.organization.id == currentuser.orgId %}
+                                                                                    {% set break = true %}
+                                                                                    {% set extUser = externalUser %}
+                                                                                {% endif %}
+                                                                            {% endfor %}
+                                                                        {% endif %}
+
+                                                                    {% if participant.team is null %}
+                                                                        <li class="participant" style="position: relative">
+                                                                            <ul class="flex-center" style="flex-direction: column">
+                                                                                <li>
+                                                                                    <div class="picture-frame">
+                                                                                        <img class="user-picture" src="{{ (user.picture != "") ? asset('lib/img/' ~ user.picture) : asset('lib/img/no-picture.png') }}" alt="">
+                                                                                    </div>
+                                                                                </li>
+                                                                                <li>
+                                                                                    <div class="participant-name">
+                                                                                            <span>
+                                                                                                {% if isExternal == true and extUser is not null %}
+                                                                                                    {% if extUser.firstname != null %}
+                                                                                                        {{ extUser.firstname }}
+                                                                                                        {% if extUser.deleted != null %}
+                                                                                                            <span style="color: black;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.deleted_user{% endtrans %}" data-delay="50">†</span>
+                                                                                                        {% endif %}
+                                                                                                    {% else %}
+                                                                                                        {{ user.organization(app).commname }}
+                                                                                                    {% endif %}
+                                                                                                {% else %}
+                                                                                                    {% if user.deleted != null %}
+                                                                                                            <span style="color: black;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.deleted_user{% endtrans %}" data-delay="50">†</span>
+                                                                                                    {% endif %}
+                                                                                                    {{ user.firstname }}
+                                                                                                {% endif %}
+                                                                                            </span>
+                                                                                            {% if isExternal == true and extUser is not null %}
+                                                                                                <span style="background-color: #26A69A;color: white;padding: 0px 5px;border-radius: 100%;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.external_user_msg{% endtrans %}" data-delay="50">E</span>
+                                                                                            {% endif %}
+                                                                                            {% if participant.type == 0 %}
+                                                                                                <span style="background-color: purple;color: white;padding: 0px 5px;border-radius: 100%;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.tp_participant_msg{% endtrans %}" data-delay="50">T</span>
+                                                                                            {% elseif participant.type == -1 %}
+                                                                                                <span style="background-color: orange;color: white;padding: 0px 5px;border-radius: 100%;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.passive_participant_msg{% endtrans %}" data-delay="50">P</span>
+                                                                                            {% endif %}
+                                                                                            {% if participant.precomment is not null and participant.precomment != "" %}
+                                                                                                <i class="fa fa-flag tooltipped" data-position="top" data-tooltip="{{ participant.precomment }}" data-delay="50" style="color:#15a6ae;" title="{% trans %}grade.precomment.button_existing_title{% endtrans %}"></i>
+                                                                                            {% endif %}
+                                                                                            {% if participant.status == 3 and stage.status < 2 %}
+                                                                                                <span class="material-icons green-text tooltipped" style="font-size:16px" data-position="top" data-tooltip="{% trans %}tooltip.activity.validated_grades{% endtrans %}" data-delay="50">check_circle</span>
+                                                                                            {% endif %}
+                                                                                    </div>
+                                                                                </li>
+                                                                            </ul>
+                                                                        </li>
+                                                                        {% else %}
+                                                                            {% if selectedTeam is null or selectedTeam != participant.team %}
+
+                                                                                {% if stage.status < 2 and allMembersHaveValidatedGrades == null %}
+
+                                                                                    {% set break = false %}
+                                                                                    {% for teamParticipant in stage.criteria[0].participants if not break %}
+                                                                                        {% if teamParticipant.team is not null and teamParticipant.status < 3 %}
+                                                                                            {% set break = true %}
+                                                                                            {% set allMembersHaveValidatedGrades = false %}
+                                                                                        {% endif %}
+                                                                                    {% endfor %}
+                                                                                    {% if break == false %}
+                                                                                        {% set allMembersHaveValidatedGrades = true %}
+                                                                                    {% endif %}
+
+                                                                                {% endif %}
+
+                                                                            <li class="participant" style="position: relative">
+                                                                                    <ul class="flex-center" style="flex-direction: column">
+                                                                                        <li>
+                                                                                            {% if participant.team.picture != "" and participant.team.picture is not null %}
+                                                                                            <div class="picture-frame">
+                                                                                                <img class="user-picture" src="{{ participant.team.picture }}" alt="">
+                                                                                            </div>
+                                                                                            {% else %}
+                                                                                                <div class="picture-frame flex-center" style="background-color: #b3b3b3; border-radius: 100%; height: 50px; justify-content: center">
+                                                                                                    <i class="fa fa-users" style="color: white; font-size: 2rem; margin: 0px;"></i>
+                                                                                                </div>
+                                                                                            {% endif %}
+                                                                                        </li>
+                                                                                        <li>
+                                                                                            <div class="participant-name">
+                                                                                                <span>{{ participant.team.name }}</span>
+                                                                                                {% if participant.type == 0 %}
+                                                                                                    <span style="background-color: purple;color: white;padding: 0px 5px;border-radius: 100%;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.tp_participant_msg{% endtrans %}" data-delay="50">T</span>
+                                                                                                {% elseif participant.type == -1 %}
+                                                                                                    <span style="background-color: orange;color: white;padding: 0px 5px;border-radius: 100%;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.passive_participant_msg{% endtrans %}" data-delay="50">P</span>
+                                                                                                {% endif %}
+                                                                                                {% if participant.precomment is not null and participant.precomment != "" %}
+                                                                                                    <i class="fa fa-flag tooltipped" data-position="top" data-tooltip="{{ participant.precomment }}" data-delay="50" style="color:#15a6ae;" title="{% trans %}grade.precomment.button_existing_title{% endtrans %}"></i>
+                                                                                                {% endif %}
+                                                                                                {% if allMembersHaveValidatedGrades == true %}
+                                                                                                    <i class="material-icons green-text tooltipped" style="font-size:16px" data-position="top" data-tooltip="{% trans %}tooltip.activity.validated_grades{% endtrans %}" data-delay="50">check_circle</i>
+                                                                                                {% endif %}
+                                                                                            </div>
+                                                                                        </li>
+                                                                                    </ul>
+                                                                            </li>
+                                                                        {% endif %}
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            </ul>
+                                                        </div>
+                                                        <br>
+                                                        <div class="row action-buttons">
+                                                            {% if stage.status < 2 %}
+                                                                {% if currentuser.role == 1 or currentuser.role == 4 or stage.masterUserId == currentuser.id and stage.status < 2 %}
+                                                                    <div class="button-field">
+                                                                        <a class="btn-large waves-effect waves-light teal lighten-1 modify-btn" href="{{ url('oldActivityDefinition',{'elmt' : 'activity', 'elmtId' : activity.id}) }}"> {% trans %}activities.modify{% endtrans %} </a>
+                                                                    </div>
+                                                                {% endif %}
+                                                            {% endif %}
+                                                            {# Grade or see results button #}
+                                                            {% if stage.status < 2 or stage.status == 2 and currentuser.role == 3 %}
+
+                                                                {% set break = false %}
+                                                                {% for participant in stage.participants if not break %}
+                                                                    {% if participant.usrId == currentuser.id and participant.type != -1 and now >= stage.gstartdate|date("Y/m/d") %}
+                                                                        {% if participant.isMailed == true and participant.status >=3 or currentuser.role == 3 or participant.status < 3 and now <= stage.genddate|date("Y/m/d") %}
+                                                                                <div class="button-field">
+                                                                                    <a class="btn-large waves-effect waves-light teal lighten-1 grade-btn" href="{{ url('newStageGrade',{'stgId' : stage.id})}}"> {% if participant.status == 3 %}{% trans %} activities.see_grades {% endtrans %}{% elseif participant.status == 2 or participant.status == 1 %}{% trans %} activities.finalize_grades {% endtrans %}{% else %}{% trans %}activities.grade{% endtrans %}{% endif %} </a>
+                                                                                </div>
+                                                                        {% endif %}
+                                                                        {% set break = true %}
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            {% endif %}
+
+
+                                                            {% if activity.stages|length == 1 %}
+
+                                                                {% if activity.status == 3 and currentuser.role == 3 or activity.status == 2 and currentuser.role != 3 %}
+                                                                    <div class="button-field">
+                                                                        <a class="btn-large waves-effect waves-light blue darken-4 results-btn" href="{{ url('activityResults',{'actId' : stage.activity.id}) }}" style="color: white;"> {% trans %}activities.results{% endtrans %}</a>
+                                                                    </div>
+                                                                {% endif %}
+
+                                                            {% else %}
+
+                                                                    {% if activity.status == 3 %}
+                                                                        {% if stage == activity.stages|last %}
+                                                                            <div class="button-field">
+                                                                                <a class="btn-large waves-effect waves-light blue darken-4 results-btn" href="{{ url('activityResults',{'actId' : stage.activity.id}) }}" style="color: white;"> {% trans %}activities.results{% endtrans %}</a>
+                                                                            </div>
+                                                                        {% endif %}
+                                                                    {% else %}
+
+                                                                        {% set allComputed = true %}
+                                                                        {% for actStage in activity.stages if allComputed %}
+                                                                            {% if actStage.status < 2 %}
+                                                                                {% set allComputed = false %}
+                                                                            {% endif %}
+                                                                        {% endfor %}
+
+                                                                        {% if stage.status == 3 and currentuser.role == 3 or stage.status == 2 and currentuser.role != 3 %}
+
+                                                                            {% if stage == activity.stages|last and allComputed %}
+                                                                                <div class="button-field">
+                                                                                    <a class="btn-large waves-effect waves-light blue darken-4 results-btn" href="{{ url('activityResults',{'actId' : stage.activity.id}) }}" style="color: white;"> {% trans %}activities.results{% endtrans %}</a>
+                                                                                </div>
+                                                                            {% elseif not allComputed %}
+
+                                                                                <div class="button-field">
+                                                                                    <a class="btn-large waves-effect waves-light blue darken-4 results-btn" href="{{ url('activityResults',{'actId' : stage.activity.id}) }}" style="color: white;"> {% trans %}activities.results{% endtrans %}</a>
+                                                                                </div>
+                                                                            {% endif %}
+
+                                                                        {% endif %}
+
+                                                                    {% endif %}
+
+                                                            {% endif %}
+                                                        </div>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    </li>
+                                </ul>
+
+
+                            {% elseif activity.status >= 2 %}
+
+
+
+                                <ul id="activityList{{ activity.id }}" class="collapsible expandMore expandLess" data-collapsible="accordion">
+                                    <li>
+                                        <div class="collapsible-header flex-center orange lighten-5">
+                                            <i class="fa fa-fw fa-chevron-down"></i>
+                                            <i class="fa fa-fw fa-chevron-right"></i>
+                                            <div class="activity-banner">
+                                                <div class="activity-title"> {{ form_row(mactivity.name) }} {% if activity.recurring %}<i class="far fa-2x fa-circle-notch fa-recurring tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.recurring{% endtrans %}" data-delay="50" style="margin-left:10px;"></i>{% endif %}</div>
+                                                {#<div class="activity-description"> {{ activity.objectives  }}</div>#}
+                                            </div>
+
+                                            <div style="margin-left:auto;">
+                                                <ul style="display:flex;align-items:center;">
+                                                    {% if activityMixed %}
+                                                        <li><i class="fa fa-2x fa-map-signs tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.mixed{% endtrans %}" data-delay="50"></i></li>
+                                                    {% else %}
+                                                        {% if activityType is defined %}
+                                                            {% if activityType == 0 %}
+                                                                <li><i class="fa fa-2x fa-pie-chart tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.contrib{% endtrans %}" data-delay="50"></i></li>
+                                                            {% elseif activityType == 1 %}
+                                                                <li><i class="fas fa-2x fa-tachometer-alt tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.eval{% endtrans %}" data-delay="50"></i></li>
+                                                            {% elseif activityType == 2 %}
+                                                                <li><i class="fas fa-2x fa-comment-dots tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.pureFeedback{% endtrans %}" data-delay="50"></i></li>
+                                                            {% endif %}
+                                                        {% endif %}
+                                                        {% if activity.status == 3 %}
+                                                            <li>
+                                                                <i class="material-icons green-text tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.released{% endtrans %}" data-delay="50">check_circle</i>
+                                                            </li>
+                                                        {% endif %}
+                                                        {# in case there is a user grading an activity belongs to another firm (external to this activity), do not apply for root user #}
+                                                        {% if activity.organization.id != currentuser.orgId and currentuser.role != 4 %}
+                                                            <li>
+                                                                <i class="material-icons green-text tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.external{% endtrans %}" data-delay="50">call_made</i>
+                                                            </li>
+                                                        {% endif %}
+
+                                                    {% endif %}
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        <div class="collapsible-body">
+                                            <div class="collapse" id="details">
+                                                <ul class="flex-center row" style="justify-content: space-between;">
+                                                    <li><h4 class="department-name no-margin">{% trans %}activities.details{% endtrans %}</h4></li>
+                                                    {% if currentuser.role == 4 %}
+                                                        <li style="margin-left:auto;"><a href="#deleteAModal" class="waves-effect waves-light red accent-4 btn white-text modal-trigger" data-aid="{{ activity.id }}">{% trans %}activities.delete_activity_btn{% endtrans %}</a></li>
+                                                    {% endif %}
+                                                </ul>
+                                            </div>
+                                            <ul class="collection">
+
+                                                {% set activityHasResults = false %}
+                                                {% set nbParticipatingReleases = 0 %}
+                                                {% set nbReleasedStages = 0 %}
+                                                {% set nbUnreleasedStages = 0 %}
+                                                {% for key, mstage in mactivity.stages %}
+
+                                                    {% set stage = activity.stages[key] %}
+
+                                                    {% set releasedStage = false %}
+                                                    {% set selectedTeam = null %}
+
+                                                    <li class="collection-item">
+
+                                                        {#{% if activity.stages|length > 1 %}#}
+                                                            <ul class="flex-center row" style="justify-content: space-between;">
+                                                                <li><h4 class="department-name no-margin">{{ form_row(mstage.name) }}</h4></li>
+                                                            </ul>
+                                                        {#{% endif %}#}
+                                                            <div class="row">
+                                                                <div class="col s6 m4">
+                                                                    <i class="fa fa-cube" aria-hidden="true"></i> {% trans %}activities.criteria{% endtrans %}
+                                                                </div>
+                                                                <div class="col s6 m8">
+                                                                    <ul class="flex-center">
+                                                                    {% for criterion in stage.criteria %}
+                                                                        <li>
+                                                                            <i class="fa fa-{% if criterion.cName.icon is null %}cube{% else %}{{ criterion.cName.icon.name }}{% endif %} tooltipped" data-position="top"
+                                                                            data-tooltip="{{ criterion.cName.name }}" style="font-size:1.3rem!important; margin-right: 10px;">
+                                                                            </i>
+                                                                        </li>
+                                                                    {% endfor %}
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col s6 m4">
+                                                                    <i class="far fa-clock" aria-hidden="true"></i> {% trans %}activities.activity_period{% endtrans %}
+                                                                </div>
+                                                                <div class="col s6 m4 desktop-dates">{{ stage.startdate|localizeddate('long', 'none') }} - {{ stage.enddate|localizeddate('long', 'none') }}</div>
+                                                                <div class="col s6 m4 mobile-dates">{{ stage.startdate|localizeddate('short', 'none', null, null, 'dd/MM') }} - {{ stage.enddate|localizeddate('short', 'none', null, null, 'dd/MM') }}</div>
+                                                            </div>
+
+                                                            <div class="row">
+                                                                <div class="col s6 m4">
+                                                                    <i class="far fa-clock" aria-hidden="true"></i> {% trans %}activities.grading_period{% endtrans %}
+                                                                </div>
+                                                                <div class="col s6 m4 desktop-dates">{{ stage.gstartdate|localizeddate('long', 'none') }} - {{ stage.genddate|localizeddate('long', 'none') }}</div>
+                                                                <div class="col s6 m4 mobile-dates">{{ stage.gstartdate|localizeddate('short', 'none', null, null, 'dd/MM') }} - {{ stage.genddate|localizeddate('short', 'none', null, null, 'dd/MM') }}</div>
+                                                            </div>
+
+                                                            <div class="row">
+                                                                <div class="col s10 m4">
+                                                                    <i class="fa fa-users" aria-hidden="true"></i>{% trans %}activities.participants{% endtrans %}
+                                                                </div>
+                                                                <div class="col s2 m4">
+                                                                    {{ stage.criteria[0].participants|length }}
+                                                                </div>
+                                                            </div>
+
+                                                        <div class="row no-margin">
+                                                            <ul class="participants">
+                                                                {% for participant in stage.criteria[0].participants %}
+
+                                                                        {% set user = participant.user(app) %}
+                                                                        {% set isParticipantExternal = false %}
+                                                                        {% set extUser = null %}
+                                                                        {% set isCurrentUserExternal = false %}
+
+
+                                                                        {% if currentuser.orgId != user.orgId %}
+                                                                            {% set isParticipantExternal = true %}
+
+                                                                            {% if stage.activity.organization.id == currentuser.orgId %}
+                                                                                {% set isCurrentUserExternal = true %}
+                                                                            {% endif %}
+
+                                                                            {% set break = false %}
+                                                                            {% for externalUser in user.externalUsers if not break %}
+                                                                                {% if externalUser.organization.id == currentuser.orgId %}
+                                                                                    {% set break = true %}
+                                                                                    {% set extUser = externalUser %}
+                                                                                {% endif %}
+                                                                            {% endfor %}
+                                                                        {% endif %}
+
+
+
+                                                                    {% if participant.team is null %}
+                                                                        <li class="participant" style="position: relative">
+                                                                            <ul class="flex-center" style="flex-direction: column">
+                                                                                <li>
+                                                                                    <div class="picture-frame">
+                                                                                        <img class="user-picture" src="{{ (user.picture is not null) ? asset('lib/img/' ~ user.picture) : asset('lib/img/no-picture.png') }}" alt="">
+                                                                                    </div>
+                                                                                </li>
+                                                                                <li>
+                                                                                    <div class="participant-name">
+                                                                                            <span>
+                                                                                                {% if isParticipantExternal == true and extUser is not null %}
+                                                                                                    {% if isCurrentUserExternal == true %}
+                                                                                                        {% if extUser.firstname != null %}
+                                                                                                            {{ extUser.firstname }}
+                                                                                                            {% if extUser.deleted != null %}
+                                                                                                                <span style="color: black;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.deleted_user{% endtrans %}" data-delay="50">†</span>
+                                                                                                            {% endif %}
+                                                                                                        {% else %}
+                                                                                                            {{ user.organization(app).commname }}
+                                                                                                        {% endif %}
+                                                                                                    {% else %}
+                                                                                                        {{ user.organization(app).commname }}
+                                                                                                    {% endif %}
+                                                                                                {% else %}
+                                                                                                    {% if user.deleted != null %}
+                                                                                                            <span style="color: black;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.deleted_user{% endtrans %}" data-delay="50">†</span>
+                                                                                                    {% endif %}
+                                                                                                    {{ user.firstname }}
+                                                                                                {% endif %}
+                                                                                            </span>
+                                                                                            {% if isCurrentUserExternal == true and extUser is not null %}
+                                                                                                <span style="background-color: #26A69A;color: white;padding: 0px 5px;border-radius: 100%;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.external_user_msg{% endtrans %}" data-delay="50">E</span>
+                                                                                            {% endif %}
+                                                                                            {% if participant.type == 0 %}
+                                                                                                <span style="background-color: purple;color: white;padding: 0px 5px;border-radius: 100%;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.tp_participant_msg{% endtrans %}" data-delay="50">T</span>
+                                                                                            {% elseif participant.type == -1 %}
+                                                                                                <span style="background-color: orange;color: white;padding: 0px 5px;border-radius: 100%;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.passive_participant_msg{% endtrans %}" data-delay="50">P</span>
+                                                                                            {% endif %}
+                                                                                            {% if participant.precomment is not null and participant.precomment != "" %}
+                                                                                                <i class="fa fa-flag tooltipped" data-position="top" data-tooltip="{{ participant.precomment }}" data-delay="50" style="color:#15a6ae;" title="{% trans %}grade.precomment.button_existing_title{% endtrans %}"></i>
+                                                                                            {% endif %}
+                                                                                    </div>
+                                                                                </li>
+                                                                            </ul>
+                                                                        </li>
+                                                                    {% else %}
+                                                                        {% if selectedTeam is null or selectedTeam != participant.team %}
+                                                                            <li class="participant" style="position: relative">
+                                                                                    <ul class="flex-center" style="flex-direction: column">
+                                                                                        <li>
+                                                                                            {% if participant.team.picture != "" and participant.team.picture is not null %}
+                                                                                            <div class="picture-frame">
+                                                                                                <img class="user-picture" src="{{ participant.team.picture }}" alt="">
+                                                                                            </div>
+                                                                                            {% else %}
+                                                                                                <div class="picture-frame flex-center" style="background-color: #b3b3b3; border-radius: 100%; height: 50px; justify-content: center">
+                                                                                                    <i class="fa fa-users" style="color: white; font-size: 2rem; margin: 0px;"></i>
+                                                                                                </div>
+                                                                                            {% endif %}
+                                                                                        </li>
+                                                                                        <li>
+                                                                                            <div class="participant-name">
+                                                                                                <span>{{ participant.team.name }}</span>
+                                                                                                {% if participant.type == 0 %}
+                                                                                                    <span style="background-color: purple;color: white;padding: 0px 5px;border-radius: 100%;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.tp_participant_msg{% endtrans %}" data-delay="50">T</span>
+                                                                                                {% elseif participant.type == -1 %}
+                                                                                                    <span style="background-color: orange;color: white;padding: 0px 5px;border-radius: 100%;" class="tooltipped" data-position="top" data-tooltip="{% trans %}tooltip.activity.passive_participant_msg{% endtrans %}" data-delay="50">P</span>
+                                                                                                {% endif %}
+                                                                                                {% if participant.precomment is not null and participant.precomment != "" %}
+                                                                                                    <i class="fa fa-flag tooltipped" data-position="top" data-tooltip="{{ participant.precomment }}" data-delay="50" style="color:#15a6ae;" title="{% trans %}grade.precomment.button_existing_title{% endtrans %}"></i>
+                                                                                                {% endif %}
+                                                                                            </div>
+                                                                                        </li>
+                                                                                    </ul>
+                                                                            </li>
+                                                                            {% set selectedTeam = participant.team %}
+                                                                        {% endif %}
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            </ul>
+                                                        </div>
+                                                        <br>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    </li>
+                                </ul>
+
+
+
+
+
+
+                            {% else %}
+
+                                <li class="activity">
+                                    <ul class="flex-center row" style="justify-content: space-between;">
+                                        <li class="stage-title">
+                                            <h4> {% trans %} Activity {% endtrans %} {{ key + 1 }}</h4>
+                                        </li>
+                                        {% if activity.status < 1 %}
+                                            <li style="margin-left:auto;"><a href="#deleteActivity" class="waves-effect waves-light red accent-4 btn white-text modal-trigger" data-aid="{{ activity.id }}">{% trans %}stages.delete_stage_btn{% endtrans %}</a></li>
+                                        {% endif %}
+                                    </ul>
+                                    <div class="row">
+                                        <div class="input-field col s12 m12">
+                                            {{ form_row(mactivity.name) }}
+                                        </div>
+                                    </div>
+                                </li>
+
+                            {% endif %}
+                        {% endfor %}
+                        </ul>
+                    </div>
+                </li>
+            </ul>
+
+            <div class="row action-buttons">
+                <div class="button-field">
+                    {{ form_row(form.submit) }}
+                </div>
+                <div class="button-field">
+                    <a class="waves-effect waves-light btn-large red modal-trigger" href="#deleteOrganization">{% trans %}create_organization.delete{% endtrans %}</a>
+                </div>
+            </div>
+
+            <script type="text/javascript">
+            
+                {% for key, user in form.orgUsers %}
+                document.querySelectorAll('select[name*="posId"]').item("{{key}}").value = "{{ user.vars.data.posId }}";
+                document.querySelectorAll('select[name*="dptId"]').item("{{key}}").value = "{{ user.vars.data.dptId }}";
+                document.querySelectorAll('select[name*="titId"]').item("{{key}}").value = "{{ user.vars.data.titId }}";
+                document.querySelectorAll('select[name*="wgtId"]').item("{{key}}").value = "{{ user.vars.data.wgtId }}";
+                {% endfor %}
+            //})
+            </script>
+
+
+
+        {{ form_rest(form) }}
+        {{ form_end(form) }}
+    </div>
+
+<div id="deleteActivity" class="modal">
+    <div class="modal-content">
+        <h4>Delete Activity</h4>
+        <p>Are you sure you want to delete this activity ?</p>
+    </div>
+    <div class="modal-footer">
+        <a class=" modal-action modal-close submit-button waves-effect waves-green btn-large adelete-button">{% trans %}user_update.delete_modal.confirm{% endtrans %}</a>
+        <a class=" modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+    </div>
+</div>
+
+<div id="deleteUser" class="modal">
+    <div class="modal-content">
+        <h4>{% trans %}user_update.delete_modal.title{% endtrans %}</h4>
+        <p>Are you sure you want to delete this user ?</p>
+    </div>
+    <div class="modal-footer">
+        <a class=" modal-action modal-close submit-button waves-effect waves-green btn-large udelete-button">{% trans %}user_update.delete_modal.confirm{% endtrans %}</a>
+        <a class=" modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+    </div>
+</div>
+
+<div id="deleteOrganization" class="modal">
+    <div class="modal-content">
+        {#{% if user_activities[k].stages|length > 1 %}#}
+        <h4>{% trans %}create_organization.delete_modal.title{% endtrans %}</h4>
+        <p>{% trans %}create_organization.delete_modal.content{% endtrans %}</p>
+        {#{% else %}
+            <p>{% trans %}activities.delete_activity_msg{% endtrans %}Are you sure you want to delete this activity ?</p>
+        {% endif %}#}
+    </div>
+    <div class="modal-footer">
+        <a class="modal-action modal-close waves-effect waves-green btn-large odelete-button" data-oid="{{ organization.id }}">{% trans %}create_organization.delete_modal.confirm{% endtrans %}</a>
+        <a class="modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}create_organization.delete_modal.cancel{% endtrans %}</a>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('js/login.js') }}"></script>
+    <script src="{{ asset('js/dropify.min.js') }}"></script>
+    <script src="{{ asset('js/organization_massive_update.js') }}"></script>
+{% endblock %}

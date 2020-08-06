@@ -1,0 +1,238 @@
+<li class="stage">
+    <ul class="collapsible expandMore expandLess" data-collapsible="accordion">
+        <li>
+            <div class="collapsible-header flex-center cyan lighten-5">
+                <i class="fa fa-fw fa-chevron-down"></i>
+                <i class="fa fa-fw fa-chevron-right"></i>
+                <!-- just giving the name an absolute position because it was interfering ith the button position -->
+                <div class="stage-banner">
+                    <ul class="flex-center">
+                        <ul style="width:100%">
+                            <li class="element-data" style="display: none;">
+                                <ul class="flex-center" style="justify-content:space-between">
+                                    <li class="stage-banner-element">
+                                        <ul class="flex-center">
+                                            <li>
+                                                <h5 class="stage-name"></h5>
+                                                <span class="stage-weight"></span>
+                                            </li>
+                                            <li class="stage-period-freq stage-banner-element">
+                                                <i class="fa fa-clock no-margin"></i>
+                                                <span></span>
+                                            </li>
+                                            <li class="stage-dates" style="display:none">
+                                                <i class="fa fa-calendar"></i>
+                                                <span></span>
+                                            </li>
+                                            <li class="stage-visibility">
+                                                <i class="fa fa-lock"></i>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a class="modify waves-effect waves-light btn-flat tooltipped not-collapse modal-trigger" href="#stage___name__"data-position="top" data-tooltip="{% trans %}organization_elements.update{% endtrans %}" data-delay="50"><i class="fa fa-pencil-alt no-margin"></i></a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <div id="stage___name__" class="element-input modal" style="width: 80%;height:70%">
+                                <div class="modal-content">
+                                    <ul class="flex-center" style="justify-content:space-between">
+                                        <li class="stage-title"><h4>{% trans %} stages.stage.title {% endtrans %} __name__</h4></li>
+                                        <li class="input-field weight" style="width: 20%;">
+                                            {{ form_label(item.weight) }}
+                                            <div class="weight-stage-slider" style="margin-top:10px;"></div>
+                                            <div class="weight-stage-slider-range-value center" style="font-size:1.2rem;padding-top: 5px"></div>
+                                            {{ form_widget(item.weight) }}
+                                            {{ form_errors(item.weight) }}
+                                        </li>
+                                        <li>
+                                            <a class="waves-effect waves-light accent-4 btn-flat tooltipped remove-stage" data-sid="0" data-position="top" data-tooltip="{% trans %}criteria.delete_criterion_btn{% endtrans %}"><i class="fa fa-trash no-margin"></i></a>
+                                        </li>
+                                    </ul>
+
+                                    <div class="row">
+                                        <div class="input-field">
+                                            {{ form_label(item.name) }}
+                                            {{ form_widget(item.name) }}
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="flex-center" style="justify-content:space-between;width:100%">
+
+                                            {% if elmtType != 'activity' %}
+                                            
+                                                <li class="switch date-switch">
+                                                    {{ form_label(item.definiteDates) }}
+                                                    <label style="display: flex;">
+                                                        <span>{% trans %}process_stages.dates_definition.defined_duration.title{% endtrans %}</span>
+                                                        {{ form_widget(item.definiteDates) }}
+                                                        <span class="lever"></span>
+                                                        <span>{% trans %}process_stages.dates_definition.defined_dates{% endtrans %}</span>
+                                                    </label>
+                                                </li>
+                                                <li class="flex-center period-freq-input">
+                                                    <ul class="flex-center" style="flex-direction: column;">
+                                                        <li class="flex-center" style="justify-content: space-between;width:100%">
+                                                            <label style="max-width: 20%;">{% trans %}process_stages.dates_definition.defined_duration.timespan{% endtrans %}</label>
+                                                            <div class="input-field">
+                                                            {{ form_widget(item.dPeriod) }}
+                                                            </div>
+                                                            <div class="input-field">
+                                                            {{ form_widget(item.dFrequency) }}
+                                                            </div>
+                                                            <label style="margin: 0 15px">{% trans %}process_stages.dates_definition.defined_duration.origin{% endtrans %}</label>
+                                                            <div class="input-field">
+                                                            {{ form_widget(item.dOrigin) }}
+                                                            </div>
+                                                        </li>
+                                                        <li class="flex-center" style="justify-content: space-between;width:100%">
+                                                            <label style="max-width: 20%;">{% trans %}process_stages.dates_definition.defined_duration.feedback{% endtrans %}</label>
+                                                            <div class="input-field">
+                                                            {{ form_widget(item.fPeriod) }}
+                                                            </div>
+                                                            <div class="input-field">
+                                                            {{ form_widget(item.fFrequency) }}
+                                                            </div>
+                                                            <label style="margin: 0 15px">{% trans %}process_stages.dates_definition.defined_duration.origin{% endtrans %}</label>
+                                                            <div class="input-field">
+                                                            {{ form_widget(item.fOrigin) }}
+                                                            </div>
+                                                        </li>
+                                                    </ul>  
+                                                </li>
+                                            
+                                            {% endif %}
+                                            <li class="flex-center dates-input" style="display:none">
+                                                <div class="input-field">
+                                                    {{ form_label(item.startdate) }}
+                                                    {{ form_widget(item.startdate) }}
+                                                </div>
+                                                <div class="input-field">
+                                                    {{ form_label(item.enddate) }}
+                                                    {{ form_widget(item.enddate) }}
+                                                </div>
+                                                <div class="input-field">
+                                                    {{ form_label(item.gstartdate) }}
+                                                    {{ form_widget(item.gstartdate) }}
+                                                </div>
+                                                <div class="input-field">
+                                                    {{ form_label(item.genddate) }}
+                                                    {{ form_widget(item.genddate) }}
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        {{ form_label(item.mode) }}
+                                        <div>
+                                            {{ form_widget(item.mode) }}
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="input-field">
+                                            {{ form_widget(item.visibility) }}
+                                            {{ form_label(item.visibility) }}
+                                        </div>
+                                    </div>
+                                    <div class="action-buttons" style="justify-content: flex-end;">
+                                        <a class="s-validate waves-effect waves-light btn blue darken-2 tooltipped modal-close" data-position="top" data-tooltip="{% trans %} criteria.tooltip.validate {% endtrans %}" data-sid="0"><i class="fa fa-check no-margin"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </ul>
+                    </ul>
+                </div>
+            </div>
+            <div class="collapsible-body">
+
+                <div class="row">
+                    <div class="col s12 m6">
+
+                        <div class="switch output-switch">
+                            <label for="output_type"></label>
+                            <label class="flex-center">
+                                <h5 style="margin-bottom: 0;">
+                                    <span class="output-type">{% trans %}activity_elements.survey{% endtrans %}</span>
+                                    <input type="checkbox" id="output_type" class="filled-in"
+                                    {#{% if stage.vars.data.surveys|length > 0 %}#} checked="checked"{#{% endif %}#}
+                                    >
+                                    <span class="lever"></span>
+                                    <span class="output-type">{% trans %}activity_elements.criteria{% endtrans %}</span>
+                                </h5>
+                            </label>
+                        </div>
+
+                      <div class="survey-element" style="display: none">
+
+
+                          <h6 class="no-participants">
+                            <span>{{ 'process_stages.no_survey'|trans }}</span>
+                            <i class="fa fa-question-circle tooltipped" data-position="top"></i>
+                          </h6>
+
+                        <a
+                          href="{{ url('surveyRequest',{'stgId' : 0 }) }}?redirect={{ url(route,routeParams)|e('url') }}"
+                          class="btn waves-effect waves-light insert-survey-btn" style="margin-top:5%">
+                          <span>{% trans %}survey.add_btn_internal{% endtrans %}</span>
+                        </a>
+
+
+                      </div>
+
+                        <div class="criteria-elements">
+
+                            <h6 class="no-criteria">
+                                <span>{{'process_stages.no_criteria'|trans}}</span>
+                                <i class="fa fa-question-circle tooltipped" data-position="top" data-tooltip="{{'process_stages.tooltip_no_criteria'|trans}}"></i>
+                            </h6>
+
+                            <ul class="criteria" data-prototype="{% filter escape %}{% include 'prototype_criterion.twig' with { 'item': item.criteria.vars.prototype } %}{% endfilter %}">
+                            </ul>
+                            <a href="#" class="waves-effect waves-light btn insert-criterion-btn">
+                                <span>{% trans %}criteria.add_btn_internal{% endtrans %}</span>
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                    {% if elmtType != "process" %}
+
+                        <div class="col s12 m6">
+
+                            <h5>{% trans %}activity_elements.participants{% endtrans %}</h5>
+
+                            <h6 class="no-participants">
+                                <span>{{'process_stages.no_participants'|trans}}</span>
+                                <i class="fa fa-question-circle tooltipped" data-position="top" data-tooltip="{{'process_stages.tooltip_no_participants'|trans}}"></i>
+                            </h6>
+
+                            <ul class="stage-participants"
+                                data-iprototype="{% filter escape %}{% include 'prototype_participant.twig' with { item: item.uniqueIntParticipations.vars.prototype, leadingOption: true } %}{% endfilter %}"
+                                data-tprototype="{% filter escape %}{% include 'prototype_participant.twig' with { item: item.uniqueTeamParticipations.vars.prototype, leadingOption: true } %}{% endfilter %}"
+                                data-eprototype="{% filter escape %}{% include 'prototype_participant.twig' with { item: item.uniqueExtParticipations.vars.prototype, leadingOption: false } %}{% endfilter %}"
+                            >
+                                <div class="action-buttons">
+                                    <a class="btn waves-effect waves-light insert-participant-btn"><i class="fa fa-plus-circle"></i>
+                                        <span>{% trans %}participants.add_btn_internal{% endtrans %}</span>
+                                    </a>
+                                    <a class="btn waves-effect waves-light insert-participant-btn"><i class="fa fa-plus-circle"></i>
+                                        <span>{% trans %}participants.add_btn_internal{% endtrans %}</span>
+                                    </a>
+                                    <a class="btn waves-effect waves-light insert-participant-btn"><i class="fa fa-plus-circle"></i>
+                                        <span>{% trans %}participants.add_btn_internal{% endtrans %}</span>
+                                    </a>
+                                </div>
+                            </ul>
+                        </div>
+
+                    {% endif %}
+
+                </div>
+            </div>
+        </li>
+    </ul>
+</li>
+
+
+

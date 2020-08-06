@@ -1,0 +1,782 @@
+{% extends "layout.html.twig" %}
+
+{% set truncVal = 12 %}
+
+{% block title %}
+    {% trans %}create_user.page_title{% endtrans %}
+{% endblock %}
+
+
+  {% block css %}
+    <!-- Dropify -->
+    <link href="{{ asset('css/dropify.min.css') }}" rel="stylesheet" type="text/css">
+    <script type="text/javascript">
+        var url = "{{ url('ajaxUserAdd',{'locale' : 'fr'}) }}";
+        var eurl = "{{ url('validateOrganizationElement',{orgId: orgId, elmtType: 'department', elmtId : 0 }) }}";
+        var rpurl = "{{ url('retrievePosFromDpt',{'dptId': 0}) }}";
+        var rwurl = "{{ url('retrieveWgtFromPos',{'posId': 0}) }}";
+        var wurl = "{{ url('addWeight',{'orgId': orgId, 'posId': 0,'usrId':0}) }}";
+        var vcurl = "{{ url('insertCheckedCSV',{'fileName': 'a','headerParameters':'b'}) }}";
+        var posTitleMsg = "{% trans %}create_position.title_msg{% endtrans %}";
+        var dptTitleMsg = "{% trans %}create_department.title_msg{% endtrans %}";
+        var titTitleMsg = "{% trans %}create_title.title_msg{% endtrans %}";
+        var wgtTitleMsg = "{% trans %}create_weight.title_msg{% endtrans %}";
+        var posContentMsg = "{% trans %}create_position.content_msg{% endtrans %}";
+        var dptContentMsg = "{% trans %}create_department.content_msg{% endtrans %}";
+        var titContentMsg = "{% trans %}create_title.content_msg{% endtrans %}";
+        var wgtContentMsg = "{% trans %}create_weight.content_msg{% endtrans %}";
+        var posSuccessMsg = "{% trans %}create_position.success_msg{% endtrans %}";
+        var dptSuccessMsg = "{% trans %}create_department.success_msg{% endtrans %}";
+        var titSuccessMsg = "{% trans %}create_title.success_msg{% endtrans %}";
+        var wgtSuccessMsg = "{% trans %}create_weight.success_msg{% endtrans %}";
+        var wgtLabel = "{% trans %}create_user.weight_label{% endtrans %}";
+        var nonWgtLabel = "{% trans %}create_user.non_weight_label{% endtrans %}";
+        var creationPage = "{{ creationPage }}";
+        const usersUrl = "{{ url('manageUsers') }}";
+    </script>
+    <style>
+
+      #main-header{
+        --actions-width: 200px;
+        --padding: 16px;
+        display: flex;
+        justify-content: center;
+        padding: 1em;
+        margin-bottom: 2em;
+        position: relative;
+      }
+
+      header .page-title{
+          display: inline-block;
+          text-align: center;
+      }
+
+      footer{
+      padding-bottom: 40px;
+      }
+
+      .add-title {
+        margin: 24px 0px 0px 0px;
+        text-align: center;
+      }
+      .select-dropdown {
+        margin-bottom: 0.4rem!important;
+      }
+      .user-role, .user-weight, .user-superior, .user-department, .user-position, .user-utitle, .user-fullname, .user-email {
+        display: inline-block;
+      }
+
+      .user-btn {
+        background-color: aliceblue;
+        color: black;
+      }
+
+      .user-title {
+        padding: 0 0.75rem;
+      }
+
+      .collection {
+        padding: 20px!important;
+        border: none!important;
+      }
+      .collection-item {
+        padding: 20px!important;
+        border: 1px solid #e0e0e0!important;
+        margin: 10px 0px!important;
+      }
+
+      .btn:hover, .btn-large:hover {
+        background-color: #2bbbad!important;
+      }
+
+      .user .row:first-of-type {
+        position: relative;
+      }
+
+      .delete-btn {
+        position: absolute;
+        right: 0;
+      }
+
+      .page-title{
+        font-size: 30px;
+      }
+
+      .back-btn{
+        position: absolute;
+        left: 40px;
+      }
+
+      .single-user{
+        width: 90%;
+        margin: 0 auto;
+      }
+
+      .user-credentials{
+        margin-bottom: 200px;
+      }
+
+    </style>
+  {% endblock %}
+
+
+{% block pagename %}
+    {% trans %}create_user.mobile_header_title{% endtrans %}
+{% endblock %}
+
+{% block username %}
+  {{ currentuser.firstname }}
+  {{ currentuser.lastname }}
+{% endblock %}
+
+{% block content %}
+    <main>
+
+      <header id="main-header" class="no-margin">
+        <a class="waves-effect waves-green btn back-btn" href="{{ url('manageUsers')}}">{{ 'team.go_back_users'|trans }}</a>
+        <span class="page-title">{{ creationPage ? 'create_user.page_title'|trans : 'user_update.page_title'|trans }}</span>
+      </header>
+
+
+    {{ form_start(form,{attr:{class: creationPage ? '' : 'single-user'}}) }}
+    {% if creationPage %}
+
+        <div style="width:90%;margin:auto;">
+          <h5>{% trans %}create_user.main_title{% endtrans %}</h5>
+
+
+          <input type="radio" id="csv" name="adding_type" required="required" value="1">
+          <label for="csv" class="required black-text">
+            <ul class="flex-center no-margin">
+              <i class="fas fa-2x fa-file-csv" style="margin-right:10px;"></i> {% trans %}create_user.csv_input_title{% endtrans %}
+            </ul>
+          </label>
+
+          <div style="margin-left:20px;margin-top:20px">
+            <div class="row csv-zone">
+              <div class="button-field">
+                  {{ form_widget(form.usersCSV) }}
+
+                <div class="errorMessage">
+                    {{ form_errors(form.usersCSV) }}
+                </div>
+              </div>
+          </div>
+        </div>
+
+        <input type="radio" id="manual" name="adding_type" required="required" value="2" checked="checked">
+        <label for="manual" class="required black-text">
+
+          <ul class="flex-center no-margin">
+            <i class="fas fa-2x fa-pen-square" style="margin-right:10px;"></i> {% trans %}create_user.manual_input_title{% endtrans %}
+          </ul>
+
+        </label>
+
+    {% endif %}
+
+
+
+    <div style="margin-left:20px">
+
+      {% if creationPage %}
+
+        <ul class="users collection" data-prototype="{% filter escape %}{% include 'prototype_user.twig' with { 'item': form.users.vars.prototype, 'enabledCreatingUser' : enabledCreatingUser } %}{% endfilter %}">
+
+        {% for key, user in form.users %}
+            {% set userData = user.vars.data %}
+    
+            <li class="user collection-item">
+              <div class="row">
+                  <div class="col s12 m4">
+                      <div class="user-role">
+                          <a class="btn user-btn user-info-role flex-center">
+                              <i class="fa fa-user-cog m-right"></i>
+                              <span class="m-right">{{ 'create_user.role'|trans }} : {{ userData.role == 1 ? 'create_user.administrator'|trans : (userData.role == 2 ? 'create_user.contributor'|trans : 'create_user.collaborator'|trans) }}</span>
+                          </a>
+                          <div class="user-select-role" style="display: none;">
+                              {{ form_label(user.role) }}
+                              {{ form_widget(user.role) }}
+                          </div>
+                      </div>
+                  </div>
+                  <div class="col s12 m4">
+                      <div class="user-weight">
+                          <a class="btn user-btn user-info-weight flex-center">
+                              <i class="fa fa-vote-yea m-right"></i>
+                              <span class="m-right">{{'create_user.influence'|trans}} : {{userData.wgtId.value}}</span>
+                          </a>
+                          <div class="user-select-weight" style="display: none;">
+                              {{ form_label(user.wgtId) }}
+                              {{ form_widget(user.wgtId) }}
+                              <a href="#addElement" class="add-weight modal-trigger" data-wid="0"><i class="fa fa-plus"></i> {% trans %}create_weight.open_modal_msg{% endtrans %}</a>
+                          </div>
+                      </div>
+                  </div>
+                  <div class="col s12 m4">
+                      <div class="user-superior">
+                          {% if userData.superior is not null %}
+                            {% set superiorName = userData.superiorUser.fullname %}
+                            {% set isTooLong = superiorName|length > truncVal %}
+                          {% else %}
+                            {% set isTooLong = false %}
+                          {% endif %}
+                          {% if not isTooLong %}
+                            <a class="btn user-btn user-info-superior flex-center">
+                          {% else %}
+                            <a class="btn user-btn user-info-superior flex-center tooltipped" data-position="top" data-tooltip="{{superiorName}}">
+                          {% endif %}
+                              <i class="fa fa-user-circle m-right"></i>
+                              <span class="m-right">
+                                {% if userData.superior is not null %}
+                                  {{'create_user.superior_short'|trans}} : {{ isTooLong ? superiorName|slice(0,truncVal) ~ '...' : superiorName }}
+                                {% else %}
+                                  {{'create_user.define_superior'|trans}}
+                                {% endif %}
+                              </span>
+                          </a>
+                          <div class="user-select-superior" style="display: none;">
+                              {{ form_row(user.superiorUser) }}
+                          </div>
+                      </div>
+                  </div>
+                  <div class="delete-btn" style="margin-left: auto;">
+                      <a class="btn-flat no-padding">
+                          <i class="fa fa-trash"></i>
+                      </a>
+                  </div>
+              </div>
+          
+              <div class="row no-margin">
+                  <div class="user-title">
+                      <h4 class="no-margin">{{ 'create_user.user'|trans }} {{key + 1}}</h4>
+                  </div>
+              </div>
+              <div class="row">
+                  <div class="input-field col s12 m4">
+                      {{ form_label(user.firstname) }}
+                      {{ form_widget(user.firstname) }}
+                  </div>
+                  <div class="input-field col s12 m4">
+                      {{ form_label(user.lastname) }}
+                      {{ form_widget(user.lastname) }}
+                  </div>
+                  <div class="input-field col s12 m4">
+                      {{ form_label(user.email) }}
+                      {{ form_widget(user.email) }}
+                  </div>
+              </div>
+              <div class="row no-margin">
+                  <div class="col s12 m4">
+                      <div class="user-department">
+                        {% if userData.dptId is not null %}
+                          {% set departmentName = userData.department.name %}
+                          {% set isTooLong = departmentName|length > truncVal %}
+                        {% else %}
+                          {% set isTooLong = false %}
+                        {% endif %}
+                          {% if not isTooLong %}
+                            <a class="btn user-btn user-info-department flex-center">
+                          {% else %}
+                            <a class="btn user-btn user-info-department flex-center tooltipped" data-position="top" data-tooltip="{{departmentName}}">
+                          {% endif %}
+                              <i class="fa fa-bezier-curve m-right"></i>
+                              <span class="m-right">
+                                {% if userData.dptId is not null %}
+                                  {{'create_user.department_short'|trans}} : {{ isTooLong ? departmentName|slice(0,truncVal) ~ '...' : departmentName }}
+                                {% else %}
+                                  {{'create_user.link_to_department'|trans}}
+                                {% endif %}
+                              </span>
+                          </a>
+                          <div class="user-select-department" style="display: none;">
+                              {{ form_row(user.dptId) }}
+                              <a href="#addElement" class="add-department modal-trigger" data-did="0"><i class="fa fa-plus"></i> {% trans %}create_department.open_modal_msg{% endtrans %}</a>
+                          </div>
+                      </div>
+                  </div>
+          
+                  <div class="col s12 m4">
+                      <div class="user-position">
+                        {% if userData.posId is not null %}
+                          {% set positionName = userData.position.name %}
+                          {% set isTooLong = positionName|length > truncVal %}
+                        {% else %}
+                          {% set isTooLong = false %}
+                        {% endif %}
+                          {% if not isTooLong %}
+                            <a class="btn user-btn user-info-position flex-center">
+                          {% else %}
+                            <a class="btn user-btn user-info-position flex-center tooltipped" data-position="top" data-tooltip="{{positionName}}">
+                          {% endif %}
+                              <i class="fa fa-bezier-curve m-right"></i>
+                              <span class="m-right">
+                                {% if userData.posId is not null %}
+                                  {{'create_user.position'|trans}} : {{ isTooLong ? positionName|slice(0,truncVal) ~ '...' : positionName }}
+                                {% else %}
+                                  {{'create_user.link_to_position'|trans}}
+                                {% endif %}
+                              </span>
+                          </a>
+                          <div class="user-select-position" style="display: none;">
+                              {{ form_row(user.posId) }}
+                              <a href="#addElement" class="add-position modal-trigger" data-pid="0"><i class="fa fa-plus"></i> {% trans %}create_position.open_modal_msg{% endtrans %}</a>
+                          </div>
+                      </div>
+                  </div>
+          
+          
+                  <div class="col s12 m4">
+                      <div class="user-utitle">
+                          <a class="btn user-btn user-info-utitle flex-center">
+                              <i class="fa fa-bezier-curve m-right"></i>
+                              <span class="m-right">
+                                {% if userData.titId is not null %}
+                                  {{'create_user.title'|trans}} : {{ userData.title.name|slice(0,truncVal) ~ '...' }}
+                                {% else %}
+                                  {{'create_user.link_to_title'|trans}}
+                                {% endif %}
+                              </span>
+                          </a>
+                          <div class="user-select-utitle" style="display: none;">
+                              {{ form_row(user.titId) }}
+                              <a href="#addElement" class="add-utitle modal-trigger" data-tid="0"><i class="fa fa-plus"></i> {% trans %}create_title.open_modal_msg{% endtrans %}</a>
+                          </div>
+                      </div>
+          
+                  </div>
+              </div>
+              
+              {% if enabledCreatingUser is defined and enabledCreatingUser == true and currentuser.role != 2 and currentuser.role != 3 %}
+                  <div class="row">
+                      <div class="col s12 m12">
+                          {{ form_widget(user.enabledCreatingUser) }}
+                          {{ form_label(user.enabledCreatingUser) }}
+                      </div>
+                  </div>
+              {% endif %}
+          </li>
+
+        {% endfor %}
+
+        </ul>
+
+        <a class="btn waves-effect waves-light insert-btn" style="margin-left:20px"><i class="fa fa-user-plus"></i>
+          <span>{% trans %}create_user.add_button{% endtrans %}</span>
+        </a>
+
+      {% else %}
+      
+        {% set user = form %}
+        {% set userData = form.vars.data %}
+        {% set userTruncVal = 30 %}
+        {% set mailTruncVal = 30 %}
+        
+        <div class="user">
+
+          <div class="row user-credentials">
+
+            <div class="col s12 m6">
+              <div class="user-fullname">
+                  {% set fullname = userData.fullname %}
+                  {% set isTooLong = fullname|length > userTruncVal %}
+               
+                  {% if not isTooLong %}
+                    <a class="btn user-btn user-info-fullname flex-center">
+                  {% else %}
+                    <a class="btn user-btn user-info-fullname flex-center tooltipped" data-position="top" data-tooltip="{{fullname}}">
+                  {% endif %}
+                      <i class="fa fa-user m-right"></i>
+                      <span class="m-right">
+                          {{'create_user.fullname'|trans}} : {{ isTooLong ? fullname|slice(0,userTruncVal) ~ '...' : fullname }}
+                      </span>
+                  </a>
+                  <div class="user-select-fullname flex-center" style="display: none;">
+                      <div class="input-field m-right">
+                        {{ form_row(user.firstname) }}
+                      </div>
+                      <div class="input-field">
+                        {{ form_row(user.lastname) }}
+                      </div>
+                  </div>
+              </div>
+            </div>
+            
+            {#
+            <div class="col s12 m4">
+              <div class="user-lastname">
+                  {% set lastname = userData.lastname %}
+                  {% set isTooLong = lastname|length > truncVal %}
+               
+                  {% if not isTooLong %}
+                    <a class="btn user-btn user-info-lastname flex-center">
+                  {% else %}
+                    <a class="btn user-btn user-info-lastname flex-center tooltipped" data-position="top" data-tooltip="{{lastname}}">
+                  {% endif %}
+                      <i class="fa fa-bezier-curve m-right"></i>
+                      <span class="m-right">
+                          {{'create_user.lastname'|trans}} : {{ isTooLong ? lastname|slice(0,truncVal) ~ '...' : lastname }}
+                      </span>
+                  </a>
+                  <div class="user-select-lastname input-field" style="display: none;">
+                      {{ form_row(user.lastname) }}
+                  </div>
+              </div>
+            </div>
+            #}
+    
+            <div class="col s12 m6">
+              <div class="user-email">
+                  {% set email = userData.email %}
+                  {% set isTooLong = email|length > mailTruncVal %}
+               
+                  {% if not isTooLong %}
+                    <a class="btn user-btn user-info-email flex-center">
+                  {% else %}
+                    <a class="btn user-btn user-info-email flex-center tooltipped" data-position="top" data-tooltip="{{email}}">
+                  {% endif %}
+                      <i class="fa fa-at m-right"></i>
+                      <span class="m-right">
+                          {{'create_user.email_short'|trans}} : {{ isTooLong ? email|slice(0,mailTruncVal) ~ '...' : email }}
+                      </span>
+                  </a>
+                  <div class="user-select-email input-field" style="display: none;">
+                      {{ form_row(user.email) }}
+                  </div>
+              </div>
+            </div>
+            {#
+            <div class="input-field col s12 m4">
+                {{ form_label(user.firstname) }}
+                {{ form_widget(user.firstname) }}
+            </div>
+            <div class="input-field col s12 m4">
+                {{ form_label(user.lastname) }}
+                {{ form_widget(user.lastname) }}
+            </div>
+            <div class="input-field col s12 m4">
+                {{ form_label(user.email) }}
+                {{ form_widget(user.email) }}
+            </div>
+            #}
+          </div>
+
+          <div class="row">
+              <div class="col s12 m4">
+                  <div class="user-role">
+                      <a class="btn user-btn user-info-role flex-center">
+                          <i class="fa fa-user-cog m-right"></i>
+                          <span class="m-right">{{ 'create_user.role'|trans }} : {{ userData.role == 1 ? 'create_user.administrator'|trans : (userData.role == 2 ? 'create_user.contributor'|trans : 'create_user.collaborator'|trans) }}</span>
+                      </a>
+                      <div class="user-select-role" style="display: none;">
+                          {{ form_label(user.role) }}
+                          {{ form_widget(user.role) }}
+                      </div>
+                  </div>
+              </div>
+              <div class="col s12 m4">
+                  <div class="user-weight">
+                      <a class="btn user-btn user-info-weight flex-center">
+                          <i class="fa fa-vote-yea m-right"></i>
+                          <span class="m-right">{{'create_user.influence'|trans}} : {{userData.weight.value}}</span>
+                      </a>
+                      <div class="user-select-weight" style="display: none;">
+                          {{ form_label(user.wgtId) }}
+                          {{ form_widget(user.wgtId) }}
+                          <a href="#addElement" class="add-weight modal-trigger" data-wid="0"><i class="fa fa-plus"></i> {% trans %}create_weight.open_modal_msg{% endtrans %}</a>
+                      </div>
+                  </div>
+              </div>
+              <div class="col s12 m4">
+                  <div class="user-superior">
+                      {% if userData.superior is not null %}
+                        {% set superiorName = userData.superiorUser.fullname %}
+                        {% set isTooLong = superiorName|length > truncVal %}
+                      {% else %}
+                        {% set isTooLong = false %}
+                      {% endif %}
+                      {% if not isTooLong %}
+                        <a class="btn user-btn user-info-superior flex-center">
+                      {% else %}
+                        <a class="btn user-btn user-info-superior flex-center tooltipped" data-position="top" data-tooltip="{{superiorName}}">
+                      {% endif %}
+                          <i class="fa fa-user-circle m-right"></i>
+                          <span class="m-right">
+                            {% if userData.superior is not null %}
+                              {{'create_user.superior_short'|trans}} : {{ isTooLong ? superiorName|slice(0,truncVal) ~ '...' : superiorName }}
+                            {% else %}
+                              {{'create_user.define_superior'|trans}}
+                            {% endif %}
+                          </span>
+                      </a>
+                      <div class="user-select-superior" style="display: none;">
+                          {{ form_row(user.superiorUser) }}
+                      </div>
+                  </div>
+              </div>
+          </div>
+          
+          <div class="row no-margin">
+              <div class="col s12 m4">
+                  <div class="user-department">
+                    {% if userData.dptId is not null %}
+                      {% set departmentName = userData.department.name %}
+                      {% set isTooLong = departmentName|length > truncVal %}
+                    {% else %}
+                      {% set isTooLong = false %}
+                    {% endif %}
+                      {% if not isTooLong %}
+                        <a class="btn user-btn user-info-department flex-center">
+                      {% else %}
+                        <a class="btn user-btn user-info-department flex-center tooltipped" data-position="top" data-tooltip="{{departmentName}}">
+                      {% endif %}
+                          <i class="fa fa-bezier-curve m-right"></i>
+                          <span class="m-right">
+                            {% if userData.dptId is not null %}
+                              {{'create_user.department_short'|trans}} : {{ isTooLong ? departmentName|slice(0,truncVal) ~ '...' : departmentName }}
+                            {% else %}
+                              {{'create_user.link_to_department'|trans}}
+                            {% endif %}
+                          </span>
+                      </a>
+                      <div class="user-select-department" style="display: none;">
+                          {{ form_row(user.dptId) }}
+                          <a href="#addElement" class="add-department modal-trigger" data-did="0"><i class="fa fa-plus"></i> {% trans %}create_department.open_modal_msg{% endtrans %}</a>
+                      </div>
+                  </div>
+              </div>
+      
+              <div class="col s12 m4">
+                  <div class="user-position">
+                    {% if userData.posId is not null %}
+                      {% set positionName = userData.position.name %}
+                      {% set isTooLong = positionName|length > truncVal %}
+                    {% else %}
+                      {% set isTooLong = false %}
+                    {% endif %}
+                      {% if not isTooLong %}
+                        <a class="btn user-btn user-info-position flex-center">
+                      {% else %}
+                        <a class="btn user-btn user-info-position flex-center tooltipped" data-position="top" data-tooltip="{{positionName}}">
+                      {% endif %}
+                          <i class="fa fa-bezier-curve m-right"></i>
+                          <span class="m-right">
+                            {% if userData.posId is not null %}
+                              {{'create_user.position'|trans}} : {{ isTooLong ? positionName|slice(0,truncVal) ~ '...' : positionName }}
+                            {% else %}
+                              {{'create_user.link_to_position'|trans}}
+                            {% endif %}
+                          </span>
+                      </a>
+                      <div class="user-select-position" style="display: none;">
+                          {{ form_row(user.posId) }}
+                          <a href="#addElement" class="add-position modal-trigger" data-pid="0"><i class="fa fa-plus"></i> {% trans %}create_position.open_modal_msg{% endtrans %}</a>
+                      </div>
+                  </div>
+              </div>
+      
+      
+              <div class="col s12 m4">
+                  <div class="user-utitle">
+                      <a class="btn user-btn user-info-utitle flex-center">
+                          <i class="fa fa-bezier-curve m-right"></i>
+                          <span class="m-right">
+                            {% if userData.titId is not null %}
+                              {{'create_user.title'|trans}} : {{ userData.title.name|slice(0,truncVal) ~ '...' }}
+                            {% else %}
+                              {{'create_user.link_to_title'|trans}}
+                            {% endif %}
+                          </span>
+                      </a>
+                      <div class="user-select-utitle" style="display: none;">
+                          {{ form_row(user.titId) }}
+                          <a href="#addElement" class="add-utitle modal-trigger" data-tid="0"><i class="fa fa-plus"></i> {% trans %}create_title.open_modal_msg{% endtrans %}</a>
+                      </div>
+                  </div>
+      
+              </div>
+          </div>
+          
+          {% if enabledCreatingUser is defined and enabledCreatingUser == true and currentuser.role != 2 and currentuser.role != 3 %}
+              <div class="row">
+                  <div class="col s12 m12">
+                      {{ form_widget(user.enabledCreatingUser) }}
+                      {{ form_label(user.enabledCreatingUser) }}
+                  </div>
+              </div>
+          {% endif %}
+        </div>
+
+        
+        {% endif %}
+      </div>
+    </main>
+        
+    <footer class="action-buttons">
+      <div class="button-field">
+          {{ form_row(form.submit) }}
+      </div>
+      {% if not creationPage %}
+        <div class="button-field">
+          <button class="waves-effect waves-light btn-large red accent-4 modal-trigger" href="#deleteModal">{% trans %}user_update.delete_button{% endtrans %}</button>
+        </div>
+      {% endif %}
+    </footer>
+
+
+
+  {{ form_rest(form) }}
+  {{ form_end(form) }}
+
+  <div id="addElement" class="modal">
+    {{ form_start(organizationElementForm) }}
+    <div class="modal-content">
+      <h5></h5>
+      <p></p>
+        {{ form_label(organizationElementForm.name) }}
+        {{ form_widget(organizationElementForm.name) }}
+        {{ form_errors(organizationElementForm.name) }}
+    </div>
+
+    <div class="modal-footer action-buttons">
+      <div class="button-field">
+        <a class=" modal-action modal-close submit-button waves-effect waves-red red btn">{% trans %}activities.create.delegate_back_btn_msg{% endtrans %}</a>
+      </div>
+      <div class="button-field">
+          {{ form_row(organizationElementForm.submit) }}
+      </div>
+    </div>
+      {{ form_rest(organizationElementForm) }}
+      {{ form_end(organizationElementForm) }}
+  </div>
+
+  <div id="addElementSuccess" class="modal">
+    <div class="modal-content">
+      <p></p>
+    </div>
+    <div class="modal-footer">
+      <div class="button-field">
+        <a class=" modal-action modal-close waves-effect btn btn-large">Ok</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="csvControl" class="modal">
+      <div class="modal-title">
+          <p><h5>{% trans %}create_user.csv.modal_title{% endtrans %}</h5></p>
+      </div>
+      <div class="modal-content">
+          <p>{% trans %}create_user.csv.table_intro{% endtrans %}</p>
+          <p></p>
+          <p>{% trans %}create_user.csv.rules{% endtrans %}</p>
+      </div>
+      <div class="modal-footer">
+          <a class="waves-effect waves-light modal-close btn-flat red-text">{% trans %}create_user.csv.back{% endtrans %}</a>
+          <a class="btn waves-effect waves-light validate-csv-btn">{% trans %}create_user.csv.validate{% endtrans %}</a>
+      </div>
+  </div>
+  </div>
+
+  {% if not creationPage %}
+
+    <div id="deleteModal" class="modal">
+      <div class="modal-content">
+          <h4>{% trans %}user_update.delete_modal.title{% endtrans %}</h4>
+          <p>{% trans %}user_update.delete_modal.content_1{% endtrans %} {{ userData.firstname }} {{ userData.lastname }}{% if currentuser.orgId == userData.orgId or currentuser.role == 4 %} {% trans %}user_update.delete_modal.content_2{% endtrans %}{% else %} {% trans %}user_update.delete_modal.content_ext_user{% endtrans %}{% endif %}</p>
+      </div>
+      <div class="modal-footer">
+          <a class=" modal-action modal-close submit-button waves-effect waves-green btn-large delete-button">{% trans %}user_update.delete_modal.confirm{% endtrans %}</a>
+          <a class=" modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+      </div>
+    </div>
+
+
+  {% endif %}
+
+
+  {% if not form.vars.valid %}
+	<div id="errors" class="modal">
+		<div class="modal-content">
+      
+      <h5>{{ 'activities.modal_error_creation_title'|trans }}</h5>
+      {% for key, user in form.users %}
+        {% if not user.vars.valid %}
+
+          <div>{{ 'create_user.user'|trans }} {{ key }} ({{user.vars.data.fullname}}) :
+            <div style="padding: 15px 0px">
+              {% for child in user.children %}
+                {% if not child.vars.valid %}
+                  <div style="margin-left: 20px;">{{form_label(child)}}<span style="display:inline-block;width: 30%;"></span> {{ form_errors(child) }}</div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+
+        {% endif %}
+			{% endfor %}
+		</div>
+		<div class="modal-footer">
+			<a class=" modal-action modal-close waves-effect waves-green btn-large notifyModalClose">Ok</a>
+		</div>
+	</div>
+	{% endif %}
+
+    {% endblock %}
+
+{% block javascripts %}
+
+  <script>
+    $('select').material_select();
+
+    $(function(){
+
+      setTimeout(() => {
+
+
+          $('.dropify').dropify({
+              messages: {
+                'default': '{% trans %}create_user.csv.file_rules{% endtrans %}',
+                'replace': '{% trans %}create_user.csv.replace{% endtrans %}',
+                'remove': '{% trans %}create_user.csv.remove{% endtrans %}',
+                'error': '{% trans %}create_user.csv.error{% endtrans %}',
+              }
+          });
+
+          $('.dropify').on('change',function(e){
+              if($('.dropify-clear').length>0){
+                  $('.create-users').attr('disabled',false);
+              }
+          })
+
+          $(document).on('click', '.dropify-clear', function(){
+              if($collectionHolder.children().length == 0){
+                  $('.create-users').attr('disabled',true);
+              }
+          })
+
+      }, 500);
+
+      $('.validate-csv-btn').on('click',function(e){
+          e.preventDefault();
+          urlToPieces = vcurl.split('/');
+          urlToPieces[urlToPieces.length-2] = $(this).data('fileName');
+          urlToPieces[urlToPieces.length-1] = $(this).data('headerOrderEntries');
+          vcurl = urlToPieces.join('/');
+          $.post(vcurl, null)
+            .done(function(){
+              url = window.location.pathname;
+              urlToPieces = url.split('/');
+              window.location = urlToPieces.slice(0,urlToPieces.length-1).join('/');
+            })
+            .fail(function(){
+              console.log('couac');
+            })
+
+      })
+
+    });
+  </script>
+  <script src="{{ asset('js/login.js') }}"></script>
+  <script src="{{ asset('js/dropify.min.js') }}"></script>
+  <script src="{{ asset('js/user_create.js') }}"></script>
+{% endblock %}

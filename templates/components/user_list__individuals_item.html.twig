@@ -1,0 +1,17 @@
+<li class="client-type-list--item client-firms hierarchized-item">
+  <header>{{ 'user_list.individuals'|trans }}</header>
+  <div class="item-body">
+    <ul class="user-list">
+      {% for firm in firms %}
+        {% set externalUser = firm.aliveExternalUsers.first %}
+        {% if externalUser %}
+          {% include "components/user_list__item.html.twig" with { user: externalUser.user } %}
+        {% endif %}
+      {% endfor %}
+      {# placeholder for no user in list #}
+      <li class="no-items-placeholder">
+        {{ 'user_list.no_defined_user'|trans }}
+      </li>
+    </ul>
+  </div>
+</li>

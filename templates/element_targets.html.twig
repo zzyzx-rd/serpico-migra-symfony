@@ -1,0 +1,103 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+    {% trans %}element_targets.page_title{% endtrans %}
+{% endblock %}
+
+
+{% block css %}
+    <link href="{{ asset('css/dropify.min.css') }}" rel="stylesheet" type="text/css">
+{% endblock %}
+
+
+{% block pagename %}
+    {% trans %}element_targets.mobile_header_title{% endtrans %}
+{% endblock %}
+
+{% block username %}
+    {{ currentuser.firstname }}
+    {{ currentuser.lastname }}
+{% endblock %}
+
+{% block content %}
+
+    <div class="row col center">
+        <h3>{{ elementName }}</h3>
+        {% if form.vars.data.targets|length == 0 %}
+        <div class="center no-targets" style="margin-top: 100px">
+            <i class="fa fa-bullseye fa-3x grey-text"></i>
+            {#<img src="{{ asset('lib/img/missing-target.png') }}" alt="">#}
+            <h4>{% trans %}targets.no_targets_title{% endtrans %}</h4>
+            <p style="text-align: center;">{% trans %}targets.no_targets_msg{% endtrans %}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="container">
+        {% for targetsId in targets %}
+        <input hidden id="{{ targetsId.id }}" value="{{ targetsId.cName }}" class="targetsId">
+        {% endfor %}
+        {{ form_start(form) }}
+        <ul class="targets" data-prototype="{% filter escape %}{% include 'prototype_element_target.twig' with { 'item': form.targets.vars.prototype } %}{% endfilter %}">
+            {% for key, target in form.targets %}
+                <li class="target">
+                    <ul class="flex-center row" style="justify-content: space-between;">
+                        <li class="target-title">
+                            <h4>Target
+                                {{ key + 1}}</h4>
+                        </li>
+                        <li style="margin-left:auto;">
+                            <a href="#deleteTarget" class="waves-effect waves-light red accent-4 btn delete-target white-text modal-trigger" data-tid="{{ target.vars.id }}">{% trans %}stages.delete_stage_btn{% endtrans %}</a>
+                        </li>
+                    </ul>
+                    <div class="row">
+                        <div class="col s12 m6">
+                            {{ form_row(target.cName) }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col s3 m3">
+                            {{ form_row(target.sign) }}
+                        </div>
+                        <div class="input-field col s3 m3">
+                            {{ form_row(target.value) }}
+                        </div>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <a class="btn waves-effect waves-light insert-btn" style="margin-left:20px"><i class="fa fa-plus-circle"></i>
+            <span>{% trans %}targets.add_button{% endtrans %}</span>
+        </a>
+
+        <div class="row" style="margin-top: 40px">
+            <div class="button-field center-button">
+                {{ form_row(form.submit) }}
+            </div>
+        </div>
+        {{ form_rest(form) }}
+        {{ form_end(form)}}
+
+        {% if currentuser.role != 3 %}
+
+            <div id="deleteTarget" class="modal">
+                <div class="modal-content">
+                    <h2>Attention</h2>
+                    <p>{% trans %}targets.delete_target_msg{% endtrans %}</p>
+                </div>
+                <div class="modal-footer">
+                    <a class=" modal-action modal-close waves-effect waves-green btn-large delete-button">{% trans %}user_update.delete_modal.confirm{% endtrans %}</a>
+                    <a class=" modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+                </div>
+            </div>
+
+        {% endif %}
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('js/login.js') }}"></script>
+    <script src="{{ asset('js/element_targets.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,19 @@
+<style>
+    #stages-have-invalid-genddate-modal .invalid-genddate-stages > li > strong:empty::after {
+        content: "(Phase sans nom)";
+    }
+</style>
+<div id="stages-have-invalid-genddate-modal" class="modal">
+    <div class="modal-content">
+        <p>
+          {{"stages.stage.errod_date"}}{{ "tomorrow"|date("d/m/Y") }}).
+            {% if not inParametersPage %}
+                <br>Celle-ci est incorrecte sur ce ou ces phases :
+            {% endif %}
+        </p>
+        <ul class="invalid-genddate-stages"></ul>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn modal-action modal-close">OK</button>
+    </div>
+</div>
