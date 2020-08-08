@@ -1,0 +1,162 @@
+<?php
+
+namespace App\Entity;
+
+use ApiPlatform\Core\Annotation\ApiResource;
+use App\Repository\IProcessActivityUserRepository;
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * @ApiResource()
+ * @ORM\Entity(repositoryClass=IProcessActivityUserRepository::class)
+ */
+class IProcessActivityUser
+{
+    /**
+     * @ORM\Id()
+     * @ORM\GeneratedValue()
+     * @ORM\Column(type="integer")
+     */
+    private $id;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $a_u_status;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $a_u_leader;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $a_u_type;
+
+    /**
+     * @ORM\Column(type="float")
+     */
+    private $a_u_mWeight;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $a_u_precomment;
+
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $a_u_createdBy;
+
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $a_u_inserted;
+
+    /**
+     * @ORM\Column(type="datetime")
+     */
+    private $a_u_deleted;
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getAUStatus(): ?int
+    {
+        return $this->a_u_status;
+    }
+
+    public function setAUStatus(int $a_u_status): self
+    {
+        $this->a_u_status = $a_u_status;
+
+        return $this;
+    }
+
+    public function getAULeader(): ?bool
+    {
+        return $this->a_u_leader;
+    }
+
+    public function setAULeader(bool $a_u_leader): self
+    {
+        $this->a_u_leader = $a_u_leader;
+
+        return $this;
+    }
+
+    public function getAUType(): ?int
+    {
+        return $this->a_u_type;
+    }
+
+    public function setAUType(int $a_u_type): self
+    {
+        $this->a_u_type = $a_u_type;
+
+        return $this;
+    }
+
+    public function getAUMWeight(): ?float
+    {
+        return $this->a_u_mWeight;
+    }
+
+    public function setAUMWeight(float $a_u_mWeight): self
+    {
+        $this->a_u_mWeight = $a_u_mWeight;
+
+        return $this;
+    }
+
+    public function getAUPrecomment(): ?string
+    {
+        return $this->a_u_precomment;
+    }
+
+    public function setAUPrecomment(string $a_u_precomment): self
+    {
+        $this->a_u_precomment = $a_u_precomment;
+
+        return $this;
+    }
+
+    public function getAUCreatedBy(): ?int
+    {
+        return $this->a_u_createdBy;
+    }
+
+    public function setAUCreatedBy(?int $a_u_createdBy): self
+    {
+        $this->a_u_createdBy = $a_u_createdBy;
+
+        return $this;
+    }
+
+    public function getAUInserted(): ?\DateTimeInterface
+    {
+        return $this->a_u_inserted;
+    }
+
+    public function setAUInserted(?\DateTimeInterface $a_u_inserted): self
+    {
+        $this->a_u_inserted = $a_u_inserted;
+
+        return $this;
+    }
+
+    public function getAUDeleted(): ?string
+    {
+        return $this->a_u_deleted;
+    }
+
+    public function setAUDeleted(string $a_u_deleted): self
+    {
+        $this->a_u_deleted = $a_u_deleted;
+
+        return $this;
+    }
+}
