@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Repository\MailRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
 
 /**
  * @ORM\Entity(repositoryClass=MailRepository::class)
@@ -13,7 +15,8 @@ class Mail
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="mail_id", type="integer", length=10, nullable=false)
+     * @var int
      */
     private $id;
 
@@ -46,6 +49,37 @@ class Mail
      * @ORM\Column(type="string", length=3)
      */
     private $mail_language;
+
+    /**
+     * @ManyToOne(targetEntity="User")
+     * @JoinColumn(name="user_usr_id", referencedColumnName="usr_id", nullable=false)
+     */
+    protected $user;
+    /**
+     * @ManyToOne(targetEntity="WorkerIndividual")
+     * @JoinColumn(name="worker_individual_win_id", referencedColumnName="win_id", nullable=false)
+     */
+    protected $workerIndividual;
+    /**
+     * @ManyToOne(targetEntity="Organization")
+     * @JoinColumn(name="organization_org_id", referencedColumnName="org_id", nullable=false)
+     */
+    protected $organization;
+    /**
+     * @ManyToOne(targetEntity="WorkerFirm")
+     * @JoinColumn(name="worker_firm_wfi_id", referencedColumnName="wfi_id", nullable=false)
+     */
+    protected $workerFirm;
+    /**
+     * @ManyToOne(targetEntity="Activity")
+     * @JoinColumn(name="activity_act_id", referencedColumnName="act_id", nullable=false)
+     */
+    protected $activity;
+    /**
+     * @ManyToOne(targetEntity="Stage")
+     * @JoinColumn(name="stage_stg_id", referencedColumnName="stg_id", nullable=false)
+     */
+    protected $stage;
 
     public function getId(): ?int
     {
@@ -123,4 +157,101 @@ class Mail
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getUser()
+    {
+        return $this->user;
+    }
+
+    /**
+     * @param mixed $user
+     */
+    public function setUser($user): void
+    {
+        $this->user = $user;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getWorkerIndividual()
+    {
+        return $this->workerIndividual;
+    }
+
+    /**
+     * @param mixed $workerIndividual
+     */
+    public function setWorkerIndividual($workerIndividual): void
+    {
+        $this->workerIndividual = $workerIndividual;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getOrganization()
+    {
+        return $this->organization;
+    }
+
+    /**
+     * @param mixed $organization
+     */
+    public function setOrganization($organization): void
+    {
+        $this->organization = $organization;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getWorkerFirm()
+    {
+        return $this->workerFirm;
+    }
+
+    /**
+     * @param mixed $workerFirm
+     */
+    public function setWorkerFirm($workerFirm): void
+    {
+        $this->workerFirm = $workerFirm;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getActivity()
+    {
+        return $this->activity;
+    }
+
+    /**
+     * @param mixed $activity
+     */
+    public function setActivity($activity): void
+    {
+        $this->activity = $activity;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getStage()
+    {
+        return $this->stage;
+    }
+
+    /**
+     * @param mixed $stage
+     */
+    public function setStage($stage): void
+    {
+        $this->stage = $stage;
+    }
+
 }

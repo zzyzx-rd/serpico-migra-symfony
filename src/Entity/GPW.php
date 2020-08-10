@@ -15,7 +15,8 @@ class GPW
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="gpw_id", type="integer")
+     * @var int
      */
     private $id;
 

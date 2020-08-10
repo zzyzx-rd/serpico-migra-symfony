@@ -4,7 +4,13 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\IProcessCriterionRepository;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\OneToMany;
+use Doctrine\ORM\Mapping\OneToOne;
+use Doctrine\ORM\Mapping\OrderBy;
 
 /**
  * @ApiResource()
@@ -15,7 +21,7 @@ class IProcessCriterion
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="crt_id", type="integer", nullable=false)
      */
     private $id;
 
@@ -78,6 +84,31 @@ class IProcessCriterion
      * @ORM\Column(type="datetime", nullable=true)
      */
     private $crt_inserted;
+
+    /**
+     * @ManyToOne(targetEntity="IProcessStage")
+     * @JoinColumn(name="iprocess_stage_stg_id", referencedColumnName="stg_id",nullable=true)
+     */
+    protected $stage;
+
+    /**
+     * @ManyToOne(targetEntity="InstitutionProcess")
+     * @JoinColumn(name="iprocess_inp_id", referencedColumnName="inp_id",nullable=true)
+     */
+    protected $institutionProcess;
+
+    /**
+     * @OneToMany(targetEntity="IProcessActivityUser", mappedBy="criterion", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OrderBy({"leader" = "DESC"})
+     * @var Collection
+     */
+    private $participants;
+
+    /**
+     * @OneToOne(targetEntity="CriterionName")
+     * @JoinColumn(name="criterion_name_cna_id", referencedColumnName="cna_id")
+     */
+    protected $cName;
 
     public function getId(): ?int
     {
@@ -227,4 +258,69 @@ class IProcessCriterion
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getStage()
+    {
+        return $this->stage;
+    }
+
+    /**
+     * @param mixed $stage
+     */
+    public function setStage($stage): void
+    {
+        $this->stage = $stage;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getInstitutionProcess()
+    {
+        return $this->institutionProcess;
+    }
+
+    /**
+     * @param mixed $institutionProcess
+     */
+    public function setInstitutionProcess($institutionProcess): void
+    {
+        $this->institutionProcess = $institutionProcess;
+    }
+
+    /**
+     * @return Collection
+     */
+    public function getParticipants(): Collection
+    {
+        return $this->participants;
+    }
+
+    /**
+     * @param Collection $participants
+     */
+    public function setParticipants(Collection $participants): void
+    {
+        $this->participants = $participants;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCName()
+    {
+        return $this->cName;
+    }
+
+    /**
+     * @param mixed $cName
+     */
+    public function setCName($cName): void
+    {
+        $this->cName = $cName;
+    }
+
 }

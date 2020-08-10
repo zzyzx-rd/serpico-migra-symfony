@@ -5,6 +5,10 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\DecisionRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\Column;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToMany;
+use Doctrine\ORM\Mapping\ManyToOne;
 
 /**
  * @ApiResource()
@@ -15,7 +19,7 @@ class Decision
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="dec_id", type="integer", nullable=false)
      */
     private $id;
 
@@ -63,6 +67,39 @@ class Decision
      * @ORM\Column(type="datetime")
      */
     private $dec_validated;
+
+    /**
+     * @ManyToOne(targetEntity="Organization")
+     * @JoinColumn(name="organization_org_id", referencedColumnName="org_id")
+     */
+    protected $organization;
+
+    /**
+     * @ManyToOne(targetEntity="Activity")
+     * @JoinColumn(name="activity_act_id", referencedColumnName="act_id")
+     */
+    protected $activity;
+
+    /**
+     * @ManyToOne(targetEntity="Stage")
+     * @JoinColumn(name="stage_stg_id", referencedColumnName="stg_id")
+     */
+    protected $stage;
+    /**
+     * @ManyToMany(targetEntity="User")
+     * @JoinColumn(name="req_usr_id", referencedColumnName="usr_id")
+     * @Column(name="req_usr_id", type="integer")
+     * @var int
+     */
+    protected $requester;
+
+    /**
+     * @ManyToMany(targetEntity="User")
+     * @JoinColumn(name="user_usr_id", referencedColumnName="usr_id")
+     * @Column(name="dec_usr_id", type="integer")
+     * @var int
+     */
+    protected $decider;
 
     public function getId(): ?int
     {
@@ -176,4 +213,85 @@ class Decision
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getOrganization()
+    {
+        return $this->organization;
+    }
+
+    /**
+     * @param mixed $organization
+     */
+    public function setOrganization($organization): void
+    {
+        $this->organization = $organization;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getActivity()
+    {
+        return $this->activity;
+    }
+
+    /**
+     * @param mixed $activity
+     */
+    public function setActivity($activity): void
+    {
+        $this->activity = $activity;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getStage()
+    {
+        return $this->stage;
+    }
+
+    /**
+     * @param mixed $stage
+     */
+    public function setStage($stage): void
+    {
+        $this->stage = $stage;
+    }
+
+    /**
+     * @return int
+     */
+    public function getRequester(): int
+    {
+        return $this->requester;
+    }
+
+    /**
+     * @param int $requester
+     */
+    public function setRequester(int $requester): void
+    {
+        $this->requester = $requester;
+    }
+
+    /**
+     * @return int
+     */
+    public function getDecider(): int
+    {
+        return $this->decider;
+    }
+
+    /**
+     * @param int $decider
+     */
+    public function setDecider(int $decider): void
+    {
+        $this->decider = $decider;
+    }
+
 }

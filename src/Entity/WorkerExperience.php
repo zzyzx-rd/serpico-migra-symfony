@@ -5,6 +5,8 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\WorkerExperienceRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
 
 /**
  * @ApiResource()
@@ -15,7 +17,8 @@ class WorkerExperience
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="wex_id", type="integer", nullable=false)
+     * @var int
      */
     private $id;
 
@@ -54,6 +57,17 @@ class WorkerExperience
      */
     private $wex_inserted;
 
+    /**
+     * @ManyToOne(targetEntity="WorkerIndividual")
+     * @JoinColumn(name="worker_individual_wid", referencedColumnName="win_id",nullable=false)
+     */
+    protected $individual;
+
+    /**
+     * @ManyToOne(targetEntity="WorkerFirm")
+     * @JoinColumn(name="worker_firm_wfi", referencedColumnName="wfi_id",nullable=false)
+     */
+    protected $firm;
     public function getId(): ?int
     {
         return $this->id;
@@ -142,4 +156,37 @@ class WorkerExperience
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getIndividual()
+    {
+        return $this->individual;
+    }
+
+    /**
+     * @param mixed $individual
+     */
+    public function setIndividual($individual): void
+    {
+        $this->individual = $individual;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFirm()
+    {
+        return $this->firm;
+    }
+
+    /**
+     * @param mixed $firm
+     */
+    public function setFirm($firm): void
+    {
+        $this->firm = $firm;
+    }
+
 }

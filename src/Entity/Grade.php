@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Repository\GradeRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
 
 /**
  * @ORM\Entity(repositoryClass=GradeRepository::class)
@@ -13,7 +15,8 @@ class Grade
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="grd_id", length=10, type="integer")
+     * @var int
      */
     private $id;
 
@@ -51,6 +54,33 @@ class Grade
      * @ORM\Column(type="datetime")
      */
     private $grd_inserted;
+
+    /**
+     * @ManyToOne(targetEntity="Team")
+     * @JoinColumn(name="activity_user_team_tea_id", referencedColumnName="tea_id")
+     */
+    protected $team;
+    /**
+     * @ManyToOne(targetEntity="ActivityUser")
+     * @JoinColumn(name="activity_user_user_usr_id", referencedColumnName="a_u_id",nullable=false)
+     * @var ActivityUser
+     */
+    protected $participant;
+    /**
+     * @ManyToOne(targetEntity="Activity")
+     * @JoinColumn(name="activity_act_id", referencedColumnName="act_id",nullable=false)
+     */
+    protected $activity;
+    /**
+     * @ManyToOne(targetEntity="Criterion")
+     * @JoinColumn(name="criterion_crt_id", referencedColumnName="crt_id",nullable=false)
+     */
+    protected $criterion;
+    /**
+     * @ManyToOne(targetEntity="Stage")
+     * @JoinColumn(name="stage_stg_id", referencedColumnName="stg_id",nullable=false)
+     */
+    protected $stage;
 
     public function getId(): ?int
     {
@@ -140,4 +170,85 @@ class Grade
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getTeam()
+    {
+        return $this->team;
+    }
+
+    /**
+     * @param mixed $team
+     */
+    public function setTeam($team): void
+    {
+        $this->team = $team;
+    }
+
+    /**
+     * @return ActivityUser
+     */
+    public function getParticipant(): ActivityUser
+    {
+        return $this->participant;
+    }
+
+    /**
+     * @param ActivityUser $participant
+     */
+    public function setParticipant(ActivityUser $participant): void
+    {
+        $this->participant = $participant;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getActivity()
+    {
+        return $this->activity;
+    }
+
+    /**
+     * @param mixed $activity
+     */
+    public function setActivity($activity): void
+    {
+        $this->activity = $activity;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCriterion()
+    {
+        return $this->criterion;
+    }
+
+    /**
+     * @param mixed $criterion
+     */
+    public function setCriterion($criterion): void
+    {
+        $this->criterion = $criterion;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getStage()
+    {
+        return $this->stage;
+    }
+
+    /**
+     * @param mixed $stage
+     */
+    public function setStage($stage): void
+    {
+        $this->stage = $stage;
+    }
+
 }

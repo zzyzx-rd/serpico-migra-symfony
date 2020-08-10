@@ -5,6 +5,9 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\SurveyFieldRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\OneToMany;
 
 /**
  * @ApiResource()
@@ -15,7 +18,8 @@ class SurveyField
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="sfi_id", type="integer", length=10, nullable=false)
+     * @var int
      */
     private $id;
 
@@ -63,6 +67,28 @@ class SurveyField
      * @ORM\Column(type="integer")
      */
     private $sfi_lowerbound;
+
+    /**
+     * @ManyToOne(targetEntity="Criterion")
+     * @JoinColumn(name="criterion_crt_id", referencedColumnName="crt_id", nullable=false)
+     */
+    protected $criterion;
+
+    /**
+     * @ManyToOne(targetEntity="Survey")
+     * @JoinColumn(name="survey_sur_id", referencedColumnName="sur_id", nullable=false)
+     */
+    protected $survey;
+
+    /**
+     * @OneToMany(targetEntity="SurveyFieldParameter", mappedBy="field", cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    protected $parameters;
+
+    /**
+     * @OneToMany(targetEntity="Answer", mappedBy="field", cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    protected $answers;
 
     public function getId(): ?int
     {
@@ -176,4 +202,69 @@ class SurveyField
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getCriterion()
+    {
+        return $this->criterion;
+    }
+
+    /**
+     * @param mixed $criterion
+     */
+    public function setCriterion($criterion): void
+    {
+        $this->criterion = $criterion;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSurvey()
+    {
+        return $this->survey;
+    }
+
+    /**
+     * @param mixed $survey
+     */
+    public function setSurvey($survey): void
+    {
+        $this->survey = $survey;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getParameters()
+    {
+        return $this->parameters;
+    }
+
+    /**
+     * @param mixed $parameters
+     */
+    public function setParameters($parameters): void
+    {
+        $this->parameters = $parameters;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAnswers()
+    {
+        return $this->answers;
+    }
+
+    /**
+     * @param mixed $answers
+     */
+    public function setAnswers($answers): void
+    {
+        $this->answers = $answers;
+    }
+
 }

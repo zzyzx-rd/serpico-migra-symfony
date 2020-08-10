@@ -5,6 +5,8 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\WorkerIndividualRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\OneToMany;
+use Doctrine\ORM\Mapping\OrderBy;
 
 /**
  * @ApiResource()
@@ -15,7 +17,8 @@ class WorkerIndividual
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="win_id", type="integer", nullable=false)
+     * @var int
      */
     private $id;
 
@@ -83,6 +86,17 @@ class WorkerIndividual
      * @ORM\Column(type="datetime")
      */
     private $win_inserted;
+
+    /**
+     * @OneToMany(targetEntity="WorkerExperience", mappedBy="individual", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OrderBy({"startDate" = "DESC"})
+     */
+    private $experiences;
+
+    /**
+     * @OneToMany(targetEntity="Mail", mappedBy="workerIndividual", cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    private $mails;
 
     public function getId(): ?int
     {

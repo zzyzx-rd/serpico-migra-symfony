@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\CountryRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\OneToMany;
 
 /**
  * @ORM\Entity(repositoryClass=CountryRepository::class)
@@ -13,7 +14,7 @@ class Country
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="cou_id", type="integer", nullable=false)
      */
     private $id;
 
@@ -41,6 +42,16 @@ class Country
      * @ORM\Column(type="datetime")
      */
     private $cou_inserted;
+
+    /**
+     * @OneToMany(targetEntity="State", mappedBy="country",cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    private $states;
+
+    /**
+     * @OneToMany(targetEntity="WorkerFirm", mappedBy="country",cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    private $firms;
 
     public function getId(): ?int
     {
@@ -106,4 +117,37 @@ class Country
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getStates()
+    {
+        return $this->states;
+    }
+
+    /**
+     * @param mixed $states
+     */
+    public function setStates($states): void
+    {
+        $this->states = $states;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFirms()
+    {
+        return $this->firms;
+    }
+
+    /**
+     * @param mixed $firms
+     */
+    public function setFirms($firms): void
+    {
+        $this->firms = $firms;
+    }
+
 }

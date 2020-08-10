@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Repository\CriterionNameRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
 
 /**
  * @ORM\Entity(repositoryClass=CriterionNameRepository::class)
@@ -13,7 +15,7 @@ class CriterionName
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="cna_id", type="integer", nullable=false)
      */
     private $id;
 
@@ -42,6 +44,33 @@ class CriterionName
      */
     private $can_inserted;
 
+    /**
+     * @ManyToOne(targetEntity="Icon")
+     * @JoinColumn(name="icon_ico_id", referencedColumnName="ico_id",nullable=false)
+     * @var Icon
+     */
+    protected $icon;
+
+    /**
+     * @ManyToOne(targetEntity="Organization")
+     * @JoinColumn(name="organization_org_id", referencedColumnName="org_id", nullable=false)
+     * @var Organization
+     */
+    protected $organization;
+
+    /**
+     * @ManyToOne(targetEntity="Department")
+     * @JoinColumn(name="department_dpt_id", referencedColumnName="dpt_id")
+     * @var Department|null
+     */
+    protected $department;
+
+    /**
+     * @ManyToOne(targetEntity="CriterionGroup", inversedBy="criteria")
+     * @JoinColumn(name="criterion_group_cgp_id", referencedColumnName="cgp_id")
+     * @var CriterionGroup
+     */
+    protected $criterionGroup;
     public function getId(): ?int
     {
         return $this->id;
@@ -106,4 +135,69 @@ class CriterionName
 
         return $this;
     }
+
+    /**
+     * @return Icon
+     */
+    public function getIcon(): Icon
+    {
+        return $this->icon;
+    }
+
+    /**
+     * @param Icon $icon
+     */
+    public function setIcon(Icon $icon): void
+    {
+        $this->icon = $icon;
+    }
+
+    /**
+     * @return Organization
+     */
+    public function getOrganization(): Organization
+    {
+        return $this->organization;
+    }
+
+    /**
+     * @param Organization $organization
+     */
+    public function setOrganization(Organization $organization): void
+    {
+        $this->organization = $organization;
+    }
+
+    /**
+     * @return Department|null
+     */
+    public function getDepartment(): ?Department
+    {
+        return $this->department;
+    }
+
+    /**
+     * @param Department|null $department
+     */
+    public function setDepartment(?Department $department): void
+    {
+        $this->department = $department;
+    }
+
+    /**
+     * @return CriterionGroup
+     */
+    public function getCriterionGroup(): CriterionGroup
+    {
+        return $this->criterionGroup;
+    }
+
+    /**
+     * @param CriterionGroup $criterionGroup
+     */
+    public function setCriterionGroup(CriterionGroup $criterionGroup): void
+    {
+        $this->criterionGroup = $criterionGroup;
+    }
+
 }

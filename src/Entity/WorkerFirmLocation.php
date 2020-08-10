@@ -15,7 +15,8 @@ class WorkerFirmLocation
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="wfl_id", type="integer", nullable=false)
+     * @var int
      */
     private $id;
 

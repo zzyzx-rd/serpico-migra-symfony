@@ -4,7 +4,12 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\TemplateActivityRepository;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\OneToMany;
+use Doctrine\ORM\Mapping\OrderBy;
 
 /**
  * @ApiResource()
@@ -15,7 +20,8 @@ class TemplateActivity
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="act_id", type="integer", nullable=false)
+     * @var int
      */
     private $id;
 
@@ -53,6 +59,37 @@ class TemplateActivity
      * @ORM\Column(type="datetime")
      */
     private $act_saved;
+
+    /**
+     * @ManyToOne(targetEntity="Organization")
+     * @JoinColumn(name="organization_org_id", referencedColumnName="org_id",nullable=false)
+     */
+    protected $organization;
+
+    /**
+     *@ManyToOne(targetEntity="Department")
+     *@JoinColumn(name="department_dpt_id", referencedColumnName="dpt_id", nullable=false)
+     */
+    protected $department;
+
+    /**
+     * @ManyToOne(targetEntity="TemplateRecurring")
+     * @JoinColumn(name="recurring_rct_id", referencedColumnName="rct_id",nullable=true)
+     */
+    protected $recurring;
+
+    /**
+     * @OneToMany(targetEntity="TemplateStage", mappedBy="activity", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OrderBy({"startdate" = "ASC"})
+     * @var Collection|TemplateStage[]
+     */
+    private $stages;
+
+    /**
+     * @OneToMany(targetEntity="TemplateActivityUser", mappedBy="activity",cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OrderBy({"team" = "ASC"})
+     */
+    private $participants;
 
     public function getId(): ?int
     {
@@ -142,4 +179,85 @@ class TemplateActivity
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getOrganization()
+    {
+        return $this->organization;
+    }
+
+    /**
+     * @param mixed $organization
+     */
+    public function setOrganization($organization): void
+    {
+        $this->organization = $organization;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDepartment()
+    {
+        return $this->department;
+    }
+
+    /**
+     * @param mixed $department
+     */
+    public function setDepartment($department): void
+    {
+        $this->department = $department;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getRecurring()
+    {
+        return $this->recurring;
+    }
+
+    /**
+     * @param mixed $recurring
+     */
+    public function setRecurring($recurring): void
+    {
+        $this->recurring = $recurring;
+    }
+
+    /**
+     * @return TemplateStage[]|Collection
+     */
+    public function getStages()
+    {
+        return $this->stages;
+    }
+
+    /**
+     * @param TemplateStage[]|Collection $stages
+     */
+    public function setStages($stages): void
+    {
+        $this->stages = $stages;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getParticipants()
+    {
+        return $this->participants;
+    }
+
+    /**
+     * @param mixed $participants
+     */
+    public function setParticipants($participants): void
+    {
+        $this->participants = $participants;
+    }
+
 }

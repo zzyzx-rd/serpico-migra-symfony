@@ -4,6 +4,9 @@ namespace App\Entity;
 
 use App\Repository\ProcessCriterionRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\OneToOne;
 
 /**
  * @ORM\Entity(repositoryClass=ProcessCriterionRepository::class)
@@ -13,7 +16,7 @@ class ProcessCriterion
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="crt_id", type="integer", nullable=false)
      */
     private $id;
 
@@ -76,6 +79,24 @@ class ProcessCriterion
      * @ORM\Column(type="datetime", nullable=true)
      */
     private $crt_inserted;
+
+    /**
+     * @ManyToOne(targetEntity="ProcessStage")
+     * @JoinColumn(name="process_stage_stg_id", referencedColumnName="stg_id",nullable=true)
+     */
+    protected $stage;
+
+    /**
+     * @ManyToOne(targetEntity="Process")
+     * @JoinColumn(name="process_pro_id", referencedColumnName="pro_id",nullable=true)
+     */
+    protected $process;
+
+    /**
+     * @OneToOne(targetEntity="CriterionName")
+     * @JoinColumn(name="criterion_name_cna_id", referencedColumnName="cna_id")
+     */
+    protected $cName;
 
     public function getId(): ?int
     {
@@ -225,4 +246,53 @@ class ProcessCriterion
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getStage()
+    {
+        return $this->stage;
+    }
+
+    /**
+     * @param mixed $stage
+     */
+    public function setStage($stage): void
+    {
+        $this->stage = $stage;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getProcess()
+    {
+        return $this->process;
+    }
+
+    /**
+     * @param mixed $process
+     */
+    public function setProcess($process): void
+    {
+        $this->process = $process;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCName()
+    {
+        return $this->cName;
+    }
+
+    /**
+     * @param mixed $cName
+     */
+    public function setCName($cName): void
+    {
+        $this->cName = $cName;
+    }
+
 }

@@ -15,7 +15,7 @@ class OptionName
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="ona_id", type="integer", nullable=false)
      */
     private $id;
 

@@ -5,6 +5,11 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\WorkerFirmRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\OneToMany;
+use Doctrine\ORM\Mapping\OneToOne;
+use Doctrine\ORM\Mapping\OrderBy;
 
 /**
  * @ApiResource()
@@ -15,7 +20,8 @@ class WorkerFirm
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="wfi_id", type="integer", nullable=false)
+     * @var int
      */
     private $id;
 
@@ -123,6 +129,41 @@ class WorkerFirm
      * @ORM\Column(type="datetime")
      */
     private $wfi_inserted;
+
+    /**
+     * @OneToOne(targetEntity="WorkerFirmSector")
+     * @JoinColumn(name="worker_firm_sector_wfs_id", referencedColumnName="wfs_id",nullable=false)
+     */
+    private $mainSector;
+
+    /**
+     * @ManyToOne(targetEntity="City")
+     * @JoinColumn(name="city_cit_id", referencedColumnName="cit_id",nullable=false)
+     */
+    private $city;
+
+    /**
+     * @ManyToOne(targetEntity="State")
+     * @JoinColumn(name="state_sta_id", referencedColumnName="sta_id",nullable=false)
+     */
+    private $state;
+
+    /**
+     * @ManyToOne(targetEntity="Country")
+     * @JoinColumn(name="country_cou_id", referencedColumnName="cou_id",nullable=false)
+     */
+    private $country;
+
+    /**
+     * @OneToMany(targetEntity="WorkerExperience", mappedBy="firm", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OrderBy({"active" = "DESC"})
+     */
+    private $experiences;
+
+    /**
+     * @OneToMany(targetEntity="Mail", mappedBy="workerFirm", cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    private $mails;
 
     public function getId(): ?int
     {
@@ -380,4 +421,101 @@ class WorkerFirm
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getMainSector()
+    {
+        return $this->mainSector;
+    }
+
+    /**
+     * @param mixed $mainSector
+     */
+    public function setMainSector($mainSector): void
+    {
+        $this->mainSector = $mainSector;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCity()
+    {
+        return $this->city;
+    }
+
+    /**
+     * @param mixed $city
+     */
+    public function setCity($city): void
+    {
+        $this->city = $city;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getState()
+    {
+        return $this->state;
+    }
+
+    /**
+     * @param mixed $state
+     */
+    public function setState($state): void
+    {
+        $this->state = $state;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCountry()
+    {
+        return $this->country;
+    }
+
+    /**
+     * @param mixed $country
+     */
+    public function setCountry($country): void
+    {
+        $this->country = $country;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getExperiences()
+    {
+        return $this->experiences;
+    }
+
+    /**
+     * @param mixed $experiences
+     */
+    public function setExperiences($experiences): void
+    {
+        $this->experiences = $experiences;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getMails()
+    {
+        return $this->mails;
+    }
+
+    /**
+     * @param mixed $mails
+     */
+    public function setMails($mails): void
+    {
+        $this->mails = $mails;
+    }
+
 }

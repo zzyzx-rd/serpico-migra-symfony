@@ -5,6 +5,10 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\TemplateStageRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\OneToMany;
+use Doctrine\ORM\Mapping\OrderBy;
 
 /**
  * @ApiResource()
@@ -15,7 +19,8 @@ class TemplateStage
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="stg_id", type="integer",nullable=false, length=10)
+     * @var int
      */
     private $id;
 
@@ -73,6 +78,24 @@ class TemplateStage
      * @ORM\Column(type="integer", nullable=true)
      */
     private $stg_mode;
+
+    /**
+     * @ManyToOne(targetEntity="TemplateActivity")
+     * @JoinColumn(name="activity_act_id", referencedColumnName="act_id",nullable=false)
+     */
+    protected $activity;
+
+    /**
+     * @OneToMany(targetEntity="TemplateCriterion", mappedBy="stage", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OrderBy({"weight" = "DESC"})
+     */
+    private $criteria;
+
+    /**
+     * @OneToMany(targetEntity="TemplateActivityUser", mappedBy="stage",cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OrderBy({"team" = "ASC"})
+     */
+    private $participants;
 
     public function getId(): ?int
     {
@@ -210,4 +233,53 @@ class TemplateStage
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getActivity()
+    {
+        return $this->activity;
+    }
+
+    /**
+     * @param mixed $activity
+     */
+    public function setActivity($activity): void
+    {
+        $this->activity = $activity;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCriteria()
+    {
+        return $this->criteria;
+    }
+
+    /**
+     * @param mixed $criteria
+     */
+    public function setCriteria($criteria): void
+    {
+        $this->criteria = $criteria;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getParticipants()
+    {
+        return $this->participants;
+    }
+
+    /**
+     * @param mixed $participants
+     */
+    public function setParticipants($participants): void
+    {
+        $this->participants = $participants;
+    }
+
 }

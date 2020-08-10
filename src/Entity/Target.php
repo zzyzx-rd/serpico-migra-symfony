@@ -5,6 +5,9 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\TargetRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\OneToOne;
 
 /**
  * @ApiResource()
@@ -15,7 +18,7 @@ class Target
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="tgt_id", type="integer", nullable=false)
      */
     private $id;
 
@@ -38,6 +41,54 @@ class Target
      * @ORM\Column(type="datetime")
      */
     private $tgt_inserted;
+
+    /**
+     * @ManyToOne(targetEntity="Organization")
+     * @JoinColumn(name="organization_org_id", referencedColumnName="org_id",nullable=false)
+     */
+    protected $organization;
+
+    /**
+     * @ManyToOne(targetEntity="Department")
+     * @JoinColumn(name="department_dpt_id", referencedColumnName="dpt_id",nullable=false)
+     */
+    protected $department;
+
+    /**
+     * @ManyToOne(targetEntity="Position")
+     * @JoinColumn(name="position_pos_id", referencedColumnName="pos_id",nullable=false)
+     */
+    protected $position;
+
+    /**
+     * @ManyToOne(targetEntity="Title")
+     * @JoinColumn(name="title_tit_id", referencedColumnName="tit_id",nullable=false)
+     */
+    protected $title;
+
+    /**
+     * @ManyToOne(targetEntity="User")
+     * @JoinColumn(name="user_usr_id", referencedColumnName="usr_id", nullable=false)
+     */
+    protected $user;
+
+    /**
+     * @ManyToOne(targetEntity="Team")
+     * @JoinColumn(name="team_tea_id", referencedColumnName="tea_id", nullable=true)
+     */
+    protected $team;
+
+    /**
+     * @OneToOne(targetEntity="CriterionName")
+     * @JoinColumn(name="criterion_name_cna_id", referencedColumnName="cna_id")
+     */
+    protected $cName;
+
+    /**
+     * @OneToOne(targetEntity="Criterion")
+     * @JoinColumn(name="criterion_crt_id", referencedColumnName="crt_id",nullable=false)
+     */
+    protected $criterion;
 
     public function getId(): ?int
     {
@@ -91,4 +142,133 @@ class Target
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getOrganization()
+    {
+        return $this->organization;
+    }
+
+    /**
+     * @param mixed $organization
+     */
+    public function setOrganization($organization): void
+    {
+        $this->organization = $organization;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDepartment()
+    {
+        return $this->department;
+    }
+
+    /**
+     * @param mixed $department
+     */
+    public function setDepartment($department): void
+    {
+        $this->department = $department;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPosition()
+    {
+        return $this->position;
+    }
+
+    /**
+     * @param mixed $position
+     */
+    public function setPosition($position): void
+    {
+        $this->position = $position;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTitle()
+    {
+        return $this->title;
+    }
+
+    /**
+     * @param mixed $title
+     */
+    public function setTitle($title): void
+    {
+        $this->title = $title;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getUser()
+    {
+        return $this->user;
+    }
+
+    /**
+     * @param mixed $user
+     */
+    public function setUser($user): void
+    {
+        $this->user = $user;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTeam()
+    {
+        return $this->team;
+    }
+
+    /**
+     * @param mixed $team
+     */
+    public function setTeam($team): void
+    {
+        $this->team = $team;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCName()
+    {
+        return $this->cName;
+    }
+
+    /**
+     * @param mixed $cName
+     */
+    public function setCName($cName): void
+    {
+        $this->cName = $cName;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCriterion()
+    {
+        return $this->criterion;
+    }
+
+    /**
+     * @param mixed $criterion
+     */
+    public function setCriterion($criterion): void
+    {
+        $this->criterion = $criterion;
+    }
+
 }

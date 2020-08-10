@@ -8,10 +8,19 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\Id;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\OneToMany;
+use Doctrine\ORM\Mapping\OneToOne;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * @ApiResource()
  * @ORM\Entity(repositoryClass=UserRepository::class)
+ * @UniqueEntity(
+ *     fields={"email"},
+ *     message="This email already exists"
+ * )
  */
 class User
 {
@@ -147,6 +156,47 @@ class User
      * @ORM\Column(type="datetime")
      */
     private $usr_deleted;
+
+    /**
+     * @ManyToOne(targetEntity="Role")
+     * @JoinColumn(name="rol_id", referencedColumnName="role_rol_id")
+     * @Column(name="role_rol_id", type="integer")
+     * @var int
+     */
+    protected $role;
+
+    /**
+     * @OneToMany(targetEntity="ExternalUser", mappedBy="user",cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    private $externalUsers;
+
+    /** @ManyToOne(targetEntity="User", inversedBy="subordinates")
+     * @JoinColumn(name="usr_superior", referencedColumnName="usr_id", nullable=true)
+     * @Column(name="usr_superior", type="integer")
+     * @var int
+     */
+    protected $superior;
+
+    /**
+     * @OneToMany(targetEntity="Mail", mappedBy="user",cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    private $mails;
+
+    /**
+     * @OneToMany(targetEntity="Target", mappedBy="user",cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    private $targets;
+
+    /**
+     * @OneToMany(targetEntity="OrganizationUserOption", mappedBy="user", cascade={"persist","remove"}, orphanRemoval=true)
+     */
+    private $options;
+
+    /**
+     * @OneToOne(targetEntity="WorkerIndividual")
+     * @JoinColumn(name="worker_individual_win_id", referencedColumnName="win_id")
+     */
+    private $workerIndividual;
 
     public function getUsrInt(): ?bool
     {
@@ -446,6 +496,134 @@ class User
         $this->usr_deleted = $usr_deleted;
 
         return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getId(): int
+    {
+        return $this->id;
+    }
+
+    /**
+     * @param int $id
+     */
+    public function setId(int $id): void
+    {
+        $this->id = $id;
+    }
+
+    /**
+     * @return int
+     */
+    public function getRole(): int
+    {
+        return $this->role;
+    }
+
+    /**
+     * @param int $role
+     */
+    public function setRole(int $role): void
+    {
+        $this->role = $role;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getExternalUsers()
+    {
+        return $this->externalUsers;
+    }
+
+    /**
+     * @param mixed $externalUsers
+     */
+    public function setExternalUsers($externalUsers): void
+    {
+        $this->externalUsers = $externalUsers;
+    }
+
+    /**
+     * @return int
+     */
+    public function getSuperior(): int
+    {
+        return $this->superior;
+    }
+
+    /**
+     * @param int $superior
+     */
+    public function setSuperior(int $superior): void
+    {
+        $this->superior = $superior;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getMails()
+    {
+        return $this->mails;
+    }
+
+    /**
+     * @param mixed $mails
+     */
+    public function setMails($mails): void
+    {
+        $this->mails = $mails;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTargets()
+    {
+        return $this->targets;
+    }
+
+    /**
+     * @param mixed $targets
+     */
+    public function setTargets($targets): void
+    {
+        $this->targets = $targets;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getOptions()
+    {
+        return $this->options;
+    }
+
+    /**
+     * @param mixed $options
+     */
+    public function setOptions($options): void
+    {
+        $this->options = $options;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getWorkerIndividual()
+    {
+        return $this->workerIndividual;
+    }
+
+    /**
+     * @param mixed $workerIndividual
+     */
+    public function setWorkerIndividual($workerIndividual): void
+    {
+        $this->workerIndividual = $workerIndividual;
     }
 
 }

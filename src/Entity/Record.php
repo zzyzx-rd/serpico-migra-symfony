@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Repository\RecordRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\Column;
+use Doctrine\ORM\Mapping\Id;
 
 /**
  * @ORM\Entity(repositoryClass=RecordRepository::class)
@@ -11,11 +13,11 @@ use Doctrine\ORM\Mapping as ORM;
 class Record
 {
     /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @Id
+     * @Column(name="rec_entity", type="string")
+     * @var string
      */
-    private $id;
+    public $entity;
 
     /**
      * @ORM\Column(type="integer")
@@ -41,6 +43,23 @@ class Record
     {
         return $this->id;
     }
+
+    /**
+     * @return string
+     */
+    public function getEntity(): string
+    {
+        return $this->entity;
+    }
+
+    /**
+     * @param string $entity
+     */
+    public function setEntity(string $entity): void
+    {
+        $this->entity = $entity;
+    }
+
 
     public function getRecTableId(): ?int
     {

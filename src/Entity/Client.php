@@ -4,7 +4,12 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\ClientRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\OneToMany;
+use Doctrine\ORM\Mapping\OneToOne;
 
 /**
  * @ApiResource()
@@ -15,7 +20,7 @@ class Client
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="cli_id", type="integer", nullable=false)
      */
     private $id;
 
@@ -49,6 +54,30 @@ class Client
      */
     private $cli_inserted;
 
+    /**
+     * @ManyToOne(targetEntity="Organization")
+     * @JoinColumn(name="organization_org_id", referencedColumnName="org_id",nullable=false)
+     */
+    protected $organization;
+
+    /**
+     * @ManyToOne(targetEntity="Organization")
+     * @JoinColumn(name="client_org_id", referencedColumnName="org_id",nullable=false)
+     * @var Organization
+     */
+    protected $clientOrganization;
+
+    /**
+     * @OneToOne(targetEntity="WorkerFirm")
+     * @JoinColumn(name="worker_firm_wfi_id", referencedColumnName="wfi_id")
+     */
+    protected $workerFirm;
+
+    /**
+     * @OneToMany(targetEntity="ExternalUser", mappedBy="client", cascade={"persist","remove"}, orphanRemoval=true)
+     * @var ArrayCollection|ExternalUser[]
+     */
+    private $externalUsers;
     public function getId(): ?int
     {
         return $this->id;
@@ -125,4 +154,69 @@ class Client
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getOrganization()
+    {
+        return $this->organization;
+    }
+
+    /**
+     * @param mixed $organization
+     */
+    public function setOrganization($organization): void
+    {
+        $this->organization = $organization;
+    }
+
+    /**
+     * @return Organization
+     */
+    public function getClientOrganization(): Organization
+    {
+        return $this->clientOrganization;
+    }
+
+    /**
+     * @param Organization $clientOrganization
+     */
+    public function setClientOrganization(Organization $clientOrganization): void
+    {
+        $this->clientOrganization = $clientOrganization;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getWorkerFirm()
+    {
+        return $this->workerFirm;
+    }
+
+    /**
+     * @param mixed $workerFirm
+     */
+    public function setWorkerFirm($workerFirm): void
+    {
+        $this->workerFirm = $workerFirm;
+    }
+
+    /**
+     * @return ExternalUser[]|ArrayCollection
+     */
+    public function getExternalUsers()
+    {
+        return $this->externalUsers;
+    }
+
+    /**
+     * @param ExternalUser[]|ArrayCollection $externalUsers
+     */
+    public function setExternalUsers($externalUsers): void
+    {
+        $this->externalUsers = $externalUsers;
+    }
+
 }

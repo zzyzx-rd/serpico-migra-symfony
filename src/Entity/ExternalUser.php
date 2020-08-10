@@ -5,6 +5,8 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\ExternalUserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
 
 /**
  * @ApiResource()
@@ -15,7 +17,8 @@ class ExternalUser
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="ext_id", type="integer", nullable=false)
+     * @var int
      */
     private $id;
 
@@ -68,6 +71,18 @@ class ExternalUser
      * @ORM\Column(type="datetime", nullable=true)
      */
     private $ext_deleted;
+
+    /**
+     * @ManyToOne(targetEntity="User")
+     * @JoinColumn(name="user_usr_id", referencedColumnName="usr_id", nullable=true)
+     */
+    protected $user;
+
+    /**
+     * @ManyToOne(targetEntity="Client")
+     * @JoinColumn(name="client_cli_id", referencedColumnName="cli_id", nullable=false)
+     */
+    protected $client;
 
     public function getId(): ?int
     {
@@ -193,4 +208,37 @@ class ExternalUser
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getUser()
+    {
+        return $this->user;
+    }
+
+    /**
+     * @param mixed $user
+     */
+    public function setUser($user): void
+    {
+        $this->user = $user;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getClient()
+    {
+        return $this->client;
+    }
+
+    /**
+     * @param mixed $client
+     */
+    public function setClient($client): void
+    {
+        $this->client = $client;
+    }
+
 }

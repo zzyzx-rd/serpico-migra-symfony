@@ -5,6 +5,8 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\ResultTeamRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
 
 /**
  * @ApiResource()
@@ -15,7 +17,7 @@ class ResultTeam
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="rst_id", type="integer", nullable=false)
      */
     private $id;
 
@@ -113,6 +115,30 @@ class ResultTeam
      * @ORM\Column(type="datetime")
      */
     private $rst_inserted;
+
+    /**
+     * @ManyToOne(targetEntity="Activity")
+     * @JoinColumn(name="activity_act_id", referencedColumnName="act_id")
+     */
+    protected $activity;
+
+    /**
+     * @ManyToOne(targetEntity="Stage")
+     * @JoinColumn(name="stage_stg_id", referencedColumnName="stg_id", nullable=true)
+     */
+    protected $stage;
+
+    /**
+     * @ManyToOne(targetEntity="Criterion")
+     * @JoinColumn(name="criterion_crt_id", referencedColumnName="crt_id", nullable=true)
+     */
+    protected $criterion;
+
+    /**
+     * @ManyToOne(targetEntity="Team")
+     * @JoinColumn(name="team_tea_id", referencedColumnName="tea_id", nullable=true)
+     */
+    protected $team;
 
     public function getId(): ?int
     {
@@ -346,4 +372,69 @@ class ResultTeam
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getActivity()
+    {
+        return $this->activity;
+    }
+
+    /**
+     * @param mixed $activity
+     */
+    public function setActivity($activity): void
+    {
+        $this->activity = $activity;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getStage()
+    {
+        return $this->stage;
+    }
+
+    /**
+     * @param mixed $stage
+     */
+    public function setStage($stage): void
+    {
+        $this->stage = $stage;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCriterion()
+    {
+        return $this->criterion;
+    }
+
+    /**
+     * @param mixed $criterion
+     */
+    public function setCriterion($criterion): void
+    {
+        $this->criterion = $criterion;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTeam()
+    {
+        return $this->team;
+    }
+
+    /**
+     * @param mixed $team
+     */
+    public function setTeam($team): void
+    {
+        $this->team = $team;
+    }
+
 }

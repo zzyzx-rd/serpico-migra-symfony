@@ -5,6 +5,10 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\IProcessStageRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\OneToMany;
+use Doctrine\ORM\Mapping\OrderBy;
 
 /**
  * @ApiResource()
@@ -12,10 +16,19 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class IProcessStage
 {
+    const STAGE_UNSTARTED    = 0;
+    const STAGE_ONGOING      = 1;
+    const STAGE_COMPLETED  = 2;
+    const STAGE_PUBLISHED    = 3;
+
+    const VISIBILITY_PRIVATE = 0;
+    const VISIBILITY_UNLISTED = 1;
+    const VISIBILITY_PUBLIC  = 2;
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="stg_id", type="integer",nullable=false, length=10)
+     * @var int
      */
     private $id;
 
@@ -149,6 +162,70 @@ class IProcessStage
      */
     private $stg_gcompleted;
 
+    /**
+     * @ManyToOne(targetEntity="InstitutionProcess")
+     * @JoinColumn(name="iprocess_inp_id", referencedColumnName="inp_id",nullable=false)
+     * @var InstitutionProcess
+     */
+    protected $institutionProcess;
+
+    /**
+     * @ManyToOne(targetEntity="Organization")
+     * @JoinColumn(name="organization_org_id", referencedColumnName="org_id",nullable=true)
+     * @var Organization
+     */
+    protected $organization;
+
+    /**
+     * @OneToMany(targetEntity="IProcessCriterion", mappedBy="stage", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OrderBy({"weight" = "DESC"})
+     */
+    private $criteria;
+
+    /**
+     * @OneToMany(targetEntity="IProcessActivityUser", mappedBy="stage",cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OrderBy({"team" = "ASC"})
+     */
+    private $participants;
+
+    /**
+     * @OneToMany(targetEntity="Decision", mappedBy="stage",cascade={"persist","remove"}, orphanRemoval=true)
+     */
+    private $decisions;
+    /**
+     * @OneToMany(targetEntity="Grade", mappedBy="stage",cascade={"persist","remove"}, orphanRemoval=true)
+     */
+    private $grades;
+
+    /**
+     * @OneToMany(targetEntity="Result", mappedBy="stage",cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    private $results;
+
+    /**
+     * @OneToMany(targetEntity="ResultTeam", mappedBy="stage",cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    private $resultTeams;
+
+    /**
+     * @OneToMany(targetEntity="Ranking", mappedBy="stage",cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    private $rankings;
+
+    /**
+     * @OneToMany(targetEntity="RankingTeam", mappedBy="stage",cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    private $rankingTeams;
+
+    /**
+     * @OneToMany(targetEntity="RankingHistory", mappedBy="stage",cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    private $historicalRankings;
+
+    /**
+     * @OneToMany(targetEntity="RankingTeamHistory", mappedBy="stage",cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    private $historicalRankingTeams;
     public function getId(): ?int
     {
         return $this->id;
@@ -465,4 +542,197 @@ class IProcessStage
 
         return $this;
     }
+
+    /**
+     * @return InstitutionProcess
+     */
+    public function getInstitutionProcess(): InstitutionProcess
+    {
+        return $this->institutionProcess;
+    }
+
+    /**
+     * @param InstitutionProcess $institutionProcess
+     */
+    public function setInstitutionProcess(InstitutionProcess $institutionProcess): void
+    {
+        $this->institutionProcess = $institutionProcess;
+    }
+
+    /**
+     * @return Organization
+     */
+    public function getOrganization(): Organization
+    {
+        return $this->organization;
+    }
+
+    /**
+     * @param Organization $organization
+     */
+    public function setOrganization(Organization $organization): void
+    {
+        $this->organization = $organization;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCriteria()
+    {
+        return $this->criteria;
+    }
+
+    /**
+     * @param mixed $criteria
+     */
+    public function setCriteria($criteria): void
+    {
+        $this->criteria = $criteria;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getParticipants()
+    {
+        return $this->participants;
+    }
+
+    /**
+     * @param mixed $participants
+     */
+    public function setParticipants($participants): void
+    {
+        $this->participants = $participants;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDecisions()
+    {
+        return $this->decisions;
+    }
+
+    /**
+     * @param mixed $decisions
+     */
+    public function setDecisions($decisions): void
+    {
+        $this->decisions = $decisions;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getGrades()
+    {
+        return $this->grades;
+    }
+
+    /**
+     * @param mixed $grades
+     */
+    public function setGrades($grades): void
+    {
+        $this->grades = $grades;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getResults()
+    {
+        return $this->results;
+    }
+
+    /**
+     * @param mixed $results
+     */
+    public function setResults($results): void
+    {
+        $this->results = $results;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getResultTeams()
+    {
+        return $this->resultTeams;
+    }
+
+    /**
+     * @param mixed $resultTeams
+     */
+    public function setResultTeams($resultTeams): void
+    {
+        $this->resultTeams = $resultTeams;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getRankings()
+    {
+        return $this->rankings;
+    }
+
+    /**
+     * @param mixed $rankings
+     */
+    public function setRankings($rankings): void
+    {
+        $this->rankings = $rankings;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getRankingTeams()
+    {
+        return $this->rankingTeams;
+    }
+
+    /**
+     * @param mixed $rankingTeams
+     */
+    public function setRankingTeams($rankingTeams): void
+    {
+        $this->rankingTeams = $rankingTeams;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getHistoricalRankings()
+    {
+        return $this->historicalRankings;
+    }
+
+    /**
+     * @param mixed $historicalRankings
+     */
+    public function setHistoricalRankings($historicalRankings): void
+    {
+        $this->historicalRankings = $historicalRankings;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getHistoricalRankingTeams()
+    {
+        return $this->historicalRankingTeams;
+    }
+
+    /**
+     * @param mixed $historicalRankingTeams
+     */
+    public function setHistoricalRankingTeams($historicalRankingTeams): void
+    {
+        $this->historicalRankingTeams = $historicalRankingTeams;
+    }
+
 }

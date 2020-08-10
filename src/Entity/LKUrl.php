@@ -13,7 +13,8 @@ class LKUrl
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="lk_url_id", type="integer", nullable=false)
+     * @var int
      */
     private $id;
 

@@ -15,7 +15,7 @@ class Contact
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="con_id", type="integer")
      */
     private $id;
 

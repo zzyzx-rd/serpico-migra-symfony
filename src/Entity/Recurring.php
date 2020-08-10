@@ -4,6 +4,10 @@ namespace App\Entity;
 
 use App\Repository\RecurringRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\OneToMany;
+use Doctrine\ORM\Mapping\OrderBy;
 
 /**
  * @ORM\Entity(repositoryClass=RecurringRepository::class)
@@ -13,7 +17,8 @@ class Recurring
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="rct_id", type="integer", length=10)
+     * @var int
      */
     private $id;
 
@@ -111,6 +116,18 @@ class Recurring
      * @ORM\Column(type="datetime", nullable=true)
      */
     private $rct_deleted;
+
+    /**
+     * @ManyToOne(targetEntity="Organization")
+     * @JoinColumn(name="organization_org_id", referencedColumnName="org_id",nullable=false)
+     */
+    protected $organization;
+
+    /**
+     * @OneToMany(targetEntity="Activity", mappedBy="recurring", cascade={"persist", "remove"},orphanRemoval=true)
+     * @OrderBy({"startdate" = "ASC"})
+     */
+    private $activities;
 
     public function getId(): ?int
     {

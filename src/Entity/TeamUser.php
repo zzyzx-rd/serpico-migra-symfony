@@ -5,6 +5,8 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\TeamUserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
 
 /**
  * @ApiResource()
@@ -15,7 +17,8 @@ class TeamUser
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="tus_id", type="integer", length=10)
+     * @var int
      */
     private $id;
 
@@ -43,6 +46,12 @@ class TeamUser
      * @ORM\Column(type="boolean")
      */
     private $tus_is_deleted;
+
+    /**
+     *@ManyToOne(targetEntity="Team")
+     *@JoinColumn(name="team_tea_id", referencedColumnName="tea_id", nullable=false)
+     */
+    protected $team;
 
     public function getId(): ?int
     {
@@ -108,4 +117,21 @@ class TeamUser
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getTeam()
+    {
+        return $this->team;
+    }
+
+    /**
+     * @param mixed $team
+     */
+    public function setTeam($team): void
+    {
+        $this->team = $team;
+    }
+
 }

@@ -4,6 +4,9 @@ namespace App\Entity;
 
 use App\Repository\StateRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\OneToMany;
 
 /**
  * @ORM\Entity(repositoryClass=StateRepository::class)
@@ -13,7 +16,8 @@ class State
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="sta_id", type="integer", nullable=false)
+     * @var int
      */
     private $id;
 
@@ -41,6 +45,22 @@ class State
      * @ORM\Column(type="datetime")
      */
     private $sta_inserted;
+
+    /**
+     * @ManyToOne(targetEntity="Country")
+     * @JoinColumn(name="country_cou_id", referencedColumnName="cou_id",nullable=false)
+     */
+    protected $country;
+
+    /**
+     * @OneToMany(targetEntity="City", mappedBy="state",cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    private $cities;
+
+    /**
+     * @OneToMany(targetEntity="WorkerFirm", mappedBy="state",cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    private $firms;
 
     public function getId(): ?int
     {
@@ -106,4 +126,53 @@ class State
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getCountry()
+    {
+        return $this->country;
+    }
+
+    /**
+     * @param mixed $country
+     */
+    public function setCountry($country): void
+    {
+        $this->country = $country;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCities()
+    {
+        return $this->cities;
+    }
+
+    /**
+     * @param mixed $cities
+     */
+    public function setCities($cities): void
+    {
+        $this->cities = $cities;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFirms()
+    {
+        return $this->firms;
+    }
+
+    /**
+     * @param mixed $firms
+     */
+    public function setFirms($firms): void
+    {
+        $this->firms = $firms;
+    }
+
 }

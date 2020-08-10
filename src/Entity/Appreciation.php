@@ -5,6 +5,8 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\AppreciationRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
 
 /**
  * @ApiResource()
@@ -15,7 +17,7 @@ class Appreciation
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="apt_id", type="integer", nullable=false)
      */
     private $id;
 
@@ -33,6 +35,11 @@ class Appreciation
      * @ORM\Column(type="integer", nullable=true)
      */
     private $apt_createdBy;
+    /**
+     * @ManyToOne(targetEntity="Criterion")
+     * @JoinColumn(name="apt_criterion", referencedColumnName="crt_id",nullable=false)
+     */
+    protected $criterion;
 
     public function getId(): ?int
     {
@@ -74,4 +81,21 @@ class Appreciation
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getCriterion()
+    {
+        return $this->criterion;
+    }
+
+    /**
+     * @param mixed $criterion
+     */
+    public function setCriterion($criterion): void
+    {
+        $this->criterion = $criterion;
+    }
+
 }

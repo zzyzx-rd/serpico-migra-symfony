@@ -5,6 +5,10 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\TemplateRecurringRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\OneToMany;
+use Doctrine\ORM\Mapping\OrderBy;
 
 /**
  * @ApiResource()
@@ -15,7 +19,8 @@ class TemplateRecurring
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="rct_id", type="integer", length=10)
+     * @var int
      */
     private $id;
 
@@ -113,6 +118,18 @@ class TemplateRecurring
      * @ORM\Column(type="datetime")
      */
     private $rct_deleted;
+
+    /**
+     * @ManyToOne(targetEntity="Organization")
+     * @JoinColumn(name="organization_org_id", referencedColumnName="org_id",nullable=false)
+     */
+    protected $organization;
+
+    /**
+     * @OneToMany(targetEntity="TemplateActivity", mappedBy="recurring", cascade={"persist", "remove"},orphanRemoval=true)
+     * @OrderBy({"startdate" = "ASC"})
+     */
+    private $activities;
 
     public function getId(): ?int
     {
@@ -346,4 +363,37 @@ class TemplateRecurring
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getOrganization()
+    {
+        return $this->organization;
+    }
+
+    /**
+     * @param mixed $organization
+     */
+    public function setOrganization($organization): void
+    {
+        $this->organization = $organization;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getActivities()
+    {
+        return $this->activities;
+    }
+
+    /**
+     * @param mixed $activities
+     */
+    public function setActivities($activities): void
+    {
+        $this->activities = $activities;
+    }
+
 }

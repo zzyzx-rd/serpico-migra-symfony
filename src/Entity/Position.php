@@ -5,6 +5,9 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\PositionRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\OneToMany;
 
 /**
  * @ApiResource()
@@ -15,7 +18,8 @@ class Position
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="pos_id", type="integer", length=10, nullable=false)
+     * @var int
      */
     private $id;
 
@@ -68,6 +72,33 @@ class Position
      * @ORM\Column(type="datetime", nullable=true)
      */
     private $pos_deleted;
+
+    /**
+     * @ManyToOne(targetEntity="Organization")
+     * @JoinColumn(name="organization_org_id", referencedColumnName="org_id", nullable=false)
+     */
+    protected $organization;
+
+    /**
+     * @ManyToOne(targetEntity="Department")
+     * @JoinColumn(name="department_dpt_id", referencedColumnName="dpt_id", nullable=true)
+     */
+    protected $department;
+
+    /**
+     * @OneToMany(targetEntity="Weight", mappedBy="position", cascade={"persist", "remove"})
+     */
+    private $weights;
+
+    /**
+     * @OneToMany(targetEntity="OrganizationUserOption", mappedBy="position", cascade={"persist","remove"}, orphanRemoval=true)
+     */
+    private $options;
+
+    /**
+     * @OneToMany(targetEntity="Target", mappedBy="position",cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    private $targets;
 
     public function getId(): ?int
     {
@@ -193,4 +224,85 @@ class Position
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getOrganization()
+    {
+        return $this->organization;
+    }
+
+    /**
+     * @param mixed $organization
+     */
+    public function setOrganization($organization): void
+    {
+        $this->organization = $organization;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDepartment()
+    {
+        return $this->department;
+    }
+
+    /**
+     * @param mixed $department
+     */
+    public function setDepartment($department): void
+    {
+        $this->department = $department;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getWeights()
+    {
+        return $this->weights;
+    }
+
+    /**
+     * @param mixed $weights
+     */
+    public function setWeights($weights): void
+    {
+        $this->weights = $weights;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getOptions()
+    {
+        return $this->options;
+    }
+
+    /**
+     * @param mixed $options
+     */
+    public function setOptions($options): void
+    {
+        $this->options = $options;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTargets()
+    {
+        return $this->targets;
+    }
+
+    /**
+     * @param mixed $targets
+     */
+    public function setTargets($targets): void
+    {
+        $this->targets = $targets;
+    }
+
 }

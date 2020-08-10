@@ -5,6 +5,8 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\IProcessActivityUserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
 
 /**
  * @ApiResource()
@@ -12,10 +14,14 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class IProcessActivityUser
 {
+    const PARTICIPATION_ACTIVE       = 1;
+    const PARTICIPATION_THIRD_PARTY  = 0;
+    const PARTICIPATION_PASSIVE      = -1;
+
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="a_u_id", type="integer", nullable=false)
      */
     private $id;
 
@@ -58,6 +64,30 @@ class IProcessActivityUser
      * @ORM\Column(type="datetime")
      */
     private $a_u_deleted;
+
+    /**
+     * @ManyToOne(targetEntity="Team")
+     * @JoinColumn(name="team_tea_id", referencedColumnName="tea_id",nullable=false)
+     */
+    protected $team;
+
+    /**
+     * @ManyToOne(targetEntity="InstitutionProcess")
+     * @JoinColumn(name="iprocess_inp_id", referencedColumnName="inp_id",nullable=false)
+     */
+    protected $institutionProcess;
+
+    /**
+     * @ManyToOne(targetEntity="IProcessStage")
+     * @JoinColumn(name="iprocess_stage_stg_id", referencedColumnName="stg_id",nullable=false)
+     */
+    protected $stage;
+
+    /**
+     * @ManyToOne(targetEntity="IProcessCriterion", inversedBy="participants")
+     * @JoinColumn(name="iprocess_criterion_crt_id", referencedColumnName="crt_id",nullable=true)
+     */
+    protected $criterion;
 
     public function getId(): ?int
     {
@@ -159,4 +189,69 @@ class IProcessActivityUser
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getTeam()
+    {
+        return $this->team;
+    }
+
+    /**
+     * @param mixed $team
+     */
+    public function setTeam($team): void
+    {
+        $this->team = $team;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getInstitutionProcess()
+    {
+        return $this->institutionProcess;
+    }
+
+    /**
+     * @param mixed $institutionProcess
+     */
+    public function setInstitutionProcess($institutionProcess): void
+    {
+        $this->institutionProcess = $institutionProcess;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getStage()
+    {
+        return $this->stage;
+    }
+
+    /**
+     * @param mixed $stage
+     */
+    public function setStage($stage): void
+    {
+        $this->stage = $stage;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCriterion()
+    {
+        return $this->criterion;
+    }
+
+    /**
+     * @param mixed $criterion
+     */
+    public function setCriterion($criterion): void
+    {
+        $this->criterion = $criterion;
+    }
+
 }

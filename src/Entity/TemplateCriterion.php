@@ -4,6 +4,11 @@ namespace App\Entity;
 
 use App\Repository\TemplateCriterionRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\OneToMany;
+use Doctrine\ORM\Mapping\OneToOne;
+use Doctrine\ORM\Mapping\OrderBy;
 
 /**
  * @ORM\Entity(repositoryClass=TemplateCriterionRepository::class)
@@ -13,7 +18,7 @@ class TemplateCriterion
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="crt_id", type="integer", nullable=false)
      */
     private $id;
 
@@ -76,6 +81,24 @@ class TemplateCriterion
      * @ORM\Column(type="datetime", nullable=true)
      */
     private $crt_inserted;
+
+    /**
+     * @ManyToOne(targetEntity="TemplateStage")
+     * @JoinColumn(name="stage_stg_id", referencedColumnName="stg_id",nullable=true)
+     */
+    protected $stage;
+
+    /**
+     * @OneToMany(targetEntity="TemplateActivityUser", mappedBy="criterion",cascade={"persist", "remove"},orphanRemoval=true)
+     * @OrderBy({"leader" = "ASC"})
+     */
+    private $participants;
+
+    /**
+     * @OneToOne(targetEntity="CriterionName")
+     * @JoinColumn(name="criterion_name_cna_id", referencedColumnName="cna_id")
+     */
+    protected $cName;
 
     public function getId(): ?int
     {
@@ -225,4 +248,53 @@ class TemplateCriterion
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getStage()
+    {
+        return $this->stage;
+    }
+
+    /**
+     * @param mixed $stage
+     */
+    public function setStage($stage): void
+    {
+        $this->stage = $stage;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getParticipants()
+    {
+        return $this->participants;
+    }
+
+    /**
+     * @param mixed $participants
+     */
+    public function setParticipants($participants): void
+    {
+        $this->participants = $participants;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCName()
+    {
+        return $this->cName;
+    }
+
+    /**
+     * @param mixed $cName
+     */
+    public function setCName($cName): void
+    {
+        $this->cName = $cName;
+    }
+
 }

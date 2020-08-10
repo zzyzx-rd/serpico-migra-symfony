@@ -4,7 +4,13 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\ActivityUserRepository;
+use DateTimeInterface;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\Column;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\OneToMany;
 
 /**
  * @ApiResource()
@@ -12,17 +18,15 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class ActivityUser
 {
+    const PARTICIPATION_ACTIVE      = 1;
+    const PARTICIPATION_THIRD_PARTY = 0;
+    const PARTICIPATION_PASSIVE     = -1;
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @Column(name="a_u_id", type="integer", nullable=false)
      */
     private $id;
-
-    /**
-     * @ORM\Column(type="integer")
-     */
-    private $user_usr_id;
 
     /**
      * @ORM\Column(type="integer")
@@ -123,22 +127,44 @@ class ActivityUser
      * @ORM\Column(type="datetime", nullable=true)
      */
     private $a_u_deleted;
-
+    /**
+     * @OneToMany(targetEntity="Grade", mappedBy="participant",cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection
+     */
+    private $grades;
+    /**
+     * @ManyToOne(targetEntity="Team")
+     * @JoinColumn(name="team_tea_id", referencedColumnName="tea_id",nullable=false)
+     */
+    protected $team;
+    /**
+     * @ManyToOne(targetEntity="Activity")
+     * @JoinColumn(name="activity_act_id", referencedColumnName="act_id",nullable=false)
+     */
+    protected $activity;
+    /**
+     * @ManyToOne(targetEntity="Stage")
+     * @JoinColumn(name="stage_stg_id", referencedColumnName="stg_id",nullable=false)
+     */
+    protected $stage;
+    /**
+     * @ManyToOne(targetEntity="Criterion", inversedBy="participants")
+     * @JoinColumn(name="criterion_crt_id", referencedColumnName="crt_id",nullable=true)
+     */
+    protected $criterion;
+    /**
+     * @ManyToOne(targetEntity="Survey", inversedBy="participants")
+     * @JoinColumn(name="survey_sur_id", referencedColumnName="sur_id",nullable=true)
+     */
+    /**
+     *
+     * @OneToMany(targetEntity="Answer", mappedBy="participant",cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|Answer[] $answers
+     */
+    protected $answers;
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getUserUsrId(): ?int
-    {
-        return $this->user_usr_id;
-    }
-
-    public function setUserUsrId(int $user_usr_id): self
-    {
-        $this->user_usr_id = $user_usr_id;
-
-        return $this;
     }
 
     public function getAUStatus(): ?int
@@ -345,39 +371,136 @@ class ActivityUser
         return $this;
     }
 
-    public function getAUInserted(): ?\DateTimeInterface
+    public function getAUInserted(): ?DateTimeInterface
     {
         return $this->a_u_inserted;
     }
 
-    public function setAUInserted(?\DateTimeInterface $a_u_inserted): self
+    public function setAUInserted(?DateTimeInterface $a_u_inserted): self
     {
         $this->a_u_inserted = $a_u_inserted;
 
         return $this;
     }
 
-    public function getAUConfirmed(): ?\DateTimeInterface
+    public function getAUConfirmed(): ?DateTimeInterface
     {
         return $this->a_u_confirmed;
     }
 
-    public function setAUConfirmed(?\DateTimeInterface $a_u_confirmed): self
+    public function setAUConfirmed(?DateTimeInterface $a_u_confirmed): self
     {
         $this->a_u_confirmed = $a_u_confirmed;
 
         return $this;
     }
 
-    public function getAUDeleted(): ?\DateTimeInterface
+    public function getAUDeleted(): ?DateTimeInterface
     {
         return $this->a_u_deleted;
     }
 
-    public function setAUDeleted(?\DateTimeInterface $a_u_deleted): self
+    public function setAUDeleted(?DateTimeInterface $a_u_deleted): self
     {
         $this->a_u_deleted = $a_u_deleted;
 
         return $this;
     }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getGrades(): ArrayCollection
+    {
+        return $this->grades;
+    }
+
+    /**
+     * @param ArrayCollection $grades
+     */
+    public function setGrades(ArrayCollection $grades): void
+    {
+        $this->grades = $grades;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTeam()
+    {
+        return $this->team;
+    }
+
+    /**
+     * @param mixed $team
+     */
+    public function setTeam($team): void
+    {
+        $this->team = $team;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getActivity()
+    {
+        return $this->activity;
+    }
+
+    /**
+     * @param mixed $activity
+     */
+    public function setActivity($activity): void
+    {
+        $this->activity = $activity;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getStage()
+    {
+        return $this->stage;
+    }
+
+    /**
+     * @param mixed $stage
+     */
+    public function setStage($stage): void
+    {
+        $this->stage = $stage;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCriterion()
+    {
+        return $this->criterion;
+    }
+
+    /**
+     * @param mixed $criterion
+     */
+    public function setCriterion($criterion): void
+    {
+        $this->criterion = $criterion;
+    }
+
+    /**
+     * @return Answer[]|ArrayCollection
+     */
+    public function getAnswers()
+    {
+        return $this->answers;
+    }
+
+    /**
+     * @param Answer[]|ArrayCollection $answers
+     */
+    public function setAnswers($answers): void
+    {
+        $this->answers = $answers;
+    }
+
 }

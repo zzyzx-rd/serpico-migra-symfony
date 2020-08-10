@@ -5,6 +5,9 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\WorkerFirmSectorRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\OneToOne;
 
 /**
  * @ApiResource()
@@ -15,7 +18,8 @@ class WorkerFirmSector
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="wfs_id", type="integer", nullable=false)
+     * @var int
      */
     private $id;
 
@@ -33,6 +37,17 @@ class WorkerFirmSector
      * @ORM\Column(type="datetime")
      */
     private $wfs_inserted;
+
+    /**
+     * @ManyToOne(targetEntity="Icon")
+     * @JoinColumn(name="icon_ico_id", referencedColumnName="ico_id",nullable=false)
+     */
+    protected $icon;
+
+    /**
+     * @OneToOne(targetEntity="WorkerFirm", mappedBy="mainSector")
+     */
+    private $firm;
 
     public function getId(): ?int
     {
@@ -74,4 +89,37 @@ class WorkerFirmSector
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getIcon()
+    {
+        return $this->icon;
+    }
+
+    /**
+     * @param mixed $icon
+     */
+    public function setIcon($icon): void
+    {
+        $this->icon = $icon;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFirm()
+    {
+        return $this->firm;
+    }
+
+    /**
+     * @param mixed $firm
+     */
+    public function setFirm($firm): void
+    {
+        $this->firm = $firm;
+    }
+
 }

@@ -2,25 +2,25 @@
 
 namespace App\Repository;
 
-use App\Entity\InsitutionProcess;
+use App\Entity\InstitutionProcess;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @method InsitutionProcess|null find($id, $lockMode = null, $lockVersion = null)
- * @method InsitutionProcess|null findOneBy(array $criteria, array $orderBy = null)
- * @method InsitutionProcess[]    findAll()
- * @method InsitutionProcess[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method InstitutionProcess|null find($id, $lockMode = null, $lockVersion = null)
+ * @method InstitutionProcess|null findOneBy(array $criteria, array $orderBy = null)
+ * @method InstitutionProcess[]    findAll()
+ * @method InstitutionProcess[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class InsitutionProcessRepository extends ServiceEntityRepository
+class InstitutionProcessRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, InsitutionProcess::class);
+        parent::__construct($registry, InstitutionProcess::class);
     }
 
     // /**
-    //  * @return InsitutionProcess[] Returns an array of InsitutionProcess objects
+    //  * @return InstitutionProcess[] Returns an array of InstitutionProcess objects
     //  */
     /*
     public function findByExampleField($value)
@@ -37,7 +37,7 @@ class InsitutionProcessRepository extends ServiceEntityRepository
     */
 
     /*
-    public function findOneBySomeField($value): ?InsitutionProcess
+    public function findOneBySomeField($value): ?InstitutionProcess
     {
         return $this->createQueryBuilder('i')
             ->andWhere('i.exampleField = :val')

@@ -5,6 +5,10 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\TitleRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\OneToMany;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * @ApiResource()
@@ -15,7 +19,8 @@ class Title
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="tit_id", type="integer", length=10, nullable=false)
+     * @var int
      */
     private $id;
 
@@ -43,6 +48,28 @@ class Title
      * @ORM\Column(type="datetime", nullable=true)
      */
     private $tit_deleted;
+
+    /**
+     * @ManyToOne(targetEntity="Organization")
+     * @JoinColumn(name="organization_org_id", referencedColumnName="org_id", nullable=false)
+     */
+    protected $organization;
+
+    /**
+     * @ManyToOne(targetEntity="Weight")
+     * @JoinColumn(name="weight_wgt_id", referencedColumnName="wgt_id", nullable=true)
+     */
+    private $weight;
+
+    /**
+     * @OneToMany(targetEntity="OrganizationUserOption", mappedBy="title", cascade={"persist","remove"}, orphanRemoval=true)
+     */
+    private $options;
+
+    /**
+     * @OneToMany(targetEntity="Target", mappedBy="title",cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    private $targets;
 
     public function getId(): ?int
     {
@@ -108,4 +135,71 @@ class Title
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getOrganization()
+    {
+        return $this->organization;
+    }
+
+    /**
+     * @param mixed $organization
+     */
+    public function setOrganization($organization): void
+    {
+        $this->organization = $organization;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getWeight()
+    {
+        return $this->weight;
+    }
+
+    /**
+     * @param mixed $weight
+     */
+    public function setWeight($weight): void
+    {
+        $this->weight = $weight;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getOptions()
+    {
+        return $this->options;
+    }
+
+    /**
+     * @param mixed $options
+     */
+    public function setOptions($options): void
+    {
+        $this->options = $options;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTargets()
+    {
+        return $this->targets;
+    }
+
+    /**
+     * @param mixed $targets
+     */
+    public function setTargets($targets): void
+    {
+        $this->targets = $targets;
+    }
+
+
+
 }

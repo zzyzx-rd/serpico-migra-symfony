@@ -15,7 +15,8 @@ class Role
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="rol_id", type="integer", nullable=false)
+     * @var int
      */
     private $id;
 

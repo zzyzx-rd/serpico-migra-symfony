@@ -5,6 +5,8 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\OTPUserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
 
 /**
  * @ApiResource()
@@ -15,7 +17,8 @@ class OTPUser
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="otp_id", type="integer", nullable=false, length=10)
+     * @var int
      */
     private $id;
 
@@ -48,6 +51,12 @@ class OTPUser
      * @ORM\Column(type="datetime")
      */
     private $otp_inserted;
+
+    /**
+     *@ManyToOne(targetEntity="Organization")
+     *@JoinColumn(name="otp_organization", referencedColumnName="org_id", nullable=false)
+     */
+    protected $organization;
 
     public function getId(): ?int
     {
@@ -125,4 +134,21 @@ class OTPUser
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getOrganization()
+    {
+        return $this->organization;
+    }
+
+    /**
+     * @param mixed $organization
+     */
+    public function setOrganization($organization): void
+    {
+        $this->organization = $organization;
+    }
+
 }

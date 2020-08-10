@@ -5,6 +5,8 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\GeneratedImageRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\OneToOne;
 
 /**
  * @ApiResource()
@@ -15,7 +17,8 @@ class GeneratedImage
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="gim_id", type="integer", nullable=false)
+     * @var int
      */
     private $id;
 
@@ -73,6 +76,12 @@ class GeneratedImage
      * @ORM\Column(type="datetime")
      */
     private $gim_inserted;
+
+    /**
+     * @OneToOne(targetEntity="CriterionName")
+     * @JoinColumn(name="criterion_name_cna_id", referencedColumnName="cna_id")
+     */
+    protected $cName;
 
     public function getId(): ?int
     {
@@ -210,4 +219,21 @@ class GeneratedImage
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getCName()
+    {
+        return $this->cName;
+    }
+
+    /**
+     * @param mixed $cName
+     */
+    public function setCName($cName): void
+    {
+        $this->cName = $cName;
+    }
+
 }

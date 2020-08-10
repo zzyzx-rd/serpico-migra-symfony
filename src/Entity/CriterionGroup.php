@@ -5,6 +5,9 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\CriterionGroupRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\OneToMany;
 
 /**
  * @ApiResource()
@@ -15,7 +18,7 @@ class CriterionGroup
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="cgp_id", type="integer", nullable=false)
      */
     private $id;
 
@@ -33,6 +36,26 @@ class CriterionGroup
      * @ORM\Column(type="string", length=255)
      */
     private $cgp_name;
+
+    /**
+     * @OneToMany(targetEntity="CriterionName", mappedBy="criterionGroup", cascade={"persist", "remove"})
+     * @var CriterionName[]
+     */
+    protected $criteria;
+
+    /**
+     * @ManyToOne(targetEntity="Organization", inversedBy="criterionGroups")
+     * @JoinColumn(name="organization_org_id", referencedColumnName="org_id")
+     * @var Organization
+     */
+    protected $organization;
+
+    /**
+     * @ManyToOne(targetEntity="Department", inversedBy="criterionGroups")
+     * @JoinColumn(name="department_dpt_id", referencedColumnName="dpt_id")
+     * @var Department
+     */
+    protected $department;
 
     public function getId(): ?int
     {
@@ -74,4 +97,53 @@ class CriterionGroup
 
         return $this;
     }
+
+    /**
+     * @return CriterionName[]
+     */
+    public function getCriteria(): array
+    {
+        return $this->criteria;
+    }
+
+    /**
+     * @param CriterionName[] $criteria
+     */
+    public function setCriteria(array $criteria): void
+    {
+        $this->criteria = $criteria;
+    }
+
+    /**
+     * @return Organization
+     */
+    public function getOrganization(): Organization
+    {
+        return $this->organization;
+    }
+
+    /**
+     * @param Organization $organization
+     */
+    public function setOrganization(Organization $organization): void
+    {
+        $this->organization = $organization;
+    }
+
+    /**
+     * @return Department
+     */
+    public function getDepartment(): Department
+    {
+        return $this->department;
+    }
+
+    /**
+     * @param Department $department
+     */
+    public function setDepartment(Department $department): void
+    {
+        $this->department = $department;
+    }
+
 }

@@ -5,6 +5,8 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\ResultRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
 
 /**
  * @ApiResource()
@@ -15,7 +17,7 @@ class Result
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="res_id", type="integer", nullable=false)
      */
     private $id;
 
@@ -113,6 +115,24 @@ class Result
      * @ORM\Column(type="datetime")
      */
     private $res_inserted;
+
+    /**
+     * @ManyToOne(targetEntity="Activity")
+     * @JoinColumn(name="activity_act_id", referencedColumnName="act_id")
+     */
+    protected $activity;
+
+    /**
+     * @ManyToOne(targetEntity="Stage")
+     * @JoinColumn(name="stage_stg_id", referencedColumnName="stg_id", nullable=true)
+     */
+    protected $stage;
+
+    /**
+     * @ManyToOne(targetEntity="Criterion")
+     * @JoinColumn(name="criterion_crt_id", referencedColumnName="crt_id", nullable=true)
+     */
+    protected $criterion;
 
     public function getId(): ?int
     {

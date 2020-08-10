@@ -5,6 +5,8 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\SurveyFieldParameterRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
 
 /**
  * @ApiResource()
@@ -15,7 +17,8 @@ class SurveyFieldParameter
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="sfp_id", type="integer", length=10, nullable=false)
+     * @var int
      */
     private $id;
 
@@ -48,6 +51,12 @@ class SurveyFieldParameter
      * @ORM\Column(type="datetime")
      */
     private $sfp_inserted;
+
+    /**
+     * @ManyToOne(targetEntity="SurveyField")
+     * @JoinColumn(name="survey_field_sfi_id", referencedColumnName="sfi_id", nullable=false)
+     */
+    protected $field;
 
     public function getId(): ?int
     {
@@ -125,4 +134,21 @@ class SurveyFieldParameter
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getField()
+    {
+        return $this->field;
+    }
+
+    /**
+     * @param mixed $field
+     */
+    public function setField($field): void
+    {
+        $this->field = $field;
+    }
+
 }

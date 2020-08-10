@@ -4,7 +4,9 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\IconRepository;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\OneToMany;
 
 /**
  * @ApiResource()
@@ -15,7 +17,7 @@ class Icon
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="ico_id", type="integer", nullable=false)
      */
     private $id;
 
@@ -43,6 +45,18 @@ class Icon
      * @ORM\Column(type="datetime")
      */
     private $ico_inserted;
+
+    /**
+     * @OneToMany(targetEntity="CriterionName", mappedBy="icon", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var Collection<CriterionName>
+     */
+    private $criterionNames;
+
+    /**
+     * @OneToMany(targetEntity="WorkerFirmSector", mappedBy="icon", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var Collection<WorkerFirmSector>
+     */
+    private $workerFirmSectors;
 
     public function getId(): ?int
     {
@@ -108,4 +122,37 @@ class Icon
 
         return $this;
     }
+
+    /**
+     * @return Collection
+     */
+    public function getCriterionNames(): Collection
+    {
+        return $this->criterionNames;
+    }
+
+    /**
+     * @param Collection $criterionNames
+     */
+    public function setCriterionNames(Collection $criterionNames): void
+    {
+        $this->criterionNames = $criterionNames;
+    }
+
+    /**
+     * @return Collection
+     */
+    public function getWorkerFirmSectors(): Collection
+    {
+        return $this->workerFirmSectors;
+    }
+
+    /**
+     * @param Collection $workerFirmSectors
+     */
+    public function setWorkerFirmSectors(Collection $workerFirmSectors): void
+    {
+        $this->workerFirmSectors = $workerFirmSectors;
+    }
+
 }

@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Repository\ResultProjectRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
 
 /**
  * @ORM\Entity(repositoryClass=ResultProjectRepository::class)
@@ -13,7 +15,7 @@ class ResultProject
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="rsp_id", type="integer", nullable=false)
      */
     private $id;
 
@@ -111,6 +113,22 @@ class ResultProject
      * @ORM\Column(type="datetime")
      */
     private $rsp_inserted;
+
+    /**
+     * @ManyToOne(targetEntity="Activity")
+     * @JoinColumn(name="activity_act_id", referencedColumnName="act_id")
+     */
+    protected $activity;
+    /**
+     * @ManyToOne(targetEntity="Stage")
+     * @JoinColumn(name="stage_stg_id", referencedColumnName="stg_id", nullable=true)
+     */
+    protected $stage;
+    /**
+     * @ManyToOne(targetEntity="Criterion")
+     * @JoinColumn(name="criterion_crt_id", referencedColumnName="crt_id", nullable=true)
+     */
+    protected $criterion;
 
     public function getId(): ?int
     {
@@ -344,4 +362,53 @@ class ResultProject
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getActivity()
+    {
+        return $this->activity;
+    }
+
+    /**
+     * @param mixed $activity
+     */
+    public function setActivity($activity): void
+    {
+        $this->activity = $activity;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getStage()
+    {
+        return $this->stage;
+    }
+
+    /**
+     * @param mixed $stage
+     */
+    public function setStage($stage): void
+    {
+        $this->stage = $stage;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCriterion()
+    {
+        return $this->criterion;
+    }
+
+    /**
+     * @param mixed $criterion
+     */
+    public function setCriterion($criterion): void
+    {
+        $this->criterion = $criterion;
+    }
+
 }

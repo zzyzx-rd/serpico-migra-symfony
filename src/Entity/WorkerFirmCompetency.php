@@ -5,6 +5,8 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\WorkerFirmCompetencyRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
 
 /**
  * @ApiResource()
@@ -15,7 +17,8 @@ class WorkerFirmCompetency
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="wfc_id", type="integer", nullable=false)
+     * @var int
      */
     private $id;
 
@@ -33,6 +36,12 @@ class WorkerFirmCompetency
      * @ORM\Column(type="datetime")
      */
     private $wfc_inserted;
+
+    /**
+     * @ManyToOne(targetEntity="WorkerFirm")
+     * @JoinColumn(name="worker_firm_wfi_id", referencedColumnName="wfi_id",nullable=false)
+     */
+    protected $firm;
 
     public function getId(): ?int
     {
@@ -74,4 +83,21 @@ class WorkerFirmCompetency
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getFirm()
+    {
+        return $this->firm;
+    }
+
+    /**
+     * @param mixed $firm
+     */
+    public function setFirm($firm): void
+    {
+        $this->firm = $firm;
+    }
+
 }
