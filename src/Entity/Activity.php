@@ -87,10 +87,10 @@ class Activity
     private $act_status;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Process::class, inversedBy="activities")
-     * @ORM\JoinColumn(nullable=false)
+     * @ManyToOne(targetEntity="Process")
+     * @JoinColumn(name="process_pro_id", referencedColumnName="pro_id")
      */
-    private $process;
+    protected $process;
 
     /**
      * @ORM\ManyToOne(targetEntity=InstitutionProcess::class, inversedBy="activities")
@@ -98,10 +98,10 @@ class Activity
     private $institutionProcess;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Organization::class, inversedBy="activities")
-     * @ORM\JoinColumn(nullable=false)
+     * @ManyToOne(targetEntity="Organization")
+     * @JoinColumn(name="organization_org_id", referencedColumnName="org_id",nullable=false)
      */
-    private $organization;
+    protected $organization;
     /**
      * @OneToMany(targetEntity="Stage", mappedBy="activity", cascade={"persist", "remove"}, orphanRemoval=true)
      * @OrderBy({"startdate" = "ASC", "inserted" = "ASC"})

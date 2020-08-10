@@ -25,6 +25,7 @@ class UserTempo extends Fixture
         $user = new \App\Entity\UserTempo();
         $user->setRole(3)
             ->setEmail("sjobs@yopmail.com")
+            ->setUsername("Steve Jobs")
             ->setPassword($this->encoder->encodePassword($user, "Serpico2019"));
         $manager->persist($user);
         $manager->flush();

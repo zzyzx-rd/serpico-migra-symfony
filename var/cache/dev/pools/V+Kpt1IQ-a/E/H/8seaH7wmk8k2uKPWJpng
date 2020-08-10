@@ -1,0 +1,34 @@
+<?php //%255BApp%255CEntity%255CSurvey%2524participants%255D%255B1%255D
+
+return [PHP_INT_MAX, static function () { return \Symfony\Component\VarExporter\Internal\Hydrator::hydrate(
+    $o = [
+        clone (($p = &\Symfony\Component\VarExporter\Internal\Registry::$prototypes)['Doctrine\\ORM\\Mapping\\OneToMany'] ?? \Symfony\Component\VarExporter\Internal\Registry::p('Doctrine\\ORM\\Mapping\\OneToMany')),
+        clone ($p['Doctrine\\ORM\\Mapping\\OrderBy'] ?? \Symfony\Component\VarExporter\Internal\Registry::p('Doctrine\\ORM\\Mapping\\OrderBy')),
+    ],
+    null,
+    [
+        'stdClass' => [
+            'mappedBy' => [
+                'survey',
+            ],
+            'targetEntity' => [
+                'ActivityUser',
+            ],
+            'cascade' => [
+                [
+                    'persist',
+                ],
+            ],
+            'value' => [
+                1 => [
+                    'leader' => 'DESC',
+                ],
+            ],
+        ],
+    ],
+    [
+        $o[0],
+        $o[1],
+    ],
+    []
+); }];
