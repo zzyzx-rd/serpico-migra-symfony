@@ -69,6 +69,12 @@ class Weight
      */
     protected $position;
 
+    /**
+     * @ORM\OneToOne(targetEntity=User::class, mappedBy="weight_wgt", cascade={"persist", "remove"})
+     * @JoinColumn(nullable=true)
+     */
+    private $user;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -188,6 +194,23 @@ class Weight
     public function setPosition($position): void
     {
         $this->position = $position;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(User $user): self
+    {
+        $this->user = $user;
+
+        // set the owning side of the relation if necessary
+        if ($user->getWeightWgt() !== $this) {
+            $user->setWeightWgt($this);
+        }
+
+        return $this;
     }
 
 }

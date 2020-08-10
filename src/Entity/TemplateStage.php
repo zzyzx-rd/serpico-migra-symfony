@@ -97,6 +97,16 @@ class TemplateStage
      */
     private $participants;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class)
+     */
+    private $stg_master_usr;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $stg_desc;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -280,6 +290,30 @@ class TemplateStage
     public function setParticipants($participants): void
     {
         $this->participants = $participants;
+    }
+
+    public function getStgMasterUsr(): ?User
+    {
+        return $this->stg_master_usr;
+    }
+
+    public function setStgMasterUsr(?User $stg_master_usr): self
+    {
+        $this->stg_master_usr = $stg_master_usr;
+
+        return $this;
+    }
+
+    public function getStgDesc(): ?string
+    {
+        return $this->stg_desc;
+    }
+
+    public function setStgDesc(string $stg_desc): self
+    {
+        $this->stg_desc = $stg_desc;
+
+        return $this;
     }
 
 }

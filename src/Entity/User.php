@@ -4,6 +4,8 @@
 namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\GeneratedValue;
@@ -197,6 +199,66 @@ class User
      * @JoinColumn(name="worker_individual_win_id", referencedColumnName="win_id")
      */
     private $workerIndividual;
+
+    /**
+     * @ORM\OneToMany(targetEntity=ActivityUser::class, mappedBy="user_usr")
+     */
+    private $activity_user_usr;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Recurring::class, mappedBy="rec_master_user")
+     */
+    private $Reccuring;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Result::class, mappedBy="user_usr")
+     */
+    private $results;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Stage::class, mappedBy="stg_master_user")
+     */
+    private $stagesWhereMaster;
+
+    /**
+     * @ORM\OneToMany(targetEntity=TeamUser::class, mappedBy="user_usr")
+     */
+    private $teamUsers;
+
+    /**
+     * @ORM\OneToOne(targetEntity=Weight::class, inversedBy="user", cascade={"persist", "remove"})
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $weight_wgt;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Position::class)
+     */
+    private $position_pos;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Department::class)
+     */
+    private $departement_dpt;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Title::class)
+     */
+    private $title_tit;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Organization::class)
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $organization_org;
+
+    public function __construct()
+    {
+        $this->Reccuring = new ArrayCollection();
+        $this->results = new ArrayCollection();
+        $this->stagesWhereMaster = new ArrayCollection();
+        $this->teamUsers = new ArrayCollection();
+    }
 
     public function getUsrInt(): ?bool
     {
@@ -624,6 +686,221 @@ class User
     public function setWorkerIndividual($workerIndividual): void
     {
         $this->workerIndividual = $workerIndividual;
+    }
+
+    /**
+     * @return Collection|ActivityUser[]
+     */
+    public function getExternalUser(): Collection
+    {
+        return $this->activity_user_usr;
+    }
+
+    public function addExternalUser(ActivityUser $externalUser): self
+    {
+        if (!$this->activity_user_usr->contains($externalUser)) {
+            $this->activity_user_usr[] = $externalUser;
+            $externalUser->setUserUsr($this);
+        }
+
+        return $this;
+    }
+
+    public function removeExternalUser(ActivityUser $externalUser): self
+    {
+        if ($this->activity_user_usr->contains($externalUser)) {
+            $this->activity_user_usr->removeElement($externalUser);
+            // set the owning side to null (unless already changed)
+            if ($externalUser->getUserUsr() === $this) {
+                $externalUser->setUserUsr(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Recurring[]
+     */
+    public function getReccuring(): Collection
+    {
+        return $this->Reccuring;
+    }
+
+    public function addReccuring(Recurring $reccuring): self
+    {
+        if (!$this->Reccuring->contains($reccuring)) {
+            $this->Reccuring[] = $reccuring;
+            $reccuring->setRecMasterUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReccuring(Recurring $reccuring): self
+    {
+        if ($this->Reccuring->contains($reccuring)) {
+            $this->Reccuring->removeElement($reccuring);
+            // set the owning side to null (unless already changed)
+            if ($reccuring->getRecMasterUser() === $this) {
+                $reccuring->setRecMasterUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Result[]
+     */
+    public function getResults(): Collection
+    {
+        return $this->results;
+    }
+
+    public function addResult(Result $result): self
+    {
+        if (!$this->results->contains($result)) {
+            $this->results[] = $result;
+            $result->setUserUsr($this);
+        }
+
+        return $this;
+    }
+
+    public function removeResult(Result $result): self
+    {
+        if ($this->results->contains($result)) {
+            $this->results->removeElement($result);
+            // set the owning side to null (unless already changed)
+            if ($result->getUserUsr() === $this) {
+                $result->setUserUsr(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Stage[]
+     */
+    public function getStagesWhereMaster(): Collection
+    {
+        return $this->stagesWhereMaster;
+    }
+
+    public function addStagesWhereMaster(Stage $stagesWhereMaster): self
+    {
+        if (!$this->stagesWhereMaster->contains($stagesWhereMaster)) {
+            $this->stagesWhereMaster[] = $stagesWhereMaster;
+            $stagesWhereMaster->setStgMasterUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeStagesWhereMaster(Stage $stagesWhereMaster): self
+    {
+        if ($this->stagesWhereMaster->contains($stagesWhereMaster)) {
+            $this->stagesWhereMaster->removeElement($stagesWhereMaster);
+            // set the owning side to null (unless already changed)
+            if ($stagesWhereMaster->getStgMasterUser() === $this) {
+                $stagesWhereMaster->setStgMasterUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|TeamUser[]
+     */
+    public function getTeamUsers(): Collection
+    {
+        return $this->teamUsers;
+    }
+
+    public function addTeamUser(TeamUser $teamUser): self
+    {
+        if (!$this->teamUsers->contains($teamUser)) {
+            $this->teamUsers[] = $teamUser;
+            $teamUser->setUserUsr($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTeamUser(TeamUser $teamUser): self
+    {
+        if ($this->teamUsers->contains($teamUser)) {
+            $this->teamUsers->removeElement($teamUser);
+            // set the owning side to null (unless already changed)
+            if ($teamUser->getUserUsr() === $this) {
+                $teamUser->setUserUsr(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getWeightWgt(): ?Weight
+    {
+        return $this->weight_wgt;
+    }
+
+    public function setWeightWgt(Weight $weight_wgt): self
+    {
+        $this->weight_wgt = $weight_wgt;
+
+        return $this;
+    }
+
+    public function getPositionPos(): ?Position
+    {
+        return $this->position_pos;
+    }
+
+    public function setPositionPos(?Position $position_pos): self
+    {
+        $this->position_pos = $position_pos;
+
+        return $this;
+    }
+
+    public function getDepartementDpt(): ?Department
+    {
+        return $this->departement_dpt;
+    }
+
+    public function setDepartementDpt(?Department $departement_dpt): self
+    {
+        $this->departement_dpt = $departement_dpt;
+
+        return $this;
+    }
+
+    public function getTitleTit(): ?Title
+    {
+        return $this->title_tit;
+    }
+
+    public function setTitleTit(?Title $title_tit): self
+    {
+        $this->title_tit = $title_tit;
+
+        return $this;
+    }
+
+    public function getOrganizationOrg(): ?Organization
+    {
+        return $this->organization_org;
+    }
+
+    public function setOrganizationOrg(?Organization $organization_org): self
+    {
+        $this->organization_org = $organization_org;
+
+        return $this;
     }
 
 }

@@ -53,6 +53,17 @@ class TeamUser
      */
     protected $team;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="teamUsers")
+     */
+    private $user_usr;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=ExternalUser::class, inversedBy="teamUsers")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $external_user_ext_id;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -132,6 +143,30 @@ class TeamUser
     public function setTeam($team): void
     {
         $this->team = $team;
+    }
+
+    public function getUserUsr(): ?User
+    {
+        return $this->user_usr;
+    }
+
+    public function setUserUsr(?User $user_usr): self
+    {
+        $this->user_usr = $user_usr;
+
+        return $this;
+    }
+
+    public function getExternalUserExtId(): ?ExternalUser
+    {
+        return $this->external_user_ext_id;
+    }
+
+    public function setExternalUserExtId(?ExternalUser $external_user_ext_id): self
+    {
+        $this->external_user_ext_id = $external_user_ext_id;
+
+        return $this;
     }
 
 }

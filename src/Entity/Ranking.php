@@ -101,6 +101,11 @@ class Ranking
      */
     protected $organization;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class)
+     */
+    private $rnk_user_usr;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -300,6 +305,18 @@ class Ranking
     public function setOrganization($organization): void
     {
         $this->organization = $organization;
+    }
+
+    public function getRnkUserUsr(): ?User
+    {
+        return $this->rnk_user_usr;
+    }
+
+    public function setRnkUserUsr(?User $rnk_user_usr): self
+    {
+        $this->rnk_user_usr = $rnk_user_usr;
+
+        return $this;
     }
 
 }

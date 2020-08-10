@@ -129,6 +129,11 @@ class Recurring
      */
     private $activities;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="Reccuring")
+     */
+    private $rec_master_user;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -358,6 +363,18 @@ class Recurring
     public function setRctDeleted(?\DateTimeInterface $rct_deleted): self
     {
         $this->rct_deleted = $rct_deleted;
+
+        return $this;
+    }
+
+    public function getRecMasterUser(): ?User
+    {
+        return $this->rec_master_user;
+    }
+
+    public function setRecMasterUser(?User $rec_master_user): self
+    {
+        $this->rec_master_user = $rec_master_user;
 
         return $this;
     }

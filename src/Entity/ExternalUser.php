@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\ExternalUserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -83,6 +85,28 @@ class ExternalUser
      * @JoinColumn(name="client_cli_id", referencedColumnName="cli_id", nullable=false)
      */
     protected $client;
+
+    /**
+     * @ORM\OneToMany(targetEntity=ActivityUser::class, mappedBy="external_user_ext_usr")
+     */
+    private $activity_user_act_usr;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Result::class, mappedBy="external_user_ext_id")
+     */
+    private $results;
+
+    /**
+     * @ORM\OneToMany(targetEntity=TeamUser::class, mappedBy="external_user_ext_id")
+     */
+    private $teamUsers;
+
+    public function __construct()
+    {
+        $this->activity_user_act_usr = new ArrayCollection();
+        $this->results = new ArrayCollection();
+        $this->teamUsers = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -239,6 +263,99 @@ class ExternalUser
     public function setClient($client): void
     {
         $this->client = $client;
+    }
+
+    /**
+     * @return Collection|ActivityUser[]
+     */
+    public function getActivityUserActUsr(): Collection
+    {
+        return $this->activity_user_act_usr;
+    }
+
+    public function addActivityUserActUsr(ActivityUser $activityUserActUsr): self
+    {
+        if (!$this->activity_user_act_usr->contains($activityUserActUsr)) {
+            $this->activity_user_act_usr[] = $activityUserActUsr;
+            $activityUserActUsr->setExternalUserExtUsr($this);
+        }
+
+        return $this;
+    }
+
+    public function removeActivityUserActUsr(ActivityUser $activityUserActUsr): self
+    {
+        if ($this->activity_user_act_usr->contains($activityUserActUsr)) {
+            $this->activity_user_act_usr->removeElement($activityUserActUsr);
+            // set the owning side to null (unless already changed)
+            if ($activityUserActUsr->getExternalUserExtUsr() === $this) {
+                $activityUserActUsr->setExternalUserExtUsr(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Result[]
+     */
+    public function getResults(): Collection
+    {
+        return $this->results;
+    }
+
+    public function addResult(Result $result): self
+    {
+        if (!$this->results->contains($result)) {
+            $this->results[] = $result;
+            $result->setExternalUserExtId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeResult(Result $result): self
+    {
+        if ($this->results->contains($result)) {
+            $this->results->removeElement($result);
+            // set the owning side to null (unless already changed)
+            if ($result->getExternalUserExtId() === $this) {
+                $result->setExternalUserExtId(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|TeamUser[]
+     */
+    public function getTeamUsers(): Collection
+    {
+        return $this->teamUsers;
+    }
+
+    public function addTeamUser(TeamUser $teamUser): self
+    {
+        if (!$this->teamUsers->contains($teamUser)) {
+            $this->teamUsers[] = $teamUser;
+            $teamUser->setExternalUserExtId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTeamUser(TeamUser $teamUser): self
+    {
+        if ($this->teamUsers->contains($teamUser)) {
+            $this->teamUsers->removeElement($teamUser);
+            // set the owning side to null (unless already changed)
+            if ($teamUser->getExternalUserExtId() === $this) {
+                $teamUser->setExternalUserExtId(null);
+            }
+        }
+
+        return $this;
     }
 
 }

@@ -134,6 +134,16 @@ class Result
      */
     protected $criterion;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="results")
+     */
+    private $user_usr;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=ExternalUser::class, inversedBy="results")
+     */
+    private $external_user_ext_id;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -363,6 +373,30 @@ class Result
     public function setResInserted(\DateTimeInterface $res_inserted): self
     {
         $this->res_inserted = $res_inserted;
+
+        return $this;
+    }
+
+    public function getUserUsr(): ?User
+    {
+        return $this->user_usr;
+    }
+
+    public function setUserUsr(?User $user_usr): self
+    {
+        $this->user_usr = $user_usr;
+
+        return $this;
+    }
+
+    public function getExternalUserExtId(): ?ExternalUser
+    {
+        return $this->external_user_ext_id;
+    }
+
+    public function setExternalUserExtId(?ExternalUser $external_user_ext_id): self
+    {
+        $this->external_user_ext_id = $external_user_ext_id;
 
         return $this;
     }

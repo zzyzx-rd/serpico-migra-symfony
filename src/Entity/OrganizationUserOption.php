@@ -99,6 +99,12 @@ class OrganizationUserOption
      */
     protected $user;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=Role::class)
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $role_rol;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -294,6 +300,18 @@ class OrganizationUserOption
     public function setUser($user): void
     {
         $this->user = $user;
+    }
+
+    public function getRoleRol(): ?Role
+    {
+        return $this->role_rol;
+    }
+
+    public function setRoleRol(?Role $role_rol): self
+    {
+        $this->role_rol = $role_rol;
+
+        return $this;
     }
 
 }

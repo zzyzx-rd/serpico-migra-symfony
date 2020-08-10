@@ -85,6 +85,11 @@ class RankingHistory
      */
     protected $criterion;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class)
+     */
+    private $rhk_user_usr;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -244,6 +249,18 @@ class RankingHistory
     public function setCriterion($criterion): void
     {
         $this->criterion = $criterion;
+    }
+
+    public function getRhkUserUsr(): ?User
+    {
+        return $this->rhk_user_usr;
+    }
+
+    public function setRhkUserUsr(?User $rhk_user_usr): self
+    {
+        $this->rhk_user_usr = $rhk_user_usr;
+
+        return $this;
     }
 
 }

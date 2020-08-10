@@ -72,6 +72,11 @@ class Template
      *@JoinColumn(name="organization_org_id", referencedColumnName="org_id", nullable=false)
      */
     protected $organization;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Activity::class)
+     */
+    private $original_activity_act;
     public function getId(): ?int
     {
         return $this->id;
@@ -203,6 +208,18 @@ class Template
     public function setOrganization($organization): void
     {
         $this->organization = $organization;
+    }
+
+    public function getOriginalActivityAct(): ?Activity
+    {
+        return $this->original_activity_act;
+    }
+
+    public function setOriginalActivityAct(?Activity $original_activity_act): self
+    {
+        $this->original_activity_act = $original_activity_act;
+
+        return $this;
     }
 
 }

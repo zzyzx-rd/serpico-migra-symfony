@@ -131,6 +131,11 @@ class TemplateRecurring
      */
     private $activities;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class)
+     */
+    private $rct_master_usr;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -394,6 +399,18 @@ class TemplateRecurring
     public function setActivities($activities): void
     {
         $this->activities = $activities;
+    }
+
+    public function getRctMasterUsr(): ?User
+    {
+        return $this->rct_master_usr;
+    }
+
+    public function setRctMasterUsr(?User $rct_master_usr): self
+    {
+        $this->rct_master_usr = $rct_master_usr;
+
+        return $this;
     }
 
 }

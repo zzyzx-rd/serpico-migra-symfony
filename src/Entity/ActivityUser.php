@@ -162,6 +162,16 @@ class ActivityUser
      * @var ArrayCollection|Answer[] $answers
      */
     protected $answers;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="external_user")
+     */
+    private $user_usr;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=ExternalUser::class, inversedBy="activity_user_act_usr")
+     */
+    private $external_user_ext_usr;
     public function getId(): ?int
     {
         return $this->id;
@@ -501,6 +511,30 @@ class ActivityUser
     public function setAnswers($answers): void
     {
         $this->answers = $answers;
+    }
+
+    public function getUserUsr(): ?User
+    {
+        return $this->user_usr;
+    }
+
+    public function setUserUsr(?User $user_usr): self
+    {
+        $this->user_usr = $user_usr;
+
+        return $this;
+    }
+
+    public function getExternalUserExtUsr(): ?ExternalUser
+    {
+        return $this->external_user_ext_usr;
+    }
+
+    public function setExternalUserExtUsr(?ExternalUser $external_user_ext_usr): self
+    {
+        $this->external_user_ext_usr = $external_user_ext_usr;
+
+        return $this;
     }
 
 }

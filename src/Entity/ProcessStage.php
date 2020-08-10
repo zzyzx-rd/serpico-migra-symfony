@@ -229,6 +229,12 @@ class ProcessStage
      */
     private $historicalRankingTeams;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class)
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $stg_master_usr;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -736,6 +742,18 @@ class ProcessStage
     public function setHistoricalRankingTeams($historicalRankingTeams): void
     {
         $this->historicalRankingTeams = $historicalRankingTeams;
+    }
+
+    public function getStgMasterUsr(): ?User
+    {
+        return $this->stg_master_usr;
+    }
+
+    public function setStgMasterUsr(?User $stg_master_usr): self
+    {
+        $this->stg_master_usr = $stg_master_usr;
+
+        return $this;
     }
 
 }

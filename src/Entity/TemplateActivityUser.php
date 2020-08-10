@@ -75,6 +75,18 @@ class TemplateActivityUser
      */
     protected $criterion;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class)
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $user_usr;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=ExternalUser::class)
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $external_user_ext_usr;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -214,6 +226,30 @@ class TemplateActivityUser
     public function setCriterion($criterion): void
     {
         $this->criterion = $criterion;
+    }
+
+    public function getUserUsr(): ?User
+    {
+        return $this->user_usr;
+    }
+
+    public function setUserUsr(?User $user_usr): self
+    {
+        $this->user_usr = $user_usr;
+
+        return $this;
+    }
+
+    public function getExternalUserExtUsr(): ?ExternalUser
+    {
+        return $this->external_user_ext_usr;
+    }
+
+    public function setExternalUserExtUsr(?ExternalUser $external_user_ext_usr): self
+    {
+        $this->external_user_ext_usr = $external_user_ext_usr;
+
+        return $this;
     }
 
 }

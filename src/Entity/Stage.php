@@ -293,6 +293,11 @@ class Stage
      */
     private $template;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="stagesWhereMaster")
+     */
+    private $stg_master_user;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -920,6 +925,18 @@ class Stage
     public function setTemplate($template): void
     {
         $this->template = $template;
+    }
+
+    public function getStgMasterUser(): ?User
+    {
+        return $this->stg_master_user;
+    }
+
+    public function setStgMasterUser(?User $stg_master_user): self
+    {
+        $this->stg_master_user = $stg_master_user;
+
+        return $this;
     }
 
 }

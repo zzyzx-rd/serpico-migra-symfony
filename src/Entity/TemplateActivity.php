@@ -91,6 +91,11 @@ class TemplateActivity
      */
     private $participants;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class)
+     */
+    private $act_master_usr;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -258,6 +263,18 @@ class TemplateActivity
     public function setParticipants($participants): void
     {
         $this->participants = $participants;
+    }
+
+    public function getActMasterUsr(): ?User
+    {
+        return $this->act_master_usr;
+    }
+
+    public function setActMasterUsr(?User $act_master_usr): self
+    {
+        $this->act_master_usr = $act_master_usr;
+
+        return $this;
     }
 
 }
