@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\ClientRepository;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
@@ -15,7 +16,7 @@ use Doctrine\ORM\Mapping\OneToOne;
  * @ApiResource()
  * @ORM\Entity(repositoryClass=ClientRepository::class)
  */
-class Client
+class Client extends DbObject
 {
     /**
      * @ORM\Id()
@@ -78,6 +79,49 @@ class Client
      * @var ArrayCollection|ExternalUser[]
      */
     private $externalUsers;
+
+    /**
+     * Client constructor.
+     * @param $id
+     * @param $clicommname
+     * @param $cli_type
+     * @param $cli_logo
+     * @param $cli_email
+     * @param $cli_createdBy
+     * @param $cli_inserted
+     * @param $organization
+     * @param Organization $clientOrganization
+     * @param $workerFirm
+     * @param ExternalUser[]|ArrayCollection $externalUsers
+     */
+    public function __construct(
+        int $id = null,
+        $cli_createdBy = null,
+        $cli_type = 'F',
+        $clicommname = null,
+        $cli_logo = null,
+        $cli_email = null,
+        $cli_inserted,
+        $organization,
+        Organization $clientOrganization = null,
+        $workerFirm,
+        $externalUsers = null)
+    {
+        parent::__construct($id, $cli_createdBy, new DateTime());
+        $this->id = $id;
+        $this->clicommname = $clicommname;
+        $this->cli_type = $cli_type;
+        $this->cli_logo = $cli_logo;
+        $this->cli_email = $cli_email;
+        $this->cli_createdBy = $cli_createdBy;
+        $this->cli_inserted = $cli_inserted;
+        $this->organization = $organization;
+        $this->clientOrganization = $clientOrganization;
+        $this->workerFirm = $workerFirm;
+        $this->externalUsers = $externalUsers?$externalUsers:new ArrayCollection();
+    }
+
+
     public function getId(): ?int
     {
         return $this->id;
@@ -219,4 +263,40 @@ class Client
         $this->externalUsers = $externalUsers;
     }
 
+    public function addExternalUser(ExternalUser $externalUser)
+    {
+        $this->externalUsers->add($externalUser);
+        $externalUser->setClient($this);
+        return $this;
+    }
+
+    public function removeExternalUser(ExternalUser $externalUser)
+    {
+        $this->externalUsers->removeElement($externalUser);
+        return $this;
+    }
+
+    public function getAliveExternalUsers()
+    {
+        $aliveExtUsers = new ArrayCollection;
+        foreach ($this->externalUsers as $externalUser) {
+            if ($externalUser->getDeleted() == null && $externalUser->getLastname() != 'ZZ') {
+                $aliveExtUsers->add($externalUser);
+            }
+        };
+        return $aliveExtUsers;
+    }
+
+    public function addAliveExternalUser(ExternalUser $externalUser)
+    {
+        $this->externalUsers->add($externalUser);
+        $externalUser->setClient($this);
+        return $this;
+    }
+
+    public function removeAliveExternalUser(ExternalUser $externalUser)
+    {
+        $this->externalUsers->removeElement($externalUser);
+        return $this;
+    }
 }
