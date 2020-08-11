@@ -6,6 +6,7 @@ use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\ActivityRepository;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\JoinColumn;
@@ -15,9 +16,9 @@ use Doctrine\ORM\Mapping\OrderBy;
 
 /**
  * @ApiResource()
- * @ORM\Entity(repositoryClass=ActivityRepository::class)
+ * @ORM\Entity(repositoryClass="App\Repository\ActivityRepository", repositoryClass=ActivityRepository::class)
  */
-class Activity
+class Activity extends DbObject
 {
     const STATUS_CANCELLED = -5;
     const STATUS_REJECTED = -4;
@@ -40,11 +41,6 @@ class Activity
      * @ORM\Column(type="boolean")
      */
     private $act_complete;
-
-    /**
-     * @ORM\Column(type="integer")
-     */
-    private $act_master_usr_id;
 
     /**
      * @ORM\Column(type="integer")
@@ -232,6 +228,139 @@ class Activity
      */
     private $act_master_usr;
 
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $diffCriteria;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $diffParticipants;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $nbParticipants;
+    /**
+     * @var DateTime
+     */
+    private $act_gEndDate;
+    private $act_gStartDate;
+
+    public function __toString()
+    {
+        return (string) $this->id;
+    }
+
+    /**
+     * Activity constructor.
+     * @param int $id
+     * @param int $magnitude
+     * @param bool $complete
+     * @param bool $simplified
+     * @param string $name
+     * @param string $visibility
+     * @param DateTime|null $startdate
+     * @param DateTime|null $enddate
+     * @param bool $diffCriteria
+     * @param bool $diffParticipants
+     * @param int $nbParticipants
+     * @param string $objectives
+     * @param int|null $status
+     * @param float $progress
+     * @param bool $isRewarding
+     * @param float $distrAmount
+     * @param int $res_inertia
+     * @param int $res_benefit_eff
+     * @param int|null $createdBy
+     * @param DateTime|null $deleted
+     * @param DateTime|null $completed
+     * @param DateTime|null $saved
+     * @param bool $isFinalized
+     * @param DateTime|null $finalized
+     * @param DateTime|null $released
+     * @param DateTime|null $archived
+     */
+    public function __construct(
+        int $id = 0,
+        int $magnitude = 1,
+        bool $complete = false,
+        bool $simplified = true,
+        string $name = '',
+        string $visibility = 'public',
+        DateTime $startdate = null,
+        DateTime $enddate = null,
+        bool $diffCriteria = false,
+        bool $diffParticipants = false,
+        int $nbParticipants = 0,
+        string $objectives = '',
+        int $status = null,
+        float $progress = 0.0,
+        bool $isRewarding = false,
+        float $distrAmount = 0.0,
+        int $res_inertia = 0,
+        int $res_benefit_eff = 0,
+        int $createdBy = null,
+        DateTime $deleted = null,
+        DateTime $completed = null,
+        DateTime $saved = null,
+        bool $isFinalized = false,
+        DateTime $finalized = null,
+        DateTime $released = null,
+        DateTime $archived = null
+    ) {
+        parent::__construct($id, $createdBy, new DateTime);
+        $this->act_magnitude = $magnitude;
+        $this->act_complete = $complete;
+        $this->act_simplified = $simplified;
+        $this->act_name = $name;
+        $this->act_name = $visibility;
+        $this->act_startDate = $startdate;
+        $this->act_endDate = $enddate;
+        $this->diffCriteria = $diffCriteria;
+        $this->diffParticipants = $diffParticipants;
+        $this->nbParticipants = $nbParticipants;
+        $this->act_objectives = $objectives;
+        $this->act_status = $status;
+        $this->progress = $progress;
+        $this->isRewarding = $isRewarding;
+        $this->distrAmount = $distrAmount;
+        $this->res_inertia = $res_inertia;
+        $this->res_benefit_eff = $res_benefit_eff;
+        $this->deleted = $deleted;
+        $this->completed = $completed;
+        $this->saved = $saved;
+        $this->isFinalized = $isFinalized;
+        $this->finalized = $finalized;
+        $this->saved = $saved;
+        $this->released = $released;
+        $this->archived = $archived;
+        $this->participants = new ArrayCollection;
+        $this->stages = new ArrayCollection;
+        $this->decisions = new ArrayCollection;
+        $this->projectResults = new ArrayCollection;
+        $this->results = new ArrayCollection;
+        $this->rankings = new ArrayCollection;
+        $this->historicalRankings = new ArrayCollection;
+        $this->resultTeams = new ArrayCollection;
+        $this->rankingTeams = new ArrayCollection;
+        $this->historicalRankingTeams = new ArrayCollection;
+        $this->createdBy = $createdBy;
+        $this->act_gEndDate = new DateTime('1990-01-01');
+        //TODO Set la date et autres dans les controlleurs
+        foreach ($this->stages as $stage) {
+            if ($stage->getGEnddate() > $this->act_gEnddate) {
+                $this->act_gEnddate = $stage->getGEnddate();
+            }
+        }
+        $this->act_gStartDate = new DateTime('2099-01-01');
+        foreach ($this->stages as $stage) {
+            if ($stage->getStartdate() <  $this->act_gStartDate) {
+                $this->act_gStartDate = $stage->getStartDate();
+            }
+        }
+    }
 
     public function getId(): ?int
     {
@@ -250,17 +379,6 @@ class Activity
         return $this;
     }
 
-    public function getActMasterUsrId(): ?int
-    {
-        return $this->act_master_usr_id;
-    }
-
-    public function setActMasterUsrId(int $act_master_usr_id): self
-    {
-        $this->act_master_usr_id = $act_master_usr_id;
-
-        return $this;
-    }
 
     public function getActMagnitude(): ?int
     {
@@ -756,10 +874,12 @@ class Activity
 
     /**
      * @param DateTime $deleted
+     * @return Activity
      */
-    public function setDeleted(DateTime $deleted): void
+    public function setDeleted(DateTime $deleted): Activity
     {
         $this->deleted = $deleted;
+        return $this;
     }
 
     /**
@@ -822,4 +942,498 @@ class Activity
         return $this;
     }
 
+    public function getDiffCriteria(): ?bool
+    {
+        return $this->diffCriteria;
+    }
+
+    public function setDiffCriteria(bool $diffCriteria): self
+    {
+        $this->diffCriteria = $diffCriteria;
+
+        return $this;
+    }
+
+    public function getDiffParticipants(): ?bool
+    {
+        return $this->diffParticipants;
+    }
+
+    public function setDiffParticipants(bool $diffParticipants): self
+    {
+        $this->diffParticipants = $diffParticipants;
+
+        return $this;
+    }
+
+    public function getNbParticipants(): ?int
+    {
+        return $this->nbParticipants;
+    }
+
+    public function setNbParticipants(int $nbParticipants): self
+    {
+        $this->nbParticipants = $nbParticipants;
+
+        return $this;
+    }
+    public function getStartdateDay()
+    {
+        $startDate = new \DateTime('2099-01-01');
+        foreach ($this->stages as $stage) {
+            if ($stage->getStartdate() < $startDate) {
+                $startDate = $stage->getStartDate();
+            }
+        }
+        $year=$startDate->format('Y');
+        $month=$startDate->format('m');
+        $day=$startDate->format('d');
+        return (int) date("z",mktime("12","00","00",(int)$month,(int)$day,(int)$year));
+    }
+    public function getPeriod()
+    {
+
+        $startDate = new \DateTime('2099-01-01');
+        $enddate = new \DateTime('2000-01-01');
+
+        foreach ($this->stages as $stage) {
+            if ($stage->getStartdate() < $startDate) {
+                $startDate = $stage->getStartDate();
+            }
+            if ($stage->getEnddate() > $enddate) {
+                $enddate = $stage->getEnddate();
+            }
+        }
+
+        $diff = $startDate->diff($enddate)->format("%a");
+        echo $diff;
+
+
+    }
+
+    public function getEnddate()
+    {
+        $enddate = new \DateTime('2000-01-01');
+        foreach ($this->getStages() as $stage) {
+            if ($stage->getEnddate() > $enddate) {
+                $enddate = $stage->getEnddate();
+            }
+        }
+        return $enddate;
+    }
+    /**
+     * @return Collection|Stage[]
+     */
+    public function getActiveStages()
+    {
+        $activeStages = new ArrayCollection;
+        $concernedStages = $this->stages->filter(
+            function (Stage $s) { return $s->getStatus() < 2; }
+        );
+        foreach($concernedStages as $concernedStage){
+            $activeStages->add($concernedStage);
+        }
+        return $activeStages;
+    }
+    /**
+     * @return Collection|Stage[]
+     */
+    public function getUserActiveGradableStages(User $u)
+    {
+        // We retrieve all stages where current user can grade
+        return $this->getActiveStages()->filter(function(Stage $s) use ($u){
+            $participations = $s->getUniqueIntParticipations();
+            return $participations && $participations->exists(function(int $i, ActivityUser $p) use ($s, $u){
+                    return $p->getDirectUser() == $u && $s->getUniqueGradableParticipations()->count() > 0;
+                });
+        });
+    }
+    /**
+     * @return Collection|Stage[]
+     */
+    public function getActiveGradableStages()
+    {
+        $activeGradableStages = new ArrayCollection;
+        $activeStages = $this->getActiveStages();
+        foreach ($activeStages as $activeStage) {
+            if ($activeStage->getUserGradableParticipations() != null || $activeStage->getTeamGradableParticipations() != null) {
+                $activeGradableStages->add($activeStage);
+            }
+        }
+        return $activeGradableStages;
+    }
+
+    public function getCompletedStagesWithSurvey()
+    {
+        return $this->getOCompletedStages()->filter(function (Stage $s) {
+            return $s->getSurvey();
+        });
+    }
+    /**
+     * @return Collection|Stage[]
+     */
+    public function getOCompletedStages()
+    {
+        $stages = $this->stages;
+        return $stages->filter(function (Stage $stage) {
+            return $stage->getStatus() >= STAGE::STAGE_COMPLETED;
+        });
+    }
+
+    /**
+     * @return Collection|Stage[]
+     */
+    public function getPCompletedStages()
+    {
+        $stages = $this->stages;
+        return $stages->filter(function (Stage $stage) {
+            return $stage->getProgress() >= STAGE::PROGRESS_COMPLETED;
+        });
+    }
+
+    /**
+     * @return Stage
+     */
+    public function getCurrentStage()
+    {
+        $today = new DateTime('now');
+
+        foreach ($this->getStages() as $stage) {
+            if ($stage->getStartdate() < $today && $today < $stage->getEnddate()) {
+                break;
+            }
+        }
+
+        return $stage;
+    }
+    public function addRanking(Ranking $ranking)
+    {
+        $this->rankings->add($ranking);
+        $ranking->setActivity($this);
+        return $this;
+    }
+    public function removeRanking(Ranking $ranking)
+    {
+        $this->rankings->removeElement($ranking);
+        return $this;
+    }
+
+    public function addHistoricalRanking(RankingHistory $historicalRanking)
+    {
+        $this->historicalRankings->add($historicalRanking);
+        $historicalRanking->setActivity($this);
+        return $this;
+    }
+
+    public function removeHistoricalRanking(RankingHistory $ranking)
+    {
+        $this->rankings->removeElement($ranking);
+        return $this;
+    }
+
+    public function addResultTeam(ResultTeam $resultTeam)
+    {
+        $this->resultTeams->add($resultTeam);
+        $resultTeam->setActivity($this);
+        return $this;
+    }
+
+    public function removeResultTeam(ResultTeam $resultTeam)
+    {
+        $this->resultTeams->removeElement($resultTeam);
+        return $this;
+    }
+
+    public function addRankingTeam(RankingTeam $rankingTeam)
+    {
+        $this->rankingTeams->add($rankingTeam);
+        $rankingTeam->setActivity($this);
+        return $this;
+    }
+
+    public function removeRankingTeam(RankingTeam $rankingTeam)
+    {
+        $this->rankingTeams->removeElement($rankingTeam);
+        return $this;
+    }
+
+    public function addHistoricalRankingTeam(RankingTeamHistory $historicalRankingTeam)
+    {
+        $this->historicalRankingTeams->add($historicalRankingTeam);
+        $historicalRankingTeam->setActivity($this);
+        return $this;
+    }
+
+    public function removeHistoricalRankingTeam(RankingTeamHistory $historicalRankingTeam)
+    {
+        $this->historicalRankingTeams->removeElement($historicalRankingTeam);
+        return $this;
+    }
+    public function isSimplified()
+    {
+        return $this->simplified;
+    }
+
+    public function setSimplified($simplified)
+    {
+        $this->simplified = $simplified;
+        return $this;
+    }
+
+    public function getLatestStage()
+    {
+        $returnedStage = $this->stages->first();
+        foreach ($this->stages as $stage) {
+            if ($stage->getEnddate() > $returnedStage) {
+                $returnedStage = $stage;
+            }
+        }
+        return $returnedStage;
+    }
+
+    public function hasParticipants()
+    {
+        foreach ($this->getActiveStages() as $stage) {
+            if (count($stage->getParticipants()) > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function hasParticipant(User $u)
+    {
+        return $this->participants->exists(
+            function (int $i, ActivityUser $p) use ($u) { return $p->getDirectUser() == $u; }
+        );
+    }
+
+    public function userIsGrader(User $u)
+    {
+        return $this->getStages()->exists(function(int $i,Stage $s) use ($u) {
+            $graders = $s->getGraderUsers();
+
+            return $graders->exists(function (int $i,User $p) use ($u) {
+                return $p === $u;
+            });
+        });
+    }
+
+    public function userCanGiveOutput(User $u)
+    {
+        return $this->getStages()->exists(function(int $i,Stage $s) use ($u) {
+            return $s->userCanGiveOutput($u);
+        });
+        //return $this->status == self::STATUS_ONGOING && $this->userIsGrader($u);
+    }
+
+    public function userCanSeeOutput(User $u){
+        return $this->getStages()->exists(function(int $i,Stage $s) use ($u) {
+            return $s->userCanSeeOutput($u);
+        });
+    }
+
+    public function userCanAnswerSurvey(User $u)
+    {
+        return $this->status == self::STATUS_ONGOING
+            && $this->getStages()->exists(function(int $i,Stage $s) use ($u) {
+                $survey = $s->getSurvey();
+
+                if (!$survey) {
+                    return false;
+                }
+
+                return $survey->getParticipants()->exists(function (int $i,ActivityUser $p) use ($u) {
+                    if($p->getUser() === $u){
+                        if($p->getStatus()==2 || $p->getStatus()==1 ){
+
+                            return true;
+
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+
+
+
+                });
+            });
+    }
+    public function userCanSendAnswerSurvey(User $u)
+    {
+        return $this->status == self::STATUS_ONGOING
+            && $this->getStages()->exists(function(int $i,Stage $s) use ($u) {
+                $survey = $s->getSurvey();
+
+                if (!$survey) {
+                    return false;
+                }
+
+                return $survey->getParticipants()->exists(function (int $i,ActivityUser $p) use ($u) {
+                    if($p->getUser() === $u){
+                        if($p->getStatus()!=2){
+                            return false;
+                        }
+                        return !empty($p->getAnswers());
+                    }
+                    else{
+                        return false;
+                    }
+                });
+            });
+    }
+    public function userCanEdit(User $u)
+    {
+        $role = $u->getRole();
+
+        if (
+            $this->act_status != self::STATUS_ONGOING &&
+            $this->act_status != self::STATUS_FUTURE &&
+            $this->act_status != self::STATUS_INCOMPLETE &&
+            $this->act_status != self::STATUS_AWAITING_CREATION
+        ) {
+            return false;
+        }
+        if ($role == 4) {
+            return true;
+        }
+        if ($this->getInitiator()->getOrganization() == $u->getOrganization()) {
+            if ($role == 1 || $this->getActiveModifiableStages()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    public function userCanViewResults(User $u)
+    {
+
+        return $this->userCanSeeResults($u);
+    }
+
+    public function userCanAccessInfo(User $u){
+        return true;
+    }
+
+    public function userCanSeeResults(User $u)
+    {
+
+        if ($this->status < self::STATUS_FINALIZED) {
+
+            return false;
+        }
+
+        $role = $u->getRole();
+
+        if ($role == 4) {
+            return true;
+        }
+
+        if (!$this->stages->exists(function (int $i,Stage $s) { return $s->getCriteria()->count(); })) {
+            // no stage with criteria. if none of them got replies (as they are surveys)
+            // results are not available
+
+
+            if (
+
+            $this->stages->forAll(function (int $i,Stage $s) {
+                $survey = $s->getSurvey();
+                if (!$survey) {
+
+                    return false;
+                }
+
+                return $survey->getAnswers()->isEmpty();
+            })
+            ) {
+
+
+                return false;
+            }
+        }
+
+        if ($role == 1) {
+            if ($u->getOrganization() != $this->getOrganization()) {
+                return false;
+            }
+        }
+
+        if ($this->hasParticipant($u)) {
+            return true;
+        }
+        $subordinates = $u->getSubordinatesRecursive();
+        $department = $u->getDepartment();
+        $departmentUsers = $department ? $department->getUsers() : [];
+
+        foreach ($this->participants as $p) {
+            if ($p->getType() != self::STATUS_FUTURE) {
+                if (in_array($p->getDirectUser(), $subordinates)) {
+                    return true;
+                } elseif (in_array($p->getDirectUser(), $departmentUsers) and $this->status == self::STATUS_PUBLISHED) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+    public function userCanSeeDetailedFeedback(User $u)
+    {
+        $canSeeResults = $this->userCanSeeResults($u);
+        $role = $u->getRole();
+
+        if ($role == 4 || $role == 1) {
+            return $canSeeResults;
+        }
+
+        return $canSeeResults && $this->participants->exists(
+                function (int $i, ActivityUser $p) use ($u) { return $p->getDirectUser() == $u && $p->isLeader(); }
+            );
+    }
+
+    public function isComplete(){
+        return $this->getActiveStages()->exists(function(int $i, Stage $s){
+            return $s->isComplete();
+        });
+    }
+    public function getIndependantUniqueParticipatingClients(){
+        $actIndependantUniqueParticipatingClients = new ArrayCollection;
+        $activityIndependantParticipatingClients = [];
+        foreach($this->stages as $stage){
+            foreach($stage->getIndependantUniqueParticipatingClients() as $client){
+                $activityIndependantParticipatingClients[] = $client;
+            };
+        }
+        $clientIds = [];
+        foreach($activityIndependantParticipatingClients as $activityIndependantParticipatingClient){
+            if(in_array($activityIndependantParticipatingClient->getId(),$clientIds) === false){
+                $actIndependantUniqueParticipatingClients->add($activityIndependantParticipatingClient);
+            }
+        }
+        return $actIndependantUniqueParticipatingClients;
+    }
+
+    public function hasMinimumOutputConfig(){
+        return $this->getActiveModifiableStages()->forAll(function(int $i,Stage $s){
+            return $s->hasMinimumOutputConfig() == 1;
+        });
+    }
+
+    public function hasMinimumParticipationConfig(){
+        return $this->getActiveModifiableStages()->forAll(function(int $i,Stage $s){
+            return $s->hasMinimumParticipationConfig() == 1;
+        });
+    }
+
+    public function hasFeedbackExpired(){
+        return $this->getActiveModifiableStages()->forAll(function(int $i,Stage $s){
+            return $s->hasFeedbackExpired() == 1;
+        });
+    }
+
+    public function getActiveConfiguredStages(){
+        return $this->getActiveModifiableStages()->filter(function(Stage $s){
+            return $s->hasMinimumOutputConfig() == 1 && $s->hasMinimumParticipationConfig() == 1;
+        });
+    }
 }
