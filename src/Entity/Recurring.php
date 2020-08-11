@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\RecurringRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -133,6 +134,48 @@ class Recurring
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="Reccuring")
      */
     private $rec_master_user;
+    public function __construct(
+        $id = 0,
+        $name = '',
+        $status = null,
+        $timeFrame = '',
+        $gStartDateInterval = 0,
+        $gStartDateTimeFrame = '',
+        $gEndDateInterval = 0,
+        $gEndDateTimeFrame = '',
+        $frequency = 0,
+        $type = 1,
+        $lowerbound = null,
+        $upperbound = null,
+        $step = null,
+        $openEnd = null,
+        $startdate = null,
+        $enddate = null,
+        $replicatePart = null,
+        $masterUser = null,
+        $deleted = null)
+    {
+        parent::__construct($id, new \DateTime);
+        $this->rct_name = $name;
+        $this->rct_status = $status;
+        $this->rct_timeframe = $timeFrame;
+        $this->rct_freq = $frequency;
+        $this->rct_gsd_interval = $gStartDateInterval;
+        $this->rct_gsd_timeframe = $gStartDateTimeFrame;
+        $this->rct_ged_interval = $gEndDateInterval;
+        $this->rct_ged_timeframe = $gEndDateTimeFrame;
+        $this->rct_type = $type;
+        $this->rct_lowerbound = $lowerbound;
+        $this->rct_upperbound = $upperbound;
+        $this->rct_step = $step;
+        $this->rct_opend_end = $openEnd;
+        $this->rct_startdate = $startdate;
+        $this->rct_enddate = $enddate;
+        $this->rct_same_part = $replicatePart;
+        $this->rec_master_user = $masterUser;
+        $this->rct_deleted = $deleted;
+        $this->activities = new ArrayCollection;
+    }
 
     public function getId(): ?int
     {
@@ -377,5 +420,36 @@ class Recurring
         $this->rec_master_user = $rec_master_user;
 
         return $this;
+    }
+    function addActivity(Activity $activity){
+
+        $this->activities->add($activity);
+        $activity->setRecurring($this);
+        return $this;
+    }
+
+    function removeActivity(Activity $activity)
+    {
+        $this->activities->removeElement($activity);
+        return $this;
+    }
+
+    public function getOngoingFutCurrActivities(){
+
+        $activities = new ArrayCollection;
+        //$activities = [];
+        foreach($this->activities as $recurringActivity){
+            if ($recurringActivity->getStatus() == 2){
+                continue;
+            }
+            $activities->add($recurringActivity);
+            //$activities[] = $recurringActivity;
+        }
+        return $activities;
+    }
+
+    public function __toString()
+    {
+        return (string) $this->id;
     }
 }
