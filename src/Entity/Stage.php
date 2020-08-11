@@ -4,7 +4,9 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\StageRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -16,7 +18,7 @@ use Doctrine\ORM\Mapping\OrderBy;
  * @ApiResource()
  * @ORM\Entity(repositoryClass=StageRepository::class)
  */
-class Stage
+class Stage extends DbObject
 {
     const STAGE_INCOMPLETE = -1;
     const STAGE_UNSTARTED = 0;
@@ -297,6 +299,161 @@ class Stage
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="stagesWhereMaster")
      */
     private $stg_master_user;
+
+    /**
+     * Stage constructor.
+     * @param int $id
+     * @param $stg_complete
+     * @param $stg_name
+     * @param $stg_mode
+     * @param $stg_visibility
+     * @param $stg_access_link
+     * @param $stg_status
+     * @param $stg_desc
+     * @param $stg_progress
+     * @param $stg_weight
+     * @param $stg_definite_dates
+     * @param $stg_dperiod
+     * @param $stg_dfrequency
+     * @param $stg_dorigin
+     * @param $stg_fperiod
+     * @param $stg_ffrequency
+     * @param $stg_forigin
+     * @param $stg_startdate
+     * @param $stg_enddate
+     * @param $stg_gstartdate
+     * @param $stg_genddate
+     * @param $stg_dealine_nb_days
+     * @param $stg_deadline_mailSent
+     * @param $stg_createdBy
+     * @param $stg_inserted
+     * @param $stg_reopened
+     * @param $stg_last_reopened
+     * @param $stg_unstarted_notif
+     * @param $stg_uncompleted_notif
+     * @param $stg_unfinished_notif
+     * @param $stg_isFinalized
+     * @param $stg_deleted
+     * @param $stg_gcompleted
+     * @param Survey $survey
+     * @param $activity
+     * @param Organization $organization
+     * @param Collection $criteria
+     * @param $participants
+     * @param $decisions
+     * @param $grades
+     * @param $projectResults
+     * @param $results
+     * @param $resultTeams
+     * @param $rankings
+     * @param $rankingTeams
+     * @param $historicalRankings
+     * @param $historicalRankingTeams
+     * @param $template
+     * @param $stg_master_user
+     */
+    public function __construct(
+        int $id = 0,
+        $stg_complete = false,
+        $stg_name = '',
+        $stg_mode = null,
+        $stg_visibility = 3,
+        $stg_access_link = null,
+        $stg_status = 0,
+        $stg_desc = null,
+        $stg_progress = -1,
+        $stg_weight = 0.0,
+        $stg_definite_dates = null,
+        $stg_dperiod = null,
+        $stg_dfrequency = null,
+        $stg_dorigin = null,
+        $stg_fperiod = null,
+        $stg_ffrequency = null,
+        $stg_forigin = null,
+        $stg_startdate = null,
+        $stg_enddate = null,
+        $stg_gstartdate = null,
+        $stg_genddate = null,
+        $stg_dealine_nb_days = 3,
+        $stg_deadline_mailSent = null,
+        $stg_createdBy = null,
+        $stg_inserted = null,
+        $stg_reopened = null,
+        $stg_last_reopened = null,
+        $stg_unstarted_notif = null,
+        $stg_uncompleted_notif = null,
+        $stg_unfinished_notif = null,
+        $stg_isFinalized = null,
+        $stg_deleted = null,
+        $stg_gcompleted = null,
+        Survey $survey = null,
+        $activity = null,
+        Organization $organization = null,
+        Collection $criteria = null,
+        $participants = null,
+        $decisions = null,
+        $grades = null,
+        $projectResults = null,
+        $results = null,
+        $resultTeams = null,
+        $rankings = null,
+        $rankingTeams = null,
+        $historicalRankings = null,
+        $historicalRankingTeams = null,
+        $template = null,
+        $stg_master_user = null)
+    {
+        $this->id = $id;
+        $this->stg_complete = $stg_complete;
+        $this->stg_name = $stg_name;
+        $this->stg_mode = $stg_mode;
+        $this->stg_visibility = $stg_visibility;
+        $this->stg_access_link = $stg_access_link;
+        $this->stg_status = $stg_status;
+        $this->stg_desc = $stg_desc;
+        $this->stg_progress = $stg_progress;
+        $this->stg_weight = $stg_weight;
+        $this->stg_definite_dates = $stg_definite_dates;
+        $this->stg_dperiod = $stg_dperiod;
+        $this->stg_dfrequency = $stg_dfrequency;
+        $this->stg_dorigin = $stg_dorigin;
+        $this->stg_fperiod = $stg_fperiod;
+        $this->stg_ffrequency = $stg_ffrequency;
+        $this->stg_forigin = $stg_forigin;
+        $this->stg_startdate = $stg_startdate;
+        $this->stg_enddate = $stg_enddate;
+        $this->stg_gstartdate = $stg_gstartdate;
+        $this->stg_genddate = $stg_genddate;
+        $this->stg_dealine_nb_days = $stg_dealine_nb_days;
+        $this->stg_deadline_mailSent = $stg_deadline_mailSent;
+        $this->stg_createdBy = $stg_createdBy;
+        $this->stg_inserted = $stg_inserted;
+        $this->stg_reopened = $stg_reopened;
+        $this->stg_last_reopened = $stg_last_reopened;
+        $this->stg_unstarted_notif = $stg_unstarted_notif;
+        $this->stg_uncompleted_notif = $stg_uncompleted_notif;
+        $this->stg_unfinished_notif = $stg_unfinished_notif;
+        $this->stg_isFinalized = $stg_isFinalized;
+        $this->stg_deleted = $stg_deleted;
+        $this->stg_gcompleted = $stg_gcompleted;
+        $this->survey = $survey;
+        $this->activity = $activity;
+        $this->organization = $organization;
+        $this->criteria = $criteria;
+        $this->participants = $participants;
+        $this->decisions = $decisions;
+        $this->grades = $grades;
+        $this->projectResults = $projectResults;
+        $this->results = $results;
+        $this->resultTeams = $resultTeams;
+        $this->rankings = $rankings;
+        $this->rankingTeams = $rankingTeams;
+        $this->historicalRankings = $historicalRankings;
+        $this->historicalRankingTeams = $historicalRankingTeams;
+        $this->template = $template;
+        $this->stg_master_user = $stg_master_user;
+    }
+
 
     public function getId(): ?int
     {
@@ -938,5 +1095,551 @@ class Stage
 
         return $this;
     }
+    public function getActiveWeight(){
+        $sumWeightCompletedStages = 0;
+        /** @var ArrayCollection|Stage[] */
+        $completedStages = $this->activity->getOCompletedStages();
+        foreach($completedStages as $completedStage){
+            $sumWeightCompletedStages += $completedStage->weight;
+        }
+        return ($sumWeightCompletedStages == 0) ? $this->weight : $this->weight / $sumWeightCompletedStages;
+    }
 
+    public function setActiveWeight($activeWeight){
+        $sumWeightCompletedStages = 0;
+        /** @var ArrayCollection|Stage[] */
+        $completedStages = $this->activity->getOCompletedStages();
+        foreach($completedStages as $completedStage){
+            $sumWeightCompletedStages += $completedStage->weight;
+        }
+        $this->weight = round((1 - $sumWeightCompletedStages) * $activeWeight, 3);
+    }
+    /**
+     * @return Collection|ActivityUser[]
+     */
+    public function getUniqueParticipations()
+    {
+
+        // Depends on whether current user is part of a team
+        $eligibleParticipants = null;
+        $uniqueParticipants = new ArrayCollection;
+        $teams = [];
+
+        $eligibleParticipants = count($this->criteria) == 0 ? $this->participants : $this->criteria->first()->getParticipants();
+
+        $myParticipations = $this->getSelfParticipations();
+        $myTeam = $myParticipations->count() == 0 ? null : $myParticipations->first()->getTeam();
+
+        foreach ($eligibleParticipants as $eligibleParticipant) {
+            $currentTeam = $eligibleParticipant->getTeam();
+            if ($currentTeam == null || $currentTeam == $myTeam) {
+                $uniqueParticipants->add($eligibleParticipant);
+            } else {
+                if (!in_array($currentTeam, $teams)) {
+                    $uniqueParticipants->add($eligibleParticipant);
+                    $teams[] = $currentTeam;
+                }
+            }
+        }
+
+        return $uniqueParticipants;
+    }
+    /**
+     * @return Collection|ActivityUser[]
+     */
+    public function getIndependantUniqueParticipations()
+    {
+        $eligibleParticipants = null;
+        $uniqueParticipants = new ArrayCollection;
+        $teams = [];
+
+
+        $eligibleParticipants = count($this->criteria) == 0 ? $this->participants : $this->criteria->first()->getParticipants();
+
+
+        foreach ($eligibleParticipants as $eligibleParticipant) {
+            $team = $eligibleParticipant->getTeam();
+            if ($team == null) {
+                $uniqueParticipants->add($eligibleParticipant);
+            } else {
+                if (!in_array($team, $teams)) {
+                    $uniqueParticipants->add($eligibleParticipant);
+                    $teams[] = $team;
+                }
+            }
+        }
+        return $uniqueParticipants;
+    }
+    /**
+     * @return Collection|ActivityUser[]
+     */
+    public function getUniqueTeamParticipations()
+    {
+        $myParticipations = $this->getSelfParticipations();
+        $myTeam = $myParticipations->count() == 0 ? null : $myParticipations->first()->getTeam();
+        return $this->getUniqueParticipations()->filter(function(ActivityUser $p) use ($myTeam){
+            return $p->getTeam() != null && $p->getTeam() != $myTeam;
+        });
+    }
+    /**
+     * @return Collection|ActivityUser[]
+     */
+    public function getUserGradableParticipations()
+    {
+        // We get all non-third party user participations, except those of people who are part of a team we don't belong to
+        if ($this->mode == STAGE::GRADED_STAGE) {
+            return null;
+        } else {
+
+            $userGradableParticipations = new ArrayCollection;
+
+            $unorderedGradableParticipations = $this->getUniqueIndivParticipations()->filter(function(ActivityUser $p){
+                return $p->getType() != ACTIVITYUSER::PARTICIPATION_THIRD_PARTY;
+            });
+
+            foreach($unorderedGradableParticipations as $unorderedGradableParticipation){
+                $userGradableParticipations->add($unorderedGradableParticipation);
+            }
+
+            return $userGradableParticipations;
+        }
+    }
+    public function addTeamGradableParticipation(ActivityUser $participant)
+    {
+        $this->participants->add($participant);
+        return $this;
+    }
+
+    public function removeTeamGradableParticipation(ActivityUser $participant)
+    {
+        $this->participants->removeElement($participant);
+        return $this;
+    }
+
+    /**
+     * @return Collection|ActivityUser[]
+     */
+    public function getUniqueGradableParticipations()
+    {
+        return $this->getUniqueParticipations()->matching(Criteria::create()->where(Criteria::expr()->neq("type", 0)));
+    }
+
+    /**
+     * @return Collection|ActivityUser[]
+     */
+    public function getUniqueGraderParticipations()
+    {
+        return $this->getUniqueParticipations()->matching(Criteria::create()->where(Criteria::expr()->neq("type", -1)));
+    }
+
+    public function addUniqueGradableParticipation(ActivityUser $participant)
+    {
+        if ($this->participants->exists(function (ActivityUser $u) use ($participant) {
+            return $u->getUser()->getId() === $participant->getUser()->getId();
+        })) {
+            return $this;
+        }
+
+        foreach ($this->criteria as $criterion) {
+            $criterion->addParticipant($participant);
+            $participant->setCriterion($criterion)->setStage($this);
+        }
+        return $this;
+    }
+
+    public function removeUniqueGradableParticipation(ActivityUser $participant)
+    {
+        foreach ($this->criteria as $criterion) {
+            $criterion->participants->removeElement($participant);
+        }
+        return $this;
+    }
+
+    public function getUniqueGradingParticipants()
+    {
+        return count($this->getUniqueParticipations()->matching(
+            Criteria::create()->where(Criteria::expr()->neq("type", -1))
+        ));
+    }
+    public function addGrade(Grade $grade)
+    {
+        $this->grades->add($grade);
+        return $this;
+    }
+
+    public function removeGrade(Grade $grade)
+    {
+        $this->grades->removeElement($grade);
+        return $this;
+    }
+
+    public function addCriterion(Criterion $criterion)
+    {
+        //The below line is to prevent adding a criterion already submitted (because of activeStages/stages).
+        // However as stage criteria are built in advance for recurring activities, we also need to take into account this exception
+
+        //if(!$criterion->getStage() || $criterion->getStage()->getActivity()->getRecurring()){
+        $this->criteria->add($criterion);
+        $criterion->setStage($this);
+        return $this;
+        //}
+    }
+    public function userCanSeeOutput(User $u)
+    {
+        return $this->status == self::STAGE_ONGOING && $this->userHasGivenOutput($u);
+    }
+
+    public function userHasGivenOutput(User $u)
+    {
+        if($this->participants->isEmpty()){
+            return false;
+        } else {
+            $userParticipations = $this->participants->filter(function(ActivityUser $p) use ($u){return $p->getDirectUser() === $u;});
+            if($userParticipations->count() > 0){
+                return $userParticipations->forAll(function(int $i, ActivityUser $p) {
+                    return $p->getStatus() >= 3;
+                });
+            } else {
+                return false;
+            }
+        }
+    }
+
+    public function addParticipant(ActivityUser $participant)
+    {
+
+        $this->participants->add($participant);
+        $participant->setStage($this);
+        return $this;
+    }
+
+    public function removeParticipant(ActivityUser $participant)
+    {
+        $this->participants->removeElement($participant);
+        return $this;
+    }
+
+    public function addUniqueParticipation(ActivityUser $participant)
+    {
+        if (count($this->criteria) != 0) {
+            foreach ($this->criteria as $criterion) {
+                $criterion->addParticipant($participant);
+                $participant->setCriterion($criterion)->setStage($this)->setActivity($this->getActivity());
+            }
+        } else {
+            $this->addParticipant($participant);
+        }
+        return $this;
+    }
+
+    public function removeUniqueParticipation(ActivityUser $participant)
+    {
+        $participantUsrId = $participant->getUsrId();
+        $participantTeam = $participant->getTeam();
+        foreach ($this->participants as $theParticipant) {
+            if ($participantUsrId == $theParticipant->getUsrId() || $participantTeam == $theParticipant->getTeam()) {
+                $this->removeParticipant($theParticipant);
+            }
+        }
+        return $this;
+    }
+
+    public function addIndependantUniqueParticipation(ActivityUser $participant)
+    {
+        return $this->addUniqueParticipation($participant);
+    }
+
+    public function removeIndependantUniqueParticipation(ActivityUser $participant)
+    {
+        return $this->removeUniqueParticipation($participant);
+    }
+
+    public function addUniqueIntParticipation(ActivityUser $participant)
+    {
+        $this->addUniqueParticipation($participant);
+        return $this;
+    }
+
+    public function removeUniqueIntParticipation(ActivityUser $participant)
+    {
+        $this->removeUniqueParticipation($participant);
+        return $this;
+    }
+
+    public function addIndependantUniqueIntParticipation(ActivityUser $participant)
+    {
+        $this->addIndependantUniqueParticipation($participant);
+        return $this;
+    }
+
+    public function removeIndependantUniqueIntParticipation(ActivityUser $participant)
+    {
+        $this->removeIndependantUniqueParticipation($participant);
+        return $this;
+    }
+
+    public function addUniqueExtParticipation(ActivityUser $participant)
+    {
+        $this->addUniqueParticipation($participant);
+        return $this;
+    }
+
+    public function removeUniqueExtParticipation(ActivityUser $participant)
+    {
+        $this->removeUniqueParticipation($participant);
+        return $this;
+    }
+
+    public function addIndependantUniqueExtParticipation(ActivityUser $participant)
+    {
+        $this->addIndependantUniqueExtParticipation($participant);
+        return $this;
+    }
+
+    public function removeIndependantUniqueExtParticipation(ActivityUser $participant)
+    {
+        $this->removeIndependantUniqueParticipation($participant);
+        return $this;
+    }
+
+    public function addUniqueTeamParticipation(ActivityUser $participant)
+    {
+        $this->addUniqueParticipation($participant);
+        return $this;
+    }
+
+    public function removeUniqueTeamParticipation(ActivityUser $participant)
+    {
+        $this->removeUniqueParticipation($participant);
+        return $this;
+    }
+
+    public function addIndependantUniqueTeamParticipation(ActivityUser $participant)
+    {
+        $this->addUniqueTeamParticipation($participant);
+        return $this;
+    }
+
+    public function removeIndependantUniqueTeamParticipation(ActivityUser $participant)
+    {
+        $this->removeUniqueTeamParticipation($participant);
+        return $this;
+    }
+
+    public function addDecision(Decision $decision)
+    {
+
+        $this->decisions->add($decision);
+        $decision->setStage($this);
+        return $this;
+    }
+
+    public function removeDecision(Decision $decision)
+    {
+        $this->decisions->removeElement($decision);
+        return $this;
+    }
+
+    public function addResult(Result $result)
+    {
+        $this->results->add($result);
+        $result->setStage($this);
+        return $this;
+    }
+
+    public function removeResult(Result $result)
+    {
+        $this->results->removeElement($result);
+        return $this;
+    }
+
+    public function addRankings(Ranking $ranking)
+    {
+        $this->rankings->add($ranking);
+        $ranking->setActivity($this);
+        return $this;
+    }
+
+    public function removeRanking(Ranking $ranking)
+    {
+        $this->rankings->removeElement($ranking);
+        return $this;
+    }
+
+    public function addHistoricalRankings(RankingHistory $historicalRanking)
+    {
+        $this->historicalRankings->add($historicalRanking);
+        $historicalRanking->setActivity($this);
+        return $this;
+    }
+
+    public function removeHistoricalRanking(RankingHistory $ranking)
+    {
+        $this->rankings->removeElement($ranking);
+        return $this;
+    }
+
+    public function addResultTeam(ResultTeam $resultTeam)
+    {
+        $this->resultTeams->add($resultTeam);
+        $resultTeam->setStage($this);
+        return $this;
+    }
+
+    public function removeResultTeam(ResultTeam $resultTeam)
+    {
+        $this->resultTeams->removeElement($resultTeam);
+        return $this;
+    }
+
+    public function addRankingTeam(RankingTeam $rankingTeam)
+    {
+        $this->rankingTeams->add($rankingTeam);
+        $rankingTeam->setActivity($this);
+        return $this;
+    }
+
+    public function removeRankingTeam(RankingTeam $rankingTeam)
+    {
+        $this->rankingTeams->removeElement($rankingTeam);
+        return $this;
+    }
+
+    public function addHistoricalRankingTeam(RankingTeamHistory $historicalRankingTeam)
+    {
+        $this->historicalRankingTeams->add($historicalRankingTeam);
+        $historicalRankingTeam->setActivity($this);
+        return $this;
+    }
+
+    public function removeHistoricalRankingTeam(RankingTeamHistory $historicalRankingTeam)
+    {
+        $this->historicalRankingTeams->removeElement($historicalRankingTeam);
+        return $this;
+    }
+    public function __toString()
+    {
+        return (string) $this->id;
+    }
+
+    // Note : to get stage progress, we only consider participants who have validated their grades
+    // (saving grades is not sufficient)
+    public function getGradingProgress()
+    {
+        $k = 0;
+        $l = 0;
+        if (count($this->participants) > 0) {
+            foreach ($this->participants as $participant) {
+                if ($participant->getStatus() >= 3) {
+                    $k++;
+                }
+                if ($participant->getType() != -1) {
+                    $l++;
+                }
+            }
+            if ($l > 0) {
+                return $k / $l;
+            } else {
+                return 0;
+            }
+        } else {
+            return 0;
+        }
+    }
+    // Defines which users can grade
+    /**
+     * @return ArrayCollection|User[]
+     */
+    public function getGraderUsers()
+    {
+        return $this->getUniqueGraderParticipations()->map(
+            function (ActivityUser $p) {
+                return $p->getDirectUser();
+            }
+        );
+    }
+
+    // Defines nb of evaluating criteria
+    /**
+     * @return int
+     */
+    public function getNbEvaluatingCriteria()
+    {
+        return count($this->getCriteria()->matching(Criteria::create()->where(Criteria::expr()->eq("type", 1))));
+    }
+    public function getSelfGrades()
+    {
+        return $this->getAllSelfGrades()->matching(Criteria::create()->where(Criteria::expr()->in("participant", $this->getSelfParticipations()->getValues())));
+    }
+
+    public function addSelfGrade(Grade $grade)
+    {
+        $this->grades->add($grade);
+        $grade->setStage($this);
+        return $this;
+    }
+
+    public function removeSelfGrade(Grade $grade)
+    {
+        $this->grades->removeElement($grade);
+        return $this;
+    }
+    public function isFeedbackTypeSettled(): bool
+    {
+        return $this->criteria->count() || $this->getSurvey();
+    }
+
+    public function userCanGiveOutput(User $u)
+    {
+        if($this->status == $this::STAGE_ONGOING){
+            return $this->getUniqueGraderParticipations()->exists(function (int $i,ActivityUser $p) use ($u) {
+                return $p->getDirectUser() === $u && $p->getType() != -1 && $p->getStatus() < 3;
+            }
+            );
+        } else {
+            return false;
+        }
+
+    }
+
+    public function getOwnerUserId(){
+        $uniqueIntParticipations = $this->getUniqueIntParticipations();
+        if($uniqueIntParticipations){
+            foreach($uniqueIntParticipations as $uniqueIntParticipation){
+                if($uniqueIntParticipation->isLeader()){
+                    return $uniqueIntParticipation->getUsrId();
+                }
+            }
+            return null;
+        }
+        return null;
+    }
+
+    public function hasMinimumParticipationConfig(){
+        return $this->getUniqueGraderParticipations()->count() > 0 && $this->getUniqueGradableParticipations()->count() > 0;
+    }
+
+    public function hasMinimumOutputConfig(){
+        return $this->getSurvey() != null || $this->getCriteria()->count() > 0;
+    }
+
+    public function hasFeedbackExpired(){
+        $yesterdayDate = new \DateTime;
+        $yesterdayDate->sub(new \DateInterval('P1D'));
+        return $this->genddate <= $yesterdayDate && $this->status < STAGE::STAGE_COMPLETED;
+    }
+
+    public function isComplete(){
+        $yesterdayDate = new \DateTime;
+        $yesterdayDate->sub(new \DateInterval('P1D'));
+        return $this->hasMinimumOutputConfig() && $this->hasMinimumParticipationConfig() && !$this->hasFeedbackExpired();
+    }
+
+    public function hasCompletedOutput(){
+        return (int) $this->participants->exists(function(int $i, ActivityUser $p){
+            return $p->getStatus() == 3;
+        });
+    }
+    //TODO remove CRitetrion et isModifiable SelfParticipation et getAllSelfGrades
+    //TODO indivParticipation
 }
