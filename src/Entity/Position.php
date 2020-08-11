@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\PositionRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -13,7 +14,7 @@ use Doctrine\ORM\Mapping\OneToMany;
  * @ApiResource()
  * @ORM\Entity(repositoryClass=PositionRepository::class)
  */
-class Position
+class Position extends DbObject
 {
     /**
      * @ORM\Id()
@@ -99,6 +100,61 @@ class Position
      * @OneToMany(targetEntity="Target", mappedBy="position",cascade={"persist", "remove"}, orphanRemoval=true)
      */
     private $targets;
+
+    /**
+     * Position constructor.
+     * @param int $id
+     * @param $pos_name
+     * @param $pos_weight_ini
+     * @param $pos_weight_1y
+     * @param $pos_weight_2y
+     * @param $pos_weight_3y
+     * @param $pos_weight_4y
+     * @param $pos_weight_5y
+     * @param $pos_createdBy
+     * @param $pos_inserted
+     * @param $pos_deleted
+     * @param $organization
+     * @param $department
+     * @param $weights
+     * @param $options
+     * @param $targets
+     */
+    public function __construct(
+        int $id = 0,
+        $pos_name = '',
+        $pos_weight_ini = 0.0,
+        $pos_weight_1y = 0.0,
+        $pos_weight_2y = 0.0,
+        $pos_weight_3y = 0.0,
+        $pos_weight_4y = 0.0,
+        $pos_weight_5y = 0.0,
+        $organization = 0,
+        $department = null,
+        $pos_createdBy = null,
+        $pos_inserted = null,
+        $pos_deleted = null,
+        $weights = null,
+        $options = null,
+        $targets = null)
+    {
+        $this->pos_name = $pos_name;
+        $this->pos_weight_ini = $pos_weight_ini;
+        $this->pos_weight_1y = $pos_weight_1y;
+        $this->pos_weight_2y = $pos_weight_2y;
+        $this->pos_weight_3y = $pos_weight_3y;
+        $this->pos_weight_4y = $pos_weight_4y;
+        $this->pos_weight_5y = $pos_weight_5y;
+        $this->pos_createdBy = $pos_createdBy;
+        $this->pos_inserted = $pos_inserted;
+        $this->pos_deleted = $pos_deleted;
+        $this->organization = $organization;
+        $this->department = $department;
+        $this->weights = $weights?$weights:new ArrayCollection();
+        $this->options = $options?$options:new ArrayCollection();
+        $this->targets = $targets?$targets:new ArrayCollection();
+    }
+
 
     public function getId(): ?int
     {
@@ -304,5 +360,57 @@ class Position
     {
         $this->targets = $targets;
     }
+
+    function addUser(User $user){
+
+        $this->users->add($user);
+        // $user->setPosition($this);
+        return $this;
+    }
+    function removeUser(User $user){
+        $this->users->removeElement($user);
+        return $this;
+    }
+
+    function addWeight(Weight $weight){
+
+        $this->weights->add($weight);
+        $weight->setPosition($this);
+        return $this;
+    }
+
+    function removeWeight(Weight $weight){
+        $this->weights->removeElement($weight);
+        return $this;
+    }
+    public function __toString()
+    {
+        return (string) $this->id;
+    }
+    function addTarget(Target $target)
+    {
+        $this->targets->add($target);
+        $target->setPosition($this);
+        return $this;
+    }
+
+    function removeTarget(Target $target)
+    {
+        $this->targets->removeElement($target);
+        return $this;
+    }
+    function addOption(OrganizationUserOption $option)
+    {
+        $this->options->add($option);
+        $option->setPosition($this);
+        return $this;
+    }
+
+    function removeOption(OrganizationUserOption $option)
+    {
+        $this->options->removeElement($option);
+        return $this;
+    }
+
 
 }
