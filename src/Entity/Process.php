@@ -15,7 +15,7 @@ use Doctrine\ORM\Mapping\OneToMany;
  * @ApiResource()
  * @ORM\Entity(repositoryClass=ProcessRepository::class)
  */
-class Process
+class Process extends DbObject
 {
     /**
      * @ORM\Id()
@@ -93,82 +93,112 @@ class Process
      */
     private $stages;
 
-    public function __construct()
+    /**
+     * Process constructor.
+     * @param int $id
+     * @param $pro_name
+     * @param $pro_approvable
+     * @param $pro_gradable
+     * @param $pro_createdBy
+     * @param $pro_inserted
+     * @param $pro_deleted
+     * @param $children
+     * @param $stages
+     */
+    public function __construct(
+        int $id = 0,
+        $pro_name = '',
+        $pro_createdBy = null,
+        $pro_gradable = true,
+        $pro_inserted = null,
+        $pro_deleted = null,
+        $pro_approvable = false,
+        $children = null,
+        $stages = null)
     {
-        $this->activities = new ArrayCollection();
+        $this->id = $id;
+        $this->pro_name = $pro_name;
+        $this->pro_approvable = $pro_approvable;
+        $this->pro_gradable = $pro_gradable;
+        $this->pro_createdBy = $pro_createdBy;
+        $this->pro_inserted = $pro_inserted;
+        $this->pro_deleted = $pro_deleted;
+        $this->children = $children?$children:new ArrayCollection();
+        $this->stages = $stages?$stages:new ArrayCollection();
     }
+
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getProName(): ?string
+    public function getName(): ?string
     {
         return $this->pro_name;
     }
 
-    public function setProName(string $pro_name): self
+    public function setName(string $pro_name): self
     {
         $this->pro_name = $pro_name;
 
         return $this;
     }
 
-    public function getProApprovable(): ?bool
+    public function gidApprovable(): ?bool
     {
         return $this->pro_approvable;
     }
 
-    public function setProApprovable(bool $pro_approvable): self
+    public function setApprovable(bool $pro_approvable): self
     {
         $this->pro_approvable = $pro_approvable;
 
         return $this;
     }
 
-    public function getProGradable(): ?bool
+    public function getGradable(): ?bool
     {
         return $this->pro_gradable;
     }
 
-    public function setProGradable(bool $pro_gradable): self
+    public function setGradable(bool $pro_gradable): self
     {
         $this->pro_gradable = $pro_gradable;
 
         return $this;
     }
 
-    public function getProCreatedBy(): ?int
+    public function getCreatedBy(): ?int
     {
         return $this->pro_createdBy;
     }
 
-    public function setProCreatedBy(int $pro_createdBy): self
+    public function setCreatedBy(int $pro_createdBy): self
     {
         $this->pro_createdBy = $pro_createdBy;
 
         return $this;
     }
 
-    public function getProInserted(): ?\DateTimeInterface
+    public function getInserted(): ?\DateTimeInterface
     {
         return $this->pro_inserted;
     }
 
-    public function setProInserted(\DateTimeInterface $pro_inserted): self
+    public function setInserted(\DateTimeInterface $pro_inserted): self
     {
         $this->pro_inserted = $pro_inserted;
 
         return $this;
     }
 
-    public function getProDeleted(): ?\DateTimeInterface
+    public function getDeleted(): ?\DateTimeInterface
     {
         return $this->pro_deleted;
     }
 
-    public function setProDeleted(?\DateTimeInterface $pro_deleted): self
+    public function setDeleted(?\DateTimeInterface $pro_deleted): self
     {
         $this->pro_deleted = $pro_deleted;
 
@@ -187,7 +217,7 @@ class Process
     {
         if (!$this->activities->contains($activity)) {
             $this->activities[] = $activity;
-            $activity->setProcess($this);
+            $activity->setcess($this);
         }
 
         return $this;
@@ -198,8 +228,8 @@ class Process
         if ($this->activities->contains($activity)) {
             $this->activities->removeElement($activity);
             // set the owning side to null (unless already changed)
-            if ($activity->getProcess() === $this) {
-                $activity->setProcess(null);
+            if ($activity->getcess() === $this) {
+                $activity->setcess(null);
             }
         }
 
@@ -301,5 +331,53 @@ class Process
     {
         $this->stages = $stages;
     }
+    function addInstitutionProcess(InstitutionProcess $institutionProcess){
+        $this->institutionProcesses->add($institutionProcess);
+        $institutionProcess->setProcess($this);
+        return $this;
+    }
+
+    function removeInstitutionProcess(InstitutionProcess $institutionProcess){
+        $this->institutionProcesses->removeElement($institutionProcess);
+        return $this;
+    }
+    function addChildren(Process $child){
+        $this->children->add($child);
+        $child->setParent($this);
+        return $this;
+    }
+
+    function removeChildren(Process $child){
+        $this->children->removeElement($child);
+        return $this;
+    }
+    function addValidatedChildren(Process $child){
+        return $this->addChildren($child);
+    }
+
+    function removeValidatedChildren(Process $child){
+        return $this->removeChildren($child);
+    }
+    function addStage(ProcessStage $stage){
+
+        $this->stages->add($stage);
+        $stage->setProcess($this);
+        return $this;
+    }
+
+    function removeStage(ProcessStage $stage){
+        $this->stages->removeElement($stage);
+        return $this;
+    }
+    public function __toString()
+    {
+        return (string) $this->id;
+    }
+
+    public function userCanEdit(User $u)
+    {
+        return $u->getRole() == 4;
+    }
+
 
 }
