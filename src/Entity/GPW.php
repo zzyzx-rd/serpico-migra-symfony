@@ -4,13 +4,14 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\GPWRepository;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ApiResource()
  * @ORM\Entity(repositoryClass=GPWRepository::class)
  */
-class GPW
+class GPW extends DbObject
 {
     /**
      * @ORM\Id()
@@ -270,605 +271,764 @@ class GPW
      */
     private $gpw_inserted;
 
+    /**
+     * GPW constructor.
+     * @param int $id
+     * @param $gpw_pid
+     * @param $gpw_firm
+     * @param $gpw_sector
+     * @param $gpw_location
+     * @param $gpw_cDate
+     * @param $gpw_nb_workers
+     * @param $gpw_website
+     * @param $gpw_genMail
+     * @param $gpw_fb
+     * @param $gpw_linkedIn
+     * @param $gpw_twitter
+     * @param $gpw_xing
+     * @param $gpw_yt
+     * @param $gpw_insta
+     * @param $gpw_contact_name
+     * @param $gpw_contact_position
+     * @param $gpw_contact_mail
+     * @param $gpw_contact_tel
+     * @param $gpw_values_careers_inspiration
+     * @param $gpw_employee_author
+     * @param $gpw_employee_position
+     * @param $gpw_employee_comment
+     * @param $gpw_boss_author
+     * @param $gpw_boss_division
+     * @param $gpw_boss_comment
+     * @param $gpw_award_year_1
+     * @param $gpw_award_title_1
+     * @param $gpw_award_rnk_1
+     * @param $gpw_award_year_2
+     * @param $gpw_award_title_2
+     * @param $gpw_award_rnk_2
+     * @param $gpw_award_year_3
+     * @param $gpw_award_title_3
+     * @param $gpw_award_rnk3
+     * @param $gpw_survey_text_1
+     * @param $gpw_survey_res_1
+     * @param $gpw_survey_text_2
+     * @param $gpw_survey_res_2
+     * @param $gpw_survey_text_3
+     * @param $gpw_survey_res_3
+     * @param $gpw_survey_text_4
+     * @param $gpw_survey_res_4
+     * @param $gpw_survey_text_5
+     * @param $gpw_survey_res_5
+     * @param $gpw_survey_text_6
+     * @param $gpw_survey_res_6
+     * @param $gpw_survey_text_7
+     * @param $gpw_survey_res_7
+     * @param $gpw_createdBy
+     * @param $gpw_inserted
+     */
+    public function __construct(
+        int $id,
+        $gpw_pid = null,
+        $gpw_firm = null,
+        $gpw_sector = null,
+        $gpw_location = null,
+        $gpw_cDate = null,
+        $gpw_nb_workers = null,
+        $gpw_website = null,
+        $gpw_genMail = null,
+        $gpw_fb = null,
+        $gpw_linkedIn = null,
+        $gpw_twitter = null,
+        $gpw_xing = null,
+        $gpw_yt = null,
+        $gpw_insta = null,
+        $gpw_contact_name = null,
+        $gpw_contact_position = null,
+        $gpw_contact_mail = null,
+        $gpw_contact_tel = null,
+        $gpw_values_careers_inspiration = null,
+        $gpw_employee_author = null,
+        $gpw_employee_position = null,
+        $gpw_employee_comment = null,
+        $gpw_boss_author = null,
+        $gpw_boss_division = null,
+        $gpw_boss_comment = null,
+        $gpw_award_year_1 = null,
+        $gpw_award_title_1 = null,
+        $gpw_award_rnk_1 = null,
+        $gpw_award_year_2 = null,
+        $gpw_award_title_2 = null,
+        $gpw_award_rnk_2 = null,
+        $gpw_award_year_3 = null,
+        $gpw_award_title_3 = null,
+        $gpw_award_rnk3 = null,
+        $gpw_survey_text_1 = null,
+        $gpw_survey_res_1 = null,
+        $gpw_survey_text_2 = null,
+        $gpw_survey_res_2 = null,
+        $gpw_survey_text_3 = null,
+        $gpw_survey_res_3 = null,
+        $gpw_survey_text_4 = null,
+        $gpw_survey_res_4 = null,
+        $gpw_survey_text_5 = null,
+        $gpw_survey_res_5 = null,
+        $gpw_survey_text_6 = null,
+        $gpw_survey_res_6 = null,
+        $gpw_survey_text_7 = null,
+        $gpw_survey_res_7 = null,
+        $gpw_createdBy = null,
+        $gpw_inserted = null)
+    {
+        parent::__construct($id, $gpw_createdBy, new DateTime());
+        $this->gpw_pid = $gpw_pid;
+        $this->gpw_firm = $gpw_firm;
+        $this->gpw_sector = $gpw_sector;
+        $this->gpw_location = $gpw_location;
+        $this->gpw_cDate = $gpw_cDate;
+        $this->gpw_nb_workers = $gpw_nb_workers;
+        $this->gpw_website = $gpw_website;
+        $this->gpw_genMail = $gpw_genMail;
+        $this->gpw_fb = $gpw_fb;
+        $this->gpw_linkedIn = $gpw_linkedIn;
+        $this->gpw_twitter = $gpw_twitter;
+        $this->gpw_xing = $gpw_xing;
+        $this->gpw_yt = $gpw_yt;
+        $this->gpw_insta = $gpw_insta;
+        $this->gpw_contact_name = $gpw_contact_name;
+        $this->gpw_contact_position = $gpw_contact_position;
+        $this->gpw_contact_mail = $gpw_contact_mail;
+        $this->gpw_contact_tel = $gpw_contact_tel;
+        $this->gpw_values_careers_inspiration = $gpw_values_careers_inspiration;
+        $this->gpw_employee_author = $gpw_employee_author;
+        $this->gpw_employee_position = $gpw_employee_position;
+        $this->gpw_employee_comment = $gpw_employee_comment;
+        $this->gpw_boss_author = $gpw_boss_author;
+        $this->gpw_boss_division = $gpw_boss_division;
+        $this->gpw_boss_comment = $gpw_boss_comment;
+        $this->gpw_award_year_1 = $gpw_award_year_1;
+        $this->gpw_award_title_1 = $gpw_award_title_1;
+        $this->gpw_award_rnk_1 = $gpw_award_rnk_1;
+        $this->gpw_award_year_2 = $gpw_award_year_2;
+        $this->gpw_award_title_2 = $gpw_award_title_2;
+        $this->gpw_award_rnk_2 = $gpw_award_rnk_2;
+        $this->gpw_award_year_3 = $gpw_award_year_3;
+        $this->gpw_award_title_3 = $gpw_award_title_3;
+        $this->gpw_award_rnk3 = $gpw_award_rnk3;
+        $this->gpw_survey_text_1 = $gpw_survey_text_1;
+        $this->gpw_survey_res_1 = $gpw_survey_res_1;
+        $this->gpw_survey_text_2 = $gpw_survey_text_2;
+        $this->gpw_survey_res_2 = $gpw_survey_res_2;
+        $this->gpw_survey_text_3 = $gpw_survey_text_3;
+        $this->gpw_survey_res_3 = $gpw_survey_res_3;
+        $this->gpw_survey_text_4 = $gpw_survey_text_4;
+        $this->gpw_survey_res_4 = $gpw_survey_res_4;
+        $this->gpw_survey_text_5 = $gpw_survey_text_5;
+        $this->gpw_survey_res_5 = $gpw_survey_res_5;
+        $this->gpw_survey_text_6 = $gpw_survey_text_6;
+        $this->gpw_survey_res_6 = $gpw_survey_res_6;
+        $this->gpw_survey_text_7 = $gpw_survey_text_7;
+        $this->gpw_survey_res_7 = $gpw_survey_res_7;
+        $this->gpw_inserted = $gpw_inserted;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getGpwPid(): ?string
+    public function getPid(): ?string
     {
         return $this->gpw_pid;
     }
 
-    public function setGpwPid(string $gpw_pid): self
+    public function setPid(string $gpw_pid): self
     {
         $this->gpw_pid = $gpw_pid;
 
         return $this;
     }
 
-    public function getGpwFirm(): ?string
+    public function getFirm(): ?string
     {
         return $this->gpw_firm;
     }
 
-    public function setGpwFirm(string $gpw_firm): self
+    public function setFirm(string $gpw_firm): self
     {
         $this->gpw_firm = $gpw_firm;
 
         return $this;
     }
 
-    public function getGpwSector(): ?string
+    public function getSector(): ?string
     {
         return $this->gpw_sector;
     }
 
-    public function setGpwSector(string $gpw_sector): self
+    public function setSector(string $gpw_sector): self
     {
         $this->gpw_sector = $gpw_sector;
 
         return $this;
     }
 
-    public function getGpwLocation(): ?string
+    public function getLocation(): ?string
     {
         return $this->gpw_location;
     }
 
-    public function setGpwLocation(string $gpw_location): self
+    public function setLocation(string $gpw_location): self
     {
         $this->gpw_location = $gpw_location;
 
         return $this;
     }
 
-    public function getGpwCDate(): ?int
+    public function getCDate(): ?int
     {
         return $this->gpw_cDate;
     }
 
-    public function setGpwCDate(int $gpw_cDate): self
+    public function setCDate(int $gpw_cDate): self
     {
         $this->gpw_cDate = $gpw_cDate;
 
         return $this;
     }
 
-    public function getGpwNbWorkers(): ?int
+    public function getNbWorkers(): ?int
     {
         return $this->gpw_nb_workers;
     }
 
-    public function setGpwNbWorkers(int $gpw_nb_workers): self
+    public function setNbWorkers(int $gpw_nb_workers): self
     {
         $this->gpw_nb_workers = $gpw_nb_workers;
 
         return $this;
     }
 
-    public function getGpwWebsite(): ?string
+    public function getWebsite(): ?string
     {
         return $this->gpw_website;
     }
 
-    public function setGpwWebsite(string $gpw_website): self
+    public function setWebsite(string $gpw_website): self
     {
         $this->gpw_website = $gpw_website;
 
         return $this;
     }
 
-    public function getGpwGenMail(): ?string
+    public function getGenMail(): ?string
     {
         return $this->gpw_genMail;
     }
 
-    public function setGpwGenMail(string $gpw_genMail): self
+    public function setGenMail(string $gpw_genMail): self
     {
         $this->gpw_genMail = $gpw_genMail;
 
         return $this;
     }
 
-    public function getGpwFb(): ?string
+    public function getFb(): ?string
     {
         return $this->gpw_fb;
     }
 
-    public function setGpwFb(string $gpw_fb): self
+    public function setFb(string $gpw_fb): self
     {
         $this->gpw_fb = $gpw_fb;
 
         return $this;
     }
 
-    public function getGpwLinkedIn(): ?string
+    public function getLinkedIn(): ?string
     {
         return $this->gpw_linkedIn;
     }
 
-    public function setGpwLinkedIn(string $gpw_linkedIn): self
+    public function setLinkedIn(string $gpw_linkedIn): self
     {
         $this->gpw_linkedIn = $gpw_linkedIn;
 
         return $this;
     }
 
-    public function getGpwTwitter(): ?string
+    public function getTwitter(): ?string
     {
         return $this->gpw_twitter;
     }
 
-    public function setGpwTwitter(string $gpw_twitter): self
+    public function setTwitter(string $gpw_twitter): self
     {
         $this->gpw_twitter = $gpw_twitter;
 
         return $this;
     }
 
-    public function getGpwXing(): ?string
+    public function getXing(): ?string
     {
         return $this->gpw_xing;
     }
 
-    public function setGpwXing(string $gpw_xing): self
+    public function setXing(string $gpw_xing): self
     {
         $this->gpw_xing = $gpw_xing;
 
         return $this;
     }
 
-    public function getGpwYt(): ?string
+    public function getYt(): ?string
     {
         return $this->gpw_yt;
     }
 
-    public function setGpwYt(string $gpw_yt): self
+    public function setYt(string $gpw_yt): self
     {
         $this->gpw_yt = $gpw_yt;
 
         return $this;
     }
 
-    public function getGpwInsta(): ?string
+    public function getInsta(): ?string
     {
         return $this->gpw_insta;
     }
 
-    public function setGpwInsta(string $gpw_insta): self
+    public function setInsta(string $gpw_insta): self
     {
         $this->gpw_insta = $gpw_insta;
 
         return $this;
     }
 
-    public function getGpwContactName(): ?string
+    public function getContactName(): ?string
     {
         return $this->gpw_contact_name;
     }
 
-    public function setGpwContactName(string $gpw_contact_name): self
+    public function setContactName(string $gpw_contact_name): self
     {
         $this->gpw_contact_name = $gpw_contact_name;
 
         return $this;
     }
 
-    public function getGpwContactPosition(): ?string
+    public function getContactPosition(): ?string
     {
         return $this->gpw_contact_position;
     }
 
-    public function setGpwContactPosition(string $gpw_contact_position): self
+    public function setContactPosition(string $gpw_contact_position): self
     {
         $this->gpw_contact_position = $gpw_contact_position;
 
         return $this;
     }
 
-    public function getGpwContactMail(): ?string
+    public function getContactMail(): ?string
     {
         return $this->gpw_contact_mail;
     }
 
-    public function setGpwContactMail(string $gpw_contact_mail): self
+    public function setContactMail(string $gpw_contact_mail): self
     {
         $this->gpw_contact_mail = $gpw_contact_mail;
 
         return $this;
     }
 
-    public function getGpwContactTel(): ?string
+    public function getContactTel(): ?string
     {
         return $this->gpw_contact_tel;
     }
 
-    public function setGpwContactTel(string $gpw_contact_tel): self
+    public function setContactTel(string $gpw_contact_tel): self
     {
         $this->gpw_contact_tel = $gpw_contact_tel;
 
         return $this;
     }
 
-    public function getGpwValuesCareersInspiration(): ?string
+    public function getValuesCareersInspiration(): ?string
     {
         return $this->gpw_values_careers_inspiration;
     }
 
-    public function setGpwValuesCareersInspiration(string $gpw_values_careers_inspiration): self
+    public function setValuesCareersInspiration(string $gpw_values_careers_inspiration): self
     {
         $this->gpw_values_careers_inspiration = $gpw_values_careers_inspiration;
 
         return $this;
     }
 
-    public function getGpwEmployeeAuthor(): ?string
+    public function getEmployeeAuthor(): ?string
     {
         return $this->gpw_employee_author;
     }
 
-    public function setGpwEmployeeAuthor(string $gpw_employee_author): self
+    public function setEmployeeAuthor(string $gpw_employee_author): self
     {
         $this->gpw_employee_author = $gpw_employee_author;
 
         return $this;
     }
 
-    public function getGpwEmployeePosition(): ?string
+    public function getEmployeePosition(): ?string
     {
         return $this->gpw_employee_position;
     }
 
-    public function setGpwEmployeePosition(string $gpw_employee_position): self
+    public function setEmployeePosition(string $gpw_employee_position): self
     {
         $this->gpw_employee_position = $gpw_employee_position;
 
         return $this;
     }
 
-    public function getGpwEmployeeComment(): ?string
+    public function getEmployeeComment(): ?string
     {
         return $this->gpw_employee_comment;
     }
 
-    public function setGpwEmployeeComment(string $gpw_employee_comment): self
+    public function setEmployeeComment(string $gpw_employee_comment): self
     {
         $this->gpw_employee_comment = $gpw_employee_comment;
 
         return $this;
     }
 
-    public function getGpwBossAuthor(): ?string
+    public function getBossAuthor(): ?string
     {
         return $this->gpw_boss_author;
     }
 
-    public function setGpwBossAuthor(string $gpw_boss_author): self
+    public function setBossAuthor(string $gpw_boss_author): self
     {
         $this->gpw_boss_author = $gpw_boss_author;
 
         return $this;
     }
 
-    public function getGpwBossDivision(): ?string
+    public function getBossDivision(): ?string
     {
         return $this->gpw_boss_division;
     }
 
-    public function setGpwBossDivision(string $gpw_boss_division): self
+    public function setBossDivision(string $gpw_boss_division): self
     {
         $this->gpw_boss_division = $gpw_boss_division;
 
         return $this;
     }
 
-    public function getGpwBossComment(): ?string
+    public function getBossComment(): ?string
     {
         return $this->gpw_boss_comment;
     }
 
-    public function setGpwBossComment(string $gpw_boss_comment): self
+    public function setBossComment(string $gpw_boss_comment): self
     {
         $this->gpw_boss_comment = $gpw_boss_comment;
 
         return $this;
     }
 
-    public function getGpwAwardyear1(): ?string
+    public function getAwardyear1(): ?string
     {
         return $this->gpw_award_year_1;
     }
 
-    public function setGpwAwardyear1(string $gpw_award_year_1): self
+    public function setAwardyear1(string $gpw_award_year_1): self
     {
         $this->gpw_award_year_1 = $gpw_award_year_1;
 
         return $this;
     }
 
-    public function getGpwAwardTitle1(): ?string
+    public function getAwardTitle1(): ?string
     {
         return $this->gpw_award_title_1;
     }
 
-    public function setGpwAwardTitle1(string $gpw_award_title_1): self
+    public function setAwardTitle1(string $gpw_award_title_1): self
     {
         $this->gpw_award_title_1 = $gpw_award_title_1;
 
         return $this;
     }
 
-    public function getGpwAwardRnk1(): ?string
+    public function getAwardRnk1(): ?string
     {
         return $this->gpw_award_rnk_1;
     }
 
-    public function setGpwAwardRnk1(string $gpw_award_rnk_1): self
+    public function setAwardRnk1(string $gpw_award_rnk_1): self
     {
         $this->gpw_award_rnk_1 = $gpw_award_rnk_1;
 
         return $this;
     }
 
-    public function getGpwAwardYear2(): ?string
+    public function getAwardYear2(): ?string
     {
         return $this->gpw_award_year_2;
     }
 
-    public function setGpwAwardYear2(string $gpw_award_year_2): self
+    public function setAwardYear2(string $gpw_award_year_2): self
     {
         $this->gpw_award_year_2 = $gpw_award_year_2;
 
         return $this;
     }
 
-    public function getGpwAwardTitle2(): ?string
+    public function getAwardTitle2(): ?string
     {
         return $this->gpw_award_title_2;
     }
 
-    public function setGpwAwardTitle2(string $gpw_award_title_2): self
+    public function setAwardTitle2(string $gpw_award_title_2): self
     {
         $this->gpw_award_title_2 = $gpw_award_title_2;
 
         return $this;
     }
 
-    public function getGpwAwardRnk2(): ?string
+    public function getAwardRnk2(): ?string
     {
         return $this->gpw_award_rnk_2;
     }
 
-    public function setGpwAwardRnk2(string $gpw_award_rnk_2): self
+    public function setAwardRnk2(string $gpw_award_rnk_2): self
     {
         $this->gpw_award_rnk_2 = $gpw_award_rnk_2;
 
         return $this;
     }
 
-    public function getGpwAwardYear3(): ?string
+    public function getAwardYear3(): ?string
     {
         return $this->gpw_award_year_3;
     }
 
-    public function setGpwAwardYear3(string $gpw_award_year_3): self
+    public function setAwardYear3(string $gpw_award_year_3): self
     {
         $this->gpw_award_year_3 = $gpw_award_year_3;
 
         return $this;
     }
 
-    public function getGpwAwardTitle3(): ?string
+    public function getAwardTitle3(): ?string
     {
         return $this->gpw_award_title_3;
     }
 
-    public function setGpwAwardTitle3(string $gpw_award_title_3): self
+    public function setAwardTitle3(string $gpw_award_title_3): self
     {
         $this->gpw_award_title_3 = $gpw_award_title_3;
 
         return $this;
     }
 
-    public function getGpwAwardRnk3(): ?string
+    public function getAwardRnk3(): ?string
     {
         return $this->gpw_award_rnk3;
     }
 
-    public function setGpwAwardRnk3(string $gpw_award_rnk3): self
+    public function setAwardRnk3(string $gpw_award_rnk3): self
     {
         $this->gpw_award_rnk3 = $gpw_award_rnk3;
 
         return $this;
     }
 
-    public function getGpwSurveyText1(): ?string
+    public function getSurveyText1(): ?string
     {
         return $this->gpw_survey_text_1;
     }
 
-    public function setGpwSurveyText1(string $gpw_survey_text_1): self
+    public function setSurveyText1(string $gpw_survey_text_1): self
     {
         $this->gpw_survey_text_1 = $gpw_survey_text_1;
 
         return $this;
     }
 
-    public function getGpwSurveyRes1(): ?string
+    public function getSurveyRes1(): ?string
     {
         return $this->gpw_survey_res_1;
     }
 
-    public function setGpwSurveyRes1(string $gpw_survey_res_1): self
+    public function setSurveyRes1(string $gpw_survey_res_1): self
     {
         $this->gpw_survey_res_1 = $gpw_survey_res_1;
 
         return $this;
     }
 
-    public function getGpwSurveyText2(): ?string
+    public function getSurveyText2(): ?string
     {
         return $this->gpw_survey_text_2;
     }
 
-    public function setGpwSurveyText2(string $gpw_survey_text_2): self
+    public function setSurveyText2(string $gpw_survey_text_2): self
     {
         $this->gpw_survey_text_2 = $gpw_survey_text_2;
 
         return $this;
     }
 
-    public function getGpwSurveyRes2(): ?string
+    public function getSurveyRes2(): ?string
     {
         return $this->gpw_survey_res_2;
     }
 
-    public function setGpwSurveyRes2(string $gpw_survey_res_2): self
+    public function setSurveyRes2(string $gpw_survey_res_2): self
     {
         $this->gpw_survey_res_2 = $gpw_survey_res_2;
 
         return $this;
     }
 
-    public function getGpwSurveyText3(): ?string
+    public function getSurveyText3(): ?string
     {
         return $this->gpw_survey_text_3;
     }
 
-    public function setGpwSurveyText3(string $gpw_survey_text_3): self
+    public function setSurveyText3(string $gpw_survey_text_3): self
     {
         $this->gpw_survey_text_3 = $gpw_survey_text_3;
 
         return $this;
     }
 
-    public function getGpwSurveyRes3(): ?string
+    public function getSurveyRes3(): ?string
     {
         return $this->gpw_survey_res_3;
     }
 
-    public function setGpwSurveyRes3(string $gpw_survey_res_3): self
+    public function setSurveyRes3(string $gpw_survey_res_3): self
     {
         $this->gpw_survey_res_3 = $gpw_survey_res_3;
 
         return $this;
     }
 
-    public function getGpwSurveyText4(): ?string
+    public function getSurveyText4(): ?string
     {
         return $this->gpw_survey_text_4;
     }
 
-    public function setGpwSurveyText4(string $gpw_survey_text_4): self
+    public function setSurveyText4(string $gpw_survey_text_4): self
     {
         $this->gpw_survey_text_4 = $gpw_survey_text_4;
 
         return $this;
     }
 
-    public function getGpwSurveyRes4(): ?string
+    public function getSurveyRes4(): ?string
     {
         return $this->gpw_survey_res_4;
     }
 
-    public function setGpwSurveyRes4(string $gpw_survey_res_4): self
+    public function setSurveyRes4(string $gpw_survey_res_4): self
     {
         $this->gpw_survey_res_4 = $gpw_survey_res_4;
 
         return $this;
     }
 
-    public function getGpwSurveyText5(): ?string
+    public function getSurveyText5(): ?string
     {
         return $this->gpw_survey_text_5;
     }
 
-    public function setGpwSurveyText5(string $gpw_survey_text_5): self
+    public function setSurveyText5(string $gpw_survey_text_5): self
     {
         $this->gpw_survey_text_5 = $gpw_survey_text_5;
 
         return $this;
     }
 
-    public function getGpwSurveyRes5(): ?string
+    public function getSurveyRes5(): ?string
     {
         return $this->gpw_survey_res_5;
     }
 
-    public function setGpwSurveyRes5(string $gpw_survey_res_5): self
+    public function setSurveyRes5(string $gpw_survey_res_5): self
     {
         $this->gpw_survey_res_5 = $gpw_survey_res_5;
 
         return $this;
     }
 
-    public function getGpwSurveyText6(): ?string
+    public function getSurveyText6(): ?string
     {
         return $this->gpw_survey_text_6;
     }
 
-    public function setGpwSurveyText6(string $gpw_survey_text_6): self
+    public function setSurveyText6(string $gpw_survey_text_6): self
     {
         $this->gpw_survey_text_6 = $gpw_survey_text_6;
 
         return $this;
     }
 
-    public function getGpwSurveyRes6(): ?string
+    public function getSurveyRes6(): ?string
     {
         return $this->gpw_survey_res_6;
     }
 
-    public function setGpwSurveyRes6(string $gpw_survey_res_6): self
+    public function setSurveyRes6(string $gpw_survey_res_6): self
     {
         $this->gpw_survey_res_6 = $gpw_survey_res_6;
 
         return $this;
     }
 
-    public function getGpwSurveyText7(): ?string
+    public function getSurveyText7(): ?string
     {
         return $this->gpw_survey_text_7;
     }
 
-    public function setGpwSurveyText7(string $gpw_survey_text_7): self
+    public function setSurveyText7(string $gpw_survey_text_7): self
     {
         $this->gpw_survey_text_7 = $gpw_survey_text_7;
 
         return $this;
     }
 
-    public function getGpwSurveyRes7(): ?string
+    public function getSurveyRes7(): ?string
     {
         return $this->gpw_survey_res_7;
     }
 
-    public function setGpwSurveyRes7(string $gpw_survey_res_7): self
+    public function setSurveyRes7(string $gpw_survey_res_7): self
     {
         $this->gpw_survey_res_7 = $gpw_survey_res_7;
 
         return $this;
     }
 
-    public function getGpwCreatedBy(): ?int
+    public function getCreatedBy(): ?int
     {
         return $this->gpw_createdBy;
     }
 
-    public function setGpwCreatedBy(?int $gpw_createdBy): self
+    public function setCreatedBy(?int $gpw_createdBy): self
     {
         $this->gpw_createdBy = $gpw_createdBy;
 
         return $this;
     }
 
-    public function getGpwInserted(): ?\DateTimeInterface
+    public function getInserted(): ?\DateTimeInterface
     {
         return $this->gpw_inserted;
     }
 
-    public function setGpwInserted(\DateTimeInterface $gpw_inserted): self
+    public function setInserted(\DateTimeInterface $gpw_inserted): self
     {
         $this->gpw_inserted = $gpw_inserted;
 
