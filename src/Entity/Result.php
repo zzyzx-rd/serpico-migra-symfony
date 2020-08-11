@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping\ManyToOne;
  * @ApiResource()
  * @ORM\Entity(repositoryClass=ResultRepository::class)
  */
-class Result
+class Result extends DbObject
 {
     /**
      * @ORM\Id()
@@ -142,7 +142,89 @@ class Result
     /**
      * @ORM\ManyToOne(targetEntity=ExternalUser::class, inversedBy="results")
      */
-    private $external_user_ext_id;
+    private $external_user_ext_usr;
+
+    /**
+     * Result constructor.
+     * @param int $id
+     * @param $res_type
+     * @param $res_war
+     * @param $res_ear
+     * @param $res_wrr
+     * @param $res_err
+     * @param $res_wsd
+     * @param $res_esd
+     * @param $res_wdf
+     * @param $res_edr
+     * @param $res_wsd_max
+     * @param $res_esd_max
+     * @param $res_win
+     * @param $res_ein
+     * @param $res_win_max
+     * @param $res_ein_max
+     * @param $res_wdr_gen
+     * @param $res_res_der_gen
+     * @param $res_createdBy
+     * @param $res_inserted
+     * @param Activity $activity
+     * @param Stage $stage
+     * @param Criterion $criterion
+     * @param User $user_usr
+     * @param null $external_user_ext_usr
+     */
+    public function __construct(
+        $id = 0,
+        $res_type = null,
+        $res_war = null,
+        $res_ear = null,
+        $res_wrr = null,
+        $res_err = null,
+        $res_wsd = null,
+        $res_esd = null,
+        $res_wdf = null,
+        $res_edr = null,
+        $res_wsd_max = null,
+        $res_esd_max = null,
+        $res_win = null,
+        $res_ein = null,
+        $res_win_max = null,
+        $res_ein_max = null,
+        $res_wdr_gen= null,
+        $res_res_der_gen= null,
+        $res_createdBy= null,
+        $res_inserted= null,
+        Activity $activity= null,
+        Stage $stage= null,
+        Criterion $criterion= null,
+        User $user_usr= null,
+        $external_user_ext_usr= null)
+    {
+        $this->id = $id;
+        $this->res_type = $res_type;
+        $this->res_war = $res_war;
+        $this->res_ear = $res_ear;
+        $this->res_wrr = $res_wrr;
+        $this->res_err = $res_err;
+        $this->res_wsd = $res_wsd;
+        $this->res_esd = $res_esd;
+        $this->res_wdf = $res_wdf;
+        $this->res_edr = $res_edr;
+        $this->res_wsd_max = $res_wsd_max;
+        $this->res_esd_max = $res_esd_max;
+        $this->res_win = $res_win;
+        $this->res_ein = $res_ein;
+        $this->res_win_max = $res_win_max;
+        $this->res_ein_max = $res_ein_max;
+        $this->res_wdr_gen = $res_wdr_gen;
+        $this->res_res_der_gen = $res_res_der_gen;
+        $this->res_createdBy = $res_createdBy;
+        $this->res_inserted = $res_inserted;
+        $this->activity = $activity;
+        $this->stage = $stage;
+        $this->criterion = $criterion;
+        $this->user_usr = $user_usr;
+        $this->external_user_ext_usr = $external_user_ext_usr;
+    }
 
     public function getId(): ?int
     {
