@@ -3,15 +3,17 @@
 namespace App\Entity;
 
 use App\Repository\CityRepository;
+use DateTime;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
 
 /**
- * @ORM\Entity(repositoryClass=CityRepository::class)
+ * @ORM\Entity(repositoryClass="App\Repository\CityRepository", repositoryClass=CityRepository::class)
  */
-class City
+class City extends DbObject
 {
     /**
      * @ORM\Id()
@@ -62,65 +64,101 @@ class City
      */
     private $firms;
 
+    /**
+     * City constructor.
+     * @param $id
+     * @param $cit_abbr
+     * @param $cit_fullname
+     * @param $cit_name
+     * @param $cit_createdBy
+     * @param $cit_inserted
+     * @param $state
+     * @param $country
+     * @param $firms
+     */
+    public function __construct(
+        int $id = 0,
+        $cit_abbr = null,
+        $cit_fullname = null,
+        $cit_name = null ,
+        $cit_createdBy = null,
+        $cit_inserted = null,
+        $state = null,
+        $country = null,
+        $firms = null)
+    {
+        parent::__construct($id, $cit_createdBy, new DateTime());
+        $this->id = $id;
+        $this->cit_abbr = $cit_abbr;
+        $this->cit_fullname = $cit_fullname;
+        $this->cit_name = $cit_name;
+        $this->cit_createdBy = $cit_createdBy;
+        $this->cit_inserted = $cit_inserted;
+        $this->state = $state;
+        $this->country = $country;
+        $this->firms = $firms?$firms:new ArrayCollection();
+    }
+
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getCitAbbr(): ?string
+    public function getAbbr(): ?string
     {
         return $this->cit_abbr;
     }
 
-    public function setCitAbbr(string $cit_abbr): self
+    public function setAbbr(string $cit_abbr): self
     {
         $this->cit_abbr = $cit_abbr;
 
         return $this;
     }
 
-    public function getCitFullname(): ?string
+    public function getFullname(): ?string
     {
         return $this->cit_fullname;
     }
 
-    public function setCitFullname(string $cit_fullname): self
+    public function setFullname(string $cit_fullname): self
     {
         $this->cit_fullname = $cit_fullname;
 
         return $this;
     }
 
-    public function getCitName(): ?string
+    public function getName(): ?string
     {
         return $this->cit_name;
     }
 
-    public function setCitName(string $cit_name): self
+    public function setName(string $cit_name): self
     {
         $this->cit_name = $cit_name;
 
         return $this;
     }
 
-    public function getCitCreatedBy(): ?int
+    public function getCreatedBy(): ?int
     {
         return $this->cit_createdBy;
     }
 
-    public function setCitCreatedBy(?int $cit_createdBy): self
+    public function setCreatedBy(?int $cit_createdBy): self
     {
         $this->cit_createdBy = $cit_createdBy;
 
         return $this;
     }
 
-    public function getCitInserted(): ?\DateTimeInterface
+    public function getInserted(): ?\DateTimeInterface
     {
         return $this->cit_inserted;
     }
 
-    public function setCitInserted(\DateTimeInterface $cit_inserted): self
+    public function setInserted(\DateTimeInterface $cit_inserted): self
     {
         $this->cit_inserted = $cit_inserted;
 
@@ -173,6 +211,21 @@ class City
     public function setFirms($firms): void
     {
         $this->firms = $firms;
+    }
+    function addFirm(WorkerFirm $firm){
+        $this->firms->add($firm);
+        $firm->setState($this);
+        return $this;
+    }
+
+    function removeFirm(WorkerFirm $firm){
+        $this->firms->removeElement($firm);
+        return $this;
+    }
+
+    public function __toString()
+    {
+        return (string) $this->id;
     }
 
 }
