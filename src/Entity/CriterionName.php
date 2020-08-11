@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\CriterionNameRepository;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -10,7 +11,7 @@ use Doctrine\ORM\Mapping\ManyToOne;
 /**
  * @ORM\Entity(repositoryClass=CriterionNameRepository::class)
  */
-class CriterionName
+class CriterionName extends DbObject
 {
     /**
      * @ORM\Id()
@@ -71,29 +72,67 @@ class CriterionName
      * @var CriterionGroup
      */
     protected $criterionGroup;
+
+    /**
+     * CriterionName constructor.
+     * @param $id
+     * @param $cna_type
+     * @param $cna_name
+     * @param $can_unit
+     * @param $can_createdBy
+     * @param $can_inserted
+     * @param Icon $icon
+     * @param Organization $organization
+     * @param Department|null $department
+     * @param CriterionGroup $criterionGroup
+     */
+    public function __construct(
+        $id = null,
+        $cna_type = null,
+        $cna_name = '',
+        $can_unit = '',
+        $can_createdBy = null,
+        $can_inserted = null,
+        Icon $icon = null,
+        Organization $organization = null,
+        ?Department $department = null,
+        CriterionGroup $criterionGroup = null)
+    {
+        parent::__construct($id, $can_createdBy, new DateTime());
+        $this->cna_type = $cna_type;
+        $this->cna_name = $cna_name;
+        $this->can_unit = $can_unit;
+        $this->can_createdBy = $can_createdBy;
+        $this->can_inserted = $can_inserted;
+        $this->icon = $icon;
+        $this->organization = $organization;
+        $this->department = $department;
+        $this->criterionGroup = $criterionGroup;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getCnaType(): ?int
+    public function getType(): ?int
     {
         return $this->cna_type;
     }
 
-    public function setCnaType(int $cna_type): self
+    public function setType(int $cna_type): self
     {
         $this->cna_type = $cna_type;
 
         return $this;
     }
 
-    public function getCnaName(): ?string
+    public function getName(): ?string
     {
         return $this->cna_name;
     }
 
-    public function setCnaName(string $cna_name): self
+    public function setName(string $cna_name): self
     {
         $this->cna_name = $cna_name;
 
@@ -199,5 +238,8 @@ class CriterionName
     {
         $this->criterionGroup = $criterionGroup;
     }
-
+    public function __toString()
+    {
+        return (string) $this->id;
+    }
 }
