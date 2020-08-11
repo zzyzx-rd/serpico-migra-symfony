@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\GeneratedImageRepository;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\OneToOne;
@@ -12,7 +13,7 @@ use Doctrine\ORM\Mapping\OneToOne;
  * @ApiResource()
  * @ORM\Entity(repositoryClass=GeneratedImageRepository::class)
  */
-class GeneratedImage
+class GeneratedImage extends DbObject
 {
     /**
      * @ORM\Id()
@@ -58,6 +59,12 @@ class GeneratedImage
     private $gim_sid;
 
     /**
+     *@Column(name="gim_cid", type="integer", nullable=true, length=10)
+     * @var int
+     */
+    protected $crtId;
+    
+    /**
      * @ORM\Column(type="integer", nullable=true)
      */
     private $gim_role;
@@ -83,137 +90,186 @@ class GeneratedImage
      */
     protected $cName;
 
+    /**
+     * GeneratedImage constructor.
+     * @param int $id
+     * @param int $gim_type
+     * @param $gim_tid
+     * @param $gim_uid
+     * @param $gim_aid
+     * @param $gim_ov
+     * @param $gim_sid
+     * @param null $crtId
+     * @param $gim_role
+     * @param $gim_createdBy
+     * @param $gim_val
+     * @param $gim_inserted
+     * @param $gim_all
+     * @param $cName
+     */
+    public function __construct(
+        int $id = 0,
+        $gim_type = 0,
+        $gim_tid = null,
+        $gim_uid = null,
+        $gim_aid = null,
+        $gim_ov = null,
+        $gim_sid = null,
+        $crtId = null,
+        $gim_role = null,
+        $gim_createdBy = null,
+        $gim_val = null,
+        $gim_inserted = null,
+        $gim_all = null,
+        $cName)
+    {
+        parent::__construct($id, $gim_createdBy, new DateTime());
+        $this->gim_all = $gim_all;
+        $this->gim_type = $gim_type;
+        $this->gim_tid = $gim_tid;
+        $this->gim_uid = $gim_uid;
+        $this->gim_aid = $gim_aid;
+        $this->gim_ov = $gim_ov;
+        $this->gim_sid = $gim_sid;
+        $this->crtId = $crtId;
+        $this->gim_role = $gim_role;
+        $this->gim_val = $gim_val;
+        $this->gim_inserted = $gim_inserted;
+        $this->cName = $cName;
+    }
+
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getGimAll(): ?int
+    public function getAll(): ?int
     {
         return $this->gim_all;
     }
 
-    public function setGimAll(int $gim_all): self
+    public function setAll(int $gim_all): self
     {
         $this->gim_all = $gim_all;
 
         return $this;
     }
 
-    public function getGimType(): ?int
+    public function getType(): ?int
     {
         return $this->gim_type;
     }
 
-    public function setGimType(int $gim_type): self
+    public function setType(int $gim_type): self
     {
         $this->gim_type = $gim_type;
 
         return $this;
     }
 
-    public function getGimTid(): ?int
+    public function getTid(): ?int
     {
         return $this->gim_tid;
     }
 
-    public function setGimTid(?int $gim_tid): self
+    public function setTid(?int $gim_tid): self
     {
         $this->gim_tid = $gim_tid;
 
         return $this;
     }
 
-    public function getGimUid(): ?int
+    public function getUid(): ?int
     {
         return $this->gim_uid;
     }
 
-    public function setGimUid(?int $gim_uid): self
+    public function setUid(?int $gim_uid): self
     {
         $this->gim_uid = $gim_uid;
 
         return $this;
     }
 
-    public function getGimAid(): ?int
+    public function getAid(): ?int
     {
         return $this->gim_aid;
     }
 
-    public function setGimAid(?int $gim_aid): self
+    public function setAid(?int $gim_aid): self
     {
         $this->gim_aid = $gim_aid;
 
         return $this;
     }
 
-    public function getGimOv(): ?bool
+    public function isOverview(): ?bool
     {
         return $this->gim_ov;
     }
 
-    public function setGimOv(bool $gim_ov): self
+    public function setOverview(bool $gim_ov): self
     {
         $this->gim_ov = $gim_ov;
 
         return $this;
     }
 
-    public function getGimSid(): ?int
+    public function getSid(): ?int
     {
         return $this->gim_sid;
     }
 
-    public function setGimSid(?int $gim_sid): self
+    public function setSid(?int $gim_sid): self
     {
         $this->gim_sid = $gim_sid;
 
         return $this;
     }
 
-    public function getGimRole(): ?int
+    public function getRole(): ?int
     {
         return $this->gim_role;
     }
 
-    public function setGimRole(?int $gim_role): self
+    public function setRole(?int $gim_role): self
     {
         $this->gim_role = $gim_role;
 
         return $this;
     }
 
-    public function getGimCreatedBy(): ?int
+    public function getCreatedBy(): ?int
     {
         return $this->gim_createdBy;
     }
 
-    public function setGimCreatedBy(?int $gim_createdBy): self
+    public function setCreatedBy(?int $gim_createdBy): self
     {
         $this->gim_createdBy = $gim_createdBy;
 
         return $this;
     }
 
-    public function getGimVal(): ?string
+    public function getVal(): ?string
     {
         return $this->gim_val;
     }
 
-    public function setGimVal(string $gim_val): self
+    public function setVal(string $gim_val): self
     {
         $this->gim_val = $gim_val;
 
         return $this;
     }
 
-    public function getGimInserted(): ?\DateTimeInterface
+    public function getInserted(): ?\DateTimeInterface
     {
         return $this->gim_inserted;
     }
 
-    public function setGimInserted(\DateTimeInterface $gim_inserted): self
+    public function setInserted(\DateTimeInterface $gim_inserted): self
     {
         $this->gim_inserted = $gim_inserted;
 
