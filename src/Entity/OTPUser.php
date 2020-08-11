@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping\ManyToOne;
  * @ApiResource()
  * @ORM\Entity(repositoryClass=OTPUserRepository::class)
  */
-class OTPUser
+class OTPUser extends DbObject
 {
     /**
      * @ORM\Id()
@@ -58,77 +58,107 @@ class OTPUser
      */
     protected $organization;
 
+    /**
+     * OTPUser constructor.
+     * @param int $id
+     * @param $otp_type
+     * @param $otp_fullname
+     * @param $otp_tipe
+     * @param $otp_email
+     * @param $otp_createdBy
+     * @param $otp_inserted
+     * @param $organization
+     */
+    public function __construct(
+        int $id = 0,
+        $otp_type = null,
+        $otp_fullname = null,
+        $otp_tipe = null,
+        Organization $organization = null,
+        $otp_email = null,
+        $otp_createdBy = null,
+        $otp_inserted = null)
+    {
+        $this->otp_type = $otp_type;
+        $this->otp_fullname = $otp_fullname;
+        $this->otp_tipe = $otp_tipe;
+        $this->otp_email = $otp_email;
+        $this->otp_inserted = $otp_inserted;
+        $this->organization = $organization;
+    }
+
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getOtpType(): ?string
+    public function getType(): ?string
     {
         return $this->otp_type;
     }
 
-    public function setOtpType(string $otp_type): self
+    public function setType(string $otp_type): self
     {
         $this->otp_type = $otp_type;
 
         return $this;
     }
 
-    public function getOtpFullname(): ?string
+    public function getFullname(): ?string
     {
         return $this->otp_fullname;
     }
 
-    public function setOtpFullname(string $otp_fullname): self
+    public function setFullname(string $otp_fullname): self
     {
         $this->otp_fullname = $otp_fullname;
 
         return $this;
     }
 
-    public function getOtpTipe(): ?string
+    public function getTipe(): ?string
     {
         return $this->otp_tipe;
     }
 
-    public function setOtpTipe(string $otp_tipe): self
+    public function setTipe(string $otp_tipe): self
     {
         $this->otp_tipe = $otp_tipe;
 
         return $this;
     }
 
-    public function getOtpEmail(): ?string
+    public function getEmail(): ?string
     {
         return $this->otp_email;
     }
 
-    public function setOtpEmail(string $otp_email): self
+    public function setEmail(string $otp_email): self
     {
         $this->otp_email = $otp_email;
 
         return $this;
     }
 
-    public function getOtpCreatedBy(): ?int
+    public function getCreatedBy(): ?int
     {
         return $this->otp_createdBy;
     }
 
-    public function setOtpCreatedBy(?int $otp_createdBy): self
+    public function setCreatedBy(?int $otp_createdBy): self
     {
         $this->otp_createdBy = $otp_createdBy;
 
         return $this;
     }
 
-    public function getOtpInserted(): ?\DateTimeInterface
+    public function getInserted(): ?\DateTimeInterface
     {
         return $this->otp_inserted;
     }
 
-    public function setOtpInserted(\DateTimeInterface $otp_inserted): self
+    public function setInserted(\DateTimeInterface $otp_inserted): self
     {
         $this->otp_inserted = $otp_inserted;
 
