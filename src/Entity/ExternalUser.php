@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\ExternalUserRepository;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -14,7 +15,7 @@ use Doctrine\ORM\Mapping\ManyToOne;
  * @ApiResource()
  * @ORM\Entity(repositoryClass=ExternalUserRepository::class)
  */
-class ExternalUser
+class ExternalUser extends DbObject
 {
     /**
      * @ORM\Id()
@@ -101,132 +102,180 @@ class ExternalUser
      */
     private $teamUsers;
 
-    public function __construct()
+    /**
+     * ExternalUser constructor.
+     * @param int $id
+     * @param $ext_fisrtname
+     * @param $ext_lastname
+     * @param $ext_email
+     * @param $ext_positionName
+     * @param $ext_weight_value
+     * @param $ext_owner
+     * @param $ext_createdBy
+     * @param $ext_inserted
+     * @param $ext_last_connected
+     * @param $ext_deleted
+     * @param $user
+     * @param $client
+     * @param $activity_user_act_usr
+     * @param $results
+     * @param $teamUsers
+     */
+    public function __construct(
+        int $id = 0,
+        $ext_fisrtname = '',
+        $ext_lastname = '',
+        $ext_email = null,
+        $ext_weight_value = 0.0,
+        $ext_positionName = null,
+        $ext_owner = null,
+        $ext_createdBy = null,
+        $ext_inserted = null,
+        $ext_last_connected = null,
+        $ext_deleted = null,
+        User $user = null,
+        Client $client = null,
+        ActivityUser $activity_user_act_usr = null,
+        Result $results = null,
+        TeamUser $teamUsers = null)
     {
-        $this->activity_user_act_usr = new ArrayCollection();
-        $this->results = new ArrayCollection();
-        $this->teamUsers = new ArrayCollection();
+        parent::__construct($id, $ext_createdBy, new DateTime());
+        $this->ext_fisrtname = $ext_fisrtname;
+        $this->ext_lastname = $ext_lastname;
+        $this->ext_email = $ext_email;
+        $this->ext_positionName = $ext_positionName;
+        $this->ext_weight_value = $ext_weight_value;
+        $this->ext_owner = $ext_owner;
+        $this->ext_inserted = $ext_inserted;
+        $this->ext_last_connected = $ext_last_connected;
+        $this->ext_deleted = $ext_deleted;
+        $this->user = $user;
+        $this->client = $client;
+        $this->activity_user_act_usr = $activity_user_act_usr;
+        $this->results = $results;
+        $this->teamUsers = $teamUsers;
     }
+
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getExtFisrtname(): ?string
+    public function getFisrtname(): ?string
     {
         return $this->ext_fisrtname;
     }
 
-    public function setExtFisrtname(string $ext_fisrtname): self
+    public function setFisrtname(string $ext_fisrtname): self
     {
         $this->ext_fisrtname = $ext_fisrtname;
 
         return $this;
     }
 
-    public function getExtLastname(): ?string
+    public function getLastname(): ?string
     {
         return $this->ext_lastname;
     }
 
-    public function setExtLastname(string $ext_lastname): self
+    public function setLastname(string $ext_lastname): self
     {
         $this->ext_lastname = $ext_lastname;
 
         return $this;
     }
 
-    public function getExtEmail(): ?string
+    public function getEmail(): ?string
     {
         return $this->ext_email;
     }
 
-    public function setExtEmail(?string $ext_email): self
+    public function setEmail(?string $ext_email): self
     {
         $this->ext_email = $ext_email;
 
         return $this;
     }
 
-    public function getExtPositionName(): ?string
+    public function getPositionName(): ?string
     {
         return $this->ext_positionName;
     }
 
-    public function setExtPositionName(string $ext_positionName): self
+    public function setPositionName(string $ext_positionName): self
     {
         $this->ext_positionName = $ext_positionName;
 
         return $this;
     }
 
-    public function getExtWeightValue(): ?float
+    public function getWeightValue(): ?float
     {
         return $this->ext_weight_value;
     }
 
-    public function setExtWeightValue(float $ext_weight_value): self
+    public function setWeightValue(float $ext_weight_value): self
     {
         $this->ext_weight_value = $ext_weight_value;
 
         return $this;
     }
 
-    public function getExtOwner(): ?bool
+    public function isOwner(): ?bool
     {
         return $this->ext_owner;
     }
 
-    public function setExtOwner(bool $ext_owner): self
+    public function setOwner(bool $ext_owner): self
     {
         $this->ext_owner = $ext_owner;
 
         return $this;
     }
 
-    public function getExtCreatedBy(): ?int
+    public function getCreatedBy(): ?int
     {
         return $this->ext_createdBy;
     }
 
-    public function setExtCreatedBy(int $ext_createdBy): self
+    public function setCreatedBy(int $ext_createdBy): self
     {
         $this->ext_createdBy = $ext_createdBy;
 
         return $this;
     }
 
-    public function getExtInserted(): ?\DateTimeInterface
+    public function getInserted(): ?\DateTimeInterface
     {
         return $this->ext_inserted;
     }
 
-    public function setExtInserted(\DateTimeInterface $ext_inserted): self
+    public function setInserted(\DateTimeInterface $ext_inserted): self
     {
         $this->ext_inserted = $ext_inserted;
 
         return $this;
     }
 
-    public function getExtLastConnected(): ?\DateTimeInterface
+    public function getLastConnected(): ?\DateTimeInterface
     {
         return $this->ext_last_connected;
     }
 
-    public function setExtLastConnected(?\DateTimeInterface $ext_last_connected): self
+    public function setLastConnected(?\DateTimeInterface $ext_last_connected): self
     {
         $this->ext_last_connected = $ext_last_connected;
 
         return $this;
     }
 
-    public function getExtDeleted(): ?\DateTimeInterface
+    public function getDeleted(): ?\DateTimeInterface
     {
         return $this->ext_deleted;
     }
 
-    public function setExtDeleted(?\DateTimeInterface $ext_deleted): self
+    public function setDeleted(?\DateTimeInterface $ext_deleted): self
     {
         $this->ext_deleted = $ext_deleted;
 
@@ -277,7 +326,7 @@ class ExternalUser
     {
         if (!$this->activity_user_act_usr->contains($activityUserActUsr)) {
             $this->activity_user_act_usr[] = $activityUserActUsr;
-            $activityUserActUsr->setExternalUserExtUsr($this);
+            $activityUserActUsr->seternalUserExtUsr($this);
         }
 
         return $this;
@@ -288,8 +337,8 @@ class ExternalUser
         if ($this->activity_user_act_usr->contains($activityUserActUsr)) {
             $this->activity_user_act_usr->removeElement($activityUserActUsr);
             // set the owning side to null (unless already changed)
-            if ($activityUserActUsr->getExternalUserExtUsr() === $this) {
-                $activityUserActUsr->setExternalUserExtUsr(null);
+            if ($activityUserActUsr->geternalUserExtUsr() === $this) {
+                $activityUserActUsr->seternalUserExtUsr(null);
             }
         }
 
@@ -308,7 +357,7 @@ class ExternalUser
     {
         if (!$this->results->contains($result)) {
             $this->results[] = $result;
-            $result->setExternalUserExtId($this);
+            $result->seternalUserExtId($this);
         }
 
         return $this;
@@ -319,8 +368,8 @@ class ExternalUser
         if ($this->results->contains($result)) {
             $this->results->removeElement($result);
             // set the owning side to null (unless already changed)
-            if ($result->getExternalUserExtId() === $this) {
-                $result->setExternalUserExtId(null);
+            if ($result->geternalUserExtId() === $this) {
+                $result->seternalUserExtId(null);
             }
         }
 
@@ -339,7 +388,7 @@ class ExternalUser
     {
         if (!$this->teamUsers->contains($teamUser)) {
             $this->teamUsers[] = $teamUser;
-            $teamUser->setExternalUserExtId($this);
+            $teamUser->seternalUserExtId($this);
         }
 
         return $this;
@@ -350,12 +399,25 @@ class ExternalUser
         if ($this->teamUsers->contains($teamUser)) {
             $this->teamUsers->removeElement($teamUser);
             // set the owning side to null (unless already changed)
-            if ($teamUser->getExternalUserExtId() === $this) {
-                $teamUser->setExternalUserExtId(null);
+            if ($teamUser->geternalUserExtId() === $this) {
+                $teamUser->seternalUserExtId(null);
             }
         }
 
         return $this;
     }
 
+    public function getFullName()
+    {
+        $prefix = $this->firstname ?? '';
+        $suffix = $this->lastname ?? '';
+        return $prefix . ' ' . $suffix;
+    }
+
+    public function getInvertedFullName()
+    {
+        $prefix = $this->lastname ?? '';
+        $suffix = $this->firstname ?? '';
+        return $prefix . ' ' . $suffix;
+    }
 }

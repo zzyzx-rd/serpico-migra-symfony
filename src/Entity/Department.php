@@ -116,7 +116,6 @@ class Department extends DbObject
     {
         $this->id = $id;
         $this->dpt_name = $dpt_name;
-        $this->dpt_createdBy = $dpt_createdBy;
         $this->dpt_inserted = $dpt_inserted;
         $this->dpt_deleted = $dpt_deleted;
         $this->masterUser = $masterUser;
