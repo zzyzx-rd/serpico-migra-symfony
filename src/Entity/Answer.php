@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\AnswerRepository;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -12,7 +13,7 @@ use Doctrine\ORM\Mapping\ManyToOne;
  * @ApiResource()
  * @ORM\Entity(repositoryClass=AnswerRepository::class)
  */
-class Answer
+class Answer extends DbObject
 {
     /**
      * @ORM\Id()
@@ -22,14 +23,14 @@ class Answer
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="asw_text", type="string", length=255)
      */
-    private $asw_text;
+    private $desc;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="asw_created_by", type="integer")
      */
-    private $asw_createdBy;
+    private $createdBy;
 
     /**
      * @ORM\Column(type="datetime")
@@ -52,31 +53,84 @@ class Answer
      */
     protected $participant;
 
+    /**
+     * Answer constructor.
+     * @param $id
+     * @param string $desc
+     * @param int|null $createdBy
+     * @param $field
+     * @param Survey $survey
+     * @param $asw_inserted
+     * @param ActivityUser $participant
+     */
+    public function __construct(
+        $id = null,
+        string $desc = null,
+        int $createdBy = null,
+        $field = null,
+        Survey $survey = null,
+        $asw_inserted = null,
+        ActivityUser $participant = null)
+    {
+        parent::__construct($id, $createdBy, new DateTime());
+        $this->id = $id;
+        $this->desc = $desc;
+        $this->createdBy = $asw_createdBy;
+        $this->asw_inserted = $asw_inserted;
+        $this->field = $field;
+        $this->survey = $survey;
+        $this->participant = $participant;
+    }
+
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getAswText(): ?string
+    public function getDesc()
     {
-        return $this->asw_text;
+        if($this->field->getType()=='MC') {
+
+            if(!is_string($this->desc)){
+
+                return $this->desc;
+            }else{
+                $data = unserialize($this->desc);
+                return $data;
+            }
+        }
+        elseif ($this->field->getType()=='UC'){
+
+            if($this->desc=="0"){
+                return false;
+            }
+            else{
+                return true;
+            }
+        }
+        else{
+
+            return $this->desc;
+
+        }
+
     }
 
-    public function setAswText(string $asw_text): self
+    public function setDesc(string $desc): self
     {
-        $this->asw_text = $asw_text;
-
+        $this->desc = $desc;
         return $this;
     }
 
-    public function getAswCreatedBy(): ?int
+    public function getCreatedBy(): ?int
     {
-        return $this->asw_createdBy;
+        return $this->createdBy;
     }
 
-    public function setAswCreatedBy(int $asw_createdBy): self
+    public function setCreatedBy(int $createdBy): self
     {
-        $this->asw_createdBy = $asw_createdBy;
+        $this->createdBy = $createdBy;
 
         return $this;
     }
@@ -135,10 +189,12 @@ class Answer
 
     /**
      * @param mixed $participant
+     * @return Answer
      */
-    public function setParticipant($participant): void
+    public function setParticipant(ActivityUser $participant): Answer
     {
         $this->participant = $participant;
+        return $this;
     }
 
 }
