@@ -18,7 +18,7 @@ use Doctrine\ORM\Mapping\OneToMany;
  * @ApiResource()
  * @ORM\Entity(repositoryClass=ActivityUserRepository::class)
  */
-class ActivityUser
+class ActivityUser extends DbObject
 {
     const PARTICIPATION_ACTIVE      = 1;
     const PARTICIPATION_THIRD_PARTY = 0;
@@ -241,7 +241,7 @@ class ActivityUser
         User $user_usr,
         ExternalUser $external_user_ext_usr = null)
     {
-        $this->id = $id;
+        parent::__construct($id, $a_u_createdBy, new DateTime());
         $this->a_u_status = $a_u_status;
         $this->a_u_aw_result = $a_u_aw_result;
         $this->a_u_ae_result = $a_u_ae_result;
@@ -258,7 +258,6 @@ class ActivityUser
         $this->a_u_of_bonus = $a_u_of_bonus;
         $this->a_u_of_penalty = $a_u_of_penalty;
         $this->a_u_mailed = $a_u_mailed;
-        $this->a_u_createdBy = $a_u_createdBy;
         $this->a_u_inserted = $a_u_inserted;
         $this->a_u_confirmed = $a_u_confirmed;
         $this->a_u_deleted = $a_u_deleted;

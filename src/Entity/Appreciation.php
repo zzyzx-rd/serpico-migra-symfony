@@ -59,10 +59,8 @@ class Appreciation extends DbObject
         $criterion = null)
     {
         parent::__construct($id, $apt_createdBy, new DateTime());
-        $this->id = $id;
         $this->apt_value = $apt_value;
         $this->apt_comment = $apt_comment;
-        $this->apt_createdBy = $apt_createdBy;
         $this->criterion = $criterion?$criterion:new ArrayCollection();
     }
 

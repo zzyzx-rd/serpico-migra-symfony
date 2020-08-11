@@ -108,12 +108,10 @@ class Client extends DbObject
         $externalUsers = null)
     {
         parent::__construct($id, $cli_createdBy, new DateTime());
-        $this->id = $id;
         $this->clicommname = $clicommname;
         $this->cli_type = $cli_type;
         $this->cli_logo = $cli_logo;
         $this->cli_email = $cli_email;
-        $this->cli_createdBy = $cli_createdBy;
         $this->cli_inserted = $cli_inserted;
         $this->organization = $organization;
         $this->clientOrganization = $clientOrganization;

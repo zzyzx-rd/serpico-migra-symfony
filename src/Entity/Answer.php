@@ -73,9 +73,7 @@ class Answer extends DbObject
         ActivityUser $participant = null)
     {
         parent::__construct($id, $createdBy, new DateTime());
-        $this->id = $id;
         $this->desc = $desc;
-        $this->createdBy = $asw_createdBy;
         $this->asw_inserted = $asw_inserted;
         $this->field = $field;
         $this->survey = $survey;

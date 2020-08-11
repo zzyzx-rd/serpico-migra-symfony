@@ -88,11 +88,9 @@ class City extends DbObject
         $firms = null)
     {
         parent::__construct($id, $cit_createdBy, new DateTime());
-        $this->id = $id;
         $this->cit_abbr = $cit_abbr;
         $this->cit_fullname = $cit_fullname;
         $this->cit_name = $cit_name;
-        $this->cit_createdBy = $cit_createdBy;
         $this->cit_inserted = $cit_inserted;
         $this->state = $state;
         $this->country = $country;

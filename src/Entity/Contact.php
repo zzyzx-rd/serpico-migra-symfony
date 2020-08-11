@@ -4,13 +4,14 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\ContactRepository;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ApiResource()
  * @ORM\Entity(repositoryClass=ContactRepository::class)
  */
-class Contact
+class Contact extends DbObject
 {
     /**
      * @ORM\Id()
@@ -114,233 +115,299 @@ class Contact
      */
     private $con_createdBy;
 
+    /**
+     * Contact constructor.
+     * @param $id
+     * @param $con_locale
+     * @param $con_type
+     * @param $con_sent
+     * @param $con_fullname
+     * @param $con_compagny
+     * @param $con_adress
+     * @param $con_zipCode
+     * @param $con_city
+     * @param $con_country
+     * @param $con_position
+     * @param $con_email
+     * @param $con_message
+     * @param $con_newsletter
+     * @param $con_doc
+     * @param $con_mdate
+     * @param $con_mtime
+     * @param $con_inserted
+     * @param $con_confirmed
+     * @param $con_createdBy
+     */
+    public function __construct(
+        $id = 0,
+        $con_locale = '',
+        $con_type = '',
+        $con_sent = false,
+        $con_fullname = null,
+        $con_compagny = "",
+        $con_adress = null,
+        $con_zipCode = null,
+        $con_city = null,
+        $con_country = null,
+        $con_position = '',
+        $con_email = '',
+        $con_message = null,
+        $con_newsletter = null,
+        $con_doc = false,
+        $con_mdate = null,
+        $con_mtime = null,
+        $con_inserted = null,
+        $con_confirmed = null,
+        $con_createdBy = null)
+    {
+        parent::__construct($id, $con_createdBy, new DateTime());
+        $this->con_locale = $con_locale;
+        $this->con_type = $con_type;
+        $this->con_sent = $con_sent;
+        $this->con_fullname = $con_fullname;
+        $this->con_compagny = $con_compagny;
+        $this->con_adress = $con_adress;
+        $this->con_zipCode = $con_zipCode;
+        $this->con_city = $con_city;
+        $this->con_country = $con_country;
+        $this->con_position = $con_position;
+        $this->con_email = $con_email;
+        $this->con_message = $con_message;
+        $this->con_newsletter = $con_newsletter;
+        $this->con_doc = $con_doc;
+        $this->con_mdate = $con_mdate;
+        $this->con_mtime = $con_mtime;
+        $this->con_inserted = $con_inserted;
+        $this->con_confirmed = $con_confirmed;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getConLocale(): ?string
+    public function getLocale(): ?string
     {
         return $this->con_locale;
     }
 
-    public function setConLocale(string $con_locale): self
+    public function setLocale(string $con_locale): self
     {
         $this->con_locale = $con_locale;
 
         return $this;
     }
 
-    public function getConType(): ?string
+    public function getType(): ?string
     {
         return $this->con_type;
     }
 
-    public function setConType(string $con_type): self
+    public function setType(string $con_type): self
     {
         $this->con_type = $con_type;
 
         return $this;
     }
 
-    public function getConSent(): ?bool
+    public function getSent(): ?bool
     {
         return $this->con_sent;
     }
 
-    public function setConSent(bool $con_sent): self
+    public function setSent(bool $con_sent): self
     {
         $this->con_sent = $con_sent;
 
         return $this;
     }
 
-    public function getConFullname(): ?string
+    public function getFullname(): ?string
     {
         return $this->con_fullname;
     }
 
-    public function setConFullname(string $con_fullname): self
+    public function setFullname(string $con_fullname): self
     {
         $this->con_fullname = $con_fullname;
 
         return $this;
     }
 
-    public function getConCompagny(): ?string
+    public function getCompagny(): ?string
     {
         return $this->con_compagny;
     }
 
-    public function setConCompagny(string $con_compagny): self
+    public function setCompagny(string $con_compagny): self
     {
         $this->con_compagny = $con_compagny;
 
         return $this;
     }
 
-    public function getConAdress(): ?string
+    public function getAdress(): ?string
     {
         return $this->con_adress;
     }
 
-    public function setConAdress(string $con_adress): self
+    public function setAdress(string $con_adress): self
     {
         $this->con_adress = $con_adress;
 
         return $this;
     }
 
-    public function getConZipCode(): ?int
+    public function getZipCode(): ?int
     {
         return $this->con_zipCode;
     }
 
-    public function setConZipCode(int $con_zipCode): self
+    public function setZipCode(int $con_zipCode): self
     {
         $this->con_zipCode = $con_zipCode;
 
         return $this;
     }
 
-    public function getConCity(): ?string
+    public function getCity(): ?string
     {
         return $this->con_city;
     }
 
-    public function setConCity(string $con_city): self
+    public function setCity(string $con_city): self
     {
         $this->con_city = $con_city;
 
         return $this;
     }
 
-    public function getConCountry(): ?string
+    public function getCountry(): ?string
     {
         return $this->con_country;
     }
 
-    public function setConCountry(string $con_country): self
+    public function setCountry(string $con_country): self
     {
         $this->con_country = $con_country;
 
         return $this;
     }
 
-    public function getConPosition(): ?string
+    public function getPosition(): ?string
     {
         return $this->con_position;
     }
 
-    public function setConPosition(string $con_position): self
+    public function setPosition(string $con_position): self
     {
         $this->con_position = $con_position;
 
         return $this;
     }
 
-    public function getConEmail(): ?string
+    public function getEmail(): ?string
     {
         return $this->con_email;
     }
 
-    public function setConEmail(string $con_email): self
+    public function setEmail(string $con_email): self
     {
         $this->con_email = $con_email;
 
         return $this;
     }
 
-    public function getConMessage(): ?string
+    public function getMessage(): ?string
     {
         return $this->con_message;
     }
 
-    public function setConMessage(string $con_message): self
+    public function setMessage(string $con_message): self
     {
         $this->con_message = $con_message;
 
         return $this;
     }
 
-    public function getConNewsletter(): ?bool
+    public function isNewsletter(): ?bool
     {
         return $this->con_newsletter;
     }
 
-    public function setConNewsletter(bool $con_newsletter): self
+    public function setNewsletter(bool $con_newsletter): self
     {
         $this->con_newsletter = $con_newsletter;
 
         return $this;
     }
 
-    public function getConDoc(): ?bool
+    public function isDoc(): ?bool
     {
         return $this->con_doc;
     }
 
-    public function setConDoc(bool $con_doc): self
+    public function setDoc(bool $con_doc): self
     {
         $this->con_doc = $con_doc;
 
         return $this;
     }
 
-    public function getConMdate(): ?\DateTimeInterface
+    public function getMdate(): ?\DateTimeInterface
     {
         return $this->con_mdate;
     }
 
-    public function setConMdate(\DateTimeInterface $con_mdate): self
+    public function setMdate(\DateTimeInterface $con_mdate): self
     {
         $this->con_mdate = $con_mdate;
 
         return $this;
     }
 
-    public function getConMtime(): ?\DateTimeInterface
+    public function getMtime(): ?\DateTimeInterface
     {
         return $this->con_mtime;
     }
 
-    public function setConMtime(\DateTimeInterface $con_mtime): self
+    public function setMtime(\DateTimeInterface $con_mtime): self
     {
         $this->con_mtime = $con_mtime;
 
         return $this;
     }
 
-    public function getConInserted(): ?\DateTimeInterface
+    public function getInserted(): ?\DateTimeInterface
     {
         return $this->con_inserted;
     }
 
-    public function setConInserted(\DateTimeInterface $con_inserted): self
+    public function setInserted(\DateTimeInterface $con_inserted): self
     {
         $this->con_inserted = $con_inserted;
 
         return $this;
     }
 
-    public function getConConfirmed(): ?\DateTimeInterface
+    public function getConfirmed(): ?\DateTimeInterface
     {
         return $this->con_confirmed;
     }
 
-    public function setConConfirmed(\DateTimeInterface $con_confirmed): self
+    public function setConfirmed(\DateTimeInterface $con_confirmed): self
     {
         $this->con_confirmed = $con_confirmed;
 
         return $this;
     }
 
-    public function getConCreatedBy(): ?int
+    public function getCreatedBy(): ?int
     {
         return $this->con_createdBy;
     }
 
-    public function setConCreatedBy(?int $con_createdBy): self
+    public function setCreatedBy(?int $con_createdBy): self
     {
         $this->con_createdBy = $con_createdBy;
 
