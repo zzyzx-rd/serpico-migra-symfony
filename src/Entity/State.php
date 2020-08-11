@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\StateRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -11,7 +12,7 @@ use Doctrine\ORM\Mapping\OneToMany;
 /**
  * @ORM\Entity(repositoryClass=StateRepository::class)
  */
-class State
+class State extends DbObject
 {
     /**
      * @ORM\Id()
@@ -61,6 +62,41 @@ class State
      * @OneToMany(targetEntity="WorkerFirm", mappedBy="state",cascade={"persist", "remove"}, orphanRemoval=true)
      */
     private $firms;
+
+    /**
+     * State constructor.
+     * @param int $id
+     * @param $sta_abbr
+     * @param $sta_fullname
+     * @param $sta_name
+     * @param $sta_createdBy
+     * @param $sta_inserted
+     * @param $country
+     * @param $cities
+     * @param $firms
+     */
+    public function __construct(
+        int $id = 0,
+        $sta_abbr = null,
+        $sta_fullname = null,
+        $sta_name = null,
+        $sta_createdBy = null,
+        $sta_inserted = null,
+        $country = null,
+        $cities = null,
+        $firms = null)
+    {
+        $this->id = $id;
+        $this->sta_abbr = $sta_abbr;
+        $this->sta_fullname = $sta_fullname;
+        $this->sta_name = $sta_name;
+        $this->sta_createdBy = $sta_createdBy;
+        $this->sta_inserted = $sta_inserted;
+        $this->country = $country;
+        $this->cities = $cities?$cities:new ArrayCollection();
+        $this->firms = $firms?$firms:new ArrayCollection();
+    }
+
 
     public function getId(): ?int
     {
@@ -173,6 +209,21 @@ class State
     public function setFirms($firms): void
     {
         $this->firms = $firms;
+    }
+    function addFirm(WorkerFirm $firm){
+        $this->firms->add($firm);
+        $firm->setState($this);
+        return $this;
+    }
+
+    function removeFirm(WorkerFirm $firm){
+        $this->firms->removeElement($firm);
+        return $this;
+    }
+
+    public function __toString()
+    {
+        return (string) $this->id;
     }
 
 }
