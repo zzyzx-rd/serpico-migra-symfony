@@ -35,41 +35,55 @@ class Role
      */
     private $rol_inserted;
 
+    /**
+     * Role constructor.
+     * @param int $id
+     * @param $rol_name
+     * @param $rol_createdBy
+     * @param $rol_inserted
+     */
+    public function __construct(int $id = 0, $rol_name = '', $rol_createdBy = null, $rol_inserted = null)
+    {
+        $this->rol_name = $rol_name;
+        $this->rol_inserted = $rol_inserted;
+    }
+
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getRolName(): ?string
+    public function getName(): ?string
     {
         return $this->rol_name;
     }
 
-    public function setRolName(string $rol_name): self
+    public function setName(string $rol_name): self
     {
         $this->rol_name = $rol_name;
 
         return $this;
     }
 
-    public function getRolCreatedBy(): ?int
+    public function getCreatedBy(): ?int
     {
         return $this->rol_createdBy;
     }
 
-    public function setRolCreatedBy(int $rol_createdBy): self
+    public function setCreatedBy(int $rol_createdBy): self
     {
         $this->rol_createdBy = $rol_createdBy;
 
         return $this;
     }
 
-    public function getRolInserted(): ?\DateTimeInterface
+    public function getInserted(): ?\DateTimeInterface
     {
         return $this->rol_inserted;
     }
 
-    public function setRolInserted(\DateTimeInterface $rol_inserted): self
+    public function setInserted(\DateTimeInterface $rol_inserted): self
     {
         $this->rol_inserted = $rol_inserted;
 
