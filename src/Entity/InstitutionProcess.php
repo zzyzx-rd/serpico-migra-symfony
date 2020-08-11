@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\InstitutionProcessRepository;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -17,7 +18,7 @@ use Doctrine\ORM\Mapping\OrderBy;
  * @ApiResource()
  * @ORM\Entity(repositoryClass=InstitutionProcessRepository::class)
  */
-class InstitutionProcess
+class InstitutionProcess extends DbObject
 {
     /**
      * @ORM\Id()
@@ -91,82 +92,126 @@ class InstitutionProcess
      */
     private $activities;
 
-    public function __construct()
+    /**
+     * InstitutionProcess constructor.
+     * @param int $id
+     * @param $inp_name
+     * @param $inp_approvable
+     * @param $inp_gradable
+     * @param $inp_createdBy
+     * @param $inp_isnerted
+     * @param $inp_deleted
+     * @param $organization
+     * @param $process
+     * @param $masterUser
+     * @param $parent
+     * @param $children
+     * @param $stages
+     * @param $activities
+     */
+    public function __construct(
+        int $id = 0,
+        $inp_name = '',
+        $inp_createdBy = null,
+        $inp_approvable = false,
+        $inp_gradable = true,
+        $inp_isnerted = null,
+        $inp_deleted = null,
+        Organization $organization = null,
+        Process $process = null,
+        User $masterUser = null,
+        $parent = null,
+        $children = null,
+        $stages = null,
+        $activities = null)
     {
-        $this->activities = new ArrayCollection();
+        parent::__construct($id, $inp_createdBy, new DateTime());
+        $this->inp_name = $inp_name;
+        $this->inp_approvable = $inp_approvable;
+        $this->inp_gradable = $inp_gradable;
+        $this->inp_isnerted = $inp_isnerted;
+        $this->inp_deleted = $inp_deleted;
+        $this->organization = $organization;
+        $this->process = $process;
+        $this->masterUser = $masterUser;
+        $this->parent = $parent;
+        $this->children = $children;
+        $this->stages = $stages;
+        $this->activities = $activities;
     }
+
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getInpName(): ?string
+    public function getName(): ?string
     {
         return $this->inp_name;
     }
 
-    public function setInpName(string $inp_name): self
+    public function setName(string $inp_name): self
     {
         $this->inp_name = $inp_name;
 
         return $this;
     }
 
-    public function getInpApprovable(): ?bool
+    public function isApprovable(): ?bool
     {
         return $this->inp_approvable;
     }
 
-    public function setInpApprovable(bool $inp_approvable): self
+    public function setApprovable(bool $inp_approvable): self
     {
         $this->inp_approvable = $inp_approvable;
 
         return $this;
     }
 
-    public function getInpGradable(): ?bool
+    public function isGradable(): ?bool
     {
         return $this->inp_gradable;
     }
 
-    public function setInpGradable(bool $inp_gradable): self
+    public function setGradable(bool $inp_gradable): self
     {
         $this->inp_gradable = $inp_gradable;
 
         return $this;
     }
 
-    public function getInpCreatedBy(): ?int
+    public function getCreatedBy(): ?int
     {
         return $this->inp_createdBy;
     }
 
-    public function setInpCreatedBy(int $inp_createdBy): self
+    public function setCreatedBy(int $inp_createdBy): self
     {
         $this->inp_createdBy = $inp_createdBy;
 
         return $this;
     }
 
-    public function getInpIsnerted(): ?\DateTimeInterface
+    public function getIsnerted(): ?\DateTimeInterface
     {
         return $this->inp_isnerted;
     }
 
-    public function setInpIsnerted(\DateTimeInterface $inp_isnerted): self
+    public function setIsnerted(\DateTimeInterface $inp_isnerted): self
     {
         $this->inp_isnerted = $inp_isnerted;
 
         return $this;
     }
 
-    public function getInpDeleted(): ?\DateTimeInterface
+    public function getDeleted(): ?\DateTimeInterface
     {
         return $this->inp_deleted;
     }
 
-    public function setInpDeleted(?\DateTimeInterface $inp_deleted): self
+    public function setDeleted(?\DateTimeInterface $inp_deleted): self
     {
         $this->inp_deleted = $inp_deleted;
 
@@ -277,5 +322,91 @@ class InstitutionProcess
         $this->stages = $stages;
     }
 
+    function addChildren(InstitutionProcess $child){
+        $this->children->add($child);
+        $child->setParent($this);
+        return $this;
+    }
 
+    function removeChildren(InstitutionProcess $child){
+        $this->children->removeElement($child);
+        return $this;
+    }
+
+    /**
+     * @return Collection|InstitutionProcess[]
+     */
+    function getValidatedChildren() {
+        return $this->children->filter(function(InstitutionProcess $p){
+            return !$p->isApprovable();
+        });
+    }
+
+    function addValidatedChildren(InstitutionProcess $child){
+        return $this->addChildren($child);
+    }
+
+    function removeValidatedChildren(InstitutionProcess $child){
+        return $this->removeChildren($child);
+    }
+    function addActivity(Activity $activity){
+
+        $this->activities->add($activity);
+        $activity->setInstitutionProcess($this);
+        return $this;
+    }
+
+    function removeActivity(Activity $activity){
+        $this->activities->removeElement($activity);
+        return $this;
+    }
+
+    function addStage(IProcessStage $stage){
+
+        $this->stages->add($stage);
+        $stage->setInstitutionProcess($this);
+        return $this;
+    }
+
+    function removeStage(IProcessStage $stage){
+        $this->stages->removeElement($stage);
+        return $this;
+    }
+    /**
+     * @return Collection|IProcessStage[]
+     */
+    public function getActiveStages()
+    {
+        return $this->getStages();
+    }
+
+    public function addActiveStage(IProcessStage $stage)
+    {
+        return $this->addStage($stage);
+    }
+
+    public function removeActiveStage(IProcessStage $stage)
+    {
+        return $this->removeStage($stage);
+    }
+
+    //TODO getActiveModifiableStages
+    public function addActiveModifiableStage(IProcessStage $stage)
+    {
+        return $this->addStage($stage);
+    }
+
+    public function removeActiveModifiableStage(IProcessStage $stage)
+    {
+        return $this->removeStage($stage);
+    }
+    public function __toString()
+    {
+        return (string) $this->id;
+    }
+
+    public function userCanEdit(User $u)
+    {
+        return $u->getRole() == 1 || $u->getRole() == 4 || $this->masterUser == $u;
+    }
 }
