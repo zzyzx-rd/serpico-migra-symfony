@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\IProcessActivityUserRepository;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -12,7 +13,7 @@ use Doctrine\ORM\Mapping\ManyToOne;
  * @ApiResource()
  * @ORM\Entity(repositoryClass=IProcessActivityUserRepository::class)
  */
-class IProcessActivityUser
+class IProcessActivityUser extends DbObject
 {
     const PARTICIPATION_ACTIVE       = 1;
     const PARTICIPATION_THIRD_PARTY  = 0;
@@ -100,101 +101,153 @@ class IProcessActivityUser
      */
     private $external_user_ext_usr;
 
+    /**
+     * IProcessActivityUser constructor.
+     * @param $id
+     * @param $a_u_status
+     * @param $a_u_leader
+     * @param $a_u_type
+     * @param $a_u_mWeight
+     * @param $a_u_precomment
+     * @param $a_u_createdBy
+     * @param $a_u_inserted
+     * @param $a_u_deleted
+     * @param $team
+     * @param $institutionProcess
+     * @param $stage
+     * @param $criterion
+     * @param $user_usr
+     * @param $external_user_ext_usr
+     */
+    public function __construct(
+        int $id = 0,
+        User $user_usr = null,
+        ExternalUser $external_user_ext_usr = null,
+        bool $a_u_leader = false,
+        int $a_u_type = 1,
+        int $a_u_status = 0,
+        float $a_u_mWeight = 0.0,
+        $a_u_precomment = '',
+        $a_u_createdBy = null,
+        DateTime $a_u_inserted = null,
+        DateTime $a_u_deleted = null,
+        Team $team = null,
+        InstitutionProcess $institutionProcess = null,
+        Stage $stage = null,
+        Criterion $criterion
+     )
+    {
+        $this->a_u_status = $a_u_status;
+        $this->a_u_leader = $a_u_leader;
+        $this->a_u_type = $a_u_type;
+        $this->a_u_mWeight = $a_u_mWeight;
+        $this->a_u_precomment = $a_u_precomment;
+        $this->a_u_inserted = $a_u_inserted;
+        $this->a_u_deleted = $a_u_deleted;
+        $this->team = $team;
+        $this->institutionProcess = $institutionProcess;
+        $this->stage = $stage;
+        $this->criterion = $criterion;
+        $this->user_usr = $user_usr;
+        $this->external_user_ext_usr = $external_user_ext_usr;
+    }
+
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getAUStatus(): ?int
+    public function getStatus(): ?int
     {
         return $this->a_u_status;
     }
 
-    public function setAUStatus(int $a_u_status): self
+    public function setStatus(int $a_u_status): self
     {
         $this->a_u_status = $a_u_status;
 
         return $this;
     }
 
-    public function getAULeader(): ?bool
+    public function isLeader(): ?bool
     {
         return $this->a_u_leader;
     }
 
-    public function setAULeader(bool $a_u_leader): self
+    public function setLeader(bool $a_u_leader): self
     {
         $this->a_u_leader = $a_u_leader;
 
         return $this;
     }
 
-    public function getAUType(): ?int
+    public function getType(): ?int
     {
         return $this->a_u_type;
     }
 
-    public function setAUType(int $a_u_type): self
+    public function setType(int $a_u_type): self
     {
         $this->a_u_type = $a_u_type;
 
         return $this;
     }
 
-    public function getAUMWeight(): ?float
+    public function getMWeight(): ?float
     {
         return $this->a_u_mWeight;
     }
 
-    public function setAUMWeight(float $a_u_mWeight): self
+    public function setMWeight(float $a_u_mWeight): self
     {
         $this->a_u_mWeight = $a_u_mWeight;
 
         return $this;
     }
 
-    public function getAUPrecomment(): ?string
+    public function getPrecomment(): ?string
     {
         return $this->a_u_precomment;
     }
 
-    public function setAUPrecomment(string $a_u_precomment): self
+    public function setPrecomment(string $a_u_precomment): self
     {
         $this->a_u_precomment = $a_u_precomment;
 
         return $this;
     }
 
-    public function getAUCreatedBy(): ?int
+    public function getCreatedBy(): ?int
     {
         return $this->a_u_createdBy;
     }
 
-    public function setAUCreatedBy(?int $a_u_createdBy): self
+    public function setCreatedBy(?int $a_u_createdBy): self
     {
         $this->a_u_createdBy = $a_u_createdBy;
 
         return $this;
     }
 
-    public function getAUInserted(): ?\DateTimeInterface
+    public function getInserted(): ?\DateTimeInterface
     {
         return $this->a_u_inserted;
     }
 
-    public function setAUInserted(?\DateTimeInterface $a_u_inserted): self
+    public function setInserted(?\DateTimeInterface $a_u_inserted): self
     {
         $this->a_u_inserted = $a_u_inserted;
 
         return $this;
     }
 
-    public function getAUDeleted(): ?string
+    public function getDeleted(): ?string
     {
         return $this->a_u_deleted;
     }
 
-    public function setAUDeleted(string $a_u_deleted): self
+    public function setDeleted(string $a_u_deleted): self
     {
         $this->a_u_deleted = $a_u_deleted;
 
@@ -288,5 +341,7 @@ class IProcessActivityUser
 
         return $this;
     }
+
+    //TODO the direct user
 
 }
