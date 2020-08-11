@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping\OneToOne;
 /**
  * @ORM\Entity(repositoryClass=ProcessCriterionRepository::class)
  */
-class ProcessCriterion
+class ProcessCriterion extends DbObject
 {
     /**
      * @ORM\Id()
@@ -98,149 +98,203 @@ class ProcessCriterion
      */
     protected $cName;
 
+    /**
+     * ProcessCriterion constructor.
+     * @param $id
+     * @param $crt_type
+     * @param $crt_name
+     * @param $crt_weight
+     * @param $crt_forceComment_compare
+     * @param $crt_forceComment_value
+     * @param $crt_forceComment_sign
+     * @param $crt_lowerbound
+     * @param $crt_upperbound
+     * @param $crt_step
+     * @param $crt_comment
+     * @param $crt_createdBy
+     * @param $crt_inserted
+     * @param $stage
+     * @param $process
+     * @param $cName
+     */
+    public function __construct(
+        $id = 0,
+        $crt_type = 1,
+        $crt_name = null,
+        $crt_weight = 1,
+        $crt_lowerbound = 0,
+        $crt_upperbound = 5,
+        $crt_step = 0.5,
+        $crt_forceComment_compare = null,
+        $crt_forceComment_value = null,
+        $crt_forceComment_sign = null,
+        $crt_comment = null,
+        $crt_createdBy = null,
+        $crt_inserted = null,
+        $stage = null,
+        $process = null,
+        $cName = null)
+    {
+        $this->crt_type = $crt_type;
+        $this->crt_name = $crt_name;
+        $this->crt_weight = $crt_weight;
+        $this->crt_forceComment_compare = $crt_forceComment_compare;
+        $this->crt_forceComment_value = $crt_forceComment_value;
+        $this->crt_forceComment_sign = $crt_forceComment_sign;
+        $this->crt_lowerbound = $crt_lowerbound;
+        $this->crt_upperbound = $crt_upperbound;
+        $this->crt_step = $crt_step;
+        $this->crt_comment = $crt_comment;
+        $this->crt_inserted = $crt_inserted;
+        $this->stage = $stage;
+        $this->process = $process;
+        $this->cName = $cName;
+    }
+
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getCrtType(): ?int
+    public function getType(): ?int
     {
         return $this->crt_type;
     }
 
-    public function setCrtType(int $crt_type): self
+    public function setType(int $crt_type): self
     {
         $this->crt_type = $crt_type;
 
         return $this;
     }
 
-    public function getCrtName(): ?string
+    public function getName(): ?string
     {
         return $this->crt_name;
     }
 
-    public function setCrtName(?string $crt_name): self
+    public function setName(?string $crt_name): self
     {
         $this->crt_name = $crt_name;
 
         return $this;
     }
 
-    public function getCrtWeight(): ?float
+    public function getWeight(): ?float
     {
         return $this->crt_weight;
     }
 
-    public function setCrtWeight(float $crt_weight): self
+    public function setWeight(float $crt_weight): self
     {
         $this->crt_weight = $crt_weight;
 
         return $this;
     }
 
-    public function getCrtForceCommentCompare(): ?bool
+    public function getForceCommentCompare(): ?bool
     {
         return $this->crt_forceComment_compare;
     }
 
-    public function setCrtForceCommentCompare(bool $crt_forceComment_compare): self
+    public function setForceCommentCompare(bool $crt_forceComment_compare): self
     {
         $this->crt_forceComment_compare = $crt_forceComment_compare;
 
         return $this;
     }
 
-    public function getCrtForceCommentValue(): ?float
+    public function getForceCommentValue(): ?float
     {
         return $this->crt_forceComment_value;
     }
 
-    public function setCrtForceCommentValue(?float $crt_forceComment_value): self
+    public function setForceCommentValue(?float $crt_forceComment_value): self
     {
         $this->crt_forceComment_value = $crt_forceComment_value;
 
         return $this;
     }
 
-    public function getCrtForceCommentSign(): ?string
+    public function getForceCommentSign(): ?string
     {
         return $this->crt_forceComment_sign;
     }
 
-    public function setCrtForceCommentSign(?string $crt_forceComment_sign): self
+    public function setForceCommentSign(?string $crt_forceComment_sign): self
     {
         $this->crt_forceComment_sign = $crt_forceComment_sign;
 
         return $this;
     }
 
-    public function getCrtLowerbound(): ?float
+    public function getLowerbound(): ?float
     {
         return $this->crt_lowerbound;
     }
 
-    public function setCrtLowerbound(?float $crt_lowerbound): self
+    public function setLowerbound(?float $crt_lowerbound): self
     {
         $this->crt_lowerbound = $crt_lowerbound;
 
         return $this;
     }
 
-    public function getCrtUpperbound(): ?float
+    public function getUpperbound(): ?float
     {
         return $this->crt_upperbound;
     }
 
-    public function setCrtUpperbound(?float $crt_upperbound): self
+    public function setUpperbound(?float $crt_upperbound): self
     {
         $this->crt_upperbound = $crt_upperbound;
 
         return $this;
     }
 
-    public function getCrtStep(): ?float
+    public function getStep(): ?float
     {
         return $this->crt_step;
     }
 
-    public function setCrtStep(?float $crt_step): self
+    public function setStep(?float $crt_step): self
     {
         $this->crt_step = $crt_step;
 
         return $this;
     }
 
-    public function getCrtComment(): ?string
+    public function getComment(): ?string
     {
         return $this->crt_comment;
     }
 
-    public function setCrtComment(?string $crt_comment): self
+    public function setComment(?string $crt_comment): self
     {
         $this->crt_comment = $crt_comment;
 
         return $this;
     }
 
-    public function getCrtCreatedBy(): ?int
+    public function getCreatedBy(): ?int
     {
         return $this->crt_createdBy;
     }
 
-    public function setCrtCreatedBy(?int $crt_createdBy): self
+    public function setCreatedBy(?int $crt_createdBy): self
     {
         $this->crt_createdBy = $crt_createdBy;
 
         return $this;
     }
 
-    public function getCrtInserted(): ?\DateTimeInterface
+    public function getInserted(): ?\DateTimeInterface
     {
         return $this->crt_inserted;
     }
 
-    public function setCrtInserted(?\DateTimeInterface $crt_inserted): self
+    public function setInserted(?\DateTimeInterface $crt_inserted): self
     {
         $this->crt_inserted = $crt_inserted;
 
@@ -294,5 +348,10 @@ class ProcessCriterion
     {
         $this->cName = $cName;
     }
+    public function __toString()
+    {
+        return (string) $this->id;
+    }
+
 
 }
