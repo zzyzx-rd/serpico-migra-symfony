@@ -3,12 +3,13 @@
 namespace App\Entity;
 
 use App\Repository\LKUrlRepository;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass=LKUrlRepository::class)
  */
-class LKUrl
+class LKUrl extends DbObject
 {
     /**
      * @ORM\Id()
@@ -48,77 +49,105 @@ class LKUrl
      */
     private $lk_url_inserted;
 
+    /**
+     * LKUrl constructor.
+     * @param int $id
+     * @param $lk_url_country
+     * @param $lk_url_letter
+     * @param $lk_url_pagNb
+     * @param $lk_url_value
+     * @param $lk_url_createdBy
+     * @param $lk_url_inserted
+     */
+    public function __construct(
+        int $id = 0,
+        $lk_url_letter = null,
+        $lk_url_value = null,
+        $lk_url_createdBy = null,
+        $lk_url_inserted = null,
+        $lk_url_pagNb = null,
+        $lk_url_country = null)
+    {
+        parent::__construct($id, $lk_url_createdBy, new DateTime());
+        $this->lk_url_country = $lk_url_country;
+        $this->lk_url_letter = $lk_url_letter;
+        $this->lk_url_pagNb = $lk_url_pagNb;
+        $this->lk_url_value = $lk_url_value;
+        $this->lk_url_inserted = $lk_url_inserted;
+    }
+
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getLkUrlCountry(): ?string
+    public function getCountry(): ?string
     {
         return $this->lk_url_country;
     }
 
-    public function setLkUrlCountry(string $lk_url_country): self
+    public function setCountry(string $lk_url_country): self
     {
         $this->lk_url_country = $lk_url_country;
 
         return $this;
     }
 
-    public function getLkUrlLetter(): ?string
+    public function getLetter(): ?string
     {
         return $this->lk_url_letter;
     }
 
-    public function setLkUrlLetter(string $lk_url_letter): self
+    public function setLetter(string $lk_url_letter): self
     {
         $this->lk_url_letter = $lk_url_letter;
 
         return $this;
     }
 
-    public function getLkUrlPagNb(): ?string
+    public function getPagNb(): ?string
     {
         return $this->lk_url_pagNb;
     }
 
-    public function setLkUrlPagNb(string $lk_url_pagNb): self
+    public function setPagNb(string $lk_url_pagNb): self
     {
         $this->lk_url_pagNb = $lk_url_pagNb;
 
         return $this;
     }
 
-    public function getLkUrlValue(): ?string
+    public function getValue(): ?string
     {
         return $this->lk_url_value;
     }
 
-    public function setLkUrlValue(string $lk_url_value): self
+    public function setValue(string $lk_url_value): self
     {
         $this->lk_url_value = $lk_url_value;
 
         return $this;
     }
 
-    public function getLkUrlCreatedBy(): ?int
+    public function getCreatedBy(): ?int
     {
         return $this->lk_url_createdBy;
     }
 
-    public function setLkUrlCreatedBy(int $lk_url_createdBy): self
+    public function setCreatedBy(int $lk_url_createdBy): self
     {
         $this->lk_url_createdBy = $lk_url_createdBy;
 
         return $this;
     }
 
-    public function getLkUrlInserted(): ?\DateTimeInterface
+    public function getInserted(): ?\DateTimeInterface
     {
         return $this->lk_url_inserted;
     }
 
-    public function setLkUrlInserted(\DateTimeInterface $lk_url_inserted): self
+    public function setInserted(\DateTimeInterface $lk_url_inserted): self
     {
         $this->lk_url_inserted = $lk_url_inserted;
 

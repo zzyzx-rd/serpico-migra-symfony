@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\IProcessStageRepository;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
@@ -323,7 +324,7 @@ class IProcessStage extends DbObject
         $historicalRankingTeams = null
         )
     {
-        $this->id = $id;
+        parent::__construct($id, $stg_createdBy, new DateTime());
         $this->stg_complete = $stg_complete;
         $this->stg_name = $stg_name;
         $this->stg_mod = $stg_mod;
