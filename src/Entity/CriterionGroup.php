@@ -77,7 +77,6 @@ class CriterionGroup extends DbObject
         array $criteria = [])
     {
         $this->id = $id;
-        $this->cgp_createdBy = $cgp_createdBy;
         $this->cgp_inserted = new DateTime();
         $this->cgp_name = $cgp_name;
         $this->criteria = $criteria;

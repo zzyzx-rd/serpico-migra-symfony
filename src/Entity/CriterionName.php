@@ -102,7 +102,6 @@ class CriterionName extends DbObject
         $this->cna_type = $cna_type;
         $this->cna_name = $cna_name;
         $this->can_unit = $can_unit;
-        $this->can_createdBy = $can_createdBy;
         $this->can_inserted = $can_inserted;
         $this->icon = $icon;
         $this->organization = $organization;

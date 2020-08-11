@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\DecisionRepository;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\JoinColumn;
@@ -14,7 +15,7 @@ use Doctrine\ORM\Mapping\ManyToOne;
  * @ApiResource()
  * @ORM\Entity(repositoryClass=DecisionRepository::class)
  */
-class Decision
+class Decision extends DbObject
 {
     /**
      * @ORM\Id()
@@ -29,19 +30,19 @@ class Decision
     private $dec_type;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="req_anon", type="integer")
      */
-    private $req_anon;
+    private $anonymousRequest;
 
     /**
-     * @ORM\Column(type="boolean", nullable=true)
+     * @ORM\Column(name= "dec_anon", type="boolean", nullable=true)
      */
-    private $dec_anon;
+    private $anonymousDecision;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="val_usr_id", type="integer")
      */
-    private $val_usr_id;
+    private $validator;
 
     /**
      * @ORM\Column(type="integer")
@@ -101,113 +102,167 @@ class Decision
      */
     protected $decider;
 
+    /**
+     * Decision constructor.
+     * @param $id
+     * @param $dec_type
+     * @param $req_anon
+     * @param $dec_anon
+     * @param $validator
+     * @param $dec_result
+     * @param $dec_createdBy
+     * @param $dec_inserted
+     * @param $dec_decided
+     * @param $dec_validated
+     * @param $organization
+     * @param $activity
+     * @param $stage
+     * @param int $requester
+     * @param int $decider
+     */
+    //TODO le requester correctement
+    public function __construct(
+        $id = 0,
+        $dec_type = 0,
+        int $requester = 0,
+        int $decider = 0,
+        $validator = 0,
+        $dec_result = null,
+        $dec_createdBy = null,
+        $dec_inserted = null,
+        $dec_decided = null,
+        $dec_validated = null,
+        Organization $organization = null,
+        Activity $activity = null,
+        Stage $stage = null,
+        $req_anon,
+        $dec_anon
+       )
+    {
+        parent::__construct($id, $dec_createdBy, new DateTime());
+        $this->dec_type = $dec_type;
+        $this->anonymousRequest = $req_anon;
+        $this->anonymousDecision = $dec_anon;
+        $this->validator = $validator;
+        $this->dec_result = $dec_result;
+        $this->dec_inserted = $dec_inserted;
+        $this->dec_decided = $dec_decided;
+        $this->dec_validated = $dec_validated;
+        $this->organization = $organization;
+        $this->activity = $activity;
+        $this->stage = $stage;
+        $this->requester = $requester;
+        $this->decider = $decider;
+    }
+
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getDecType(): ?int
+    public function getType(): ?int
     {
         return $this->dec_type;
     }
 
-    public function setDecType(int $dec_type): self
+    public function setType(int $dec_type): self
     {
         $this->dec_type = $dec_type;
 
         return $this;
     }
 
-    public function getReqAnon(): ?int
+    public function getAnonymousRequest(): ?int
     {
-        return $this->req_anon;
+        return $this->anonymousRequest;
     }
 
-    public function setReqAnon(int $req_anon): self
+    public function setAnonymousRequest(int $anonymousRequest): self
     {
-        $this->req_anon = $req_anon;
+        $this->anonymousRequest = $anonymousRequest;
 
         return $this;
     }
 
-    public function getDecAnon(): ?bool
+    public function getAnonymousDecision(): ?bool
     {
-        return $this->dec_anon;
+        return $this->anonymousDecision;
     }
 
-    public function setDecAnon(?bool $dec_anon): self
+    public function setAnonymousDecision(?bool $dec_anon): self
     {
-        $this->dec_anon = $dec_anon;
+        $this->anonymousDecision = $dec_anon;
 
         return $this;
     }
 
-    public function getValUsrId(): ?int
+    public function getValidator(): ?int
     {
-        return $this->val_usr_id;
+        return $this->validator;
     }
 
-    public function setValUsrId(int $val_usr_id): self
+    public function setValidator(int $validator): self
     {
-        $this->val_usr_id = $val_usr_id;
+        $this->validator = $validator;
 
         return $this;
     }
 
-    public function getDecResult(): ?int
+    public function getResult(): ?int
     {
         return $this->dec_result;
     }
 
-    public function setDecResult(int $dec_result): self
+    public function setResult(int $dec_result): self
     {
         $this->dec_result = $dec_result;
 
         return $this;
     }
 
-    public function getDecCreatedBy(): ?int
+    public function getCreatedBy(): ?int
     {
         return $this->dec_createdBy;
     }
 
-    public function setDecCreatedBy(int $dec_createdBy): self
+    public function setCreatedBy(int $dec_createdBy): self
     {
         $this->dec_createdBy = $dec_createdBy;
 
         return $this;
     }
 
-    public function getDecInserted(): ?\DateTimeInterface
+    public function getInserted(): ?\DateTimeInterface
     {
         return $this->dec_inserted;
     }
 
-    public function setDecInserted(\DateTimeInterface $dec_inserted): self
+    public function setInserted(\DateTimeInterface $dec_inserted): self
     {
         $this->dec_inserted = $dec_inserted;
 
         return $this;
     }
 
-    public function getDecDecided(): ?\DateTimeInterface
+    public function getDecided(): ?\DateTimeInterface
     {
         return $this->dec_decided;
     }
 
-    public function setDecDecided(\DateTimeInterface $dec_decided): self
+    public function setDecided(\DateTimeInterface $dec_decided): self
     {
         $this->dec_decided = $dec_decided;
 
         return $this;
     }
 
-    public function getDecValidated(): ?\DateTimeInterface
+    public function getValidated(): ?\DateTimeInterface
     {
         return $this->dec_validated;
     }
 
-    public function setDecValidated(\DateTimeInterface $dec_validated): self
+    public function setValidated(\DateTimeInterface $dec_validated): self
     {
         $this->dec_validated = $dec_validated;
 
@@ -281,7 +336,7 @@ class Decision
     /**
      * @return int
      */
-    public function getDecider(): int
+    public function getider(): int
     {
         return $this->decider;
     }
@@ -289,7 +344,7 @@ class Decision
     /**
      * @param int $decider
      */
-    public function setDecider(int $decider): void
+    public function setider(int $decider): void
     {
         $this->decider = $decider;
     }
