@@ -15,7 +15,7 @@ use Doctrine\ORM\Mapping\OrderBy;
  * @ApiResource()
  * @ORM\Entity(repositoryClass=DepartmentRepository::class)
  */
-class Department
+class Department extends DbObject
 {
     /**
      * @ORM\Id()
@@ -84,53 +84,98 @@ class Department
      */
     private $targets;
 
+    /**
+     * Department constructor.
+     * @param $id
+     * @param $dpt_name
+     * @param $dpt_createdBy
+     * @param $dpt_inserted
+     * @param $dpt_deleted
+     * @param $masterUser
+     * @param $positions
+     * @param $templateActivities
+     * @param $options
+     * @param $organization
+     * @param ArrayCollection $criterionGroups
+     * @param $targets
+     */
+    //TODO Set correctement dans les controlleurs
+    public function __construct(
+        $id = 0,
+        $dpt_name = '',
+        $dpt_createdBy = null,
+        $dpt_inserted = null,
+        $dpt_deleted = null,
+        $masterUser,
+        $positions = null,
+        $templateActivities = null,
+        ArrayCollection $options = null,
+        $organization,
+        ArrayCollection $criterionGroups,
+        ArrayCollection $targets = null)
+    {
+        $this->id = $id;
+        $this->dpt_name = $dpt_name;
+        $this->dpt_createdBy = $dpt_createdBy;
+        $this->dpt_inserted = $dpt_inserted;
+        $this->dpt_deleted = $dpt_deleted;
+        $this->masterUser = $masterUser;
+        $this->positions = $positions?$positions:new ArrayCollection();
+        $this->templateActivities = $templateActivities;
+        $this->options = $options?$options:new ArrayCollection();
+        $this->organization = $organization;
+        $this->criterionGroups = $criterionGroups;
+        $this->targets = $targets?$targets:new ArrayCollection();
+    }
+
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getDptName(): ?string
+    public function getName(): ?string
     {
         return $this->dpt_name;
     }
 
-    public function setDptName(string $dpt_name): self
+    public function setName(string $dpt_name): self
     {
         $this->dpt_name = $dpt_name;
 
         return $this;
     }
 
-    public function getDptCreatedBy(): ?int
+    public function getCreatedBy(): ?int
     {
         return $this->dpt_createdBy;
     }
 
-    public function setDptCreatedBy(int $dpt_createdBy): self
+    public function setCreatedBy(int $dpt_createdBy): self
     {
         $this->dpt_createdBy = $dpt_createdBy;
 
         return $this;
     }
 
-    public function getDptInserted(): ?\DateTimeInterface
+    public function getInserted(): ?\DateTimeInterface
     {
         return $this->dpt_inserted;
     }
 
-    public function setDptInserted(\DateTimeInterface $dpt_inserted): self
+    public function setInserted(\DateTimeInterface $dpt_inserted): self
     {
         $this->dpt_inserted = $dpt_inserted;
 
         return $this;
     }
 
-    public function getDptDeleted(): ?\DateTimeInterface
+    public function getDeleted(): ?\DateTimeInterface
     {
         return $this->dpt_deleted;
     }
 
-    public function setDptDeleted(?\DateTimeInterface $dpt_deleted): self
+    public function setDeleted(?\DateTimeInterface $dpt_deleted): self
     {
         $this->dpt_deleted = $dpt_deleted;
 
@@ -249,4 +294,51 @@ class Department
         $this->targets = $targets;
     }
 
+    function addPosition(Position $position){
+
+        $this->positions->add($position);
+        $position->setDepartment($this);
+        return $this;
+    }
+
+    function removePosition(Position $position){
+        $this->positions->removeElement($position);
+        return $this;
+    }
+
+    function addTemplateActivity(TemplateActivity $templateActivity){
+        $this->templateActivities->add($templateActivity);
+        $templateActivity->setDepartment($this);
+        return $this;
+    }
+
+    function removeTemplateActivity(TemplateActivity $templateActivity){
+        $this->templateActivities->removeElement($templateActivity);
+        return $this;
+    }
+    //TODO l'histoire du getUSers et viewable users
+
+    public function toArray() {
+        return [
+            'id' => $this->id,
+            'name' => $this->dpt_name
+        ];
+    }
+    function addOption(OrganizationUserOption $option)
+    {
+        $this->options->add($option);
+        $option->setDepartment($this);
+        return $this;
+    }
+
+    function removeOption(OrganizationUserOption $option)
+    {
+        $this->options->removeElement($option);
+        return $this;
+    }
+
+    function __toString()
+    {
+        return $this->dpt_name;
+    }
 }
