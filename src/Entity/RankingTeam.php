@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping\ManyToOne;
  * @ApiResource()
  * @ORM\Entity(repositoryClass=RankingTeamRepository::class)
  */
-class RankingTeam
+class RankingTeam extends DbObject
 {
     /**
      * @ORM\Id()
@@ -107,137 +107,150 @@ class RankingTeam
      */
     protected $organization;
 
+    public function __construct($id=0, $dType=null, $wType=null, $organization=null, $absResult=null, $relResult=null, $period=null, $frequency=null, $value= null, $seriesPopulation= null, $createdBy = null, $inserted=null, $updated=null)
+    {
+        parent::__construct($id, $createdBy, new \DateTime);
+        $this->rkt_dtype = $dType;
+        $this->rkt_wtype = $wType;
+        $this->rkt_abs_result = $absResult;
+        $this->rkt_rel_result = $relResult;
+        $this->rkt_period = $period;
+        $this->rkt_freq = $frequency;
+        $this->rkt_series_pop = $seriesPopulation;
+        $this->rkt_updated = $updated;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getRktDtype(): ?string
+    public function getDtype(): ?string
     {
         return $this->rkt_dtype;
     }
 
-    public function setRktDtype(string $rkt_dtype): self
+    public function setDtype(string $rkt_dtype): self
     {
         $this->rkt_dtype = $rkt_dtype;
 
         return $this;
     }
 
-    public function getRktWtype(): ?string
+    public function getWtype(): ?string
     {
         return $this->rkt_wtype;
     }
 
-    public function setRktWtype(string $rkt_wtype): self
+    public function setWtype(string $rkt_wtype): self
     {
         $this->rkt_wtype = $rkt_wtype;
 
         return $this;
     }
 
-    public function getRktAbsResult(): ?int
+    public function getAbsResult(): ?int
     {
         return $this->rkt_abs_result;
     }
 
-    public function setRktAbsResult(int $rkt_abs_result): self
+    public function setAbsResult(int $rkt_abs_result): self
     {
         $this->rkt_abs_result = $rkt_abs_result;
 
         return $this;
     }
 
-    public function getRktRelResult(): ?float
+    public function getRelResult(): ?float
     {
         return $this->rkt_rel_result;
     }
 
-    public function setRktRelResult(float $rkt_rel_result): self
+    public function setRelResult(float $rkt_rel_result): self
     {
         $this->rkt_rel_result = $rkt_rel_result;
 
         return $this;
     }
 
-    public function getRktPeriod(): ?int
+    public function getPeriod(): ?int
     {
         return $this->rkt_period;
     }
 
-    public function setRktPeriod(int $rkt_period): self
+    public function setPeriod(int $rkt_period): self
     {
         $this->rkt_period = $rkt_period;
 
         return $this;
     }
 
-    public function getRktFreq(): ?int
+    public function getFreq(): ?int
     {
         return $this->rkt_freq;
     }
 
-    public function setRktFreq(int $rkt_freq): self
+    public function setFreq(int $rkt_freq): self
     {
         $this->rkt_freq = $rkt_freq;
 
         return $this;
     }
 
-    public function getRktValue(): ?float
+    public function getValue(): ?float
     {
         return $this->rkt_value;
     }
 
-    public function setRktValue(float $rkt_value): self
+    public function setValue(float $rkt_value): self
     {
         $this->rkt_value = $rkt_value;
 
         return $this;
     }
 
-    public function getRktSeriesPop(): ?int
+    public function getSeriesPop(): ?int
     {
         return $this->rkt_series_pop;
     }
 
-    public function setRktSeriesPop(int $rkt_series_pop): self
+    public function setSeriesPop(int $rkt_series_pop): self
     {
         $this->rkt_series_pop = $rkt_series_pop;
 
         return $this;
     }
 
-    public function getRktCreatedBy(): ?int
+    public function getCreatedBy(): ?int
     {
         return $this->rkt_createdBy;
     }
 
-    public function setRktCreatedBy(?int $rkt_createdBy): self
+    public function setCreatedBy(?int $rkt_createdBy): self
     {
         $this->rkt_createdBy = $rkt_createdBy;
 
         return $this;
     }
 
-    public function getRktInserted(): ?\DateTimeInterface
+    public function getInserted(): ?\DateTimeInterface
     {
         return $this->rkt_inserted;
     }
 
-    public function setRktInserted(\DateTimeInterface $rkt_inserted): self
+    public function setInserted(\DateTimeInterface $rkt_inserted): self
     {
         $this->rkt_inserted = $rkt_inserted;
 
         return $this;
     }
 
-    public function getRktUpdated(): ?\DateTimeInterface
+    public function getUpdated(): ?\DateTimeInterface
     {
         return $this->rkt_updated;
     }
 
-    public function setRktUpdated(\DateTimeInterface $rkt_updated): self
+    public function setUpdated(\DateTimeInterface $rkt_updated): self
     {
         $this->rkt_updated = $rkt_updated;
 
