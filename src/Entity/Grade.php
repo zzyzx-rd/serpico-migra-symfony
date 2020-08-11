@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\GradeRepository;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -10,7 +11,7 @@ use Doctrine\ORM\Mapping\ManyToOne;
 /**
  * @ORM\Entity(repositoryClass=GradeRepository::class)
  */
-class Grade
+class Grade extends DbObject
 {
     /**
      * @ORM\Id()
@@ -82,89 +83,135 @@ class Grade
      */
     protected $stage;
 
+    /**
+     * Grade constructor.
+     * @param int $id
+     * @param $grd_type
+     * @param $grd_graded_usr_id
+     * @param $grd_graded_tea_id
+     * @param $grd_value
+     * @param $grd_comment
+     * @param $grd_createdBy
+     * @param $grd_inserted
+     * @param $team
+     * @param ActivityUser $participant
+     * @param $activity
+     * @param $criterion
+     * @param $stage
+     */
+    //TODO gérer les controllers
+    public function __construct(
+        int $id = 0,
+        $grd_type = 1,
+        $grd_graded_usr_id = null,
+        $grd_graded_tea_id = null,
+        $grd_value = null,
+        $grd_comment = null,
+        $grd_createdBy = null,
+        $grd_inserted = null,
+        Team $team = null,
+        ActivityUser $participant,
+        Activity$activity,
+        Criterion $criterion,
+        Stage $stage)
+    {
+        parent::__construct($id, $grd_createdBy, new DateTime());
+        $this->grd_type = $grd_type;
+        $this->grd_graded_usr_id = $grd_graded_usr_id;
+        $this->grd_graded_tea_id = $grd_graded_tea_id;
+        $this->grd_value = $grd_value;
+        $this->grd_comment = $grd_comment;
+        $this->grd_inserted = $grd_inserted;
+        $this->team = $team;
+        $this->participant = $participant;
+        $this->activity = $activity;
+        $this->criterion = $criterion;
+        $this->stage = $stage;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getGrdType(): ?int
+    public function getType(): ?int
     {
         return $this->grd_type;
     }
 
-    public function setGrdType(int $grd_type): self
+    public function setType(int $grd_type): self
     {
         $this->grd_type = $grd_type;
 
         return $this;
     }
 
-    public function getGrdGradedUsrId(): ?int
+    public function getGradedUsrId(): ?int
     {
         return $this->grd_graded_usr_id;
     }
 
-    public function setGrdGradedUsrId(int $grd_graded_usr_id): self
+    public function setGradedUsrId(int $grd_graded_usr_id): self
     {
         $this->grd_graded_usr_id = $grd_graded_usr_id;
 
         return $this;
     }
 
-    public function getGrdGradedTeaId(): ?int
+    public function getGradedTeaId(): ?int
     {
         return $this->grd_graded_tea_id;
     }
 
-    public function setGrdGradedTeaId(int $grd_graded_tea_id): self
+    public function setGradedTeaId(int $grd_graded_tea_id): self
     {
         $this->grd_graded_tea_id = $grd_graded_tea_id;
 
         return $this;
     }
 
-    public function getGrdValue(): ?float
+    public function getValue(): ?float
     {
         return $this->grd_value;
     }
 
-    public function setGrdValue(float $grd_value): self
+    public function setValue(float $grd_value): self
     {
         $this->grd_value = $grd_value;
 
         return $this;
     }
 
-    public function getGrdComment(): ?string
+    public function getComment(): ?string
     {
         return $this->grd_comment;
     }
 
-    public function setGrdComment(?string $grd_comment): self
+    public function setComment(?string $grd_comment): self
     {
         $this->grd_comment = $grd_comment;
 
         return $this;
     }
 
-    public function getGrdCreatedBy(): ?int
+    public function getCreatedBy(): ?int
     {
         return $this->grd_createdBy;
     }
 
-    public function setGrdCreatedBy(?int $grd_createdBy): self
+    public function setCreatedBy(?int $grd_createdBy): self
     {
         $this->grd_createdBy = $grd_createdBy;
 
         return $this;
     }
 
-    public function getGrdInserted(): ?\DateTimeInterface
+    public function getInserted(): ?\DateTimeInterface
     {
         return $this->grd_inserted;
     }
 
-    public function setGrdInserted(\DateTimeInterface $grd_inserted): self
+    public function setInserted(\DateTimeInterface $grd_inserted): self
     {
         $this->grd_inserted = $grd_inserted;
 
@@ -174,7 +221,7 @@ class Grade
     /**
      * @return mixed
      */
-    public function getTeam()
+    public function getGradedTeam()
     {
         return $this->team;
     }
@@ -190,7 +237,7 @@ class Grade
     /**
      * @return ActivityUser
      */
-    public function getParticipant(): ActivityUser
+    public function getGradedParticipant(): ActivityUser
     {
         return $this->participant;
     }
