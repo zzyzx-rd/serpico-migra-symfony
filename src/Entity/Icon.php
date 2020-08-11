@@ -4,15 +4,17 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\IconRepository;
+use DateTime;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\OneToMany;
+use IntlChar;
 
 /**
  * @ApiResource()
  * @ORM\Entity(repositoryClass=IconRepository::class)
  */
-class Icon
+class Icon extends DbObject
 {
     /**
      * @ORM\Id()
@@ -58,12 +60,43 @@ class Icon
      */
     private $workerFirmSectors;
 
+    /**
+     * Icon constructor.
+     * @param $id
+     * @param $ico_type
+     * @param $ico_name
+     * @param $ico_unicode
+     * @param $ico_createdBy
+     * @param $ico_inserted
+     * @param Collection $criterionNames
+     * @param Collection $workerFirmSectors
+     */
+    public function __construct(
+        $id = null,
+        $ico_type = null,
+        $ico_name = null,
+        $ico_unicode = null,
+        $ico_createdBy = null,
+        $ico_inserted = null,
+        Collection $criterionNames = null,
+        Collection $workerFirmSectors = null)
+    {
+        parent::__construct($id, $ico_createdBy, new DateTime());
+        $this->ico_type = $ico_type;
+        $this->ico_name = $ico_name;
+        $this->ico_unicode = $ico_unicode;
+        $this->ico_inserted = $ico_inserted;
+        $this->criterionNames = $criterionNames;
+        $this->workerFirmSectors = $workerFirmSectors;
+    }
+
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getIcoType(): ?string
+    public function etType(): ?string
     {
         return $this->ico_type;
     }
@@ -75,7 +108,7 @@ class Icon
         return $this;
     }
 
-    public function getIcoName(): ?string
+    public function etName(): ?string
     {
         return $this->ico_name;
     }
@@ -87,7 +120,7 @@ class Icon
         return $this;
     }
 
-    public function getIcoUnicode(): ?string
+    public function etUnicode(): ?string
     {
         return $this->ico_unicode;
     }
@@ -99,7 +132,7 @@ class Icon
         return $this;
     }
 
-    public function getIcoCreatedBy(): ?int
+    public function etCreatedBy(): ?int
     {
         return $this->ico_createdBy;
     }
@@ -111,7 +144,7 @@ class Icon
         return $this;
     }
 
-    public function getIcoInserted(): ?\DateTimeInterface
+    public function etInserted(): ?\DateTimeInterface
     {
         return $this->ico_inserted;
     }
@@ -155,4 +188,41 @@ class Icon
         $this->workerFirmSectors = $workerFirmSectors;
     }
 
+    function addCriterionName(CriterionName $criterionName)
+    {
+        $criterionName->setIcon($this);
+        $this->criterionNames->add($criterionName);
+        return $this;
+    }
+
+    function removeCriterionName(CriterionName $criterionName)
+    {
+        $this->criterionNames->removeElement($criterionName);
+        return $this;
+    }
+
+    function addWorkerFirmSector(WorkerFirmSector $workerFirmSector)
+    {
+        $workerFirmSector->setIcon($this);
+        $this->workerFirmSectors->add($workerFirmSector);
+        return $this;
+    }
+
+    function removeWorkerFirmSector(WorkerFirmSector $workerFirmSector)
+    {
+        $this->workerFirmSectors->removeElement($workerFirmSector);
+        return $this;
+    }
+
+    function getChar() {
+        switch ($this->ico_type) {
+            case 'm': return $this->ico_name;
+            default: return IntlChar::chr(hexdec($this->ico_unicode));
+        }
+    }
+
+    public function __toString()
+    {
+        return $this->getChar();
+    }
 }
