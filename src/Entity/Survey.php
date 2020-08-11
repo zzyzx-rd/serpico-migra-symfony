@@ -16,7 +16,7 @@ use Doctrine\ORM\Mapping\OrderBy;
  * @ApiResource()
  * @ORM\Entity(repositoryClass=SurveyRepository::class)
  */
-class Survey
+class Survey extends DbObject
 {
     /**
      * @ORM\Id()
@@ -77,6 +77,42 @@ class Survey
      * @var ArrayCollection|Answer[] $answers
      */
     protected $answers;
+
+    /**
+     * Survey constructor.
+     * @param int $id
+     * @param $sur_name
+     * @param $sur_createdBy
+     * @param $sur_inserted
+     * @param $sur_state
+     * @param $stage
+     * @param $organization
+     * @param ArrayCollection $participants
+     * @param SurveyField[] $fields
+     * @param Answer[]|ArrayCollection $answers
+     */
+    public function __construct(
+        int $id = 0,
+        $sur_state = null,
+        $sur_name = '',
+        $sur_createdBy = null,
+        $sur_inserted = null,
+        Stage $stage = null,
+        Organization $organization = null,
+        ArrayCollection $participants = null,
+        array $fields = [],
+        $answers = null)
+    {
+        $this->sur_name = $sur_name;
+        $this->sur_inserted = $sur_inserted;
+        $this->sur_state = $sur_state;
+        $this->stage = $stage;
+        $this->organization = $organization;
+        $this->participants = $participants?$participants: new ArrayCollection();
+        $this->fields = $fields?$fields: new ArrayCollection();
+        $this->answers = $answers?$fields: new ArrayCollection();
+    }
+
 
     public function getId(): ?int
     {
@@ -210,5 +246,57 @@ class Survey
     {
         $this->answers = $answers;
     }
+    public function addParticipant(ActivityUser $participant)
+    {
+        $this->participants->add($participant);
+        $participant->setSurvey($this);
+        return $this;
+    }
 
+    public function removeParticipant(ActivityUser $participant)
+    {
+        // Remove this participant
+        $this->participants->removeElement($participant);
+        return $this;
+    }
+    public function addField(SurveyField $field)
+    {
+        $this->fields->add($field);
+        $field->setSurvey($this);
+        return $this;
+    }
+
+    public function removeField(SurveyField $field)
+    {
+        $this->fields->removeElement($field);
+        return $this;
+    }
+    public function addUserAnswer(Answer $answer)
+    {
+        $this->answers->add($answer);
+        $answer->setSurvey($this);
+        return $this;
+    }
+    public function removeUserAnswer(Answer $answer)
+    {
+        $this->answers->removeElement($answer);
+        return $this;
+    }
+    public function addAnswer(Answer $answer)
+    {
+        $this->answers->add($answer);
+        $answer->setSurvey($this);
+        return $this;
+    }
+
+    public function removeAnswer(Answer $answer)
+    {
+        $this->answers->removeElement($answer);
+        return $this;
+    }
+
+    public function __toString()
+    {
+        return (string) $this->id;
+    }
 }
