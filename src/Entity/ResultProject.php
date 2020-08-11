@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping\ManyToOne;
 /**
  * @ORM\Entity(repositoryClass=ResultProjectRepository::class)
  */
-class ResultProject
+class ResultProject extends DbObject
 {
     /**
      * @ORM\Id()
@@ -129,6 +129,80 @@ class ResultProject
      * @JoinColumn(name="criterion_crt_id", referencedColumnName="crt_id", nullable=true)
      */
     protected $criterion;
+
+    /**
+     * ResultProject constructor.
+     * @param $id
+     * @param $rsp_type
+     * @param $rsp_war
+     * @param $rsp_ear
+     * @param $rsp_wrr
+     * @param $rsp_err
+     * @param $rsp_wsd
+     * @param $rsp_esd
+     * @param $rsp_wdr
+     * @param $rsp_edr
+     * @param $rsp_wsd_max
+     * @param $rsp_esd_max
+     * @param $rsp_win
+     * @param $rsp_ein
+     * @param $rsp_win_max
+     * @param $rsp_ein_max
+     * @param $rsp_wdr_gen
+     * @param $rsp_edr_gen
+     * @param $rsp_createdBy
+     * @param $rsp_inserted
+     * @param $activity
+     * @param $stage
+     * @param $criterion
+     */
+    public function __construct(
+        $id = null,
+        $rsp_type = null,
+        $rsp_war = null,
+        $rsp_ear = null,
+        $rsp_wrr = null,
+        $rsp_err = null,
+        $rsp_wsd = null,
+        $rsp_esd = null,
+        $rsp_wdr = null,
+        $rsp_edr = null,
+        $rsp_wsd_max = null,
+        $rsp_esd_max = null,
+        $rsp_win = null,
+        $rsp_ein = null,
+        $rsp_win_max = null,
+        $rsp_ein_max = null,
+        $rsp_wdr_gen = null,
+        $rsp_edr_gen = null,
+        $rsp_createdBy = null,
+        $rsp_inserted = null,
+        $activity = null,
+        $stage = null,
+        $criterion = null)
+    {
+        $this->rsp_type = $rsp_type;
+        $this->rsp_war = $rsp_war;
+        $this->rsp_ear = $rsp_ear;
+        $this->rsp_wrr = $rsp_wrr;
+        $this->rsp_err = $rsp_err;
+        $this->rsp_wsd = $rsp_wsd;
+        $this->rsp_esd = $rsp_esd;
+        $this->rsp_wdr = $rsp_wdr;
+        $this->rsp_edr = $rsp_edr;
+        $this->rsp_wsd_max = $rsp_wsd_max;
+        $this->rsp_esd_max = $rsp_esd_max;
+        $this->rsp_win = $rsp_win;
+        $this->rsp_ein = $rsp_ein;
+        $this->rsp_win_max = $rsp_win_max;
+        $this->rsp_ein_max = $rsp_ein_max;
+        $this->rsp_wdr_gen = $rsp_wdr_gen;
+        $this->rsp_edr_gen = $rsp_edr_gen;
+        $this->rsp_inserted = $rsp_inserted;
+        $this->activity = $activity;
+        $this->stage = $stage;
+        $this->criterion = $criterion;
+    }
 
     public function getId(): ?int
     {
