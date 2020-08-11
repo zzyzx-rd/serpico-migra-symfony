@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping\ManyToOne;
  * @ApiResource()
  * @ORM\Entity(repositoryClass=ResultTeamRepository::class)
  */
-class ResultTeam
+class ResultTeam extends DbObject
 {
     /**
      * @ORM\Id()
@@ -139,6 +139,83 @@ class ResultTeam
      * @JoinColumn(name="team_tea_id", referencedColumnName="tea_id", nullable=true)
      */
     protected $team;
+
+    /**
+     * ResultTeam constructor.
+     * @param $id
+     * @param $rst_type
+     * @param $rst_war
+     * @param $rst_ear
+     * @param $rst_wrr
+     * @param $rst_err
+     * @param $rst_wsd
+     * @param $rst_esd
+     * @param $rst_wdr
+     * @param $rst_edr
+     * @param $rst_wsd_max
+     * @param $rst_esd_max
+     * @param $rst_win
+     * @param $rst_ein
+     * @param $rst_win_max
+     * @param $rst_ein_max
+     * @param $rst_wdr_gen
+     * @param $rst_edr_gen
+     * @param $rst_createdBy
+     * @param $rst_inserted
+     * @param $activity
+     * @param $stage
+     * @param $criterion
+     * @param $team
+     */
+    public function __construct(
+        $id = 0,
+        $rst_type = null,
+        $rst_war = null,
+        $rst_ear = null,
+        $rst_wrr = null,
+        $rst_err = null,
+        $rst_wsd = null,
+        $rst_esd = null,
+        $rst_wdr = null,
+        $rst_edr = null,
+        $rst_wsd_max = null,
+        $rst_esd_max = null,
+        $rst_win = null,
+        $rst_ein = null,
+        $rst_win_max = null,
+        $rst_ein_max = null,
+        $rst_wdr_gen = null,
+        $rst_edr_gen = null,
+        $rst_createdBy = null,
+        $rst_inserted = null,
+        $activity = null,
+        $stage = null,
+        $criterion = null,
+        $team = null)
+    {
+        $this->rst_type = $rst_type;
+        $this->rst_war = $rst_war;
+        $this->rst_ear = $rst_ear;
+        $this->rst_wrr = $rst_wrr;
+        $this->rst_err = $rst_err;
+        $this->rst_wsd = $rst_wsd;
+        $this->rst_esd = $rst_esd;
+        $this->rst_wdr = $rst_wdr;
+        $this->rst_edr = $rst_edr;
+        $this->rst_wsd_max = $rst_wsd_max;
+        $this->rst_esd_max = $rst_esd_max;
+        $this->rst_win = $rst_win;
+        $this->rst_ein = $rst_ein;
+        $this->rst_win_max = $rst_win_max;
+        $this->rst_ein_max = $rst_ein_max;
+        $this->rst_wdr_gen = $rst_wdr_gen;
+        $this->rst_edr_gen = $rst_edr_gen;
+        $this->rst_inserted = $rst_inserted;
+        $this->activity = $activity;
+        $this->stage = $stage;
+        $this->criterion = $criterion;
+        $this->team = $team;
+    }
 
     public function getId(): ?int
     {
