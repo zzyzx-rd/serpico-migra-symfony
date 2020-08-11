@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\CriterionGroupRepository;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -13,7 +14,7 @@ use Doctrine\ORM\Mapping\OneToMany;
  * @ApiResource()
  * @ORM\Entity(repositoryClass=CriterionGroupRepository::class)
  */
-class CriterionGroup
+class CriterionGroup extends DbObject
 {
     /**
      * @ORM\Id()
@@ -57,41 +58,69 @@ class CriterionGroup
      */
     protected $department;
 
+    /**
+     * CriterionGroup constructor.
+     * @param $id
+     * @param $cgp_createdBy
+     * @param $cgp_inserted
+     * @param $cgp_name
+     * @param CriterionName[] $criteria
+     * @param Organization $organization
+     * @param Department $department
+     */
+    public function __construct(
+        string $cgp_name = null,
+        Organization $organization = null,
+        Department $department = null,
+        $cgp_createdBy = null,
+        $id = null,
+        array $criteria = [])
+    {
+        $this->id = $id;
+        $this->cgp_createdBy = $cgp_createdBy;
+        $this->cgp_inserted = new DateTime();
+        $this->cgp_name = $cgp_name;
+        $this->criteria = $criteria;
+        $this->organization = $organization;
+        $this->department = $department;
+    }
+
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getCgpCreatedBy(): ?int
+    public function getCreatedBy(): ?int
     {
         return $this->cgp_createdBy;
     }
 
-    public function setCgpCreatedBy(int $cgp_createdBy): self
+    public function setCreatedBy(int $cgp_createdBy): self
     {
         $this->cgp_createdBy = $cgp_createdBy;
 
         return $this;
     }
 
-    public function getCgpInserted(): ?\DateTimeInterface
+    public function getInserted(): ?\DateTimeInterface
     {
         return $this->cgp_inserted;
     }
 
-    public function setCgpInserted(\DateTimeInterface $cgp_inserted): self
+    public function setInserted(\DateTimeInterface $cgp_inserted): self
     {
         $this->cgp_inserted = $cgp_inserted;
 
         return $this;
     }
 
-    public function getCgpName(): ?string
+    public function getName(): ?string
     {
         return $this->cgp_name;
     }
 
-    public function setCgpName(string $cgp_name): self
+    public function setName(string $cgp_name): self
     {
         $this->cgp_name = $cgp_name;
 
@@ -146,4 +175,45 @@ class CriterionGroup
         $this->department = $department;
     }
 
+    function addCriterion(CriterionName $criterion) {
+        if (!$criterion->getCriterionGroup()) {
+            $this->criteria[] = $criterion;
+            $criterion->setCriterionGroup($this);
+        }
+        return $this;
+    }
+
+    function removeCriterion(CriterionName $criterion) {
+        $this->criteria->removeElement($criterion);
+        return $this;
+    }
+    public function hasNoCriterion() {
+        return $this->criteria->isEmpty();
+    }
+
+    public function toArray() {
+        $criteria = $this->criteria->map(function(CriterionName $e) {
+            return [
+                'id' => $e->getId(),
+                'type' => $e->getType(),
+                'name' => $e->getName()
+            ];
+        })->toArray();
+
+        return [
+            'id' => $this->id,
+            'createdBy' => $this->createdBy,
+            'inserted' => $this->inserted,
+            'name' => $this->cgp_name,
+            'criteria' => $criteria,
+            'organization' => $this->organization->toArray(),
+            'department' => $this->department->toArray()
+        ];
+    }
+
+    function __toString()
+    {
+        return $this->cgp_name;
+    }
+    
 }
