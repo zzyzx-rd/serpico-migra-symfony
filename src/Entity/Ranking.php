@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping\ManyToOne;
  * @ApiResource()
  * @ORM\Entity(repositoryClass=RankingRepository::class)
  */
-class Ranking
+class Ranking extends DbObject
 {
     /**
      * @ORM\Id()
@@ -105,6 +105,63 @@ class Ranking
      * @ORM\ManyToOne(targetEntity=User::class)
      */
     private $rnk_user_usr;
+
+    /**
+     * Ranking constructor.
+     * @param int $id
+     * @param $rnk_dtype
+     * @param $rnk_wtype
+     * @param $rnk_abs_result
+     * @param $rnk_rel_result
+     * @param $rnk_period
+     * @param $rnk_freq
+     * @param $rnk_value
+     * @param $rnk_series_pop
+     * @param $rnk_createdBy
+     * @param $rnk_inserted
+     * @param $rnk_updated
+     * @param $activity
+     * @param $stage
+     * @param $criterion
+     * @param $organization
+     * @param $rnk_user_usr
+     */
+    public function __construct(
+        int $id = 0,
+        $rnk_dtype = null,
+        $rnk_wtype = null,
+        $rnk_user_usr = null,
+        $organization = null,
+        $rnk_abs_result = null,
+        $rnk_rel_result = null,
+        $rnk_period = null,
+        $rnk_freq = null,
+        $rnk_value = null,
+        $rnk_series_pop = null,
+        $rnk_createdBy = null,
+        $rnk_inserted = null,
+        $rnk_updated = null,
+        $activity = null,
+        $stage = null,
+        $criterion = null)
+    {
+        $this->rnk_dtype = $rnk_dtype;
+        $this->rnk_wtype = $rnk_wtype;
+        $this->rnk_abs_result = $rnk_abs_result;
+        $this->rnk_rel_result = $rnk_rel_result;
+        $this->rnk_period = $rnk_period;
+        $this->rnk_freq = $rnk_freq;
+        $this->rnk_value = $rnk_value;
+        $this->rnk_series_pop = $rnk_series_pop;
+        $this->rnk_inserted = $rnk_inserted;
+        $this->rnk_updated = $rnk_updated;
+        $this->activity = $activity;
+        $this->stage = $stage;
+        $this->criterion = $criterion;
+        $this->organization = $organization;
+        $this->rnk_user_usr = $rnk_user_usr;
+    }
+
 
     public function getId(): ?int
     {
