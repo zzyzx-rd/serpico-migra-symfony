@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping\ManyToOne;
  * @ApiResource()
  * @ORM\Entity(repositoryClass=RankingTeamHistoryRepository::class)
  */
-class RankingTeamHistory
+class RankingTeamHistory extends DbObject
 {
     /**
      * @ORM\Id()
@@ -101,6 +101,17 @@ class RankingTeamHistory
      */
     protected $organization;
 
+    public function __construct($id=0, $dType=null, $wType=null, $organization=null, $absResult=null, $relResult=null, $period=null, $frequency=null, $value= null, $seriesPopulation=null,$createdBy=null, $inserted=null)
+    {
+        parent::__construct($id,$createdBy, new \DateTime);
+        $this->dType = $dType;
+        $this->rth_wtype = $wType;
+        $this->rth_abs_result = $absResult;
+        $this->rth_rel_result = $relResult;
+        $this->rth_period = $period;
+        $this->rth_freq = $frequency;
+        $this->rth_series_pop = $seriesPopulation;
+    }
     public function getId(): ?int
     {
         return $this->id;
