@@ -13,7 +13,7 @@ use Doctrine\ORM\Mapping\OneToOne;
  * @ApiResource()
  * @ORM\Entity(repositoryClass=OrganizationUserOptionRepository::class)
  */
-class OrganizationUserOption
+class OrganizationUserOption extends DbObject
 {
     /**
      * @ORM\Id()
@@ -105,53 +105,65 @@ class OrganizationUserOption
      */
     private $role_rol;
 
+    /**
+     * OrganizationUserOption constructor.
+     * @param $opt_enabled
+     * @param $opt_createdBy
+     */
+    public function __construct($opt_enabled = true, $opt_createdBy = null)
+    {
+        $this->opt_enabled = $opt_enabled;
+        $this->opt_createdBy = $opt_createdBy;
+    }
+
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getOptBoolValue(): ?bool
+    public function isOptionTrue(): ?bool
     {
         return $this->opt_bool_value;
     }
 
-    public function setOptBoolValue(bool $opt_bool_value): self
+    public function setOptionValue(bool $opt_bool_value): self
     {
         $this->opt_bool_value = $opt_bool_value;
 
         return $this;
     }
 
-    public function getOptIntValue(): ?float
+    public function getIntValue(): ?float
     {
         return $this->opt_int_value;
     }
 
-    public function setOptIntValue(float $opt_int_value): self
+    public function setIntValue(float $opt_int_value): self
     {
         $this->opt_int_value = $opt_int_value;
 
         return $this;
     }
 
-    public function getOptIntValue2(): ?float
+    public function getIntValue2(): ?float
     {
         return $this->opt_int_value_2;
     }
 
-    public function setOptIntValue2(float $opt_int_value_2): self
+    public function setIntValue2(float $opt_int_value_2): self
     {
         $this->opt_int_value_2 = $opt_int_value_2;
 
         return $this;
     }
 
-    public function getOptFloatValue(): ?float
+    public function getFloatValue(): ?float
     {
         return $this->opt_float_value;
     }
 
-    public function setOptFloatValue(float $opt_float_value): self
+    public function setFloatValue(float $opt_float_value): self
     {
         $this->opt_float_value = $opt_float_value;
 
@@ -170,36 +182,36 @@ class OrganizationUserOption
         return $this;
     }
 
-    public function getOptEnabled(): ?bool
+    public function isEnabled(): ?bool
     {
         return $this->opt_enabled;
     }
 
-    public function setOptEnabled(bool $opt_enabled): self
+    public function setEnabled(bool $opt_enabled): self
     {
         $this->opt_enabled = $opt_enabled;
 
         return $this;
     }
 
-    public function getOptCreatedBy(): ?int
+    public function getCreatedBy(): ?int
     {
         return $this->opt_createdBy;
     }
 
-    public function setOptCreatedBy(?int $opt_createdBy): self
+    public function setCreatedBy(?int $opt_createdBy): self
     {
         $this->opt_createdBy = $opt_createdBy;
 
         return $this;
     }
 
-    public function getOptInserted(): ?\DateTimeInterface
+    public function getInserted(): ?\DateTimeInterface
     {
         return $this->opt_inserted;
     }
 
-    public function setOptInserted(\DateTimeInterface $opt_inserted): self
+    public function setInserted(\DateTimeInterface $opt_inserted): self
     {
         $this->opt_inserted = $opt_inserted;
 
@@ -312,6 +324,10 @@ class OrganizationUserOption
         $this->role_rol = $role_rol;
 
         return $this;
+    }
+    public function __toString()
+    {
+        return (string) $this->id;
     }
 
 }
