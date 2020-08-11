@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping\ManyToOne;
 /**
  * @ORM\Entity(repositoryClass=MailRepository::class)
  */
-class Mail
+class Mail extends DbObject
 {
     /**
      * @ORM\Id()
@@ -44,6 +44,12 @@ class Mail
      * @ORM\Column(type="datetime")
      */
     private $mail_inserted;
+
+    /**
+     * @Column(name="mail_type", length= 255, type="string")
+     * @var string
+     */
+    protected $type;
 
     /**
      * @ORM\Column(type="string", length=3)
@@ -80,6 +86,54 @@ class Mail
      * @JoinColumn(name="stage_stg_id", referencedColumnName="stg_id", nullable=false)
      */
     protected $stage;
+
+    /**
+     * Mail constructor.
+     * @param int $id
+     * @param $type
+     * @param $mail_persona
+     * @param $mail_token
+     * @param $mail_read
+     * @param $mail_createdBy
+     * @param $mail_inserted
+     * @param $mail_language
+     * @param $user
+     * @param $workerIndividual
+     * @param $organization
+     * @param $workerFirm
+     * @param $activity
+     * @param $stage
+     */
+    public function __construct(
+        int $id,
+        $type = null,
+        $mail_persona = null,
+        $mail_token = null,
+        $mail_read = null,
+        $mail_createdBy = null,
+        $mail_inserted = null,
+        $mail_language = null,
+        User $user = null,
+        WorkerIndividual $workerIndividual = null,
+        Organization $organization = null,
+        WorkerFirm $workerFirm = null,
+        Activity $activity = null,
+        Stage $stage = null)
+    {
+        $this->type = $type;
+        $this->mail_persona = $mail_persona;
+        $this->mail_token = $mail_token;
+        $this->mail_read = $mail_read;
+        $this->mail_inserted = $mail_inserted;
+        $this->mail_language = $mail_language;
+        $this->user = $user;
+        $this->workerIndividual = $workerIndividual;
+        $this->organization = $organization;
+        $this->workerFirm = $workerFirm;
+        $this->activity = $activity;
+        $this->stage = $stage;
+    }
+
 
     public function getId(): ?int
     {
