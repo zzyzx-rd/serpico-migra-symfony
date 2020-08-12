@@ -6,6 +6,7 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\GeneratedValue;
@@ -15,6 +16,7 @@ use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\OneToOne;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /**
  * @ApiResource()
@@ -24,7 +26,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *     message="This email already exists"
  * )
  */
-class User
+class User extends DbObject
 {
     /**
      * @Id()
@@ -252,308 +254,449 @@ class User
      */
     private $organization_org;
 
-    public function __construct()
+    /**
+     * @OneToMany(targetEntity="Department", mappedBy="masterUser",cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    private $leadingDepartments;
+    
+    /**
+     * @var UploadedFile
+     */
+    protected $pictureFile;
+
+    /**
+     * User constructor.
+     * @param int $id
+     * @param bool $usr_int
+     * @param string $usr_firstname
+     * @param string $usr_lastname
+     * @param string $usr_username
+     * @param string $usr_nickname
+     * @param $usr_birthdate
+     * @param string $usr_email
+     * @param string $usr_password
+     * @param $usr_picture
+     * @param null $pictureFile
+     * @param $usr_positionName
+     * @param $usr_token
+     * @param $usr_weight_ini
+     * @param $usr_usr_weight_1y
+     * @param $usr_weight_2y
+     * @param $usr_weight_3y
+     * @param $usr_weight_4y
+     * @param $usr_weight_5y
+     * @param $usr_act_archive_nbDays
+     * @param $usr_rm_token
+     * @param $usr_validated
+     * @param $usr_enabledCreatingUser
+     * @param $usr_createdBy
+     * @param $usr_inserted
+     * @param $usr_last_connected
+     * @param $usr_deleted
+     * @param int $role
+     * @param $externalUsers
+     * @param int $superior
+     * @param $mails
+     * @param $targets
+     * @param $options
+     * @param $workerIndividual
+     * @param $activity_user_usr
+     * @param $Reccuring
+     * @param $results
+     * @param $stagesWhereMaster
+     * @param $teamUsers
+     * @param $weight_wgt
+     * @param $position_pos
+     * @param $departement_dpt
+     * @param $title_tit
+     * @param $organization_org
+     */
+    public function __construct(
+        int $id = null,
+        $usr_int = true,
+        $usr_firstname = '',
+        $usr_lastname = '',
+        $usr_username = '',
+        $usr_nickname = '',
+        $usr_birthdate = null,
+        $usr_email = '',
+        $usr_password = '',
+        $usr_picture = null,
+        $pictureFile = null,
+        $usr_token ='',
+        $usr_weight_ini = null,
+        $usr_usr_weight_1y = 0.0,
+        $usr_weight_2y = 0.0,
+        $usr_weight_3y = 0.0,
+        $usr_weight_4y = 0.0,
+        $usr_weight_5y = 0.0,
+        int $role = null,
+        $departement_dpt = null,
+        $position_pos = null,
+        $usr_positionName = null,
+        $organization_org = null,
+        $usr_act_archive_nbDays = 7,
+        $usr_rm_token = null,
+        int $superior = null,
+        $usr_createdBy = null,
+        $usr_inserted = null,
+        $usr_validated = null,
+        $usr_last_connected = null,
+        $usr_deleted = null,
+        $usr_enabledCreatingUser = null,
+        $externalUsers = null,
+        $mails = null,
+        $targets = null,
+        $options = null,
+        $workerIndividual = null,
+        $activity_user_usr = null,
+        $Reccuring = null,
+        $results = null,
+        $stagesWhereMaster = null,
+        $teamUsers = null,
+        $weight_wgt = null,
+        $title_tit = null)
     {
-        $this->Reccuring = new ArrayCollection();
-        $this->results = new ArrayCollection();
-        $this->stagesWhereMaster = new ArrayCollection();
-        $this->teamUsers = new ArrayCollection();
+        $this->pictureFile = $pictureFile;
+        $this->usr_int = $usr_int;
+        $this->usr_firstname = $usr_firstname;
+        $this->usr_lastname = $usr_lastname;
+        $this->usr_username = $usr_username;
+        $this->usr_nickname = $usr_nickname;
+        $this->usr_birthdate = $usr_birthdate;
+        $this->usr_email = $usr_email;
+        $this->usr_password = $usr_password;
+        $this->usr_positionName = $usr_positionName;
+        $this->usr_picture = $usr_picture;
+        $this->usr_token = $usr_token;
+        $this->usr_weight_ini = $usr_weight_ini;
+        $this->usr_usr_weight_1y = $usr_usr_weight_1y;
+        $this->usr_weight_2y = $usr_weight_2y;
+        $this->usr_weight_3y = $usr_weight_3y;
+        $this->usr_weight_4y = $usr_weight_4y;
+        $this->usr_weight_5y = $usr_weight_5y;
+        $this->usr_act_archive_nbDays = $usr_act_archive_nbDays;
+        $this->usr_rm_token = $usr_rm_token;
+        $this->usr_validated = $usr_validated;
+        $this->usr_enabledCreatingUser = $usr_enabledCreatingUser;
+        $this->usr_inserted = $usr_inserted;
+        $this->usr_last_connected = $usr_last_connected;
+        $this->usr_deleted = $usr_deleted;
+        $this->role = $role;
+        $this->externalUsers = $externalUsers?$externalUsers:new ArrayCollection();
+        $this->superior = $superior;
+        $this->mails = $mails?$mails:new ArrayCollection();
+        $this->targets = $targets?$targets:new ArrayCollection();
+        $this->options = $options?$options:new ArrayCollection();
+        $this->workerIndividual = $workerIndividual;
+        $this->activity_user_usr = $activity_user_usr;
+        $this->Reccuring = $Reccuring;
+        $this->results = $results;
+        $this->stagesWhereMaster = $stagesWhereMaster;
+        $this->teamUsers = $teamUsers;
+        $this->weight_wgt = $weight_wgt;
+        $this->position_pos = $position_pos;
+        $this->departement_dpt = $departement_dpt;
+        $this->title_tit = $title_tit;
+        $this->organization_org = $organization_org;
+        $this->leadingDepartments = new ArrayCollection();
     }
 
-    public function getUsrInt(): ?bool
+
+    public function getInt(): ?bool
     {
         return $this->usr_int;
     }
 
-    public function setUsrInt(bool $usr_int): self
+    public function setInt(bool $usr_int): self
     {
         $this->usr_int = $usr_int;
 
         return $this;
     }
 
-    public function getUsrFirstname(): ?string
+    public function getFirstname(): ?string
     {
         return $this->usr_firstname;
     }
 
-    public function setUsrFirstname(string $usr_firstname): self
+    public function setFirstname(string $usr_firstname): self
     {
         $this->usr_firstname = $usr_firstname;
 
         return $this;
     }
 
-    public function getUsrLastname(): ?string
+    public function getLastname(): ?string
     {
         return $this->usr_lastname;
     }
 
-    public function setUsrLastname(string $usr_lastname): self
+    public function setLastname(string $usr_lastname): self
     {
         $this->usr_lastname = $usr_lastname;
 
         return $this;
     }
 
-    public function getUsrUsername(): ?string
+    public function getUsername(): ?string
     {
         return $this->usr_username;
     }
 
-    public function setUsrUsername(string $usr_username): self
+    public function setUsername(string $usr_username): self
     {
         $this->usr_username = $usr_username;
 
         return $this;
     }
 
-    public function getUsrNickname(): ?string
+    public function getNickname(): ?string
     {
         return $this->usr_nickname;
     }
 
-    public function setUsrNickname(string $usr_nickname): self
+    public function setNickname(string $usr_nickname): self
     {
         $this->usr_nickname = $usr_nickname;
 
         return $this;
     }
 
-    public function getUsrBirthdate(): ?\DateTimeInterface
+    public function getBirthdate(): ?\DateTimeInterface
     {
         return $this->usr_birthdate;
     }
 
-    public function setUsrBirthdate(\DateTimeInterface $usr_birthdate): self
+    public function setBirthdate(\DateTimeInterface $usr_birthdate): self
     {
         $this->usr_birthdate = $usr_birthdate;
 
         return $this;
     }
 
-    public function getUsrEmail(): ?string
+    public function getEmail(): ?string
     {
         return $this->usr_email;
     }
 
-    public function setUsrEmail(?string $usr_email): self
+    public function setEmail(?string $usr_email): self
     {
         $this->usr_email = $usr_email;
 
         return $this;
     }
 
-    public function getUsrPassword(): ?string
+    public function getPassword(): ?string
     {
         return $this->usr_password;
     }
 
-    public function setUsrPassword(?string $usr_password): self
+    public function setPassword(?string $usr_password): self
     {
         $this->usr_password = $usr_password;
 
         return $this;
     }
 
-    public function getUsrPositionName(): ?string
+    public function getPositionName(): ?string
     {
         return $this->usr_positionName;
     }
 
-    public function setUsrPositionName(?string $usr_positionName): self
+    public function setPositionName(?string $usr_positionName): self
     {
         $this->usr_positionName = $usr_positionName;
 
         return $this;
     }
 
-    public function getUsrPicture(): ?string
+    public function getPicture(): ?string
     {
         return $this->usr_picture;
     }
 
-    public function setUsrPicture(string $usr_picture): self
+    public function setPicture(string $usr_picture): self
     {
         $this->usr_picture = $usr_picture;
 
         return $this;
     }
 
-    public function getUsrToken(): ?string
+    public function getToken(): ?string
     {
         return $this->usr_token;
     }
 
-    public function setUsrToken(string $usr_token): self
+    public function setToken(string $usr_token): self
     {
         $this->usr_token = $usr_token;
 
         return $this;
     }
 
-    public function getUsrWeightIni(): ?float
+    public function getWeightIni(): ?float
     {
         return $this->usr_weight_ini;
     }
 
-    public function setUsrWeightIni(float $usr_weight_ini): self
+    public function setWeightIni(float $usr_weight_ini): self
     {
         $this->usr_weight_ini = $usr_weight_ini;
 
         return $this;
     }
 
-    public function getUsrUsrWeight1y(): ?float
+    public function getUsrWeight1y(): ?float
     {
         return $this->usr_usr_weight_1y;
     }
 
-    public function setUsrUsrWeight1y(float $usr_usr_weight_1y): self
+    public function setUsrWeight1y(float $usr_usr_weight_1y): self
     {
         $this->usr_usr_weight_1y = $usr_usr_weight_1y;
 
         return $this;
     }
 
-    public function getUsrWeight2y(): ?float
+    public function getWeight2y(): ?float
     {
         return $this->usr_weight_2y;
     }
 
-    public function setUsrWeight2y(float $usr_weight_2y): self
+    public function setWeight2y(float $usr_weight_2y): self
     {
         $this->usr_weight_2y = $usr_weight_2y;
 
         return $this;
     }
 
-    public function getUsrWeight3y(): ?float
+    public function getWeight3y(): ?float
     {
         return $this->usr_weight_3y;
     }
 
-    public function setUsrWeight3y(float $usr_weight_3y): self
+    public function setWeight3y(float $usr_weight_3y): self
     {
         $this->usr_weight_3y = $usr_weight_3y;
 
         return $this;
     }
 
-    public function getUsrWeight4y(): ?float
+    public function getWeight4y(): ?float
     {
         return $this->usr_weight_4y;
     }
 
-    public function setUsrWeight4y(float $usr_weight_4y): self
+    public function setWeight4y(float $usr_weight_4y): self
     {
         $this->usr_weight_4y = $usr_weight_4y;
 
         return $this;
     }
 
-    public function getUsrWeight5y(): ?float
+    public function getWeight5y(): ?float
     {
         return $this->usr_weight_5y;
     }
 
-    public function setUsrWeight5y(float $usr_weight_5y): self
+    public function setWeight5y(float $usr_weight_5y): self
     {
         $this->usr_weight_5y = $usr_weight_5y;
 
         return $this;
     }
 
-    public function getUsrActArchiveNbDays(): ?int
+    public function getActArchiveNbDays(): ?int
     {
         return $this->usr_act_archive_nbDays;
     }
 
-    public function setUsrActArchiveNbDays(int $usr_act_archive_nbDays): self
+    public function setActArchiveNbDays(int $usr_act_archive_nbDays): self
     {
         $this->usr_act_archive_nbDays = $usr_act_archive_nbDays;
 
         return $this;
     }
 
-    public function getUsrRmToken(): ?string
+    public function getRmToken(): ?string
     {
         return $this->usr_rm_token;
     }
 
-    public function setUsrRmToken(string $usr_rm_token): self
+    public function setRmToken(string $usr_rm_token): self
     {
         $this->usr_rm_token = $usr_rm_token;
 
         return $this;
     }
 
-    public function getUsrValidated(): ?\DateTimeInterface
+    public function getValidated(): ?\DateTimeInterface
     {
         return $this->usr_validated;
     }
 
-    public function setUsrValidated(\DateTimeInterface $usr_validated): self
+    public function setValidated(\DateTimeInterface $usr_validated): self
     {
         $this->usr_validated = $usr_validated;
 
         return $this;
     }
 
-    public function getUsrEnabledCreatingUser(): ?bool
+    public function getEnabledCreatingUser(): ?bool
     {
         return $this->usr_enabledCreatingUser;
     }
 
-    public function setUsrEnabledCreatingUser(bool $usr_enabledCreatingUser): self
+    public function setEnabledCreatingUser(bool $usr_enabledCreatingUser): self
     {
         $this->usr_enabledCreatingUser = $usr_enabledCreatingUser;
 
         return $this;
     }
 
-    public function getUsrCreatedBy(): ?int
+    public function getCreatedBy(): ?int
     {
         return $this->usr_createdBy;
     }
 
-    public function setUsrCreatedBy(int $usr_createdBy): self
+    public function setCreatedBy(int $usr_createdBy): self
     {
         $this->usr_createdBy = $usr_createdBy;
 
         return $this;
     }
 
-    public function getUsrInserted(): ?\DateTimeInterface
+    public function getInserted(): ?\DateTimeInterface
     {
         return $this->usr_inserted;
     }
 
-    public function setUsrInserted(\DateTimeInterface $usr_inserted): self
+    public function setInserted(\DateTimeInterface $usr_inserted): self
     {
         $this->usr_inserted = $usr_inserted;
 
         return $this;
     }
 
-    public function getUsrLastConnected(): ?\DateTimeInterface
+    public function getLastConnected(): ?\DateTimeInterface
     {
         return $this->usr_last_connected;
     }
 
-    public function setUsrLastConnected(?\DateTimeInterface $usr_last_connected): self
+    public function setLastConnected(?\DateTimeInterface $usr_last_connected): self
     {
         $this->usr_last_connected = $usr_last_connected;
 
         return $this;
     }
 
-    public function getUsrDeleted(): ?\DateTimeInterface
+    public function getDeleted(): ?\DateTimeInterface
     {
         return $this->usr_deleted;
     }
 
-    public function setUsrDeleted(\DateTimeInterface $usr_deleted): self
+    public function setDeleted(\DateTimeInterface $usr_deleted): self
     {
         $this->usr_deleted = $usr_deleted;
 
@@ -902,5 +1045,88 @@ class User
 
         return $this;
     }
+    public function getFullName(): string
+    {
+        if ($this->deleted) {
+            return (string) $this->id;
+        }
+
+        return "$this->firstname $this->lastname";
+    }
+
+    public function getInvertedFullName()
+    {
+        if ($this->deleted) {
+            return (string) $this->id;
+        }
+
+        return "$this->lastname $this->firstname";
+    }
+    public function getAbbr()
+    {
+        $prefix = $this->firstname ? $this->firstname[0] : '';
+        $suffix = $this->lastname ? $this->lastname[0] : '';
+        return strtoupper($prefix . $suffix);
+    }
+    public function removeOption(OrganizationUserOption $option)
+    {
+        $this->options->removeElement($option);
+        return $this;
+    }
+    public function __toString()
+    {
+        return  strval($this->id);
+    }
+    public function addMail(Mail $mail)
+    {
+        $this->mails->add($mail);
+        $mail->setUser($this);
+        return $this;
+    }
+
+    public function removeMail(Mail $mail)
+    {
+        $this->mails->removeElement($mail);
+        return $this;
+    }
+    public function addTarget(Target $target)
+    {
+        $this->targets->add($target);
+        $target->setUser($this);
+        return $this;
+    }
+
+    public function removeTarget(Target $target)
+    {
+        $this->targets->removeElement($target);
+        return $this;
+    }
+    /**
+     * @return Collection|Grade[]
+     */
+    public function getGrades(Stage $stage, User $gradingUser)
+    {
+        $grades = new ArrayCollection;
+        foreach ($stage->getParticipants() as $participant) {
+            // Retrieving grading user participations
+            if ($participant->getUsrId() == $gradingUser->getId()) {
+                foreach ($participant->getGrades() as $grade) {
+                    if ($grade->getGradedUsrId() == $this->id) {
+                        $grades->add($grade);
+                    }
+                }
+            }
+        }
+        return $grades;
+    }
+
+    /**
+     * @return Collection|ActivityUser[]
+     */
+    public function getStageParticipations(Stage $stage)
+    {
+        return $stage->getParticipants()->matching(Criteria::create()->where(Criteria::expr()->eq("usrId", $this->id)));
+    }
+    //TODO get Role et les autres gros trucs, subordinates
 
 }
