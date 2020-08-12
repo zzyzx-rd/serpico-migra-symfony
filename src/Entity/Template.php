@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\TemplateRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -14,7 +15,7 @@ use Doctrine\ORM\Mapping\OneToOne;
  * @ApiResource()
  * @ORM\Entity(repositoryClass=TemplateRepository::class)
  */
-class Template
+class Template extends DbObject
 {
     /**
      * @ORM\Id()
@@ -77,53 +78,92 @@ class Template
      * @ORM\ManyToOne(targetEntity=Activity::class)
      */
     private $original_activity_act;
+
+    /**
+     * Template constructor.
+     * @param int $id
+     * @param $tmp_name
+     * @param $tmp_createdBy
+     * @param $tmp_inserted
+     * @param $tmp_deleted
+     * @param $activities
+     * @param $stage
+     * @param $criterion
+     * @param $department
+     * @param $organization
+     * @param $original_activity_act
+     */
+    public function __construct(
+        int $id = 0,
+        $tmp_name = null,
+        $original_activity_act = null,
+        $tmp_createdBy = null,
+        $tmp_inserted = null,
+        $tmp_deleted = null,
+        $activities = null,
+        $stage = null,
+        $criterion = null,
+        $department = null,
+        $organization = null)
+    {
+        $this->tmp_name = $tmp_name;
+        $this->tmp_inserted = $tmp_inserted;
+        $this->tmp_deleted = $tmp_deleted;
+        $this->activities = $activities?$activities:new ArrayCollection();
+        $this->stage = $stage;
+        $this->criterion = $criterion;
+        $this->department = $department;
+        $this->organization = $organization;
+        $this->original_activity_act = $original_activity_act;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getTmpName(): ?string
+    public function getName(): ?string
     {
         return $this->tmp_name;
     }
 
-    public function setTmpName(string $tmp_name): self
+    public function setName(string $tmp_name): self
     {
         $this->tmp_name = $tmp_name;
 
         return $this;
     }
 
-    public function getTmpCreatedBy(): ?int
+    public function getCreatedBy(): ?int
     {
         return $this->tmp_createdBy;
     }
 
-    public function setTmpCreatedBy(int $tmp_createdBy): self
+    public function setCreatedBy(int $tmp_createdBy): self
     {
         $this->tmp_createdBy = $tmp_createdBy;
 
         return $this;
     }
 
-    public function getTmpInserted(): ?\DateTimeInterface
+    public function getInserted(): ?\DateTimeInterface
     {
         return $this->tmp_inserted;
     }
 
-    public function setTmpInserted(\DateTimeInterface $tmp_inserted): self
+    public function setInserted(\DateTimeInterface $tmp_inserted): self
     {
         $this->tmp_inserted = $tmp_inserted;
 
         return $this;
     }
 
-    public function getTmpDeleted(): ?\DateTimeInterface
+    public function getDeleted(): ?\DateTimeInterface
     {
         return $this->tmp_deleted;
     }
 
-    public function setTmpDeleted(\DateTimeInterface $tmp_deleted): self
+    public function setDeleted(\DateTimeInterface $tmp_deleted): self
     {
         $this->tmp_deleted = $tmp_deleted;
 
@@ -221,5 +261,18 @@ class Template
 
         return $this;
     }
+    function addActivity(Activity $activity){
+        $this->activities->add($activity);
+        $activity->setTemplate($this);
+        return $this;
+    }
 
+    function removeActivity(Activity $activity){
+        $this->activities->removeElement($activity);
+        return $this;
+    }
+    public function __toString()
+    {
+        return (string) $this->id;
+    }
 }
