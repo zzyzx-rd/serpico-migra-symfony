@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\TemplateCriterionRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -13,7 +14,7 @@ use Doctrine\ORM\Mapping\OrderBy;
 /**
  * @ORM\Entity(repositoryClass=TemplateCriterionRepository::class)
  */
-class TemplateCriterion
+class TemplateCriterion extends DbObject
 {
     /**
      * @ORM\Id()
@@ -99,6 +100,59 @@ class TemplateCriterion
      * @JoinColumn(name="criterion_name_cna_id", referencedColumnName="cna_id")
      */
     protected $cName;
+
+    /**
+     * TemplateCriterion constructor.
+     * @param $id
+     * @param $icrt_type
+     * @param $crt_name
+     * @param $crt_weight
+     * @param $crt_forceComment_compare
+     * @param $crt_forceComment_value
+     * @param $crt_forceComment_sign
+     * @param $crt_lowerbound
+     * @param $crt_upperbound
+     * @param $crt_step
+     * @param $crt_comment
+     * @param $crt_createdBy
+     * @param $crt_inserted
+     * @param $stage
+     * @param $participants
+     * @param $cName
+     */
+    public function __construct(
+        $id = 0,
+        $icrt_type = 1,
+        $crt_name = null,
+        $crt_weight = 1,
+        $crt_lowerbound = 0,
+        $crt_upperbound = 5,
+        $crt_step = 0.5,
+        $crt_forceComment_compare = null,
+        $crt_forceComment_value = null,
+        $crt_forceComment_sign = null,
+        $crt_comment = null,
+        $crt_createdBy = null,
+        $crt_inserted = null,
+        $stage = null,
+        $participants = null,
+        $cName = null)
+    {
+        $this->icrt_type = $icrt_type;
+        $this->crt_name = $crt_name;
+        $this->crt_weight = $crt_weight;
+        $this->crt_forceComment_compare = $crt_forceComment_compare;
+        $this->crt_forceComment_value = $crt_forceComment_value;
+        $this->crt_forceComment_sign = $crt_forceComment_sign;
+        $this->crt_lowerbound = $crt_lowerbound;
+        $this->crt_upperbound = $crt_upperbound;
+        $this->crt_step = $crt_step;
+        $this->crt_comment = $crt_comment;
+        $this->crt_inserted = $crt_inserted;
+        $this->stage = $stage;
+        $this->participants = $participants?$participants:new ArrayCollection();
+        $this->cName = $cName;
+    }
 
     public function getId(): ?int
     {
@@ -296,5 +350,23 @@ class TemplateCriterion
     {
         $this->cName = $cName;
     }
+    function addParticipant(TemplateActivityUser $participant){
+        $this->participants->add($participant);
+        $participant->setCriterion($this);
+        return $this;
+    }
+
+
+    function removeParticipant(TemplateActivityUser $participant){
+        // Remove this participant
+        $this->participants->removeElement($participant);
+        return $this;
+    }
+    public function __toString()
+    {
+        return (string) $this->id;
+    }
+
+
 
 }
