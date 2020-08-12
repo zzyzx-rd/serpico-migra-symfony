@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\TitleRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -14,7 +15,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  * @ApiResource()
  * @ORM\Entity(repositoryClass=TitleRepository::class)
  */
-class Title
+class Title extends DbObject
 {
     /**
      * @ORM\Id()
@@ -71,65 +72,101 @@ class Title
      */
     private $targets;
 
+    /**
+     * Title constructor.
+     * @param int $id
+     * @param $tit_name
+     * @param $tit_weight_ini
+     * @param $tit_createdBy
+     * @param $tit_inserted
+     * @param $tit_deleted
+     * @param $organization
+     * @param $weight
+     * @param $options
+     * @param $targets
+     */
+    public function __construct(
+        int $id = 0,
+        $tit_name = '',
+        $tit_weight_ini = 0.0,
+        $tit_createdBy = null,
+        $tit_inserted = null,
+        $tit_deleted = null,
+        $organization = null,
+        $weight = null,
+        $options = null,
+        $targets = null)
+    {
+        $this->tit_name = $tit_name;
+        $this->tit_weight_ini = $tit_weight_ini;
+        $this->tit_inserted = $tit_inserted;
+        $this->tit_deleted = $tit_deleted;
+        $this->organization = $organization;
+        $this->weight = $weight;
+        $this->options = $options?$options:new ArrayCollection();
+        $this->targets = $targets?$targets:new ArrayCollection();
+    }
+
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getTitName(): ?string
+    public function getName(): ?string
     {
         return $this->tit_name;
     }
 
-    public function setTitName(string $tit_name): self
+    public function setName(string $tit_name): self
     {
         $this->tit_name = $tit_name;
 
         return $this;
     }
 
-    public function getTitWeightIni(): ?float
+    public function getWeightIni(): ?float
     {
         return $this->tit_weight_ini;
     }
 
-    public function setTitWeightIni(float $tit_weight_ini): self
+    public function setWeightIni(float $tit_weight_ini): self
     {
         $this->tit_weight_ini = $tit_weight_ini;
 
         return $this;
     }
 
-    public function getTitCreatedBy(): ?int
+    public function getCreatedBy(): ?int
     {
         return $this->tit_createdBy;
     }
 
-    public function setTitCreatedBy(int $tit_createdBy): self
+    public function setCreatedBy(int $tit_createdBy): self
     {
         $this->tit_createdBy = $tit_createdBy;
 
         return $this;
     }
 
-    public function getTitInserted(): ?\DateTimeInterface
+    public function getInserted(): ?\DateTimeInterface
     {
         return $this->tit_inserted;
     }
 
-    public function setTitInserted(\DateTimeInterface $tit_inserted): self
+    public function setInserted(\DateTimeInterface $tit_inserted): self
     {
         $this->tit_inserted = $tit_inserted;
 
         return $this;
     }
 
-    public function getTitDeleted(): ?\DateTimeInterface
+    public function getDeleted(): ?\DateTimeInterface
     {
         return $this->tit_deleted;
     }
 
-    public function setTitDeleted(?\DateTimeInterface $tit_deleted): self
+    public function setDeleted(?\DateTimeInterface $tit_deleted): self
     {
         $this->tit_deleted = $tit_deleted;
 
@@ -200,6 +237,46 @@ class Title
         $this->targets = $targets;
     }
 
+    function addUser(User $user){
 
+        $this->users->add($user);
+        // $user->setPosition($this);
+        return $this;
+    }
 
+    function removeUser(User $user){
+        $this->users->removeElement($user);
+        return $this;
+    }
+
+    function addTarget(Target $target)
+    {
+        $this->targets->add($target);
+        $target->setPosition($this);
+        return $this;
+    }
+
+    function removeTarget(Target $target)
+    {
+        $this->targets->removeElement($target);
+        return $this;
+    }
+
+    function addOption(OrganizationUserOption $option)
+    {
+        $this->options->add($option);
+        $option->setTitle($this);
+        return $this;
+    }
+
+    function removeOption(OrganizationUserOption $option)
+    {
+        $this->options->removeElement($option);
+        return $this;
+    }
+
+    public function __toString()
+    {
+        return (string) $this->id;
+    }
 }
