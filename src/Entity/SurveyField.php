@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\SurveyFieldRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -13,7 +14,7 @@ use Doctrine\ORM\Mapping\OneToMany;
  * @ApiResource()
  * @ORM\Entity(repositoryClass=SurveyFieldRepository::class)
  */
-class SurveyField
+class SurveyField extends DbObject
 {
     /**
      * @ORM\Id()
@@ -90,113 +91,160 @@ class SurveyField
      */
     protected $answers;
 
+    /**
+     * SurveyField constructor.
+     * @param int $id
+     * @param $sfi_type
+     * @param $sfi_isMandatory
+     * @param $sfi_title
+     * @param $sfi_position
+     * @param $sfi_description
+     * @param $sfi_createdBy
+     * @param $sfi_inserted
+     * @param $sfi_upperbound
+     * @param $sfi_lowerbound
+     * @param $criterion
+     * @param $survey
+     * @param $parameters
+     * @param $answers
+     */
+    public function __construct(
+        int $id = 0,
+        $sfi_type = null,
+        $sfi_isMandatory = true,
+        $sfi_title = null,
+        $sfi_description = null,
+        $sfi_position = null,
+        $sfi_upperbound = null,
+        $sfi_lowerbound = null,
+        $sfi_createdBy = null,
+        $criterion = null,
+        $sfi_inserted = null,
+        Survey $survey = null,
+        $parameters = null,
+        Answer $answers = null)
+    {
+        $this->sfi_type = $sfi_type;
+        $this->sfi_isMandatory = $sfi_isMandatory;
+        $this->sfi_title = $sfi_title;
+        $this->sfi_position = $sfi_position;
+        $this->sfi_description = $sfi_description;
+        $this->sfi_inserted = $sfi_inserted;
+        $this->sfi_upperbound = $sfi_upperbound;
+        $this->sfi_lowerbound = $sfi_lowerbound;
+        $this->criterion = $criterion;
+        $this->survey = $survey;
+        $this->parameters = $parameters?$parameters:new ArrayCollection();
+        $this->answers = $answers?$answers: new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getSfiType(): ?string
+    public function getType(): ?string
     {
         return $this->sfi_type;
     }
 
-    public function setSfiType(string $sfi_type): self
+    public function setType(string $sfi_type): self
     {
         $this->sfi_type = $sfi_type;
 
         return $this;
     }
 
-    public function getSfiIsMandatory(): ?bool
+    public function getIsMandatory(): ?bool
     {
         return $this->sfi_isMandatory;
     }
 
-    public function setSfiIsMandatory(bool $sfi_isMandatory): self
+    public function setIsMandatory(bool $sfi_isMandatory): self
     {
         $this->sfi_isMandatory = $sfi_isMandatory;
 
         return $this;
     }
 
-    public function getSfiTitle(): ?string
+    public function getTitle(): ?string
     {
         return $this->sfi_title;
     }
 
-    public function setSfiTitle(string $sfi_title): self
+    public function setTitle(string $sfi_title): self
     {
         $this->sfi_title = $sfi_title;
 
         return $this;
     }
 
-    public function getSfiPosition(): ?int
+    public function getPosition(): ?int
     {
         return $this->sfi_position;
     }
 
-    public function setSfiPosition(int $sfi_position): self
+    public function setPosition(int $sfi_position): self
     {
         $this->sfi_position = $sfi_position;
 
         return $this;
     }
 
-    public function getSfiDescription(): ?string
+    public function getDescription(): ?string
     {
         return $this->sfi_description;
     }
 
-    public function setSfiDescription(string $sfi_description): self
+    public function setDescription(string $sfi_description): self
     {
         $this->sfi_description = $sfi_description;
 
         return $this;
     }
 
-    public function getSfiCreatedBy(): ?int
+    public function getCreatedBy(): ?int
     {
         return $this->sfi_createdBy;
     }
 
-    public function setSfiCreatedBy(int $sfi_createdBy): self
+    public function setCreatedBy(int $sfi_createdBy): self
     {
         $this->sfi_createdBy = $sfi_createdBy;
 
         return $this;
     }
 
-    public function getSfiInserted(): ?\DateTimeInterface
+    public function getInserted(): ?\DateTimeInterface
     {
         return $this->sfi_inserted;
     }
 
-    public function setSfiInserted(\DateTimeInterface $sfi_inserted): self
+    public function setInserted(\DateTimeInterface $sfi_inserted): self
     {
         $this->sfi_inserted = $sfi_inserted;
 
         return $this;
     }
 
-    public function getSfiUpperbound(): ?int
+    public function getUpperbound(): ?int
     {
         return $this->sfi_upperbound;
     }
 
-    public function setSfiUpperbound(int $sfi_upperbound): self
+    public function setUpperbound(int $sfi_upperbound): self
     {
         $this->sfi_upperbound = $sfi_upperbound;
 
         return $this;
     }
 
-    public function getSfiLowerbound(): ?int
+    public function getLowerbound(): ?int
     {
         return $this->sfi_lowerbound;
     }
 
-    public function setSfiLowerbound(int $sfi_lowerbound): self
+    public function setLowerbound(int $sfi_lowerbound): self
     {
         $this->sfi_lowerbound = $sfi_lowerbound;
 
@@ -265,6 +313,31 @@ class SurveyField
     public function setAnswers($answers): void
     {
         $this->answers = $answers;
+    }
+
+    public function addParameter(SurveyFieldParameter $parameter)
+    {
+        $this->parameters->add($parameter);
+        /*$parameter->setSurveyField($this);*/
+        return $this;
+    }
+
+    public function removeParameter(SurveyFieldParameter $parameter)
+    {
+        $this->parameters->removeElement($parameter);
+        return $this;
+    }
+    public function addAnswers(Answer $answers)
+    {
+        $this->answers->add($answers);
+        /*$parameter->setSurveyField($this);*/
+        return $this;
+    }
+
+    public function removeAnswers(Answer $answers)
+    {
+        $this->answers->removeElement($answers);
+        return $this;
     }
 
 }
