@@ -19,42 +19,42 @@ class Grade extends DbObject
      * @ORM\Column(name="grd_id", length=10, type="integer")
      * @var int
      */
-    private $id;
+    protected $id;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $grd_type;
+    public $grd_type;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $grd_graded_usr_id;
+    public $grd_graded_usr_id;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $grd_graded_tea_id;
+    public $grd_graded_tea_id;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $grd_value;
+    public $grd_value;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $grd_comment;
+    public $grd_comment;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $grd_createdBy;
+    public $grd_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $grd_inserted;
+    public $grd_inserted;
 
     /**
      * @ManyToOne(targetEntity="Team")
@@ -190,18 +190,6 @@ class Grade extends DbObject
     public function setComment(?string $grd_comment): self
     {
         $this->grd_comment = $grd_comment;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->grd_createdBy;
-    }
-
-    public function setCreatedBy(?int $grd_createdBy): self
-    {
-        $this->grd_createdBy = $grd_createdBy;
 
         return $this;
     }

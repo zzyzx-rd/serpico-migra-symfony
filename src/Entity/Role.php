@@ -18,22 +18,22 @@ class Role
      * @ORM\Column(name="rol_id", type="integer", nullable=false)
      * @var int
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="string", length=10)
      */
-    private $rol_name;
+    public $rol_name;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $rol_createdBy;
+    public $rol_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $rol_inserted;
+    public $rol_inserted;
 
     /**
      * Role constructor.
@@ -63,18 +63,6 @@ class Role
     public function setName(string $rol_name): self
     {
         $this->rol_name = $rol_name;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->rol_createdBy;
-    }
-
-    public function setCreatedBy(int $rol_createdBy): self
-    {
-        $this->rol_createdBy = $rol_createdBy;
 
         return $this;
     }

@@ -21,44 +21,44 @@ class Icon extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="ico_id", type="integer", nullable=false)
      */
-    private $id;
+    protected $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $ico_type;
+    public $ico_type;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $ico_name;
+    public $ico_name;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $ico_unicode;
+    public $ico_unicode;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $ico_createdBy;
+    public $ico_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $ico_inserted;
+    public $ico_inserted;
 
     /**
      * @OneToMany(targetEntity="CriterionName", mappedBy="icon", cascade={"persist", "remove"}, orphanRemoval=true)
      * @var Collection<CriterionName>
      */
-    private $criterionNames;
+    public $criterionNames;
 
     /**
      * @OneToMany(targetEntity="WorkerFirmSector", mappedBy="icon", cascade={"persist", "remove"}, orphanRemoval=true)
      * @var Collection<WorkerFirmSector>
      */
-    private $workerFirmSectors;
+    public $workerFirmSectors;
 
     /**
      * Icon constructor.
@@ -128,18 +128,6 @@ class Icon extends DbObject
     public function setIcoUnicode(string $ico_unicode): self
     {
         $this->ico_unicode = $ico_unicode;
-
-        return $this;
-    }
-
-    public function etCreatedBy(): ?int
-    {
-        return $this->ico_createdBy;
-    }
-
-    public function setIcoCreatedBy(?int $ico_createdBy): self
-    {
-        $this->ico_createdBy = $ico_createdBy;
 
         return $this;
     }

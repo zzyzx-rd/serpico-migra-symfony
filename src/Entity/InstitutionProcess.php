@@ -26,37 +26,37 @@ class InstitutionProcess extends DbObject
      * @ORM\Column(name="inp_id", type="integer", length=10)
      * @var int
      */
-    private $id;
+    protected $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $inp_name;
+    public $inp_name;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $inp_approvable;
+    public $inp_approvable;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $inp_gradable;
+    public $inp_gradable;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $inp_createdBy;
+    public $inp_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $inp_isnerted;
+    public $inp_isnerted;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
-    private $inp_deleted;
+    public $inp_deleted;
 
     /**
      * @ManyToOne(targetEntity="Organization")
@@ -77,20 +77,20 @@ class InstitutionProcess extends DbObject
      * @OneToOne(targetEntity="InstitutionProcess")
      * @JoinColumn(name="parent_id", referencedColumnName="inp_id", nullable=true)
      */
-    private $parent;
+    public $parent;
     /**
      * @OneToMany(targetEntity="InstitutionProcess", mappedBy="parent", cascade={"persist"}, orphanRemoval=false)
      */
-    private $children;
+    public $children;
     /**
      * @OneToMany(targetEntity="IProcessStage", mappedBy="institutionProcess", cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $stages;
+    public $stages;
     /**
      * @OneToMany(targetEntity="Activity", mappedBy="institutionProcess", cascade={"persist","remove"})
      * @OrderBy({"status" = "ASC", "name" = "ASC"})
      */
-    private $activities;
+    public $activities;
 
     /**
      * InstitutionProcess constructor.
@@ -178,18 +178,6 @@ class InstitutionProcess extends DbObject
     public function setGradable(bool $inp_gradable): self
     {
         $this->inp_gradable = $inp_gradable;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->inp_createdBy;
-    }
-
-    public function setCreatedBy(int $inp_createdBy): self
-    {
-        $this->inp_createdBy = $inp_createdBy;
 
         return $this;
     }

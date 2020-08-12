@@ -35,52 +35,52 @@ class Activity extends DbObject
      * @Column(name="act_id", type="integer", nullable=false)
      * @var int
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $act_complete;
+    public $act_complete;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $act_magnitude;
+    public $act_magnitude;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $act_simplified;
+    public $act_simplified;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $act_name;
+    public $act_name;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $act_visibility;
+    public $act_visibility;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $act_startDate;
+    public $act_startDate;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $act_endDate;
+    public $act_endDate;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $act_objectives;
+    public $act_objectives;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $act_status;
+    public $act_status;
 
     /**
      * @ManyToOne(targetEntity="Process")
@@ -91,7 +91,7 @@ class Activity extends DbObject
     /**
      * @ORM\ManyToOne(targetEntity=InstitutionProcess::class, inversedBy="activities")
      */
-    private $institutionProcess;
+    public $institutionProcess;
 
     /**
      * @ManyToOne(targetEntity="Organization")
@@ -102,55 +102,55 @@ class Activity extends DbObject
      * @OneToMany(targetEntity="Stage", mappedBy="activity", cascade={"persist", "remove"}, orphanRemoval=true)
      * @OrderBy({"startdate" = "ASC", "inserted" = "ASC"})
      */
-    private $stages;
+    public $stages;
     /**
      * @OneToMany(targetEntity="Decision", mappedBy="activity",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $decisions;
+    public $decisions;
     /**
      * @OneToMany(targetEntity="Grade", mappedBy="activity",cascade={"persist", "remove"}, orphanRemoval=true)
      * @var ArrayCollection|Grade[]
      */
-    private $grades;
+    public $grades;
     /**
      * @OneToMany(targetEntity="Result", mappedBy="activity",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $results;
+    public $results;
     /**
      * @OneToMany(targetEntity="ResultProject", mappedBy="activity",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $projectResults;
+    public $projectResults;
     /**
      * @OneToMany(targetEntity="ResultTeam", mappedBy="activity",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $resultTeams;
+    public $resultTeams;
     /**
      * @OneToMany(targetEntity="Ranking", mappedBy="activity",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $rankings;
+    public $rankings;
     /**
      * @OneToMany(targetEntity="RankingTeam", mappedBy="activity",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $rankingTeams;
+    public $rankingTeams;
     /**
      * @OneToMany(targetEntity="RankingHistory", mappedBy="activity",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $historicalRankings;
+    public $historicalRankings;
     /**
      * @OneToMany(targetEntity="RankingTeamHistory", mappedBy="activity",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $historicalRankingTeams;
+    public $historicalRankingTeams;
     /**
      * @ManyToOne(targetEntity="TemplateActivity")
      * @JoinColumn(name="template_activity_act_id", referencedColumnName="act_id",nullable=true)
      */
-    private $template;
+    public $template;
     /**
      * @OneToMany(targetEntity="ActivityUser", mappedBy="activity",cascade={"persist", "remove"}, orphanRemoval=true)
      * @OrderBy({"team" = "ASC"})
      * @var ArrayCollection|ActivityUser[]
      */
-    private $participants;
+    public $participants;
     /**
      * @Column(name="act_progress", type="float")
      * @var float
@@ -226,27 +226,27 @@ class Activity extends DbObject
      * @ORM\ManyToOne(targetEntity=User::class)
      * @ORM\JoinColumn(nullable=false)
      */
-    private $act_master_usr;
+    public $act_master_usr;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $diffCriteria;
+    public $diffCriteria;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $diffParticipants;
+    public $diffParticipants;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $nbParticipants;
+    public $nbParticipants;
     /**
      * @var DateTime
      */
-    private $act_gEndDate;
-    private $act_gStartDate;
+    public $act_gEndDate;
+    public $act_gStartDate;
 
     public function __toString()
     {
@@ -782,22 +782,6 @@ class Activity extends DbObject
     public function setResBenefitEff(int $res_benefit_eff): void
     {
         $this->res_benefit_eff = $res_benefit_eff;
-    }
-
-    /**
-     * @return int
-     */
-    public function getCreatedBy(): int
-    {
-        return $this->createdBy;
-    }
-
-    /**
-     * @param int $createdBy
-     */
-    public function setCreatedBy(int $createdBy): void
-    {
-        $this->createdBy = $createdBy;
     }
 
     /**

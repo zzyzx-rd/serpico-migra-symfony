@@ -20,62 +20,62 @@ class Ranking extends DbObject
      * @ORM\Column(name="rnk_id", type="integer", nullable=false, length=10)
      * @var int
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="string", length=1)
      */
-    private $rnk_dtype;
+    public $rnk_dtype;
 
     /**
      * @ORM\Column(type="string", length=1)
      */
-    private $rnk_wtype;
+    public $rnk_wtype;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $rnk_abs_result;
+    public $rnk_abs_result;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $rnk_rel_result;
+    public $rnk_rel_result;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $rnk_period;
+    public $rnk_period;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $rnk_freq;
+    public $rnk_freq;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $rnk_value;
+    public $rnk_value;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $rnk_series_pop;
+    public $rnk_series_pop;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $rnk_createdBy;
+    public $rnk_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $rnk_inserted;
+    public $rnk_inserted;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $rnk_updated;
+    public $rnk_updated;
 
     /**
      *@ManyToOne(targetEntity="Activity")
@@ -104,7 +104,7 @@ class Ranking extends DbObject
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
      */
-    private $rnk_user_usr;
+    public $rnk_user_usr;
 
     /**
      * Ranking constructor.

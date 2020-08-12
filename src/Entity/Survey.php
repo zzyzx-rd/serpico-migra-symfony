@@ -24,27 +24,27 @@ class Survey extends DbObject
      * @ORM\Column(name="sur_id", type="integer", length=10, nullable=false)
      * @var int
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="string", length=45)
      */
-    private $sur_name;
+    public $sur_name;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $sur_createdBy;
+    public $sur_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $sur_inserted;
+    public $sur_inserted;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $sur_state;
+    public $sur_state;
 
     /**
      * @OneToOne(targetEntity="Stage")
@@ -63,7 +63,7 @@ class Survey extends DbObject
      * @OrderBy({"leader" = "DESC"})
      * @var ArrayCollection<ActivityUser>
      */
-    private $participants;
+    public $participants;
 
     /**
      * @OneToMany(targetEntity="SurveyField", mappedBy="survey", cascade={"persist", "remove"}, orphanRemoval=true)

@@ -20,32 +20,32 @@ class City extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="cit_id", type="integer", nullable=false)
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $cit_abbr;
+    public $cit_abbr;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $cit_fullname;
+    public $cit_fullname;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $cit_name;
+    public $cit_name;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $cit_createdBy;
+    public $cit_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $cit_inserted;
+    public $cit_inserted;
 
     /**
      * @ManyToOne(targetEntity="State")
@@ -62,7 +62,7 @@ class City extends DbObject
     /**
      * @OneToMany(targetEntity="WorkerFirm", mappedBy="city",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $firms;
+    public $firms;
 
     /**
      * City constructor.
@@ -135,18 +135,6 @@ class City extends DbObject
     public function setName(string $cit_name): self
     {
         $this->cit_name = $cit_name;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->cit_createdBy;
-    }
-
-    public function setCreatedBy(?int $cit_createdBy): self
-    {
-        $this->cit_createdBy = $cit_createdBy;
 
         return $this;
     }

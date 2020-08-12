@@ -17,102 +17,102 @@ class ResultProject extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="rsp_id", type="integer", nullable=false)
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $rsp_type;
+    public $rsp_type;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $rsp_war;
+    public $rsp_war;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $rsp_ear;
+    public $rsp_ear;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $rsp_wrr;
+    public $rsp_wrr;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $rsp_err;
+    public $rsp_err;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $rsp_wsd;
+    public $rsp_wsd;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $rsp_esd;
+    public $rsp_esd;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $rsp_wdr;
+    public $rsp_wdr;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $rsp_edr;
+    public $rsp_edr;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $rsp_wsd_max;
+    public $rsp_wsd_max;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $rsp_esd_max;
+    public $rsp_esd_max;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $rsp_win;
+    public $rsp_win;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $rsp_ein;
+    public $rsp_ein;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $rsp_win_max;
+    public $rsp_win_max;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $rsp_ein_max;
+    public $rsp_ein_max;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $rsp_wdr_gen;
+    public $rsp_wdr_gen;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $rsp_edr_gen;
+    public $rsp_edr_gen;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $rsp_createdBy;
+    public $rsp_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $rsp_inserted;
+    public $rsp_inserted;
 
     /**
      * @ManyToOne(targetEntity="Activity")

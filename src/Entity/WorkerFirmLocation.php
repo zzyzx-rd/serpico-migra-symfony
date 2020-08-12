@@ -18,32 +18,32 @@ class WorkerFirmLocation
      * @ORM\Column(name="wfl_id", type="integer", nullable=false)
      * @var int
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $wfl_hq_city;
+    public $wfl_hq_city;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $wfl_hq_state;
+    public $wfl_hq_state;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $wfl_hq_country;
+    public $wfl_hq_country;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $wfl_createdBy;
+    public $wfl_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $wfl_inserted;
+    public $wfl_inserted;
 
     /**
      * WorkerFirmLocation constructor.

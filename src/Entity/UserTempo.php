@@ -17,28 +17,28 @@ class UserTempo implements UserInterface, \Serializable
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $email;
+    public $email;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $password;
+    public $password;
 
     /**
      * @ORM\Column(name="role_rol_id", type="integer")
      * @var int
      */
-    private $role;
+    public $role;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $username;
+    public $username;
 
     public function getId(): ?int
     {

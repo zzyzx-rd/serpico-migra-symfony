@@ -20,32 +20,32 @@ class State extends DbObject
      * @ORM\Column(name="sta_id", type="integer", nullable=false)
      * @var int
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $sta_abbr;
+    public $sta_abbr;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $sta_fullname;
+    public $sta_fullname;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $sta_name;
+    public $sta_name;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $sta_createdBy;
+    public $sta_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $sta_inserted;
+    public $sta_inserted;
 
     /**
      * @ManyToOne(targetEntity="Country")
@@ -56,12 +56,12 @@ class State extends DbObject
     /**
      * @OneToMany(targetEntity="City", mappedBy="state",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $cities;
+    public $cities;
 
     /**
      * @OneToMany(targetEntity="WorkerFirm", mappedBy="state",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $firms;
+    public $firms;
 
     /**
      * State constructor.

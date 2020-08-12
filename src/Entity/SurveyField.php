@@ -22,52 +22,52 @@ class SurveyField extends DbObject
      * @ORM\Column(name="sfi_id", type="integer", length=10, nullable=false)
      * @var int
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $sfi_type;
+    public $sfi_type;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $sfi_isMandatory;
+    public $sfi_isMandatory;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $sfi_title;
+    public $sfi_title;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $sfi_position;
+    public $sfi_position;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $sfi_description;
+    public $sfi_description;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $sfi_createdBy;
+    public $sfi_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $sfi_inserted;
+    public $sfi_inserted;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $sfi_upperbound;
+    public $sfi_upperbound;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $sfi_lowerbound;
+    public $sfi_lowerbound;
 
     /**
      * @ManyToOne(targetEntity="Criterion")
@@ -200,18 +200,6 @@ class SurveyField extends DbObject
     public function setDescription(string $sfi_description): self
     {
         $this->sfi_description = $sfi_description;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->sfi_createdBy;
-    }
-
-    public function setCreatedBy(int $sfi_createdBy): self
-    {
-        $this->sfi_createdBy = $sfi_createdBy;
 
         return $this;
     }

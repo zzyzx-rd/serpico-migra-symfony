@@ -20,57 +20,57 @@ class RankingTeamHistory extends DbObject
      * @ORM\Column(name="rth_id", type="integer", nullable=false, length=10)
      * @var int
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="string", length=1)
      */
-    private $rth_dtype;
+    public $rth_dtype;
 
     /**
      * @ORM\Column(type="string", length=1)
      */
-    private $rth_wtype;
+    public $rth_wtype;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $rth_abs_result;
+    public $rth_abs_result;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $rth_rel_result;
+    public $rth_rel_result;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $rth_period;
+    public $rth_period;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $rth_freq;
+    public $rth_freq;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $rth_value;
+    public $rth_value;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $rth_series_pop;
+    public $rth_series_pop;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $rth_creatdBy;
+    public $rth_creatdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $rth_inserted;
+    public $rth_inserted;
 
     /**
      *@ManyToOne(targetEntity="Activity")

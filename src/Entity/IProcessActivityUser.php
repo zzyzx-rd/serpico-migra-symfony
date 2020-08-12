@@ -24,47 +24,47 @@ class IProcessActivityUser extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="a_u_id", type="integer", nullable=false)
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $a_u_status;
+    public $a_u_status;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $a_u_leader;
+    public $a_u_leader;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $a_u_type;
+    public $a_u_type;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $a_u_mWeight;
+    public $a_u_mWeight;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $a_u_precomment;
+    public $a_u_precomment;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $a_u_createdBy;
+    public $a_u_createdBy;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
-    private $a_u_inserted;
+    public $a_u_inserted;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $a_u_deleted;
+    public $a_u_deleted;
 
     /**
      * @ManyToOne(targetEntity="Team")
@@ -93,13 +93,13 @@ class IProcessActivityUser extends DbObject
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
      */
-    private $user_usr;
+    public $user_usr;
 
     /**
      * @ORM\ManyToOne(targetEntity=ExternalUser::class)
      * @ORM\JoinColumn(nullable=false)
      */
-    private $external_user_ext_usr;
+    public $external_user_ext_usr;
 
     /**
      * IProcessActivityUser constructor.
@@ -214,18 +214,6 @@ class IProcessActivityUser extends DbObject
     public function setPrecomment(string $a_u_precomment): self
     {
         $this->a_u_precomment = $a_u_precomment;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->a_u_createdBy;
-    }
-
-    public function setCreatedBy(?int $a_u_createdBy): self
-    {
-        $this->a_u_createdBy = $a_u_createdBy;
 
         return $this;
     }

@@ -23,37 +23,37 @@ class Client extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="cli_id", type="integer", nullable=false)
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $clicommname;
+    public $clicommname;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $cli_type;
+    public $cli_type;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $cli_logo;
+    public $cli_logo;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $cli_email;
+    public $cli_email;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $cli_createdBy;
+    public $cli_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $cli_inserted;
+    public $cli_inserted;
 
     /**
      * @ManyToOne(targetEntity="Organization")
@@ -78,7 +78,7 @@ class Client extends DbObject
      * @OneToMany(targetEntity="ExternalUser", mappedBy="client", cascade={"persist","remove"}, orphanRemoval=true)
      * @var ArrayCollection|ExternalUser[]
      */
-    private $externalUsers;
+    public $externalUsers;
 
     /**
      * Client constructor.

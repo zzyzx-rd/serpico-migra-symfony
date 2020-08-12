@@ -20,42 +20,42 @@ class WorkerExperience extends DbObject
      * @ORM\Column(name="wex_id", type="integer", nullable=false)
      * @var int
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $wex_active;
+    public $wex_active;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $wex_position;
+    public $wex_position;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $wex_location;
+    public $wex_location;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $wex_startdate;
+    public $wex_startdate;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $wex_enddate;
+    public $wex_enddate;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $wex_createdBy;
+    public $wex_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $wex_inserted;
+    public $wex_inserted;
 
     /**
      * @ManyToOne(targetEntity="WorkerIndividual")
@@ -166,18 +166,6 @@ class WorkerExperience extends DbObject
     public function setEnddate(\DateTimeInterface $wex_enddate): self
     {
         $this->wex_enddate = $wex_enddate;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->wex_createdBy;
-    }
-
-    public function setCreatedBy(int $wex_createdBy): self
-    {
-        $this->wex_createdBy = $wex_createdBy;
 
         return $this;
     }

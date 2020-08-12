@@ -18,42 +18,42 @@ class Country extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="cou_id", type="integer", nullable=false)
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $cou_abbr;
+    public $cou_abbr;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $cou_fullname;
+    public $cou_fullname;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $cou_name;
+    public $cou_name;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $cou_createdBy;
+    public $cou_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $cou_inserted;
+    public $cou_inserted;
 
     /**
      * @OneToMany(targetEntity="State", mappedBy="country",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $states;
+    public $states;
 
     /**
      * @OneToMany(targetEntity="WorkerFirm", mappedBy="country",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $firms;
+    public $firms;
 
     /**
      * Country constructor.
@@ -123,18 +123,6 @@ class Country extends DbObject
     public function setName(string $cou_name): self
     {
         $this->cou_name = $cou_name;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->cou_createdBy;
-    }
-
-    public function setCreatedBy(?int $cou_createdBy): self
-    {
-        $this->cou_createdBy = $cou_createdBy;
 
         return $this;
     }

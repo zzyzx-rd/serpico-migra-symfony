@@ -19,102 +19,102 @@ class Result extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="res_id", type="integer", nullable=false)
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $res_type;
+    public $res_type;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $res_war;
+    public $res_war;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $res_ear;
+    public $res_ear;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $res_wrr;
+    public $res_wrr;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $res_err;
+    public $res_err;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $res_wsd;
+    public $res_wsd;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $res_esd;
+    public $res_esd;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $res_wdf;
+    public $res_wdf;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $res_edr;
+    public $res_edr;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $res_wsd_max;
+    public $res_wsd_max;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $res_esd_max;
+    public $res_esd_max;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $res_win;
+    public $res_win;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $res_ein;
+    public $res_ein;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $res_win_max;
+    public $res_win_max;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $res_ein_max;
+    public $res_ein_max;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $res_wdr_gen;
+    public $res_wdr_gen;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $res_res_der_gen;
+    public $res_res_der_gen;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $res_createdBy;
+    public $res_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $res_inserted;
+    public $res_inserted;
 
     /**
      * @ManyToOne(targetEntity="Activity")
@@ -137,12 +137,12 @@ class Result extends DbObject
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="results")
      */
-    private $user_usr;
+    public $user_usr;
 
     /**
      * @ORM\ManyToOne(targetEntity=ExternalUser::class, inversedBy="results")
      */
-    private $external_user_ext_usr;
+    public $external_user_ext_usr;
 
     /**
      * Result constructor.

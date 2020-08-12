@@ -18,32 +18,32 @@ class CriterionName extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="cna_id", type="integer", nullable=false)
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $cna_type;
+    public $cna_type;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $cna_name;
+    public $cna_name;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $can_unit;
+    public $can_unit;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $can_createdBy;
+    public $can_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $can_inserted;
+    public $can_inserted;
 
     /**
      * @ManyToOne(targetEntity="Icon")

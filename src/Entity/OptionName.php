@@ -17,32 +17,32 @@ class OptionName extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="ona_id", type="integer", nullable=false)
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $ona_type;
+    public $ona_type;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $ona_name;
+    public $ona_name;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $ona_description;
+    public $ona_description;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $ona_createdBy;
+    public $ona_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $ona_inserted;
+    public $ona_inserted;
 
     /**
      * OptionName constructor.
@@ -107,18 +107,6 @@ class OptionName extends DbObject
     public function setOnaDescription(string $ona_description): self
     {
         $this->ona_description = $ona_description;
-
-        return $this;
-    }
-
-    public function getOnaCreatedBy(): ?\DateTimeInterface
-    {
-        return $this->ona_createdBy;
-    }
-
-    public function setOnaCreatedBy(\DateTimeInterface $ona_createdBy): self
-    {
-        $this->ona_createdBy = $ona_createdBy;
 
         return $this;
     }

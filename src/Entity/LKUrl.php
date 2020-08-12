@@ -17,37 +17,37 @@ class LKUrl extends DbObject
      * @ORM\Column(name="lk_url_id", type="integer", nullable=false)
      * @var int
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="string", length=10)
      */
-    private $lk_url_country;
+    public $lk_url_country;
 
     /**
      * @ORM\Column(type="string", length=10)
      */
-    private $lk_url_letter;
+    public $lk_url_letter;
 
     /**
      * @ORM\Column(type="string", length=10)
      */
-    private $lk_url_pagNb;
+    public $lk_url_pagNb;
 
     /**
      * @ORM\Column(type="string", length=10)
      */
-    private $lk_url_value;
+    public $lk_url_value;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $lk_url_createdBy;
+    public $lk_url_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $lk_url_inserted;
+    public $lk_url_inserted;
 
     /**
      * LKUrl constructor.
@@ -126,18 +126,6 @@ class LKUrl extends DbObject
     public function setValue(string $lk_url_value): self
     {
         $this->lk_url_value = $lk_url_value;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->lk_url_createdBy;
-    }
-
-    public function setCreatedBy(int $lk_url_createdBy): self
-    {
-        $this->lk_url_createdBy = $lk_url_createdBy;
 
         return $this;
     }

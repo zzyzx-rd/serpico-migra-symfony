@@ -20,37 +20,37 @@ class OTPUser extends DbObject
      * @ORM\Column(name="otp_id", type="integer", nullable=false, length=10)
      * @var int
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="string", length=1)
      */
-    private $otp_type;
+    public $otp_type;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $otp_fullname;
+    public $otp_fullname;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $otp_tipe;
+    public $otp_tipe;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $otp_email;
+    public $otp_email;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $otp_createdBy;
+    public $otp_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $otp_inserted;
+    public $otp_inserted;
 
     /**
      *@ManyToOne(targetEntity="Organization")
@@ -138,18 +138,6 @@ class OTPUser extends DbObject
     public function setEmail(string $otp_email): self
     {
         $this->otp_email = $otp_email;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->otp_createdBy;
-    }
-
-    public function setCreatedBy(?int $otp_createdBy): self
-    {
-        $this->otp_createdBy = $otp_createdBy;
 
         return $this;
     }

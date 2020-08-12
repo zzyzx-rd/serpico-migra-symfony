@@ -19,257 +19,257 @@ class GPW extends DbObject
      * @ORM\Column(name="gpw_id", type="integer")
      * @var int
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_pid;
+    public $gpw_pid;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_firm;
+    public $gpw_firm;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_sector;
+    public $gpw_sector;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_location;
+    public $gpw_location;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $gpw_cDate;
+    public $gpw_cDate;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $gpw_nb_workers;
+    public $gpw_nb_workers;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_website;
+    public $gpw_website;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_genMail;
+    public $gpw_genMail;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_fb;
+    public $gpw_fb;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_linkedIn;
+    public $gpw_linkedIn;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_twitter;
+    public $gpw_twitter;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_xing;
+    public $gpw_xing;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_yt;
+    public $gpw_yt;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_insta;
+    public $gpw_insta;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_contact_name;
+    public $gpw_contact_name;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_contact_position;
+    public $gpw_contact_position;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_contact_mail;
+    public $gpw_contact_mail;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_contact_tel;
+    public $gpw_contact_tel;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_values_careers_inspiration;
+    public $gpw_values_careers_inspiration;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_employee_author;
+    public $gpw_employee_author;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_employee_position;
+    public $gpw_employee_position;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_employee_comment;
+    public $gpw_employee_comment;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_boss_author;
+    public $gpw_boss_author;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_boss_division;
+    public $gpw_boss_division;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_boss_comment;
+    public $gpw_boss_comment;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_award_year_1;
+    public $gpw_award_year_1;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_award_title_1;
+    public $gpw_award_title_1;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_award_rnk_1;
+    public $gpw_award_rnk_1;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_award_year_2;
+    public $gpw_award_year_2;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_award_title_2;
+    public $gpw_award_title_2;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_award_rnk_2;
+    public $gpw_award_rnk_2;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_award_year_3;
+    public $gpw_award_year_3;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_award_title_3;
+    public $gpw_award_title_3;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_award_rnk3;
+    public $gpw_award_rnk3;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_survey_text_1;
+    public $gpw_survey_text_1;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_survey_res_1;
+    public $gpw_survey_res_1;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_survey_text_2;
+    public $gpw_survey_text_2;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_survey_res_2;
+    public $gpw_survey_res_2;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_survey_text_3;
+    public $gpw_survey_text_3;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_survey_res_3;
+    public $gpw_survey_res_3;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_survey_text_4;
+    public $gpw_survey_text_4;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_survey_res_4;
+    public $gpw_survey_res_4;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_survey_text_5;
+    public $gpw_survey_text_5;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_survey_res_5;
+    public $gpw_survey_res_5;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_survey_text_6;
+    public $gpw_survey_text_6;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_survey_res_6;
+    public $gpw_survey_res_6;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_survey_text_7;
+    public $gpw_survey_text_7;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gpw_survey_res_7;
+    public $gpw_survey_res_7;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $gpw_createdBy;
+    public $gpw_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $gpw_inserted;
+    public $gpw_inserted;
 
     /**
      * GPW constructor.
@@ -1011,17 +1011,6 @@ class GPW extends DbObject
         return $this;
     }
 
-    public function getCreatedBy(): ?int
-    {
-        return $this->gpw_createdBy;
-    }
-
-    public function setCreatedBy(?int $gpw_createdBy): self
-    {
-        $this->gpw_createdBy = $gpw_createdBy;
-
-        return $this;
-    }
 
     public function getInserted(): ?\DateTimeInterface
     {

@@ -22,57 +22,57 @@ class Position extends DbObject
      * @ORM\Column(name="pos_id", type="integer", length=10, nullable=false)
      * @var int
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $pos_name;
+    public $pos_name;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $pos_weight_ini;
+    public $pos_weight_ini;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $pos_weight_1y;
+    public $pos_weight_1y;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $pos_weight_2y;
+    public $pos_weight_2y;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $pos_weight_3y;
+    public $pos_weight_3y;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $pos_weight_4y;
+    public $pos_weight_4y;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $pos_weight_5y;
+    public $pos_weight_5y;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $pos_createdBy;
+    public $pos_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $pos_inserted;
+    public $pos_inserted;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
-    private $pos_deleted;
+    public $pos_deleted;
 
     /**
      * @ManyToOne(targetEntity="Organization")
@@ -89,17 +89,17 @@ class Position extends DbObject
     /**
      * @OneToMany(targetEntity="Weight", mappedBy="position", cascade={"persist", "remove"})
      */
-    private $weights;
+    public $weights;
 
     /**
      * @OneToMany(targetEntity="OrganizationUserOption", mappedBy="position", cascade={"persist","remove"}, orphanRemoval=true)
      */
-    private $options;
+    public $options;
 
     /**
      * @OneToMany(targetEntity="Target", mappedBy="position",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $targets;
+    public $targets;
 
     /**
      * Position constructor.
@@ -241,18 +241,6 @@ class Position extends DbObject
     public function setPosWeight5y(float $pos_weight_5y): self
     {
         $this->pos_weight_5y = $pos_weight_5y;
-
-        return $this;
-    }
-
-    public function getPosCreatedBy(): ?int
-    {
-        return $this->pos_createdBy;
-    }
-
-    public function setPosCreatedBy(int $pos_createdBy): self
-    {
-        $this->pos_createdBy = $pos_createdBy;
 
         return $this;
     }

@@ -20,62 +20,62 @@ class RankingTeam extends DbObject
      * @ORM\Column(name="rkt_id", type="integer", nullable=false, length=10)
      * @var int
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="string", length=1)
      */
-    private $rkt_dtype;
+    public $rkt_dtype;
 
     /**
      * @ORM\Column(type="string", length=1)
      */
-    private $rkt_wtype;
+    public $rkt_wtype;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $rkt_abs_result;
+    public $rkt_abs_result;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $rkt_rel_result;
+    public $rkt_rel_result;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $rkt_period;
+    public $rkt_period;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $rkt_freq;
+    public $rkt_freq;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $rkt_value;
+    public $rkt_value;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $rkt_series_pop;
+    public $rkt_series_pop;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $rkt_createdBy;
+    public $rkt_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $rkt_inserted;
+    public $rkt_inserted;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $rkt_updated;
+    public $rkt_updated;
 
     /**
      *@ManyToOne(targetEntity="Activity")
@@ -217,18 +217,6 @@ class RankingTeam extends DbObject
     public function setSeriesPop(int $rkt_series_pop): self
     {
         $this->rkt_series_pop = $rkt_series_pop;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->rkt_createdBy;
-    }
-
-    public function setCreatedBy(?int $rkt_createdBy): self
-    {
-        $this->rkt_createdBy = $rkt_createdBy;
 
         return $this;
     }

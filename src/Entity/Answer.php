@@ -20,22 +20,22 @@ class Answer extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="asw_id", type="integer", length=11, nullable=false)
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(name="asw_text", type="string", length=255)
      */
-    private $desc;
+    public $desc;
 
     /**
      * @ORM\Column(name="asw_created_by", type="integer")
      */
-    private $createdBy;
+    public $createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $asw_inserted;
+    public $asw_inserted;
     /**
      * @ManyToOne(targetEntity="SurveyField")
      * @JoinColumn(name="survey_field_sfi_id", referencedColumnName="sfi_id", nullable=false)
@@ -118,18 +118,6 @@ class Answer extends DbObject
     public function setDesc(string $desc): self
     {
         $this->desc = $desc;
-        return $this;
-    }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->createdBy;
-    }
-
-    public function setCreatedBy(int $createdBy): self
-    {
-        $this->createdBy = $createdBy;
-
         return $this;
     }
 

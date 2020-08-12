@@ -21,22 +21,22 @@ class WorkerFirmSector
      * @ORM\Column(name="wfs_id", type="integer", nullable=false)
      * @var int
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $wfs_name;
+    public $wfs_name;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $wfs_createdBy;
+    public $wfs_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $wfs_inserted;
+    public $wfs_inserted;
 
     /**
      * @ManyToOne(targetEntity="Icon")
@@ -47,7 +47,7 @@ class WorkerFirmSector
     /**
      * @OneToOne(targetEntity="WorkerFirm", mappedBy="mainSector")
      */
-    private $firm;
+    public $firm;
 
     /**
      * WorkerFirmSector constructor.
@@ -86,18 +86,6 @@ class WorkerFirmSector
     public function setName(string $wfs_name): self
     {
         $this->wfs_name = $wfs_name;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->wfs_createdBy;
-    }
-
-    public function setCreatedBy(int $wfs_createdBy): self
-    {
-        $this->wfs_createdBy = $wfs_createdBy;
 
         return $this;
     }

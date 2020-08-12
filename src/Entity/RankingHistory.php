@@ -20,52 +20,52 @@ class RankingHistory extends DbObject
      * @ORM\Column(name="rkh_id", type="integer", nullable=false, length=10)
      *@var int
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="string", length=1)
      */
-    private $rkh_wtype;
+    public $rkh_wtype;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $rkh_abs_result;
+    public $rkh_abs_result;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $rkh_rel_result;
+    public $rkh_rel_result;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $rkh_period;
+    public $rkh_period;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $rkh_freq;
+    public $rkh_freq;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $rkh_value;
+    public $rkh_value;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $rkh_series_pop;
+    public $rkh_series_pop;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $rkh_createdBy;
+    public $rkh_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $rkh_inserted;
+    public $rkh_inserted;
 
     /**
      * @ManyToOne(targetEntity="Activity")
@@ -88,7 +88,7 @@ class RankingHistory extends DbObject
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
      */
-    private $rhk_user_usr;
+    public $rhk_user_usr;
 
     /**
      * RankingHistory constructor.
@@ -224,18 +224,6 @@ class RankingHistory extends DbObject
     public function setSeriesPop(int $rkh_series_pop): self
     {
         $this->rkh_series_pop = $rkh_series_pop;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->rkh_createdBy;
-    }
-
-    public function setCreatedBy(?int $rkh_createdBy): self
-    {
-        $this->rkh_createdBy = $rkh_createdBy;
 
         return $this;
     }

@@ -23,57 +23,57 @@ class ExternalUser extends DbObject
      * @ORM\Column(name="ext_id", type="integer", nullable=false)
      * @var int
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $ext_fisrtname;
+    public $ext_fisrtname;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $ext_lastname;
+    public $ext_lastname;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $ext_email;
+    public $ext_email;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $ext_positionName;
+    public $ext_positionName;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $ext_weight_value;
+    public $ext_weight_value;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $ext_owner;
+    public $ext_owner;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $ext_createdBy;
+    public $ext_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $ext_inserted;
+    public $ext_inserted;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
-    private $ext_last_connected;
+    public $ext_last_connected;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
-    private $ext_deleted;
+    public $ext_deleted;
 
     /**
      * @ManyToOne(targetEntity="User")
@@ -90,17 +90,17 @@ class ExternalUser extends DbObject
     /**
      * @ORM\OneToMany(targetEntity=ActivityUser::class, mappedBy="external_user_ext_usr")
      */
-    private $activity_user_act_usr;
+    public $activity_user_act_usr;
 
     /**
      * @ORM\OneToMany(targetEntity=Result::class, mappedBy="external_user_ext_id")
      */
-    private $results;
+    public $results;
 
     /**
      * @ORM\OneToMany(targetEntity=TeamUser::class, mappedBy="external_user_ext_id")
      */
-    private $teamUsers;
+    public $teamUsers;
 
     /**
      * ExternalUser constructor.
@@ -230,18 +230,6 @@ class ExternalUser extends DbObject
     public function setOwner(bool $ext_owner): self
     {
         $this->ext_owner = $ext_owner;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->ext_createdBy;
-    }
-
-    public function setCreatedBy(int $ext_createdBy): self
-    {
-        $this->ext_createdBy = $ext_createdBy;
 
         return $this;
     }

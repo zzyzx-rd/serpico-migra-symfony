@@ -39,127 +39,127 @@ class User extends DbObject
     /**
      * @ORM\Column(type="boolean")
      */
-    private $usr_int;
+    public $usr_int;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $usr_firstname;
+    public $usr_firstname;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $usr_lastname;
+    public $usr_lastname;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $usr_username;
+    public $usr_username;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $usr_nickname;
+    public $usr_nickname;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $usr_birthdate;
+    public $usr_birthdate;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $usr_email;
+    public $usr_email;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $usr_password;
+    public $usr_password;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $usr_positionName;
+    public $usr_positionName;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $usr_picture;
+    public $usr_picture;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $usr_token;
+    public $usr_token;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $usr_weight_ini;
+    public $usr_weight_ini;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $usr_usr_weight_1y;
+    public $usr_usr_weight_1y;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $usr_weight_2y;
+    public $usr_weight_2y;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $usr_weight_3y;
+    public $usr_weight_3y;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $usr_weight_4y;
+    public $usr_weight_4y;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $usr_weight_5y;
+    public $usr_weight_5y;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $usr_act_archive_nbDays;
+    public $usr_act_archive_nbDays;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $usr_rm_token;
+    public $usr_rm_token;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $usr_validated;
+    public $usr_validated;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $usr_enabledCreatingUser;
+    public $usr_enabledCreatingUser;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $usr_createdBy;
+    public $usr_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $usr_inserted;
+    public $usr_inserted;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
-    private $usr_last_connected;
+    public $usr_last_connected;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $usr_deleted;
+    public $usr_deleted;
 
     /**
      * @ManyToOne(targetEntity="Role")
@@ -172,7 +172,7 @@ class User extends DbObject
     /**
      * @OneToMany(targetEntity="ExternalUser", mappedBy="user",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $externalUsers;
+    public $externalUsers;
 
     /** @ManyToOne(targetEntity="User", inversedBy="subordinates")
      * @JoinColumn(name="usr_superior", referencedColumnName="usr_id", nullable=true)
@@ -184,80 +184,80 @@ class User extends DbObject
     /**
      * @OneToMany(targetEntity="Mail", mappedBy="user",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $mails;
+    public $mails;
 
     /**
      * @OneToMany(targetEntity="Target", mappedBy="user",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $targets;
+    public $targets;
 
     /**
      * @OneToMany(targetEntity="OrganizationUserOption", mappedBy="user", cascade={"persist","remove"}, orphanRemoval=true)
      */
-    private $options;
+    public $options;
 
     /**
      * @OneToOne(targetEntity="WorkerIndividual")
      * @JoinColumn(name="worker_individual_win_id", referencedColumnName="win_id")
      */
-    private $workerIndividual;
+    public $workerIndividual;
 
     /**
      * @ORM\OneToMany(targetEntity=ActivityUser::class, mappedBy="user_usr")
      */
-    private $activity_user_usr;
+    public $activity_user_usr;
 
     /**
      * @ORM\OneToMany(targetEntity=Recurring::class, mappedBy="rec_master_user")
      */
-    private $Reccuring;
+    public $Reccuring;
 
     /**
      * @ORM\OneToMany(targetEntity=Result::class, mappedBy="user_usr")
      */
-    private $results;
+    public $results;
 
     /**
      * @ORM\OneToMany(targetEntity=Stage::class, mappedBy="stg_master_user")
      */
-    private $stagesWhereMaster;
+    public $stagesWhereMaster;
 
     /**
      * @ORM\OneToMany(targetEntity=TeamUser::class, mappedBy="user_usr")
      */
-    private $teamUsers;
+    public $teamUsers;
 
     /**
      * @ORM\OneToOne(targetEntity=Weight::class, inversedBy="user", cascade={"persist", "remove"})
      * @ORM\JoinColumn(nullable=false)
      */
-    private $weight_wgt;
+    public $weight_wgt;
 
     /**
      * @ORM\ManyToOne(targetEntity=Position::class)
      */
-    private $position_pos;
+    public $position_pos;
 
     /**
      * @ORM\ManyToOne(targetEntity=Department::class)
      */
-    private $departement_dpt;
+    public $departement_dpt;
 
     /**
      * @ORM\ManyToOne(targetEntity=Title::class)
      */
-    private $title_tit;
+    public $title_tit;
 
     /**
      * @ORM\ManyToOne(targetEntity=Organization::class)
      * @ORM\JoinColumn(nullable=false)
      */
-    private $organization_org;
+    public $organization_org;
 
     /**
      * @OneToMany(targetEntity="Department", mappedBy="masterUser",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $leadingDepartments;
+    public $leadingDepartments;
     
     /**
      * @var UploadedFile
@@ -652,18 +652,6 @@ class User extends DbObject
     public function setEnabledCreatingUser(bool $usr_enabledCreatingUser): self
     {
         $this->usr_enabledCreatingUser = $usr_enabledCreatingUser;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->usr_createdBy;
-    }
-
-    public function setCreatedBy(int $usr_createdBy): self
-    {
-        $this->usr_createdBy = $usr_createdBy;
 
         return $this;
     }

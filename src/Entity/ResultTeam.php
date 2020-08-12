@@ -19,102 +19,102 @@ class ResultTeam extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="rst_id", type="integer", nullable=false)
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $rst_type;
+    public $rst_type;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $rst_war;
+    public $rst_war;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $rst_ear;
+    public $rst_ear;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $rst_wrr;
+    public $rst_wrr;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $rst_err;
+    public $rst_err;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $rst_wsd;
+    public $rst_wsd;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $rst_esd;
+    public $rst_esd;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $rst_wdr;
+    public $rst_wdr;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $rst_edr;
+    public $rst_edr;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $rst_wsd_max;
+    public $rst_wsd_max;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $rst_esd_max;
+    public $rst_esd_max;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $rst_win;
+    public $rst_win;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $rst_ein;
+    public $rst_ein;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $rst_win_max;
+    public $rst_win_max;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $rst_ein_max;
+    public $rst_ein_max;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $rst_wdr_gen;
+    public $rst_wdr_gen;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $rst_edr_gen;
+    public $rst_edr_gen;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $rst_createdBy;
+    public $rst_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $rst_inserted;
+    public $rst_inserted;
 
     /**
      * @ManyToOne(targetEntity="Activity")

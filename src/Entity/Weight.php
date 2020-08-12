@@ -21,42 +21,42 @@ class Weight extends DbObject
      * @ORM\Column(name="wgt_id", type="integer", length=10, nullable=false)
      * @var int
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $wgt_interval;
+    public $wgt_interval;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $wgt_titleframe;
+    public $wgt_titleframe;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $wgt_value;
+    public $wgt_value;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
-    private $wgt_modified;
+    public $wgt_modified;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $wgt_createdBy;
+    public $wgt_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $wgt_inserted;
+    public $wgt_inserted;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
-    private $wgt_deleted;
+    public $wgt_deleted;
 
     /**
      * @ManyToOne(targetEntity="Organization")
@@ -74,7 +74,7 @@ class Weight extends DbObject
      * @ORM\OneToOne(targetEntity=User::class, mappedBy="weight_wgt", cascade={"persist", "remove"})
      * @JoinColumn(nullable=true)
      */
-    private $user;
+    public $user;
 
     /**
      * Weight constructor.
@@ -164,18 +164,6 @@ class Weight extends DbObject
     public function setModified(?\DateTimeInterface $wgt_modified): self
     {
         $this->wgt_modified = $wgt_modified;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->wgt_createdBy;
-    }
-
-    public function setCreatedBy(int $wgt_createdBy): self
-    {
-        $this->wgt_createdBy = $wgt_createdBy;
 
         return $this;
     }

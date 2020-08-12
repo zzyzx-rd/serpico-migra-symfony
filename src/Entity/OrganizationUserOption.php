@@ -21,47 +21,47 @@ class OrganizationUserOption extends DbObject
      * @ORM\Column(name="opt_id", type="integer", nullable=false)
      * @var int
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $opt_bool_value;
+    public $opt_bool_value;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $opt_int_value;
+    public $opt_int_value;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $opt_int_value_2;
+    public $opt_int_value_2;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $opt_float_value;
+    public $opt_float_value;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $pot_string_value;
+    public $pot_string_value;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $opt_enabled;
+    public $opt_enabled;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $opt_createdBy;
+    public $opt_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $opt_inserted;
+    public $opt_inserted;
 
     /**
      * @OneToOne(targetEntity="OptionName")
@@ -103,7 +103,7 @@ class OrganizationUserOption extends DbObject
      * @ORM\ManyToOne(targetEntity=Role::class)
      * @ORM\JoinColumn(nullable=false)
      */
-    private $role_rol;
+    public $role_rol;
 
     /**
      * OrganizationUserOption constructor.
@@ -192,18 +192,6 @@ class OrganizationUserOption extends DbObject
     public function setEnabled(bool $opt_enabled): self
     {
         $this->opt_enabled = $opt_enabled;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->opt_createdBy;
-    }
-
-    public function setCreatedBy(?int $opt_createdBy): self
-    {
-        $this->opt_createdBy = $opt_createdBy;
 
         return $this;
     }

@@ -23,32 +23,32 @@ class Template extends DbObject
      * @ORM\Column(name="tmp_id", type="integer", length=10)
      * @var int
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $tmp_name;
+    public $tmp_name;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $tmp_createdBy;
+    public $tmp_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $tmp_inserted;
+    public $tmp_inserted;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $tmp_deleted;
+    public $tmp_deleted;
 
     /**
      *@OneToMany(targetEntity="Activity", mappedBy="activity")
      */
-    private $activities;
+    public $activities;
 
     /**
      *@OneToOne(targetEntity="Stage")
@@ -77,7 +77,7 @@ class Template extends DbObject
     /**
      * @ORM\ManyToOne(targetEntity=Activity::class)
      */
-    private $original_activity_act;
+    public $original_activity_act;
 
     /**
      * Template constructor.
@@ -131,18 +131,6 @@ class Template extends DbObject
     public function setName(string $tmp_name): self
     {
         $this->tmp_name = $tmp_name;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->tmp_createdBy;
-    }
-
-    public function setCreatedBy(int $tmp_createdBy): self
-    {
-        $this->tmp_createdBy = $tmp_createdBy;
 
         return $this;
     }

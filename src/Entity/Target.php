@@ -20,27 +20,27 @@ class Target
      * @ORM\GeneratedValue()
      * @ORM\Column(name="tgt_id", type="integer", nullable=false)
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $tgt_sign;
+    public $tgt_sign;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $tgt_value;
+    public $tgt_value;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $tgt_createdBy;
+    public $tgt_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $tgt_inserted;
+    public $tgt_inserted;
 
     /**
      * @ManyToOne(targetEntity="Organization")

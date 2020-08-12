@@ -23,42 +23,42 @@ class Process extends DbObject
      * @ORM\Column(name="pro_id", type="integer", length=10, nullable=false)
      * @var int
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $pro_name;
+    public $pro_name;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $pro_approvable;
+    public $pro_approvable;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $pro_gradable;
+    public $pro_gradable;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $pro_createdBy;
+    public $pro_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $pro_inserted;
+    public $pro_inserted;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
-    private $pro_deleted;
+    public $pro_deleted;
 
     /**
      * @ORM\OneToMany(targetEntity=Activity::class, mappedBy="process")
      */
-    private $activities;
+    public $activities;
 
     /**
      *@ManyToOne(targetEntity="Organization")
@@ -70,12 +70,12 @@ class Process extends DbObject
      * @ManyToOne(targetEntity="Process", inversedBy="children")
      * @JoinColumn(name="parent_id", referencedColumnName="pro_id", nullable=true)
      */
-    private $parent;
+    public $parent;
 
     /**
      * @OneToMany(targetEntity="Process", mappedBy="parent", cascade={"persist"}, orphanRemoval=false)
      */
-    private $children;
+    public $children;
 
     /**
      * @ManyToOne(targetEntity="Icon")
@@ -86,12 +86,12 @@ class Process extends DbObject
     /**
      * @OneToMany(targetEntity="InstitutionProcess", mappedBy="process", cascade={"persist"})
      */
-    private $institutionProcesses;
+    public $institutionProcesses;
 
     /**
      * @OneToMany(targetEntity="ProcessStage", mappedBy="process", cascade={"persist","remove"}, orphanRemoval=true)
      */
-    private $stages;
+    public $stages;
 
     /**
      * Process constructor.
@@ -164,18 +164,6 @@ class Process extends DbObject
     public function setGradable(bool $pro_gradable): self
     {
         $this->pro_gradable = $pro_gradable;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->pro_createdBy;
-    }
-
-    public function setCreatedBy(int $pro_createdBy): self
-    {
-        $this->pro_createdBy = $pro_createdBy;
 
         return $this;
     }

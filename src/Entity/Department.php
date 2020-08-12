@@ -22,27 +22,27 @@ class Department extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="dpt_id", type="integer", length=10, nullable=false)
      */
-    private $id;
+    protected $id;
 
     /**
      * @ORM\Column(type="string", length=45)
      */
-    private $dpt_name;
+    public $dpt_name;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $dpt_createdBy;
+    public $dpt_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $dpt_inserted;
+    public $dpt_inserted;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
-    private $dpt_deleted;
+    public $dpt_deleted;
 
     /**
      * @ManyToOne(targetEntity="User")
@@ -54,18 +54,18 @@ class Department extends DbObject
      * @OneToMany(targetEntity="Position", mappedBy="department", cascade={"persist", "remove"})
      * @OrderBy({"name" = "ASC"})
      */
-    private $positions;
+    public $positions;
 
     /**
      * @OneToMany(targetEntity="TemplateActivity", mappedBy="department", cascade={"persist", "remove"},orphanRemoval=true)
      * @OrderBy({"name" = "ASC"})
      */
-    private $templateActivities;
+    public $templateActivities;
 
     /**
      * @OneToMany(targetEntity="OrganizationUserOption", mappedBy="department", cascade={"persist","remove"}, orphanRemoval=true)
      */
-    private $options;
+    public $options;
 
     /**
      * @ManyToOne(targetEntity="Organization")
@@ -82,7 +82,7 @@ class Department extends DbObject
     /**
      * @OneToMany(targetEntity="Target", mappedBy="department",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $targets;
+    public $targets;
 
     /**
      * Department constructor.
@@ -141,18 +141,6 @@ class Department extends DbObject
     public function setName(string $dpt_name): self
     {
         $this->dpt_name = $dpt_name;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->dpt_createdBy;
-    }
-
-    public function setCreatedBy(int $dpt_createdBy): self
-    {
-        $this->dpt_createdBy = $dpt_createdBy;
 
         return $this;
     }

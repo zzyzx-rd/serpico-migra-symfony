@@ -20,37 +20,37 @@ class SurveyFieldParameter extends DbObject
      * @ORM\Column(name="sfp_id", type="integer", length=10, nullable=false)
      * @var int
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $sfp_value;
+    public $sfp_value;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $sfp_lowerbound;
+    public $sfp_lowerbound;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $sfp_upperbound;
+    public $sfp_upperbound;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $sfp_step;
+    public $sfp_step;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $sfp_createdBy;
+    public $sfp_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $sfp_inserted;
+    public $sfp_inserted;
 
     /**
      * @ManyToOne(targetEntity="SurveyField")
@@ -137,18 +137,6 @@ class SurveyFieldParameter extends DbObject
     public function setStep(?float $sfp_step): self
     {
         $this->sfp_step = $sfp_step;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->sfp_createdBy;
-    }
-
-    public function setCreatedBy(int $sfp_createdBy): self
-    {
-        $this->sfp_createdBy = $sfp_createdBy;
 
         return $this;
     }

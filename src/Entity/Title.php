@@ -23,32 +23,32 @@ class Title extends DbObject
      * @ORM\Column(name="tit_id", type="integer", length=10, nullable=false)
      * @var int
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $tit_name;
+    public $tit_name;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $tit_weight_ini;
+    public $tit_weight_ini;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $tit_createdBy;
+    public $tit_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $tit_inserted;
+    public $tit_inserted;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
-    private $tit_deleted;
+    public $tit_deleted;
 
     /**
      * @ManyToOne(targetEntity="Organization")
@@ -60,17 +60,17 @@ class Title extends DbObject
      * @ManyToOne(targetEntity="Weight")
      * @JoinColumn(name="weight_wgt_id", referencedColumnName="wgt_id", nullable=true)
      */
-    private $weight;
+    public $weight;
 
     /**
      * @OneToMany(targetEntity="OrganizationUserOption", mappedBy="title", cascade={"persist","remove"}, orphanRemoval=true)
      */
-    private $options;
+    public $options;
 
     /**
      * @OneToMany(targetEntity="Target", mappedBy="title",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $targets;
+    public $targets;
 
     /**
      * Title constructor.
@@ -134,18 +134,6 @@ class Title extends DbObject
     public function setWeightIni(float $tit_weight_ini): self
     {
         $this->tit_weight_ini = $tit_weight_ini;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->tit_createdBy;
-    }
-
-    public function setCreatedBy(int $tit_createdBy): self
-    {
-        $this->tit_createdBy = $tit_createdBy;
 
         return $this;
     }

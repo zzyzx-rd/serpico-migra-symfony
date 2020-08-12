@@ -23,37 +23,37 @@ class Team extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="tea_id", type="integer", nullable=false, length=10)
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $tea_name;
+    public $tea_name;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $tea_weight_ini;
+    public $tea_weight_ini;
 
     /**
      * @ORM\Column(type="string", length=10, nullable=true)
      */
-    private $tea_picture;
+    public $tea_picture;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $tea_createdBy;
+    public $tea_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $tea_inserted;
+    public $tea_inserted;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $tea_deleted;
+    public $tea_deleted;
 
     /**
      *@ManyToOne(targetEntity="Organization")
@@ -79,7 +79,7 @@ class Team extends DbObject
     /**
      * @OneToMany(targetEntity="Target", mappedBy="team",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $targets;
+    public $targets;
 
     /**
      * Team constructor.
@@ -160,18 +160,6 @@ class Team extends DbObject
     public function setPicture(?string $tea_picture): self
     {
         $this->tea_picture = $tea_picture;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->tea_createdBy;
-    }
-
-    public function setCreatedBy(int $tea_createdBy): self
-    {
-        $this->tea_createdBy = $tea_createdBy;
 
         return $this;
     }

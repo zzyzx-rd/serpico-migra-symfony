@@ -7,6 +7,7 @@ use App\Repository\TemplateStageRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
@@ -24,17 +25,17 @@ class TemplateStage extends DbObject
      * @ORM\Column(name="stg_id", type="integer",nullable=false, length=10)
      * @var int
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $stg_weight;
+    public $stg_weight;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $stg_period;
+    public $stg_period;
 
     /**
      * @Column(name="stg_name", type="string")
@@ -45,47 +46,47 @@ class TemplateStage extends DbObject
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $stg_frequency;
+    public $stg_frequency;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $stg_startdate;
+    public $stg_startdate;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $stg_enddate;
+    public $stg_enddate;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $stg_gstartdate;
+    public $stg_gstartdate;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $stg_genddate;
+    public $stg_genddate;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $stg_deadline_nbDays;
+    public $stg_deadline_nbDays;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $stg_createdBy;
+    public $stg_createdBy;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
-    private $stg_inserted;
+    public $stg_inserted;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $stg_mode;
+    public $stg_mode;
 
     /**
      * @ManyToOne(targetEntity="TemplateActivity")
@@ -97,23 +98,23 @@ class TemplateStage extends DbObject
      * @OneToMany(targetEntity="TemplateCriterion", mappedBy="stage", cascade={"persist", "remove"}, orphanRemoval=true)
      * @OrderBy({"weight" = "DESC"})
      */
-    private $criteria;
+    public $criteria;
 
     /**
      * @OneToMany(targetEntity="TemplateActivityUser", mappedBy="stage",cascade={"persist", "remove"}, orphanRemoval=true)
      * @OrderBy({"team" = "ASC"})
      */
-    private $participants;
+    public $participants;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
      */
-    private $stg_master_usr;
+    public $stg_master_usr;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $stg_desc;
+    public $stg_desc;
 
     /**
      * TemplateStage constructor.

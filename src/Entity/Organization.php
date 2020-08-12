@@ -27,140 +27,140 @@ class Organization extends DbObject
      * @ORM\Column(name="org_id", type="integer", nullable=false)
      * @var int
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $org_legalname;
+    public $org_legalname;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $org_commname;
+    public $org_commname;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $org_type;
+    public $org_type;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $org_isClient;
+    public $org_isClient;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $org_oth_language;
+    public $org_oth_language;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $org_weight_type;
+    public $org_weight_type;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $org_createdBy;
+    public $org_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $org_inserted;
+    public $org_inserted;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $org_validated;
+    public $org_validated;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $org_expired;
+    public $org_expired;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $org_testing_reminder_sent;
+    public $org_testing_reminder_sent;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
-    private $org_deleted;
+    public $org_deleted;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
-    private $org_routine_pstatus;
+    public $org_routine_pstatus;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
-    private $org_routine_greminders;
+    public $org_routine_greminders;
 
     /**
      * @OneToMany(targetEntity="Stage", mappedBy="organization", cascade={"persist", "remove"}, orphanRemoval=true)
      * @OrderBy({"startdate" = "ASC"})
      */
-    private $stages;
+    public $stages;
     /**
      * @OneToMany(targetEntity="Department", mappedBy="organization", cascade={"persist", "remove"},orphanRemoval=true)
      * @OrderBy({"name" = "ASC"})
      */
-    private $departments;
+    public $departments;
     /**
      * @OneToMany(targetEntity="Position", mappedBy="organization", cascade={"persist", "remove"},orphanRemoval=true)
      * @OrderBy({"name" = "ASC"})
      */
-    private $positions;
+    public $positions;
     /**
      * @OneToMany(targetEntity="Title", mappedBy="organization", cascade={"persist", "remove"},orphanRemoval=true)
      * @OrderBy({"name" = "ASC"})
      */
-    private $titles;
+    public $titles;
     /**
      * @OneToMany(targetEntity="Weight", mappedBy="organization", cascade={"persist", "remove"},orphanRemoval=true)
      * @OrderBy({"value" = "ASC"})
      */
-    private $weights;
+    public $weights;
     /**
      * @OneToMany(targetEntity="Decision", mappedBy="organization", cascade={"persist", "remove"},orphanRemoval=true)
      * @OrderBy({"inserted" = "ASC"})
      */
-    private $decisions;
+    public $decisions;
     /**
      * @OneToMany(targetEntity="Activity", mappedBy="organization", cascade={"persist", "remove"},orphanRemoval=true)
      * @OrderBy({"status" = "ASC", "name" = "ASC"})
      */
-    private $activities;
+    public $activities;
     /**
      * @OneToMany(targetEntity="Criterion", mappedBy="organization", cascade={"persist", "remove"}, orphanRemoval=true)
      * @OrderBy({"type" = "ASC", "inserted" = "ASC"})
      */
-    private $criteria;
+    public $criteria;
     /**
      * @OneToMany(targetEntity="TemplateActivity", mappedBy="organization", cascade={"persist", "remove"},orphanRemoval=true)
      * @OrderBy({"name" = "ASC"})
      */
-    private $templateActivities;
+    public $templateActivities;
     /**
      * @OneToMany(targetEntity="Client", mappedBy="organization", cascade={"persist", "remove"},orphanRemoval=true)
      * @var ArrayCollection|Client[]
      */
-    private $clients;
+    public $clients;
 
     /**
      * @OneToMany(targetEntity="CriterionName", mappedBy="organization", cascade={"persist", "remove"},orphanRemoval=true)
      * @OrderBy({"type" = "DESC", "name" = "ASC"})
      */
-    private $criterionNames;
+    public $criterionNames;
 
     /**
      * @Column(name="org_users_CSV", type="string")
      * @Assert\File(mimeTypes={ "text/csv" })
      */
-    private $usersCSV;
+    public $usersCSV;
     /**
      * @Column(name="org_logo", type="string", nullable=true)
      * @var string
@@ -169,28 +169,28 @@ class Organization extends DbObject
     /**
      * @OneToMany(targetEntity="Team", mappedBy="organization",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $teams;
+    public $teams;
     /**
      * @OneToMany(targetEntity="Mail", mappedBy="organization", cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $mails;
+    public $mails;
     /**
      * @OneToMany(targetEntity="Target", mappedBy="organization",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $targets;
+    public $targets;
     /**
      * @OneToMany(targetEntity="OrganizationUserOption", mappedBy="organization", cascade={"persist","remove"}, orphanRemoval=true)
      */
-    private $options;
+    public $options;
     /**
      * @OneToMany(targetEntity="Process", mappedBy="organization", cascade={"persist","remove"}, orphanRemoval=true)
      */
-    private $processes;
+    public $processes;
     /**
      * @OneToMany(targetEntity="InstitutionProcess", mappedBy="organization", cascade={"persist","remove"}, orphanRemoval=true)
      * @var ArrayCollection|InstitutionProcess[]
      */
-    private $institutionProcesses;
+    public $institutionProcesses;
 
     /**
      * @OneToMany(targetEntity="CriterionGroup", mappedBy="organization", cascade={"persist","remove"}, orphanRemoval=true)
@@ -201,7 +201,7 @@ class Organization extends DbObject
      * @OneToOne(targetEntity="WorkerFirm")
      * @JoinColumn(name="worker_firm_wfi_id", referencedColumnName="wfi_id")
      */
-    private $workerFirm;
+    public $workerFirm;
 
     /**
      * Organization constructor.
@@ -391,18 +391,6 @@ class Organization extends DbObject
     public function setWeightType(string $org_weight_type): self
     {
         $this->org_weight_type = $org_weight_type;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->org_createdBy;
-    }
-
-    public function setCreatedBy(int $org_createdBy): self
-    {
-        $this->org_createdBy = $org_createdBy;
 
         return $this;
     }

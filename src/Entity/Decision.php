@@ -22,52 +22,52 @@ class Decision extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="dec_id", type="integer", nullable=false)
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $dec_type;
+    public $dec_type;
 
     /**
      * @ORM\Column(name="req_anon", type="integer")
      */
-    private $anonymousRequest;
+    public $anonymousRequest;
 
     /**
      * @ORM\Column(name= "dec_anon", type="boolean", nullable=true)
      */
-    private $anonymousDecision;
+    public $anonymousDecision;
 
     /**
      * @ORM\Column(name="val_usr_id", type="integer")
      */
-    private $validator;
+    public $validator;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $dec_result;
+    public $dec_result;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $dec_createdBy;
+    public $dec_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $dec_inserted;
+    public $dec_inserted;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $dec_decided;
+    public $dec_decided;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $dec_validated;
+    public $dec_validated;
 
     /**
      * @ManyToOne(targetEntity="Organization")
@@ -217,18 +217,6 @@ class Decision extends DbObject
     public function setResult(int $dec_result): self
     {
         $this->dec_result = $dec_result;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->dec_createdBy;
-    }
-
-    public function setCreatedBy(int $dec_createdBy): self
-    {
-        $this->dec_createdBy = $dec_createdBy;
 
         return $this;
     }

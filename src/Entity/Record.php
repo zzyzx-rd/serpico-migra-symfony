@@ -22,22 +22,22 @@ class Record
     /**
      * @ORM\Column(type="integer")
      */
-    private $rec_table_id;
+    public $rec_table_id;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $rec_property;
+    public $rec_property;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $rec_old;
+    public $rec_old;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $rec_new;
+    public $rec_new;
 
     public function getId(): ?int
     {

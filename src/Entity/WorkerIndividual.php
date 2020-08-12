@@ -22,83 +22,83 @@ class WorkerIndividual
      * @ORM\Column(name="win_id", type="integer", nullable=false)
      * @var int
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="string", length=10)
      */
-    private $win_lk_country;
+    public $win_lk_country;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $win_lk_url;
+    public $win_lk_url;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $win_lk_fullName;
+    public $win_lk_fullName;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $win_lk_male;
+    public $win_lk_male;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $win_created;
+    public $win_created;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $win_firstname;
+    public $win_firstname;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $win_lastname;
+    public $win_lastname;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $win_email;
+    public $win_email;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $win_gdpr;
+    public $win_gdpr;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $win_lk_nbConnections;
+    public $win_lk_nbConnections;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $win_lk_contacted;
+    public $win_lk_contacted;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $win_createdBy;
+    public $win_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $win_inserted;
+    public $win_inserted;
 
     /**
      * @OneToMany(targetEntity="WorkerExperience", mappedBy="individual", cascade={"persist", "remove"}, orphanRemoval=true)
      * @OrderBy({"startDate" = "DESC"})
      */
-    private $experiences;
+    public $experiences;
 
     /**
      * @OneToMany(targetEntity="Mail", mappedBy="workerIndividual", cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $mails;
+    public $mails;
 
     /**
      * WorkerIndividual constructor.
@@ -290,19 +290,7 @@ class WorkerIndividual
 
         return $this;
     }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->win_createdBy;
-    }
-
-    public function setCreatedBy(int $win_createdBy): self
-    {
-        $this->win_createdBy = $win_createdBy;
-
-        return $this;
-    }
-
+    
     public function getInserted(): ?\DateTimeInterface
     {
         return $this->win_inserted;

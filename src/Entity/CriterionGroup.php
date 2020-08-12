@@ -21,22 +21,22 @@ class CriterionGroup extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="cgp_id", type="integer", nullable=false)
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $cgp_createdBy;
+    public $cgp_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $cgp_inserted;
+    public $cgp_inserted;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $cgp_name;
+    public $cgp_name;
 
     /**
      * @OneToMany(targetEntity="CriterionName", mappedBy="criterionGroup", cascade={"persist", "remove"})
@@ -88,18 +88,6 @@ class CriterionGroup extends DbObject
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->cgp_createdBy;
-    }
-
-    public function setCreatedBy(int $cgp_createdBy): self
-    {
-        $this->cgp_createdBy = $cgp_createdBy;
-
-        return $this;
     }
 
     public function getInserted(): ?\DateTimeInterface

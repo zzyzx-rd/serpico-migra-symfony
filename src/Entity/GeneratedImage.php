@@ -6,6 +6,7 @@ use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\GeneratedImageRepository;
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\OneToOne;
 
@@ -21,42 +22,42 @@ class GeneratedImage extends DbObject
      * @ORM\Column(name="gim_id", type="integer", nullable=false)
      * @var int
      */
-    private $id;
+    protected $id;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $gim_all;
+    public $gim_all;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $gim_type;
+    public $gim_type;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $gim_tid;
+    public $gim_tid;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $gim_uid;
+    public $gim_uid;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $gim_aid;
+    public $gim_aid;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $gim_ov;
+    public $gim_ov;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $gim_sid;
+    public $gim_sid;
 
     /**
      *@Column(name="gim_cid", type="integer", nullable=true, length=10)
@@ -67,22 +68,22 @@ class GeneratedImage extends DbObject
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $gim_role;
+    public $gim_role;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $gim_createdBy;
+    public $gim_createdBy;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $gim_val;
+    public $gim_val;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $gim_inserted;
+    public $gim_inserted;
 
     /**
      * @OneToOne(targetEntity="CriterionName")
@@ -236,18 +237,6 @@ class GeneratedImage extends DbObject
     public function setRole(?int $gim_role): self
     {
         $this->gim_role = $gim_role;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->gim_createdBy;
-    }
-
-    public function setCreatedBy(?int $gim_createdBy): self
-    {
-        $this->gim_createdBy = $gim_createdBy;
 
         return $this;
     }

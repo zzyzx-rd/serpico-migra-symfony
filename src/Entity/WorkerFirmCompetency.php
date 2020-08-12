@@ -20,22 +20,22 @@ class WorkerFirmCompetency extends DbObject
      * @ORM\Column(name="wfc_id", type="integer", nullable=false)
      * @var int
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $wfc_name;
+    public $wfc_name;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $wfc_createdBy;
+    public $wfc_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $wfc_inserted;
+    public $wfc_inserted;
 
     /**
      * @ManyToOne(targetEntity="WorkerFirm")

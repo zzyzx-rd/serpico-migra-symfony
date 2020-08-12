@@ -20,32 +20,32 @@ class TeamUser extends DbObject
      * @ORM\Column(name="tus_id", type="integer", length=10)
      * @var int
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $tus_leader;
+    public $tus_leader;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $tus_createdBy;
+    public $tus_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $tus_inserted;
+    public $tus_inserted;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
-    private $tus_deleted;
+    public $tus_deleted;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $tus_is_deleted;
+    public $tus_is_deleted;
 
     /**
      *@ManyToOne(targetEntity="Team")
@@ -56,13 +56,13 @@ class TeamUser extends DbObject
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="teamUsers")
      */
-    private $user_usr;
+    public $user_usr;
 
     /**
      * @ORM\ManyToOne(targetEntity=ExternalUser::class, inversedBy="teamUsers")
      * @ORM\JoinColumn(nullable=false)
      */
-    private $external_user_ext_id;
+    public $external_user_ext_id;
 
     /**
      * TeamUser constructor.
@@ -110,18 +110,6 @@ class TeamUser extends DbObject
     public function setLeader(bool $tus_leader): self
     {
         $this->tus_leader = $tus_leader;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->tus_createdBy;
-    }
-
-    public function setCreatedBy(int $tus_createdBy): self
-    {
-        $this->tus_createdBy = $tus_createdBy;
 
         return $this;
     }

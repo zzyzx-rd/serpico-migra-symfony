@@ -6,6 +6,7 @@ use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\WorkerFirmRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
@@ -24,153 +25,153 @@ class WorkerFirm extends DbObject
      * @ORM\Column(name="wfi_id", type="integer", nullable=false)
      * @var int
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $wfi_hq_location;
+    public $wfi_hq_location;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $wfi_hq_city;
+    public $wfi_hq_city;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $wfi_hq_state;
+    public $wfi_hq_state;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $wfi_hq_country;
+    public $wfi_hq_country;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $wfi_logo;
+    public $wfi_logo;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $wfi_website;
+    public $wfi_website;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $wfi_creation;
+    public $wfi_creation;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $wfi_firm_type;
+    public $wfi_firm_type;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $wfi_size;
+    public $wfi_size;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $wfi_nb_lk_followers;
+    public $wfi_nb_lk_followers;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $wfi_nb_lk_employees;
+    public $wfi_nb_lk_employees;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $wfi_active;
+    public $wfi_active;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $wfi_url;
+    public $wfi_url;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $wfi_name;
+    public $wfi_name;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $wfi_common_name;
+    public $wfi_common_name;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $wfi_mail_prefix;
+    public $wfi_mail_prefix;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $wfi_suffix;
+    public $wfi_suffix;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $wfi_nb_active_exp;
+    public $wfi_nb_active_exp;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $wfi_created;
+    public $wfi_created;
 
     /**
      *@Column(name="wfi_creation_date", type="datetime", nullable=false)
      * @var \DateTime
      */
-    private $creationDate;
+    public $creationDate;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $wfi_createdBy;
+    public $wfi_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $wfi_inserted;
+    public $wfi_inserted;
 
     /**
      * @OneToOne(targetEntity="WorkerFirmSector")
      * @JoinColumn(name="worker_firm_sector_wfs_id", referencedColumnName="wfs_id",nullable=false)
      */
-    private $mainSector;
+    public $mainSector;
 
     /**
      * @ManyToOne(targetEntity="City")
      * @JoinColumn(name="city_cit_id", referencedColumnName="cit_id",nullable=false)
      */
-    private $city;
+    public $city;
 
     /**
      * @ManyToOne(targetEntity="State")
      * @JoinColumn(name="state_sta_id", referencedColumnName="sta_id",nullable=false)
      */
-    private $state;
+    public $state;
 
     /**
      * @ManyToOne(targetEntity="Country")
      * @JoinColumn(name="country_cou_id", referencedColumnName="cou_id",nullable=false)
      */
-    private $country;
+    public $country;
 
     /**
      * @OneToMany(targetEntity="WorkerExperience", mappedBy="firm", cascade={"persist", "remove"}, orphanRemoval=true)
      * @OrderBy({"active" = "DESC"})
      */
-    private $experiences;
+    public $experiences;
 
     /**
      * @OneToMany(targetEntity="Mail", mappedBy="workerFirm", cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $mails;
+    public $mails;
 
     /**
      * WorkerFirm constructor.
@@ -494,18 +495,6 @@ class WorkerFirm extends DbObject
     public function setCreated(int $wfi_created): self
     {
         $this->wfi_created = $wfi_created;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->wfi_createdBy;
-    }
-
-    public function setCreatedBy(int $wfi_createdBy): self
-    {
-        $this->wfi_createdBy = $wfi_createdBy;
 
         return $this;
     }

@@ -79,8 +79,4 @@ abstract class DbObject
         return $this->inserted;
     }
 
-    public function getCreatorUser(EntityManager $em){
-        $repoU = $em->getRepository(User::class);
-        return $repoU->findById($this->createdBy);
-    }
 }

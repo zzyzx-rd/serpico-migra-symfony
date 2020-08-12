@@ -18,67 +18,67 @@ class ProcessCriterion extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="crt_id", type="integer", nullable=false)
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $crt_type;
+    public $crt_type;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $crt_name;
+    public $crt_name;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $crt_weight;
+    public $crt_weight;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $crt_forceComment_compare;
+    public $crt_forceComment_compare;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $crt_forceComment_value;
+    public $crt_forceComment_value;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $crt_forceComment_sign;
+    public $crt_forceComment_sign;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $crt_lowerbound;
+    public $crt_lowerbound;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $crt_upperbound;
+    public $crt_upperbound;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $crt_step;
+    public $crt_step;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $crt_comment;
+    public $crt_comment;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $crt_createdBy;
+    public $crt_createdBy;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
-    private $crt_inserted;
+    public $crt_inserted;
 
     /**
      * @ManyToOne(targetEntity="ProcessStage")
@@ -274,18 +274,6 @@ class ProcessCriterion extends DbObject
     public function setComment(?string $crt_comment): self
     {
         $this->crt_comment = $crt_comment;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->crt_createdBy;
-    }
-
-    public function setCreatedBy(?int $crt_createdBy): self
-    {
-        $this->crt_createdBy = $crt_createdBy;
 
         return $this;
     }

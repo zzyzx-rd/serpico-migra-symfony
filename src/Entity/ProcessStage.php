@@ -26,7 +26,7 @@ class ProcessStage extends DbObject
 
     const VISIBILITY_PUBLIC  = 1;
     const VISIBILITY_UNLISTED = 2;
-    const VISIBILITY_PRIVATE = 3;
+    const VISIBILITY_public = 3;
 
     /**
      * @ORM\Id()
@@ -34,137 +34,137 @@ class ProcessStage extends DbObject
      * @ORM\Column(name="stg_id", type="integer",nullable=false, length=10)
      * @var int
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $stg_complete;
+    public $stg_complete;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $stg_name;
+    public $stg_name;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $stg_mode;
+    public $stg_mode;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $stg_visibility;
+    public $stg_visibility;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $stg_definite_dates;
+    public $stg_definite_dates;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $stg_status;
+    public $stg_status;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $stg_desc;
+    public $stg_desc;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $stg_progress;
+    public $stg_progress;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $stg_weight;
+    public $stg_weight;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $stg_dperiod;
+    public $stg_dperiod;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $stg_dfrequency;
+    public $stg_dfrequency;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $stg_dorigin;
+    public $stg_dorigin;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $stg_fperiod;
+    public $stg_fperiod;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $stg_ffrequency;
+    public $stg_ffrequency;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $stg_forigin;
+    public $stg_forigin;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $stg_startdate;
+    public $stg_startdate;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $stg_enddated;
+    public $stg_enddated;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $stg_gstartdate;
+    public $stg_gstartdate;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $stg_genddate;
+    public $stg_genddate;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $stg_dealine_nbDays;
+    public $stg_dealine_nbDays;
 
     /**
      * @ORM\Column(type="boolean", nullable=true)
      */
-    private $stg_deadline_mailSent;
+    public $stg_deadline_mailSent;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $stg_createdBy;
+    public $stg_createdBy;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
-    private $stg_inserted;
+    public $stg_inserted;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $stg_isFinalized;
+    public $stg_isFinalized;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $stg_deleted;
+    public $stg_deleted;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $stg_dcompleted;
+    public $stg_dcompleted;
 
     /**
      * @ManyToOne(targetEntity="Process")
@@ -183,59 +183,59 @@ class ProcessStage extends DbObject
      * @OrderBy({"weight" = "DESC"})
      * @var Collection
      */
-    private $criteria;
+    public $criteria;
 
     /**
      * @OneToMany(targetEntity="IProcessActivityUser", mappedBy="stage",cascade={"persist", "remove"}, orphanRemoval=true)
      * @OrderBy({"team" = "ASC"})
      */
-    private $participants;
+    public $participants;
 
     /**
      * @OneToMany(targetEntity="Decision", mappedBy="stage",cascade={"persist","remove"}, orphanRemoval=true)
      */
-    private $decisions;
+    public $decisions;
 
     /**
      * @OneToMany(targetEntity="Grade", mappedBy="stage",cascade={"persist","remove"}, orphanRemoval=true)
      */
-    private $grades;
+    public $grades;
 
     /**
      * @OneToMany(targetEntity="Result", mappedBy="stage",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $results;
+    public $results;
 
     /**
      * @OneToMany(targetEntity="ResultTeam", mappedBy="stage",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $resultTeams;
+    public $resultTeams;
 
     /**
      * @OneToMany(targetEntity="Ranking", mappedBy="stage",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $rankings;
+    public $rankings;
 
     /**
      * @OneToMany(targetEntity="RankingTeam", mappedBy="stage",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $rankingTeams;
+    public $rankingTeams;
 
     /**
      * @OneToMany(targetEntity="RankingHistory", mappedBy="stage",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $historicalRankings;
+    public $historicalRankings;
 
     /**
      * @OneToMany(targetEntity="RankingTeamHistory", mappedBy="stage",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $historicalRankingTeams;
+    public $historicalRankingTeams;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
      * @ORM\JoinColumn(nullable=false)
      */
-    private $stg_master_usr;
+    public $stg_master_usr;
 
     /**
      * ProcessStage constructor.
@@ -617,18 +617,6 @@ class ProcessStage extends DbObject
     public function setDeadlineMailSent(?bool $stg_deadline_mailSent): self
     {
         $this->stg_deadline_mailSent = $stg_deadline_mailSent;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->stg_createdBy;
-    }
-
-    public function setCreatedBy(?int $stg_createdBy): self
-    {
-        $this->stg_createdBy = $stg_createdBy;
 
         return $this;
     }

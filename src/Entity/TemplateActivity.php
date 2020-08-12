@@ -7,6 +7,7 @@ use App\Repository\TemplateActivityRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
@@ -24,7 +25,8 @@ class TemplateActivity extends DbObject
      * @ORM\Column(name="act_id", type="integer", nullable=false)
      * @var int
      */
-    private $id;
+    public  $id;
+
     /**
      * @Column(name="act_magnitude", type="integer")
      * @var int
@@ -34,37 +36,37 @@ class TemplateActivity extends DbObject
     /**
      * @ORM\Column(type="boolean")
      */
-    private $act_simplified;
+    public $act_simplified;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $act_name;
+    public $act_name;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $act_visibility;
+    public $act_visibility;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $act_objectives;
+    public $act_objectives;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $act_createdBy;
+    public $act_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $act_inserted;
+    public $act_inserted;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $act_saved;
+    public $act_saved;
 
     /**
      * @ManyToOne(targetEntity="Organization")
@@ -89,26 +91,26 @@ class TemplateActivity extends DbObject
      * @OrderBy({"startdate" = "ASC"})
      * @var Collection|TemplateStage[]
      */
-    private $stages;
+    public $stages;
 
     /**
      * @OneToMany(targetEntity="TemplateActivityUser", mappedBy="activity",cascade={"persist", "remove"}, orphanRemoval=true)
      * @OrderBy({"team" = "ASC"})
      */
-    private $participants;
+    public $participants;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
      */
-    private $act_master_usr;
+    public $act_master_usr;
     /**
      * @var DateTime
      */
-    private $startdate;
+    public $startdate;
     /**
      * @var DateTime
      */
-    private $enddate;
+    public $enddate;
 
     /**
      * TemplateActivity constructor.
@@ -211,18 +213,6 @@ class TemplateActivity extends DbObject
     public function setObjectives(string $act_objectives): self
     {
         $this->act_objectives = $act_objectives;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->act_createdBy;
-    }
-
-    public function setCreatedBy(int $act_createdBy): self
-    {
-        $this->act_createdBy = $act_createdBy;
 
         return $this;
     }

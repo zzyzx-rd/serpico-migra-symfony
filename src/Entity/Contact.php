@@ -18,102 +18,102 @@ class Contact extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="con_id", type="integer")
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $con_locale;
+    public $con_locale;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $con_type;
+    public $con_type;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $con_sent;
+    public $con_sent;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $con_fullname;
+    public $con_fullname;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $con_compagny;
+    public $con_compagny;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $con_adress;
+    public $con_adress;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $con_zipCode;
+    public $con_zipCode;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $con_city;
+    public $con_city;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $con_country;
+    public $con_country;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $con_position;
+    public $con_position;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $con_email;
+    public $con_email;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $con_message;
+    public $con_message;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $con_newsletter;
+    public $con_newsletter;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $con_doc;
+    public $con_doc;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $con_mdate;
+    public $con_mdate;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $con_mtime;
+    public $con_mtime;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $con_inserted;
+    public $con_inserted;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $con_confirmed;
+    public $con_confirmed;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $con_createdBy;
+    public $con_createdBy;
 
     /**
      * Contact constructor.
@@ -402,15 +402,4 @@ class Contact extends DbObject
         return $this;
     }
 
-    public function getCreatedBy(): ?int
-    {
-        return $this->con_createdBy;
-    }
-
-    public function setCreatedBy(?int $con_createdBy): self
-    {
-        $this->con_createdBy = $con_createdBy;
-
-        return $this;
-    }
 }

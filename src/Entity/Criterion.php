@@ -24,142 +24,142 @@ class Criterion extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="crt_id", type="integer", nullable=false)
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $cri_complete;
+    public $cri_complete;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $cri_type;
+    public $cri_type;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $cri_name;
+    public $cri_name;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $cri_weight;
+    public $cri_weight;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $cri_forceComment_compare;
+    public $cri_forceComment_compare;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $cri_forceCommentValue;
+    public $cri_forceCommentValue;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $cri_forceComment_sign;
+    public $cri_forceComment_sign;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $cri_lowerbound;
+    public $cri_lowerbound;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $cri_upperbound;
+    public $cri_upperbound;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $cri_step;
+    public $cri_step;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $cri_grade_type;
+    public $cri_grade_type;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $cri_avg_ae_res;
+    public $cri_avg_ae_res;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $cri_avg_rw_res;
+    public $cri_avg_rw_res;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $cri_avg_re_res;
+    public $cri_avg_re_res;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $cri_max_w_dev;
+    public $cri_max_w_dev;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $cri_max_e_dev;
+    public $cri_max_e_dev;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $cri_avg_w_dev;
+    public $cri_avg_w_dev;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $cri_avg_e_dev;
+    public $cri_avg_e_dev;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $cri_w_inertia;
+    public $cri_w_inertia;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $cri_e_inertia;
+    public $cri_e_inertia;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $cri_max_w_inertia;
+    public $cri_max_w_inertia;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $cri_max_e_inertia;
+    public $cri_max_e_inertia;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $cri_w_distratio;
+    public $cri_w_distratio;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $cri_comment;
+    public $cri_comment;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $cri_createdBy;
+    public $cri_createdBy;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
-    private $cri_inserted;
+    public $cri_inserted;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
-    private $cri_deleted;
+    public $cri_deleted;
 
     /**
      * @ManyToOne(targetEntity="Stage")
@@ -178,7 +178,7 @@ class Criterion extends DbObject
      * @OrderBy({"leader" = "DESC"})
      * @var Collection
      */
-    private $participants;
+    public $participants;
 
     /**
      * @ManyToOne(targetEntity="CriterionName")
@@ -188,39 +188,39 @@ class Criterion extends DbObject
     /**
      * @OneToOne(targetEntity="Target", mappedBy="criterion",cascade={"persist"}, orphanRemoval=true)
      */
-    private $target;
+    public $target;
     /**
      * @OneToMany(targetEntity="Grade", mappedBy="criterion", cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $grades;
+    public $grades;
     /**
      * @OneToMany(targetEntity="Result", mappedBy="criterion",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $results;
+    public $results;
     /**
      * @OneToMany(targetEntity="ResultTeam", mappedBy="criterion",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $resultTeams;
+    public $resultTeams;
     /**
      * @OneToMany(targetEntity="Ranking", mappedBy="criterion",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $rankings;
+    public $rankings;
     /**
      * @OneToMany(targetEntity="RankingTeam", mappedBy="criterion",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $rankingTeams;
+    public $rankingTeams;
     /**
      * @OneToMany(targetEntity="RankingHistory", mappedBy="criterion",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $historicalRankings;
+    public $historicalRankings;
     /**
      * @OneToMany(targetEntity="RankingTeamHistory", mappedBy="criterion",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $historicalRankingTeams;
+    public $historicalRankingTeams;
     /**
      * @OneToOne(targetEntity="Template", mappedBy="criterion",cascade={"persist","remove"}, orphanRemoval=true)
      */
-    private $template;
+    public $template;
 
     /**
      * Criterion constructor.
@@ -643,18 +643,6 @@ class Criterion extends DbObject
     public function setComment(string $cri_comment): self
     {
         $this->cri_comment = $cri_comment;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->cri_createdBy;
-    }
-
-    public function setCreatedBy(?int $cri_createdBy): self
-    {
-        $this->cri_createdBy = $cri_createdBy;
 
         return $this;
     }

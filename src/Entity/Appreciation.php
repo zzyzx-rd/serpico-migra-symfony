@@ -21,22 +21,22 @@ class Appreciation extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="apt_id", type="integer", nullable=false)
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $apt_value;
+    public $apt_value;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $apt_comment;
+    public $apt_comment;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $apt_createdBy;
+    public $apt_createdBy;
     /**
      * @ManyToOne(targetEntity="Criterion")
      * @JoinColumn(name="apt_criterion", referencedColumnName="crt_id",nullable=false)
@@ -99,7 +99,7 @@ class Appreciation extends DbObject
         return $this->apt_createdBy;
     }
 
-    public function setCreatedBy(?int $apt_createdBy): self
+    public function setCreatedBy($apt_createdBy): self
     {
         $this->apt_createdBy = $apt_createdBy;
 

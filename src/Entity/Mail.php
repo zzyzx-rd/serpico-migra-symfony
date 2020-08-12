@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\MailRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 
@@ -18,32 +19,32 @@ class Mail extends DbObject
      * @ORM\Column(name="mail_id", type="integer", length=10, nullable=false)
      * @var int
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="string", length=1)
      */
-    private $mail_persona;
+    public $mail_persona;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $mail_token;
+    public $mail_token;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $mail_read;
+    public $mail_read;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $mail_createdBy;
+    public $mail_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $mail_inserted;
+    public $mail_inserted;
 
     /**
      * @Column(name="mail_type", length= 255, type="string")
@@ -54,7 +55,7 @@ class Mail extends DbObject
     /**
      * @ORM\Column(type="string", length=3)
      */
-    private $mail_language;
+    public $mail_language;
 
     /**
      * @ManyToOne(targetEntity="User")
@@ -174,18 +175,6 @@ class Mail extends DbObject
     public function setMailRead(\DateTimeInterface $mail_read): self
     {
         $this->mail_read = $mail_read;
-
-        return $this;
-    }
-
-    public function getMailCreatedBy(): ?int
-    {
-        return $this->mail_createdBy;
-    }
-
-    public function setMailCreatedBy(int $mail_createdBy): self
-    {
-        $this->mail_createdBy = $mail_createdBy;
 
         return $this;
     }

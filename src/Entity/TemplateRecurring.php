@@ -23,102 +23,102 @@ class TemplateRecurring extends DbObject
      * @ORM\Column(name="rct_id", type="integer", length=10)
      * @var int
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $rct_name;
+    public $rct_name;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $rct_status;
+    public $rct_status;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $rct_timeframe;
+    public $rct_timeframe;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $rct_freq;
+    public $rct_freq;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $rct_gsd_interval;
+    public $rct_gsd_interval;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $rct_gsd_timeframe;
+    public $rct_gsd_timeframe;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $rct_ged_interval;
+    public $rct_ged_interval;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $rct_ged_timeframe;
+    public $rct_ged_timeframe;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $rct_type;
+    public $rct_type;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $rct_lowerbound;
+    public $rct_lowerbound;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $rct_upperbound;
+    public $rct_upperbound;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $rct_step;
+    public $rct_step;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $rct_open_end;
+    public $rct_open_end;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $rct_startdate;
+    public $rct_startdate;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $rct_enddate;
+    public $rct_enddate;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $rct_same_part;
+    public $rct_same_part;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $rct_createdBy;
+    public $rct_createdBy;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $rct_inserted;
+    public $rct_inserted;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $rct_deleted;
+    public $rct_deleted;
 
     /**
      * @ManyToOne(targetEntity="Organization")
@@ -130,12 +130,12 @@ class TemplateRecurring extends DbObject
      * @OneToMany(targetEntity="TemplateActivity", mappedBy="recurring", cascade={"persist", "remove"},orphanRemoval=true)
      * @OrderBy({"startdate" = "ASC"})
      */
-    private $activities;
+    public $activities;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
      */
-    private $rct_master_usr;
+    public $rct_master_usr;
 
     /**
      * TemplateRecurring constructor.
@@ -406,18 +406,6 @@ class TemplateRecurring extends DbObject
     public function setSamePart(bool $rct_same_part): self
     {
         $this->rct_same_part = $rct_same_part;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?int
-    {
-        return $this->rct_createdBy;
-    }
-
-    public function setCreatedBy(int $rct_createdBy): self
-    {
-        $this->rct_createdBy = $rct_createdBy;
 
         return $this;
     }
