@@ -90,6 +90,50 @@ class Target
      */
     protected $criterion;
 
+    /**
+     * Target constructor.
+     * @param $id
+     * @param $tgt_sign
+     * @param $tgt_value
+     * @param $tgt_createdBy
+     * @param $tgt_inserted
+     * @param $organization
+     * @param $department
+     * @param $position
+     * @param $title
+     * @param $user
+     * @param $team
+     * @param $cName
+     * @param $criterion
+     */
+    public function __construct(
+        $id = 0,
+        $tgt_sign = null,
+        $tgt_value = null,
+        $tgt_createdBy = null,
+        $tgt_inserted = null,
+        $organization = null,
+        $department = null,
+        $position = null,
+        $title = null,
+        $user = null,
+        $team = null,
+        $cName = null,
+        $criterion = null)
+    {
+        $this->tgt_sign = $tgt_sign;
+        $this->tgt_value = $tgt_value;
+        $this->tgt_inserted = $tgt_inserted;
+        $this->organization = $organization;
+        $this->department = $department;
+        $this->position = $position;
+        $this->title = $title;
+        $this->user = $user;
+        $this->team = $team;
+        $this->cName = $cName;
+        $this->criterion = $criterion;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -271,4 +315,8 @@ class Target
         $this->criterion = $criterion;
     }
 
-}
+    public function __toString()
+    {
+        return (string) $this->id;
+    }
+ }
