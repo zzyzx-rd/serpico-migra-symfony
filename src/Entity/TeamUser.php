@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping\ManyToOne;
  * @ApiResource()
  * @ORM\Entity(repositoryClass=TeamUserRepository::class)
  */
-class TeamUser
+class TeamUser extends DbObject
 {
     /**
      * @ORM\Id()
@@ -64,65 +64,97 @@ class TeamUser
      */
     private $external_user_ext_id;
 
+    /**
+     * TeamUser constructor.
+     * @param int $id
+     * @param $tus_leader
+     * @param $tus_createdBy
+     * @param $tus_inserted
+     * @param $tus_deleted
+     * @param $tus_is_deleted
+     * @param $team
+     * @param $user_usr
+     * @param $external_user_ext_id
+     */
+    public function __construct(
+        int $id = 0,
+        $user_usr = null,
+        $external_user_ext_id = null,
+        $tus_createdBy = null,
+        $tus_leader = false,
+        $tus_inserted = null,
+        $tus_deleted = null,
+        $tus_is_deleted = false,
+        $team = null)
+    {
+        $this->tus_leader = $tus_leader;
+        $this->tus_inserted = $tus_inserted;
+        $this->tus_deleted = $tus_deleted;
+        $this->tus_is_deleted = $tus_is_deleted;
+        $this->team = $team;
+        $this->user_usr = $user_usr;
+        $this->external_user_ext_id = $external_user_ext_id;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getTusLeader(): ?bool
+    public function getLeader(): ?bool
     {
         return $this->tus_leader;
     }
 
-    public function setTusLeader(bool $tus_leader): self
+    public function setLeader(bool $tus_leader): self
     {
         $this->tus_leader = $tus_leader;
 
         return $this;
     }
 
-    public function getTusCreatedBy(): ?int
+    public function getCreatedBy(): ?int
     {
         return $this->tus_createdBy;
     }
 
-    public function setTusCreatedBy(int $tus_createdBy): self
+    public function setCreatedBy(int $tus_createdBy): self
     {
         $this->tus_createdBy = $tus_createdBy;
 
         return $this;
     }
 
-    public function getTusInserted(): ?\DateTimeInterface
+    public function getInserted(): ?\DateTimeInterface
     {
         return $this->tus_inserted;
     }
 
-    public function setTusInserted(\DateTimeInterface $tus_inserted): self
+    public function setInserted(\DateTimeInterface $tus_inserted): self
     {
         $this->tus_inserted = $tus_inserted;
 
         return $this;
     }
 
-    public function getTusDeleted(): ?\DateTimeInterface
+    public function getDeleted(): ?\DateTimeInterface
     {
         return $this->tus_deleted;
     }
 
-    public function setTusDeleted(?\DateTimeInterface $tus_deleted): self
+    public function setDeleted(?\DateTimeInterface $tus_deleted): self
     {
         $this->tus_deleted = $tus_deleted;
 
         return $this;
     }
 
-    public function getTusIsDeleted(): ?bool
+    public function getIsDeleted(): ?bool
     {
         return $this->tus_is_deleted;
     }
 
-    public function setTusIsDeleted(bool $tus_is_deleted): self
+    public function setIsDeleted(bool $tus_is_deleted): self
     {
         $this->tus_is_deleted = $tus_is_deleted;
 
@@ -168,5 +200,9 @@ class TeamUser
 
         return $this;
     }
-
+    public function toggleIsDeleted()
+    {
+        $this->tus_is_deleted = !$this->tus_is_deleted;
+        return $this;
+    }
 }
