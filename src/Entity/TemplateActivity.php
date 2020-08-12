@@ -479,6 +479,6 @@ class TemplateActivity extends DbObject
     {
         return $u->getRole() == 1 || $u->getRole() == 4 || $this->masterUserId == $u->getId();
     }
-    
+
 
 }

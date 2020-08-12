@@ -87,77 +87,123 @@ class TemplateActivityUser
      */
     private $external_user_ext_usr;
 
+    /**
+     * TemplateActivityUser constructor.
+     * @param $id
+     * @param $a_u_leader
+     * @param $a_u_type
+     * @param $a_u_mWeight
+     * @param $a_u_precomment
+     * @param $a_u_createdBy
+     * @param $a_u_inserted
+     * @param $team
+     * @param $activity
+     * @param $stage
+     * @param $criterion
+     * @param $user_usr
+     * @param $external_user_ext_usr
+     */
+    public function __construct(
+        $id = 0,
+        $user_usr = null,
+        $external_user_ext_usr = null,
+        $a_u_leader = false,
+        $a_u_type = 1,
+        $a_u_mWeight = 0.0,
+        $a_u_precomment = null,
+        $a_u_createdBy = null,
+        $a_u_inserted = null,
+        Team $team = null,
+        Activity $activity = null,
+        Stage $stage = null,
+        Criterion $criterion = null)
+    {
+        $this->id = $id;
+        $this->a_u_leader = $a_u_leader;
+        $this->a_u_type = $a_u_type;
+        $this->a_u_mWeight = $a_u_mWeight;
+        $this->a_u_precomment = $a_u_precomment;
+        $this->a_u_createdBy = $a_u_createdBy;
+        $this->a_u_inserted = $a_u_inserted;
+        $this->team = $team;
+        $this->activity = $activity;
+        $this->stage = $stage;
+        $this->criterion = $criterion;
+        $this->user_usr = $user_usr;
+        $this->external_user_ext_usr = $external_user_ext_usr;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getAULeader(): ?bool
+    public function getLeader(): ?bool
     {
         return $this->a_u_leader;
     }
 
-    public function setAULeader(bool $a_u_leader): self
+    public function setLeader(bool $a_u_leader): self
     {
         $this->a_u_leader = $a_u_leader;
 
         return $this;
     }
 
-    public function getAUType(): ?int
+    public function getType(): ?int
     {
         return $this->a_u_type;
     }
 
-    public function setAUType(int $a_u_type): self
+    public function setType(int $a_u_type): self
     {
         $this->a_u_type = $a_u_type;
 
         return $this;
     }
 
-    public function getAUMWeight(): ?float
+    public function getMWeight(): ?float
     {
         return $this->a_u_mWeight;
     }
 
-    public function setAUMWeight(float $a_u_mWeight): self
+    public function setMWeight(float $a_u_mWeight): self
     {
         $this->a_u_mWeight = $a_u_mWeight;
 
         return $this;
     }
 
-    public function getAUPrecomment(): ?string
+    public function getPrecomment(): ?string
     {
         return $this->a_u_precomment;
     }
 
-    public function setAUPrecomment(string $a_u_precomment): self
+    public function setPrecomment(string $a_u_precomment): self
     {
         $this->a_u_precomment = $a_u_precomment;
 
         return $this;
     }
 
-    public function getAUCreatedBy(): ?int
+    public function getCreatedBy(): ?int
     {
         return $this->a_u_createdBy;
     }
 
-    public function setAUCreatedBy(?int $a_u_createdBy): self
+    public function setCreatedBy(?int $a_u_createdBy): self
     {
         $this->a_u_createdBy = $a_u_createdBy;
 
         return $this;
     }
 
-    public function getAUInserted(): ?\DateTimeInterface
+    public function getInserted(): ?\DateTimeInterface
     {
         return $this->a_u_inserted;
     }
 
-    public function setAUInserted(?\DateTimeInterface $a_u_inserted): self
+    public function setInserted(?\DateTimeInterface $a_u_inserted): self
     {
         $this->a_u_inserted = $a_u_inserted;
 
