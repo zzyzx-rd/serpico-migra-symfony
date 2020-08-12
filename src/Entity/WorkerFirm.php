@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\WorkerFirmRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -15,7 +16,7 @@ use Doctrine\ORM\Mapping\OrderBy;
  * @ApiResource()
  * @ORM\Entity(repositoryClass=WorkerFirmRepository::class)
  */
-class WorkerFirm
+class WorkerFirm extends DbObject
 {
     /**
      * @ORM\Id()
@@ -121,6 +122,12 @@ class WorkerFirm
     private $wfi_created;
 
     /**
+     *@Column(name="wfi_creation_date", type="datetime", nullable=false)
+     * @var \DateTime
+     */
+    private $creationDate;
+
+    /**
      * @ORM\Column(type="integer")
      */
     private $wfi_createdBy;
@@ -165,257 +172,349 @@ class WorkerFirm
      */
     private $mails;
 
+    /**
+     * WorkerFirm constructor.
+     * @param int $id
+     * @param $wfi_active
+     * @param $wfi_hq_city
+     * @param $wfi_hq_state
+     * @param $wfi_hq_country
+     * @param $wfi_logo
+     * @param null $creationDate
+     * @param $wfi_hq_location
+     * @param $wfi_website
+     * @param $wfi_creation
+     * @param $wfi_firm_type
+     * @param $wfi_size
+     * @param $wfi_nb_lk_followers
+     * @param $wfi_nb_lk_employees
+     * @param $wfi_url
+     * @param $wfi_name
+     * @param $wfi_common_name
+     * @param $wfi_mail_prefix
+     * @param $wfi_suffix
+     * @param $wfi_nb_active_exp
+     * @param $wfi_created
+     * @param $wfi_createdBy
+     * @param $wfi_inserted
+     * @param $mainSector
+     * @param $city
+     * @param $state
+     * @param $country
+     * @param $experiences
+     * @param $mails
+     */
+    public function __construct(
+        int $id = 0,
+        $wfi_active = null,
+        $wfi_hq_city = null,
+        $wfi_hq_state = null,
+        $wfi_hq_country = null,
+        $wfi_logo = null,
+        $creationDate = null,
+        $wfi_firm_type = null,
+        $wfi_size = null,
+        $wfi_nb_lk_followers = null,
+        $wfi_nb_lk_employees = null,
+        $wfi_url = null,
+        $wfi_name = null,
+        $wfi_common_name = null,
+        $wfi_mail_prefix = null,
+        $wfi_suffix = null,
+        $wfi_nb_active_exp = null,
+        $wfi_created = null,
+        $wfi_createdBy = null,
+        $wfi_inserted = null,
+        $wfi_hq_location = null,
+        $wfi_website = null,
+        $wfi_creation = null,
+        $mainSector = null,
+        $city = null,
+        $state = null,
+        $country = null,
+        $experiences = null,
+        $mails = null)
+    {
+        $this->creationDate = $creationDate;
+        $this->wfi_hq_location = $wfi_hq_location;
+        $this->wfi_hq_city = $wfi_hq_city;
+        $this->wfi_hq_state = $wfi_hq_state;
+        $this->wfi_hq_country = $wfi_hq_country;
+        $this->wfi_logo = $wfi_logo;
+        $this->wfi_website = $wfi_website;
+        $this->wfi_creation = $wfi_creation;
+        $this->wfi_firm_type = $wfi_firm_type;
+        $this->wfi_size = $wfi_size;
+        $this->wfi_nb_lk_followers = $wfi_nb_lk_followers;
+        $this->wfi_nb_lk_employees = $wfi_nb_lk_employees;
+        $this->wfi_active = $wfi_active;
+        $this->wfi_url = $wfi_url;
+        $this->wfi_name = $wfi_name;
+        $this->wfi_common_name = $wfi_common_name;
+        $this->wfi_mail_prefix = $wfi_mail_prefix;
+        $this->wfi_suffix = $wfi_suffix;
+        $this->wfi_nb_active_exp = $wfi_nb_active_exp;
+        $this->wfi_created = $wfi_created;
+        $this->wfi_inserted = $wfi_inserted;
+        $this->mainSector = $mainSector;
+        $this->city = $city;
+        $this->state = $state;
+        $this->country = $country;
+        $this->experiences = $experiences?$experiences:new ArrayCollection();
+        $this->mails = $mails?$mails:new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getWfiHqLocation(): ?string
+    public function getHQLocation(): ?string
     {
         return $this->wfi_hq_location;
     }
 
-    public function setWfiHqLocation(string $wfi_hq_location): self
+    public function setHQLocation(string $wfi_hq_location): self
     {
         $this->wfi_hq_location = $wfi_hq_location;
 
         return $this;
     }
 
-    public function getWfiHqCity(): ?string
+    public function getHQCity(): ?string
     {
         return $this->wfi_hq_city;
     }
 
-    public function setWfiHqCity(string $wfi_hq_city): self
+    public function setHQCity(string $wfi_hq_city): self
     {
         $this->wfi_hq_city = $wfi_hq_city;
 
         return $this;
     }
 
-    public function getWfiHqState(): ?string
+    public function getHQState(): ?string
     {
         return $this->wfi_hq_state;
     }
 
-    public function setWfiHqState(string $wfi_hq_state): self
+    public function setHQState(string $wfi_hq_state): self
     {
         $this->wfi_hq_state = $wfi_hq_state;
 
         return $this;
     }
 
-    public function getWfiHqCountry(): ?string
+    public function getHQCountry(): ?string
     {
         return $this->wfi_hq_country;
     }
 
-    public function setWfiHqCountry(string $wfi_hq_country): self
+    public function setHQCountry(string $wfi_hq_country): self
     {
         $this->wfi_hq_country = $wfi_hq_country;
 
         return $this;
     }
 
-    public function getWfiLogo(): ?string
+    public function getLogo(): ?string
     {
         return $this->wfi_logo;
     }
 
-    public function setWfiLogo(string $wfi_logo): self
+    public function setLogo(string $wfi_logo): self
     {
         $this->wfi_logo = $wfi_logo;
 
         return $this;
     }
 
-    public function getWfiWebsite(): ?string
+    public function getWebsite(): ?string
     {
         return $this->wfi_website;
     }
 
-    public function setWfiWebsite(string $wfi_website): self
+    public function setWebsite(string $wfi_website): self
     {
         $this->wfi_website = $wfi_website;
 
         return $this;
     }
 
-    public function getWfiCreation(): ?string
+    public function getCreation(): ?string
     {
         return $this->wfi_creation;
     }
 
-    public function setWfiCreation(string $wfi_creation): self
+    public function setCreation(string $wfi_creation): self
     {
         $this->wfi_creation = $wfi_creation;
 
         return $this;
     }
 
-    public function getWfiFirmType(): ?string
+    public function getFirmType(): ?string
     {
         return $this->wfi_firm_type;
     }
 
-    public function setWfiFirmType(string $wfi_firm_type): self
+    public function setFirmType(string $wfi_firm_type): self
     {
         $this->wfi_firm_type = $wfi_firm_type;
 
         return $this;
     }
 
-    public function getWfiSize(): ?int
+    public function getSize(): ?int
     {
         return $this->wfi_size;
     }
 
-    public function setWfiSize(int $wfi_size): self
+    public function setSize(int $wfi_size): self
     {
         $this->wfi_size = $wfi_size;
 
         return $this;
     }
 
-    public function getWfiNbLkFollowers(): ?int
+    public function getNbLkFollowers(): ?int
     {
         return $this->wfi_nb_lk_followers;
     }
 
-    public function setWfiNbLkFollowers(int $wfi_nb_lk_followers): self
+    public function setNbLkFollowers(int $wfi_nb_lk_followers): self
     {
         $this->wfi_nb_lk_followers = $wfi_nb_lk_followers;
 
         return $this;
     }
 
-    public function getWfiNbLkEmployees(): ?int
+    public function getNbLkEmployees(): ?int
     {
         return $this->wfi_nb_lk_employees;
     }
 
-    public function setWfiNbLkEmployees(int $wfi_nb_lk_employees): self
+    public function setNbLkEmployees(int $wfi_nb_lk_employees): self
     {
         $this->wfi_nb_lk_employees = $wfi_nb_lk_employees;
 
         return $this;
     }
 
-    public function getWfiActive(): ?bool
+    public function getActive(): ?bool
     {
         return $this->wfi_active;
     }
 
-    public function setWfiActive(bool $wfi_active): self
+    public function setActive(bool $wfi_active): self
     {
         $this->wfi_active = $wfi_active;
 
         return $this;
     }
 
-    public function getWfiUrl(): ?string
+    public function getUrl(): ?string
     {
         return $this->wfi_url;
     }
 
-    public function setWfiUrl(string $wfi_url): self
+    public function setUrl(string $wfi_url): self
     {
         $this->wfi_url = $wfi_url;
 
         return $this;
     }
 
-    public function getWfiName(): ?string
+    public function getName(): ?string
     {
         return $this->wfi_name;
     }
 
-    public function setWfiName(string $wfi_name): self
+    public function setName(string $wfi_name): self
     {
         $this->wfi_name = $wfi_name;
 
         return $this;
     }
 
-    public function getWfiCommonName(): ?string
+    public function getCommonName(): ?string
     {
         return $this->wfi_common_name;
     }
 
-    public function setWfiCommonName(string $wfi_common_name): self
+    public function setCommonName(string $wfi_common_name): self
     {
         $this->wfi_common_name = $wfi_common_name;
 
         return $this;
     }
 
-    public function getWfiMailPrefix(): ?int
+    public function getMailPrefix(): ?int
     {
         return $this->wfi_mail_prefix;
     }
 
-    public function setWfiMailPrefix(int $wfi_mail_prefix): self
+    public function setMailPrefix(int $wfi_mail_prefix): self
     {
         $this->wfi_mail_prefix = $wfi_mail_prefix;
 
         return $this;
     }
 
-    public function getWfiSuffix(): ?string
+    public function getSuffix(): ?string
     {
         return $this->wfi_suffix;
     }
 
-    public function setWfiSuffix(string $wfi_suffix): self
+    public function setSuffix(string $wfi_suffix): self
     {
         $this->wfi_suffix = $wfi_suffix;
 
         return $this;
     }
 
-    public function getWfiNbActiveExp(): ?int
+    public function getNbActiveExp(): ?int
     {
         return $this->wfi_nb_active_exp;
     }
 
-    public function setWfiNbActiveExp(int $wfi_nb_active_exp): self
+    public function setNbActiveExp(int $wfi_nb_active_exp): self
     {
         $this->wfi_nb_active_exp = $wfi_nb_active_exp;
 
         return $this;
     }
 
-    public function getWfiCreated(): ?int
+    public function getCreated(): ?int
     {
         return $this->wfi_created;
     }
 
-    public function setWfiCreated(int $wfi_created): self
+    public function setCreated(int $wfi_created): self
     {
         $this->wfi_created = $wfi_created;
 
         return $this;
     }
 
-    public function getWfiCreatedBy(): ?int
+    public function getCreatedBy(): ?int
     {
         return $this->wfi_createdBy;
     }
 
-    public function setWfiCreatedBy(int $wfi_createdBy): self
+    public function setCreatedBy(int $wfi_createdBy): self
     {
         $this->wfi_createdBy = $wfi_createdBy;
 
         return $this;
     }
 
-    public function getWfiInserted(): ?\DateTimeInterface
+    public function getInserted(): ?\DateTimeInterface
     {
         return $this->wfi_inserted;
     }
 
-    public function setWfiInserted(\DateTimeInterface $wfi_inserted): self
+    public function setInserted(\DateTimeInterface $wfi_inserted): self
     {
         $this->wfi_inserted = $wfi_inserted;
 
@@ -517,5 +616,60 @@ class WorkerFirm
     {
         $this->mails = $mails;
     }
+    public function getActiveExperiences()
+    {
+        $activeExperiences = [];
+        $firmExperiences = $this->experiences;
+        foreach($firmExperiences as $firmExperience){
+            if($firmExperience->isActive() == true){
+                $activeExperiences[] = $firmExperience;
+            }
+        }
+        return $activeExperiences;
+    }
+
+    function addExperience(WorkerExperience $experience){
+        $this->experiences->add($experience);
+        $experience->setFirm($this);
+        return $this;
+    }
+
+    function removeExperience(WorkerExperience $experience){
+        $this->experiences->removeElement($experience);
+        return $this;
+    }
+    function removeMail(Mail $mail){
+        $this->mails->removeElement($mail);
+        return $this;
+    }
+
+    /**
+     * @return Collection|WorkingIndividual[]
+     */
+    function getWorkingIndividuals(){
+        $workingIndividuals = [];
+        foreach($this->experiences as $experience){
+            if($experience->isActive() == true){
+                $workingIndividuals[] = $experience->getIndividual();
+            }
+        }
+
+        $workingIndividuals = new ArrayCollection($workingIndividuals);
+        $iterator =  $workingIndividuals->getIterator();
+
+        $iterator->uasort(function ($first, $second) {
+            return ($first->getExperiences()->last()->getStartDate() > $second->getExperiences()->last()->getStartDate()) ? 1 : -1;
+        });
+
+        $workingIndividuals = new ArrayCollection(iterator_to_array($iterator));
+        return $workingIndividuals;
+    }
+
+
+    public function __toString()
+    {
+        return (string) $this->id;
+    }
+
 
 }
