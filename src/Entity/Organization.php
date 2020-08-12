@@ -280,6 +280,7 @@ class Organization extends DbObject
         array $criterionGroups = null,
         $workerFirm = null)
     {
+        parent::__construct($id, $org_createdBy, new DateTime());
         $this->org_legalname = $org_legalname;
         $this->org_commname = $org_commname;
         $this->org_type = $org_type;

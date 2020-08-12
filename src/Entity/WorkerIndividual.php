@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\WorkerIndividualRepository;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\OneToMany;
@@ -136,6 +137,7 @@ class WorkerIndividual
         $experiences = null,
         $mails = null)
     {
+        parent::__construct($id, $win_createdBy, new DateTime());
         $this->win_lk_country = $win_lk_country;
         $this->win_lk_url = $win_lk_url;
         $this->win_lk_fullName = $win_lk_fullName;
@@ -148,8 +150,8 @@ class WorkerIndividual
         $this->win_lk_nbConnections = $win_lk_nbConnections;
         $this->win_lk_contacted = $win_lk_contacted;
         $this->win_inserted = $win_inserted;
-        $this->experiences = $experiences = new ArrayCollection();
-        $this->mails = $mails = new ArrayCollection();
+        $this->experiences = $experiences?$experiences: new ArrayCollection();
+        $this->mails = $mails?$mails: new ArrayCollection();
     }
 
     public function getId(): ?int

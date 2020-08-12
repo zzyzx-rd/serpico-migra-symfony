@@ -235,6 +235,7 @@ class WorkerFirm extends DbObject
         $experiences = null,
         $mails = null)
     {
+        parent::__construct($id, $wfi_createdBy, new DateTime());
         $this->creationDate = $creationDate;
         $this->wfi_hq_location = $wfi_hq_location;
         $this->wfi_hq_city = $wfi_hq_city;

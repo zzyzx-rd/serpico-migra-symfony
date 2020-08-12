@@ -123,6 +123,7 @@ class RankingHistory extends DbObject
         $criterion = null,
         $rhk_user_usr = null)
     {
+        parent::__construct($id, $rkh_createdBy, new DateTime());
         $this->rkh_wtype = $rkh_wtype;
         $this->rkh_abs_result = $rkh_abs_result;
         $this->rkh_rel_result = $rkh_rel_result;

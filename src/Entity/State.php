@@ -86,11 +86,10 @@ class State extends DbObject
         $cities = null,
         $firms = null)
     {
-        $this->id = $id;
+        parent::__construct($id,$sta_createdBy , new DateTime());
         $this->sta_abbr = $sta_abbr;
         $this->sta_fullname = $sta_fullname;
         $this->sta_name = $sta_name;
-        $this->sta_createdBy = $sta_createdBy;
         $this->sta_inserted = $sta_inserted;
         $this->country = $country;
         $this->cities = $cities?$cities:new ArrayCollection();

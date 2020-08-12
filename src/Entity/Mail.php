@@ -120,6 +120,8 @@ class Mail extends DbObject
         Activity $activity = null,
         Stage $stage = null)
     {
+        parent::__construct($id, $lk_url_createdBy, new DateTime());
+
         $this->type = $type;
         $this->mail_persona = $mail_persona;
         $this->mail_token = $mail_token;

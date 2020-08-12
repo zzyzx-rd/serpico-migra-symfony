@@ -322,7 +322,7 @@ class ProcessStage extends DbObject
         $historicalRankings = null,
         $historicalRankingTeams = null)
     {
-        $this->id = $id;
+        parent::__construct($id, $stg_createdBy, new DateTime());
         $this->stg_complete = $stg_complete;
         $this->stg_name = $stg_name;
         $this->stg_mode = $stg_mode;
@@ -344,7 +344,6 @@ class ProcessStage extends DbObject
         $this->stg_genddate = $stg_genddate;
         $this->stg_dealine_nbDays = $stg_dealine_nbDays;
         $this->stg_deadline_mailSent = $stg_deadline_mailSent;
-        $this->stg_createdBy = $stg_createdBy;
         $this->stg_inserted = $stg_inserted;
         $this->stg_isFinalized = $stg_isFinalized;
         $this->stg_deleted = $stg_deleted;

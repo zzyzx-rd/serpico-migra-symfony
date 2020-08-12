@@ -79,6 +79,7 @@ class SurveyFieldParameter extends DbObject
         $sfp_inserted = null,
         $field = null)
     {
+        parent::__construct($id, $sfp_createdBy, new DateTime());
         $this->sfp_value = $sfp_value;
         $this->sfp_lowerbound = $sfp_lowerbound;
         $this->sfp_upperbound = $sfp_upperbound;

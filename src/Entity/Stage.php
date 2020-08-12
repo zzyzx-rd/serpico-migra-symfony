@@ -403,7 +403,7 @@ class Stage extends DbObject
         $template = null,
         $stg_master_user = null)
     {
-        $this->id = $id;
+        parent::__construct($id, $stg_createdBy, new DateTime());
         $this->stg_complete = $stg_complete;
         $this->stg_name = $stg_name;
         $this->stg_mode = $stg_mode;
@@ -426,7 +426,6 @@ class Stage extends DbObject
         $this->stg_genddate = $stg_genddate;
         $this->stg_dealine_nb_days = $stg_dealine_nb_days;
         $this->stg_deadline_mailSent = $stg_deadline_mailSent;
-        $this->stg_createdBy = $stg_createdBy;
         $this->stg_inserted = $stg_inserted;
         $this->stg_reopened = $stg_reopened;
         $this->stg_last_reopened = $stg_last_reopened;

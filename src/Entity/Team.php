@@ -110,6 +110,7 @@ class Team extends DbObject
         $grades = null,
         $targets = null)
     {
+        parent::__construct($id, $tea_createdBy, new DateTime());
         $this->tea_name = $tea_name;
         $this->tea_weight_ini = $tea_weight_ini;
         $this->tea_picture = $tea_picture;

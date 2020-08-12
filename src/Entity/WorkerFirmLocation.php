@@ -62,6 +62,7 @@ class WorkerFirmLocation
         $wfl_hq_state = null,
         $wfl_hq_country = null)
     {
+        parent::__construct($id, $wfl_createdBy, new DateTime());
         $this->wfl_hq_city = $wfl_hq_city;
         $this->wfl_hq_state = $wfl_hq_state;
         $this->wfl_hq_country = $wfl_hq_country;

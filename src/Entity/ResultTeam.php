@@ -193,6 +193,7 @@ class ResultTeam extends DbObject
         $criterion = null,
         $team = null)
     {
+        parent::__construct($id, $rst_createdBy, new DateTime());
         $this->rst_type = $rst_type;
         $this->rst_war = $rst_war;
         $this->rst_ear = $rst_ear;

@@ -79,6 +79,7 @@ class OTPUser extends DbObject
         $otp_createdBy = null,
         $otp_inserted = null)
     {
+        parent::__construct($id,$otp_createdBy , new DateTime());
         $this->otp_type = $otp_type;
         $this->otp_fullname = $otp_fullname;
         $this->otp_tipe = $otp_tipe;

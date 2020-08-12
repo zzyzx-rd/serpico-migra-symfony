@@ -66,6 +66,7 @@ class WorkerFirmSector
         $icon = null,
         $firm = null)
     {
+        parent::__construct($id, $wfs_createdBy, new DateTime());
         $this->wfs_name = $wfs_name;
         $this->wfs_inserted = $wfs_inserted;
         $this->icon = $icon;

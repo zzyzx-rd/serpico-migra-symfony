@@ -357,6 +357,7 @@ class User extends DbObject
         $weight_wgt = null,
         $title_tit = null)
     {
+        parent::__construct($id, $usr_createdBy, new DateTime());
         $this->pictureFile = $pictureFile;
         $this->usr_int = $usr_int;
         $this->usr_firstname = $usr_firstname;

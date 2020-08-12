@@ -97,6 +97,7 @@ class Title extends DbObject
         $options = null,
         $targets = null)
     {
+        parent::__construct($id, $tit_createdBy, new DateTime());
         $this->tit_name = $tit_name;
         $this->tit_weight_ini = $tit_weight_ini;
         $this->tit_inserted = $tit_inserted;

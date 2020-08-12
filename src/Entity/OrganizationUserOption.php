@@ -107,11 +107,13 @@ class OrganizationUserOption extends DbObject
 
     /**
      * OrganizationUserOption constructor.
-     * @param $opt_enabled
+     * @param int $id
+     * @param bool $opt_enabled
      * @param $opt_createdBy
      */
-    public function __construct($opt_enabled = true, $opt_createdBy = null)
+    public function __construct($id = 0, $opt_enabled = true, $opt_createdBy = null)
     {
+        parent::__construct($id,$opt_createdBy , new DateTime());
         $this->opt_enabled = $opt_enabled;
         $this->opt_createdBy = $opt_createdBy;
     }

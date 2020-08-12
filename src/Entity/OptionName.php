@@ -61,6 +61,8 @@ class OptionName extends DbObject
         $ona_createdBy = null,
         $ona_inserted = null)
     {
+        parent::__construct($id, $ona_createdBy, new DateTime());
+
         $this->ona_type = $ona_type;
         $this->ona_name = $ona_name;
         $this->ona_description = $ona_description;

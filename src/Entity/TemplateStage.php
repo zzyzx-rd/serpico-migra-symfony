@@ -156,6 +156,7 @@ class TemplateStage extends DbObject
         $criteria = null,
         $participants = null)
     {
+        parent::__construct($id, $stg_createdBy, new DateTime());
         $this->name = $name;
         $this->stg_weight = $stg_weight;
         $this->stg_period = $stg_period;

@@ -145,6 +145,7 @@ class TemplateActivity extends DbObject
         $stages = null,
         $participants = null)
     {
+        parent::__construct($id, $act_createdBy, new DateTime());
         $this->magnitude = $magnitude;
         $this->act_simplified = $act_simplified;
         $this->act_name = $act_name;

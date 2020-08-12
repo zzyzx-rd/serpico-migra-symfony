@@ -181,6 +181,7 @@ class ResultProject extends DbObject
         $stage = null,
         $criterion = null)
     {
+        parent::__construct($id, $rsp_createdBy, new DateTime());
         $this->rsp_type = $rsp_type;
         $this->rsp_war = $rsp_war;
         $this->rsp_ear = $rsp_ear;

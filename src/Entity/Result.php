@@ -199,7 +199,7 @@ class Result extends DbObject
         User $user_usr= null,
         $external_user_ext_usr= null)
     {
-        $this->id = $id;
+        parent::__construct($id, $res_createdBy, new DateTime());
         $this->res_type = $res_type;
         $this->res_war = $res_war;
         $this->res_ear = $res_ear;
@@ -217,7 +217,6 @@ class Result extends DbObject
         $this->res_ein_max = $res_ein_max;
         $this->res_wdr_gen = $res_wdr_gen;
         $this->res_res_der_gen = $res_res_der_gen;
-        $this->res_createdBy = $res_createdBy;
         $this->res_inserted = $res_inserted;
         $this->activity = $activity;
         $this->stage = $stage;

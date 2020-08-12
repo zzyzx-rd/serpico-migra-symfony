@@ -124,6 +124,7 @@ class SurveyField extends DbObject
         $parameters = null,
         Answer $answers = null)
     {
+        parent::__construct($id, $sfi_createdBy, new DateTime());
         $this->sfi_type = $sfi_type;
         $this->sfi_isMandatory = $sfi_isMandatory;
         $this->sfi_title = $sfi_title;

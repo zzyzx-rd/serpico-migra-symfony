@@ -103,6 +103,7 @@ class Survey extends DbObject
         array $fields = [],
         $answers = null)
     {
+        parent::__construct($id, $sur_createdBy, new DateTime());
         $this->sur_name = $sur_name;
         $this->sur_inserted = $sur_inserted;
         $this->sur_state = $sur_state;

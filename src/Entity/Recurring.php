@@ -155,7 +155,7 @@ class Recurring
         $masterUser = null,
         $deleted = null)
     {
-        parent::__construct($id, new \DateTime);
+        parent::__construct($id,null ,new \DateTime);
         $this->rct_name = $name;
         $this->rct_status = $status;
         $this->rct_timeframe = $timeFrame;

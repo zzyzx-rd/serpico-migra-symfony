@@ -188,6 +188,7 @@ class TemplateRecurring extends DbObject
         $organization = null,
         $activities = null)
     {
+        parent::__construct($id, $rct_createdBy, new DateTime());
         $this->rct_name = $rct_name;
         $this->rct_status = $rct_status;
         $this->rct_timeframe = $rct_timeframe;

@@ -138,6 +138,7 @@ class Position extends DbObject
         $options = null,
         $targets = null)
     {
+        parent::__construct($id, $pos_createdBy, new DateTime());
         $this->pos_name = $pos_name;
         $this->pos_weight_ini = $pos_weight_ini;
         $this->pos_weight_1y = $pos_weight_1y;
@@ -145,7 +146,6 @@ class Position extends DbObject
         $this->pos_weight_3y = $pos_weight_3y;
         $this->pos_weight_4y = $pos_weight_4y;
         $this->pos_weight_5y = $pos_weight_5y;
-        $this->pos_createdBy = $pos_createdBy;
         $this->pos_inserted = $pos_inserted;
         $this->pos_deleted = $pos_deleted;
         $this->organization = $organization;

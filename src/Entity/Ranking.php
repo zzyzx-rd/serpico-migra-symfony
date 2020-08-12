@@ -145,6 +145,7 @@ class Ranking extends DbObject
         $stage = null,
         $criterion = null)
     {
+        parent::__construct($id, $rnk_createdBy, new DateTime());
         $this->rnk_dtype = $rnk_dtype;
         $this->rnk_wtype = $rnk_wtype;
         $this->rnk_abs_result = $rnk_abs_result;

@@ -135,6 +135,7 @@ class ProcessCriterion extends DbObject
         $process = null,
         $cName = null)
     {
+        parent::__construct($id, $crt_createdBy, new DateTime());
         $this->crt_type = $crt_type;
         $this->crt_name = $crt_name;
         $this->crt_weight = $crt_weight;

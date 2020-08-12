@@ -116,11 +116,10 @@ class Process extends DbObject
         $children = null,
         $stages = null)
     {
-        $this->id = $id;
+        parent::__construct($id, $pro_createdBy, new DateTime());
         $this->pro_name = $pro_name;
         $this->pro_approvable = $pro_approvable;
         $this->pro_gradable = $pro_gradable;
-        $this->pro_createdBy = $pro_createdBy;
         $this->pro_inserted = $pro_inserted;
         $this->pro_deleted = $pro_deleted;
         $this->children = $children?$children:new ArrayCollection();

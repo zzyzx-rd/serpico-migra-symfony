@@ -118,12 +118,11 @@ class TemplateActivityUser
         Stage $stage = null,
         Criterion $criterion = null)
     {
-        $this->id = $id;
+        parent::__construct($id, $a_u_createdBy, new DateTime());
         $this->a_u_leader = $a_u_leader;
         $this->a_u_type = $a_u_type;
         $this->a_u_mWeight = $a_u_mWeight;
         $this->a_u_precomment = $a_u_precomment;
-        $this->a_u_createdBy = $a_u_createdBy;
         $this->a_u_inserted = $a_u_inserted;
         $this->team = $team;
         $this->activity = $activity;

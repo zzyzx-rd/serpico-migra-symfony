@@ -58,6 +58,7 @@ class WorkerFirmCompetency extends DbObject
         $wfc_inserted = null,
         $firm = null)
     {
+        parent::__construct($id, $wfc_createdBy, new DateTime());
         $this->wfc_name = $wfc_name;
         $this->wfc_inserted = $wfc_inserted;
         $this->firm = $firm;

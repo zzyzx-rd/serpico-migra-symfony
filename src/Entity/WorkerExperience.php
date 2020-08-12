@@ -94,6 +94,7 @@ class WorkerExperience extends DbObject
         $individual = null,
         $firm = null)
     {
+        parent::__construct($id, $wex_createdBy, new DateTime());
         $this->wex_active = $wex_active;
         $this->wex_position = $wex_position;
         $this->wex_location = $wex_location;

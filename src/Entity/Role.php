@@ -44,6 +44,7 @@ class Role
      */
     public function __construct(int $id = 0, $rol_name = '', $rol_createdBy = null, $rol_inserted = null)
     {
+        parent::__construct($id, $rol_createdBy, new DateTime());
         $this->rol_name = $rol_name;
         $this->rol_inserted = $rol_inserted;
     }

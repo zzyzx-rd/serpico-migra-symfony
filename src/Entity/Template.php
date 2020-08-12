@@ -106,6 +106,7 @@ class Template extends DbObject
         $department = null,
         $organization = null)
     {
+        parent::__construct($id,$tmp_createdBy , new DateTime());
         $this->tmp_name = $tmp_name;
         $this->tmp_inserted = $tmp_inserted;
         $this->tmp_deleted = $tmp_deleted;

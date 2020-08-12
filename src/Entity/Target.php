@@ -121,6 +121,7 @@ class Target
         $cName = null,
         $criterion = null)
     {
+        parent::__construct($id, $tgt_createdBy, new DateTime());
         $this->tgt_sign = $tgt_sign;
         $this->tgt_value = $tgt_value;
         $this->tgt_inserted = $tgt_inserted;

@@ -103,12 +103,11 @@ class Weight extends DbObject
         $organization = null,
         $position = null)
     {
-        $this->id = $id;
+        parent::__construct($id, $wgt_createdBy, new DateTime());
         $this->wgt_interval = $wgt_interval;
         $this->wgt_titleframe = $wgt_titleframe;
         $this->wgt_value = $wgt_value;
         $this->wgt_modified = $wgt_modified;
-        $this->wgt_createdBy = $wgt_createdBy;
         $this->wgt_inserted = $wgt_inserted;
         $this->wgt_deleted = $wgt_deleted;
         $this->organization = $organization;
