@@ -81,7 +81,7 @@ class Position extends DbObject
     protected $organization;
 
     /**
-     * @ManyToOne(targetEntity="Department")
+     * @ManyToOne(targetEntity="Department", inversedBy="positions")
      * @JoinColumn(name="department_dpt_id", referencedColumnName="dpt_id", nullable=true)
      */
     protected $department;

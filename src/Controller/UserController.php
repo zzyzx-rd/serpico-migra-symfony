@@ -1,0 +1,1756 @@
+<?php
+
+namespace App\Controller;
+
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Criteria;
+use App\Form\AddFirstAdminForm;
+use App\Form\AddUserPictureForm;
+use App\Form\DelegateActivityForm;
+use App\Form\FinalizeUserForm;
+use App\Form\RequestActivityForm;
+use App\Form\ContactForm;
+use App\Entity\ActivityUser;
+use App\Entity\TeamUser;
+use App\Entity\Decision;
+use App\Entity\Department;
+use App\Entity\Organization;
+use App\Entity\Contact;
+use App\Entity\Ranking;
+use App\Entity\RankingTeam;
+use App\Entity\Result;
+use App\Entity\Stage;
+use App\Entity\Criterion;
+use App\Entity\CriterionName;
+use App\Entity\OrganizationUserOption;
+use App\Form\AddProcessForm;
+use App\Form\PasswordDefinitionForm;
+use App\Form\SignUpForm;
+use App\Form\UpdateWorkerIndividualForm;
+use App\Form\UserPublicForm;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use App\Entity\User;
+use App\Entity\Mail;
+use App\Entity\Position;
+use App\Entity\Activity;
+use App\Entity\InstitutionProcess;
+use App\Entity\Process;
+use App\Entity\WorkerFirm;
+use App\Entity\WorkerIndividual;
+use App\Repository\UserRepository;
+use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
+
+class UserController extends MasterController
+{
+    /*********** ADDITION, MODIFICATION, DELETION AND DISPLAY OF USERS *****************/
+    public function displayTCAction(Request $request, Application $app) {
+        return $app['twig']->render(
+            'terms_conditions.html.twig',
+            [
+                'request' => $request
+            ]
+        );
+    }
+
+    public function trackMLinkClick(Application $app, $trkToken) {
+        $em = $this->getEntityManager($app);
+        $repoM = $em->getRepository(Mail::class);
+        $clickedLinkMail = $repoM->findOneByToken($trkToken);
+        if ($clickedLinkMail !== null) {
+            $parameters = [];
+            $actionType = $clickedLinkMail->getType();
+            switch ($actionType) {
+                case 'prospecting_1':
+                    $path = 'login';
+                    break;
+                case 'activityParticipation':
+                case 'activityValidation':
+                case 'activityAssignation':
+                case 'updateProgressStatus':
+                case 'request' :
+                    $path = 'myActivities';
+                    break;
+                case 'teamCreation':
+                    $path = 'home';
+                    break;
+                case 'activityCreation':
+                    $path = 'oldActivityDefinition';
+                    $parameters = [
+                        'elmt' => 'activity',
+                        'elmtId' => $clickedLinkMail->getActivity()->getId()
+                    ];
+                    break;
+                case 'resultsReleasable':
+                case 'resultsReleased':
+                    $path = 'activityResults';
+                    $parameters = [
+                        'actId' => $clickedLinkMail->getActivity()->getId()
+                    ];
+                    break;
+                case 'gradingDeadlineReminder':
+                case 'unvalidatedGradesStageJoiner':
+                case 'unvalidatedGradesTeamJoiner':
+                    $path = 'newStageGrade';
+                    $parameters = [
+                        'stgId' => $clickedLinkMail->getStage()->getId()
+                    ];
+                    break;
+                case 'validateOrgSbuscription':
+                    $path = 'validateOrganization';
+                    $parameters = [
+                        'orgId' => $clickedLinkMail->getOrganization()->getId()
+                    ];
+                    break;
+                default:
+                    break;
+            }
+
+            $clickedLinkMail->setRead(new \DateTime);
+            $em->persist($clickedLinkMail);
+            $em->flush();
+            return $app->redirect($app['url_generator']->generate($path, $parameters));
+        } else {
+            return $app->redirect($app['url_generator']->generate('login'));
+        }
+    }
+
+    // Create pwd (render form)
+    public function definePasswordAction(Request $request, Application $app, $token)
+    {
+        $entityManager = $this->getEntityManager();
+        $repository = $entityManager->getRepository(User::class);
+        $user = $repository->findOneByToken($token);
+        $formFactory = $app['form.factory'];
+        $pwdForm = $formFactory->create(PasswordDefinitionForm::class, $user, ['standalone' => true]);
+        $pwdForm->handleRequest($request);
+
+        if ($pwdForm->isSubmitted() && $pwdForm->isValid()) {
+            $encoder = $app['security.encoder_factory']->getEncoder($user);
+            $password = $encoder->encodePassword($user->getPassword(), 'azerty');
+            $user->setPassword($password);
+
+            $user->setToken('');
+            $entityManager->persist($user);
+            $entityManager->flush();
+            return $app->redirect($app['url_generator']->generate('home'));
+        }
+
+        if (!$user) {
+            return $app['twig']->render('user_no_token.html.twig');
+        } else {
+
+            return $app['twig']->render('password_definition.html.twig',
+                [
+                    'firstname' => $user->getFirstName(),
+                    'form' => $pwdForm->createView(),
+                    'token' => $token,
+                    'request' => $request,
+                ]);
+        }
+    }
+
+    public function signupAction(Request $request, Application $app)
+    {
+        $entityManager = $this->getEntityManager();
+
+        $formFactory = $app['form.factory'];
+        $user = new User;
+        $signupForm = $formFactory->create(SignUpForm::class, $user, ['standalone' => true]);
+        $signupForm->handleRequest($request);
+
+        if ($signupForm->isSubmitted() && $signupForm->isValid()) {
+
+            $encoder = $app['security.encoder_factory']->getEncoder($user);
+            $unencodedPwd = $user->getPassword();
+            $password = $encoder->encodePassword($unencodedPwd, 'azerty');
+            $repoO = $entityManager->getRepository(Organization::class);
+            $repoWI = $entityManager->getRepository(WorkerIndividual::class);
+            $user->setPassword($password)->setRole(3)->setOrgId($repoO->findOneByCommname('Public')->getId());
+            $entityManager->persist($user);
+            $entityManager->flush();
+
+            $workerIndividual = $repoWI->findBy(['firstname' => $user->getFirstname(), 'lastname' => $user->getLastname()]);
+            if(!$workerIndividual){
+                $workerIndividual = new WorkerIndividual;
+                $workerIndividual
+                    ->setFirstname($user->getFirstname())
+                    ->setLastname($user->getLastname())
+                    ->setCreated(true);
+            }
+
+            $workerIndividual
+                ->setEmail($user->getEmail())
+                ->setCreatedBy($user->getId());
+
+            $entityManager->persist($workerIndividual);
+            $user->setWorkerIndividual($workerIndividual);
+
+            $recipients = [];
+            $recipients[] = $user;
+            $settings = [];
+            MasterController::sendMail($app,$recipients,'signup',$settings);
+
+            return $app->redirect($app['url_generator']->generate('home'));
+        }
+
+
+        return $this->render(
+            'signup.html.twig',
+            [
+                'form' => $signupForm->createView(),
+                'request' => $request,
+            ]
+        );
+    }
+
+    public function displayAllInstitutionsAction(Request $request, Application $app){
+
+        $entityManager = $this->getEntityManager($app);
+        $repoO = $entityManager->getRepository(Organization::class);
+        $institutions = $repoO->findBy(['type' => 'P'],['commname' => 'ASC']);
+        $formFactory = $app['form.factory'];
+
+        $addInstitutionProcessForm = $formFactory->create(AddProcessForm::class, null, ['standalone' => true]);
+        $addInstitutionProcessForm->handleRequest($request);
+        $currentUser = MasterController::getAuthorizedUser();
+
+            /*
+            $recipients = [];
+            $recipients[] = $currentUser;
+            $settings = [];
+            MasterController::sendMail($app,$recipients,'InstitutionsAction',$settings);
+            */
+
+
+        return $app['twig']->render('institution_list.html.twig',
+            [
+                'institutions' => $institutions,
+                'processForm' => $addInstitutionProcessForm->createView(),
+            ]);
+
+    }
+
+    public function createProcessRequestAction(Request $request, Application $app, $orgId)
+    {
+        $entityManager = $this->getEntityManager();
+        $repoO = $entityManager->getRepository(Organization::class);
+        /** @var Organization */
+        if($orgId == 0){
+            $organization = $entityManager->getRepository(Process::class)->findAll()[0]->getOrganization();
+            $element = new Process;
+            $formParam = 'process';
+        } else {
+            $organization = $repoO->find($orgId);
+            $element = new InstitutionProcess;
+            $formParam = 'iprocess';
+        }
+       
+        $currentUser = MasterController::getAuthorizedUser();
+
+        if (!$organization) {
+            return new JsonResponse(null, Response::HTTP_NOT_FOUND);
+        }
+
+        $formFactory = $app['form.factory'];
+        $createProcessRequestForm = $formFactory->create(AddProcessForm::class, $element, ['standalone' => true, 'organization' => $organization, 'elmt' => $formParam]);
+        $createProcessRequestForm->handleRequest($request);
+
+        if ($createProcessRequestForm->isValid()) {
+            $element->setOrganization($organization)->setApprovable(true)->setCreatedBy($currentUser->getId());
+            $entityManager->persist($element);
+            $entityManager->flush();
+
+            $recipientsAdministrators = [];
+
+            $administrators = $entityManager->getRepository(User::class)->findBy(['role' => $orgId == 0 ? 4 : 1, 'orgId' => $organization->getId()]);
+            foreach ($administrators as $administrator) {
+                if ($currentUser->getId() != $administrator->getId()) {
+                    $recipientsAdministrators[] = $administrator;
+                }
+            }
+
+            $settings['process'] = $element;
+            $settings['requester'] = $currentUser;
+            MasterController::sendMail($app, $recipientsAdministrators, 'requestProcess', $settings);
+
+            return new JsonResponse(['id' => $element->getId()],200);
+        } else {
+            $errors = $this->buildErrorArray($createProcessRequestForm);
+            return $errors;
+        }
+    }
+
+    // Create pwd (AJAX submission)
+    public function createPwdActionAJAX(Request $request, Application $app, $token)
+    {
+        //try{
+        $entityManager = $this->getEntityManager($app);
+        $repoU = $entityManager->getRepository(User::class);
+        $user = $repoU->findOneByToken($token);
+            $formFactory = $app['form.factory'];
+            $pwdForm = $formFactory->create(PasswordDefinitionForm::class, $user, ['standalone' => true]);
+            $pwdForm->handleRequest($request);
+
+            if ($pwdForm->isValid()) {
+
+                $encoder = $app['security.encoder_factory']->getEncoder($user);
+                $password = $encoder->encodePassword($user->getPassword(), 'azerty');
+                $user->setPassword($password);
+                $user->setToken('');
+                $entityManager->persist($user);
+                $entityManager->flush();
+                return new JsonResponse(['message' => 'Success!'], 200);
+                /*return $app->redirect($app['url_generator']->generate('login'))*/ ;
+            } else {
+                $errors = $this->buildErrorArray($pwdForm);
+                return $errors;
+            }
+        /*} catch(\Exception $e){
+            print_r($e->getMessage());
+            die;
+        }*/
+
+    }
+
+    public function manageProfileAction(Request $request, Application $app){
+        $currentUser = self::getAuthorizedUser();
+        $organization = $currentUser->getOrganization();
+        if (!$currentUser /*|| $organization->getCommname() != "Public"*/) {
+            return $this->redirectToRoute('login');
+        }
+
+        if($currentUser->getWorkerIndividual() == null){
+            $workerIndividual = new WorkerIndividual;
+            $workerIndividual->setFirstname($currentUser->getFirstname())
+                ->setLastname($currentUser->getLastname());
+        }
+
+        $entityManager = $this->getEntityManager($app);
+        $formFactory = $app['form.factory'];
+        $workerIndividual = $currentUser->getWorkerIndividual();
+        $workerIndividualForm = $formFactory->create(UpdateWorkerIndividualForm::class, $workerIndividual, ['standalone' => true]);
+        $workerIndividualForm->handleRequest($request);
+        $pictureForm = $formFactory->create(AddUserPictureForm::class);
+        $pictureForm->handleRequest($request);
+
+        if ($workerIndividualForm->isSubmitted() && $workerIndividualForm->isValid()) {
+            $repoWF = $entityManager->getRepository(WorkerFirm::class);
+            foreach($workerIndividualForm->get('experiences') as $key => $experienceForm){
+                $experience = $experienceForm->getData();
+                $experience->setFirm($repoWF->find((int) $experienceForm->get('firm')->getData()));
+                $entityManager->persist($experience);
+                /*
+                if($experience->getEnddate() == null){
+                    $workerIndividual->getExperiences()->get($key)->setEnddate(new \DateTime);
+                }*/
+            }
+            $entityManager->persist($currentUser);
+            $entityManager->flush();
+            return $this->redirectToRoute('home');
+        }
+
+        return $app['twig']->render('worker_individual_data.html.twig',
+        [
+            'form' => $workerIndividualForm->createView(),
+            'pictureForm' => $pictureForm->createView()
+        ]);
+
+    }
+
+    // AJAX call to get all processes from a given institution
+    public function getAllProcessesFromInstitution(Request $request, Application $app, $orgId){
+        $entityManager = $this->getEntityManager($app);
+        $repoO = $entityManager->getRepository(Organization::class);
+        /** @var Organization */
+        $organization = $repoO->findOneById($orgId);
+        if($orgId != 0){
+            $institutionProcesses = $organization->getInstitutionProcesses()->filter(function(InstitutionProcess $p){return $p->getParent() == null;});
+        } else {
+            $allProcesses = new ArrayCollection($entityManager->getRepository(Process::class)->findAll());
+            $institutionProcesses = $allProcesses->filter(function(Process $p){return $p->getParent() == null;});
+        }
+        $orgIProcesses = [];
+        foreach($institutionProcesses as $institutionProcess) {
+            $children = $institutionProcess->getChildren();
+            if($institutionProcess->isGradable() || count($children)){
+                $orgIProcess = [];
+                $orgIProcess['key'] = $institutionProcess->getId();
+                $orgIProcess['value'] = $institutionProcess->getName();
+                $orgIProcess['disabled'] = $institutionProcess->isGradable() == true ? '' : 'disabled';
+                    $IProcessChild = [];
+                    foreach($institutionProcess->getChildren() as $child){
+                        $subchildren = $child->getChildren();
+                        if($child->isGradable() || count($subchildren)){
+                            $IProcessChild['key'] = $child->getId();
+                            $IProcessChild['value'] = $child->getName();
+                            $IProcessChild['disabled'] = $child->isGradable() == true ? '' : 'disabled';
+                            $IProcessSubChild = [];
+                            foreach($child->getChildren() as $subchild){
+                                $subsubchilden = $subchild->getChildren();
+                                if($subchild->isGradable() || count($subsubchilden)){
+                                    $IProcessSubChild['key'] = $subchild->getId();
+                                    $IProcessSubChild['value'] = $subchild->getName();
+                                    $IProcessSubChild['disabled'] = $subchild->isGradable() == true ? '' : 'disabled';
+                                    $IProcessChild['children'][] = $IProcessSubChild;
+                                }
+                            }
+                            $orgIProcess['children'][] = $IProcessChild;
+                        }
+                    }
+                $orgIProcesses[] = $orgIProcess;
+            }
+        }
+        return new JsonResponse(['processes' => $orgIProcesses],200);
+    }
+
+    public function getElementConfigAction(Request $request, Application $app, $elmtType, $elmtId){
+        $em = self::getEntityManager();
+        $currentUser = self::getAuthorizedUser();
+        switch ($elmtType) {
+            case 'iprocess':
+                $repoE    = $em->getRepository(InstitutionProcess::class);
+                break;
+            case 'process':
+                $repoE    = $em->getRepository(Process::class);
+            case 'template':
+                $repoE    = $em->getRepository(TemplateActivity::class);
+                break;
+            case 'activity':
+                $repoE    = $em->getRepository(Activity::class);
+                break;
+            default:
+                return new Response(null, Response::HTTP_BAD_REQUEST);
+        }
+
+        $element = $repoE->find($elmtId);
+        $elmtConfig = [];
+        $elmtConfig['id'] = $element->getId();
+        $elmtConfig['name'] = $element->getName();
+        /** @var Collection|Stage[]|Collection|TemplateStage[]|Collection|IProcessStage */
+        $stages =
+            ($currentUser->getOrganization() == $element->getOrganization()) ?
+
+                (($currentUser->getRole() == USER::ROLE_ADMIN || $currentUser->getRole() == USER::ROLE_ROOT) ?
+                $element->getActiveStages() : $element->getActiveModifiableStages())
+                :
+                $element->getStages()->filter(function($s) use($currentUser){
+                    return $s->getParticipants()->filter(function($p) use ($currentUser){
+                        return $p->getDirectUser() == $currentUser;
+                    });
+                });
+            ;
+
+        if($elmtType == 'activity'){
+            $elmtConfig['pStatus'] = $element->getProgress();
+            $elmtConfig['oStatus'] = $element->getStatus();
+            $elmtConfig['nbOCompletedStages'] = $element->getOCompletedStages()->count();
+            $elmtConfig['nbPCompletedStages'] = $element->getPCompletedStages()->count();
+        }
+
+        $repoU = $em->getRepository(User::class);
+        $masterUser = $elmtType == 'activity' ?  $repoU->find($element->getMasterUserId()) : ($element->getMasterUser() ?: $repoU->find($element->getCreatedBy()));
+        $elmtConfig['masterUserFullname'] = $masterUser->getFullname();
+        $elmtConfig['masterUserPicture'] = $masterUser->getPicture();
+        $elmtConfig['masterFNFL'] = $masterUser->getFirstName()[0];
+        $elmtConfig['canEdit'] = $element->userCanEdit($currentUser);
+        $elmtConfig['isDeletable'] = ($elmtType == 'activity') ? $element->isDeletable() && $elmtConfig['canEdit'] : false;
+        foreach($stages as $stage){
+            $sData = [];
+            $sData['id'] = $stage->getId();
+            if($elmtType == 'activity'){
+                $sData['r'] = $stage->isReopened();
+            }
+            $sData['name'] = $stage->getName();
+            $sData['pReadiness'] = sizeof($stage->getUniqueGradableParticipations()) >= 1 && sizeof($stage->getUniqueGraderParticipations()) >= 1;
+            $sData['oReadiness'] = sizeof($stage->getCriteria()) >= 1 || $stage->getSurvey() != null;
+            $sData['progress'] = $stage->getProgress();
+            $sData['ddates'] = $stage->isDefiniteDates();
+            $sData['startdate'] = $stage->getStartdate();
+            $sData['enddate'] = $stage->getEnddate();
+            $sData['gstartdate'] = $stage->getGStartdate();
+            $sData['genddate'] = $stage->getGEnddate();
+            $sData['dorigin'] = $stage->getDOrigin();
+            $sData['dperiod'] = $stage->getDPeriod();
+            $sData['dfreq'] = $stage->getDFrequency();
+            $sData['forigin'] = $stage->getFOrigin();
+            $sData['fperiod'] = $stage->getFPeriod();
+            $sData['ffreq'] = $stage->getFFrequency();
+            $sData['activeWeight'] = $stage->getActiveWeight();
+            $sData['mode'] = $stage->getMode();
+
+            foreach($stage->getCriteria() as $criterion){
+                $cData = [];
+                $cData['name'] = $criterion->getCName()->getName();
+                $cData['icon'] = $criterion->getCName()->getIcon()->getUnicode() ? '~'.$criterion->getCName()->getIcon()->getUnicode().'~' : '~f1b2~';
+                $cData['type'] = $criterion->getType();
+                $cData['weight'] = $criterion->getWeight();
+                $sData['criteria'][] = $cData;
+            }
+
+            $team = null;
+            foreach($stage->getIndependantUniqueParticipations() as $participant){
+                $pData = [];
+                if($participant->getTeam() != null){
+
+                    $team = $participant->getTeam();
+                    $tData = [];
+                    $tData['name'] = $team->getName();
+                    $tData['picture'] = $team->getPicture();
+
+                    foreach($team->getTeamUsers() as $teamUser){
+                        $user = $teamUser->getUser();
+                        $pData['img'] = $user->getPicture();
+                        $pData['name'] = $user->getFullName();
+                        $pData['fnfl'] = $user->getFirstName()[0];
+                        $pData['type'] = $participant->getType();
+                        $pData['status'] = $participant->getStatus();
+                        $tData['indivs'][] = $pData;
+                    }
+
+                    $sData['teams'][] = $tData;
+
+                } else {
+
+                    $user = $participant->getDirectUser();
+                    $pData['img'] = $user->getPicture();
+                    $name = $user->getFirstname() == 'ZZ' ? $user->getOrganization()->getCommname() :  $user->getFullName();
+                    $pData['name'] = $name;
+                    $pData['fnfl'] = $name[0];
+                    $pData['type'] = $participant->getType();
+                    $pData['status'] = $participant->getStatus();
+                    $sData['indivs'][] = $pData;
+
+                }
+
+            }
+
+            $config['stage']['survey'] = [];
+            if($stage->getSurvey()){
+                $surData = [];
+                $surData['name'] = $stage->getSurvey()->getName();
+                $surData['nbQuestions'] = sizeof($stage->getSurvey()->getFields());
+                $sData['survey'] = $surData;
+            }
+
+            $elmtConfig['activeStages'][] = $sData;
+
+        }
+        return new JsonResponse($elmtConfig, 200);
+    }
+
+
+    public function createUserProcessActivity(Request $request, Application $app, $inpId){
+        $entityManager = $this->getEntityManager($app);
+        $repoIP = $entityManager->getRepository(InstitutionProcess::class);
+        $repoU = $entityManager->getRepository(User::class);
+        $currentUser = MasterController::getAuthorizedUser();
+        // If not fresh new internal activity, institution is null. If activity request by citizen/external, then is necessarily linked to an (i)process
+        $institutionProcess = $inpId != 0 ? $repoIP->findOneById($inpId) : null;
+        $institution = ($_POST['fi'] == 1) ? $currentUser->getOrganization() : $institutionProcess->getOrganization();
+        $activity = new Activity;
+        $startdate = new \DateTime;
+        $fromInternal = $_POST['fi'] == 1;
+        $actName = $_POST['an'];
+        $isUnlinkedToAnyProcess = isset($_POST['up']) &&  $_POST['up'] == 1;
+        $informingMail = isset($_POST['im']) && $_POST['im'] == 1;
+
+        if($actName != ''){
+            $duplicateActivity = $entityManager->getRepository(Activity::class)->findOneBy(['name' => $actName, 'organization' => $institution]);
+            if($duplicateActivity){
+                return new JsonResponse(['errorMsg' => 'There is already an activity created with such name. Please give another one'], 500);
+            }
+        }
+
+        // Does IProcess has defined stages ? If it is the case, activity will inheritate from IProcess stages and so on
+        // Otherwise, activity will inheritate from Process stages and so on
+
+        if($institutionProcess && !$institutionProcess->isApprovable()){
+            $IProcessStages = $institutionProcess->getStages();
+
+            if (count($IProcessStages) != 0){
+                $baseElement = $institutionProcess;
+            } else if (count($institutionProcess->getProcess()->getStages()) != 0) {
+                $baseElement = $institutionProcess->getProcess();
+            } else {
+                return new JsonResponse('No possibility to create activity', 500);
+            }
+        }
+
+        if($isUnlinkedToAnyProcess || $institutionProcess->isApprovable()){
+            $val = ActivityController::addActivityId('activity', $inpId, $actName);
+            return $val;
+        } else {
+
+            // We duplicate activity process/iprocess
+            $activity
+            ->setName($actName != '' ? $actName : $institutionProcess->getName())
+            ->setOrganization($institution)
+            ->setMasterUserId(
+                $institutionProcess->getMasterUser() ?
+                    $institutionProcess->getMasterUser()->getId() :
+                    $repoU->findOneBy(['firstname' => 'ZZ','lastname' => 'ZZ','orgId' => $institution->getId()])->getId()
+                )
+            ->setCreatedBy($currentUser->getId())
+            ->setStatus($institutionProcess->isApprovable() ? -3 : 1);
+
+            if($institutionProcess->isApprovable() & !$fromInternal){
+                $recipients = [];
+                /*** We need the person in charge of approval : it is, by order of importance,
+                    1/ The person in charge of the process, or
+                    2/ Parent process responsible (up to order 2), or
+                    3/ One administrator (the first alive in the DB)
+                ***/
+                $IProcessResponsible = $institutionProcess->getMasterUser();
+                $parentIProcess = $institutionProcess->getParent();
+                $grandParentIProcess = $parentIProcess != null ? $parentIProcess->getParent() : null;
+
+                if($IProcessResponsible != null){
+                    $recipients[] = $IProcessResponsible;
+                } else if ($parentIProcess){
+                    $parentIProcessResponsible = $parentIProcess->getMasterUser();
+                    if($parentIProcessResponsible != null){
+                        $recipients[] = $parentIProcessResponsible;
+                    } else if ($grandParentIProcess){
+                        $grandParentIProcessResponsible = $grandParentIProcess->getMasterUser();
+                        if($grandParentIProcessResponsible != null){
+                            $recipients[] = $grandParentIProcessResponsible;
+                        }
+                    }
+                }
+
+                if(!$recipients){
+                    $firstAliveAdministrator = $repoU->findOneBy(['role' => 1, 'deleted' => null, 'orgId' => $institution->getId()]);
+                    $recipients[] = $firstAliveAdministrator;
+                }
+
+                $settings = [];
+                $settings['activity'] = $activity;
+                $settings['requester'] = $currentUser;
+
+                //2 - Send mail to recipients, set them as deciders
+                foreach ($recipients as $recipient) {
+
+                    $decision = new Decision;
+                    $decision
+                        ->setType(1)
+                        ->setRequester($currentUser->getId())
+                        ->setAnonymousRequest(false)
+                        ->setAnonymousDecision(false)
+                        ->setDecider($recipient->getId())
+                        ->setOrganization($institution)
+                        ->setActivity($activity);
+                    $decision->setCreatedBy($currentUser->getId());
+                    $entityManager->persist($decision);
+                }
+
+                $entityManager->persist($activity);
+
+                MasterController::sendMail($app, $recipients, 'request', $settings);
+            }
+
+
+            (count($IProcessStages) != 0) ?
+                $activity->setInstitutionProcess($baseElement)->setProcess($baseElement->getProcess()) :
+                $activity->setProcess($baseElement);
+
+            $pStages = $baseElement->getStages();
+            $accessLinks = [];
+
+            foreach($pStages as $pStage){
+                $stage = new Stage;
+
+                if(!$pStage->isDefiniteDates()){
+
+                    $clonedSD = clone $startdate;
+                    $pStageFreq = $pStage->getDFrequency();
+                    if($pStageFreq != 'BD'){
+                        $dateIntervalPrefix = ($pStageFreq == 'm' || $pStageFreq == 'H') ? 'PT' : 'P';
+                        $enddate = $clonedSD->add(new \DateInterval($dateIntervalPrefix.$pStage->getDPeriod().$pStageFreq));
+                    } else {
+                        $enddate = $clonedSD->modify("+{$pStage->getPeriod()}weekdays");
+                    }
+                    $gStartdate = $clonedSD;
+                    $gEnddate = $clonedSD->add(new \DateInterval('P15D'));
+
+                } else {
+                    $startdate = $pStage->getStartdate();
+                    $enddate = $pStage->getEnddate();
+                    $gStartdate = $pStage->getGStartdate();
+                    $gEnddate = $pStage->getGEnddate();
+                }
+
+                $accessLink = mt_rand(100000, 999999);
+
+                $stage
+                ->setName($pStage->getName())
+                ->setMasterUserId($pStage->getMasterUserId())
+                ->setVisibility($pStage->getVisibility())
+                ->setAccessLink($accessLink)
+                ->setWeight(1)
+                ->setStartdate($startdate)
+                ->setEnddate($enddate)
+                ->setGstartdate($gStartdate)
+                ->setGenddate($gEnddate)
+                ->setMode(1)
+                ->setCreatedBy($currentUser->getId());
+
+
+                if($pStage->getVisibility() == 2){
+                    $accessLinks[] = $accessLink;
+                }
+                $pCriteria = $pStage->getCriteria();
+
+                if(count($pCriteria) != 0){
+                    foreach($pCriteria as $pCriterion){
+                        $criterion = new Criterion;
+
+                        $criterion->setCName($pCriterion->getCName())
+                            ->setType($pCriterion->getType())
+                            ->setWeight($pCriterion->getWeight())
+                            ->setLowerbound($pCriterion->getLowerbound())
+                            ->setUpperbound($pCriterion->getUpperbound())
+                            ->setStep($pCriterion->getStep())
+                            ->setForceCommentCompare($pCriterion->isForceCommentCompare())
+                            ->setForceCommentSign($pCriterion->getForceCommentSign())
+                            ->setForceCommentValue($pCriterion->getForceCommentValue());
+
+                        $stage->addCriterion($criterion);
+
+                        $pParticipations = count($IProcessStages) != 0 ? $pCriterion->getParticipants() : null;
+                        if(count($IProcessStages) != 0 && count($pParticipations) != 0){
+                            foreach($pParticipations as $pParticipation){
+                                $participation = new ActivityUser;
+                                $participation->setLeader($pParticipation->isLeader())
+                                    ->setMWeight($pParticipation->getMWeight())
+                                    ->setPrecomment($pParticipation->getPrecomment())
+                                    ->setTeam($pParticipation->getTeam())
+                                    ->setUsrId($pParticipation->getUsrId())
+                                    ->setType($pParticipation->getType());
+                                $stage->addParticipant($participation);
+                                $criterion->addParticipant($participation);
+                            }
+
+                        } else {
+                            $synthParticipation = new ActivityUser;
+                            $institutionSynthUser = $repoU->findOneBy(['firstname' => 'ZZ','lastname' => 'ZZ','orgId' => $institution->getId()]);
+
+                            $synthParticipation->setLeader(true)
+                            ->setTeam(null)
+                            ->setUsrId($institutionSynthUser->getId())
+                            ->setType(-1);
+                            $stage->addParticipant($synthParticipation);
+                            $criterion->addParticipant($synthParticipation);
+                        }
+
+                        // If comes from an external request, we create external participation
+                        if(!$fromInternal){
+                            $userParticipation = new ActivityUser;
+                            $userParticipation->setLeader(false)
+                                ->setUsrId($currentUser->getId())
+                                ->setType(0);
+                            $stage->addParticipant($userParticipation);
+                            $criterion->addParticipant($userParticipation);
+                        }
+                    }
+                    $stage->addCriterion($criterion);
+                }
+                $activity->addStage($stage);
+                $entityManager->persist($activity);
+
+                // Sending participants mails if necessary
+                if($informingMail){
+                    if(count($stage->getCriteria()) > 0){
+
+                        // Parameter for subject mail title
+                        if(count($institutionProcess->getStages()) > 1){
+                            $mailSettings['stage'] = $stage;
+                        } else {
+                            $mailSettings['activity'] = $activity;
+                        }
+
+                        /** @var ActivityUser[] */
+                        $uniqueParticipations = $stage->getUniqueParticipations();
+                        if(count($uniqueParticipations) > 0){
+                            foreach($uniqueParticipations as $uniqueParticipation){
+                                if(count($pParticipations) != 0 || count($pParticipations) == 0 && $uniqueParticipation->getUsrId() != $synthParticipation->getUsrId()){
+                                    $recipients[] = $uniqueParticipation->getDirectUser();
+                                    $uniqueParticipation->setIsMailed(true);
+                                    $entityManager->persist($uniqueParticipation);
+                                }
+                            }
+                            self::sendMail($app, $recipients, 'activityParticipation', $mailSettings);
+                        }
+                    }
+                }
+            }
+            $entityManager->flush();
+            return new JsonResponse(['message' => 'success', 'aid' => $activity->getId(), 'ali' => $accessLinks],200);
+        }
+    }
+
+
+    // Reset pwd
+    public function resetPwdAction(Request $request, Application $app)
+    {
+
+        $entityManager = $this->getEntityManager($app);
+        $repository = $entityManager->getRepository(User::class);
+        $user = $repository->findOneByEmail($_POST['email']);
+
+        if($user){
+            $token = md5(rand());
+            $user->setToken($token);
+            $user->setPassword('');
+            $entityManager->persist($user);
+            $entityManager->flush();
+            $settings['token'] = $token;
+
+            $recipients = [];
+            $recipients[] = $user;
+
+            MasterController::sendMail($app,$recipients,'passwordModify',$settings);
+        }
+        return new JsonResponse(['message' => 'success'],200);
+    }
+
+    // Modify pwd
+    public function modifyPwdAction(Request $request, Application $app, $token)
+    {
+
+
+        $entityManager = $this->getEntityManager($app) ;
+        $repository = $entityManager->getRepository(User::class) ;
+        $user = $repository->findOneByToken($token);
+        if(!$user){
+            return $app['twig']->render('user_no_token.html.twig');
+        }
+
+        $formFactory = $app['form.factory'] ;
+        $pwdForm = $formFactory->create(SignUpForm::class, $user, ['standalone' => true]) ;
+        $pwdForm->handleRequest($request);
+
+
+        /*
+        if ($pwdForm->isSubmitted() /*&& $pwdForm->isValid()) {
+            $encoder = $app['security.encoder_factory']->getEncoder($user);
+            $password = $encoder->encodePassword($user->getPassword(), 'azerty');
+            $user->setPassword($password);
+
+            $user->setToken('');
+            $entityManager->persist($user);
+            $entityManager->flush();
+            return $app->redirect($app['url_generator']->generate('login')) ;
+        }*/
+
+        //$errors = $this->buildErrorArray($pwdForm);
+        //return $errors;
+
+        return $app['twig']->render('password_modify.html.twig',
+            [
+                'firstname' => $user->getFirstName(),
+                'form' => $pwdForm->createView(),
+                'token' => $token,
+                'request' => $request
+            ]
+        );
+    }
+
+    // Display all activities for current user
+    public function getAllUserActivitiesAction(Request $request, Application $app)
+    {
+        $currentUser = self::getAuthorizedUser();
+        if (!$currentUser) {
+            return $this->redirectToRoute('login');
+        }
+
+        $em = $this->getEntityManager();
+        $repoA = $em->getRepository(Activity::class);
+        $repoAU = $em->getRepository(ActivityUser::class);
+        $repoO = $em->getRepository(Organization::class);
+        $repoDec = $em->getRepository(Decision::class);
+        $role = $currentUser->getRole();
+        $currentUsrId = $currentUser->getId();
+        $organization = $repoO->find($currentUser->getOrgId());
+
+        $userArchivingPeriod = $currentUser->getActivitiesArchivingNbDays();
+
+
+        // Add activities where current user is either is a leader, or at least a participant;
+
+        $orgActivities = $repoA->findBy(['organization'=> $organization],['status' => 'ASC']);
+
+        // We get all user info and visibility options :
+        // * we need to check access to results with the integer option value
+
+        $existingAccessAndResultsViewOption = null;
+        $statusAccess = null;
+        $accessAndResultsViewOptions = $organization->getOptions()->filter(function(OrganizationUserOption $option) use($currentUser){return $option->getOName()->getName() == 'activitiesAccessAndResultsView' && ($option->getRole() == $currentUser->getRole() || $option->getUser() == $currentUser);});
+
+        // We always chose the most selective access option (NB : we could in the future, create options decidated to position, departments... so below option selection should be rewritten)
+        if(count($accessAndResultsViewOptions) > 0){
+            if(count($accessAndResultsViewOptions) == 2){
+                foreach($accessAndResultsViewOptions as $accessAndResultsViewOption){
+                    if($accessAndResultsViewOption->getUser() != null){
+                        $existingAccessAndResultsViewOption = $accessAndResultsViewOption;
+                    }
+                }
+            } else {
+                $existingAccessAndResultsViewOption = $accessAndResultsViewOptions->first();
+            }
+        }
+
+        $checkingIds = [$currentUsrId];
+        $userActivities = new ArrayCollection;
+
+        if($existingAccessAndResultsViewOption){
+            $activitiesAccess = $existingAccessAndResultsViewOption->getOptionIValue();
+            $statusAccess = $existingAccessAndResultsViewOption->getOptionSecondaryIValue();
+            $noParticipationRestriction = $existingAccessAndResultsViewOption->getOptionSValue() == 'none';
+            if($activitiesAccess == 1){
+                $userActivities = new ArrayCollection($orgActivities);
+            } else if ($activitiesAccess == 2){
+                $departmentUsers = $em->getRepository(Department::class)->find($currentUser->getDptId())->getUsers();
+                foreach($departmentUsers as $departmentUser){
+                    $checkingIds[] = $departmentUser->getId();
+                }
+            }
+        }
+
+        $userArchivedActivities = new ArrayCollection;
+
+
+        if($existingAccessAndResultsViewOption == null || $activitiesAccess != 1){
+
+            // 1/ Get requested activities (as currentuser is not a participant, we have to retrieve them with a different query)
+            // passing through Decision table
+
+            if ($role == 3){
+                $pendingDecisions = $repoDec->findBy(['requester' => $checkingIds, 'validated' => null]);
+                foreach($pendingDecisions as $pendingDecision){
+                    $userActivities->add($pendingDecision->getActivity());
+                }
+            } else {
+                $pendingDecisions = $repoDec->findBy(['decider' => $checkingIds, 'validated' => null]);
+                foreach($pendingDecisions as $pendingDecision){
+                    $userActivities->add($pendingDecision->getActivity());
+                }
+            }
+
+            // IDs of activities in which at least one *graded* participant is a direct or indirect subordinate
+            $subordinates = $currentUser->getSubordinatesRecursive();
+            /** @var ActivityUser[] */
+            $subordinatesParticipations = $repoAU->findBy([ 'usrId' => $subordinates, 'type' => [ -1, 1 ] ]);
+            $activitiesWithSubordinates_IDs = array_map(function (ActivityUser $p) {
+                return $p->getActivity()->getId();
+            }, $subordinatesParticipations);
+
+            foreach($orgActivities as $orgActivity){
+                if (
+                    $orgActivity->getStatus() == -2 && in_array($orgActivity->getMasterUserId(), $checkingIds) ||
+                    in_array($orgActivity->getId(), $activitiesWithSubordinates_IDs)
+                ){
+                    $userActivities->add($orgActivity);
+                }
+
+                // 3/ Get all activities in which current user is participating
+
+                if(!$orgActivity->getArchived()){
+
+                    // Remove created non-requested, -discarded and -cancelled activity(ies) which have unsaved stage dates (possible if user skips activity creation)
+                    /*
+                    if($orgActivity->getStatus() != -4 && $orgActivity->getStatus() != -3 && $orgActivity->getStatus() != -2){
+                        $firstStage = $orgActivity->getStages()->first();
+                        if($firstStage->getStartdate() == null && $firstStage->getEnddate() == null && $firstStage->getGStartdate() == null && $firstStage->getGEnddate() == null) {
+                            $organization->removeActivity($orgActivity);
+                            $entityManager->persist($organization);
+                        }
+                    }*/
+
+                    $isParticipant = 0;
+                    $isMasterUserId = 0;
+                    foreach ($orgActivity->getStages() as $orgStage){
+                        foreach ($orgStage->getParticipants() as $orgParticipant){
+                            if (in_array($orgParticipant->getUsrId(), $checkingIds)){
+                                $isParticipant = 1;
+                                ($orgParticipant->getStatus() != 5) ? $userActivities->add($orgActivity) : $userArchivedActivities->add($orgActivity);
+                                break;
+                            }
+                        }
+
+                        if ($isParticipant == 1){
+                            break;
+                        } elseif(in_array($orgStage->getMasterUserId(), $checkingIds)){
+                            $isMasterUserId = 1;
+                            break;
+                        }
+                    }
+
+                    if($isMasterUserId == 1 && $isParticipant == 0 && $orgActivity->getStatus() != -2){
+                        $userActivities->add($orgActivity);
+                    }
+
+                } else {
+                    $userArchivedActivities->add($orgActivity);
+                }
+            }
+            //Get activities where user is participating as external user
+            $externalActivities = $currentUser->getExternalActivities();
+            $userActivities = new ArrayCollection((array)$userActivities->toArray() + $externalActivities->toArray());
+
+        }
+
+
+
+
+        $nbActivitiesCategories = 0;
+
+        $cancelledActivities = $userActivities->matching(Criteria::create()->where(Criteria::expr()->eq("status", -5)));
+        $nbActivitiesCategories = (count($cancelledActivities) > 0) ? $nbActivitiesCategories + 1 : $nbActivitiesCategories;
+        $discardedActivities = $userActivities->matching(Criteria::create()->where(Criteria::expr()->eq("status", -4)));
+        $nbActivitiesCategories = (count($discardedActivities) > 0) ? $nbActivitiesCategories + 1 : $nbActivitiesCategories;
+        $requestedActivities = $userActivities->matching(Criteria::create()->where(Criteria::expr()->eq("status", -3)));
+        $nbActivitiesCategories = (count($requestedActivities) > 0) ? $nbActivitiesCategories + 1 : $nbActivitiesCategories;
+        $attributedActivities = $userActivities->matching(Criteria::create()->where(Criteria::expr()->eq("status", -2)));
+        $nbActivitiesCategories = (count($attributedActivities) > 0) ? $nbActivitiesCategories + 1 : $nbActivitiesCategories;
+        $incompleteActivities = $userActivities->matching(Criteria::create()->where(Criteria::expr()->eq("status", -1)));
+        $nbActivitiesCategories = (count($incompleteActivities) > 0) ? $nbActivitiesCategories + 1 : $nbActivitiesCategories;
+        $futureActivities = $userActivities->matching(Criteria::create()->where(Criteria::expr()->eq("status", 0)));
+        $nbActivitiesCategories = (count($futureActivities) > 0) ? $nbActivitiesCategories + 1 : $nbActivitiesCategories;
+        $currentActivities = $userActivities->matching(Criteria::create()->where(Criteria::expr()->eq("status", 1))->orderBy(['gEnddate' => Criteria::ASC]));
+        /*
+        $iterator = $currentActivities->getIterator();
+
+        $iterator->uasort(function ($first, $second) {
+            return (int) $first->getGEnddate() > (int) $second->getGEnddate() ? 1 : -1;
+        });
+        $currentActivities = $iterator;*/
+
+
+        //$currentActivities = $currentActivities->matching(Criteria::create()));
+        /*
+        foreach($requestedActivities as $requestedActivity){
+            print_r(count($repoDec->findOneBy(['decider' => $currentUsrId, 'activity' => $requestedActivity])));
+        }
+        die;
+        */
+
+        $iterator = $requestedActivities->getIterator();
+
+        $iterator->uasort(function ($a, $b) use ($repoDec, $checkingIds) {
+            foreach($checkingIds as $checkingId){
+                return ($repoDec->findOneBy(['decider' => $checkingId, 'activity' => $a]) != null && $repoDec->findOneBy(['decider' => $checkingId, 'activity' => $b]) == null) ? -1 : 1;
+            }
+            //return ($a->getId() > $b->getId()) ? -1 : 1;
+        });
+        $requestedActivities = new ArrayCollection(iterator_to_array($iterator));
+
+        $currActGEnddates = [];
+        foreach ($currentActivities as $currentActivity){
+            $currActGEnddates[] = $currentActivity->getGEnddate();
+        }
+
+        $nbActivitiesCategories = (count($currentActivities) > 0) ? $nbActivitiesCategories + 1 : $nbActivitiesCategories;
+        $completedActivities = $userActivities->matching(Criteria::create()->where(Criteria::expr()->eq("status", 2))->orderBy(['gEnddate' => Criteria::DESC]));
+        $releasedActivities = $userActivities->matching(Criteria::create()->where(Criteria::expr()->eq("status", 3))->orderBy(['gEnddate' => Criteria::DESC]));
+        $nbActivitiesCategories = (count($completedActivities) + count($releasedActivities) > 0) ? $nbActivitiesCategories + 1 : $nbActivitiesCategories;
+        $archivedActivities = $userActivities->matching(Criteria::create()->where(Criteria::expr()->eq("status", 4)));
+
+        $formFactory = $app['form.factory'];
+
+        $delegateActivityForm = $formFactory->create(DelegateActivityForm::class, null, ['standalone' => true, 'app' => $app]) ;
+        $delegateActivityForm->handleRequest($request);
+        $requestActivityForm = $formFactory->create(RequestActivityForm::class, null, ['standalone' => true, 'app' => $app]) ;
+        $requestActivityForm->handleRequest($request);
+        $validateRequestForm = $formFactory->create(DelegateActivityForm::class, null,  ['app' => $app, 'standalone' => true, 'request' => true]);
+        $validateRequestForm->handleRequest($request);
+
+        // In case they might access results depending on user participation, then we need to feed all stages and feed a collection which will be analysed therefore in hideResultsFromStages function
+        if($existingAccessAndResultsViewOption && !$noParticipationRestriction){
+            $userStages = new ArrayCollection;
+            foreach($userActivities as $activity){
+                foreach($activity->getStages() as $stage){
+                    $userStages->add($stage);
+                }
+            }
+        }
+
+        return $app['twig']->render('activity_list.html.twig',
+            [
+                'organization' => $organization,
+                'user_activities' => $userActivities,
+                'request' => $request,
+                'delegateForm' => $delegateActivityForm->createView(),
+                'validateRequestForm' => $validateRequestForm->createView(),
+                'requestForm' => $requestActivityForm->createView(),
+                'orgMode' => false,
+                'cancelledActivities' => $cancelledActivities,
+                'discardedActivities' => $discardedActivities,
+                'requestedActivities' => $requestedActivities,
+                'attributedActivities' => $attributedActivities,
+                'incompleteActivities' => $incompleteActivities,
+                'futureActivities' => $futureActivities,
+                'currentActivities' => $currentActivities,
+                'completedActivities' => $completedActivities,
+                'releasedActivities' => $releasedActivities,
+                'archivedActivities' => $userArchivedActivities,
+                'nbCategories' => $nbActivitiesCategories,
+                'statusAccess' => $statusAccess,
+                'existingAccessAndResultsViewOption' => $existingAccessAndResultsViewOption,
+                'hideResultsFromStageIds' => (!$existingAccessAndResultsViewOption || $noParticipationRestriction) ? [] : self::hideResultsFromStages($userStages),
+            ]);
+    }
+
+    public function getUserSettingsAction(Request $request, Application $app){
+
+
+        $entityManager = $this->getEntityManager($app);
+        $currentUser = MasterController::getAuthorizedUser($app);
+        // TODO : to create
+        return $app['twig']->render('user_settings.html.twig',
+            [
+                'settings' => true,
+            ]);
+
+
+    }
+
+    // Modify user info  (ajax call)
+    public function updatePictureAction(Request $request, Application $app)
+    {
+        $user = self::getAuthorizedUser();
+        if (!$user) {
+            return new Response(null, Response::HTTP_UNAUTHORIZED);
+        }
+
+        $em = self::getEntityManager();
+        /** @var FormFactoryInterface */
+        $formFactory = $app['form.factory'];
+        $pictureForm = $formFactory->create(AddUserPictureForm::class);
+        $pictureForm->handleRequest($request);
+        $userPicture = $user->getPicture();
+
+        // Delete existing image
+        if ($userPicture) {
+            unlink(__DIR__ . "/../../web/lib/img/$userPicture");
+        }
+
+        $path = $_FILES['profile-pic']['name'];
+        $rand = md5(rand());
+        $ext = pathinfo($path, PATHINFO_EXTENSION);
+        $fileName = "$rand.$ext";
+        move_uploaded_file($_FILES['profile-pic']['tmp_name'], __DIR__ . "/../../web/lib/img/$fileName");
+        $user->setPicture($fileName);
+        $em->persist($user);
+        $em->flush();
+        return new JsonResponse([ 'filename' => $fileName ]);
+    }
+
+    // Delete user (ajax call)
+    public function deleteUserAction(Request $request, Application $app, $id){
+        $manager = $app['orm.em'];
+        $repository = $manager->getRepository(User::class);
+        $user = $repository->find($id);
+
+        if (!$user) {
+            $message = sprintf('User %d not found', $id);
+            return $app->json(['status' => 'error', 'message' => $message], 404);
+        }
+        $user->setDeleted(new \DateTime);
+        $manager->persist($user);
+        //$manager->remove($user);
+        $manager->flush();
+
+        return $app->json(['status' => 'done']);
+    }
+
+    /************ CONTACT PAGE **********************************/
+
+    public function displayContactAction(Request $request, Application $app){
+
+            return $app['twig']->render('contact.html.twig',[
+                'last_username' => $app['session']->get('security.last_username'),
+                'error' => $app['security.last_error']($request),
+                'request' => $request,
+            ]);
+
+    }
+
+    /************ NEWS PAGE **********************************/
+
+    public function displayNewsAction(Request $request, Application $app){
+
+        return $app['twig']->render('news.html.twig',[
+            'error' => $app['security.last_error']($request),
+            'request' => $request,
+        ]);
+
+    }
+
+    /*********** USER LOGIN AND CONTEXTUAL MENU *****************/
+    //Redirection from '/' to '/fr'
+    public function redirectAction(Request $request, Application $app){
+        return $app->redirect($app['url_generator']->generate('login'));
+    }
+
+    //Logs current user
+    public function loginAction(Request $request, Application $app)
+    {
+        $currentUser = self::getAuthorizedUser();
+        if ($currentUser) {
+            return $this->redirectToRoute('home');
+        }
+
+        $formFactory = $app['form.factory'];
+        $csrf_token = $app['csrf.token_manager']->getToken('token_id');
+        $contact = new Contact;
+        $contactForm = $formFactory->create(
+            ContactForm::class,
+            $contact,
+            [ 'standalone' => true ]
+        )->handleRequest($request);
+
+        return $app['twig']->render('landing.html.twig',
+            [
+                'csrf_token' => $csrf_token,
+                'error' => $app['security.last_error']($request),
+                'last_username' => $app['session']->get('security.last_username'),
+                'contactForm' => $contactForm->createView(),
+                'request' => $request
+            ]
+        );
+    }
+
+    public function displayAboutPageAction(Request $request,Application $app){
+
+            $csrf_token = $app['csrf.token_manager']->getToken('token_id');
+
+            return $app['twig']->render('about.html.twig',
+            [
+                'csrf_token' => $csrf_token,
+                'error' => $app['security.last_error']($request),
+                'last_username' => $app['session']->get('security.last_username'),
+                'request' => $request,
+            ]);
+    }
+
+     public function displaySolutionPageAction(Request $request,Application $app){
+
+            $csrf_token = $app['csrf.token_manager']->getToken('token_id');
+
+            return $app['twig']->render('use_cases.html.twig',
+            [
+                'csrf_token' => $csrf_token,
+                'error' => $app['security.last_error']($request),
+                'last_username' => $app['session']->get('security.last_username'),
+                'request' => $request,
+            ]);
+    }
+
+    public function displayUseCasesAction(Request $request,Application $app){
+
+        $csrf_token = $app['csrf.token_manager']->getToken('token_id');
+
+        return $app['twig']->render('use_cases.html.twig',
+        [
+            'csrf_token' => $csrf_token,
+            'error' => $app['security.last_error']($request),
+            'last_username' => $app['session']->get('security.last_username'),
+            'request' => $request,
+        ]);
+}
+
+    //Save registering user
+    public function contactAction(Request $request,Application $app){
+        //Insert Grades
+        $entityManager = $this->getEntityManager($app);
+        //$repoR = $entityManager->getRepository(Contact::class);
+        $contact = new Contact;
+        $repoO = $entityManager->getRepository(Organization::class);
+        $repoU = $entityManager->getRepository(User::class);
+        $formFactory = $app['form.factory'];
+        $csrf_token = $app['csrf.token_manager']->getToken('token_id');
+        $contactForm = $formFactory->create(ContactForm::class,$contact,['standalone' => true]);
+        $contactForm->handleRequest($request);
+
+        if($contactForm->isValid()){
+
+            $entityManager->persist($contact);
+            $entityManager->flush();
+
+            $rootSettings = [];
+            $rootSettings['email'] = $contactForm->get('mail')->getData();
+            $rootSettings['fullName'] = $contactForm->get('fullName')->getData();
+            $rootSettings['company'] = $contactForm->get('company')->getData();
+            $rootSettings['address'] = $contactForm->get('address')->getData();
+            $rootSettings['zipcode'] = $contactForm->get('zipcode')->getData();
+            $rootSettings['city'] = $contactForm->get('city')->getData();
+            $rootSettings['country'] = $contactForm->get('country')->getData();
+            $rootSettings['message'] = $contactForm->get('message')->getData();
+            $rootSettings['meetingDate'] = $contactForm->get('meetingDate')->getData();
+            $rootSettings['meetingTime'] = $contactForm->get('meetingTime')->getData();
+
+            $settings = [];
+            $settings['email'] = $rootSettings['email'];
+            $settings['fullName'] = $rootSettings['fullName'];
+            $settings['company'] = $rootSettings['company'];
+            $settings['address'] = $rootSettings['address'];
+            $settings['zipcode'] =  $rootSettings['zipcode'];
+            $settings['city'] = $rootSettings['city'];
+            $settings['country'] = $rootSettings['country'];
+            $settings['message'] = $rootSettings['message'];
+            $settings['meetingDate'] = $rootSettings['meetingDate'];
+            $settings['meetingTime'] = $rootSettings['meetingTime'];
+            $settings['recipientUsers'] = false;
+            $recipients[] = $settings['email'];
+            // Send mail acknowledgment to meeting requester
+            MasterController::sendMail($app,$recipients,'meetingValidation',$settings);
+
+            // Notify Serpico administrators
+            $serpicoOrg = $repoO->findOneByCommname('Serpico');
+            $serpiValidatingUsers = $repoU->findBy(['role' => 4, 'orgId' => $serpicoOrg->getId()]);
+            MasterController::sendMail($app,$serpiValidatingUsers,'meetingProposition',$rootSettings);
+            return new JsonResponse(['message' => 'Success'],200);
+        } else {
+            $errors = $this->buildErrorArray($contactForm);
+            return $errors;
+        }
+
+
+    }
+
+    // Display all users (when HR clicks on "users" from /settings)
+    public function finalizeUserAction(Request $request, Application $app, $usrId)
+    {
+        $entityManager = $this->getEntityManager($app);
+        $repoO = $entityManager->getRepository(Organization::class);
+        $formFactory = $app['form.factory'];
+        $user = MasterController::getAuthorizedUser($app);
+        $orgId = $user->getOrgId();
+        $organization = $repoO->findOneById($orgId);
+        $finalizeUserForm = $formFactory->create(FinalizeUserForm::class,null,['user' => $user]);
+        $finalizeUserForm->handleRequest($request);
+        if($finalizeUserForm->isValid()){
+            $department = new Department;
+            $department->setName($finalizeUserForm->get('department')->getData());
+            $position = new Position;
+            $position->setName($finalizeUserForm->get('position')->getData());
+            $department->addPosition($position);
+            $organization->addPosition($position);
+            $user->setFirstname($finalizeUserForm->get('firstname')->getData());
+            $user->setLastname($finalizeUserForm->get('lastname')->getData());
+            $user->setPositionName(null);
+            $entityManager->persist($user);
+            $organization->addDepartment($department);
+            $entityManager->persist($organization);
+            $entityManager->flush();
+            $user
+                ->setPosId($position->getId())
+                ->setDptId($department->getId());
+            $entityManager->persist($user);
+            $entityManager->flush();
+            return new JsonResponse(['message' => 'Success'],200);
+        } else {
+            $errors = $this->buildErrorArray($finalizeUserForm);
+            return $errors;
+        }
+    }
+
+    //Displays the menu in relation with user role
+    public function homeAction(Request $request, Application $app)
+    {
+        /** @var \Doctrine\ORM\EntityManager */
+        $em = $this->getEntityManager();
+
+        if (isset($_COOKIE['!auth!'])) {
+            setcookie('!auth!', null, 1, '/'); // delete cookie immediatly
+            /** @var TokenStorage */
+            $tokenObj = $app['security.token_storage'];
+            $token = $tokenObj->getToken();
+            if ($token === null) {
+                throw 'No token';
+            }
+
+            /** @var User */
+            $user = $token->getUser();
+
+            // we basically "remember" the user
+            $user->setRememberMeToken($_COOKIE['REMEMBERME']);
+            $em->persist($user);
+            $em->flush();
+        }
+
+        $user = self::getAuthorizedUser();
+        if (!$user) {
+            return $app->redirect($app['url_generator']->generate('login'));
+        }
+        $repoA = $em->getRepository(Activity::class);
+        $repoO = $em->getRepository(Organization::class);
+        /** @var UserRepository */
+        $repoU = $em->getRepository(User::class);
+        $repoAU = $em->getRepository(ActivityUser::class);
+        $repoR = $em->getRepository(Result::class);
+        $repoRK = $em->getRepository(Ranking::class);
+        $repoRT = $em->getRepository(RankingTeam::class);
+        $repoTU = $em->getRepository(TeamUser::class);
+        $repoC = $em->getRepository(Criterion::class);
+        $repoCN = $em->getRepository(CriterionName::class);
+        $orgId = $user->getOrgId();
+        $organization = $repoO->findOneById($orgId);
+        $orgHasActiveAdmin =$organization->hasActiveAdmin();
+        $orgOptions = $organization->getOptions();
+
+        foreach($orgOptions as $orgOption){
+            if($orgOption->getOName()->getName() == 'enabledUserSeeRanking'){
+                $enabledUserSeeRanking = $orgOption->isOptionTrue();
+            }
+        }
+        $formFactory = $app['form.factory'];
+        $pictureForm = $formFactory->create(AddUserPictureForm::class);
+        $pictureForm->handleRequest($request);
+
+        $finalizeUserForm = $formFactory->create(FinalizeUserForm::class,null,['user' => $user]);
+        $finalizeUserForm->handleRequest($request);
+
+        $myHotStageParticipations = new ArrayCollection;
+
+        // As there are no date listeners, check if we need to refresh organization activity status
+        $orgUsers = $repoU->findByOrgId($orgId);
+
+        $isRefreshed = false;
+        foreach ($orgUsers as $orgUser) {
+            $dateObject = new \DateTime;
+            if ($orgUser->getLastConnected() > $dateObject->sub(new \DateInterval('P1D'))) {
+                $isRefreshed = true;
+            }
+        }
+
+        if (!$isRefreshed) {
+            $repoA = $em->getRepository(Activity::class);
+            $supposedlyFutureActivities = $repoA->findBy(['organization' => $organization, 'status' => 0]);
+            foreach ($supposedlyFutureActivities as $supposedlyFutureActivity) {
+                if ($supposedlyFutureActivity->getStartdate() < new \DateTime) {
+                    $supposedlyFutureActivity->setStatus(1);
+                }
+                $em->persist($supposedlyFutureActivity);
+            }
+        }
+
+        $firstco = 0;
+        if($user->getLastConnected()!=null) {
+            $firstco = 1;
+        }
+        $user->setLastConnected(new \DateTime);
+        $user->setRememberMeToken($_COOKIE['REMEMBERME']);
+        $em->persist($user);
+        $em->flush();
+        $totalParticipations = new ArrayCollection($repoAU->findBy(['usrId' => $user->getId()], ['status' => 'ASC', 'activity' => 'ASC', 'stage' => 'ASC']));
+
+        // We consider each graded activity as having at least one releasable criterion an nothing more
+        $nbPublishedActivities = 0;
+        $nbPublishedStages = 0;
+        $nbGradedActivity = 0;
+        $nbActivities = 0;
+        $nbActivities = 0;
+        $theActivity = null;
+        $nbStages = 0;
+        $nbCriteria = 0;
+        $nbUpcomingCriteria = 0;
+        $nbOngoingCriteria = 0;
+        $nbResultsCriteria = 0;
+        $nbPublishedCriteria = 0;
+        $theStage = null;
+        $myHotStages = [];
+        $nbUpcomingStages = 0;
+        $nbOngoingStages = 0;
+        $nbResultsStages = 0;
+        $nbPublishedStages = 0;
+        $nbResultsActivities = 0;
+        $nbUpcomingActivities = 0;
+        $nbOngoingActivities = 0;
+        $notOrderedHotParticipations = true;
+
+        $nowDT = date_create('now');
+        //$totalParticipations = new ArrayCollection($totalParticipations);
+        $iterator = $totalParticipations->getIterator();
+
+        $iterator->uasort(function ($first, $second) use ($nowDT) {
+            $firstGEnddate = clone $first->getStage()->getGEnddate();
+            $secondGEnddate = clone $second->getStage()->getGEnddate();
+            return ($nowDT->diff($firstGEnddate)->days > $nowDT->diff($secondGEnddate)->days) ? 1 : -1;
+        });
+
+        $totalParticipations = iterator_to_array($iterator);
+
+        if ($totalParticipations) {
+            // Find the two hottest activities for current user
+            $nowDT = date_create('now');
+
+            // We get the first 5 nearest stage in terms of grading deadline in our results
+            foreach ($totalParticipations as $participation) {
+                $nbCriteria++;
+                $stage = $participation->getStage();
+                $activity = $stage->getActivity();
+
+                if ($participation->getStatus() < 3) {
+                    //$stageGEnddate = $participation->getStage()->getGEnddate();
+                    //$stageGStartdate = $participation->getStage()->getGStartdate();
+                    if (count($myHotStageParticipations) < 5) {
+                        // Invert is equal to 1 if dateInterval is negative (ie genddate is in the past)
+                        //if (($nowDT->diff($stageGEnddate)->invert == 0 || $nowDT->diff($stageGEnddate)->days == 0) && !in_array($participation->getStage(),$myHotStages)) {
+                            if(!in_array($stage,$myHotStages) && $activity->getStatus() >= 0){
+                                $myHotStages[] = $stage;
+                                $myHotStageParticipations->add($participation);
+                            }
+                            //$participationStatus[] = ($nowDT->diff($stageGEnddate)->invert == 1) ? -1 : $participation->getStatus();
+                        //}
+                    }
+                }
+
+                if ($participation->getStatus() >= 3 && count($myHotStageParticipations) < 5 && !in_array($stage, $myHotStages)) {
+
+                    if(!in_array($stage,$myHotStages)){
+                        $myHotStages[] = $stage;
+                        $myHotStageParticipations->add($participation);
+                    }
+                }
+
+                if ($activity != $theActivity) {
+                    $theActivity = $activity;
+                    $nbActivities++;
+
+                    if ($theActivity->getStatus() == 0) {
+                        $nbUpcomingActivities++;
+                    } else if ($theActivity->getStatus() == 1) {
+                        $nbOngoingActivities++;
+                    } else if ($theActivity->getStatus() >= 2) {
+                        $nbResultsActivities++;
+                        if ($theActivity->getStatus() == 3) {
+                            $nbPublishedActivities++;
+                        }
+                    }
+                }
+
+                if ($stage != $theStage) {
+                    $nbStages++;
+                    $theStage = $stage;
+
+                    if ($theStage->getStatus() <= 1) {
+                        // Ongoing and upcoming
+                        if ($theActivity->getStatus() == 1) {
+                            if ($theStage->getGEnddate() >= new \DateTime) {
+                                $nbOngoingStages++;
+                                $nbOngoingCriteria += count($theStage->getCriteria());
+                            }
+                        } else if ($activity->getStatus() == 0){
+                            $nbUpcomingStages++;
+                            $nbUpcomingCriteria += count($theStage->getCriteria());
+                        }
+                    } else if ($theStage->getStatus() >= 2) {
+                        $nbResultsStages++;
+                        $nbResultsCriteria += count($theStage->getCriteria());
+                        if ($theStage->getStatus() == 3) {
+                            $nbPublishedStages++;
+                        }
+                    }
+                }
+
+                if ($participation->getStatus() >= 3) {
+                    $ungradedActivity = 0;
+                    ($participation->getStatus() == 4) ? $nbPublishedCriteria++ : $nbGradedActivity++;
+                }
+            }
+
+            // Sorting participations in case they were not already sorted, i.e. when there are at least 5 "real" hot stages for a participant and we do not add finished participations
+
+            if ($notOrderedHotParticipations) {
+                $iterator = $myHotStageParticipations->getIterator();
+                $iterator->uasort(function ($first, $second) {
+                    if ($first->getStage()->getGEnddate() == $second->getStage()->getGEnddate()) {
+                        return 0;
+                    }
+                    return $first->getStage()->getGEnddate() > $second->getStage()->getGEnddate()
+                    ? 1
+                    : -1;
+                });
+                $myHotStageParticipations = new ArrayCollection(iterator_to_array($iterator));
+            }
+        }
+
+        // If user is a external, no ranking is computed for him
+        if ($user->isInternal()) {
+            if ($repoR->findOneBy(['type' => 1, 'usrId' => $user->getId()]) != null) {
+                $userWPerfRanking = $repoRK->findOneBy(['dType' => 'P', 'wType' => 'W', 'usrId' => $user->getId(), 'period' => 0, 'frequency' => 'D']);
+                $userWDevRatioRanking = $repoRK->findOneBy(['dType' => 'D', 'wType' => 'W', 'usrId' => $user->getId(), 'period' => 0, 'frequency' => 'D']);
+            }
+        }
+        MasterController::sendStageDeadlineMails();
+        MasterController::sendOrganizationTestingReminders();
+        MasterController::updateProgressStatus();
+
+        $teamParticipations = [];
+        $teamUserInclusions = $repoTU->findByUsrId($user->getId());
+        foreach($teamUserInclusions as $teamUserInclusion){
+            $team = $teamUserInclusion->getTeam();
+            $teamParticipation['name'] = $team->getName();
+            $teamParticipation['id'] = $team->getId();
+            $teamParticipation['nbParticipants'] = count($team->getActiveTeamUsers());
+            $teamMeanPerf = $repoRT->findOneBy(['dType' => 'P', 'wType' => 'W', 'team' => $team, 'period' => 0, 'frequency' => 'D']);
+            $teamMeanDist = $repoRT->findOneBy(['dType' => 'D', 'wType' => 'W', 'team' => $team, 'period' => 0, 'frequency' => 'D']);
+            $teamParticipation['meanPerf'] = ($teamMeanPerf == null) ?: $teamMeanPerf->getValue();
+            $teamParticipation['meanDist']= ($teamMeanDist == null) ?: $teamMeanDist->getValue();
+            $teamParticipations[] = $teamParticipation;
+        }
+        $topCriteria=[];
+        $topUsedCrits=[];
+        $topValue = 0;
+        $array_length = 0;
+        $topCritIds = [];
+        $topCriterionIds = [];
+
+        $topCriteriaResults = $repoR->findBy(['usrId' => $user->getId()], ['weightedRelativeResult'=>'DESC']);
+        foreach($topCriteriaResults as $topCriteriaResult){
+            if ($topCriteriaResult->getCriterion() != null && $topCriteriaResult->getWeightedRelativeResult() != null){
+                $topCritNameIds = $repoC->findBy(['id' => $topCriteriaResult->getCriterion()]);
+                foreach($topCritNameIds as $topCritNameId){
+                    $topCritIds[]=$topCritNameId->getCName();
+                    $topCriterionIds[]=$topCritNameId->getId();
+                }
+                $topCNameIds = array_unique($topCritIds);
+                foreach($topCNameIds as $topCNameId){
+                    if(in_array($topCNameId, $topUsedCrits) == false){
+                        $topUsedCrits[]=$topCNameId;
+                        $topCritSum=0;
+                        $topCritAvg = 0;
+                        $array_length = 0;
+                        $topCritKeys = array_keys($topCritIds,$topCNameId);
+                        foreach($topCritKeys as $key=>$value){
+                            $results = $repoR->findBy(['usrId'=> $user->getId(),'criterion'=>$topCriterionIds[$value]]);
+                            foreach($results as $result){
+                                if($result->getWeightedRelativeResult() != null){
+                                    $array_length++;
+                                    $topCritSum += $result->getWeightedRelativeResult();
+                                }
+                            }
+                        }
+                        $topCritAvg = $topCritSum/$array_length;
+                        $topValue = round($topCritAvg * 100, 1);
+                        $topCNames = $repoCN->findBy(['id' => $topCritNameId->getCName()]);
+                        foreach($topCNames as $topCName){
+                            $topCriteria[] = ['cName' => $topCName, 'value' => $topValue, 'vote' => $topCritSum];
+                        }
+                    }
+                }
+            }
+        }
+
+        $topPerformingCriteria = $repoU->findUserTopPerformingCriteria($user);
+        $ungradedTargets = $repoU->findUserUngradedTargets($user);
+        //if(!$orgHasActiveAdmin){
+
+            $addFirstAdminFormView = !$orgHasActiveAdmin ? $formFactory->create(AddFirstAdminForm::class,null)->createView() : null;
+
+            //$addFirstAdminFormView = !$orgHasActiveAdmin ? $finalizeUserForm->createView() : null;
+        //}
+
+        $myHotStageParticipations = array_reverse($myHotStageParticipations->getValues());
+
+        return $app['twig']->render('my_profile.html.twig', [
+            'firstConnection' => $firstco,
+            'orgHasActiveAdmin' => $orgHasActiveAdmin,
+            'addFirstAdminForm' => $addFirstAdminFormView,
+            'userData' => $user->toArray(),
+            'pictureForm' => $pictureForm->createView(),
+            'finalizeUserForm' => isset($finalizeUserForm) ? $finalizeUserForm->createView() : null,
+            'organization' => $organization->getCommname(),
+            'wRelPerfAbsRanking' => isset($userWPerfRanking) ? $userWPerfRanking->getAbsResult() : null,
+            'wRelPerfRelRanking' => isset($userWPerfRanking) ? $userWPerfRanking->getRelResult() : null,
+            'wDevRatioRelRanking' => isset($userWDevRatioRanking) ? $userWDevRatioRanking->getRelResult() : null,
+            'wDevRatioAbsRanking' => isset($userWDevRatioRanking) ? $userWDevRatioRanking->getAbsResult() : null,
+            'nbOrgUsers' => count($repoU->findBy(['orgId' => $orgId, 'deleted' => null, 'internal' => 1])),
+            'nbEvaluatedPerfUsers' => count($repoRK->findBy(['organization' => $organization, 'dType' => 'P', 'wType' => 'W', 'period' => 0, 'frequency' => 'D'])),
+            'nbEvaluatedDistUsers' => count($repoRK->findBy(['organization' => $organization, 'dType' => 'D', 'wType' => 'W', 'period' => 0, 'frequency' => 'D'])),
+            'myHotStageParticipations' => $myHotStageParticipations,
+            'nbCriteria' => $nbCriteria,
+            'nbOngoingCriteria' => $nbOngoingCriteria,
+            'nbUpcomingCriteria' => $nbUpcomingCriteria,
+            'nbResultsCriteria' => $nbResultsCriteria,
+            'nbPublishedCriteria' => $nbPublishedCriteria,
+            'nbStages' => $nbStages,
+            'nbOngoingStages' => $nbOngoingStages,
+            'nbUpcomingStages' => $nbUpcomingStages,
+            'nbResultsStages' => $nbResultsStages,
+            'nbPublishedStages' => $nbPublishedStages,
+            'nbActivities' => $nbActivities,
+            'nbOngoingActivities' => $nbOngoingActivities,
+            'nbUpcomingActivities' => $nbUpcomingActivities,
+            'nbResultsActivities' => $nbResultsActivities,
+            'nbPublishedActivities' => $nbPublishedActivities,
+            'error' => $app['security.last_error']($request),
+            'last_username' => $app['session']->get('security.last_username'),
+            'token' => $app['security.token_storage']->getToken(),
+            'teamParticipations' => $teamParticipations,
+            'topCriteria' => $topCriteria,
+            'topPerformingCriteria' => $topPerformingCriteria,
+            'ungradedTargets' => $ungradedTargets,
+            'enabledUserSeeRanking' => $enabledUserSeeRanking ?? false,
+        ]);
+    }
+
+    /*********** ADDITION, MODIFICATION AND DELETION *****************/
+
+    public function displayProfile(Application $app)
+    {
+        $entityManager = $this->getEntityManager();
+        $repoAU = $entityManager->getRepository(ActivityUser::class);
+        $repoO = $entityManager->getRepository(Organization::class);
+        $user = self::getAuthorizedUser();
+        $organization = $repoO->find($user->getOrgId());
+        $totalParticipations = $repoAU->findBy([ 'usrId' => $user->getId(), 'activity' => 'ASC' ]);
+
+        // We consider each graded activity as having at least one releasable criterion an nothing more
+        $totalGradedActivity = 0;
+        $totalUngradedActivity = 0;
+
+        if ($totalParticipations) {
+            $ungradedActivity = 1;
+            $skipParticipations = 0;
+            $actId = $totalParticipations[0]->getActId();
+
+            foreach ($totalParticipations as $participation) {
+                if ($participation->getActId() != $actId) {
+                    $skipParticipations = 0;
+                    if ($ungradedActivity == 1) {
+                        ++$totalUngradedActivity;
+                    }
+                    $actId = $participation->getId();
+                } else {
+                    if ($participation->getStatus() >= 3 and $skipParticipations == 0) {
+                        $ungradedActivity = 0;
+                        $totalGradedActivity++;
+                        $skipParticipations = 1;
+                    }
+                }
+            }
+        }
+
+        return $app['twig']->render('my_profile.html.twig',
+            [
+                'organization' => $organization->getCommname(),
+                'validatedActivities' => $totalGradedActivity,
+                'unvalidatedActivities' => $totalUngradedActivity,
+            ]
+        );
+    }
+
+    public function helpAction(Request $request, Application $app)
+    {
+        return $app['twig']->render('help.html.twig',
+            [
+                'request' => $request
+            ]
+        );
+    }
+}
