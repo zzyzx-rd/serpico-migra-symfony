@@ -49,41 +49,64 @@ class WorkerFirmSector
      */
     private $firm;
 
+    /**
+     * WorkerFirmSector constructor.
+     * @param int $id
+     * @param $wfs_name
+     * @param $wfs_createdBy
+     * @param $wfs_inserted
+     * @param $icon
+     * @param $firm
+     */
+    public function __construct(
+        int $id = 0,
+        $wfs_name = null,
+        $wfs_createdBy = null,
+        $wfs_inserted = null,
+        $icon = null,
+        $firm = null)
+    {
+        $this->wfs_name = $wfs_name;
+        $this->wfs_inserted = $wfs_inserted;
+        $this->icon = $icon;
+        $this->firm = $firm;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getWfsName(): ?string
+    public function getName(): ?string
     {
         return $this->wfs_name;
     }
 
-    public function setWfsName(string $wfs_name): self
+    public function setName(string $wfs_name): self
     {
         $this->wfs_name = $wfs_name;
 
         return $this;
     }
 
-    public function getWfsCreatedBy(): ?int
+    public function getCreatedBy(): ?int
     {
         return $this->wfs_createdBy;
     }
 
-    public function setWfsCreatedBy(int $wfs_createdBy): self
+    public function setCreatedBy(int $wfs_createdBy): self
     {
         $this->wfs_createdBy = $wfs_createdBy;
 
         return $this;
     }
 
-    public function getWfsInserted(): ?\DateTimeInterface
+    public function getInserted(): ?\DateTimeInterface
     {
         return $this->wfs_inserted;
     }
 
-    public function setWfsInserted(\DateTimeInterface $wfs_inserted): self
+    public function setInserted(\DateTimeInterface $wfs_inserted): self
     {
         $this->wfs_inserted = $wfs_inserted;
 
