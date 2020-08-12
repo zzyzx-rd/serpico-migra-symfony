@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\TemplateStageRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -14,7 +16,7 @@ use Doctrine\ORM\Mapping\OrderBy;
  * @ApiResource()
  * @ORM\Entity(repositoryClass=TemplateStageRepository::class)
  */
-class TemplateStage
+class TemplateStage extends DbObject
 {
     /**
      * @ORM\Id()
@@ -33,6 +35,12 @@ class TemplateStage
      * @ORM\Column(type="integer")
      */
     private $stg_period;
+
+    /**
+     * @Column(name="stg_name", type="string")
+     * @var string
+     */
+    protected $name;
 
     /**
      * @ORM\Column(type="string", length=255)
@@ -106,6 +114,65 @@ class TemplateStage
      * @ORM\Column(type="string", length=255)
      */
     private $stg_desc;
+
+    /**
+     * TemplateStage constructor.
+     * @param int $id
+     * @param $stg_master_usr
+     * @param null $name
+     * @param $stg_weight
+     * @param $stg_period
+     * @param $stg_frequency
+     * @param $stg_startdate
+     * @param $stg_enddate
+     * @param $stg_gstartdate
+     * @param $stg_genddate
+     * @param $stg_deadline_nbDays
+     * @param $stg_createdBy
+     * @param $stg_inserted
+     * @param $stg_mode
+     * @param $activity
+     * @param $criteria
+     * @param $participants
+     * @param $stg_desc
+     */
+    public function __construct(
+        int $id = 0,
+        $stg_master_usr = null,
+        $name= null,
+        $stg_mode = null,
+        $stg_desc = null,
+        $stg_weight = 0.0,
+        $stg_period = 15,
+        $stg_frequency = '0',
+        $stg_startdate = null,
+        $stg_enddate = null,
+        $stg_gstartdate = null,
+        $stg_genddate = null,
+        $stg_deadline_nbDays = 3,
+        $stg_createdBy = null,
+        $stg_inserted = null,
+        $activity = null,
+        $criteria = null,
+        $participants = null)
+    {
+        $this->name = $name;
+        $this->stg_weight = $stg_weight;
+        $this->stg_period = $stg_period;
+        $this->stg_frequency = $stg_frequency;
+        $this->stg_startdate = $stg_startdate;
+        $this->stg_enddate = $stg_enddate;
+        $this->stg_gstartdate = $stg_gstartdate;
+        $this->stg_genddate = $stg_genddate;
+        $this->stg_deadline_nbDays = $stg_deadline_nbDays;
+        $this->stg_inserted = $stg_inserted;
+        $this->stg_mode = $stg_mode;
+        $this->activity = $activity;
+        $this->criteria = $criteria?$criteria:new ArrayCollection();
+        $this->participants = $participants?$participants:new ArrayCollection();
+        $this->stg_master_usr = $stg_master_usr;
+        $this->stg_desc = $stg_desc;
+    }
 
     public function getId(): ?int
     {
@@ -315,5 +382,77 @@ class TemplateStage
 
         return $this;
     }
+    function addCriterion(TemplateCriterion $criterion){
+        //The below line is to prevent adding a criterion already submitted (because of activeStages/stages).
+        // However as stage criteria are built in advance for recurring activities, we also need to take into account this exception
 
+        //if(!$criterion->getStage() || $criterion->getStage()->getActivity()->getRecurring()){
+        $this->criteria->add($criterion);
+        $criterion->setStage($this);
+        return $this;
+        //}
+    }
+
+    function removeCriterion(TemplateCriterion $criterion){
+        $this->criteria->removeElement($criterion);
+        $criterion->setStage(null);
+        return $this;
+    }
+
+    function addParticipant(TemplateActivityUser $participant){
+
+        $this->participants->add($participant);
+        $participant->setStage($this);
+        return $this;
+    }
+
+    function removeParticipant(TemplateActivityUser $participant){
+        $this->participants->removeElement($participant);
+        return $this;
+    }
+
+    public function __toString()
+    {
+        return (string) $this->id;
+    }
+
+    public function getGradingProgress()
+    {
+        $k = 0;
+        $l = 0;
+        if(count($this->participants) > 0){
+            foreach($this->participants as $participant){
+                if($participant->getStatus() >= 2){
+                    $k++;
+                } else {
+                    $l++;
+                }
+            }
+            return $k / ($k + $l);
+        } else {
+            return 0;
+        }
+    }
+    /**
+     * @return Collection|TemplateActivityUser[]
+     */
+    public function getUniqueParticipations()
+    {
+        return $this->criteria->first()->getParticipants();
+    }
+
+    function addUniqueParticipation(TemplateActivityUser $participant){
+        foreach($this->criteria as $criterion){
+            $criterion->addParticipant($participant);
+            $participant->setCriterion($criterion)->setStage($this);
+        }
+        return $this;
+    }
+
+    function removeUniqueParticipation(TemplateActivityUser $participant){
+        foreach($this->criteria as $criterion){
+            $criterion->getParticipants()->removeElement($participant);
+        }
+        return $this;
+    }
 }
