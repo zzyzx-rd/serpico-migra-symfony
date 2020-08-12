@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping\ManyToOne;
  * @ApiResource()
  * @ORM\Entity(repositoryClass=WorkerFirmCompetencyRepository::class)
  */
-class WorkerFirmCompetency
+class WorkerFirmCompetency extends DbObject
 {
     /**
      * @ORM\Id()
@@ -42,6 +42,26 @@ class WorkerFirmCompetency
      * @JoinColumn(name="worker_firm_wfi_id", referencedColumnName="wfi_id",nullable=false)
      */
     protected $firm;
+
+    /**
+     * WorkerFirmCompetency constructor.
+     * @param int $id
+     * @param $wfc_name
+     * @param $wfc_createdBy
+     * @param $wfc_inserted
+     * @param $firm
+     */
+    public function __construct(
+        int $id = 0,
+        $wfc_name = null,
+        $wfc_createdBy = null,
+        $wfc_inserted = null,
+        $firm = null)
+    {
+        $this->wfc_name = $wfc_name;
+        $this->wfc_inserted = $wfc_inserted;
+        $this->firm = $firm;
+    }
 
     public function getId(): ?int
     {
