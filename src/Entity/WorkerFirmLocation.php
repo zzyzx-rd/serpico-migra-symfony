@@ -45,6 +45,29 @@ class WorkerFirmLocation
      */
     private $wfl_inserted;
 
+    /**
+     * WorkerFirmLocation constructor.
+     * @param int $id
+     * @param $wfl_hq_city
+     * @param $wfl_hq_state
+     * @param $wfl_hq_country
+     * @param $wfl_createdBy
+     * @param $wfl_inserted
+     */
+    public function __construct(
+        int $id = 0,
+        $wfl_createdBy = null,
+        $wfl_inserted = null,
+        $wfl_hq_city = null,
+        $wfl_hq_state = null,
+        $wfl_hq_country = null)
+    {
+        $this->wfl_hq_city = $wfl_hq_city;
+        $this->wfl_hq_state = $wfl_hq_state;
+        $this->wfl_hq_country = $wfl_hq_country;
+        $this->wfl_inserted = $wfl_inserted;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -108,5 +131,9 @@ class WorkerFirmLocation
         $this->wfl_inserted = $wfl_inserted;
 
         return $this;
+    }
+    public function __toString()
+    {
+        return (string) $this->id;
     }
 }
