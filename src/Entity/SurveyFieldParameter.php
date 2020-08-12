@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping\ManyToOne;
  * @ApiResource()
  * @ORM\Entity(repositoryClass=SurveyFieldParameterRepository::class)
  */
-class SurveyFieldParameter
+class SurveyFieldParameter extends DbObject
 {
     /**
      * @ORM\Id()
@@ -58,77 +58,106 @@ class SurveyFieldParameter
      */
     protected $field;
 
+    /**
+     * SurveyFieldParameter constructor.
+     * @param int $id
+     * @param $sfp_value
+     * @param $sfp_lowerbound
+     * @param $sfp_upperbound
+     * @param $sfp_step
+     * @param $sfp_createdBy
+     * @param $sfp_inserted
+     * @param $field
+     */
+    public function __construct(
+        int $id = 0,
+        $sfp_value = null,
+        $sfp_lowerbound = true,
+        $sfp_upperbound = null,
+        $sfp_step = null,
+        $sfp_createdBy = null,
+        $sfp_inserted = null,
+        $field = null)
+    {
+        $this->sfp_value = $sfp_value;
+        $this->sfp_lowerbound = $sfp_lowerbound;
+        $this->sfp_upperbound = $sfp_upperbound;
+        $this->sfp_step = $sfp_step;
+        $this->sfp_inserted = $sfp_inserted;
+        $this->field = $field;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getSfpValue(): ?string
+    public function getValue(): ?string
     {
         return $this->sfp_value;
     }
 
-    public function setSfpValue(string $sfp_value): self
+    public function setValue(string $sfp_value): self
     {
         $this->sfp_value = $sfp_value;
 
         return $this;
     }
 
-    public function getSfpLowerbound(): ?float
+    public function getLowerbound(): ?float
     {
         return $this->sfp_lowerbound;
     }
 
-    public function setSfpLowerbound(?float $sfp_lowerbound): self
+    public function setLowerbound(?float $sfp_lowerbound): self
     {
         $this->sfp_lowerbound = $sfp_lowerbound;
 
         return $this;
     }
 
-    public function getSfpUpperbound(): ?float
+    public function getUpperbound(): ?float
     {
         return $this->sfp_upperbound;
     }
 
-    public function setSfpUpperbound(?float $sfp_upperbound): self
+    public function setUpperbound(?float $sfp_upperbound): self
     {
         $this->sfp_upperbound = $sfp_upperbound;
 
         return $this;
     }
 
-    public function getSfpStep(): ?float
+    public function getStep(): ?float
     {
         return $this->sfp_step;
     }
 
-    public function setSfpStep(?float $sfp_step): self
+    public function setStep(?float $sfp_step): self
     {
         $this->sfp_step = $sfp_step;
 
         return $this;
     }
 
-    public function getSfpCreatedBy(): ?int
+    public function getCreatedBy(): ?int
     {
         return $this->sfp_createdBy;
     }
 
-    public function setSfpCreatedBy(int $sfp_createdBy): self
+    public function setCreatedBy(int $sfp_createdBy): self
     {
         $this->sfp_createdBy = $sfp_createdBy;
 
         return $this;
     }
 
-    public function getSfpInserted(): ?\DateTimeInterface
+    public function getInserted(): ?\DateTimeInterface
     {
         return $this->sfp_inserted;
     }
 
-    public function setSfpInserted(\DateTimeInterface $sfp_inserted): self
+    public function setInserted(\DateTimeInterface $sfp_inserted): self
     {
         $this->sfp_inserted = $sfp_inserted;
 
@@ -151,4 +180,10 @@ class SurveyFieldParameter
         $this->field = $field;
     }
 
+    public function jsonSerialize()
+    {
+        return [
+            'value'=>$this->value,
+        ];
+    }
 }
