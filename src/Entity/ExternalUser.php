@@ -76,13 +76,13 @@ class ExternalUser extends DbObject
     public $ext_deleted;
 
     /**
-     * @ManyToOne(targetEntity="User")
+     * @ManyToOne(targetEntity="User", inversedBy="externalUsers")
      * @JoinColumn(name="user_usr_id", referencedColumnName="usr_id", nullable=true)
      */
     protected $user;
 
     /**
-     * @ManyToOne(targetEntity="Client")
+     * @ManyToOne(targetEntity="Client", inversedBy="externalUsers")
      * @JoinColumn(name="client_cli_id", referencedColumnName="cli_id", nullable=false)
      */
     protected $client;

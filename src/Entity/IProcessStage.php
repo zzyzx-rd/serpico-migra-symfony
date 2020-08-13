@@ -168,7 +168,7 @@ class IProcessStage extends DbObject
     public $stg_gcompleted;
 
     /**
-     * @ManyToOne(targetEntity="InstitutionProcess")
+     * @ManyToOne(targetEntity="InstitutionProcess", inversedBy="stages")
      * @JoinColumn(name="iprocess_inp_id", referencedColumnName="inp_id",nullable=false)
      * @var InstitutionProcess
      */

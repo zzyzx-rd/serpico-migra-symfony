@@ -43,37 +43,37 @@ class Target
     public $tgt_inserted;
 
     /**
-     * @ManyToOne(targetEntity="Organization")
+     * @ManyToOne(targetEntity="Organization", inversedBy="targets")
      * @JoinColumn(name="organization_org_id", referencedColumnName="org_id",nullable=false)
      */
     protected $organization;
 
     /**
-     * @ManyToOne(targetEntity="Department")
+     * @ManyToOne(targetEntity="Department", inversedBy="targets")
      * @JoinColumn(name="department_dpt_id", referencedColumnName="dpt_id",nullable=false)
      */
     protected $department;
 
     /**
-     * @ManyToOne(targetEntity="Position")
+     * @ManyToOne(targetEntity="Position", inversedBy="targets")
      * @JoinColumn(name="position_pos_id", referencedColumnName="pos_id",nullable=false)
      */
     protected $position;
 
     /**
-     * @ManyToOne(targetEntity="Title")
+     * @ManyToOne(targetEntity="Title", inversedBy="targets")
      * @JoinColumn(name="title_tit_id", referencedColumnName="tit_id",nullable=false)
      */
     protected $title;
 
     /**
-     * @ManyToOne(targetEntity="User")
+     * @ManyToOne(targetEntity="User", inversedBy="targets")
      * @JoinColumn(name="user_usr_id", referencedColumnName="usr_id", nullable=false)
      */
     protected $user;
 
     /**
-     * @ManyToOne(targetEntity="Team")
+     * @ManyToOne(targetEntity="Team", inversedBy="targets")
      * @JoinColumn(name="team_tea_id", referencedColumnName="tea_id", nullable=true)
      */
     protected $team;
@@ -85,7 +85,7 @@ class Target
     protected $cName;
 
     /**
-     * @OneToOne(targetEntity="Criterion")
+     * @OneToOne(targetEntity="Criterion", inversedBy="target")
      * @JoinColumn(name="criterion_crt_id", referencedColumnName="crt_id",nullable=false)
      */
     protected $criterion;

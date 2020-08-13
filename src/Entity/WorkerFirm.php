@@ -139,25 +139,25 @@ class WorkerFirm extends DbObject
     public $wfi_inserted;
 
     /**
-     * @OneToOne(targetEntity="WorkerFirmSector")
+     * @OneToOne(targetEntity="WorkerFirmSector", inversedBy="firm")
      * @JoinColumn(name="worker_firm_sector_wfs_id", referencedColumnName="wfs_id",nullable=false)
      */
     public $mainSector;
 
     /**
-     * @ManyToOne(targetEntity="City")
+     * @ManyToOne(targetEntity="City", inversedBy="firms")
      * @JoinColumn(name="city_cit_id", referencedColumnName="cit_id",nullable=false)
      */
     public $city;
 
     /**
-     * @ManyToOne(targetEntity="State")
+     * @ManyToOne(targetEntity="State", inversedBy="firms")
      * @JoinColumn(name="state_sta_id", referencedColumnName="sta_id",nullable=false)
      */
     public $state;
 
     /**
-     * @ManyToOne(targetEntity="Country")
+     * @ManyToOne(targetEntity="Country", inversedBy="firms")
      * @JoinColumn(name="country_cou_id", referencedColumnName="cou_id",nullable=false)
      */
     public $country;

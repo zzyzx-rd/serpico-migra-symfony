@@ -57,28 +57,28 @@ class Grade extends DbObject
     public $grd_inserted;
 
     /**
-     * @ManyToOne(targetEntity="Team")
+     * @ManyToOne(targetEntity="Team", inversedBy="grades")
      * @JoinColumn(name="activity_user_team_tea_id", referencedColumnName="tea_id")
      */
     protected $team;
     /**
-     * @ManyToOne(targetEntity="ActivityUser")
+     * @ManyToOne(targetEntity="ActivityUser", inversedBy="grades")
      * @JoinColumn(name="activity_user_user_usr_id", referencedColumnName="a_u_id",nullable=false)
      * @var ActivityUser
      */
     protected $participant;
     /**
-     * @ManyToOne(targetEntity="Activity")
+     * @ManyToOne(targetEntity="Activity", inversedBy="grades")
      * @JoinColumn(name="activity_act_id", referencedColumnName="act_id",nullable=false)
      */
     protected $activity;
     /**
-     * @ManyToOne(targetEntity="Criterion")
+     * @ManyToOne(targetEntity="Criterion", inversedBy="grades")
      * @JoinColumn(name="criterion_crt_id", referencedColumnName="crt_id",nullable=false)
      */
     protected $criterion;
     /**
-     * @ManyToOne(targetEntity="Stage")
+     * @ManyToOne(targetEntity="Stage", inversedBy="grades")
      * @JoinColumn(name="stage_stg_id", referencedColumnName="stg_id",nullable=false)
      */
     protected $stage;

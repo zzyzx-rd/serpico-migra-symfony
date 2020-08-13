@@ -4,48 +4,58 @@ namespace App\Controller;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Criteria;
-use App\Form\AddFirstAdminForm;
-use App\Form\AddUserPictureForm;
-use App\Form\DelegateActivityForm;
-use App\Form\FinalizeUserForm;
-use App\Form\RequestActivityForm;
-use App\Form\ContactForm;
-use App\Entity\ActivityUser;
-use App\Entity\TeamUser;
-use App\Entity\Decision;
-use App\Entity\Department;
-use App\Entity\Organization;
-use App\Entity\Contact;
-use App\Entity\Ranking;
-use App\Entity\RankingTeam;
-use App\Entity\Result;
-use App\Entity\Stage;
-use App\Entity\Criterion;
-use App\Entity\CriterionName;
-use App\Entity\OrganizationUserOption;
-use App\Form\AddProcessForm;
-use App\Form\PasswordDefinitionForm;
-use App\Form\SignUpForm;
-use App\Form\UpdateWorkerIndividualForm;
-use App\Form\UserPublicForm;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
+use Form\AddFirstAdminForm;
+use Form\AddUserPictureForm;
+use Form\DelegateActivityForm;
+use Form\FinalizeUserForm;
+use Form\RequestActivityForm;
+use Form\ContactForm;
+use Model\ActivityUser;
+use Model\TeamUser;
+use Model\Decision;
+use Model\Department;
+use Model\Organization;
+use Model\Contact;
+use Model\Ranking;
+use Model\RankingTeam;
+use Model\Result;
+use Model\Stage;
+use Model\Criterion;
+use Model\CriterionName;
+use Model\OrganizationUserOption;
+use Form\AddProcessForm;
+use Form\PasswordDefinitionForm;
+use Form\SignUpForm;
+use Form\UpdateWorkerIndividualForm;
+use Form\UserPublicForm;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use App\Entity\User;
-use App\Entity\Mail;
-use App\Entity\Position;
-use App\Entity\Activity;
-use App\Entity\InstitutionProcess;
-use App\Entity\Process;
-use App\Entity\WorkerFirm;
-use App\Entity\WorkerIndividual;
-use App\Repository\UserRepository;
+use Model\User;
+use Model\Mail;
+use Model\Position;
+use Model\Activity;
+use Model\InstitutionProcess;
+use Model\Process;
+use Model\WorkerFirm;
+use Model\WorkerIndividual;
+use Repository\UserRepository;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 
 class UserController extends MasterController
 {
     /*********** ADDITION, MODIFICATION, DELETION AND DISPLAY OF USERS *****************/
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return mixed
+     * @Route("/terms-conditions", name= "displayTC")
+     */
     public function displayTCAction(Request $request, Application $app) {
         return $app['twig']->render(
             'terms_conditions.html.twig',
@@ -55,9 +65,17 @@ class UserController extends MasterController
         );
     }
 
+    /**
+     * @Route ("/trk/{trkToken}", name="trackMLinkClick")
+     * @param Application $app
+     * @param $trkToken
+     * @return mixed
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
     public function trackMLinkClick(Application $app, $trkToken) {
-        $em = $this->getEntityManager($app);
-        $repoM = $em->getRepository(Mail::class);
+        $this->em = $this->getEntityManager($app);
+        $repoM = $this->em->getRepository(Mail::class);
         $clickedLinkMail = $repoM->findOneByToken($trkToken);
         if ($clickedLinkMail !== null) {
             $parameters = [];
@@ -109,8 +127,8 @@ class UserController extends MasterController
             }
 
             $clickedLinkMail->setRead(new \DateTime);
-            $em->persist($clickedLinkMail);
-            $em->flush();
+            $this->em->persist($clickedLinkMail);
+            $this->em->flush();
             return $app->redirect($app['url_generator']->generate($path, $parameters));
         } else {
             return $app->redirect($app['url_generator']->generate('login'));
@@ -118,6 +136,16 @@ class UserController extends MasterController
     }
 
     // Create pwd (render form)
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $token
+     * @return mixed
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/password/{token}", name="definePassword")
+     */
     public function definePasswordAction(Request $request, Application $app, $token)
     {
         $entityManager = $this->getEntityManager();
@@ -152,6 +180,15 @@ class UserController extends MasterController
         }
     }
 
+    /**
+     * @Route("/accounts/signup", name="signup")
+     * @param Request $request
+     * @param Application $app
+     * @return string
+     * @throws ORMException
+     * @throws OptimisticLockException
+     *
+     */
     public function signupAction(Request $request, Application $app)
     {
         $entityManager = $this->getEntityManager();
@@ -206,6 +243,12 @@ class UserController extends MasterController
         );
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return mixed
+     * @Route("/institutions/all", name="displayAllInstitutions")
+     */
     public function displayAllInstitutionsAction(Request $request, Application $app){
 
         $entityManager = $this->getEntityManager($app);
@@ -233,6 +276,15 @@ class UserController extends MasterController
 
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $orgId
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/process/create/institution/{orgId}", name="createProcessRequest")
+     */
     public function createProcessRequestAction(Request $request, Application $app, $orgId)
     {
         $entityManager = $this->getEntityManager();
@@ -284,6 +336,16 @@ class UserController extends MasterController
     }
 
     // Create pwd (AJAX submission)
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $token
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/ajax/password/{token}", name="createPasswordAJAX")
+     */
     public function createPwdActionAJAX(Request $request, Application $app, $token)
     {
         //try{
@@ -315,6 +377,14 @@ class UserController extends MasterController
 
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return RedirectResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/profile", name="manageProfile")
+     */
     public function manageProfileAction(Request $request, Application $app){
         $currentUser = self::getAuthorizedUser();
         $organization = $currentUser->getOrganization();
@@ -361,6 +431,14 @@ class UserController extends MasterController
     }
 
     // AJAX call to get all processes from a given institution
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $orgId
+     * @return JsonResponse
+     * @Route("/institution/processes/{orgId}", name="getAllProcessesFromInstitution")
+     */
     public function getAllProcessesFromInstitution(Request $request, Application $app, $orgId){
         $entityManager = $this->getEntityManager($app);
         $repoO = $entityManager->getRepository(Organization::class);
@@ -406,20 +484,28 @@ class UserController extends MasterController
         return new JsonResponse(['processes' => $orgIProcesses],200);
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $elmtType
+     * @param $elmtId
+     * @return JsonResponse|Response
+     * @Route("/institution/{elmtType}/config/{elmtId}", name="getElementConfig")
+     */
     public function getElementConfigAction(Request $request, Application $app, $elmtType, $elmtId){
-        $em = self::getEntityManager();
+        $this->em = self::getEntityManager();
         $currentUser = self::getAuthorizedUser();
         switch ($elmtType) {
             case 'iprocess':
-                $repoE    = $em->getRepository(InstitutionProcess::class);
+                $repoE    = $this->em->getRepository(InstitutionProcess::class);
                 break;
             case 'process':
-                $repoE    = $em->getRepository(Process::class);
+                $repoE    = $this->em->getRepository(Process::class);
             case 'template':
-                $repoE    = $em->getRepository(TemplateActivity::class);
+                $repoE    = $this->em->getRepository(TemplateActivity::class);
                 break;
             case 'activity':
-                $repoE    = $em->getRepository(Activity::class);
+                $repoE    = $this->em->getRepository(Activity::class);
                 break;
             default:
                 return new Response(null, Response::HTTP_BAD_REQUEST);
@@ -450,7 +536,7 @@ class UserController extends MasterController
             $elmtConfig['nbPCompletedStages'] = $element->getPCompletedStages()->count();
         }
 
-        $repoU = $em->getRepository(User::class);
+        $repoU = $this->em->getRepository(User::class);
         $masterUser = $elmtType == 'activity' ?  $repoU->find($element->getMasterUserId()) : ($element->getMasterUser() ?: $repoU->find($element->getCreatedBy()));
         $elmtConfig['masterUserFullname'] = $masterUser->getFullname();
         $elmtConfig['masterUserPicture'] = $masterUser->getPicture();
@@ -542,6 +628,15 @@ class UserController extends MasterController
     }
 
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $inpId
+     * @return JsonResponse|RedirectResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/institution/activity/process/{inpId}", name="createProcessActivity")
+     */
     public function createUserProcessActivity(Request $request, Application $app, $inpId){
         $entityManager = $this->getEntityManager($app);
         $repoIP = $entityManager->getRepository(InstitutionProcess::class);
@@ -793,6 +888,15 @@ class UserController extends MasterController
 
 
     // Reset pwd
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/rpassword", name="resetPassword")
+     */
     public function resetPwdAction(Request $request, Application $app)
     {
 
@@ -817,6 +921,14 @@ class UserController extends MasterController
     }
 
     // Modify pwd
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $token
+     * @return mixed
+     * @Route("/mpassword/{token}", name="modifyPassword")
+     */
     public function modifyPwdAction(Request $request, Application $app, $token)
     {
 
@@ -866,11 +978,11 @@ class UserController extends MasterController
             return $this->redirectToRoute('login');
         }
 
-        $em = $this->getEntityManager();
-        $repoA = $em->getRepository(Activity::class);
-        $repoAU = $em->getRepository(ActivityUser::class);
-        $repoO = $em->getRepository(Organization::class);
-        $repoDec = $em->getRepository(Decision::class);
+        $this->em = $this->getEntityManager();
+        $repoA = $this->em->getRepository(Activity::class);
+        $repoAU = $this->em->getRepository(ActivityUser::class);
+        $repoO = $this->em->getRepository(Organization::class);
+        $repoDec = $this->em->getRepository(Decision::class);
         $role = $currentUser->getRole();
         $currentUsrId = $currentUser->getId();
         $organization = $repoO->find($currentUser->getOrgId());
@@ -912,7 +1024,7 @@ class UserController extends MasterController
             if($activitiesAccess == 1){
                 $userActivities = new ArrayCollection($orgActivities);
             } else if ($activitiesAccess == 2){
-                $departmentUsers = $em->getRepository(Department::class)->find($currentUser->getDptId())->getUsers();
+                $departmentUsers = $this->em->getRepository(Department::class)->find($currentUser->getDptId())->getUsers();
                 foreach($departmentUsers as $departmentUser){
                     $checkingIds[] = $departmentUser->getId();
                 }
@@ -1103,6 +1215,12 @@ class UserController extends MasterController
             ]);
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return mixed
+     * @Route("mysettings", name="mySettings")
+     */
     public function getUserSettingsAction(Request $request, Application $app){
 
 
@@ -1118,6 +1236,15 @@ class UserController extends MasterController
     }
 
     // Modify user info  (ajax call)
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return JsonResponse|Response
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/profile/picture", name="updatePicture")
+     */
     public function updatePictureAction(Request $request, Application $app)
     {
         $user = self::getAuthorizedUser();
@@ -1125,7 +1252,7 @@ class UserController extends MasterController
             return new Response(null, Response::HTTP_UNAUTHORIZED);
         }
 
-        $em = self::getEntityManager();
+        $this->em = self::getEntityManager();
         /** @var FormFactoryInterface */
         $formFactory = $app['form.factory'];
         $pictureForm = $formFactory->create(AddUserPictureForm::class);
@@ -1143,8 +1270,8 @@ class UserController extends MasterController
         $fileName = "$rand.$ext";
         move_uploaded_file($_FILES['profile-pic']['tmp_name'], __DIR__ . "/../../web/lib/img/$fileName");
         $user->setPicture($fileName);
-        $em->persist($user);
-        $em->flush();
+        $this->em->persist($user);
+        $this->em->flush();
         return new JsonResponse([ 'filename' => $fileName ]);
     }
 
@@ -1190,39 +1317,13 @@ class UserController extends MasterController
     }
 
     /*********** USER LOGIN AND CONTEXTUAL MENU *****************/
-    //Redirection from '/' to '/fr'
-    public function redirectAction(Request $request, Application $app){
-        return $app->redirect($app['url_generator']->generate('login'));
-    }
 
-    //Logs current user
-    public function loginAction(Request $request, Application $app)
-    {
-        $currentUser = self::getAuthorizedUser();
-        if ($currentUser) {
-            return $this->redirectToRoute('home');
-        }
-
-        $formFactory = $app['form.factory'];
-        $csrf_token = $app['csrf.token_manager']->getToken('token_id');
-        $contact = new Contact;
-        $contactForm = $formFactory->create(
-            ContactForm::class,
-            $contact,
-            [ 'standalone' => true ]
-        )->handleRequest($request);
-
-        return $app['twig']->render('landing.html.twig',
-            [
-                'csrf_token' => $csrf_token,
-                'error' => $app['security.last_error']($request),
-                'last_username' => $app['session']->get('security.last_username'),
-                'contactForm' => $contactForm->createView(),
-                'request' => $request
-            ]
-        );
-    }
-
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return mixed
+     * @Route("/about", name="about")
+     */
     public function displayAboutPageAction(Request $request,Application $app){
 
             $csrf_token = $app['csrf.token_manager']->getToken('token_id');
@@ -1249,6 +1350,12 @@ class UserController extends MasterController
             ]);
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return mixed
+     * @Route("some-use-cases", name="useCases")
+     */
     public function displayUseCasesAction(Request $request,Application $app){
 
         $csrf_token = $app['csrf.token_manager']->getToken('token_id');
@@ -1263,6 +1370,16 @@ class UserController extends MasterController
 }
 
     //Save registering user
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/contact/{type}/{isAborted}", name="contact_us")
+     * @Route("/contact", name="contact")
+     */
     public function contactAction(Request $request,Application $app){
         //Insert Grades
         $entityManager = $this->getEntityManager($app);
@@ -1322,6 +1439,16 @@ class UserController extends MasterController
     }
 
     // Display all users (when HR clicks on "users" from /settings)
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $usrId
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/user/{usrId}/finalize", name="finalizeUser")
+     */
     public function finalizeUserAction(Request $request, Application $app, $usrId)
     {
         $entityManager = $this->getEntityManager($app);
@@ -1359,44 +1486,46 @@ class UserController extends MasterController
     }
 
     //Displays the menu in relation with user role
-    public function homeAction(Request $request, Application $app)
+
+    /**
+     * @param Request $request
+     * @return mixed
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/home", name="home")
+     */
+    public function homeAction(Request $request)
     {
-        /** @var \Doctrine\ORM\EntityManager */
-        $em = $this->getEntityManager();
+//        if (isset($_COOKIE['!auth!'])) {
+//            setcookie('!auth!', null, 1, '/'); // delete cookie immediatly
+////            /** @var TokenStorage */
+////            $tokenObj = $app['security.token_storage'];
+////            $token = $tokenObj->getToken();
+////            if ($token === null) {
+////                throw 'No token';
+////            }
+////            $user = $token->getUser();
+//            // we basically "remember" the user
+////            $user->setRememberMeToken($_COOKIE['REMEMBERME']);
+////            $this->em->persist($user);
+////            $this->em->flush();
+//        }
 
-        if (isset($_COOKIE['!auth!'])) {
-            setcookie('!auth!', null, 1, '/'); // delete cookie immediatly
-            /** @var TokenStorage */
-            $tokenObj = $app['security.token_storage'];
-            $token = $tokenObj->getToken();
-            if ($token === null) {
-                throw 'No token';
-            }
-
-            /** @var User */
-            $user = $token->getUser();
-
-            // we basically "remember" the user
-            $user->setRememberMeToken($_COOKIE['REMEMBERME']);
-            $em->persist($user);
-            $em->flush();
-        }
-
-        $user = self::getAuthorizedUser();
+        $user = $this->security->getUser();
         if (!$user) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirect('home_welcome');
         }
-        $repoA = $em->getRepository(Activity::class);
-        $repoO = $em->getRepository(Organization::class);
+        $repoA = $this->em->getRepository(Activity::class);
+        $repoO = $this->em->getRepository(Organization::class);
         /** @var UserRepository */
-        $repoU = $em->getRepository(User::class);
-        $repoAU = $em->getRepository(ActivityUser::class);
-        $repoR = $em->getRepository(Result::class);
-        $repoRK = $em->getRepository(Ranking::class);
-        $repoRT = $em->getRepository(RankingTeam::class);
-        $repoTU = $em->getRepository(TeamUser::class);
-        $repoC = $em->getRepository(Criterion::class);
-        $repoCN = $em->getRepository(CriterionName::class);
+        $repoU = $this->em->getRepository(User::class);
+        $repoAU = $this->em->getRepository(ActivityUser::class);
+        $repoR = $this->em->getRepository(Result::class);
+        $repoRK = $this->em->getRepository(Ranking::class);
+        $repoRT = $this->em->getRepository(RankingTeam::class);
+        $repoTU = $this->em->getRepository(TeamUser::class);
+        $repoC = $this->em->getRepository(Criterion::class);
+        $repoCN = $this->em->getRepository(CriterionName::class);
         $orgId = $user->getOrgId();
         $organization = $repoO->findOneById($orgId);
         $orgHasActiveAdmin =$organization->hasActiveAdmin();
@@ -1407,11 +1536,10 @@ class UserController extends MasterController
                 $enabledUserSeeRanking = $orgOption->isOptionTrue();
             }
         }
-        $formFactory = $app['form.factory'];
-        $pictureForm = $formFactory->create(AddUserPictureForm::class);
+        $pictureForm = $this->createForm(AddUserPictureForm::class);
         $pictureForm->handleRequest($request);
 
-        $finalizeUserForm = $formFactory->create(FinalizeUserForm::class,null,['user' => $user]);
+        $finalizeUserForm = $this->createForm(FinalizeUserForm::class,null,['user' => $user]);
         $finalizeUserForm->handleRequest($request);
 
         $myHotStageParticipations = new ArrayCollection;
@@ -1428,13 +1556,13 @@ class UserController extends MasterController
         }
 
         if (!$isRefreshed) {
-            $repoA = $em->getRepository(Activity::class);
+            $repoA = $this->em->getRepository(Activity::class);
             $supposedlyFutureActivities = $repoA->findBy(['organization' => $organization, 'status' => 0]);
             foreach ($supposedlyFutureActivities as $supposedlyFutureActivity) {
                 if ($supposedlyFutureActivity->getStartdate() < new \DateTime) {
                     $supposedlyFutureActivity->setStatus(1);
                 }
-                $em->persist($supposedlyFutureActivity);
+                $this->em->persist($supposedlyFutureActivity);
             }
         }
 
@@ -1444,15 +1572,14 @@ class UserController extends MasterController
         }
         $user->setLastConnected(new \DateTime);
         $user->setRememberMeToken($_COOKIE['REMEMBERME']);
-        $em->persist($user);
-        $em->flush();
+        $this->em->persist($user);
+        $this->em->flush();
         $totalParticipations = new ArrayCollection($repoAU->findBy(['usrId' => $user->getId()], ['status' => 'ASC', 'activity' => 'ASC', 'stage' => 'ASC']));
 
         // We consider each graded activity as having at least one releasable criterion an nothing more
         $nbPublishedActivities = 0;
         $nbPublishedStages = 0;
         $nbGradedActivity = 0;
-        $nbActivities = 0;
         $nbActivities = 0;
         $theActivity = null;
         $nbStages = 0;
@@ -1650,7 +1777,7 @@ class UserController extends MasterController
         $ungradedTargets = $repoU->findUserUngradedTargets($user);
         //if(!$orgHasActiveAdmin){
 
-            $addFirstAdminFormView = !$orgHasActiveAdmin ? $formFactory->create(AddFirstAdminForm::class,null)->createView() : null;
+            $addFirstAdminFormView = !$orgHasActiveAdmin ? $this->createForm(AddFirstAdminForm::class,null)->createView() : null;
 
             //$addFirstAdminFormView = !$orgHasActiveAdmin ? $finalizeUserForm->createView() : null;
         //}
@@ -1701,6 +1828,11 @@ class UserController extends MasterController
 
     /*********** ADDITION, MODIFICATION AND DELETION *****************/
 
+    /**
+     * @param Application $app
+     * @return mixed
+     * @Route("/the-solution", name="solution")
+     */
     public function displayProfile(Application $app)
     {
         $entityManager = $this->getEntityManager();
@@ -1745,6 +1877,12 @@ class UserController extends MasterController
         );
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return mixed
+     * @Route("/help", name="help")
+     */
     public function helpAction(Request $request, Application $app)
     {
         return $app['twig']->render('help.html.twig',

@@ -135,17 +135,17 @@ class ActivityUser extends DbObject
      */
     public $grades;
     /**
-     * @ManyToOne(targetEntity="Team")
+     * @ManyToOne(targetEntity="Team", inversedBy="participations")
      * @JoinColumn(name="team_tea_id", referencedColumnName="tea_id",nullable=false)
      */
     protected $team;
     /**
-     * @ManyToOne(targetEntity="Activity")
+     * @ManyToOne(targetEntity="Activity", inversedBy="participants")
      * @JoinColumn(name="activity_act_id", referencedColumnName="act_id",nullable=false)
      */
     protected $activity;
     /**
-     * @ManyToOne(targetEntity="Stage")
+     * @ManyToOne(targetEntity="Stage", inversedBy="participants")
      * @JoinColumn(name="stage_stg_id", referencedColumnName="stg_id",nullable=false)
      */
     protected $stage;
@@ -167,7 +167,7 @@ class ActivityUser extends DbObject
     protected $answers;
 
     /**
-     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="external_user")
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="activity_user_act_usr")
      */
     public $user_usr;
 

@@ -56,7 +56,7 @@ class Client extends DbObject
     public $cli_inserted;
 
     /**
-     * @ManyToOne(targetEntity="Organization")
+     * @ManyToOne(targetEntity="Organization", inversedBy="clients")
      * @JoinColumn(name="organization_org_id", referencedColumnName="org_id",nullable=false)
      */
     protected $organization;

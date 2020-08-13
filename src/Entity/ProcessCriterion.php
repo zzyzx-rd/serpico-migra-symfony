@@ -81,13 +81,13 @@ class ProcessCriterion extends DbObject
     public $crt_inserted;
 
     /**
-     * @ManyToOne(targetEntity="ProcessStage")
+     * @ManyToOne(targetEntity="ProcessStage", inversedBy="criteria")
      * @JoinColumn(name="process_stage_stg_id", referencedColumnName="stg_id",nullable=true)
      */
     protected $stage;
 
     /**
-     * @ManyToOne(targetEntity="Process")
+     * @ManyToOne(targetEntity="Process", inversedBy="criteria")
      * @JoinColumn(name="process_pro_id", referencedColumnName="pro_id",nullable=true)
      */
     protected $process;

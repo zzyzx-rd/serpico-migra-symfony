@@ -51,7 +51,7 @@ class Title extends DbObject
     public $tit_deleted;
 
     /**
-     * @ManyToOne(targetEntity="Organization")
+     * @ManyToOne(targetEntity="Organization", inversedBy="titles")
      * @JoinColumn(name="organization_org_id", referencedColumnName="org_id", nullable=false)
      */
     protected $organization;

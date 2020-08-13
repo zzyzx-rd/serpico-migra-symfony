@@ -3,23 +3,26 @@
 namespace App\Controller;
 
 use Doctrine\Common\Collections\Collection;
-use App\Entity\Activity;
-use App\Entity\ActivityUser;
-use App\Entity\Criterion;
-use App\Entity\DbObject;
-use App\Entity\Grade;
-use App\Entity\OrganizationUserOption;
-use App\Entity\Result;
-use App\Entity\ResultProject;
-use App\Entity\Stage;
-use App\Entity\User;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
+use Exception;
+use Model\Activity;
+use Model\ActivityUser;
+use Model\Criterion;
+use Model\DbObject;
+use Model\Grade;
+use Model\OrganizationUserOption;
+use Model\Result;
+use Model\ResultProject;
+use Model\Stage;
+use Model\User;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Routing\Annotation\Route;
 
 final class ActivityResultsController extends MasterController
 {
-    private static $em;
     private static $gradeRepo;
     private static $stageRepo;
     private static $activityRepo;
@@ -37,9 +40,9 @@ final class ActivityResultsController extends MasterController
         '#66aa00',
     ];
 
-    public function __construct()
+    public function __construct(EntityManagerInterface $em)
     {
-        self::$em = self::getEntityManager();
+        parent::__construct($em);
         self::$gradeRepo = self::$em->getRepository(Grade::class);
         self::$stageRepo = self::$em->getRepository(Stage::class);
         self::$activityRepo = self::$em->getRepository(Activity::class);
@@ -93,6 +96,7 @@ final class ActivityResultsController extends MasterController
             fn(int $i, ActivityUser $e) => $e->isLeader()
         );
     }
+
 
     public function getPerfResultsChart(int $actId, int $stgId = null, int $crtId = null, bool $aggregated = false): JsonResponse
     {
@@ -359,6 +363,15 @@ final class ActivityResultsController extends MasterController
         ]);
     }
 
+    /**
+     * @param int $actId
+     * @param int|null $stgId
+     * @param int|null $crtId
+     * @param bool $aggregated
+     * @return JsonResponse
+     * @throws Exception
+     * @Route("/perfresults/{actId}/{stgId}/{crtId}/{aggregated}/")
+     */
     public function getPerfResultsJson(int $actId, int $stgId = null, int $crtId = null, bool $aggregated = false): JsonResponse
     {
         return new JsonResponse(self::getPerfResults($actId, $stgId, $crtId, $aggregated));
@@ -375,12 +388,15 @@ final class ActivityResultsController extends MasterController
      * @param int $actId ID of activity
      * @param int $stgId ID of stage
      * @param int $crtId ID of criteria
+     * @param bool $aggregated
+     * @return array
+     * @throws Exception
      */
     private static function getPerfResults(int $actId, int $stgId = null, int $crtId = null, bool $aggregated = false): array
     {
         $currentUser = self::getAuthorizedUser();
         if (!$currentUser) {
-            throw new \Exception('unauthorized');
+            throw new Exception('unauthorized');
         }
 
         // $resultsView = self::getActivitiesAccessAndResultsView();
@@ -395,7 +411,7 @@ final class ActivityResultsController extends MasterController
             /** @var Criterion|null */
             $criterion = $criterionRepo->find($crtId);
             if (!$criterion) {
-                throw new \Exception('criterion not found');
+                throw new Exception('criterion not found');
             }
 
             return self::getCriterionResults($criterion, $canViewDetailedResults);
@@ -405,7 +421,7 @@ final class ActivityResultsController extends MasterController
             /** @var Stage|null */
             $stage = $stageRepo->find($stgId);
             if (!$stage) {
-                throw new \Exception('stage not found');
+                throw new Exception('stage not found');
             }
 
             return self::getStageResults($stage, $aggregated);
@@ -415,7 +431,7 @@ final class ActivityResultsController extends MasterController
             /** @var Activity|null */
             $activity = $activityRepo->find($actId);
             if (!$activity) {
-                throw new \Exception('activity not found');
+                throw new Exception('activity not found');
             }
 
             return self::getActivityResults($activity, $aggregated);
@@ -439,7 +455,7 @@ final class ActivityResultsController extends MasterController
         /** @var Result|null */
         $activityAvgResult = $resultRepo->findOneBy(['activity' => $activity, 'stage' => null, 'criterion' => null, 'usrId' => null]);
         if (!$activityAvgResult) {
-            throw new \Exception('activityAvgResult is null');
+            throw new Exception('activityAvgResult is null');
         }
         $activityAverage = $relative
         ? $activityAvgResult->getWeightedRelativeResult() * 100
@@ -459,7 +475,7 @@ final class ActivityResultsController extends MasterController
 
             $stages = $activity->getStages();
             if (!($stages instanceof Collection)) {
-                throw new \Exception('stages not a Collection');
+                throw new Exception('stages not a Collection');
             }
             $stagesValues = $stages->getValues();
 
@@ -477,7 +493,7 @@ final class ActivityResultsController extends MasterController
                 /** @var Result|null */
                 $result = $resultRepo->findOneBy(['activity' => $activity, 'stage' => null, 'criterion' => null, 'usrId' => $usrId]);
                 if (!$result) {
-                    throw new \Exception('result is null');
+                    throw new Exception('result is null');
                 }
                 $average = $relative
                 ? $result->getWeightedRelativeResult() * 100
@@ -507,7 +523,7 @@ final class ActivityResultsController extends MasterController
 
         $participants = $stage->getGradableUsers();
         if (!($participants instanceof Collection)) {
-            throw new \Exception('participants not a Collection');
+            throw new Exception('participants not a Collection');
         }
         /** @var User[] */
         $participantsValues = $participants->getValues();
@@ -515,7 +531,7 @@ final class ActivityResultsController extends MasterController
         /** @var Result|null */
         $stageAvgResult = $resultRepo->findOneBy(['stage' => $stage, 'criterion' => null, 'usrId' => null]);
         if (!$stageAvgResult) {
-            throw new \Exception('stageAvgResult is null');
+            throw new Exception('stageAvgResult is null');
         }
         $stageAverage = $relative
         ? $stageAvgResult->getWeightedRelativeResult() * 100
@@ -535,7 +551,7 @@ final class ActivityResultsController extends MasterController
 
             $criteria = $stage->getCriteria();
             if (!($criteria instanceof Collection)) {
-                throw new \Exception('criteria not a Collection');
+                throw new Exception('criteria not a Collection');
             }
             /** @var Criterion[] */
             $criteriaValues = $criteria->getValues();
@@ -552,7 +568,7 @@ final class ActivityResultsController extends MasterController
                 /** @var Result|null */
                 $result = $resultRepo->findOneBy(['stage' => $stage, 'criterion' => null, 'usrId' => $usrId]);
                 if (!$result) {
-                    throw new \Exception('result is null');
+                    throw new Exception('result is null');
                 }
                 $average = $relative
                 ? $result->getWeightedRelativeResult() * 100
@@ -573,7 +589,7 @@ final class ActivityResultsController extends MasterController
         $stage = $criterion->getStage();
         $grades = $criterion->getGrades();
         if (!($grades instanceof Collection)) {
-            throw new \Exception('grades not a Collection');
+            throw new Exception('grades not a Collection');
         }
 
         $showGraders = $graders;
@@ -581,7 +597,7 @@ final class ActivityResultsController extends MasterController
         /** @var Result|null */
         $result = $resultRepo->findOneBy(['criterion' => $criterion, 'usrId' => null]);
         if (!$result) {
-            throw new \Exception('result is null');
+            throw new Exception('result is null');
         }
         $criterionAvg = $relative
         ? $result->getWeightedRelativeResult() * 100
@@ -618,7 +634,7 @@ final class ActivityResultsController extends MasterController
             /** @var Result|null */
             $result = $resultRepo->findOneBy(['criterion' => $criterion, 'usrId' => $user->getId()]);
             if (!$result) {
-                throw new \Exception('result not found');
+                throw new Exception('result not found');
             }
 
             $userName = $user->getFullName();
@@ -657,7 +673,7 @@ final class ActivityResultsController extends MasterController
         if ($e instanceof Activity) {
             $stages = $e->getStages();
             if (!($stages instanceof Collection)) {
-                throw new \Exception('stages not a Collection');
+                throw new Exception('stages not a Collection');
             }
 
             /** @var Stage $stageLast */
@@ -678,7 +694,7 @@ final class ActivityResultsController extends MasterController
         elseif ($e instanceof Stage) {
             $criteria = $e->getCriteria();
             if (!($criteria instanceof Collection)) {
-                throw new \Exception('criteria not a Collection');
+                throw new Exception('criteria not a Collection');
             }
 
             /** @var Criterion */
@@ -694,7 +710,7 @@ final class ActivityResultsController extends MasterController
         }
         // anything else
         else {
-            throw new \Exception('invalid argument');
+            throw new Exception('invalid argument');
         }
 
         return new Scale(
@@ -707,14 +723,14 @@ final class ActivityResultsController extends MasterController
     {
         $currentUser = self::getAuthorizedUser();
         if (!$currentUser) {
-            throw new \Exception('unauthorized');
+            throw new Exception('unauthorized');
         }
 
         $organization = $currentUser->getOrganization();
         $userRole = $currentUser->getRole();
         $options = $organization->getOptions();
         if (!($options instanceof Collection)) {
-            throw new \Exception('options not a Collection');
+            throw new Exception('options not a Collection');
         }
 
         $optionResultsView = $options->filter(function (OrganizationUserOption $option) use ($userRole): bool {
@@ -739,7 +755,7 @@ final class ActivityResultsController extends MasterController
         }
 
         if (!$currentUser or !$activity->userCanSeeResults($currentUser)) {
-            throw new \Exception;
+            throw new Exception;
         }
 
         $globalAvgColorCode = '#3366cc';
@@ -793,11 +809,17 @@ final class ActivityResultsController extends MasterController
         ]);
     }
 
+    /**
+     * @param int $crtId
+     * @return JsonResponse
+     * @throws Exception
+     * @Route("/perfresults/{actId}/{stgId}/{crtId}/{aggregated}/chartjs/")
+     */
     public function getCriterionPerfResultsChart(int $crtId)
     {
         $currentUser = self::getAuthorizedUser();
         if (!$currentUser) {
-            throw new \Exception;
+            throw new Exception;
         }
 
         $criterion = self::$criterionRepo->find($crtId);
@@ -808,7 +830,7 @@ final class ActivityResultsController extends MasterController
         $stage = $criterion->getStage();
 
         if (!$stage->getActivity()->userCanSeeResults($currentUser)) {
-            throw new \Exception;
+            throw new Exception;
         }
 
         $stageName = $stage->getName();
@@ -886,7 +908,7 @@ final class ActivityResultsController extends MasterController
     {
         $currentUser = self::getAuthorizedUser();
         if (!$currentUser) {
-            throw new \Exception;
+            throw new Exception;
         }
 
         $stage = self::$stageRepo->find($stgId);
@@ -895,7 +917,7 @@ final class ActivityResultsController extends MasterController
             throw new NotFoundHttpException;
         }
         if (!$stage->getActivity()->userCanSeeResults($currentUser)) {
-            throw new \Exception;
+            throw new Exception;
         }
 
         /** @var ResultProject|null $stageAvgResult */
@@ -1074,7 +1096,7 @@ final class ActivityResultsController extends MasterController
     {
         $user = self::getAuthorizedUser();
         if (!$user) {
-            throw new \Exception;
+            throw new Exception;
         }
 
         $stage = self::$stageRepo->find($stgId);
@@ -1082,7 +1104,7 @@ final class ActivityResultsController extends MasterController
             throw new NotFoundHttpException;
         }
         if (!$stage->getActivity()->userCanSeeResults($user)) {
-            throw new \Exception;
+            throw new Exception;
         }
 
         $labels = [];

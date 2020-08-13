@@ -45,7 +45,7 @@ class Department extends DbObject
     public $dpt_deleted;
 
     /**
-     * @ManyToOne(targetEntity="User")
+     * @ManyToOne(targetEntity="User", inversedBy="leadingDepartments")
      * @JoinColumn(name="masterUser_usr_id", referencedColumnName="usr_id", nullable=false)
      */
     protected $masterUser;
@@ -68,7 +68,7 @@ class Department extends DbObject
     public $options;
 
     /**
-     * @ManyToOne(targetEntity="Organization")
+     * @ManyToOne(targetEntity="Organization", inversedBy="departments")
      * @JoinColumn(name="organization_org_id", referencedColumnName="org_id", nullable=false)
      */
     protected $organization;

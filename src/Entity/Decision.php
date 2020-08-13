@@ -70,19 +70,19 @@ class Decision extends DbObject
     public $dec_validated;
 
     /**
-     * @ManyToOne(targetEntity="Organization")
+     * @ManyToOne(targetEntity="Organization", inversedBy="decisions")
      * @JoinColumn(name="organization_org_id", referencedColumnName="org_id")
      */
     protected $organization;
 
     /**
-     * @ManyToOne(targetEntity="Activity")
+     * @ManyToOne(targetEntity="Activity", inversedBy="decisions")
      * @JoinColumn(name="activity_act_id", referencedColumnName="act_id")
      */
     protected $activity;
 
     /**
-     * @ManyToOne(targetEntity="Stage")
+     * @ManyToOne(targetEntity="Stage", inversedBy="decisions")
      * @JoinColumn(name="stage_stg_id", referencedColumnName="stg_id")
      */
     protected $stage;

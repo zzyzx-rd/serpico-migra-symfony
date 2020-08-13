@@ -2,11 +2,14 @@
 
 namespace App\Controller;
 
-use App\Entity\Client;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
+use Model\Client;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Routing\Annotation\Route;
 
 final class ClientController extends MasterController
 {
@@ -20,6 +23,14 @@ final class ClientController extends MasterController
         self::$assetsPackages = $app['assets.packages'];
     }
 
+    /**
+     * @param Request $req
+     * @param int $clientId
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/client/{clientId}/icon", name="setClientIcon")
+     */
     public function setClientIcon(Request $req, int $clientId)
     {
         $em = self::getEntityManager();

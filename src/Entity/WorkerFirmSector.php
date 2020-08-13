@@ -39,7 +39,7 @@ class WorkerFirmSector
     public $wfs_inserted;
 
     /**
-     * @ManyToOne(targetEntity="Icon")
+     * @ManyToOne(targetEntity="Icon", inversedBy="workerFirmSectors")
      * @JoinColumn(name="icon_ico_id", referencedColumnName="ico_id",nullable=false)
      */
     protected $icon;

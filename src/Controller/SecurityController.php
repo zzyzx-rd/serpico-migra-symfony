@@ -17,7 +17,8 @@ class SecurityController extends AbstractController
      * @param AuthenticationUtils $authenticationUtils
      * @return Response
      */
-    public function login(AuthenticationUtils $authenticationUtils){
+    public function login(AuthenticationUtils $authenticationUtils): Response
+    {
         $lastUserName = $authenticationUtils->getLastUsername();
         $error = $authenticationUtils->getLastAuthenticationError();
         return $this->render('login.html.twig', [

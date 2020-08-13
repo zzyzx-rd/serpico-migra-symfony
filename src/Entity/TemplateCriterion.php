@@ -84,7 +84,7 @@ class TemplateCriterion extends DbObject
     public $crt_inserted;
 
     /**
-     * @ManyToOne(targetEntity="TemplateStage")
+     * @ManyToOne(targetEntity="TemplateStage", inversedBy="criteria")
      * @JoinColumn(name="stage_stg_id", referencedColumnName="stg_id",nullable=true)
      */
     protected $stage;

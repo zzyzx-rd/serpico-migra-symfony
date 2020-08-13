@@ -48,7 +48,7 @@ class TeamUser extends DbObject
     public $tus_is_deleted;
 
     /**
-     *@ManyToOne(targetEntity="Team")
+     *@ManyToOne(targetEntity="Team", inversedBy="teamUsers")
      *@JoinColumn(name="team_tea_id", referencedColumnName="tea_id", nullable=false)
      */
     protected $team;

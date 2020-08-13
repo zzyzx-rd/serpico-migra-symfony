@@ -48,7 +48,7 @@ class City extends DbObject
     public $cit_inserted;
 
     /**
-     * @ManyToOne(targetEntity="State")
+     * @ManyToOne(targetEntity="State", inversedBy="cities")
      * @JoinColumn(name="state_sta_id", referencedColumnName="sta_id",nullable=false)
      */
     protected $state;

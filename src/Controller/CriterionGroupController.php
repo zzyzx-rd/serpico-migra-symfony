@@ -2,26 +2,37 @@
 
 namespace App\Controller;
 
-use App\Form\ManageCriteriaForm;
-use App\Form\Type\CriterionNameType;
-use App\Entity\CriterionGroup;
-use App\Entity\CriterionName;
-use App\Entity\Department;
-use App\Entity\Icon;
-use App\Entity\Organization;
-use App\Entity\Target;
-use App\Entity\User;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
+use Form\ManageCriteriaForm;
+use Form\Type\CriterionNameType;
+use Model\CriterionGroup;
+use Model\CriterionName;
+use Model\Department;
+use Model\Icon;
+use Model\Organization;
+use Model\Target;
+use Model\User;
 use Repository\CriterionNameRepository;
 use Repository\OrganizationRepository;
 use Silex\Application;
 use Symfony\Component\Form\FormFactory;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
 use Twig_Environment;
 
 class CriterionGroupController extends MasterController
 {
+    /**
+     * @param Request $request
+     * @return JsonResponse|Response
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/criteriongroup/create", name="createCriterionGroup")
+     */
     public function createCriterionGroup(Request $request)
     {
         /**
@@ -74,9 +85,13 @@ class CriterionGroupController extends MasterController
         return new JsonResponse([ 'id' => $criterionGroup->getId() ], 201);
     }
 
-
-
-
+    /**
+     * @param Request $request
+     * @param int $cgpId
+     * @return Response
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
     public function setCgpDepartment(Request $request, int $cgpId)
     {
         /**
@@ -109,8 +124,12 @@ class CriterionGroupController extends MasterController
     }
 
 
-
-
+    /**
+     * @param Application $app
+     * @param $id
+     * @return JsonResponse|Response
+     * @Route("/settings/criteriongroup/{id}")
+     */
     public function getCriterionGroupById(
         Application $app,
         $id
@@ -136,9 +155,15 @@ class CriterionGroupController extends MasterController
         return new JsonResponse($criterionGroup->toArray($app));
     }
 
-
-
-
+    /**
+     * @param Request $request
+     * @param int $cgpId
+     * @return JsonResponse|Response
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/criteriongroup/{id}/criterion")
+     * @Route("/settings/criteriongroup/criterion/{cgpId}", name="addCriterion")
+     */
     public function addCriterion(Request $request, int $cgpId)
     {
         $currentUser = $this->getAuthorizedUser();
@@ -189,9 +214,13 @@ class CriterionGroupController extends MasterController
         ]);
     }
 
-
-
-
+    /**
+     * @param Request $request
+     * @return Response
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/criteriongroup/criterion", name="removeCriterion")
+     */
     public function removeCriterion(
         Request $request
     ) {
@@ -242,8 +271,14 @@ class CriterionGroupController extends MasterController
     }
 
 
-
-
+    /**
+     * @param Request $request
+     * @param int $id
+     * @return Response
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/criteriongroup/{id}/name", name="updateCriterionGroupName")
+     */
     public function updateCriterionGroupName(
         Request $request,
         int $id
@@ -280,6 +315,14 @@ class CriterionGroupController extends MasterController
         return new Response(null, 204);
     }
 
+    /**
+     * @param Request $request
+     * @param int $id
+     * @return Response
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/criterion/{id}/name", name="updateCriterionName")
+     */
     public function updateCriterionName(
         Request $request,
         int $id
@@ -316,6 +359,14 @@ class CriterionGroupController extends MasterController
         return new Response(null, 204);
     }
 
+    /**
+     * @param Request $request
+     * @param int $cnId
+     * @return JsonResponse|Response
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/criterion/{cnId}", name="setCriterionIcon")
+     */
     public function setCriterionIcon(Request $request, int $cnId) {
         $icoId = $request->get('ico-id');
         if (!$icoId) {
@@ -368,8 +419,13 @@ class CriterionGroupController extends MasterController
     }
 
 
-
-
+    /**
+     * @param int $id
+     * @return Response
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/criteriongroup/delete/{id}",name="deleteCriterionGroup")
+     */
     public function deleteCriterionGroup(
         int $id
     ) {
@@ -398,8 +454,11 @@ class CriterionGroupController extends MasterController
     }
 
 
-
-
+    /**
+     * @param Application $app
+     * @return RedirectResponse
+     * @Route("/organization/settings/criteriongroups/", name="manageCriterionGroups")
+     */
     public function criterionGroupsListAction(Application $app)
     {
         $currentUser = $this->getAuthorizedUser();

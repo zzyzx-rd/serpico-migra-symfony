@@ -56,7 +56,7 @@ class Team extends DbObject
     public $tea_deleted;
 
     /**
-     *@ManyToOne(targetEntity="Organization")
+     *@ManyToOne(targetEntity="Organization", inversedBy="teams")
      *@JoinColumn(name="organization_org_id", referencedColumnName="org_id", nullable=false)
      */
     protected $organization;

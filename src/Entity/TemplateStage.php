@@ -89,7 +89,7 @@ class TemplateStage extends DbObject
     public $stg_mode;
 
     /**
-     * @ManyToOne(targetEntity="TemplateActivity")
+     * @ManyToOne(targetEntity="TemplateActivity", inversedBy="stages")
      * @JoinColumn(name="activity_act_id", referencedColumnName="act_id",nullable=false)
      */
     protected $activity;

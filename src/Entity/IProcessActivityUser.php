@@ -79,7 +79,7 @@ class IProcessActivityUser extends DbObject
     protected $institutionProcess;
 
     /**
-     * @ManyToOne(targetEntity="IProcessStage")
+     * @ManyToOne(targetEntity="IProcessStage", inversedBy="participants")
      * @JoinColumn(name="iprocess_stage_stg_id", referencedColumnName="stg_id",nullable=false)
      */
     protected $stage;

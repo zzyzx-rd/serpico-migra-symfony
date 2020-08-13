@@ -37,18 +37,18 @@ class Answer extends DbObject
      */
     public $asw_inserted;
     /**
-     * @ManyToOne(targetEntity="SurveyField")
+     * @ManyToOne(targetEntity="SurveyField", inversedBy="answers")
      * @JoinColumn(name="survey_field_sfi_id", referencedColumnName="sfi_id", nullable=false)
      */
     protected $field;
 
     /**
-     * @ManyToOne(targetEntity="Survey")
+     * @ManyToOne(targetEntity="Survey", inversedBy="answers")
      * @JoinColumn(name="survey_sur_id", referencedColumnName="sur_id", nullable=false)
      */
     protected $survey;
     /**
-     * @ManyToOne(targetEntity="ActivityUser")
+     * @ManyToOne(targetEntity="ActivityUser", inversedBy="answers")
      * @JoinColumn(name="activity_user_a_u_id", referencedColumnName="a_u_id", nullable=true)
      */
     protected $participant;

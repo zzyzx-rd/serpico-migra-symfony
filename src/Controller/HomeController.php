@@ -10,7 +10,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class HomeController extends AbstractController
 {
     /**
-     * @Route("/", name="firstPage")
+     * @Route("/", name="home_welcome")
      */
     public function home(){
 

@@ -167,7 +167,7 @@ class ProcessStage extends DbObject
     public $stg_dcompleted;
 
     /**
-     * @ManyToOne(targetEntity="Process")
+     * @ManyToOne(targetEntity="Process", inversedBy="stages")
      * @JoinColumn(name="process_pro_id", referencedColumnName="pro_id",nullable=false)
      */
     protected $process;

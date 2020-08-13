@@ -58,19 +58,19 @@ class TemplateActivityUser
     protected $team;
 
     /**
-     * @ManyToOne(targetEntity="TemplateActivity")
+     * @ManyToOne(targetEntity="TemplateActivity", inversedBy="participants")
      * @JoinColumn(name="activity_act_id", referencedColumnName="act_id",nullable=false)
      */
     protected $activity;
 
     /**
-     * @ManyToOne(targetEntity="TemplateStage")
+     * @ManyToOne(targetEntity="TemplateStage", inversedBy="participants")
      * @JoinColumn(name="stage_stg_id", referencedColumnName="stg_id",nullable=false)
      */
     protected $stage;
 
     /**
-     * @ManyToOne(targetEntity="TemplateCriterion")
+     * @ManyToOne(targetEntity="TemplateCriterion", inversedBy="participants")
      * @JoinColumn(name="criterion_crt_id", referencedColumnName="crt_id",nullable=true)
      */
     protected $criterion;

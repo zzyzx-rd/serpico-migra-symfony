@@ -68,19 +68,19 @@ class RankingHistory extends DbObject
     public $rkh_inserted;
 
     /**
-     * @ManyToOne(targetEntity="Activity")
+     * @ManyToOne(targetEntity="Activity", inversedBy="historicalRankings")
      * @JoinColumn(name="rkh_activity", referencedColumnName="act_id", nullable=false)
      */
     protected $activity;
 
     /**
-     * @ManyToOne(targetEntity="Stage")
+     * @ManyToOne(targetEntity="Stage", inversedBy="historicalRankings")
      * @JoinColumn(name="rkh_stage", referencedColumnName="stg_id", nullable=true)
      */
     protected $stage;
 
     /**
-     * @ManyToOne(targetEntity="Criterion")
+     * @ManyToOne(targetEntity="Criterion", inversedBy="historicalRankings")
      * @JoinColumn(name="rkh_criterion", referencedColumnName="crt_id", nullable=true)
      */
     protected $criterion;

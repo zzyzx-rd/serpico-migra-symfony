@@ -4,6 +4,7 @@
 namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
@@ -17,16 +18,17 @@ use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\OneToOne;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @ApiResource()
  * @ORM\Entity(repositoryClass=UserRepository::class)
- * @UniqueEntity(
- *     fields={"email"},
- *     message="This email already exists"
- * )
  */
-class User extends DbObject
+// * @UniqueEntity(
+// *     fields={"email"},
+// *     message="This email already exists"
+// * )
+class User extends DbObject implements  UserInterface, \Serializable
 {
     /**
      * @Id()
@@ -205,7 +207,7 @@ class User extends DbObject
     /**
      * @ORM\OneToMany(targetEntity=ActivityUser::class, mappedBy="user_usr")
      */
-    public $activity_user_usr;
+    public $activity_user_act_usr;
 
     /**
      * @ORM\OneToMany(targetEntity=Recurring::class, mappedBy="rec_master_user")
@@ -229,7 +231,7 @@ class User extends DbObject
 
     /**
      * @ORM\OneToOne(targetEntity=Weight::class, inversedBy="user", cascade={"persist", "remove"})
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(name="wgt_id", nullable=false)
      */
     public $weight_wgt;
 
@@ -702,10 +704,12 @@ class User extends DbObject
 
     /**
      * @param int $id
+     * @return User
      */
-    public function setId(int $id): void
+    public function setId(int $id): User
     {
         $this->id = $id;
+        return $this;
     }
 
     /**
@@ -719,9 +723,10 @@ class User extends DbObject
     /**
      * @param int $role
      */
-    public function setRole(int $role): void
+    public function setRole(int $role): User
     {
         $this->role = $role;
+        return $this;
     }
 
     /**
@@ -735,9 +740,11 @@ class User extends DbObject
     /**
      * @param mixed $externalUsers
      */
-    public function setExternalUsers($externalUsers): void
+    public function setExternalUsers($externalUsers): User
     {
         $this->externalUsers = $externalUsers;
+        return $this;
+
     }
 
     /**
@@ -751,9 +758,11 @@ class User extends DbObject
     /**
      * @param int $superior
      */
-    public function setSuperior(int $superior): void
+    public function setSuperior(int $superior): User
     {
         $this->superior = $superior;
+        return $this;
+
     }
 
     /**
@@ -767,9 +776,10 @@ class User extends DbObject
     /**
      * @param mixed $mails
      */
-    public function setMails($mails): void
+    public function setMails($mails): User
     {
         $this->mails = $mails;
+        return $this;
     }
 
     /**
@@ -783,9 +793,10 @@ class User extends DbObject
     /**
      * @param mixed $targets
      */
-    public function setTargets($targets): void
+    public function setTargets($targets): User
     {
         $this->targets = $targets;
+        return $this;
     }
 
     /**
@@ -799,9 +810,10 @@ class User extends DbObject
     /**
      * @param mixed $options
      */
-    public function setOptions($options): void
+    public function setOptions($options): User
     {
         $this->options = $options;
+        return $this;
     }
 
     /**
@@ -815,9 +827,10 @@ class User extends DbObject
     /**
      * @param mixed $workerIndividual
      */
-    public function setWorkerIndividual($workerIndividual): void
+    public function setWorkerIndividual($workerIndividual): User
     {
         $this->workerIndividual = $workerIndividual;
+        return $this;
     }
 
     /**
@@ -1110,6 +1123,7 @@ class User extends DbObject
     }
 
     /**
+     * @param Stage $stage
      * @return Collection|ActivityUser[]
      */
     public function getStageParticipations(Stage $stage)
@@ -1118,4 +1132,38 @@ class User extends DbObject
     }
     //TODO get Role et les autres gros trucs, subordinates
 
+
+    public function getRoles()
+    {
+        return ['ROLE_ADMIN'];
+    }
+
+    public function getSalt()
+    {
+        return null;
+    }
+
+    public function eraseCredentials()
+    {
+    }
+
+    public function serialize()
+    {
+        return serialize([
+            $this->getId(),
+            $this->getUsername(),
+            $this->getEmail(),
+            $this->getPassword(),
+        ]);
+    }
+
+    public function unserialize($serialized)
+    {
+        [
+            $this->id,
+            $this->usr_username,
+            $this->usr_email,
+            $this->usr_password,
+        ] = unserialize($serialized, ['allow_classes' => false]);
+    }
 }

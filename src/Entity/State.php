@@ -48,7 +48,7 @@ class State extends DbObject
     public $sta_inserted;
 
     /**
-     * @ManyToOne(targetEntity="Country")
+     * @ManyToOne(targetEntity="Country", inversedBy="states")
      * @JoinColumn(name="country_cou_id", referencedColumnName="cou_id",nullable=false)
      */
     protected $country;

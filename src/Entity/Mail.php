@@ -58,22 +58,22 @@ class Mail extends DbObject
     public $mail_language;
 
     /**
-     * @ManyToOne(targetEntity="User")
+     * @ManyToOne(targetEntity="User", inversedBy="mails")
      * @JoinColumn(name="user_usr_id", referencedColumnName="usr_id", nullable=false)
      */
     protected $user;
     /**
-     * @ManyToOne(targetEntity="WorkerIndividual")
+     * @ManyToOne(targetEntity="WorkerIndividual", inversedBy="mails")
      * @JoinColumn(name="worker_individual_win_id", referencedColumnName="win_id", nullable=false)
      */
     protected $workerIndividual;
     /**
-     * @ManyToOne(targetEntity="Organization")
+     * @ManyToOne(targetEntity="Organization", inversedBy="mails")
      * @JoinColumn(name="organization_org_id", referencedColumnName="org_id", nullable=false)
      */
     protected $organization;
     /**
-     * @ManyToOne(targetEntity="WorkerFirm")
+     * @ManyToOne(targetEntity="WorkerFirm", inversedBy="mails")
      * @JoinColumn(name="worker_firm_wfi_id", referencedColumnName="wfi_id", nullable=false)
      */
     protected $workerFirm;

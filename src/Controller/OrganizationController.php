@@ -4,76 +4,83 @@ namespace App\Controller;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Criteria;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
 use Dompdf\Dompdf;
 use Exception;
-use App\Form\ActivityElementForm;
-use App\Form\AddAnswerForm;
-use App\Form\AddClientForm;
-use App\Form\AddElementTargetForm;
-use App\Form\AddFirstAdminForm;
-use App\Form\AddProcessForm;
-use App\Form\AddStageForm;
-use App\Form\AddSurveyForm;
-use App\Form\AddTeamForm;
-use App\Form\AddUserForm;
-use App\Form\DelegateActivityForm;
-use App\Form\ManageCriterionNameForm;
-use App\Form\ManageOrganizationElementsForm;
-use App\Form\RequestActivityForm;
-use App\Form\SetClientIconForm;
-use App\Form\SettingsOrganizationForm;
-use App\Form\StageNameType;
-use App\Form\Type\AnswerType;
-use App\Form\Type\ClientType;
-use App\Form\Type\ClientUserType;
-use App\Form\Type\CriterionType;
-use App\Form\Type\ExternalUserType;
-use App\Form\Type\OrganizationElementType;
-use App\Form\Type\StageType;
-use App\Form\Type\UserType;
+use Form\ActivityElementForm;
+use Form\AddAnswerForm;
+use Form\AddClientForm;
+use Form\AddElementTargetForm;
+use Form\AddFirstAdminForm;
+use Form\AddProcessForm;
+use Form\AddStageForm;
+use Form\AddSurveyForm;
+use Form\AddTeamForm;
+use Form\AddUserForm;
+use Form\DelegateActivityForm;
+use Form\ManageCriterionNameForm;
+use Form\ManageOrganizationElementsForm;
+use Form\RequestActivityForm;
+use Form\SetClientIconForm;
+use Form\SettingsOrganizationForm;
+use Form\StageNameType;
+use Form\Type\AnswerType;
+use Form\Type\ClientType;
+use Form\Type\ClientUserType;
+use Form\Type\CriterionType;
+use Form\Type\ExternalUserType;
+use Form\Type\OrganizationElementType;
+use Form\Type\StageType;
+use Form\Type\UserType;
 use League\Csv\Reader;
-use App\Entity\Activity;
-use App\Entity\ActivityUser;
-use App\Entity\Answer;
-use App\Entity\Client;
-use App\Entity\Criterion;
-use App\Entity\CriterionGroup;
-use App\Entity\CriterionName;
-use App\Entity\Decision;
-use App\Entity\Department;
-use App\Entity\ExternalUser;
-use App\Entity\GeneratedImage;
-use App\Entity\Grade;
-use App\Entity\InstitutionProcess;
-use App\Entity\IProcessCriterion;
-use App\Entity\IProcessStage;
-use App\Entity\OptionName;
-use App\Entity\Organization;
-use App\Entity\OrganizationUserOption;
-use App\Entity\Position;
-use App\Entity\Process;
-use App\Entity\ProcessCriterion;
-use App\Entity\ProcessStage;
-use App\Entity\Recurring;
-use App\Entity\Result;
-use App\Entity\ResultProject;
-use App\Entity\ResultTeam;
-use App\Entity\Stage;
-use App\Entity\Survey;
-use App\Entity\SurveyField;
-use App\Entity\SurveyFieldParameter;
-use App\Entity\Target;
-use App\Entity\Team;
-use App\Entity\TeamUser;
-use App\Entity\Template;
-use App\Entity\TemplateActivity;
-use App\Entity\TemplateCriterion;
-use App\Entity\TemplateStage;
-use App\Entity\Title;
-use App\Entity\User;
-use App\Entity\Weight;
-use App\Entity\WorkerFirm;
-use App\Repository\OrganizationRepository;
+use Model\Activity;
+use Model\ActivityUser;
+use Model\Answer;
+use Model\Client;
+use Model\Criterion;
+use Model\CriterionGroup;
+use Model\CriterionName;
+use Model\Decision;
+use Model\Department;
+use Model\ExternalUser;
+use Model\GeneratedImage;
+use Model\Grade;
+use Model\InstitutionProcess;
+use Model\IProcessCriterion;
+use Model\IProcessStage;
+use Model\OptionName;
+use Model\Organization;
+use Model\OrganizationUserOption;
+use Model\Position;
+use Model\Process;
+use Model\ProcessCriterion;
+use Model\ProcessStage;
+use Model\Recurring;
+use Model\Result;
+use Model\ResultProject;
+use Model\ResultTeam;
+use Model\Stage;
+use Model\Survey;
+use Model\SurveyField;
+use Model\SurveyFieldParameter;
+use Model\Target;
+use Model\Team;
+use Model\TeamUser;
+use Model\Template;
+use Model\TemplateActivity;
+use Model\TemplateCriterion;
+use Model\TemplateStage;
+use Model\Title;
+use Model\User;
+use Model\Weight;
+use Model\WorkerFirm;
+use Repository\OrganizationRepository;
+use Silex\Application;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Translation\Translator;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormFactory;
@@ -86,15 +93,22 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class OrganizationController extends MasterController
 {
     private $loggedUser;
-    private $em;
     private $notFoundResponse;
 
-    public function __construct() {
+    public function __construct(EntityManagerInterface $em) {
+        parent::__construct($em);
         $this->loggedUser = self::getAuthorizedUser();
-        $this->em = self::getEntityManager();
         $this->notFoundResponse = new Response(null, Response::HTTP_NOT_FOUND);
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/organization/administrators/create", name="addFirstAdmin")
+     */
     public function addFirstAdminAction(Request $request, Application $app){
         $formFactory = self::getFormFactory();
         $user = new User;
@@ -118,6 +132,14 @@ class OrganizationController extends MasterController
         }
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/organization/administrators/validate", name="validateAdmins")
+     */
     public function validateAdminsAction(Request $request, Application $app){
 
 
@@ -169,6 +191,13 @@ class OrganizationController extends MasterController
         }
     }
 
+    /**
+     * @return RedirectResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/teams/create", name="createTeam")
+     * @Route("/team/create", name="createTeam")
+     */
     public function createTeamAction(){
         $currentUser = MasterController::getAuthorizedUser();
         $team = new Team;
@@ -181,6 +210,13 @@ class OrganizationController extends MasterController
         return $this->redirectToRoute('manageTeam',['teaId' => $team->getId()]);
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $posId
+     * @return false|string
+     * @Route("/ajax/position/{posId}/weights", name="retrieveWgtFromPos")
+     */
     public function retrieveWgtFromPosAction(Request $request, Application $app, $posId)
     {
         $repoP       = $this->em->getRepository(Position::class);
@@ -386,6 +422,15 @@ class OrganizationController extends MasterController
         );
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $stgId
+     * @return JsonResponse|RedirectResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/stage/{stgId}/status/update", name="updateStageStatus")
+     */
     public function updateStageStatusAction(Request $request, Application $app, $stgId){
         $currentUser = self::getAuthorizedUser();
         if (!$currentUser) {
@@ -416,6 +461,16 @@ class OrganizationController extends MasterController
     }
 
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $elmtType
+     * @param $elmtId
+     * @return string|RedirectResponse|Response
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/{elmtType}/{elmtId}", name="manageActivityElement")
+     */
     public function manageActivityElementAction(Request $request, Application $app, $elmtType, $elmtId)
     {
         $currentUser = self::getAuthorizedUser();
@@ -588,6 +643,16 @@ class OrganizationController extends MasterController
         );*/
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $elmtType
+     * @param $elmtId
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/{elmtType}/stage/duplicate/{elmtId}", name="duplicateStage")
+     */
     public function duplicateElementStageAction(Request $request, Application $app, $elmtType, $elmtId){
         $em    = self::getEntityManager();
         $repoO = $em->getRepository(Organization::class);
@@ -701,6 +766,17 @@ class OrganizationController extends MasterController
         return new JsonResponse(['msg' => 'Success', 'sid' => $newStage->getId()],200);
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $elmtType
+     * @param $elmtId
+     * @param $stgId
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/{elmtType}/{elmtId}/stage/validate/{stgId}", name="validateStageElement")
+     */
     public function validateElementStageAction(Request $request, Application $app, $elmtType, $elmtId, $stgId)
     {
         $em    = self::getEntityManager();
@@ -860,6 +936,15 @@ class OrganizationController extends MasterController
         }
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $surId
+     * @return string
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/ajax/insert/question/{surId}", name= "createFieldAjax")
+     */
     public function CreateFieldRequestActionAJAX (Request $request, Application $app,$surId)
     {
         $em          = self::getEntityManager();
@@ -874,10 +959,18 @@ class OrganizationController extends MasterController
         $surveyfield->setType('ST');
         $em->persist($surveyfield);
         $em->flush();
-
-
         return " ";
     }
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $surId
+     * @return mixed
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/ajax/insert/parameter/{surId}", name="insertParametersAjax")
+     */
     public function CreateParameterRequestActionAJAX(Request $request, Application $app, $surId)
     {
 
@@ -911,6 +1004,15 @@ class OrganizationController extends MasterController
         return $app->redirect($redirect);
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $surId
+     * @return mixed
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/ajax/copy/question/{surId}", name="copyFieldAjax")
+     */
     public function copyFieldRequestActionAJAX (Request $request, Application $app,$surId)
     {
         $em          = self::getEntityManager();
@@ -973,6 +1075,16 @@ class OrganizationController extends MasterController
         return $app->redirect($redirect);
 
     }
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $surId
+     * @return string
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/ajax/save/question/{surId}", name="saveFieldAjax")
+     */
     public function saveFieldRequestActionAJAX (Request $request, Application $app,$surId)
     {
 
@@ -1014,6 +1126,16 @@ class OrganizationController extends MasterController
         return "";
 
     }
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $surId
+     * @return string
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/ajax/delete/question/{surId}", name="deleteFieldAjax")
+     */
     public function DeleteFieldRequestActionAJAX(Request $request, Application $app, $surId){
 
         $em = self::getEntityManager();
@@ -1030,7 +1152,15 @@ class OrganizationController extends MasterController
 
     }
 
-
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $surId
+     * @return string
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/ajax/delete/parameter/{surId}", name="deleteParametersAjax")
+     */
     public function DeleteParameterRequestActionAJAX(Request $request, Application $app, $surId){
 
         $em = self::getEntityManager();
@@ -1047,6 +1177,16 @@ class OrganizationController extends MasterController
 
 
     }
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $surId
+     * @return mixed
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/ajax/delete/all/parameter/{surId}", name="deleteAllParametersAjax")
+     */
     public function DeleteAllParameterRequestActionAJAX(Request $request, Application $app, $surId){
 
         $em = self::getEntityManager();
@@ -1069,6 +1209,16 @@ class OrganizationController extends MasterController
 
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $elmtType
+     * @param $elmtId
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/{elmtType}/{elmtId}/validate/name", name="validateElementName")
+     */
     public function validateElementNameAction(Request $request, Application $app, $elmtType, $elmtId){
 
         $em = self::getEntityManager();
@@ -1109,6 +1259,18 @@ class OrganizationController extends MasterController
         }
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $elmtType
+     * @param $elmtId
+     * @param $stgId
+     * @param $crtId
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/{elmtType}/{elmtId}/stage/{stgId}/criterion/validate/{crtId}", name="validateCriterionElement")
+     */
     public function validateElementCriterionAction(Request $request, Application $app, $elmtType, $elmtId, $stgId, $crtId)
     {
         $em = self::getEntityManager();
@@ -1282,6 +1444,16 @@ class OrganizationController extends MasterController
 
     //Adds surveys to current organization
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $stgId
+     * @return RedirectResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/activity/survey/form/{stgId}", name= "surveyRequest")
+     * @Route("/edit/survey/{stgId}", name = "editSurvey")
+     */
     public function surveyRequestAction(Request $request, Application $app, $stgId)
     {
         $entityManager = $this->getEntityManager($app);
@@ -1363,6 +1535,16 @@ class OrganizationController extends MasterController
                 'edition' => true,
             ]);
     }
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $surId
+     * @return mixed
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/activity/answer/send/{surId}", name="sendAnswer")
+     */
     public function sendAnswerAction(Request $request, Application $app,$surId){
         $currentUser = MasterController::getAuthorizedUser();
         $em = $this->getEntityManager($app);
@@ -1377,6 +1559,14 @@ class OrganizationController extends MasterController
         return $app->redirect($redirect);
 
     }
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $surId
+     * @return mixed
+     * @Route("/activity/result/send/{surId}", name="sendResult")
+     */
     public function sendResultAction(Request $request, Application $app,$surId){
 
         $em = $this->getEntityManager($app);
@@ -1388,13 +1578,23 @@ class OrganizationController extends MasterController
         foreach ($activities as $activity) {
             $activity->setStatus(4);
         }
-        $em->flush();
+        try {
+            $em->flush();
+        } catch (OptimisticLockException $e) {
+        } catch (ORMException $e) {
+        }
         return $app->redirect($redirect);
 
 
     }
 
-
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $surId
+     * @return mixed
+     * @Route("/activity/survey/answer/answers/{surId}", name="answerShow")
+     */
     public function answerShowAction(Request $request, Application $app, $surId)
     {
         $em = $this->getEntityManager($app);
@@ -1424,6 +1624,15 @@ class OrganizationController extends MasterController
             ]);
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $surId
+     * @return mixed
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/ajax/activity/survey/delete/{surId}", name="surveyDelete")
+     */
     public function deleteSurveyAction(Request $request, Application $app, $surId)
     {
         $redirect = $request->get('redirect');
@@ -1444,7 +1653,15 @@ class OrganizationController extends MasterController
 
     }
 
-
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $stgId
+     * @return mixed
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/send/survey/{stgId}", name="surveyRequestFinalized")
+     */
     public function surveyRequestFinalized(Request $request ,Application $app, $stgId)
     {
         $redirect = $request->get('redirect');
@@ -1460,6 +1677,15 @@ class OrganizationController extends MasterController
     }
 
     //Adds user(s) to current organization (limited to HR)
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return mixed
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/users/create", name="createUser")
+     */
     public function addUserAction(Request $request, Application $app)
     {
 
@@ -1553,6 +1779,15 @@ class OrganizationController extends MasterController
             ]);
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $cliId
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/ajax/client/validate/{cliId}", name="validateClient")
+     */
     public function validateClientAction(Request $request, Application $app, $cliId){
 
         $em = self::getEntityManager();
@@ -1644,6 +1879,16 @@ class OrganizationController extends MasterController
         }
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $cliId
+     * @param $extId
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/user/{usrId}", name="validateClientUser")
+     */
     public function validateClientUserAction(Request $request, Application $app, $cliId, $extId){
 
         $em = self::getEntityManager();
@@ -1692,6 +1937,14 @@ class OrganizationController extends MasterController
         }
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return mixed
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/clients/create", name="createClient")
+     */
     public function addClientAction(Request $request, Application $app)
     {
         $currentUser = self::getAuthorizedUser();
@@ -1796,6 +2049,15 @@ class OrganizationController extends MasterController
             ]);
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $cliId
+     * @return mixed
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/client/{cliId}/users/create", name="createClientUser")
+     */
     public function addClientUserAction(Request $request, Application $app, $cliId)
     {
         $currentUser = self::getAuthorizedUser();
@@ -1872,6 +2134,16 @@ class OrganizationController extends MasterController
             ]);
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $fileName
+     * @param $headerParameters
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/users-csv-insert/{fileName}/{headerParameters}", name="insertCheckedCSV")
+     */
     public function insertCheckedCSV(Request $request, Application $app, $fileName, $headerParameters)
     {
         $filePath = __DIR__ . '/' . $fileName . '.txt';
@@ -2091,6 +2363,15 @@ class OrganizationController extends MasterController
     }
 
     //Create users in a ajax mode
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/ajax/users", name="ajexUSerAdd")
+     */
     public function ajaxAddUserAction(Request $request, Application $app)
     {
         //TODO : get current language dynamically
@@ -2254,6 +2535,15 @@ class OrganizationController extends MasterController
     }
 
     //Create users in a ajax mode
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/ajax/client/users", name="ajaxClientUserAdd")
+     */
     public function ajaxAddClientUserAction(Request $request, Application $app)
     {
         //TODO : get current language dynamically
@@ -2414,6 +2704,16 @@ class OrganizationController extends MasterController
 
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $elmtType
+     * @param $elmtId
+     * @return mixed
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/targets/{elmtType}/{elmtId}", name="updateElementTargets")
+     */
     public function updateElementTargetsAction(Request $request, Application $app, $elmtType, $elmtId)
     {
         $em          = self::getEntityManager();
@@ -2523,6 +2823,16 @@ class OrganizationController extends MasterController
 
     // Function which updates either departments or positions, depending of parameter $elmtType
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $elmtType
+     * @param $orgId
+     * @return mixed
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/organization/{orgId}/{elmtType}s", name="updateOrganizationElements")
+     */
     public function updateOrganizationElementsAction(Request $request, Application $app, $elmtType, $orgId)
     {
         $em    = self::getEntityManager();
@@ -2581,6 +2891,17 @@ class OrganizationController extends MasterController
         }
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $elmtType
+     * @param $elmtId
+     * @param $orgId
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/organization/{orgId}/{elmtType}/validate/{elmtId}", name="validateOrganizationElement")
+     */
     public function validateOrganizationElementAction(Request $request, Application $app, $elmtType, $elmtId, $orgId)
     {
         $em    = self::getEntityManager();
@@ -2668,6 +2989,17 @@ class OrganizationController extends MasterController
         }
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $elmtType
+     * @param $elmtId
+     * @param $orgId
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/organization/{orgId}/{elmtType}/delete/{elmtId}", name="deleteOrganizationElement")
+     */
     public function deleteOrganizationElementAction(Request $request, Application $app, $elmtType, $elmtId, $orgId)
     {
 
@@ -2713,6 +3045,15 @@ class OrganizationController extends MasterController
 
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $orgId
+     * @return mixed
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/organization/{orgId}/criteria", name="updateCriterionNames")
+     */
     public function updateCriterionNamesAction(Request $request, Application $app, $orgId)
     {
         $em          = self::getEntityManager();
@@ -2835,6 +3176,14 @@ class OrganizationController extends MasterController
         return $app->redirect($app['url_generator']->generate('firmSettings'));
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return bool|JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/organization/convert", name="convertAccount")
+     */
     public function convertAccountAction(Request $request, Application $app)
     {
         $entityManager = self::getEntityManager();
@@ -2904,6 +3253,14 @@ class OrganizationController extends MasterController
         return true;
     }
 
+    /**
+     * @param int $usrId
+     * @param $superior
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/user/{usrId}/superior/{superior}", name="defineSuperior")
+     */
     public function defineSuperior(int $usrId, $superior)
     {
         $em   = self::getEntityManager();
@@ -2920,6 +3277,13 @@ class OrganizationController extends MasterController
     }
 
     // Display all users (when HR clicks on "users" from /settings)
+
+    /**
+     * @param Application $app
+     * @return RedirectResponse
+     * @Route("/settings/users", name="manageUsers")
+     * @Route("/colleagues-teams", name="seeColleaguesTeams")
+     */
     public function getAllUsersAction(Application $app)
     {
         $user = self::getAuthorizedUser();
@@ -3068,6 +3432,14 @@ class OrganizationController extends MasterController
         return new Response(null, Response::HTTP_NO_CONTENT);
     }
 
+    /**
+     * @param string $elmtType
+     * @param int $stgId
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/ajax/{elmtType}/stage/delete/{stgId}", name="ajaxStageDelete")
+     */
     public function deleteStageAction(string $elmtType, int $stgId)
     {
         /*if ($elmt === 'iprocess') {
@@ -3134,6 +3506,16 @@ class OrganizationController extends MasterController
         return new JsonResponse(['status' => 'done']);
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $elmtType
+     * @param $stgId
+     * @return mixed
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/ajax/{elmtType}/stage/{stgId}/clear-output", name= "clearStageOutput")
+     */
     public function clearStageOutputAction(Request $request, Application $app, $elmtType, $stgId){
         $em       = self::getEntityManager();
         $stage = $em->getRepository(Stage::class)->find($stgId);
@@ -3151,6 +3533,16 @@ class OrganizationController extends MasterController
         return $app->json(['status' => 'done','surveyDeletion' => $surveyDeletion], 200);
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $elmtType
+     * @param $criId
+     * @return mixed
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/ajax/{elmtType}/criterion/delete/{criId}", name="ajaxCriterionDelete")
+     */
     public function deleteCriterionAction(Request $request, Application $app, $elmtType, $criId)
     {
 
@@ -3198,6 +3590,15 @@ class OrganizationController extends MasterController
         return $app->json(['status' => 'done']);
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $actId
+     * @return bool
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/ajax/activity/delete/{actId}", name="ajaxActivityDelete")
+     */
     public function deleteActivityAction(Request $request, Application $app, $actId)
     {
         $em       = self::getEntityManager();
@@ -3215,6 +3616,15 @@ class OrganizationController extends MasterController
         return true;
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $rctId
+     * @return mixed
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/ajax/recurring/delete/{rctId}", name="ajaxRecurringDelete")
+     */
     public function deleteRecurringAction(Request $request, Application $app, $rctId)
     {
 
@@ -3228,6 +3638,15 @@ class OrganizationController extends MasterController
         return $app->json(['status' => 'done']);
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $actId
+     * @return mixed
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/ajax/activity/archive/{actId}", name="ajaxActivityArchive")
+     */
     public function archiveActivityAction(Request $request, Application $app, $actId)
     {
 
@@ -3250,6 +3669,13 @@ class OrganizationController extends MasterController
     }
 
     // Display all organization activities (limited to HR)
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return mixed
+     * @Route("/activities/all", name="firmActivities")
+     */
     public function getAllActivitiesAction(Request $request, Application $app)
     {
         $entityManager = self::getEntityManager();
@@ -3342,7 +3768,13 @@ class OrganizationController extends MasterController
         );
     }
 
-    public function displayfirmSettingsAction(Request $request, Application $app)
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return mixed
+     * @Route("/organization/settings", name="firmSettings")
+     */
+    public function displayFirmSettingsAction(Request $request, Application $app)
     {
 
         $connectedUser = self::getAuthorizedUser();
@@ -3369,6 +3801,14 @@ class OrganizationController extends MasterController
             ]);
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/organization/settings/update", name="updateFirmSettings")
+     */
     public function updateFirmSettingsAction(Request $request, Application $app)
     {
 
@@ -3428,6 +3868,12 @@ class OrganizationController extends MasterController
         }
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return mixed
+     * @Route("/settings/templates/manage", name="manageTemplates")
+     */
     public function manageTemplatesAction(Request $request, Application $app)
     {
         $connectedUser = self::getAuthorizedUser();
@@ -3453,6 +3899,15 @@ class OrganizationController extends MasterController
             ]);
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $tmpId
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/template/{tmpId}", name="templateDelete")
+     */
     public function deleteTemplateAction(Request $request, Application $app, $tmpId)
     {
 
@@ -3490,6 +3945,13 @@ class OrganizationController extends MasterController
 
     // Display user info, enables modification. Note : root user can modify users from other organizations
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $usrId
+     * @return mixed
+     * @Route("/settings/user/{usrId}", name="updateUser")
+     */
     public function updateUserAction(Request $request, Application $app, $usrId)
     {
 
@@ -3580,6 +4042,15 @@ class OrganizationController extends MasterController
 
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $usrId
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/user/{usrId}",name="updateUserAJAX")
+     */
     public function updateUserActionAJAX(Request $request, Application $app, $usrId)
     {
         $em            = self::getEntityManager();
@@ -3749,6 +4220,12 @@ class OrganizationController extends MasterController
         }
     }
 
+    /**
+     * @param Application $app
+     * @param string $elmtType
+     * @return RedirectResponse
+     * @Route("/settings/criterion/{elmtType}s-average-results", name="elementAvgResultPerCriterion")
+     */
     public function elementAvgResultPerCriterionAction(Application $app, string $elmtType)
     {
         $currentUser = self::getAuthorizedUser();
@@ -3773,6 +4250,14 @@ class OrganizationController extends MasterController
         ]);
     }
 
+    /**
+     * @param Application $app
+     * @param $elmtType
+     * @param $elmtId
+     * @param bool $orgEnabledCreatingUser
+     * @return mixed
+     * @Route("/settings/{elmtType}/{elmtId}/overview", name="elementoverview")
+     */
     public function elementOverviewAction(
         Application $app, $elmtType, $elmtId, $orgEnabledCreatingUser = false
     ) {
@@ -4067,6 +4552,14 @@ class OrganizationController extends MasterController
 
     }
 
+    /**
+     * @param string $elmtType
+     * @param int $participationType
+     * @param int $cName
+     * @return JsonResponse
+     * @throws Exception
+     * @Route("/settings/{elmtType}/graph/{participationType}/{cName}", name="getElementResPerCrtGraph")
+     */
     public function getElementResPerCrtGraphAction(string $elmtType, int $participationType, int $cName)
     {
         $currentUser = self::getAuthorizedUser();
@@ -4127,6 +4620,18 @@ class OrganizationController extends MasterController
         return new JsonResponse(['elementGraphData' => $graphData], 200);
     }
 
+    /**
+     * @param Application $app
+     * @param $elmtType
+     * @param $actElmt
+     * @param $mode
+     * @param $elmtId
+     * @param $participationType
+     * @param $cName
+     * @return JsonResponse
+     * @throws Exception
+     * @Route("/settings/{elmtType}/graph/{mode}/{actElmt}/{elmtId}/{participationType}/{cName}", name="getElementGraph")
+     */
     public function getElementGraphAction(
         Application $app, $elmtType, $actElmt, $mode, $elmtId, $participationType, $cName
     ) {
@@ -4824,6 +5329,18 @@ class OrganizationController extends MasterController
         return new JsonResponse(['userGraphData' => $specificCriterionGraphData], 200);
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $elmtType
+     * @param $elmtId
+     * @param $type
+     * @param $cName
+     * @return bool
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/report/save/{elmtType}_report/{elmtId}/{type}/{cName}", name="saveImageElementReport")
+     */
     public function saveImageElementReportAction(Request $request, Application $app, $elmtType, $elmtId, $type, $cName)
     {
         $em            = self::getEntityManager();
@@ -4845,6 +5362,15 @@ class OrganizationController extends MasterController
         return true;
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $elmtType
+     * @param $elmtId
+     * @return mixed
+     * @throws Exception
+     * @Route("/settings/report/{elmtType}/generate/{elmtId}", name="generateElementReport")
+     */
     public function generateElementReportAction(Request $request, Application $app, $elmtType, $elmtId)
     {
 
@@ -5159,6 +5685,13 @@ class OrganizationController extends MasterController
         return $this->get('t_fox_mpdf_port.pdf');
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $usrId
+     * @return mixed
+     * @Route("/settings/report/user/{usrId}", name="viewUserReport")
+     */
     public function viewUserReportAction(Request $request, Application $app, $usrId)
     {
 
@@ -5233,6 +5766,16 @@ class OrganizationController extends MasterController
     }
 
     // Admin user deletion function
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $usrId
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/user/{usrId}", name="ajaxUserDelete")
+     */
     public function deleteUserAction(Request $request, Application $app, $usrId)
     {
         $em          = self::getEntityManager();
@@ -5289,6 +5832,15 @@ class OrganizationController extends MasterController
         return new JsonResponse(['message' => 'Success!'], 200);
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $cliId
+     * @return mixed
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/client/{cliId}/delete", name="clientDelete")
+     */
     public function deleteClientAction(Request $request, Application $app, $cliId){
         $em = self::getEntityManager();
         $repoC  = $em->getRepository(Client::class);
@@ -5324,6 +5876,15 @@ class OrganizationController extends MasterController
         return $app->json(['status' => 'done'], 200);
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $extId
+     * @return mixed
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/external-user/{extId}/delete", name="clientUserDelete")
+     */
     public function deleteClientUserAction(Request $request, Application $app, $extId)
     {
         $em          = self::getEntityManager();
@@ -5356,6 +5917,16 @@ class OrganizationController extends MasterController
     }
 
     //Adds team(s) to current organization (limited to HR)
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param null $teaId
+     * @return mixed
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/teams/manage/{teaId}", name="manageTeam")
+     */
     public function manageTeamAction(Request $request, Application $app, $teaId = null)
     {
         $em = self::getEntityManager();
@@ -5720,6 +6291,15 @@ class OrganizationController extends MasterController
 
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $teaId
+     * @return bool
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/teams/delete/{teaId}", name="deleteTeam")
+     */
     public function deleteTeamAction(Request $request, Application $app, $teaId)
     {
         $currentUser = self::getAuthorizedUser();
@@ -5751,6 +6331,14 @@ class OrganizationController extends MasterController
 
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return mixed
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/organizations/new", name="userCreateOrganization")
+     */
     public function addUserOrganizationAction(Request $request, Application $app)
     {
 
@@ -5947,6 +6535,14 @@ class OrganizationController extends MasterController
 
     }
 
+    /**
+     * @param Application $app
+     * @param Request $request
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/process/request/reject", name="rejectProcessRequest")
+     */
     public function rejectProcessRequestAction(Application $app, Request $request){ 
         $id = $request->get('id');
         $type = $request->get('type');
@@ -5977,6 +6573,14 @@ class OrganizationController extends MasterController
         return new JsonResponse(['msg' => 'success'],200);
     }
 
+    /**
+     * @param Application $app
+     * @param Request $request
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/{elmtType}/request/validate", name="validateProcessRequest")
+     */
     public function validateProcessRequestAction(Application $app, Request $request){
         $id = $request->get('id');
         $type = $request->get('type');

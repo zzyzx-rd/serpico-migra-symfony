@@ -76,7 +76,7 @@ class SurveyField extends DbObject
     protected $criterion;
 
     /**
-     * @ManyToOne(targetEntity="Survey")
+     * @ManyToOne(targetEntity="Survey", inversedBy="fields")
      * @JoinColumn(name="survey_sur_id", referencedColumnName="sur_id", nullable=false)
      */
     protected $survey;

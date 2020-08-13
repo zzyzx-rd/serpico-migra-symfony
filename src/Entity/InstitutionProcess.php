@@ -59,12 +59,12 @@ class InstitutionProcess extends DbObject
     public $inp_deleted;
 
     /**
-     * @ManyToOne(targetEntity="Organization")
+     * @ManyToOne(targetEntity="Organization", inversedBy="institutionProcesses")
      * @JoinColumn(name="organization_org_id", referencedColumnName="org_id", nullable=false)
      */
     protected $organization;
     /**
-     * @ManyToOne(targetEntity="Process")
+     * @ManyToOne(targetEntity="Process", inversedBy="institutionProcesses")
      * @JoinColumn(name="process_pro_id", referencedColumnName="pro_id", nullable=false)
      */
     protected $process;
@@ -74,7 +74,7 @@ class InstitutionProcess extends DbObject
      */
     protected $masterUser;
     /**
-     * @OneToOne(targetEntity="InstitutionProcess")
+     * @OneToOne(targetEntity="InstitutionProcess", inversedBy="children")
      * @JoinColumn(name="parent_id", referencedColumnName="inp_id", nullable=true)
      */
     public $parent;

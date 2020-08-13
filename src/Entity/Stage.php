@@ -220,13 +220,13 @@ class Stage extends DbObject
     protected $survey;
 
     /**
-     * @ManyToOne(targetEntity="Activity")
+     * @ManyToOne(targetEntity="Activity", inversedBy="stages")
      * @JoinColumn(name="activity_act_id", referencedColumnName="act_id",nullable=false)
      */
     protected $activity;
 
     /**
-     * @ManyToOne(targetEntity="Organization")
+     * @ManyToOne(targetEntity="Organization", inversedBy="stages")
      * @JoinColumn(name="organization_org_id", referencedColumnName="org_id",nullable=true)
      * @var Organization
      */

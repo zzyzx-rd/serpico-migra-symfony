@@ -4,28 +4,32 @@ namespace App\Controller;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Criteria;
-use App\Form\AddProcessForm;
-use App\Form\DelegateActivityForm;
-use App\Form\RequestActivityForm;
-use App\Entity\Activity;
-use App\Entity\ActivityUser;
-use App\Entity\Decision;
-use App\Entity\Department;
-use App\Entity\OrganizationUserOption;
-use App\Entity\Survey;
-use App\Repository\ActivityRepository;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
+use Form\AddProcessForm;
+use Form\DelegateActivityForm;
+use Form\RequestActivityForm;
+use Model\Activity;
+use Model\ActivityUser;
+use Model\Decision;
+use Model\Department;
+use Model\OrganizationUserOption;
+use Model\Survey;
+use Repository\ActivityRepository;
+use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
 
 final class InstitutionController extends MasterController
 {
-    private $em;
     private $user;
     private $org;
     /** @var ActivityRepository */
     private $activityRepo;
 
-    public function __construct()
+    public function __construct(EntityManagerInterface $em)
     {
+        parent::__construct($em);
         $this->user = self::getAuthorizedUser();
         if (!$this->user) {
             return $this->redirectToRoute('login');
@@ -36,6 +40,10 @@ final class InstitutionController extends MasterController
         $this->activityRepo = $this->em->getRepository(Activity::class);
     }
 
+    /**
+     * @return string
+     * @Route("/settings/institution/processes", name="processList")
+     */
     public function processesListAction()
     {
         if(isset($_COOKIE['sorting_type'])){
@@ -97,6 +105,12 @@ final class InstitutionController extends MasterController
         );
     }
 
+    /**
+     * @param Application $app
+     * @param Request $request
+     * @return string
+     * @Route("/myactivities", name="myActivities")
+     */
     public function myActivitiesListAction(Application $app, Request $request){
 
         $em = $this->getEntityManager();

@@ -12,30 +12,32 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException as ORMExceptionAlias;
-use Doctrine\Persistence\ObjectManager;
 use Exception;
-use App\Entity\Activity;
-use App\Entity\ActivityUser;
-use App\Entity\Criterion;
-use App\Entity\Department;
-use App\Entity\Mail;
-use App\Entity\OptionName;
-use App\Entity\Organization;
-use App\Entity\OrganizationUserOption;
-use App\Entity\Position;
-use App\Entity\Ranking;
-use App\Entity\RankingHistory;
-use App\Entity\RankingTeam;
-use App\Entity\RankingTeamHistory;
-use App\Entity\Recurring;
-use App\Entity\Result;
-use App\Entity\ResultProject;
-use App\Entity\ResultTeam;
-use App\Entity\Stage;
-use App\Entity\Team;
-use App\Entity\User;
-use App\Repository\ActivityUserRepository;
-use App\Repository\UserRepository;
+use Model\Activity;
+use Model\ActivityUser;
+use Model\Criterion;
+use Model\Department;
+use Model\Mail;
+use Model\Notation\Constantes;
+use Model\Notation\Results;
+use Model\OptionName;
+use Model\Organization;
+use Model\OrganizationUserOption;
+use Model\Position;
+use Model\Ranking;
+use Model\RankingHistory;
+use Model\RankingTeam;
+use Model\RankingTeamHistory;
+use Model\Recurring;
+use Model\Result;
+use Model\ResultProject;
+use Model\ResultTeam;
+use Model\Stage;
+use Model\Team;
+use Model\User;
+use Repository\ActivityUserRepository;
+use Repository\UserRepository;
+use Silex\Application;
 use Swift_Image;
 use Swift_Mailer;
 use Swift_Message;
@@ -48,6 +50,8 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGenerator;
+use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Translation\Translator;
 use Symfony\Component\Validator\Constraints\DateTime;
 
 abstract class MasterController
@@ -63,19 +67,24 @@ abstract class MasterController
     const SERVEUR_URL_PREFIXE = "http://51.15.121.241:5000";
     const MAIN_CRITERIA_COMPUTATION = "/main/criteriaComputation";
     /**
-     * @var ObjectManager
+     * @var EntityManager
      */
-    private $em;
+    public $em;
+    /**
+     * @var Security
+     */
+    protected $security;
 
     /**
      * MasterController constructor.
      * @param EntityManagerInterface $em
+     * @param Security $security
      */
-    public function __construct(EntityManagerInterface $em)
+    public function __construct(EntityManagerInterface $em, Security $security)
     {
         $this->em = $em;
+        $this->security = $security;
     }
-
 
     public static function getTwig(): \Twig\Environment
     {
@@ -109,16 +118,15 @@ abstract class MasterController
     }
 
     /**
-     * @return \Doctrine\ORM\EntityManager
+     * @return EntityManager
      */
-    public static function getEntityManager()
+    public  function getEntityManager()
     {
-        global $app;
-        return $app['orm.em'];
+        return $this->em;
     }
 
     /**
-     * @return \Symfony\Component\Translation\Translator
+     * @return Translator
      */
     public static function getTranslator()
     {
@@ -215,7 +223,7 @@ abstract class MasterController
     /**
      * @return User|null
      */
-    public static function getAuthorizedUser()
+    public function getAuthorizedUser()
     {
         global $app;
         return isset($_COOKIE['REMEMBERME'])
@@ -223,9 +231,9 @@ abstract class MasterController
             : null;
     }
 
-    public static function getRememberedUser($app, $token)
+    public  function getRememberedUser($token)
     {
-        $repoU = $app['orm.em']->getRepository(User::class);
+        $repoU = $this->em->getRepository(User::class);
         return $repoU->findOneByRememberMeToken($token);
     }
 

@@ -69,19 +69,19 @@ class TemplateActivity extends DbObject
     public $act_saved;
 
     /**
-     * @ManyToOne(targetEntity="Organization")
+     * @ManyToOne(targetEntity="Organization", inversedBy="templateActivities")
      * @JoinColumn(name="organization_org_id", referencedColumnName="org_id",nullable=false)
      */
     protected $organization;
 
     /**
-     *@ManyToOne(targetEntity="Department")
+     *@ManyToOne(targetEntity="Department", inversedBy="templateActivities")
      *@JoinColumn(name="department_dpt_id", referencedColumnName="dpt_id", nullable=false)
      */
     protected $department;
 
     /**
-     * @ManyToOne(targetEntity="TemplateRecurring")
+     * @ManyToOne(targetEntity="TemplateRecurring", inversedBy="activities")
      * @JoinColumn(name="recurring_rct_id", referencedColumnName="rct_id",nullable=true)
      */
     protected $recurring;

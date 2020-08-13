@@ -53,7 +53,7 @@ class SurveyFieldParameter extends DbObject
     public $sfp_inserted;
 
     /**
-     * @ManyToOne(targetEntity="SurveyField")
+     * @ManyToOne(targetEntity="SurveyField", inversedBy="parameters")
      * @JoinColumn(name="survey_field_sfi_id", referencedColumnName="sfi_id", nullable=false)
      */
     protected $field;

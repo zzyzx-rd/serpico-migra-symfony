@@ -70,31 +70,31 @@ class OrganizationUserOption extends DbObject
     protected $oName;
 
     /**
-     * @ManyToOne(targetEntity="Organization")
+     * @ManyToOne(targetEntity="Organization", inversedBy="options")
      * @JoinColumn(name="organization_org_id", referencedColumnName="org_id", nullable=false)
      */
     protected $organization;
 
     /**
-     * @ManyToOne(targetEntity="Department")
+     * @ManyToOne(targetEntity="Department", inversedBy="options")
      * @JoinColumn(name="department_dpt_id", referencedColumnName="dpt_id")
      */
     protected $department;
 
     /**
-     * @ManyToOne(targetEntity="Position")
+     * @ManyToOne(targetEntity="Position", inversedBy="options")
      * @JoinColumn(name="position_pos_id", referencedColumnName="pos_id")
      */
     protected $position;
 
     /**
-     * @ManyToOne(targetEntity="Title")
+     * @ManyToOne(targetEntity="Title", inversedBy="options")
      * @JoinColumn(name="title_tit_id", referencedColumnName="tit_id")
      */
     protected $title;
 
     /**
-     * @ManyToOne(targetEntity="User")
+     * @ManyToOne(targetEntity="User", inversedBy="options")
      * @JoinColumn(name="user_usr_id", referencedColumnName="usr_id")
      */
     protected $user;

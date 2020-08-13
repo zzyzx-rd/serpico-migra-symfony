@@ -115,12 +115,12 @@ class ResultProject extends DbObject
     public $rsp_inserted;
 
     /**
-     * @ManyToOne(targetEntity="Activity")
+     * @ManyToOne(targetEntity="Activity", inversedBy="projectResults")
      * @JoinColumn(name="activity_act_id", referencedColumnName="act_id")
      */
     protected $activity;
     /**
-     * @ManyToOne(targetEntity="Stage")
+     * @ManyToOne(targetEntity="Stage", inversedBy="projectResults")
      * @JoinColumn(name="stage_stg_id", referencedColumnName="stg_id", nullable=true)
      */
     protected $stage;

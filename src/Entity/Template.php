@@ -51,13 +51,13 @@ class Template extends DbObject
     public $activities;
 
     /**
-     *@OneToOne(targetEntity="Stage")
+     *@OneToOne(targetEntity="Stage", inversedBy="template")
      *@JoinColumn(name="stage_stg_id", referencedColumnName="stg_id", nullable=false)
      */
     protected $stage;
 
     /**
-     *@OneToOne(targetEntity="Criterion")
+     *@OneToOne(targetEntity="Criterion", inversedBy="template")
      *@JoinColumn(name="criterion_crt_id", referencedColumnName="crt_id", nullable=false)
      */
     protected $criterion;

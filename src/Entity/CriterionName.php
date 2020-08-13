@@ -46,14 +46,14 @@ class CriterionName extends DbObject
     public $can_inserted;
 
     /**
-     * @ManyToOne(targetEntity="Icon")
+     * @ManyToOne(targetEntity="Icon", inversedBy="criterionNames")
      * @JoinColumn(name="icon_ico_id", referencedColumnName="ico_id",nullable=false)
      * @var Icon
      */
     protected $icon;
 
     /**
-     * @ManyToOne(targetEntity="Organization")
+     * @ManyToOne(targetEntity="Organization", inversedBy="criterionNames")
      * @JoinColumn(name="organization_org_id", referencedColumnName="org_id", nullable=false)
      * @var Organization
      */

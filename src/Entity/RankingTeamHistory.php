@@ -73,19 +73,19 @@ class RankingTeamHistory extends DbObject
     public $rth_inserted;
 
     /**
-     *@ManyToOne(targetEntity="Activity")
+     *@ManyToOne(targetEntity="Activity", inversedBy="historicalRankingTeams")
      *@JoinColumn(name="rth_activity", referencedColumnName="act_id", nullable=false)
      */
     protected $activity;
 
     /**
-     *@ManyToOne(targetEntity="Stage")
+     *@ManyToOne(targetEntity="Stage", inversedBy="historicalRankingTeams")
      *@JoinColumn(name="rth_stage", referencedColumnName="stg_id", nullable=true)
      */
     protected $stage;
 
     /**
-     *@ManyToOne(targetEntity="Criterion")
+     *@ManyToOne(targetEntity="Criterion", inversedBy="historicalRankingTeams")
      *@JoinColumn(name="rth_criterion", referencedColumnName="crt_id", nullable=true)
      */
     protected $criterion;

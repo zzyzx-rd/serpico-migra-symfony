@@ -59,20 +59,20 @@ class Weight extends DbObject
     public $wgt_deleted;
 
     /**
-     * @ManyToOne(targetEntity="Organization")
+     * @ManyToOne(targetEntity="Organization", inversedBy="weights")
      * @JoinColumn(name="org_id", referencedColumnName="org_id",nullable=false)
      */
     protected $organization;
 
     /**
-     * @ManyToOne(targetEntity="Position")
+     * @ManyToOne(targetEntity="Position", inversedBy="weights")
      * @JoinColumn(name="pos_id", referencedColumnName="pos_id",nullable=false)
      */
     protected $position;
 
     /**
      * @ORM\OneToOne(targetEntity=User::class, mappedBy="weight_wgt", cascade={"persist", "remove"})
-     * @JoinColumn(nullable=true)
+     * @JoinColumn(name="usr_id", nullable=true)
      */
     public $user;
 

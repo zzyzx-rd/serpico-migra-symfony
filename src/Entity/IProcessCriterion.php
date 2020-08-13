@@ -87,7 +87,7 @@ class IProcessCriterion extends DbObject
     public $crt_inserted;
 
     /**
-     * @ManyToOne(targetEntity="IProcessStage")
+     * @ManyToOne(targetEntity="IProcessStage", inversedBy="criteria")
      * @JoinColumn(name="iprocess_stage_stg_id", referencedColumnName="stg_id",nullable=true)
      */
     protected $stage;

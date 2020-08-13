@@ -83,7 +83,7 @@ class Activity extends DbObject
     public $act_status;
 
     /**
-     * @ManyToOne(targetEntity="Process")
+     * @ManyToOne(targetEntity="Process", inversedBy="activities")
      * @JoinColumn(name="process_pro_id", referencedColumnName="pro_id")
      */
     protected $process;
@@ -94,7 +94,7 @@ class Activity extends DbObject
     public $institutionProcess;
 
     /**
-     * @ManyToOne(targetEntity="Organization")
+     * @ManyToOne(targetEntity="Organization", inversedBy="activities")
      * @JoinColumn(name="organization_org_id", referencedColumnName="org_id",nullable=false)
      */
     protected $organization;

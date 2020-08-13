@@ -162,13 +162,13 @@ class Criterion extends DbObject
     public $cri_deleted;
 
     /**
-     * @ManyToOne(targetEntity="Stage")
+     * @ManyToOne(targetEntity="Stage", inversedBy="criteria")
      * @JoinColumn(name="stage_stg_id", referencedColumnName="stg_id",nullable=true)
      */
     protected $stage;
 
     /**
-     * @ManyToOne(targetEntity="Organization")
+     * @ManyToOne(targetEntity="Organization", inversedBy="criteria")
      * @JoinColumn(name="organization_org_id", referencedColumnName="org_id",nullable=true)
      */
     protected $organization;

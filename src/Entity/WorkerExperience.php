@@ -58,13 +58,13 @@ class WorkerExperience extends DbObject
     public $wex_inserted;
 
     /**
-     * @ManyToOne(targetEntity="WorkerIndividual")
+     * @ManyToOne(targetEntity="WorkerIndividual", inversedBy="experiences")
      * @JoinColumn(name="worker_individual_wid", referencedColumnName="win_id",nullable=false)
      */
     protected $individual;
 
     /**
-     * @ManyToOne(targetEntity="WorkerFirm")
+     * @ManyToOne(targetEntity="WorkerFirm", inversedBy="experiences")
      * @JoinColumn(name="worker_firm_wfi", referencedColumnName="wfi_id",nullable=false)
      */
     protected $firm;

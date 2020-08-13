@@ -117,19 +117,19 @@ class Result extends DbObject
     public $res_inserted;
 
     /**
-     * @ManyToOne(targetEntity="Activity")
+     * @ManyToOne(targetEntity="Activity", inversedBy="results")
      * @JoinColumn(name="activity_act_id", referencedColumnName="act_id")
      */
     protected $activity;
 
     /**
-     * @ManyToOne(targetEntity="Stage")
+     * @ManyToOne(targetEntity="Stage", inversedBy="results")
      * @JoinColumn(name="stage_stg_id", referencedColumnName="stg_id", nullable=true)
      */
     protected $stage;
 
     /**
-     * @ManyToOne(targetEntity="Criterion")
+     * @ManyToOne(targetEntity="Criterion", inversedBy="results")
      * @JoinColumn(name="criterion_crt_id", referencedColumnName="crt_id", nullable=true)
      */
     protected $criterion;

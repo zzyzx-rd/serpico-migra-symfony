@@ -61,7 +61,7 @@ class Process extends DbObject
     public $activities;
 
     /**
-     *@ManyToOne(targetEntity="Organization")
+     *@ManyToOne(targetEntity="Organization", inversedBy="processes")
      *@JoinColumn(name="organization_org_id", referencedColumnName="org_id", nullable=false)
      */
     protected $organization;

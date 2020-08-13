@@ -78,19 +78,19 @@ class RankingTeam extends DbObject
     public $rkt_updated;
 
     /**
-     *@ManyToOne(targetEntity="Activity")
+     *@ManyToOne(targetEntity="Activity", inversedBy="rankingTeams")
      *@JoinColumn(name="rkt_activity", referencedColumnName="act_id", nullable=false)
      */
     protected $activity;
 
     /**
-     *@ManyToOne(targetEntity="Stage")
+     *@ManyToOne(targetEntity="Stage", inversedBy="rankingTeams")
      *@JoinColumn(name="rkt_stage", referencedColumnName="stg_id", nullable=true)
      */
     protected $stage;
 
     /**
-     *@ManyToOne(targetEntity="Criterion")
+     *@ManyToOne(targetEntity="Criterion", inversedBy="rankingTeams")
      *@JoinColumn(name="rkt_criterion", referencedColumnName="crt_id", nullable=true)
      */
     protected $criterion;

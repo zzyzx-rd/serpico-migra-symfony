@@ -10,72 +10,83 @@ use Doctrine\Common\Persistence\Mapping\MappingException;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
+use Dompdf\Dompdf;
 use Exception;
-use App\Form\ActivityReportForm;
-use App\Form\AddActivityCriteriaForm;
-use App\Form\AddActivityForm;
-use App\Form\AddCriterionForm;
-use App\Form\AddStageForm;
-use App\Form\AddSurveyForm;
-use App\Form\AddTemplateForm;
-use App\Form\CreateCriterionForm;
-use App\Form\DelegateActivityForm;
-use App\Form\ManageStageParticipantsForm;
-use App\Form\RequestActivityForm;
-use App\Form\Type\StageUniqueParticipationsType;
-use App\Entity\Activity;
-use App\Entity\ActivityUser;
-use App\Entity\Answer;
-use App\Entity\Client;
-use App\Entity\Criterion;
-use App\Entity\CriterionName;
-use App\Entity\DbObject;
-use App\Entity\Decision;
-use App\Entity\Department;
-use App\Entity\ExternalUser;
-use App\Entity\GeneratedImage;
-use App\Entity\Grade;
-use App\Entity\Icon;
-use App\Entity\InstitutionProcess;
-use App\Entity\IProcessActivityUser;
-use App\Entity\IProcessCriterion;
-use App\Entity\IProcessStage;
-use App\Entity\Organization;
-use App\Entity\OrganizationUserOption;
-use App\Entity\ProcessStage;
-use App\Entity\Recurring;
-use App\Entity\Result;
-use App\Entity\Stage;
-use App\Entity\Survey;
-use App\Entity\Target;
-use App\Entity\Team;
-use App\Entity\TeamUser;
-use App\Entity\TemplateActivity;
-use App\Entity\TemplateActivityUser;
-use App\Entity\TemplateCriterion;
-use App\Entity\TemplateStage;
-use App\Entity\User;
-use App\Repository\UserRepository;
+use Form\ActivityReportForm;
+use Form\AddActivityCriteriaForm;
+use Form\AddActivityForm;
+use Form\AddCriterionForm;
+use Form\AddStageForm;
+use Form\AddSurveyForm;
+use Form\AddTemplateForm;
+use Form\CreateCriterionForm;
+use Form\DelegateActivityForm;
+use Form\ManageStageParticipantsForm;
+use Form\RequestActivityForm;
+use Form\Type\StageUniqueParticipationsType;
+use Model\Activity;
+use Model\ActivityUser;
+use Model\Answer;
+use Model\Client;
+use Model\Criterion;
+use Model\CriterionName;
+use Model\DbObject;
+use Model\Decision;
+use Model\Department;
+use Model\ExternalUser;
+use Model\GeneratedImage;
+use Model\Grade;
+use Model\Icon;
+use Model\InstitutionProcess;
+use Model\IProcessActivityUser;
+use Model\IProcessCriterion;
+use Model\IProcessStage;
+use Model\Organization;
+use Model\OrganizationUserOption;
+use Model\ProcessStage;
+use Model\Recurring;
+use Model\Result;
+use Model\Stage;
+use Model\Survey;
+use Model\Target;
+use Model\Team;
+use Model\TeamUser;
+use Model\TemplateActivity;
+use Model\TemplateActivityUser;
+use Model\TemplateCriterion;
+use Model\TemplateStage;
+use Model\User;
+use Repository\UserRepository;
 use RouteDumper;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormFactory;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
 
 class ActivityController extends MasterController
 {
     // Creating activity V1 : attributing leadership to current user and redirecting to parameters
+    /**
+     * @param string $elmtType
+     * @param int $inpId
+     * @param string $actName
+     * @return JsonResponse|RedirectResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/{elmt}/create",name="activityInitialisation")
+     */
     public function addActivityId(string $elmtType, $inpId = 0, $actName = '')
     {
-        $currentUser = self::getAuthorizedUser();
+        $currentUser = $this->getAuthorizedUser();
         if (!$currentUser) {
             return $this->redirectToRoute('login');
         }
 
-        global $app;
         $usrId = $currentUser->getId();
         $usrOrg = $currentUser->getOrganization();
-        $em = self::getEntityManager();
+        $em = $this::getEntityManager();
         $isActivity = $elmtType == 'activity';
 
         $activity = $isActivity ? new Activity : new TemplateActivity;
@@ -140,7 +151,9 @@ class ActivityController extends MasterController
 
         /*if ($inpId) {*/
         // Has been launched from iprocess panel, expecting JSON response
-        return new JsonResponse(['message' => 'success to create activity', 'redirect' => $app['url_generator']->generate('manageActivityElement', ['elmtType' => 'activity', 'elmtId' => $activity->getId()])], 200);
+        //TODO
+//        return new JsonResponse(['message' => 'success to create activity', 'redirect' => $app['url_generator']->generate('manageActivityElement', ['elmtType' => 'activity', 'elmtId' => $activity->getId()])], 200);
+        //TODO END
         /*} else {
 
             return self::redirectToRoute(
@@ -156,9 +169,16 @@ class ActivityController extends MasterController
 
     // Delegation of activity creation
 
-    public function delegateActivityAction(Request $request, Application $app)
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/activity/delegate", name="activityDelegate")
+     */
+    public function delegateActivityAction(Request $request)
     {
-        $currentUser = self::getAuthorizedUser();
+        $currentUser = $this->getAuthorizedUser();
         if (!$currentUser) {
             throw new Exception('unauthorized');
         }
@@ -244,6 +264,14 @@ class ActivityController extends MasterController
 
     // Request of activity creation
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return JsonResponse|RedirectResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/activity/request", name="activityRequest")
+     */
     public function requestActivityAction(Request $request, Application $app)
     {
         $em = self::getEntityManager();
@@ -326,6 +354,16 @@ class ActivityController extends MasterController
 
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $actId
+     * @param $action
+     * @return bool|JsonResponse|RedirectResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/activity/request/{actId}/{action}", name="activityResolveRequest")
+     */
     public function resolveActivityRequest(Request $request, Application $app, $actId, $action)
     {
 
@@ -431,6 +469,14 @@ class ActivityController extends MasterController
 
     // 1st step - criterion definition (limited to activity manager)
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $elmt
+     * @param $elmtId
+     * @return RedirectResponse
+     * @Route("/{elmt}/{elmtId}/parameters", name="oldActivityDefinition")
+     */
     public function oldAddActivityDefinition(Request $request, Application $app, $elmt, $elmtId)
     {
         $user = self::getAuthorizedUser();
@@ -523,6 +569,16 @@ class ActivityController extends MasterController
     }
 
     // Change activity complexity after user has clicked on the add phases/stages button
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $actId
+     * @return false|int|string
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/activity/{actId}/complexify", name="activityComplexify")
+     */
     public function complexifyActivity(Request $request, Application $app, $actId)
     {
         $elmt = strpos($_SERVER['HTTP_REFERER'], 'activity');
@@ -540,6 +596,18 @@ class ActivityController extends MasterController
         return $elmt;
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $elmt
+     * @param $elmtId
+     * @param $actionType
+     * @param bool $returnJSON
+     * @return JsonResponse|RedirectResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/ajax/{elmt}/{elmtId}/parameters/{actionType}", name="oldActivityDefinitionAJAX")
+     */
     public function oldAddActivityDefinitionAJAX(Request $request, Application $app, $elmt, $elmtId, $actionType, $returnJSON = true)
     {
         $currentUser = self::getAuthorizedUser();
@@ -1118,6 +1186,16 @@ class ActivityController extends MasterController
     }
      */
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $elmt
+     * @param $elmtId
+     * @return RedirectResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/{elmt}/{elmtId}/participants", name="activityParticipants")
+     */
     public function newAddActivityParticipant(Request $request, Application $app, $elmt, $elmtId)
     {
         $user = self::getAuthorizedUser();
@@ -1305,6 +1383,17 @@ class ActivityController extends MasterController
         );
     }
 
+    /**
+     * @param Application $app
+     * @param Request $request
+     * @param int $stgId
+     * @param string $elmtType
+     * @param int $elmtId
+     * @return JsonResponse|void
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/{elmtType}/stage/{stgId}/participant/validate/{elmtId}", name="validateParticipant")
+     */
     public function validateParticipantAction(
         Application $app,
         Request $request,
@@ -1667,6 +1756,16 @@ class ActivityController extends MasterController
         ], 200);
     }
 
+    /**
+     * @param Application $app
+     * @param Request $request
+     * @param int $teaId
+     * @param int $tusId
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/team/{teaId}/team-user/validate/{tusId}", name="validateTeamUser")
+     */
     public function validateTeamUserAction(
         Application $app,
         Request $request,
@@ -1824,6 +1923,17 @@ class ActivityController extends MasterController
 
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $stgId
+     * @param $elmtType
+     * @param $elmtId
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/{_locale}/{elmtType}/stage/{stgId}/participant/delete/{elmtId}", name="deleteParticipant")
+     */
     public function deleteParticipantAction(Request $request, Application $app, $stgId, $elmtType, $elmtId)
     {
 
@@ -1883,6 +1993,15 @@ class ActivityController extends MasterController
 
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $tusId
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/remove-team-user/{tusId}", name="deleteTeamUser")
+     */
     public function deleteTeamUserAction(Request $request, Application $app, $tusId)
     {
 
@@ -1961,6 +2080,18 @@ class ActivityController extends MasterController
 
     //AJAX call which inserts users in created stages
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $elmt
+     * @param $elmtId
+     * @param $actionType
+     * @param bool $returnJSON
+     * @return JsonResponse|RedirectResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/ajax/{elmt}/{elmtId}/participants/{actionType}", name="ajaxParticipantsAdd")
+     */
     public function oldInsertParticipantsAction(Request $request, Application $app, $elmt, $elmtId, $actionType, $returnJSON = true)
     {
         $firstFinalization = false;
@@ -3017,6 +3148,14 @@ class ActivityController extends MasterController
 
     // 2 - Create stages
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $elmt
+     * @param $elmtId
+     * @return RedirectResponse
+     * @Route("/{elmt}/{elmtId}/stages", name="activityStages")
+     */
     public function displayActivityStages(Request $request, Application $app, $elmt, $elmtId)
     {
         $user = self::getAuthorizedUser();
@@ -3081,6 +3220,18 @@ class ActivityController extends MasterController
 
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $elmt
+     * @param $elmtId
+     * @param $actionType
+     * @param bool $returnJSON
+     * @return JsonResponse|RedirectResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/ajax/{elmt}/{elmtId}/stages/{actionType}", name=")
+     */
     public function saveActivityStages(Request $request, Application $app, $elmt, $elmtId, $actionType, $returnJSON = true)
     {
 
@@ -3316,6 +3467,14 @@ class ActivityController extends MasterController
 
     // 3 - Create criteria
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $elmt
+     * @param $elmtId
+     * @return RedirectResponse
+     * @Route("/{elmt}/{elmtId}/criteria", name="activityCriteria")
+     */
     public function addActivityCriterion(Request $request, Application $app, $elmt, $elmtId)
     {
         $user = self::getAuthorizedUser();
@@ -3403,6 +3562,14 @@ class ActivityController extends MasterController
         }
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return false|string|JsonResponse|RedirectResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/ajax/criterion-name/add", name="addCriterionName")
+     */
     public function createOrganizationCriterionAction(Request $request, Application $app)
     {
         $currentUser = self::getAuthorizedUser();
@@ -3459,6 +3626,18 @@ class ActivityController extends MasterController
 
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $elmt
+     * @param $elmtId
+     * @param $actionType
+     * @param bool $returnJSON
+     * @return JsonResponse|RedirectResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("}/ajax/{elmt}/{elmtId}/criteria/{actionType}", name="saveActivityCriteria")
+     */
     public function saveActivityCriteria(Request $request, Application $app, $elmt, $elmtId, $actionType, $returnJSON = true)
     {
 
@@ -3883,7 +4062,7 @@ class ActivityController extends MasterController
             $em->flush();
 
             $em = self::getEntityManager();
-            $repository = $em->getRepository(\App\Entity\User::class);
+            $repository = $em->getRepository(\Model\User::class);
             $allUsers = [];
             foreach ($repository->findAll() as $user) {
                 $allUsers[] = $user->toArray($app);
@@ -3915,6 +4094,13 @@ class ActivityController extends MasterController
 
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $actId
+     * @return JsonResponse
+     * @Route("/activity/{actId}/gstages", name="getGradableStages")
+     */
     public function getGradableStagesAction(Request $request, Application $app, $actId)
     {
         $em = self::getEntityManager();
@@ -3932,6 +4118,18 @@ class ActivityController extends MasterController
         }
         return new JsonResponse(['stages' => $output], 200);
     }
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $stgId
+     * @param null $usrId
+     * @return RedirectResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/activity/survey/form/answer/{stgId}", name="answerSurvey")
+     * @Route("/activity/survey/form/answer/{stgId}", name="AnswerRequest")
+     */
     public function answerRequestAction(Request $request, Application $app, $stgId, $usrId = null)
     {
         $error="";
@@ -4079,6 +4277,15 @@ class ActivityController extends MasterController
             ]);
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $stgId
+     * @return RedirectResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("}/activity/{stgId}/grade", name="newStageGrade")
+     */
     public function gradeAction(Request $request, Application $app, $stgId)
     {
         $em = self::getEntityManager();
@@ -4602,6 +4809,15 @@ class ActivityController extends MasterController
     }
 
     //Get the results of an activity for intended users
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $actId
+     * @return RedirectResponse
+     * @throws ORMException
+     * @Route("/activity/{actId}/results", name="activityResults")
+     */
     public function displayResultsAction(Request $request, Application $app, $actId)
     {
         set_time_limit(300);
@@ -4714,6 +4930,13 @@ class ActivityController extends MasterController
         }
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $stgId
+     * @param $usrId
+     * @Route("/stage/{stgId}/request/{usrId}/results", name="requestResults")
+     */
     public function requestResultsAction(Request $request, Application $app, $stgId, $usrId)
     {
 
@@ -4725,6 +4948,20 @@ class ActivityController extends MasterController
     // Function which saves report PNG images for generated PDF
     // (by default, if graph is not concerning activity/stage/criteria, the related value remains to -1. Type equals 0 for result graph, and 1 for distance graph)
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $actId
+     * @param $stgId
+     * @param $crtId
+     * @param $type
+     * @param $overview
+     * @param $equalEntries
+     * @return bool|RedirectResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/report/save/{actId}/{stgId}/{crtId}/{type}/{overview}/{equalEntries}", name="saveImageActivityReport")
+     */
     public function saveImageActivityReportAction(Request $request, Application $app, $actId, $stgId, $crtId, $type, $overview, $equalEntries)
     {
 
@@ -4761,6 +4998,16 @@ class ActivityController extends MasterController
         return true;
     }
 
+    /**
+     * @param Application $app
+     * @param Request $request
+     * @param $actId
+     * @param $stgIndex
+     * @param $crtIndex
+     * @param $equalEntries
+     * @return false|string|JsonResponse
+     * @Route("graph/{actId}/{stgIndex}/{crtIndex}/{equalEntries}", name="provideGraphData")
+     */
     public function provideGraphDataAction(Application $app, Request $request, $actId, $stgIndex, $crtIndex, $equalEntries)
     {
         $em = self::getEntityManager();
@@ -6667,6 +6914,17 @@ class ActivityController extends MasterController
 
     //public function generateTooltipContent(Application $app, )
 
+    /**
+     * @param Application $app
+     * @param Request $request
+     * @param $actId
+     * @param $printedElmts
+     * @param $isPDFVersion
+     * @param $equalEntries
+     * @return RedirectResponse
+     * @Route("/settings/report/activity/{actId}/{stgIndex}/{crtIndex}/{isPDFVersion}/{equalEntries}",
+     *     name="generateActivityReport")
+     */
     public function generateActivityReportAction(Application $app, Request $request, $actId, $printedElmts, $isPDFVersion, $equalEntries)
     {
 
@@ -6970,6 +7228,13 @@ class ActivityController extends MasterController
 
     }
 
+    /**
+     * @param Application $app
+     * @param Request $request
+     * @param $isPDFVersion
+     * @return RedirectResponse
+     * @Route("}/settings/report/activity/{isPDFVersion", name="generateNewActivityReport")
+     */
     public function newGenerateActivityReportAction(Application $app, Request $request, $isPDFVersion)
     {
 
@@ -7551,6 +7816,16 @@ class ActivityController extends MasterController
     }
 
     //Save user grades, determine whether the activity is computable
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $action
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/myactivities/{action}", name="afterGrading")
+     */
     public function newSaveGradesAction(Request $request, Application $app, $action)
     {
 
@@ -7692,6 +7967,15 @@ class ActivityController extends MasterController
     }
 
     //Releases stage results to participants
+
+    /**
+     * @param Application $app
+     * @param $stgId
+     * @return bool|RedirectResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/stage/{stgId}/release", name="releaseStage")
+     */
     public function releaseStage(Application $app, $stgId)
     {
 
@@ -7783,6 +8067,15 @@ class ActivityController extends MasterController
     }
 
     //Releases activity results to participants
+
+    /**
+     * @param Application $app
+     * @param $actId
+     * @return bool|RedirectResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/activity/{actId}/release", name="releaseActivity")
+     */
     public function releaseActivity(Application $app, $actId)
     {
         $currentUser = self::getAuthorizedUser();
@@ -7870,6 +8163,16 @@ class ActivityController extends MasterController
         return true;
     }
 
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $actStep
+     * @param $elmtId
+     * @return JsonResponse|RedirectResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/templates/{actStep}/{elmtId}/save", name="saveTemplate")
+     */
     public function saveTemplateAction(Request $request, Application $app, $actStep, $elmtId)
     {
 
@@ -7988,6 +8291,16 @@ class ActivityController extends MasterController
     }
 
     // Ajax activity creation
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $tmpId
+     * @return JsonResponse|RedirectResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/activity/create/template/{tmpId}", name="createFromTemplate")
+     */
     public function createFromTemplateAction(Request $request, Application $app, $tmpId)
     {
 
