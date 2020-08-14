@@ -78,9 +78,9 @@ class Activity extends DbObject
     public $act_objectives;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="act_status", type="integer")
      */
-    public $act_status;
+    public $status;
 
     /**
      * @ManyToOne(targetEntity="Process", inversedBy="activities")
@@ -90,6 +90,7 @@ class Activity extends DbObject
 
     /**
      * @ORM\ManyToOne(targetEntity=InstitutionProcess::class, inversedBy="activities")
+     * @JoinColumn(name="institution_process_id", referencedColumnName="inp_id")
      */
     public $institutionProcess;
 
@@ -100,7 +101,7 @@ class Activity extends DbObject
     protected $organization;
     /**
      * @OneToMany(targetEntity="Stage", mappedBy="activity", cascade={"persist", "remove"}, orphanRemoval=true)
-     * @OrderBy({"startdate" = "ASC", "inserted" = "ASC"})
+     * @OrderBy({"stg_startdate" = "ASC", "inserted" = "ASC"})
      */
     public $stages;
     /**
@@ -224,7 +225,7 @@ class Activity extends DbObject
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(name="act_master_usr_id", referencedColumnName="usr_id", nullable=false)
      */
     public $act_master_usr;
 
@@ -322,7 +323,7 @@ class Activity extends DbObject
         $this->diffParticipants = $diffParticipants;
         $this->nbParticipants = $nbParticipants;
         $this->act_objectives = $objectives;
-        $this->act_status = $status;
+        $this->status = $status;
         $this->progress = $progress;
         $this->isRewarding = $isRewarding;
         $this->distrAmount = $distrAmount;
@@ -464,14 +465,14 @@ class Activity extends DbObject
         return $this;
     }
 
-    public function getActStatus(): ?int
+    public function getStatus(): ?int
     {
-        return $this->act_status;
+        return $this->status;
     }
 
-    public function setActStatus(int $act_status): self
+    public function setStatus(int $status): self
     {
-        $this->act_status = $act_status;
+        $this->status = $status;
 
         return $this;
     }
@@ -1272,10 +1273,10 @@ class Activity extends DbObject
         $role = $u->getRole();
 
         if (
-            $this->act_status != self::STATUS_ONGOING &&
-            $this->act_status != self::STATUS_FUTURE &&
-            $this->act_status != self::STATUS_INCOMPLETE &&
-            $this->act_status != self::STATUS_AWAITING_CREATION
+            $this->status != self::STATUS_ONGOING &&
+            $this->status != self::STATUS_FUTURE &&
+            $this->status != self::STATUS_INCOMPLETE &&
+            $this->status != self::STATUS_AWAITING_CREATION
         ) {
             return false;
         }

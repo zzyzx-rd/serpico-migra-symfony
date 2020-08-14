@@ -147,14 +147,14 @@ class Criterion extends DbObject
     public $cri_comment;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="cri_created_by", type="integer", nullable=true)
      */
-    public $cri_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="cri_inserted", type="datetime", nullable=true)
      */
-    public $cri_inserted;
+    public $inserted;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
@@ -335,8 +335,8 @@ class Criterion extends DbObject
         $this->cri_max_e_inertia = $cri_max_e_inertia;
         $this->cri_w_distratio = $cri_w_distratio;
         $this->cri_comment = $cri_comment;
-        $this->cri_createdBy = $cri_createdBy;
-        $this->cri_inserted = $cri_inserted;
+        $this->createdBy = $cri_createdBy;
+        $this->inserted = $cri_inserted;
         $this->cri_deleted = $cri_deleted;
         $this->stage = $stage;
         $this->organization = $organization;
@@ -649,12 +649,12 @@ class Criterion extends DbObject
 
     public function getInserted(): ?\DateTimeInterface
     {
-        return $this->cri_inserted;
+        return $this->inserted;
     }
 
     public function setInserted(?\DateTimeInterface $cri_inserted): self
     {
-        $this->cri_inserted = $cri_inserted;
+        $this->inserted = $cri_inserted;
 
         return $this;
     }

@@ -22,32 +22,32 @@ class Result extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="res_type", type="integer", nullable=true)
      */
-    public $res_type;
+    public $type;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="res_war", type="float", nullable=true)
      */
-    public $res_war;
+    public $weightedAbsoluteResult;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="res_ear", type="float", nullable=true)
      */
-    public $res_ear;
+    public $equalAbsoluteResult;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="res_wrr", type="float", nullable=true)
      */
-    public $res_wrr;
+    public $weightedRelativeResult;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="res_err", type="float", nullable=true)
      */
-    public $res_err;
+    public $equalRelativeResult;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="res_wsd", type="float", nullable=true)
      */
     public $res_wsd;
 
@@ -107,14 +107,14 @@ class Result extends DbObject
     public $res_res_der_gen;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="res_created_by", type="integer", nullable=true)
      */
-    public $res_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="res_inserted", type="datetime")
      */
-    public $res_inserted;
+    public $inserted;
 
     /**
      * @ManyToOne(targetEntity="Activity", inversedBy="results")
@@ -136,11 +136,13 @@ class Result extends DbObject
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="results")
+     * @JoinColumn(name="user_usr_id", referencedColumnName="usr_id")
      */
     public $user_usr;
 
     /**
      * @ORM\ManyToOne(targetEntity=ExternalUser::class, inversedBy="results")
+     * @JoinColumn(name="external_user_ext_usr_id", referencedColumnName="ext_id")
      */
     public $external_user_ext_usr;
 
@@ -200,11 +202,11 @@ class Result extends DbObject
         $external_user_ext_usr= null)
     {
         parent::__construct($id, $res_createdBy, new DateTime());
-        $this->res_type = $res_type;
-        $this->res_war = $res_war;
-        $this->res_ear = $res_ear;
-        $this->res_wrr = $res_wrr;
-        $this->res_err = $res_err;
+        $this->type = $res_type;
+        $this->weightedAbsoluteResult = $res_war;
+        $this->equalAbsoluteResult = $res_ear;
+        $this->weightedRelativeResult = $res_wrr;
+        $this->equalRelativeResult = $res_err;
         $this->res_wsd = $res_wsd;
         $this->res_esd = $res_esd;
         $this->res_wdf = $res_wdf;
@@ -217,7 +219,7 @@ class Result extends DbObject
         $this->res_ein_max = $res_ein_max;
         $this->res_wdr_gen = $res_wdr_gen;
         $this->res_res_der_gen = $res_res_der_gen;
-        $this->res_inserted = $res_inserted;
+        $this->inserted = $res_inserted;
         $this->activity = $activity;
         $this->stage = $stage;
         $this->criterion = $criterion;
@@ -230,62 +232,62 @@ class Result extends DbObject
         return $this->id;
     }
 
-    public function getResType(): ?int
+    public function getType(): ?int
     {
-        return $this->res_type;
+        return $this->type;
     }
 
-    public function setResType(?int $res_type): self
+    public function setType(?int $type): self
     {
-        $this->res_type = $res_type;
+        $this->type = $type;
 
         return $this;
     }
 
-    public function getResWar(): ?float
+    public function getWeightedAbsoluteResult(): ?float
     {
-        return $this->res_war;
+        return $this->weightedAbsoluteResult;
     }
 
-    public function setResWar(?float $res_war): self
+    public function setWeightedAbsoluteResult(?float $weightedAbsoluteResult): self
     {
-        $this->res_war = $res_war;
+        $this->weightedAbsoluteResult = $weightedAbsoluteResult;
 
         return $this;
     }
 
-    public function getResEar(): ?float
+    public function getEqualAbsoluteResult(): ?float
     {
-        return $this->res_ear;
+        return $this->equalAbsoluteResult;
     }
 
-    public function setResEar(?float $res_ear): self
+    public function setEqualAbsoluteResult(?float $equalAbsoluteResult): self
     {
-        $this->res_ear = $res_ear;
+        $this->equalAbsoluteResult = $equalAbsoluteResult;
 
         return $this;
     }
 
-    public function getResWrr(): ?float
+    public function getWeightedRelativeResult(): ?float
     {
-        return $this->res_wrr;
+        return $this->weightedRelativeResult;
     }
 
-    public function setResWrr(?float $res_wrr): self
+    public function setWeightedRelativeResult(?float $weightedRelativeResult): self
     {
-        $this->res_wrr = $res_wrr;
+        $this->weightedRelativeResult = $weightedRelativeResult;
 
         return $this;
     }
 
-    public function getResErr(): ?float
+    public function getEqualRelativeResult(): ?float
     {
-        return $this->res_err;
+        return $this->equalRelativeResult;
     }
 
-    public function setResErr(?float $res_err): self
+    public function setEqualRelativeResult(?float $equalRelativeResult): self
     {
-        $this->res_err = $res_err;
+        $this->equalRelativeResult = $equalRelativeResult;
 
         return $this;
     }
@@ -434,26 +436,15 @@ class Result extends DbObject
         return $this;
     }
 
-    public function getResCreatedBy(): ?int
+
+    public function getInserted(): ?\DateTimeInterface
     {
-        return $this->res_createdBy;
+        return $this->inserted;
     }
 
-    public function setResCreatedBy(?int $res_createdBy): self
+    public function setInserted(\DateTimeInterface $inserted): self
     {
-        $this->res_createdBy = $res_createdBy;
-
-        return $this;
-    }
-
-    public function getResInserted(): ?\DateTimeInterface
-    {
-        return $this->res_inserted;
-    }
-
-    public function setResInserted(\DateTimeInterface $res_inserted): self
-    {
-        $this->res_inserted = $res_inserted;
+        $this->inserted = $inserted;
 
         return $this;
     }

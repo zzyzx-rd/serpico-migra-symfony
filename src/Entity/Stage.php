@@ -78,9 +78,9 @@ class Stage extends DbObject
     public $stg_access_link;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="stg_status", type="integer")
      */
-    public $stg_status;
+    public $status;
 
     /**
      * @ORM\Column(type="string", length=255)
@@ -220,7 +220,7 @@ class Stage extends DbObject
     protected $survey;
 
     /**
-     * @ManyToOne(targetEntity="Activity", inversedBy="stages")
+     * @ManyToOne(targetEntity=Activity::class, inversedBy="stages")
      * @JoinColumn(name="activity_act_id", referencedColumnName="act_id",nullable=false)
      */
     protected $activity;
@@ -297,6 +297,7 @@ class Stage extends DbObject
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="stagesWhereMaster")
+     * @JoinColumn(name="usr_id", referencedColumnName="usr_id")
      */
     public $stg_master_user;
 
@@ -409,7 +410,7 @@ class Stage extends DbObject
         $this->stg_mode = $stg_mode;
         $this->stg_visibility = $stg_visibility;
         $this->stg_access_link = $stg_access_link;
-        $this->stg_status = $stg_status;
+        $this->status = $stg_status;
         $this->stg_desc = $stg_desc;
         $this->stg_progress = $stg_progress;
         $this->stg_weight = $stg_weight;
@@ -519,14 +520,14 @@ class Stage extends DbObject
         return $this;
     }
 
-    public function getStgStatus(): ?int
+    public function getStatus(): ?int
     {
-        return $this->stg_status;
+        return $this->status;
     }
 
-    public function setStgStatus(int $stg_status): self
+    public function setStatus(int $status): self
     {
-        $this->stg_status = $stg_status;
+        $this->status = $status;
 
         return $this;
     }

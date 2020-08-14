@@ -6,42 +6,43 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
-use Form\AddFirstAdminForm;
-use Form\AddUserPictureForm;
-use Form\DelegateActivityForm;
-use Form\FinalizeUserForm;
-use Form\RequestActivityForm;
-use Form\ContactForm;
-use Model\ActivityUser;
-use Model\TeamUser;
-use Model\Decision;
-use Model\Department;
-use Model\Organization;
-use Model\Contact;
-use Model\Ranking;
-use Model\RankingTeam;
-use Model\Result;
-use Model\Stage;
-use Model\Criterion;
-use Model\CriterionName;
-use Model\OrganizationUserOption;
-use Form\AddProcessForm;
-use Form\PasswordDefinitionForm;
-use Form\SignUpForm;
-use Form\UpdateWorkerIndividualForm;
-use Form\UserPublicForm;
+use App\Form\AddFirstAdminForm;
+use App\Form\AddUserPictureForm;
+use App\Form\DelegateActivityForm;
+use App\Form\FinalizeUserForm;
+use App\Form\RequestActivityForm;
+use App\Form\ContactForm;
+use App\Entity\ActivityUser;
+use App\Entity\TeamUser;
+use App\Entity\Decision;
+use App\Entity\Department;
+use App\Entity\Organization;
+use App\Entity\Contact;
+use App\Entity\Ranking;
+use App\Entity\RankingTeam;
+use App\Entity\Result;
+use App\Entity\Stage;
+use App\Entity\Criterion;
+use App\Entity\CriterionName;
+use App\Entity\OrganizationUserOption;
+use App\Form\AddProcessForm;
+use App\Form\PasswordDefinitionForm;
+use App\Form\SignUpForm;
+use App\Form\UpdateWorkerIndividualForm;
+use App\Form\UserPublicForm;
+use phpDocumentor\Reflection\Type;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Model\User;
-use Model\Mail;
-use Model\Position;
-use Model\Activity;
-use Model\InstitutionProcess;
-use Model\Process;
-use Model\WorkerFirm;
-use Model\WorkerIndividual;
-use Repository\UserRepository;
+use App\Entity\User;
+use App\Entity\Mail;
+use App\Entity\Position;
+use App\Entity\Activity;
+use App\Entity\InstitutionProcess;
+use App\Entity\Process;
+use App\Entity\WorkerFirm;
+use App\Entity\WorkerIndividual;
+use App\Repository\UserRepository;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -1253,7 +1254,7 @@ class UserController extends MasterController
         }
 
         $this->em = self::getEntityManager();
-        /** @var FormFactoryInterface */
+        /** @var App\FormFactoryInterface */
         $formFactory = $app['form.factory'];
         $pictureForm = $formFactory->create(AddUserPictureForm::class);
         $pictureForm->handleRequest($request);
@@ -1379,6 +1380,7 @@ class UserController extends MasterController
      * @throws OptimisticLockException
      * @Route("/contact/{type}/{isAborted}", name="contact_us")
      * @Route("/contact", name="contact")
+     * To do à la fin
      */
     public function contactAction(Request $request,Application $app){
         //Insert Grades
@@ -1513,7 +1515,7 @@ class UserController extends MasterController
 
         $user = $this->security->getUser();
         if (!$user) {
-            return $this->redirect('home_welcome');
+            return $this->redirectToRoute('home_welcome');
         }
         $repoA = $this->em->getRepository(Activity::class);
         $repoO = $this->em->getRepository(Organization::class);
@@ -1526,11 +1528,9 @@ class UserController extends MasterController
         $repoTU = $this->em->getRepository(TeamUser::class);
         $repoC = $this->em->getRepository(Criterion::class);
         $repoCN = $this->em->getRepository(CriterionName::class);
-        $orgId = $user->getOrgId();
-        $organization = $repoO->findOneById($orgId);
-        $orgHasActiveAdmin =$organization->hasActiveAdmin();
+        $organization = $user->getOrganization();
+        $orgHasActiveAdmin =$repoO->hasActiveAdmin($organization);
         $orgOptions = $organization->getOptions();
-
         foreach($orgOptions as $orgOption){
             if($orgOption->getOName()->getName() == 'enabledUserSeeRanking'){
                 $enabledUserSeeRanking = $orgOption->isOptionTrue();
@@ -1545,7 +1545,7 @@ class UserController extends MasterController
         $myHotStageParticipations = new ArrayCollection;
 
         // As there are no date listeners, check if we need to refresh organization activity status
-        $orgUsers = $repoU->findByOrgId($orgId);
+        $orgUsers = $repoU->findByOrganization($organization);
 
         $isRefreshed = false;
         foreach ($orgUsers as $orgUser) {
@@ -1571,10 +1571,11 @@ class UserController extends MasterController
             $firstco = 1;
         }
         $user->setLastConnected(new \DateTime);
-        $user->setRememberMeToken($_COOKIE['REMEMBERME']);
+        //TODO : reset le rememberme dans le twig
+//        $user->setRememberMeToken($_COOKIE['REMEMBERME']);
         $this->em->persist($user);
         $this->em->flush();
-        $totalParticipations = new ArrayCollection($repoAU->findBy(['usrId' => $user->getId()], ['status' => 'ASC', 'activity' => 'ASC', 'stage' => 'ASC']));
+        $totalParticipations = new ArrayCollection($repoAU->findBy(['user_usr' => $user], ['status' => 'ASC', 'activity' => 'ASC', 'stage' => 'ASC']));
 
         // We consider each graded activity as having at least one releasable criterion an nothing more
         $nbPublishedActivities = 0;
@@ -1707,19 +1708,19 @@ class UserController extends MasterController
         }
 
         // If user is a external, no ranking is computed for him
-        if ($user->isInternal()) {
-            if ($repoR->findOneBy(['type' => 1, 'usrId' => $user->getId()]) != null) {
-                $userWPerfRanking = $repoRK->findOneBy(['dType' => 'P', 'wType' => 'W', 'usrId' => $user->getId(), 'period' => 0, 'frequency' => 'D']);
-                $userWDevRatioRanking = $repoRK->findOneBy(['dType' => 'D', 'wType' => 'W', 'usrId' => $user->getId(), 'period' => 0, 'frequency' => 'D']);
-            }
+        if ($user->isInternal() && $repoR->findOneBy(['type' => 1, 'user_usr' => $user]) != null) {
+            $userWPerfRanking = $repoRK->findOneBy(['dType' => 'P', 'wType' => 'W', 'usrId' => $user->getId(), 'period' => 0, 'frequency' => 'D']);
+            $userWDevRatioRanking = $repoRK->findOneBy(['dType' => 'D', 'wType' => 'W', 'usrId' => $user->getId(), 'period' => 0, 'frequency' => 'D']);
         }
-        MasterController::sendStageDeadlineMails();
-        MasterController::sendOrganizationTestingReminders();
-        MasterController::updateProgressStatus();
+        //TODO trouver pourquoi çà merde au niveau des stages
+//        MasterController::sendStageDeadlineMails();
+//        MasterController::sendOrganizationTestingReminders();
+//        MasterController::updateProgressStatus();
 
         $teamParticipations = [];
-        $teamUserInclusions = $repoTU->findByUsrId($user->getId());
+        $teamUserInclusions = $repoTU->findByUser($user);
         foreach($teamUserInclusions as $teamUserInclusion){
+            dd( $teamUserInclusion instanceof TeamUser);
             $team = $teamUserInclusion->getTeam();
             $teamParticipation['name'] = $team->getName();
             $teamParticipation['id'] = $team->getId();
@@ -1737,7 +1738,7 @@ class UserController extends MasterController
         $topCritIds = [];
         $topCriterionIds = [];
 
-        $topCriteriaResults = $repoR->findBy(['usrId' => $user->getId()], ['weightedRelativeResult'=>'DESC']);
+        $topCriteriaResults = $repoR->findBy(['user_usr' => $user], ['weightedRelativeResult'=>'DESC']);
         foreach($topCriteriaResults as $topCriteriaResult){
             if ($topCriteriaResult->getCriterion() != null && $topCriteriaResult->getWeightedRelativeResult() != null){
                 $topCritNameIds = $repoC->findBy(['id' => $topCriteriaResult->getCriterion()]);
@@ -1784,7 +1785,7 @@ class UserController extends MasterController
 
         $myHotStageParticipations = array_reverse($myHotStageParticipations->getValues());
 
-        return $app['twig']->render('my_profile.html.twig', [
+        return $this->render('my_profile.html.twig', [
             'firstConnection' => $firstco,
             'orgHasActiveAdmin' => $orgHasActiveAdmin,
             'addFirstAdminForm' => $addFirstAdminFormView,
@@ -1796,7 +1797,7 @@ class UserController extends MasterController
             'wRelPerfRelRanking' => isset($userWPerfRanking) ? $userWPerfRanking->getRelResult() : null,
             'wDevRatioRelRanking' => isset($userWDevRatioRanking) ? $userWDevRatioRanking->getRelResult() : null,
             'wDevRatioAbsRanking' => isset($userWDevRatioRanking) ? $userWDevRatioRanking->getAbsResult() : null,
-            'nbOrgUsers' => count($repoU->findBy(['orgId' => $orgId, 'deleted' => null, 'internal' => 1])),
+            'nbOrgUsers' => count($repoU->findBy(['organization_org'=> $organization, 'deleted' => null, 'internal' => 1])),
             'nbEvaluatedPerfUsers' => count($repoRK->findBy(['organization' => $organization, 'dType' => 'P', 'wType' => 'W', 'period' => 0, 'frequency' => 'D'])),
             'nbEvaluatedDistUsers' => count($repoRK->findBy(['organization' => $organization, 'dType' => 'D', 'wType' => 'W', 'period' => 0, 'frequency' => 'D'])),
             'myHotStageParticipations' => $myHotStageParticipations,
@@ -1815,14 +1816,16 @@ class UserController extends MasterController
             'nbUpcomingActivities' => $nbUpcomingActivities,
             'nbResultsActivities' => $nbResultsActivities,
             'nbPublishedActivities' => $nbPublishedActivities,
-            'error' => $app['security.last_error']($request),
-            'last_username' => $app['session']->get('security.last_username'),
-            'token' => $app['security.token_storage']->getToken(),
+            'error' => null,
+            //TODO get les errors (et check le coup du last user, et gérer les crsf token
+            'last_username' => $user->getUsername(),
+            'token' => null,
             'teamParticipations' => $teamParticipations,
             'topCriteria' => $topCriteria,
             'topPerformingCriteria' => $topPerformingCriteria,
             'ungradedTargets' => $ungradedTargets,
             'enabledUserSeeRanking' => $enabledUserSeeRanking ?? false,
+            'userpicture' => 'lib/img/' . ($user->getPicture() ?: 'no-picture.png'),
         ]);
     }
 

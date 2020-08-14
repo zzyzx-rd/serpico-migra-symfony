@@ -28,14 +28,14 @@ class TeamUser extends DbObject
     public $tus_leader;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="tus_created_by", type="integer")
      */
-    public $tus_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="tus_inserted", type="datetime")
      */
-    public $tus_inserted;
+    public $inserted;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
@@ -55,12 +55,13 @@ class TeamUser extends DbObject
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="teamUsers")
+     * @JoinColumn(name="user_usr_id", referencedColumnName="usr_id")
      */
     public $user_usr;
 
     /**
      * @ORM\ManyToOne(targetEntity=ExternalUser::class, inversedBy="teamUsers")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(name="external_user_ext_usr_id", referencedColumnName="ext_id", nullable=false)
      */
     public $external_user_ext_id;
 
@@ -89,7 +90,7 @@ class TeamUser extends DbObject
     {
         parent::__construct($id,$tus_createdBy , new DateTime());
         $this->tus_leader = $tus_leader;
-        $this->tus_inserted = $tus_inserted;
+        $this->inserted = $tus_inserted;
         $this->tus_deleted = $tus_deleted;
         $this->tus_is_deleted = $tus_is_deleted;
         $this->team = $team;
@@ -116,12 +117,12 @@ class TeamUser extends DbObject
 
     public function getInserted(): ?\DateTimeInterface
     {
-        return $this->tus_inserted;
+        return $this->inserted;
     }
 
     public function setInserted(\DateTimeInterface $tus_inserted): self
     {
-        $this->tus_inserted = $tus_inserted;
+        $this->inserted = $tus_inserted;
 
         return $this;
     }

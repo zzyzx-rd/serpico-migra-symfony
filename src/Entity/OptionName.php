@@ -25,9 +25,9 @@ class OptionName extends DbObject
     public $ona_type;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="ona_name", type="string", length=255)
      */
-    public $ona_name;
+    public $name;
 
     /**
      * @ORM\Column(type="string", length=255)
@@ -35,14 +35,14 @@ class OptionName extends DbObject
     public $ona_description;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="ona_created_by", type="integer", nullable=true)
      */
-    public $ona_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="ona_inserted", type="datetime")
      */
-    public $ona_inserted;
+    public $inserted;
 
     /**
      * OptionName constructor.
@@ -64,9 +64,9 @@ class OptionName extends DbObject
         parent::__construct($id, $ona_createdBy, new DateTime());
 
         $this->ona_type = $ona_type;
-        $this->ona_name = $ona_name;
+        $this->name = $ona_name;
         $this->ona_description = $ona_description;
-        $this->ona_inserted = $ona_inserted;
+        $this->inserted = $ona_inserted;
     }
 
 
@@ -75,50 +75,50 @@ class OptionName extends DbObject
         return $this->id;
     }
 
-    public function getOnaType(): ?int
+    public function getType(): ?int
     {
         return $this->ona_type;
     }
 
-    public function setOnaType(int $ona_type): self
+    public function setType(int $ona_type): self
     {
         $this->ona_type = $ona_type;
 
         return $this;
     }
 
-    public function getOnaName(): ?string
+    public function getName(): ?string
     {
-        return $this->ona_name;
+        return $this->name;
     }
 
-    public function setOnaName(string $ona_name): self
+    public function setName(string $ona_name): self
     {
-        $this->ona_name = $ona_name;
+        $this->name = $ona_name;
 
         return $this;
     }
 
-    public function getOnaDescription(): ?string
+    public function getDescription(): ?string
     {
         return $this->ona_description;
     }
 
-    public function setOnaDescription(string $ona_description): self
+    public function setDescription(string $ona_description): self
     {
         $this->ona_description = $ona_description;
 
         return $this;
     }
 
-    public function getOnaInserted(): ?string
+    public function getInserted(): ?string
     {
-        return $this->ona_inserted;
+        return $this->inserted;
     }
 
-    public function setOnaInserted(string $ona_inserted): self
+    public function setInserted(string $ona_inserted): self
     {
-        $this->ona_inserted = $ona_inserted;
+        $this->inserted = $ona_inserted;
 
         return $this;
     }

@@ -23,14 +23,14 @@ class Ranking extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="string", length=1)
+     * @ORM\Column(name="rnk_dtype", type="string", length=1)
      */
-    public $rnk_dtype;
+    public $dType;
 
     /**
-     * @ORM\Column(type="string", length=1)
+     * @ORM\Column(name="rnk_wtype", type="string", length=1)
      */
-    public $rnk_wtype;
+    public $wType;
 
     /**
      * @ORM\Column(type="integer")
@@ -43,14 +43,14 @@ class Ranking extends DbObject
     public $rnk_rel_result;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="rnk_period", type="integer")
      */
-    public $rnk_period;
+    public $period;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="rnk_freq", type="integer")
      */
-    public $rnk_freq;
+    public $frequency;
 
     /**
      * @ORM\Column(type="float")
@@ -63,14 +63,14 @@ class Ranking extends DbObject
     public $rnk_series_pop;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="rnk_created_by", type="integer", nullable=true)
      */
-    public $rnk_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="rnk_inserted", type="datetime")
      */
-    public $rnk_inserted;
+    public $inserted;
 
     /**
      * @ORM\Column(type="datetime")
@@ -103,6 +103,7 @@ class Ranking extends DbObject
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
+     * @JoinColumn(name="rnk_user_usr_id", referencedColumnName="usr_id")
      */
     public $rnk_user_usr;
 
@@ -146,15 +147,15 @@ class Ranking extends DbObject
         $criterion = null)
     {
         parent::__construct($id, $rnk_createdBy, new DateTime());
-        $this->rnk_dtype = $rnk_dtype;
-        $this->rnk_wtype = $rnk_wtype;
+        $this->dType = $rnk_dtype;
+        $this->wType = $rnk_wtype;
         $this->rnk_abs_result = $rnk_abs_result;
         $this->rnk_rel_result = $rnk_rel_result;
-        $this->rnk_period = $rnk_period;
-        $this->rnk_freq = $rnk_freq;
+        $this->period = $rnk_period;
+        $this->frequency = $rnk_freq;
         $this->rnk_value = $rnk_value;
         $this->rnk_series_pop = $rnk_series_pop;
-        $this->rnk_inserted = $rnk_inserted;
+        $this->inserted = $rnk_inserted;
         $this->rnk_updated = $rnk_updated;
         $this->activity = $activity;
         $this->stage = $stage;
@@ -169,26 +170,26 @@ class Ranking extends DbObject
         return $this->id;
     }
 
-    public function getRnkDtype(): ?string
+    public function getDType(): ?string
     {
-        return $this->rnk_dtype;
+        return $this->dType;
     }
 
-    public function setRnkDtype(string $rnk_dtype): self
+    public function setDType(string $dType): self
     {
-        $this->rnk_dtype = $rnk_dtype;
+        $this->dType = $dType;
 
         return $this;
     }
 
-    public function getRnkWtype(): ?string
+    public function getWType(): ?string
     {
-        return $this->rnk_wtype;
+        return $this->wType;
     }
 
-    public function setRnkWtype(string $rnk_wtype): self
+    public function setWType(string $wType): self
     {
-        $this->rnk_wtype = $rnk_wtype;
+        $this->wType = $wType;
 
         return $this;
     }
@@ -217,26 +218,26 @@ class Ranking extends DbObject
         return $this;
     }
 
-    public function getRnkPeriod(): ?int
+    public function getPeriod(): ?int
     {
-        return $this->rnk_period;
+        return $this->period;
     }
 
-    public function setRnkPeriod(int $rnk_period): self
+    public function setPeriod(int $period): self
     {
-        $this->rnk_period = $rnk_period;
+        $this->period = $period;
 
         return $this;
     }
 
-    public function getRnkFreq(): ?int
+    public function getFrequency(): ?int
     {
-        return $this->rnk_freq;
+        return $this->frequency;
     }
 
-    public function setRnkFreq(int $rnk_freq): self
+    public function setFrequency(int $frequency): self
     {
-        $this->rnk_freq = $rnk_freq;
+        $this->frequency = $frequency;
 
         return $this;
     }
@@ -265,26 +266,15 @@ class Ranking extends DbObject
         return $this;
     }
 
-    public function getRnkCreatedBy(): ?int
+
+    public function getInserted(): ?\DateTimeInterface
     {
-        return $this->rnk_createdBy;
+        return $this->inserted;
     }
 
-    public function setRnkCreatedBy(?int $rnk_createdBy): self
+    public function setInserted(\DateTimeInterface $inserted): self
     {
-        $this->rnk_createdBy = $rnk_createdBy;
-
-        return $this;
-    }
-
-    public function getRnkInserted(): ?\DateTimeInterface
-    {
-        return $this->rnk_inserted;
-    }
-
-    public function setRnkInserted(\DateTimeInterface $rnk_inserted): self
-    {
-        $this->rnk_inserted = $rnk_inserted;
+        $this->inserted = $inserted;
 
         return $this;
     }

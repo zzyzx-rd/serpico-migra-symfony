@@ -34,8 +34,6 @@ final class InstitutionController extends MasterController
         if (!$this->user) {
             return $this->redirectToRoute('login');
         }
-
-        $this->em           = self::getEntityManager();
         $this->org          = $this->user->getOrganization();
         $this->activityRepo = $this->em->getRepository(Activity::class);
     }

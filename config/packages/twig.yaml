@@ -3,3 +3,4 @@ twig:
     globals:
         global: '@App\globalVar'
         freeAccessRoutes: '/fr'
+        userRepo: '@App\Repository\UserRepository'

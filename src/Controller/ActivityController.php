@@ -469,104 +469,104 @@ class ActivityController extends MasterController
 
     // 1st step - criterion definition (limited to activity manager)
 
-    /**
-     * @param Request $request
-     * @param Application $app
-     * @param $elmt
-     * @param $elmtId
-     * @return RedirectResponse
-     * @Route("/{elmt}/{elmtId}/parameters", name="oldActivityDefinition")
-     */
-    public function oldAddActivityDefinition(Request $request, Application $app, $elmt, $elmtId)
-    {
-        $user = self::getAuthorizedUser();
-        if (!$user) {
-            return $this->redirectToRoute('login');
-        }
-
-        $em = self::getEntityManager();
-        $userRole = $user->getRole();
-        $organization = $user->getOrganization();
-        /** @var Activity|TemplateActivity|null */
-        $activity = $em->getRepository(
-            $elmt === 'activity' ? Activity::class : TemplateActivity::class
-        )->find($elmtId);
-        $userIsNotRoot = $userRole != 4;
-        $userIsAdmin = $userRole == 1;
-        $userIsAM = $userRole == 2;
-        $userIsCollab = $userRole == 3;
-        $hasPageAccess = true;
-
-        if (!$activity) {
-            $errorMsg = 'activityDoNotExist';
-            $hasPageAccess = false;
-        } else {
-            $simplifiedActivity = count($activity->getStages()) == 1 && count($activity->getStages()->first()->getCriteria()) == 1;
-            $actOrganization = $activity->getOrganization();
-            $actBelongsToDifferentOrg = $organization != $actOrganization;
-
-            if ($activity instanceof Activity) {
-                $activeModifiableStages = $activity->getActiveModifiableStages();
-                $actHasNoActiveModifiableStages = count($activeModifiableStages) == 0;
-
-                if ($userIsNotRoot and ($actBelongsToDifferentOrg or !$userIsAdmin and $actHasNoActiveModifiableStages)) {
-                    if ($userIsNotRoot || $actBelongsToDifferentOrg) {
-                        $errorMsg = 'externalViolation';
-                    } else {
-                        $errorMsg = 'unmodifiableActivity';
-                    }
-                    $hasPageAccess = false;
-                }
-            } else {
-                if ($userIsCollab or ($userIsAM or $userIsAdmin) and $actBelongsToDifferentOrg) {
-                    $hasPageAccess = false;
-                }
-            }
-        }
-
-        if (!$hasPageAccess) {
-            return $app['twig']->render('errors/403.html.twig', [
-                'errorMsg' => $errorMsg,
-                'returnRoute' => 'myActivities',
-            ]);
-        } else {
-            /** @var FormFactory */
-            $formFactory = $app['form.factory'];
-            $incomplete = $activity->getStages()->first() == null;
-            $parametersForm = $formFactory->create(
-                AddActivityCriteriaForm::class,
-                null,
-                [
-                    'standalone' => true,
-                    'activity' => $activity,
-                    'incomplete' => $incomplete,
-                    'organization' => $organization,
-                ]
-            );
-            $parametersForm->handleRequest($request);
-            $createTemplateForm = null;
-            $createCriterionForm = null;
-            if ($simplifiedActivity) {
-                $createCriterionForm = $formFactory->create(CreateCriterionForm::class, null, ['standalone' => true]);
-                $createCriterionForm->handleRequest($request);
-            }
-            if ($elmt == 'activity' && $activity->getTemplate() == null) {
-                $createTemplateForm = $formFactory->create(AddTemplateForm::class, null, ['standalone' => true]);
-                $createTemplateForm->handleRequest($request);
-            }
-
-            return $app['twig']->render('activity_create_definition_old.twig',
-                [
-                    'form' => $parametersForm->createView(),
-                    'activity' => $activity,
-                    'incomplete' => $incomplete,
-                    'createTemplateForm' => ($createTemplateForm === null) ?: $createTemplateForm->createView(),
-                    'createCriterionForm' => ($createCriterionForm === null) ?: $createCriterionForm->createView(),
-                    'icons' => $em->getRepository(Icon::class)->findAll(),
-                ]
-            );
-        }
-    }
+//    /**
+//     * @param Request $request
+//     * @param Application $app
+//     * @param $elmt
+//     * @param $elmtId
+//     * @return RedirectResponse
+//     * @Route("/{elmt}/{elmtId}/parameters", name="oldActivityDefinition")
+//     */
+//    public function oldAddActivityDefinition(Request $request, Application $app, $elmt, $elmtId)
+//    {
+//        $user = self::getAuthorizedUser();
+//        if (!$user) {
+//            return $this->redirectToRoute('login');
+//        }
+//
+//        $em = self::getEntityManager();
+//        $userRole = $user->getRole();
+//        $organization = $user->getOrganization();
+//        /** @var Activity|TemplateActivity|null */
+//        $activity = $em->getRepository(
+//            $elmt === 'activity' ? Activity::class : TemplateActivity::class
+//        )->find($elmtId);
+//        $userIsNotRoot = $userRole != 4;
+//        $userIsAdmin = $userRole == 1;
+//        $userIsAM = $userRole == 2;
+//        $userIsCollab = $userRole == 3;
+//        $hasPageAccess = true;
+//
+//        if (!$activity) {
+//            $errorMsg = 'activityDoNotExist';
+//            $hasPageAccess = false;
+//        } else {
+//            $simplifiedActivity = count($activity->getStages()) == 1 && count($activity->getStages()->first()->getCriteria()) == 1;
+//            $actOrganization = $activity->getOrganization();
+//            $actBelongsToDifferentOrg = $organization != $actOrganization;
+//
+//            if ($activity instanceof Activity) {
+//                $activeModifiableStages = $activity->getActiveModifiableStages();
+//                $actHasNoActiveModifiableStages = count($activeModifiableStages) == 0;
+//
+//                if ($userIsNotRoot and ($actBelongsToDifferentOrg or !$userIsAdmin and $actHasNoActiveModifiableStages)) {
+//                    if ($userIsNotRoot || $actBelongsToDifferentOrg) {
+//                        $errorMsg = 'externalViolation';
+//                    } else {
+//                        $errorMsg = 'unmodifiableActivity';
+//                    }
+//                    $hasPageAccess = false;
+//                }
+//            } else {
+//                if ($userIsCollab or ($userIsAM or $userIsAdmin) and $actBelongsToDifferentOrg) {
+//                    $hasPageAccess = false;
+//                }
+//            }
+//        }
+//
+//        if (!$hasPageAccess) {
+//            return $app['twig']->render('errors/403.html.twig', [
+//                'errorMsg' => $errorMsg,
+//                'returnRoute' => 'myActivities',
+//            ]);
+//        } else {
+//            /** @var FormFactory */
+//            $formFactory = $app['form.factory'];
+//            $incomplete = $activity->getStages()->first() == null;
+//            $parametersForm = $formFactory->create(
+//                AddActivityCriteriaForm::class,
+//                null,
+//                [
+//                    'standalone' => true,
+//                    'activity' => $activity,
+//                    'incomplete' => $incomplete,
+//                    'organization' => $organization,
+//                ]
+//            );
+//            $parametersForm->handleRequest($request);
+//            $createTemplateForm = null;
+//            $createCriterionForm = null;
+//            if ($simplifiedActivity) {
+//                $createCriterionForm = $formFactory->create(CreateCriterionForm::class, null, ['standalone' => true]);
+//                $createCriterionForm->handleRequest($request);
+//            }
+//            if ($elmt == 'activity' && $activity->getTemplate() == null) {
+//                $createTemplateForm = $formFactory->create(AddTemplateForm::class, null, ['standalone' => true]);
+//                $createTemplateForm->handleRequest($request);
+//            }
+//
+//            return $app['twig']->render('activity_create_definition_old.twig',
+//                [
+//                    'form' => $parametersForm->createView(),
+//                    'activity' => $activity,
+//                    'incomplete' => $incomplete,
+//                    'createTemplateForm' => ($createTemplateForm === null) ?: $createTemplateForm->createView(),
+//                    'createCriterionForm' => ($createCriterionForm === null) ?: $createCriterionForm->createView(),
+//                    'icons' => $em->getRepository(Icon::class)->findAll(),
+//                ]
+//            );
+//        }
+//    }
 
     // Change activity complexity after user has clicked on the add phases/stages button
 
@@ -1186,202 +1186,202 @@ class ActivityController extends MasterController
     }
      */
 
-    /**
-     * @param Request $request
-     * @param Application $app
-     * @param $elmt
-     * @param $elmtId
-     * @return RedirectResponse
-     * @throws ORMException
-     * @throws OptimisticLockException
-     * @Route("/{elmt}/{elmtId}/participants", name="activityParticipants")
-     */
-    public function newAddActivityParticipant(Request $request, Application $app, $elmt, $elmtId)
-    {
-        $user = self::getAuthorizedUser();
-        if (!$user) {
-            return $this->redirectToRoute('login');
-        }
-        $userRole = $user->getRole();
-        $em = self::getEntityManager();
-        $elmtIsActivity = $elmt === 'activity';
-        /** @var Activity|TemplateActivity */
-        $activity = $em->getRepository(
-            $elmt === 'activity' ? Activity::class : TemplateActivity::class
-        )->find($elmtId);
-
-        $organization = $user->getOrganization();
-        /** @var Organization */
-        $actOrganization = $activity->getOrganization();
-        $activeModifiableStages = $activity->getActiveModifiableStages();
-
-        $userIsNotRoot = $userRole != 4;
-        $userIsAdmin = $userRole == 1;
-        $userIsAM = $userRole == 2;
-        $userIsCollab = $userRole == 3;
-        $actBelongsToDifferentOrg = $organization != $actOrganization;
-        $actHasNoActiveModifiableStages = count($activeModifiableStages) == 0;
-        $hasPageAccess = true;
-        if ($elmtIsActivity) {
-            if ($userIsNotRoot and ($actBelongsToDifferentOrg or !$userIsAdmin and $actHasNoActiveModifiableStages)) {
-                $hasPageAccess = false;
-            }
-        } else {
-            if ($userIsCollab or ($userIsAM or $userIsAdmin) and $actBelongsToDifferentOrg) {
-                $hasPageAccess = false;
-            }
-        }
-
-        if (!$hasPageAccess) {
-            return $app['twig']->render('errors/403.html.twig');
-        }
-
-        $mailSettings = [];
-
-        /** @var FormFactory */
-        $formFactory = $app['form.factory'];
-        $manageStageParticipantsForm = $formFactory->create(ManageStageParticipantsForm::class, $activity, ['standalone' => true, 'elmt' => $elmt, 'organization' => $organization]);
-        $manageStageParticipantsForm->handleRequest($request);
-        $createTemplateForm = null;
-        if ($elmt == 'activity' && $activity->getTemplate() == null) {
-            $createTemplateForm = $formFactory->create(AddTemplateForm::class, null, ['standalone' => true]);
-            $createTemplateForm->handleRequest($request);
-        }
-
-        if ($manageStageParticipantsForm->isSubmitted()) {
-
-            // If user has clicked in a button, but activity has been finalized (due to participant deletion)
-            if ($elmt == 'activity' && $activity->getStatus() >= 2) {
-                return $this->redirectToRoute('myActivities');
-            }
-
-            if ($manageStageParticipantsForm->get('finalize')->isClicked() && $elmt == 'activity') {
-
-                $nbTotalStages = count($activity->getStages());
-
-                foreach ($activity->getActiveModifiableStages() as $stage) {
-                    // add newly added people that were not AJAX-added
-                    $newlyAddedParticipantsCollection = $stage->getUniqueParticipations()->filter(function (ActivityUser $u) {
-                        return !$u->getId();
-                    });
-                    /** @var ActivityUser[] */
-                    $newlyAddedParticipants = $newlyAddedParticipantsCollection->getValues();
-
-                    foreach ($newlyAddedParticipants as $participant) {
-                        foreach ($stage->getCriteria() as $c) {
-                            $theParticipant = clone $participant;
-                            $theParticipant->setCriterion($c);
-                            $em->persist($theParticipant);
-                        }
-                    }
-                    $em->flush();
-
-                    // 1 - Sending participants mails if necessary
-                    // Parameter for subject mail title
-                    if ($nbTotalStages > 1) {
-                        $mailSettings['stage'] = $stage;
-                    } else {
-                        $mailSettings['activity'] = $activity;
-                    }
-
-                    $notYetMailedParticipants = $stage->getUniqueParticipations()->filter(function (ActivityUser $u) {
-                        return !$u->getisMailed();
-                    });
-                    /** @var ActivityUser[] */
-                    $participants = $notYetMailedParticipants->getValues();
-
-                    foreach ($participants as $participant) {
-                        self::sendMail($app, [$participant->getDirectUser()], 'activityParticipation', $mailSettings);
-                        $participant->setIsMailed(true);
-                        $em->persist($participant);
-                    }
-                    $em->flush();
-                }
-
-                if ($activity->getIsFinalized() == false) {
-                    $activity->setIsFinalized(true);
-                    $em->persist($activity);
-                }
-                $em->flush();
-
-            }
-
-            if ($elmt == 'activity') {
-                if ($activity->getIsFinalized()) {
-
-                    // 2 - Updating activity status if necessary
-
-                    $tomorrowDate = new \DateTime;
-                    $tomorrowDate->add(new \DateInterval('P1D'));
-
-                    $yesterdayDate = new \DateTime;
-                    $yesterdayDate->sub(new \DateInterval('P1D'));
-                    $k = 0;
-                    $p = 0;
-
-                    foreach ($activity->getActiveStages() as $stage) {
-                        if ($stage->getGStartDate() > $tomorrowDate) {
-                            $k++;
-                        }
-                        if ($stage->getGEndDate() <= $yesterdayDate) {
-                            $p++;
-                        }
-                    }
-
-                    $nbActiveStages = count($activity->getActiveStages());
-
-                    // If every grading stage starts in the future...
-                    if ($k == $nbActiveStages) {
-                        $activity->setStatus(0);
-                    } else {
-                        //..else if not every grading stage ends in the past...
-                        if ($p != $nbActiveStages) {
-                            $activity->setStatus(1);
-                        } else {
-                            $activity->setStatus(-1);
-                        }
-                    }
-
-                }
-            }
-
-            $em->flush();
-
-            $parameters = ['elmt' => $elmt, 'elmtId' => $elmtId];
-            if (array_key_exists('participant', $_POST['manage_stage_participants_form'])) {
-                $path = 'activityParticipants';
-            } else if (array_key_exists('parameter', $_POST['manage_stage_participants_form'])) {
-                $path = 'oldActivityDefinition';
-            } else if ($manageStageParticipantsForm->get('back')->isClicked() || array_key_exists('save', $_POST['manage_stage_participants_form']) || $manageStageParticipantsForm->get('finalize')->isClicked()) {
-                $path = ($elmt == 'activity') ? 'myActivities' : 'manageTemplates';
-                $parameters = [];
-            } else if (array_key_exists('stage', $_POST['manage_stage_participants_form'])) {
-                $path = 'activityStages';
-            } else if ($manageStageParticipantsForm->get('previous')->isClicked() || array_key_exists('criterion', $_POST['manage_stage_participants_form'])) {
-                $path = 'activityCriteria';
-            }
-
-            return $app->redirect($app['url_generator']->generate($path, $parameters));
-        }
-
-        /** @var UserRepository */
-        $userRepo = $em->getRepository(User::class);
-        $usersWithPic[0] = '/lib/img/no-picture.png';
-        foreach ($userRepo->usersWithPicture() as $u) {
-            $id = $u->getId();
-            $pic = $u->getPicture();
-            $usersWithPic[$id] = "/lib/img/$pic";
-        }
-
-        return $app['twig']->render(
-            'activity_define_participants.twig',
-            [
-                'form' => $manageStageParticipantsForm->createView(),
-                'createTemplateForm' => ($createTemplateForm === null) ?: $createTemplateForm->createView(),
-                'userPics' => json_encode($usersWithPic),
-            ]
-        );
-    }
+//    /**
+//     * @param Request $request
+//     * @param Application $app
+//     * @param $elmt
+//     * @param $elmtId
+//     * @return RedirectResponse
+//     * @throws ORMException
+//     * @throws OptimisticLockException
+//     * @Route("/{elmt}/{elmtId}/participants", name="activityParticipants")
+//     */
+//    public function newAddActivityParticipant(Request $request, Application $app, $elmt, $elmtId)
+//    {
+//        $user = self::getAuthorizedUser();
+//        if (!$user) {
+//            return $this->redirectToRoute('login');
+//        }
+//        $userRole = $user->getRole();
+//        $em = self::getEntityManager();
+//        $elmtIsActivity = $elmt === 'activity';
+//        /** @var Activity|TemplateActivity */
+//        $activity = $em->getRepository(
+//            $elmt === 'activity' ? Activity::class : TemplateActivity::class
+//        )->find($elmtId);
+//
+//        $organization = $user->getOrganization();
+//        /** @var Organization */
+//        $actOrganization = $activity->getOrganization();
+//        $activeModifiableStages = $activity->getActiveModifiableStages();
+//
+//        $userIsNotRoot = $userRole != 4;
+//        $userIsAdmin = $userRole == 1;
+//        $userIsAM = $userRole == 2;
+//        $userIsCollab = $userRole == 3;
+//        $actBelongsToDifferentOrg = $organization != $actOrganization;
+//        $actHasNoActiveModifiableStages = count($activeModifiableStages) == 0;
+//        $hasPageAccess = true;
+//        if ($elmtIsActivity) {
+//            if ($userIsNotRoot and ($actBelongsToDifferentOrg or !$userIsAdmin and $actHasNoActiveModifiableStages)) {
+//                $hasPageAccess = false;
+//            }
+//        } else {
+//            if ($userIsCollab or ($userIsAM or $userIsAdmin) and $actBelongsToDifferentOrg) {
+//                $hasPageAccess = false;
+//            }
+//        }
+//
+//        if (!$hasPageAccess) {
+//            return $app['twig']->render('errors/403.html.twig');
+//        }
+//
+//        $mailSettings = [];
+//
+//        /** @var FormFactory */
+//        $formFactory = $app['form.factory'];
+//        $manageStageParticipantsForm = $formFactory->create(ManageStageParticipantsForm::class, $activity, ['standalone' => true, 'elmt' => $elmt, 'organization' => $organization]);
+//        $manageStageParticipantsForm->handleRequest($request);
+//        $createTemplateForm = null;
+//        if ($elmt == 'activity' && $activity->getTemplate() == null) {
+//            $createTemplateForm = $formFactory->create(AddTemplateForm::class, null, ['standalone' => true]);
+//            $createTemplateForm->handleRequest($request);
+//        }
+//
+//        if ($manageStageParticipantsForm->isSubmitted()) {
+//
+//            // If user has clicked in a button, but activity has been finalized (due to participant deletion)
+//            if ($elmt == 'activity' && $activity->getStatus() >= 2) {
+//                return $this->redirectToRoute('myActivities');
+//            }
+//
+//            if ($manageStageParticipantsForm->get('finalize')->isClicked() && $elmt == 'activity') {
+//
+//                $nbTotalStages = count($activity->getStages());
+//
+//                foreach ($activity->getActiveModifiableStages() as $stage) {
+//                    // add newly added people that were not AJAX-added
+//                    $newlyAddedParticipantsCollection = $stage->getUniqueParticipations()->filter(function (ActivityUser $u) {
+//                        return !$u->getId();
+//                    });
+//                    /** @var ActivityUser[] */
+//                    $newlyAddedParticipants = $newlyAddedParticipantsCollection->getValues();
+//
+//                    foreach ($newlyAddedParticipants as $participant) {
+//                        foreach ($stage->getCriteria() as $c) {
+//                            $theParticipant = clone $participant;
+//                            $theParticipant->setCriterion($c);
+//                            $em->persist($theParticipant);
+//                        }
+//                    }
+//                    $em->flush();
+//
+//                    // 1 - Sending participants mails if necessary
+//                    // Parameter for subject mail title
+//                    if ($nbTotalStages > 1) {
+//                        $mailSettings['stage'] = $stage;
+//                    } else {
+//                        $mailSettings['activity'] = $activity;
+//                    }
+//
+//                    $notYetMailedParticipants = $stage->getUniqueParticipations()->filter(function (ActivityUser $u) {
+//                        return !$u->getisMailed();
+//                    });
+//                    /** @var ActivityUser[] */
+//                    $participants = $notYetMailedParticipants->getValues();
+//
+//                    foreach ($participants as $participant) {
+//                        self::sendMail($app, [$participant->getDirectUser()], 'activityParticipation', $mailSettings);
+//                        $participant->setIsMailed(true);
+//                        $em->persist($participant);
+//                    }
+//                    $em->flush();
+//                }
+//
+//                if ($activity->getIsFinalized() == false) {
+//                    $activity->setIsFinalized(true);
+//                    $em->persist($activity);
+//                }
+//                $em->flush();
+//
+//            }
+//
+//            if ($elmt == 'activity') {
+//                if ($activity->getIsFinalized()) {
+//
+//                    // 2 - Updating activity status if necessary
+//
+//                    $tomorrowDate = new \DateTime;
+//                    $tomorrowDate->add(new \DateInterval('P1D'));
+//
+//                    $yesterdayDate = new \DateTime;
+//                    $yesterdayDate->sub(new \DateInterval('P1D'));
+//                    $k = 0;
+//                    $p = 0;
+//
+//                    foreach ($activity->getActiveStages() as $stage) {
+//                        if ($stage->getGStartDate() > $tomorrowDate) {
+//                            $k++;
+//                        }
+//                        if ($stage->getGEndDate() <= $yesterdayDate) {
+//                            $p++;
+//                        }
+//                    }
+//
+//                    $nbActiveStages = count($activity->getActiveStages());
+//
+//                    // If every grading stage starts in the future...
+//                    if ($k == $nbActiveStages) {
+//                        $activity->setStatus(0);
+//                    } else {
+//                        //..else if not every grading stage ends in the past...
+//                        if ($p != $nbActiveStages) {
+//                            $activity->setStatus(1);
+//                        } else {
+//                            $activity->setStatus(-1);
+//                        }
+//                    }
+//
+//                }
+//            }
+//
+//            $em->flush();
+//
+//            $parameters = ['elmt' => $elmt, 'elmtId' => $elmtId];
+//            if (array_key_exists('participant', $_POST['manage_stage_participants_form'])) {
+//                $path = 'activityParticipants';
+//            } else if (array_key_exists('parameter', $_POST['manage_stage_participants_form'])) {
+//                $path = 'oldActivityDefinition';
+//            } else if ($manageStageParticipantsForm->get('back')->isClicked() || array_key_exists('save', $_POST['manage_stage_participants_form']) || $manageStageParticipantsForm->get('finalize')->isClicked()) {
+//                $path = ($elmt == 'activity') ? 'myActivities' : 'manageTemplates';
+//                $parameters = [];
+//            } else if (array_key_exists('stage', $_POST['manage_stage_participants_form'])) {
+//                $path = 'activityStages';
+//            } else if ($manageStageParticipantsForm->get('previous')->isClicked() || array_key_exists('criterion', $_POST['manage_stage_participants_form'])) {
+//                $path = 'activityCriteria';
+//            }
+//
+//            return $app->redirect($app['url_generator']->generate($path, $parameters));
+//        }
+//
+//        /** @var UserRepository */
+//        $userRepo = $em->getRepository(User::class);
+//        $usersWithPic[0] = '/lib/img/no-picture.png';
+//        foreach ($userRepo->usersWithPicture() as $u) {
+//            $id = $u->getId();
+//            $pic = $u->getPicture();
+//            $usersWithPic[$id] = "/lib/img/$pic";
+//        }
+//
+//        return $app['twig']->render(
+//            'activity_define_participants.twig',
+//            [
+//                'form' => $manageStageParticipantsForm->createView(),
+//                'createTemplateForm' => ($createTemplateForm === null) ?: $createTemplateForm->createView(),
+//                'userPics' => json_encode($usersWithPic),
+//            ]
+//        );
+//    }
 
     /**
      * @param Application $app
@@ -3016,551 +3016,426 @@ class ActivityController extends MasterController
 
     }
 
-    public function addStageCompletedActivity(Request $request, Application $app, $actId)
-    {
-
-        $em = self::getEntityManager();
-        $activity = $em->getRepository(Activity::class)->find($actId);
-
-        $originalStages = new ArrayCollection;
-
-        // We get the collection of current stages objects in the database
-        foreach ($activity->getStages() as $stage) {
-            $originalStages->add($stage);
-
-            //We create at least a criterion per stage in case there are none
-
-            if ($stage->getCriteria()->isEmpty()) {
-                $criterion = new Criterion;
-                $criterion->setStage($stage);
-                $criterion->setWeight(1);
-                $criterion->setName('General evaluation');
-                $criterion->setCreatedBy($currentUser->getId());
-                $em->persist($criterion);
-            }
-        }
-
-        $formFactory = $app['form.factory'];
-        $stageForm = $formFactory->create(AddStageForm::class, $activity, ['standalone' => true]);
-        $stageForm->handleRequest($request);
-
-        if ($stageForm->isSubmitted()) {
-            if ($stageForm->isValid()) {
-
-                //In case a stage has been removed, we remove its relationship with its related activity
-                $submittedStages = $stageForm->getData()->getStages();
-
-                foreach ($originalStages as $stage) {
-                    if ($submittedStages->contains($stage) === false) {
-                        $stage->setActivity(null);
-                        $stage->setCreatedBy($currentUser->getId());
-                        $em->persist($stage);
-                    }
-                }
-
-                $em->persist($activity);
-                $em->flush();
-
-                return $app->redirect($app['url_generator']->generate('activityCriterion', ['actId' => $actId]));
-            }
-        }
-
-        return $app['twig']->render('activity_define_stages.twig',
-            [
-                'form' => $stageForm->createView(),
-            ]);
-
-    }
 
     // ACTIVITY CREATION (V1)
 
     // 1st step - Activity definition (limited to activity manager)
 
-    public function addActivityDefinition(Request $request, Application $app, $actId)
-    {
-
-        $em = self::getEntityManager();
-        $activity = $em->getRepository(Activity::class)->find($actId);
-
-        $formFactory = $app['form.factory'];
-        $activityForm = $formFactory->create(AddActivityForm::class, $activity, ['standalone' => true]);
-        $activityForm->handleRequest($request);
-
-        if ($activityForm->isSubmitted() && $activityForm->isValid()) {
-
-            //  Feeding data for first stage
-            $activityEndDate = $activityForm->get('enddate')->getData();
-            $modifActivityEndDate = clone $activityEndDate;
-            $gradingEndDate = $modifActivityEndDate->add(new \DateInterval('P7D'));
-
-            // If user has not already sent the data once (doing a back/forth submission) we need to update some stage values
-            // when necessary
-            if (!$activity->getStages()->isEmpty()) {
-
-                $stage = $activity->getStages()->first();
-
-                if ($activity->getStartdate() != $stage->getStartdate()) {
-                    $stage->setStartdate($activity->getStartdate());
-                    $stage->setCreatedBy($currentUser->getId());
-                    $em->persist($stage);
-                }
-
-                $stage = $activity->getStages()->last();
-
-                if ($activity->getEnddate() != $stage->getEnddate()) {
-                    $stage->setEnddate($activity->getEnddate());
-                    $stage->setGstartdate($activityEndDate);
-                    $stage->setGenddate($gradingEndDate);
-                    $stage->setCreatedBy($currentUser->getId());
-                    $em->persist($stage);
-                }
-
-            } else {
-
-                $stage = new Stage;
-                $stage->setName($activityForm->get('name')->getData());
-                $stage->setStartdate($activityForm->get('startdate')->getData());
-                $stage->setEnddate($activityEndDate);
-                $stage->setGstartdate($activityEndDate);
-                $stage->setGenddate($gradingEndDate);
-                $stage->setActivity($activity);
-                $stage->setCreatedBy($currentUser->getId());
-                $stage->setWeight(1);
-                $em->persist($stage);
-            }
-
-            $em->persist($activity);
-            $em->flush();
-
-            //Subrequest to get to participants and keep param values with post method
-            // as activity will not be inserted in DB till act mgr does not finish activity creation
-            //$subrequest = Request::create($app['url_generator']->generate('activityStage'), 'POST', $_POST, $_COOKIE, $_FILES, $_SERVER);
-            //$app->handle($subrequest,HttpKernelInterface::SUB_REQUEST);
-
-            return $app->redirect($app['url_generator']->generate('activityStage', ['actId' => $actId]));
-        }
-
-        return $app['twig']->render('activity_create_definition.twig',
-            [
-                'form' => $activityForm->createView(),
-            ]);
-    }
-
     // 2 - Create stages
 
-    /**
-     * @param Request $request
-     * @param Application $app
-     * @param $elmt
-     * @param $elmtId
-     * @return RedirectResponse
-     * @Route("/{elmt}/{elmtId}/stages", name="activityStages")
-     */
-    public function displayActivityStages(Request $request, Application $app, $elmt, $elmtId)
-    {
-        $user = self::getAuthorizedUser();
-        if (!$user instanceof User) {
-            return $this->redirectToRoute('login');
-        }
-        $userRole = $user->getRole();
-        $em = self::getEntityManager();
-        $elmtIsActivity = $elmt === 'activity';
-        /** @var Activity|TemplateActivity */
-        $activity = $em->getRepository(
-            $elmtIsActivity ? Activity::class : TemplateActivity::class
-        )->find($elmtId);
-        $organization = $user->getOrganization();
-        $actOrganization = $activity->getOrganization();
-        $createTemplateForm = null;
-        $formFactory = $app['form.factory'];
-        if ($elmt == 'activity' && $activity->getTemplate() == null) {
-            $createTemplateForm = $formFactory->create(AddTemplateForm::class, null, ['standalone' => true]);
-            $createTemplateForm->handleRequest($request);
-        }
+//    /**
+//     * @param Request $request
+//     * @param Application $app
+//     * @param $elmt
+//     * @param $elmtId
+//     * @return RedirectResponse
+//     * @Route("/{elmt}/{elmtId}/stages", name="activityStages")
+//     */
+//    public function displayActivityStages(Request $request, Application $app, $elmt, $elmtId)
+//    {
+//        $user = self::getAuthorizedUser();
+//        if (!$user instanceof User) {
+//            return $this->redirectToRoute('login');
+//        }
+//        $userRole = $user->getRole();
+//        $em = self::getEntityManager();
+//        $elmtIsActivity = $elmt === 'activity';
+//        /** @var Activity|TemplateActivity */
+//        $activity = $em->getRepository(
+//            $elmtIsActivity ? Activity::class : TemplateActivity::class
+//        )->find($elmtId);
+//        $organization = $user->getOrganization();
+//        $actOrganization = $activity->getOrganization();
+//        $createTemplateForm = null;
+//        $formFactory = $app['form.factory'];
+//        if ($elmt == 'activity' && $activity->getTemplate() == null) {
+//            $createTemplateForm = $formFactory->create(AddTemplateForm::class, null, ['standalone' => true]);
+//            $createTemplateForm->handleRequest($request);
+//        }
+//
+//        $sumWeightModifiableStages = 0;
+//        $activeModifiableStages = $activity->getActiveModifiableStages();
+//        foreach ($activeModifiableStages as $activeModifiableStage) {
+//            $sumWeightModifiableStages += $activeModifiableStage->getWeight();
+//        }
+//
+//        $userIsNotRoot = $userRole != 4;
+//        $userIsAdmin = $userRole == 1;
+//        $userIsAM = $userRole == 2;
+//        $userIsCollab = $userRole == 3;
+//        $actBelongsToDifferentOrg = $organization != $actOrganization;
+//        $actHasNoActiveModifiableStages = count($activeModifiableStages) == 0;
+//        $hasPageAccess = true;
+//        if ($elmtIsActivity) {
+//            if ($userIsNotRoot and ($actBelongsToDifferentOrg or !$userIsAdmin and $actHasNoActiveModifiableStages)) {
+//                $hasPageAccess = false;
+//            }
+//        } else {
+//            if ($userIsCollab or ($userIsAM or $userIsAdmin) and $actBelongsToDifferentOrg) {
+//                $hasPageAccess = false;
+//            }
+//        }
+//
+//        if (!$hasPageAccess) {
+//            return $app['twig']->render('errors/403.html.twig');
+//        } else {
+//            $formFactory = $app['form.factory'];
+//            $stageForm = $formFactory->create(AddStageForm::class, $activity, ['standalone' => true, 'elmt' => $elmt]);
+//            $stageForm->handleRequest($request);
+//
+//            return $app['twig']->render('activity_define_stages.twig',
+//                [
+//                    'form' => $stageForm->createView(),
+//                    'elmt' => $elmt,
+//                    'activity' => $activity,
+//                    'createTemplateForm' => ($createTemplateForm === null) ?: $createTemplateForm->createView(),
+//                    'sumWeightModifiableStages' => $sumWeightModifiableStages,
+//                ]);
+//        }
+//
+//    }
 
-        $sumWeightModifiableStages = 0;
-        $activeModifiableStages = $activity->getActiveModifiableStages();
-        foreach ($activeModifiableStages as $activeModifiableStage) {
-            $sumWeightModifiableStages += $activeModifiableStage->getWeight();
-        }
-
-        $userIsNotRoot = $userRole != 4;
-        $userIsAdmin = $userRole == 1;
-        $userIsAM = $userRole == 2;
-        $userIsCollab = $userRole == 3;
-        $actBelongsToDifferentOrg = $organization != $actOrganization;
-        $actHasNoActiveModifiableStages = count($activeModifiableStages) == 0;
-        $hasPageAccess = true;
-        if ($elmtIsActivity) {
-            if ($userIsNotRoot and ($actBelongsToDifferentOrg or !$userIsAdmin and $actHasNoActiveModifiableStages)) {
-                $hasPageAccess = false;
-            }
-        } else {
-            if ($userIsCollab or ($userIsAM or $userIsAdmin) and $actBelongsToDifferentOrg) {
-                $hasPageAccess = false;
-            }
-        }
-
-        if (!$hasPageAccess) {
-            return $app['twig']->render('errors/403.html.twig');
-        } else {
-            $formFactory = $app['form.factory'];
-            $stageForm = $formFactory->create(AddStageForm::class, $activity, ['standalone' => true, 'elmt' => $elmt]);
-            $stageForm->handleRequest($request);
-
-            return $app['twig']->render('activity_define_stages.twig',
-                [
-                    'form' => $stageForm->createView(),
-                    'elmt' => $elmt,
-                    'activity' => $activity,
-                    'createTemplateForm' => ($createTemplateForm === null) ?: $createTemplateForm->createView(),
-                    'sumWeightModifiableStages' => $sumWeightModifiableStages,
-                ]);
-        }
-
-    }
-
-    /**
-     * @param Request $request
-     * @param Application $app
-     * @param $elmt
-     * @param $elmtId
-     * @param $actionType
-     * @param bool $returnJSON
-     * @return JsonResponse|RedirectResponse
-     * @throws ORMException
-     * @throws OptimisticLockException
-     * @Route("/ajax/{elmt}/{elmtId}/stages/{actionType}", name=")
-     */
-    public function saveActivityStages(Request $request, Application $app, $elmt, $elmtId, $actionType, $returnJSON = true)
-    {
-
-        $em = self::getEntityManager();
-        if ($elmt == 'activity') {
-            $activity = $em->getRepository(Activity::class)->find($elmtId);
-            $completedStages = $activity->getOCompletedStages();
-            $sumWeightModifiableStages = 0;
-            $activeModifiableStages = $activity->getActiveModifiableStages();
-            foreach ($activeModifiableStages as $activeModifiableStage) {
-                $sumWeightModifiableStages += $activeModifiableStage->getWeight();
-            }
-
-        } else {
-            $activity = $em->getRepository(TemplateActivity::class)->find($elmtId);
-        }
-
-        $activityStages = $activity->getActiveModifiableStages();
-
-        $theOriginalStages = clone $activityStages;
-        $submittedStages = new ArrayCollection;
-
-        $formFactory = $app['form.factory'];
-        $stageForm = $formFactory->create(AddStageForm::class, $activity, ['standalone' => true, 'elmt' => $elmt]);
-        $stageForm->handleRequest($request);
-
-        $repoCN = $em->getRepository(CriterionName::class);
-        $currentUser = self::getAuthorizedUser();
-        if (!$currentUser) {
-            return $this->redirectToRoute('login');
-        }
-
-        $orgId = $currentUser->getOrgId();
-        $repoO = $em->getRepository(Organization::class);
-        $organization = $repoO->findOneById($orgId);
-
-        if ($actionType == 'next' || $actionType == 'prev') {
-
-            if ($stageForm->isValid()) {
-
-                $formStages = $stageForm->getData()->getActiveModifiableStages();
-                $k = 0;
-                foreach ($formStages as $stage) {
-                    //We create at least a criterion per stage in case there are none
-
-                    if ($theOriginalStages->contains($stage) === false) {
-                        $criterion = ($elmt == 'activity') ? new Criterion : new TemplateCriterion;
-                        $criterion->setCName($organization->getCriterionNames()->first());
-                        $criterion->setWeight(1);
-                        $criterion->setName('General evaluation');
-                        $stage->setActivity($activity);
-                        $stage->setMasterUserId($currentUser->getId());
-                        $stage->addCriterion($criterion);
-                        $stage->setCreatedBy($currentUser->getId());
-                        $em->persist($stage);
-                    }
-                    if ($elmt == 'activity') {
-                        $stage->setWeight($stage->getWeight() * $sumWeightModifiableStages);
-                    }
-                }
-
-                //In case a stage has been removed, we remove its relationship with its related activity
-
-                // As the form is valid, the stage has been correctly inserted, we need to put the complete prop to true
-                // to display it as by default, a created stage is incomplete
-
-                //$totalWeight = 0;
-                /*foreach ($submittedStages as $submittedStage) {
-
-                //$totalWeight = $totalWeight + $submittedStage->getWeight();
-
-                if ($submittedStage->getMasterUserId() == null) {
-                $submittedStage->setMasterUserId(MasterController::getAuthorizedUser($app)->getId());
-                }
-
-                if ($activityStages->contains($submittedStage) === false) {
-                $submittedStage->setWeight($submittedStage->getWeight() * (1 - $completedStagesWeight));
-                }
-
-                $em->persist($submittedStage);
-                }*/
-
-                /*foreach ($activityStages as $stage) {
-                if ($submittedStages->contains($stage) === false) {
-                $activity->removeStage($stage);
-                }
-                }*/
-
-                // See if activity status needs to get updated
-                if ($elmt == 'activity') {
-                    if ($activity->getStatus() == 1) {
-                        $k = 0;
-                        foreach ($activityStages as $stage) {
-                            if ($stage->getGStartDate() > new \DateTime) {
-                                $stage->setStatus(0);
-                                $k++;
-                            } else {
-                                $stage->setStatus(1);
-                            }
-                            $em->persist($stage);
-                        }
-                        if ($k == count($activity->getActiveModifiableStages())) {
-                            $activity->setStatus(0);
-                        }
-                        if ($activity->getStatus() == 0) {
-
-                            $tomorrowDate = new \DateTime;
-                            $tomorrowDate->add(new \DateInterval('P1D'));
-                            foreach ($activity->getActiveModifiableStages() as $stage) {
-                                if ($stage->getGStartDate() < $tomorrowDate) {
-                                    $activity->setStatus(1);
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                $em->persist($activity);
-                $em->flush();
-
-                /*
-                if ($totalWeight > 1 || $totalWeight < 1) {
-
-                return new JsonResponse(['message' => 'Total Weight is below or above 1']);
-                }
-                 */
-
-                return new JsonResponse(['message' => 'goNext'], 200);
-
-            } else {
-                $errors = $this->buildErrorArray($stageForm);
-                return $errors;
-            }
-
-        } else {
-
-            $k = 0;
-            $activity->setSaved(new \DateTime);
-            $em->persist($activity);
-            $totalWeight = 0;
-            // We try to save stages which are correctly inserted
-            foreach ($stageForm->get('activeModifiableStages') as $individualStageForm) {
-                $totalWeight = $totalWeight + $individualStageForm->get('weight')->getData();
-            }
-
-            foreach ($stageForm->get('activeModifiableStages') as $individualStageForm) {
-
-                $stage = $individualStageForm->getData();
-
-                if ($individualStageForm->get('name')->isValid()) {$stage->setName($individualStageForm->get('name')->getData());} else {
-                    if ($stage->getName() == null) {
-                        $stage->setName('Phase ' . ($activity->getStages()->indexOf($stage) + 1));
-                    }
-                    $k++;
-                };
-                if ($individualStageForm->get('startdate')->isValid()) {$stage->setStartdate($individualStageForm->get('startdate')->getData());} else { $k++;};
-                if ($individualStageForm->get('enddate')->isValid()) {$stage->setEnddate($individualStageForm->get('enddate')->getData());} else { $k++;};
-                if ($individualStageForm->get('gstartdate')->isValid()) {$stage->setGstartdate($individualStageForm->get('gstartdate')->getData());} else { $k++;};
-                if ($individualStageForm->get('genddate')->isValid()) {$stage->setGenddate($individualStageForm->get('genddate')->getData());} else { $k++;};
-                if ($totalWeight == 100) {$stage->setGenddate($individualStageForm->get('weight')->getData());} else { $k++;};
-
-                if ($elmt == 'activity' && $stage->setOrganization() == null) {$stage->setOrganization($organization);}
-                if ($stage->getMasterUserId() == null) {$stage->setMasterUserId($currentUser->getId());}
-
-                if (count($stage->getCriteria()) == 0) {
-                    $criterion = ($elmt == 'activity') ? new Criterion : new TemplateCriterion;
-                    $criterion->setCName($organization->getCriterionNames()->first());
-                    $stage->addCriterion($criterion);
-                }
-
-                $em->persist($stage);
-
-            }
-
-            // See if activity status needs to be updated, will only be if activity is not incomplete
-            if ($elmt == 'activity') {
-                if ($activity->getStatus() != -1) {
-                    $k = 0;
-                    foreach ($activityStages as $stage) {
-                        if ($stage->getGStartDate() > new \DateTime) {
-                            $stage->setStatus(0);
-                            $k++;
-                        } else {
-                            $stage->setStatus(1);
-                        }
-                        $em->persist($stage);
-                    }
-                    if ($k == count($activity->getActiveModifiableStages())) {
-                        $activity->setStatus(0);
-                    }
-                    if ($activity->getStatus() == 0) {
-
-                        $tomorrowDate = new \DateTime;
-                        $tomorrowDate->add(new \DateInterval('P1D'));
-                        foreach ($activity->getActiveModifiableStages() as $stage) {
-                            if ($stage->getGStartDate() < $tomorrowDate) {
-                                $activity->setStatus(1);
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-
-            $em->persist($activity);
-            $em->flush();
-
-            switch ($actionType) {
-                case 'back':
-                case 'save':
-                    $message = 'goBack';
-                    break;
-                case 'stage':
-                    $message = 'stages';
-                    break;
-                case 'parameter':
-                    $message = 'parameters';
-                    break;
-                case 'criterion':
-                    $message = 'criteria';
-                    break;
-                case 'participant':
-                    $message = 'participants';
-                    break;
-            }
-
-            return new JsonResponse(['message' => $message], 200);
-
-        }
-
-    }
+//    /**
+//     * @param Request $request
+//     * @param Application $app
+//     * @param $elmt
+//     * @param $elmtId
+//     * @param $actionType
+//     * @param bool $returnJSON
+//     * @return JsonResponse|RedirectResponse
+//     * @throws ORMException
+//     * @throws OptimisticLockException
+//     * @Route("/ajax/{elmt}/{elmtId}/stages/{actionType}", name=")
+//     */
+//    public function saveActivityStages(Request $request, Application $app, $elmt, $elmtId, $actionType, $returnJSON = true)
+//    {
+//
+//        $em = self::getEntityManager();
+//        if ($elmt == 'activity') {
+//            $activity = $em->getRepository(Activity::class)->find($elmtId);
+//            $completedStages = $activity->getOCompletedStages();
+//            $sumWeightModifiableStages = 0;
+//            $activeModifiableStages = $activity->getActiveModifiableStages();
+//            foreach ($activeModifiableStages as $activeModifiableStage) {
+//                $sumWeightModifiableStages += $activeModifiableStage->getWeight();
+//            }
+//
+//        } else {
+//            $activity = $em->getRepository(TemplateActivity::class)->find($elmtId);
+//        }
+//
+//        $activityStages = $activity->getActiveModifiableStages();
+//
+//        $theOriginalStages = clone $activityStages;
+//        $submittedStages = new ArrayCollection;
+//
+//        $formFactory = $app['form.factory'];
+//        $stageForm = $formFactory->create(AddStageForm::class, $activity, ['standalone' => true, 'elmt' => $elmt]);
+//        $stageForm->handleRequest($request);
+//
+//        $repoCN = $em->getRepository(CriterionName::class);
+//        $currentUser = self::getAuthorizedUser();
+//        if (!$currentUser) {
+//            return $this->redirectToRoute('login');
+//        }
+//
+//        $orgId = $currentUser->getOrgId();
+//        $repoO = $em->getRepository(Organization::class);
+//        $organization = $repoO->findOneById($orgId);
+//
+//        if ($actionType == 'next' || $actionType == 'prev') {
+//
+//            if ($stageForm->isValid()) {
+//
+//                $formStages = $stageForm->getData()->getActiveModifiableStages();
+//                $k = 0;
+//                foreach ($formStages as $stage) {
+//                    //We create at least a criterion per stage in case there are none
+//
+//                    if ($theOriginalStages->contains($stage) === false) {
+//                        $criterion = ($elmt == 'activity') ? new Criterion : new TemplateCriterion;
+//                        $criterion->setCName($organization->getCriterionNames()->first());
+//                        $criterion->setWeight(1);
+//                        $criterion->setName('General evaluation');
+//                        $stage->setActivity($activity);
+//                        $stage->setMasterUserId($currentUser->getId());
+//                        $stage->addCriterion($criterion);
+//                        $stage->setCreatedBy($currentUser->getId());
+//                        $em->persist($stage);
+//                    }
+//                    if ($elmt == 'activity') {
+//                        $stage->setWeight($stage->getWeight() * $sumWeightModifiableStages);
+//                    }
+//                }
+//
+//                //In case a stage has been removed, we remove its relationship with its related activity
+//
+//                // As the form is valid, the stage has been correctly inserted, we need to put the complete prop to true
+//                // to display it as by default, a created stage is incomplete
+//
+//                //$totalWeight = 0;
+//                /*foreach ($submittedStages as $submittedStage) {
+//
+//                //$totalWeight = $totalWeight + $submittedStage->getWeight();
+//
+//                if ($submittedStage->getMasterUserId() == null) {
+//                $submittedStage->setMasterUserId(MasterController::getAuthorizedUser($app)->getId());
+//                }
+//
+//                if ($activityStages->contains($submittedStage) === false) {
+//                $submittedStage->setWeight($submittedStage->getWeight() * (1 - $completedStagesWeight));
+//                }
+//
+//                $em->persist($submittedStage);
+//                }*/
+//
+//                /*foreach ($activityStages as $stage) {
+//                if ($submittedStages->contains($stage) === false) {
+//                $activity->removeStage($stage);
+//                }
+//                }*/
+//
+//                // See if activity status needs to get updated
+//                if ($elmt == 'activity') {
+//                    if ($activity->getStatus() == 1) {
+//                        $k = 0;
+//                        foreach ($activityStages as $stage) {
+//                            if ($stage->getGStartDate() > new \DateTime) {
+//                                $stage->setStatus(0);
+//                                $k++;
+//                            } else {
+//                                $stage->setStatus(1);
+//                            }
+//                            $em->persist($stage);
+//                        }
+//                        if ($k == count($activity->getActiveModifiableStages())) {
+//                            $activity->setStatus(0);
+//                        }
+//                        if ($activity->getStatus() == 0) {
+//
+//                            $tomorrowDate = new \DateTime;
+//                            $tomorrowDate->add(new \DateInterval('P1D'));
+//                            foreach ($activity->getActiveModifiableStages() as $stage) {
+//                                if ($stage->getGStartDate() < $tomorrowDate) {
+//                                    $activity->setStatus(1);
+//                                    break;
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//
+//                $em->persist($activity);
+//                $em->flush();
+//
+//                /*
+//                if ($totalWeight > 1 || $totalWeight < 1) {
+//
+//                return new JsonResponse(['message' => 'Total Weight is below or above 1']);
+//                }
+//                 */
+//
+//                return new JsonResponse(['message' => 'goNext'], 200);
+//
+//            } else {
+//                $errors = $this->buildErrorArray($stageForm);
+//                return $errors;
+//            }
+//
+//        } else {
+//
+//            $k = 0;
+//            $activity->setSaved(new \DateTime);
+//            $em->persist($activity);
+//            $totalWeight = 0;
+//            // We try to save stages which are correctly inserted
+//            foreach ($stageForm->get('activeModifiableStages') as $individualStageForm) {
+//                $totalWeight = $totalWeight + $individualStageForm->get('weight')->getData();
+//            }
+//
+//            foreach ($stageForm->get('activeModifiableStages') as $individualStageForm) {
+//
+//                $stage = $individualStageForm->getData();
+//
+//                if ($individualStageForm->get('name')->isValid()) {$stage->setName($individualStageForm->get('name')->getData());} else {
+//                    if ($stage->getName() == null) {
+//                        $stage->setName('Phase ' . ($activity->getStages()->indexOf($stage) + 1));
+//                    }
+//                    $k++;
+//                };
+//                if ($individualStageForm->get('startdate')->isValid()) {$stage->setStartdate($individualStageForm->get('startdate')->getData());} else { $k++;};
+//                if ($individualStageForm->get('enddate')->isValid()) {$stage->setEnddate($individualStageForm->get('enddate')->getData());} else { $k++;};
+//                if ($individualStageForm->get('gstartdate')->isValid()) {$stage->setGstartdate($individualStageForm->get('gstartdate')->getData());} else { $k++;};
+//                if ($individualStageForm->get('genddate')->isValid()) {$stage->setGenddate($individualStageForm->get('genddate')->getData());} else { $k++;};
+//                if ($totalWeight == 100) {$stage->setGenddate($individualStageForm->get('weight')->getData());} else { $k++;};
+//
+//                if ($elmt == 'activity' && $stage->setOrganization() == null) {$stage->setOrganization($organization);}
+//                if ($stage->getMasterUserId() == null) {$stage->setMasterUserId($currentUser->getId());}
+//
+//                if (count($stage->getCriteria()) == 0) {
+//                    $criterion = ($elmt == 'activity') ? new Criterion : new TemplateCriterion;
+//                    $criterion->setCName($organization->getCriterionNames()->first());
+//                    $stage->addCriterion($criterion);
+//                }
+//
+//                $em->persist($stage);
+//
+//            }
+//
+//            // See if activity status needs to be updated, will only be if activity is not incomplete
+//            if ($elmt == 'activity') {
+//                if ($activity->getStatus() != -1) {
+//                    $k = 0;
+//                    foreach ($activityStages as $stage) {
+//                        if ($stage->getGStartDate() > new \DateTime) {
+//                            $stage->setStatus(0);
+//                            $k++;
+//                        } else {
+//                            $stage->setStatus(1);
+//                        }
+//                        $em->persist($stage);
+//                    }
+//                    if ($k == count($activity->getActiveModifiableStages())) {
+//                        $activity->setStatus(0);
+//                    }
+//                    if ($activity->getStatus() == 0) {
+//
+//                        $tomorrowDate = new \DateTime;
+//                        $tomorrowDate->add(new \DateInterval('P1D'));
+//                        foreach ($activity->getActiveModifiableStages() as $stage) {
+//                            if ($stage->getGStartDate() < $tomorrowDate) {
+//                                $activity->setStatus(1);
+//                                break;
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//
+//            $em->persist($activity);
+//            $em->flush();
+//
+//            switch ($actionType) {
+//                case 'back':
+//                case 'save':
+//                    $message = 'goBack';
+//                    break;
+//                case 'stage':
+//                    $message = 'stages';
+//                    break;
+//                case 'parameter':
+//                    $message = 'parameters';
+//                    break;
+//                case 'criterion':
+//                    $message = 'criteria';
+//                    break;
+//                case 'participant':
+//                    $message = 'participants';
+//                    break;
+//            }
+//
+//            return new JsonResponse(['message' => $message], 200);
+//
+//        }
+//
+//    }
 
     // 3 - Create criteria
 
-    /**
-     * @param Request $request
-     * @param Application $app
-     * @param $elmt
-     * @param $elmtId
-     * @return RedirectResponse
-     * @Route("/{elmt}/{elmtId}/criteria", name="activityCriteria")
-     */
-    public function addActivityCriterion(Request $request, Application $app, $elmt, $elmtId)
-    {
-        $user = self::getAuthorizedUser();
-        if (!$user instanceof User) {
-            return $this->redirectToRoute('login');
-        }
-        $userRole = $user->getRole();
-        $em = self::getEntityManager();
-        $elmtIsActivity = $elmt === 'activity';
-        /** @var Activity|TemplateActivity */
-        $activity = $em->getRepository(
-            $elmtIsActivity ? Activity::class : TemplateActivity::class
-        )->find($elmtId);
-        $repoI = $em->getRepository(Icon::class);
-        $icons = $repoI->findAll();
-        $organization = $user->getOrganization();
-        $actOrganization = $activity->getOrganization();
-        $activeModifiableStages = $activity->getActiveModifiableStages();
-
-        $userIsNotRoot = $userRole != 4;
-        $userIsAdmin = $userRole == 1;
-        $userIsAM = $userRole == 2;
-        $userIsCollab = $userRole == 3;
-        $actBelongsToDifferentOrg = $organization != $actOrganization;
-        $actHasNoActiveModifiableStages = count($activeModifiableStages) == 0;
-        $hasPageAccess = true;
-        if ($elmtIsActivity) {
-            if ($userIsNotRoot and ($actBelongsToDifferentOrg or !$userIsAdmin and $actHasNoActiveModifiableStages)) {
-                $hasPageAccess = false;
-            }
-        } else {
-            if ($userIsCollab or ($userIsAM or $userIsAdmin) and $actBelongsToDifferentOrg) {
-                $hasPageAccess = false;
-            }
-        }
-
-        if (!$hasPageAccess) {
-            return $app['twig']->render('errors/403.html.twig');
-        } else {
-            $stages = ($elmt == 'activity') ?
-            $activity->getActiveStages() :
-            $activity->getStages();
-            $diffStagesCriteria = true;
-            // We get the collection of current stages objects in the database (names and associated criteria)
-            // We also check whether criteria are differentiated among stages
-
-            $multActiveStages = (count($stages) > 1) ?: false;
-
-            $formFactory = $app['form.factory'];
-            $createCriterionForm = $formFactory->create(CreateCriterionForm::class, null, ['standalone' => true]);
-            $addCriterionForm = $formFactory->create(
-                AddCriterionForm::class,
-                $activity,
-                [
-                    'standalone' => true,
-                    'multiple_active_stages' => $multActiveStages,
-                    'diff_stages_criteria' => $diffStagesCriteria,
-                    'app' => $app,
-                    'elmt' => $elmt,
-                    'attr' => [
-                        'autocomplete' => 'off',
-                    ],
-                ]
-            );
-            $createCriterionForm->handleRequest($request);
-            $addCriterionForm->handleRequest($request);
-            $createTemplateForm = null;
-            if ($elmt == 'activity' && $activity->getTemplate() == null) {
-                $createTemplateForm = $formFactory->create(AddTemplateForm::class, null, ['standalone' => true]);
-                $createTemplateForm->handleRequest($request);
-            }
-
-            $csrfToken = $app['csrf.token_manager']->getToken('token_id');
-
-            return $app['twig']->render('activity_define_criteria.twig',
-                [
-                    'createCriterionForm' => $createCriterionForm->createView(),
-                    'form' => $addCriterionForm->createView(),
-                    'elmt' => $elmt,
-                    'activity' => $activity,
-                    'diffStagesCriteria' => $diffStagesCriteria,
-                    'createTemplateForm' => ($createTemplateForm === null) ?: $createTemplateForm->createView(),
-                    'icons' => $icons,
-                ]);
-        }
-    }
+//    /**
+//     * @param Request $request
+//     * @param Application $app
+//     * @param $elmt
+//     * @param $elmtId
+//     * @return RedirectResponse
+//     * @Route("/{elmt}/{elmtId}/criteria", name="activityCriteria")
+//     */
+//    public function addActivityCriterion(Request $request, Application $app, $elmt, $elmtId)
+//    {
+//        $user = self::getAuthorizedUser();
+//        if (!$user instanceof User) {
+//            return $this->redirectToRoute('login');
+//        }
+//        $userRole = $user->getRole();
+//        $em = self::getEntityManager();
+//        $elmtIsActivity = $elmt === 'activity';
+//        /** @var Activity|TemplateActivity */
+//        $activity = $em->getRepository(
+//            $elmtIsActivity ? Activity::class : TemplateActivity::class
+//        )->find($elmtId);
+//        $repoI = $em->getRepository(Icon::class);
+//        $icons = $repoI->findAll();
+//        $organization = $user->getOrganization();
+//        $actOrganization = $activity->getOrganization();
+//        $activeModifiableStages = $activity->getActiveModifiableStages();
+//
+//        $userIsNotRoot = $userRole != 4;
+//        $userIsAdmin = $userRole == 1;
+//        $userIsAM = $userRole == 2;
+//        $userIsCollab = $userRole == 3;
+//        $actBelongsToDifferentOrg = $organization != $actOrganization;
+//        $actHasNoActiveModifiableStages = count($activeModifiableStages) == 0;
+//        $hasPageAccess = true;
+//        if ($elmtIsActivity) {
+//            if ($userIsNotRoot and ($actBelongsToDifferentOrg or !$userIsAdmin and $actHasNoActiveModifiableStages)) {
+//                $hasPageAccess = false;
+//            }
+//        } else {
+//            if ($userIsCollab or ($userIsAM or $userIsAdmin) and $actBelongsToDifferentOrg) {
+//                $hasPageAccess = false;
+//            }
+//        }
+//
+//        if (!$hasPageAccess) {
+//            return $app['twig']->render('errors/403.html.twig');
+//        } else {
+//            $stages = ($elmt == 'activity') ?
+//            $activity->getActiveStages() :
+//            $activity->getStages();
+//            $diffStagesCriteria = true;
+//            // We get the collection of current stages objects in the database (names and associated criteria)
+//            // We also check whether criteria are differentiated among stages
+//
+//            $multActiveStages = (count($stages) > 1) ?: false;
+//
+//            $formFactory = $app['form.factory'];
+//            $createCriterionForm = $formFactory->create(CreateCriterionForm::class, null, ['standalone' => true]);
+//            $addCriterionForm = $formFactory->create(
+//                AddCriterionForm::class,
+//                $activity,
+//                [
+//                    'standalone' => true,
+//                    'multiple_active_stages' => $multActiveStages,
+//                    'diff_stages_criteria' => $diffStagesCriteria,
+//                    'app' => $app,
+//                    'elmt' => $elmt,
+//                    'attr' => [
+//                        'autocomplete' => 'off',
+//                    ],
+//                ]
+//            );
+//            $createCriterionForm->handleRequest($request);
+//            $addCriterionForm->handleRequest($request);
+//            $createTemplateForm = null;
+//            if ($elmt == 'activity' && $activity->getTemplate() == null) {
+//                $createTemplateForm = $formFactory->create(AddTemplateForm::class, null, ['standalone' => true]);
+//                $createTemplateForm->handleRequest($request);
+//            }
+//
+//            $csrfToken = $app['csrf.token_manager']->getToken('token_id');
+//
+//            return $app['twig']->render('activity_define_criteria.twig',
+//                [
+//                    'createCriterionForm' => $createCriterionForm->createView(),
+//                    'form' => $addCriterionForm->createView(),
+//                    'elmt' => $elmt,
+//                    'activity' => $activity,
+//                    'diffStagesCriteria' => $diffStagesCriteria,
+//                    'createTemplateForm' => ($createTemplateForm === null) ?: $createTemplateForm->createView(),
+//                    'icons' => $icons,
+//                ]);
+//        }
+//    }
 
     /**
      * @param Request $request
@@ -3626,361 +3501,361 @@ class ActivityController extends MasterController
 
     }
 
-    /**
-     * @param Request $request
-     * @param Application $app
-     * @param $elmt
-     * @param $elmtId
-     * @param $actionType
-     * @param bool $returnJSON
-     * @return JsonResponse|RedirectResponse
-     * @throws ORMException
-     * @throws OptimisticLockException
-     * @Route("}/ajax/{elmt}/{elmtId}/criteria/{actionType}", name="saveActivityCriteria")
-     */
-    public function saveActivityCriteria(Request $request, Application $app, $elmt, $elmtId, $actionType, $returnJSON = true)
-    {
-
-        $em = self::getEntityManager();
-        $originalCriteria = new ArrayCollection;
-        $stageNames = [];
-        $repoO = $em->getRepository(Organization::class);
-        $currentUser = self::getAuthorizedUser();
-        if (!$currentUser) {
-            return $this->redirectToRoute('login');
-        }
-        $organization = $repoO->find($currentUser->getOrgId());
-
-        // Get all submitted criteria
-
-        $activity = ($elmt == 'activity') ?
-        $em->getRepository(Activity::class)->find($elmtId) :
-        $em->getRepository(TemplateActivity::class)->find($elmtId);
-        $formFactory = $app['form.factory'];
-        $activeStages = clone $activity->getActiveStages();
-        $multActiveStages = (count($activity->getActiveStages()) > 1) ?: false;
-        $criterionForm = $formFactory->create(AddCriterionForm::class, $activity, ['standalone' => true, 'multiple_active_stages' => $multActiveStages, 'diff_stages_criteria' => false, 'app' => $app, 'organization' => $organization, 'elmt' => $elmt]);
-        $criterionForm->handleRequest($request);
-
-        /** @var Stage[] */
-        $criterionFormStages = $criterionForm->getData()->getActiveModifiableStages();
-
-        foreach ($criterionForm->get('activeModifiableStages') as $activeStageForm) {
-            foreach ($activeStageForm->get('criteria') as $activeStageCriterionForm) {
-                $criteriaForm[] = $activeStageCriterionForm;
-            }
-        }
-
-        if ($elmt == 'activity') {
-
-            $mailRecipients = [];
-
-            foreach ($criterionFormStages as $formStage) {
-                $newCriteria = $formStage->getCriteria()->exists(function (int $i, Criterion $c) {
-                    return $c->getId() === 0;
-                });
-
-                if ($newCriteria) {
-                    // criteria were added, invalidate all grades from participants in the stage
-                    // who have *confirmed* their grading (status == 3) and notify them by email
-                    /** @var ActivityUser[] */
-                    $participations = $formStage->getParticipants()->filter(function (ActivityUser $a) {
-                        return $a->getStatus() === 3;
-                    })->getValues();
-                    foreach ($participations as $participation) {
-                        $participation->setStatus(2); // 2 means saved but not confirmed
-                    };
-                }
-            }
-
-            if (count($mailRecipients)) {
-                self::sendMail(
-                    $app,
-                    $mailRecipients,
-                    'stageCriteriaAdded',
-                    []
-                );
-            }
-        }
-
-        $activeStageCriteria = [];
-        foreach ($activeStages as $activeStage) {
-            $activeStageCriteria[] = $activeStage->getCriteria();
-        }
-
-        // We get the collection of current stages objects in the database (names and associated criteria)
-        foreach ($activeStages as $stage) {
-            foreach ($stage->getCriteria() as $criterion) {
-                $originalCriteria->add($criterion);
-            }
-            $stageNames[] = $stage->getName();
-        }
-
-        if (($actionType == 'next') || ($actionType == 'prev')) {
-
-            if ($criterionForm->isSubmitted()) {
-
-                foreach ($criterionFormStages as $stage) {
-                    $stageTotalCriteriaWeight = 0;
-                    foreach ($stage->getCriteria() as $criterion) {
-                        $stageTotalCriteriaWeight += $criterion->getWeight();
-                    }
-
-                    if (round($stageTotalCriteriaWeight, 4) != 1) {
-                        return new JsonResponse(['message' => 'supHundredPct', 'stageName' => $stage->getName(), 'totalWeights' => round(100 * $stageTotalCriteriaWeight, 1)], 200);
-                    }
-                }
-            }
-
-            if ($criterionForm->isValid()) {
-
-                // check values already set in DB and dissociate those which are different
-                $submittedCriteria = new ArrayCollection;
-
-                foreach ($criterionFormStages as $stage) {
-                    foreach ($stage->getCriteria() as $criterion) {
-                        $submittedCriteria->add($criterion);
-                    }
-                }
-
-                //return [count($submittedCriteria),count($originalCriteria)];
-
-                foreach ($submittedCriteria as $submittedCriterion) {
-                    if ($submittedCriterion->getType() == 3) {
-                        $submittedCriterion->setLowerbound(0)->setUpperbound(1);
-                    }
-
-                    foreach ($criteriaForm as $key => $criterionForm) {
-                        if ($criterionForm->getData() == $submittedCriterion) {
-                            $criterionKey = $key;
-                            break;
-                        }
-                    }
-
-                    $targetValueField = $criteriaForm[$criterionKey]->get('targetValue');
-                    //return [$targetValueField->getData()];
-                    $targetValue = ($targetValueField->getData() == null) ? null : $targetValueField->getData();
-
-                    if ($targetValue != null) {
-                        if ($submittedCriterion->getTarget() != null) {
-                            $target = $submittedCriterion->getTarget();
-                        } else {
-                            $target = new Target;
-                            $target->setCriterion($submittedCriterion);
-                            $submittedCriterion->setTarget($target);
-                        }
-                        $target->setValue($targetValue);
-                    } else {
-                        $target = $submittedCriterion->getTarget();
-                        if ($target !== null) {
-                            $criterion->setTarget(null);
-                            $target->setCriterion(null);
-                            $removableTargets[] = $target;
-                        }
-                    }
-
-                    $em->persist($submittedCriterion);
-                }
-
-                /*
-                foreach ($originalCriteria as $originalCriterion) {
-                if ($submittedCriteria->contains($originalCriterion) === false) {
-                //$originalCriterion->setStage(null);
-                $currentStage = $originalCriterion->getStage();
-                $currentStage->removeCriterion($originalCriterion);
-                //$originalCriterion->setDeleted(new \DateTime);
-                $em->persist($currentStage);
-                }
-                }*/
-
-                foreach ($submittedCriteria as $submittedCriterion) {
-
-                    if (count($submittedCriterion->getParticipants()) == 0) {
-
-                        foreach ($submittedCriteria as $theSubmittedCriterion) {
-                            if (count($theSubmittedCriterion->getParticipants()) != 0 && $theSubmittedCriterion->getStage() == $submittedCriterion->getStage()) {
-                                break;
-                            }
-                        }
-
-                        foreach ($theSubmittedCriterion->getParticipants() as $participant) {
-                            $newCriterionParticipant = clone $participant;
-                            $newCriterionParticipant->setInserted(new \DateTime);
-                            $submittedCriterion->addParticipant($newCriterionParticipant);
-                            $em->persist($submittedCriterion);
-                        }
-                    }
-                }
-
-                $em->flush();
-                if (isset($removableTargets)) {
-
-                    foreach ($removableTargets as $removableTarget) {
-                        $em->remove($removableTarget);
-                        $em->flush();
-                    }
-                }
-
-                $message = ($actionType == 'next') ? 'goNext' : 'goPrev';
-                return new JsonResponse(['message' => $message], 200);
-
-            } else {
-
-                //print_r($criterionForm->getErrors());
-                //die;
-
-                $errors = $this->buildErrorArray($criterionForm);
-                return $errors;
-            }
-
-        } else {
-
-            foreach ($criterionFormStages as $stage) {
-                $stageTotalCriteriaWeight = 0;
-                foreach ($stage->getCriteria() as $criterion) {
-                    $stageTotalCriteriaWeight += $criterion->getWeight();
-                }
-
-                if (round($stageTotalCriteriaWeight, 4) != 1) {
-                    return new JsonResponse(['message' => 'supHundredPct', 'stageName' => $stage->getName(), 'totalWeights' => round(100 * $stageTotalCriteriaWeight, 1)], 200);
-                }
-            }
-
-            //$k = 0;
-            $activity->setSaved(new \DateTime);
-            $em->persist($activity);
-
-            // We insert each individual criteria which is correctly inputed
-            // In case a already existing criterion has been modified and becomes unvalid, then we do not modify it
-
-            $criterionGeneralFormElement = $criterionForm->get('activeModifiableStages');
-
-            foreach ($criterionGeneralFormElement as $activeStageForm) {
-
-                foreach ($activeStageForm->get('criteria') as $activeStageCriterionForm) {
-                    $k = 0;
-                    $criterion = $activeStageCriterionForm->getData();
-
-                    if ($activeStageCriterionForm->get('cName')->isValid()) {
-                        $repoCN = $em->getRepository(CriterionName::class);
-                        $criterion->setCName($repoCN->find($activeStageCriterionForm->get('cName')->getData()));}
-                    if ($activeStageCriterionForm->get('type')->isValid()) {$criterion->setType($activeStageCriterionForm->get('type')->getData());} else { $k++;}
-                    if ($activeStageCriterionForm->get('lowerbound')->isValid()) {$criterion->setLowerbound($activeStageCriterionForm->get('lowerbound')->getData());} else { $k++;}
-                    if ($activeStageCriterionForm->get('upperbound')->isValid()) {$criterion->setUpperbound($activeStageCriterionForm->get('upperbound')->getData());} else { $k++;}
-                    if ($activeStageCriterionForm->get('step')->isValid()) {$criterion->setStep($activeStageCriterionForm->get('step')->getData());} else { $k++;}
-                    if ($activeStageCriterionForm->get('weight')->isValid()) {$criterion->setWeight($activeStageCriterionForm->get('weight')->getData());} else { $k++;}
-                    if ($elmt == 'activity') {
-                        $criterion->setComplete(($k == 0));
-                    }
-
-                    // We only add new participants in case considered stage had participants
-
-                    if (count($criterion->getParticipants()) == 0) {
-                        $l = 0;
-                        foreach ($activeStageForm->get('criteria')->getData() as $theSubmittedCriterion) {
-                            if (count($theSubmittedCriterion->getParticipants()) != 0) {
-                                $l = 1;
-                                break;
-                            }
-                        }
-
-                        // We only add new participants in case considered stage had participants
-
-                        if ($l == 1) {
-                            $existingCriterionParticipants = $theSubmittedCriterion->getParticipants();
-
-                            foreach ($existingCriterionParticipants as $existingCriterionParticipant) {
-                                $participant = clone $existingCriterionParticipant;
-                                $participant->setInserted(new \DateTime);
-                                $criterion->addParticipant($participant);
-                            }
-                        }
-                    }
-
-                    $em->persist($criterion);
-
-                    /*if ($activeStageCriterionForm->get('cName')->isValid() && $activeStageCriterionForm->get('type')->isValid() && $activeStageCriterionForm->get('lowerbound')->isValid() && $activeStageCriterionForm->get('upperbound')->isValid() && $activeStageCriterionForm->get('step')->isValid() && $activeStageCriterionForm->get('weight')->isValid()) {
-
-                $concernedCriterion = $activeStageCriterionForm->getData();
-
-                $concernedCriterion->setStage($activeStageForm->getData())
-                ->setCName($activeStageCriterionForm->get('cName')->getData())
-                ->setType($activeStageCriterionForm->get('type')->getData())
-                ->setLowerbound($activeStageCriterionForm->get('lowerbound')->getData())
-                ->setUpperbound($activeStageCriterionForm->get('upperbound')->getData())
-                ->setStep($activeStageCriterionForm->get('step')->getData())
-                ->setWeight($activeStageCriterionForm->get('weight')->getData());
-
-                if ($elmt == 'activity') {
-                $concernedCriterion->setComplete(true);
-                }
-
-                if (count($concernedCriterion->getParticipants()) == 0) {
-                $k = 0;
-                foreach ($activeStageForm->get('criteria')->getData() as $theSubmittedCriterion) {
-                if (count($theSubmittedCriterion->getParticipants()) != 0) {
-                $k = 1;
-                break;
-                }
-                }
-
-                // We only add new participants in case considered stage had participants
-
-                if ($k == 1) {
-                $existingCriterionParticipants = $theSubmittedCriterion->getParticipants();
-
-                foreach ($existingCriterionParticipants as $existingCriterionParticipant) {
-                $participant = clone $existingCriterionParticipant;
-                $participant->setInserted(new \DateTime);
-                $concernedCriterion->addParticipant($participant);
-                }
-                }
-
-                }
-
-                $em->persist($concernedCriterion);
-
-                }*/
-
-                }
-
-                //$k++;
-
-            }
-
-            $em->flush();
-
-            switch ($actionType) {
-                case 'back':
-                case 'save':
-                    $message = 'goBack';
-                    break;
-                case 'stage':
-                    $message = 'stages';
-                    break;
-                case 'parameter':
-                    $message = 'parameters';
-                    break;
-                case 'criterion':
-                    $message = 'criteria';
-                    break;
-                case 'participant':
-                    $message = 'participants';
-                    break;
-            }
-
-            return new JsonResponse(['message' => $message], 200);
-
-        }
-
-        /*} elseif ($actionType == 'back') {
-
-    return new JsonResponse(['message' => 'goBack'], 200);
-    } elseif ($actionType == 'previous') {
-
-    return new JsonResponse(['message' => 'goPrev'], 200);
-    }*/
-    }
+//    /**
+//     * @param Request $request
+//     * @param Application $app
+//     * @param $elmt
+//     * @param $elmtId
+//     * @param $actionType
+//     * @param bool $returnJSON
+//     * @return JsonResponse|RedirectResponse
+//     * @throws ORMException
+//     * @throws OptimisticLockException
+//     * @Route("}/ajax/{elmt}/{elmtId}/criteria/{actionType}", name="saveActivityCriteria")
+//     */
+//    public function saveActivityCriteria(Request $request, Application $app, $elmt, $elmtId, $actionType, $returnJSON = true)
+//    {
+//
+//        $em = self::getEntityManager();
+//        $originalCriteria = new ArrayCollection;
+//        $stageNames = [];
+//        $repoO = $em->getRepository(Organization::class);
+//        $currentUser = self::getAuthorizedUser();
+//        if (!$currentUser) {
+//            return $this->redirectToRoute('login');
+//        }
+//        $organization = $repoO->find($currentUser->getOrgId());
+//
+//        // Get all submitted criteria
+//
+//        $activity = ($elmt == 'activity') ?
+//        $em->getRepository(Activity::class)->find($elmtId) :
+//        $em->getRepository(TemplateActivity::class)->find($elmtId);
+//        $formFactory = $app['form.factory'];
+//        $activeStages = clone $activity->getActiveStages();
+//        $multActiveStages = (count($activity->getActiveStages()) > 1) ?: false;
+//        $criterionForm = $formFactory->create(AddCriterionForm::class, $activity, ['standalone' => true, 'multiple_active_stages' => $multActiveStages, 'diff_stages_criteria' => false, 'app' => $app, 'organization' => $organization, 'elmt' => $elmt]);
+//        $criterionForm->handleRequest($request);
+//
+//        /** @var Stage[] */
+//        $criterionFormStages = $criterionForm->getData()->getActiveModifiableStages();
+//
+//        foreach ($criterionForm->get('activeModifiableStages') as $activeStageForm) {
+//            foreach ($activeStageForm->get('criteria') as $activeStageCriterionForm) {
+//                $criteriaForm[] = $activeStageCriterionForm;
+//            }
+//        }
+//
+//        if ($elmt == 'activity') {
+//
+//            $mailRecipients = [];
+//
+//            foreach ($criterionFormStages as $formStage) {
+//                $newCriteria = $formStage->getCriteria()->exists(function (int $i, Criterion $c) {
+//                    return $c->getId() === 0;
+//                });
+//
+//                if ($newCriteria) {
+//                    // criteria were added, invalidate all grades from participants in the stage
+//                    // who have *confirmed* their grading (status == 3) and notify them by email
+//                    /** @var ActivityUser[] */
+//                    $participations = $formStage->getParticipants()->filter(function (ActivityUser $a) {
+//                        return $a->getStatus() === 3;
+//                    })->getValues();
+//                    foreach ($participations as $participation) {
+//                        $participation->setStatus(2); // 2 means saved but not confirmed
+//                    };
+//                }
+//            }
+//
+//            if (count($mailRecipients)) {
+//                self::sendMail(
+//                    $app,
+//                    $mailRecipients,
+//                    'stageCriteriaAdded',
+//                    []
+//                );
+//            }
+//        }
+//
+//        $activeStageCriteria = [];
+//        foreach ($activeStages as $activeStage) {
+//            $activeStageCriteria[] = $activeStage->getCriteria();
+//        }
+//
+//        // We get the collection of current stages objects in the database (names and associated criteria)
+//        foreach ($activeStages as $stage) {
+//            foreach ($stage->getCriteria() as $criterion) {
+//                $originalCriteria->add($criterion);
+//            }
+//            $stageNames[] = $stage->getName();
+//        }
+//
+//        if (($actionType == 'next') || ($actionType == 'prev')) {
+//
+//            if ($criterionForm->isSubmitted()) {
+//
+//                foreach ($criterionFormStages as $stage) {
+//                    $stageTotalCriteriaWeight = 0;
+//                    foreach ($stage->getCriteria() as $criterion) {
+//                        $stageTotalCriteriaWeight += $criterion->getWeight();
+//                    }
+//
+//                    if (round($stageTotalCriteriaWeight, 4) != 1) {
+//                        return new JsonResponse(['message' => 'supHundredPct', 'stageName' => $stage->getName(), 'totalWeights' => round(100 * $stageTotalCriteriaWeight, 1)], 200);
+//                    }
+//                }
+//            }
+//
+//            if ($criterionForm->isValid()) {
+//
+//                // check values already set in DB and dissociate those which are different
+//                $submittedCriteria = new ArrayCollection;
+//
+//                foreach ($criterionFormStages as $stage) {
+//                    foreach ($stage->getCriteria() as $criterion) {
+//                        $submittedCriteria->add($criterion);
+//                    }
+//                }
+//
+//                //return [count($submittedCriteria),count($originalCriteria)];
+//
+//                foreach ($submittedCriteria as $submittedCriterion) {
+//                    if ($submittedCriterion->getType() == 3) {
+//                        $submittedCriterion->setLowerbound(0)->setUpperbound(1);
+//                    }
+//
+//                    foreach ($criteriaForm as $key => $criterionForm) {
+//                        if ($criterionForm->getData() == $submittedCriterion) {
+//                            $criterionKey = $key;
+//                            break;
+//                        }
+//                    }
+//
+//                    $targetValueField = $criteriaForm[$criterionKey]->get('targetValue');
+//                    //return [$targetValueField->getData()];
+//                    $targetValue = ($targetValueField->getData() == null) ? null : $targetValueField->getData();
+//
+//                    if ($targetValue != null) {
+//                        if ($submittedCriterion->getTarget() != null) {
+//                            $target = $submittedCriterion->getTarget();
+//                        } else {
+//                            $target = new Target;
+//                            $target->setCriterion($submittedCriterion);
+//                            $submittedCriterion->setTarget($target);
+//                        }
+//                        $target->setValue($targetValue);
+//                    } else {
+//                        $target = $submittedCriterion->getTarget();
+//                        if ($target !== null) {
+//                            $criterion->setTarget(null);
+//                            $target->setCriterion(null);
+//                            $removableTargets[] = $target;
+//                        }
+//                    }
+//
+//                    $em->persist($submittedCriterion);
+//                }
+//
+//                /*
+//                foreach ($originalCriteria as $originalCriterion) {
+//                if ($submittedCriteria->contains($originalCriterion) === false) {
+//                //$originalCriterion->setStage(null);
+//                $currentStage = $originalCriterion->getStage();
+//                $currentStage->removeCriterion($originalCriterion);
+//                //$originalCriterion->setDeleted(new \DateTime);
+//                $em->persist($currentStage);
+//                }
+//                }*/
+//
+//                foreach ($submittedCriteria as $submittedCriterion) {
+//
+//                    if (count($submittedCriterion->getParticipants()) == 0) {
+//
+//                        foreach ($submittedCriteria as $theSubmittedCriterion) {
+//                            if (count($theSubmittedCriterion->getParticipants()) != 0 && $theSubmittedCriterion->getStage() == $submittedCriterion->getStage()) {
+//                                break;
+//                            }
+//                        }
+//
+//                        foreach ($theSubmittedCriterion->getParticipants() as $participant) {
+//                            $newCriterionParticipant = clone $participant;
+//                            $newCriterionParticipant->setInserted(new \DateTime);
+//                            $submittedCriterion->addParticipant($newCriterionParticipant);
+//                            $em->persist($submittedCriterion);
+//                        }
+//                    }
+//                }
+//
+//                $em->flush();
+//                if (isset($removableTargets)) {
+//
+//                    foreach ($removableTargets as $removableTarget) {
+//                        $em->remove($removableTarget);
+//                        $em->flush();
+//                    }
+//                }
+//
+//                $message = ($actionType == 'next') ? 'goNext' : 'goPrev';
+//                return new JsonResponse(['message' => $message], 200);
+//
+//            } else {
+//
+//                //print_r($criterionForm->getErrors());
+//                //die;
+//
+//                $errors = $this->buildErrorArray($criterionForm);
+//                return $errors;
+//            }
+//
+//        } else {
+//
+//            foreach ($criterionFormStages as $stage) {
+//                $stageTotalCriteriaWeight = 0;
+//                foreach ($stage->getCriteria() as $criterion) {
+//                    $stageTotalCriteriaWeight += $criterion->getWeight();
+//                }
+//
+//                if (round($stageTotalCriteriaWeight, 4) != 1) {
+//                    return new JsonResponse(['message' => 'supHundredPct', 'stageName' => $stage->getName(), 'totalWeights' => round(100 * $stageTotalCriteriaWeight, 1)], 200);
+//                }
+//            }
+//
+//            //$k = 0;
+//            $activity->setSaved(new \DateTime);
+//            $em->persist($activity);
+//
+//            // We insert each individual criteria which is correctly inputed
+//            // In case a already existing criterion has been modified and becomes unvalid, then we do not modify it
+//
+//            $criterionGeneralFormElement = $criterionForm->get('activeModifiableStages');
+//
+//            foreach ($criterionGeneralFormElement as $activeStageForm) {
+//
+//                foreach ($activeStageForm->get('criteria') as $activeStageCriterionForm) {
+//                    $k = 0;
+//                    $criterion = $activeStageCriterionForm->getData();
+//
+//                    if ($activeStageCriterionForm->get('cName')->isValid()) {
+//                        $repoCN = $em->getRepository(CriterionName::class);
+//                        $criterion->setCName($repoCN->find($activeStageCriterionForm->get('cName')->getData()));}
+//                    if ($activeStageCriterionForm->get('type')->isValid()) {$criterion->setType($activeStageCriterionForm->get('type')->getData());} else { $k++;}
+//                    if ($activeStageCriterionForm->get('lowerbound')->isValid()) {$criterion->setLowerbound($activeStageCriterionForm->get('lowerbound')->getData());} else { $k++;}
+//                    if ($activeStageCriterionForm->get('upperbound')->isValid()) {$criterion->setUpperbound($activeStageCriterionForm->get('upperbound')->getData());} else { $k++;}
+//                    if ($activeStageCriterionForm->get('step')->isValid()) {$criterion->setStep($activeStageCriterionForm->get('step')->getData());} else { $k++;}
+//                    if ($activeStageCriterionForm->get('weight')->isValid()) {$criterion->setWeight($activeStageCriterionForm->get('weight')->getData());} else { $k++;}
+//                    if ($elmt == 'activity') {
+//                        $criterion->setComplete(($k == 0));
+//                    }
+//
+//                    // We only add new participants in case considered stage had participants
+//
+//                    if (count($criterion->getParticipants()) == 0) {
+//                        $l = 0;
+//                        foreach ($activeStageForm->get('criteria')->getData() as $theSubmittedCriterion) {
+//                            if (count($theSubmittedCriterion->getParticipants()) != 0) {
+//                                $l = 1;
+//                                break;
+//                            }
+//                        }
+//
+//                        // We only add new participants in case considered stage had participants
+//
+//                        if ($l == 1) {
+//                            $existingCriterionParticipants = $theSubmittedCriterion->getParticipants();
+//
+//                            foreach ($existingCriterionParticipants as $existingCriterionParticipant) {
+//                                $participant = clone $existingCriterionParticipant;
+//                                $participant->setInserted(new \DateTime);
+//                                $criterion->addParticipant($participant);
+//                            }
+//                        }
+//                    }
+//
+//                    $em->persist($criterion);
+//
+//                    /*if ($activeStageCriterionForm->get('cName')->isValid() && $activeStageCriterionForm->get('type')->isValid() && $activeStageCriterionForm->get('lowerbound')->isValid() && $activeStageCriterionForm->get('upperbound')->isValid() && $activeStageCriterionForm->get('step')->isValid() && $activeStageCriterionForm->get('weight')->isValid()) {
+//
+//                $concernedCriterion = $activeStageCriterionForm->getData();
+//
+//                $concernedCriterion->setStage($activeStageForm->getData())
+//                ->setCName($activeStageCriterionForm->get('cName')->getData())
+//                ->setType($activeStageCriterionForm->get('type')->getData())
+//                ->setLowerbound($activeStageCriterionForm->get('lowerbound')->getData())
+//                ->setUpperbound($activeStageCriterionForm->get('upperbound')->getData())
+//                ->setStep($activeStageCriterionForm->get('step')->getData())
+//                ->setWeight($activeStageCriterionForm->get('weight')->getData());
+//
+//                if ($elmt == 'activity') {
+//                $concernedCriterion->setComplete(true);
+//                }
+//
+//                if (count($concernedCriterion->getParticipants()) == 0) {
+//                $k = 0;
+//                foreach ($activeStageForm->get('criteria')->getData() as $theSubmittedCriterion) {
+//                if (count($theSubmittedCriterion->getParticipants()) != 0) {
+//                $k = 1;
+//                break;
+//                }
+//                }
+//
+//                // We only add new participants in case considered stage had participants
+//
+//                if ($k == 1) {
+//                $existingCriterionParticipants = $theSubmittedCriterion->getParticipants();
+//
+//                foreach ($existingCriterionParticipants as $existingCriterionParticipant) {
+//                $participant = clone $existingCriterionParticipant;
+//                $participant->setInserted(new \DateTime);
+//                $concernedCriterion->addParticipant($participant);
+//                }
+//                }
+//
+//                }
+//
+//                $em->persist($concernedCriterion);
+//
+//                }*/
+//
+//                }
+//
+//                //$k++;
+//
+//            }
+//
+//            $em->flush();
+//
+//            switch ($actionType) {
+//                case 'back':
+//                case 'save':
+//                    $message = 'goBack';
+//                    break;
+//                case 'stage':
+//                    $message = 'stages';
+//                    break;
+//                case 'parameter':
+//                    $message = 'parameters';
+//                    break;
+//                case 'criterion':
+//                    $message = 'criteria';
+//                    break;
+//                case 'participant':
+//                    $message = 'participants';
+//                    break;
+//            }
+//
+//            return new JsonResponse(['message' => $message], 200);
+//
+//        }
+//
+//        /*} elseif ($actionType == 'back') {
+//
+//    return new JsonResponse(['message' => 'goBack'], 200);
+//    } elseif ($actionType == 'previous') {
+//
+//    return new JsonResponse(['message' => 'goPrev'], 200);
+//    }*/
+//    }
 
     // 4 - Display participants to be added
 

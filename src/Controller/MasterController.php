@@ -13,35 +13,35 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException as ORMExceptionAlias;
 use Exception;
-use Model\Activity;
-use Model\ActivityUser;
-use Model\Criterion;
-use Model\Department;
-use Model\Mail;
-use Model\Notation\Constantes;
-use Model\Notation\Results;
-use Model\OptionName;
-use Model\Organization;
-use Model\OrganizationUserOption;
-use Model\Position;
-use Model\Ranking;
-use Model\RankingHistory;
-use Model\RankingTeam;
-use Model\RankingTeamHistory;
-use Model\Recurring;
-use Model\Result;
-use Model\ResultProject;
-use Model\ResultTeam;
-use Model\Stage;
-use Model\Team;
-use Model\User;
-use Repository\ActivityUserRepository;
-use Repository\UserRepository;
-use Silex\Application;
+use App\Entity\Activity;
+use App\Entity\ActivityUser;
+use App\Entity\Criterion;
+use App\Entity\Department;
+use App\Entity\Mail;
+use App\Entity\Notation\Constantes;
+use App\Entity\Notation\Results;
+use App\Entity\OptionName;
+use App\Entity\Organization;
+use App\Entity\OrganizationUserOption;
+use App\Entity\Position;
+use App\Entity\Ranking;
+use App\Entity\RankingHistory;
+use App\Entity\RankingTeam;
+use App\Entity\RankingTeamHistory;
+use App\Entity\Recurring;
+use App\Entity\Result;
+use App\Entity\ResultProject;
+use App\Entity\ResultTeam;
+use App\Entity\Stage;
+use App\Entity\Team;
+use App\Entity\User;
+use App\Repository\ActivityUserRepository;
+use App\Repository\UserRepository;
 use Swift_Image;
 use Swift_Mailer;
 use Swift_Message;
 use Swift_SpoolTransport;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\TwigBundle\TwigEngine;
 use Symfony\Component\Form\FormFactory;
 use Symfony\Component\Form\FormInterface;
@@ -54,7 +54,7 @@ use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Translation\Translator;
 use Symfony\Component\Validator\Constraints\DateTime;
 
-abstract class MasterController
+abstract class MasterController extends AbstractController
 {
     const EVALUATION_COMMENT = 1;
     const COMMENT = 2;
@@ -86,36 +86,36 @@ abstract class MasterController
         $this->security = $security;
     }
 
-    public static function getTwig(): \Twig\Environment
-    {
-        global $app;
-        return $app['twig'];
-    }
+//    public static function getTwig(): \Twig\Environment
+//    {
+//        global $app;
+//        return $app['twig'];
+//    }
+//
+//    public static function getFormFactory(): FormFactory
+//    {
+//        global $app;
+//        return $app['form.factory'];
+//    }
 
-    public static function getFormFactory(): FormFactory
-    {
-        global $app;
-        return $app['form.factory'];
-    }
-
-    /**
-     * @param string|TemplateReferenceInterface $name A template name or a TemplateReferenceInterface instance
-     *
-     * @param array $parameters An array of parameters to pass to the template
-     *
-     * @return string The evaluated template as a string
-     *
-     * @throws Error if something went wrong like a thrown exception while rendering the template
-     */
-    protected function render($name, array $parameters = []): string
-    {
-        return self::getTwig()->render($name, $parameters);
-    }
-
-    protected function json($data, int $status = 200, array $headers = []): JsonResponse
-    {
-        return new JsonResponse($data, $status, $headers);
-    }
+//    /**
+//     * @param string|TemplateReferenceInterface $name A template name or a TemplateReferenceInterface instance
+//     *
+//     * @param array $parameters An array of parameters to pass to the template
+//     *
+//     * @return string The evaluated template as a string
+//     *
+//     * @throws Error if something went wrong like a thrown exception while rendering the template
+//     */
+//    protected function render($name, array $parameters = []): string
+//    {
+//        return self::getTwig()->render($name, $parameters);
+//    }
+//
+//    protected function json($data, int $status = 200, array $headers = []): JsonResponse
+//    {
+//        return new JsonResponse($data, $status, $headers);
+//    }
 
     /**
      * @return EntityManager
@@ -134,20 +134,20 @@ abstract class MasterController
         return $app['translator'];
     }
 
-    public function redirectToRoute(string $route, array $parameters = [], int $status = 302): RedirectResponse
-    {
-        global $app;
-        /** @var UrlGenerator */
-        $urlGenerator = $app['url_generator'];
-        return $app->redirect($urlGenerator->generate($route, $parameters), $status);
-    }
+//    public function redirectToRoute(string $route, array $parameters = [], int $status = 302): RedirectResponse
+//    {
+//        global $app;
+//        /** @var UrlGenerator */
+//        $urlGenerator = $app['url_generator'];
+//        return $app->redirect($urlGenerator->generate($route, $parameters), $status);
+//    }
 
-    public function generateUniqueFileName()
-    {
-        // md5() reduces the similarity of the file names generated by
-        // uniqid(), which is based on timestamps
-        return md5(uniqid());
-    }
+//    public function generateUniqueFileName()
+//    {
+//        // md5() reduces the similarity of the file names generated by
+//        // uniqid(), which is based on timestamps
+//        return md5(uniqid());
+//    }
 
     public static function hideResultsFromStages(Collection $stages): array
     {
@@ -220,16 +220,7 @@ abstract class MasterController
         return [];
     }
 
-    /**
-     * @return User|null
-     */
-    public function getAuthorizedUser()
-    {
-        global $app;
-        return isset($_COOKIE['REMEMBERME'])
-            ? self::getRememberedUser($app, $_COOKIE['REMEMBERME'])
-            : null;
-    }
+
 
     public  function getRememberedUser($token)
     {
@@ -360,12 +351,12 @@ abstract class MasterController
         if ($entityType == 'users') {
             $repoU = $em->getRepository(User::class);
             $repoRH = $em->getRepository(RankingHistory::class);
-            $consideredEntity = 'Model\Ranking';
+            $consideredEntity = 'App\Entity\Ranking';
             $consideredEntityElmt = 'usrId';
         } else {
             $repoT = $em->getRepository(Team::class);
             $repoRTH = $em->getRepository(RankingTeamHistory::class);
-            $consideredEntity = 'Model\RankingTeam';
+            $consideredEntity = 'App\Entity\RankingTeam';
             $consideredEntityElmt = 'team';
         }
 
@@ -574,13 +565,12 @@ abstract class MasterController
         return new JsonResponse($errors, 500);
     }
 
-    public static function sendStageDeadlineMails($forAllFirms = true)
+    public function sendStageDeadlineMails($forAllFirms = true)
     {
-        $em = self::getEntityManager();
-        $repoS = $em->getRepository(Stage::class);
-        $repoAU = $em->getRepository(ActivityUser::class);
-        $repoON = $em->getRepository(OptionName::class);
-        $repoOP = $em->getRepository(OrganizationUserOption::class);
+        $repoS = $this->em->getRepository(Stage::class);
+        $repoAU = $this->em->getRepository(ActivityUser::class);
+        $repoON = $this->em->getRepository(OptionName::class);
+        $repoOP = $this->em->getRepository(OrganizationUserOption::class);
         $deadlineOption = $repoON->findOneByName('mailDeadlineNbDays');
         if($forAllFirms){
             $activeStages = new ArrayCollection($repoS->findBy(['status' => [0, 1]]));
@@ -636,12 +626,12 @@ abstract class MasterController
                     $settings['stage'] = $stage;
                     self::sendMail(null, $recipients, 'gradingDeadlineReminder', $settings);
                     $stage->setDeadlineMailSent(true);
-                    $em->persist($stage);
+                    $this->em->persist($stage);
                 }
             }
         }
         try {
-            $em->flush();
+            $this->em->flush();
         } catch (OptimisticLockException $e) {
         } catch (ORMExceptionAlias $e) {
         }
@@ -650,10 +640,7 @@ abstract class MasterController
 
     public static function sendOrganizationTestingReminders()
     {
-        global $app;
-
-        $em = self::getEntityManager();
-        $allOrganizations = new ArrayCollection($em->getRepository(Organization::class)->findAll());
+        $allOrganizations = new ArrayCollection($this->em->getRepository(Organization::class)->findAll());
         $expiringOrganizations =
             $allOrganizations->matching(
                 Criteria::create()
@@ -662,7 +649,7 @@ abstract class MasterController
                     ->andWhere(Criteria::expr()->neq('reminderMailSent', true)
                     )
             );
-        $repoU = $em->getRepository(User::class);
+        $repoU = $this->em->getRepository(User::class);
 
         foreach ($expiringOrganizations as $expiringOrganization) {
             // Sending testing organization administration to motivate them onboard activities
@@ -676,10 +663,10 @@ abstract class MasterController
                 self::sendMail(null, $administrators, 'firstMailReminderTPeriod', $adminSettings);
                 self::sendMail(null, $nonAdministrators, 'firstMailReminderTPeriod', $nonAdminSettings);
                 $expiringOrganization->setReminderMailSent(true);
-                $em->persist($expiringOrganization);
+                $this->em->persist($expiringOrganization);
             }
         }
-        $em->flush();
+        $this->em->flush();
         return true;
     }
 

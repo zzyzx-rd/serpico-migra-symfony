@@ -31,9 +31,9 @@ class ActivityUser extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="a_u_status", type="integer")
      */
-    public $a_u_status;
+    public $status;
 
     /**
      * @ORM\Column(type="float", nullable=true)
@@ -71,9 +71,9 @@ class ActivityUser extends DbObject
     public $a_u_leader;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="a_u_type", type="integer")
      */
-    public $a_u_type;
+    public $type;
 
     /**
      * @ORM\Column(type="float")
@@ -111,14 +111,14 @@ class ActivityUser extends DbObject
     public $a_u_mailed;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="a_u_created_by", type="integer", nullable=true)
      */
-    public $a_u_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="a_u_inserted", type="datetime", nullable=true)
      */
-    public $a_u_inserted;
+    public $inserted;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
@@ -168,11 +168,13 @@ class ActivityUser extends DbObject
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="activity_user_act_usr")
+     * @JoinColumn(name="user_usr_id", referencedColumnName="usr_id")
      */
     public $user_usr;
 
     /**
      * @ORM\ManyToOne(targetEntity=ExternalUser::class, inversedBy="activity_user_act_usr")
+     * @JoinColumn(name="external_user_ext_usr_id", referencedColumnName="ext_id")
      */
     public $external_user_ext_usr;
 
@@ -242,7 +244,7 @@ class ActivityUser extends DbObject
         ExternalUser $external_user_ext_usr = null)
     {
         parent::__construct($id, $a_u_createdBy, new DateTime());
-        $this->a_u_status = $a_u_status;
+        $this->status = $a_u_status;
         $this->a_u_aw_result = $a_u_aw_result;
         $this->a_u_ae_result = $a_u_ae_result;
         $this->a_u_re_result = $a_u_re_result;
@@ -250,7 +252,7 @@ class ActivityUser extends DbObject
         $this->a_u_w_devratio = $a_u_w_devratio;
         $this->a_u_e_devratio = $a_u_e_devratio;
         $this->a_u_leader = $a_u_leader;
-        $this->a_u_type = $a_u_type;
+        $this->type = $a_u_type;
         $this->a_u_mWeight = $a_u_mWeight;
         $this->a_u_precomment = $a_u_precomment;
         $this->a_u_ivp_bonus = $a_u_ivp_bonus;
@@ -258,7 +260,7 @@ class ActivityUser extends DbObject
         $this->a_u_of_bonus = $a_u_of_bonus;
         $this->a_u_of_penalty = $a_u_of_penalty;
         $this->a_u_mailed = $a_u_mailed;
-        $this->a_u_inserted = $a_u_inserted;
+        $this->inserted = $a_u_inserted;
         $this->a_u_confirmed = $a_u_confirmed;
         $this->a_u_deleted = $a_u_deleted;
         $this->grades = $grades;
@@ -280,12 +282,12 @@ class ActivityUser extends DbObject
 
     public function getStatus(): ?int
     {
-        return $this->a_u_status;
+        return $this->status;
     }
 
     public function setStatus(int $a_u_status): self
     {
-        $this->a_u_status = $a_u_status;
+        $this->status = $a_u_status;
 
         return $this;
     }
@@ -376,12 +378,12 @@ class ActivityUser extends DbObject
 
     public function getType(): ?int
     {
-        return $this->a_u_type;
+        return $this->type;
     }
 
     public function setType(int $a_u_type): self
     {
-        $this->a_u_type = $a_u_type;
+        $this->type = $a_u_type;
 
         return $this;
     }
@@ -472,12 +474,12 @@ class ActivityUser extends DbObject
 
     public function getInserted(): ?DateTimeInterface
     {
-        return $this->a_u_inserted;
+        return $this->inserted;
     }
 
     public function setInserted(?DateTimeInterface $a_u_inserted): self
     {
-        $this->a_u_inserted = $a_u_inserted;
+        $this->inserted = $a_u_inserted;
 
         return $this;
     }

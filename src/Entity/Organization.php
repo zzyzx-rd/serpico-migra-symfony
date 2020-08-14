@@ -12,7 +12,6 @@ use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\OneToOne;
 use Doctrine\ORM\Mapping\OrderBy;
-use Model\OrganizationUserOption;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -60,14 +59,14 @@ class Organization extends DbObject
     public $org_weight_type;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="org_created_by", type="integer")
      */
-    public $org_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="org_inserted", type="datetime")
      */
-    public $org_inserted;
+    public $inserted;
 
     /**
      * @ORM\Column(type="datetime")
@@ -287,7 +286,7 @@ class Organization extends DbObject
         $this->org_isClient = $org_isClient;
         $this->org_oth_language = $org_oth_language;
         $this->org_weight_type = $org_weight_type;
-        $this->org_inserted = $org_inserted;
+        $this->inserted = $org_inserted;
         $this->org_validated = $org_validated;
         $this->org_expired = $org_expired;
         $this->org_testing_reminder_sent = $org_testing_reminder_sent;
@@ -397,12 +396,12 @@ class Organization extends DbObject
 
     public function getInserted(): ?\DateTimeInterface
     {
-        return $this->org_inserted;
+        return $this->inserted;
     }
 
     public function setInserted(\DateTimeInterface $org_inserted): self
     {
-        $this->org_inserted = $org_inserted;
+        $this->inserted = $org_inserted;
 
         return $this;
     }
@@ -871,14 +870,16 @@ class Organization extends DbObject
         return $this;
     }
 
-    function addOption(OrganizationUserOption $option){
+    public function addOption(OrganizationUserOption $option): Organization
+    {
 
         $this->options->add($option);
         $option->setOrganization($this);
         return $this;
     }
 
-    function removeOption(OrganizationUserOption $option){
+    public function removeOption(OrganizationUserOption $option): Organization
+    {
         $this->options->removeElement($option);
         return $this;
     }
@@ -1086,12 +1087,7 @@ class Organization extends DbObject
         return (string) $this->id;
     }
 
-    public function hasActiveAdmin(){
-        return $this->getActiveUsers()
-            ->exists(function(int $i, User $u){
-                return $u->getRole() == USER::ROLE_ADMIN && $u->getLastConnected() != null;
-            });
-    }
+
     //TODO userSortedDepartement et le removePosition
 
 }

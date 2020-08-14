@@ -9,10 +9,10 @@
 {% endblock %}
 
 {% block username %}
-  {{ currentuser.firstname }} {{ currentuser.lastname }}
+  {{ global.currentuser.firstname }} {{ global.currentuser.lastname }}
 {% endblock %}
 
-{% set orgName = currentuser.organization.commname %}
+{% set orgName = global.currentuser.organization.commname %}
 
 {% block css %}
   <!-- Dropify -->
@@ -51,19 +51,19 @@
 {% block content %}
   <div class="menu">
     <div class="container background-container" style="position:relative">
-      {% if nbResultsStages > 0 and currentuser.role != 3 or nbPublishedStages > 0 and currentuser.role == 3 %}
-        <a href="{{ path('elementOverview', {'elmtType' : 'user', 'elmtId' : currentuser.id}) }}" class="btn btn-large white-text waves-effect waves-light teal lighten-1"><ul class="flex-center" style="margin: 0;justify-content:center;"><i class="fa fa-chart-bar" style="margin-right: 17px;"></i><span>{{ 'profile.my_results'|trans }}</span></ul></a>
+      {% if nbResultsStages > 0 and global.currentuser.role != 3 or nbPublishedStages > 0 and global.currentuser.role == 3 %}
+        <a href="{{ path('elementOverview', {'elmtType' : 'user', 'elmtId' : global.currentuser.id}) }}" class="btn btn-large white-text waves-effect waves-light teal lighten-1"><ul class="flex-center" style="margin: 0;justify-content:center;"><i class="fa fa-chart-bar" style="margin-right: 17px;"></i><span>{{ 'profile.my_results'|trans }}</span></ul></a>
       {% endif %}
     </div>
   </div>
   <div class="container data-container">
     <ul class="flex-center">
       <div class="col s12 m3" style="margin-right: 30px; position: relative">
-        {% if currentuser.picture is null %}
+        {% if global.currentuser.picture is null %}
           <img class="user-profile-picture clickable-image" src="{{ asset('lib/img/no-picture.png') }}" width="150px" height="150px" style="border-radius: 100%">
           <a class="btn-floating add-photo-btn clickable-image" style="position: absolute; top: 84%; left: 35%;"><i class="fa fa-camera"></i></a>
         {% else %}
-          <img class="user-profile-picture" src="{{ asset('lib/img/' ~ currentuser.picture) }}" width="150px" height="150px" style="border-radius: 100%">
+          <img class="user-profile-picture" src="{{ asset('lib/img/' ~ global.currentuser.picture) }}" width="150px" height="150px" style="border-radius: 100%">
           {% if orgName != "Public" %}
             <a class="btn-floating add-photo-btn" style="position: absolute; top: 84%; left: 35%;"><i class="fa fa-pencil-alt"></i></a>
           {% endif %}
@@ -74,10 +74,10 @@
         <ul>
           <h3 class="header flex-center" style="margin: 0; flex-direction:column">
                         <span>
-                        {% if currentuser.nickname != null %}
-                          {{ currentuser.nickname }}
+                        {% if global.currentuser.usr_nickname != null %}
+                          {{ global.currentuser.usr_nickname }}
                         {% else %}
-                          {{ currentuser.fullname }}
+                          {{ global.currentuser.fullname }}
                         {% endif %}
                         </span>
             {#{% if orgName == "Public" %}#}
@@ -88,20 +88,20 @@
           </h3>
           {#
           {% if orgName != "Public" %}
-            <h5 class="header flex-center stats-elmts"><span style="margin-right: 10px">{{currentuser.positionName}} </span>
-              {% if currentuser.role == 4 %}
+            <h5 class="header flex-center stats-elmts"><span style="margin-right: 10px">{{global.currentuser.positionName}} </span>
+              {% if global.currentuser.role == 4 %}
                 <div class="root-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{{ 'tooltip.user.role.root'|trans }}">
                   <span>R</span>
                 </div>
-              {% elseif currentuser.role == 2 %}
+              {% elseif global.currentuser.role == 2 %}
                 <div class="am-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{{ 'tooltip.user.role.activity_manager'|trans }}">
                   <span>M</span>
                 </div>
-              {% elseif currentuser.role == 3 %}
+              {% elseif global.currentuser.role == 3 %}
                 <div class="collaborator-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{{ 'tooltip.user.role.collaborator'|trans }}">
                   <span>C</span>
                 </div>
-              {% elseif currentuser.role == 1 %}
+              {% elseif global.currentuser.role == 1 %}
                 <div class="admin-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{{ 'tooltip.user.role.admin'|trans }}">
                   <span>A</span>
                 </div>
@@ -112,7 +112,7 @@
         </ul>
       </div>
 
-      {% if currentuser.role != 3 %}
+      {% if global.currentuser.role != 3 %}
         {% set userAccess = true %}
       {% else %}
         {% set userAccess = false %}
@@ -126,12 +126,12 @@
               <li>
                 <ul class="profile-stat-elmt">
                   <i class="fa fa-chart-line tooltipped" data-position="top" data-tooltip="{{ 'tooltip.user.performance'|trans }}"></i>
-                  <span>{% if currentuser.ranking('A','P','W', userAccess) is null or currentuser.ranking('A','P','W', userAccess) is empty %} -{% else %} {{ (100 * currentuser.ranking('A','P','W', userAccess)[0].value)|round(0) }} %{% endif %}</span>
+                  <span>{% if userRepo.ranking('A','P','W', userAccess, global.currentuser) is null or userRepo.ranking('A','P','W', userAccess, global.currentuser) is empty %} -{% else %} {{ (100 * userRepo.ranking('A','P','W', userAccess, global.currentuser)[0].value)|round(0) }} %{% endif %}</span>
                 </ul>
               </li>
-              {% if enabledUserSeeRanking and currentuser.ranking('A','P','W', userAccess) is not null and currentuser.ranking('A','P','W', userAccess) is not empty %}
+              {% if enabledUserSeeRanking and userRepo.ranking('A','P','W', userAccess, global.currentuser) is not null and userRepo.ranking('A','P','W', userAccess, global.currentuser) is not empty %}
                 <li>
-                  <span {% if currentuser.ranking('A','P','W', userAccess)[0].relResult < 0.34 %}class="green-text text-accent-4"{% elseif currentuser.ranking('A','P','W', userAccess)[0].relResult > 0.67 %}class="orange-text text-accent-4"{% endif %}>{{ currentuser.ranking('A','P','W', userAccess)[0].absResult }}</span><span style="font-size: 1.2rem"> / {{ (currentuser.ranking('A','P','W', userAccess)[0].absResult / currentuser.ranking('A','P','W', userAccess)[0].relResult)|round(0) }}</span>
+                  <span {% if userRepo.ranking('A','P','W', userAccess, global.currentuser)[0].relResult < 0.34 %}class="green-text text-accent-4"{% elseif userRepo.ranking('A','P','W', userAccess, global.currentuser)[0].relResult > 0.67 %}class="orange-text text-accent-4"{% endif %}>{{ userRepo.ranking('A','P','W', userAccess, global.currentuser)[0].absResult }}</span><span style="font-size: 1.2rem"> / {{ (userRepo.ranking('A','P','W', userAccess, global.currentuser)[0].absResult / userRepo.ranking('A','P','W', userAccess, global.currentuser)[0].relResult)|round(0) }}</span>
                 </li>
               {% endif %}
             </ul>
@@ -141,12 +141,12 @@
               <li>
                 <ul class="profile-stat-elmt">
                   <i class="fa fa-arrows-alt-h tooltipped" data-position="top" data-tooltip="{{ 'tooltip.user.distance'|trans }}"></i>
-                  <span>{% if currentuser.ranking('A','D','W', userAccess) is null or currentuser.ranking('A','D','W', userAccess) is empty %} -{% else %} {{ (100 * currentuser.ranking('A','D','W', userAccess)[0].value)|round(0) }} %{% endif %}</span>
+                  <span>{% if userRepo.ranking('A','P','W', userAccess, global.currentuser) is null or userRepo.ranking('A','P','W', userAccess, global.currentuser) is empty %} -{% else %} {{ (100 * userRepo.ranking('A','P','W', userAccess, global.currentuser)[0].value)|round(0) }} %{% endif %}</span>
                 </ul>
               </li>
-              {% if enabledUserSeeRanking and currentuser.ranking('A','D','W', userAccess) is not null and currentuser.ranking('A','D','W', userAccess) is not empty %}
+              {% if enabledUserSeeRanking and userRepo.ranking('A','P','W', userAccess, global.currentuser) is not null and userRepo.ranking('A','P','W', userAccess, global.currentuser) is not empty %}
                 <li>
-                  <span {% if currentuser.ranking('A','D','W', userAccess)[0].relResult < 0.34 %}class="green-text text-accent-4"{% elseif currentuser.ranking('A','D','W', userAccess)[0].relResult > 0.67 %}class="orange-text text-accent-4"{% endif %}>{{ currentuser.ranking('A','D','W', userAccess)[0].absResult }}</span><span style="font-size: 1.2rem"> / {{ (currentuser.ranking('A','D','W', userAccess)[0].absResult / currentuser.ranking('A','D','W', userAccess)[0].relResult)|round(0) }}</span>
+                  <span {% if userRepo.ranking('A','P','W', userAccess, global.currentuser)[0].relResult < 0.34 %}class="green-text text-accent-4"{% elseif userRepo.ranking('A','P','W', userAccess, global.currentuser)[0].relResult > 0.67 %}class="orange-text text-accent-4"{% endif %}>{{ userRepo.ranking('A','P','W', userAccess, global.currentuser)[0].absResult }}</span><span style="font-size: 1.2rem"> / {{ (userRepo.ranking('A','P','W', userAccess, global.currentuser)[0].absResult / userRepo.ranking('A','P','W', userAccess, global.currentuser)[0].relResult)|round(0) }}</span>
                 </li>
               {% endif %}
             </ul>
@@ -303,8 +303,8 @@
 
               {% set stageType = stage.criteria|length > 0 ? stage.criteria[0].type : -1 %}
 
-              {% for criterion in stage.criteria if not stageMixed %}
-                {% if criterion.type != stageType %}
+              {% for criterion in stage.criteria %}
+                {% if criterion.type != stageType and (not stageMixed) %}
                   {% set stageMixed = true %}
                 {% endif %}
               {% endfor %}
@@ -584,7 +584,7 @@
     </div>
   </div>
 
-  {% if not currentuser.isInternal %}
+  {% if not global.currentuser.isInternal %}
     <div id="finalizeUser" class="modal">
       <div class="modal-title">
         <h4>{{ 'profile.finalizeUserCreation.modal_title'|trans }}</h4>
@@ -622,7 +622,7 @@
         <br>
         <h5>Nouveau sur Serpico ? Nous sommes là pour vous aider !</h5>
         <br>
-        {% if currentuser.role== 1 %}
+        {% if global.currentuser.role== 1 %}
           <div class="page-modal" id="0">
             <img src="{{ asset('lib/gif/create-activity.gif') }}">
             <p>En cliquant sur l'onglet Activités, vous pouvez dès à présent créer une activité .</p>
@@ -649,7 +649,7 @@
             <p>En cliquant sur l'onglet Paramètres, vous avez la possibilité de changer les paramètres de l'entreprise.</p>
           </div>
         {% endif %}
-        {% if currentuser.role== 2 %}
+        {% if global.currentuser.role== 2 %}
 
           <div class="page-modal" id="0">
             <img src="{{ asset('lib/gif/create-activity.gif') }}">
@@ -673,7 +673,7 @@
           </div>
 
         {% endif %}
-        {% if currentuser.role==3  %}
+        {% if global.currentuser.role==3  %}
 
           <div class="page-modal" id="0">
             <img src="{{ asset('lib/gif/note-dashboard.gif') }}">
@@ -699,10 +699,10 @@
         {% endif %}
         {% if not orgHasActiveAdmin %}
 
-          <div class="page-modal admin-choice-panel" id="{{ currentuser.role == 1 ? 5 : 4 }}">
+          <div class="page-modal admin-choice-panel" id="{{ global.currentuser.role == 1 ? 5 : 4 }}">
             <p>{{'profile.first_connection.add_first_admin.modal_msg'|trans}}</p>
             <div>
-              <input type="checkbox" id="self_admin" name="self_admin" class="filled-in admin-choice" checked data-id="{{currentuser.id}}">
+              <input type="checkbox" id="self_admin" name="self_admin" class="filled-in admin-choice" checked data-id="{{global.currentuser.id}}">
               <label for="self_admin">{{'profile.first_connection.add_first_admin.self_keeping_option'|trans}}</label>
             </div>
             <div>
@@ -710,8 +710,8 @@
               <label for="other_admin">{{'profile.first_connection.add_first_admin.give_ownership_option'|trans}}</label>
               <div class="admin-select-zone" style="display: none;">
                 <select id="userSelector" multiple>
-                  {% for user in currentuser.organization.activeUsers %}
-                    {% if user != currentuser and user.lastname != "ZZ" %}
+                  {% for user in global.currentuser.organization.activeUsers %}
+                    {% if user != global.currentuser and user.lastname != "ZZ" %}
                       <option value="{{ user.id }}">{{ user.fullname }}</option>
                     {% endif %}
                   {% endfor %}
@@ -770,7 +770,7 @@
 {% block javascripts %}
   <script src="{{ asset('js/profile.js') }}"></script>
   <script src="{{ asset('js/dropify.min.js') }}"></script>
-  {% if currentuser.position is null %}
+  {% if global.currentuser.position is null %}
     <script>
       $(function() {
         $('#finalizeUser').modal({
@@ -780,7 +780,7 @@
         $('.user-submit').on('click', function(e) {
           e.preventDefault();
           $.post(
-            '{{ path("finalizeUser", { usrId: currentuser.id }) }}',
+            '{{ path("finalizeUser", { usrId: global.currentuser.id }) }}',
             $('#finalizeUser').find('form').serialize()
           )
             .done(function(data){

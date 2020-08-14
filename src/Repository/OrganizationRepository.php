@@ -3,7 +3,9 @@
 namespace App\Repository;
 
 use App\Entity\Organization;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -19,6 +21,16 @@ class OrganizationRepository extends ServiceEntityRepository
         parent::__construct($registry, Organization::class);
     }
 
+    public function hasActiveAdmin(Organization $organization){
+        return $this->getActiveUsers($organization->getId())
+            ->exists(function(int $i, User $u){
+                return $u->getRole() == USER::ROLE_ADMIN && $u->getLastConnected() != null;
+            });
+    }
+
+    public function getActiveUsers(int $orgId){
+        return new ArrayCollection($this->_em->getRepository(User::class)->findBy(['organization_org' => $orgId, 'deleted' => null],['usr_lastname' => 'ASC']));
+    }
     // /**
     //  * @return Organization[] Returns an array of Organization objects
     //  */

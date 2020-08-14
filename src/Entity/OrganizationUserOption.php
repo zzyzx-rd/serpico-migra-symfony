@@ -54,14 +54,14 @@ class OrganizationUserOption extends DbObject
     public $opt_enabled;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="opt_created_by", type="integer", nullable=true)
      */
-    public $opt_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="opt_inserted", type="datetime")
      */
-    public $opt_inserted;
+    public $inserted;
 
     /**
      * @OneToOne(targetEntity="OptionName")
@@ -101,7 +101,7 @@ class OrganizationUserOption extends DbObject
 
     /**
      * @ORM\ManyToOne(targetEntity=Role::class)
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(name="role_rol_id", referencedColumnName="rol_id", nullable=false)
      */
     public $role_rol;
 
@@ -115,7 +115,7 @@ class OrganizationUserOption extends DbObject
     {
         parent::__construct($id,$opt_createdBy , new DateTime());
         $this->opt_enabled = $opt_enabled;
-        $this->opt_createdBy = $opt_createdBy;
+        $this->createdBy = $opt_createdBy;
     }
 
 
@@ -198,12 +198,12 @@ class OrganizationUserOption extends DbObject
 
     public function getInserted(): ?\DateTimeInterface
     {
-        return $this->opt_inserted;
+        return $this->inserted;
     }
 
     public function setInserted(\DateTimeInterface $opt_inserted): self
     {
-        $this->opt_inserted = $opt_inserted;
+        $this->inserted = $opt_inserted;
 
         return $this;
     }
@@ -235,9 +235,10 @@ class OrganizationUserOption extends DbObject
     /**
      * @param mixed $organization
      */
-    public function setOrganization($organization): void
+    public function setOrganization($organization): OrganizationUserOption
     {
         $this->organization = $organization;
+        return $this;
     }
 
     /**

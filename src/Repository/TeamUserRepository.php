@@ -3,7 +3,9 @@
 namespace App\Repository;
 
 use App\Entity\TeamUser;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -18,7 +20,9 @@ class TeamUserRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, TeamUser::class);
     }
-
+    public function findByUser(User $user){
+        return new ArrayCollection($this->_em->getRepository(TeamUser::class)->findBy(["user_usr" =>$user]));
+    }
     // /**
     //  * @return TeamUser[] Returns an array of TeamUser objects
     //  */

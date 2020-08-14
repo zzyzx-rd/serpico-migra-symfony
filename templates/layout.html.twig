@@ -26,8 +26,8 @@
     </script>
   </head>
 
-{#  {% if currentuser != null %}#}
-{#    {% set orgName = currentuser.organization.commname %}#}
+{#  {% if global.currentuser != null %}#}
+{#    {% set orgName = global.currentuser.organization.commname %}#}
 {#  {% else %}#}
 {#    {% set orgName = '' %}#}
 {#  {% endif %}#}
@@ -37,7 +37,7 @@
       <nav id="nav" class="black">
         <div class="nav-wrapper">
           <ul>
-            {% if is_granted('IS_AUTHENTICATED_REMEMBERED') and currentuser is not null %}
+            {% if is_granted('IS_AUTHENTICATED_REMEMBERED') and global.currentuser is not null %}
               <li class="logo">
                 <a href="/"><img src="{{ asset('lib/img/logo_l.svg') }}"></a>
               </li>
@@ -47,7 +47,7 @@
                   <span>{% trans %}header.help{% endtrans %}</span>
                 </a>
               </li>
-              {% if is_root %}
+              {% if global.currentuser.is_root %}
                 <li class="firm">
                   <a href="{{ path('rootManagement') }}">
                     <i class="fa fa-cogs" aria-hidden="true"></i>
@@ -55,7 +55,7 @@
                   </a>
                 </li>
               {% endif %}
-              {% if is_admin %}
+              {% if global.currentuser.is_admin %}
                 <li class="firm">
                   <a href="{{ path('firmSettings') }}">
                     <i class="fa fa-cog" aria-hidden="true"></i>
@@ -78,9 +78,9 @@
               #}
               {% if orgName != "Public" %}
                 <li>
-                  <a href="{{ path(is_admin ? 'manageUsers' : 'seeColleaguesTeams') }}">
+                  <a href="{{ path(global.currentuser.is_admin ? 'manageUsers' : 'seeColleaguesTeams') }}">
                     <i class="fa fa-users" aria-hidden="true"></i>
-                    {% set str = 'header.' ~ (is_admin ? 'users' : 'community') %}
+                    {% set str = 'header.' ~ (global.currentuser.is_admin ? 'users' : 'community') %}
                     {{ str|trans }}
                   </a>
                 </li>
@@ -101,11 +101,11 @@
                 <a href="{{ path('home') }}">
                   <img class="user-profile-picture" src="{{ asset(userpicture) }}">
                   {# username is only defined for user being citizen (public), otherwise fullname #}
-                  {{ currentuser.selfUsername != "" ? currentuser.selfUsername : currentuser.fullname }}
+                  {{ global.currentuser.usr_username != "" ? global.currentuser.usr_username : global.currentuser.usr_fullname }}
                 </a>
               </li>
               <li class="logout">
-                <a href="{{ path('admin_logout') }}">
+                <a href="{{ path('logout') }}">
                   <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
                   {% trans %}header.logout{% endtrans %}
                 </a>

@@ -36,14 +36,14 @@ class CriterionName extends DbObject
     public $can_unit;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="can_created_by", type="integer")
      */
-    public $can_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="can_inserted", type="datetime")
      */
-    public $can_inserted;
+    public $inserted;
 
     /**
      * @ManyToOne(targetEntity="Icon", inversedBy="criterionNames")
@@ -102,7 +102,7 @@ class CriterionName extends DbObject
         $this->cna_type = $cna_type;
         $this->cna_name = $cna_name;
         $this->can_unit = $can_unit;
-        $this->can_inserted = $can_inserted;
+        $this->inserted = $can_inserted;
         $this->icon = $icon;
         $this->organization = $organization;
         $this->department = $department;
@@ -150,26 +150,14 @@ class CriterionName extends DbObject
         return $this;
     }
 
-    public function getCanCreatedBy(): ?int
+    public function getInserted(): ?\DateTimeInterface
     {
-        return $this->can_createdBy;
+        return $this->inserted;
     }
 
-    public function setCanCreatedBy(int $can_createdBy): self
+    public function setInserted(\DateTimeInterface $inserted): self
     {
-        $this->can_createdBy = $can_createdBy;
-
-        return $this;
-    }
-
-    public function getCanInserted(): ?\DateTimeInterface
-    {
-        return $this->can_inserted;
-    }
-
-    public function setCanInserted(\DateTimeInterface $can_inserted): self
-    {
-        $this->can_inserted = $can_inserted;
+        $this->inserted = $inserted;
 
         return $this;
     }
