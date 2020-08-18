@@ -5,13 +5,12 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\InstitutionProcessRepository;
 use DateTime;
-use Doctrine\Common\Collections\ArrayCollection;
+use DateTimeInterface;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
-use Doctrine\ORM\Mapping\OneToOne;
 use Doctrine\ORM\Mapping\OrderBy;
 
 /**
@@ -23,40 +22,40 @@ class InstitutionProcess extends DbObject
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(name="inp_id", type="integer", length=10)
+     * @ORM\Column(name="inp_id", type="integer", length=10, nullable=true)
      * @var int
      */
     protected $id;
 
     /**
-     * @ORM\Column(name="inp_name", type="string", length=255)
+     * @ORM\Column(name="inp_name", type="string", length=255, nullable=true)
      */
     public $name;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(name="inp_approvable", type="boolean", nullable=true)
      */
-    public $inp_approvable;
+    public $approvable;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(name="inp_gradable", type="boolean", nullable=true)
      */
-    public $inp_gradable;
+    public $gradable;
 
     /**
-     * @ORM\Column(name="inp_created_by", type="integer")
+     * @ORM\Column(name="inp_created_by", type="integer", nullable=true)
      */
     public $createdBy;
 
     /**
-     * @ORM\Column(name="inp_inserted", type="datetime")
+     * @ORM\Column(name="inp_inserted", type="datetime", nullable=true)
      */
     public $inserted;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="inp_deleted", type="datetime", nullable=true)
      */
-    public $inp_deleted;
+    public $deleted;
 
     /**
      * @ManyToOne(targetEntity="Organization", inversedBy="institutionProcesses")
@@ -127,10 +126,10 @@ class InstitutionProcess extends DbObject
     {
         parent::__construct($id, $inp_createdBy, new DateTime());
         $this->name = $inp_name;
-        $this->inp_approvable = $inp_approvable;
-        $this->inp_gradable = $inp_gradable;
+        $this->approvable = $inp_approvable;
+        $this->gradable = $inp_gradable;
         $this->inserted = $inp_isnerted;
-        $this->inp_deleted = $inp_deleted;
+        $this->deleted = $inp_deleted;
         $this->organization = $organization;
         $this->process = $process;
         $this->masterUser = $masterUser;
@@ -140,11 +139,6 @@ class InstitutionProcess extends DbObject
         $this->activities = $activities;
     }
 
-
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
 
     public function getName(): ?string
     {
@@ -160,48 +154,48 @@ class InstitutionProcess extends DbObject
 
     public function isApprovable(): ?bool
     {
-        return $this->inp_approvable;
+        return $this->approvable;
     }
 
     public function setApprovable(bool $inp_approvable): self
     {
-        $this->inp_approvable = $inp_approvable;
+        $this->approvable = $inp_approvable;
 
         return $this;
     }
 
     public function isGradable(): ?bool
     {
-        return $this->inp_gradable;
+        return $this->gradable;
     }
 
     public function setGradable(bool $inp_gradable): self
     {
-        $this->inp_gradable = $inp_gradable;
+        $this->gradable = $inp_gradable;
 
         return $this;
     }
 
-    public function getIsnerted(): ?\DateTimeInterface
+    public function getIsnerted(): ?DateTimeInterface
     {
         return $this->inserted;
     }
 
-    public function setIsnerted(\DateTimeInterface $inp_isnerted): self
+    public function setIsnerted(DateTimeInterface $inp_isnerted): self
     {
         $this->inserted = $inp_isnerted;
 
         return $this;
     }
 
-    public function getDeleted(): ?\DateTimeInterface
+    public function getDeleted(): ?DateTimeInterface
     {
-        return $this->inp_deleted;
+        return $this->deleted;
     }
 
-    public function setDeleted(?\DateTimeInterface $inp_deleted): self
+    public function setDeleted(?DateTimeInterface $inp_deleted): self
     {
-        $this->inp_deleted = $inp_deleted;
+        $this->deleted = $inp_deleted;
 
         return $this;
     }
@@ -310,13 +304,15 @@ class InstitutionProcess extends DbObject
         $this->stages = $stages;
     }
 
-    function addChildren(InstitutionProcess $child){
+    public function addChildren(InstitutionProcess $child): InstitutionProcess
+    {
         $this->children->add($child);
         $child->setParent($this);
         return $this;
     }
 
-    function removeChildren(InstitutionProcess $child){
+    public function removeChildren(InstitutionProcess $child): InstitutionProcess
+    {
         $this->children->removeElement($child);
         return $this;
     }
@@ -324,39 +320,45 @@ class InstitutionProcess extends DbObject
     /**
      * @return Collection|InstitutionProcess[]
      */
-    function getValidatedChildren() {
-        return $this->children->filter(function(InstitutionProcess $p){
+    public function getValidatedChildren() {
+        return $this->children->filter(static function(InstitutionProcess $p){
             return !$p->isApprovable();
         });
     }
 
-    function addValidatedChildren(InstitutionProcess $child){
+    public function addValidatedChildren(InstitutionProcess $child): InstitutionProcess
+    {
         return $this->addChildren($child);
     }
 
-    function removeValidatedChildren(InstitutionProcess $child){
+    public function removeValidatedChildren(InstitutionProcess $child): InstitutionProcess
+    {
         return $this->removeChildren($child);
     }
-    function addActivity(Activity $activity){
+    public function addActivity(Activity $activity): InstitutionProcess
+    {
 
         $this->activities->add($activity);
         $activity->setInstitutionProcess($this);
         return $this;
     }
 
-    function removeActivity(Activity $activity){
+    public function removeActivity(Activity $activity): InstitutionProcess
+    {
         $this->activities->removeElement($activity);
         return $this;
     }
 
-    function addStage(IProcessStage $stage){
+    public function addStage(IProcessStage $stage): InstitutionProcess
+    {
 
         $this->stages->add($stage);
         $stage->setInstitutionProcess($this);
         return $this;
     }
 
-    function removeStage(IProcessStage $stage){
+    public function removeStage(IProcessStage $stage): InstitutionProcess
+    {
         $this->stages->removeElement($stage);
         return $this;
     }
@@ -368,23 +370,23 @@ class InstitutionProcess extends DbObject
         return $this->getStages();
     }
 
-    public function addActiveStage(IProcessStage $stage)
+    public function addActiveStage(IProcessStage $stage): InstitutionProcess
     {
         return $this->addStage($stage);
     }
 
-    public function removeActiveStage(IProcessStage $stage)
+    public function removeActiveStage(IProcessStage $stage): InstitutionProcess
     {
         return $this->removeStage($stage);
     }
 
     //TODO getActiveModifiableStages
-    public function addActiveModifiableStage(IProcessStage $stage)
+    public function addActiveModifiableStage(IProcessStage $stage): InstitutionProcess
     {
         return $this->addStage($stage);
     }
 
-    public function removeActiveModifiableStage(IProcessStage $stage)
+    public function removeActiveModifiableStage(IProcessStage $stage): InstitutionProcess
     {
         return $this->removeStage($stage);
     }
@@ -393,7 +395,7 @@ class InstitutionProcess extends DbObject
         return (string) $this->id;
     }
 
-    public function userCanEdit(User $u)
+    public function userCanEdit(User $u): bool
     {
         return $u->getRole() == 1 || $u->getRole() == 4 || $this->masterUser == $u;
     }

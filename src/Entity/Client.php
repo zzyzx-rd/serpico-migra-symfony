@@ -5,6 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\ClientRepository;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
@@ -26,34 +27,34 @@ class Client extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     public $clicommname;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="cli_type", type="string", length=255, nullable=true)
      */
-    public $cli_type;
+    public $type;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="cli_logo", type="string", length=255, nullable=true)
      */
-    public $cli_logo;
+    public $logo;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="cli_email", type="string", length=255, nullable=true)
      */
-    public $cli_email;
+    public $email;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="cli_createdBy", type="integer", nullable=true)
      */
-    public $cli_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="cli_inserted", type="datetime", nullable=true)
      */
-    public $cli_inserted;
+    public $inserted;
 
     /**
      * @ManyToOne(targetEntity="Organization", inversedBy="clients")
@@ -70,7 +71,7 @@ class Client extends DbObject
 
     /**
      * @OneToOne(targetEntity="WorkerFirm")
-     * @JoinColumn(name="worker_firm_wfi_id", referencedColumnName="wfi_id")
+     * @JoinColumn(name="worker_firm_wfi_id", referencedColumnName="wfi_id", nullable=true)
      */
     protected $workerFirm;
 
@@ -101,29 +102,24 @@ class Client extends DbObject
         $clicommname = null,
         $cli_logo = null,
         $cli_email = null,
-        $cli_inserted,
-        $organization,
+        $cli_inserted = null,
+        $organization = null,
         Organization $clientOrganization = null,
-        $workerFirm,
+        $workerFirm = null,
         $externalUsers = null)
     {
         parent::__construct($id, $cli_createdBy, new DateTime());
         $this->clicommname = $clicommname;
-        $this->cli_type = $cli_type;
-        $this->cli_logo = $cli_logo;
-        $this->cli_email = $cli_email;
-        $this->cli_inserted = $cli_inserted;
+        $this->type = $cli_type;
+        $this->logo = $cli_logo;
+        $this->email = $cli_email;
+        $this->inserted = $cli_inserted;
         $this->organization = $organization;
         $this->clientOrganization = $clientOrganization;
         $this->workerFirm = $workerFirm;
-        $this->externalUsers = $externalUsers?$externalUsers:new ArrayCollection();
+        $this->externalUsers = $externalUsers?:new ArrayCollection();
     }
 
-
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
 
     public function getClicommname(): ?string
     {
@@ -137,62 +133,45 @@ class Client extends DbObject
         return $this;
     }
 
-    public function getCliType(): ?string
+    public function getType(): ?string
     {
-        return $this->cli_type;
+        return $this->type;
     }
 
-    public function setCliType(string $cli_type): self
+    public function setType(string $type): self
     {
-        $this->cli_type = $cli_type;
+        $this->type = $type;
 
         return $this;
     }
 
-    public function getCliLogo(): ?string
+    public function getLogo(): ?string
     {
-        return $this->cli_logo;
+        return $this->logo;
     }
 
-    public function setCliLogo(string $cli_logo): self
+    public function setLogo(string $logo): self
     {
-        $this->cli_logo = $cli_logo;
+        $this->logo = $logo;
 
         return $this;
     }
 
-    public function getCliEmail(): ?string
+    public function getEmail(): ?string
     {
-        return $this->cli_email;
+        return $this->email;
     }
 
-    public function setCliEmail(?string $cli_email): self
+    public function setEmail(?string $email): self
     {
-        $this->cli_email = $cli_email;
+        $this->email = $email;
 
         return $this;
     }
 
-    public function getCliCreatedBy(): ?int
+    public function setInserted(DateTimeInterface $inserted): self
     {
-        return $this->cli_createdBy;
-    }
-
-    public function setCliCreatedBy(int $cli_createdBy): self
-    {
-        $this->cli_createdBy = $cli_createdBy;
-
-        return $this;
-    }
-
-    public function getCliInserted(): ?\DateTimeInterface
-    {
-        return $this->cli_inserted;
-    }
-
-    public function setCliInserted(\DateTimeInterface $cli_inserted): self
-    {
-        $this->cli_inserted = $cli_inserted;
+        $this->inserted = $inserted;
 
         return $this;
     }
@@ -261,38 +240,38 @@ class Client extends DbObject
         $this->externalUsers = $externalUsers;
     }
 
-    public function addExternalUser(ExternalUser $externalUser)
+    public function addExternalUser(ExternalUser $externalUser): Client
     {
         $this->externalUsers->add($externalUser);
         $externalUser->setClient($this);
         return $this;
     }
 
-    public function removeExternalUser(ExternalUser $externalUser)
+    public function removeExternalUser(ExternalUser $externalUser): Client
     {
         $this->externalUsers->removeElement($externalUser);
         return $this;
     }
 
-    public function getAliveExternalUsers()
+    public function getAliveExternalUsers(): ArrayCollection
     {
         $aliveExtUsers = new ArrayCollection;
         foreach ($this->externalUsers as $externalUser) {
-            if ($externalUser->getDeleted() == null && $externalUser->getLastname() != 'ZZ') {
+            if ($externalUser->getDeleted() == null && $externalUser->getLastname() !== 'ZZ') {
                 $aliveExtUsers->add($externalUser);
             }
         };
         return $aliveExtUsers;
     }
 
-    public function addAliveExternalUser(ExternalUser $externalUser)
+    public function addAliveExternalUser(ExternalUser $externalUser): Client
     {
         $this->externalUsers->add($externalUser);
         $externalUser->setClient($this);
         return $this;
     }
 
-    public function removeAliveExternalUser(ExternalUser $externalUser)
+    public function removeAliveExternalUser(ExternalUser $externalUser): Client
     {
         $this->externalUsers->removeElement($externalUser);
         return $this;

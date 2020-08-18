@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\CountryRepository;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\OneToMany;
@@ -21,29 +22,29 @@ class Country extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="cou_abbr", type="string", length=255, nullable=true)
      */
-    public $cou_abbr;
+    public $abbr;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="cou_fullname", type="string", length=255, nullable=true)
      */
-    public $cou_fullname;
+    public $fullname;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="cou_name", type="string", length=255, nullable=true)
      */
-    public $cou_name;
+    public $name;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="cou_created_by", type="integer", nullable=true)
      */
-    public $cou_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="cou_inserted", type="datetime", nullable=true)
      */
-    public $cou_inserted;
+    public $inserted;
 
     /**
      * @OneToMany(targetEntity="State", mappedBy="country",cascade={"persist", "remove"}, orphanRemoval=true)
@@ -77,64 +78,54 @@ class Country extends DbObject
         $firms = null)
     {
         parent::__construct($id, $cou_createdBy, new DateTime());
-        $this->cou_abbr = $cou_abbr;
-        $this->cou_fullname = $cou_fullname;
-        $this->cou_name = $cou_name;
-        $this->cou_inserted = $cou_inserted;
+        $this->abbr = $cou_abbr;
+        $this->fullname = $cou_fullname;
+        $this->name = $cou_name;
+        $this->inserted = $cou_inserted;
         $this->states = $states?$states:new ArrayCollection();
         $this->firms = $firms?$firms:new ArrayCollection();
     }
 
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
     public function getAbbr(): ?string
     {
-        return $this->cou_abbr;
+        return $this->abbr;
     }
 
     public function setAbbr(string $cou_abbr): self
     {
-        $this->cou_abbr = $cou_abbr;
+        $this->abbr = $cou_abbr;
 
         return $this;
     }
 
     public function getFullname(): ?string
     {
-        return $this->cou_fullname;
+        return $this->fullname;
     }
 
     public function setFullname(string $cou_fullname): self
     {
-        $this->cou_fullname = $cou_fullname;
+        $this->fullname = $cou_fullname;
 
         return $this;
     }
 
     public function getName(): ?string
     {
-        return $this->cou_name;
+        return $this->name;
     }
 
     public function setName(string $cou_name): self
     {
-        $this->cou_name = $cou_name;
+        $this->name = $cou_name;
 
         return $this;
     }
 
-    public function getInserted(): ?\DateTimeInterface
+    public function setInserted(DateTimeInterface $cou_inserted): self
     {
-        return $this->cou_inserted;
-    }
-
-    public function setInserted(\DateTimeInterface $cou_inserted): self
-    {
-        $this->cou_inserted = $cou_inserted;
+        $this->inserted = $cou_inserted;
 
         return $this;
     }
@@ -170,13 +161,15 @@ class Country extends DbObject
     {
         $this->firms = $firms;
     }
-    function addFirm(WorkerFirm $firm){
+    public function addFirm(WorkerFirm $firm): Country
+    {
         $this->firms->add($firm);
         $firm->setState($this);
         return $this;
     }
 
-    function removeFirm(WorkerFirm $firm){
+    public function removeFirm(WorkerFirm $firm): Country
+    {
         $this->firms->removeElement($firm);
         return $this;
     }

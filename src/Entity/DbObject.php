@@ -24,19 +24,19 @@ abstract class DbObject
      * 
      * @Id()
      * @GeneratedValue()
-     * @Column(name="id", type="integer") @GeneratedValue
+     * @Column(name="id", type="integer", nullable=true) @GeneratedValue
      * @var int
      */
     protected $id;
 
     /**
-     * @Column(name="createdBy", type="integer")
+     * @Column(name="created_by", type="integer", nullable=true)
      * @var int
      */
     protected $createdBy;
 
     /**
-     * @Column(name="inserted", type="datetime")
+     * @Column(name="inserted", type="datetime", nullable=true)
      * @var DateTime
      */
     protected $inserted;

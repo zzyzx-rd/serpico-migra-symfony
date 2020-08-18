@@ -24,7 +24,7 @@ class TemplateCriterion extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="integer", nullable=true)
      */
     public $icrt_type;
 
@@ -34,12 +34,12 @@ class TemplateCriterion extends DbObject
     public $crt_name;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="float", nullable=true)
      */
     public $crt_weight;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="boolean", nullable=true)
      */
     public $crt_forceComment_compare;
 
@@ -69,7 +69,7 @@ class TemplateCriterion extends DbObject
     public $crt_step;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     public $crt_comment;
 

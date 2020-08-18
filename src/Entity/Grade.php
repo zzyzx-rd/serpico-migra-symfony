@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\GradeRepository;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -16,49 +17,49 @@ class Grade extends DbObject
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(name="grd_id", length=10, type="integer")
+     * @ORM\Column(name="grd_id", length=10, type="integer", nullable=true)
      * @var int
      */
     protected $id;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="grd_type", type="integer", nullable=true)
      */
-    public $grd_type;
+    public $type;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="grd_graded_usr_id", type="integer", nullable=true)
      */
-    public $grd_graded_usr_id;
+    public $graded_usr_id;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="grd_graded_tea_id", type="integer", nullable=true)
      */
-    public $grd_graded_tea_id;
+    public $graded_tea_id;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(name="grd_value", type="float", nullable=true)
      */
-    public $grd_value;
+    public $value;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="grd_comment", type="string", length=255, nullable=true)
      */
-    public $grd_comment;
+    public $comment;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="grd_created_by", type="integer", nullable=true)
      */
-    public $grd_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="grd_inserted", type="datetime", nullable=true)
      */
-    public $grd_inserted;
+    public $inserted;
 
     /**
      * @ManyToOne(targetEntity="Team", inversedBy="grades")
-     * @JoinColumn(name="activity_user_team_tea_id", referencedColumnName="tea_id")
+     * @JoinColumn(name="activity_user_team_tea_id", referencedColumnName="tea_id", nullable=true)
      */
     protected $team;
     /**
@@ -110,18 +111,18 @@ class Grade extends DbObject
         $grd_createdBy = null,
         $grd_inserted = null,
         Team $team = null,
-        ActivityUser $participant,
-        Activity$activity,
-        Criterion $criterion,
-        Stage $stage)
+        ActivityUser $participant = null,
+        Activity$activity = null,
+        Criterion $criterion = null,
+        Stage $stage = null)
     {
         parent::__construct($id, $grd_createdBy, new DateTime());
-        $this->grd_type = $grd_type;
-        $this->grd_graded_usr_id = $grd_graded_usr_id;
-        $this->grd_graded_tea_id = $grd_graded_tea_id;
-        $this->grd_value = $grd_value;
-        $this->grd_comment = $grd_comment;
-        $this->grd_inserted = $grd_inserted;
+        $this->type = $grd_type;
+        $this->graded_usr_id = $grd_graded_usr_id;
+        $this->graded_tea_id = $grd_graded_tea_id;
+        $this->value = $grd_value;
+        $this->comment = $grd_comment;
+        $this->inserted = $grd_inserted;
         $this->team = $team;
         $this->participant = $participant;
         $this->activity = $activity;
@@ -129,79 +130,69 @@ class Grade extends DbObject
         $this->stage = $stage;
     }
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
     public function getType(): ?int
     {
-        return $this->grd_type;
+        return $this->type;
     }
 
     public function setType(int $grd_type): self
     {
-        $this->grd_type = $grd_type;
+        $this->type = $grd_type;
 
         return $this;
     }
 
     public function getGradedUsrId(): ?int
     {
-        return $this->grd_graded_usr_id;
+        return $this->graded_usr_id;
     }
 
     public function setGradedUsrId(int $grd_graded_usr_id): self
     {
-        $this->grd_graded_usr_id = $grd_graded_usr_id;
+        $this->graded_usr_id = $grd_graded_usr_id;
 
         return $this;
     }
 
     public function getGradedTeaId(): ?int
     {
-        return $this->grd_graded_tea_id;
+        return $this->graded_tea_id;
     }
 
     public function setGradedTeaId(int $grd_graded_tea_id): self
     {
-        $this->grd_graded_tea_id = $grd_graded_tea_id;
+        $this->graded_tea_id = $grd_graded_tea_id;
 
         return $this;
     }
 
     public function getValue(): ?float
     {
-        return $this->grd_value;
+        return $this->value;
     }
 
     public function setValue(float $grd_value): self
     {
-        $this->grd_value = $grd_value;
+        $this->value = $grd_value;
 
         return $this;
     }
 
     public function getComment(): ?string
     {
-        return $this->grd_comment;
+        return $this->comment;
     }
 
     public function setComment(?string $grd_comment): self
     {
-        $this->grd_comment = $grd_comment;
+        $this->comment = $grd_comment;
 
         return $this;
     }
 
-    public function getInserted(): ?\DateTimeInterface
+    public function setInserted(DateTimeInterface $grd_inserted): self
     {
-        return $this->grd_inserted;
-    }
-
-    public function setInserted(\DateTimeInterface $grd_inserted): self
-    {
-        $this->grd_inserted = $grd_inserted;
+        $this->inserted = $grd_inserted;
 
         return $this;
     }

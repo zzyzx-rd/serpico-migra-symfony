@@ -24,12 +24,12 @@ class Weight extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="integer", nullable=true)
      */
     public $wgt_interval;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     public $wgt_titleframe;
 
@@ -44,12 +44,12 @@ class Weight extends DbObject
     public $wgt_modified;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="integer", nullable=true)
      */
     public $wgt_createdBy;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="datetime", nullable=true)
      */
     public $wgt_inserted;
 

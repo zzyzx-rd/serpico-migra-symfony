@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\DepartmentRepository;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
@@ -30,19 +32,19 @@ class Department extends DbObject
     public $dpt_name;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="dpt_created_by", type="integer", nullable=true)
      */
-    public $dpt_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="dpt_inserted", type="datetime", nullable=true)
      */
-    public $dpt_inserted;
+    public $inserted;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="dpt_deleted", type="datetime", nullable=true)
      */
-    public $dpt_deleted;
+    public $deleted;
 
     /**
      * @ManyToOne(targetEntity="User", inversedBy="leadingDepartments")
@@ -106,25 +108,25 @@ class Department extends DbObject
         $dpt_createdBy = null,
         $dpt_inserted = null,
         $dpt_deleted = null,
-        $masterUser,
+        $masterUser = null,
         $positions = null,
         $templateActivities = null,
         ArrayCollection $options = null,
-        $organization,
-        ArrayCollection $criterionGroups,
+        $organization = null,
+        ArrayCollection $criterionGroups = null,
         ArrayCollection $targets = null)
     {
-        $this->id = $id;
+        parent::__construct($id, $dpt_createdBy, new DateTime());
         $this->dpt_name = $dpt_name;
-        $this->dpt_inserted = $dpt_inserted;
-        $this->dpt_deleted = $dpt_deleted;
+        $this->inserted = $dpt_inserted;
+        $this->deleted = $dpt_deleted;
         $this->masterUser = $masterUser;
-        $this->positions = $positions?$positions:new ArrayCollection();
+        $this->positions = $positions?:new ArrayCollection();
         $this->templateActivities = $templateActivities;
-        $this->options = $options?$options:new ArrayCollection();
+        $this->options = $options?:new ArrayCollection();
         $this->organization = $organization;
         $this->criterionGroups = $criterionGroups;
-        $this->targets = $targets?$targets:new ArrayCollection();
+        $this->targets = $targets?:new ArrayCollection();
     }
 
 
@@ -145,26 +147,21 @@ class Department extends DbObject
         return $this;
     }
 
-    public function getInserted(): ?\DateTimeInterface
+    public function setInserted(DateTimeInterface $dpt_inserted): self
     {
-        return $this->dpt_inserted;
-    }
-
-    public function setInserted(\DateTimeInterface $dpt_inserted): self
-    {
-        $this->dpt_inserted = $dpt_inserted;
+        $this->inserted = $dpt_inserted;
 
         return $this;
     }
 
-    public function getDeleted(): ?\DateTimeInterface
+    public function getDeleted(): ?DateTimeInterface
     {
-        return $this->dpt_deleted;
+        return $this->deleted;
     }
 
-    public function setDeleted(?\DateTimeInterface $dpt_deleted): self
+    public function setDeleted(?DateTimeInterface $dpt_deleted): self
     {
-        $this->dpt_deleted = $dpt_deleted;
+        $this->deleted = $dpt_deleted;
 
         return $this;
     }
@@ -281,50 +278,55 @@ class Department extends DbObject
         $this->targets = $targets;
     }
 
-    function addPosition(Position $position){
+    public function addPosition(Position $position): Department
+    {
 
         $this->positions->add($position);
         $position->setDepartment($this);
         return $this;
     }
 
-    function removePosition(Position $position){
+    public function removePosition(Position $position): Department
+    {
         $this->positions->removeElement($position);
         return $this;
     }
 
-    function addTemplateActivity(TemplateActivity $templateActivity){
+    public function addTemplateActivity(TemplateActivity $templateActivity): Department
+    {
         $this->templateActivities->add($templateActivity);
         $templateActivity->setDepartment($this);
         return $this;
     }
 
-    function removeTemplateActivity(TemplateActivity $templateActivity){
+    public function removeTemplateActivity(TemplateActivity $templateActivity): Department
+    {
         $this->templateActivities->removeElement($templateActivity);
         return $this;
     }
     //TODO l'histoire du getUSers et viewable users
 
-    public function toArray() {
+    public function toArray(): array
+    {
         return [
             'id' => $this->id,
             'name' => $this->dpt_name
         ];
     }
-    function addOption(OrganizationUserOption $option)
+    public function addOption(OrganizationUserOption $option): Department
     {
         $this->options->add($option);
         $option->setDepartment($this);
         return $this;
     }
 
-    function removeOption(OrganizationUserOption $option)
+    public function removeOption(OrganizationUserOption $option): Department
     {
         $this->options->removeElement($option);
         return $this;
     }
 
-    function __toString()
+    public function __toString()
     {
         return $this->dpt_name;
     }

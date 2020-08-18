@@ -54,162 +54,162 @@ class Stage extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="boolean", nullable=true)
      */
     public $stg_complete;
 
     /**
-     * @ORM\Column(name="stg_name", type="string", length=255)
+     * @ORM\Column(name="stg_name", type="string", length=255, nullable=true)
      */
     public $name;
 
     /**
-     * @ORM\Column(name="stg_mode", type="integer")
+     * @ORM\Column(name="stg_mode", type="integer", nullable=true)
      */
     public $mode;
 
     /**
-     * @ORM\Column(name="stG_visibility", type="integer")
+     * @ORM\Column(name="stG_visibility", type="integer", nullable=true)
      */
     public $visibility;
 
     /**
-     * @ORM\Column(name="stg_access_link", type="string", length=255)
+     * @ORM\Column(name="stg_access_link", type="string", length=255, nullable=true)
      */
     public $access_link;
 
     /**
-     * @ORM\Column(name="stg_status", type="integer")
+     * @ORM\Column(name="stg_status", type="integer", nullable=true)
      */
     public $status;
 
     /**
-     * @ORM\Column(name="$stg_desc", type="string", length=255)
+     * @ORM\Column(name"stg_desc", type="string", length=255, nullable=true)
      */
     public $desc;
 
     /**
-     * @ORM\Column(name="stg_progress", type="integer")
+     * @ORM\Column(name="stg_progress", type="integer", nullable=true)
      */
     public $progress;
 
     /**
-     * @ORM\Column(name="stg_weight", type="float")
+     * @ORM\Column(name="stg_weight", type="float", nullable=true)
      */
     public $weight;
 
     /**
-     * @ORM\Column(name="$stg_definite_dates", type="boolean")
+     * @ORM\Column(name"stg_definite_dates", type="boolean", nullable=true)
      */
     public $definite_dates;
 
     /**
-     * @ORM\Column(name="$stg_dperiod", type="integer")
+     * @ORM\Column(name"stg_dperiod", type="integer", nullable=true)
      */
     public $dperiod;
 
     /**
-     * @ORM\Column(name="$stg_dfrequency", type="string", length=255)
+     * @ORM\Column(name"stg_dfrequency", type="string", length=255, nullable=true)
      */
     public $dfrequency;
 
     /**
-     * @ORM\Column(name="$stg_dorigin", type="integer")
+     * @ORM\Column(name"stg_dorigin", type="integer", nullable=true)
      */
     public $dorigin;
 
     /**
-     * @ORM\Column(name="stg_fperiod",type="integer")
+     * @ORM\Column(name="stg_fperiod",type="integer", nullable=true)
      */
     public $fperiod;
 
     /**
-     * @ORM\Column(name="stg_ffrequency", type="string", length=255)
+     * @ORM\Column(name="stg_ffrequency", type="string", length=255, nullable=true)
      */
     public $ffrequency;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="integer", nullable=true)
      */
     public $stg_forigin;
 
     /**
-     * @ORM\Column(name="stg_startdate", type="datetime")
+     * @ORM\Column(name="stg_startdate", type="datetime", nullable=true)
      */
     public $startdate;
 
     /**
-     * @ORM\Column(name="$stg_enddate", type="datetime")
+     * @ORM\Column(name"stg_enddate", type="datetime", nullable=true)
      */
     public $enddate;
 
     /**
-     * @ORM\Column(name="stg_gstartdate", type="datetime")
+     * @ORM\Column(name="stg_gstartdate", type="datetime", nullable=true)
      */
     public $gstartdate;
 
     /**
-     * @ORM\Column(name=" $stg_genddate", type="datetime")
+     * @ORM\Column(name=" $stg_genddate", type="datetime", nullable=true)
      */
     public $genddate;
 
     /**
-     * @ORM\Column(name="stg_dealine_nb_days", type="integer")
+     * @ORM\Column(name="stg_dealine_nb_days", type="integer", nullable=true)
      */
     public $dealine_nb_days;
 
     /**
-     * @ORM\Column(name="$stg_deadline_mailSent", type="boolean", nullable=true)
+     * @ORM\Column(name"stg_deadline_mailSent", type="boolean", nullable=true)
      */
     public $deadline_mailSent;
 
     /**
-     * @ORM\Column(name="$stg_createdBy", type="integer", nullable=true)
+     * @ORM\Column(name"stg_created_by", type="integer", nullable=true)
      */
     public $createdBy;
 
     /**
-     * @ORM\Column(name="$stg_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name"stg_inserted", type="datetime", nullable=true)
      */
     public $inserted;
 
     /**
-     * @ORM\Column(name="$stg_reopened", type="boolean")
+     * @ORM\Column(name"stg_reopened", type="boolean", nullable=true)
      */
     public $reopened;
 
     /**
-     * @ORM\Column(name="$stg_last_reopened", type="datetime")
+     * @ORM\Column(name"stg_last_reopened", type="datetime", nullable=true)
      */
     public $last_reopened;
 
     /**
-     * @ORM\Column(name="$stg_unstarted_notif", type="boolean")
+     * @ORM\Column(name"stg_unstarted_notif", type="boolean", nullable=true)
      */
     public $unstarted_notif;
 
     /**
-     * @ORM\Column(name="$stg_uncompleted_notif", type="boolean")
+     * @ORM\Column(name"stg_uncompleted_notif", type="boolean", nullable=true)
      */
     public $uncompleted_notif;
 
     /**
-     * @ORM\Column(name="$stg_unfinished_notif", type="boolean")
+     * @ORM\Column(name"stg_unfinished_notif", type="boolean", nullable=true)
      */
     public $unfinished_notif;
 
     /**
-     * @ORM\Column(name="$stg_isFinalized", type="boolean")
+     * @ORM\Column(name"stg_isFinalized", type="boolean", nullable=true)
      */
     public $isFinalized;
 
     /**
-     * @ORM\Column(name="$stg_deleted", type="datetime")
+     * @ORM\Column(name"stg_deleted", type="datetime", nullable=true)
      */
     public $deleted;
 
     /**
-     * @ORM\Column(name="$stg_gcompleted", type="datetime")
+     * @ORM\Column(name"stg_gcompleted", type="datetime", nullable=true)
      */
     public $gcompleted;
 
@@ -1632,4 +1632,5 @@ class Stage extends DbObject
     }
     //TODO remove CRitetrion et isModifiable SelfParticipation et getAllSelfGrades
     //TODO indivParticipation
+
 }

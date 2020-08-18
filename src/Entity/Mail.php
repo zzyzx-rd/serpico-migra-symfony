@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\MailRepository;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\JoinColumn;
@@ -22,69 +24,69 @@ class Mail extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="string", length=1)
+     * @ORM\Column(name="mail_persona", type="string", length=1)
      */
-    public $mail_persona;
+    public $persona;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="mail_token", type="string", length=255, nullable=true)
      */
-    public $mail_token;
+    public $token;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="mail_read", type="datetime", nullable=true)
      */
-    public $mail_read;
+    public $read;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="mail_createdBy", type="integer", nullable=true)
      */
-    public $mail_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="mail_inserted", type="datetime", nullable=true)
      */
-    public $mail_inserted;
+    public $inserted;
 
     /**
-     * @Column(name="mail_type", length= 255, type="string")
+     * @Column(name="mail_type", length= 255, type="string", nullable=true)
      * @var string
      */
     protected $type;
 
     /**
-     * @ORM\Column(type="string", length=3)
+     * @ORM\Column(name="mail_language", type="string", length=3)
      */
-    public $mail_language;
+    public $language;
 
     /**
      * @ManyToOne(targetEntity="User", inversedBy="mails")
-     * @JoinColumn(name="user_usr_id", referencedColumnName="usr_id", nullable=false)
+     * @JoinColumn(name="user_usr_id", referencedColumnName="usr_id", nullable=true)
      */
     protected $user;
     /**
      * @ManyToOne(targetEntity="WorkerIndividual", inversedBy="mails")
-     * @JoinColumn(name="worker_individual_win_id", referencedColumnName="win_id", nullable=false)
+     * @JoinColumn(name="worker_individual_win_id", referencedColumnName="win_id", nullable=true)
      */
     protected $workerIndividual;
     /**
      * @ManyToOne(targetEntity="Organization", inversedBy="mails")
-     * @JoinColumn(name="organization_org_id", referencedColumnName="org_id", nullable=false)
+     * @JoinColumn(name="organization_org_id", referencedColumnName="org_id", nullable=true)
      */
     protected $organization;
     /**
      * @ManyToOne(targetEntity="WorkerFirm", inversedBy="mails")
-     * @JoinColumn(name="worker_firm_wfi_id", referencedColumnName="wfi_id", nullable=false)
+     * @JoinColumn(name="worker_firm_wfi_id", referencedColumnName="wfi_id", nullable=true)
      */
     protected $workerFirm;
     /**
      * @ManyToOne(targetEntity="Activity")
-     * @JoinColumn(name="activity_act_id", referencedColumnName="act_id", nullable=false)
+     * @JoinColumn(name="activity_act_id", referencedColumnName="act_id", nullable=true)
      */
     protected $activity;
     /**
      * @ManyToOne(targetEntity="Stage")
-     * @JoinColumn(name="stage_stg_id", referencedColumnName="stg_id", nullable=false)
+     * @JoinColumn(name="stage_stg_id", referencedColumnName="stg_id", nullable=true)
      */
     protected $stage;
 
@@ -95,15 +97,15 @@ class Mail extends DbObject
      * @param $mail_persona
      * @param $mail_token
      * @param $mail_read
-     * @param $mail_createdBy
      * @param $mail_inserted
      * @param $mail_language
-     * @param $user
-     * @param $workerIndividual
-     * @param $organization
-     * @param $workerFirm
-     * @param $activity
-     * @param $stage
+     * @param null $createdBy
+     * @param User $user
+     * @param WorkerIndividual $workerIndividual
+     * @param Organization $organization
+     * @param WorkerFirm $workerFirm
+     * @param Activity $activity
+     * @param Stage $stage
      */
     public function __construct(
         int $id,
@@ -111,9 +113,9 @@ class Mail extends DbObject
         $mail_persona = null,
         $mail_token = null,
         $mail_read = null,
-        $mail_createdBy = null,
         $mail_inserted = null,
         $mail_language = null,
+        $createdBy = null,
         User $user = null,
         WorkerIndividual $workerIndividual = null,
         Organization $organization = null,
@@ -121,14 +123,13 @@ class Mail extends DbObject
         Activity $activity = null,
         Stage $stage = null)
     {
-        parent::__construct($id, $lk_url_createdBy, new DateTime());
-
+        parent::__construct($id, $createdBy, new DateTime());
         $this->type = $type;
-        $this->mail_persona = $mail_persona;
-        $this->mail_token = $mail_token;
-        $this->mail_read = $mail_read;
-        $this->mail_inserted = $mail_inserted;
-        $this->mail_language = $mail_language;
+        $this->persona = $mail_persona;
+        $this->token = $mail_token;
+        $this->read = $mail_read;
+        $this->inserted = $mail_inserted;
+        $this->language = $mail_language;
         $this->user = $user;
         $this->workerIndividual = $workerIndividual;
         $this->organization = $organization;
@@ -138,67 +139,57 @@ class Mail extends DbObject
     }
 
 
-    public function getId(): ?int
+    public function getPersona(): ?string
     {
-        return $this->id;
+        return $this->persona;
     }
 
-    public function getMailPersona(): ?string
+    public function setPersona(string $persona): self
     {
-        return $this->mail_persona;
-    }
-
-    public function setMailPersona(string $mail_persona): self
-    {
-        $this->mail_persona = $mail_persona;
+        $this->persona = $persona;
 
         return $this;
     }
 
-    public function getMailToken(): ?string
+    public function getToken(): ?string
     {
-        return $this->mail_token;
+        return $this->token;
     }
 
-    public function setMailToken(string $mail_token): self
+    public function setToken(string $token): self
     {
-        $this->mail_token = $mail_token;
+        $this->token = $token;
 
         return $this;
     }
 
-    public function getMailRead(): ?\DateTimeInterface
+    public function getRead(): ?DateTimeInterface
     {
-        return $this->mail_read;
+        return $this->read;
     }
 
-    public function setMailRead(\DateTimeInterface $mail_read): self
+    public function setRead(DateTimeInterface $read): self
     {
-        $this->mail_read = $mail_read;
+        $this->read = $read;
 
         return $this;
     }
 
-    public function getMailInserted(): ?\DateTimeInterface
+    public function setInserted(DateTimeInterface $inserted): self
     {
-        return $this->mail_inserted;
-    }
-
-    public function setMailInserted(\DateTimeInterface $mail_inserted): self
-    {
-        $this->mail_inserted = $mail_inserted;
+        $this->inserted = $inserted;
 
         return $this;
     }
 
-    public function getMailLanguage(): ?string
+    public function getLanguage(): ?string
     {
-        return $this->mail_language;
+        return $this->language;
     }
 
-    public function setMailLanguage(string $mail_language): self
+    public function setLanguage(string $language): self
     {
-        $this->mail_language = $mail_language;
+        $this->language = $language;
 
         return $this;
     }

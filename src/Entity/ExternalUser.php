@@ -5,6 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\ExternalUserRepository;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -26,54 +27,54 @@ class ExternalUser extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="ext_fisrtname", type="string", length=255, nullable=true)
      */
-    public $ext_fisrtname;
+    public $fisrtname;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="ext_lastname", type="string", length=255, nullable=true)
      */
-    public $ext_lastname;
+    public $lastname;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="ext_email", type="string", length=255, nullable=true)
      */
-    public $ext_email;
+    public $email;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="ext_positionName", type="string", length=255, nullable=true)
      */
-    public $ext_positionName;
+    public $positionName;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(name="ext_weight_value", type="float", nullable=true)
      */
-    public $ext_weight_value;
+    public $weight_value;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(name="ext_owner", type="boolean", nullable=true)
      */
-    public $ext_owner;
+    public $owner;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="ext_created_by", type="integer", nullable=true)
      */
-    public $ext_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="ext_inserted", type="datetime", nullable=true)
      */
-    public $ext_inserted;
+    public $inserted;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="ext_last_connected", type="datetime", nullable=true)
      */
-    public $ext_last_connected;
+    public $last_connected;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="ext_deleted", type="datetime", nullable=true)
      */
-    public $ext_deleted;
+    public $deleted;
 
     /**
      * @ManyToOne(targetEntity="User", inversedBy="externalUsers")
@@ -100,21 +101,20 @@ class ExternalUser extends DbObject
     /**
      * ExternalUser constructor.
      * @param int $id
-     * @param $ext_fisrtname
-     * @param $ext_lastname
+     * @param string $ext_fisrtname
+     * @param string $ext_lastname
      * @param $ext_email
+     * @param float $ext_weight_value
      * @param $ext_positionName
-     * @param $ext_weight_value
      * @param $ext_owner
      * @param $ext_createdBy
      * @param $ext_inserted
      * @param $ext_last_connected
      * @param $ext_deleted
-     * @param $user
-     * @param $client
-     * @param $activity_user_act_usr
-     * @param $results
-     * @param $teamUsers
+     * @param User $user
+     * @param Client $client
+     * @param ActivityUser $activity_user_act_usr
+     * @param TeamUser $teamUsers
      */
     public function __construct(
         int $id = 0,
@@ -131,136 +131,124 @@ class ExternalUser extends DbObject
         User $user = null,
         Client $client = null,
         ActivityUser $activity_user_act_usr = null,
-        Result $results = null,
         TeamUser $teamUsers = null)
     {
         parent::__construct($id, $ext_createdBy, new DateTime());
-        $this->ext_fisrtname = $ext_fisrtname;
-        $this->ext_lastname = $ext_lastname;
-        $this->ext_email = $ext_email;
-        $this->ext_positionName = $ext_positionName;
-        $this->ext_weight_value = $ext_weight_value;
-        $this->ext_owner = $ext_owner;
-        $this->ext_inserted = $ext_inserted;
-        $this->ext_last_connected = $ext_last_connected;
-        $this->ext_deleted = $ext_deleted;
+        $this->fisrtname = $ext_fisrtname;
+        $this->lastname = $ext_lastname;
+        $this->email = $ext_email;
+        $this->positionName = $ext_positionName;
+        $this->weight_value = $ext_weight_value;
+        $this->owner = $ext_owner;
+        $this->inserted = $ext_inserted;
+        $this->last_connected = $ext_last_connected;
+        $this->deleted = $ext_deleted;
         $this->user = $user;
         $this->client = $client;
         $this->activity_user_act_usr = $activity_user_act_usr;
-        $this->results = $results;
         $this->teamUsers = $teamUsers;
     }
 
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
     public function getFisrtname(): ?string
     {
-        return $this->ext_fisrtname;
+        return $this->fisrtname;
     }
 
     public function setFisrtname(string $ext_fisrtname): self
     {
-        $this->ext_fisrtname = $ext_fisrtname;
+        $this->fisrtname = $ext_fisrtname;
 
         return $this;
     }
 
     public function getLastname(): ?string
     {
-        return $this->ext_lastname;
+        return $this->lastname;
     }
 
     public function setLastname(string $ext_lastname): self
     {
-        $this->ext_lastname = $ext_lastname;
+        $this->lastname = $ext_lastname;
 
         return $this;
     }
 
     public function getEmail(): ?string
     {
-        return $this->ext_email;
+        return $this->email;
     }
 
     public function setEmail(?string $ext_email): self
     {
-        $this->ext_email = $ext_email;
+        $this->email = $ext_email;
 
         return $this;
     }
 
     public function getPositionName(): ?string
     {
-        return $this->ext_positionName;
+        return $this->positionName;
     }
 
     public function setPositionName(string $ext_positionName): self
     {
-        $this->ext_positionName = $ext_positionName;
+        $this->positionName = $ext_positionName;
 
         return $this;
     }
 
     public function getWeightValue(): ?float
     {
-        return $this->ext_weight_value;
+        return $this->weight_value;
     }
 
     public function setWeightValue(float $ext_weight_value): self
     {
-        $this->ext_weight_value = $ext_weight_value;
+        $this->weight_value = $ext_weight_value;
 
         return $this;
     }
 
     public function isOwner(): ?bool
     {
-        return $this->ext_owner;
+        return $this->owner;
     }
 
     public function setOwner(bool $ext_owner): self
     {
-        $this->ext_owner = $ext_owner;
+        $this->owner = $ext_owner;
 
         return $this;
     }
 
-    public function getInserted(): ?\DateTimeInterface
+    public function setInserted(DateTimeInterface $ext_inserted): self
     {
-        return $this->ext_inserted;
-    }
-
-    public function setInserted(\DateTimeInterface $ext_inserted): self
-    {
-        $this->ext_inserted = $ext_inserted;
+        $this->inserted = $ext_inserted;
 
         return $this;
     }
 
-    public function getLastConnected(): ?\DateTimeInterface
+    public function getLastConnected(): ?DateTimeInterface
     {
-        return $this->ext_last_connected;
+        return $this->last_connected;
     }
 
-    public function setLastConnected(?\DateTimeInterface $ext_last_connected): self
+    public function setLastConnected(?DateTimeInterface $ext_last_connected): self
     {
-        $this->ext_last_connected = $ext_last_connected;
+        $this->last_connected = $ext_last_connected;
 
         return $this;
     }
 
-    public function getDeleted(): ?\DateTimeInterface
+    public function getDeleted(): ?DateTimeInterface
     {
-        return $this->ext_deleted;
+        return $this->deleted;
     }
 
-    public function setDeleted(?\DateTimeInterface $ext_deleted): self
+    public function setDeleted(?DateTimeInterface $ext_deleted): self
     {
-        $this->ext_deleted = $ext_deleted;
+        $this->deleted = $ext_deleted;
 
         return $this;
     }
@@ -298,9 +286,9 @@ class ExternalUser extends DbObject
     }
 
     /**
-     * @return Collection|ActivityUser[]
+     * @return ActivityUser
      */
-    public function getActivityUserActUsr(): Collection
+    public function getActivityUserActUsr(): ActivityUser
     {
         return $this->activity_user_act_usr;
     }
@@ -328,36 +316,6 @@ class ExternalUser extends DbObject
         return $this;
     }
 
-    /**
-     * @return Collection|Result[]
-     */
-    public function getResults(): Collection
-    {
-        return $this->results;
-    }
-
-    public function addResult(Result $result): self
-    {
-        if (!$this->results->contains($result)) {
-            $this->results[] = $result;
-            $result->seternalUserExtId($this);
-        }
-
-        return $this;
-    }
-
-    public function removeResult(Result $result): self
-    {
-        if ($this->results->contains($result)) {
-            $this->results->removeElement($result);
-            // set the owning side to null (unless already changed)
-            if ($result->geternalUserExtId() === $this) {
-                $result->seternalUserExtId(null);
-            }
-        }
-
-        return $this;
-    }
 
     /**
      * @return Collection|TeamUser[]
@@ -390,14 +348,14 @@ class ExternalUser extends DbObject
         return $this;
     }
 
-    public function getFullName()
+    public function getFullName(): string
     {
         $prefix = $this->firstname ?? '';
         $suffix = $this->lastname ?? '';
         return $prefix . ' ' . $suffix;
     }
 
-    public function getInvertedFullName()
+    public function getInvertedFullName(): string
     {
         $prefix = $this->lastname ?? '';
         $suffix = $this->firstname ?? '';

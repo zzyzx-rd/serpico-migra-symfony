@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\CriterionNameRepository;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -21,54 +22,54 @@ class CriterionName extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="cna_type", type="integer", nullable=true)
      */
-    public $cna_type;
+    public $type;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="cna_name", type="string", length=255, nullable=true)
      */
-    public $cna_name;
+    public $name;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="can_unit", type="string", length=255, nullable=true)
      */
-    public $can_unit;
+    public $unit;
 
     /**
-     * @ORM\Column(name="can_created_by", type="integer")
+     * @ORM\Column(name="can_created_by", type="integer", nullable=true)
      */
     public $createdBy;
 
     /**
-     * @ORM\Column(name="can_inserted", type="datetime")
+     * @ORM\Column(name="can_inserted", type="datetime", nullable=true)
      */
     public $inserted;
 
     /**
      * @ManyToOne(targetEntity="Icon", inversedBy="criterionNames")
-     * @JoinColumn(name="icon_ico_id", referencedColumnName="ico_id",nullable=false)
+     * @JoinColumn(name="icon_ico_id", referencedColumnName="ico_id",nullable=true)
      * @var Icon
      */
     protected $icon;
 
     /**
      * @ManyToOne(targetEntity="Organization", inversedBy="criterionNames")
-     * @JoinColumn(name="organization_org_id", referencedColumnName="org_id", nullable=false)
+     * @JoinColumn(name="organization_org_id", referencedColumnName="org_id", nullable=true)
      * @var Organization
      */
     protected $organization;
 
     /**
      * @ManyToOne(targetEntity="Department")
-     * @JoinColumn(name="department_dpt_id", referencedColumnName="dpt_id")
+     * @JoinColumn(name="department_dpt_id", referencedColumnName="dpt_id", nullable=true)
      * @var Department|null
      */
     protected $department;
 
     /**
      * @ManyToOne(targetEntity="CriterionGroup", inversedBy="criteria")
-     * @JoinColumn(name="criterion_group_cgp_id", referencedColumnName="cgp_id")
+     * @JoinColumn(name="criterion_group_cgp_id", referencedColumnName="cgp_id", nullable=true)
      * @var CriterionGroup
      */
     protected $criterionGroup;
@@ -99,9 +100,9 @@ class CriterionName extends DbObject
         CriterionGroup $criterionGroup = null)
     {
         parent::__construct($id, $can_createdBy, new DateTime());
-        $this->cna_type = $cna_type;
-        $this->cna_name = $cna_name;
-        $this->can_unit = $can_unit;
+        $this->type = $cna_type;
+        $this->name = $cna_name;
+        $this->unit = $can_unit;
         $this->inserted = $can_inserted;
         $this->icon = $icon;
         $this->organization = $organization;
@@ -109,53 +110,43 @@ class CriterionName extends DbObject
         $this->criterionGroup = $criterionGroup;
     }
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
     public function getType(): ?int
     {
-        return $this->cna_type;
+        return $this->type;
     }
 
     public function setType(int $cna_type): self
     {
-        $this->cna_type = $cna_type;
+        $this->type = $cna_type;
 
         return $this;
     }
 
     public function getName(): ?string
     {
-        return $this->cna_name;
+        return $this->name;
     }
 
     public function setName(string $cna_name): self
     {
-        $this->cna_name = $cna_name;
+        $this->name = $cna_name;
 
         return $this;
     }
 
-    public function getCanUnit(): ?string
+    public function getUnit(): ?string
     {
-        return $this->can_unit;
+        return $this->unit;
     }
 
-    public function setCanUnit(string $can_unit): self
+    public function setUnit(string $unit): self
     {
-        $this->can_unit = $can_unit;
+        $this->unit = $unit;
 
         return $this;
     }
 
-    public function getInserted(): ?\DateTimeInterface
-    {
-        return $this->inserted;
-    }
-
-    public function setInserted(\DateTimeInterface $inserted): self
+    public function setInserted(DateTimeInterface $inserted): self
     {
         $this->inserted = $inserted;
 

@@ -33,32 +33,32 @@ class Ranking extends DbObject
     public $wType;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="integer", nullable=true)
      */
     public $rnk_abs_result;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="float", nullable=true)
      */
     public $rnk_rel_result;
 
     /**
-     * @ORM\Column(name="rnk_period", type="integer")
+     * @ORM\Column(name="rnk_period", type="integer", nullable=true)
      */
     public $period;
 
     /**
-     * @ORM\Column(name="rnk_freq", type="integer")
+     * @ORM\Column(name="rnk_freq", type="integer", nullable=true)
      */
     public $frequency;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="float", nullable=true)
      */
     public $rnk_value;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="integer", nullable=true)
      */
     public $rnk_series_pop;
 
@@ -68,12 +68,12 @@ class Ranking extends DbObject
     public $createdBy;
 
     /**
-     * @ORM\Column(name="rnk_inserted", type="datetime")
+     * @ORM\Column(name="rnk_inserted", type="datetime", nullable=true)
      */
     public $inserted;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="datetime", nullable=true)
      */
     public $rnk_updated;
 

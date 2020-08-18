@@ -5,6 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\IProcessStageRepository;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
@@ -13,7 +14,6 @@ use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\OrderBy;
-use phpDocumentor\Reflection\Types\False_;
 
 /**
  * @ApiResource()
@@ -21,14 +21,14 @@ use phpDocumentor\Reflection\Types\False_;
  */
 class IProcessStage extends DbObject
 {
-    const STAGE_UNSTARTED    = 0;
-    const STAGE_ONGOING      = 1;
-    const STAGE_COMPLETED  = 2;
-    const STAGE_PUBLISHED    = 3;
+    public const STAGE_UNSTARTED    = 0;
+    public const STAGE_ONGOING      = 1;
+    public const STAGE_COMPLETED  = 2;
+    public const STAGE_PUBLISHED    = 3;
 
-    const VISIBILITY_public = 0;
-    const VISIBILITY_UNLISTED = 1;
-    const VISIBILITY_PUBLIC  = 2;
+    public const VISIBILITY_public = 0;
+    public const VISIBILITY_UNLISTED = 1;
+    public const VISIBILITY_PUBLIC  = 2;
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
@@ -38,138 +38,138 @@ class IProcessStage extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(name="stg_complete", type="boolean", nullable=true)
      */
-    public $stg_complete;
+    public $complete;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="stg_name", type="string", length=255, nullable=true)
      */
-    public $stg_name;
+    public $name;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="stg_mod", type="integer", nullable=true)
      */
-    public $stg_mod;
+    public $mod;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="stg_visibility", type="integer", nullable=true)
      */
-    public $stg_visibility;
+    public $visibility;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(name="stg_status", type="float", nullable=true)
      */
-    public $stg_status;
+    public $status;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="stg_desc", type="string", length=255, nullable=true)
      */
-    public $stg_desc;
+    public $desc;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(name="stg_progress", type="float", nullable=true)
      */
-    public $stg_progress;
+    public $progress;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(name="stg_weight", type="float", nullable=true)
      */
-    public $stg_weight;
+    public $weight;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="stg_dperiod", type="integer", nullable=true)
      */
-    public $stg_dperiod;
+    public $dperiod;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="stg_dfrequency", type="string", length=255, nullable=true)
      */
-    public $stg_dfrequency;
+    public $dfrequency;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="stg_dorigin", type="integer", nullable=true)
      */
-    public $stg_dorigin;
+    public $dorigin;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="stg_ffrequency", type="string", length=255, nullable=true)
      */
-    public $stg_ffrequency;
+    public $ffrequency;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="stg_forigin", type="integer", nullable=true)
      */
-    public $stg_forigin;
+    public $forigin;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(name="stg_definite_dates", type="boolean", nullable=true)
      */
-    public $stg_definite_dates;
+    public $definite_dates;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="stg_startdate", type="datetime", nullable=true)
      */
-    public $stg_startdate;
+    public $startdate;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="stg_enddate", type="datetime", nullable=true)
      */
-    public $stg_enddate;
+    public $enddate;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="stg_gstartdate", type="datetime", nullable=true)
      */
-    public $stg_gstartdate;
+    public $gstartdate;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="stg_genddate", type="datetime", nullable=true)
      */
-    public $stg_genddate;
+    public $genddate;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="stg_deadline_nbDays", type="integer", nullable=true)
      */
-    public $stg_deadline_nbDays;
+    public $deadline_nbDays;
 
     /**
-     * @ORM\Column(type="boolean", nullable=true)
+     * @ORM\Column(name="stg_deadline_mailSent", type="boolean", nullable=true)
      */
-    public $stg_deadline_mailSent;
+    public $deadline_mailSent;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="stg_created_by", type="integer", nullable=true)
      */
-    public $stg_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="stg_inserted", type="datetime", nullable=true)
      */
-    public $stg_inserted;
+    public $inserted;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(name="stg_isFinalized", type="boolean", nullable=true)
      */
-    public $stg_isFinalized;
+    public $isFinalized;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="stg_finalized", type="datetime", nullable=true)
      */
-    public $stg_finalized;
+    public $finalized;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="stg_deleted", type="datetime", nullable=true)
      */
-    public $stg_deleted;
+    public $deleted;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="stg_gcompleted", type="datetime", nullable=true)
      */
-    public $stg_gcompleted;
+    public $gcompleted;
 
     /**
      * @ManyToOne(targetEntity="InstitutionProcess", inversedBy="stages")
-     * @JoinColumn(name="iprocess_inp_id", referencedColumnName="inp_id",nullable=false)
+     * @JoinColumn(name="iprocess_inp_id", referencedColumnName="inp_id",nullable=true)
      * @var InstitutionProcess
      */
     protected $institutionProcess;
@@ -234,7 +234,7 @@ class IProcessStage extends DbObject
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
-     * @ORM\JoinColumn(name="stg_master_user_id", referencedColumnName="usr_id", nullable=false)
+     * @ORM\JoinColumn(name="stg_master_user_id", referencedColumnName="usr_id", nullable=true)
      */
     public $stg_master_usr;
 
@@ -325,32 +325,32 @@ class IProcessStage extends DbObject
         )
     {
         parent::__construct($id, $stg_createdBy, new DateTime());
-        $this->stg_complete = $stg_complete;
-        $this->stg_name = $stg_name;
-        $this->stg_mod = $stg_mod;
-        $this->stg_visibility = $stg_visibility;
-        $this->stg_status = $stg_status;
-        $this->stg_desc = $stg_desc;
-        $this->stg_progress = $stg_progress;
-        $this->stg_weight = $stg_weight;
-        $this->stg_dperiod = $stg_dperiod;
-        $this->stg_dfrequency = $stg_dfrequency;
-        $this->stg_dorigin = $stg_dorigin;
-        $this->stg_ffrequency = $stg_ffrequency;
-        $this->stg_forigin = $stg_forigin;
-        $this->stg_definite_dates = $stg_definite_dates;
-        $this->stg_startdate = $stg_startdate;
-        $this->stg_enddate = $stg_enddate;
-        $this->stg_gstartdate = $stg_gstartdate;
-        $this->stg_genddate = $stg_genddate;
-        $this->stg_deadline_nbDays = $stg_deadline_nbDays;
-        $this->stg_deadline_mailSent = $stg_deadline_mailSent;
-        $this->stg_createdBy = $stg_createdBy;
-        $this->stg_inserted = $stg_inserted;
-        $this->stg_isFinalized = $stg_isFinalized;
-        $this->stg_finalized = $stg_finalized;
-        $this->stg_deleted = $stg_deleted;
-        $this->stg_gcompleted = $stg_gcompleted;
+        $this->complete = $stg_complete;
+        $this->name = $stg_name;
+        $this->mod = $stg_mod;
+        $this->visibility = $stg_visibility;
+        $this->status = $stg_status;
+        $this->desc = $stg_desc;
+        $this->progress = $stg_progress;
+        $this->weight = $stg_weight;
+        $this->dperiod = $stg_dperiod;
+        $this->dfrequency = $stg_dfrequency;
+        $this->dorigin = $stg_dorigin;
+        $this->ffrequency = $stg_ffrequency;
+        $this->forigin = $stg_forigin;
+        $this->definite_dates = $stg_definite_dates;
+        $this->startdate = $stg_startdate;
+        $this->enddate = $stg_enddate;
+        $this->gstartdate = $stg_gstartdate;
+        $this->genddate = $stg_genddate;
+        $this->deadline_nbDays = $stg_deadline_nbDays;
+        $this->deadline_mailSent = $stg_deadline_mailSent;
+        $this->createdBy = $stg_createdBy;
+        $this->inserted = $stg_inserted;
+        $this->isFinalized = $stg_isFinalized;
+        $this->finalized = $stg_finalized;
+        $this->deleted = $stg_deleted;
+        $this->gcompleted = $stg_gcompleted;
         $this->institutionProcess = $institutionProcess;
         $this->organization = $organization;
         $this->criteria = $criteria;
@@ -367,307 +367,297 @@ class IProcessStage extends DbObject
     }
 
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
     public function isComplete(): ?bool
     {
-        return $this->stg_complete;
+        return $this->complete;
     }
 
     public function setComplete(bool $stg_complete): self
     {
-        $this->stg_complete = $stg_complete;
+        $this->complete = $stg_complete;
 
         return $this;
     }
 
     public function getName(): ?string
     {
-        return $this->stg_name;
+        return $this->name;
     }
 
     public function setName(string $stg_name): self
     {
-        $this->stg_name = $stg_name;
+        $this->name = $stg_name;
 
         return $this;
     }
 
     public function getMod(): ?int
     {
-        return $this->stg_mod;
+        return $this->mod;
     }
 
     public function setMod(int $stg_mod): self
     {
-        $this->stg_mod = $stg_mod;
+        $this->mod = $stg_mod;
 
         return $this;
     }
 
     public function getVisibility(): ?int
     {
-        return $this->stg_visibility;
+        return $this->visibility;
     }
 
     public function setVisibility(int $stg_visibility): self
     {
-        $this->stg_visibility = $stg_visibility;
+        $this->visibility = $stg_visibility;
 
         return $this;
     }
 
     public function getStatus(): ?float
     {
-        return $this->stg_status;
+        return $this->status;
     }
 
     public function setStatus(float $stg_status): self
     {
-        $this->stg_status = $stg_status;
+        $this->status = $stg_status;
 
         return $this;
     }
 
     public function getDesc(): ?string
     {
-        return $this->stg_desc;
+        return $this->desc;
     }
 
     public function setDesc(string $stg_desc): self
     {
-        $this->stg_desc = $stg_desc;
+        $this->desc = $stg_desc;
 
         return $this;
     }
 
     public function getProgress(): ?float
     {
-        return $this->stg_progress;
+        return $this->progress;
     }
 
     public function setProgress(float $stg_progress): self
     {
-        $this->stg_progress = $stg_progress;
+        $this->progress = $stg_progress;
 
         return $this;
     }
 
     public function getWeight(): ?float
     {
-        return $this->stg_weight;
+        return $this->weight;
     }
 
     public function setWeight(float $stg_weight): self
     {
-        $this->stg_weight = $stg_weight;
+        $this->weight = $stg_weight;
 
         return $this;
     }
 
     public function getDperiod(): ?int
     {
-        return $this->stg_dperiod;
+        return $this->dperiod;
     }
 
     public function setDperiod(int $stg_dperiod): self
     {
-        $this->stg_dperiod = $stg_dperiod;
+        $this->dperiod = $stg_dperiod;
 
         return $this;
     }
 
     public function getDfrequency(): ?string
     {
-        return $this->stg_dfrequency;
+        return $this->dfrequency;
     }
 
     public function setDfrequency(string $stg_dfrequency): self
     {
-        $this->stg_dfrequency = $stg_dfrequency;
+        $this->dfrequency = $stg_dfrequency;
 
         return $this;
     }
 
     public function getDorigin(): ?int
     {
-        return $this->stg_dorigin;
+        return $this->dorigin;
     }
 
     public function setDorigin(int $stg_dorigin): self
     {
-        $this->stg_dorigin = $stg_dorigin;
+        $this->dorigin = $stg_dorigin;
 
         return $this;
     }
 
     public function getFfrequency(): ?string
     {
-        return $this->stg_ffrequency;
+        return $this->ffrequency;
     }
 
     public function setFfrequency(string $stg_ffrequency): self
     {
-        $this->stg_ffrequency = $stg_ffrequency;
+        $this->ffrequency = $stg_ffrequency;
 
         return $this;
     }
 
     public function getForigin(): ?int
     {
-        return $this->stg_forigin;
+        return $this->forigin;
     }
 
     public function setForigin(int $stg_forigin): self
     {
-        $this->stg_forigin = $stg_forigin;
+        $this->forigin = $stg_forigin;
 
         return $this;
     }
 
     public function isDefiniteDates(): ?bool
     {
-        return $this->stg_definite_dates;
+        return $this->definite_dates;
     }
 
     public function setDefiniteDates(bool $stg_definite_dates): self
     {
-        $this->stg_definite_dates = $stg_definite_dates;
+        $this->definite_dates = $stg_definite_dates;
 
         return $this;
     }
 
-    public function getStartdate(): ?\DateTimeInterface
+    public function getStartdate(): ?DateTimeInterface
     {
-        return $this->stg_startdate;
+        return $this->startdate;
     }
 
-    public function setStartdate(\DateTimeInterface $stg_startdate): self
+    public function setStartdate(DateTimeInterface $stg_startdate): self
     {
-        $this->stg_startdate = $stg_startdate;
+        $this->startdate = $stg_startdate;
 
         return $this;
     }
 
-    public function getEnddate(): ?\DateTimeInterface
+    public function getEnddate(): ?DateTimeInterface
     {
-        return $this->stg_enddate;
+        return $this->enddate;
     }
 
-    public function setEnddate(\DateTimeInterface $stg_enddate): self
+    public function setEnddate(DateTimeInterface $stg_enddate): self
     {
-        $this->stg_enddate = $stg_enddate;
+        $this->enddate = $stg_enddate;
 
         return $this;
     }
 
-    public function getGstartdate(): ?\DateTimeInterface
+    public function getGstartdate(): ?DateTimeInterface
     {
-        return $this->stg_gstartdate;
+        return $this->gstartdate;
     }
 
-    public function setGstartdate(\DateTimeInterface $stg_gstartdate): self
+    public function setGstartdate(DateTimeInterface $stg_gstartdate): self
     {
-        $this->stg_gstartdate = $stg_gstartdate;
+        $this->gstartdate = $stg_gstartdate;
 
         return $this;
     }
 
-    public function getGenddate(): ?\DateTimeInterface
+    public function getGenddate(): ?DateTimeInterface
     {
-        return $this->stg_genddate;
+        return $this->genddate;
     }
 
-    public function setGenddate(\DateTimeInterface $stg_genddate): self
+    public function setGenddate(DateTimeInterface $stg_genddate): self
     {
-        $this->stg_genddate = $stg_genddate;
+        $this->genddate = $stg_genddate;
 
         return $this;
     }
 
     public function isDeadlineNbDays(): ?int
     {
-        return $this->stg_deadline_nbDays;
+        return $this->deadline_nbDays;
     }
 
     public function setDeadlineNbDays(int $stg_deadline_nbDays): self
     {
-        $this->stg_deadline_nbDays = $stg_deadline_nbDays;
+        $this->deadline_nbDays = $stg_deadline_nbDays;
 
         return $this;
     }
 
     public function getDeadlineMailSent(): ?bool
     {
-        return $this->stg_deadline_mailSent;
+        return $this->deadline_mailSent;
     }
 
     public function setDeadlineMailSent(?bool $stg_deadline_mailSent): self
     {
-        $this->stg_deadline_mailSent = $stg_deadline_mailSent;
+        $this->deadline_mailSent = $stg_deadline_mailSent;
 
         return $this;
     }
 
-    public function getInserted(): ?\DateTimeInterface
+    public function setInserted(?DateTimeInterface $stg_inserted): self
     {
-        return $this->stg_inserted;
-    }
-
-    public function setInserted(?\DateTimeInterface $stg_inserted): self
-    {
-        $this->stg_inserted = $stg_inserted;
+        $this->inserted = $stg_inserted;
 
         return $this;
     }
 
     public function getIsFinalized(): ?bool
     {
-        return $this->stg_isFinalized;
+        return $this->isFinalized;
     }
 
     public function setIsFinalized(bool $stg_isFinalized): self
     {
-        $this->stg_isFinalized = $stg_isFinalized;
+        $this->isFinalized = $stg_isFinalized;
 
         return $this;
     }
 
-    public function getFinalized(): ?\DateTimeInterface
+    public function getFinalized(): ?DateTimeInterface
     {
-        return $this->stg_finalized;
+        return $this->finalized;
     }
 
-    public function setFinalized(\DateTimeInterface $stg_finalized): self
+    public function setFinalized(DateTimeInterface $stg_finalized): self
     {
-        $this->stg_finalized = $stg_finalized;
+        $this->finalized = $stg_finalized;
 
         return $this;
     }
 
-    public function getDeleted(): ?\DateTimeInterface
+    public function getDeleted(): ?DateTimeInterface
     {
-        return $this->stg_deleted;
+        return $this->deleted;
     }
 
-    public function setDeleted(\DateTimeInterface $stg_deleted): self
+    public function setDeleted(DateTimeInterface $stg_deleted): self
     {
-        $this->stg_deleted = $stg_deleted;
+        $this->deleted = $stg_deleted;
 
         return $this;
     }
 
-    public function getGcompleted(): ?\DateTimeInterface
+    public function getGcompleted(): ?DateTimeInterface
     {
-        return $this->stg_gcompleted;
+        return $this->gcompleted;
     }
 
-    public function setGcompleted(\DateTimeInterface $stg_gcompleted): self
+    public function setGcompleted(DateTimeInterface $stg_gcompleted): self
     {
-        $this->stg_gcompleted = $stg_gcompleted;
+        $this->gcompleted = $stg_gcompleted;
 
         return $this;
     }
@@ -935,7 +925,7 @@ class IProcessStage extends DbObject
 
 
     // Display participant names
-    public function getUniqueParticipantNames($fullNameFormat = false)
+    public function getUniqueParticipantNames($fullNameFormat = false): ?array
     {
         $uniqueParticipants = $this->criteria->first()->getParticipants();
         $DNames = [];
@@ -960,16 +950,19 @@ class IProcessStage extends DbObject
             return $DNames;
         }
     }
-    function addGrade(Grade $grade){
+    public function addGrade(Grade $grade): IProcessStage
+    {
         $this->grades->add($grade);
         return $this;
     }
 
-    function removeGrade(Grade $grade){
+    public function removeGrade(Grade $grade): IProcessStage
+    {
         $this->grades->removeElement($grade);
         return $this;
     }
-    function addCriterion(IProcessCriterion $criterion){
+    public function addCriterion(IProcessCriterion $criterion): IProcessStage
+    {
         //The below line is to prevent adding a criterion already submitted (because of activeStages/stages).
         // However as stage criteria are built in advance for recurring activities, we also need to take into account this exception
 
@@ -980,25 +973,29 @@ class IProcessStage extends DbObject
         //}
     }
 
-    function removeCriterion(IProcessCriterion $criterion){
+    public function removeCriterion(IProcessCriterion $criterion): IProcessStage
+    {
         $this->criteria->removeElement($criterion);
         $criterion->setStage(null);
         return $this;
     }
 
-    function addParticipant(IProcessActivityUser $participant){
+    public function addParticipant(IProcessActivityUser $participant): IProcessStage
+    {
 
         $this->participants->add($participant);
         $participant->setStage($this);
         return $this;
     }
 
-    function removeParticipant(IProcessActivityUser $participant){
+    public function removeParticipant(IProcessActivityUser $participant): IProcessStage
+    {
         $this->participants->removeElement($participant);
         return $this;
     }
 
-    function addUniqueParticipation(IProcessActivityUser $participant){
+    public function addUniqueParticipation(IProcessActivityUser $participant): IProcessStage
+    {
         foreach($this->criteria as $criterion){
             $criterion->addParticipant($participant);
             $participant->setCriterion($criterion)->setStage($this)->setInstitutionProcess($this->getInstitutionProcess());
@@ -1006,7 +1003,8 @@ class IProcessStage extends DbObject
         return $this;
     }
 
-    function removeUniqueParticipation(IProcessActivityUser $participant){
+    public function removeUniqueParticipation(IProcessActivityUser $participant): IProcessStage
+    {
         $participantUsrId = $participant->getUsrId();
         foreach ($this->participants as $theParticipant) {
             if ($participantUsrId == $theParticipant->getUsrId()) {
@@ -1023,7 +1021,7 @@ class IProcessStage extends DbObject
     /**
      * @return Collection|User[]
      */
-    function getGraderUsers(){
+    public function getGraderUsers(){
         $graderUsers = new ArrayCollection;
         $uniqueGraderParticipations = $this->getUniqueGraderParticipations();
         foreach($uniqueGraderParticipations as $uniqueGraderParticipation){
@@ -1035,8 +1033,9 @@ class IProcessStage extends DbObject
     /**
      * @return int
      */
-    function getNbEvaluatingCriteria(){
-        return count($this->getCriteria()->matching(Criteria::create()->where(Criteria::expr()->eq("type", 1))));
+    public function getNbEvaluatingCriteria(): int
+    {
+        return count($this->getCriteria()->matching(Criteria::create()->where(Criteria::expr()->eq(", type", 1))));
     }
 
     /**
@@ -1055,46 +1054,44 @@ class IProcessStage extends DbObject
             $team = $eligibleParticipant->getTeam();
             if ($team == null) {
                 $uniqueParticipants->add($eligibleParticipant);
-            } else {
-                if (!in_array($team, $teams)) {
-                    $uniqueParticipants->add($eligibleParticipant);
-                    $teams[] = $team;
-                }
+            } else if (!in_array($team, $teams)) {
+                $uniqueParticipants->add($eligibleParticipant);
+                $teams[] = $team;
             }
         }
         return $uniqueParticipants;
     }
-    public function addIndependantUniqueIntParticipation(IProcessActivityUser $participant)
+    public function addIndependantUniqueIntParticipation(IProcessActivityUser $participant): IProcessStage
     {
         $this->addUniqueParticipation($participant);
         return $this;
     }
 
-    public function removeIndependantUniqueIntParticipation(IProcessActivityUser $participant)
+    public function removeIndependantUniqueIntParticipation(IProcessActivityUser $participant): IProcessStage
     {
         $this->removeUniqueParticipation($participant);
         return $this;
     }
 
-    public function addIndependantUniqueExtParticipation(IProcessActivityUser $participant)
+    public function addIndependantUniqueExtParticipation(IProcessActivityUser $participant): IProcessStage
     {
         $this->addUniqueParticipation($participant);
         return $this;
     }
 
-    public function removeIndependantUniqueExtParticipation(IProcessActivityUser $participant)
+    public function removeIndependantUniqueExtParticipation(IProcessActivityUser $participant): IProcessStage
     {
         $this->removeUniqueParticipation($participant);
         return $this;
     }
 
-    public function addIndependantUniqueTeamParticipation(ActivityUser $participant)
+    public function addIndependantUniqueTeamParticipation(ActivityUser $participant): IProcessStage
     {
         $this->addUniqueTeamParticipation($participant);
         return $this;
     }
 
-    public function removeIndependantUniqueTeamParticipation(ActivityUser $participant)
+    public function removeIndependantUniqueTeamParticipation(ActivityUser $participant): IProcessStage
     {
         $this->removeUniqueTeamParticipation($participant);
         return $this;

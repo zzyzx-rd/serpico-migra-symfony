@@ -54,7 +54,6 @@ class AnswerType extends AbstractType
                 $currentUser = MasterController::getAuthorizedUser();
 
                 if ($child instanceof Answer) {
-                    $desc = $child->getDesc();
                     $SF = $child->getField();
                     $value = [];
 

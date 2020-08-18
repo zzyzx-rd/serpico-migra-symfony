@@ -5,6 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\CriterionGroupRepository;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -24,19 +25,19 @@ class CriterionGroup extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="cgp_created_by", type="integer", nullable=true)
      */
-    public $cgp_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="cgp_inserted", type="datetime", nullable=true)
      */
-    public $cgp_inserted;
+    public $inserted;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="cgp_name", type="string", length=255, nullable=true)
      */
-    public $cgp_name;
+    public $name;
 
     /**
      * @OneToMany(targetEntity="CriterionName", mappedBy="criterionGroup", cascade={"persist", "remove"})
@@ -46,27 +47,26 @@ class CriterionGroup extends DbObject
 
     /**
      * @ManyToOne(targetEntity="Organization", inversedBy="criterionGroups")
-     * @JoinColumn(name="organization_org_id", referencedColumnName="org_id")
+     * @JoinColumn(name="organization_org_id", referencedColumnName="org_id", nullable=true)
      * @var Organization
      */
     protected $organization;
 
     /**
      * @ManyToOne(targetEntity="Department", inversedBy="criterionGroups")
-     * @JoinColumn(name="department_dpt_id", referencedColumnName="dpt_id")
+     * @JoinColumn(name="department_dpt_id", referencedColumnName="dpt_id", nullable=true)
      * @var Department
      */
     protected $department;
 
     /**
      * CriterionGroup constructor.
-     * @param $id
-     * @param $cgp_createdBy
-     * @param $cgp_inserted
-     * @param $cgp_name
-     * @param CriterionName[] $criteria
+     * @param string $cgp_name
      * @param Organization $organization
      * @param Department $department
+     * @param $cgp_createdBy
+     * @param $id
+     * @param CriterionName[] $criteria
      */
     public function __construct(
         string $cgp_name = null,
@@ -76,40 +76,29 @@ class CriterionGroup extends DbObject
         $id = null,
         array $criteria = [])
     {
-        $this->id = $id;
-        $this->cgp_inserted = new DateTime();
-        $this->cgp_name = $cgp_name;
+        parent::__construct($id, $cgp_createdBy, null);
+        $this->name = $cgp_name;
         $this->criteria = $criteria;
         $this->organization = $organization;
         $this->department = $department;
     }
 
 
-    public function getId(): ?int
+    public function setInserted(DateTimeInterface $cgp_inserted): self
     {
-        return $this->id;
-    }
-
-    public function getInserted(): ?\DateTimeInterface
-    {
-        return $this->cgp_inserted;
-    }
-
-    public function setInserted(\DateTimeInterface $cgp_inserted): self
-    {
-        $this->cgp_inserted = $cgp_inserted;
+        $this->inserted = $cgp_inserted;
 
         return $this;
     }
 
     public function getName(): ?string
     {
-        return $this->cgp_name;
+        return $this->name;
     }
 
     public function setName(string $cgp_name): self
     {
-        $this->cgp_name = $cgp_name;
+        $this->name = $cgp_name;
 
         return $this;
     }
@@ -162,7 +151,8 @@ class CriterionGroup extends DbObject
         $this->department = $department;
     }
 
-    function addCriterion(CriterionName $criterion) {
+    public function addCriterion(CriterionName $criterion): CriterionGroup
+    {
         if (!$criterion->getCriterionGroup()) {
             $this->criteria[] = $criterion;
             $criterion->setCriterionGroup($this);
@@ -170,7 +160,8 @@ class CriterionGroup extends DbObject
         return $this;
     }
 
-    function removeCriterion(CriterionName $criterion) {
+    public function removeCriterion(CriterionName $criterion): CriterionGroup
+    {
         $this->criteria->removeElement($criterion);
         return $this;
     }
@@ -179,7 +170,7 @@ class CriterionGroup extends DbObject
     }
 
     public function toArray() {
-        $criteria = $this->criteria->map(function(CriterionName $e) {
+        $criteria = $this->criteria->map(static function(CriterionName $e) {
             return [
                 'id' => $e->getId(),
                 'type' => $e->getType(),
@@ -191,16 +182,16 @@ class CriterionGroup extends DbObject
             'id' => $this->id,
             'createdBy' => $this->createdBy,
             'inserted' => $this->inserted,
-            'name' => $this->cgp_name,
+            'name' => $this->name,
             'criteria' => $criteria,
             'organization' => $this->organization->toArray(),
             'department' => $this->department->toArray()
         ];
     }
 
-    function __toString()
-    {
-        return $this->cgp_name;
-    }
+//    public function __toString()
+//    {
+//        return $this->name;
+//    }
     
 }

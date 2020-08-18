@@ -24,19 +24,19 @@ class Appreciation extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="float", nullable=true)
      */
     public $apt_value;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="apt_comment", type="string", length=255, nullable=true)
      */
-    public $apt_comment;
+    public $comment;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="apt_created_by", type="integer", nullable=true)
      */
-    public $apt_createdBy;
+    public $createdBy;
     /**
      * @ManyToOne(targetEntity="Criterion")
      * @JoinColumn(name="apt_criterion", referencedColumnName="crt_id",nullable=false)
@@ -60,15 +60,10 @@ class Appreciation extends DbObject
     {
         parent::__construct($id, $apt_createdBy, new DateTime());
         $this->apt_value = $apt_value;
-        $this->apt_comment = $apt_comment;
-        $this->criterion = $criterion?$criterion:new ArrayCollection();
+        $this->comment = $apt_comment;
+        $this->criterion = $criterion?:new ArrayCollection();
     }
 
-
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
 
     public function getValue(): ?float
     {
@@ -84,24 +79,19 @@ class Appreciation extends DbObject
 
     public function getComment(): ?string
     {
-        return $this->apt_comment;
+        return $this->comment;
     }
 
     public function setComment(string $apt_comment): self
     {
-        $this->apt_comment = $apt_comment;
+        $this->comment = $apt_comment;
 
         return $this;
     }
 
-    public function getCreatedBy(): ?int
-    {
-        return $this->apt_createdBy;
-    }
-
     public function setCreatedBy($apt_createdBy): self
     {
-        $this->apt_createdBy = $apt_createdBy;
+        $this->createdBy = $apt_createdBy;
 
         return $this;
     }

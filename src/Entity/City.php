@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\CityRepository;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
@@ -23,39 +24,39 @@ class City extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="cit_abbr", type="string", length=255, nullable=true)
      */
-    public $cit_abbr;
+    public $abbr;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="cit_fullname", type="string", length=255, nullable=true)
      */
-    public $cit_fullname;
+    public $fullname;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     public $cit_name;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="cit_created_by", type="integer", nullable=true)
      */
-    public $cit_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="cit_inserted", type="datetime", nullable=true)
      */
-    public $cit_inserted;
+    public $inserted;
 
     /**
      * @ManyToOne(targetEntity="State", inversedBy="cities")
-     * @JoinColumn(name="state_sta_id", referencedColumnName="sta_id",nullable=false)
+     * @JoinColumn(name="state_sta_id", referencedColumnName="sta_id",nullable=true)
      */
     protected $state;
 
     /**
      * @ManyToOne(targetEntity="Country")
-     * @JoinColumn(name="country_cou_id", referencedColumnName="cou_id",nullable=false)
+     * @JoinColumn(name="country_cou_id", referencedColumnName="cou_id",nullable=true)
      */
     protected $country;
 
@@ -88,41 +89,36 @@ class City extends DbObject
         $firms = null)
     {
         parent::__construct($id, $cit_createdBy, new DateTime());
-        $this->cit_abbr = $cit_abbr;
-        $this->cit_fullname = $cit_fullname;
+        $this->abbr = $cit_abbr;
+        $this->fullname = $cit_fullname;
         $this->cit_name = $cit_name;
-        $this->cit_inserted = $cit_inserted;
+        $this->inserted = $cit_inserted;
         $this->state = $state;
         $this->country = $country;
-        $this->firms = $firms?$firms:new ArrayCollection();
+        $this->firms = $firms?:new ArrayCollection();
     }
 
-
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
 
     public function getAbbr(): ?string
     {
-        return $this->cit_abbr;
+        return $this->abbr;
     }
 
     public function setAbbr(string $cit_abbr): self
     {
-        $this->cit_abbr = $cit_abbr;
+        $this->abbr = $cit_abbr;
 
         return $this;
     }
 
     public function getFullname(): ?string
     {
-        return $this->cit_fullname;
+        return $this->fullname;
     }
 
     public function setFullname(string $cit_fullname): self
     {
-        $this->cit_fullname = $cit_fullname;
+        $this->fullname = $cit_fullname;
 
         return $this;
     }
@@ -139,14 +135,9 @@ class City extends DbObject
         return $this;
     }
 
-    public function getInserted(): ?\DateTimeInterface
+    public function setInserted(DateTimeInterface $cit_inserted): self
     {
-        return $this->cit_inserted;
-    }
-
-    public function setInserted(\DateTimeInterface $cit_inserted): self
-    {
-        $this->cit_inserted = $cit_inserted;
+        $this->inserted = $cit_inserted;
 
         return $this;
     }
@@ -198,13 +189,15 @@ class City extends DbObject
     {
         $this->firms = $firms;
     }
-    function addFirm(WorkerFirm $firm){
+    public function addFirm(WorkerFirm $firm): City
+    {
         $this->firms->add($firm);
         $firm->setState($this);
         return $this;
     }
 
-    function removeFirm(WorkerFirm $firm){
+    public function removeFirm(WorkerFirm $firm): City
+    {
         $this->firms->removeElement($firm);
         return $this;
     }

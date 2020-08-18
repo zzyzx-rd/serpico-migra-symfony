@@ -20,17 +20,17 @@ class OptionName extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="integer", nullable=true)
      */
     public $ona_type;
 
     /**
-     * @ORM\Column(name="ona_name", type="string", length=255)
+     * @ORM\Column(name="ona_name", type="string", length=255, nullable=true)
      */
     public $name;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     public $ona_description;
 
@@ -40,7 +40,7 @@ class OptionName extends DbObject
     public $createdBy;
 
     /**
-     * @ORM\Column(name="ona_inserted", type="datetime")
+     * @ORM\Column(name="ona_inserted", type="datetime", nullable=true)
      */
     public $inserted;
 

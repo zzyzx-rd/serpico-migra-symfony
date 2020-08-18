@@ -29,57 +29,57 @@ class Organization extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     public $org_legalname;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     public $org_commname;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     public $org_type;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="boolean", nullable=true)
      */
     public $org_isClient;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     public $org_oth_language;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     public $org_weight_type;
 
     /**
-     * @ORM\Column(name="org_created_by", type="integer")
+     * @ORM\Column(name="org_created_by", type="integer", nullable=true)
      */
     public $createdBy;
 
     /**
-     * @ORM\Column(name="org_inserted", type="datetime")
+     * @ORM\Column(name="org_inserted", type="datetime", nullable=true)
      */
     public $inserted;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="datetime", nullable=true)
      */
     public $org_validated;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="datetime", nullable=true)
      */
     public $org_expired;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="boolean", nullable=true)
      */
     public $org_testing_reminder_sent;
 
@@ -156,7 +156,7 @@ class Organization extends DbObject
     public $criterionNames;
 
     /**
-     * @Column(name="org_users_CSV", type="string")
+     * @Column(name="org_users_CSV", type="string", nullable=true)
      * @Assert\File(mimeTypes={ "text/csv" })
      */
     public $usersCSV;

@@ -5,6 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\AnswerRepository;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -23,28 +24,28 @@ class Answer extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(name="asw_text", type="string", length=255)
+     * @ORM\Column(name="asw_text", type="string", length=255, nullable=true)
      */
     public $desc;
 
     /**
-     * @ORM\Column(name="asw_created_by", type="integer")
+     * @ORM\Column(name="asw_created_by", type="integer", nullable=true)
      */
     public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="asw_inserted", type="datetime", nullable=true)
      */
-    public $asw_inserted;
+    public $inserted;
     /**
      * @ManyToOne(targetEntity="SurveyField", inversedBy="answers")
-     * @JoinColumn(name="survey_field_sfi_id", referencedColumnName="sfi_id", nullable=false)
+     * @JoinColumn(name="survey_field_sfi_id", referencedColumnName="sfi_id", nullable=true)
      */
     protected $field;
 
     /**
      * @ManyToOne(targetEntity="Survey", inversedBy="answers")
-     * @JoinColumn(name="survey_sur_id", referencedColumnName="sur_id", nullable=false)
+     * @JoinColumn(name="survey_sur_id", referencedColumnName="sur_id", nullable=true)
      */
     protected $survey;
     /**
@@ -74,45 +75,10 @@ class Answer extends DbObject
     {
         parent::__construct($id, $createdBy, new DateTime());
         $this->desc = $desc;
-        $this->asw_inserted = $asw_inserted;
+        $this->inserted = $asw_inserted;
         $this->field = $field;
         $this->survey = $survey;
         $this->participant = $participant;
-    }
-
-
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
-    public function getDesc()
-    {
-        if($this->field->getType()=='MC') {
-
-            if(!is_string($this->desc)){
-
-                return $this->desc;
-            }else{
-                $data = unserialize($this->desc);
-                return $data;
-            }
-        }
-        elseif ($this->field->getType()=='UC'){
-
-            if($this->desc=="0"){
-                return false;
-            }
-            else{
-                return true;
-            }
-        }
-        else{
-
-            return $this->desc;
-
-        }
-
     }
 
     public function setDesc(string $desc): self
@@ -121,14 +87,9 @@ class Answer extends DbObject
         return $this;
     }
 
-    public function getAswInserted(): ?\DateTimeInterface
+    public function setInserted(DateTimeInterface $inserted): self
     {
-        return $this->asw_inserted;
-    }
-
-    public function setAswInserted(\DateTimeInterface $asw_inserted): self
-    {
-        $this->asw_inserted = $asw_inserted;
+        $this->inserted = $inserted;
 
         return $this;
     }

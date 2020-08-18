@@ -17,23 +17,23 @@ class TeamUser extends DbObject
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(name="tus_id", type="integer", length=10)
+     * @ORM\Column(name="tus_id", type="integer", length=10, nullable=true)
      * @var int
      */
     public $id;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="boolean", nullable=true)
      */
     public $tus_leader;
 
     /**
-     * @ORM\Column(name="tus_created_by", type="integer")
+     * @ORM\Column(name="tus_created_by", type="integer", nullable=true)
      */
     public $createdBy;
 
     /**
-     * @ORM\Column(name="tus_inserted", type="datetime")
+     * @ORM\Column(name="tus_inserted", type="datetime", nullable=true)
      */
     public $inserted;
 
@@ -43,7 +43,7 @@ class TeamUser extends DbObject
     public $tus_deleted;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="boolean", nullable=true)
      */
     public $tus_is_deleted;
 

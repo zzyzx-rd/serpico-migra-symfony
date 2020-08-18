@@ -24,32 +24,32 @@ class OrganizationUserOption extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="boolean", nullable=true)
      */
     public $opt_bool_value;
 
     /**
-     * @ORM\Column(name="opt_int_value", type="float")
+     * @ORM\Column(name="opt_int_value", type="float", nullable=true)
      */
     public $optionIValue;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="float", nullable=true)
      */
     public $opt_int_value_2;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="float", nullable=true)
      */
     public $opt_float_value;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     public $opt_string_value;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="boolean", nullable=true)
      */
     public $opt_enabled;
 
@@ -59,7 +59,7 @@ class OrganizationUserOption extends DbObject
     public $createdBy;
 
     /**
-     * @ORM\Column(name="opt_inserted", type="datetime")
+     * @ORM\Column(name="opt_inserted", type="datetime", nullable=true)
      */
     public $inserted;
 

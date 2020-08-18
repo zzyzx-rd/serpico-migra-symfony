@@ -5,6 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\GeneratedImageRepository;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\JoinColumn;
@@ -25,69 +26,69 @@ class GeneratedImage extends DbObject
     protected $id;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="gim_all", type="integer", nullable=true)
      */
-    public $gim_all;
+    public $all;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="gim_type", type="integer", nullable=true)
      */
-    public $gim_type;
+    public $type;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="gim_tid", type="integer", nullable=true)
      */
-    public $gim_tid;
+    public $tid;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="gim_uid", type="integer", nullable=true)
      */
-    public $gim_uid;
+    public $uid;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="gim_aid", type="integer", nullable=true)
      */
-    public $gim_aid;
+    public $aid;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(name="gim_aid", type="boolean", nullable=true)
      */
-    public $gim_ov;
+    public $overview;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="gim_sid", type="integer", nullable=true)
      */
-    public $gim_sid;
+    public $sid;
 
     /**
-     *@Column(name="gim_cid", type="integer", nullable=true, length=10)
+     * @Column(name="gim_cid", type="integer", nullable=true, length=10)
      * @var int
      */
     protected $crtId;
     
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="gim_role", type="integer", nullable=true)
      */
-    public $gim_role;
+    public $role;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="gim_createdBy", type="integer", nullable=true)
      */
-    public $gim_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="gim_val", type="string", length=255, nullable=true)
      */
-    public $gim_val;
+    public $val;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="gim_inserted", type="datetime", nullable=true)
      */
-    public $gim_inserted;
+    public $inserted;
 
     /**
      * @OneToOne(targetEntity="CriterionName")
-     * @JoinColumn(name="criterion_name_cna_id", referencedColumnName="cna_id")
+     * @JoinColumn(name="criterion_name_cna_id", referencedColumnName="cna_id", nullable=true)
      */
     protected $cName;
 
@@ -122,145 +123,135 @@ class GeneratedImage extends DbObject
         $gim_val = null,
         $gim_inserted = null,
         $gim_all = null,
-        $cName)
+        $cName = null)
     {
         parent::__construct($id, $gim_createdBy, new DateTime());
-        $this->gim_all = $gim_all;
-        $this->gim_type = $gim_type;
-        $this->gim_tid = $gim_tid;
-        $this->gim_uid = $gim_uid;
-        $this->gim_aid = $gim_aid;
-        $this->gim_ov = $gim_ov;
-        $this->gim_sid = $gim_sid;
+        $this->all = $gim_all;
+        $this->type = $gim_type;
+        $this->tid = $gim_tid;
+        $this->uid = $gim_uid;
+        $this->aid = $gim_aid;
+        $this->overview = $gim_ov;
+        $this->sid = $gim_sid;
         $this->crtId = $crtId;
-        $this->gim_role = $gim_role;
-        $this->gim_val = $gim_val;
-        $this->gim_inserted = $gim_inserted;
+        $this->role = $gim_role;
+        $this->val = $gim_val;
+        $this->inserted = $gim_inserted;
         $this->cName = $cName;
     }
 
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
     public function getAll(): ?int
     {
-        return $this->gim_all;
+        return $this->all;
     }
 
     public function setAll(int $gim_all): self
     {
-        $this->gim_all = $gim_all;
+        $this->all = $gim_all;
 
         return $this;
     }
 
     public function getType(): ?int
     {
-        return $this->gim_type;
+        return $this->type;
     }
 
     public function setType(int $gim_type): self
     {
-        $this->gim_type = $gim_type;
+        $this->type = $gim_type;
 
         return $this;
     }
 
     public function getTid(): ?int
     {
-        return $this->gim_tid;
+        return $this->tid;
     }
 
     public function setTid(?int $gim_tid): self
     {
-        $this->gim_tid = $gim_tid;
+        $this->tid = $gim_tid;
 
         return $this;
     }
 
     public function getUid(): ?int
     {
-        return $this->gim_uid;
+        return $this->uid;
     }
 
     public function setUid(?int $gim_uid): self
     {
-        $this->gim_uid = $gim_uid;
+        $this->uid = $gim_uid;
 
         return $this;
     }
 
     public function getAid(): ?int
     {
-        return $this->gim_aid;
+        return $this->aid;
     }
 
     public function setAid(?int $gim_aid): self
     {
-        $this->gim_aid = $gim_aid;
+        $this->aid = $gim_aid;
 
         return $this;
     }
 
     public function isOverview(): ?bool
     {
-        return $this->gim_ov;
+        return $this->overview;
     }
 
     public function setOverview(bool $gim_ov): self
     {
-        $this->gim_ov = $gim_ov;
+        $this->overview = $gim_ov;
 
         return $this;
     }
 
     public function getSid(): ?int
     {
-        return $this->gim_sid;
+        return $this->sid;
     }
 
     public function setSid(?int $gim_sid): self
     {
-        $this->gim_sid = $gim_sid;
+        $this->sid = $gim_sid;
 
         return $this;
     }
 
     public function getRole(): ?int
     {
-        return $this->gim_role;
+        return $this->role;
     }
 
     public function setRole(?int $gim_role): self
     {
-        $this->gim_role = $gim_role;
+        $this->role = $gim_role;
 
         return $this;
     }
 
     public function getVal(): ?string
     {
-        return $this->gim_val;
+        return $this->val;
     }
 
     public function setVal(string $gim_val): self
     {
-        $this->gim_val = $gim_val;
+        $this->val = $gim_val;
 
         return $this;
     }
 
-    public function getInserted(): ?\DateTimeInterface
+    public function setInserted(DateTimeInterface $gim_inserted): self
     {
-        return $this->gim_inserted;
-    }
-
-    public function setInserted(\DateTimeInterface $gim_inserted): self
-    {
-        $this->gim_inserted = $gim_inserted;
+        $this->inserted = $gim_inserted;
 
         return $this;
     }

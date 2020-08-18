@@ -72,37 +72,37 @@ class Result extends DbObject
     public $res_wsd_max;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="float", nullable=true)
      */
     public $res_esd_max;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="float", nullable=true)
      */
     public $res_win;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="float", nullable=true)
      */
     public $res_ein;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="float", nullable=true)
      */
     public $res_win_max;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="float", nullable=true)
      */
     public $res_ein_max;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="float", nullable=true)
      */
     public $res_wdr_gen;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="float", nullable=true)
      */
     public $res_res_der_gen;
 
@@ -112,7 +112,7 @@ class Result extends DbObject
     public $createdBy;
 
     /**
-     * @ORM\Column(name="res_inserted", type="datetime")
+     * @ORM\Column(name="res_inserted", type="datetime", nullable=true)
      */
     public $inserted;
 

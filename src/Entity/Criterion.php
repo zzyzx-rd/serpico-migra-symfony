@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\CriterionRepository;
+use DateTimeInterface;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
@@ -27,124 +28,64 @@ class Criterion extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(name="cri_complete", type="boolean", nullable=true)
      */
-    public $cri_complete;
+    public $complete;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="cri_type", type="integer", nullable=true)
      */
-    public $cri_type;
+    public $type;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="cri_name", type="string", length=255, nullable=true)
      */
-    public $cri_name;
+    public $name;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(name="cri_weight", type="float", nullable=true)
      */
-    public $cri_weight;
+    public $weight;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(name="cri_forceComment_compare", type="boolean", nullable=true)
      */
-    public $cri_forceComment_compare;
+    public $forceComment_compare;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="cri_forceCommentValue", type="float", nullable=true)
      */
-    public $cri_forceCommentValue;
+    public $forceCommentValue;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="cri_forceComment_sign", type="string", length=255, nullable=true)
      */
-    public $cri_forceComment_sign;
+    public $forceComment_sign;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="cri_lowerbound", type="float", nullable=true)
      */
-    public $cri_lowerbound;
+    public $lowerbound;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="cri_upperbound", type="float", nullable=true)
      */
-    public $cri_upperbound;
+    public $upperbound;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="cri_step", type="float", nullable=true)
      */
-    public $cri_step;
+    public $step;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="cri_grade_type", type="integer", nullable=true)
      */
-    public $cri_grade_type;
+    public $grade_type;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(name="cri_comment", type="string", length=255, nullable=true)
      */
-    public $cri_avg_ae_res;
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    public $cri_avg_rw_res;
-
-    /**
-     * @ORM\Column(type="float")
-     */
-    public $cri_avg_re_res;
-
-    /**
-     * @ORM\Column(type="float")
-     */
-    public $cri_max_w_dev;
-
-    /**
-     * @ORM\Column(type="float")
-     */
-    public $cri_max_e_dev;
-
-    /**
-     * @ORM\Column(type="float")
-     */
-    public $cri_avg_w_dev;
-
-    /**
-     * @ORM\Column(type="float")
-     */
-    public $cri_avg_e_dev;
-
-    /**
-     * @ORM\Column(type="float")
-     */
-    public $cri_w_inertia;
-
-    /**
-     * @ORM\Column(type="float")
-     */
-    public $cri_e_inertia;
-
-    /**
-     * @ORM\Column(type="float")
-     */
-    public $cri_max_w_inertia;
-
-    /**
-     * @ORM\Column(type="float")
-     */
-    public $cri_max_e_inertia;
-
-    /**
-     * @ORM\Column(type="float")
-     */
-    public $cri_w_distratio;
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    public $cri_comment;
+    public $comment;
 
     /**
      * @ORM\Column(name="cri_created_by", type="integer", nullable=true)
@@ -157,9 +98,9 @@ class Criterion extends DbObject
     public $inserted;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="cri_deleted", type="datetime", nullable=true)
      */
-    public $cri_deleted;
+    public $deleted;
 
     /**
      * @ManyToOne(targetEntity="Stage", inversedBy="criteria")
@@ -182,7 +123,7 @@ class Criterion extends DbObject
 
     /**
      * @ManyToOne(targetEntity="CriterionName")
-     * @JoinColumn(name="criterion_name_cna_id", referencedColumnName="cna_id")
+     * @JoinColumn(name="criterion_name_cna_id", referencedColumnName="cna_id", nullable=true)
      */
     protected $cName;
     /**
@@ -236,18 +177,6 @@ class Criterion extends DbObject
      * @param $cri_upperbound
      * @param $cri_step
      * @param $cri_grade_type
-     * @param $cri_avg_ae_res
-     * @param $cri_avg_rw_res
-     * @param $cri_avg_re_res
-     * @param $cri_max_w_dev
-     * @param $cri_max_e_dev
-     * @param $cri_avg_w_dev
-     * @param $cri_avg_e_dev
-     * @param $cri_w_inertia
-     * @param $cri_e_inertia
-     * @param $cri_max_w_inertia
-     * @param $cri_max_e_inertia
-     * @param $cri_w_distratio
      * @param $cri_comment
      * @param $cri_createdBy
      * @param $cri_inserted
@@ -279,29 +208,17 @@ class Criterion extends DbObject
         $cri_forceCommentValue = null,
         $cri_forceComment_sign = null,
         $cri_grade_type = 1,
-        $cri_avg_ae_res = null,
-        $cri_avg_rw_res = null,
-        $cri_avg_re_res = null,
-        $cri_max_w_dev = null,
-        $cri_max_e_dev = null,
-        $cri_avg_w_dev = null,
-        $cri_avg_e_dev = null,
-        $cri_w_inertia = null,
-        $cri_e_inertia = null,
-        $cri_max_w_inertia = null,
-        $cri_max_e_inertia = null,
-        $cri_w_distratio = null,
         $cri_comment = '',
         $cri_createdBy = null,
         $cri_inserted = null,
         $cri_deleted = null,
         //TODO Gérer la création dans les controlleurs
         Stage $stage = null,
-        Organization $organization,
-        Collection $participants,
-        $cName,
-        $target,
-        $grades,
+        Organization $organization = null,
+        Collection $participants = null,
+        $cName = null,
+        $target = null,
+        $grades = null,
         Result $results = null,
         ResultTeam $resultTeams = null,
         Ranking $rankings = null,
@@ -310,34 +227,22 @@ class Criterion extends DbObject
         RankingTeamHistory $historicalRankingTeams = null,
         $template = null)
     {
-        $this->id = $id;
-        $this->cri_complete = $cri_complete;
-        $this->cri_type = $cri_type;
-        $this->cri_name = $cri_name;
-        $this->cri_weight = $cri_weight;
-        $this->cri_forceComment_compare = $cri_forceComment_compare;
-        $this->cri_forceCommentValue = $cri_forceCommentValue;
-        $this->cri_forceComment_sign = $cri_forceComment_sign;
-        $this->cri_lowerbound = $cri_lowerbound;
-        $this->cri_upperbound = $cri_upperbound;
-        $this->cri_step = $cri_step;
-        $this->cri_grade_type = $cri_grade_type;
-        $this->cri_avg_ae_res = $cri_avg_ae_res;
-        $this->cri_avg_rw_res = $cri_avg_rw_res;
-        $this->cri_avg_re_res = $cri_avg_re_res;
-        $this->cri_max_w_dev = $cri_max_w_dev;
-        $this->cri_max_e_dev = $cri_max_e_dev;
-        $this->cri_avg_w_dev = $cri_avg_w_dev;
-        $this->cri_avg_e_dev = $cri_avg_e_dev;
-        $this->cri_w_inertia = $cri_w_inertia;
-        $this->cri_e_inertia = $cri_e_inertia;
-        $this->cri_max_w_inertia = $cri_max_w_inertia;
-        $this->cri_max_e_inertia = $cri_max_e_inertia;
-        $this->cri_w_distratio = $cri_w_distratio;
-        $this->cri_comment = $cri_comment;
+        parent::__construct($id, $cri_createdBy, $cri_inserted);
+        $this->complete = $cri_complete;
+        $this->type = $cri_type;
+        $this->name = $cri_name;
+        $this->weight = $cri_weight;
+        $this->forceComment_compare = $cri_forceComment_compare;
+        $this->forceCommentValue = $cri_forceCommentValue;
+        $this->forceComment_sign = $cri_forceComment_sign;
+        $this->lowerbound = $cri_lowerbound;
+        $this->upperbound = $cri_upperbound;
+        $this->step = $cri_step;
+        $this->grade_type = $cri_grade_type;
+        $this->comment = $cri_comment;
         $this->createdBy = $cri_createdBy;
         $this->inserted = $cri_inserted;
-        $this->cri_deleted = $cri_deleted;
+        $this->deleted = $cri_deleted;
         $this->stage = $stage;
         $this->organization = $organization;
         $this->participants = $participants;
@@ -354,319 +259,165 @@ class Criterion extends DbObject
     }
 
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
     public function getComplete(): ?bool
     {
-        return $this->cri_complete;
+        return $this->complete;
     }
 
     public function setComplete(bool $cri_complete): self
     {
-        $this->cri_complete = $cri_complete;
+        $this->complete = $cri_complete;
 
         return $this;
     }
 
     public function getType(): ?int
     {
-        return $this->cri_type;
+        return $this->type;
     }
 
     public function setType(int $cri_type): self
     {
-        $this->cri_type = $cri_type;
+        $this->type = $cri_type;
 
         return $this;
     }
 
     public function getName(): ?string
     {
-        return $this->cri_name;
+        return $this->name;
     }
 
     public function setName(string $cri_name): self
     {
-        $this->cri_name = $cri_name;
+        $this->name = $cri_name;
 
         return $this;
     }
 
     public function getWeight(): ?float
     {
-        return $this->cri_weight;
+        return $this->weight;
     }
 
     public function setWeight(float $cri_weight): self
     {
-        $this->cri_weight = $cri_weight;
+        $this->weight = $cri_weight;
 
         return $this;
     }
 
     public function getForceCommentCompare(): ?bool
     {
-        return $this->cri_forceComment_compare;
+        return $this->forceComment_compare;
     }
 
     public function setForceCommentCompare(bool $cri_forceComment_compare): self
     {
-        $this->cri_forceComment_compare = $cri_forceComment_compare;
+        $this->forceComment_compare = $cri_forceComment_compare;
 
         return $this;
     }
 
     public function getForceCommentValue(): ?float
     {
-        return $this->cri_forceCommentValue;
+        return $this->forceCommentValue;
     }
 
     public function setForceCommentValue(?float $cri_forceCommentValue): self
     {
-        $this->cri_forceCommentValue = $cri_forceCommentValue;
+        $this->forceCommentValue = $cri_forceCommentValue;
 
         return $this;
     }
 
     public function getForceCommentSign(): ?string
     {
-        return $this->cri_forceComment_sign;
+        return $this->forceComment_sign;
     }
 
     public function setForceCommentSign(?string $cri_forceComment_sign): self
     {
-        $this->cri_forceComment_sign = $cri_forceComment_sign;
+        $this->forceComment_sign = $cri_forceComment_sign;
 
         return $this;
     }
 
     public function getLowerbound(): ?float
     {
-        return $this->cri_lowerbound;
+        return $this->lowerbound;
     }
 
     public function setLowerbound(?float $cri_lowerbound): self
     {
-        $this->cri_lowerbound = $cri_lowerbound;
+        $this->lowerbound = $cri_lowerbound;
 
         return $this;
     }
 
     public function getUpperbound(): ?float
     {
-        return $this->cri_upperbound;
+        return $this->upperbound;
     }
 
     public function setUpperbound(?float $cri_upperbound): self
     {
-        $this->cri_upperbound = $cri_upperbound;
+        $this->upperbound = $cri_upperbound;
 
         return $this;
     }
 
     public function getStep(): ?float
     {
-        return $this->cri_step;
+        return $this->step;
     }
 
     public function setStep(?float $cri_step): self
     {
-        $this->cri_step = $cri_step;
+        $this->step = $cri_step;
 
         return $this;
     }
 
     public function getGradeType(): ?int
     {
-        return $this->cri_grade_type;
+        return $this->grade_type;
     }
 
     public function setGradeType(int $cri_grade_type): self
     {
-        $this->cri_grade_type = $cri_grade_type;
-
-        return $this;
-    }
-
-    public function getAvgAeRes(): ?float
-    {
-        return $this->cri_avg_ae_res;
-    }
-
-    public function setAvgAeRes(float $cri_avg_ae_res): self
-    {
-        $this->cri_avg_ae_res = $cri_avg_ae_res;
-
-        return $this;
-    }
-
-    public function getAvgRwRes(): ?string
-    {
-        return $this->cri_avg_rw_res;
-    }
-
-    public function setAvgRwRes(string $cri_avg_rw_res): self
-    {
-        $this->cri_avg_rw_res = $cri_avg_rw_res;
-
-        return $this;
-    }
-
-    public function getAvgReRes(): ?float
-    {
-        return $this->cri_avg_re_res;
-    }
-
-    public function setAvgReRes(float $cri_avg_re_res): self
-    {
-        $this->cri_avg_re_res = $cri_avg_re_res;
-
-        return $this;
-    }
-
-    public function getMaxWDev(): ?float
-    {
-        return $this->cri_max_w_dev;
-    }
-
-    public function setMaxWDev(float $cri_max_w_dev): self
-    {
-        $this->cri_max_w_dev = $cri_max_w_dev;
-
-        return $this;
-    }
-
-    public function getMaxEDev(): ?float
-    {
-        return $this->cri_max_e_dev;
-    }
-
-    public function setMaxEDev(float $cri_max_e_dev): self
-    {
-        $this->cri_max_e_dev = $cri_max_e_dev;
-
-        return $this;
-    }
-
-    public function getAvgWDev(): ?float
-    {
-        return $this->cri_avg_w_dev;
-    }
-
-    public function setAvgWDev(float $cri_avg_w_dev): self
-    {
-        $this->cri_avg_w_dev = $cri_avg_w_dev;
-
-        return $this;
-    }
-
-    public function getAvgEDev(): ?float
-    {
-        return $this->cri_avg_e_dev;
-    }
-
-    public function setAvgEDev(float $cri_avg_e_dev): self
-    {
-        $this->cri_avg_e_dev = $cri_avg_e_dev;
-
-        return $this;
-    }
-
-    public function getWInertia(): ?float
-    {
-        return $this->cri_w_inertia;
-    }
-
-    public function setWInertia(float $cri_w_inertia): self
-    {
-        $this->cri_w_inertia = $cri_w_inertia;
-
-        return $this;
-    }
-
-    public function getEInertia(): ?float
-    {
-        return $this->cri_e_inertia;
-    }
-
-    public function setEInertia(float $cri_e_inertia): self
-    {
-        $this->cri_e_inertia = $cri_e_inertia;
-
-        return $this;
-    }
-
-    public function getMaxWInertia(): ?float
-    {
-        return $this->cri_max_w_inertia;
-    }
-
-    public function setMaxWInertia(float $cri_max_w_inertia): self
-    {
-        $this->cri_max_w_inertia = $cri_max_w_inertia;
-
-        return $this;
-    }
-
-    public function getMaxEInertia(): ?float
-    {
-        return $this->cri_max_e_inertia;
-    }
-
-    public function setMaxEInertia(float $cri_max_e_inertia): self
-    {
-        $this->cri_max_e_inertia = $cri_max_e_inertia;
-
-        return $this;
-    }
-
-    public function getWDistratio(): ?float
-    {
-        return $this->cri_w_distratio;
-    }
-
-    public function setWDistratio(float $cri_w_distratio): self
-    {
-        $this->cri_w_distratio = $cri_w_distratio;
+        $this->grade_type = $cri_grade_type;
 
         return $this;
     }
 
     public function getComment(): ?string
     {
-        return $this->cri_comment;
+        return $this->comment;
     }
 
     public function setComment(string $cri_comment): self
     {
-        $this->cri_comment = $cri_comment;
+        $this->comment = $cri_comment;
 
         return $this;
     }
 
-    public function getInserted(): ?\DateTimeInterface
-    {
-        return $this->inserted;
-    }
-
-    public function setInserted(?\DateTimeInterface $cri_inserted): self
+    public function setInserted(?DateTimeInterface $cri_inserted): self
     {
         $this->inserted = $cri_inserted;
 
         return $this;
     }
 
-    public function getDeleted(): ?\DateTimeInterface
+    public function getDeleted(): ?DateTimeInterface
     {
-        return $this->cri_deleted;
+        return $this->deleted;
     }
 
-    public function setDeleted(?\DateTimeInterface $cri_deleted): self
+    public function setDeleted(?DateTimeInterface $cri_deleted): self
     {
-        $this->cri_deleted = $cri_deleted;
+        $this->deleted = $cri_deleted;
 
         return $this;
     }
@@ -879,121 +630,136 @@ class Criterion extends DbObject
         $this->template = $template;
     }
 
-    function addGrade(Grade $grade){
+    public function addGrade(Grade $grade): Criterion
+    {
 
         $this->grades->add($grade);
         $grade->setCriterion($this);
         return $this;
     }
 
-    function removeGrade(Grade $grade){
+    public function removeGrade(Grade $grade): Criterion
+    {
         $this->grades->removeElement($grade);
         return $this;
     }
 
-    function addParticipant(ActivityUser $participant){
+    public function addParticipant(ActivityUser $participant): Criterion
+    {
         $this->participants->add($participant);
         $participant->setCriterion($this);
         return $this;
     }
 
 
-    function removeParticipant(ActivityUser $participant){
+    public function removeParticipant(ActivityUser $participant): Criterion
+    {
         // Remove this participant
         $this->participants->removeElement($participant);
         return $this;
     }
 
-    function addResult(Result $result){
+    public function addResult(Result $result): Criterion
+    {
         $this->results->add($result);
         $result->setCriterion($this);
         return $this;
     }
 
-    function removeResult(Result $result){
+    public function removeResult(Result $result): Criterion
+    {
         $this->results->removeElement($result);
         return $this;
     }
 
-    function addRankings(Ranking $ranking){
+    public function addRankings(Ranking $ranking): Criterion
+    {
         $this->rankings->add($ranking);
         $ranking->setActivity($this);
         return $this;
     }
 
-    function removeRanking(Ranking $ranking){
+    public function removeRanking(Ranking $ranking): Criterion
+    {
         $this->rankings->removeElement($ranking);
         return $this;
     }
 
-    function addHistoricalRankings(RankingHistory $historicalRanking){
+    public function addHistoricalRankings(RankingHistory $historicalRanking): Criterion
+    {
         $this->historicalRankings->add($historicalRanking);
         $historicalRanking->setActivity($this);
         return $this;
     }
 
-    function removeHistoricalRanking(RankingHistory $ranking){
+    public function removeHistoricalRanking(RankingHistory $ranking): Criterion
+    {
         $this->rankings->removeElement($ranking);
         return $this;
     }
 
-    function addResultTeam(ResultTeam $resultTeam){
+    public function addResultTeam(ResultTeam $resultTeam): Criterion
+    {
         $this->resultTeams->add($resultTeam);
         $resultTeam->setCriterion($this);
         return $this;
     }
 
-    function removeResultTeam(ResultTeam $resultTeam){
+    public function removeResultTeam(ResultTeam $resultTeam): Criterion
+    {
         $this->resultTeams->removeElement($resultTeam);
         return $this;
     }
 
-    function addRankingTeam(RankingTeam $rankingTeam){
+    public function addRankingTeam(RankingTeam $rankingTeam): Criterion
+    {
         $this->rankingTeams->add($rankingTeam);
         $rankingTeam->setActivity($this);
         return $this;
     }
 
-    function removeRankingTeam(RankingTeam $rankingTeam){
+    public function removeRankingTeam(RankingTeam $rankingTeam): Criterion
+    {
         $this->rankingTeams->removeElement($rankingTeam);
         return $this;
     }
 
-    function addHistoricalRankingTeam(RankingTeamHistory $historicalRankingTeam){
+    public function addHistoricalRankingTeam(RankingTeamHistory $historicalRankingTeam): Criterion
+    {
         $this->historicalRankingTeams->add($historicalRankingTeam);
         $historicalRankingTeam->setActivity($this);
         return $this;
     }
 
-    function removeHistoricalRankingTeam(RankingTeamHistory $historicalRankingTeam){
+    public function removeHistoricalRankingTeam(RankingTeamHistory $historicalRankingTeam): Criterion
+    {
         $this->historicalRankingTeams->removeElement($historicalRankingTeam);
         return $this;
     }
 
-    public function getGlobalParticipants(){
+    public function getGlobalParticipants(): array
+    {
         $teams = [];
         $globalParticipants = [];
         foreach($this->participants as $participant){
             $team = $participant->getTeam();
             if($team == null){
                 $globalParticipants[] = $participant;
-            } else {
-                if(!in_array($team,$teams)){
-                    $globalParticipants[] = $participant;
-                    $teams[] = $team;
-                }
+            } else if(!in_array($team,$teams)){
+                $globalParticipants[] = $participant;
+                $teams[] = $team;
             }
         }
         return $globalParticipants;
     }
 
-    public function getTargetValue()
+    public function getTargetValue(): ?float
     {
-        if($this->target != null){
+        if($this->target !== null){
             return $this->target->getValue();
-        } else {
-            return 0.7;
         }
+
+        return 0.7;
     }
 
     public function __toString()
@@ -1002,15 +768,15 @@ class Criterion extends DbObject
     }
 
 
-    public function toArray()
+    public function toArray(): array
     {
         return [
             'id' => $this->id,
             'name' => $this->cName,
-            'lowerbound' => $this->cri_lowerbound,
-            'upperbound' => $this->cri_upperbound,
-            'step' => $this->cri_step,
-            'weight'=> $this->cri_weight
+            'lowerbound' => $this->lowerbound,
+            'upperbound' => $this->upperbound,
+            'step' => $this->step,
+            'weight'=> $this->weight
         ];
     }
 }

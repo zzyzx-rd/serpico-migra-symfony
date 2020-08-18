@@ -26,32 +26,32 @@ class Process extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(name="pro_name", type="string", length=255)
+     * @ORM\Column(name="pro_name", type="string", length=255, nullable=true)
      */
     public $name;
 
     /**
-     * @ORM\Column(name="$pro_approvable", type="boolean")
+     * @ORM\Column(name"pro_approvable", type="boolean", nullable=true)
      */
     public $pro_approvable;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="boolean", nullable=true)
      */
     public $pro_gradable;
 
     /**
-     * @ORM\Column(name="$pro_createdBy", type="integer")
+     * @ORM\Column(name"pro_created_by", type="integer", nullable=true)
      */
     public $createdBy;
 
     /**
-     * @ORM\Column(name="$pro_inserted", type="datetime")
+     * @ORM\Column(name"pro_inserted", type="datetime", nullable=true)
      */
     public $inserted;
 
     /**
-     * @ORM\Column(name="$pro_deleted", type="datetime", nullable=true)
+     * @ORM\Column(name"pro_deleted", type="datetime", nullable=true)
      */
     public $deleted;
 

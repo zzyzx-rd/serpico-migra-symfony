@@ -5,6 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\ContactRepository;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -16,104 +17,104 @@ class Contact extends DbObject
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(name="con_id", type="integer")
+     * @ORM\Column(name="con_id", type="integer", nullable=true)
      */
     public $id;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="con_locale", type="string", length=255, nullable=true)
      */
-    public $con_locale;
+    public $locale;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="con_type", type="string", length=255, nullable=true)
      */
-    public $con_type;
+    public $type;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(name="con_sent", type="boolean", nullable=true)
      */
-    public $con_sent;
+    public $sent;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="con_fullname", type="string", length=255, nullable=true)
      */
-    public $con_fullname;
+    public $fullname;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="con_compagny", type="string", length=255, nullable=true)
      */
-    public $con_compagny;
+    public $compagny;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="con_adress", type="string", length=255, nullable=true)
      */
-    public $con_adress;
+    public $adress;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="con_zipCode", type="integer", nullable=true)
      */
-    public $con_zipCode;
+    public $zipCode;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="con_city", type="string", length=255, nullable=true)
      */
-    public $con_city;
+    public $city;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="con_country", type="string", length=255, nullable=true)
      */
-    public $con_country;
+    public $country;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="con_position", type="string", length=255, nullable=true)
      */
-    public $con_position;
+    public $position;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="con_email", type="string", length=255, nullable=true)
      */
-    public $con_email;
+    public $email;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="con_message", type="string", length=255, nullable=true)
      */
-    public $con_message;
+    public $message;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(name="con_newsletter", type="boolean", nullable=true)
      */
-    public $con_newsletter;
+    public $newsletter;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(name="con_doc", type="boolean", nullable=true)
      */
-    public $con_doc;
+    public $doc;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="con_mdate", type="datetime", nullable=true)
      */
-    public $con_mdate;
+    public $mdate;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="con_mtime", type="datetime", nullable=true)
      */
-    public $con_mtime;
+    public $mtime;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="con_inserted", type="datetime", nullable=true)
      */
-    public $con_inserted;
+    public $inserted;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="con_confirmed", type="datetime", nullable=true)
      */
-    public $con_confirmed;
+    public $confirmed;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="con_created_by", type="integer", nullable=true)
      */
-    public $con_createdBy;
+    public $createdBy;
 
     /**
      * Contact constructor.
@@ -161,243 +162,233 @@ class Contact extends DbObject
         $con_createdBy = null)
     {
         parent::__construct($id, $con_createdBy, new DateTime());
-        $this->con_locale = $con_locale;
-        $this->con_type = $con_type;
-        $this->con_sent = $con_sent;
-        $this->con_fullname = $con_fullname;
-        $this->con_compagny = $con_compagny;
-        $this->con_adress = $con_adress;
-        $this->con_zipCode = $con_zipCode;
-        $this->con_city = $con_city;
-        $this->con_country = $con_country;
-        $this->con_position = $con_position;
-        $this->con_email = $con_email;
-        $this->con_message = $con_message;
-        $this->con_newsletter = $con_newsletter;
-        $this->con_doc = $con_doc;
-        $this->con_mdate = $con_mdate;
-        $this->con_mtime = $con_mtime;
-        $this->con_inserted = $con_inserted;
-        $this->con_confirmed = $con_confirmed;
-    }
-
-    public function getId(): ?int
-    {
-        return $this->id;
+        $this->locale = $con_locale;
+        $this->type = $con_type;
+        $this->sent = $con_sent;
+        $this->fullname = $con_fullname;
+        $this->compagny = $con_compagny;
+        $this->adress = $con_adress;
+        $this->zipCode = $con_zipCode;
+        $this->city = $con_city;
+        $this->country = $con_country;
+        $this->position = $con_position;
+        $this->email = $con_email;
+        $this->message = $con_message;
+        $this->newsletter = $con_newsletter;
+        $this->doc = $con_doc;
+        $this->mdate = $con_mdate;
+        $this->mtime = $con_mtime;
+        $this->inserted = $con_inserted;
+        $this->confirmed = $con_confirmed;
     }
 
     public function getLocale(): ?string
     {
-        return $this->con_locale;
+        return $this->locale;
     }
 
     public function setLocale(string $con_locale): self
     {
-        $this->con_locale = $con_locale;
+        $this->locale = $con_locale;
 
         return $this;
     }
 
     public function getType(): ?string
     {
-        return $this->con_type;
+        return $this->type;
     }
 
     public function setType(string $con_type): self
     {
-        $this->con_type = $con_type;
+        $this->type = $con_type;
 
         return $this;
     }
 
     public function getSent(): ?bool
     {
-        return $this->con_sent;
+        return $this->sent;
     }
 
     public function setSent(bool $con_sent): self
     {
-        $this->con_sent = $con_sent;
+        $this->sent = $con_sent;
 
         return $this;
     }
 
     public function getFullname(): ?string
     {
-        return $this->con_fullname;
+        return $this->fullname;
     }
 
     public function setFullname(string $con_fullname): self
     {
-        $this->con_fullname = $con_fullname;
+        $this->fullname = $con_fullname;
 
         return $this;
     }
 
     public function getCompagny(): ?string
     {
-        return $this->con_compagny;
+        return $this->compagny;
     }
 
     public function setCompagny(string $con_compagny): self
     {
-        $this->con_compagny = $con_compagny;
+        $this->compagny = $con_compagny;
 
         return $this;
     }
 
     public function getAdress(): ?string
     {
-        return $this->con_adress;
+        return $this->adress;
     }
 
     public function setAdress(string $con_adress): self
     {
-        $this->con_adress = $con_adress;
+        $this->adress = $con_adress;
 
         return $this;
     }
 
     public function getZipCode(): ?int
     {
-        return $this->con_zipCode;
+        return $this->zipCode;
     }
 
     public function setZipCode(int $con_zipCode): self
     {
-        $this->con_zipCode = $con_zipCode;
+        $this->zipCode = $con_zipCode;
 
         return $this;
     }
 
     public function getCity(): ?string
     {
-        return $this->con_city;
+        return $this->city;
     }
 
     public function setCity(string $con_city): self
     {
-        $this->con_city = $con_city;
+        $this->city = $con_city;
 
         return $this;
     }
 
     public function getCountry(): ?string
     {
-        return $this->con_country;
+        return $this->country;
     }
 
     public function setCountry(string $con_country): self
     {
-        $this->con_country = $con_country;
+        $this->country = $con_country;
 
         return $this;
     }
 
     public function getPosition(): ?string
     {
-        return $this->con_position;
+        return $this->position;
     }
 
     public function setPosition(string $con_position): self
     {
-        $this->con_position = $con_position;
+        $this->position = $con_position;
 
         return $this;
     }
 
     public function getEmail(): ?string
     {
-        return $this->con_email;
+        return $this->email;
     }
 
     public function setEmail(string $con_email): self
     {
-        $this->con_email = $con_email;
+        $this->email = $con_email;
 
         return $this;
     }
 
     public function getMessage(): ?string
     {
-        return $this->con_message;
+        return $this->message;
     }
 
     public function setMessage(string $con_message): self
     {
-        $this->con_message = $con_message;
+        $this->message = $con_message;
 
         return $this;
     }
 
     public function isNewsletter(): ?bool
     {
-        return $this->con_newsletter;
+        return $this->newsletter;
     }
 
     public function setNewsletter(bool $con_newsletter): self
     {
-        $this->con_newsletter = $con_newsletter;
+        $this->newsletter = $con_newsletter;
 
         return $this;
     }
 
     public function isDoc(): ?bool
     {
-        return $this->con_doc;
+        return $this->doc;
     }
 
     public function setDoc(bool $con_doc): self
     {
-        $this->con_doc = $con_doc;
+        $this->doc = $con_doc;
 
         return $this;
     }
 
-    public function getMdate(): ?\DateTimeInterface
+    public function getMdate(): ?DateTimeInterface
     {
-        return $this->con_mdate;
+        return $this->mdate;
     }
 
-    public function setMdate(\DateTimeInterface $con_mdate): self
+    public function setMdate(DateTimeInterface $con_mdate): self
     {
-        $this->con_mdate = $con_mdate;
+        $this->mdate = $con_mdate;
 
         return $this;
     }
 
-    public function getMtime(): ?\DateTimeInterface
+    public function getMtime(): ?DateTimeInterface
     {
-        return $this->con_mtime;
+        return $this->mtime;
     }
 
-    public function setMtime(\DateTimeInterface $con_mtime): self
+    public function setMtime(DateTimeInterface $con_mtime): self
     {
-        $this->con_mtime = $con_mtime;
+        $this->mtime = $con_mtime;
 
         return $this;
     }
 
-    public function getInserted(): ?\DateTimeInterface
+    public function setInserted(DateTimeInterface $con_inserted): self
     {
-        return $this->con_inserted;
-    }
-
-    public function setInserted(\DateTimeInterface $con_inserted): self
-    {
-        $this->con_inserted = $con_inserted;
+        $this->inserted = $con_inserted;
 
         return $this;
     }
 
-    public function getConfirmed(): ?\DateTimeInterface
+    public function getConfirmed(): ?DateTimeInterface
     {
-        return $this->con_confirmed;
+        return $this->confirmed;
     }
 
-    public function setConfirmed(\DateTimeInterface $con_confirmed): self
+    public function setConfirmed(DateTimeInterface $con_confirmed): self
     {
-        $this->con_confirmed = $con_confirmed;
+        $this->confirmed = $con_confirmed;
 
         return $this;
     }

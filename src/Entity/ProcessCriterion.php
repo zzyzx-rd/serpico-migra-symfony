@@ -21,7 +21,7 @@ class ProcessCriterion extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="integer", nullable=true)
      */
     public $crt_type;
 
@@ -31,12 +31,12 @@ class ProcessCriterion extends DbObject
     public $crt_name;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="float", nullable=true)
      */
     public $crt_weight;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="boolean", nullable=true)
      */
     public $crt_forceComment_compare;
 

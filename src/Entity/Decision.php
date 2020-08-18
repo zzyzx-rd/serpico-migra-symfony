@@ -5,6 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\DecisionRepository;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\JoinColumn;
@@ -25,12 +26,12 @@ class Decision extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="dec_type", type="integer", nullable=true)
      */
-    public $dec_type;
+    public $type;
 
     /**
-     * @ORM\Column(name="req_anon", type="integer")
+     * @ORM\Column(name="req_anon", type="integer", nullable=true)
      */
     public $anonymousRequest;
 
@@ -40,56 +41,56 @@ class Decision extends DbObject
     public $anonymousDecision;
 
     /**
-     * @ORM\Column(name="val_usr_id", type="integer")
+     * @ORM\Column(name="val_usr_id", type="integer", nullable=true)
      */
     public $validator;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="dec_result", type="integer", nullable=true)
      */
-    public $dec_result;
+    public $result;
 
     /**
-     * @ORM\Column(name="dec_created_by", type="integer")
+     * @ORM\Column(name="dec_created_by", type="integer", nullable=true)
      */
     public $createdBy;
 
     /**
-     * @ORM\Column(name="dec_inserted", type="datetime")
+     * @ORM\Column(name="dec_inserted", type="datetime", nullable=true)
      */
     public $inserted;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="dec_decided", type="datetime", nullable=true)
      */
-    public $dec_decided;
+    public $decided;
 
     /**
-     * @ORM\Column(name="dec_validated", type="datetime")
+     * @ORM\Column(name="dec_validated", type="datetime", nullable=true)
      */
     public $validated;
 
     /**
      * @ManyToOne(targetEntity="Organization", inversedBy="decisions")
-     * @JoinColumn(name="organization_org_id", referencedColumnName="org_id")
+     * @JoinColumn(name="organization_org_id", referencedColumnName="org_id", nullable=true)
      */
     protected $organization;
 
     /**
      * @ManyToOne(targetEntity="Activity", inversedBy="decisions")
-     * @JoinColumn(name="activity_act_id", referencedColumnName="act_id")
+     * @JoinColumn(name="activity_act_id", referencedColumnName="act_id", nullable=true)
      */
     protected $activity;
 
     /**
      * @ManyToOne(targetEntity="Stage", inversedBy="decisions")
-     * @JoinColumn(name="stage_stg_id", referencedColumnName="stg_id")
+     * @JoinColumn(name="stage_stg_id", referencedColumnName="stg_id", nullable=true)
      */
     protected $stage;
     /**
      * @ManyToMany(targetEntity="User")
      * @JoinColumn(name="req_usr_id", referencedColumnName="usr_id")
-     * @Column(name="req_usr_id", type="integer")
+     * @Column(name="req_usr_id", type="integer", nullable=true)
      * @var int
      */
     protected $requester;
@@ -97,7 +98,7 @@ class Decision extends DbObject
     /**
      * @ManyToMany(targetEntity="User")
      * @JoinColumn(name="user_usr_id", referencedColumnName="usr_id")
-     * @Column(name="dec_usr_id", type="integer")
+     * @Column(name="dec_usr_id", type="integer", nullable=true)
      * @var int
      */
     protected $decider;
@@ -135,18 +136,18 @@ class Decision extends DbObject
         Organization $organization = null,
         Activity $activity = null,
         Stage $stage = null,
-        $req_anon,
-        $dec_anon
+        $req_anon = null,
+        $dec_anon = null
        )
     {
         parent::__construct($id, $dec_createdBy, new DateTime());
-        $this->dec_type = $dec_type;
+        $this->type = $dec_type;
         $this->anonymousRequest = $req_anon;
         $this->anonymousDecision = $dec_anon;
         $this->validator = $validator;
-        $this->dec_result = $dec_result;
+        $this->result = $dec_result;
         $this->inserted = $dec_inserted;
-        $this->dec_decided = $dec_decided;
+        $this->decided = $dec_decided;
         $this->validated = $dec_validated;
         $this->organization = $organization;
         $this->activity = $activity;
@@ -156,19 +157,14 @@ class Decision extends DbObject
     }
 
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
     public function getType(): ?int
     {
-        return $this->dec_type;
+        return $this->type;
     }
 
     public function setType(int $dec_type): self
     {
-        $this->dec_type = $dec_type;
+        $this->type = $dec_type;
 
         return $this;
     }
@@ -211,46 +207,41 @@ class Decision extends DbObject
 
     public function getResult(): ?int
     {
-        return $this->dec_result;
+        return $this->result;
     }
 
     public function setResult(int $dec_result): self
     {
-        $this->dec_result = $dec_result;
+        $this->result = $dec_result;
 
         return $this;
     }
 
-    public function getInserted(): ?\DateTimeInterface
-    {
-        return $this->inserted;
-    }
-
-    public function setInserted(\DateTimeInterface $dec_inserted): self
+    public function setInserted(DateTimeInterface $dec_inserted): self
     {
         $this->inserted = $dec_inserted;
 
         return $this;
     }
 
-    public function getDecided(): ?\DateTimeInterface
+    public function getDecided(): ?DateTimeInterface
     {
-        return $this->dec_decided;
+        return $this->decided;
     }
 
-    public function setDecided(\DateTimeInterface $dec_decided): self
+    public function setDecided(DateTimeInterface $dec_decided): self
     {
-        $this->dec_decided = $dec_decided;
+        $this->decided = $dec_decided;
 
         return $this;
     }
 
-    public function getValidated(): ?\DateTimeInterface
+    public function getValidated(): ?DateTimeInterface
     {
         return $this->validated;
     }
 
-    public function setValidated(\DateTimeInterface $dec_validated): self
+    public function setValidated(DateTimeInterface $dec_validated): self
     {
         $this->validated = $dec_validated;
 

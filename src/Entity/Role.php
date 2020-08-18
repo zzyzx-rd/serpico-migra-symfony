@@ -21,7 +21,7 @@ class Role
     public $id;
 
     /**
-     * @ORM\Column(type="string", length=10)
+     * @ORM\Column(type="string", length=10, nullable=true)
      */
     public $rol_name;
 

@@ -14,28 +14,28 @@ class Record
 {
     /**
      * @Id
-     * @Column(name="rec_entity", type="string")
+     * @Column(name="rec_entity", type="string", nullable=true)
      * @var string
      */
     public $entity;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="integer", nullable=true)
      */
     public $rec_table_id;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     public $rec_property;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     public $rec_old;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     public $rec_new;
 

@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\LKUrlRepository;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -20,34 +21,34 @@ class LKUrl extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="string", length=10)
+     * @ORM\Column(name="lk_url_country", type="string", length=10, nullable=true)
      */
-    public $lk_url_country;
+    public $url_country;
 
     /**
-     * @ORM\Column(type="string", length=10)
+     * @ORM\Column(name="lk_url_letter", type="string", length=10, nullable=true)
      */
-    public $lk_url_letter;
+    public $letter;
 
     /**
-     * @ORM\Column(type="string", length=10)
+     * @ORM\Column(name="lk_url_pagNb", type="string", length=10, nullable=true)
      */
-    public $lk_url_pagNb;
+    public $pagNb;
 
     /**
-     * @ORM\Column(type="string", length=10)
+     * @ORM\Column(name="lk_url_value", type="string", length=10, nullable=true)
      */
-    public $lk_url_value;
+    public $value;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="lk_url_createdBy", type="integer", nullable=true)
      */
-    public $lk_url_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="lk_url_inserted", type="datetime", nullable=true)
      */
-    public $lk_url_inserted;
+    public $inserted;
 
     /**
      * LKUrl constructor.
@@ -69,75 +70,65 @@ class LKUrl extends DbObject
         $lk_url_country = null)
     {
         parent::__construct($id, $lk_url_createdBy, new DateTime());
-        $this->lk_url_country = $lk_url_country;
-        $this->lk_url_letter = $lk_url_letter;
-        $this->lk_url_pagNb = $lk_url_pagNb;
-        $this->lk_url_value = $lk_url_value;
-        $this->lk_url_inserted = $lk_url_inserted;
+        $this->url_country = $lk_url_country;
+        $this->letter = $lk_url_letter;
+        $this->pagNb = $lk_url_pagNb;
+        $this->value = $lk_url_value;
+        $this->inserted = $lk_url_inserted;
     }
 
-
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
 
     public function getCountry(): ?string
     {
-        return $this->lk_url_country;
+        return $this->url_country;
     }
 
     public function setCountry(string $lk_url_country): self
     {
-        $this->lk_url_country = $lk_url_country;
+        $this->url_country = $lk_url_country;
 
         return $this;
     }
 
     public function getLetter(): ?string
     {
-        return $this->lk_url_letter;
+        return $this->letter;
     }
 
     public function setLetter(string $lk_url_letter): self
     {
-        $this->lk_url_letter = $lk_url_letter;
+        $this->letter = $lk_url_letter;
 
         return $this;
     }
 
     public function getPagNb(): ?string
     {
-        return $this->lk_url_pagNb;
+        return $this->pagNb;
     }
 
     public function setPagNb(string $lk_url_pagNb): self
     {
-        $this->lk_url_pagNb = $lk_url_pagNb;
+        $this->pagNb = $lk_url_pagNb;
 
         return $this;
     }
 
     public function getValue(): ?string
     {
-        return $this->lk_url_value;
+        return $this->value;
     }
 
     public function setValue(string $lk_url_value): self
     {
-        $this->lk_url_value = $lk_url_value;
+        $this->value = $lk_url_value;
 
         return $this;
     }
 
-    public function getInserted(): ?\DateTimeInterface
+    public function setInserted(DateTimeInterface $lk_url_inserted): self
     {
-        return $this->lk_url_inserted;
-    }
-
-    public function setInserted(\DateTimeInterface $lk_url_inserted): self
-    {
-        $this->lk_url_inserted = $lk_url_inserted;
+        $this->inserted = $lk_url_inserted;
 
         return $this;
     }

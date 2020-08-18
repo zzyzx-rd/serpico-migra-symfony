@@ -5,13 +5,13 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\IProcessCriterionRepository;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\OneToOne;
-use Doctrine\ORM\Mapping\OrderBy;
 
 /**
  * @ApiResource()
@@ -27,64 +27,64 @@ class IProcessCriterion extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="crt_type", type="integer", nullable=true)
      */
-    public $crt_type;
+    public $type;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="crt_name", type="string", length=255, nullable=true)
      */
-    public $crt_name;
+    public $name;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(name="crt_weight", type="float", nullable=true)
      */
-    public $crt_weight;
+    public $weight;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(name="crt_forceComment_compare", type="boolean", nullable=true)
      */
-    public $crt_forceComment_compare;
+    public $forceComment_compare;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="crt_forceComment_value", type="float", nullable=true)
      */
-    public $crt_forceComment_value;
+    public $forceComment_value;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="crt_forceComment_sign", type="string", length=255, nullable=true)
      */
-    public $crt_forceComment_sign;
+    public $forceComment_sign;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="crt_lowerBound", type="float", nullable=true)
      */
-    public $crt_lowerBound;
+    public $lowerBound;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="crt_upperbound", type="float", nullable=true)
      */
-    public $crt_upperbound;
+    public $upperbound;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="crt_step", type="float", nullable=true)
      */
-    public $crt_step;
+    public $step;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="crt_comment", type="string", length=255, nullable=true)
      */
-    public $crt_comment;
+    public $comment;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="crt_created_by", type="integer", nullable=true)
      */
-    public $crt_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="crt_inserted", type="datetime", nullable=true)
      */
-    public $crt_inserted;
+    public $inserted;
 
     /**
      * @ManyToOne(targetEntity="IProcessStage", inversedBy="criteria")
@@ -107,7 +107,7 @@ class IProcessCriterion extends DbObject
 
     /**
      * @OneToOne(targetEntity="CriterionName")
-     * @JoinColumn(name="criterion_name_cna_id", referencedColumnName="cna_id")
+     * @JoinColumn(name="criterion_name_cna_id", referencedColumnName="cna_id", nullable=true)
      */
     protected $cName;
 
@@ -151,17 +151,17 @@ class IProcessCriterion extends DbObject
         $cName = null)
     {
         parent::__construct($id, $crt_createdBy, new DateTime());
-        $this->crt_type = $crt_type;
-        $this->crt_name = $crt_name;
-        $this->crt_weight = $crt_weight;
-        $this->crt_forceComment_compare = $crt_forceComment_compare;
-        $this->crt_forceComment_value = $crt_forceComment_value;
-        $this->crt_forceComment_sign = $crt_forceComment_sign;
-        $this->crt_lowerBound = $crt_lowerBound;
-        $this->crt_upperbound = $crt_upperbound;
-        $this->crt_step = $crt_step;
-        $this->crt_comment = $crt_comment;
-        $this->crt_inserted = $crt_inserted;
+        $this->type = $crt_type;
+        $this->name = $crt_name;
+        $this->weight = $crt_weight;
+        $this->forceComment_compare = $crt_forceComment_compare;
+        $this->forceComment_value = $crt_forceComment_value;
+        $this->forceComment_sign = $crt_forceComment_sign;
+        $this->lowerBound = $crt_lowerBound;
+        $this->upperbound = $crt_upperbound;
+        $this->step = $crt_step;
+        $this->comment = $crt_comment;
+        $this->inserted = $crt_inserted;
         $this->stage = $stage;
         $this->institutionProcess = $institutionProcess;
         $this->participants = $participants;
@@ -169,139 +169,129 @@ class IProcessCriterion extends DbObject
     }
 
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
     public function getType(): ?int
     {
-        return $this->crt_type;
+        return $this->type;
     }
 
     public function setType(int $crt_type): self
     {
-        $this->crt_type = $crt_type;
+        $this->type = $crt_type;
 
         return $this;
     }
 
     public function getName(): ?string
     {
-        return $this->crt_name;
+        return $this->name;
     }
 
     public function setName(?string $crt_name): self
     {
-        $this->crt_name = $crt_name;
+        $this->name = $crt_name;
 
         return $this;
     }
 
     public function getWeight(): ?float
     {
-        return $this->crt_weight;
+        return $this->weight;
     }
 
     public function setWeight(float $crt_weight): self
     {
-        $this->crt_weight = $crt_weight;
+        $this->weight = $crt_weight;
 
         return $this;
     }
 
     public function getForceCommentCompare(): ?bool
     {
-        return $this->crt_forceComment_compare;
+        return $this->forceComment_compare;
     }
 
     public function setForceCommentCompare(bool $crt_forceComment_compare): self
     {
-        $this->crt_forceComment_compare = $crt_forceComment_compare;
+        $this->forceComment_compare = $crt_forceComment_compare;
 
         return $this;
     }
 
     public function getForceCommentValue(): ?float
     {
-        return $this->crt_forceComment_value;
+        return $this->forceComment_value;
     }
 
     public function setForceCommentValue(?float $crt_forceComment_value): self
     {
-        $this->crt_forceComment_value = $crt_forceComment_value;
+        $this->forceComment_value = $crt_forceComment_value;
 
         return $this;
     }
 
     public function getForceCommentSign(): ?string
     {
-        return $this->crt_forceComment_sign;
+        return $this->forceComment_sign;
     }
 
     public function setForceCommentSign(?string $crt_forceComment_sign): self
     {
-        $this->crt_forceComment_sign = $crt_forceComment_sign;
+        $this->forceComment_sign = $crt_forceComment_sign;
 
         return $this;
     }
 
     public function getLowerBound(): ?float
     {
-        return $this->crt_lowerBound;
+        return $this->lowerBound;
     }
 
     public function setLowerBound(?float $crt_lowerBound): self
     {
-        $this->crt_lowerBound = $crt_lowerBound;
+        $this->lowerBound = $crt_lowerBound;
 
         return $this;
     }
 
     public function getUpperbound(): ?float
     {
-        return $this->crt_upperbound;
+        return $this->upperbound;
     }
 
     public function setUpperbound(?float $crt_upperbound): self
     {
-        $this->crt_upperbound = $crt_upperbound;
+        $this->upperbound = $crt_upperbound;
 
         return $this;
     }
 
     public function getStep(): ?float
     {
-        return $this->crt_step;
+        return $this->step;
     }
 
     public function setStep(?float $crt_step): self
     {
-        $this->crt_step = $crt_step;
+        $this->step = $crt_step;
 
         return $this;
     }
 
     public function getComment(): ?string
     {
-        return $this->crt_comment;
+        return $this->comment;
     }
 
     public function setComment(string $crt_comment): self
     {
-        $this->crt_comment = $crt_comment;
+        $this->comment = $crt_comment;
 
         return $this;
     }
 
-    public function getInserted(): ?\DateTimeInterface
+    public function setInserted(?DateTimeInterface $crt_inserted): self
     {
-        return $this->crt_inserted;
-    }
-
-    public function setInserted(?\DateTimeInterface $crt_inserted): self
-    {
-        $this->crt_inserted = $crt_inserted;
+        $this->inserted = $crt_inserted;
 
         return $this;
     }
@@ -375,14 +365,16 @@ class IProcessCriterion extends DbObject
         return (string) $this->id;
     }
 
-    function addParticipant(IProcessActivityUser $participant){
+    public function addParticipant(IProcessActivityUser $participant): IProcessCriterion
+    {
         $this->participants->add($participant);
         $participant->setCriterion($this);
         return $this;
     }
 
 
-    function removeParticipant(IProcessActivityUser $participant){
+    public function removeParticipant(IProcessActivityUser $participant): IProcessCriterion
+    {
         // Remove this participant
         $this->participants->removeElement($participant);
         return $this;

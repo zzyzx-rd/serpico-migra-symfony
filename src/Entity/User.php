@@ -45,32 +45,32 @@ class User extends DbObject implements  UserInterface, \Serializable
     protected $id;
 
     /**
-     * @ORM\Column(name="usr_int", type="boolean")
+     * @ORM\Column(name="usr_int", type="boolean", nullable=true)
      */
     public $internal;
 
     /**
-     * @ORM\Column(name="usr_firstname", type="string", length=255)
+     * @ORM\Column(name="usr_firstname", type="string", length=255, nullable=true)
      */
     public $firstname;
 
     /**
-     * @ORM\Column(name="usr_lastname", type="string", length=255)
+     * @ORM\Column(name="usr_lastname", type="string", length=255, nullable=true)
      */
     public $lastname;
 
     /**
-     * @ORM\Column(name="usr_username", type="string", length=255)
+     * @ORM\Column(name="usr_username", type="string", length=255, nullable=true)
      */
     public $username;
 
     /**
-     * @ORM\Column(name="usr_nickname", type="string", length=255)
+     * @ORM\Column(name="usr_nickname", type="string", length=255, nullable=true)
      */
     public $nickname;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="datetime", nullable=true)
      */
     public $usr_birthdate;
 
@@ -90,72 +90,72 @@ class User extends DbObject implements  UserInterface, \Serializable
     public $usr_positionName;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     public $usr_picture;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     public $usr_token;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="float", nullable=true)
      */
     public $usr_weight_ini;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="float", nullable=true)
      */
     public $usr_usr_weight_1y;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="float", nullable=true)
      */
     public $usr_weight_2y;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="float", nullable=true)
      */
     public $usr_weight_3y;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="float", nullable=true)
      */
     public $usr_weight_4y;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="float", nullable=true)
      */
     public $usr_weight_5y;
 
     /**
-     * @ORM\Column(name="usr_act_archive_nb_days", type="integer")
+     * @ORM\Column(name="usr_act_archive_nb_days", type="integer", nullable=true)
      */
     public $activitiesArchivingNbDays;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     public $usr_rm_token;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="datetime", nullable=true)
      */
     public $usr_validated;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="boolean", nullable=true)
      */
     public $usr_enabledCreatingUser;
 
     /**
-     * @ORM\Column(name="usr_created_by", type="integer")
+     * @ORM\Column(name="usr_created_by", type="integer", nullable=true)
      */
     public $createdBy;
 
     /**
-     * @ORM\Column(name="usr_inserted", type="datetime")
+     * @ORM\Column(name="usr_inserted", type="datetime", nullable=true)
      */
     public $inserted;
 
@@ -165,14 +165,14 @@ class User extends DbObject implements  UserInterface, \Serializable
     public $usr_last_connected;
 
     /**
-     * @ORM\Column(name="usr_deleted", type="datetime")
+     * @ORM\Column(name="usr_deleted", type="datetime", nullable=true)
      */
     public $deleted;
 
     /**
      * @ManyToOne(targetEntity="Role")
      * @JoinColumn(name="rol_id", referencedColumnName="role_rol_id")
-     * @Column(name="role_rol_id", type="integer")
+     * @Column(name="role_rol_id", type="integer", nullable=true)
      * @var int
      */
     protected $role;
@@ -184,7 +184,7 @@ class User extends DbObject implements  UserInterface, \Serializable
 
     /** @ManyToOne(targetEntity="User", inversedBy="subordinates")
      * @JoinColumn(name="usr_superior", referencedColumnName="usr_id", nullable=true)
-     * @Column(name="usr_superior", type="integer")
+     * @Column(name="usr_superior", type="integer", nullable=true)
      * @var int
      */
     protected $superior;
@@ -854,7 +854,7 @@ class User extends DbObject implements  UserInterface, \Serializable
     {
         if (!$this->activity_user_usr->contains($externalUser)) {
             $this->activity_user_usr[] = $externalUser;
-            $externalUser->setUserUsr($this);
+            $externalUser->setUser($this);
         }
 
         return $this;
@@ -865,8 +865,8 @@ class User extends DbObject implements  UserInterface, \Serializable
         if ($this->activity_user_usr->contains($externalUser)) {
             $this->activity_user_usr->removeElement($externalUser);
             // set the owning side to null (unless already changed)
-            if ($externalUser->getUserUsr() === $this) {
-                $externalUser->setUserUsr(null);
+            if ($externalUser->getUser() === $this) {
+                $externalUser->setUser(null);
             }
         }
 

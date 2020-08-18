@@ -5,6 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\ActivityRepository;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -20,15 +21,15 @@ use Doctrine\ORM\Mapping\OrderBy;
  */
 class Activity extends DbObject
 {
-    const STATUS_CANCELLED = -5;
-    const STATUS_REJECTED = -4;
-    const STATUS_REQUESTED = -3;
-    const STATUS_AWAITING_CREATION = -2;
-    const STATUS_INCOMPLETE = -1;
-    const STATUS_FUTURE = 0;
-    const STATUS_ONGOING = 1;
-    const STATUS_FINALIZED = 2;
-    const STATUS_PUBLISHED = 3;
+    public const STATUS_CANCELLED = -5;
+    public const STATUS_REJECTED = -4;
+    public const STATUS_REQUESTED = -3;
+    public const STATUS_AWAITING_CREATION = -2;
+    public const STATUS_INCOMPLETE = -1;
+    public const STATUS_FUTURE = 0;
+    public const STATUS_ONGOING = 1;
+    public const STATUS_FINALIZED = 2;
+    public const STATUS_PUBLISHED = 3;
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
@@ -38,59 +39,59 @@ class Activity extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(name="act_complete", type="boolean", nullable=false)
      */
-    public $act_complete;
+    public $complete;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="act_magnitude", type="integer", nullable=true)
      */
-    public $act_magnitude;
+    public $magnitude;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(name="act_simplified", type="boolean", nullable=false)
      */
-    public $act_simplified;
+    public $simplified;
 
     /**
-     * @ORM\Column(name="act_name", type="string", length=255)
+     * @ORM\Column(name="act_name", type="string", length=255, nullable=true)
      */
     public $name;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="act_visibility", type="string", length=255, nullable=true)
      */
-    public $act_visibility;
+    public $visibility;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="act_startDate", type="datetime", nullable=true)
      */
-    public $act_startDate;
+    public $startdate;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="act_endDate", type="datetime", nullable=true)
      */
-    public $act_endDate;
+    public $enddate;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="act_objectives", type="string", length=255, nullable=true)
      */
-    public $act_objectives;
+    public $objectives;
 
     /**
-     * @ORM\Column(name="act_status", type="integer")
+     * @ORM\Column(name="act_status", type="integer", nullable=true)
      */
     public $status;
 
     /**
      * @ManyToOne(targetEntity="Process", inversedBy="activities")
-     * @JoinColumn(name="process_pro_id", referencedColumnName="pro_id")
+     * @JoinColumn(name="process_pro_id", referencedColumnName="pro_id", nullable=true)
      */
     protected $process;
 
     /**
      * @ORM\ManyToOne(targetEntity=InstitutionProcess::class, inversedBy="activities")
-     * @JoinColumn(name="institution_process_id", referencedColumnName="inp_id")
+     * @JoinColumn(name="institution_process_id", referencedColumnName="inp_id", nullable=true)
      */
     public $institutionProcess;
 
@@ -153,47 +154,47 @@ class Activity extends DbObject
      */
     public $participants;
     /**
-     * @Column(name="act_progress", type="float")
+     * @Column(name="act_progress", type="float", nullable=false)
      * @var float
      */
     protected $progress;
     /**
-     * @Column(name="act_isRewarding", type="boolean")
+     * @Column(name="act_isRewarding", type="boolean", nullable=true)
      * @var bool
      */
     protected $isRewarding;
     /**
-     * @Column(name="act_distrAmount", length=10, type="float")
+     * @Column(name="act_distrAmount", length=10, type="float", nullable=true)
      * @var float
      */
     protected $distrAmount;
     /**
-     * @Column(name="act_res_inertia", length= 10, type="float")
+     * @Column(name="act_res_inertia", length= 10, type="float", nullable=true)
      * @var int
      */
     protected $res_inertia;
     /**
-     * @Column(name="act_res_benefit_eff", length= 10, type="float")
+     * @Column(name="act_res_benefit_eff", length= 10, type="float", nullable=true)
      * @var int
      */
     protected $res_benefit_eff;
     /**
-     * @Column(name="act_createdBy", type="integer")
+     * @Column(name="act_created_by", type="integer", nullable=true)
      * @var int
      */
     protected $createdBy;
     /**
-     * @Column(name="act_inserted", type="datetime")
+     * @Column(name="act_inserted", type="datetime", nullable=true)
      * @var DateTime
      */
     protected $inserted;
     /**
-     * @Column(name="act_saved", type="datetime")
+     * @Column(name="act_saved", type="datetime", nullable=true)
      * @var DateTime
      */
     protected $saved;
     /**
-     * @Column(name="act_isFinalized", type="boolean")
+     * @Column(name="act_isFinalized", type="boolean", nullable=false)
      * @var bool
      */
     protected $isFinalized;
@@ -203,22 +204,22 @@ class Activity extends DbObject
      */
     protected $finalized;
     /**
-     * @Column(name="act_deleted", type="datetime")
+     * @Column(name="act_deleted", type="datetime", nullable=true)
      * @var DateTime
      */
     protected $deleted;
     /**
-     * @Column(name="act_completed", type="datetime")
+     * @Column(name="act_completed", type="datetime", nullable=true)
      * @var DateTime
      */
     protected $completed;
     /**
-     * @Column(name="act_released", type="datetime")
+     * @Column(name="act_released", type="datetime", nullable=true)
      * @var DateTime
      */
     protected $released;
     /**
-     * @Column(name="act_archived", type="datetime")
+     * @Column(name="act_archived", type="datetime", nullable=true)
      * @var DateTime
      */
     protected $archived;
@@ -230,17 +231,17 @@ class Activity extends DbObject
     public $master_usr;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="boolean", nullable=true)
      */
     public $diffCriteria;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="boolean", nullable=false)
      */
     public $diffParticipants;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="integer", nullable=false)
      */
     public $nbParticipants;
     /**
@@ -312,17 +313,17 @@ class Activity extends DbObject
         DateTime $archived = null
     ) {
         parent::__construct($id, $createdBy, new DateTime);
-        $this->act_magnitude = $magnitude;
-        $this->act_complete = $complete;
-        $this->act_simplified = $simplified;
+        $this->magnitude = $magnitude;
+        $this->complete = $complete;
+        $this->simplified = $simplified;
         $this->name = $name;
-        $this->name = $visibility;
-        $this->act_startDate = $startdate;
-        $this->act_endDate = $enddate;
+        $this->visibility = $visibility;
+        $this->startdate = $startdate;
+        $this->enddate = $enddate;
         $this->diffCriteria = $diffCriteria;
         $this->diffParticipants = $diffParticipants;
         $this->nbParticipants = $nbParticipants;
-        $this->act_objectives = $objectives;
+        $this->objectives = $objectives;
         $this->status = $status;
         $this->progress = $progress;
         $this->isRewarding = $isRewarding;
@@ -363,44 +364,39 @@ class Activity extends DbObject
         }
     }
 
-    public function getId(): ?int
+    public function getComplete(): ?bool
     {
-        return $this->id;
+        return $this->complete;
     }
 
-    public function getActComplete(): ?bool
+    public function setComplete(bool $complete): self
     {
-        return $this->act_complete;
-    }
-
-    public function setActComplete(bool $act_complete): self
-    {
-        $this->act_complete = $act_complete;
+        $this->complete = $complete;
 
         return $this;
     }
 
 
-    public function getActMagnitude(): ?int
+    public function getMagnitude(): ?int
     {
-        return $this->act_magnitude;
+        return $this->magnitude;
     }
 
-    public function setActMagnitude(int $act_magnitude): self
+    public function setMagnitude(int $magnitude): self
     {
-        $this->act_magnitude = $act_magnitude;
+        $this->magnitude = $magnitude;
 
         return $this;
     }
 
-    public function getActSimplified(): ?bool
+    public function getSimplified(): ?bool
     {
-        return $this->act_simplified;
+        return $this->simplified;
     }
 
-    public function setActSimplified(bool $act_simplified): self
+    public function setSimplified(bool $simplified): self
     {
-        $this->act_simplified = $act_simplified;
+        $this->simplified = $simplified;
 
         return $this;
     }
@@ -417,50 +413,45 @@ class Activity extends DbObject
         return $this;
     }
 
-    public function getActVisibility(): ?string
+    public function getVisibility(): ?string
     {
-        return $this->act_visibility;
+        return $this->visibility;
     }
 
-    public function setActVisibility(string $act_visibility): self
+    public function setVisibility(string $visibility): self
     {
-        $this->act_visibility = $act_visibility;
+        $this->visibility = $visibility;
 
         return $this;
     }
 
-    public function getActStartDate(): ?\DateTimeInterface
+    public function getStartdate(): ?DateTimeInterface
     {
-        return $this->act_startDate;
+        return $this->startdate;
     }
 
-    public function setActStartDate(\DateTimeInterface $act_startDate): self
+    public function setStartdate(DateTimeInterface $startdate): self
     {
-        $this->act_startDate = $act_startDate;
+        $this->startdate = $startdate;
 
         return $this;
     }
 
-    public function getActEndDate(): ?\DateTimeInterface
+    public function setEnddate(DateTimeInterface $enddate): self
     {
-        return $this->act_endDate;
-    }
-
-    public function setActEndDate(\DateTimeInterface $act_endDate): self
-    {
-        $this->act_endDate = $act_endDate;
+        $this->enddate = $enddate;
 
         return $this;
     }
 
-    public function getActObjectives(): ?string
+    public function getObjectives(): ?string
     {
-        return $this->act_objectives;
+        return $this->objectives;
     }
 
-    public function setActObjectives(string $act_objectives): self
+    public function setObjectives(string $objectives): self
     {
-        $this->act_objectives = $act_objectives;
+        $this->objectives = $objectives;
 
         return $this;
     }
@@ -786,14 +777,6 @@ class Activity extends DbObject
     }
 
     /**
-     * @return DateTime
-     */
-    public function getInserted(): DateTime
-    {
-        return $this->inserted;
-    }
-
-    /**
      * @param DateTime $inserted
      */
     public function setInserted(DateTime $inserted): void
@@ -962,9 +945,9 @@ class Activity extends DbObject
 
         return $this;
     }
-    public function getStartdateDay()
+    public function getStartdateDay(): int
     {
-        $startDate = new \DateTime('2099-01-01');
+        $startDate = new DateTime('2099-01-01');
         foreach ($this->stages as $stage) {
             if ($stage->getStartdate() < $startDate) {
                 $startDate = $stage->getStartDate();
@@ -975,11 +958,11 @@ class Activity extends DbObject
         $day=$startDate->format('d');
         return (int) date("z",mktime("12","00","00",(int)$month,(int)$day,(int)$year));
     }
-    public function getPeriod()
+    public function getPeriod(): void
     {
 
-        $startDate = new \DateTime('2099-01-01');
-        $enddate = new \DateTime('2000-01-01');
+        $startDate = new DateTime('2099-01-01');
+        $enddate = new DateTime('2000-01-01');
 
         foreach ($this->stages as $stage) {
             if ($stage->getStartdate() < $startDate) {
@@ -998,13 +981,13 @@ class Activity extends DbObject
 
     public function getEnddate()
     {
-        $enddate = new \DateTime('2000-01-01');
+        $endDate = new DateTime('2000-01-01');
         foreach ($this->getStages() as $stage) {
-            if ($stage->getEnddate() > $enddate) {
-                $enddate = $stage->getEnddate();
+            if ($stage->getEnddate() > $endDate) {
+                $endDate = $stage->getEnddate();
             }
         }
-        return $enddate;
+        return $endDate;
     }
     /**
      * @return Collection|Stage[]
@@ -1013,23 +996,25 @@ class Activity extends DbObject
     {
         $activeStages = new ArrayCollection;
         $concernedStages = $this->stages->filter(
-            function (Stage $s) { return $s->getStatus() < 2; }
+            static function (Stage $s) { return $s->getStatus() < 2; }
         );
         foreach($concernedStages as $concernedStage){
             $activeStages->add($concernedStage);
         }
         return $activeStages;
     }
+
     /**
+     * @param User $u
      * @return Collection|Stage[]
      */
     public function getUserActiveGradableStages(User $u)
     {
         // We retrieve all stages where current user can grade
-        return $this->getActiveStages()->filter(function(Stage $s) use ($u){
+        return $this->getActiveStages()->filter(static function(Stage $s) use ($u){
             $participations = $s->getUniqueIntParticipations();
-            return $participations && $participations->exists(function(int $i, ActivityUser $p) use ($s, $u){
-                    return $p->getDirectUser() == $u && $s->getUniqueGradableParticipations()->count() > 0;
+            return $participations && $participations->exists(static function(int $i, ActivityUser $p) use ($s, $u){
+                    return ($p->getUser() == $u) && ($s->getUniqueGradableParticipations()->count() > 0);
                 });
         });
     }
@@ -1041,7 +1026,7 @@ class Activity extends DbObject
         $activeGradableStages = new ArrayCollection;
         $activeStages = $this->getActiveStages();
         foreach ($activeStages as $activeStage) {
-            if ($activeStage->getUserGradableParticipations() != null || $activeStage->getTeamGradableParticipations() != null) {
+            if ($activeStage->getUserGradableParticipations() !== null || $activeStage->getTeamGradableParticipations() !== null) {
                 $activeGradableStages->add($activeStage);
             }
         }
@@ -1050,7 +1035,7 @@ class Activity extends DbObject
 
     public function getCompletedStagesWithSurvey()
     {
-        return $this->getOCompletedStages()->filter(function (Stage $s) {
+        return $this->getOCompletedStages()->filter(static function (Stage $s) {
             return $s->getSurvey();
         });
     }
@@ -1060,7 +1045,7 @@ class Activity extends DbObject
     public function getOCompletedStages()
     {
         $stages = $this->stages;
-        return $stages->filter(function (Stage $stage) {
+        return $stages->filter(static function (Stage $stage) {
             return $stage->getStatus() >= STAGE::STAGE_COMPLETED;
         });
     }
@@ -1071,7 +1056,7 @@ class Activity extends DbObject
     public function getPCompletedStages()
     {
         $stages = $this->stages;
-        return $stages->filter(function (Stage $stage) {
+        return $stages->filter(static function (Stage $stage) {
             return $stage->getProgress() >= STAGE::PROGRESS_COMPLETED;
         });
     }
@@ -1079,7 +1064,7 @@ class Activity extends DbObject
     /**
      * @return Stage
      */
-    public function getCurrentStage()
+    public function getCurrentStage(): Stage
     {
         $today = new DateTime('now');
 
@@ -1091,78 +1076,72 @@ class Activity extends DbObject
 
         return $stage;
     }
-    public function addRanking(Ranking $ranking)
+    public function addRanking(Ranking $ranking): Activity
     {
         $this->rankings->add($ranking);
         $ranking->setActivity($this);
         return $this;
     }
-    public function removeRanking(Ranking $ranking)
+    public function removeRanking(Ranking $ranking): Activity
     {
         $this->rankings->removeElement($ranking);
         return $this;
     }
 
-    public function addHistoricalRanking(RankingHistory $historicalRanking)
+    public function addHistoricalRanking(RankingHistory $historicalRanking): Activity
     {
         $this->historicalRankings->add($historicalRanking);
         $historicalRanking->setActivity($this);
         return $this;
     }
 
-    public function removeHistoricalRanking(RankingHistory $ranking)
+    public function removeHistoricalRanking(RankingHistory $ranking): Activity
     {
         $this->rankings->removeElement($ranking);
         return $this;
     }
 
-    public function addResultTeam(ResultTeam $resultTeam)
+    public function addResultTeam(ResultTeam $resultTeam): Activity
     {
         $this->resultTeams->add($resultTeam);
         $resultTeam->setActivity($this);
         return $this;
     }
 
-    public function removeResultTeam(ResultTeam $resultTeam)
+    public function removeResultTeam(ResultTeam $resultTeam): Activity
     {
         $this->resultTeams->removeElement($resultTeam);
         return $this;
     }
 
-    public function addRankingTeam(RankingTeam $rankingTeam)
+    public function addRankingTeam(RankingTeam $rankingTeam): Activity
     {
         $this->rankingTeams->add($rankingTeam);
         $rankingTeam->setActivity($this);
         return $this;
     }
 
-    public function removeRankingTeam(RankingTeam $rankingTeam)
+    public function removeRankingTeam(RankingTeam $rankingTeam): Activity
     {
         $this->rankingTeams->removeElement($rankingTeam);
         return $this;
     }
 
-    public function addHistoricalRankingTeam(RankingTeamHistory $historicalRankingTeam)
+    public function addHistoricalRankingTeam(RankingTeamHistory $historicalRankingTeam): Activity
     {
         $this->historicalRankingTeams->add($historicalRankingTeam);
         $historicalRankingTeam->setActivity($this);
         return $this;
     }
 
-    public function removeHistoricalRankingTeam(RankingTeamHistory $historicalRankingTeam)
+    public function removeHistoricalRankingTeam(RankingTeamHistory $historicalRankingTeam): Activity
     {
         $this->historicalRankingTeams->removeElement($historicalRankingTeam);
         return $this;
     }
-    public function isSimplified()
+    public function isSimplified(): bool
     {
         return $this->simplified;
-    }
-
-    public function setSimplified($simplified)
-    {
-        $this->simplified = $simplified;
-        return $this;
     }
 
     public function getLatestStage()
@@ -1176,7 +1155,7 @@ class Activity extends DbObject
         return $returnedStage;
     }
 
-    public function hasParticipants()
+    public function hasParticipants(): bool
     {
         foreach ($this->getActiveStages() as $stage) {
             if (count($stage->getParticipants()) > 0) {
@@ -1189,55 +1168,49 @@ class Activity extends DbObject
     public function hasParticipant(User $u)
     {
         return $this->participants->exists(
-            function (int $i, ActivityUser $p) use ($u) { return $p->getDirectUser() == $u; }
+            static function (int $i, ActivityUser $p) use ($u) { return $p->getUser() == $u; }
         );
     }
 
-    public function userIsGrader(User $u)
+    public function userIsGrader(User $u): bool
     {
-        return $this->getStages()->exists(function(int $i,Stage $s) use ($u) {
+        return $this->getStages()->exists(static function(int $i, Stage $s) use ($u) {
             $graders = $s->getGraderUsers();
 
-            return $graders->exists(function (int $i,User $p) use ($u) {
+            return $graders->exists(static function (int $i, User $p) use ($u) {
                 return $p === $u;
             });
         });
     }
 
-    public function userCanGiveOutput(User $u)
+    public function userCanGiveOutput(User $u): bool
     {
-        return $this->getStages()->exists(function(int $i,Stage $s) use ($u) {
+        return $this->getStages()->exists(static function(int $i, Stage $s) use ($u) {
             return $s->userCanGiveOutput($u);
         });
         //return $this->status == self::STATUS_ONGOING && $this->userIsGrader($u);
     }
 
-    public function userCanSeeOutput(User $u){
-        return $this->getStages()->exists(function(int $i,Stage $s) use ($u) {
+    public function userCanSeeOutput(User $u): bool
+    {
+        return $this->getStages()->exists(static function(int $i, Stage $s) use ($u) {
             return $s->userCanSeeOutput($u);
         });
     }
 
-    public function userCanAnswerSurvey(User $u)
+    public function userCanAnswerSurvey(User $u): bool
     {
         return $this->status == self::STATUS_ONGOING
-            && $this->getStages()->exists(function(int $i,Stage $s) use ($u) {
+            && $this->getStages()->exists(static function(int $i, Stage $s) use ($u) {
                 $survey = $s->getSurvey();
 
                 if (!$survey) {
                     return false;
                 }
 
-                return $survey->getParticipants()->exists(function (int $i,ActivityUser $p) use ($u) {
+                return $survey->getParticipants()->exists(static function (int $i, ActivityUser $p) use ($u) {
                     if($p->getUser() === $u){
-                        if($p->getStatus()==2 || $p->getStatus()==1 ){
-
-                            return true;
-
-                        }
-                        else{
-                            return false;
-                        }
+                        return $p->getStatus() == 2 || $p->getStatus() == 1;
                     }
 
 
@@ -1245,7 +1218,7 @@ class Activity extends DbObject
                 });
             });
     }
-    public function userCanSendAnswerSurvey(User $u)
+    public function userCanSendAnswerSurvey(User $u): bool
     {
         return $this->status == self::STATUS_ONGOING
             && $this->getStages()->exists(function(int $i,Stage $s) use ($u) {
@@ -1262,13 +1235,12 @@ class Activity extends DbObject
                         }
                         return !empty($p->getAnswers());
                     }
-                    else{
-                        return false;
-                    }
+
+                    return false;
                 });
             });
     }
-    public function userCanEdit(User $u)
+    public function userCanEdit(User $u): bool
     {
         $role = $u->getRole();
 
@@ -1283,10 +1255,8 @@ class Activity extends DbObject
         if ($role == 4) {
             return true;
         }
-        if ($this->getInitiator()->getOrganization() == $u->getOrganization()) {
-            if ($role == 1 || $this->getActiveModifiableStages()) {
-                return true;
-            }
+        if (($this->getInitiator()->getOrganization() == $u->getOrganization()) && ($role == 1 || $this->getActiveModifiableStages())) {
+            return true;
         }
         return false;
     }
@@ -1296,11 +1266,13 @@ class Activity extends DbObject
         return $this->userCanSeeResults($u);
     }
 
-    public function userCanAccessInfo(User $u){
+    public function userCanAccessInfo(User $u): bool
+    {
         return true;
     }
 
-    public function userCanSeeResults(User $u)
+    //TODO fix le coup du subordinate
+    public function userCanSeeResults(User $u): bool
     {
 
         if ($this->status < self::STATUS_FINALIZED) {
@@ -1314,14 +1286,14 @@ class Activity extends DbObject
             return true;
         }
 
-        if (!$this->stages->exists(function (int $i,Stage $s) { return $s->getCriteria()->count(); })) {
+        if (!$this->stages->exists(static function (int $i, Stage $s) { return $s->getCriteria()->count(); })) {
             // no stage with criteria. if none of them got replies (as they are surveys)
             // results are not available
 
 
             if (
 
-            $this->stages->forAll(function (int $i,Stage $s) {
+            $this->stages->forAll(static function (int $i, Stage $s) {
                 $survey = $s->getSurvey();
                 if (!$survey) {
 
@@ -1337,10 +1309,8 @@ class Activity extends DbObject
             }
         }
 
-        if ($role == 1) {
-            if ($u->getOrganization() != $this->getOrganization()) {
-                return false;
-            }
+        if (($role == 1) && $u->getOrganization() != $this->getOrganization()) {
+            return false;
         }
 
         if ($this->hasParticipant($u)) {
@@ -1362,7 +1332,7 @@ class Activity extends DbObject
 
         return false;
     }
-    public function userCanSeeDetailedFeedback(User $u)
+    public function userCanSeeDetailedFeedback(User $u): bool
     {
         $canSeeResults = $this->userCanSeeResults($u);
         $role = $u->getRole();
@@ -1372,26 +1342,27 @@ class Activity extends DbObject
         }
 
         return $canSeeResults && $this->participants->exists(
-                function (int $i, ActivityUser $p) use ($u) { return $p->getDirectUser() == $u && $p->isLeader(); }
+                static function (int $i, ActivityUser $p) use ($u) { return $p->getUser() == $u && $p->isLeader(); }
             );
     }
 
     public function isComplete(){
-        return $this->getActiveStages()->exists(function(int $i, Stage $s){
+        return $this->getActiveStages()->exists(static function(int $i, Stage $s){
             return $s->isComplete();
         });
     }
-    public function getIndependantUniqueParticipatingClients(){
+    public function getIndependantUniqueParticipatingClients(): ArrayCollection
+    {
         $actIndependantUniqueParticipatingClients = new ArrayCollection;
         $activityIndependantParticipatingClients = [];
         foreach($this->stages as $stage){
             foreach($stage->getIndependantUniqueParticipatingClients() as $client){
                 $activityIndependantParticipatingClients[] = $client;
-            };
+            }
         }
         $clientIds = [];
         foreach($activityIndependantParticipatingClients as $activityIndependantParticipatingClient){
-            if(in_array($activityIndependantParticipatingClient->getId(),$clientIds) === false){
+            if(in_array($activityIndependantParticipatingClient->getId(), $clientIds, true) === false){
                 $actIndependantUniqueParticipatingClients->add($activityIndependantParticipatingClient);
             }
         }
@@ -1399,7 +1370,7 @@ class Activity extends DbObject
     }
 
     public function hasMinimumOutputConfig(){
-        return $this->getActiveModifiableStages()->forAll(function(int $i,Stage $s){
+        return $this->getActiveModifiableStages()->forAll(static function(int $i, Stage $s){
             return $s->hasMinimumOutputConfig() == 1;
         });
     }
@@ -1421,14 +1392,14 @@ class Activity extends DbObject
             return $s->hasMinimumOutputConfig() == 1 && $s->hasMinimumParticipationConfig() == 1;
         });
     }
-    public function addStage(Stage $stage)
+    public function addStage(Stage $stage): Activity
     {
         $this->stages->add($stage);
         $stage->setActivity($this);
         return $this;
     }
 
-    public function removeStage(Stage $stage)
+    public function removeStage(Stage $stage): Activity
     {
         $this->stages->removeElement($stage);
         return $this;

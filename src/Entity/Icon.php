@@ -5,6 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\IconRepository;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\OneToMany;
@@ -24,29 +25,29 @@ class Icon extends DbObject
     protected $id;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="ico_type", type="string", length=255, nullable=true)
      */
-    public $ico_type;
+    public $type;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="ico_name", type="string", length=255, nullable=true)
      */
-    public $ico_name;
+    public $name;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="ico_unicode", type="string", length=255, nullable=true)
      */
-    public $ico_unicode;
+    public $unicode;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="ico_created_by", type="integer", nullable=true)
      */
-    public $ico_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="ico_inserted", type="datetime", nullable=true)
      */
-    public $ico_inserted;
+    public $inserted;
 
     /**
      * @OneToMany(targetEntity="CriterionName", mappedBy="icon", cascade={"persist", "remove"}, orphanRemoval=true)
@@ -82,64 +83,59 @@ class Icon extends DbObject
         Collection $workerFirmSectors = null)
     {
         parent::__construct($id, $ico_createdBy, new DateTime());
-        $this->ico_type = $ico_type;
-        $this->ico_name = $ico_name;
-        $this->ico_unicode = $ico_unicode;
-        $this->ico_inserted = $ico_inserted;
+        $this->type = $ico_type;
+        $this->name = $ico_name;
+        $this->unicode = $ico_unicode;
+        $this->inserted = $ico_inserted;
         $this->criterionNames = $criterionNames;
         $this->workerFirmSectors = $workerFirmSectors;
     }
 
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
     public function etType(): ?string
     {
-        return $this->ico_type;
+        return $this->type;
     }
 
-    public function setIcoType(string $ico_type): self
+    public function setType(string $type): self
     {
-        $this->ico_type = $ico_type;
+        $this->type = $type;
 
         return $this;
     }
 
     public function etName(): ?string
     {
-        return $this->ico_name;
+        return $this->name;
     }
 
-    public function setIcoName(string $ico_name): self
+    public function setName(string $name): self
     {
-        $this->ico_name = $ico_name;
+        $this->name = $name;
 
         return $this;
     }
 
     public function etUnicode(): ?string
     {
-        return $this->ico_unicode;
+        return $this->unicode;
     }
 
-    public function setIcoUnicode(string $ico_unicode): self
+    public function setUnicode(string $unicode): self
     {
-        $this->ico_unicode = $ico_unicode;
+        $this->unicode = $unicode;
 
         return $this;
     }
 
-    public function etInserted(): ?\DateTimeInterface
+    public function etInserted(): ?DateTimeInterface
     {
-        return $this->ico_inserted;
+        return $this->inserted;
     }
 
-    public function setIcoInserted(\DateTimeInterface $ico_inserted): self
+    public function setInserted(DateTimeInterface $inserted): self
     {
-        $this->ico_inserted = $ico_inserted;
+        $this->inserted = $inserted;
 
         return $this;
     }
@@ -176,41 +172,43 @@ class Icon extends DbObject
         $this->workerFirmSectors = $workerFirmSectors;
     }
 
-    function addCriterionName(CriterionName $criterionName)
+    public function addCriterionName(CriterionName $criterionName): Icon
     {
         $criterionName->setIcon($this);
         $this->criterionNames->add($criterionName);
         return $this;
     }
 
-    function removeCriterionName(CriterionName $criterionName)
+    public function removeCriterionName(CriterionName $criterionName): Icon
     {
         $this->criterionNames->removeElement($criterionName);
         return $this;
     }
 
-    function addWorkerFirmSector(WorkerFirmSector $workerFirmSector)
+    public function addWorkerFirmSector(WorkerFirmSector $workerFirmSector): Icon
     {
         $workerFirmSector->setIcon($this);
         $this->workerFirmSectors->add($workerFirmSector);
         return $this;
     }
 
-    function removeWorkerFirmSector(WorkerFirmSector $workerFirmSector)
+    public function removeWorkerFirmSector(WorkerFirmSector $workerFirmSector): Icon
     {
         $this->workerFirmSectors->removeElement($workerFirmSector);
         return $this;
     }
 
-    function getChar() {
-        switch ($this->ico_type) {
-            case 'm': return $this->ico_name;
-            default: return IntlChar::chr(hexdec($this->ico_unicode));
+    public function getChar() {
+        $i = $this->type;
+        if ($i === 'm') {
+            return $this->name;
         }
+
+        return IntlChar::chr(hexdec($this->unicode));
     }
 
-    public function __toString()
-    {
-        return $this->getChar();
-    }
+//    public function __toString()
+//    {
+//        return $this->getChar();
+//    }
 }
