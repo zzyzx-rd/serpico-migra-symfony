@@ -34,7 +34,7 @@ class UserRepository extends ServiceEntityRepository
         return new ArrayCollection($this->_em->getRepository(User::class)->findBy(["organization_org" => $organization->id]));
     }
 
-    function findUserTopPerformingCriteria(User $u, int $precision = 0, int $count = 0)
+    public function findUserTopPerformingCriteria(User $u, int $precision = 0, int $count = 0)
     {
         $usrPos = $u->getPosition();
         $usrDpt = $u->getDepartment();
@@ -102,7 +102,7 @@ class UserRepository extends ServiceEntityRepository
         );
     }
 
-    function findUserUngradedTargets(User $u, int $precision = 0, int $count = 0)
+    public function findUserUngradedTargets(User $u, int $precision = 0, int $count = 0)
     {
         $usrId = $u->getId();
         $usrPos = $u->getPosition();
@@ -262,5 +262,43 @@ class UserRepository extends ServiceEntityRepository
         }
     }
 
+    /**
+     * @param User $user
+     * @return User[]
+     */
+    public function getSubordinates(User $user)
+    {
+        return $this->_em->getRepository(User::class)->findBy(['superior' => $user->getId()]);
+    }
 
+    /**
+     * @param User $user
+     * @return User[]
+     */
+    public function subordinatesOf(User $user): array
+    {
+        $subordinates = $this->getSubordinates($user);
+        $return = $subordinates;
+
+        foreach ($subordinates as $user) {
+            $return = array_merge($return, $this->subordinatesOf($user));
+        }
+
+        return $return;
+    }
+
+    public function getExternalActivities(Organization $organization = null, User $user)
+    {
+        $externalActivities = new ArrayCollection;
+        $userParticipations = $this->_em->getRepository(ActivityUser::class)->findBy(['id' => $user->getId()]);
+        foreach ($userParticipations as $userParticipation) {
+            $activity = $userParticipation->getStage()->getActivity();
+            if (($organization != null && $activity->getOrganization() == $organization) || ($organization == null && $activity->getOrganization() != $user->getOrganization())) {
+                if (!$externalActivities->contains($activity)) {
+                    $externalActivities->add($activity);
+                }
+            }
+        }
+        return $externalActivities;
+    }
 }

@@ -15,7 +15,6 @@ use Model\Target;
 use Model\User;
 use Repository\CriterionNameRepository;
 use Repository\OrganizationRepository;
-use Silex\Application;
 use Symfony\Component\Form\FormFactory;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;

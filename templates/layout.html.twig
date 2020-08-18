@@ -1,3 +1,4 @@
+{% set locale = app.request.getLocale() in ['fr','en'] ? app.request.getLocale() : en %}
 <!DOCTYPE html>
 <html id="serpicoapp" {% block data_params %}{% endblock %}>
   <head>
@@ -26,11 +27,11 @@
     </script>
   </head>
 
-{#  {% if global.currentuser != null %}#}
-{#    {% set orgName = global.currentuser.organization.commname %}#}
-{#  {% else %}#}
-{#    {% set orgName = '' %}#}
-{#  {% endif %}#}
+  {% if global.currentuser != null %}
+    {% set orgName = global.currentuser.organization.commname %}
+  {% else %}
+    {% set orgName = '' %}
+  {% endif %}
 
   <body>
     <div class="page-container">
@@ -99,9 +100,9 @@
               </li>
               <li>
                 <a href="{{ path('home') }}">
-                  <img class="user-profile-picture" src="{{ asset(userpicture) }}">
+                  <img class="user-profile-picture" src="{{ asset(global.userpicture) }}">
                   {# username is only defined for user being citizen (public), otherwise fullname #}
-                  {{ global.currentuser.usr_username != "" ? global.currentuser.usr_username : global.currentuser.usr_fullname }}
+                  {{ global.currentuser.username != "" ? global.currentuser.username : global.currentuser.fullname }}
                 </a>
               </li>
               <li class="logout">
@@ -147,26 +148,72 @@
               </li>
             {% endif %}
             <li class="lg-icon">
-              <div class="collapsible" data-collapsible="accordion">
-                <div class="collapsible-header">
-                  {% set currentlocale = global.request.get('_locale') %}
-                  {% set locales = ["en", "fr"] %}
-                  <div class="flag locale-flag {{ currentlocale }}"></div>
-                  <span class="country">{{ global.request.get('_locale')|upper }}</span>
-                </div>
-                <ul class="collapsible-body lang-menu">
-                  {% for locale in locales %}
-                    {% if locale != currentlocale %}
+{#              <div class="collapsible" data-collapsible="accordion">#}
+{#                <div class="collapsible-header">#}
+{#                  {% set currentlocale = global.request.get('_locale') %}#}
+{#                  {% set locales = ["en", "fr"] %}#}
+{#                  <div class="flag locale-flag {{ currentlocale }}"></div>#}
+{#                  <span class="country">{{ global.request.get('_locale')|upper }}</span>#}
+{#                </div>#}
+{#                <ul class="collapsible-body lang-menu">#}
+{#                  {% for locale in locales %}#}
+{#                    {% if locale != currentlocale %}#}
+{#                      <li>#}
+{#                        <a href="{{ path(global.route, global.routeParams|merge({ _locale: locale })) }}">#}
+{#                          <div class="flag {{ locale }}"></div>#}
+{#                          <span class="country">{{ locale|upper }}</span>#}
+{#                        </a>#}
+{#                      </li>#}
+{#                    {% endif %}#}
+{#                  {% endfor %}#}
+{#                </ul>#}
+{#              </div>#}
+              <ul class="collapsible flags" data-collapsible="accordion">
+                <li>
+                  <div class="collapsible-header">
+                    <ul class="flex-center">
                       <li>
-                        <a href="{{ path(global.route, global.routeParams|merge({ _locale: locale })) }}">
-                          <div class="flag {{ locale }}"></div>
-                          <span class="country">{{ locale|upper }}</span>
-                        </a>
+                        <div class="flag {{ locale }}"></div>
                       </li>
-                    {% endif %}
-                  {% endfor %}
-                </ul>
-              </div>
+                      <li>
+                        <span class="country">{{ locale|upper }}</span>
+                      </li>
+                    </ul>
+                  </div>
+                  <div class="collapsible-body language-collapsible-body">
+                    <ul class="lang-menu">
+                      {% if locale != 'en' %}
+                        <li>
+                          <ul class="flex-center">
+                            <a href="{{ path('change_locale', {'locale': 'en'}) }}" class="flex-center">
+                              <li>
+                                <div class="flag en"></div>
+                              </li>
+                              <li>
+                                <span class="country">EN</span>
+                              </li>
+                            </a>
+                          </ul>
+                        </li>
+                      {% endif %}
+                      {% if locale != 'fr' %}
+                        <li>
+                          <ul class="flex-center">
+                            <a href="{{ path('change_locale', {'locale': 'fr'}) }}" class="flex-center">
+                              <li>
+                                <div class="flag fr"></div>
+                              </li>
+                              <li>
+                                <span class="country">FR</span>
+                              </li>
+                            </a>
+                          </ul>
+                        </li>
+                      {% endif %}
+                    </ul>
+                  </div>
+                </li>
+              </ul>
             </li>
           </ul>
         </div>

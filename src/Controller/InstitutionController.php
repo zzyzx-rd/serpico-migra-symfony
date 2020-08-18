@@ -2,41 +2,30 @@
 
 namespace App\Controller;
 
+use App\Entity\Activity;
+use App\Entity\ActivityUser;
+use App\Entity\Decision;
+use App\Entity\OrganizationUserOption;
+use App\Entity\Survey;
+use App\Entity\User;
+use App\Form\AddProcessForm;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
-use Form\AddProcessForm;
-use Form\DelegateActivityForm;
-use Form\RequestActivityForm;
-use Model\Activity;
-use Model\ActivityUser;
-use Model\Decision;
-use Model\Department;
-use Model\OrganizationUserOption;
-use Model\Survey;
-use Repository\ActivityRepository;
-use Silex\Application;
+use App\Form\DelegateActivityForm;
+use App\Form\RequestActivityForm;
+use App\Repository\ActivityRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Security;
 
 final class InstitutionController extends MasterController
 {
-    private $user;
-    private $org;
+    protected $user;
+    protected $org;
     /** @var ActivityRepository */
-    private $activityRepo;
-
-    public function __construct(EntityManagerInterface $em)
-    {
-        parent::__construct($em);
-        $this->user = self::getAuthorizedUser();
-        if (!$this->user) {
-            return $this->redirectToRoute('login');
-        }
-        $this->org          = $this->user->getOrganization();
-        $this->activityRepo = $this->em->getRepository(Activity::class);
-    }
+    protected $activityRepo;
 
     /**
      * @return string
@@ -82,10 +71,8 @@ final class InstitutionController extends MasterController
             }
         }
 
-        global $app;
-        $formFactory = $app['form.factory'];
-        $addProcessForm = $formFactory->create(AddProcessForm::class, null, ['standalone' => true]);
-        $delegateActivityForm = $formFactory->create(DelegateActivityForm::class, null, ['standalone' => true, 'app' => $app]) ;
+        $addProcessForm = $this->createForm(AddProcessForm::class, null, ['standalone' => true]);
+        $delegateActivityForm = $this->createForm(DelegateActivityForm::class, null, ['standalone' => true, 'app' => $app]) ;
 
         //$name = $viewType == 'd' ? 'iprocess_list.html.twig' : 'iprocess2_list.html.twig';
 
@@ -104,12 +91,11 @@ final class InstitutionController extends MasterController
     }
 
     /**
-     * @param Application $app
      * @param Request $request
      * @return string
      * @Route("/myactivities", name="myActivities")
      */
-    public function myActivitiesListAction(Application $app, Request $request){
+    public function myActivitiesListAction(Request $request){
 
         $em = $this->getEntityManager();
         $repoA = $em->getRepository(Activity::class);
@@ -144,7 +130,7 @@ final class InstitutionController extends MasterController
 
         $existingAccessAndResultsViewOption = null;
         $statusAccess = null;
-        $accessAndResultsViewOptions = $this->org->getOptions()->filter(function(OrganizationUserOption $option) {return $option->getOName()->getName() == 'activitiesAccessAndResultsView' && ($option->getRole() == $this->user->getRole() || $option->getUser() == $this->user);});
+        $accessAndResultsViewOptions = $this->org->getOptions()->filter(function(OrganizationUserOption $option) {return $option->getOName()->getName() == 'activitiesAccessAndResultsView' && ($option->getRole()->getId() == $this->user->getRole() || $option->getUser() == $this->user);});
 
         // We always chose the most selective access option (NB : we could in the future, create options decidated to position, departments... so below option selection should be rewritten)
         if(count($accessAndResultsViewOptions) > 0){
@@ -197,16 +183,16 @@ final class InstitutionController extends MasterController
             }
 
             // IDs of activities in which at least one *graded* participant is a direct or indirect subordinate
-            $subordinates = $this->user->getSubordinatesRecursive();
+            $subordinates = $this->em->getRepository(User::class)->subordinatesOf($this->user);
             /** @var ActivityUser[] */
-            $subordinatesParticipations = $repoAU->findBy(['usrId' => $subordinates, 'type' => [ -1, 1 ] ]);
+            $subordinatesParticipations = $repoAU->findBy(['id' => $subordinates, 'type' => [ -1, 1 ] ]);
             $activitiesWithSubordinates_IDs = array_map(function (ActivityUser $p) {
                 return $p->getStage()->getActivity()->getId();
             }, $subordinatesParticipations);
 
             foreach($orgActivities as $orgActivity){
                 if (
-                    $orgActivity->getStatus() == -2 && in_array($orgActivity->getMasterUserId(), $checkingIds) ||
+                    ($orgActivity->getStatus() == -2 && in_array($orgActivity->getMasterUserId(), $checkingIds)) ||
                     in_array($orgActivity->getId(), $activitiesWithSubordinates_IDs)
                 ){
                     $userActivities->add($orgActivity);
@@ -246,19 +232,17 @@ final class InstitutionController extends MasterController
                 }
             }
             //Get activities where user is participating as external user
-            $externalActivities = $this->user->getExternalActivities();
+            $externalActivities = $this->em->getRepository(User::class)->getExternalActivities(null, $this->user);
             $userActivities = new ArrayCollection((array)$userActivities->toArray() + $externalActivities->toArray());
 
         }
 
-        global $app;
-        $formFactory = $app['form.factory'];
-        $addProcessForm = $formFactory->create(AddProcessForm::class, null, ['standalone' => true]);
-        $delegateActivityForm = $formFactory->create(DelegateActivityForm::class, null, ['standalone' => true, 'app' => $app]) ;
+        $addProcessForm = $this->createForm( AddProcessForm::class, null, ['standalone' => true]);
+        $delegateActivityForm = $this->createForm(DelegateActivityForm::class,null, ['standalone' => true, 'currentUser' => $this->user]) ;
         $delegateActivityForm->handleRequest($request);
-        $requestActivityForm = $formFactory->create(RequestActivityForm::class, null, ['standalone' => true, 'app' => $app]) ;
+        $requestActivityForm = $this->createForm(RequestActivityForm::class, null, ['standalone' => true, 'em' => $this->em, 'currentUser' => $this->user]) ;
         $requestActivityForm->handleRequest($request);
-        $validateRequestForm = $formFactory->create(DelegateActivityForm::class, null,  ['app' => $app, 'standalone' => true, 'request' => true]);
+        $validateRequestForm = $this->createForm(DelegateActivityForm::class, null,  [ 'standalone' => true, 'request' => true, 'currentUser' => $this->user]);
         $validateRequestForm->handleRequest($request);
 
         // In case they might access results depending on user participation, then we need to feed all stages and feed a collection which will be analysed therefore in hideResultsFromStages function

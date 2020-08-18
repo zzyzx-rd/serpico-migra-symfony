@@ -50,24 +50,24 @@ class User extends DbObject implements  UserInterface, \Serializable
     public $internal;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="usr_firstname", type="string", length=255)
      */
-    public $usr_firstname;
+    public $firstname;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="usr_lastname", type="string", length=255)
      */
-    public $usr_lastname;
+    public $lastname;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="usr_username", type="string", length=255)
      */
-    public $usr_username;
+    public $username;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="usr_nickname", type="string", length=255)
      */
-    public $usr_nickname;
+    public $nickname;
 
     /**
      * @ORM\Column(type="datetime")
@@ -130,9 +130,9 @@ class User extends DbObject implements  UserInterface, \Serializable
     public $usr_weight_5y;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="usr_act_archive_nb_days", type="integer")
      */
-    public $usr_act_archive_nbDays;
+    public $activitiesArchivingNbDays;
 
     /**
      * @ORM\Column(type="string", length=255)
@@ -371,10 +371,10 @@ class User extends DbObject implements  UserInterface, \Serializable
         parent::__construct($id, $usr_createdBy, new DateTime());
         $this->pictureFile = $pictureFile;
         $this->internal = $usr_int;
-        $this->usr_firstname = $usr_firstname;
-        $this->usr_lastname = $usr_lastname;
-        $this->usr_username = $usr_username;
-        $this->usr_nickname = $usr_nickname;
+        $this->firstname = $usr_firstname;
+        $this->lastname = $usr_lastname;
+        $this->username = $usr_username;
+        $this->nickname = $usr_nickname;
         $this->usr_birthdate = $usr_birthdate;
         $this->usr_email = $usr_email;
         $this->usr_password = $usr_password;
@@ -387,7 +387,7 @@ class User extends DbObject implements  UserInterface, \Serializable
         $this->usr_weight_3y = $usr_weight_3y;
         $this->usr_weight_4y = $usr_weight_4y;
         $this->usr_weight_5y = $usr_weight_5y;
-        $this->usr_act_archive_nbDays = $usr_act_archive_nbDays;
+        $this->activitiesArchivingNbDays = $usr_act_archive_nbDays;
         $this->usr_rm_token = $usr_rm_token;
         $this->usr_validated = $usr_validated;
         $this->usr_enabledCreatingUser = $usr_enabledCreatingUser;
@@ -429,48 +429,48 @@ class User extends DbObject implements  UserInterface, \Serializable
 
     public function getFirstname(): ?string
     {
-        return $this->usr_firstname;
+        return $this->firstname;
     }
 
     public function setFirstname(string $usr_firstname): self
     {
-        $this->usr_firstname = $usr_firstname;
+        $this->firstname = $usr_firstname;
 
         return $this;
     }
 
     public function getLastname(): ?string
     {
-        return $this->usr_lastname;
+        return $this->lastname;
     }
 
     public function setLastname(string $usr_lastname): self
     {
-        $this->usr_lastname = $usr_lastname;
+        $this->lastname = $usr_lastname;
 
         return $this;
     }
 
     public function getUsername(): ?string
     {
-        return $this->usr_username;
+        return $this->username;
     }
 
     public function setUsername(string $usr_username): self
     {
-        $this->usr_username = $usr_username;
+        $this->username = $usr_username;
 
         return $this;
     }
 
     public function getNickname(): ?string
     {
-        return $this->usr_nickname;
+        return $this->nickname;
     }
 
     public function setNickname(string $usr_nickname): self
     {
-        $this->usr_nickname = $usr_nickname;
+        $this->nickname = $usr_nickname;
 
         return $this;
     }
@@ -619,14 +619,14 @@ class User extends DbObject implements  UserInterface, \Serializable
         return $this;
     }
 
-    public function getActArchiveNbDays(): ?int
+    public function getActivitiesArchivingNbDays(): ?int
     {
-        return $this->usr_act_archive_nbDays;
+        return $this->activitiesArchivingNbDays;
     }
 
-    public function setActArchiveNbDays(int $usr_act_archive_nbDays): self
+    public function setActivitiesArchivingNbDays(int $usr_act_archive_nbDays): self
     {
-        $this->usr_act_archive_nbDays = $usr_act_archive_nbDays;
+        $this->activitiesArchivingNbDays = $usr_act_archive_nbDays;
 
         return $this;
     }
@@ -1062,7 +1062,7 @@ class User extends DbObject implements  UserInterface, \Serializable
             return (string) $this->id;
         }
 
-        return "$this->usr_firstname . $this->usr_lastname";
+        return "$this->firstname . $this->lastname";
     }
 
     public function getInvertedFullName()
@@ -1071,7 +1071,7 @@ class User extends DbObject implements  UserInterface, \Serializable
             return (string) $this->id;
         }
 
-        return "$this->usr_lastname $this->usr_firstname";
+        return "$this->lastname $this->firstname";
     }
     public function getAbbr()
     {
@@ -1170,7 +1170,7 @@ class User extends DbObject implements  UserInterface, \Serializable
     {
         [
             $this->id,
-            $this->usr_username,
+            $this->username,
             $this->usr_email,
             $this->usr_password,
         ] = unserialize($serialized, ['allow_classes' => false]);
@@ -1242,8 +1242,8 @@ class User extends DbObject implements  UserInterface, \Serializable
             'id' => $this->id,
             'orgId' => $this->getOrganization()->getId(),
             'organization' => $this->getOrganization(),
-            'firstname' => $this->usr_firstname,
-            'lastname' => $this->usr_lastname,
+            'firstname' => $this->firstname,
+            'lastname' => $this->lastname,
             'picture' => $this->usr_picture,
             'weight' => $this->weight_wgt?$this->weight_wgt->getValue():null,
             'inserted' => $this->inserted,

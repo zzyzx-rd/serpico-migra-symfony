@@ -240,25 +240,7 @@ help:
 #    label_doc: Envoyez-moi de la documentation
 #    submit: OK
 #    success_msg: Votre inscription a bien été prise en compte ! Vous serez rapidement tenu au courant par notre équipe ;)
-#
-#  firmSettings: "Entreprise :"
-#  my_actions: Mes actions et démarches
-#  firmActivities: Activités
-#  firmConfig: Paramètres groupe
-#  firms: Entreprises
-#  root_mgt: Gestion avancée
-#  profile: Mon profil
-#  add_activity: Créer une activité
-#  convert: Utiliser en interne
-#  users: Utilisateurs
-#  community: Communauté
-#  institutions: Institutions
-#  colleagues_teams: Collègues & équipes
-#  settings: Paramètres
-#  help: Aide
-#  home: Accueil
-#  logout:
-#  discover: Know more
+
 
 footer:
   title: Une marque de ZZYZX Road
@@ -495,9 +477,24 @@ header:
   product: La solution
   about: A propos
   login: Connexion
-
-#footer:
-#  tc: Conditions générales d'utilisation
+  firmSettings: "Entreprise :"
+  my_actions: Mes actions et démarches
+  firmActivities: Activités
+  firmConfig: Paramètres groupe
+  firms: Entreprises
+  root_mgt: Gestion avancée
+  profile: Mon profil
+  add_activity: Créer une activité
+  convert: Utiliser en interne
+  users: Utilisateurs
+  community: Communauté
+  institutions: Institutions
+  colleagues_teams: Collègues & équipes
+  settings: Paramètres
+  help: Aide
+  home: Accueil
+  logout: se déconnecter
+  discover: Know more
 
 solution:
   hr: RH
@@ -2715,7 +2712,7 @@ create_user:
     rules: "Quelques remarques : <br><br> Les doublons ne seront pas pris en compte <br><br> S'il manque une donnée nécessaire pour un utilisateur (ex. prénom ou email), celui-ci ne sera pas créé <br><br> Si vous avez inséré des supérieurs hiérarchiques aux utilisateurs, vérifiez que le format de leur colonne est de type \Prénom Nom\ afin d'être reconnu dans le système"
     validate: Ok
 
-  file:
+#  file:
   firstname: Prénom
   lastname: Nom
   role: Role

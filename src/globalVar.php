@@ -28,6 +28,11 @@ class globalVar {
         return ["_locale" =>"fr"];
     }
 
+    public function userpicture(){
+        $userPicture = $this->CurrentUser()?$this->CurrentUser()->getPicture(): null;
+        return 'lib/img/' . ($userPicture ?: 'no-picture.png');
+    }
+
     public function request(){
         return $this->requestStack->getCurrentRequest();
     }
@@ -38,5 +43,14 @@ class globalVar {
     public function CurrentUser(): ?User
     {
         return $this->security->getUser();
+    }
+
+    public function html_data_params(array $arr){
+        $dataParams = [];
+        foreach ($arr as $key => $value) {
+            $dataParams[] = "data-$key=\"$value\"";
+        }
+
+        return implode(' ', $dataParams);
     }
 }

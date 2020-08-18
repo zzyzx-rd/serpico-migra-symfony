@@ -1,7 +1,7 @@
 {% extends "layout.html.twig" %}
 
 {% block data_params %}
-  {{ html_data_params({
+  {{ global.html_data_params({
     aurl: url('createUserProcessActivity', { inpId: 0 })|raw
   }) }}
 {% endblock %}
@@ -10,7 +10,7 @@
   {{ 'iprocesses.title'|trans }}
 {% endblock title %}
 
-{% set sortingType = app.request_stack.currentrequest.get('sortingType') %}
+{% set sortingType = global.request.get('sortingType') %}
 
 {% block css %}
   <link rel="stylesheet" href="{{ asset('css/activity_list_item.css') }}">
@@ -23,7 +23,7 @@
     var adurl = "{{ url('activityDelegate') }}";
     var adeleteUrl="{{ url('ajaxActivityDelete', {'actId' : 0}) }}";
     var usurl= "{{ url('updateStageStatus', {stgId : 0}) }}";
-    var cpurl = "{{ url('createProcessRequest', {orgId : currentuser.orgId}) }}";
+    var cpurl = "{{ url('createProcessRequest', {orgId : global.currentuser.organization.id}) }}";
   </script>
   <style>
       .elmts{
@@ -717,7 +717,7 @@
 {% block content %}
   <main>
 
-    {% if currentuser.role == 1 %}
+    {% if global.currentuser.role == 1 %}
       <div class="modal-footer action-buttons">
         <div class="button-field">
           {% if route == "myActivities" %}
@@ -733,9 +733,9 @@
       <div class="container">
         <div class="center" style="margin-top: 20px;">
             <i class="fa fa-clipboard fa-3x"></i>
-            {% if currentuser.organization.commname != "Public" %}
+            {% if global.currentuser.organization.commname != "Public" %}
                 <h4>{% trans %}activities.no_activities_title{% endtrans %}</h4>
-                <p>{% if currentuser.role == 3 %}{% trans %}activities.no_activities_msg_collaborator{% endtrans %}{% else %}{% trans %}activities.no_activities_msg_activity_manager{% endtrans %}{% endif %}</p>
+                <p>{% if global.currentuser.role == 3 %}{% trans %}activities.no_activities_msg_collaborator{% endtrans %}{% else %}{% trans %}activities.no_activities_msg_activity_manager{% endtrans %}{% endif %}</p>
             {% else %}
                 <h4>{% trans %}activities.no_registered_activities_title{% endtrans %}</h4>
                 <p>{% trans %}activities.no_registered_activities_msg{% endtrans %}</p>
@@ -887,9 +887,9 @@
       {% endif %}
     </div>
 
-    {% if currentuser.role != 3 %}
+    {% if global.currentuser.role != 3 %}
       <div id="fixedButton" class="fixed-action-btn">
-          <a class="btn-floating blue darken-2 modal-trigger" href="#createActivity" onclick="onAddProcessClick('{{ currentuser.orgId }}')" data-oid="{{currentuser.orgId}}"><i class="material-icons">add</i></a>
+          <a class="btn-floating blue darken-2 modal-trigger" href="#createActivity" onclick="onAddProcessClick('{{ global.currentuser.orgId }}')" data-oid="{{global.currentuser.orgId}}"><i class="material-icons">add</i></a>
           {#}
           <ul>
               <li><a class="btn-floating orange lighten-2 tooltipped modal-trigger" data-position="left" data-delay="50" data-tooltip="{% trans %}tooltip.template.create_from_scratch{% endtrans %}" href="{{ path('activityInitialisation',{'elmt' : 'template'}) }}">
@@ -899,8 +899,8 @@
                   </div>
                   </a>
               </li>
-              <li><a class="btn-floating tooltipped {% if currentuser.organization.templateActivities|length == 0 %}grey{% else %} cyan darken-2 modal-trigger" href="#selectTemplate{% endif %}" data-position="left" data-delay="50" data-tooltip="{% trans %}tooltip.activity.create_from_template{% endtrans %}"><i class="material-icons">view_headline</i></a></li>
-              <li><a class="btn-floating teal accent-4 tooltipped" data-position="left" data-delay="50" data-tooltip="{% trans %}tooltip.activity.create_from_scratch{% endtrans %}" href="#createActivity" onclick="onAddProcessClick('{{ currentuser.orgId }}')" data-oid="{{currentuser.orgId}}"><i class="material-icons">create</i></a></li>
+              <li><a class="btn-floating tooltipped {% if global.currentuser.organization.templateActivities|length == 0 %}grey{% else %} cyan darken-2 modal-trigger" href="#selectTemplate{% endif %}" data-position="left" data-delay="50" data-tooltip="{% trans %}tooltip.activity.create_from_template{% endtrans %}"><i class="material-icons">view_headline</i></a></li>
+              <li><a class="btn-floating teal accent-4 tooltipped" data-position="left" data-delay="50" data-tooltip="{% trans %}tooltip.activity.create_from_scratch{% endtrans %}" href="#createActivity" onclick="onAddProcessClick('{{ global.currentuser.orgId }}')" data-oid="{{global.currentuser.orgId}}"><i class="material-icons">create</i></a></li>
           </ul>
           #}
       </div>
@@ -919,10 +919,10 @@
               </div>
           </div>
           <div>
-              {% if currentuser.role != 1 %}
-                <a class="modal-trigger" href="#requestNewProcess" onclick="onAddProcessClick('{{currentuser.orgId}}')">
+              {% if global.currentuser.role != 1 %}
+                <a class="modal-trigger" href="#requestNewProcess" onclick="onAddProcessClick('{{global.currentuser.organization.id}}')">
               {% else %}
-                <a href="{{url('manageProcesses',{orgId: currentuser.orgId})}}">
+                <a href="{{url('manageProcesses',{orgId: global.currentuser.orgId})}}">
               {% endif %}
                   <i class="fas fa-plus modal-close"></i>
                   {% trans %} activities.request_process{% endtrans %}

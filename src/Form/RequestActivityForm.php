@@ -28,11 +28,10 @@ class RequestActivityForm extends AbstractType
     {
 
 
-        $app = $options['app'];
-        $em = $app['orm.em'];
+        $em = $options['em'];
         $repoU = $em->getRepository(User::class);
-        $orgId = MasterController::getAuthorizedUser($app)->getOrgId();
-        $users = $repoU->findByOrgId($orgId);
+        $org = $options['currentUser']->getOrganization();
+        $users = $repoU->findByOrganization($org);
         $keys = [];
         $values = [];
         foreach($users as $user){
@@ -110,7 +109,7 @@ class RequestActivityForm extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setRequired('app');
+        $resolver->setRequired(['em', 'currentUser']);
         $resolver->setDefault('standalone', false);
         $resolver->addAllowedTypes('standalone', 'bool');
     }

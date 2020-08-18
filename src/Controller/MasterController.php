@@ -18,8 +18,6 @@ use App\Entity\ActivityUser;
 use App\Entity\Criterion;
 use App\Entity\Department;
 use App\Entity\Mail;
-use App\Entity\Notation\Constantes;
-use App\Entity\Notation\Results;
 use App\Entity\OptionName;
 use App\Entity\Organization;
 use App\Entity\OrganizationUserOption;
@@ -48,24 +46,28 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGenerator;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Translation\Translator;
 use Symfony\Component\Validator\Constraints\DateTime;
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
+use Twig\Loader\LoaderInterface;
 
 abstract class MasterController extends AbstractController
 {
-    const EVALUATION_COMMENT = 1;
-    const COMMENT = 2;
-    const CRITERIA = 1;
-    const STAGE = 2;
-    const ACTIVITY = 2;
-    const STAGE_ONLY = 0;
-    const USERS_ONLY = 1;
-    const LOCAL_URL_PREFIXE = "http://0.0.0.0:5000";
-    const SERVEUR_URL_PREFIXE = "http://51.15.121.241:5000";
-    const MAIN_CRITERIA_COMPUTATION = "/main/criteriaComputation";
+    public const EVALUATION_COMMENT = 1;
+    public const COMMENT = 2;
+    public const CRITERIA = 1;
+    public const STAGE = 2;
+    public const ACTIVITY = 2;
+    public const STAGE_ONLY = 0;
+    public const USERS_ONLY = 1;
+    public const LOCAL_URL_PREFIXE = "http://0.0.0.0:5000";
+    public const SERVEUR_URL_PREFIXE = "http://51.15.121.241:5000";
+    public const MAIN_CRITERIA_COMPUTATION = "/main/criteriaComputation";
     /**
      * @var EntityManager
      */
@@ -74,16 +76,44 @@ abstract class MasterController extends AbstractController
      * @var Security
      */
     protected $security;
+    /**
+     * @var RequestStack
+     */
+    public $stack;
+    /**
+     * @var LoaderInterface
+     */
+    private $loader;
 
     /**
      * MasterController constructor.
      * @param EntityManagerInterface $em
      * @param Security $security
+     * @param RequestStack $stack
      */
-    public function __construct(EntityManagerInterface $em, Security $security)
+    public function __construct(EntityManagerInterface $em, Security $security, RequestStack $stack)
     {
         $this->em = $em;
         $this->security = $security;
+        $this->stack = $stack;
+        $this->user = $security->getUser();
+//        if ($this->user === null) {
+//            $this->redirectToRoute('login');
+//        }
+        if ($this->user){
+            $this->org = $this->user->getOrganization();
+        }
+        $this->activityRepo = $this->em->getRepository(Activity::class);
+        $this->em = $em;
+        $this->security = $security;
+        // Twig constants
+//        $loader = new FilesystemLoader('../templates');
+//        $twig = new Environment($loader);
+////        $twig = $this->get('twig');
+//        $twig->addGlobal("route", "login");
+//        $twig->addGlobal("routeParams", ["_locale" =>"fr"]);
+//        $twig->addGlobal("request", $this->stack->getCurrentRequest());
+//        $twig->addGlobal("currentUser", $this->user);
     }
 
 //    public static function getTwig(): \Twig\Environment
@@ -123,15 +153,6 @@ abstract class MasterController extends AbstractController
     public  function getEntityManager()
     {
         return $this->em;
-    }
-
-    /**
-     * @return Translator
-     */
-    public static function getTranslator()
-    {
-        global $app;
-        return $app['translator'];
     }
 
 //    public function redirectToRoute(string $route, array $parameters = [], int $status = 302): RedirectResponse
@@ -220,6 +241,10 @@ abstract class MasterController extends AbstractController
         return [];
     }
 
+    public function getAuthorizedUser(): ?\Symfony\Component\Security\Core\User\UserInterface
+    {
+        return $this->user;
+    }
 
 
     public  function getRememberedUser($token)
@@ -638,7 +663,7 @@ abstract class MasterController extends AbstractController
         return true;
     }
 
-    public static function sendOrganizationTestingReminders()
+    public function sendOrganizationTestingReminders()
     {
         $allOrganizations = new ArrayCollection($this->em->getRepository(Organization::class)->findAll());
         $expiringOrganizations =
@@ -682,7 +707,7 @@ abstract class MasterController extends AbstractController
         $array_unique = array_unique($array);
 
         if (count($array) - count($array_unique)) {
-            for ($i = 0; $i < count($array); $i++) {
+            for ($i = 0, $iMax = count($array); $i < $iMax; $i++) {
                 if (!array_key_exists($i, $array_unique)) {
                     $r_valeur[] = $array[$i];
                 }

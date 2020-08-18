@@ -11,7 +11,6 @@ use App\Entity\OTPUser;
 use App\Entity\Position;
 use App\Entity\User;
 use App\Entity\Weight;
-use Silex\Application;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;

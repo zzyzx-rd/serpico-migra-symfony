@@ -29,9 +29,9 @@ class InstitutionProcess extends DbObject
     protected $id;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="inp_name", type="string", length=255)
      */
-    public $inp_name;
+    public $name;
 
     /**
      * @ORM\Column(type="boolean")
@@ -44,14 +44,14 @@ class InstitutionProcess extends DbObject
     public $inp_gradable;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="inp_created_by", type="integer")
      */
-    public $inp_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="inp_inserted", type="datetime")
      */
-    public $inp_isnerted;
+    public $inserted;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
@@ -126,10 +126,10 @@ class InstitutionProcess extends DbObject
         $activities = null)
     {
         parent::__construct($id, $inp_createdBy, new DateTime());
-        $this->inp_name = $inp_name;
+        $this->name = $inp_name;
         $this->inp_approvable = $inp_approvable;
         $this->inp_gradable = $inp_gradable;
-        $this->inp_isnerted = $inp_isnerted;
+        $this->inserted = $inp_isnerted;
         $this->inp_deleted = $inp_deleted;
         $this->organization = $organization;
         $this->process = $process;
@@ -148,12 +148,12 @@ class InstitutionProcess extends DbObject
 
     public function getName(): ?string
     {
-        return $this->inp_name;
+        return $this->name;
     }
 
     public function setName(string $inp_name): self
     {
-        $this->inp_name = $inp_name;
+        $this->name = $inp_name;
 
         return $this;
     }
@@ -184,12 +184,12 @@ class InstitutionProcess extends DbObject
 
     public function getIsnerted(): ?\DateTimeInterface
     {
-        return $this->inp_isnerted;
+        return $this->inserted;
     }
 
     public function setIsnerted(\DateTimeInterface $inp_isnerted): self
     {
-        $this->inp_isnerted = $inp_isnerted;
+        $this->inserted = $inp_isnerted;
 
         return $this;
     }

@@ -8,18 +8,20 @@
 
 namespace App\Form;
 
-use Symfony\Component\App\FormExtension\Core\Type\SubmitType;
-use Symfony\Component\App\FormExtension\Core\Type\TextType;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\App\FormFormBuilderInterface;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\App\FormAbstractType;
-use Validator\UniquePerOrganization;
 use Doctrine\ORM\EntityRepository;
 use App\Entity\InstitutionProcess;
 use App\Entity\Process;
-use Symfony\Bridge\Doctrine\App\FormType\EntityType;
+use Validator\UniquePerOrganization;
 
 class AddProcessForm extends AbstractType
 {
@@ -42,7 +44,7 @@ class AddProcessForm extends AbstractType
         ])->add('parent', EntityType::class,
         [
             'label_format' => 'institutions.add_process.%name%',
-            'class' => $options['elmt'] == 'iprocess' ? InstitutionProcess::class : Process::class,
+            'class' => $options['elmt'] === 'iprocess' ? InstitutionProcess::class : Process::class,
             'choice_label' => 'name',
             'query_builder' => function (EntityRepository $er) {
                 return $er->createQueryBuilder('p')
@@ -68,7 +70,7 @@ class AddProcessForm extends AbstractType
         ->setDefaults([
             'elmt' => 'iprocess',
             'data_class' => function (Options $options) {
-                return $options['elmt'] == 'iprocess'
+                return $options['elmt'] === 'iprocess'
                        ? InstitutionProcess::class
                        : Process::class;
             },

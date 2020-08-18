@@ -8,10 +8,10 @@
 
 namespace App\Form;
 
-use Controller\MasterController;
+use App\Controller\MasterController;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Bridge\Doctrine\App\Form\Type\EntityType;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -46,7 +46,7 @@ class DelegateActivityForm extends AbstractType
 
         $submitBtnClass = ($options['request']) ? 'validate-button' : 'delegate-button';
 
-        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, static function (FormEvent $event) use ($options) {
 
             $form = $event->getForm();
            
@@ -56,10 +56,10 @@ class DelegateActivityForm extends AbstractType
                     'label_format' => 'activities.create.%name%',
                     'class' => User::class,
                     'choice_label' => 'invertedFullName',
-                    'query_builder' => function (EntityRepository $er) {
-                        $currentUser = MasterController::getAuthorizedUser();
+                    'query_builder' => static function (EntityRepository $er) use ($options) {
+                        $currentUser = $options['currentUser'];
                         return $er->createQueryBuilder('u')
-                            ->where("u.orgId = ".$currentUser->getOrgId())
+                            ->where("u.organization_org = ".$currentUser->getOrganization())
                             ->andWhere("u.deleted is NULL")
                             ->andWhere("u.lastname != 'ZZ'")
                             ->andWhere("u.firstname != '".$currentUser->getFirstname()."' AND u.lastname != '".$currentUser->getLastname()."'")
@@ -78,7 +78,7 @@ class DelegateActivityForm extends AbstractType
                 'constraints' => [
                     new Assert\NotBlank,
                     new UniquePerOrganization([
-                        'organization' => MasterController::getAuthorizedUser()->getOrganization(),
+                        'organization' => $options["currentUser"]->getOrganization(),
                         'entity' => 'activity',
                         'element' => null,
                         'property' => 'name',
@@ -120,7 +120,7 @@ class DelegateActivityForm extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setRequired('app');
+        $resolver->setRequired('currentUser');
         $resolver->setDefault('standalone', false);
         $resolver->setDefault('request', false);
         $resolver->addAllowedTypes('standalone', 'bool');

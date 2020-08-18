@@ -53,11 +53,10 @@ class UserController extends MasterController
     /*********** ADDITION, MODIFICATION, DELETION AND DISPLAY OF USERS *****************/
     /**
      * @param Request $request
-     * @param Application $app
      * @return mixed
      * @Route("/terms-conditions", name= "displayTC")
      */
-    public function displayTCAction(Request $request, Application $app) {
+    public function displayTCAction(Request $request) {
         return $app['twig']->render(
             'terms_conditions.html.twig',
             [
@@ -636,7 +635,7 @@ class UserController extends MasterController
      * @return JsonResponse|RedirectResponse
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/institution/activity/process/{inpId}", name="createProcessActivity")
+     * @Route("/institution/activity/process/{inpId}", name="createUserProcessActivity")
      */
     public function createUserProcessActivity(Request $request, Application $app, $inpId){
         $entityManager = $this->getEntityManager($app);

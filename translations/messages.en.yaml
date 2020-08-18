@@ -500,6 +500,24 @@ header:
   product: Our solution
   about: About us
   login: Connexion
+  firmSettings: Settings
+  firms: Firms
+  root_mgt: Root Management
+  my_actions: My requests & actions
+  firmActivities: Activities
+  firmConfig: Configuration
+  add_activity: Create activity
+  profile: My profile
+  users: Users
+  community: Community
+  institutions: Institutions
+  colleagues_teams: Colleagues & Teams
+  settings: Settings
+  convert: Use internally
+  help: Help
+  home: Home
+  logout: logout
+  discover: Découvrir
 
 #footer:
 #  tc: Terms of service
@@ -1643,6 +1661,7 @@ profile:
   insert_photo: Add picture
   update_photo: Modify picture
   position_in: in
+  perf: performence
   performance_feedbacks: My performance & feedbacks
   targets_goals: My objectives
   performance_indicators: My Performance Indicators

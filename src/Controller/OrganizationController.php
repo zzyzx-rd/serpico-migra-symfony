@@ -10,77 +10,78 @@ use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Dompdf\Dompdf;
 use Exception;
-use Form\ActivityElementForm;
-use Form\AddAnswerForm;
-use Form\AddClientForm;
-use Form\AddElementTargetForm;
-use Form\AddFirstAdminForm;
-use Form\AddProcessForm;
-use Form\AddStageForm;
-use Form\AddSurveyForm;
-use Form\AddTeamForm;
-use Form\AddUserForm;
-use Form\DelegateActivityForm;
-use Form\ManageCriterionNameForm;
-use Form\ManageOrganizationElementsForm;
-use Form\RequestActivityForm;
-use Form\SetClientIconForm;
-use Form\SettingsOrganizationForm;
-use Form\StageNameType;
-use Form\Type\AnswerType;
-use Form\Type\ClientType;
-use Form\Type\ClientUserType;
-use Form\Type\CriterionType;
-use Form\Type\ExternalUserType;
-use Form\Type\OrganizationElementType;
-use Form\Type\StageType;
-use Form\Type\UserType;
+use App\Form\ActivityElementForm;
+use App\Form\AddAnswerForm;
+use App\Form\AddClientForm;
+use App\Form\AddElementTargetForm;
+use App\Form\AddFirstAdminForm;
+use App\Form\AddProcessForm;
+use App\Form\AddStageForm;
+use App\Form\AddSurveyForm;
+use App\Form\AddTeamForm;
+use App\Form\AddUserForm;
+use App\Form\DelegateActivityForm;
+use App\Form\ManageCriterionNameForm;
+use App\Form\ManageOrganizationElementsForm;
+use App\Form\RequestActivityForm;
+use App\Form\SetClientIconForm;
+use App\Form\SettingsOrganizationForm;
+use App\Form\StageNameType;
+use App\Form\Type\AnswerType;
+use App\Form\Type\ClientType;
+use App\Form\Type\ClientUserType;
+use App\Form\Type\CriterionType;
+use App\Form\Type\ExternalUserType;
+use App\Form\Type\OrganizationElementType;
+use App\Form\Type\StageType;
+use App\Form\Type\UserType;
 use League\Csv\Reader;
-use Model\Activity;
-use Model\ActivityUser;
-use Model\Answer;
-use Model\Client;
-use Model\Criterion;
-use Model\CriterionGroup;
-use Model\CriterionName;
-use Model\Decision;
-use Model\Department;
-use Model\ExternalUser;
-use Model\GeneratedImage;
-use Model\Grade;
-use Model\InstitutionProcess;
-use Model\IProcessCriterion;
-use Model\IProcessStage;
-use Model\OptionName;
-use Model\Organization;
-use Model\OrganizationUserOption;
-use Model\Position;
-use Model\Process;
-use Model\ProcessCriterion;
-use Model\ProcessStage;
-use Model\Recurring;
-use Model\Result;
-use Model\ResultProject;
-use Model\ResultTeam;
-use Model\Stage;
-use Model\Survey;
-use Model\SurveyField;
-use Model\SurveyFieldParameter;
-use Model\Target;
-use Model\Team;
-use Model\TeamUser;
-use Model\Template;
-use Model\TemplateActivity;
-use Model\TemplateCriterion;
-use Model\TemplateStage;
-use Model\Title;
-use Model\User;
-use Model\Weight;
-use Model\WorkerFirm;
-use Repository\OrganizationRepository;
-use Silex\Application;
+use App\Entity\Activity;
+use App\Entity\ActivityUser;
+use App\Entity\Answer;
+use App\Entity\Client;
+use App\Entity\Criterion;
+use App\Entity\CriterionGroup;
+use App\Entity\CriterionName;
+use App\Entity\Decision;
+use App\Entity\Department;
+use App\Entity\ExternalUser;
+use App\Entity\GeneratedImage;
+use App\Entity\Grade;
+use App\Entity\InstitutionProcess;
+use App\Entity\IProcessCriterion;
+use App\Entity\IProcessStage;
+use App\Entity\OptionName;
+use App\Entity\Organization;
+use App\Entity\OrganizationUserOption;
+use App\Entity\Position;
+use App\Entity\Process;
+use App\Entity\ProcessCriterion;
+use App\Entity\ProcessStage;
+use App\Entity\Recurring;
+use App\Entity\Result;
+use App\Entity\ResultProject;
+use App\Entity\ResultTeam;
+use App\Entity\Stage;
+use App\Entity\Survey;
+use App\Entity\SurveyField;
+use App\Entity\SurveyFieldParameter;
+use App\Entity\Target;
+use App\Entity\Team;
+use App\Entity\TeamUser;
+use App\Entity\Template;
+use App\Entity\TemplateActivity;
+use App\Entity\TemplateCriterion;
+use App\Entity\TemplateStage;
+use App\Entity\Title;
+use App\Entity\User;
+use App\Entity\Weight;
+use App\Entity\WorkerFirm;
+use App\Repository\OrganizationRepository;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Translation\Translator;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormFactory;
@@ -92,12 +93,10 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class OrganizationController extends MasterController
 {
-    private $loggedUser;
     private $notFoundResponse;
 
-    public function __construct(EntityManagerInterface $em) {
-        parent::__construct($em);
-        $this->loggedUser = self::getAuthorizedUser();
+    public function __construct(EntityManagerInterface $em, Security $security, RequestStack $stack) {
+        parent::__construct($em, $security, $stack);
         $this->notFoundResponse = new Response(null, Response::HTTP_NOT_FOUND);
     }
 
@@ -115,10 +114,10 @@ class OrganizationController extends MasterController
         $addFirstAdminForm = $formFactory->create(AddFirstAdminForm::class,$user);
         $addFirstAdminForm->handleRequest($request);
         if($addFirstAdminForm->isValid()){
-            $defaultOrgWeight = $this->loggedUser->getOrganization()->getWeights()->filter(function(Weight $w){
+            $defaultOrgWeight = $this->user->getOrganization()->getWeights()->filter(function(Weight $w){
                 return $w->getPosition() == null && $w->getCreatedBy() == null && $w->getInterval() == null && $w->getTimeframe() == null;
             })->first();
-            $user->setOrgId($this->loggedUser->getOrgId())
+            $user->setOrgId($this->user->getOrgId())
                 ->setRole(USER::ROLE_ADMIN)
                 ->setToken(md5(rand()))
                 ->setWgtId($defaultOrgWeight->getId())
@@ -150,18 +149,18 @@ class OrganizationController extends MasterController
         } else {
 
             $repoU = $this->em->getRepository(User::class);
-            $orgPreviousAdminUsers = new ArrayCollection($repoU->findBy(['orgId' => $this->loggedUser->getOrgId(),'role' => 1]));
+            $orgPreviousAdminUsers = new ArrayCollection($repoU->findBy(['orgId' => $this->user->getOrgId(),'role' => 1]));
             $settings = [];
             $recipients = [];
 
             foreach($admins as $admin){
                 $adminUser = $repoU->find($admin['id']);
-                if($adminUser != $this->loggedUser){
+                if($adminUser != $this->user){
                     $recipients[] = $adminUser;
                     $settings['tokens'][] = $adminUser->getToken();
                     $orgPreviousAdminUsers->removeElement($adminUser);
                 } else {
-                    $this->loggedUser->setRole(USER::ROLE_ADMIN);
+                    $this->user->setRole(USER::ROLE_ADMIN);
                 }
             }
 
@@ -172,7 +171,7 @@ class OrganizationController extends MasterController
 
             $settings = [];
             $settings['rootCreation'] = false;
-            $settings['adminFullName'] = $this->loggedUser->getFullName();
+            $settings['adminFullName'] = $this->user->getFullName();
 
             $recipients = [];
             foreach($orgPreviousAdminUsers as $orgPreviousAdminUser){
@@ -241,11 +240,11 @@ class OrganizationController extends MasterController
 
     public function abstractActivityConfigurationAction(Request $request, string $elmtType, int $id)
     {
-        if (!$this->loggedUser) {
+        if (!$this->user) {
             return $this->redirectToRoute('login');
         }
 
-        $organization = $this->loggedUser->getOrganization();
+        $organization = $this->user->getOrganization();
         $orgId        = $organization->getId();
 
         switch ($elmtType) {
@@ -254,14 +253,14 @@ class OrganizationController extends MasterController
                 $redirectLink = $this->redirectToRoute('manageProcesses', ['orgId' => $orgId]);
 
                 return $iprocess
-                ? $this->iprocessConfigurationAction($iprocess, $this->loggedUser,$elmtType,$redirectLink)
+                ? $this->iprocessConfigurationAction($iprocess, $this->user,$elmtType,$redirectLink)
                 : $this->notFoundResponse;
 
             case 'process':
                 $process = $this->em->getRepository(Process::class)->find($id);
                 $redirectLink = $this->redirectToRoute('manageProcesses', ['orgId' => $orgId]);
                 return $process
-                ? $this->processConfigurationAction($process, $this->loggedUser,$elmtType,$redirectLink)
+                ? $this->processConfigurationAction($process, $this->user,$elmtType,$redirectLink)
                 : $this->notFoundResponse;
 
             case 'template':
@@ -270,14 +269,14 @@ class OrganizationController extends MasterController
                 $activity = $this->em->getRepository(Activity::class)->find($id);
                 $redirectLink = $this->redirectToRoute('myActivities');
                 return $activity
-                ? $this->activityConfigurationAction($request, $activity, $this->loggedUser,$elmtType,$redirectLink)
+                ? $this->activityConfigurationAction($request, $activity, $this->user,$elmtType,$redirectLink)
                 : $this->notFoundResponse;
         }
 
         return new Response(null, Response::HTTP_BAD_REQUEST);
     }
 
-    private function activityConfigurationAction(Request $request, $element, User $loggedUser, $elmtType, $redirectLink)
+    private function activityConfigurationAction(Request $request, $element, User $user, $elmtType, $redirectLink)
     {
 
         global $app;
@@ -390,7 +389,7 @@ class OrganizationController extends MasterController
         );
     }
 
-    private function iprocessConfigurationAction(InstitutionProcess $iprocess, User $loggedUser)
+    private function iprocessConfigurationAction(InstitutionProcess $iprocess, User $user)
     {
         $formFactory = self::getFormFactory();
         $activityForm = $formFactory->create(
@@ -406,7 +405,7 @@ class OrganizationController extends MasterController
         );
     }
 
-    private function processConfigurationAction(Process $process, User $loggedUser)
+    private function processConfigurationAction(Process $process, User $user)
     {
         $formFactory = self::getFormFactory();
         $activityForm = $formFactory->create(
@@ -458,189 +457,6 @@ class OrganizationController extends MasterController
         $em->persist($stage);
         $em->flush();
         return new JsonResponse(['msg' => "Success"], 200);
-    }
-
-
-    /**
-     * @param Request $request
-     * @param Application $app
-     * @param $elmtType
-     * @param $elmtId
-     * @return string|RedirectResponse|Response
-     * @throws ORMException
-     * @throws OptimisticLockException
-     * @Route("/{elmtType}/{elmtId}", name="manageActivityElement")
-     */
-    public function manageActivityElementAction(Request $request, Application $app, $elmtType, $elmtId)
-    {
-        $currentUser = self::getAuthorizedUser();
-        if (!$currentUser) {
-            return $this->redirectToRoute('login');
-        }
-
-        $em = self::getEntityManager();
-        $organization = $currentUser->getOrganization();
-        $orgId = $organization->getId();
-
-        switch ($elmtType) {
-            case 'iprocess':
-                $repoE = $em->getRepository(InstitutionProcess::class);
-                $redirect = $this->redirectToRoute('manageProcesses', ['orgId' => $orgId]);
-                break;
-            case 'process':
-                $repoE = $em->getRepository(Process::class);
-                $redirect = $this->redirectToRoute('manageProcesses', ['orgId' => $orgId]);
-                break;
-            case 'template':
-                $repoE = $em->getRepository(TemplateActivity::class);
-                $redirect = $this->redirectToRoute('manageTemplates');
-                break;
-            case 'activity':
-                $repoE = $em->getRepository(Activity::class);
-                $repoU = $em->getRepository(ActivityUser::class);
-                $redirect = $this->redirectToRoute('myActivities');
-                break;
-            default:
-                return new Response(null, Response::HTTP_BAD_REQUEST);
-        }
-        $element = $repoE->find($elmtId);
-        $formFactory = $app['form.factory'];
-        $activityElementForm = $formFactory->create(
-            ActivityElementForm::class,
-            $element,
-            ['elmtType' => $elmtType]
-        );
-        $stageElementForm = $formFactory->create(
-            StageType::class,
-            null,
-            ['elmtType' => $elmtType, 'standalone' => true]
-        );
-
-        $criterionElementForm = $formFactory->create(
-            CriterionType::class,
-            null,
-            ['elmtType' => $elmtType, 'standalone' => true]
-        );
-
-        $activityElementForm->handleRequest($request);
-        $stageElementForm->handleRequest($request);
-        $criterionElementForm->handleRequest($request);
-
-
-        if($activityElementForm->isSubmitted()){
-
-            if($_POST['clicked-btn'] == "save" && !$activityElementForm->isValid()){
-                $element->setStatus(ACTIVITY::STATUS_INCOMPLETE);
-                $this->em->persist($element);
-                $this->em->flush();
-                return $redirect;
-            }
-
-            if ($activityElementForm->isValid()) {
-    
-                if ($_POST['clicked-btn'] == "update" && $elmtType == 'activity') {
-    
-                    $nbTotalStages = count($element->getStages());
-    
-                    foreach ($element->getActiveModifiableStages() as $stage) {
-                        // 1 - Sending participants mails if necessary
-                        // Parameter for subject mail title
-                        if ($nbTotalStages > 1) {
-                            $mailSettings['stage'] = $stage;
-                        } else {
-                            $mailSettings['activity'] = $element;
-                        }
-    
-                        $notYetMailedParticipants = $stage->getDistinctParticipations()->filter(function (ActivityUser $p) {
-                            return !$p->getisMailed();
-                        });
-                        /** @var ActivityUser[] */
-                        $participants = $notYetMailedParticipants->getValues();
-                        $recipients   = [];
-                        foreach ($participants as $participant) {
-                            $recipients[] = $participant->getDirectUser();
-                            $participant->setStatus(1);
-                            $participant->setIsMailed(true);
-                            $em->persist($participant);
-                        }
-    
-                        self::sendMail($app, $recipients, 'activityParticipation', $mailSettings);
-                        $em->flush();
-                    }
-    
-    
-                    // We need to update activity/stage o- and p- statuses accordingly
-                    foreach($element->getActiveModifiableStages() as $stage){
-                        //Output status
-                        if($stage->isComplete()){
-                            $stage->setStatus((int) ($stage->getGStartDate() <= new \DateTime));
-                        } else {
-                            $stage->setStatus($stage::STAGE_INCOMPLETE);
-                        }
-    
-                        //Progress status
-                        if(!$stage->getProgress() == -1){
-                            $now = new \DateTime();
-                            $stage->setProgress(
-                                $stage->getEnddate() < $now ? STAGE::PROGRESS_COMPLETED :
-                                ($stage->getStartdate() < $now ? STAGE::PROGRESS_ONGOING : STAGE::PROGRESS_UPCOMING)
-                            );
-                        }
-    
-                        $em->persist($stage);
-                    }
-    
-                    if($element->isComplete()){
-                        if($element->getActiveModifiableStages()->forAll(function(int $i,Stage $s){
-                            return $s->getStatus() == $s::STAGE_UNSTARTED;
-                        })){
-                            $element->setStatus($element::STATUS_FUTURE);
-                        } else {
-                            $element->setStatus($element::STATUS_ONGOING);
-                        }
-                    } else {
-                        $element->setStatus($element::STATUS_INCOMPLETE);
-                    }
-    
-                    if (!$element->getIsFinalized()){$element->setIsFinalized(true);}
-                    $em->persist($element);
-                    $em->flush();
-                }
-                return $redirect;
-    
-            }
-        
-        }
-
-
-        /** @var UserRepository */
-        $userRepo        = $em->getRepository(User::class);
-        $usersWithPic[0] = '/lib/img/no-picture.png';
-        foreach ($userRepo->usersWithPicture() as $u) {
-            $id                = $u->getId();
-            $pic               = $u->getPicture();
-            $usersWithPic[$id] = '/lib/img/' . $pic;
-        }
-        return $this->render(
-            'activity_element_2.html.twig',
-            [
-                'activity' => $element,
-                'form' => $activityElementForm->createView(),
-                'stageElementForm' => $stageElementForm->createView(),
-                'criterionElementForm' => $criterionElementForm->createView(),
-            ]
-        );
-
-        /*
-        return $app['twig']->render('activity_element.html.twig',
-            [
-                'form'                 => $activityElementForm->createView(),
-                'stageElementForm'     => $stageElementForm->createView(),
-                'criterionElementForm' => $criterionElementForm->createView(),
-                'userPics'             => json_encode($usersWithPic),
-                'survey'               => $surveys,
-            ]
-        );*/
     }
 
     /**
@@ -2316,7 +2132,7 @@ class OrganizationController extends MasterController
                         $weightValue = 100;
                     }
 
-                    $weight->setValue($weightValue)->setInterval(0)->setTimeframe('D')->setCreatedBy($this->loggedUser->getId());
+                    $weight->setValue($weightValue)->setInterval(0)->setTimeframe('D')->setCreatedBy($this->user->getId());
                     if ($position != null) {
                         $position->addWeight($weight);
                     }
@@ -2341,13 +2157,13 @@ class OrganizationController extends MasterController
                             $weight = new Weight;
                             $weight->setOrganization($organization);
                             $weightValue = 100;
-                            $weight->setValue($weightValue)->setCreatedBy($this->loggedUser->getId());
+                            $weight->setValue($weightValue)->setCreatedBy($this->user->getId());
                         }
                     } else {
                         $weight = new Weight;
                         $weight->setOrganization($organization);
                         $weightValue = 100;
-                        $weight->setUsrId($user->getId())->setValue($weightValue)->setCreatedBy($this->loggedUser->getId());
+                        $weight->setUsrId($user->getId())->setValue($weightValue)->setCreatedBy($this->user->getId());
                     }
                     $em->persist($weight);
                     $em->flush();
@@ -2946,7 +2762,7 @@ class OrganizationController extends MasterController
             if ($elmtId != 0) {
                 $element = $repoE->find($elmtId);
             } else {
-                $element->setOrganization($organization)->setCreatedBy($this->loggedUser->getId());
+                $element->setOrganization($organization)->setCreatedBy($this->user->getId());
             }
 
             $organizationElmtForm = $formFactory->create(OrganizationElementType::class, $element, ['standalone' => false, 'elmtType' => $elmtType, 'organization' => $organization]);
@@ -3770,21 +3586,15 @@ class OrganizationController extends MasterController
 
     /**
      * @param Request $request
-     * @param Application $app
      * @return mixed
      * @Route("/organization/settings", name="firmSettings")
      */
-    public function displayFirmSettingsAction(Request $request, Application $app)
+    public function displayFirmSettingsAction(Request $request)
     {
 
         $connectedUser = self::getAuthorizedUser();
-        if (!$connectedUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
-        }
-        $em                        = self::getEntityManager();
-        $repoO                     = $em->getRepository(Organization::class);
+        $repoO                     = $this->em->getRepository(Organization::class);
         $organization              = $repoO->find($connectedUser->getOrgId());
-        $formFactory               = $app['form.factory'];
         $enabledCreatingUserOption = false;
         $orgOptions                = $organization->getOptions();
         foreach ($orgOptions as $orgOption) {
@@ -3792,9 +3602,9 @@ class OrganizationController extends MasterController
                 $enabledCreatingUserOption = $orgOption->isOptionTrue();
             }
         }
-        $settingsOrganizationForm = $formFactory->create(SettingsOrganizationForm::class, $organization, ['standalone' => true]);
+        $settingsOrganizationForm = $this->createForm(SettingsOrganizationForm::class, $organization, ['standalone' => true]);
         $settingsOrganizationForm->handleRequest($request);
-        return $app['twig']->render('firm_settings.html.twig',
+        return $this->render('firm_settings.html.twig',
             [
                 'form' => $settingsOrganizationForm->createView(),
                 'user' => null,
@@ -6456,7 +6266,7 @@ class OrganizationController extends MasterController
                 $em->flush();
 
                 $weight = new Weight;
-                $weight->setUsrId($user->getId())->setInterval(0)->setTimeframe('D')->setValue(100)->setCreatedBy($this->loggedUser->getId());
+                $weight->setUsrId($user->getId())->setInterval(0)->setTimeframe('D')->setValue(100)->setCreatedBy($this->user->getId());
                 $position->addWeight($weight);
                 $em->persist($position);
                 $organization
@@ -6608,6 +6418,187 @@ class OrganizationController extends MasterController
             $errors = $this->buildErrorArray($validateProcessForm);
             return $errors;
         } 
+    }
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $elmtType
+     * @param $elmtId
+     * @return string|RedirectResponse|Response
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/{elmtType}/{elmtId}", name="manageActivityElement")
+     */
+    public function manageActivityElementAction(Request $request, Application $app, $elmtType, $elmtId)
+    {
+        $currentUser = self::getAuthorizedUser();
+        if (!$currentUser) {
+            return $this->redirectToRoute('login');
+        }
+
+        $em = self::getEntityManager();
+        $organization = $currentUser->getOrganization();
+        $orgId = $organization->getId();
+
+        switch ($elmtType) {
+            case 'iprocess':
+                $repoE = $em->getRepository(InstitutionProcess::class);
+                $redirect = $this->redirectToRoute('manageProcesses', ['orgId' => $orgId]);
+                break;
+            case 'process':
+                $repoE = $em->getRepository(Process::class);
+                $redirect = $this->redirectToRoute('manageProcesses', ['orgId' => $orgId]);
+                break;
+            case 'template':
+                $repoE = $em->getRepository(TemplateActivity::class);
+                $redirect = $this->redirectToRoute('manageTemplates');
+                break;
+            case 'activity':
+                $repoE = $em->getRepository(Activity::class);
+                $repoU = $em->getRepository(ActivityUser::class);
+                $redirect = $this->redirectToRoute('myActivities');
+                break;
+            default:
+                return new Response(null, Response::HTTP_BAD_REQUEST);
+        }
+        $element = $repoE->find($elmtId);
+        $formFactory = $app['form.factory'];
+        $activityElementForm = $formFactory->create(
+            ActivityElementForm::class,
+            $element,
+            ['elmtType' => $elmtType]
+        );
+        $stageElementForm = $formFactory->create(
+            StageType::class,
+            null,
+            ['elmtType' => $elmtType, 'standalone' => true]
+        );
+
+        $criterionElementForm = $formFactory->create(
+            CriterionType::class,
+            null,
+            ['elmtType' => $elmtType, 'standalone' => true]
+        );
+
+        $activityElementForm->handleRequest($request);
+        $stageElementForm->handleRequest($request);
+        $criterionElementForm->handleRequest($request);
+
+
+        if($activityElementForm->isSubmitted()){
+
+            if($_POST['clicked-btn'] == "save" && !$activityElementForm->isValid()){
+                $element->setStatus(ACTIVITY::STATUS_INCOMPLETE);
+                $this->em->persist($element);
+                $this->em->flush();
+                return $redirect;
+            }
+
+            if ($activityElementForm->isValid()) {
+
+                if ($_POST['clicked-btn'] == "update" && $elmtType == 'activity') {
+
+                    $nbTotalStages = count($element->getStages());
+
+                    foreach ($element->getActiveModifiableStages() as $stage) {
+                        // 1 - Sending participants mails if necessary
+                        // Parameter for subject mail title
+                        if ($nbTotalStages > 1) {
+                            $mailSettings['stage'] = $stage;
+                        } else {
+                            $mailSettings['activity'] = $element;
+                        }
+
+                        $notYetMailedParticipants = $stage->getDistinctParticipations()->filter(function (ActivityUser $p) {
+                            return !$p->getisMailed();
+                        });
+                        /** @var ActivityUser[] */
+                        $participants = $notYetMailedParticipants->getValues();
+                        $recipients   = [];
+                        foreach ($participants as $participant) {
+                            $recipients[] = $participant->getDirectUser();
+                            $participant->setStatus(1);
+                            $participant->setIsMailed(true);
+                            $em->persist($participant);
+                        }
+
+                        self::sendMail($app, $recipients, 'activityParticipation', $mailSettings);
+                        $em->flush();
+                    }
+
+
+                    // We need to update activity/stage o- and p- statuses accordingly
+                    foreach($element->getActiveModifiableStages() as $stage){
+                        //Output status
+                        if($stage->isComplete()){
+                            $stage->setStatus((int) ($stage->getGStartDate() <= new \DateTime));
+                        } else {
+                            $stage->setStatus($stage::STAGE_INCOMPLETE);
+                        }
+
+                        //Progress status
+                        if(!$stage->getProgress() == -1){
+                            $now = new \DateTime();
+                            $stage->setProgress(
+                                $stage->getEnddate() < $now ? STAGE::PROGRESS_COMPLETED :
+                                    ($stage->getStartdate() < $now ? STAGE::PROGRESS_ONGOING : STAGE::PROGRESS_UPCOMING)
+                            );
+                        }
+
+                        $em->persist($stage);
+                    }
+
+                    if($element->isComplete()){
+                        if($element->getActiveModifiableStages()->forAll(function(int $i,Stage $s){
+                            return $s->getStatus() == $s::STAGE_UNSTARTED;
+                        })){
+                            $element->setStatus($element::STATUS_FUTURE);
+                        } else {
+                            $element->setStatus($element::STATUS_ONGOING);
+                        }
+                    } else {
+                        $element->setStatus($element::STATUS_INCOMPLETE);
+                    }
+
+                    if (!$element->getIsFinalized()){$element->setIsFinalized(true);}
+                    $em->persist($element);
+                    $em->flush();
+                }
+                return $redirect;
+
+            }
+
+        }
+
+
+        /** @var UserRepository */
+        $userRepo        = $em->getRepository(User::class);
+        $usersWithPic[0] = '/lib/img/no-picture.png';
+        foreach ($userRepo->usersWithPicture() as $u) {
+            $id                = $u->getId();
+            $pic               = $u->getPicture();
+            $usersWithPic[$id] = '/lib/img/' . $pic;
+        }
+        return $this->render(
+            'activity_element_2.html.twig',
+            [
+                'activity' => $element,
+                'form' => $activityElementForm->createView(),
+                'stageElementForm' => $stageElementForm->createView(),
+                'criterionElementForm' => $criterionElementForm->createView(),
+            ]
+        );
+
+        /*
+        return $app['twig']->render('activity_element.html.twig',
+            [
+                'form'                 => $activityElementForm->createView(),
+                'stageElementForm'     => $stageElementForm->createView(),
+                'criterionElementForm' => $criterionElementForm->createView(),
+                'userPics'             => json_encode($usersWithPic),
+                'survey'               => $surveys,
+            ]
+        );*/
     }
 
 }

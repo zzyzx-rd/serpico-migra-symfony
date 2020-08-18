@@ -317,7 +317,7 @@ class Organization extends DbObject
     }
 
 
-    public function getId(): ?int
+    public function getOrgId(): ?int
     {
         return $this->id;
     }

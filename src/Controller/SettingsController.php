@@ -46,7 +46,6 @@ use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Silex\Application;
 use Model\User;
 use Model\ExternalUser;
 use Model\Organization;

@@ -50,14 +50,14 @@ class Decision extends DbObject
     public $dec_result;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="dec_created_by", type="integer")
      */
-    public $dec_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="dec_inserted", type="datetime")
      */
-    public $dec_inserted;
+    public $inserted;
 
     /**
      * @ORM\Column(type="datetime")
@@ -65,9 +65,9 @@ class Decision extends DbObject
     public $dec_decided;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="dec_validated", type="datetime")
      */
-    public $dec_validated;
+    public $validated;
 
     /**
      * @ManyToOne(targetEntity="Organization", inversedBy="decisions")
@@ -145,9 +145,9 @@ class Decision extends DbObject
         $this->anonymousDecision = $dec_anon;
         $this->validator = $validator;
         $this->dec_result = $dec_result;
-        $this->dec_inserted = $dec_inserted;
+        $this->inserted = $dec_inserted;
         $this->dec_decided = $dec_decided;
-        $this->dec_validated = $dec_validated;
+        $this->validated = $dec_validated;
         $this->organization = $organization;
         $this->activity = $activity;
         $this->stage = $stage;
@@ -223,12 +223,12 @@ class Decision extends DbObject
 
     public function getInserted(): ?\DateTimeInterface
     {
-        return $this->dec_inserted;
+        return $this->inserted;
     }
 
     public function setInserted(\DateTimeInterface $dec_inserted): self
     {
-        $this->dec_inserted = $dec_inserted;
+        $this->inserted = $dec_inserted;
 
         return $this;
     }
@@ -247,12 +247,12 @@ class Decision extends DbObject
 
     public function getValidated(): ?\DateTimeInterface
     {
-        return $this->dec_validated;
+        return $this->validated;
     }
 
     public function setValidated(\DateTimeInterface $dec_validated): self
     {
-        $this->dec_validated = $dec_validated;
+        $this->validated = $dec_validated;
 
         return $this;
     }

@@ -26,12 +26,12 @@ class Role
     public $rol_name;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="integer", nullable=true)
      */
     public $rol_createdBy;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="datetime", nullable=true)
      */
     public $rol_inserted;
 
@@ -77,5 +77,9 @@ class Role
         $this->rol_inserted = $rol_inserted;
 
         return $this;
+    }
+    public function __toString()
+    {
+        return (string)$this->getId();
     }
 }

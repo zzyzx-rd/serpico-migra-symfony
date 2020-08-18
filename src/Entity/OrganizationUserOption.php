@@ -29,9 +29,9 @@ class OrganizationUserOption extends DbObject
     public $opt_bool_value;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(name="opt_int_value", type="float")
      */
-    public $opt_int_value;
+    public $optionIValue;
 
     /**
      * @ORM\Column(type="float")
@@ -46,7 +46,7 @@ class OrganizationUserOption extends DbObject
     /**
      * @ORM\Column(type="string", length=255)
      */
-    public $pot_string_value;
+    public $opt_string_value;
 
     /**
      * @ORM\Column(type="boolean")
@@ -103,7 +103,7 @@ class OrganizationUserOption extends DbObject
      * @ORM\ManyToOne(targetEntity=Role::class)
      * @ORM\JoinColumn(name="role_rol_id", referencedColumnName="rol_id", nullable=false)
      */
-    public $role_rol;
+    public $role;
 
     /**
      * OrganizationUserOption constructor.
@@ -136,19 +136,19 @@ class OrganizationUserOption extends DbObject
         return $this;
     }
 
-    public function getIntValue(): ?float
+    public function getOptionIValue(): ?float
     {
-        return $this->opt_int_value;
+        return $this->optionIValue;
     }
 
     public function setIntValue(float $opt_int_value): self
     {
-        $this->opt_int_value = $opt_int_value;
+        $this->optionIValue = $opt_int_value;
 
         return $this;
     }
 
-    public function getIntValue2(): ?float
+    public function getOptionSecondaryIValue(): ?float
     {
         return $this->opt_int_value_2;
     }
@@ -172,14 +172,14 @@ class OrganizationUserOption extends DbObject
         return $this;
     }
 
-    public function getPotStringValue(): ?string
+    public function getOptionSValue(): ?string
     {
-        return $this->pot_string_value;
+        return $this->opt_string_value;
     }
 
-    public function setPotStringValue(string $pot_string_value): self
+    public function setOptStringValue(string $opt_string_value): self
     {
-        $this->pot_string_value = $pot_string_value;
+        $this->opt_string_value = $opt_string_value;
 
         return $this;
     }
@@ -305,14 +305,14 @@ class OrganizationUserOption extends DbObject
         $this->user = $user;
     }
 
-    public function getRoleRol(): ?Role
+    public function getRole(): ?Role
     {
-        return $this->role_rol;
+        return $this->role;
     }
 
-    public function setRoleRol(?Role $role_rol): self
+    public function setRole(?Role $role): self
     {
-        $this->role_rol = $role_rol;
+        $this->role = $role;
 
         return $this;
     }

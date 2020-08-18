@@ -29,7 +29,7 @@ class OrganizationRepository extends ServiceEntityRepository
     }
 
     public function getActiveUsers(int $orgId){
-        return new ArrayCollection($this->_em->getRepository(User::class)->findBy(['organization_org' => $orgId, 'deleted' => null],['usr_lastname' => 'ASC']));
+        return new ArrayCollection($this->_em->getRepository(User::class)->findBy(['organization_org' => $orgId, 'deleted' => null],['lastname' => 'ASC']));
     }
     // /**
     //  * @return Organization[] Returns an array of Organization objects
