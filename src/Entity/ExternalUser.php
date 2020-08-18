@@ -93,11 +93,6 @@ class ExternalUser extends DbObject
     public $activity_user_act_usr;
 
     /**
-     * @ORM\OneToMany(targetEntity=Result::class, mappedBy="external_user_ext_id")
-     */
-    public $results;
-
-    /**
      * @ORM\OneToMany(targetEntity=TeamUser::class, mappedBy="external_user_ext_id")
      */
     public $teamUsers;

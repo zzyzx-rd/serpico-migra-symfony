@@ -26,12 +26,12 @@ class Process extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="pro_name", type="string", length=255)
      */
-    public $pro_name;
+    public $name;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(name="$pro_approvable", type="boolean")
      */
     public $pro_approvable;
 
@@ -41,19 +41,19 @@ class Process extends DbObject
     public $pro_gradable;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="$pro_createdBy", type="integer")
      */
-    public $pro_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="$pro_inserted", type="datetime")
      */
-    public $pro_inserted;
+    public $inserted;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="$pro_deleted", type="datetime", nullable=true)
      */
-    public $pro_deleted;
+    public $deleted;
 
     /**
      * @ORM\OneToMany(targetEntity=Activity::class, mappedBy="process")
@@ -94,6 +94,11 @@ class Process extends DbObject
     public $stages;
 
     /**
+     * @ORM\OneToMany(targetEntity=ProcessCriterion::class, mappedBy="process")
+     */
+    private $criteria;
+
+    /**
      * Process constructor.
      * @param int $id
      * @param $pro_name
@@ -117,13 +122,14 @@ class Process extends DbObject
         $stages = null)
     {
         parent::__construct($id, $pro_createdBy, new DateTime());
-        $this->pro_name = $pro_name;
+        $this->name = $pro_name;
         $this->pro_approvable = $pro_approvable;
         $this->pro_gradable = $pro_gradable;
-        $this->pro_inserted = $pro_inserted;
-        $this->pro_deleted = $pro_deleted;
+        $this->inserted = $pro_inserted;
+        $this->deleted = $pro_deleted;
         $this->children = $children?$children:new ArrayCollection();
         $this->stages = $stages?$stages:new ArrayCollection();
+        $this->criteria = new ArrayCollection();
     }
 
 
@@ -134,12 +140,12 @@ class Process extends DbObject
 
     public function getName(): ?string
     {
-        return $this->pro_name;
+        return $this->name;
     }
 
     public function setName(string $pro_name): self
     {
-        $this->pro_name = $pro_name;
+        $this->name = $pro_name;
 
         return $this;
     }
@@ -170,24 +176,24 @@ class Process extends DbObject
 
     public function getInserted(): ?\DateTimeInterface
     {
-        return $this->pro_inserted;
+        return $this->inserted;
     }
 
     public function setInserted(\DateTimeInterface $pro_inserted): self
     {
-        $this->pro_inserted = $pro_inserted;
+        $this->inserted = $pro_inserted;
 
         return $this;
     }
 
     public function getDeleted(): ?\DateTimeInterface
     {
-        return $this->pro_deleted;
+        return $this->deleted;
     }
 
     public function setDeleted(?\DateTimeInterface $pro_deleted): self
     {
-        $this->pro_deleted = $pro_deleted;
+        $this->deleted = $pro_deleted;
 
         return $this;
     }
@@ -364,6 +370,37 @@ class Process extends DbObject
     public function userCanEdit(User $u)
     {
         return $u->getRole() == 4;
+    }
+
+    /**
+     * @return Collection|ProcessCriterion[]
+     */
+    public function getCriteria(): Collection
+    {
+        return $this->criteria;
+    }
+
+    public function addCriterion(ProcessCriterion $criterion): self
+    {
+        if (!$this->criteria->contains($criterion)) {
+            $this->criteria[] = $criterion;
+            $criterion->setProcess($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCriterion(ProcessCriterion $criterion): self
+    {
+        if ($this->criteria->contains($criterion)) {
+            $this->criteria->removeElement($criterion);
+            // set the owning side to null (unless already changed)
+            if ($criterion->getProcess() === $this) {
+                $criterion->setProcess(null);
+            }
+        }
+
+        return $this;
     }
 
 

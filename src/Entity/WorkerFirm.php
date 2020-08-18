@@ -164,8 +164,8 @@ class WorkerFirm extends DbObject
 
     /**
      * @OneToMany(targetEntity="WorkerExperience", mappedBy="firm", cascade={"persist", "remove"}, orphanRemoval=true)
-     * @OrderBy({"active" = "DESC"})
      */
+//     * @OrderBy({"active" = "DESC"})
     public $experiences;
 
     /**

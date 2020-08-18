@@ -87,16 +87,17 @@ class ProcessCriterion extends DbObject
     protected $stage;
 
     /**
-     * @ManyToOne(targetEntity="Process", inversedBy="criteria")
+     * @ORM\ManyToOne(targetEntity=Process::class, inversedBy="criteria")
      * @JoinColumn(name="process_pro_id", referencedColumnName="pro_id",nullable=true)
      */
-    protected $process;
+    private $process;
 
     /**
      * @OneToOne(targetEntity="CriterionName")
      * @JoinColumn(name="criterion_name_cna_id", referencedColumnName="cna_id")
      */
     protected $cName;
+
 
     /**
      * ProcessCriterion constructor.

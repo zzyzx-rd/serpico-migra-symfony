@@ -85,14 +85,15 @@ class TemplateCriterion extends DbObject
 
     /**
      * @ManyToOne(targetEntity="TemplateStage", inversedBy="criteria")
-     * @JoinColumn(name="stage_stg_id", referencedColumnName="stg_id",nullable=true)
+     * @JoinColumn(name="stage_stg_id", referencedColumnName="stg_id", nullable=true)
      */
     protected $stage;
 
     /**
      * @OneToMany(targetEntity="TemplateActivityUser", mappedBy="criterion",cascade={"persist", "remove"},orphanRemoval=true)
-     * @OrderBy({"leader" = "ASC"})
+     * @JoinColumn(name="")
      */
+//     * @OrderBy({"leader" = "ASC"})
     public $participants;
 
     /**

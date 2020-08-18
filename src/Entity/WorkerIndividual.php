@@ -91,8 +91,8 @@ class WorkerIndividual
 
     /**
      * @OneToMany(targetEntity="WorkerExperience", mappedBy="individual", cascade={"persist", "remove"}, orphanRemoval=true)
-     * @OrderBy({"startDate" = "DESC"})
      */
+//     * @OrderBy({"startDate" = "DESC"})
     public $experiences;
 
     /**

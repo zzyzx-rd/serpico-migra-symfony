@@ -72,7 +72,7 @@ class Weight extends DbObject
 
     /**
      * @ORM\OneToOne(targetEntity=User::class, mappedBy="weight_wgt", cascade={"persist", "remove"})
-     * @JoinColumn(name="usr_id", nullable=true)
+     * @JoinColumn(name="user_usr_id",referencedColumnName="usr_id", nullable=true)
      */
     public $user;
 

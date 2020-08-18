@@ -12,50 +12,50 @@ use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Dompdf\Dompdf;
 use Exception;
-use Form\ActivityReportForm;
-use Form\AddActivityCriteriaForm;
-use Form\AddActivityForm;
-use Form\AddCriterionForm;
-use Form\AddStageForm;
-use Form\AddSurveyForm;
-use Form\AddTemplateForm;
-use Form\CreateCriterionForm;
-use Form\DelegateActivityForm;
-use Form\ManageStageParticipantsForm;
-use Form\RequestActivityForm;
-use Form\Type\StageUniqueParticipationsType;
-use Model\Activity;
-use Model\ActivityUser;
-use Model\Answer;
-use Model\Client;
-use Model\Criterion;
-use Model\CriterionName;
-use Model\DbObject;
-use Model\Decision;
-use Model\Department;
-use Model\ExternalUser;
-use Model\GeneratedImage;
-use Model\Grade;
-use Model\Icon;
-use Model\InstitutionProcess;
-use Model\IProcessActivityUser;
-use Model\IProcessCriterion;
-use Model\IProcessStage;
-use Model\Organization;
-use Model\OrganizationUserOption;
-use Model\ProcessStage;
-use Model\Recurring;
-use Model\Result;
-use Model\Stage;
-use Model\Survey;
-use Model\Target;
-use Model\Team;
-use Model\TeamUser;
-use Model\TemplateActivity;
-use Model\TemplateActivityUser;
-use Model\TemplateCriterion;
-use Model\TemplateStage;
-use Model\User;
+use App\Form\ActivityReportForm;
+use App\Form\AddActivityCriteriaForm;
+use App\Form\AddActivityForm;
+use App\Form\AddCriterionForm;
+use App\Form\AddStageForm;
+use App\Form\AddSurveyForm;
+use App\Form\AddTemplateForm;
+use App\Form\CreateCriterionForm;
+use App\Form\DelegateActivityForm;
+use App\Form\ManageStageParticipantsForm;
+use App\Form\RequestActivityForm;
+use App\Form\Type\StageUniqueParticipationsType;
+use App\Entity\Activity;
+use App\Entity\ActivityUser;
+use App\Entity\Answer;
+use App\Entity\Client;
+use App\Entity\Criterion;
+use App\Entity\CriterionName;
+use App\Entity\DbObject;
+use App\Entity\Decision;
+use App\Entity\Department;
+use App\Entity\ExternalUser;
+use App\Entity\GeneratedImage;
+use App\Entity\Grade;
+use App\Entity\Icon;
+use App\Entity\InstitutionProcess;
+use App\Entity\IProcessActivityUser;
+use App\Entity\IProcessCriterion;
+use App\Entity\IProcessStage;
+use App\Entity\Organization;
+use App\Entity\OrganizationUserOption;
+use App\Entity\ProcessStage;
+use App\Entity\Recurring;
+use App\Entity\Result;
+use App\Entity\Stage;
+use App\Entity\Survey;
+use App\Entity\Target;
+use App\Entity\Team;
+use App\Entity\TeamUser;
+use App\Entity\TemplateActivity;
+use App\Entity\TemplateActivityUser;
+use App\Entity\TemplateCriterion;
+use App\Entity\TemplateStage;
+use App\Entity\User;
 use Repository\UserRepository;
 use RouteDumper;
 use Symfony\Component\Form\FormError;
@@ -79,14 +79,13 @@ class ActivityController extends MasterController
      */
     public function addActivityId(string $elmtType, $inpId = 0, $actName = '')
     {
-        $currentUser = $this->getAuthorizedUser();
+        $currentUser = $this->security->getUser();
         if (!$currentUser) {
             return $this->redirectToRoute('login');
         }
 
         $usrId = $currentUser->getId();
         $usrOrg = $currentUser->getOrganization();
-        $em = $this::getEntityManager();
         $isActivity = $elmtType == 'activity';
 
         $activity = $isActivity ? new Activity : new TemplateActivity;
@@ -110,17 +109,17 @@ class ActivityController extends MasterController
         $activity
             ->setName($activityName)
             ->setOrganization($currentUser->getOrganization())
-            ->setMasterUserId($usrId)
+            ->setMasterUsr($currentUser)
             ->setCreatedBy($currentUser->getId())
             ->addStage($stage);
 
         if ($inpId != 0) {
-            $activity->setInstitutionProcess($em->getRepository(InstitutionProcess::class)->find($inpId));
+            $activity->setInstitutionProcess($this->em->getRepository(InstitutionProcess::class)->find($inpId));
         }
 
         $stage
             ->setName($stageName)
-            ->setMasterUserId($usrId)
+            ->setMasterUser($currentUser)
             ->setWeight(1)
             ->setStartdate($activityStartDate)
             ->setEnddate($activityEndDate)
@@ -146,8 +145,8 @@ class ActivityController extends MasterController
                 ->setOrganization($usrOrg);
         }
 
-        $em->persist($activity);
-        $em->flush();
+        $this->em->persist($activity);
+        $this->em->flush();
 
         /*if ($inpId) {*/
         // Has been launched from iprocess panel, expecting JSON response
@@ -190,13 +189,10 @@ class ActivityController extends MasterController
         $repoO = $em->getRepository(Organization::class);
 
         /** @var FormFactory */
-        $formFactory = $app['form.factory'];
-
-        $delegateActivityForm = $formFactory->create(
+        $delegateActivityForm = $this->createForm(
             DelegateActivityForm::class,
             null,
             [
-                'app' => $app,
                 'standalone' => true,
             ]
         )->handleRequest($request);
@@ -266,13 +262,12 @@ class ActivityController extends MasterController
 
     /**
      * @param Request $request
-     * @param Application $app
      * @return JsonResponse|RedirectResponse
      * @throws ORMException
      * @throws OptimisticLockException
      * @Route("/activity/request", name="activityRequest")
      */
-    public function requestActivityAction(Request $request, Application $app)
+    public function requestActivityAction(Request $request)
     {
         $em = self::getEntityManager();
         $repoU = $em->getRepository(User::class);
@@ -282,8 +277,7 @@ class ActivityController extends MasterController
         }
         $organization = $em->getRepository(Organization::class)->find($currentUser->getOrgId());
         /** @var FormFactory */
-        $formFactory = $app['form.factory'];
-        $requestActivityForm = $formFactory->create(RequestActivityForm::class, null, ['app' => $app, 'standalone' => true]);
+        $requestActivityForm = $this->createForm(RequestActivityForm::class, null, ['standalone' => true]);
         $requestActivityForm->handleRequest($request);
 
         if ($requestActivityForm->isValid()) {
@@ -356,7 +350,6 @@ class ActivityController extends MasterController
 
     /**
      * @param Request $request
-     * @param Application $app
      * @param $actId
      * @param $action
      * @return bool|JsonResponse|RedirectResponse
@@ -364,7 +357,7 @@ class ActivityController extends MasterController
      * @throws OptimisticLockException
      * @Route("/activity/request/{actId}/{action}", name="activityResolveRequest")
      */
-    public function resolveActivityRequest(Request $request, Application $app, $actId, $action)
+    public function resolveActivityRequest(Request $request, $actId, $action)
     {
 
         $em = self::getEntityManager();
@@ -409,8 +402,8 @@ class ActivityController extends MasterController
             $activity->setStatus(-2);
             $decision->setResult(1);
 
-            $formFactory = $app['form.factory'];
-            $validateRequestForm = $formFactory->create(DelegateActivityForm::class, null, ['app' => $app, 'standalone' => true, 'request' => true]);
+            
+            $validateRequestForm = $this->createForm(DelegateActivityForm::class, null, ['standalone' => true, 'request' => true]);
             $validateRequestForm->handleRequest($request);
 
             if ($validateRequestForm->isValid()) {
@@ -525,15 +518,15 @@ class ActivityController extends MasterController
 //        }
 //
 //        if (!$hasPageAccess) {
-//            return $app['twig']->render('errors/403.html.twig', [
+//            return $this->render('errors/403.html.twig', [
 //                'errorMsg' => $errorMsg,
 //                'returnRoute' => 'myActivities',
 //            ]);
 //        } else {
 //            /** @var FormFactory */
-//            $formFactory = $app['form.factory'];
+//            
 //            $incomplete = $activity->getStages()->first() == null;
-//            $parametersForm = $formFactory->create(
+//            $parametersForm = $this->createForm(
 //                AddActivityCriteriaForm::class,
 //                null,
 //                [
@@ -547,15 +540,15 @@ class ActivityController extends MasterController
 //            $createTemplateForm = null;
 //            $createCriterionForm = null;
 //            if ($simplifiedActivity) {
-//                $createCriterionForm = $formFactory->create(CreateCriterionForm::class, null, ['standalone' => true]);
+//                $createCriterionForm = $this->createForm(CreateCriterionForm::class, null, ['standalone' => true]);
 //                $createCriterionForm->handleRequest($request);
 //            }
 //            if ($elmt == 'activity' && $activity->getTemplate() == null) {
-//                $createTemplateForm = $formFactory->create(AddTemplateForm::class, null, ['standalone' => true]);
+//                $createTemplateForm = $this->createForm(AddTemplateForm::class, null, ['standalone' => true]);
 //                $createTemplateForm->handleRequest($request);
 //            }
 //
-//            return $app['twig']->render('activity_create_definition_old.twig',
+//            return $this->render('activity_create_definition_old.twig',
 //                [
 //                    'form' => $parametersForm->createView(),
 //                    'activity' => $activity,
@@ -572,14 +565,13 @@ class ActivityController extends MasterController
 
     /**
      * @param Request $request
-     * @param Application $app
      * @param $actId
      * @return false|int|string
      * @throws ORMException
      * @throws OptimisticLockException
      * @Route("/activity/{actId}/complexify", name="activityComplexify")
      */
-    public function complexifyActivity(Request $request, Application $app, $actId)
+    public function complexifyActivity(Request $request, $actId)
     {
         $elmt = strpos($_SERVER['HTTP_REFERER'], 'activity');
         $em = self::getEntityManager();
@@ -598,7 +590,6 @@ class ActivityController extends MasterController
 
     /**
      * @param Request $request
-     * @param Application $app
      * @param $elmt
      * @param $elmtId
      * @param $actionType
@@ -608,7 +599,7 @@ class ActivityController extends MasterController
      * @throws OptimisticLockException
      * @Route("/ajax/{elmt}/{elmtId}/parameters/{actionType}", name="oldActivityDefinitionAJAX")
      */
-    public function oldAddActivityDefinitionAJAX(Request $request, Application $app, $elmt, $elmtId, $actionType, $returnJSON = true)
+    public function oldAddActivityDefinitionAJAX(Request $request, $elmt, $elmtId, $actionType, $returnJSON = true)
     {
         $currentUser = self::getAuthorizedUser();
         if (!$currentUser) {
@@ -632,7 +623,7 @@ class ActivityController extends MasterController
 
         $em = self::getEntityManager();
         /** @var FormFactory */
-        $formFactory = $app['form.factory'];
+        
 
         $activity = $elmt == 'activity'
         ? $em->getRepository(Activity::class)->find($elmtId)
@@ -644,7 +635,7 @@ class ActivityController extends MasterController
         $repoO = $em->getRepository(Organization::class);
         $repoCN = $em->getRepository(CriterionName::class);
         $organization = $currentUser->getOrganization();
-        $parametersForm = $formFactory->create(
+        $parametersForm = $this->createForm(
             AddActivityCriteriaForm::class,
             null,
             [
@@ -961,7 +952,7 @@ class ActivityController extends MasterController
 
     // 2 - Display participants to be added
 
-    public function oldAddActivityParticipant(Request $request, Application $app, $elmt, $elmtId)
+    public function oldAddActivityParticipant(Request $request, $elmt, $elmtId)
     {
 
         // Get all participants (users)
@@ -1001,8 +992,8 @@ class ActivityController extends MasterController
         $actOrganization = $activity->getOrganization();
         $createTemplateForm = null;
         if ($elmt == 'activity' && $activity->getTemplate() == null) {
-            $formFactory = $app['form.factory'];
-            $createTemplateForm = $formFactory->create(AddTemplateForm::class, null, ['standalone' => true]);
+            
+            $createTemplateForm = $this->createForm(AddTemplateForm::class, null, ['standalone' => true]);
             $createTemplateForm->handleRequest($request);
         }
 
@@ -1026,7 +1017,7 @@ class ActivityController extends MasterController
         }
 
         if (!$hasPageAccess) {
-            return $app['twig']->render('errors/403.html.twig');
+            return $this->render('errors/403.html.twig');
         } else {
             /** @var UserRepository $repoU */
             $repoU = $em->getRepository(User::class);
@@ -1162,13 +1153,12 @@ class ActivityController extends MasterController
             }
 
             try {
-                return $app['twig']->render('participants_list.html.twig',
+                return $this->render('participants_list.html.twig',
                     [
                         'stages' => $results,
                         'actName' => $activity->getName(),
                         'activity' => $activity,
                         'elmt' => $elmt,
-                        'app' => $app,
                         'createTemplateForm' => ($createTemplateForm === null) ?: $createTemplateForm->createView(),
                         'orgEnabledCreatingUser' => $orgEnabledCreatingUser,
                     ]);} catch (\Exception $e) {
@@ -1233,18 +1223,18 @@ class ActivityController extends MasterController
 //        }
 //
 //        if (!$hasPageAccess) {
-//            return $app['twig']->render('errors/403.html.twig');
+//            return $this->render('errors/403.html.twig');
 //        }
 //
 //        $mailSettings = [];
 //
 //        /** @var FormFactory */
-//        $formFactory = $app['form.factory'];
-//        $manageStageParticipantsForm = $formFactory->create(ManageStageParticipantsForm::class, $activity, ['standalone' => true, 'elmt' => $elmt, 'organization' => $organization]);
+//        
+//        $manageStageParticipantsForm = $this->createForm(ManageStageParticipantsForm::class, $activity, ['standalone' => true, 'elmt' => $elmt, 'organization' => $organization]);
 //        $manageStageParticipantsForm->handleRequest($request);
 //        $createTemplateForm = null;
 //        if ($elmt == 'activity' && $activity->getTemplate() == null) {
-//            $createTemplateForm = $formFactory->create(AddTemplateForm::class, null, ['standalone' => true]);
+//            $createTemplateForm = $this->createForm(AddTemplateForm::class, null, ['standalone' => true]);
 //            $createTemplateForm->handleRequest($request);
 //        }
 //
@@ -1373,7 +1363,7 @@ class ActivityController extends MasterController
 //            $usersWithPic[$id] = "/lib/img/$pic";
 //        }
 //
-//        return $app['twig']->render(
+//        return $this->render(
 //            'activity_define_participants.twig',
 //            [
 //                'form' => $manageStageParticipantsForm->createView(),
@@ -1384,7 +1374,6 @@ class ActivityController extends MasterController
 //    }
 
     /**
-     * @param Application $app
      * @param Request $request
      * @param int $stgId
      * @param string $elmtType
@@ -1395,7 +1384,6 @@ class ActivityController extends MasterController
      * @Route("/{elmtType}/stage/{stgId}/participant/validate/{elmtId}", name="validateParticipant")
      */
     public function validateParticipantAction(
-        Application $app,
         Request $request,
         int $stgId,
         string $elmtType,
@@ -1757,7 +1745,6 @@ class ActivityController extends MasterController
     }
 
     /**
-     * @param Application $app
      * @param Request $request
      * @param int $teaId
      * @param int $tusId
@@ -1767,7 +1754,6 @@ class ActivityController extends MasterController
      * @Route("/team/{teaId}/team-user/validate/{tusId}", name="validateTeamUser")
      */
     public function validateTeamUserAction(
-        Application $app,
         Request $request,
         int $teaId,
         int $tusId
@@ -1925,7 +1911,6 @@ class ActivityController extends MasterController
 
     /**
      * @param Request $request
-     * @param Application $app
      * @param $stgId
      * @param $elmtType
      * @param $elmtId
@@ -1934,7 +1919,7 @@ class ActivityController extends MasterController
      * @throws OptimisticLockException
      * @Route("/{_locale}/{elmtType}/stage/{stgId}/participant/delete/{elmtId}", name="deleteParticipant")
      */
-    public function deleteParticipantAction(Request $request, Application $app, $stgId, $elmtType, $elmtId)
+    public function deleteParticipantAction(Request $request, $stgId, $elmtType, $elmtId)
     {
 
         $em = self::getEntityManager();
@@ -1972,7 +1957,7 @@ class ActivityController extends MasterController
         }
 
         if (!$hasPageAccess) {
-            return $app['twig']->render('errors/403.html.twig');
+            return $this->render('errors/403.html.twig');
         } else {
 
             $participant = $repoAU->find($elmtId);
@@ -1995,14 +1980,13 @@ class ActivityController extends MasterController
 
     /**
      * @param Request $request
-     * @param Application $app
      * @param $tusId
      * @return JsonResponse
      * @throws ORMException
      * @throws OptimisticLockException
      * @Route("/remove-team-user/{tusId}", name="deleteTeamUser")
      */
-    public function deleteTeamUserAction(Request $request, Application $app, $tusId)
+    public function deleteTeamUserAction(Request $request, $tusId)
     {
 
         $em = self::getEntityManager();
@@ -2027,7 +2011,7 @@ class ActivityController extends MasterController
         }
 
         if (!$hasPageAccess) {
-            return $app['twig']->render('errors/403.html.twig');
+            return $this->render('errors/403.html.twig');
         } else {
 
             $teamUser
@@ -2047,7 +2031,7 @@ class ActivityController extends MasterController
 
 
 
-    public function newInsertParticipantsAction(Request $request, Application $app, $elmt, $elmtId, $actionType, $returnJSON = true)
+    public function newInsertParticipantsAction(Request $request,  $elmt, $elmtId, $actionType, $returnJSON = true)
     {
 
         // Get all participants (users)
@@ -2082,7 +2066,6 @@ class ActivityController extends MasterController
 
     /**
      * @param Request $request
-     * @param Application $app
      * @param $elmt
      * @param $elmtId
      * @param $actionType
@@ -2092,7 +2075,7 @@ class ActivityController extends MasterController
      * @throws OptimisticLockException
      * @Route("/ajax/{elmt}/{elmtId}/participants/{actionType}", name="ajaxParticipantsAdd")
      */
-    public function oldInsertParticipantsAction(Request $request, Application $app, $elmt, $elmtId, $actionType, $returnJSON = true)
+    public function oldInsertParticipantsAction(Request $request, $elmt, $elmtId, $actionType, $returnJSON = true)
     {
         $firstFinalization = false;
         if ($actionType != 'back' && $actionType != 'previous') {
@@ -3047,9 +3030,9 @@ class ActivityController extends MasterController
 //        $organization = $user->getOrganization();
 //        $actOrganization = $activity->getOrganization();
 //        $createTemplateForm = null;
-//        $formFactory = $app['form.factory'];
+//        
 //        if ($elmt == 'activity' && $activity->getTemplate() == null) {
-//            $createTemplateForm = $formFactory->create(AddTemplateForm::class, null, ['standalone' => true]);
+//            $createTemplateForm = $this->createForm(AddTemplateForm::class, null, ['standalone' => true]);
 //            $createTemplateForm->handleRequest($request);
 //        }
 //
@@ -3077,13 +3060,13 @@ class ActivityController extends MasterController
 //        }
 //
 //        if (!$hasPageAccess) {
-//            return $app['twig']->render('errors/403.html.twig');
+//            return $this->render('errors/403.html.twig');
 //        } else {
-//            $formFactory = $app['form.factory'];
-//            $stageForm = $formFactory->create(AddStageForm::class, $activity, ['standalone' => true, 'elmt' => $elmt]);
+//            
+//            $stageForm = $this->createForm(AddStageForm::class, $activity, ['standalone' => true, 'elmt' => $elmt]);
 //            $stageForm->handleRequest($request);
 //
-//            return $app['twig']->render('activity_define_stages.twig',
+//            return $this->render('activity_define_stages.twig',
 //                [
 //                    'form' => $stageForm->createView(),
 //                    'elmt' => $elmt,
@@ -3129,8 +3112,8 @@ class ActivityController extends MasterController
 //        $theOriginalStages = clone $activityStages;
 //        $submittedStages = new ArrayCollection;
 //
-//        $formFactory = $app['form.factory'];
-//        $stageForm = $formFactory->create(AddStageForm::class, $activity, ['standalone' => true, 'elmt' => $elmt]);
+//        
+//        $stageForm = $this->createForm(AddStageForm::class, $activity, ['standalone' => true, 'elmt' => $elmt]);
 //        $stageForm->handleRequest($request);
 //
 //        $repoCN = $em->getRepository(CriterionName::class);
@@ -3387,7 +3370,7 @@ class ActivityController extends MasterController
 //        }
 //
 //        if (!$hasPageAccess) {
-//            return $app['twig']->render('errors/403.html.twig');
+//            return $this->render('errors/403.html.twig');
 //        } else {
 //            $stages = ($elmt == 'activity') ?
 //            $activity->getActiveStages() :
@@ -3398,9 +3381,9 @@ class ActivityController extends MasterController
 //
 //            $multActiveStages = (count($stages) > 1) ?: false;
 //
-//            $formFactory = $app['form.factory'];
-//            $createCriterionForm = $formFactory->create(CreateCriterionForm::class, null, ['standalone' => true]);
-//            $addCriterionForm = $formFactory->create(
+//            
+//            $createCriterionForm = $this->createForm(CreateCriterionForm::class, null, ['standalone' => true]);
+//            $addCriterionForm = $this->createForm(
 //                AddCriterionForm::class,
 //                $activity,
 //                [
@@ -3418,13 +3401,13 @@ class ActivityController extends MasterController
 //            $addCriterionForm->handleRequest($request);
 //            $createTemplateForm = null;
 //            if ($elmt == 'activity' && $activity->getTemplate() == null) {
-//                $createTemplateForm = $formFactory->create(AddTemplateForm::class, null, ['standalone' => true]);
+//                $createTemplateForm = $this->createForm(AddTemplateForm::class, null, ['standalone' => true]);
 //                $createTemplateForm->handleRequest($request);
 //            }
 //
 //            $csrfToken = $app['csrf.token_manager']->getToken('token_id');
 //
-//            return $app['twig']->render('activity_define_criteria.twig',
+//            return $this->render('activity_define_criteria.twig',
 //                [
 //                    'createCriterionForm' => $createCriterionForm->createView(),
 //                    'form' => $addCriterionForm->createView(),
@@ -3439,13 +3422,12 @@ class ActivityController extends MasterController
 
     /**
      * @param Request $request
-     * @param Application $app
      * @return false|string|JsonResponse|RedirectResponse
      * @throws ORMException
      * @throws OptimisticLockException
      * @Route("/ajax/criterion-name/add", name="addCriterionName")
      */
-    public function createOrganizationCriterionAction(Request $request, Application $app)
+    public function createOrganizationCriterionAction(Request $request)
     {
         $currentUser = self::getAuthorizedUser();
         if (!$currentUser) {
@@ -3455,12 +3437,12 @@ class ActivityController extends MasterController
         $organization = $currentUser->getOrganization();
         $em = self::getEntityManager();
         /** @var FormFactory */
-        $formFactory = $app['form.factory'];
+        
         $repoCL = $em->getRepository(CriterionName::class);
         $repoI = $em->getRepository(Icon::class);
 
         $organizationCriteriaNames = $repoCL->findBy(['organization' => [null, $organization]]);
-        $createCriterionForm = $formFactory->create(
+        $createCriterionForm = $this->createForm(
             CreateCriterionForm::class,
             null,
             ['standalone' => true]
@@ -3531,10 +3513,10 @@ class ActivityController extends MasterController
 //        $activity = ($elmt == 'activity') ?
 //        $em->getRepository(Activity::class)->find($elmtId) :
 //        $em->getRepository(TemplateActivity::class)->find($elmtId);
-//        $formFactory = $app['form.factory'];
+//        
 //        $activeStages = clone $activity->getActiveStages();
 //        $multActiveStages = (count($activity->getActiveStages()) > 1) ?: false;
-//        $criterionForm = $formFactory->create(AddCriterionForm::class, $activity, ['standalone' => true, 'multiple_active_stages' => $multActiveStages, 'diff_stages_criteria' => false, 'app' => $app, 'organization' => $organization, 'elmt' => $elmt]);
+//        $criterionForm = $this->createForm(AddCriterionForm::class, $activity, ['standalone' => true, 'multiple_active_stages' => $multActiveStages, 'diff_stages_criteria' => false, 'app' => $app, 'organization' => $organization, 'elmt' => $elmt]);
 //        $criterionForm->handleRequest($request);
 //
 //        /** @var Stage[] */
@@ -3860,7 +3842,7 @@ class ActivityController extends MasterController
     // 4 - Display participants to be added
 
     // Display all participants (after Activity Mgr sets activities parameters)
-    public function addParticipantsAction(Request $request, Application $app, $elmt, $elmtId)
+    public function addParticipantsAction(Request $request, $elmt, $elmtId)
     {
         RouteDumper::dump($app);
         $em = self::getEntityManager();
@@ -3875,7 +3857,7 @@ class ActivityController extends MasterController
             die;
         }
 
-        return $app['twig']->render('participants_list.html.twig',
+        return $this->render('participants_list.html.twig',
             [
                 'stages' => $stages,
                 'actId' => $actId,
@@ -3915,8 +3897,8 @@ class ActivityController extends MasterController
         $criterion = $repoC->findOneByActId($actId);
 
         /** @var FormFactory */
-        $formFactory = $app['form.factory'];
-        $modifyActivityForm = $formFactory->create(
+        
+        $modifyActivityForm = $this->createForm(
             AddActivityCriteriaForm::class,
             $criterion,
             [
@@ -3937,7 +3919,7 @@ class ActivityController extends MasterController
             $em->flush();
 
             $em = self::getEntityManager();
-            $repository = $em->getRepository(\Model\User::class);
+            $repository = $em->getRepository(\App\Entity\User::class);
             $allUsers = [];
             foreach ($repository->findAll() as $user) {
                 $allUsers[] = $user->toArray($app);
@@ -3954,7 +3936,7 @@ class ActivityController extends MasterController
                 $activeId[] = $value['usr_id'];
             }
 
-            return $app['twig']->render('participants_list.html.twig',
+            return $this->render('participants_list.html.twig',
                 [
                     'participants' => $allUsers,
                     'activeId' => $activeId,
@@ -3962,7 +3944,7 @@ class ActivityController extends MasterController
                     'update' => true,
                 ]);
         }
-        return $app['twig']->render('activity_modify.html.twig',
+        return $this->render('activity_modify.html.twig',
             [
                 'form' => $modifyActivityForm->createView(),
             ]);
@@ -3971,12 +3953,11 @@ class ActivityController extends MasterController
 
     /**
      * @param Request $request
-     * @param Application $app
      * @param $actId
      * @return JsonResponse
      * @Route("/activity/{actId}/gstages", name="getGradableStages")
      */
-    public function getGradableStagesAction(Request $request, Application $app, $actId)
+    public function getGradableStagesAction(Request $request, $actId)
     {
         $em = self::getEntityManager();
         $currentUser = self::getAuthorizedUser();
@@ -3996,7 +3977,6 @@ class ActivityController extends MasterController
 
     /**
      * @param Request $request
-     * @param Application $app
      * @param $stgId
      * @param null $usrId
      * @return RedirectResponse
@@ -4005,11 +3985,11 @@ class ActivityController extends MasterController
      * @Route("/activity/survey/form/answer/{stgId}", name="answerSurvey")
      * @Route("/activity/survey/form/answer/{stgId}", name="AnswerRequest")
      */
-    public function answerRequestAction(Request $request, Application $app, $stgId, $usrId = null)
+    public function answerRequestAction(Request $request, $stgId, $usrId = null)
     {
         $error="";
         $em = $this->getEntityManager($app);
-        $formFactory = $app['form.factory'];
+        
         $repo0 = $em->getRepository(Survey::class);
         $repo2 = $em->getRepository(ActivityUser::class);
         $repo1 = $em->getRepository(Answer::class);
@@ -4024,7 +4004,7 @@ class ActivityController extends MasterController
         }
 
         if (!$survey->getStage()->getGraderUsers()->contains($currentUser)) {
-            return $app['twig']->render('errors/403.html.twig');
+            return $this->render('errors/403.html.twig');
         }
 
         foreach ( $survey->getAnswers() as $answer){
@@ -4073,7 +4053,7 @@ class ActivityController extends MasterController
             }
         }
 
-        $answerForm = $formFactory->create(AddSurveyForm::class, $survey, ['edition' => false, 'survey' => $survey, 'user' => $currentUser]);
+        $answerForm = $this->createForm(AddSurveyForm::class, $survey, ['edition' => false, 'survey' => $survey, 'user' => $currentUser]);
 
 
         $answerForm->handleRequest($request);
@@ -4143,7 +4123,7 @@ class ActivityController extends MasterController
 
 
 
-        return $app['twig']->render('answer_survey.html.twig',
+        return $this->render('answer_survey.html.twig',
             ['surId' => $survey->getId(),
                 'survey' => $survey,
                 'form' => $answerForm->createView(),
@@ -4154,17 +4134,16 @@ class ActivityController extends MasterController
 
     /**
      * @param Request $request
-     * @param Application $app
      * @param $stgId
      * @return RedirectResponse
      * @throws ORMException
      * @throws OptimisticLockException
      * @Route("}/activity/{stgId}/grade", name="newStageGrade")
      */
-    public function gradeAction(Request $request, Application $app, $stgId)
+    public function gradeAction(Request $request, $stgId)
     {
         $em = self::getEntityManager();
-        $formFactory = $app['form.factory'];
+        
         $currentUser = self::getAuthorizedUser();
         if (!$currentUser) {
             return $this->redirectToRoute('login');
@@ -4178,13 +4157,13 @@ class ActivityController extends MasterController
         }
         // Prevent access if current user is not a grader (i.e has none non-passive participations)
         if (!$stage->getGraderUsers()->contains($currentUser)) {
-            return $app['twig']->render('errors/403.html.twig');
+            return $this->render('errors/403.html.twig');
         } else {
             $this->updateStageGrades($stage);
 
             $userParticipations = $repoAU->findBy(['stage' => $stage, 'usrId' => $currentUser->getId()]);
-            $formFactory = $app['form.factory'];
-            $stageUniqueParticipationsForm = $formFactory->create(StageUniqueParticipationsType::class, $stage, ['standalone' => true, 'mode' => 'grade']);
+            
+            $stageUniqueParticipationsForm = $this->createForm(StageUniqueParticipationsType::class, $stage, ['standalone' => true, 'mode' => 'grade']);
             $stageUniqueParticipationsForm->handleRequest($request);
 
             // We save grades and redirect when either grades are saved, or finalized without errors, otherwise reload of page with errors shown in modal
@@ -4210,7 +4189,7 @@ class ActivityController extends MasterController
                 return $this->redirectToRoute('myActivities',['sortingType' => 'p']);
             }
 
-            return $app['twig']->render('activity_grade_new.html.twig',
+            return $this->render('activity_grade_new.html.twig',
                 [
                     'stage' => $stage,
                     'form' => $stageUniqueParticipationsForm->createView(),
@@ -4218,7 +4197,7 @@ class ActivityController extends MasterController
         }
     }
 
-    public function newGradeAction(Request $request, Application $app, $stgId)
+    public function newGradeAction(Request $request, $stgId)
     {
 
         $em = self::getEntityManager();
@@ -4244,7 +4223,7 @@ class ActivityController extends MasterController
         }
 
         if (!$userIsParticipant) {
-            return $app['twig']->render('errors/403.html.twig');
+            return $this->render('errors/403.html.twig');
         } else {
 
             //Get all participants
@@ -4456,7 +4435,7 @@ class ActivityController extends MasterController
             } catch (ORMException $e) {
             }
 
-            return $app['twig']->render('activity_grade.html.twig',
+            return $this->render('activity_grade.html.twig',
                     [
                         'stage' => $stage,
                         'currentUserPersonGrades' => $currentUserPersonGrades,
@@ -4470,7 +4449,6 @@ class ActivityController extends MasterController
     public function updateStageGrades($stage)
     {
 
-        global $app;
         $em = self::getEntityManager();
         $currentUser = self::getAuthorizedUser();
         $repoAU = $em->getRepository(ActivityUser::class);
@@ -4687,16 +4665,14 @@ class ActivityController extends MasterController
 
     /**
      * @param Request $request
-     * @param Application $app
      * @param $actId
      * @return RedirectResponse
      * @throws ORMException
      * @Route("/activity/{actId}/results", name="activityResults")
      */
-    public function displayResultsAction(Request $request, Application $app, $actId)
+    public function displayResultsAction(Request $request, $actId)
     {
         set_time_limit(300);
-        $em = $app['orm.em'];
         $repoA = $em->getRepository(Activity::class);
         $repoAU = $em->getRepository(ActivityUser::class);
         $repoGI = $em->getRepository(GeneratedImage::class);
@@ -4717,7 +4693,7 @@ class ActivityController extends MasterController
         $stagesData = [];
 
         if ($organization != $actOrganization && $user->getRole() != 4) {
-            return $app['twig']->render('errors/403.html.twig');
+            return $this->render('errors/403.html.twig');
         } else {
 
             $stagesSumContributiveWeights = [];
@@ -4775,12 +4751,12 @@ class ActivityController extends MasterController
 
             // Sort by desc participant status to display released stages in priority
             arsort($participantStatuses);
-            $formFactory = $app['form.factory'];
-            $activityReportForm = $formFactory->create(ActivityReportForm::class, null, ['standalone' => true, 'activity' => $activity]);
+            
+            $activityReportForm = $this->createForm(ActivityReportForm::class, null, ['standalone' => true, 'activity' => $activity]);
             $activityReportForm->handleRequest($request);
 
             try {
-                return $app['twig']->render('activity_results.html.twig',
+                return $this->render('activity_results.html.twig',
                     [
                         //'stagesAccess' => $stageAccess,
                         'participantStatus' => $participantStatuses,
@@ -7056,7 +7032,7 @@ class ActivityController extends MasterController
         $comments = $repoAU->findBy(['criterion' => $commentCrtValue]);
 
         try {
-            $html = $app['twig']->render('activity_report.html.twig',
+            $html = $this->render('activity_report.html.twig',
                 [
                     //'stagesAccess' => $stageAccess,
                     'participantStatus' => $participantStatuses,
@@ -7504,7 +7480,7 @@ class ActivityController extends MasterController
             $printingElmts = MasterController::array_msort($printingElmts, ['stage' => SORT_ASC, 'criterion' => SORT_ASC]);
         }
 
-        $html = $app['twig']->render('activity_report_new.html.twig',
+        $html = $this->render('activity_report_new.html.twig',
             [
                 'printingElmts' => $printingElmts,
                 'actName' => $activity->getName(),
@@ -7671,7 +7647,7 @@ class ActivityController extends MasterController
 
         }
 
-        return $app['twig']->render('activity_report.html.twig',
+        return $this->render('activity_report.html.twig',
             [
                 //'stagesAccess' => $stageAccess,
                 'stage' => $stage,
@@ -8060,8 +8036,8 @@ class ActivityController extends MasterController
         $repoD = $em->getRepository(Department::class);
         $repoTA = $em->getRepository(TemplateActivity::class);
         $templateActivity = new TemplateActivity;
-        $formFactory = $app['form.factory'];
-        $createTemplateForm = $formFactory->create(AddTemplateForm::class, $templateActivity, ['standalone' => true]);
+        
+        $createTemplateForm = $this->createForm(AddTemplateForm::class, $templateActivity, ['standalone' => true]);
         $createTemplateForm->handleRequest($request);
 
         switch ($actStep) {
@@ -8192,7 +8168,7 @@ class ActivityController extends MasterController
         $templateActivity = $repoTA->find($tmpId);
 
         if ($templateActivity->getOrganization() != $organization) {
-            return $app['twig']->render('errors/403.html.twig');
+            return $this->render('errors/403.html.twig');
         } else {
             $templateActivities = $repoA->findBy(['template' => $templateActivity]);
             if ($templateActivities != null) {

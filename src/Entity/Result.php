@@ -141,10 +141,11 @@ class Result extends DbObject
     public $user_usr;
 
     /**
-     * @ORM\ManyToOne(targetEntity=ExternalUser::class, inversedBy="results")
+     * @ORM\ManyToOne(targetEntity=ExternalUser::class)
      * @JoinColumn(name="external_user_ext_usr_id", referencedColumnName="ext_id")
      */
-    public $external_user_ext_usr;
+    private $external_user_ext_usr;
+    
 
     /**
      * Result constructor.
@@ -469,6 +470,18 @@ class Result extends DbObject
     public function setExternalUserExtId(?ExternalUser $external_user_ext_id): self
     {
         $this->external_user_ext_id = $external_user_ext_id;
+
+        return $this;
+    }
+
+    public function getExternalUserExtUsr(): ?ExternalUser
+    {
+        return $this->external_user_ext_usr;
+    }
+
+    public function setExternalUserExtUsr(?ExternalUser $external_user_ext_usr): self
+    {
+        $this->external_user_ext_usr = $external_user_ext_usr;
 
         return $this;
     }

@@ -77,15 +77,15 @@ class TemplateActivityUser
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(name="user_usr_id", referencedColumnName="usr_id", nullable=false)
      */
-    public $user_usr;
+    public $user;
 
     /**
      * @ORM\ManyToOne(targetEntity=ExternalUser::class)
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(name="external_user_ext_usr_id", referencedColumnName="ext_id", nullable=true)
      */
-    public $external_user_ext_usr;
+    public $ext_user;
 
     /**
      * TemplateActivityUser constructor.
@@ -128,8 +128,8 @@ class TemplateActivityUser
         $this->activity = $activity;
         $this->stage = $stage;
         $this->criterion = $criterion;
-        $this->user_usr = $user_usr;
-        $this->external_user_ext_usr = $external_user_ext_usr;
+        $this->user = $user_usr;
+        $this->ext_user = $external_user_ext_usr;
     }
 
     public function getId(): ?int
@@ -261,26 +261,26 @@ class TemplateActivityUser
         $this->criterion = $criterion;
     }
 
-    public function getUserUsr(): ?User
+    public function getUser(): ?User
     {
-        return $this->user_usr;
+        return $this->user;
     }
 
-    public function setUserUsr(?User $user_usr): self
+    public function setUser(?User $user): self
     {
-        $this->user_usr = $user_usr;
+        $this->user = $user;
 
         return $this;
     }
 
-    public function getExternalUserExtUsr(): ?ExternalUser
+    public function getExtUser(): ?ExternalUser
     {
-        return $this->external_user_ext_usr;
+        return $this->ext_user;
     }
 
-    public function setExternalUserExtUsr(?ExternalUser $external_user_ext_usr): self
+    public function setExtUser(?ExternalUser $ext_user): self
     {
-        $this->external_user_ext_usr = $external_user_ext_usr;
+        $this->ext_user = $ext_user;
 
         return $this;
     }

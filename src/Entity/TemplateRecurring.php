@@ -128,14 +128,15 @@ class TemplateRecurring extends DbObject
 
     /**
      * @OneToMany(targetEntity="TemplateActivity", mappedBy="recurring", cascade={"persist", "remove"},orphanRemoval=true)
-     * @OrderBy({"startdate" = "ASC"})
      */
+    //     * @OrderBy({"startdate" = "ASC"})
     public $activities;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
+     * @JoinColumn(name="rct_master_usr_id", referencedColumnName="usr_id")
      */
-    public $rct_master_usr;
+    public $master_usr;
 
     /**
      * TemplateRecurring constructor.
@@ -209,7 +210,7 @@ class TemplateRecurring extends DbObject
         $this->rct_deleted = $rct_deleted;
         $this->organization = $organization;
         $this->activities = $activities?$activities:new ArrayCollection();
-        $this->rct_master_usr = $rct_master_usr;
+        $this->master_usr = $rct_master_usr;
     }
 
 
@@ -468,12 +469,12 @@ class TemplateRecurring extends DbObject
 
     public function getMasterUsr(): ?User
     {
-        return $this->rct_master_usr;
+        return $this->master_usr;
     }
 
     public function setMasterUsr(?User $rct_master_usr): self
     {
-        $this->rct_master_usr = $rct_master_usr;
+        $this->master_usr = $rct_master_usr;
 
         return $this;
     }

@@ -731,7 +731,7 @@ processes:
   submit: Ok
   cancel: Annuler
   unset_process: Process non configuré
-  modify_prior_launching_act: Configurer le process avant de lancer l'activité
+  modify_prior_launching_act: Configurer le process avant de lancer l\'activité
   request_btn: Je ne trouve pas la famille souhaitée
   update: Modifier la catégorie
   process_request_msg: Demandez à rajouter une nouvelle famille aux administrateurs de Serpico, qui répondront à votre demande
@@ -2034,10 +2034,10 @@ activities:
     success_msg: l'activité a bien été créée et a été rajoutée dans votre fil d'activités
     success_close_btn_msg: Ok
 
-  no_activities_title: Pas encore d'activité créée !
+  no_activities_title: Aucune activité créée !
   no_activities_msg_collaborator: Attendez d'être ajouté à une activité ou demandez à ce qu'une activité soit créée afin de prendre part à une évaluation
   no_activities_msg_activity_manager: Créez une activité afin de prendre part à une évaluation
-  no_registered_activities_title: Pas encore de démarche ajoutée !
+  no_registered_activities_title: Aucune démarche ajoutée !
   no_registered_activities_msg: Inscrivez-vous à une démarche existante afin de suivre et renseigner son évolution !
 
 

@@ -720,7 +720,7 @@
     {% if global.currentuser.role == 1 %}
       <div class="modal-footer action-buttons">
         <div class="button-field">
-          {% if route == "myActivities" %}
+          {% if global.route == "myActivities" %}
               <a href="{{ url('processesList') }}" class="btn-large waves-effect waves-light teal lighten-1" style="margin:20px 0px 0px 0px">{% trans %}activities.firm_activities{% endtrans %}</a>
           {% else %}
               <a href="{{ url('myActivities') }}" class="btn-large waves-effect waves-light teal lighten-1" style="margin:20px 0px 0px 0px">{% trans %}activities.my_activities{% endtrans %}</a>
@@ -889,7 +889,7 @@
 
     {% if global.currentuser.role != 3 %}
       <div id="fixedButton" class="fixed-action-btn">
-          <a class="btn-floating blue darken-2 modal-trigger" href="#createActivity" onclick="onAddProcessClick('{{ global.currentuser.orgId }}')" data-oid="{{global.currentuser.orgId}}"><i class="material-icons">add</i></a>
+          <a class="btn-floating blue darken-2 modal-trigger" href="#createActivity" onclick="onAddProcessClick('{{ global.currentuser.organization_org }}')" data-oid="{{global.currentuser.organization_org}}"><i class="material-icons">add</i></a>
           {#}
           <ul>
               <li><a class="btn-floating orange lighten-2 tooltipped modal-trigger" data-position="left" data-delay="50" data-tooltip="{% trans %}tooltip.template.create_from_scratch{% endtrans %}" href="{{ path('activityInitialisation',{'elmt' : 'template'}) }}">
@@ -922,7 +922,7 @@
               {% if global.currentuser.role != 1 %}
                 <a class="modal-trigger" href="#requestNewProcess" onclick="onAddProcessClick('{{global.currentuser.organization.id}}')">
               {% else %}
-                <a href="{{url('manageProcesses',{orgId: global.currentuser.orgId})}}">
+                <a href="{{url('manageProcesses',{orgId: global.currentuser.organization_org})}}">
               {% endif %}
                   <i class="fas fa-plus modal-close"></i>
                   {% trans %} activities.request_process{% endtrans %}

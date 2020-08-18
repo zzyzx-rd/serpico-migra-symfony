@@ -60,9 +60,9 @@ class Survey extends DbObject
 
     /**
      * @OneToMany(targetEntity="ActivityUser", mappedBy="survey", cascade={"persist"})
-     * @OrderBy({"leader" = "DESC"})
      * @var ArrayCollection<ActivityUser>
      */
+//     * @OrderBy({"leader" = "DESC"})
     public $participants;
 
     /**
@@ -73,9 +73,9 @@ class Survey extends DbObject
     protected $fields;
     /**
      * @OneToMany(targetEntity="Answer", mappedBy="survey", cascade={"persist", "remove"}, orphanRemoval=true)
-     * @ORM\OrderBy({"sfi_id" = "ASC"})
      * @var ArrayCollection|Answer[] $answers
      */
+//     * @ORM\OrderBy({"sfi_id" = "ASC"})
     protected $answers;
 
     /**

@@ -43,7 +43,7 @@ class Activity extends DbObject
     public $act_complete;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="integer", nullable=true)
      */
     public $act_magnitude;
 
@@ -53,9 +53,9 @@ class Activity extends DbObject
     public $act_simplified;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(name="act_name", type="string", length=255)
      */
-    public $act_name;
+    public $name;
 
     /**
      * @ORM\Column(type="string", length=255)
@@ -101,8 +101,8 @@ class Activity extends DbObject
     protected $organization;
     /**
      * @OneToMany(targetEntity="Stage", mappedBy="activity", cascade={"persist", "remove"}, orphanRemoval=true)
-     * @OrderBy({"stg_startdate" = "ASC", "inserted" = "ASC"})
      */
+//     * @OrderBy({"stg_startdate" = "ASC", "inserted" = "ASC"})
     public $stages;
     /**
      * @OneToMany(targetEntity="Decision", mappedBy="activity",cascade={"persist", "remove"}, orphanRemoval=true)
@@ -227,7 +227,7 @@ class Activity extends DbObject
      * @ORM\ManyToOne(targetEntity=User::class)
      * @ORM\JoinColumn(name="act_master_usr_id", referencedColumnName="usr_id", nullable=false)
      */
-    public $act_master_usr;
+    public $master_usr;
 
     /**
      * @ORM\Column(type="boolean")
@@ -315,8 +315,8 @@ class Activity extends DbObject
         $this->act_magnitude = $magnitude;
         $this->act_complete = $complete;
         $this->act_simplified = $simplified;
-        $this->act_name = $name;
-        $this->act_name = $visibility;
+        $this->name = $name;
+        $this->name = $visibility;
         $this->act_startDate = $startdate;
         $this->act_endDate = $enddate;
         $this->diffCriteria = $diffCriteria;
@@ -405,14 +405,14 @@ class Activity extends DbObject
         return $this;
     }
 
-    public function getActName(): ?string
+    public function getName(): ?string
     {
-        return $this->act_name;
+        return $this->name;
     }
 
-    public function setActName(string $act_name): self
+    public function setName(string $name): self
     {
-        $this->act_name = $act_name;
+        $this->name = $name;
 
         return $this;
     }
@@ -915,14 +915,14 @@ class Activity extends DbObject
         $this->archived = $archived;
     }
 
-    public function getActMasterUsr(): ?User
+    public function getMasterUsr(): ?User
     {
-        return $this->act_master_usr;
+        return $this->master_usr;
     }
 
-    public function setActMasterUsr(?User $act_master_usr): self
+    public function setMasterUsr(?User $master_usr): self
     {
-        $this->act_master_usr = $act_master_usr;
+        $this->master_usr = $master_usr;
 
         return $this;
     }
@@ -1420,5 +1420,17 @@ class Activity extends DbObject
         return $this->getActiveModifiableStages()->filter(function(Stage $s){
             return $s->hasMinimumOutputConfig() == 1 && $s->hasMinimumParticipationConfig() == 1;
         });
+    }
+    public function addStage(Stage $stage)
+    {
+        $this->stages->add($stage);
+        $stage->setActivity($this);
+        return $this;
+    }
+
+    public function removeStage(Stage $stage)
+    {
+        $this->stages->removeElement($stage);
+        return $this;
     }
 }

@@ -46,11 +46,6 @@ class Template extends DbObject
     public $tmp_deleted;
 
     /**
-     *@OneToMany(targetEntity="Activity", mappedBy="activity")
-     */
-    public $activities;
-
-    /**
      *@OneToOne(targetEntity="Stage", inversedBy="template")
      *@JoinColumn(name="stage_stg_id", referencedColumnName="stg_id", nullable=false)
      */
@@ -76,6 +71,7 @@ class Template extends DbObject
 
     /**
      * @ORM\ManyToOne(targetEntity=Activity::class)
+     * @JoinColumn(name="original_activity_act", referencedColumnName="act_id")
      */
     public $original_activity_act;
 

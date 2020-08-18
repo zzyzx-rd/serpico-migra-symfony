@@ -22,7 +22,7 @@ class globalVar {
     }
 
     public function route(){
-        return "login";
+        return $this->request()->get('_route');
     }
     public function routeParams(){
         return ["_locale" =>"fr"];

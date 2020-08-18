@@ -189,7 +189,7 @@ class SettingsController extends MasterController
      * @return mixed
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/settings/organization/{orgId}/processes", name="manageProcess")
+     * @Route("/settings/organization/{orgId}/processes", name="manageProcesses")
      */
     public function manageProcessesAction(Request $request, Application $app){
         $em = $this->getEntityManager($app);

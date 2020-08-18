@@ -226,7 +226,7 @@ class User extends DbObject implements  UserInterface, \Serializable
     public $results;
 
     /**
-     * @ORM\OneToMany(targetEntity=Stage::class, mappedBy="stg_master_user")
+     * @ORM\OneToMany(targetEntity=Stage::class, mappedBy="masterUser")
      */
     public $stagesWhereMaster;
 
@@ -947,7 +947,7 @@ class User extends DbObject implements  UserInterface, \Serializable
     {
         if (!$this->stagesWhereMaster->contains($stagesWhereMaster)) {
             $this->stagesWhereMaster[] = $stagesWhereMaster;
-            $stagesWhereMaster->setStgMasterUser($this);
+            $stagesWhereMaster->setMasterUser($this);
         }
 
         return $this;
@@ -958,8 +958,8 @@ class User extends DbObject implements  UserInterface, \Serializable
         if ($this->stagesWhereMaster->contains($stagesWhereMaster)) {
             $this->stagesWhereMaster->removeElement($stagesWhereMaster);
             // set the owning side to null (unless already changed)
-            if ($stagesWhereMaster->getStgMasterUser() === $this) {
-                $stagesWhereMaster->setStgMasterUser(null);
+            if ($stagesWhereMaster->getMasterUser() === $this) {
+                $stagesWhereMaster->setMasterUser(null);
             }
         }
 

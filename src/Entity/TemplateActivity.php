@@ -88,21 +88,23 @@ class TemplateActivity extends DbObject
 
     /**
      * @OneToMany(targetEntity="TemplateStage", mappedBy="activity", cascade={"persist", "remove"}, orphanRemoval=true)
-     * @OrderBy({"startdate" = "ASC"})
      * @var Collection|TemplateStage[]
      */
+//     * @OrderBy({"startdate" = "ASC"})
     public $stages;
 
     /**
      * @OneToMany(targetEntity="TemplateActivityUser", mappedBy="activity",cascade={"persist", "remove"}, orphanRemoval=true)
-     * @OrderBy({"team" = "ASC"})
+     * @JoinColumn(name="a_u_participant", referencedColumnName="a_u_id")
      */
+//     * @OrderBy({"team" = "ASC"})
     public $participants;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
+     * @JoinColumn(name="act_master_id", referencedColumnName="usr_id")
      */
-    public $act_master_usr;
+    public $master_usr;
     /**
      * @var DateTime
      */
@@ -160,7 +162,7 @@ class TemplateActivity extends DbObject
         $this->recurring = $recurring;
         $this->stages = $stages?$stages: new ArrayCollection();
         $this->participants = $participants?$participants:new ArrayCollection();
-        $this->act_master_usr = $act_master_usr;
+        $this->master_usr = $act_master_usr;
     }
 
 
@@ -323,12 +325,12 @@ class TemplateActivity extends DbObject
 
     public function getMasterUsr(): ?User
     {
-        return $this->act_master_usr;
+        return $this->master_usr;
     }
 
     public function setMasterUsr(?User $act_master_usr): self
     {
-        $this->act_master_usr = $act_master_usr;
+        $this->master_usr = $act_master_usr;
 
         return $this;
     }

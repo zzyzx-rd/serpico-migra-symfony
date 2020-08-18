@@ -175,9 +175,9 @@ class Criterion extends DbObject
 
     /**
      * @OneToMany(targetEntity="ActivityUser", mappedBy="criterion",cascade={"persist", "remove"}, orphanRemoval=true)
-     * @OrderBy({"leader" = "DESC"})
      * @var Collection
      */
+//     * @OrderBy({"leader" = "DESC"})
     public $participants;
 
     /**

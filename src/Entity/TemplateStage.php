@@ -96,8 +96,8 @@ class TemplateStage extends DbObject
 
     /**
      * @OneToMany(targetEntity="TemplateCriterion", mappedBy="stage", cascade={"persist", "remove"}, orphanRemoval=true)
-     * @OrderBy({"weight" = "DESC"})
      */
+//     * @OrderBy({"weight" = "DESC"})
     public $criteria;
 
     /**
@@ -108,8 +108,9 @@ class TemplateStage extends DbObject
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
+     * @JoinColumn(name="stg_master_usr_id", referencedColumnName="usr_id")
      */
-    public $stg_master_usr;
+    public $master_usr;
 
     /**
      * @ORM\Column(type="string", length=255)
@@ -172,7 +173,7 @@ class TemplateStage extends DbObject
         $this->activity = $activity;
         $this->criteria = $criteria?$criteria:new ArrayCollection();
         $this->participants = $participants?$participants:new ArrayCollection();
-        $this->stg_master_usr = $stg_master_usr;
+        $this->master_usr = $stg_master_usr;
         $this->stg_desc = $stg_desc;
     }
 
@@ -361,14 +362,14 @@ class TemplateStage extends DbObject
         $this->participants = $participants;
     }
 
-    public function getStgMasterUsr(): ?User
+    public function getMasterUsr(): ?User
     {
-        return $this->stg_master_usr;
+        return $this->master_usr;
     }
 
-    public function setStgMasterUsr(?User $stg_master_usr): self
+    public function setMasterUsr(?User $master_usr): self
     {
-        $this->stg_master_usr = $stg_master_usr;
+        $this->master_usr = $master_usr;
 
         return $this;
     }

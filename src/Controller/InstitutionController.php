@@ -29,7 +29,7 @@ final class InstitutionController extends MasterController
 
     /**
      * @return string
-     * @Route("/settings/institution/processes", name="processList")
+     * @Route("/settings/institution/processes", name="processesList")
      */
     public function processesListAction()
     {

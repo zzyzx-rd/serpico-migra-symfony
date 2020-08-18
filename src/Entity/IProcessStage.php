@@ -183,8 +183,8 @@ class IProcessStage extends DbObject
 
     /**
      * @OneToMany(targetEntity="IProcessCriterion", mappedBy="stage", cascade={"persist", "remove"}, orphanRemoval=true)
-     * @OrderBy({"weight" = "DESC"})
      */
+//     * @OrderBy({"weight" = "DESC"})
     public $criteria;
 
     /**
@@ -234,7 +234,7 @@ class IProcessStage extends DbObject
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(name="stg_master_user_id", referencedColumnName="usr_id", nullable=false)
      */
     public $stg_master_usr;
 

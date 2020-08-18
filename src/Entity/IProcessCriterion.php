@@ -100,9 +100,9 @@ class IProcessCriterion extends DbObject
 
     /**
      * @OneToMany(targetEntity="IProcessActivityUser", mappedBy="criterion", cascade={"persist", "remove"}, orphanRemoval=true)
-     * @OrderBy({"leader" = "DESC"})
      * @var Collection
      */
+//     * @OrderBy({"leader" = "DESC"})
     public $participants;
 
     /**

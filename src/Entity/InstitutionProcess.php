@@ -74,7 +74,7 @@ class InstitutionProcess extends DbObject
      */
     protected $masterUser;
     /**
-     * @OneToOne(targetEntity="InstitutionProcess", inversedBy="children")
+     * @ManyToOne(targetEntity="InstitutionProcess", inversedBy="children")
      * @JoinColumn(name="parent_id", referencedColumnName="inp_id", nullable=true)
      */
     public $parent;

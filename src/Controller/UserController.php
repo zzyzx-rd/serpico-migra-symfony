@@ -434,20 +434,18 @@ class UserController extends MasterController
 
     /**
      * @param Request $request
-     * @param Application $app
      * @param $orgId
      * @return JsonResponse
      * @Route("/institution/processes/{orgId}", name="getAllProcessesFromInstitution")
      */
-    public function getAllProcessesFromInstitution(Request $request, Application $app, $orgId){
-        $entityManager = $this->getEntityManager($app);
-        $repoO = $entityManager->getRepository(Organization::class);
+    public function getAllProcessesFromInstitution(Request $request, $orgId){
+        $repoO = $this->em->getRepository(Organization::class);
         /** @var Organization */
         $organization = $repoO->findOneById($orgId);
         if($orgId != 0){
             $institutionProcesses = $organization->getInstitutionProcesses()->filter(function(InstitutionProcess $p){return $p->getParent() == null;});
         } else {
-            $allProcesses = new ArrayCollection($entityManager->getRepository(Process::class)->findAll());
+            $allProcesses = new ArrayCollection($this->em->getRepository(Process::class)->findAll());
             $institutionProcesses = $allProcesses->filter(function(Process $p){return $p->getParent() == null;});
         }
         $orgIProcesses = [];
@@ -637,11 +635,10 @@ class UserController extends MasterController
      * @throws OptimisticLockException
      * @Route("/institution/activity/process/{inpId}", name="createUserProcessActivity")
      */
-    public function createUserProcessActivity(Request $request, Application $app, $inpId){
-        $entityManager = $this->getEntityManager($app);
-        $repoIP = $entityManager->getRepository(InstitutionProcess::class);
-        $repoU = $entityManager->getRepository(User::class);
-        $currentUser = MasterController::getAuthorizedUser();
+    public function createUserProcessActivity(Request $request, $inpId){
+        $repoIP = $this->em->getRepository(InstitutionProcess::class);
+        $repoU = $this->em->getRepository(User::class);
+        $currentUser = $this->security->getUser();
         // If not fresh new internal activity, institution is null. If activity request by citizen/external, then is necessarily linked to an (i)process
         $institutionProcess = $inpId != 0 ? $repoIP->findOneById($inpId) : null;
         $institution = ($_POST['fi'] == 1) ? $currentUser->getOrganization() : $institutionProcess->getOrganization();
@@ -653,7 +650,7 @@ class UserController extends MasterController
         $informingMail = isset($_POST['im']) && $_POST['im'] == 1;
 
         if($actName != ''){
-            $duplicateActivity = $entityManager->getRepository(Activity::class)->findOneBy(['name' => $actName, 'organization' => $institution]);
+            $duplicateActivity = $this->em->getRepository(Activity::class)->findOneBy(['name' => $actName, 'organization' => $institution]);
             if($duplicateActivity){
                 return new JsonResponse(['errorMsg' => 'There is already an activity created with such name. Please give another one'], 500);
             }
@@ -675,8 +672,8 @@ class UserController extends MasterController
         }
 
         if($isUnlinkedToAnyProcess || $institutionProcess->isApprovable()){
-            $val = ActivityController::addActivityId('activity', $inpId, $actName);
-            return $val;
+            $activityController = new ActivityController($this->em, $this->security, $this->stack);
+            return $activityController->addActivityId('activity', $inpId, $actName);
         } else {
 
             // We duplicate activity process/iprocess
@@ -738,10 +735,10 @@ class UserController extends MasterController
                         ->setOrganization($institution)
                         ->setActivity($activity);
                     $decision->setCreatedBy($currentUser->getId());
-                    $entityManager->persist($decision);
+                    $this->em->persist($decision);
                 }
 
-                $entityManager->persist($activity);
+                $this->em->persist($activity);
 
                 MasterController::sendMail($app, $recipients, 'request', $settings);
             }
@@ -853,7 +850,7 @@ class UserController extends MasterController
                     $stage->addCriterion($criterion);
                 }
                 $activity->addStage($stage);
-                $entityManager->persist($activity);
+                $this->em->persist($activity);
 
                 // Sending participants mails if necessary
                 if($informingMail){
@@ -873,7 +870,7 @@ class UserController extends MasterController
                                 if(count($pParticipations) != 0 || count($pParticipations) == 0 && $uniqueParticipation->getUsrId() != $synthParticipation->getUsrId()){
                                     $recipients[] = $uniqueParticipation->getDirectUser();
                                     $uniqueParticipation->setIsMailed(true);
-                                    $entityManager->persist($uniqueParticipation);
+                                    $this->em->persist($uniqueParticipation);
                                 }
                             }
                             self::sendMail($app, $recipients, 'activityParticipation', $mailSettings);
@@ -881,7 +878,7 @@ class UserController extends MasterController
                     }
                 }
             }
-            $entityManager->flush();
+            $this->em->flush();
             return new JsonResponse(['message' => 'success', 'aid' => $activity->getId(), 'ali' => $accessLinks],200);
         }
     }

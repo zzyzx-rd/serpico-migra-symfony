@@ -87,8 +87,9 @@ class RankingHistory extends DbObject
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
+     * @JoinColumn(name="rkh_user_usr_id", referencedColumnName="usr_id")
      */
-    public $rhk_user_usr;
+    public $user_usr;
 
     /**
      * RankingHistory constructor.
@@ -135,7 +136,7 @@ class RankingHistory extends DbObject
         $this->activity = $activity;
         $this->stage = $stage;
         $this->criterion = $criterion;
-        $this->rhk_user_usr = $rhk_user_usr;
+        $this->user_usr = $rhk_user_usr;
     }
 
 
@@ -288,14 +289,14 @@ class RankingHistory extends DbObject
         $this->criterion = $criterion;
     }
 
-    public function getRhkUserUsr(): ?User
+    public function getUserUsr(): ?User
     {
-        return $this->rhk_user_usr;
+        return $this->user_usr;
     }
 
-    public function setRhkUserUsr(?User $rhk_user_usr): self
+    public function setUserUsr(?User $user_usr): self
     {
-        $this->rhk_user_usr = $rhk_user_usr;
+        $this->user_usr = $user_usr;
 
         return $this;
     }

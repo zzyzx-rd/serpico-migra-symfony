@@ -175,7 +175,7 @@ class UserRepository extends ServiceEntityRepository
                         ->andWhere("rnk.wType = '" . $methodType . "'")
                         ->andWhere($qb->expr()->isNull('rnk.stage'))
                         ->andWhere($qb->expr()->isNull('rnk.criterion'))
-                        ->andWhere('rnk.usrId = ' . $user->getId())
+                        ->andWhere('rnk.user_usr = ' . $user)
                         ->getQuery()
                         ->getResult();
                     break;
@@ -186,7 +186,7 @@ class UserRepository extends ServiceEntityRepository
                         ->andWhere("rnk.wType = '" . $methodType . "'")
                         ->andWhere($qb->expr()->isNotNull('rnk.stage'))
                         ->andWhere($qb->expr()->isNull('rnk.criterion'))
-                        ->andWhere('rnk.usrId = ' . $user->getId())
+                        ->andWhere('rnk.user_usr = ' . $user)
                         ->getQuery()
                         ->getResult();
                     break;
@@ -196,7 +196,7 @@ class UserRepository extends ServiceEntityRepository
                         ->where("rnk.dType = '" . $resType . "'")
                         ->andWhere("rnk.wType = '" . $methodType . "'")
                         ->andWhere($qb->expr()->isNotNull('rnk.criterion'))
-                        ->andWhere('rnk.usrId = ' . $user->getId())
+                        ->andWhere('rnk.user_usr = ' . $user)
                         ->getQuery()
                         ->getResult();
                 default:

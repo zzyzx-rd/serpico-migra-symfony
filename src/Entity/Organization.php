@@ -100,48 +100,48 @@ class Organization extends DbObject
 
     /**
      * @OneToMany(targetEntity="Stage", mappedBy="organization", cascade={"persist", "remove"}, orphanRemoval=true)
-     * @OrderBy({"startdate" = "ASC"})
      */
+//     * @OrderBy({"startdate" = "ASC"})
     public $stages;
     /**
      * @OneToMany(targetEntity="Department", mappedBy="organization", cascade={"persist", "remove"},orphanRemoval=true)
-     * @OrderBy({"name" = "ASC"})
      */
+//     * @OrderBy({"name" = "ASC"})
     public $departments;
     /**
      * @OneToMany(targetEntity="Position", mappedBy="organization", cascade={"persist", "remove"},orphanRemoval=true)
-     * @OrderBy({"name" = "ASC"})
      */
+//     * @OrderBy({"name" = "ASC"})
     public $positions;
     /**
      * @OneToMany(targetEntity="Title", mappedBy="organization", cascade={"persist", "remove"},orphanRemoval=true)
-     * @OrderBy({"name" = "ASC"})
      */
+//     * @OrderBy({"name" = "ASC"})
     public $titles;
     /**
      * @OneToMany(targetEntity="Weight", mappedBy="organization", cascade={"persist", "remove"},orphanRemoval=true)
-     * @OrderBy({"value" = "ASC"})
      */
+//     * @OrderBy({"value" = "ASC"})
     public $weights;
     /**
      * @OneToMany(targetEntity="Decision", mappedBy="organization", cascade={"persist", "remove"},orphanRemoval=true)
-     * @OrderBy({"inserted" = "ASC"})
      */
+//     * @OrderBy({"inserted" = "ASC"})
     public $decisions;
     /**
      * @OneToMany(targetEntity="Activity", mappedBy="organization", cascade={"persist", "remove"},orphanRemoval=true)
-     * @OrderBy({"status" = "ASC", "name" = "ASC"})
      */
+//     * @OrderBy({"status" = "ASC", "name" = "ASC"})
     public $activities;
     /**
      * @OneToMany(targetEntity="Criterion", mappedBy="organization", cascade={"persist", "remove"}, orphanRemoval=true)
-     * @OrderBy({"type" = "ASC", "inserted" = "ASC"})
      */
+//     * @OrderBy({"type" = "ASC", "inserted" = "ASC"})
     public $criteria;
     /**
      * @OneToMany(targetEntity="TemplateActivity", mappedBy="organization", cascade={"persist", "remove"},orphanRemoval=true)
-     * @OrderBy({"name" = "ASC"})
      */
+//     * @OrderBy({"name" = "ASC"})
     public $templateActivities;
     /**
      * @OneToMany(targetEntity="Client", mappedBy="organization", cascade={"persist", "remove"},orphanRemoval=true)
@@ -151,8 +151,8 @@ class Organization extends DbObject
 
     /**
      * @OneToMany(targetEntity="CriterionName", mappedBy="organization", cascade={"persist", "remove"},orphanRemoval=true)
-     * @OrderBy({"type" = "DESC", "name" = "ASC"})
      */
+//     * @OrderBy({"type" = "DESC", "name" = "ASC"})
     public $criterionNames;
 
     /**

@@ -52,14 +52,14 @@ class Department extends DbObject
 
     /**
      * @OneToMany(targetEntity="Position", mappedBy="department", cascade={"persist", "remove"})
-     * @OrderBy({"name" = "ASC"})
      */
+//     * @OrderBy({"name" = "ASC"})
     public $positions;
 
     /**
      * @OneToMany(targetEntity="TemplateActivity", mappedBy="department", cascade={"persist", "remove"},orphanRemoval=true)
-     * @OrderBy({"name" = "ASC"})
      */
+//     * @OrderBy({"name" = "ASC"})
     public $templateActivities;
 
     /**

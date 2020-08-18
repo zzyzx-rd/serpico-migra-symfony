@@ -180,9 +180,9 @@ class ProcessStage extends DbObject
 
     /**
      * @OneToMany(targetEntity="ProcessCriterion", mappedBy="stage", cascade={"persist", "remove"}, orphanRemoval=true)
-     * @OrderBy({"weight" = "DESC"})
      * @var Collection
      */
+//     * @OrderBy({"weight" = "DESC"})
     public $criteria;
 
     /**
@@ -233,9 +233,9 @@ class ProcessStage extends DbObject
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(name="stg_master_usr_id", referencedColumnName="usr_id", nullable=false)
      */
-    public $stg_master_usr;
+    public $master_usr;
 
     /**
      * ProcessStage constructor.
@@ -360,7 +360,7 @@ class ProcessStage extends DbObject
         $this->rankingTeams = $rankingTeams?$rankingTeams:new ArrayCollection();
         $this->historicalRankings = $historicalRankings?$historicalRankings:new ArrayCollection();
         $this->historicalRankingTeams = $historicalRankingTeams?$historicalRankingTeams:new ArrayCollection();
-        $this->stg_master_usr = $stg_master_usr;
+        $this->master_usr = $stg_master_usr;
     }
 
 
@@ -863,12 +863,12 @@ class ProcessStage extends DbObject
 
     public function getMasterUsr(): ?User
     {
-        return $this->stg_master_usr;
+        return $this->master_usr;
     }
 
     public function setMasterUsr(?User $stg_master_usr): self
     {
-        $this->stg_master_usr = $stg_master_usr;
+        $this->master_usr = $stg_master_usr;
 
         return $this;
     }

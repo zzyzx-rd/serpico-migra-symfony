@@ -92,12 +92,13 @@ class IProcessActivityUser extends DbObject
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
+     * @JoinColumn(name="user_usr_id", referencedColumnName="usr_id")
      */
     public $user_usr;
 
     /**
      * @ORM\ManyToOne(targetEntity=ExternalUser::class)
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(name="external_useR_ext_usr_id", referencedColumnName="ext_id", nullable=true)
      */
     public $external_user_ext_usr;
 

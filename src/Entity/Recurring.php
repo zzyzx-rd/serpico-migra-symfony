@@ -125,13 +125,8 @@ class Recurring
     protected $organization;
 
     /**
-     * @OneToMany(targetEntity="Activity", mappedBy="recurring", cascade={"persist", "remove"},orphanRemoval=true)
-     * @OrderBy({"startdate" = "ASC"})
-     */
-    public $activities;
-
-    /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="Reccuring")
+     * @JoinColumn(name="rec_master_user_id", referencedColumnName="usr_id")
      */
     public $rec_master_user;
     public function __construct(
