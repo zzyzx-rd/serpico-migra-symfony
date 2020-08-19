@@ -69,9 +69,9 @@ class Survey extends DbObject
 
     /**
      * @OneToMany(targetEntity="SurveyField", mappedBy="survey", cascade={"persist", "remove"}, orphanRemoval=true)
-     * @ORM\OrderBy({"sfi_position" = "ASC"})
      *  @var SurveyField[] $fields
      */
+//     * @ORM\OrderBy({"sfi_position" = "ASC"})
     protected $fields;
     /**
      * @OneToMany(targetEntity="Answer", mappedBy="survey", cascade={"persist", "remove"}, orphanRemoval=true)

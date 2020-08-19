@@ -33,7 +33,7 @@ class Process extends DbObject
     public $name;
 
     /**
-     * @ORM\Column(name"pro_approvable", type="boolean", nullable=true)
+     * @ORM\Column(name="pro_approvable", type="boolean", nullable=true)
      */
     public $approvable;
 
@@ -43,17 +43,17 @@ class Process extends DbObject
     public $gradable;
 
     /**
-     * @ORM\Column(name"pro_created_by", type="integer", nullable=true)
+     * @ORM\Column(name="pro_created_by", type="integer", nullable=true)
      */
     public $createdBy;
 
     /**
-     * @ORM\Column(name"pro_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="pro_inserted", type="datetime", nullable=true)
      */
     public $inserted;
 
     /**
-     * @ORM\Column(name"pro_deleted", type="datetime", nullable=true)
+     * @ORM\Column(name="pro_deleted", type="datetime", nullable=true)
      */
     public $deleted;
 

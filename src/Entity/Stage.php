@@ -11,6 +11,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
@@ -86,7 +87,7 @@ class Stage extends DbObject
     public $status;
 
     /**
-     * @ORM\Column(name"stg_desc", type="string", length=255, nullable=true)
+     * @ORM\Column(name="stg_desc", type="string", length=255, nullable=true)
      */
     public $description;
 
@@ -101,22 +102,22 @@ class Stage extends DbObject
     public $weight;
 
     /**
-     * @ORM\Column(name"stg_definite_dates", type="boolean", nullable=true)
+     * @ORM\Column(name="stg_definite_dates", type="boolean", nullable=true)
      */
     public $definiteDates;
 
     /**
-     * @ORM\Column(name"stg_dperiod", type="integer", nullable=true)
+     * @ORM\Column(name="stg_dperiod", type="integer", nullable=true)
      */
     public $dPeriod;
 
     /**
-     * @ORM\Column(name"stg_dfrequency", type="string", length=255, nullable=true)
+     * @ORM\Column(name="stg_dfrequency", type="string", length=255, nullable=true)
      */
     public $dFrequency;
 
     /**
-     * @ORM\Column(name"stg_dorigin", type="integer", nullable=true)
+     * @ORM\Column(name="stg_dorigin", type="integer", nullable=true)
      */
     public $dOrigin;
 
@@ -141,7 +142,7 @@ class Stage extends DbObject
     public $startdate;
 
     /**
-     * @ORM\Column(name"stg_enddate", type="datetime", nullable=true)
+     * @ORM\Column(name="stg_enddate", type="datetime", nullable=true)
      */
     public $enddate;
 
@@ -161,47 +162,47 @@ class Stage extends DbObject
     public $deadlineNbDays;
 
     /**
-     * @ORM\Column(name"stg_deadline_mailSent", type="boolean", nullable=true)
+     * @ORM\Column(name="stg_deadline_mailSent", type="boolean", nullable=true)
      */
     public $deadlineMailSent;
 
     /**
-     * @ORM\Column(name"stg_created_by", type="integer", nullable=true)
+     * @ORM\Column(name="stg_created_by", type="integer", nullable=true)
      */
     public $createdBy;
 
     /**
-     * @ORM\Column(name"stg_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="stg_inserted", type="datetime", nullable=true)
      */
     public $inserted;
 
     /**
-     * @ORM\Column(name"stg_reopened", type="boolean", nullable=true)
+     * @ORM\Column(name="stg_reopened", type="boolean", nullable=true)
      */
     public $reopened;
 
     /**
-     * @ORM\Column(name"stg_last_reopened", type="datetime", nullable=true)
+     * @ORM\Column(name="stg_last_reopened", type="datetime", nullable=true)
      */
     public $lastReopened;
 
     /**
-     * @ORM\Column(name"stg_unstarted_notif", type="boolean", nullable=true)
+     * @ORM\Column(name="stg_unstarted_notif", type="boolean", nullable=true)
      */
     public $unstartedNotif;
 
     /**
-     * @ORM\Column(name"stg_uncompleted_notif", type="boolean", nullable=true)
+     * @ORM\Column(name="stg_uncompleted_notif", type="boolean", nullable=true)
      */
     public $uncompletedNotif;
 
     /**
-     * @ORM\Column(name"stg_unfinished_notif", type="boolean", nullable=true)
+     * @ORM\Column(name="stg_unfinished_notif", type="boolean", nullable=true)
      */
     public $unfinishedNotif;
 
     /**
-     * @ORM\Column(name"stg_isFinalized", type="boolean", nullable=true)
+     * @ORM\Column(name="stg_isFinalized", type="boolean", nullable=true)
      */
     public $isFinalized;
 
@@ -212,12 +213,12 @@ class Stage extends DbObject
     protected $finalized;
 
     /**
-     * @ORM\Column(name"stg_deleted", type="datetime", nullable=true)
+     * @ORM\Column(name="stg_deleted", type="datetime", nullable=true)
      */
     public $deleted;
 
     /**
-     * @ORM\Column(name"stg_gcompleted", type="datetime", nullable=true)
+     * @ORM\Column(name="stg_gcompleted", type="datetime", nullable=true)
      */
     public $gcompleted;
 

@@ -111,7 +111,7 @@ class WorkerFirm extends DbObject
     public $mailPrefix;
 
     /**
-     * @ORM\Column(name="wfi_mail_prefix", type="string", length=255, nullable=true)
+     * @ORM\Column(name="wfi_mail_suffix", type="string", length=255, nullable=true)
      */
     public $suffix;
 
@@ -143,7 +143,7 @@ class WorkerFirm extends DbObject
 
     /**
      * @OneToOne(targetEntity="WorkerFirmSector", inversedBy="firm")
-     * @JoinColumn(name="worker_firm_sector_wfs_id", referencedColumnName="wfs_id",nullable=false)
+     * @JoinColumn(name="worker_firm_sector_wfs_id", referencedColumnName="wfs_id",nullable=true)
      */
     public $mainSector;
 
@@ -175,6 +175,12 @@ class WorkerFirm extends DbObject
      * @OneToMany(targetEntity="Mail", mappedBy="workerFirm", cascade={"persist", "remove"}, orphanRemoval=true)
      */
     public $mails;
+
+    /**
+     * @ORM\OneToOne(targetEntity=Organization::class, mappedBy="worker_firm_wfi", cascade={"persist", "remove"})
+     * @JoinColumn(name="organization_org_id", referencedColumnName="org_id", nullable=true)
+     */
+    private $organization;
 
     /**
      * WorkerFirm constructor.
@@ -656,6 +662,24 @@ class WorkerFirm extends DbObject
     public function __toString()
     {
         return (string) $this->id;
+    }
+
+    public function getOrganization(): ?Organization
+    {
+        return $this->organization;
+    }
+
+    public function setOrganization(?Organization $organization): self
+    {
+        $this->organization = $organization;
+
+        // set (or unset) the owning side of the relation if necessary
+        $newWorker_firm_wfi = null === $organization ? null : $this;
+        if ($organization->getWorkerFirmWfi() !== $newWorker_firm_wfi) {
+            $organization->setWorkerFirmWfi($newWorker_firm_wfi);
+        }
+
+        return $this;
     }
 
 

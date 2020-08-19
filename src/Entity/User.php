@@ -212,7 +212,7 @@ class User extends DbObject implements  UserInterface, \Serializable
     public $workerIndividual;
 
     /**
-     * @ORM\OneToMany(targetEntity=ActivityUser::class, mappedBy="user_usr")
+     * @ORM\OneToMany(targetEntity=ActivityUser::class, mappedBy="user")
      */
     public $activity_user_act_usr;
 

@@ -198,11 +198,13 @@ class Organization extends DbObject
      * @var CriterionGroup[]
      */
     protected $criterionGroups;
+
     /**
-     * @OneToOne(targetEntity="WorkerFirm")
-     * @JoinColumn(name="worker_firm_wfi_id", referencedColumnName="wfi_id")
+     * @ORM\OneToOne(targetEntity=WorkerFirm::class, inversedBy="organization", cascade={"persist", "remove"})
+     * @JoinColumn(name="worker_firm_wfi_id", referencedColumnName="wfi_id", nullable=true)
      */
-    public $workerFirm;
+    private $worker_firm_wfi;
+    
 
     /**
      * Organization constructor.
@@ -1107,5 +1109,17 @@ class Organization extends DbObject
 
 
     //TODO userSortedDepartement et le removePosition
+
+    public function getWorkerFirmWfi(): ?WorkerFirm
+    {
+        return $this->worker_firm_wfi;
+    }
+
+    public function setWorkerFirmWfi(?WorkerFirm $worker_firm_wfi): self
+    {
+        $this->worker_firm_wfi = $worker_firm_wfi;
+
+        return $this;
+    }
 
 }

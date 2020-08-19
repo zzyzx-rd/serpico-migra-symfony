@@ -67,7 +67,7 @@ class WorkerExperience extends DbObject
 
     /**
      * @ManyToOne(targetEntity="WorkerFirm", inversedBy="experiences")
-     * @JoinColumn(name="worker_firm_wfi", referencedColumnName="wfi_id",nullable=false)
+     * @JoinColumn(name="worker_firm_wfi", referencedColumnName="wfi_id",nullable=true)
      */
     protected $firm;
 

@@ -41,7 +41,7 @@ class WorkerFirmCompetency extends DbObject
 
     /**
      * @ManyToOne(targetEntity="WorkerFirm")
-     * @JoinColumn(name="worker_firm_wfi_id", referencedColumnName="wfi_id",nullable=false)
+     * @JoinColumn(name="worker_firm_wfi_id", referencedColumnName="wfi_id", nullable=true)
      */
     protected $firm;
 

@@ -51,7 +51,7 @@ class GeneratedImage extends DbObject
     public $aid;
 
     /**
-     * @ORM\Column(name="gim_aid", type="boolean", nullable=true)
+     * @ORM\Column(name="gim_ov", type="boolean", nullable=true)
      */
     public $overview;
 
