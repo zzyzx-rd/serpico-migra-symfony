@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\OrganizationRepository;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -29,34 +31,34 @@ class Organization extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="org_legalname", type="string", length=255, nullable=true)
      */
-    public $org_legalname;
+    public $legalname;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="org_commname", type="string", length=255, nullable=true)
      */
-    public $org_commname;
+    public $commname;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="org_type", type="string", length=255, nullable=true)
      */
-    public $org_type;
+    public $type;
 
     /**
-     * @ORM\Column(type="boolean", nullable=true)
+     * @ORM\Column(name="org_isClient", type="boolean", nullable=true)
      */
-    public $org_isClient;
+    public $isClient;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="org_oth_language", type="string", length=255, nullable=true)
      */
-    public $org_oth_language;
+    public $oth_language;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="org_weight_type", type="string", length=255, nullable=true)
      */
-    public $org_weight_type;
+    public $weight_type;
 
     /**
      * @ORM\Column(name="org_created_by", type="integer", nullable=true)
@@ -69,34 +71,34 @@ class Organization extends DbObject
     public $inserted;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="org_validated", type="datetime", nullable=true)
      */
-    public $org_validated;
+    public $validated;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="org_expired", type="datetime", nullable=true)
      */
-    public $org_expired;
+    public $expired;
 
     /**
-     * @ORM\Column(type="boolean", nullable=true)
+     * @ORM\Column(name="org_testing_reminder_sent", type="boolean", nullable=true)
      */
-    public $org_testing_reminder_sent;
+    public $reminderMailSent;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="org_deleted", type="datetime", nullable=true)
      */
-    public $org_deleted;
+    public $deleted;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="org_routine_pstatus", type="datetime", nullable=true)
      */
-    public $org_routine_pstatus;
+    public $orgRoutinePStatus;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="org_routine_greminders", type="datetime", nullable=true)
      */
-    public $org_routine_greminders;
+    public $routineGreminders;
 
     /**
      * @OneToMany(targetEntity="Stage", mappedBy="organization", cascade={"persist", "remove"}, orphanRemoval=true)
@@ -136,7 +138,7 @@ class Organization extends DbObject
     /**
      * @OneToMany(targetEntity="Criterion", mappedBy="organization", cascade={"persist", "remove"}, orphanRemoval=true)
      */
-//     * @OrderBy({"type" = "ASC", "inserted" = "ASC"})
+//     * @OrderBy({", type" = "ASC", "inserted" = "ASC"})
     public $criteria;
     /**
      * @OneToMany(targetEntity="TemplateActivity", mappedBy="organization", cascade={"persist", "remove"},orphanRemoval=true)
@@ -152,7 +154,7 @@ class Organization extends DbObject
     /**
      * @OneToMany(targetEntity="CriterionName", mappedBy="organization", cascade={"persist", "remove"},orphanRemoval=true)
      */
-//     * @OrderBy({"type" = "DESC", "name" = "ASC"})
+//     * @OrderBy({", type" = "DESC", "name" = "ASC"})
     public $criterionNames;
 
     /**
@@ -280,38 +282,38 @@ class Organization extends DbObject
         $workerFirm = null)
     {
         parent::__construct($id, $org_createdBy, new DateTime());
-        $this->org_legalname = $org_legalname;
-        $this->org_commname = $org_commname;
-        $this->org_type = $org_type;
-        $this->org_isClient = $org_isClient;
-        $this->org_oth_language = $org_oth_language;
-        $this->org_weight_type = $org_weight_type;
+        $this->legalname = $org_legalname;
+        $this->commname = $org_commname;
+        $this->type = $org_type;
+        $this->isClient = $org_isClient;
+        $this->oth_language = $org_oth_language;
+        $this->weight_type = $org_weight_type;
         $this->inserted = $org_inserted;
-        $this->org_validated = $org_validated;
-        $this->org_expired = $org_expired;
-        $this->org_testing_reminder_sent = $org_testing_reminder_sent;
-        $this->org_deleted = $org_deleted;
-        $this->org_routine_pstatus = $org_routine_pstatus;
-        $this->org_routine_greminders = $org_routine_greminders;
+        $this->validated = $org_validated;
+        $this->expired = $org_expired;
+        $this->reminderMailSent = $org_testing_reminder_sent;
+        $this->deleted = $org_deleted;
+        $this->orgRoutinePStatus = $org_routine_pstatus;
+        $this->routineGreminders = $org_routine_greminders;
         $this->stages = $stages;
-        $this->departments = $departments?$departments: new ArrayCollection();
-        $this->positions = $positions?$positions : new ArrayCollection();
-        $this->titles = $titles?$titles : new ArrayCollection();
-        $this->weights = $weights? $weights : new ArrayCollection();
-        $this->decisions = $decisions? $decisions: new ArrayCollection();
-        $this->activities = $activities?$activities : new ArrayCollection();
+        $this->departments = $departments?: new ArrayCollection();
+        $this->positions = $positions?: new ArrayCollection();
+        $this->titles = $titles?: new ArrayCollection();
+        $this->weights = $weights?: new ArrayCollection();
+        $this->decisions = $decisions?: new ArrayCollection();
+        $this->activities = $activities?: new ArrayCollection();
         $this->criteria = $criteria;
-        $this->templateActivities = $templateActivities?$templateActivities:new ArrayCollection();
-        $this->clients = $clients?$clients: new ArrayCollection();
-        $this->criterionNames = $criterionNames?$criterionNames: new ArrayCollection();
+        $this->templateActivities = $templateActivities?:new ArrayCollection();
+        $this->clients = $clients?: new ArrayCollection();
+        $this->criterionNames = $criterionNames?: new ArrayCollection();
         $this->usersCSV = $usersCSV;
         $this->logo = $logo;
         $this->teams = $teams;
         $this->mails = $mails;
-        $this->targets = $targets?$targets: new ArrayCollection();
+        $this->targets = $targets?: new ArrayCollection();
         $this->options = $options;
-        $this->processes = $processes?$processes: new ArrayCollection();
-        $this->institutionProcesses = $institutionProcesses?$institutionProcesses: new ArrayCollection();
+        $this->processes = $processes?: new ArrayCollection();
+        $this->institutionProcesses = $institutionProcesses?: new ArrayCollection();
         $this->criterionGroups = $criterionGroups;
         $this->workerFirm = $workerFirm;
     }
@@ -324,156 +326,151 @@ class Organization extends DbObject
 
     public function getLegalname(): ?string
     {
-        return $this->org_legalname;
+        return $this->legalname;
     }
 
     public function setLegalname(string $org_legalname): self
     {
-        $this->org_legalname = $org_legalname;
+        $this->legalname = $org_legalname;
 
         return $this;
     }
 
     public function getCommname(): ?string
     {
-        return $this->org_commname;
+        return $this->commname;
     }
 
     public function setCommname(string $org_commname): self
     {
-        $this->org_commname = $org_commname;
+        $this->commname = $org_commname;
 
         return $this;
     }
 
     public function getType(): ?string
     {
-        return $this->org_type;
+        return $this->type;
     }
 
     public function setType(string $org_type): self
     {
-        $this->org_type = $org_type;
+        $this->type = $org_type;
 
         return $this;
     }
 
     public function getIsClient(): ?bool
     {
-        return $this->org_isClient;
+        return $this->isClient;
     }
 
     public function setIsClient(bool $org_isClient): self
     {
-        $this->org_isClient = $org_isClient;
+        $this->isClient = $org_isClient;
 
         return $this;
     }
 
     public function getOthLanguage(): ?string
     {
-        return $this->org_oth_language;
+        return $this->oth_language;
     }
 
     public function setOthLanguage(string $org_oth_language): self
     {
-        $this->org_oth_language = $org_oth_language;
+        $this->oth_language = $org_oth_language;
 
         return $this;
     }
 
     public function getWeightType(): ?string
     {
-        return $this->org_weight_type;
+        return $this->weight_type;
     }
 
     public function setWeightType(string $org_weight_type): self
     {
-        $this->org_weight_type = $org_weight_type;
+        $this->weight_type = $org_weight_type;
 
         return $this;
     }
 
-    public function getInserted(): ?\DateTimeInterface
-    {
-        return $this->inserted;
-    }
-
-    public function setInserted(\DateTimeInterface $org_inserted): self
+    public function setInserted(DateTimeInterface $org_inserted): self
     {
         $this->inserted = $org_inserted;
 
         return $this;
     }
 
-    public function getValidated(): ?\DateTimeInterface
+    public function getValidated(): ?DateTimeInterface
     {
-        return $this->org_validated;
+        return $this->validated;
     }
 
-    public function setValidated(\DateTimeInterface $org_validated): self
+    public function setValidated(DateTimeInterface $org_validated): self
     {
-        $this->org_validated = $org_validated;
+        $this->validated = $org_validated;
 
         return $this;
     }
 
-    public function getExpired(): ?\DateTimeInterface
+    public function getExpired(): ?DateTimeInterface
     {
-        return $this->org_expired;
+        return $this->expired;
     }
 
-    public function setExpired(\DateTimeInterface $org_expired): self
+    public function setExpired(DateTimeInterface $org_expired): self
     {
-        $this->org_expired = $org_expired;
+        $this->expired = $org_expired;
 
         return $this;
     }
 
     public function isReminderMailSent(): ?bool
     {
-        return $this->org_testing_reminder_sent;
+        return $this->reminderMailSent;
     }
 
-    public function setTestingReminderSent(bool $org_testing_reminder_sent): self
+    public function setReminderMailSent(bool $org_testing_reminder_sent): self
     {
-        $this->org_testing_reminder_sent = $org_testing_reminder_sent;
+        $this->reminderMailSent = $org_testing_reminder_sent;
 
         return $this;
     }
 
-    public function getDeleted(): ?\DateTimeInterface
+    public function getDeleted(): ?DateTimeInterface
     {
-        return $this->org_deleted;
+        return $this->deleted;
     }
 
-    public function setDeleted(?\DateTimeInterface $org_deleted): self
+    public function setDeleted(?DateTimeInterface $org_deleted): self
     {
-        $this->org_deleted = $org_deleted;
+        $this->deleted = $org_deleted;
 
         return $this;
     }
 
-    public function getRoutinePstatus(): ?\DateTimeInterface
+    public function getRoutinePstatus(): ?DateTimeInterface
     {
-        return $this->org_routine_pstatus;
+        return $this->orgRoutinePStatus;
     }
 
-    public function setRoutinePstatus(?\DateTimeInterface $org_routine_pstatus): self
+    public function setRoutinePstatus(?DateTimeInterface $org_routine_pstatus): self
     {
-        $this->org_routine_pstatus = $org_routine_pstatus;
+        $this->orgRoutinePStatus = $org_routine_pstatus;
 
         return $this;
     }
 
-    public function getRoutineGreminders(): ?\DateTimeInterface
+    public function getRoutineGreminders(): ?DateTimeInterface
     {
-        return $this->org_routine_greminders;
+        return $this->routineGreminders;
     }
 
-    public function setRoutineGreminders(?\DateTimeInterface $org_routine_greminders): self
+    public function setRoutineGreminders(?DateTimeInterface $org_routine_greminders): self
     {
-        $this->org_routine_greminders = $org_routine_greminders;
+        $this->routineGreminders = $org_routine_greminders;
 
         return $this;
     }
@@ -828,42 +825,47 @@ class Organization extends DbObject
     {
         $this->workerFirm = $workerFirm;
     }
-    function addDepartment(Department $department){
+    public function addDepartment(Department $department): Organization
+    {
 
         $this->departments->add($department);
         $department->setOrganization($this);
         return $this;
     }
 
-    function removeDepartment(Department $department){
+    public function removeDepartment(Department $department): Organization
+    {
         $this->departments->removeElement($department);
         return $this;
     }
-    function addTitle(Title $title){
+    public function addTitle(Title $title): Organization
+    {
 
         $this->titles->add($title);
         $title->setOrganization($this);
         return $this;
     }
 
-    function removeTitle(Title $title){
+    public function removeTitle(Title $title): Organization
+    {
         $this->titles->removeElement($title);
         return $this;
     }
 
-    public function getActiveTeams()
+    public function getActiveTeams(): ArrayCollection
     {
         $theTeams = new ArrayCollection;
         $teams = $this->teams;
         foreach($teams as $team){
-            if($team->getDeleted() != null){
+            if($team->getDeleted() !== null){
                 $theTeams->add($team);
             }
         }
         return $theTeams;
     }
 
-    function addPosition(Position $position){
+    public function addPosition(Position $position): Organization
+    {
 
         $this->positions->add($position);
         $position->setOrganization($this);
@@ -889,74 +891,72 @@ class Organization extends DbObject
      */
     public function getAliveOptions()
     {
-        return $this->options->filter(function(OrganizationUserOption $o) {return $o->isEnabled();});
+        return $this->options->filter(static function(OrganizationUserOption $o) {return $o->isEnabled();});
     }
 
-    function addAliveOption(OrganizationUserOption $option){
+    public function addAliveOption(OrganizationUserOption $option): Organization
+    {
 
         $this->aliveOptions->add($option);
         $option->setOrganization($this);
         return $this;
     }
 
-    function removeAliveOption(OrganizationUserOption $option){
+    public function removeAliveOption(OrganizationUserOption $option): Organization
+    {
         $this->aliveOptions->removeElement($option);
         return $this;
     }
-    function addCriterion(Criterion $criterion){
+    public function addCriterion(Criterion $criterion): Organization
+    {
         $this->criteria->add($criterion);
         $criterion->setOrganization($this);
         return $this;
     }
 
-    function removeCriterion(Criterion $criterion){
+    public function removeCriterion(Criterion $criterion): Organization
+    {
         $this->criteria->removeElement($criterion);
         return $this;
     }
-    function addWeight(Weight $weight){
+    public function addWeight(Weight $weight): Organization
+    {
 
         $this->weights->add($weight);
         $weight->setOrganization($this);
         return $this;
     }
 
-    function removeWeight(Weight $weight){
+    public function removeWeight(Weight $weight): Organization
+    {
         $this->weights->removeElement($weight);
         return $this;
     }
 
-    function addDecision(Decision $decision){
+    public function addDecision(Decision $decision): Organization
+    {
 
         $this->decisions->add($decision);
         $decision->setOrganization($this);
         return $this;
     }
 
-    function removeDecision(Decision $decision){
+    public function removeDecision(Decision $decision): Organization
+    {
         $this->decisions->removeElement($decision);
         return $this;
     }
 
-    function addRecurring(Recurring $recurring){
-
-        $this->recurrings->add($recurring);
-        $recurring->setOrganization($this);
-        return $this;
-    }
-
-    function removeRecurring(Recurring $recurring){
-        $this->recurrings->removeElement($recurring);
-        return $this;
-    }
-
-    function addTeam(Team $team){
+    public function addTeam(Team $team): Organization
+    {
 
         $this->teams->add($team);
         $team->setOrganization($this);
         return $this;
     }
 
-    function removeTeam(Team $team){
+    public function removeTeam(Team $team): Organization
+    {
         $this->teams->removeElement($team);
         //$team->setOrganization(null);
         return $this;
@@ -969,7 +969,7 @@ class Organization extends DbObject
         $extUsers = new ArrayCollection;
         foreach($this->clients as $client){
             foreach($client->getExternalUsers() as $externalUser){
-                if($externalUser->getDeleted() == null){
+                if($externalUser->getDeleted() === null){
                     $extUsers->add($externalUser);
                 }
             }
@@ -977,86 +977,102 @@ class Organization extends DbObject
         return $extUsers;
     }
 
-    function addCriterionName(CriterionName $criterionName){
+    public function addCriterionName(CriterionName $criterionName): Organization
+    {
 
         $this->criterionNames->add($criterionName);
         $criterionName->setOrganization($this);
         return $this;
     }
 
-    function removeCriterionName(CriterionName $criterionName){
+    public function removeCriterionName(CriterionName $criterionName): Organization
+    {
         $this->criterionNames->removeElement($criterionName);
         return $this;
     }
-    function addTemplateActivity(TemplateActivity $templateActivity){
+    public function addTemplateActivity(TemplateActivity $templateActivity): Organization
+    {
         $this->templateActivities->add($templateActivity);
         $templateActivity->setOrganization($this);
         return $this;
     }
 
-    function removeTemplateActivity(TemplateActivity $templateActivity){
+    public function removeTemplateActivity(TemplateActivity $templateActivity): Organization
+    {
         $this->templateActivities->removeElement($templateActivity);
         return $this;
     }
-    function addStage(Stage $stage){
+    public function addStage(Stage $stage): Organization
+    {
 
         $this->stages->add($stage);
         //- $stage->setActivity($this);
         return $this;
     }
 
-    function removeStage(Stage $stage){
+    public function removeStage(Stage $stage): Organization
+    {
         $this->stages->removeElement($stage);
         //$stage->setActivity(null);
         return $this;
     }
-    function addMail(Mail $mail){
+    public function addMail(Mail $mail): Organization
+    {
         $this->mails->add($mail);
         //- $mail->setUser($this);
         return $this;
     }
 
-    function removeMail(Mail $mail){
+    public function removeMail(Mail $mail): Organization
+    {
         $this->mails->removeElement($mail);
         return $this;
     }
-    function addTarget(Target $target){
+    public function addTarget(Target $target): Organization
+    {
         $this->targets->add($target);
         $target->setOrganization($this);
         return $this;
     }
 
-    function removeTarget(Target $target){
+    public function removeTarget(Target $target): Organization
+    {
         $this->targets->removeElement($target);
         return $this;
     }
-    function addCriterionGroup(CriterionGroup $criterionGroup){
+    public function addCriterionGroup(CriterionGroup $criterionGroup): Organization
+    {
         $this->criterionGroups->add($criterionGroup);
         $criterionGroup->setOrganization($this);
         return $this;
     }
 
-    function removeCriterionGroup(CriterionGroup $criterionGroup){
+    public function removeCriterionGroup(CriterionGroup $criterionGroup): Organization
+    {
         $this->criterionGroups->removeElement($criterionGroup);
         return $this;
     }
-    function addInstitutionProcess(InstitutionProcess $institutionProcess){
+    public function addInstitutionProcess(InstitutionProcess $institutionProcess): Organization
+    {
         $this->institutionProcesses->add($institutionProcess);
         $institutionProcess->setOrganization($this);
         return $this;
     }
 
-    function removeInstitutionProcess(InstitutionProcess $institutionProcess){
+    public function removeInstitutionProcess(InstitutionProcess $institutionProcess): Organization
+    {
         $this->institutionProcesses->removeElement($institutionProcess);
         return $this;
     }
-    function addProcess(Process $process){
+    public function addProcess(Process $process): Organization
+    {
         $this->processes->add($process);
         $process->setOrganization($this);
         return $this;
     }
 
-    function removeProcess(Process $process){
+    public function removeProcess(Process $process): Organization
+    {
         $this->processes->removeElement($process);
         $children = $process->getChildren();
         foreach($children as $child){
@@ -1067,18 +1083,20 @@ class Organization extends DbObject
     /**
      * @return Collection|Process[]
      */
-    function getParentValidatedProcesses() {
-        return $this->processes->filter(function(Process $p){
-            return $p->getOrganization()->getId() == 1 && $p->getParent() == null && !$p->isApprovable();
+    public function getParentValidatedProcesses() {
+        return $this->processes->filter(static function(Process $p){
+            return $p->getOrganization()->getId() === 1 && $p->getParent() === null && !$p->isApprovable();
         });
     }
 
-    function addParentValidatedProcess(Process $process){
+    public function addParentValidatedProcess(Process $process): Organization
+    {
         $this->addProcess($process);
         return $this;
     }
 
-    function removeParentValidatedProcess(Process $process){
+    public function removeParentValidatedProcess(Process $process): Organization
+    {
         $this->removeProcess($process);
         return $this;
     }

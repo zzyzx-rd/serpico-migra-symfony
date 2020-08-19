@@ -5,6 +5,7 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
@@ -23,7 +24,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @ApiResource()
- * @ORM\Entity(repositoryClass=App\Repository\UserRepository::class)
+ * @ORM\Entity(repositoryClass=UserRepository::class)
  */
 // * @UniqueEntity(
 // *     fields={"email"},
@@ -32,10 +33,10 @@ use Symfony\Component\Security\Core\User\UserInterface;
 class User extends DbObject implements  UserInterface, \Serializable
 {
 
-    const ROLE_ADMIN = 1;
-    const ROLE_ROOT = 4;
-    const ROLE_AM = 2;
-    const ROLE_COLLAB = 3;
+    public const ROLE_ADMIN = 1;
+    public const ROLE_ROOT = 4;
+    public const ROLE_AM = 2;
+    public const ROLE_COLLAB = 3;
     /**
      * @Id()
      * @GeneratedValue()
@@ -70,64 +71,64 @@ class User extends DbObject implements  UserInterface, \Serializable
     public $nickname;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="usr_birthdate", type="datetime", nullable=true)
      */
-    public $usr_birthdate;
+    public $birthdate;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="usr_email", type="string", length=255, nullable=true)
      */
-    public $usr_email;
+    public $email;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="usr_password", type="string", length=255, nullable=true)
      */
-    public $usr_password;
+    public $password;
 
     /**
      * @ORM\Column(name="usr_position_name", type="string", length=255, nullable=true)
      */
-    public $usr_positionName;
+    public $positionName;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="usr_picture", type="string", length=255, nullable=true)
      */
-    public $usr_picture;
+    public $picture;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="usr_token", type="string", length=255, nullable=true)
      */
-    public $usr_token;
+    public $token;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="usr_weight_ini", type="float", nullable=true)
      */
-    public $usr_weight_ini;
+    public $weight_ini;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="usr_usr_weight_1y", type="float", nullable=true)
      */
-    public $usr_usr_weight_1y;
+    public $weight_1y;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="usr_weight_2y", type="float", nullable=true)
      */
-    public $usr_weight_2y;
+    public $weight_2y;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="usr_weight_3y", type="float", nullable=true)
      */
-    public $usr_weight_3y;
+    public $weight_3y;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="usr_weight_4y", type="float", nullable=true)
      */
-    public $usr_weight_4y;
+    public $weight_4y;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="usr_weight_5y", type="float", nullable=true)
      */
-    public $usr_weight_5y;
+    public $weight_5y;
 
     /**
      * @ORM\Column(name="usr_act_archive_nb_days", type="integer", nullable=true)
@@ -135,19 +136,19 @@ class User extends DbObject implements  UserInterface, \Serializable
     public $activitiesArchivingNbDays;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="usr_rm_token", type="string", length=255, nullable=true)
      */
-    public $usr_rm_token;
+    public $rememberMeToken;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="usr_validated", type="datetime", nullable=true)
      */
-    public $usr_validated;
+    public $validated;
 
     /**
-     * @ORM\Column(type="boolean", nullable=true)
+     * @ORM\Column(name="usr_enabledCreatingUser", type="boolean", nullable=true)
      */
-    public $usr_enabledCreatingUser;
+    public $enabledCreatingUser;
 
     /**
      * @ORM\Column(name="usr_created_by", type="integer", nullable=true)
@@ -160,9 +161,9 @@ class User extends DbObject implements  UserInterface, \Serializable
     public $inserted;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="usr_last_connected", type="datetime", nullable=true)
      */
-    public $usr_last_connected;
+    public $lastConnected;
 
     /**
      * @ORM\Column(name="usr_deleted", type="datetime", nullable=true)
@@ -237,31 +238,31 @@ class User extends DbObject implements  UserInterface, \Serializable
 
     /**
      * @ORM\OneToOne(targetEntity=Weight::class, inversedBy="user", cascade={"persist", "remove"})
-     * @ORM\JoinColumn(name="weight_wgt_id",referencedColumnName="wgt_id", nullable=false)
+     * @ORM\JoinColumn(name="weight_wgt_id",referencedColumnName="wgt_id", nullable=true)
      */
     public $weight_wgt;
 
     /**
      * @ORM\ManyToOne(targetEntity=Position::class)
-     * @JoinColumn(name="position_pos_id", referencedColumnName="pos_id")
+     * @JoinColumn(name="position_pos_id", referencedColumnName="pos_id", nullable=true)
      */
     public $position_pos;
 
     /**
      * @ORM\ManyToOne(targetEntity=Department::class)
-     * @JoinColumn(name="department_dpt_id", referencedColumnName="dpt_id")
+     * @JoinColumn(name="department_dpt_id", referencedColumnName="dpt_id", nullable=true)
      */
     public $departement_dpt;
 
     /**
      * @ORM\ManyToOne(targetEntity=Title::class)
-     * @JoinColumn(name="title_tit_id", referencedColumnName="tit_id")
+     * @JoinColumn(name="title_tit_id", referencedColumnName="tit_id", nullable=true)
      */
     public $title_tit;
 
     /**
      * @ORM\ManyToOne(targetEntity=Organization::class)
-     * @ORM\JoinColumn(nullable=false, name="organization_org_id", referencedColumnName="org_id")
+     * @ORM\JoinColumn(nullable=false, name="organization_org_id", referencedColumnName="org_id", nullable=true)
      */
     public $organization_org;
 
@@ -375,33 +376,33 @@ class User extends DbObject implements  UserInterface, \Serializable
         $this->lastname = $usr_lastname;
         $this->username = $usr_username;
         $this->nickname = $usr_nickname;
-        $this->usr_birthdate = $usr_birthdate;
-        $this->usr_email = $usr_email;
-        $this->usr_password = $usr_password;
-        $this->usr_positionName = $usr_positionName;
-        $this->usr_picture = $usr_picture;
-        $this->usr_token = $usr_token;
-        $this->usr_weight_ini = $usr_weight_ini;
-        $this->usr_usr_weight_1y = $usr_usr_weight_1y;
-        $this->usr_weight_2y = $usr_weight_2y;
-        $this->usr_weight_3y = $usr_weight_3y;
-        $this->usr_weight_4y = $usr_weight_4y;
-        $this->usr_weight_5y = $usr_weight_5y;
+        $this->birthdate = $usr_birthdate;
+        $this->email = $usr_email;
+        $this->password = $usr_password;
+        $this->positionName = $usr_positionName;
+        $this->picture = $usr_picture;
+        $this->token = $usr_token;
+        $this->weight_ini = $usr_weight_ini;
+        $this->weight_1y = $usr_usr_weight_1y;
+        $this->weight_2y = $usr_weight_2y;
+        $this->weight_3y = $usr_weight_3y;
+        $this->weight_4y = $usr_weight_4y;
+        $this->weight_5y = $usr_weight_5y;
         $this->activitiesArchivingNbDays = $usr_act_archive_nbDays;
-        $this->usr_rm_token = $usr_rm_token;
-        $this->usr_validated = $usr_validated;
-        $this->usr_enabledCreatingUser = $usr_enabledCreatingUser;
+        $this->rememberMeToken = $usr_rm_token;
+        $this->validated = $usr_validated;
+        $this->enabledCreatingUser = $usr_enabledCreatingUser;
         $this->inserted = $usr_inserted;
-        $this->usr_last_connected = $usr_last_connected;
+        $this->lastConnected = $usr_last_connected;
         $this->deleted = $usr_deleted;
         $this->role = $role;
-        $this->externalUsers = $externalUsers?$externalUsers:new ArrayCollection();
+        $this->externalUsers = $externalUsers?:new ArrayCollection();
         $this->superior = $superior;
-        $this->mails = $mails?$mails:new ArrayCollection();
-        $this->targets = $targets?$targets:new ArrayCollection();
-        $this->options = $options?$options:new ArrayCollection();
+        $this->mails = $mails?:new ArrayCollection();
+        $this->targets = $targets?:new ArrayCollection();
+        $this->options = $options?:new ArrayCollection();
         $this->workerIndividual = $workerIndividual;
-        $this->activity_user_usr = $activity_user_usr;
+        $this->activity_user_act_usr = $activity_user_usr;
         $this->Reccuring = $Reccuring;
         $this->results = $results;
         $this->stagesWhereMaster = $stagesWhereMaster;
@@ -475,146 +476,146 @@ class User extends DbObject implements  UserInterface, \Serializable
         return $this;
     }
 
-    public function getBirthdate(): ?\DateTimeInterface
+    public function getBirthdate(): ?DateTimeInterface
     {
-        return $this->usr_birthdate;
+        return $this->birthdate;
     }
 
-    public function setBirthdate(\DateTimeInterface $usr_birthdate): self
+    public function setBirthdate(DateTimeInterface $usr_birthdate): self
     {
-        $this->usr_birthdate = $usr_birthdate;
+        $this->birthdate = $usr_birthdate;
 
         return $this;
     }
 
     public function getEmail(): ?string
     {
-        return $this->usr_email;
+        return $this->email;
     }
 
     public function setEmail(?string $usr_email): self
     {
-        $this->usr_email = $usr_email;
+        $this->email = $usr_email;
 
         return $this;
     }
 
     public function getPassword(): ?string
     {
-        return $this->usr_password;
+        return $this->password;
     }
 
     public function setPassword(?string $usr_password): self
     {
-        $this->usr_password = $usr_password;
+        $this->password = $usr_password;
 
         return $this;
     }
 
     public function getPositionName(): ?string
     {
-        return $this->usr_positionName;
+        return $this->positionName;
     }
 
     public function setPositionName(?string $usr_positionName): self
     {
-        $this->usr_positionName = $usr_positionName;
+        $this->positionName = $usr_positionName;
 
         return $this;
     }
 
     public function getPicture(): ?string
     {
-        return $this->usr_picture;
+        return $this->picture;
     }
 
     public function setPicture(string $usr_picture): self
     {
-        $this->usr_picture = $usr_picture;
+        $this->picture = $usr_picture;
 
         return $this;
     }
 
     public function getToken(): ?string
     {
-        return $this->usr_token;
+        return $this->token;
     }
 
     public function setToken(string $usr_token): self
     {
-        $this->usr_token = $usr_token;
+        $this->token = $usr_token;
 
         return $this;
     }
 
     public function getWeightIni(): ?float
     {
-        return $this->usr_weight_ini;
+        return $this->weight_ini;
     }
 
     public function setWeightIni(float $usr_weight_ini): self
     {
-        $this->usr_weight_ini = $usr_weight_ini;
+        $this->weight_ini = $usr_weight_ini;
 
         return $this;
     }
 
     public function getUsrWeight1y(): ?float
     {
-        return $this->usr_usr_weight_1y;
+        return $this->weight_1y;
     }
 
     public function setUsrWeight1y(float $usr_usr_weight_1y): self
     {
-        $this->usr_usr_weight_1y = $usr_usr_weight_1y;
+        $this->weight_1y = $usr_usr_weight_1y;
 
         return $this;
     }
 
     public function getWeight2y(): ?float
     {
-        return $this->usr_weight_2y;
+        return $this->weight_2y;
     }
 
     public function setWeight2y(float $usr_weight_2y): self
     {
-        $this->usr_weight_2y = $usr_weight_2y;
+        $this->weight_2y = $usr_weight_2y;
 
         return $this;
     }
 
     public function getWeight3y(): ?float
     {
-        return $this->usr_weight_3y;
+        return $this->weight_3y;
     }
 
     public function setWeight3y(float $usr_weight_3y): self
     {
-        $this->usr_weight_3y = $usr_weight_3y;
+        $this->weight_3y = $usr_weight_3y;
 
         return $this;
     }
 
     public function getWeight4y(): ?float
     {
-        return $this->usr_weight_4y;
+        return $this->weight_4y;
     }
 
     public function setWeight4y(float $usr_weight_4y): self
     {
-        $this->usr_weight_4y = $usr_weight_4y;
+        $this->weight_4y = $usr_weight_4y;
 
         return $this;
     }
 
     public function getWeight5y(): ?float
     {
-        return $this->usr_weight_5y;
+        return $this->weight_5y;
     }
 
     public function setWeight5y(float $usr_weight_5y): self
     {
-        $this->usr_weight_5y = $usr_weight_5y;
+        $this->weight_5y = $usr_weight_5y;
 
         return $this;
     }
@@ -633,82 +634,69 @@ class User extends DbObject implements  UserInterface, \Serializable
 
     public function getRememberMeToken(): ?string
     {
-        return $this->usr_rm_token;
+        return $this->rememberMeToken;
     }
 
     public function setRememberMeToken(string $usr_rm_token): self
     {
-        $this->usr_rm_token = $usr_rm_token;
+        $this->rememberMeToken = $usr_rm_token;
 
         return $this;
     }
 
-    public function getValidated(): ?\DateTimeInterface
+    public function getValidated(): ?DateTimeInterface
     {
-        return $this->usr_validated;
+        return $this->validated;
     }
 
-    public function setValidated(\DateTimeInterface $usr_validated): self
+    public function setValidated(DateTimeInterface $usr_validated): self
     {
-        $this->usr_validated = $usr_validated;
+        $this->validated = $usr_validated;
 
         return $this;
     }
 
     public function getEnabledCreatingUser(): ?bool
     {
-        return $this->usr_enabledCreatingUser;
+        return $this->enabledCreatingUser;
     }
 
     public function setEnabledCreatingUser(bool $usr_enabledCreatingUser): self
     {
-        $this->usr_enabledCreatingUser = $usr_enabledCreatingUser;
+        $this->enabledCreatingUser = $usr_enabledCreatingUser;
 
         return $this;
     }
 
-    public function getInserted(): ?\DateTimeInterface
-    {
-        return $this->inserted;
-    }
-
-    public function setInserted(\DateTimeInterface $usr_inserted): self
+    public function setInserted(DateTimeInterface $usr_inserted): self
     {
         $this->inserted = $usr_inserted;
 
         return $this;
     }
 
-    public function getLastConnected(): ?\DateTimeInterface
+    public function getLastConnected(): ?DateTimeInterface
     {
-        return $this->usr_last_connected;
+        return $this->lastConnected;
     }
 
-    public function setLastConnected(?\DateTimeInterface $usr_last_connected): self
+    public function setLastConnected(?DateTimeInterface $usr_last_connected): self
     {
-        $this->usr_last_connected = $usr_last_connected;
+        $this->lastConnected = $usr_last_connected;
 
         return $this;
     }
 
-    public function getDeleted(): ?\DateTimeInterface
+    public function getDeleted(): ?DateTimeInterface
     {
         return $this->deleted;
     }
 
-    public function setDeleted(\DateTimeInterface $usr_deleted): self
+    public function setDeleted(DateTimeInterface $usr_deleted): self
     {
         $this->deleted = $usr_deleted;
 
         return $this;
-    }
-
-    /**
-     * @return int
-     */
-    public function getId(): int
-    {
-        return $this->id;
     }
 
     /**
@@ -731,6 +719,7 @@ class User extends DbObject implements  UserInterface, \Serializable
 
     /**
      * @param int $role
+     * @return User
      */
     public function setRole(int $role): User
     {
@@ -748,6 +737,7 @@ class User extends DbObject implements  UserInterface, \Serializable
 
     /**
      * @param mixed $externalUsers
+     * @return User
      */
     public function setExternalUsers($externalUsers): User
     {
@@ -766,6 +756,7 @@ class User extends DbObject implements  UserInterface, \Serializable
 
     /**
      * @param int $superior
+     * @return User
      */
     public function setSuperior(int $superior): User
     {
@@ -784,6 +775,7 @@ class User extends DbObject implements  UserInterface, \Serializable
 
     /**
      * @param mixed $mails
+     * @return User
      */
     public function setMails($mails): User
     {
@@ -818,6 +810,7 @@ class User extends DbObject implements  UserInterface, \Serializable
 
     /**
      * @param mixed $options
+     * @return User
      */
     public function setOptions($options): User
     {
@@ -835,6 +828,7 @@ class User extends DbObject implements  UserInterface, \Serializable
 
     /**
      * @param mixed $workerIndividual
+     * @return User
      */
     public function setWorkerIndividual($workerIndividual): User
     {
@@ -847,13 +841,13 @@ class User extends DbObject implements  UserInterface, \Serializable
      */
     public function getExternalUser(): Collection
     {
-        return $this->activity_user_usr;
+        return $this->activity_user_act_usr;
     }
 
     public function addExternalUser(ActivityUser $externalUser): self
     {
-        if (!$this->activity_user_usr->contains($externalUser)) {
-            $this->activity_user_usr[] = $externalUser;
+        if (!$this->activity_user_act_usr->contains($externalUser)) {
+            $this->activity_user_act_usr[] = $externalUser;
             $externalUser->setUser($this);
         }
 
@@ -862,8 +856,8 @@ class User extends DbObject implements  UserInterface, \Serializable
 
     public function removeExternalUser(ActivityUser $externalUser): self
     {
-        if ($this->activity_user_usr->contains($externalUser)) {
-            $this->activity_user_usr->removeElement($externalUser);
+        if ($this->activity_user_act_usr->contains($externalUser)) {
+            $this->activity_user_act_usr->removeElement($externalUser);
             // set the owning side to null (unless already changed)
             if ($externalUser->getUser() === $this) {
                 $externalUser->setUser(null);
@@ -1065,7 +1059,7 @@ class User extends DbObject implements  UserInterface, \Serializable
         return "$this->firstname . $this->lastname";
     }
 
-    public function getInvertedFullName()
+    public function getInvertedFullName(): string
     {
         if ($this->deleted) {
             return (string) $this->id;
@@ -1079,7 +1073,7 @@ class User extends DbObject implements  UserInterface, \Serializable
         $suffix = $this->lastname ? $this->lastname[0] : '';
         return strtoupper($prefix . $suffix);
     }
-    public function removeOption(OrganizationUserOption $option)
+    public function removeOption(OrganizationUserOption $option): User
     {
         $this->options->removeElement($option);
         return $this;
@@ -1088,31 +1082,34 @@ class User extends DbObject implements  UserInterface, \Serializable
     {
         return  strval($this->id);
     }
-    public function addMail(Mail $mail)
+    public function addMail(Mail $mail): User
     {
         $this->mails->add($mail);
         $mail->setUser($this);
         return $this;
     }
 
-    public function removeMail(Mail $mail)
+    public function removeMail(Mail $mail): User
     {
         $this->mails->removeElement($mail);
         return $this;
     }
-    public function addTarget(Target $target)
+    public function addTarget(Target $target): User
     {
         $this->targets->add($target);
         $target->setUser($this);
         return $this;
     }
 
-    public function removeTarget(Target $target)
+    public function removeTarget(Target $target): User
     {
         $this->targets->removeElement($target);
         return $this;
     }
+
     /**
+     * @param Stage $stage
+     * @param User $gradingUser
      * @return Collection|Grade[]
      */
     public function getGrades(Stage $stage, User $gradingUser)
@@ -1142,7 +1139,7 @@ class User extends DbObject implements  UserInterface, \Serializable
     //TODO get Role et les autres gros trucs, subordinates
 
 
-    public function getRoles()
+    public function getRoles(): array
     {
         return ['ROLE_ADMIN'];
     }
@@ -1171,14 +1168,14 @@ class User extends DbObject implements  UserInterface, \Serializable
         [
             $this->id,
             $this->username,
-            $this->usr_email,
-            $this->usr_password,
+            $this->email,
+            $this->password,
         ] = unserialize($serialized, ['allow_classes' => false]);
     }
 
-    public function toArray()
+    public function toArray(): array
     {
-        if ($this->position_pos != null) {
+        if ($this->position_pos !== null) {
             $posName = $this->position_pos->getName();
         } else {
             $posName = "";
@@ -1244,13 +1241,13 @@ class User extends DbObject implements  UserInterface, \Serializable
             'organization' => $this->getOrganization(),
             'firstname' => $this->firstname,
             'lastname' => $this->lastname,
-            'picture' => $this->usr_picture,
+            'picture' => $this->picture,
             'weight' => $this->weight_wgt?$this->weight_wgt->getValue():null,
             'inserted' => $this->inserted,
             'internal' => $this->internal,
             'position' => $posName,
             'role' => $this->role,
-            'email' => ($this->usr_email == null) ? 0 : 1,
+            'email' => ($this->email === null) ? 0 : 1,
 //            'avgGrade' => ($this->role == 3) ? $this->getAverage($app, false, 'P', 'W', 'A') : $this->getAverage($app, true, 'P', 'W', 'A'),
 //            'avgStdDevRatio' => ($this->role == 3) ? $this->getAverage($app, false, 'D', 'W', 'A') : $this->getAverage($app, true, 'D', 'W', 'A'),
 //            'nbCompletedActivities' => $nbCompletedActivities,
@@ -1261,20 +1258,20 @@ class User extends DbObject implements  UserInterface, \Serializable
 
     public function is_root(): bool
     {
-        return $this->role == 4;
+        return $this->role === 4;
     }
 
     public function is_admin(): bool
     {
-        return $this->role == 1;
+        return $this->role === 1;
     }
     public function is_am(): bool
     {
-        return $this->role == 2;
+        return $this->role === 2;
     }
 
     public function is_collab(): bool
     {
-        return $this->role == 3;
+        return $this->role === 3;
     }
 }

@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\ProcessRepository;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -33,12 +35,12 @@ class Process extends DbObject
     /**
      * @ORM\Column(name"pro_approvable", type="boolean", nullable=true)
      */
-    public $pro_approvable;
+    public $approvable;
 
     /**
-     * @ORM\Column(type="boolean", nullable=true)
+     * @ORM\Column(name="pro_gradable", type="boolean", nullable=true)
      */
-    public $pro_gradable;
+    public $gradable;
 
     /**
      * @ORM\Column(name"pro_created_by", type="integer", nullable=true)
@@ -123,20 +125,15 @@ class Process extends DbObject
     {
         parent::__construct($id, $pro_createdBy, new DateTime());
         $this->name = $pro_name;
-        $this->pro_approvable = $pro_approvable;
-        $this->pro_gradable = $pro_gradable;
+        $this->approvable = $pro_approvable;
+        $this->gradable = $pro_gradable;
         $this->inserted = $pro_inserted;
         $this->deleted = $pro_deleted;
-        $this->children = $children?$children:new ArrayCollection();
-        $this->stages = $stages?$stages:new ArrayCollection();
+        $this->children = $children?:new ArrayCollection();
+        $this->stages = $stages?:new ArrayCollection();
         $this->criteria = new ArrayCollection();
     }
 
-
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
 
     public function getName(): ?string
     {
@@ -152,46 +149,41 @@ class Process extends DbObject
 
     public function gidApprovable(): ?bool
     {
-        return $this->pro_approvable;
+        return $this->approvable;
     }
 
     public function setApprovable(bool $pro_approvable): self
     {
-        $this->pro_approvable = $pro_approvable;
+        $this->approvable = $pro_approvable;
 
         return $this;
     }
 
     public function getGradable(): ?bool
     {
-        return $this->pro_gradable;
+        return $this->gradable;
     }
 
     public function setGradable(bool $pro_gradable): self
     {
-        $this->pro_gradable = $pro_gradable;
+        $this->gradable = $pro_gradable;
 
         return $this;
     }
 
-    public function getInserted(): ?\DateTimeInterface
-    {
-        return $this->inserted;
-    }
-
-    public function setInserted(\DateTimeInterface $pro_inserted): self
+    public function setInserted(DateTimeInterface $pro_inserted): self
     {
         $this->inserted = $pro_inserted;
 
         return $this;
     }
 
-    public function getDeleted(): ?\DateTimeInterface
+    public function getDeleted(): ?DateTimeInterface
     {
         return $this->deleted;
     }
 
-    public function setDeleted(?\DateTimeInterface $pro_deleted): self
+    public function setDeleted(?DateTimeInterface $pro_deleted): self
     {
         $this->deleted = $pro_deleted;
 
@@ -324,41 +316,49 @@ class Process extends DbObject
     {
         $this->stages = $stages;
     }
-    function addInstitutionProcess(InstitutionProcess $institutionProcess){
+    public function addInstitutionProcess(InstitutionProcess $institutionProcess): Process
+    {
         $this->institutionProcesses->add($institutionProcess);
         $institutionProcess->setProcess($this);
         return $this;
     }
 
-    function removeInstitutionProcess(InstitutionProcess $institutionProcess){
+    public function removeInstitutionProcess(InstitutionProcess $institutionProcess): Process
+    {
         $this->institutionProcesses->removeElement($institutionProcess);
         return $this;
     }
-    function addChildren(Process $child){
+    public function addChildren(Process $child): Process
+    {
         $this->children->add($child);
         $child->setParent($this);
         return $this;
     }
 
-    function removeChildren(Process $child){
+    public function removeChildren(Process $child): Process
+    {
         $this->children->removeElement($child);
         return $this;
     }
-    function addValidatedChildren(Process $child){
+    public function addValidatedChildren(Process $child): Process
+    {
         return $this->addChildren($child);
     }
 
-    function removeValidatedChildren(Process $child){
+    public function removeValidatedChildren(Process $child): Process
+    {
         return $this->removeChildren($child);
     }
-    function addStage(ProcessStage $stage){
+    public function addStage(ProcessStage $stage): Process
+    {
 
         $this->stages->add($stage);
         $stage->setProcess($this);
         return $this;
     }
 
-    function removeStage(ProcessStage $stage){
+    public function removeStage(ProcessStage $stage): Process
+    {
         $this->stages->removeElement($stage);
         return $this;
     }
@@ -367,9 +367,9 @@ class Process extends DbObject
         return (string) $this->id;
     }
 
-    public function userCanEdit(User $u)
+    public function userCanEdit(User $u): bool
     {
-        return $u->getRole() == 4;
+        return $u->getRole() === 4;
     }
 
     /**

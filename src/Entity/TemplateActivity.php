@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\TemplateActivityRepository;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -15,7 +17,7 @@ use Doctrine\ORM\Mapping\OrderBy;
 
 /**
  * @ApiResource()
- * @ORM\Entity(repositoryClass=TemplateActivityRepository::class)
+ * @ORM\Entity(repositoryClass="App\Repository\TemplateActivityRepository", repositoryClass=TemplateActivityRepository::class)
  */
 class TemplateActivity extends DbObject
 {
@@ -34,39 +36,39 @@ class TemplateActivity extends DbObject
     protected $magnitude;
     
     /**
-     * @ORM\Column(type="boolean", nullable=true)
+     * @ORM\Column(name="act_simplified", type="boolean", nullable=true)
      */
-    public $act_simplified;
+    public $simplified;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="act_name", type="string", length=255, nullable=true)
      */
-    public $act_name;
+    public $name;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="act_visibility", type="string", length=255, nullable=true)
      */
-    public $act_visibility;
+    public $visibility;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="act_objectives", type="string", length=255, nullable=true)
      */
-    public $act_objectives;
+    public $objectives;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="act_created_by", type="integer", nullable=true)
      */
-    public $act_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="act_inserted", type="datetime", nullable=true)
      */
-    public $act_inserted;
+    public $inserted;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="act_saved", type="datetime", nullable=true)
      */
-    public $act_saved;
+    public $saved;
 
     /**
      * @ManyToOne(targetEntity="Organization", inversedBy="templateActivities")
@@ -102,9 +104,9 @@ class TemplateActivity extends DbObject
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
-     * @JoinColumn(name="act_master_id", referencedColumnName="usr_id")
+     * @JoinColumn(name="act_master_id", referencedColumnName="usr_id", nullable=true)
      */
-    public $master_usr;
+    public $masterUser;
     /**
      * @var DateTime
      */
@@ -151,94 +153,84 @@ class TemplateActivity extends DbObject
     {
         parent::__construct($id, $act_createdBy, new DateTime());
         $this->magnitude = $magnitude;
-        $this->act_simplified = $act_simplified;
-        $this->act_name = $act_name;
-        $this->act_visibility = $act_visibility;
-        $this->act_objectives = $act_objectives;
-        $this->act_inserted = $act_inserted;
-        $this->act_saved = $act_saved;
+        $this->simplified = $act_simplified;
+        $this->name = $act_name;
+        $this->visibility = $act_visibility;
+        $this->objectives = $act_objectives;
+        $this->inserted = $act_inserted;
+        $this->saved = $act_saved;
         $this->organization = $organization;
         $this->department = $department;
         $this->recurring = $recurring;
-        $this->stages = $stages?$stages: new ArrayCollection();
-        $this->participants = $participants?$participants:new ArrayCollection();
-        $this->master_usr = $act_master_usr;
+        $this->stages = $stages?: new ArrayCollection();
+        $this->participants = $participants?:new ArrayCollection();
+        $this->masterUser = $act_master_usr;
     }
 
-
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
 
     public function getSimplified(): ?bool
     {
-        return $this->act_simplified;
+        return $this->simplified;
     }
 
     public function setSimplified(bool $act_simplified): self
     {
-        $this->act_simplified = $act_simplified;
+        $this->simplified = $act_simplified;
 
         return $this;
     }
 
     public function getName(): ?string
     {
-        return $this->act_name;
+        return $this->name;
     }
 
     public function setName(string $act_name): self
     {
-        $this->act_name = $act_name;
+        $this->name = $act_name;
 
         return $this;
     }
 
     public function getVisibility(): ?string
     {
-        return $this->act_visibility;
+        return $this->visibility;
     }
 
     public function setVisibility(string $act_visibility): self
     {
-        $this->act_visibility = $act_visibility;
+        $this->visibility = $act_visibility;
 
         return $this;
     }
 
     public function getObjectives(): ?string
     {
-        return $this->act_objectives;
+        return $this->objectives;
     }
 
     public function setObjectives(string $act_objectives): self
     {
-        $this->act_objectives = $act_objectives;
+        $this->objectives = $act_objectives;
 
         return $this;
     }
 
-    public function getInserted(): ?\DateTimeInterface
+    public function setInserted(DateTimeInterface $act_inserted): self
     {
-        return $this->act_inserted;
-    }
-
-    public function setInserted(\DateTimeInterface $act_inserted): self
-    {
-        $this->act_inserted = $act_inserted;
+        $this->inserted = $act_inserted;
 
         return $this;
     }
 
-    public function getSaved(): ?\DateTimeInterface
+    public function getSaved(): ?DateTimeInterface
     {
-        return $this->act_saved;
+        return $this->saved;
     }
 
-    public function setSaved(\DateTimeInterface $act_saved): self
+    public function setSaved(DateTimeInterface $act_saved): self
     {
-        $this->act_saved = $act_saved;
+        $this->saved = $act_saved;
 
         return $this;
     }
@@ -323,31 +315,31 @@ class TemplateActivity extends DbObject
         $this->participants = $participants;
     }
 
-    public function getMasterUsr(): ?User
+    public function getMasterUser(): ?User
     {
-        return $this->master_usr;
+        return $this->masterUser;
     }
 
-    public function setMasterUsr(?User $act_master_usr): self
+    public function setMasterUser(?User $act_master_usr): self
     {
-        $this->master_usr = $act_master_usr;
+        $this->masterUser = $act_master_usr;
 
         return $this;
     }
-    function addParticipant(TemplateActivityUser $participant)
+    public function addParticipant(TemplateActivityUser $participant): TemplateActivity
     {
         $this->participants->add($participant);
         $participant->setivity($this);
         return $this;
     }
 
-    function removeParticipant(TemplateActivityUser $participant)
+    public function removeParticipant(TemplateActivityUser $participant): TemplateActivity
     {
         $this->participants->removeElement($participant);
         return $this;
     }
 
-    function addStage(TemplateStage $stage)
+    public function addStage(TemplateStage $stage): TemplateActivity
     {
 
         $this->stages->add($stage);
@@ -355,21 +347,13 @@ class TemplateActivity extends DbObject
         return $this;
     }
 
-    function removeStage(TemplateStage $stage)
+    public function removeStage(TemplateStage $stage): TemplateActivity
     {
         $this->stages->removeElement($stage);
         return $this;
     }
 
-    function addActiveStage(TemplateStage $stage)
-    {
-
-        $this->stages->add($stage);
-        $stage->setivity($this);
-        return $this;
-    }
-
-    function removeActiveStage(TemplateStage $stage)
+    public function removeActiveStage(TemplateStage $stage): TemplateActivity
     {
         $this->stages->removeElement($stage);
         return $this;
@@ -390,7 +374,7 @@ class TemplateActivity extends DbObject
         return (string) $this->id;
     }
 
-    public function hasParticipants()
+    public function hasParticipants(): bool
     {
         foreach ($this->getActiveStages() as $stage){
             if (count($stage->getParticipants()) > 1){
@@ -402,7 +386,7 @@ class TemplateActivity extends DbObject
     /**
      * @return DateTime
      */
-    public function getStartdate()
+    public function getStartdate(): DateTime
     {
         $startDate = new DateTime('2099-01-01');
         foreach ($this->stages as $stage) {
@@ -428,7 +412,7 @@ class TemplateActivity extends DbObject
      * @param DateTime $startdate
      * @return TemplateActivity
      */
-    public function setStartdate($startdate)
+    public function setStartdate($startdate): TemplateActivity
     {
         $this->startdate = $startdate;
         return $this;
@@ -439,12 +423,12 @@ class TemplateActivity extends DbObject
      * @param DateTime $enddate
      * @return TemplateActivity
      */
-    public function setEnddate($enddate)
+    public function setEnddate($enddate): TemplateActivity
     {
         $this->enddate = $enddate;
         return $this;
     }
-    function addActiveModifiableStage(TemplateStage $stage)
+    public function addActiveModifiableStage(TemplateStage $stage): ?TemplateActivity
     {
         if (!$stage->getActivity()) {
             $this->stages->add($stage);
@@ -453,7 +437,7 @@ class TemplateActivity extends DbObject
         }
     }
 
-    function removeActiveModifiableStage(TemplateStage $stage)
+    public function removeActiveModifiableStage(TemplateStage $stage): TemplateActivity
     {
         $this->stages->removeElement($stage);
         //$stage->setActivity(null);
@@ -464,13 +448,14 @@ class TemplateActivity extends DbObject
      * An activity template is *never* finalized by definition,
      * however this getter is necessary in various templates
      */
-    function isFinalized() {
+    public function isFinalized(): bool
+    {
         return false;
     }
 
-    public function userCanEdit(User $u)
+    public function userCanEdit(User $u): bool
     {
-        return $u->getRole() == 1 || $u->getRole() == 4 || $this->masterUserId == $u->getId();
+        return $u->getRole() === 1 || $u->getRole() === 4 || $this->masterUser == $u;
     }
 
 

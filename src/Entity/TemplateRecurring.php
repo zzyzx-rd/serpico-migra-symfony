@@ -4,8 +4,10 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\TemplateRecurringRepository;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
@@ -26,99 +28,106 @@ class TemplateRecurring extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @Column(name="rct_name", type="string")
+     * @var string
      */
-    public $rct_name;
-
+    protected $name;
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @Column(name="rct_status", type="integer")
+     * @var int
      */
-    public $rct_status;
-
+    protected $status;
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @Column(name="rct_timeframe", type="string")
+     * @var string
      */
-    public $rct_timeframe;
-
+    protected $timeFrame;
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @Column(name="rct_freq", type="integer")
+     * @var int
      */
-    public $rct_freq;
-
+    protected $frequency;
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @Column(name="rct_gsd_interval", type="integer")
+     * @var int
      */
-    public $rct_gsd_interval;
-
+    protected $gStartDateInterval;
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @Column(name="rct_gsd_timeframe", type="string")
+     * @var string
      */
-    public $rct_gsd_timeframe;
-
+    protected $gStartDateTimeFrame;
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @Column(name="rct_ged_interval", type="integer")
+     * @var int
      */
-    public $rct_ged_interval;
-
+    protected $gEndDateInterval;
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @Column(name="rct_ged_timeframe", type="string")
+     * @var string
      */
-    public $rct_ged_timeframe;
-
+    protected $gEndDateTimeFrame;
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @Column(name="rct_type", type="integer")
+     * @var int
      */
-    public $rct_type;
-
+    protected $type;
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @Column(name="rct_lowerbound", type="float")
+     * @var float
      */
-    public $rct_lowerbound;
-
+    protected $lowerbound;
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @Column(name="rct_upperbound", type="float")
+     * @var float
      */
-    public $rct_upperbound;
-
+    protected $upperbound;
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @Column(name="rct_step", type="float")
+     * @var float
      */
-    public $rct_step;
-
+    protected $step;
     /**
-     * @ORM\Column(type="boolean", nullable=true)
+     * @Column(name="rct_open_end", type="boolean")
+     * @var bool
      */
-    public $rct_open_end;
-
+    protected $openEnd;
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @Column(name="rct_startdate", type="datetime")
+     * @var \DateTime
      */
-    public $rct_startdate;
-
+    protected $startdate;
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @Column(name="rct_enddate", type="datetime")
+     * @var \DateTime
      */
-    public $rct_enddate;
-
+    protected $enddate;
     /**
-     * @ORM\Column(type="boolean", nullable=true)
+     * @Column(name="rct_same_part", type="boolean")
+     * @var bool
      */
-    public $rct_same_part;
-
+    protected $replicatePart;
+    //AAAA
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @Column(name="rct_master_usr_id", type="integer")
+     * @var int
      */
-    public $rct_createdBy;
-
+    protected $masterUserId;
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @Column(name="rct_createdBy", type="integer")
+     * @var int
      */
-    public $rct_inserted;
-
+    protected $createdBy;
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @Column(name="rct_inserted", type="datetime")
+     * @var \DateTime
      */
-    public $rct_deleted;
+    protected $inserted;
+    /**
+     * @Column(name="rct_deleted", type="datetime")
+     * @var \DateTime
+     */
+    protected $deleted;
 
     /**
      * @ManyToOne(targetEntity="Organization")
@@ -141,299 +150,77 @@ class TemplateRecurring extends DbObject
     /**
      * TemplateRecurring constructor.
      * @param int $id
-     * @param $rct_name
-     * @param $rct_status
-     * @param $rct_timeframe
-     * @param $rct_freq
-     * @param $rct_gsd_interval
-     * @param $rct_gsd_timeframe
-     * @param $rct_ged_interval
-     * @param $rct_ged_timeframe
-     * @param $rct_type
-     * @param $rct_lowerbound
-     * @param $rct_upperbound
-     * @param $rct_step
-     * @param $rct_open_end
-     * @param $rct_startdate
-     * @param $rct_enddate
-     * @param $rct_same_part
+     * @param string $name
+     * @param null $status
+     * @param string $timeFrame
+     * @param int $gStartDateInterval
+     * @param string $gStartDateTimeFrame
+     * @param int $gEndDateInterval
+     * @param string $gEndDateTimeFrame
+     * @param int $frequency
+     * @param int $type
+     * @param null $lowerbound
+     * @param null $upperbound
+     * @param null $step
+     * @param null $openEnd
+     * @param null $startdate
+     * @param null $enddate
+     * @param null $deleted
+     * @param null $replicatePart
+     * @param $rct_master_usr
      * @param $rct_createdBy
-     * @param $rct_inserted
-     * @param $rct_deleted
      * @param $organization
      * @param $activities
-     * @param $rct_master_usr
      */
     public function __construct(
         int $id = 0,
-        $rct_name = '',
-        $rct_status = null,
-        $rct_timeframe = '',
-        $rct_gsd_interval = 0,
-        $rct_gsd_timeframe = '',
-        $rct_ged_interval = 0,
-        $rct_ged_timeframe = '',
-        $rct_freq = 0,
-        $rct_type = 1,
-        $rct_lowerbound = null,
-        $rct_upperbound = null,
-        $rct_step = null,
-        $rct_open_end = null,
-        $rct_startdate = null,
-        $rct_enddate = null,
-        $rct_same_part = null,
+        $name = '',
+        $status = null,
+        $timeFrame = '',
+        $gStartDateInterval = 0,
+        $gStartDateTimeFrame = '',
+        $gEndDateInterval = 0,
+        $gEndDateTimeFrame = '',
+        $frequency = 0,
+        $type = 1,
+        $lowerbound = null,
+        $upperbound = null,
+        $step = null,
+        $openEnd = null,
+        $startdate = null,
+        $enddate = null,
+        $deleted = null,
+        $replicatePart = null,
         $rct_master_usr = null,
         $rct_createdBy = null,
-        $rct_inserted = null,
-        $rct_deleted = null,
         $organization = null,
         $activities = null)
     {
         parent::__construct($id, $rct_createdBy, new DateTime());
-        $this->rct_name = $rct_name;
-        $this->rct_status = $rct_status;
-        $this->rct_timeframe = $rct_timeframe;
-        $this->rct_freq = $rct_freq;
-        $this->rct_gsd_interval = $rct_gsd_interval;
-        $this->rct_gsd_timeframe = $rct_gsd_timeframe;
-        $this->rct_ged_interval = $rct_ged_interval;
-        $this->rct_ged_timeframe = $rct_ged_timeframe;
-        $this->rct_type = $rct_type;
-        $this->rct_lowerbound = $rct_lowerbound;
-        $this->rct_upperbound = $rct_upperbound;
-        $this->rct_step = $rct_step;
-        $this->rct_open_end = $rct_open_end;
-        $this->rct_startdate = $rct_startdate;
-        $this->rct_enddate = $rct_enddate;
-        $this->rct_same_part = $rct_same_part;
-        $this->rct_inserted = $rct_inserted;
-        $this->rct_deleted = $rct_deleted;
+        $this->name = $name;
+        $this->status = $status;
+        $this->timeFrame = $timeFrame;
+        $this->frequency = $frequency;
+        $this->gStartDateInterval = $gStartDateInterval;
+        $this->gStartDateTimeFrame = $gStartDateTimeFrame;
+        $this->gEndDateInterval = $gEndDateInterval;
+        $this->gEndDateTimeFrame = $gEndDateTimeFrame;
+        $this->type = $type;
+        $this->lowerbound = $lowerbound;
+        $this->upperbound = $upperbound;
+        $this->step = $step;
+        $this->openEnd = $openEnd;
+        $this->startdate = $startdate;
+        $this->enddate = $enddate;
+        $this->replicatePart = $replicatePart;
+        $this->deleted = $deleted;
         $this->organization = $organization;
-        $this->activities = $activities?$activities:new ArrayCollection();
+        $this->activities = $activities?:new ArrayCollection();
         $this->master_usr = $rct_master_usr;
     }
 
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
 
-    public function getName(): ?string
-    {
-        return $this->rct_name;
-    }
-
-    public function setName(string $rct_name): self
-    {
-        $this->rct_name = $rct_name;
-
-        return $this;
-    }
-
-    public function getStatus(): ?int
-    {
-        return $this->rct_status;
-    }
-
-    public function setStatus(int $rct_status): self
-    {
-        $this->rct_status = $rct_status;
-
-        return $this;
-    }
-
-    public function getTimeframe(): ?string
-    {
-        return $this->rct_timeframe;
-    }
-
-    public function setTimeframe(string $rct_timeframe): self
-    {
-        $this->rct_timeframe = $rct_timeframe;
-
-        return $this;
-    }
-
-    public function getFreq(): ?int
-    {
-        return $this->rct_freq;
-    }
-
-    public function setFreq(int $rct_freq): self
-    {
-        $this->rct_freq = $rct_freq;
-
-        return $this;
-    }
-
-    public function getGsdInterval(): ?int
-    {
-        return $this->rct_gsd_interval;
-    }
-
-    public function setGsdInterval(int $rct_gsd_interval): self
-    {
-        $this->rct_gsd_interval = $rct_gsd_interval;
-
-        return $this;
-    }
-
-    public function getGsdTimeframe(): ?string
-    {
-        return $this->rct_gsd_timeframe;
-    }
-
-    public function setGsdTimeframe(string $rct_gsd_timeframe): self
-    {
-        $this->rct_gsd_timeframe = $rct_gsd_timeframe;
-
-        return $this;
-    }
-
-    public function getGedInterval(): ?int
-    {
-        return $this->rct_ged_interval;
-    }
-
-    public function setGedInterval(int $rct_ged_interval): self
-    {
-        $this->rct_ged_interval = $rct_ged_interval;
-
-        return $this;
-    }
-
-    public function getGedTimeframe(): ?string
-    {
-        return $this->rct_ged_timeframe;
-    }
-
-    public function setGedTimeframe(string $rct_ged_timeframe): self
-    {
-        $this->rct_ged_timeframe = $rct_ged_timeframe;
-
-        return $this;
-    }
-
-    public function getType(): ?int
-    {
-        return $this->rct_type;
-    }
-
-    public function setType(int $rct_type): self
-    {
-        $this->rct_type = $rct_type;
-
-        return $this;
-    }
-
-    public function getLowerbound(): ?float
-    {
-        return $this->rct_lowerbound;
-    }
-
-    public function setLowerbound(float $rct_lowerbound): self
-    {
-        $this->rct_lowerbound = $rct_lowerbound;
-
-        return $this;
-    }
-
-    public function getUpperbound(): ?float
-    {
-        return $this->rct_upperbound;
-    }
-
-    public function setUpperbound(float $rct_upperbound): self
-    {
-        $this->rct_upperbound = $rct_upperbound;
-
-        return $this;
-    }
-
-    public function getStep(): ?float
-    {
-        return $this->rct_step;
-    }
-
-    public function setStep(float $rct_step): self
-    {
-        $this->rct_step = $rct_step;
-
-        return $this;
-    }
-
-    public function getOpenEnd(): ?bool
-    {
-        return $this->rct_open_end;
-    }
-
-    public function setOpenEnd(bool $rct_open_end): self
-    {
-        $this->rct_open_end = $rct_open_end;
-
-        return $this;
-    }
-
-    public function getStartdate(): ?\DateTimeInterface
-    {
-        return $this->rct_startdate;
-    }
-
-    public function setStartdate(\DateTimeInterface $rct_startdate): self
-    {
-        $this->rct_startdate = $rct_startdate;
-
-        return $this;
-    }
-
-    public function getEnddate(): ?\DateTimeInterface
-    {
-        return $this->rct_enddate;
-    }
-
-    public function setEnddate(\DateTimeInterface $rct_enddate): self
-    {
-        $this->rct_enddate = $rct_enddate;
-
-        return $this;
-    }
-
-    public function getSamePart(): ?bool
-    {
-        return $this->rct_same_part;
-    }
-
-    public function setSamePart(bool $rct_same_part): self
-    {
-        $this->rct_same_part = $rct_same_part;
-
-        return $this;
-    }
-
-    public function getInserted(): ?\DateTimeInterface
-    {
-        return $this->rct_inserted;
-    }
-
-    public function setInserted(\DateTimeInterface $rct_inserted): self
-    {
-        $this->rct_inserted = $rct_inserted;
-
-        return $this;
-    }
-
-    public function getDeleted(): ?\DateTimeInterface
-    {
-        return $this->rct_deleted;
-    }
-
-    public function setDeleted(\DateTimeInterface $rct_deleted): self
-    {
-        $this->rct_deleted = $rct_deleted;
-
-        return $this;
-    }
 
     /**
      * @return mixed
@@ -441,6 +228,340 @@ class TemplateRecurring extends DbObject
     public function getOrganization()
     {
         return $this->organization;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    /**
+     * @param string $name
+     * @return TemplateRecurring
+     */
+    public function setName(string $name): TemplateRecurring
+    {
+        $this->name = $name;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getStatus(): int
+    {
+        return $this->status;
+    }
+
+    /**
+     * @param int $status
+     * @return TemplateRecurring
+     */
+    public function setStatus(int $status): TemplateRecurring
+    {
+        $this->status = $status;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTimeFrame(): string
+    {
+        return $this->timeFrame;
+    }
+
+    /**
+     * @param string $timeFrame
+     * @return TemplateRecurring
+     */
+    public function setTimeFrame(string $timeFrame): TemplateRecurring
+    {
+        $this->timeFrame = $timeFrame;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getFrequency(): int
+    {
+        return $this->frequency;
+    }
+
+    /**
+     * @param int $frequency
+     * @return TemplateRecurring
+     */
+    public function setFrequency(int $frequency): TemplateRecurring
+    {
+        $this->frequency = $frequency;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getGStartDateInterval(): int
+    {
+        return $this->gStartDateInterval;
+    }
+
+    /**
+     * @param int $gStartDateInterval
+     * @return TemplateRecurring
+     */
+    public function setGStartDateInterval(int $gStartDateInterval): TemplateRecurring
+    {
+        $this->gStartDateInterval = $gStartDateInterval;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getGStartDateTimeFrame(): string
+    {
+        return $this->gStartDateTimeFrame;
+    }
+
+    /**
+     * @param string $gStartDateTimeFrame
+     * @return TemplateRecurring
+     */
+    public function setGStartDateTimeFrame(string $gStartDateTimeFrame): TemplateRecurring
+    {
+        $this->gStartDateTimeFrame = $gStartDateTimeFrame;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getGEndDateInterval(): int
+    {
+        return $this->gEndDateInterval;
+    }
+
+    /**
+     * @param int $gEndDateInterval
+     * @return TemplateRecurring
+     */
+    public function setGEndDateInterval(int $gEndDateInterval): TemplateRecurring
+    {
+        $this->gEndDateInterval = $gEndDateInterval;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getGEndDateTimeFrame(): string
+    {
+        return $this->gEndDateTimeFrame;
+    }
+
+    /**
+     * @param string $gEndDateTimeFrame
+     * @return TemplateRecurring
+     */
+    public function setGEndDateTimeFrame(string $gEndDateTimeFrame): TemplateRecurring
+    {
+        $this->gEndDateTimeFrame = $gEndDateTimeFrame;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getType(): int
+    {
+        return $this->type;
+    }
+
+    /**
+     * @param int $type
+     * @return TemplateRecurring
+     */
+    public function setType(int $type): TemplateRecurring
+    {
+        $this->type = $type;
+        return $this;
+    }
+
+    /**
+     * @return float
+     */
+    public function getLowerbound(): float
+    {
+        return $this->lowerbound;
+    }
+
+    /**
+     * @param float $lowerbound
+     * @return TemplateRecurring
+     */
+    public function setLowerbound(float $lowerbound): TemplateRecurring
+    {
+        $this->lowerbound = $lowerbound;
+        return $this;
+    }
+
+    /**
+     * @return float
+     */
+    public function getUpperbound(): float
+    {
+        return $this->upperbound;
+    }
+
+    /**
+     * @param float $upperbound
+     * @return TemplateRecurring
+     */
+    public function setUpperbound(float $upperbound): TemplateRecurring
+    {
+        $this->upperbound = $upperbound;
+        return $this;
+    }
+
+    /**
+     * @return float
+     */
+    public function getStep(): float
+    {
+        return $this->step;
+    }
+
+    /**
+     * @param float $step
+     * @return TemplateRecurring
+     */
+    public function setStep(float $step): TemplateRecurring
+    {
+        $this->step = $step;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isOpenEnd(): bool
+    {
+        return $this->openEnd;
+    }
+
+    /**
+     * @param bool $openEnd
+     * @return TemplateRecurring
+     */
+    public function setOpenEnd(bool $openEnd): TemplateRecurring
+    {
+        $this->openEnd = $openEnd;
+        return $this;
+    }
+
+    /**
+     * @return DateTime
+     */
+    public function getStartdate(): DateTime
+    {
+        return $this->startdate;
+    }
+
+    /**
+     * @param DateTime $startdate
+     * @return TemplateRecurring
+     */
+    public function setStartdate(DateTime $startdate): TemplateRecurring
+    {
+        $this->startdate = $startdate;
+        return $this;
+    }
+
+    /**
+     * @return DateTime
+     */
+    public function getEnddate(): DateTime
+    {
+        return $this->enddate;
+    }
+
+    /**
+     * @param DateTime $enddate
+     * @return TemplateRecurring
+     */
+    public function setEnddate(DateTime $enddate): TemplateRecurring
+    {
+        $this->enddate = $enddate;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isReplicatePart(): bool
+    {
+        return $this->replicatePart;
+    }
+
+    /**
+     * @param bool $replicatePart
+     * @return TemplateRecurring
+     */
+    public function setReplicatePart(bool $replicatePart): TemplateRecurring
+    {
+        $this->replicatePart = $replicatePart;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getMasterUserId(): int
+    {
+        return $this->masterUserId;
+    }
+
+    /**
+     * @param int $masterUserId
+     * @return TemplateRecurring
+     */
+    public function setMasterUserId(int $masterUserId): TemplateRecurring
+    {
+        $this->masterUserId = $masterUserId;
+        return $this;
+    }
+
+    /**
+     * @param DateTime $inserted
+     * @return TemplateRecurring
+     */
+    public function setInserted(DateTime $inserted): TemplateRecurring
+    {
+        $this->inserted = $inserted;
+        return $this;
+    }
+
+    /**
+     * @return DateTime
+     */
+    public function getDeleted(): DateTime
+    {
+        return $this->deleted;
+    }
+
+    /**
+     * @param DateTime $deleted
+     * @return TemplateRecurring
+     */
+    public function setDeleted(DateTime $deleted): TemplateRecurring
+    {
+        $this->deleted = $deleted;
+        return $this;
     }
 
     /**
@@ -478,23 +599,26 @@ class TemplateRecurring extends DbObject
 
         return $this;
     }
-    function addActivity(TemplateActivity $activity){
+    public function addActivity(TemplateActivity $activity): TemplateRecurring
+    {
 
         $this->activities->add($activity);
         $activity->setRecurring($this);
         return $this;
     }
 
-    function removeActivity(TemplateActivity $activity){
+    public function removeActivity(TemplateActivity $activity): TemplateRecurring
+    {
         $this->activities->removeElement($activity);
         return $this;
     }
-    public function getOngoingFutCurrActivities(){
+    public function getOngoingFutCurrActivities(): ArrayCollection
+    {
 
         $activities = new ArrayCollection;
         //$activities = [];
         foreach($this->activities as $recurringActivity){
-            if ($recurringActivity->getStatus() == 2){
+            if ($recurringActivity->getStatus() === 2){
                 continue;
             }
             $activities->add($recurringActivity);

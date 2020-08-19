@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\WorkerFirmCompetencyRepository;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -23,19 +25,19 @@ class WorkerFirmCompetency extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="wfc_name", type="string", length=255, nullable=true)
      */
-    public $wfc_name;
+    public $name;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="wfc_created_by", type="integer", nullable=true)
      */
-    public $wfc_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="wfc_inserted", type="datetime", nullable=true)
      */
-    public $wfc_inserted;
+    public $inserted;
 
     /**
      * @ManyToOne(targetEntity="WorkerFirm")
@@ -59,48 +61,26 @@ class WorkerFirmCompetency extends DbObject
         $firm = null)
     {
         parent::__construct($id, $wfc_createdBy, new DateTime());
-        $this->wfc_name = $wfc_name;
-        $this->wfc_inserted = $wfc_inserted;
+        $this->name = $wfc_name;
+        $this->inserted = $wfc_inserted;
         $this->firm = $firm;
     }
 
-    public function getId(): ?int
+    public function getName(): ?string
     {
-        return $this->id;
+        return $this->name;
     }
 
-    public function getWfcName(): ?string
+    public function setName(string $name): self
     {
-        return $this->wfc_name;
-    }
-
-    public function setWfcName(string $wfc_name): self
-    {
-        $this->wfc_name = $wfc_name;
+        $this->name = $name;
 
         return $this;
     }
 
-    public function getWfcCreatedBy(): ?int
+    public function setInserted(DateTimeInterface $inserted): self
     {
-        return $this->wfc_createdBy;
-    }
-
-    public function setWfcCreatedBy(int $wfc_createdBy): self
-    {
-        $this->wfc_createdBy = $wfc_createdBy;
-
-        return $this;
-    }
-
-    public function getWfcInserted(): ?\DateTimeInterface
-    {
-        return $this->wfc_inserted;
-    }
-
-    public function setWfcInserted(\DateTimeInterface $wfc_inserted): self
-    {
-        $this->wfc_inserted = $wfc_inserted;
+        $this->inserted = $inserted;
 
         return $this;
     }

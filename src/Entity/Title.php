@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\TitleRepository;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
@@ -26,33 +28,33 @@ class Title extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="tit_name", type="string", length=255, nullable=true)
      */
-    public $tit_name;
+    public $name;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="tit_weight_ini", type="float", nullable=true)
      */
-    public $tit_weight_ini;
+    public $weightIni;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="tit_created_by", type="integer", nullable=true)
      */
-    public $tit_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="tit_inserted", type="datetime", nullable=true)
      */
-    public $tit_inserted;
+    public $inserted;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="tit_deleted", type="datetime", nullable=true)
      */
-    public $tit_deleted;
+    public $deleted;
 
     /**
      * @ManyToOne(targetEntity="Organization", inversedBy="titles")
-     * @JoinColumn(name="organization_org_id", referencedColumnName="org_id", nullable=false)
+     * @JoinColumn(name="organization_org_id", referencedColumnName="org_id", nullable=true)
      */
     protected $organization;
 
@@ -71,6 +73,7 @@ class Title extends DbObject
      * @OneToMany(targetEntity="Target", mappedBy="title",cascade={"persist", "remove"}, orphanRemoval=true)
      */
     public $targets;
+    private $users;
 
     /**
      * Title constructor.
@@ -98,66 +101,56 @@ class Title extends DbObject
         $targets = null)
     {
         parent::__construct($id, $tit_createdBy, new DateTime());
-        $this->tit_name = $tit_name;
-        $this->tit_weight_ini = $tit_weight_ini;
-        $this->tit_inserted = $tit_inserted;
-        $this->tit_deleted = $tit_deleted;
+        $this->name = $tit_name;
+        $this->weightIni = $tit_weight_ini;
+        $this->inserted = $tit_inserted;
+        $this->deleted = $tit_deleted;
         $this->organization = $organization;
         $this->weight = $weight;
-        $this->options = $options?$options:new ArrayCollection();
-        $this->targets = $targets?$targets:new ArrayCollection();
+        $this->options = $options?:new ArrayCollection();
+        $this->targets = $targets?:new ArrayCollection();
     }
 
-
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
 
     public function getName(): ?string
     {
-        return $this->tit_name;
+        return $this->name;
     }
 
     public function setName(string $tit_name): self
     {
-        $this->tit_name = $tit_name;
+        $this->name = $tit_name;
 
         return $this;
     }
 
     public function getWeightIni(): ?float
     {
-        return $this->tit_weight_ini;
+        return $this->weightIni;
     }
 
     public function setWeightIni(float $tit_weight_ini): self
     {
-        $this->tit_weight_ini = $tit_weight_ini;
+        $this->weightIni = $tit_weight_ini;
 
         return $this;
     }
 
-    public function getInserted(): ?\DateTimeInterface
+    public function setInserted(DateTimeInterface $tit_inserted): self
     {
-        return $this->tit_inserted;
-    }
-
-    public function setInserted(\DateTimeInterface $tit_inserted): self
-    {
-        $this->tit_inserted = $tit_inserted;
+        $this->inserted = $tit_inserted;
 
         return $this;
     }
 
-    public function getDeleted(): ?\DateTimeInterface
+    public function getDeleted(): ?DateTimeInterface
     {
-        return $this->tit_deleted;
+        return $this->deleted;
     }
 
-    public function setDeleted(?\DateTimeInterface $tit_deleted): self
+    public function setDeleted(?DateTimeInterface $tit_deleted): self
     {
-        $this->tit_deleted = $tit_deleted;
+        $this->deleted = $tit_deleted;
 
         return $this;
     }
@@ -226,39 +219,41 @@ class Title extends DbObject
         $this->targets = $targets;
     }
 
-    function addUser(User $user){
+    public function addUser(User $user): Title
+    {
 
         $this->users->add($user);
         // $user->setPosition($this);
         return $this;
     }
 
-    function removeUser(User $user){
+    public function removeUser(User $user): Title
+    {
         $this->users->removeElement($user);
         return $this;
     }
 
-    function addTarget(Target $target)
+    public function addTarget(Target $target): Title
     {
         $this->targets->add($target);
         $target->setPosition($this);
         return $this;
     }
 
-    function removeTarget(Target $target)
+    public function removeTarget(Target $target): Title
     {
         $this->targets->removeElement($target);
         return $this;
     }
 
-    function addOption(OrganizationUserOption $option)
+    public function addOption(OrganizationUserOption $option): Title
     {
         $this->options->add($option);
         $option->setTitle($this);
         return $this;
     }
 
-    function removeOption(OrganizationUserOption $option)
+    public function removeOption(OrganizationUserOption $option): Title
     {
         $this->options->removeElement($option);
         return $this;

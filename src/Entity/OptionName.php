@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\OptionNameRepository;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -20,9 +21,9 @@ class OptionName extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="ona_type", type="integer", nullable=true)
      */
-    public $ona_type;
+    public $type;
 
     /**
      * @ORM\Column(name="ona_name", type="string", length=255, nullable=true)
@@ -30,9 +31,9 @@ class OptionName extends DbObject
     public $name;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="ona_description", type="string", length=255, nullable=true)
      */
-    public $ona_description;
+    public $description;
 
     /**
      * @ORM\Column(name="ona_created_by", type="integer", nullable=true)
@@ -63,26 +64,21 @@ class OptionName extends DbObject
     {
         parent::__construct($id, $ona_createdBy, new DateTime());
 
-        $this->ona_type = $ona_type;
+        $this->type = $ona_type;
         $this->name = $ona_name;
-        $this->ona_description = $ona_description;
+        $this->description = $ona_description;
         $this->inserted = $ona_inserted;
     }
 
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
     public function getType(): ?int
     {
-        return $this->ona_type;
+        return $this->type;
     }
 
     public function setType(int $ona_type): self
     {
-        $this->ona_type = $ona_type;
+        $this->type = $ona_type;
 
         return $this;
     }
@@ -101,19 +97,14 @@ class OptionName extends DbObject
 
     public function getDescription(): ?string
     {
-        return $this->ona_description;
+        return $this->description;
     }
 
     public function setDescription(string $ona_description): self
     {
-        $this->ona_description = $ona_description;
+        $this->description = $ona_description;
 
         return $this;
-    }
-
-    public function getInserted(): ?string
-    {
-        return $this->inserted;
     }
 
     public function setInserted(string $ona_inserted): self

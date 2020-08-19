@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\RankingTeamRepository;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -23,59 +25,59 @@ class RankingTeam extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="string", length=1)
+     * @ORM\Column(name="rkt_dtype", type="string", length=1)
      */
-    public $rkt_dtype;
+    public $dType;
 
     /**
-     * @ORM\Column(type="string", length=1)
+     * @ORM\Column(name="rkt_wtype", type="string", length=1)
      */
-    public $rkt_wtype;
+    public $wType;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="rkt_abs_result", type="integer", nullable=true)
      */
-    public $rkt_abs_result;
+    public $absResult;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="rkt_rel_result", type="float", nullable=true)
      */
-    public $rkt_rel_result;
+    public $relResult;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="rkt_period", type="integer", nullable=true)
      */
-    public $rkt_period;
+    public $period;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="rkt_freq", type="integer", nullable=true)
      */
-    public $rkt_freq;
+    public $frequency;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="rkt_value", type="float", nullable=true)
      */
-    public $rkt_value;
+    public $value;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="rkt_series_pop", type="integer", nullable=true)
      */
-    public $rkt_series_pop;
+    public $seriesPopulation;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="rkt_created_by", type="integer", nullable=true)
      */
-    public $rkt_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="rkt_inserted", type="datetime", nullable=true)
      */
-    public $rkt_inserted;
+    public $inserted;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="rkt_updated", type="datetime", nullable=true)
      */
-    public $rkt_updated;
+    public $updated;
 
     /**
      *@ManyToOne(targetEntity="Activity", inversedBy="rankingTeams")
@@ -107,140 +109,140 @@ class RankingTeam extends DbObject
      */
     protected $organization;
 
-    public function __construct($id=0, $dType=null, $wType=null, $organization=null, $absResult=null, $relResult=null, $period=null, $frequency=null, $value= null, $seriesPopulation= null, $createdBy = null, $inserted=null, $updated=null)
+    public function __construct(
+        $id = 0,
+        $dType = null,
+        $wType = null,
+        $absResult = null,
+        $relResult = null,
+        $period = null,
+        $frequency = null,
+        $seriesPopulation = null,
+        $createdBy = null,
+        $updated = null)
     {
-        parent::__construct($id, $createdBy, new \DateTime);
-        $this->rkt_dtype = $dType;
-        $this->rkt_wtype = $wType;
-        $this->rkt_abs_result = $absResult;
-        $this->rkt_rel_result = $relResult;
-        $this->rkt_period = $period;
-        $this->rkt_freq = $frequency;
-        $this->rkt_series_pop = $seriesPopulation;
-        $this->rkt_updated = $updated;
-    }
-
-    public function getId(): ?int
-    {
-        return $this->id;
+        parent::__construct($id, $createdBy, new DateTime);
+        $this->dType = $dType;
+        $this->wType = $wType;
+        $this->absResult = $absResult;
+        $this->relResult = $relResult;
+        $this->period = $period;
+        $this->frequency = $frequency;
+        $this->seriesPopulation = $seriesPopulation;
+        $this->updated = $updated;
     }
 
     public function getDtype(): ?string
     {
-        return $this->rkt_dtype;
+        return $this->dType;
     }
 
     public function setDtype(string $rkt_dtype): self
     {
-        $this->rkt_dtype = $rkt_dtype;
+        $this->dType = $rkt_dtype;
 
         return $this;
     }
 
     public function getWtype(): ?string
     {
-        return $this->rkt_wtype;
+        return $this->wType;
     }
 
     public function setWtype(string $rkt_wtype): self
     {
-        $this->rkt_wtype = $rkt_wtype;
+        $this->wType = $rkt_wtype;
 
         return $this;
     }
 
     public function getAbsResult(): ?int
     {
-        return $this->rkt_abs_result;
+        return $this->absResult;
     }
 
     public function setAbsResult(int $rkt_abs_result): self
     {
-        $this->rkt_abs_result = $rkt_abs_result;
+        $this->absResult = $rkt_abs_result;
 
         return $this;
     }
 
     public function getRelResult(): ?float
     {
-        return $this->rkt_rel_result;
+        return $this->relResult;
     }
 
     public function setRelResult(float $rkt_rel_result): self
     {
-        $this->rkt_rel_result = $rkt_rel_result;
+        $this->relResult = $rkt_rel_result;
 
         return $this;
     }
 
     public function getPeriod(): ?int
     {
-        return $this->rkt_period;
+        return $this->period;
     }
 
     public function setPeriod(int $rkt_period): self
     {
-        $this->rkt_period = $rkt_period;
+        $this->period = $rkt_period;
 
         return $this;
     }
 
     public function getFreq(): ?int
     {
-        return $this->rkt_freq;
+        return $this->frequency;
     }
 
     public function setFreq(int $rkt_freq): self
     {
-        $this->rkt_freq = $rkt_freq;
+        $this->frequency = $rkt_freq;
 
         return $this;
     }
 
     public function getValue(): ?float
     {
-        return $this->rkt_value;
+        return $this->value;
     }
 
     public function setValue(float $rkt_value): self
     {
-        $this->rkt_value = $rkt_value;
+        $this->value = $rkt_value;
 
         return $this;
     }
 
     public function getSeriesPop(): ?int
     {
-        return $this->rkt_series_pop;
+        return $this->seriesPopulation;
     }
 
     public function setSeriesPop(int $rkt_series_pop): self
     {
-        $this->rkt_series_pop = $rkt_series_pop;
+        $this->seriesPopulation = $rkt_series_pop;
 
         return $this;
     }
 
-    public function getInserted(): ?\DateTimeInterface
+    public function setInserted(DateTimeInterface $rkt_inserted): self
     {
-        return $this->rkt_inserted;
-    }
-
-    public function setInserted(\DateTimeInterface $rkt_inserted): self
-    {
-        $this->rkt_inserted = $rkt_inserted;
+        $this->inserted = $rkt_inserted;
 
         return $this;
     }
 
-    public function getUpdated(): ?\DateTimeInterface
+    public function getUpdated(): ?DateTimeInterface
     {
-        return $this->rkt_updated;
+        return $this->updated;
     }
 
-    public function setUpdated(\DateTimeInterface $rkt_updated): self
+    public function setUpdated(DateTimeInterface $rkt_updated): self
     {
-        $this->rkt_updated = $rkt_updated;
+        $this->updated = $rkt_updated;
 
         return $this;
     }

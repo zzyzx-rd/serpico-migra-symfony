@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\TemplateRepository;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
@@ -26,54 +28,58 @@ class Template extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="tmp_name", type="string", length=255, nullable=true)
      */
-    public $tmp_name;
+    public $name;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="tmp_created_by", type="integer", nullable=true)
      */
-    public $tmp_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="tmp_inserted", type="datetime", nullable=true)
      */
-    public $tmp_inserted;
+    public $inserted;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="tmp_deleted", type="datetime", nullable=true)
      */
-    public $tmp_deleted;
+    public $deleted;
 
     /**
      *@OneToOne(targetEntity="Stage", inversedBy="template")
-     *@JoinColumn(name="stage_stg_id", referencedColumnName="stg_id", nullable=false)
+     *@JoinColumn(name="stage_stg_id", referencedColumnName="stg_id", nullable=true)
      */
     protected $stage;
 
     /**
      *@OneToOne(targetEntity="Criterion", inversedBy="template")
-     *@JoinColumn(name="criterion_crt_id", referencedColumnName="crt_id", nullable=false)
+     *@JoinColumn(name="criterion_crt_id", referencedColumnName="crt_id", nullable=true)
      */
     protected $criterion;
 
     /**
      *@ManyToOne(targetEntity="Department")
-     *@JoinColumn(name="department_dpt_id", referencedColumnName="dpt_id", nullable=false)
+     *@JoinColumn(name="department_dpt_id", referencedColumnName="dpt_id", nullable=true)
      */
     protected $department;
 
     /**
      *@ManyToOne(targetEntity="Organization")
-     *@JoinColumn(name="organization_org_id", referencedColumnName="org_id", nullable=false)
+     *@JoinColumn(name="organization_org_id", referencedColumnName="org_id", nullable=true)
      */
     protected $organization;
 
     /**
      * @ORM\ManyToOne(targetEntity=Activity::class)
-     * @JoinColumn(name="original_activity_act", referencedColumnName="act_id")
+     * @JoinColumn(name="original_activity_act", referencedColumnName="act_id", nullable=true)
      */
     public $original_activity_act;
+    /**
+     * @var ArrayCollection|null
+     */
+    private $activities;
 
     /**
      * Template constructor.
@@ -103,10 +109,10 @@ class Template extends DbObject
         $organization = null)
     {
         parent::__construct($id,$tmp_createdBy , new DateTime());
-        $this->tmp_name = $tmp_name;
-        $this->tmp_inserted = $tmp_inserted;
-        $this->tmp_deleted = $tmp_deleted;
-        $this->activities = $activities?$activities:new ArrayCollection();
+        $this->name = $tmp_name;
+        $this->inserted = $tmp_inserted;
+        $this->deleted = $tmp_deleted;
+        $this->activities = $activities?:new ArrayCollection();
         $this->stage = $stage;
         $this->criterion = $criterion;
         $this->department = $department;
@@ -121,36 +127,31 @@ class Template extends DbObject
 
     public function getName(): ?string
     {
-        return $this->tmp_name;
+        return $this->name;
     }
 
     public function setName(string $tmp_name): self
     {
-        $this->tmp_name = $tmp_name;
+        $this->name = $tmp_name;
 
         return $this;
     }
 
-    public function getInserted(): ?\DateTimeInterface
+    public function setInserted(DateTimeInterface $tmp_inserted): self
     {
-        return $this->tmp_inserted;
-    }
-
-    public function setInserted(\DateTimeInterface $tmp_inserted): self
-    {
-        $this->tmp_inserted = $tmp_inserted;
+        $this->inserted = $tmp_inserted;
 
         return $this;
     }
 
-    public function getDeleted(): ?\DateTimeInterface
+    public function getDeleted(): ?DateTimeInterface
     {
-        return $this->tmp_deleted;
+        return $this->deleted;
     }
 
-    public function setDeleted(\DateTimeInterface $tmp_deleted): self
+    public function setDeleted(DateTimeInterface $tmp_deleted): self
     {
-        $this->tmp_deleted = $tmp_deleted;
+        $this->deleted = $tmp_deleted;
 
         return $this;
     }
@@ -246,13 +247,15 @@ class Template extends DbObject
 
         return $this;
     }
-    function addActivity(Activity $activity){
+    public function addActivity(Activity $activity): Template
+    {
         $this->activities->add($activity);
         $activity->setTemplate($this);
         return $this;
     }
 
-    function removeActivity(Activity $activity){
+    public function removeActivity(Activity $activity): Template
+    {
         $this->activities->removeElement($activity);
         return $this;
     }

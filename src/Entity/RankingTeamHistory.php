@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\RankingTeamHistoryRepository;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -23,58 +25,58 @@ class RankingTeamHistory extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="string", length=1)
+     * @ORM\Column(name="rth_dtype", type="string", length=1)
      */
-    public $rth_dtype;
+    public $dType;
 
     /**
-     * @ORM\Column(type="string", length=1)
+     * @ORM\Column(name="rth_wtype", type="string", length=1)
      */
-    public $rth_wtype;
+    public $wType;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="rth_abs_result", type="integer", nullable=true)
      */
-    public $rth_abs_result;
+    public $absResult;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="rth_rel_result", type="float", nullable=true)
      */
-    public $rth_rel_result;
+    public $relResult;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="rth_period", type="integer", nullable=true)
      */
-    public $rth_period;
+    public $period;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="rth_freq", type="integer", nullable=true)
      */
-    public $rth_freq;
+    public $frequency;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="rth_value", type="float", nullable=true)
      */
-    public $rth_value;
+    public $value;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="rth_series_pop", type="integer", nullable=true)
      */
-    public $rth_series_pop;
+    public $seriesPopulation;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="rth_created_by", type="integer", nullable=true)
      */
-    public $rth_creatdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="rth_inserted", type="datetime", nullable=true)
      */
-    public $rth_inserted;
+    public $inserted;
 
     /**
      *@ManyToOne(targetEntity="Activity", inversedBy="historicalRankingTeams")
-     *@JoinColumn(name="rth_activity", referencedColumnName="act_id", nullable=false)
+     *@JoinColumn(name="rth_activity", referencedColumnName="act_id", nullable=true)
      */
     protected $activity;
 
@@ -92,7 +94,7 @@ class RankingTeamHistory extends DbObject
 
     /**
      *@ManyToOne(targetEntity="Team")
-     *@JoinColumn(name="team_tea_id", referencedColumnName="tea_id", nullable=false)
+     *@JoinColumn(name="team_tea_id", referencedColumnName="tea_id", nullable=true)
      */
     protected $team;
     /**
@@ -101,138 +103,126 @@ class RankingTeamHistory extends DbObject
      */
     protected $organization;
 
-    public function __construct($id=0, $dType=null, $wType=null, $organization=null, $absResult=null, $relResult=null, $period=null, $frequency=null, $value= null, $seriesPopulation=null,$createdBy=null, $inserted=null)
+    public function __construct(
+        $id = 0,
+        $dType = null,
+        $wType = null,
+        $absResult = null,
+        $relResult = null,
+        $period = null,
+        $frequency = null,
+        $seriesPopulation = null,
+        $createdBy = null)
     {
-        parent::__construct($id,$createdBy, new \DateTime);
+        parent::__construct($id, $createdBy, new DateTime);
         $this->dType = $dType;
-        $this->rth_wtype = $wType;
-        $this->rth_abs_result = $absResult;
-        $this->rth_rel_result = $relResult;
-        $this->rth_period = $period;
-        $this->rth_freq = $frequency;
-        $this->rth_series_pop = $seriesPopulation;
-    }
-    public function getId(): ?int
-    {
-        return $this->id;
+        $this->wType = $wType;
+        $this->absResult = $absResult;
+        $this->relResult = $relResult;
+        $this->period = $period;
+        $this->frequency = $frequency;
+        $this->seriesPopulation = $seriesPopulation;
     }
 
-    public function getRthDtype(): ?string
+    public function getDtype(): ?string
     {
-        return $this->rth_dtype;
+        return $this->dType;
     }
 
-    public function setRthDtype(string $rth_dtype): self
+    public function setDtype(string $dtype): self
     {
-        $this->rth_dtype = $rth_dtype;
+        $this->dType = $dtype;
 
         return $this;
     }
 
-    public function getRthWtype(): ?string
+    public function getWType(): ?string
     {
-        return $this->rth_wtype;
+        return $this->wType;
     }
 
-    public function setRthWtype(string $rth_wtype): self
+    public function setWType(string $wType): self
     {
-        $this->rth_wtype = $rth_wtype;
+        $this->wType = $wType;
 
         return $this;
     }
 
-    public function getRthAbsResult(): ?int
+    public function getAbsResult(): ?int
     {
-        return $this->rth_abs_result;
+        return $this->absResult;
     }
 
-    public function setRthAbsResult(int $rth_abs_result): self
+    public function setAbsResult(int $absResult): self
     {
-        $this->rth_abs_result = $rth_abs_result;
+        $this->absResult = $absResult;
 
         return $this;
     }
 
-    public function getRthRelResult(): ?float
+    public function getRelResult(): ?float
     {
-        return $this->rth_rel_result;
+        return $this->relResult;
     }
 
-    public function setRthRelResult(float $rth_rel_result): self
+    public function setRelResult(float $relResult): self
     {
-        $this->rth_rel_result = $rth_rel_result;
+        $this->relResult = $relResult;
 
         return $this;
     }
 
-    public function getRthPeriod(): ?int
+    public function getPeriod(): ?int
     {
-        return $this->rth_period;
+        return $this->period;
     }
 
-    public function setRthPeriod(int $rth_period): self
+    public function setPeriod(int $period): self
     {
-        $this->rth_period = $rth_period;
+        $this->period = $period;
 
         return $this;
     }
 
-    public function getRthFreq(): ?int
+    public function getFrequency(): ?int
     {
-        return $this->rth_freq;
+        return $this->frequency;
     }
 
-    public function setRthFreq(int $rth_freq): self
+    public function setFrequency(int $frequency): self
     {
-        $this->rth_freq = $rth_freq;
+        $this->frequency = $frequency;
 
         return $this;
     }
 
-    public function getRthValue(): ?float
+    public function getValue(): ?float
     {
-        return $this->rth_value;
+        return $this->value;
     }
 
-    public function setRthValue(float $rth_value): self
+    public function setValue(float $value): self
     {
-        $this->rth_value = $rth_value;
+        $this->value = $value;
 
         return $this;
     }
 
-    public function getRthSeriesPop(): ?int
+    public function getSeriesPopulation(): ?int
     {
-        return $this->rth_series_pop;
+        return $this->seriesPopulation;
     }
 
-    public function setRthSeriesPop(int $rth_series_pop): self
+    public function setSeriesPopulation(int $seriesPopulation): self
     {
-        $this->rth_series_pop = $rth_series_pop;
+        $this->seriesPopulation = $seriesPopulation;
 
         return $this;
     }
 
-    public function getRthCreatdBy(): ?int
+    public function setInserted(DateTimeInterface $inserted): self
     {
-        return $this->rth_creatdBy;
-    }
-
-    public function setRthCreatdBy(?int $rth_creatdBy): self
-    {
-        $this->rth_creatdBy = $rth_creatdBy;
-
-        return $this;
-    }
-
-    public function getRthInserted(): ?\DateTimeInterface
-    {
-        return $this->rth_inserted;
-    }
-
-    public function setRthInserted(\DateTimeInterface $rth_inserted): self
-    {
-        $this->rth_inserted = $rth_inserted;
+        $this->inserted = $inserted;
 
         return $this;
     }

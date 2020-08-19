@@ -4,13 +4,15 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\RoleRepository;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ApiResource()
  * @ORM\Entity(repositoryClass=RoleRepository::class)
  */
-class Role
+class Role extends DbObject
 {
     /**
      * @ORM\Id()
@@ -21,19 +23,19 @@ class Role
     public $id;
 
     /**
-     * @ORM\Column(type="string", length=10, nullable=true)
+     * @ORM\Column(name="rol_name", type="string", length=10, nullable=true)
      */
-    public $rol_name;
+    public $name;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="rol_createdBy", type="integer", nullable=true)
      */
-    public $rol_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="rol_inserted", type="datetime", nullable=true)
      */
-    public $rol_inserted;
+    public $inserted;
 
     /**
      * Role constructor.
@@ -45,36 +47,26 @@ class Role
     public function __construct(int $id = 0, $rol_name = '', $rol_createdBy = null, $rol_inserted = null)
     {
         parent::__construct($id, $rol_createdBy, new DateTime());
-        $this->rol_name = $rol_name;
-        $this->rol_inserted = $rol_inserted;
+        $this->name = $rol_name;
+        $this->inserted = $rol_inserted;
     }
 
-
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
 
     public function getName(): ?string
     {
-        return $this->rol_name;
+        return $this->name;
     }
 
     public function setName(string $rol_name): self
     {
-        $this->rol_name = $rol_name;
+        $this->name = $rol_name;
 
         return $this;
     }
 
-    public function getInserted(): ?\DateTimeInterface
+    public function setInserted(DateTimeInterface $rol_inserted): self
     {
-        return $this->rol_inserted;
-    }
-
-    public function setInserted(\DateTimeInterface $rol_inserted): self
-    {
-        $this->rol_inserted = $rol_inserted;
+        $this->inserted = $rol_inserted;
 
         return $this;
     }

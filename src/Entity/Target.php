@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\TargetRepository;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -13,7 +15,7 @@ use Doctrine\ORM\Mapping\OneToOne;
  * @ApiResource()
  * @ORM\Entity(repositoryClass=TargetRepository::class)
  */
-class Target
+class Target extends DbObject
 {
     /**
      * @ORM\Id()
@@ -23,52 +25,52 @@ class Target
     public $id;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="tgt_sign", type="integer", nullable=true)
      */
-    public $tgt_sign;
+    public $sign;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="tgt_value", type="float", nullable=true)
      */
-    public $tgt_value;
+    public $value;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="tgt_createdBy", type="integer", nullable=true)
      */
-    public $tgt_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="tgt_inserted", type="datetime", nullable=true)
      */
-    public $tgt_inserted;
+    public $inserted;
 
     /**
      * @ManyToOne(targetEntity="Organization", inversedBy="targets")
-     * @JoinColumn(name="organization_org_id", referencedColumnName="org_id",nullable=false)
+     * @JoinColumn(name="organization_org_id", referencedColumnName="org_id",nullable=true)
      */
     protected $organization;
 
     /**
      * @ManyToOne(targetEntity="Department", inversedBy="targets")
-     * @JoinColumn(name="department_dpt_id", referencedColumnName="dpt_id",nullable=false)
+     * @JoinColumn(name="department_dpt_id", referencedColumnName="dpt_id",nullable=true)
      */
     protected $department;
 
     /**
      * @ManyToOne(targetEntity="Position", inversedBy="targets")
-     * @JoinColumn(name="position_pos_id", referencedColumnName="pos_id",nullable=false)
+     * @JoinColumn(name="position_pos_id", referencedColumnName="pos_id",nullable=true)
      */
     protected $position;
 
     /**
      * @ManyToOne(targetEntity="Title", inversedBy="targets")
-     * @JoinColumn(name="title_tit_id", referencedColumnName="tit_id",nullable=false)
+     * @JoinColumn(name="title_tit_id", referencedColumnName="tit_id",nullable=true)
      */
     protected $title;
 
     /**
      * @ManyToOne(targetEntity="User", inversedBy="targets")
-     * @JoinColumn(name="user_usr_id", referencedColumnName="usr_id", nullable=false)
+     * @JoinColumn(name="user_usr_id", referencedColumnName="usr_id", nullable=true)
      */
     protected $user;
 
@@ -80,13 +82,13 @@ class Target
 
     /**
      * @OneToOne(targetEntity="CriterionName")
-     * @JoinColumn(name="criterion_name_cna_id", referencedColumnName="cna_id")
+     * @JoinColumn(name="criterion_name_cna_id", referencedColumnName="cna_id", nullable=true)
      */
     protected $cName;
 
     /**
      * @OneToOne(targetEntity="Criterion", inversedBy="target")
-     * @JoinColumn(name="criterion_crt_id", referencedColumnName="crt_id",nullable=false)
+     * @JoinColumn(name="criterion_crt_id", referencedColumnName="crt_id",nullable=true)
      */
     protected $criterion;
 
@@ -122,9 +124,9 @@ class Target
         $criterion = null)
     {
         parent::__construct($id, $tgt_createdBy, new DateTime());
-        $this->tgt_sign = $tgt_sign;
-        $this->tgt_value = $tgt_value;
-        $this->tgt_inserted = $tgt_inserted;
+        $this->sign = $tgt_sign;
+        $this->value = $tgt_value;
+        $this->inserted = $tgt_inserted;
         $this->organization = $organization;
         $this->department = $department;
         $this->position = $position;
@@ -135,55 +137,33 @@ class Target
         $this->criterion = $criterion;
     }
 
-    public function getId(): ?int
+    public function getSign(): ?int
     {
-        return $this->id;
+        return $this->sign;
     }
 
-    public function getTgtSign(): ?int
+    public function setSign(int $sign): self
     {
-        return $this->tgt_sign;
-    }
-
-    public function setTgtSign(int $tgt_sign): self
-    {
-        $this->tgt_sign = $tgt_sign;
+        $this->sign = $sign;
 
         return $this;
     }
 
-    public function getTgtValue(): ?float
+    public function getValue(): ?float
     {
-        return $this->tgt_value;
+        return $this->value;
     }
 
-    public function setTgtValue(float $tgt_value): self
+    public function setValue(float $value): self
     {
-        $this->tgt_value = $tgt_value;
+        $this->value = $value;
 
         return $this;
     }
 
-    public function getTgtCreatedBy(): ?int
+    public function setInserted(DateTimeInterface $inserted): self
     {
-        return $this->tgt_createdBy;
-    }
-
-    public function setTgtCreatedBy(?int $tgt_createdBy): self
-    {
-        $this->tgt_createdBy = $tgt_createdBy;
-
-        return $this;
-    }
-
-    public function getTgtInserted(): ?\DateTimeInterface
-    {
-        return $this->tgt_inserted;
-    }
-
-    public function setTgtInserted(\DateTimeInterface $tgt_inserted): self
-    {
-        $this->tgt_inserted = $tgt_inserted;
+        $this->inserted = $inserted;
 
         return $this;
     }

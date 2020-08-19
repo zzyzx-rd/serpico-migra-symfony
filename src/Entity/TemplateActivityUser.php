@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\TemplateActivityUserRepository;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -12,7 +14,7 @@ use Doctrine\ORM\Mapping\ManyToOne;
  * @ApiResource()
  * @ORM\Entity(repositoryClass=TemplateActivityUserRepository::class)
  */
-class TemplateActivityUser
+class TemplateActivityUser extends DbObject
 {
     /**
      * @ORM\Id()
@@ -22,34 +24,34 @@ class TemplateActivityUser
     public $id;
 
     /**
-     * @ORM\Column(type="boolean", nullable=true)
+     * @ORM\Column(name="a_u_leader", type="boolean", nullable=true)
      */
-    public $a_u_leader;
+    public $leader;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="a_u_type", type="integer", nullable=true)
      */
-    public $a_u_type;
+    public $type;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="a_u_mWeight", type="float", nullable=true)
      */
-    public $a_u_mWeight;
+    public $mWeight;
 
     /**
-     * @ORM\Column(type="string", length=10, nullable=true)
+     * @ORM\Column(name="a_u_precomment", type="string", length=10, nullable=true)
      */
-    public $a_u_precomment;
+    public $precomment;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="a_u_createdBy", type="integer", nullable=true)
      */
-    public $a_u_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="a_u_inserted", type="datetime", nullable=true)
      */
-    public $a_u_inserted;
+    public $inserted;
 
     /**
      * @ManyToOne(targetEntity="Team")
@@ -119,11 +121,11 @@ class TemplateActivityUser
         Criterion $criterion = null)
     {
         parent::__construct($id, $a_u_createdBy, new DateTime());
-        $this->a_u_leader = $a_u_leader;
-        $this->a_u_type = $a_u_type;
-        $this->a_u_mWeight = $a_u_mWeight;
-        $this->a_u_precomment = $a_u_precomment;
-        $this->a_u_inserted = $a_u_inserted;
+        $this->leader = $a_u_leader;
+        $this->type = $a_u_type;
+        $this->mWeight = $a_u_mWeight;
+        $this->precomment = $a_u_precomment;
+        $this->inserted = $a_u_inserted;
         $this->team = $team;
         $this->activity = $activity;
         $this->stage = $stage;
@@ -132,67 +134,62 @@ class TemplateActivityUser
         $this->ext_user = $external_user_ext_usr;
     }
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
     public function getLeader(): ?bool
     {
-        return $this->a_u_leader;
+        return $this->leader;
     }
 
     public function setLeader(bool $a_u_leader): self
     {
-        $this->a_u_leader = $a_u_leader;
+        $this->leader = $a_u_leader;
 
         return $this;
     }
 
     public function getType(): ?int
     {
-        return $this->a_u_type;
+        return $this->type;
     }
 
     public function setType(int $a_u_type): self
     {
-        $this->a_u_type = $a_u_type;
+        $this->type = $a_u_type;
 
         return $this;
     }
 
     public function getMWeight(): ?float
     {
-        return $this->a_u_mWeight;
+        return $this->mWeight;
     }
 
     public function setMWeight(float $a_u_mWeight): self
     {
-        $this->a_u_mWeight = $a_u_mWeight;
+        $this->mWeight = $a_u_mWeight;
 
         return $this;
     }
 
     public function getPrecomment(): ?string
     {
-        return $this->a_u_precomment;
+        return $this->precomment;
     }
 
     public function setPrecomment(string $a_u_precomment): self
     {
-        $this->a_u_precomment = $a_u_precomment;
+        $this->precomment = $a_u_precomment;
 
         return $this;
     }
 
-    public function getInserted(): ?\DateTimeInterface
+    public function getInserted(): ?DateTimeInterface
     {
-        return $this->a_u_inserted;
+        return $this->inserted;
     }
 
-    public function setInserted(?\DateTimeInterface $a_u_inserted): self
+    public function setInserted(?DateTimeInterface $a_u_inserted): self
     {
-        $this->a_u_inserted = $a_u_inserted;
+        $this->inserted = $a_u_inserted;
 
         return $this;
     }

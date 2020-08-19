@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\WorkerExperienceRepository;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -23,39 +25,39 @@ class WorkerExperience extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="boolean", nullable=true)
+     * @ORM\Column(name="wex_active", type="boolean", nullable=true)
      */
-    public $wex_active;
+    public $active;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="wex_position", type="string", length=255, nullable=true)
      */
-    public $wex_position;
+    public $position;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="wex_location", type="string", length=255, nullable=true)
      */
-    public $wex_location;
+    public $location;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="wex_startdate", type="datetime", nullable=true)
      */
-    public $wex_startdate;
+    public $startdate;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="wex_enddate", type="datetime", nullable=true)
      */
-    public $wex_enddate;
+    public $enddate;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="wex_createdBy", type="integer", nullable=true)
      */
-    public $wex_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="wex_inserted", type="datetime", nullable=true)
      */
-    public $wex_inserted;
+    public $inserted;
 
     /**
      * @ManyToOne(targetEntity="WorkerIndividual", inversedBy="experiences")
@@ -95,89 +97,84 @@ class WorkerExperience extends DbObject
         $firm = null)
     {
         parent::__construct($id, $wex_createdBy, new DateTime());
-        $this->wex_active = $wex_active;
-        $this->wex_position = $wex_position;
-        $this->wex_location = $wex_location;
-        $this->wex_startdate = $wex_startdate;
-        $this->wex_enddate = $wex_enddate;
-        $this->wex_inserted = $wex_inserted;
+        $this->active = $wex_active;
+        $this->position = $wex_position;
+        $this->location = $wex_location;
+        $this->startdate = $wex_startdate;
+        $this->enddate = $wex_enddate;
+        $this->inserted = $wex_inserted;
         $this->individual = $individual;
         $this->firm = $firm;
     }
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
     public function getActive(): ?bool
     {
-        return $this->wex_active;
+        return $this->active;
     }
 
     public function setActive(bool $wex_active): self
     {
-        $this->wex_active = $wex_active;
+        $this->active = $wex_active;
 
         return $this;
     }
 
     public function getPosition(): ?string
     {
-        return $this->wex_position;
+        return $this->position;
     }
 
     public function setPosition(string $wex_position): self
     {
-        $this->wex_position = $wex_position;
+        $this->position = $wex_position;
 
         return $this;
     }
 
     public function getLocation(): ?string
     {
-        return $this->wex_location;
+        return $this->location;
     }
 
     public function setLocation(string $wex_location): self
     {
-        $this->wex_location = $wex_location;
+        $this->location = $wex_location;
 
         return $this;
     }
 
-    public function getStartdate(): ?\DateTimeInterface
+    public function getStartdate(): ?DateTimeInterface
     {
-        return $this->wex_startdate;
+        return $this->startdate;
     }
 
-    public function setStartdate(\DateTimeInterface $wex_startdate): self
+    public function setStartdate(DateTimeInterface $wex_startdate): self
     {
-        $this->wex_startdate = $wex_startdate;
+        $this->startdate = $wex_startdate;
 
         return $this;
     }
 
-    public function getEnddate(): ?\DateTimeInterface
+    public function getEnddate(): ?DateTimeInterface
     {
-        return $this->wex_enddate;
+        return $this->enddate;
     }
 
-    public function setEnddate(\DateTimeInterface $wex_enddate): self
+    public function setEnddate(DateTimeInterface $wex_enddate): self
     {
-        $this->wex_enddate = $wex_enddate;
+        $this->enddate = $wex_enddate;
 
         return $this;
     }
 
-    public function getInserted(): ?\DateTimeInterface
+    public function getInserted(): ?DateTimeInterface
     {
-        return $this->wex_inserted;
+        return $this->inserted;
     }
 
-    public function setInserted(\DateTimeInterface $wex_inserted): self
+    public function setInserted(DateTimeInterface $wex_inserted): self
     {
-        $this->wex_inserted = $wex_inserted;
+        $this->inserted = $wex_inserted;
 
         return $this;
     }

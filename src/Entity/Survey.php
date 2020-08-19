@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\SurveyRepository;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
@@ -27,24 +29,24 @@ class Survey extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="string", length=45)
+     * @ORM\Column(name="sur_name", type="string", length=45)
      */
-    public $sur_name;
+    public $name;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="sur_created_by", type="integer", nullable=true)
      */
-    public $sur_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="sur_inserted", type="datetime", nullable=true)
      */
-    public $sur_inserted;
+    public $inserted;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="sur_state", type="integer", nullable=true)
      */
-    public $sur_state;
+    public $state;
 
     /**
      * @OneToOne(targetEntity="Stage")
@@ -104,66 +106,44 @@ class Survey extends DbObject
         $answers = null)
     {
         parent::__construct($id, $sur_createdBy, new DateTime());
-        $this->sur_name = $sur_name;
-        $this->sur_inserted = $sur_inserted;
-        $this->sur_state = $sur_state;
+        $this->name = $sur_name;
+        $this->inserted = $sur_inserted;
+        $this->state = $sur_state;
         $this->stage = $stage;
         $this->organization = $organization;
-        $this->participants = $participants?$participants: new ArrayCollection();
-        $this->fields = $fields?$fields: new ArrayCollection();
+        $this->participants = $participants?: new ArrayCollection();
+        $this->fields = $fields?: new ArrayCollection();
         $this->answers = $answers?$fields: new ArrayCollection();
     }
 
 
-    public function getId(): ?int
+    public function getName(): ?string
     {
-        return $this->id;
+        return $this->name;
     }
 
-    public function getSurName(): ?string
+    public function setName(string $name): self
     {
-        return $this->sur_name;
-    }
-
-    public function setSurName(string $sur_name): self
-    {
-        $this->sur_name = $sur_name;
+        $this->name = $name;
 
         return $this;
     }
 
-    public function getSurCreatedBy(): ?int
+    public function setInserted(DateTimeInterface $inserted): self
     {
-        return $this->sur_createdBy;
-    }
-
-    public function setSurCreatedBy(int $sur_createdBy): self
-    {
-        $this->sur_createdBy = $sur_createdBy;
+        $this->inserted = $inserted;
 
         return $this;
     }
 
-    public function getSurInserted(): ?\DateTimeInterface
+    public function getState(): ?int
     {
-        return $this->sur_inserted;
+        return $this->state;
     }
 
-    public function setSurInserted(\DateTimeInterface $sur_inserted): self
+    public function setState(int $state): self
     {
-        $this->sur_inserted = $sur_inserted;
-
-        return $this;
-    }
-
-    public function getSurState(): ?int
-    {
-        return $this->sur_state;
-    }
-
-    public function setSurState(int $sur_state): self
-    {
-        $this->sur_state = $sur_state;
+        $this->state = $state;
 
         return $this;
     }
@@ -260,37 +240,37 @@ class Survey extends DbObject
         $this->participants->removeElement($participant);
         return $this;
     }
-    public function addField(SurveyField $field)
+    public function addField(SurveyField $field): Survey
     {
         $this->fields->add($field);
         $field->setSurvey($this);
         return $this;
     }
 
-    public function removeField(SurveyField $field)
+    public function removeField(SurveyField $field): Survey
     {
         $this->fields->removeElement($field);
         return $this;
     }
-    public function addUserAnswer(Answer $answer)
+    public function addUserAnswer(Answer $answer): Survey
     {
         $this->answers->add($answer);
         $answer->setSurvey($this);
         return $this;
     }
-    public function removeUserAnswer(Answer $answer)
+    public function removeUserAnswer(Answer $answer): Survey
     {
         $this->answers->removeElement($answer);
         return $this;
     }
-    public function addAnswer(Answer $answer)
+    public function addAnswer(Answer $answer): Survey
     {
         $this->answers->add($answer);
         $answer->setSurvey($this);
         return $this;
     }
 
-    public function removeAnswer(Answer $answer)
+    public function removeAnswer(Answer $answer): Survey
     {
         $this->answers->removeElement($answer);
         return $this;

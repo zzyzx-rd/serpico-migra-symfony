@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\RankingHistoryRepository;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -23,24 +25,24 @@ class RankingHistory extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="string", length=1)
+     * @ORM\Column(name="rkh_wtype", type="string", length=1)
      */
-    public $rkh_wtype;
+    public $wtype;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="rkh_abs_result", type="integer", nullable=true)
      */
-    public $rkh_abs_result;
+    public $absResult;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="rkh_rel_result", type="float", nullable=true)
      */
-    public $rkh_rel_result;
+    public $relResult;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="rkh_period", type="integer", nullable=true)
      */
-    public $rkh_period;
+    public $period;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
@@ -48,24 +50,24 @@ class RankingHistory extends DbObject
     public $rkh_freq;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="rkh_value", type="float", nullable=true)
      */
-    public $rkh_value;
+    public $value;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="rkh_series_pop", type="integer", nullable=true)
      */
-    public $rkh_series_pop;
+    public $seriesPopulation;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="rkh_createdBy", type="integer", nullable=true)
      */
-    public $rkh_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="rkh_inserted", type="datetime", nullable=true)
      */
-    public $rkh_inserted;
+    public $inserted;
 
     /**
      * @ManyToOne(targetEntity="Activity", inversedBy="historicalRankings")
@@ -125,14 +127,14 @@ class RankingHistory extends DbObject
         $rhk_user_usr = null)
     {
         parent::__construct($id, $rkh_createdBy, new DateTime());
-        $this->rkh_wtype = $rkh_wtype;
-        $this->rkh_abs_result = $rkh_abs_result;
-        $this->rkh_rel_result = $rkh_rel_result;
-        $this->rkh_period = $rkh_period;
+        $this->wtype = $rkh_wtype;
+        $this->absResult = $rkh_abs_result;
+        $this->relResult = $rkh_rel_result;
+        $this->period = $rkh_period;
         $this->rkh_freq = $rkh_freq;
-        $this->rkh_value = $rkh_value;
-        $this->rkh_series_pop = $rkh_series_pop;
-        $this->rkh_inserted = $rkh_inserted;
+        $this->value = $rkh_value;
+        $this->seriesPopulation = $rkh_series_pop;
+        $this->inserted = $rkh_inserted;
         $this->activity = $activity;
         $this->stage = $stage;
         $this->criterion = $criterion;
@@ -140,55 +142,50 @@ class RankingHistory extends DbObject
     }
 
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
     public function getWtype(): ?string
     {
-        return $this->rkh_wtype;
+        return $this->wtype;
     }
 
     public function setWtype(string $rkh_wtype): self
     {
-        $this->rkh_wtype = $rkh_wtype;
+        $this->wtype = $rkh_wtype;
 
         return $this;
     }
 
     public function getAbsResult(): ?int
     {
-        return $this->rkh_abs_result;
+        return $this->absResult;
     }
 
     public function setAbsResult(int $rkh_abs_result): self
     {
-        $this->rkh_abs_result = $rkh_abs_result;
+        $this->absResult = $rkh_abs_result;
 
         return $this;
     }
 
     public function getRelResult(): ?float
     {
-        return $this->rkh_rel_result;
+        return $this->relResult;
     }
 
     public function setRelResult(float $rkh_rel_result): self
     {
-        $this->rkh_rel_result = $rkh_rel_result;
+        $this->relResult = $rkh_rel_result;
 
         return $this;
     }
 
     public function getPeriod(): ?int
     {
-        return $this->rkh_period;
+        return $this->period;
     }
 
     public function setPeriod(int $rkh_period): self
     {
-        $this->rkh_period = $rkh_period;
+        $this->period = $rkh_period;
 
         return $this;
     }
@@ -207,36 +204,31 @@ class RankingHistory extends DbObject
 
     public function getValue(): ?float
     {
-        return $this->rkh_value;
+        return $this->value;
     }
 
     public function setValue(float $rkh_value): self
     {
-        $this->rkh_value = $rkh_value;
+        $this->value = $rkh_value;
 
         return $this;
     }
 
     public function getSeriesPop(): ?int
     {
-        return $this->rkh_series_pop;
+        return $this->seriesPopulation;
     }
 
     public function setSeriesPop(int $rkh_series_pop): self
     {
-        $this->rkh_series_pop = $rkh_series_pop;
+        $this->seriesPopulation = $rkh_series_pop;
 
         return $this;
     }
 
-    public function getInserted(): ?\DateTimeInterface
+    public function setInserted(DateTimeInterface $rkh_inserted): self
     {
-        return $this->rkh_inserted;
-    }
-
-    public function setInserted(\DateTimeInterface $rkh_inserted): self
-    {
-        $this->rkh_inserted = $rkh_inserted;
+        $this->inserted = $rkh_inserted;
 
         return $this;
     }

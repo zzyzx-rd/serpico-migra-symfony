@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\TeamUserRepository;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -23,9 +25,9 @@ class TeamUser extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="boolean", nullable=true)
+     * @ORM\Column(name="tus_leader", type="boolean", nullable=true)
      */
-    public $tus_leader;
+    public $leader;
 
     /**
      * @ORM\Column(name="tus_created_by", type="integer", nullable=true)
@@ -38,14 +40,14 @@ class TeamUser extends DbObject
     public $inserted;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="tus_deleted", type="datetime", nullable=true)
      */
-    public $tus_deleted;
+    public $deleted;
 
     /**
-     * @ORM\Column(type="boolean", nullable=true)
+     * @ORM\Column(name="tus_is_deleted", type="boolean", nullable=true)
      */
-    public $tus_is_deleted;
+    public $isDeleted;
 
     /**
      *@ManyToOne(targetEntity="Team", inversedBy="teamUsers")
@@ -89,64 +91,54 @@ class TeamUser extends DbObject
         $team = null)
     {
         parent::__construct($id,$tus_createdBy , new DateTime());
-        $this->tus_leader = $tus_leader;
+        $this->leader = $tus_leader;
         $this->inserted = $tus_inserted;
-        $this->tus_deleted = $tus_deleted;
-        $this->tus_is_deleted = $tus_is_deleted;
+        $this->deleted = $tus_deleted;
+        $this->isDeleted = $tus_is_deleted;
         $this->team = $team;
         $this->user_usr = $user_usr;
         $this->external_user_ext_id = $external_user_ext_id;
     }
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
     public function getLeader(): ?bool
     {
-        return $this->tus_leader;
+        return $this->leader;
     }
 
     public function setLeader(bool $tus_leader): self
     {
-        $this->tus_leader = $tus_leader;
+        $this->leader = $tus_leader;
 
         return $this;
     }
 
-    public function getInserted(): ?\DateTimeInterface
-    {
-        return $this->inserted;
-    }
-
-    public function setInserted(\DateTimeInterface $tus_inserted): self
+    public function setInserted(DateTimeInterface $tus_inserted): self
     {
         $this->inserted = $tus_inserted;
 
         return $this;
     }
 
-    public function getDeleted(): ?\DateTimeInterface
+    public function getDeleted(): ?DateTimeInterface
     {
-        return $this->tus_deleted;
+        return $this->deleted;
     }
 
-    public function setDeleted(?\DateTimeInterface $tus_deleted): self
+    public function setDeleted(?DateTimeInterface $tus_deleted): self
     {
-        $this->tus_deleted = $tus_deleted;
+        $this->deleted = $tus_deleted;
 
         return $this;
     }
 
     public function getIsDeleted(): ?bool
     {
-        return $this->tus_is_deleted;
+        return $this->isDeleted;
     }
 
     public function setIsDeleted(bool $tus_is_deleted): self
     {
-        $this->tus_is_deleted = $tus_is_deleted;
+        $this->isDeleted = $tus_is_deleted;
 
         return $this;
     }
@@ -190,9 +182,9 @@ class TeamUser extends DbObject
 
         return $this;
     }
-    public function toggleIsDeleted()
+    public function toggleIsDeleted(): TeamUser
     {
-        $this->tus_is_deleted = !$this->tus_is_deleted;
+        $this->isDeleted = !$this->isDeleted;
         return $this;
     }
 }

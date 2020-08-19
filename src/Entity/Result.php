@@ -4,7 +4,10 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\ResultRepository;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 
@@ -27,85 +30,85 @@ class Result extends DbObject
     public $type;
 
     /**
-     * @ORM\Column(name="res_war", type="float", nullable=true)
+     * @Column(name="res_war", length= 10, type="float", nullable=true)
+     * @var float
      */
-    public $weightedAbsoluteResult;
-
+    protected $weightedAbsoluteResult;
     /**
-     * @ORM\Column(name="res_ear", type="float", nullable=true)
+     * @Column(name="res_ear", length= 10, type="float", nullable=true)
+     * @var float
      */
-    public $equalAbsoluteResult;
-
+    protected $equalAbsoluteResult;
     /**
-     * @ORM\Column(name="res_wrr", type="float", nullable=true)
+     * @Column(name="res_wrr", length= 10, type="float", nullable=true)
+     * @var float
      */
-    public $weightedRelativeResult;
-
+    protected $weightedRelativeResult;
     /**
-     * @ORM\Column(name="res_err", type="float", nullable=true)
+     * @Column(name="res_err", length= 10, type="float", nullable=true)
+     * @var float
      */
-    public $equalRelativeResult;
-
+    protected $equalRelativeResult;
     /**
-     * @ORM\Column(name="res_wsd", type="float", nullable=true)
+     * @Column(name="res_wsd", length= 10, type="float", nullable=true)
+     * @var float
      */
-    public $res_wsd;
-
+    protected $weightedStdDev;
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @Column(name="res_esd", length= 10, type="float", nullable=true)
+     * @var float
      */
-    public $res_esd;
-
+    protected $equalStdDev;
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @Column(name="res_wdr", length= 10, type="float", nullable=true)
+     * @var float
      */
-    public $res_wdf;
-
+    protected $weightedDevRatio;
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @Column(name="res_edr", length= 10, type="float", nullable=true)
+     * @var float
      */
-    public $res_edr;
-
+    protected $equalDevRatio;
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @Column(name="res_wsd_max", length= 10, type="float")
+     * @var float
      */
-    public $res_wsd_max;
-
+    protected $weightedStdDevMax;
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @Column(name="res_esd_max", length= 10, type="float")
+     * @var float
      */
-    public $res_esd_max;
-
+    protected $equalStdDevMax;
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @Column(name="res_win", length= 10, type="float")
+     * @var float
      */
-    public $res_win;
-
+    protected $weightedInertia;
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @Column(name="res_ein", length= 10, type="float")
+     * @var float
      */
-    public $res_ein;
-
+    protected $equalInertia;
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @Column(name="res_win_max", length= 10, type="float")
+     * @var float
      */
-    public $res_win_max;
-
+    protected $weightedInertiaMax;
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @Column(name="res_ein_max", length= 10, type="float")
+     * @var float
      */
-    public $res_ein_max;
-
+    protected $equalInertiaMax;
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @Column(name="res_wdr_gen", length= 10, type="float")
+     * @var float
      */
-    public $res_wdr_gen;
-
+    protected $weightedDistanceRatio;
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @Column(name="res_edr_gen", length= 10, type="float")
+     * @var float
      */
-    public $res_res_der_gen;
-
+    protected $equalDistanceRatio;
     /**
      * @ORM\Column(name="res_created_by", type="integer", nullable=true)
      */
@@ -145,7 +148,7 @@ class Result extends DbObject
      * @JoinColumn(name="external_user_ext_usr_id", referencedColumnName="ext_id")
      */
     private $external_user_ext_usr;
-    
+
 
     /**
      * Result constructor.
@@ -155,18 +158,22 @@ class Result extends DbObject
      * @param $res_ear
      * @param $res_wrr
      * @param $res_err
-     * @param $res_wsd
-     * @param $res_esd
-     * @param $res_wdf
-     * @param $res_edr
-     * @param $res_wsd_max
-     * @param $res_esd_max
-     * @param $res_win
-     * @param $res_ein
-     * @param $res_win_max
-     * @param $res_ein_max
-     * @param $res_wdr_gen
-     * @param $res_res_der_gen
+     * @param null $weightedAbsoluteResult
+     * @param null $equalAbsoluteResult
+     * @param null $weightedRelativeResult
+     * @param null $equalRelativeResult
+     * @param null $weightedStdDev
+     * @param null $equalStdDev
+     * @param null $weightedDevRatio
+     * @param null $equalDevRatio
+     * @param null $weightedStdDevMax
+     * @param null $equalStdDevMax
+     * @param null $weightedInertia
+     * @param null $equalInertia
+     * @param null $weightedInertiaMax
+     * @param null $equalInertiaMax
+     * @param null $weightedDistanceRatio
+     * @param null $equalDistanceRatio
      * @param $res_createdBy
      * @param $res_inserted
      * @param Activity $activity
@@ -182,18 +189,22 @@ class Result extends DbObject
         $res_ear = null,
         $res_wrr = null,
         $res_err = null,
-        $res_wsd = null,
-        $res_esd = null,
-        $res_wdf = null,
-        $res_edr = null,
-        $res_wsd_max = null,
-        $res_esd_max = null,
-        $res_win = null,
-        $res_ein = null,
-        $res_win_max = null,
-        $res_ein_max = null,
-        $res_wdr_gen= null,
-        $res_res_der_gen= null,
+        $weightedAbsoluteResult = null,
+        $equalAbsoluteResult = null,
+        $weightedRelativeResult = null,
+        $equalRelativeResult = null,
+        $weightedStdDev = null,
+        $equalStdDev = null,
+        $weightedDevRatio = null,
+        $equalDevRatio = null,
+        $weightedStdDevMax = null,
+        $equalStdDevMax = null,
+        $weightedInertia = null,
+        $equalInertia = null,
+        $weightedInertiaMax = null,
+        $equalInertiaMax = null,
+        $weightedDistanceRatio = null,
+        $equalDistanceRatio = null,
         $res_createdBy= null,
         $res_inserted= null,
         Activity $activity= null,
@@ -208,29 +219,28 @@ class Result extends DbObject
         $this->equalAbsoluteResult = $res_ear;
         $this->weightedRelativeResult = $res_wrr;
         $this->equalRelativeResult = $res_err;
-        $this->res_wsd = $res_wsd;
-        $this->res_esd = $res_esd;
-        $this->res_wdf = $res_wdf;
-        $this->res_edr = $res_edr;
-        $this->res_wsd_max = $res_wsd_max;
-        $this->res_esd_max = $res_esd_max;
-        $this->res_win = $res_win;
-        $this->res_ein = $res_ein;
-        $this->res_win_max = $res_win_max;
-        $this->res_ein_max = $res_ein_max;
-        $this->res_wdr_gen = $res_wdr_gen;
-        $this->res_res_der_gen = $res_res_der_gen;
+        $this->weightedAbsoluteResult = $weightedAbsoluteResult;
+        $this->equalAbsoluteResult = $equalAbsoluteResult;
+        $this->weightedRelativeResult = $weightedRelativeResult;
+        $this->equalRelativeResult = $equalRelativeResult;
+        $this->weightedStdDev = $weightedStdDev;
+        $this->equalStdDev = $equalStdDev;
+        $this->weightedDevRatio = $weightedDevRatio;
+        $this->equalDevRatio = $equalDevRatio;
+        $this->weightedStdDevMax = $weightedStdDevMax;
+        $this->equalStdDevMax = $equalStdDevMax;
+        $this->weightedInertia = $weightedInertia;
+        $this->equalInertia = $equalInertia;
+        $this->weightedInertiaMax = $weightedInertiaMax;
+        $this->equalInertiaMax = $equalInertiaMax;
+        $this->weightedDistanceRatio = $weightedDistanceRatio;
+        $this->equalDistanceRatio = $equalDistanceRatio;
         $this->inserted = $res_inserted;
         $this->activity = $activity;
         $this->stage = $stage;
         $this->criterion = $criterion;
         $this->user_usr = $user_usr;
         $this->external_user_ext_usr = $external_user_ext_usr;
-    }
-
-    public function getId(): ?int
-    {
-        return $this->id;
     }
 
     public function getType(): ?int
@@ -293,157 +303,224 @@ class Result extends DbObject
         return $this;
     }
 
-    public function getResWsd(): ?float
+    /**
+     * @return float
+     */
+    public function getWeightedStdDev(): float
     {
-        return $this->res_wsd;
+        return $this->weightedStdDev;
     }
 
-    public function setResWsd(?float $res_wsd): self
+    /**
+     * @param float $weightedStdDev
+     * @return Result
+     */
+    public function setWeightedStdDev(float $weightedStdDev): Result
     {
-        $this->res_wsd = $res_wsd;
-
+        $this->weightedStdDev = $weightedStdDev;
         return $this;
     }
 
-    public function getResEsd(): ?float
+    /**
+     * @return float
+     */
+    public function getEqualStdDev(): float
     {
-        return $this->res_esd;
+        return $this->equalStdDev;
     }
 
-    public function setResEsd(?float $res_esd): self
+    /**
+     * @param float $equalStdDev
+     * @return Result
+     */
+    public function setEqualStdDev(float $equalStdDev): Result
     {
-        $this->res_esd = $res_esd;
-
+        $this->equalStdDev = $equalStdDev;
         return $this;
     }
 
-    public function getResWdf(): ?float
+    /**
+     * @return float
+     */
+    public function getWeightedDevRatio(): float
     {
-        return $this->res_wdf;
+        return $this->weightedDevRatio;
     }
 
-    public function setResWdf(?float $res_wdf): self
+    /**
+     * @param float $weightedDevRatio
+     * @return Result
+     */
+    public function setWeightedDevRatio(float $weightedDevRatio): Result
     {
-        $this->res_wdf = $res_wdf;
-
+        $this->weightedDevRatio = $weightedDevRatio;
         return $this;
     }
 
-    public function getResEdr(): ?float
+    /**
+     * @return float
+     */
+    public function getEqualDevRatio(): float
     {
-        return $this->res_edr;
+        return $this->equalDevRatio;
     }
 
-    public function setResEdr(?float $res_edr): self
+    /**
+     * @param float $equalDevRatio
+     * @return Result
+     */
+    public function setEqualDevRatio(float $equalDevRatio): Result
     {
-        $this->res_edr = $res_edr;
-
+        $this->equalDevRatio = $equalDevRatio;
         return $this;
     }
 
-    public function getResWsdMax(): ?float
+    /**
+     * @return float
+     */
+    public function getWeightedStdDevMax(): float
     {
-        return $this->res_wsd_max;
+        return $this->weightedStdDevMax;
     }
 
-    public function setResWsdMax(?float $res_wsd_max): self
+    /**
+     * @param float $weightedStdDevMax
+     * @return Result
+     */
+    public function setWeightedStdDevMax(float $weightedStdDevMax): Result
     {
-        $this->res_wsd_max = $res_wsd_max;
-
+        $this->weightedStdDevMax = $weightedStdDevMax;
         return $this;
     }
 
-    public function getResEsdMax(): ?float
+    /**
+     * @return float
+     */
+    public function getEqualStdDevMax(): float
     {
-        return $this->res_esd_max;
+        return $this->equalStdDevMax;
     }
 
-    public function setResEsdMax(float $res_esd_max): self
+    /**
+     * @param float $equalStdDevMax
+     * @return Result
+     */
+    public function setEqualStdDevMax(float $equalStdDevMax): Result
     {
-        $this->res_esd_max = $res_esd_max;
-
+        $this->equalStdDevMax = $equalStdDevMax;
         return $this;
     }
 
-    public function getResWin(): ?float
+    /**
+     * @return float
+     */
+    public function getWeightedInertia(): float
     {
-        return $this->res_win;
+        return $this->weightedInertia;
     }
 
-    public function setResWin(float $res_win): self
+    /**
+     * @param float $weightedInertia
+     * @return Result
+     */
+    public function setWeightedInertia(float $weightedInertia): Result
     {
-        $this->res_win = $res_win;
-
+        $this->weightedInertia = $weightedInertia;
         return $this;
     }
 
-    public function getResEin(): ?float
+    /**
+     * @return float
+     */
+    public function getEqualInertia(): float
     {
-        return $this->res_ein;
+        return $this->equalInertia;
     }
 
-    public function setResEin(float $res_ein): self
+    /**
+     * @param float $equalInertia
+     * @return Result
+     */
+    public function setEqualInertia(float $equalInertia): Result
     {
-        $this->res_ein = $res_ein;
-
+        $this->equalInertia = $equalInertia;
         return $this;
     }
 
-    public function getResWinMax(): ?float
+    /**
+     * @return float
+     */
+    public function getWeightedInertiaMax(): float
     {
-        return $this->res_win_max;
+        return $this->weightedInertiaMax;
     }
 
-    public function setResWinMax(float $res_win_max): self
+    /**
+     * @param float $weightedInertiaMax
+     * @return Result
+     */
+    public function setWeightedInertiaMax(float $weightedInertiaMax): Result
     {
-        $this->res_win_max = $res_win_max;
-
+        $this->weightedInertiaMax = $weightedInertiaMax;
         return $this;
     }
 
-    public function getResEinMax(): ?float
+    /**
+     * @return float
+     */
+    public function getEqualInertiaMax(): float
     {
-        return $this->res_ein_max;
+        return $this->equalInertiaMax;
     }
 
-    public function setResEinMax(float $res_ein_max): self
+    /**
+     * @param float $equalInertiaMax
+     * @return Result
+     */
+    public function setEqualInertiaMax(float $equalInertiaMax): Result
     {
-        $this->res_ein_max = $res_ein_max;
-
+        $this->equalInertiaMax = $equalInertiaMax;
         return $this;
     }
 
-    public function getResWdrGen(): ?float
+    /**
+     * @return float
+     */
+    public function getWeightedDistanceRatio(): float
     {
-        return $this->res_wdr_gen;
+        return $this->weightedDistanceRatio;
     }
 
-    public function setResWdrGen(float $res_wdr_gen): self
+    /**
+     * @param float $weightedDistanceRatio
+     * @return Result
+     */
+    public function setWeightedDistanceRatio(float $weightedDistanceRatio): Result
     {
-        $this->res_wdr_gen = $res_wdr_gen;
-
+        $this->weightedDistanceRatio = $weightedDistanceRatio;
         return $this;
     }
 
-    public function getResResDerGen(): ?float
+    /**
+     * @return float
+     */
+    public function getEqualDistanceRatio(): float
     {
-        return $this->res_res_der_gen;
+        return $this->equalDistanceRatio;
     }
 
-    public function setResResDerGen(float $res_res_der_gen): self
+    /**
+     * @param float $equalDistanceRatio
+     * @return Result
+     */
+    public function setEqualDistanceRatio(float $equalDistanceRatio): Result
     {
-        $this->res_res_der_gen = $res_res_der_gen;
-
+        $this->equalDistanceRatio = $equalDistanceRatio;
         return $this;
     }
 
 
-    public function getInserted(): ?\DateTimeInterface
-    {
-        return $this->inserted;
-    }
-
-    public function setInserted(\DateTimeInterface $inserted): self
+    public function setInserted(DateTimeInterface $inserted): self
     {
         $this->inserted = $inserted;
 
@@ -462,17 +539,6 @@ class Result extends DbObject
         return $this;
     }
 
-    public function getExternalUserExtId(): ?ExternalUser
-    {
-        return $this->external_user_ext_id;
-    }
-
-    public function setExternalUserExtId(?ExternalUser $external_user_ext_id): self
-    {
-        $this->external_user_ext_id = $external_user_ext_id;
-
-        return $this;
-    }
 
     public function getExternalUserExtUsr(): ?ExternalUser
     {

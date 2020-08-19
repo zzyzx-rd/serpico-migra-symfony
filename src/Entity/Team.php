@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\TeamRepository;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
@@ -26,38 +28,38 @@ class Team extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="tea_name", type="string", length=255, nullable=true)
      */
-    public $tea_name;
+    public $name;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="tea_weight_ini", type="float", nullable=true)
      */
-    public $tea_weight_ini;
+    public $weightIni;
 
     /**
-     * @ORM\Column(type="string", length=10, nullable=true)
+     * @ORM\Column(name="tea_picture", type="string", length=10, nullable=true)
      */
-    public $tea_picture;
+    public $picture;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="tea_created_by", type="integer", nullable=true)
      */
-    public $tea_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="tea_inserted", type="datetime", nullable=true)
      */
-    public $tea_inserted;
+    public $inserted;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="tea_deleted", type="datetime", nullable=true)
      */
-    public $tea_deleted;
+    public $deleted;
 
     /**
      *@ManyToOne(targetEntity="Organization", inversedBy="teams")
-     *@JoinColumn(name="organization_org_id", referencedColumnName="org_id", nullable=false)
+     *@JoinColumn(name="organization_org_id", referencedColumnName="org_id", nullable=true)
      */
     protected $organization;
 
@@ -111,79 +113,69 @@ class Team extends DbObject
         $targets = null)
     {
         parent::__construct($id, $tea_createdBy, new DateTime());
-        $this->tea_name = $tea_name;
-        $this->tea_weight_ini = $tea_weight_ini;
-        $this->tea_picture = $tea_picture;
-        $this->tea_inserted = $tea_inserted;
-        $this->tea_deleted = $tea_deleted;
+        $this->name = $tea_name;
+        $this->weightIni = $tea_weight_ini;
+        $this->picture = $tea_picture;
+        $this->inserted = $tea_inserted;
+        $this->deleted = $tea_deleted;
         $this->organization = $organization;
-        $this->teamUsers = $teamUsers?$teamUsers:new ArrayCollection();
-        $this->participations = $participations?$participations: new ArrayCollection();
-        $this->grades = $grades?$grades:new ArrayCollection();
-        $this->targets = $targets?$targets: new ArrayCollection();
-    }
-
-    public function getId(): ?int
-    {
-        return $this->id;
+        $this->teamUsers = $teamUsers?:new ArrayCollection();
+        $this->participations = $participations?: new ArrayCollection();
+        $this->grades = $grades?:new ArrayCollection();
+        $this->targets = $targets?: new ArrayCollection();
     }
 
     public function getName(): ?string
     {
-        return $this->tea_name;
+        return $this->name;
     }
 
     public function setName(string $tea_name): self
     {
-        $this->tea_name = $tea_name;
+        $this->name = $tea_name;
 
         return $this;
     }
 
     public function getWeightIni(): ?float
     {
-        return $this->tea_weight_ini;
+        return $this->weightIni;
     }
 
     public function setWeightIni(float $tea_weight_ini): self
     {
-        $this->tea_weight_ini = $tea_weight_ini;
+        $this->weightIni = $tea_weight_ini;
 
         return $this;
     }
 
     public function getPicture(): ?string
     {
-        return $this->tea_picture;
+        return $this->picture;
     }
 
     public function setPicture(?string $tea_picture): self
     {
-        $this->tea_picture = $tea_picture;
+        $this->picture = $tea_picture;
 
         return $this;
     }
 
-    public function getInserted(): ?\DateTimeInterface
+    public function setInserted(DateTimeInterface $tea_inserted): self
     {
-        return $this->tea_inserted;
-    }
-
-    public function setInserted(\DateTimeInterface $tea_inserted): self
-    {
-        $this->tea_inserted = $tea_inserted;
+        $this->inserted = $tea_inserted;
 
         return $this;
     }
 
-    public function getDeleted(): ?\DateTimeInterface
+    public function getDeleted(): ?DateTimeInterface
     {
-        return $this->tea_deleted;
+        return $this->deleted;
     }
 
-    public function setDeleted(\DateTimeInterface $tea_deleted): self
+    public function setDeleted(DateTimeInterface $tea_deleted): self
     {
-        $this->tea_deleted = $tea_deleted;
+        $this->deleted = $tea_deleted;
 
         return $this;
     }
@@ -274,89 +266,92 @@ class Team extends DbObject
         return $this;
     }
 
-    function removeTeamUser(TeamUser $teamUser){
+    public function removeTeamUser(TeamUser $teamUser): Team
+    {
 
         $this->teamUsers->removeElement($teamUser);
         return $this;
     }
-    public function getCurrentTeamUsers()
+    public function getCurrentTeamUsers(): ArrayCollection
     {
-        return $this->teamUsers->filter(function(TeamUser $tu){
+        return $this->teamUsers->filter(static function(TeamUser $tu){
             return !$tu->isDeleted();
         });
     }
 
     public function getCurrentTeamExtUsers()
     {
-        return $this->getTeamExtUsers()->filter(function(TeamUser $tu){
+        return $this->getTeamExtUsers()->filter(static function(TeamUser $tu){
             return !$tu->isDeleted();
         });
     }
 
     public function getPastTeamExtUsers()
     {
-        return $this->getTeamExtUsers()->filter(function(TeamUser $tu){
+        return $this->getTeamExtUsers()->filter(static function(TeamUser $tu){
             return $tu->isDeleted();
         });
     }
 
     public function getCurrentTeamIntUsers()
     {
-        return $this->getTeamIntUsers()->filter(function(TeamUser $tu){
+        return $this->getTeamIntUsers()->filter(static function(TeamUser $tu){
             return !$tu->isDeleted();
         });
     }
 
     public function getPastTeamIntUsers()
     {
-        return $this->getTeamIntUsers()->filter(function(TeamUser $tu){
+        return $this->getTeamIntUsers()->filter(static function(TeamUser $tu){
             return $tu->isDeleted();
         });
     }
 
-    function addTeamIntUser(TeamUser $teamUser)
+    public function addTeamIntUser(TeamUser $teamUser): Team
     {
         $this->teamUsers->add($teamUser);
         $teamUser->setTeam($this);
         return $this;
     }
 
-    function removeTeamIntUser(TeamUser $teamUser)
+    public function removeTeamIntUser(TeamUser $teamUser): Team
     {
         $this->teamUsers->removeElement($teamUser);
         return $this;
     }
 
-    function addTeamExtUser(TeamUser $teamUser)
+    public function addTeamExtUser(TeamUser $teamUser): Team
     {
         $this->teamUsers->add($teamUser);
         $teamUser->setTeam($this);
         return $this;
     }
 
-    function removeTeamExtUser(TeamUser $teamUser)
+    public function removeTeamExtUser(TeamUser $teamUser): Team
     {
         $this->teamUsers->removeElement($teamUser);
         return $this;
     }
-    public function getActiveTeamUsers()
+    public function getActiveTeamUsers(): ArrayCollection
     {
         $activeTeamUsers = new ArrayCollection;
         foreach ($this->teamUsers as $teamUser) {
-            if ($teamUser->isDeleted() == false){
+            if ($teamUser->isDeleted() === false){
                 $activeTeamUsers->add($teamUser);
             }
         }
         return $activeTeamUsers;
     }
-    function addGrade(Grade $grade){
+    public function addGrade(Grade $grade): Team
+    {
 
         $this->grades->add($grade);
         $grade->setParticipant($this);
         return $this;
     }
 
-    function removeGrade(Grade $grade){
+    public function removeGrade(Grade $grade): Team
+    {
         $this->grades->removeElement($grade);
         return $this;
     }
@@ -369,13 +364,15 @@ class Team extends DbObject
             'name' => $this->name,
         ];
     }
-    function addTarget(Target $target){
+    public function addTarget(Target $target): Team
+    {
         $this->targets->add($target);
         $target->setTeam($this);
         return $this;
     }
 
-    function removeTarget(Target $target){
+    public function removeTarget(Target $target): Team
+    {
         $this->targets->removeElement($target);
         return $this;
     }

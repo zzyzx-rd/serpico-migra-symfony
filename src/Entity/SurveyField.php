@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\SurveyFieldRepository;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
@@ -25,49 +27,49 @@ class SurveyField extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="sfi_type", type="string", length=255, nullable=true)
      */
-    public $sfi_type;
+    public $type;
 
     /**
-     * @ORM\Column(type="boolean", nullable=true)
+     * @ORM\Column(name="sfi_isMandatory", type="boolean", nullable=true)
      */
-    public $sfi_isMandatory;
+    public $isMandatory;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="sfi_title", type="string", length=255, nullable=true)
      */
-    public $sfi_title;
+    public $title;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="sfi_position", type="integer", nullable=true)
      */
-    public $sfi_position;
+    public $position;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="sfi_description", type="string", length=255, nullable=true)
      */
-    public $sfi_description;
+    public $description;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="sfi_created_by", type="integer", nullable=true)
      */
-    public $sfi_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="sfi_inserted", type="datetime", nullable=true)
      */
-    public $sfi_inserted;
+    public $inserted;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="sfi_upperbound", type="integer", nullable=true)
      */
-    public $sfi_upperbound;
+    public $upperbound;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="sfi_lowerbound", type="integer", nullable=true)
      */
-    public $sfi_lowerbound;
+    public $lowerbound;
 
     /**
      * @ManyToOne(targetEntity="Criterion")
@@ -125,117 +127,107 @@ class SurveyField extends DbObject
         Answer $answers = null)
     {
         parent::__construct($id, $sfi_createdBy, new DateTime());
-        $this->sfi_type = $sfi_type;
-        $this->sfi_isMandatory = $sfi_isMandatory;
-        $this->sfi_title = $sfi_title;
-        $this->sfi_position = $sfi_position;
-        $this->sfi_description = $sfi_description;
-        $this->sfi_inserted = $sfi_inserted;
-        $this->sfi_upperbound = $sfi_upperbound;
-        $this->sfi_lowerbound = $sfi_lowerbound;
+        $this->type = $sfi_type;
+        $this->isMandatory = $sfi_isMandatory;
+        $this->title = $sfi_title;
+        $this->position = $sfi_position;
+        $this->description = $sfi_description;
+        $this->inserted = $sfi_inserted;
+        $this->upperbound = $sfi_upperbound;
+        $this->lowerbound = $sfi_lowerbound;
         $this->criterion = $criterion;
         $this->survey = $survey;
-        $this->parameters = $parameters?$parameters:new ArrayCollection();
-        $this->answers = $answers?$answers: new ArrayCollection();
-    }
-
-    public function getId(): ?int
-    {
-        return $this->id;
+        $this->parameters = $parameters?:new ArrayCollection();
+        $this->answers = $answers?: new ArrayCollection();
     }
 
     public function getType(): ?string
     {
-        return $this->sfi_type;
+        return $this->type;
     }
 
     public function setType(string $sfi_type): self
     {
-        $this->sfi_type = $sfi_type;
+        $this->type = $sfi_type;
 
         return $this;
     }
 
     public function getIsMandatory(): ?bool
     {
-        return $this->sfi_isMandatory;
+        return $this->isMandatory;
     }
 
     public function setIsMandatory(bool $sfi_isMandatory): self
     {
-        $this->sfi_isMandatory = $sfi_isMandatory;
+        $this->isMandatory = $sfi_isMandatory;
 
         return $this;
     }
 
     public function getTitle(): ?string
     {
-        return $this->sfi_title;
+        return $this->title;
     }
 
     public function setTitle(string $sfi_title): self
     {
-        $this->sfi_title = $sfi_title;
+        $this->title = $sfi_title;
 
         return $this;
     }
 
     public function getPosition(): ?int
     {
-        return $this->sfi_position;
+        return $this->position;
     }
 
     public function setPosition(int $sfi_position): self
     {
-        $this->sfi_position = $sfi_position;
+        $this->position = $sfi_position;
 
         return $this;
     }
 
     public function getDescription(): ?string
     {
-        return $this->sfi_description;
+        return $this->description;
     }
 
     public function setDescription(string $sfi_description): self
     {
-        $this->sfi_description = $sfi_description;
+        $this->description = $sfi_description;
 
         return $this;
     }
 
-    public function getInserted(): ?\DateTimeInterface
+    public function setInserted(DateTimeInterface $sfi_inserted): self
     {
-        return $this->sfi_inserted;
-    }
-
-    public function setInserted(\DateTimeInterface $sfi_inserted): self
-    {
-        $this->sfi_inserted = $sfi_inserted;
+        $this->inserted = $sfi_inserted;
 
         return $this;
     }
 
     public function getUpperbound(): ?int
     {
-        return $this->sfi_upperbound;
+        return $this->upperbound;
     }
 
     public function setUpperbound(int $sfi_upperbound): self
     {
-        $this->sfi_upperbound = $sfi_upperbound;
+        $this->upperbound = $sfi_upperbound;
 
         return $this;
     }
 
     public function getLowerbound(): ?int
     {
-        return $this->sfi_lowerbound;
+        return $this->lowerbound;
     }
 
     public function setLowerbound(int $sfi_lowerbound): self
     {
-        $this->sfi_lowerbound = $sfi_lowerbound;
+        $this->lowerbound = $sfi_lowerbound;
 
         return $this;
     }
@@ -304,26 +296,26 @@ class SurveyField extends DbObject
         $this->answers = $answers;
     }
 
-    public function addParameter(SurveyFieldParameter $parameter)
+    public function addParameter(SurveyFieldParameter $parameter): SurveyField
     {
         $this->parameters->add($parameter);
         /*$parameter->setSurveyField($this);*/
         return $this;
     }
 
-    public function removeParameter(SurveyFieldParameter $parameter)
+    public function removeParameter(SurveyFieldParameter $parameter): SurveyField
     {
         $this->parameters->removeElement($parameter);
         return $this;
     }
-    public function addAnswers(Answer $answers)
+    public function addAnswers(Answer $answers): SurveyField
     {
         $this->answers->add($answers);
         /*$parameter->setSurveyField($this);*/
         return $this;
     }
 
-    public function removeAnswers(Answer $answers)
+    public function removeAnswers(Answer $answers): SurveyField
     {
         $this->answers->removeElement($answers);
         return $this;

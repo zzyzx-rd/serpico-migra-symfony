@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\SurveyFieldParameterRepository;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -23,34 +25,34 @@ class SurveyFieldParameter extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="sfp_value", type="string", length=255, nullable=true)
      */
-    public $sfp_value;
+    public $value;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="sfp_lowerbound", type="float", nullable=true)
      */
-    public $sfp_lowerbound;
+    public $lowerbound;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="sfp_upperbound", type="float", nullable=true)
      */
-    public $sfp_upperbound;
+    public $upperbound;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="sfp_step", type="float", nullable=true)
      */
-    public $sfp_step;
+    public $step;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="sfp_createdBy", type="integer", nullable=true)
      */
-    public $sfp_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="sfp_inserted", type="datetime", nullable=true)
      */
-    public $sfp_inserted;
+    public $inserted;
 
     /**
      * @ManyToOne(targetEntity="SurveyField", inversedBy="parameters")
@@ -80,75 +82,65 @@ class SurveyFieldParameter extends DbObject
         $field = null)
     {
         parent::__construct($id, $sfp_createdBy, new DateTime());
-        $this->sfp_value = $sfp_value;
-        $this->sfp_lowerbound = $sfp_lowerbound;
-        $this->sfp_upperbound = $sfp_upperbound;
-        $this->sfp_step = $sfp_step;
-        $this->sfp_inserted = $sfp_inserted;
+        $this->value = $sfp_value;
+        $this->lowerbound = $sfp_lowerbound;
+        $this->upperbound = $sfp_upperbound;
+        $this->step = $sfp_step;
+        $this->inserted = $sfp_inserted;
         $this->field = $field;
-    }
-
-    public function getId(): ?int
-    {
-        return $this->id;
     }
 
     public function getValue(): ?string
     {
-        return $this->sfp_value;
+        return $this->value;
     }
 
     public function setValue(string $sfp_value): self
     {
-        $this->sfp_value = $sfp_value;
+        $this->value = $sfp_value;
 
         return $this;
     }
 
     public function getLowerbound(): ?float
     {
-        return $this->sfp_lowerbound;
+        return $this->lowerbound;
     }
 
     public function setLowerbound(?float $sfp_lowerbound): self
     {
-        $this->sfp_lowerbound = $sfp_lowerbound;
+        $this->lowerbound = $sfp_lowerbound;
 
         return $this;
     }
 
     public function getUpperbound(): ?float
     {
-        return $this->sfp_upperbound;
+        return $this->upperbound;
     }
 
     public function setUpperbound(?float $sfp_upperbound): self
     {
-        $this->sfp_upperbound = $sfp_upperbound;
+        $this->upperbound = $sfp_upperbound;
 
         return $this;
     }
 
     public function getStep(): ?float
     {
-        return $this->sfp_step;
+        return $this->step;
     }
 
     public function setStep(?float $sfp_step): self
     {
-        $this->sfp_step = $sfp_step;
+        $this->step = $sfp_step;
 
         return $this;
     }
 
-    public function getInserted(): ?\DateTimeInterface
+    public function setInserted(DateTimeInterface $sfp_inserted): self
     {
-        return $this->sfp_inserted;
-    }
-
-    public function setInserted(\DateTimeInterface $sfp_inserted): self
-    {
-        $this->sfp_inserted = $sfp_inserted;
+        $this->inserted = $sfp_inserted;
 
         return $this;
     }
@@ -169,7 +161,7 @@ class SurveyFieldParameter extends DbObject
         $this->field = $field;
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         return [
             'value'=>$this->value,

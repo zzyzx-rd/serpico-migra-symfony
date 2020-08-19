@@ -3,8 +3,10 @@
 namespace App\Entity;
 
 use App\Repository\TemplateCriterionRepository;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
@@ -24,64 +26,66 @@ class TemplateCriterion extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="crt_type", type="integer", nullable=true)
      */
-    public $icrt_type;
+    public $type;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @Column(name="crt_name", type="string",nullable=true)
+     * @var string
      */
-    public $crt_name;
-
+    protected $name;
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @Column(name="crt_weight", length= 10, type="float")
+     * @var float
      */
-    public $crt_weight;
-
+    protected $weight;
     /**
-     * @ORM\Column(type="boolean", nullable=true)
+     * @Column(name="crt_forceComment_compare", type="boolean")
+     * @var bool
      */
-    public $crt_forceComment_compare;
-
+    protected $forceCommentCompare;
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @Column(name="crt_forceComment_value", length= 10, type="float", nullable= true)
+     * @var float
      */
-    public $crt_forceComment_value;
-
+    protected $forceCommentValue;
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @Column(name="crt_forceComment_sign", type="string", nullable= true)
+     * @var string
      */
-    public $crt_forceComment_sign;
-
+    protected $forceCommentSign;
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @Column(name="crt_lowerbound", length= 10, type="float",nullable=true)
+     * @var float
      */
-    public $crt_lowerbound;
-
+    protected $lowerbound;
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @Column(name="crt_upperbound", length= 10, type="float",nullable=true)
+     * @var float
+     *
      */
-    public $crt_upperbound;
-
+    protected $upperbound;
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @Column(name="crt_step", length= 10, type="float",nullable=true)
+     * @var float
      */
-    public $crt_step;
-
+    protected $step;
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @Column(name="crt_comment", type="string")
+     * @var string
      */
-    public $crt_comment;
-
+    protected $comment;
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @Column(name="crt_createdBy", type="integer", nullable= true)
+     * @var int
      */
-    public $crt_createdBy;
-
+    protected $createdBy;
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @Column(name="crt_inserted", type="datetime", nullable= true)
+     * @var DateTime
      */
-    public $crt_inserted;
+    protected $inserted;
 
     /**
      * @ManyToOne(targetEntity="TemplateStage", inversedBy="criteria")
@@ -104,203 +108,63 @@ class TemplateCriterion extends DbObject
 
     /**
      * TemplateCriterion constructor.
-     * @param $id
-     * @param $icrt_type
-     * @param $crt_name
-     * @param $crt_weight
-     * @param $crt_forceComment_compare
-     * @param $crt_forceComment_value
-     * @param $crt_forceComment_sign
-     * @param $crt_lowerbound
-     * @param $crt_upperbound
-     * @param $crt_step
-     * @param $crt_comment
+     * @param int $id
+     * @param int $type
+     * @param null $name
+     * @param int $weight
+     * @param int $lowerbound
+     * @param int $upperbound
+     * @param float $step
+     * @param null $forceCommentCompare
+     * @param null $forceCommentValue
+     * @param null $forceCommentSign
+     * @param null $comment
      * @param $crt_createdBy
-     * @param $crt_inserted
      * @param $stage
      * @param $participants
      * @param $cName
      */
     public function __construct(
         $id = 0,
-        $icrt_type = 1,
-        $crt_name = null,
-        $crt_weight = 1,
-        $crt_lowerbound = 0,
-        $crt_upperbound = 5,
-        $crt_step = 0.5,
-        $crt_forceComment_compare = null,
-        $crt_forceComment_value = null,
-        $crt_forceComment_sign = null,
-        $crt_comment = null,
+        $type = 1,
+        $name = null,
+        $weight = 1,
+        $lowerbound = 0,
+        $upperbound = 5,
+        $step = 0.5,
+        $forceCommentCompare = null,
+        $forceCommentValue = null,
+        $forceCommentSign = null,
+        $comment = null,
         $crt_createdBy = null,
-        $crt_inserted = null,
         $stage = null,
         $participants = null,
         $cName = null)
     {
         parent::__construct($id,$crt_createdBy , new DateTime());
-        $this->icrt_type = $icrt_type;
-        $this->crt_name = $crt_name;
-        $this->crt_weight = $crt_weight;
-        $this->crt_forceComment_compare = $crt_forceComment_compare;
-        $this->crt_forceComment_value = $crt_forceComment_value;
-        $this->crt_forceComment_sign = $crt_forceComment_sign;
-        $this->crt_lowerbound = $crt_lowerbound;
-        $this->crt_upperbound = $crt_upperbound;
-        $this->crt_step = $crt_step;
-        $this->crt_comment = $crt_comment;
-        $this->crt_inserted = $crt_inserted;
+        $this->name = $name;
+        $this->type = $type;
+        $this->weight = $weight;
+        $this->lowerbound = $lowerbound;
+        $this->upperbound = $upperbound;
+        $this->step = $step;
+        $this->comment = $comment;
+        $this->forceCommentCompare = $forceCommentCompare;
+        $this->forceCommentSign = $forceCommentSign;
+        $this->forceCommentValue = $forceCommentValue;
         $this->stage = $stage;
-        $this->participants = $participants?$participants:new ArrayCollection();
+        $this->participants = $participants?:new ArrayCollection();
         $this->cName = $cName;
     }
 
-    public function getId(): ?int
+    public function getType(): ?int
     {
-        return $this->id;
+        return $this->type;
     }
 
-    public function getIcrtType(): ?int
+    public function setType(int $type): self
     {
-        return $this->icrt_type;
-    }
-
-    public function setIcrtType(int $icrt_type): self
-    {
-        $this->icrt_type = $icrt_type;
-
-        return $this;
-    }
-
-    public function getCrtName(): ?string
-    {
-        return $this->crt_name;
-    }
-
-    public function setCrtName(?string $crt_name): self
-    {
-        $this->crt_name = $crt_name;
-
-        return $this;
-    }
-
-    public function getCrtWeight(): ?float
-    {
-        return $this->crt_weight;
-    }
-
-    public function setCrtWeight(float $crt_weight): self
-    {
-        $this->crt_weight = $crt_weight;
-
-        return $this;
-    }
-
-    public function getCrtForceCommentCompare(): ?bool
-    {
-        return $this->crt_forceComment_compare;
-    }
-
-    public function setCrtForceCommentCompare(bool $crt_forceComment_compare): self
-    {
-        $this->crt_forceComment_compare = $crt_forceComment_compare;
-
-        return $this;
-    }
-
-    public function getCrtForceCommentValue(): ?float
-    {
-        return $this->crt_forceComment_value;
-    }
-
-    public function setCrtForceCommentValue(?float $crt_forceComment_value): self
-    {
-        $this->crt_forceComment_value = $crt_forceComment_value;
-
-        return $this;
-    }
-
-    public function getCrtForceCommentSign(): ?string
-    {
-        return $this->crt_forceComment_sign;
-    }
-
-    public function setCrtForceCommentSign(?string $crt_forceComment_sign): self
-    {
-        $this->crt_forceComment_sign = $crt_forceComment_sign;
-
-        return $this;
-    }
-
-    public function getCrtLowerbound(): ?float
-    {
-        return $this->crt_lowerbound;
-    }
-
-    public function setCrtLowerbound(?float $crt_lowerbound): self
-    {
-        $this->crt_lowerbound = $crt_lowerbound;
-
-        return $this;
-    }
-
-    public function getCrtUpperbound(): ?float
-    {
-        return $this->crt_upperbound;
-    }
-
-    public function setCrtUpperbound(?float $crt_upperbound): self
-    {
-        $this->crt_upperbound = $crt_upperbound;
-
-        return $this;
-    }
-
-    public function getCrtStep(): ?float
-    {
-        return $this->crt_step;
-    }
-
-    public function setCrtStep(?float $crt_step): self
-    {
-        $this->crt_step = $crt_step;
-
-        return $this;
-    }
-
-    public function getCrtComment(): ?string
-    {
-        return $this->crt_comment;
-    }
-
-    public function setCrtComment(string $crt_comment): self
-    {
-        $this->crt_comment = $crt_comment;
-
-        return $this;
-    }
-
-    public function getCrtCreatedBy(): ?int
-    {
-        return $this->crt_createdBy;
-    }
-
-    public function setCrtCreatedBy(?int $crt_createdBy): self
-    {
-        $this->crt_createdBy = $crt_createdBy;
-
-        return $this;
-    }
-
-    public function getCrtInserted(): ?\DateTimeInterface
-    {
-        return $this->crt_inserted;
-    }
-
-    public function setCrtInserted(?\DateTimeInterface $crt_inserted): self
-    {
-        $this->crt_inserted = $crt_inserted;
+        $this->type = $type;
 
         return $this;
     }
@@ -359,7 +223,8 @@ class TemplateCriterion extends DbObject
     }
 
 
-    function removeParticipant(TemplateActivityUser $participant){
+    public function removeParticipant(TemplateActivityUser $participant): TemplateCriterion
+    {
         // Remove this participant
         $this->participants->removeElement($participant);
         return $this;

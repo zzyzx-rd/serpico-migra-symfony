@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\OTPUserRepository;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -23,34 +25,34 @@ class OTPUser extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="string", length=1)
+     * @ORM\Column(name="otp_type", type="string", length=1)
      */
-    public $otp_type;
+    public $type;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="otp_fullname", type="string", length=255, nullable=true)
      */
-    public $otp_fullname;
+    public $fullname;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="otp_tipe", type="string", length=255, nullable=true)
      */
-    public $otp_tipe;
+    public $tipe;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="otp_email", type="string", length=255, nullable=true)
      */
-    public $otp_email;
+    public $email;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="otp_created_by", type="integer", nullable=true)
      */
-    public $otp_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="otp_inserted", type="datetime", nullable=true)
      */
-    public $otp_inserted;
+    public $inserted;
 
     /**
      *@ManyToOne(targetEntity="Organization")
@@ -80,76 +82,66 @@ class OTPUser extends DbObject
         $otp_inserted = null)
     {
         parent::__construct($id,$otp_createdBy , new DateTime());
-        $this->otp_type = $otp_type;
-        $this->otp_fullname = $otp_fullname;
-        $this->otp_tipe = $otp_tipe;
-        $this->otp_email = $otp_email;
-        $this->otp_inserted = $otp_inserted;
+        $this->type = $otp_type;
+        $this->fullname = $otp_fullname;
+        $this->tipe = $otp_tipe;
+        $this->email = $otp_email;
+        $this->inserted = $otp_inserted;
         $this->organization = $organization;
     }
 
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
     public function getType(): ?string
     {
-        return $this->otp_type;
+        return $this->type;
     }
 
     public function setType(string $otp_type): self
     {
-        $this->otp_type = $otp_type;
+        $this->type = $otp_type;
 
         return $this;
     }
 
     public function getFullname(): ?string
     {
-        return $this->otp_fullname;
+        return $this->fullname;
     }
 
     public function setFullname(string $otp_fullname): self
     {
-        $this->otp_fullname = $otp_fullname;
+        $this->fullname = $otp_fullname;
 
         return $this;
     }
 
     public function getTipe(): ?string
     {
-        return $this->otp_tipe;
+        return $this->tipe;
     }
 
     public function setTipe(string $otp_tipe): self
     {
-        $this->otp_tipe = $otp_tipe;
+        $this->tipe = $otp_tipe;
 
         return $this;
     }
 
     public function getEmail(): ?string
     {
-        return $this->otp_email;
+        return $this->email;
     }
 
     public function setEmail(string $otp_email): self
     {
-        $this->otp_email = $otp_email;
+        $this->email = $otp_email;
 
         return $this;
     }
 
-    public function getInserted(): ?\DateTimeInterface
+    public function setInserted(DateTimeInterface $otp_inserted): self
     {
-        return $this->otp_inserted;
-    }
-
-    public function setInserted(\DateTimeInterface $otp_inserted): self
-    {
-        $this->otp_inserted = $otp_inserted;
+        $this->inserted = $otp_inserted;
 
         return $this;
     }

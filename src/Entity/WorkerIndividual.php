@@ -5,6 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\WorkerIndividualRepository;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\OneToMany;
@@ -14,7 +15,7 @@ use Doctrine\ORM\Mapping\OrderBy;
  * @ApiResource()
  * @ORM\Entity(repositoryClass=WorkerIndividualRepository::class)
  */
-class WorkerIndividual
+class WorkerIndividual extends DbObject
 {
     /**
      * @ORM\Id()
@@ -25,69 +26,69 @@ class WorkerIndividual
     public $id;
 
     /**
-     * @ORM\Column(type="string", length=10, nullable=true)
+     * @ORM\Column(name="win_lk_country", type="string", length=10, nullable=true)
      */
-    public $win_lk_country;
+    public $country;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="win_lk_url", type="string", length=255, nullable=true)
      */
-    public $win_lk_url;
+    public $url;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="win_lk_fullName", type="string", length=255, nullable=true)
      */
-    public $win_lk_fullName;
+    public $fullName;
 
     /**
-     * @ORM\Column(type="boolean", nullable=true)
+     * @ORM\Column(name="win_lk_male", type="boolean", nullable=true)
      */
-    public $win_lk_male;
+    public $male;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="win_created", type="integer", nullable=true)
      */
-    public $win_created;
+    public $created;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="win_firstname", type="string", length=255, nullable=true)
      */
-    public $win_firstname;
+    public $firstname;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="win_lastname", type="string", length=255, nullable=true)
      */
-    public $win_lastname;
+    public $lastname;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="win_email", type="string", length=255, nullable=true)
      */
-    public $win_email;
+    public $email;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="win_gdpr", type="datetime", nullable=true)
      */
-    public $win_gdpr;
+    public $gdpr;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="win_lk_nbConnections", type="integer", nullable=true)
      */
-    public $win_lk_nbConnections;
+    public $nbConnections;
 
     /**
-     * @ORM\Column(type="boolean", nullable=true)
+     * @ORM\Column(name="win_lk_contacted", type="boolean", nullable=true)
      */
-    public $win_lk_contacted;
+    public $contacted;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="win_createdBy", type="integer", nullable=true)
      */
-    public $win_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="win_inserted", type="datetime", nullable=true)
      */
-    public $win_inserted;
+    public $inserted;
 
     /**
      * @OneToMany(targetEntity="WorkerExperience", mappedBy="individual", cascade={"persist", "remove"}, orphanRemoval=true)
@@ -138,18 +139,18 @@ class WorkerIndividual
         $mails = null)
     {
         parent::__construct($id, $win_createdBy, new DateTime());
-        $this->win_lk_country = $win_lk_country;
-        $this->win_lk_url = $win_lk_url;
-        $this->win_lk_fullName = $win_lk_fullName;
-        $this->win_lk_male = $win_lk_male;
-        $this->win_created = $win_created;
-        $this->win_firstname = $win_firstname;
-        $this->win_lastname = $win_lastname;
-        $this->win_email = $win_email;
-        $this->win_gdpr = $win_gdpr;
-        $this->win_lk_nbConnections = $win_lk_nbConnections;
-        $this->win_lk_contacted = $win_lk_contacted;
-        $this->win_inserted = $win_inserted;
+        $this->country = $win_lk_country;
+        $this->url = $win_lk_url;
+        $this->fullName = $win_lk_fullName;
+        $this->male = $win_lk_male;
+        $this->created = $win_created;
+        $this->firstname = $win_firstname;
+        $this->lastname = $win_lastname;
+        $this->email = $win_email;
+        $this->gdpr = $win_gdpr;
+        $this->nbConnections = $win_lk_nbConnections;
+        $this->contacted = $win_lk_contacted;
+        $this->inserted = $win_inserted;
         $this->experiences = $experiences?$experiences: new ArrayCollection();
         $this->mails = $mails?$mails: new ArrayCollection();
     }
@@ -161,155 +162,150 @@ class WorkerIndividual
 
     public function getCountry(): ?string
     {
-        return $this->win_lk_country;
+        return $this->country;
     }
 
     public function setCountry(string $win_lk_country): self
     {
-        $this->win_lk_country = $win_lk_country;
+        $this->country = $win_lk_country;
 
         return $this;
     }
 
     public function getUrl(): ?string
     {
-        return $this->win_lk_url;
+        return $this->url;
     }
 
     public function setUrl(string $win_lk_url): self
     {
-        $this->win_lk_url = $win_lk_url;
+        $this->url = $win_lk_url;
 
         return $this;
     }
 
     public function getFullName(): ?string
     {
-        return $this->win_lk_fullName;
+        return $this->fullName;
     }
 
     public function setFullName(string $win_lk_fullName): self
     {
-        $this->win_lk_fullName = $win_lk_fullName;
+        $this->fullName = $win_lk_fullName;
 
         return $this;
     }
 
     public function getMale(): ?bool
     {
-        return $this->win_lk_male;
+        return $this->male;
     }
 
     public function setMale(bool $win_lk_male): self
     {
-        $this->win_lk_male = $win_lk_male;
+        $this->male = $win_lk_male;
 
         return $this;
     }
 
     public function getCreated(): ?int
     {
-        return $this->win_created;
+        return $this->created;
     }
 
     public function setCreated(int $win_created): self
     {
-        $this->win_created = $win_created;
+        $this->created = $win_created;
 
         return $this;
     }
 
     public function getFirstname(): ?string
     {
-        return $this->win_firstname;
+        return $this->firstname;
     }
 
     public function setFirstname(string $win_firstname): self
     {
-        $this->win_firstname = $win_firstname;
+        $this->firstname = $win_firstname;
 
         return $this;
     }
 
     public function getLastname(): ?string
     {
-        return $this->win_lastname;
+        return $this->lastname;
     }
 
     public function setLastname(string $win_lastname): self
     {
-        $this->win_lastname = $win_lastname;
+        $this->lastname = $win_lastname;
 
         return $this;
     }
 
     public function getEmail(): ?string
     {
-        return $this->win_email;
+        return $this->email;
     }
 
     public function setEmail(string $win_email): self
     {
-        $this->win_email = $win_email;
+        $this->email = $win_email;
 
         return $this;
     }
 
-    public function getGdpr(): ?\DateTimeInterface
+    public function getGdpr(): ?DateTimeInterface
     {
-        return $this->win_gdpr;
+        return $this->gdpr;
     }
 
-    public function setGdpr(\DateTimeInterface $win_gdpr): self
+    public function setGdpr(DateTimeInterface $win_gdpr): self
     {
-        $this->win_gdpr = $win_gdpr;
+        $this->gdpr = $win_gdpr;
 
         return $this;
     }
 
     public function getNbConnections(): ?int
     {
-        return $this->win_lk_nbConnections;
+        return $this->nbConnections;
     }
 
     public function setNbConnections(int $win_lk_nbConnections): self
     {
-        $this->win_lk_nbConnections = $win_lk_nbConnections;
+        $this->nbConnections = $win_lk_nbConnections;
 
         return $this;
     }
 
     public function getContacted(): ?bool
     {
-        return $this->win_lk_contacted;
+        return $this->contacted;
     }
 
     public function setContacted(bool $win_lk_contacted): self
     {
-        $this->win_lk_contacted = $win_lk_contacted;
+        $this->contacted = $win_lk_contacted;
 
         return $this;
     }
-    
-    public function getInserted(): ?\DateTimeInterface
-    {
-        return $this->win_inserted;
-    }
 
-    public function setInserted(\DateTimeInterface $win_inserted): self
+    public function setInserted(DateTimeInterface $win_inserted): self
     {
-        $this->win_inserted = $win_inserted;
+        $this->inserted = $win_inserted;
 
         return $this;
     }
-    public function addExperience(WorkerExperience $experience)
+    public function addExperience(WorkerExperience $experience): WorkerIndividual
     {
         $this->experiences->add($experience);
         $experience->setIndividual($this);
         return $this;
     }
 
-    public function removeExperience(WorkerExperience $experience)
+    public function removeExperience(WorkerExperience $experience): WorkerIndividual
     {
         $this->experiences->removeElement($experience);
         return $this;

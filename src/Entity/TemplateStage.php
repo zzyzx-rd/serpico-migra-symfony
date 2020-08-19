@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\TemplateStageRepository;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -28,14 +30,14 @@ class TemplateStage extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="stg_weight", type="float", nullable=true)
      */
-    public $stg_weight;
+    public $weight;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="stg_period", type="integer", nullable=true)
      */
-    public $stg_period;
+    public $period;
 
     /**
      * @Column(name="stg_name", type="string", nullable=true)
@@ -44,49 +46,49 @@ class TemplateStage extends DbObject
     protected $name;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="stg_frequency", type="string", length=255, nullable=true)
      */
-    public $stg_frequency;
+    public $frequency;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="stg_startdate", type="datetime", nullable=true)
      */
-    public $stg_startdate;
+    public $startdate;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="stg_enddate", type="datetime", nullable=true)
      */
-    public $stg_enddate;
+    public $enddate;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="stg_gstartdate", type="datetime", nullable=true)
      */
-    public $stg_gstartdate;
+    public $gstartdate;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="stg_genddate", type="datetime", nullable=true)
      */
-    public $stg_genddate;
+    public $genddate;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="stg_deadline_nbDays", type="integer", nullable=true)
      */
-    public $stg_deadline_nbDays;
+    public $deadlineNbDays;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="stg_created_by", type="string", length=255, nullable=true)
      */
-    public $stg_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="stg_inserted", type="datetime", nullable=true)
      */
-    public $stg_inserted;
+    public $inserted;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="stg_mode", type="integer", nullable=true)
      */
-    public $stg_mode;
+    public $mode;
 
     /**
      * @ManyToOne(targetEntity="TemplateActivity", inversedBy="stages")
@@ -108,7 +110,7 @@ class TemplateStage extends DbObject
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
-     * @JoinColumn(name="stg_master_usr_id", referencedColumnName="usr_id")
+     * @JoinColumn(name="stg_master_usr_id", referencedColumnName="usr_id", nullable=true)
      */
     public $master_usr;
 
@@ -160,156 +162,139 @@ class TemplateStage extends DbObject
     {
         parent::__construct($id, $stg_createdBy, new DateTime());
         $this->name = $name;
-        $this->stg_weight = $stg_weight;
-        $this->stg_period = $stg_period;
-        $this->stg_frequency = $stg_frequency;
-        $this->stg_startdate = $stg_startdate;
-        $this->stg_enddate = $stg_enddate;
-        $this->stg_gstartdate = $stg_gstartdate;
-        $this->stg_genddate = $stg_genddate;
-        $this->stg_deadline_nbDays = $stg_deadline_nbDays;
-        $this->stg_inserted = $stg_inserted;
-        $this->stg_mode = $stg_mode;
+        $this->weight = $stg_weight;
+        $this->period = $stg_period;
+        $this->frequency = $stg_frequency;
+        $this->startdate = $stg_startdate;
+        $this->enddate = $stg_enddate;
+        $this->gstartdate = $stg_gstartdate;
+        $this->genddate = $stg_genddate;
+        $this->deadlineNbDays = $stg_deadline_nbDays;
+        $this->inserted = $stg_inserted;
+        $this->mode = $stg_mode;
         $this->activity = $activity;
-        $this->criteria = $criteria?$criteria:new ArrayCollection();
-        $this->participants = $participants?$participants:new ArrayCollection();
+        $this->criteria = $criteria?:new ArrayCollection();
+        $this->participants = $participants?:new ArrayCollection();
         $this->master_usr = $stg_master_usr;
         $this->stg_desc = $stg_desc;
     }
 
-    public function getId(): ?int
+    public function getWeight(): ?float
     {
-        return $this->id;
+        return $this->weight;
     }
 
-    public function getStgWeight(): ?float
+    public function setWeight(float $weight): self
     {
-        return $this->stg_weight;
-    }
-
-    public function setStgWeight(float $stg_weight): self
-    {
-        $this->stg_weight = $stg_weight;
+        $this->weight = $weight;
 
         return $this;
     }
 
-    public function getStgPeriod(): ?int
+    public function getPeriod(): ?int
     {
-        return $this->stg_period;
+        return $this->period;
     }
 
-    public function setStgPeriod(int $stg_period): self
+    public function setPeriod(int $period): self
     {
-        $this->stg_period = $stg_period;
+        $this->period = $period;
 
         return $this;
     }
 
-    public function getStgFrequency(): ?string
+    public function getFrequency(): ?string
     {
-        return $this->stg_frequency;
+        return $this->frequency;
     }
 
-    public function setStgFrequency(string $stg_frequency): self
+    public function setFrequency(string $frequency): self
     {
-        $this->stg_frequency = $stg_frequency;
+        $this->frequency = $frequency;
 
         return $this;
     }
 
-    public function getStgStartdate(): ?\DateTimeInterface
+    public function getStartdate(): ?DateTimeInterface
     {
-        return $this->stg_startdate;
+        return $this->startdate;
     }
 
-    public function setStgStartdate(\DateTimeInterface $stg_startdate): self
+    public function setStartdate(DateTimeInterface $startdate): self
     {
-        $this->stg_startdate = $stg_startdate;
+        $this->startdate = $startdate;
 
         return $this;
     }
 
-    public function getStgEnddate(): ?\DateTimeInterface
+    public function getEnddate(): ?DateTimeInterface
     {
-        return $this->stg_enddate;
+        return $this->enddate;
     }
 
-    public function setStgEnddate(\DateTimeInterface $stg_enddate): self
+    public function setEnddate(DateTimeInterface $enddate): self
     {
-        $this->stg_enddate = $stg_enddate;
+        $this->enddate = $enddate;
 
         return $this;
     }
 
-    public function getStgGstartdate(): ?\DateTimeInterface
+    public function getGstartdate(): ?DateTimeInterface
     {
-        return $this->stg_gstartdate;
+        return $this->gstartdate;
     }
 
-    public function setStgGstartdate(\DateTimeInterface $stg_gstartdate): self
+    public function setGstartdate(DateTimeInterface $gstartdate): self
     {
-        $this->stg_gstartdate = $stg_gstartdate;
+        $this->gstartdate = $gstartdate;
 
         return $this;
     }
 
-    public function getStgGenddate(): ?\DateTimeInterface
+    public function getGenddate(): ?DateTimeInterface
     {
-        return $this->stg_genddate;
+        return $this->genddate;
     }
 
-    public function setStgGenddate(\DateTimeInterface $stg_genddate): self
+    public function setGenddate(DateTimeInterface $genddate): self
     {
-        $this->stg_genddate = $stg_genddate;
+        $this->genddate = $genddate;
 
         return $this;
     }
 
-    public function getStgDeadlineNbDays(): ?int
+    public function getDeadlineNbDays(): ?int
     {
-        return $this->stg_deadline_nbDays;
+        return $this->deadlineNbDays;
     }
 
-    public function setStgDeadlineNbDays(int $stg_deadline_nbDays): self
+    public function setDeadlineNbDays(int $deadlineNbDays): self
     {
-        $this->stg_deadline_nbDays = $stg_deadline_nbDays;
+        $this->deadlineNbDays = $deadlineNbDays;
 
         return $this;
     }
 
-    public function getStgCreatedBy(): ?string
+    public function getCreatedBy(): ?string
     {
-        return $this->stg_createdBy;
+        return $this->createdBy;
     }
 
-    public function setStgCreatedBy(?string $stg_createdBy): self
+    public function setInserted(?DateTimeInterface $inserted): self
     {
-        $this->stg_createdBy = $stg_createdBy;
+        $this->inserted = $inserted;
 
         return $this;
     }
 
-    public function getStgInserted(): ?\DateTimeInterface
+    public function getMode(): ?int
     {
-        return $this->stg_inserted;
+        return $this->mode;
     }
 
-    public function setStgInserted(?\DateTimeInterface $stg_inserted): self
+    public function setMode(?int $mode): self
     {
-        $this->stg_inserted = $stg_inserted;
-
-        return $this;
-    }
-
-    public function getStgMode(): ?int
-    {
-        return $this->stg_mode;
-    }
-
-    public function setStgMode(?int $stg_mode): self
-    {
-        $this->stg_mode = $stg_mode;
+        $this->mode = $mode;
 
         return $this;
     }
@@ -385,7 +370,8 @@ class TemplateStage extends DbObject
 
         return $this;
     }
-    function addCriterion(TemplateCriterion $criterion){
+    public function addCriterion(TemplateCriterion $criterion): TemplateStage
+    {
         //The below line is to prevent adding a criterion already submitted (because of activeStages/stages).
         // However as stage criteria are built in advance for recurring activities, we also need to take into account this exception
 
@@ -396,20 +382,23 @@ class TemplateStage extends DbObject
         //}
     }
 
-    function removeCriterion(TemplateCriterion $criterion){
+    public function removeCriterion(TemplateCriterion $criterion): TemplateStage
+    {
         $this->criteria->removeElement($criterion);
         $criterion->setStage(null);
         return $this;
     }
 
-    function addParticipant(TemplateActivityUser $participant){
+    public function addParticipant(TemplateActivityUser $participant): TemplateStage
+    {
 
         $this->participants->add($participant);
         $participant->setStage($this);
         return $this;
     }
 
-    function removeParticipant(TemplateActivityUser $participant){
+    public function removeParticipant(TemplateActivityUser $participant): TemplateStage
+    {
         $this->participants->removeElement($participant);
         return $this;
     }
@@ -432,9 +421,9 @@ class TemplateStage extends DbObject
                 }
             }
             return $k / ($k + $l);
-        } else {
-            return 0;
         }
+
+        return 0;
     }
     /**
      * @return Collection|TemplateActivityUser[]
@@ -444,7 +433,8 @@ class TemplateStage extends DbObject
         return $this->criteria->first()->getParticipants();
     }
 
-    function addUniqueParticipation(TemplateActivityUser $participant){
+    public function addUniqueParticipation(TemplateActivityUser $participant): TemplateStage
+    {
         foreach($this->criteria as $criterion){
             $criterion->addParticipant($participant);
             $participant->setCriterion($criterion)->setStage($this);
@@ -452,7 +442,8 @@ class TemplateStage extends DbObject
         return $this;
     }
 
-    function removeUniqueParticipation(TemplateActivityUser $participant){
+    public function removeUniqueParticipation(TemplateActivityUser $participant): TemplateStage
+    {
         foreach($this->criteria as $criterion){
             $criterion->getParticipants()->removeElement($participant);
         }

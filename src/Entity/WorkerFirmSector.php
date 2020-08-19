@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\WorkerFirmSectorRepository;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -13,7 +15,7 @@ use Doctrine\ORM\Mapping\OneToOne;
  * @ApiResource()
  * @ORM\Entity(repositoryClass=WorkerFirmSectorRepository::class)
  */
-class WorkerFirmSector
+class WorkerFirmSector extends DbObject
 {
     /**
      * @ORM\Id()
@@ -24,23 +26,23 @@ class WorkerFirmSector
     public $id;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="wfs_name", type="string", length=255, nullable=true)
      */
-    public $wfs_name;
+    public $name;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="wfs_createdBy", type="integer", nullable=true)
      */
-    public $wfs_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="wfs_inserted", type="datetime", nullable=true)
      */
-    public $wfs_inserted;
+    public $inserted;
 
     /**
      * @ManyToOne(targetEntity="Icon", inversedBy="workerFirmSectors")
-     * @JoinColumn(name="icon_ico_id", referencedColumnName="ico_id",nullable=false)
+     * @JoinColumn(name="icon_ico_id", referencedColumnName="ico_id",nullable=true)
      */
     protected $icon;
 
@@ -67,8 +69,8 @@ class WorkerFirmSector
         $firm = null)
     {
         parent::__construct($id, $wfs_createdBy, new DateTime());
-        $this->wfs_name = $wfs_name;
-        $this->wfs_inserted = $wfs_inserted;
+        $this->name = $wfs_name;
+        $this->inserted = $wfs_inserted;
         $this->icon = $icon;
         $this->firm = $firm;
     }
@@ -80,24 +82,19 @@ class WorkerFirmSector
 
     public function getName(): ?string
     {
-        return $this->wfs_name;
+        return $this->name;
     }
 
     public function setName(string $wfs_name): self
     {
-        $this->wfs_name = $wfs_name;
+        $this->name = $wfs_name;
 
         return $this;
     }
 
-    public function getInserted(): ?\DateTimeInterface
+    public function setInserted(DateTimeInterface $wfs_inserted): self
     {
-        return $this->wfs_inserted;
-    }
-
-    public function setInserted(\DateTimeInterface $wfs_inserted): self
-    {
-        $this->wfs_inserted = $wfs_inserted;
+        $this->inserted = $wfs_inserted;
 
         return $this;
     }

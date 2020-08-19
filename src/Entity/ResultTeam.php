@@ -4,7 +4,9 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\ResultTeamRepository;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 
@@ -22,99 +24,100 @@ class ResultTeam extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @Column(name="rst_type", type="integer", nullable=true)
+     * @var int
      */
-    public $rst_type;
-
+    protected $type;
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @Column(name="rst_war", length= 10, type="float", nullable=true)
+     * @var float
      */
-    public $rst_war;
-
+    protected $weightedAbsoluteResult;
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @Column(name="rst_ear", length= 10, type="float", nullable=true)
+     * @var float
      */
-    public $rst_ear;
-
+    protected $equalAbsoluteResult;
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @Column(name="rst_wrr", length= 10, type="float", nullable=true)
+     * @var float
      */
-    public $rst_wrr;
-
+    protected $weightedRelativeResult;
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @Column(name="rst_err", length= 10, type="float", nullable=true)
+     * @var float
      */
-    public $rst_err;
-
+    protected $equalRelativeResult;
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @Column(name="rst_wsd", length= 10, type="float", nullable=true)
+     * @var float
      */
-    public $rst_wsd;
-
+    protected $weightedStdDev;
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @Column(name="rst_esd", length= 10, type="float", nullable=true)
+     * @var float
      */
-    public $rst_esd;
-
+    protected $equalStdDev;
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @Column(name="rst_wdr", length= 10, type="float", nullable=true)
+     * @var float
      */
-    public $rst_wdr;
-
+    protected $weightedDevRatio;
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @Column(name="rst_edr", length= 10, type="float", nullable=true)
+     * @var float
      */
-    public $rst_edr;
-
+    protected $equalDevRatio;
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @Column(name="rst_wsd_max", length= 10, type="float")
+     * @var float
      */
-    public $rst_wsd_max;
-
+    protected $weightedStdDevMax;
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @Column(name="rst_esd_max", length= 10, type="float")
+     * @var float
      */
-    public $rst_esd_max;
-
+    protected $equalStdDevMax;
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @Column(name="rst_win", length= 10, type="float")
+     * @var float
      */
-    public $rst_win;
-
+    protected $weightedInertia;
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @Column(name="rst_ein", length= 10, type="float")
+     * @var float
      */
-    public $rst_ein;
-
+    protected $equalInertia;
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @Column(name="rst_win_max", length= 10, type="float")
+     * @var float
      */
-    public $rst_win_max;
-
+    protected $weightedInertiaMax;
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @Column(name="rst_ein_max", length= 10, type="float")
+     * @var float
      */
-    public $rst_ein_max;
-
+    protected $equalInertiaMax;
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @Column(name="rst_wdr_gen", length= 10, type="float")
+     * @var float
      */
-    public $rst_wdr_gen;
-
+    protected $weightedDistanceRatio;
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @Column(name="rst_edr_gen", length= 10, type="float")
+     * @var float
      */
-    public $rst_edr_gen;
-
+    protected $equalDistanceRatio;
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @Column(name="rst_createdBy", type="integer")
+     * @var int
      */
-    public $rst_createdBy;
-
+    protected $createdBy;
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @Column(name="rst_inserted", type="datetime")
+     * @var /DateTime
      */
-    public $rst_inserted;
+    protected $inserted;
 
     /**
      * @ManyToOne(targetEntity="Activity", inversedBy="resultTeams")
@@ -142,26 +145,24 @@ class ResultTeam extends DbObject
 
     /**
      * ResultTeam constructor.
-     * @param $id
-     * @param $rst_type
-     * @param $rst_war
-     * @param $rst_ear
-     * @param $rst_wrr
-     * @param $rst_err
-     * @param $rst_wsd
-     * @param $rst_esd
-     * @param $rst_wdr
-     * @param $rst_edr
-     * @param $rst_wsd_max
-     * @param $rst_esd_max
-     * @param $rst_win
-     * @param $rst_ein
-     * @param $rst_win_max
-     * @param $rst_ein_max
-     * @param $rst_wdr_gen
-     * @param $rst_edr_gen
+     * @param int $id
+     * @param $weightedAbsoluteResult
+     * @param $equalAbsoluteResult
+     * @param $weightedRelativeResult
+     * @param $equalRelativeResult
+     * @param $weightedStdDev
+     * @param $equalStdDev
+     * @param $weightedDevRatio
+     * @param $equalDevRatio
+     * @param $weightedStdDevMax
+     * @param $equalStdDevMax
+     * @param $weightedInertia
+     * @param $equalInertia
+     * @param $weightedInertiaMax
+     * @param $equalInertiaMax
+     * @param $weightedDistanceRatio
+     * @param $equalDistanceRatio
      * @param $rst_createdBy
-     * @param $rst_inserted
      * @param $activity
      * @param $stage
      * @param $criterion
@@ -169,287 +170,358 @@ class ResultTeam extends DbObject
      */
     public function __construct(
         $id = 0,
-        $rst_type = null,
-        $rst_war = null,
-        $rst_ear = null,
-        $rst_wrr = null,
-        $rst_err = null,
-        $rst_wsd = null,
-        $rst_esd = null,
-        $rst_wdr = null,
-        $rst_edr = null,
-        $rst_wsd_max = null,
-        $rst_esd_max = null,
-        $rst_win = null,
-        $rst_ein = null,
-        $rst_win_max = null,
-        $rst_ein_max = null,
-        $rst_wdr_gen = null,
-        $rst_edr_gen = null,
+        $weightedAbsoluteResult = null,
+        $equalAbsoluteResult = null,
+        $weightedRelativeResult = null,
+        $equalRelativeResult = null,
+        $weightedStdDev = null,
+        $equalStdDev = null,
+        $weightedDevRatio = null,
+        $equalDevRatio = null,
+        $weightedStdDevMax = null,
+        $equalStdDevMax = null,
+        $weightedInertia = null,
+        $equalInertia = null,
+        $weightedInertiaMax = null,
+        $equalInertiaMax = null,
+        $weightedDistanceRatio = null,
+        $equalDistanceRatio = null,
         $rst_createdBy = null,
-        $rst_inserted = null,
         $activity = null,
         $stage = null,
         $criterion = null,
         $team = null)
     {
         parent::__construct($id, $rst_createdBy, new DateTime());
-        $this->rst_type = $rst_type;
-        $this->rst_war = $rst_war;
-        $this->rst_ear = $rst_ear;
-        $this->rst_wrr = $rst_wrr;
-        $this->rst_err = $rst_err;
-        $this->rst_wsd = $rst_wsd;
-        $this->rst_esd = $rst_esd;
-        $this->rst_wdr = $rst_wdr;
-        $this->rst_edr = $rst_edr;
-        $this->rst_wsd_max = $rst_wsd_max;
-        $this->rst_esd_max = $rst_esd_max;
-        $this->rst_win = $rst_win;
-        $this->rst_ein = $rst_ein;
-        $this->rst_win_max = $rst_win_max;
-        $this->rst_ein_max = $rst_ein_max;
-        $this->rst_wdr_gen = $rst_wdr_gen;
-        $this->rst_edr_gen = $rst_edr_gen;
-        $this->rst_inserted = $rst_inserted;
+        $this->weightedAbsoluteResult = $weightedAbsoluteResult;
+        $this->equalAbsoluteResult = $equalAbsoluteResult;
+        $this->weightedRelativeResult = $weightedRelativeResult;
+        $this->equalRelativeResult = $equalRelativeResult;
+        $this->weightedStdDev = $weightedStdDev;
+        $this->equalStdDev = $equalStdDev;
+        $this->weightedDevRatio = $weightedDevRatio;
+        $this->equalDevRatio = $equalDevRatio;
+        $this->weightedStdDevMax = $weightedStdDevMax;
+        $this->equalStdDevMax = $equalStdDevMax;
+        $this->weightedInertia = $weightedInertia;
+        $this->equalInertia = $equalInertia;
+        $this->weightedInertiaMax = $weightedInertiaMax;
+        $this->equalInertiaMax = $equalInertiaMax;
+        $this->weightedDistanceRatio = $weightedDistanceRatio;
+        $this->equalDistanceRatio = $equalDistanceRatio;
         $this->activity = $activity;
         $this->stage = $stage;
         $this->criterion = $criterion;
         $this->team = $team;
     }
 
-    public function getId(): ?int
+    /**
+     * @return int
+     */
+    public function getType(): int
     {
-        return $this->id;
+        return $this->type;
     }
 
-    public function getRstType(): ?int
+    /**
+     * @param int $type
+     * @return ResultTeam
+     */
+    public function setType(int $type): ResultTeam
     {
-        return $this->rst_type;
-    }
-
-    public function setRstType(?int $rst_type): self
-    {
-        $this->rst_type = $rst_type;
-
+        $this->type = $type;
         return $this;
     }
 
-    public function getRstWar(): ?float
+    /**
+     * @return float
+     */
+    public function getWeightedAbsoluteResult(): float
     {
-        return $this->rst_war;
+        return $this->weightedAbsoluteResult;
     }
 
-    public function setRstWar(?float $rst_war): self
+    /**
+     * @param float $weightedAbsoluteResult
+     * @return ResultTeam
+     */
+    public function setWeightedAbsoluteResult(float $weightedAbsoluteResult): ResultTeam
     {
-        $this->rst_war = $rst_war;
-
+        $this->weightedAbsoluteResult = $weightedAbsoluteResult;
         return $this;
     }
 
-    public function getRstEar(): ?float
+    /**
+     * @return float
+     */
+    public function getEqualAbsoluteResult(): float
     {
-        return $this->rst_ear;
+        return $this->equalAbsoluteResult;
     }
 
-    public function setRstEar(?float $rst_ear): self
+    /**
+     * @param float $equalAbsoluteResult
+     * @return ResultTeam
+     */
+    public function setEqualAbsoluteResult(float $equalAbsoluteResult): ResultTeam
     {
-        $this->rst_ear = $rst_ear;
-
+        $this->equalAbsoluteResult = $equalAbsoluteResult;
         return $this;
     }
 
-    public function getRstWrr(): ?float
+    /**
+     * @return float
+     */
+    public function getWeightedRelativeResult(): float
     {
-        return $this->rst_wrr;
+        return $this->weightedRelativeResult;
     }
 
-    public function setRstWrr(?float $rst_wrr): self
+    /**
+     * @param float $weightedRelativeResult
+     * @return ResultTeam
+     */
+    public function setWeightedRelativeResult(float $weightedRelativeResult): ResultTeam
     {
-        $this->rst_wrr = $rst_wrr;
-
+        $this->weightedRelativeResult = $weightedRelativeResult;
         return $this;
     }
 
-    public function getRstErr(): ?float
+    /**
+     * @return float
+     */
+    public function getEqualRelativeResult(): float
     {
-        return $this->rst_err;
+        return $this->equalRelativeResult;
     }
 
-    public function setRstErr(?float $rst_err): self
+    /**
+     * @param float $equalRelativeResult
+     * @return ResultTeam
+     */
+    public function setEqualRelativeResult(float $equalRelativeResult): ResultTeam
     {
-        $this->rst_err = $rst_err;
-
+        $this->equalRelativeResult = $equalRelativeResult;
         return $this;
     }
 
-    public function getRstWsd(): ?float
+    /**
+     * @return float
+     */
+    public function getWeightedStdDev(): float
     {
-        return $this->rst_wsd;
+        return $this->weightedStdDev;
     }
 
-    public function setRstWsd(?float $rst_wsd): self
+    /**
+     * @param float $weightedStdDev
+     * @return ResultTeam
+     */
+    public function setWeightedStdDev(float $weightedStdDev): ResultTeam
     {
-        $this->rst_wsd = $rst_wsd;
-
+        $this->weightedStdDev = $weightedStdDev;
         return $this;
     }
 
-    public function getRstEsd(): ?float
+    /**
+     * @return float
+     */
+    public function getEqualStdDev(): float
     {
-        return $this->rst_esd;
+        return $this->equalStdDev;
     }
 
-    public function setRstEsd(?float $rst_esd): self
+    /**
+     * @param float $equalStdDev
+     * @return ResultTeam
+     */
+    public function setEqualStdDev(float $equalStdDev): ResultTeam
     {
-        $this->rst_esd = $rst_esd;
-
+        $this->equalStdDev = $equalStdDev;
         return $this;
     }
 
-    public function getRstWdr(): ?float
+    /**
+     * @return float
+     */
+    public function getWeightedDevRatio(): float
     {
-        return $this->rst_wdr;
+        return $this->weightedDevRatio;
     }
 
-    public function setRstWdr(?float $rst_wdr): self
+    /**
+     * @param float $weightedDevRatio
+     * @return ResultTeam
+     */
+    public function setWeightedDevRatio(float $weightedDevRatio): ResultTeam
     {
-        $this->rst_wdr = $rst_wdr;
-
+        $this->weightedDevRatio = $weightedDevRatio;
         return $this;
     }
 
-    public function getRstEdr(): ?float
+    /**
+     * @return float
+     */
+    public function getEqualDevRatio(): float
     {
-        return $this->rst_edr;
+        return $this->equalDevRatio;
     }
 
-    public function setRstEdr(?float $rst_edr): self
+    /**
+     * @param float $equalDevRatio
+     * @return ResultTeam
+     */
+    public function setEqualDevRatio(float $equalDevRatio): ResultTeam
     {
-        $this->rst_edr = $rst_edr;
-
+        $this->equalDevRatio = $equalDevRatio;
         return $this;
     }
 
-    public function getRstWsdMax(): ?float
+    /**
+     * @return float
+     */
+    public function getWeightedStdDevMax(): float
     {
-        return $this->rst_wsd_max;
+        return $this->weightedStdDevMax;
     }
 
-    public function setRstWsdMax(float $rst_wsd_max): self
+    /**
+     * @param float $weightedStdDevMax
+     * @return ResultTeam
+     */
+    public function setWeightedStdDevMax(float $weightedStdDevMax): ResultTeam
     {
-        $this->rst_wsd_max = $rst_wsd_max;
-
+        $this->weightedStdDevMax = $weightedStdDevMax;
         return $this;
     }
 
-    public function getRstEsdMax(): ?float
+    /**
+     * @return float
+     */
+    public function getEqualStdDevMax(): float
     {
-        return $this->rst_esd_max;
+        return $this->equalStdDevMax;
     }
 
-    public function setRstEsdMax(float $rst_esd_max): self
+    /**
+     * @param float $equalStdDevMax
+     * @return ResultTeam
+     */
+    public function setEqualStdDevMax(float $equalStdDevMax): ResultTeam
     {
-        $this->rst_esd_max = $rst_esd_max;
-
+        $this->equalStdDevMax = $equalStdDevMax;
         return $this;
     }
 
-    public function getRstWin(): ?float
+    /**
+     * @return float
+     */
+    public function getWeightedInertia(): float
     {
-        return $this->rst_win;
+        return $this->weightedInertia;
     }
 
-    public function setRstWin(float $rst_win): self
+    /**
+     * @param float $weightedInertia
+     * @return ResultTeam
+     */
+    public function setWeightedInertia(float $weightedInertia): ResultTeam
     {
-        $this->rst_win = $rst_win;
-
+        $this->weightedInertia = $weightedInertia;
         return $this;
     }
 
-    public function getRstEin(): ?float
+    /**
+     * @return float
+     */
+    public function getEqualInertia(): float
     {
-        return $this->rst_ein;
+        return $this->equalInertia;
     }
 
-    public function setRstEin(float $rst_ein): self
+    /**
+     * @param float $equalInertia
+     * @return ResultTeam
+     */
+    public function setEqualInertia(float $equalInertia): ResultTeam
     {
-        $this->rst_ein = $rst_ein;
-
+        $this->equalInertia = $equalInertia;
         return $this;
     }
 
-    public function getRstWinMax(): ?float
+    /**
+     * @return float
+     */
+    public function getWeightedInertiaMax(): float
     {
-        return $this->rst_win_max;
+        return $this->weightedInertiaMax;
     }
 
-    public function setRstWinMax(float $rst_win_max): self
+    /**
+     * @param float $weightedInertiaMax
+     * @return ResultTeam
+     */
+    public function setWeightedInertiaMax(float $weightedInertiaMax): ResultTeam
     {
-        $this->rst_win_max = $rst_win_max;
-
+        $this->weightedInertiaMax = $weightedInertiaMax;
         return $this;
     }
 
-    public function getRstEinMax(): ?float
+    /**
+     * @return float
+     */
+    public function getEqualInertiaMax(): float
     {
-        return $this->rst_ein_max;
+        return $this->equalInertiaMax;
     }
 
-    public function setRstEinMax(float $rst_ein_max): self
+    /**
+     * @param float $equalInertiaMax
+     * @return ResultTeam
+     */
+    public function setEqualInertiaMax(float $equalInertiaMax): ResultTeam
     {
-        $this->rst_ein_max = $rst_ein_max;
-
+        $this->equalInertiaMax = $equalInertiaMax;
         return $this;
     }
 
-    public function getRstWdrGen(): ?float
+    /**
+     * @return float
+     */
+    public function getWeightedDistanceRatio(): float
     {
-        return $this->rst_wdr_gen;
+        return $this->weightedDistanceRatio;
     }
 
-    public function setRstWdrGen(float $rst_wdr_gen): self
+    /**
+     * @param float $weightedDistanceRatio
+     * @return ResultTeam
+     */
+    public function setWeightedDistanceRatio(float $weightedDistanceRatio): ResultTeam
     {
-        $this->rst_wdr_gen = $rst_wdr_gen;
-
+        $this->weightedDistanceRatio = $weightedDistanceRatio;
         return $this;
     }
 
-    public function getRstEdrGen(): ?float
+    /**
+     * @return float
+     */
+    public function getEqualDistanceRatio(): float
     {
-        return $this->rst_edr_gen;
+        return $this->equalDistanceRatio;
     }
 
-    public function setRstEdrGen(float $rst_edr_gen): self
+    /**
+     * @param float $equalDistanceRatio
+     * @return ResultTeam
+     */
+    public function setEqualDistanceRatio(float $equalDistanceRatio): ResultTeam
     {
-        $this->rst_edr_gen = $rst_edr_gen;
-
+        $this->equalDistanceRatio = $equalDistanceRatio;
         return $this;
     }
 
-    public function getRstCreatedBy(): ?int
-    {
-        return $this->rst_createdBy;
-    }
 
-    public function setRstCreatedBy(int $rst_createdBy): self
-    {
-        $this->rst_createdBy = $rst_createdBy;
-
-        return $this;
-    }
-
-    public function getRstInserted(): ?\DateTimeInterface
-    {
-        return $this->rst_inserted;
-    }
-
-    public function setRstInserted(\DateTimeInterface $rst_inserted): self
-    {
-        $this->rst_inserted = $rst_inserted;
-
-        return $this;
-    }
 
     /**
      * @return mixed

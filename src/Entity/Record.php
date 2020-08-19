@@ -20,29 +20,24 @@ class Record
     public $entity;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="rec_table_id", type="integer", nullable=true)
      */
-    public $rec_table_id;
+    public $tableId;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="rec_property", type="string", length=255, nullable=true)
      */
-    public $rec_property;
+    public $property;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="rec_old", type="string", length=255, nullable=true)
      */
-    public $rec_old;
+    public $old;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="rec_new", type="string", length=255, nullable=true)
      */
-    public $rec_new;
-
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
+    public $new;
 
     /**
      * @return string
@@ -61,50 +56,50 @@ class Record
     }
 
 
-    public function getRecTableId(): ?int
+    public function getTableId(): ?int
     {
-        return $this->rec_table_id;
+        return $this->tableId;
     }
 
-    public function setRecTableId(int $rec_table_id): self
+    public function setTableId(int $tableId): self
     {
-        $this->rec_table_id = $rec_table_id;
+        $this->tableId = $tableId;
 
         return $this;
     }
 
-    public function getRecProperty(): ?string
+    public function getProperty(): ?string
     {
-        return $this->rec_property;
+        return $this->property;
     }
 
-    public function setRecProperty(string $rec_property): self
+    public function setProperty(string $property): self
     {
-        $this->rec_property = $rec_property;
+        $this->property = $property;
 
         return $this;
     }
 
-    public function getRecOld(): ?string
+    public function getOld(): ?string
     {
-        return $this->rec_old;
+        return $this->old;
     }
 
-    public function setRecOld(string $rec_old): self
+    public function setOld(string $old): self
     {
-        $this->rec_old = $rec_old;
+        $this->old = $old;
 
         return $this;
     }
 
-    public function getRecNew(): ?string
+    public function getNew(): ?string
     {
-        return $this->rec_new;
+        return $this->new;
     }
 
-    public function setRecNew(string $rec_new): self
+    public function setNew(string $new): self
     {
-        $this->rec_new = $rec_new;
+        $this->new = $new;
 
         return $this;
     }

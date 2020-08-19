@@ -5,6 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\WeightRepository;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -24,39 +25,39 @@ class Weight extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="wgt_interval", type="integer", nullable=true)
      */
-    public $wgt_interval;
+    public $interval;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="wgt_titleframe", type="string", length=255, nullable=true)
      */
-    public $wgt_titleframe;
+    public $titleframe;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="wgt_value", type="float", nullable=true)
      */
-    public $wgt_value;
+    public $value;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="wgt_modified", type="datetime", nullable=true)
      */
-    public $wgt_modified;
+    public $modified;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="wgt_createdBy", type="integer", nullable=true)
      */
-    public $wgt_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="wgt_inserted", type="datetime", nullable=true)
      */
-    public $wgt_inserted;
+    public $inserted;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="wgt_deleted", type="datetime", nullable=true)
      */
-    public $wgt_deleted;
+    public $deleted;
 
     /**
      * @ManyToOne(targetEntity="Organization", inversedBy="weights")
@@ -104,90 +105,85 @@ class Weight extends DbObject
         $position = null)
     {
         parent::__construct($id, $wgt_createdBy, new DateTime());
-        $this->wgt_interval = $wgt_interval;
-        $this->wgt_titleframe = $wgt_titleframe;
-        $this->wgt_value = $wgt_value;
-        $this->wgt_modified = $wgt_modified;
-        $this->wgt_inserted = $wgt_inserted;
-        $this->wgt_deleted = $wgt_deleted;
+        $this->interval = $wgt_interval;
+        $this->titleframe = $wgt_titleframe;
+        $this->value = $wgt_value;
+        $this->modified = $wgt_modified;
+        $this->inserted = $wgt_inserted;
+        $this->deleted = $wgt_deleted;
         $this->organization = $organization;
         $this->position = $position;
         $this->user = $user;
     }
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
     public function getInterval(): ?int
     {
-        return $this->wgt_interval;
+        return $this->interval;
     }
 
     public function setInterval(int $wgt_interval): self
     {
-        $this->wgt_interval = $wgt_interval;
+        $this->interval = $wgt_interval;
 
         return $this;
     }
 
     public function getTitleframe(): ?string
     {
-        return $this->wgt_titleframe;
+        return $this->titleframe;
     }
 
     public function setTitleframe(string $wgt_titleframe): self
     {
-        $this->wgt_titleframe = $wgt_titleframe;
+        $this->titleframe = $wgt_titleframe;
 
         return $this;
     }
 
     public function getValue(): ?float
     {
-        return $this->wgt_value;
+        return $this->value;
     }
 
     public function setValue(?float $wgt_value): self
     {
-        $this->wgt_value = $wgt_value;
+        $this->value = $wgt_value;
 
         return $this;
     }
 
-    public function getModified(): ?\DateTimeInterface
+    public function getModified(): ?DateTimeInterface
     {
-        return $this->wgt_modified;
+        return $this->modified;
     }
 
-    public function setModified(?\DateTimeInterface $wgt_modified): self
+    public function setModified(?DateTimeInterface $wgt_modified): self
     {
-        $this->wgt_modified = $wgt_modified;
+        $this->modified = $wgt_modified;
 
         return $this;
     }
 
-    public function getInserted(): ?\DateTimeInterface
+    public function getInserted(): ?DateTimeInterface
     {
-        return $this->wgt_inserted;
+        return $this->inserted;
     }
 
-    public function setInserted(\DateTimeInterface $wgt_inserted): self
+    public function setInserted(DateTimeInterface $wgt_inserted): self
     {
-        $this->wgt_inserted = $wgt_inserted;
+        $this->inserted = $wgt_inserted;
 
         return $this;
     }
 
-    public function getDeleted(): ?\DateTimeInterface
+    public function getDeleted(): ?DateTimeInterface
     {
-        return $this->wgt_deleted;
+        return $this->deleted;
     }
 
-    public function setDeleted(?\DateTimeInterface $wgt_deleted): self
+    public function setDeleted(?DateTimeInterface $wgt_deleted): self
     {
-        $this->wgt_deleted = $wgt_deleted;
+        $this->deleted = $wgt_deleted;
 
         return $this;
     }

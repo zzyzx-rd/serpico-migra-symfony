@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\RankingRepository;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -33,14 +35,14 @@ class Ranking extends DbObject
     public $wType;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="rnk_abs_result", type="integer", nullable=true)
      */
-    public $rnk_abs_result;
+    public $absResult;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="rnk_rel_result", type="float", nullable=true)
      */
-    public $rnk_rel_result;
+    public $relResult;
 
     /**
      * @ORM\Column(name="rnk_period", type="integer", nullable=true)
@@ -53,14 +55,14 @@ class Ranking extends DbObject
     public $frequency;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="rnk_value", type="float", nullable=true)
      */
-    public $rnk_value;
+    public $value;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="rnk_series_pop", type="integer", nullable=true)
      */
-    public $rnk_series_pop;
+    public $seriesPopulation;
 
     /**
      * @ORM\Column(name="rnk_created_by", type="integer", nullable=true)
@@ -73,9 +75,9 @@ class Ranking extends DbObject
     public $inserted;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="rnk_updated", type="datetime", nullable=true)
      */
-    public $rnk_updated;
+    public $updated;
 
     /**
      *@ManyToOne(targetEntity="Activity", inversedBy="rankings")
@@ -149,14 +151,14 @@ class Ranking extends DbObject
         parent::__construct($id, $rnk_createdBy, new DateTime());
         $this->dType = $rnk_dtype;
         $this->wType = $rnk_wtype;
-        $this->rnk_abs_result = $rnk_abs_result;
-        $this->rnk_rel_result = $rnk_rel_result;
+        $this->absResult = $rnk_abs_result;
+        $this->relResult = $rnk_rel_result;
         $this->period = $rnk_period;
         $this->frequency = $rnk_freq;
-        $this->rnk_value = $rnk_value;
-        $this->rnk_series_pop = $rnk_series_pop;
+        $this->value = $rnk_value;
+        $this->seriesPopulation = $rnk_series_pop;
         $this->inserted = $rnk_inserted;
-        $this->rnk_updated = $rnk_updated;
+        $this->updated = $rnk_updated;
         $this->activity = $activity;
         $this->stage = $stage;
         $this->criterion = $criterion;
@@ -164,11 +166,6 @@ class Ranking extends DbObject
         $this->user_usr = $rnk_user_usr;
     }
 
-
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
 
     public function getDType(): ?string
     {
@@ -194,26 +191,26 @@ class Ranking extends DbObject
         return $this;
     }
 
-    public function getRnkAbsResult(): ?int
+    public function getAbsResult(): ?int
     {
-        return $this->rnk_abs_result;
+        return $this->absResult;
     }
 
-    public function setRnkAbsResult(int $rnk_abs_result): self
+    public function setAbsResult(int $absResult): self
     {
-        $this->rnk_abs_result = $rnk_abs_result;
+        $this->absResult = $absResult;
 
         return $this;
     }
 
-    public function getRnkRelResult(): ?float
+    public function getRelResult(): ?float
     {
-        return $this->rnk_rel_result;
+        return $this->relResult;
     }
 
-    public function setRnkRelResult(float $rnk_rel_result): self
+    public function setRelResult(float $relResult): self
     {
-        $this->rnk_rel_result = $rnk_rel_result;
+        $this->relResult = $relResult;
 
         return $this;
     }
@@ -242,51 +239,46 @@ class Ranking extends DbObject
         return $this;
     }
 
-    public function getRnkValue(): ?float
+    public function getValue(): ?float
     {
-        return $this->rnk_value;
+        return $this->value;
     }
 
-    public function setRnkValue(float $rnk_value): self
+    public function setValue(float $value): self
     {
-        $this->rnk_value = $rnk_value;
+        $this->value = $value;
 
         return $this;
     }
 
-    public function getRnkSeriesPop(): ?int
+    public function getSeriesPopulation(): ?int
     {
-        return $this->rnk_series_pop;
+        return $this->seriesPopulation;
     }
 
-    public function setRnkSeriesPop(int $rnk_series_pop): self
+    public function setSeriesPopulation(int $seriesPopulation): self
     {
-        $this->rnk_series_pop = $rnk_series_pop;
+        $this->seriesPopulation = $seriesPopulation;
 
         return $this;
     }
 
 
-    public function getInserted(): ?\DateTimeInterface
-    {
-        return $this->inserted;
-    }
-
-    public function setInserted(\DateTimeInterface $inserted): self
+    public function setInserted(DateTimeInterface $inserted): self
     {
         $this->inserted = $inserted;
 
         return $this;
     }
 
-    public function getRnkUpdated(): ?\DateTimeInterface
+    public function getUpdated(): ?DateTimeInterface
     {
-        return $this->rnk_updated;
+        return $this->updated;
     }
 
-    public function setRnkUpdated(\DateTimeInterface $rnk_updated): self
+    public function setUpdated(DateTimeInterface $updated): self
     {
-        $this->rnk_updated = $rnk_updated;
+        $this->updated = $updated;
 
         return $this;
     }

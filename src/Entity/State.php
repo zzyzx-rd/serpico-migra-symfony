@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\StateRepository;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
@@ -23,33 +25,33 @@ class State extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="sta_abbr", type="string", length=255, nullable=true)
      */
-    public $sta_abbr;
+    public $abbr;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="sta_fullname", type="string", length=255, nullable=true)
      */
-    public $sta_fullname;
+    public $fullname;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="sta_name", type="string", length=255, nullable=true)
      */
-    public $sta_name;
+    public $name;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="sta_createdBy", type="integer", nullable=true)
      */
-    public $sta_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="sta_inserted", type="datetime", nullable=true)
      */
-    public $sta_inserted;
+    public $inserted;
 
     /**
      * @ManyToOne(targetEntity="Country", inversedBy="states")
-     * @JoinColumn(name="country_cou_id", referencedColumnName="cou_id",nullable=false)
+     * @JoinColumn(name="country_cou_id", referencedColumnName="cou_id",nullable=true)
      */
     protected $country;
 
@@ -87,77 +89,55 @@ class State extends DbObject
         $firms = null)
     {
         parent::__construct($id,$sta_createdBy , new DateTime());
-        $this->sta_abbr = $sta_abbr;
-        $this->sta_fullname = $sta_fullname;
-        $this->sta_name = $sta_name;
-        $this->sta_inserted = $sta_inserted;
+        $this->abbr = $sta_abbr;
+        $this->fullname = $sta_fullname;
+        $this->name = $sta_name;
+        $this->inserted = $sta_inserted;
         $this->country = $country;
-        $this->cities = $cities?$cities:new ArrayCollection();
-        $this->firms = $firms?$firms:new ArrayCollection();
+        $this->cities = $cities?:new ArrayCollection();
+        $this->firms = $firms?:new ArrayCollection();
     }
 
 
-    public function getId(): ?int
+    public function getAbbr(): ?string
     {
-        return $this->id;
+        return $this->abbr;
     }
 
-    public function getStaAbbr(): ?string
+    public function setAbbr(string $abbr): self
     {
-        return $this->sta_abbr;
-    }
-
-    public function setStaAbbr(string $sta_abbr): self
-    {
-        $this->sta_abbr = $sta_abbr;
+        $this->abbr = $abbr;
 
         return $this;
     }
 
-    public function getStaFullname(): ?string
+    public function getFullname(): ?string
     {
-        return $this->sta_fullname;
+        return $this->fullname;
     }
 
-    public function setStaFullname(string $sta_fullname): self
+    public function setFullname(string $fullname): self
     {
-        $this->sta_fullname = $sta_fullname;
+        $this->fullname = $fullname;
 
         return $this;
     }
 
-    public function getStaName(): ?string
+    public function getName(): ?string
     {
-        return $this->sta_name;
+        return $this->name;
     }
 
-    public function setStaName(string $sta_name): self
+    public function setName(string $name): self
     {
-        $this->sta_name = $sta_name;
+        $this->name = $name;
 
         return $this;
     }
 
-    public function getStaCreatedBy(): ?int
+    public function setInserted(DateTimeInterface $inserted): self
     {
-        return $this->sta_createdBy;
-    }
-
-    public function setStaCreatedBy(?int $sta_createdBy): self
-    {
-        $this->sta_createdBy = $sta_createdBy;
-
-        return $this;
-    }
-
-    public function getStaInserted(): ?\DateTimeInterface
-    {
-        return $this->sta_inserted;
-    }
-
-    public function setStaInserted(\DateTimeInterface $sta_inserted): self
-    {
-        $this->sta_inserted = $sta_inserted;
+        $this->inserted = $inserted;
 
         return $this;
     }
@@ -209,13 +189,15 @@ class State extends DbObject
     {
         $this->firms = $firms;
     }
-    function addFirm(WorkerFirm $firm){
+    public function addFirm(WorkerFirm $firm): State
+    {
         $this->firms->add($firm);
         $firm->setState($this);
         return $this;
     }
 
-    function removeFirm(WorkerFirm $firm){
+    public function removeFirm(WorkerFirm $firm): State
+    {
         $this->firms->removeElement($firm);
         return $this;
     }

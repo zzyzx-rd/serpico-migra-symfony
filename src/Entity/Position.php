@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\PositionRepository;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
@@ -25,54 +27,54 @@ class Position extends DbObject
     public $id;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="pos_name", type="string", length=255, nullable=true)
      */
-    public $pos_name;
+    public $name;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="pos_weight_ini", type="float", nullable=true)
      */
-    public $pos_weight_ini;
+    public $weight_ini;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="pos_weight_1y", type="float", nullable=true)
      */
-    public $pos_weight_1y;
+    public $weight_1y;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="pos_weight_2y", type="float", nullable=true)
      */
-    public $pos_weight_2y;
+    public $weight_2y;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="pos_weight_3y", type="float", nullable=true)
      */
-    public $pos_weight_3y;
+    public $weight_3y;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="pos_weight_4y", type="float", nullable=true)
      */
-    public $pos_weight_4y;
+    public $weight_4y;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="pos_weight_5y", type="float", nullable=true)
      */
-    public $pos_weight_5y;
+    public $weight_5y;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="pos_created_by", type="integer", nullable=true)
      */
-    public $pos_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="pos_inserted", type="datetime", nullable=true)
      */
-    public $pos_inserted;
+    public $inserted;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="pos_deleted", type="datetime", nullable=true)
      */
-    public $pos_deleted;
+    public $deleted;
 
     /**
      * @ManyToOne(targetEntity="Organization", inversedBy="positions")
@@ -100,6 +102,7 @@ class Position extends DbObject
      * @OneToMany(targetEntity="Target", mappedBy="position",cascade={"persist", "remove"}, orphanRemoval=true)
      */
     public $targets;
+    private $users;
 
     /**
      * Position constructor.
@@ -139,132 +142,123 @@ class Position extends DbObject
         $targets = null)
     {
         parent::__construct($id, $pos_createdBy, new DateTime());
-        $this->pos_name = $pos_name;
-        $this->pos_weight_ini = $pos_weight_ini;
-        $this->pos_weight_1y = $pos_weight_1y;
-        $this->pos_weight_2y = $pos_weight_2y;
-        $this->pos_weight_3y = $pos_weight_3y;
-        $this->pos_weight_4y = $pos_weight_4y;
-        $this->pos_weight_5y = $pos_weight_5y;
-        $this->pos_inserted = $pos_inserted;
-        $this->pos_deleted = $pos_deleted;
+        $this->name = $pos_name;
+        $this->weight_ini = $pos_weight_ini;
+        $this->weight_1y = $pos_weight_1y;
+        $this->weight_2y = $pos_weight_2y;
+        $this->weight_3y = $pos_weight_3y;
+        $this->weight_4y = $pos_weight_4y;
+        $this->weight_5y = $pos_weight_5y;
+        $this->inserted = $pos_inserted;
+        $this->deleted = $pos_deleted;
         $this->organization = $organization;
         $this->department = $department;
-        $this->weights = $weights?$weights:new ArrayCollection();
-        $this->options = $options?$options:new ArrayCollection();
-        $this->targets = $targets?$targets:new ArrayCollection();
+        $this->weights = $weights?:new ArrayCollection();
+        $this->options = $options?:new ArrayCollection();
+        $this->targets = $targets?:new ArrayCollection();
+        $this->users = new ArrayCollection();
     }
 
 
-    public function getId(): ?int
+    public function getName(): ?string
     {
-        return $this->id;
+        return $this->name;
     }
 
-    public function getPosName(): ?string
+    public function setName(string $name): self
     {
-        return $this->pos_name;
-    }
-
-    public function setPosName(string $pos_name): self
-    {
-        $this->pos_name = $pos_name;
+        $this->name = $name;
 
         return $this;
     }
 
-    public function getPosWeightIni(): ?float
+    public function getWeightIni(): ?float
     {
-        return $this->pos_weight_ini;
+        return $this->weight_ini;
     }
 
-    public function setPosWeightIni(float $pos_weight_ini): self
+    public function setWeightIni(float $weight_ini): self
     {
-        $this->pos_weight_ini = $pos_weight_ini;
+        $this->weight_ini = $weight_ini;
 
         return $this;
     }
 
-    public function getPosWeight1y(): ?float
+    public function getWeight1Y(): ?float
     {
-        return $this->pos_weight_1y;
+        return $this->weight_1y;
     }
 
-    public function setPosWeight1y(float $pos_weight_1y): self
+    public function setWeight1Y(float $weight_1y): self
     {
-        $this->pos_weight_1y = $pos_weight_1y;
+        $this->weight_1y = $weight_1y;
 
         return $this;
     }
 
-    public function getPosWeight2y(): ?float
+    public function getWeight2Y(): ?float
     {
-        return $this->pos_weight_2y;
+        return $this->weight_2y;
     }
 
-    public function setPosWeight2y(float $pos_weight_2y): self
+    public function setWeight2Y(float $weight_2y): self
     {
-        $this->pos_weight_2y = $pos_weight_2y;
+        $this->weight_2y = $weight_2y;
 
         return $this;
     }
 
-    public function getPosWeight3y(): ?float
+    public function getWeight3Y(): ?float
     {
-        return $this->pos_weight_3y;
+        return $this->weight_3y;
     }
 
-    public function setPosWeight3y(float $pos_weight_3y): self
+    public function setWeight3Y(float $weight_3y): self
     {
-        $this->pos_weight_3y = $pos_weight_3y;
+        $this->weight_3y = $weight_3y;
 
         return $this;
     }
 
-    public function getPosWeight4y(): ?float
+    public function getWeight4Y(): ?float
     {
-        return $this->pos_weight_4y;
+        return $this->weight_4y;
     }
 
-    public function setPosWeight4y(float $pos_weight_4y): self
+    public function setWeight4Y(float $weight_4y): self
     {
-        $this->pos_weight_4y = $pos_weight_4y;
+        $this->weight_4y = $weight_4y;
 
         return $this;
     }
 
-    public function getPosWeight5y(): ?float
+    public function getWeight5Y(): ?float
     {
-        return $this->pos_weight_5y;
+        return $this->weight_5y;
     }
 
-    public function setPosWeight5y(float $pos_weight_5y): self
+    public function setWeight5Y(float $weight_5y): self
     {
-        $this->pos_weight_5y = $pos_weight_5y;
+        $this->weight_5y = $weight_5y;
 
         return $this;
     }
 
-    public function getPosInserted(): ?\DateTimeInterface
+    public function setInserted(DateTimeInterface $inserted): self
     {
-        return $this->pos_inserted;
-    }
-
-    public function setPosInserted(\DateTimeInterface $pos_inserted): self
-    {
-        $this->pos_inserted = $pos_inserted;
+        $this->inserted = $inserted;
 
         return $this;
     }
 
-    public function getPosDeleted(): ?\DateTimeInterface
+    public function getDeleted(): ?DateTimeInterface
     {
-        return $this->pos_deleted;
+        return $this->deleted;
     }
 
-    public function setPosDeleted(?\DateTimeInterface $pos_deleted): self
+    public function setDeleted(?DateTimeInterface $deleted): self
     {
-        $this->pos_deleted = $pos_deleted;
+        $this->deleted = $deleted;
 
         return $this;
     }
@@ -349,25 +343,29 @@ class Position extends DbObject
         $this->targets = $targets;
     }
 
-    function addUser(User $user){
+    public function addUser(User $user): Position
+    {
 
         $this->users->add($user);
         // $user->setPosition($this);
         return $this;
     }
-    function removeUser(User $user){
+    public function removeUser(User $user): Position
+    {
         $this->users->removeElement($user);
         return $this;
     }
 
-    function addWeight(Weight $weight){
+    public function addWeight(Weight $weight): Position
+    {
 
         $this->weights->add($weight);
         $weight->setPosition($this);
         return $this;
     }
 
-    function removeWeight(Weight $weight){
+    public function removeWeight(Weight $weight): Position
+    {
         $this->weights->removeElement($weight);
         return $this;
     }
@@ -375,26 +373,26 @@ class Position extends DbObject
     {
         return (string) $this->id;
     }
-    function addTarget(Target $target)
+    public function addTarget(Target $target): Position
     {
         $this->targets->add($target);
         $target->setPosition($this);
         return $this;
     }
 
-    function removeTarget(Target $target)
+    public function removeTarget(Target $target): Position
     {
         $this->targets->removeElement($target);
         return $this;
     }
-    function addOption(OrganizationUserOption $option)
+    public function addOption(OrganizationUserOption $option): Position
     {
         $this->options->add($option);
         $option->setPosition($this);
         return $this;
     }
 
-    function removeOption(OrganizationUserOption $option)
+    public function removeOption(OrganizationUserOption $option): Position
     {
         $this->options->removeElement($option);
         return $this;

@@ -4,13 +4,15 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\WorkerFirmLocationRepository;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ApiResource()
  * @ORM\Entity(repositoryClass=WorkerFirmLocationRepository::class)
  */
-class WorkerFirmLocation
+class WorkerFirmLocation extends DbObject
 {
     /**
      * @ORM\Id()
@@ -21,29 +23,29 @@ class WorkerFirmLocation
     public $id;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="wfl_hq_city", type="string", length=255, nullable=true)
      */
-    public $wfl_hq_city;
+    public $HQCity;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="wfl_hq_state", type="string", length=255, nullable=true)
      */
-    public $wfl_hq_state;
+    public $HQState;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="wfl_hq_country", type="string", length=255, nullable=true)
      */
-    public $wfl_hq_country;
+    public $HQCountry;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="wfl_created_by", type="integer", nullable=true)
      */
-    public $wfl_createdBy;
+    public $createdBy;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(name="wfl_inserted", type="datetime", nullable=true)
      */
-    public $wfl_inserted;
+    public $inserted;
 
     /**
      * WorkerFirmLocation constructor.
@@ -63,73 +65,51 @@ class WorkerFirmLocation
         $wfl_hq_country = null)
     {
         parent::__construct($id, $wfl_createdBy, new DateTime());
-        $this->wfl_hq_city = $wfl_hq_city;
-        $this->wfl_hq_state = $wfl_hq_state;
-        $this->wfl_hq_country = $wfl_hq_country;
-        $this->wfl_inserted = $wfl_inserted;
+        $this->HQCity = $wfl_hq_city;
+        $this->HQState = $wfl_hq_state;
+        $this->HQCountry = $wfl_hq_country;
+        $this->inserted = $wfl_inserted;
     }
 
-    public function getId(): ?int
+    public function getHQCity(): ?string
     {
-        return $this->id;
+        return $this->HQCity;
     }
 
-    public function getWflHqCity(): ?string
+    public function setHQCity(string $HQCity): self
     {
-        return $this->wfl_hq_city;
-    }
-
-    public function setWflHqCity(string $wfl_hq_city): self
-    {
-        $this->wfl_hq_city = $wfl_hq_city;
+        $this->HQCity = $HQCity;
 
         return $this;
     }
 
-    public function getWflHqState(): ?string
+    public function getHQState(): ?string
     {
-        return $this->wfl_hq_state;
+        return $this->HQState;
     }
 
-    public function setWflHqState(string $wfl_hq_state): self
+    public function setHQState(string $HQState): self
     {
-        $this->wfl_hq_state = $wfl_hq_state;
+        $this->HQState = $HQState;
 
         return $this;
     }
 
-    public function getWflHqCountry(): ?string
+    public function getHQCountry(): ?string
     {
-        return $this->wfl_hq_country;
+        return $this->HQCountry;
     }
 
-    public function setWflHqCountry(string $wfl_hq_country): self
+    public function setHQCountry(string $HQCountry): self
     {
-        $this->wfl_hq_country = $wfl_hq_country;
+        $this->HQCountry = $HQCountry;
 
         return $this;
     }
 
-    public function getWflCreatedBy(): ?int
+    public function setInserted(DateTimeInterface $inserted): self
     {
-        return $this->wfl_createdBy;
-    }
-
-    public function setWflCreatedBy(int $wfl_createdBy): self
-    {
-        $this->wfl_createdBy = $wfl_createdBy;
-
-        return $this;
-    }
-
-    public function getWflInserted(): ?\DateTimeInterface
-    {
-        return $this->wfl_inserted;
-    }
-
-    public function setWflInserted(\DateTimeInterface $wfl_inserted): self
-    {
-        $this->wfl_inserted = $wfl_inserted;
+        $this->inserted = $inserted;
 
         return $this;
     }
