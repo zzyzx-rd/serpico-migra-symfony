@@ -32,7 +32,6 @@ class ManageCriterionNameForm extends AbstractType
                 'entry_type' => CriterionNameType::class,
                 'entry_options' => [
                     //'user' => $options['organization'],
-                    //'app' => $options['app'],
                     //'organization' => $options['organization'],
                     //'enabledCreatingUser' => $options['enabledCreatingUser'],
                 ],
@@ -61,7 +60,6 @@ class ManageCriterionNameForm extends AbstractType
         $resolver->setDefault('standalone', false);
         $resolver->addAllowedTypes('standalone', 'bool');
         $resolver->setDefault('organization', null);
-        $resolver->setDefault('app', null);
     }
     
 }

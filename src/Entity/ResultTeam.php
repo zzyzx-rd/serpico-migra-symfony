@@ -21,7 +21,7 @@ class ResultTeam extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="rst_id", type="integer", nullable=false)
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @Column(name="rst_type", type="integer", nullable=true)
@@ -112,12 +112,12 @@ class ResultTeam extends DbObject
      * @Column(name="rst_createdBy", type="integer")
      * @var int
      */
-    protected $createdBy;
+    protected ?int $createdBy;
     /**
      * @Column(name="rst_inserted", type="datetime")
-     * @var /DateTime
+     * @var DateTime
      */
-    protected $inserted;
+    protected ?DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="Activity", inversedBy="resultTeams")
@@ -145,7 +145,7 @@ class ResultTeam extends DbObject
 
     /**
      * ResultTeam constructor.
-     * @param int $id
+     * @param ?int$id
      * @param $weightedAbsoluteResult
      * @param $equalAbsoluteResult
      * @param $weightedRelativeResult

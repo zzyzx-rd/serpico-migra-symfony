@@ -276,7 +276,6 @@ class UserMType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefault('data_class',User::class);
-        $resolver->setRequired('app');
         $resolver->setRequired('user');
         $resolver->setRequired('organization');
         $resolver->setDefault('standalone', false);

@@ -10,7 +10,6 @@ use Doctrine\Common\Persistence\Mapping\MappingException;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
-use Dompdf\Dompdf;
 use Exception;
 use App\Form\ActivityReportForm;
 use App\Form\AddActivityCriteriaForm;
@@ -51,13 +50,8 @@ use App\Entity\Survey;
 use App\Entity\Target;
 use App\Entity\Team;
 use App\Entity\TeamUser;
-use App\Entity\TemplateActivity;
-use App\Entity\TemplateActivityUser;
-use App\Entity\TemplateCriterion;
-use App\Entity\TemplateStage;
 use App\Entity\User;
-use Repository\UserRepository;
-use RouteDumper;
+use App\Repository\UserRepository;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormFactory;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -72,7 +66,6 @@ class ActivityController extends MasterController
      * @param string $elmtType
      * @param int $inpId
      * @param string $actName
-     * @return JsonResponse|RedirectResponse
      * @throws ORMException
      * @throws OptimisticLockException
      * @Route("/{elmt}/create",name="activityInitialisation")
@@ -86,14 +79,14 @@ class ActivityController extends MasterController
 
         $usrId = $currentUser->getId();
         $usrOrg = $currentUser->getOrganization();
-        $isActivity = $elmtType == 'activity';
+        $isActivity = $elmtType === 'activity';
 
-        $activity = $isActivity ? new Activity : new TemplateActivity;
-        $stage = $isActivity ? new Stage : new TemplateStage;
+        $activity = new Activity ;
+        $stage = new Stage ;
         //$criterion = $isActivity ? new Criterion : new TemplateCriterion;
         //$participant = $isActivity ? new ActivityUser : new TemplateActivityUser;
 
-        $startDate = new \DateTime;
+        $startDate = new DateTime;
         $activityStartDate = clone $startDate;
         $activityEndDate = clone $startDate;
         $activityGStartDate = clone $startDate;
@@ -103,13 +96,13 @@ class ActivityController extends MasterController
         $nextActIndex = $activityCount + 1;
         $actDefaultName = "Activity $nextActIndex";
         $stgDefaultName = "Stage 1";
-        $activityName = $actName != '' ? $actName : $actDefaultName;
-        $stageName = $actName != '' ? $actName : $stgDefaultName;
+        $activityName = $actName !== '' ? $actName : $actDefaultName;
+        $stageName = $actName !== '' ? $actName : $stgDefaultName;
 
         $activity
             ->setName($activityName)
             ->setOrganization($currentUser->getOrganization())
-            ->setMasterUsr($currentUser)
+            ->setMasterUser($currentUser)
             ->setCreatedBy($currentUser->getId())
             ->addStage($stage);
 
@@ -128,16 +121,7 @@ class ActivityController extends MasterController
             ->setMode(1)
             ->setProgress(STAGE::PROGRESS_ONGOING)
             ->setCreatedBy($usrId);
-            /*->addCriterion($criterion);
-        $criterion
-            ->setCName($usrOrg->getCriterionNames()->first());
-        $participant
-            ->setType(1)
-            ->setLeader(true)
-            ->setUsrId($usrId)
-            ->setActivity($activity)
-            ->setStage($stage);
-        */
+
         if ($isActivity) {
             $activity
                 ->setStatus(-1);
@@ -147,23 +131,10 @@ class ActivityController extends MasterController
 
         $this->em->persist($activity);
         $this->em->flush();
+        return $this->redirectToRoute('manageActivityElement', ['elmtType' => 'activity', 'elmtId' => $activity->getId()] );
+//        return new JsonResponse(['message' => 'success to create activity', 'redirect' => $this->redirectToRoute('manageActivityElement', ['elmtType' => 'activity', 'elmtId' => $activity->getId()])], 200);
 
-        /*if ($inpId) {*/
-        // Has been launched from iprocess panel, expecting JSON response
-        //TODO
-//        return new JsonResponse(['message' => 'success to create activity', 'redirect' => $app['url_generator']->generate('manageActivityElement', ['elmtType' => 'activity', 'elmtId' => $activity->getId()])], 200);
-        //TODO END
-        /*} else {
 
-            return self::redirectToRoute(
-                'manageActivityElement',
-                [
-                    'elmtType' => $elmtType,
-                    'elmtId' => $activity->getId(),
-                ]
-            );
-
-        }*/
     }
 
     // Delegation of activity creation
@@ -199,7 +170,7 @@ class ActivityController extends MasterController
 
         if ($delegateActivityForm->isValid()) {
             // 1 - Create Activity (similar to addActivityId without redirection)
-            $startDate = new \DateTime;
+            $startDate = new DateTime;
             $activityName = $delegateActivityForm->get('activityName')->getData();
             /** @var User */
             $activityLeader = $delegateActivityForm->get('activityLeader')->getData();
@@ -307,7 +278,7 @@ class ActivityController extends MasterController
             $em->persist($activity);
             //$em->flush();
             $stage = new Stage;
-            $startDate = new \DateTime;
+            $startDate = new DateTime;
             $activityStartDate = clone $startDate;
             $activityEndDate = clone $startDate;
             $activityGStartDate = clone $startDate;
@@ -377,12 +348,12 @@ class ActivityController extends MasterController
         $requester = $repoU->find($decision->getRequester());
         $recipients = [];
         $recipients[] = $requester;
-        $decision->setDecided(new \DateTime);
+        $decision->setDecided(new DateTime);
 
         // Here we consider that the activity is validated or discarded thanks to a single person.
         // But in a enhanced approach, we could consider the approval of a certain number of users,
         // thus we should leave validated field to NULL until conditions are met
-        $decision->setValidated(new \DateTime);
+        $decision->setValidated(new DateTime);
         $decision->setValidator($currentUser->getId());
 
         if ($action == 'cancel') {
@@ -575,13 +546,7 @@ class ActivityController extends MasterController
     {
         $elmt = strpos($_SERVER['HTTP_REFERER'], 'activity');
         $em = self::getEntityManager();
-        if ($elmt !== false) {
-            $activity = $em->getRepository(Activity::class)->find($actId);
-
-        } else {
-            $elmt = 'hello';
-            $activity = $em->getRepository(TemplateActivity::class)->find($actId);
-        }
+        $activity = $em->getRepository(Activity::class)->find($actId);
         $activity->setSimplified(false);
         $em->persist($activity);
         $em->flush();
@@ -607,7 +572,8 @@ class ActivityController extends MasterController
         }
 
         /**
-         * @param Activity|TemplateActivity $activity
+         * @param DbObject $activity
+         * @param string $name
          */
         function giveActNameToStage(DbObject $activity, string $name)
         {
@@ -727,7 +693,7 @@ class ActivityController extends MasterController
                         $activity->setStartdate($parametersForm->get('startdate')->getData())->setEnddate($parametersForm->get('enddate')->getData());
                         $em->persist($activity);
 
-                        $nextDayDate = new \DateTime;
+                        $nextDayDate = new DateTime;
                         //$nextDayDate->add(new \DateInterval('P1D'));
 
                         // Check if activity is complete, change status in this case (in case we manipulate a non-template activity)
@@ -897,7 +863,7 @@ class ActivityController extends MasterController
                 $em->persist($criterion);
 
                 // Set activity status, in case we manipulate a non-template activity
-                $now = new \DateTime;
+                $now = new DateTime;
 
                 if ($elmt == 'activity') {
 
@@ -921,7 +887,7 @@ class ActivityController extends MasterController
                 }
             }
 
-            $activity->setSaved(new \DateTime);
+            $activity->setSaved(new DateTime);
             $em->persist($activity);
             $em->flush();
 
@@ -1414,10 +1380,6 @@ class ActivityController extends MasterController
             case 'activity' :
                 $repoS = $em->getRepository(Stage::class);
                 $repoAU = $em->getRepository(ActivityUser::class);
-                break;
-            case 'template' :
-                $repoS = $em->getRepository(TemplateStage::class);
-                $repoAU = $em->getRepository(TemplateActivityUser::class);
                 break;
         }
         $repoU = $em->getRepository(User::class);
@@ -2015,7 +1977,7 @@ class ActivityController extends MasterController
         } else {
 
             $teamUser
-                ->setDeleted(new \DateTime)
+                ->setDeleted(new DateTime)
                 ->setIsDeleted(true);
             $em->persist($teamUser);
             $em->flush();
@@ -2057,7 +2019,7 @@ class ActivityController extends MasterController
 
         // Insert saved timestamp in case activity is saved
         if ($actionType == 'save') {
-            $activity->setSaved(new \DateTime);
+            $activity->setSaved(new DateTime);
             $em->persist($activity);
         }
     }
@@ -2103,7 +2065,7 @@ class ActivityController extends MasterController
 
             // Insert saved timestamp in case activity is saved
             if ($actionType == 'save') {
-                $activity->setSaved(new \DateTime);
+                $activity->setSaved(new DateTime);
                 $em->persist($activity);
             }
 
@@ -2884,9 +2846,9 @@ class ActivityController extends MasterController
                                 }
 
                                 MasterController::sendMail($app, $recipients, 'activityCreation', $mailSettings);
-                                $stage->setFinalized(new \DateTime)->setIsFinalized(true);
+                                $stage->setFinalized(new DateTime)->setIsFinalized(true);
                                 if ($activity->getIsFinalized() === false) {
-                                    $activity->setFinalized(new \DateTime)->setIsFinalized(true);
+                                    $activity->setFinalized(new DateTime)->setIsFinalized(true);
                                     $firstFinalization = true;
                                 }
                                 $em->persist($stage);
@@ -2911,7 +2873,7 @@ class ActivityController extends MasterController
                         if ($activity->getIsFinalized() === false) {
 
                             MasterController::sendMail($app, $recipients, 'activityCreation', $mailSettings);
-                            $activity->setFinalized(new \DateTime)->setIsFinalized(true);
+                            $activity->setFinalized(new DateTime)->setIsFinalized(true);
                             $firstFinalization = true;
                         }
 
@@ -2919,10 +2881,10 @@ class ActivityController extends MasterController
                 }
             }
 
-            $tomorrowDate = new \DateTime;
+            $tomorrowDate = new DateTime;
             $tomorrowDate->add(new \DateInterval('P1D'));
 
-            $yesterdayDate = new \DateTime;
+            $yesterdayDate = new DateTime;
             $yesterdayDate->sub(new \DateInterval('P1D'));
 
             $k = 0;
@@ -7068,7 +7030,7 @@ class ActivityController extends MasterController
 
                 // Output the generated PDF to Browser
 
-                $d = new \DateTime;
+                $d = new DateTime;
                 return $domPdf->stream($d->format("Ymd") . '_report_' . str_replace(" ", "_", $activity->getName()) . '.pdf');
             } catch (\Exception $e) {
                 print_r($e->getMessage());
@@ -7503,7 +7465,7 @@ class ActivityController extends MasterController
 
             // Output the generated PDF to Browser
 
-            $d = new \DateTime;
+            $d = new DateTime;
             return $domPdf->stream($d->format("Ymd") . '_report_' . str_replace(" ", "_", $activity->getName()) . '.pdf');
         } catch (\Exception $e) {
             print_r($e->getMessage());
@@ -7805,7 +7767,7 @@ class ActivityController extends MasterController
         foreach ($currentUserParticipations as $currentUserParticipation) {
             $currentUserParticipation->setStatus($participantStatus);
             if ($action == "confirm") {
-                $currentUserParticipation->setConfirmed(new \DateTime);
+                $currentUserParticipation->setConfirmed(new DateTime);
             }
             $em->persist($currentUserParticipation);
         }

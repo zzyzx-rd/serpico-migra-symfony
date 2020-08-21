@@ -9,6 +9,7 @@
 namespace App\Form;
 
 use App\Controller\MasterController;
+use App\Validator\UniquePerOrganization;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -23,7 +24,6 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use App\Entity\User;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
-use Validator\UniquePerOrganization;
 
 class DelegateActivityForm extends AbstractType
 {
@@ -59,7 +59,7 @@ class DelegateActivityForm extends AbstractType
                     'query_builder' => static function (EntityRepository $er) use ($options) {
                         $currentUser = $options['currentUser'];
                         return $er->createQueryBuilder('u')
-                            ->where("u.organization_org = ".$currentUser->getOrganization())
+                            ->where("u.organization = ".$currentUser->getOrganization())
                             ->andWhere("u.deleted is NULL")
                             ->andWhere("u.lastname != 'ZZ'")
                             ->andWhere("u.firstname != '".$currentUser->getFirstname()."' AND u.lastname != '".$currentUser->getLastname()."'")

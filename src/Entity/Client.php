@@ -24,7 +24,7 @@ class Client extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="cli_id", type="integer", nullable=false)
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
@@ -49,12 +49,12 @@ class Client extends DbObject
     /**
      * @ORM\Column(name="cli_createdBy", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="cli_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="Organization", inversedBy="clients")
@@ -96,7 +96,7 @@ class Client extends DbObject
      * @param ExternalUser[]|ArrayCollection $externalUsers
      */
     public function __construct(
-        int $id = null,
+      ?int $id = null,
         $cli_createdBy = null,
         $cli_type = 'F',
         $clicommname = null,

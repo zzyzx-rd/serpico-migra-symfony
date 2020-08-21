@@ -23,7 +23,7 @@ class Decision extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="dec_id", type="integer", nullable=false)
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="dec_type", type="integer", nullable=true)
@@ -53,12 +53,12 @@ class Decision extends DbObject
     /**
      * @ORM\Column(name="dec_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="dec_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ORM\Column(name="dec_decided", type="datetime", nullable=true)

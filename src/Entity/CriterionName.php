@@ -19,7 +19,7 @@ class CriterionName extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="cna_id", type="integer", nullable=false)
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="cna_type", type="integer", nullable=true)
@@ -39,12 +39,12 @@ class CriterionName extends DbObject
     /**
      * @ORM\Column(name="can_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="can_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="Icon", inversedBy="criterionNames")

@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Activity;
 use App\Entity\ActivityUser;
 use App\Entity\Decision;
+use App\Entity\Department;
 use App\Entity\OrganizationUserOption;
 use App\Entity\Survey;
 use App\Entity\User;
@@ -17,6 +18,7 @@ use App\Form\DelegateActivityForm;
 use App\Form\RequestActivityForm;
 use App\Repository\ActivityRepository;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Security;
 
@@ -28,10 +30,9 @@ final class InstitutionController extends MasterController
     protected $activityRepo;
 
     /**
-     * @return string
      * @Route("/settings/institution/processes", name="processesList")
      */
-    public function processesListAction()
+    public function processesListAction(): Response
     {
         if(isset($_COOKIE['sorting_type'])){
             $sortingType = $_COOKIE['sorting_type'];
@@ -48,18 +49,18 @@ final class InstitutionController extends MasterController
 
 
         $statuses = [
-            -5 => $sortingType == 'o' ? 'cancelled' : 'stopped',
-            -4 => $sortingType == 'o' ? 'discarded' : 'postponed',
-            -3 => $sortingType == 'o' ? 'requested' : 'suspended',
-            -2 => $sortingType == 'o' ? 'attributed' : 'reopened',
-            -1 => $sortingType == 'o' ? 'incomplete' : 'unstarted',
-            0  => $sortingType == 'o' ? 'future' : 'upcoming',
-            1  => $sortingType == 'o' ? 'current' : 'ongoing',
+            -5 => $sortingType === 'o' ? 'cancelled' : 'stopped',
+            -4 => $sortingType === 'o' ? 'discarded' : 'postponed',
+            -3 => $sortingType === 'o' ? 'requested' : 'suspended',
+            -2 => $sortingType === 'o' ? 'attributed' : 'reopened',
+            -1 => $sortingType === 'o' ? 'incomplete' : 'unstarted',
+            0  => $sortingType === 'o' ? 'future' : 'upcoming',
+            1  => $sortingType === 'o' ? 'current' : 'ongoing',
             2  => 'completed',
-            3  => $sortingType == 'o' ? 'published' : 'finalized',
+            3  => $sortingType === 'o' ? 'published' : 'finalized',
         ];
 
-        $sortingProperty = $sortingType == 'o' ? 'status' : 'progress';
+        $sortingProperty = $sortingType === 'o' ? 'status' : 'progress';
         $displayedStatuses = [];
 
         $orphanActivities  = $this->activityRepo->getOrgOrphanActivities($this->org);
@@ -72,7 +73,7 @@ final class InstitutionController extends MasterController
         }
 
         $addProcessForm = $this->createForm(AddProcessForm::class, null, ['standalone' => true]);
-        $delegateActivityForm = $this->createForm(DelegateActivityForm::class, null, ['standalone' => true, 'app' => $app]) ;
+        $delegateActivityForm = $this->createForm(DelegateActivityForm::class, null, ['standalone' => true, 'currentUser' => $this->user]) ;
 
         //$name = $viewType == 'd' ? 'iprocess_list.html.twig' : 'iprocess2_list.html.twig';
 
@@ -82,7 +83,7 @@ final class InstitutionController extends MasterController
                 'delegateForm' => $delegateActivityForm->createView(),
                 'displayedStatuses'  => $displayedStatuses,
                 'orphanActivities'  => $orphanActivities,
-                'processActivities' => $processActivities,
+                'processesActivities' => $processActivities,
                 'addProcessForm' => $addProcessForm->createView(),
                 'sortingTypeCookie' => $sortingType,
                 'viewTypeCookie' => $viewType,
@@ -92,10 +93,11 @@ final class InstitutionController extends MasterController
 
     /**
      * @param Request $request
-     * @return string
      * @Route("/myactivities", name="myActivities")
+     * @return Response
      */
-    public function myActivitiesListAction(Request $request){
+    public function myActivitiesListAction(Request $request): Response
+    {
 
         $em = $this->getEntityManager();
         $repoA = $em->getRepository(Activity::class);
@@ -130,13 +132,13 @@ final class InstitutionController extends MasterController
 
         $existingAccessAndResultsViewOption = null;
         $statusAccess = null;
-        $accessAndResultsViewOptions = $this->org->getOptions()->filter(function(OrganizationUserOption $option) {return $option->getOName()->getName() == 'activitiesAccessAndResultsView' && ($option->getRole()->getId() == $this->user->getRole() || $option->getUser() == $this->user);});
+        $accessAndResultsViewOptions = $this->org->getOptions()->filter(function(OrganizationUserOption $option) {return $option->getOName()->getName() === 'activitiesAccessAndResultsView' && ($option->getRole() == $this->user->getRole() || $option->getUser() == $this->user);});
 
         // We always chose the most selective access option (NB : we could in the future, create options decidated to position, departments... so below option selection should be rewritten)
         if(count($accessAndResultsViewOptions) > 0){
-            if(count($accessAndResultsViewOptions) == 2){
+            if(count($accessAndResultsViewOptions) === 2){
                 foreach($accessAndResultsViewOptions as $accessAndResultsViewOption){
-                    if($accessAndResultsViewOption->getUser() != null){
+                    if($accessAndResultsViewOption->getUser() !== null){
                         $existingAccessAndResultsViewOption = $accessAndResultsViewOption;
                     }
                 }
@@ -151,10 +153,10 @@ final class InstitutionController extends MasterController
         if($existingAccessAndResultsViewOption){
             $activitiesAccess = $existingAccessAndResultsViewOption->getOptionIValue();
             $statusAccess = $existingAccessAndResultsViewOption->getOptionSecondaryIValue();
-            $noParticipationRestriction = $existingAccessAndResultsViewOption->getOptionSValue() == 'none';
-            if($activitiesAccess == 1){
+            $noParticipationRestriction = $existingAccessAndResultsViewOption->getOptionSValue() === 'none';
+            if($activitiesAccess === 1){
                 $userActivities = new ArrayCollection($orgActivities);
-            } else if ($activitiesAccess == 2){
+            } else if ($activitiesAccess === 2){
                 $departmentUsers = $em->getRepository(Department::class)->find($this->user->getDptId())->getUsers();
                 foreach($departmentUsers as $departmentUser){
                     $checkingIds[] = $departmentUser->getId();
@@ -165,12 +167,12 @@ final class InstitutionController extends MasterController
         $userArchivedActivities = new ArrayCollection;
 
 
-        if($existingAccessAndResultsViewOption == null || $activitiesAccess != 1){
+        if($existingAccessAndResultsViewOption === null || $activitiesAccess !== 1){
 
             // 1/ Get requested activities (as currentuser is not a participant, we have to retrieve them with a different query)
             // passing through Decision table
 
-            if ($role == 3){
+            if ($role === 3){
                 $pendingDecisions = $repoDec->findBy(['requester' => $checkingIds, 'validated' => null]);
                 foreach($pendingDecisions as $pendingDecision){
                     $userActivities->add($pendingDecision->getActivity());
@@ -186,43 +188,43 @@ final class InstitutionController extends MasterController
             $subordinates = $this->em->getRepository(User::class)->subordinatesOf($this->user);
             /** @var ActivityUser[] */
             $subordinatesParticipations = $repoAU->findBy(['id' => $subordinates, 'type' => [ -1, 1 ] ]);
-            $activitiesWithSubordinates_IDs = array_map(function (ActivityUser $p) {
+            $activitiesWithSubordinates_IDs = array_map(static function (ActivityUser $p) {
                 return $p->getStage()->getActivity()->getId();
             }, $subordinatesParticipations);
 
             foreach($orgActivities as $orgActivity){
                 if (
-                    ($orgActivity->getStatus() == -2 && in_array($orgActivity->getMasterUserId(), $checkingIds)) ||
-                    in_array($orgActivity->getId(), $activitiesWithSubordinates_IDs)
+                    ($orgActivity->getStatus() === -2 && in_array($orgActivity->getMasterUserId(), $checkingIds, true)) ||
+                    in_array($orgActivity->getId(), $activitiesWithSubordinates_IDs, true)
                 ){
                     $userActivities->add($orgActivity);
                 }
 
                 // 3/ Get all activities in which current user is participating
 
-                if(!in_array($orgActivity->getId(), $activitiesWithSubordinates_IDs)){
+                if(!in_array($orgActivity->getId(), $activitiesWithSubordinates_IDs, true)){
                     if(!$orgActivity->getArchived()){
 
                         $isParticipant = 0;
                         $isMasterUserId = 0;
                         foreach ($orgActivity->getStages() as $orgStage){
                             foreach ($orgStage->getParticipants() as $orgParticipant){
-                                if (in_array($orgParticipant->getUsrId(), $checkingIds)){
+                                if (in_array($orgParticipant->getUsrId(), $checkingIds, true)){
                                     $isParticipant = 1;
-                                    ($orgParticipant->getStatus() != 5) ? $userActivities->add($orgActivity) : $userArchivedActivities->add($orgActivity);
+                                    ($orgParticipant->getStatus() !== 5) ? $userActivities->add($orgActivity) : $userArchivedActivities->add($orgActivity);
                                     break;
                                 }
                             }
 
-                            if ($isParticipant == 1){
+                            if ($isParticipant === 1){
                                 break;
-                            } elseif(in_array($orgStage->getMasterUserId(), $checkingIds) && (!$orgStage->getOwnerUserId() || in_array($orgStage->getOwnerUserId(), $checkingIds))){
+                            } elseif(in_array($orgStage->getMasterUser(), $checkingIds, true) && (!$orgStage->getOwnerUserId() || in_array($orgStage->getOwnerUserId(), $checkingIds, true))){
                                 $isMasterUserId = 1;
                                 break;
                             }
                         }
 
-                        if($isMasterUserId == 1 && $isParticipant == 0 && $orgActivity->getStatus() != -2){
+                        if($isMasterUserId === 1 && $isParticipant === 0 && $orgActivity->getStatus() !== -2){
                             $userActivities->add($orgActivity);
                         }
 
@@ -258,18 +260,18 @@ final class InstitutionController extends MasterController
 
 
         $statuses = [
-            -5 => $sortingType == 'o' ? 'cancelled' : 'stopped',
-            -4 => $sortingType == 'o' ? 'discarded' : 'postponed',
-            -3 => $sortingType == 'o' ? 'requested' : 'suspended',
-            -2 => $sortingType == 'o' ? 'attributed' : 'reopened',
-            -1 => $sortingType == 'o' ? 'incomplete' : 'unstarted',
-            0  => $sortingType == 'o' ? 'future' : 'upcoming',
-            1  => $sortingType == 'o' ? 'current' : 'ongoing',
+            -5 => $sortingType === 'o' ? 'cancelled' : 'stopped',
+            -4 => $sortingType === 'o' ? 'discarded' : 'postponed',
+            -3 => $sortingType === 'o' ? 'requested' : 'suspended',
+            -2 => $sortingType === 'o' ? 'attributed' : 'reopened',
+            -1 => $sortingType === 'o' ? 'incomplete' : 'unstarted',
+            0  => $sortingType === 'o' ? 'future' : 'upcoming',
+            1  => $sortingType === 'o' ? 'current' : 'ongoing',
             2  => 'completed',
-            3  => $sortingType == 'o' ? 'published' : 'finalized',
+            3  => $sortingType === 'o' ? 'published' : 'finalized',
         ];
 
-        $sortingProperty = $sortingType == 'o' ? 'status' : 'progress';
+        $sortingProperty = $sortingType === 'o' ? 'status' : 'progress';
 
         $displayedStatuses = [];
 

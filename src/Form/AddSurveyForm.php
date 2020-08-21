@@ -30,7 +30,7 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 use Twig\Extension\StagingExtension;
 use App\Form\Type\StageCriterionType;
 use App\Entity\ActivityUser;
-use Validator\UniquePerOrganization;
+use App\Validator\UniquePerOrganization;
 
 class AddSurveyForm extends AbstractType
 {

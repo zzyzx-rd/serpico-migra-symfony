@@ -25,7 +25,7 @@ class Title extends DbObject
      * @ORM\Column(name="tit_id", type="integer", length=10, nullable=false)
      * @var int
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="tit_name", type="string", length=255, nullable=true)
@@ -40,12 +40,12 @@ class Title extends DbObject
     /**
      * @ORM\Column(name="tit_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="tit_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ORM\Column(name="tit_deleted", type="datetime", nullable=true)
@@ -77,7 +77,7 @@ class Title extends DbObject
 
     /**
      * Title constructor.
-     * @param int $id
+     * @param ?int$id
      * @param $tit_name
      * @param $tit_weight_ini
      * @param $tit_createdBy
@@ -89,7 +89,7 @@ class Title extends DbObject
      * @param $targets
      */
     public function __construct(
-        int $id = 0,
+      ?int $id = 0,
         $tit_name = '',
         $tit_weight_ini = 0.0,
         $tit_createdBy = null,

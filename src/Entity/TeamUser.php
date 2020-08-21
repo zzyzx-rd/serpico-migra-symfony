@@ -22,7 +22,7 @@ class TeamUser extends DbObject
      * @ORM\Column(name="tus_id", type="integer", length=10, nullable=true)
      * @var int
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="tus_leader", type="boolean", nullable=true)
@@ -32,12 +32,12 @@ class TeamUser extends DbObject
     /**
      * @ORM\Column(name="tus_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="tus_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ORM\Column(name="tus_deleted", type="datetime", nullable=true)
@@ -59,7 +59,7 @@ class TeamUser extends DbObject
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="teamUsers")
      * @JoinColumn(name="user_usr_id", referencedColumnName="usr_id")
      */
-    public $user_usr;
+    public $user;
 
     /**
      * @ORM\ManyToOne(targetEntity=ExternalUser::class, inversedBy="teamUsers")
@@ -69,7 +69,7 @@ class TeamUser extends DbObject
 
     /**
      * TeamUser constructor.
-     * @param int $id
+     * @param ?int$id
      * @param $tus_leader
      * @param $tus_createdBy
      * @param $tus_inserted
@@ -80,7 +80,7 @@ class TeamUser extends DbObject
      * @param $external_user_ext_id
      */
     public function __construct(
-        int $id = 0,
+      ?int $id = 0,
         $user_usr = null,
         $external_user_ext_id = null,
         $tus_createdBy = null,
@@ -96,7 +96,7 @@ class TeamUser extends DbObject
         $this->deleted = $tus_deleted;
         $this->isDeleted = $tus_is_deleted;
         $this->team = $team;
-        $this->user_usr = $user_usr;
+        $this->user = $user_usr;
         $this->external_user_ext_id = $external_user_ext_id;
     }
 
@@ -159,14 +159,14 @@ class TeamUser extends DbObject
         $this->team = $team;
     }
 
-    public function getUserUsr(): ?User
+    public function getUser(): ?User
     {
-        return $this->user_usr;
+        return $this->user;
     }
 
-    public function setUserUsr(?User $user_usr): self
+    public function setUser(?User $user): self
     {
-        $this->user_usr = $user_usr;
+        $this->user = $user;
 
         return $this;
     }

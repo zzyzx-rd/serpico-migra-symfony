@@ -23,7 +23,7 @@ class WorkerFirmSector extends DbObject
      * @ORM\Column(name="wfs_id", type="integer", nullable=false)
      * @var int
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="wfs_name", type="string", length=255, nullable=true)
@@ -33,12 +33,12 @@ class WorkerFirmSector extends DbObject
     /**
      * @ORM\Column(name="wfs_createdBy", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="wfs_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="Icon", inversedBy="workerFirmSectors")
@@ -53,7 +53,7 @@ class WorkerFirmSector extends DbObject
 
     /**
      * WorkerFirmSector constructor.
-     * @param int $id
+     * @param ?int$id
      * @param $wfs_name
      * @param $wfs_createdBy
      * @param $wfs_inserted
@@ -61,7 +61,7 @@ class WorkerFirmSector extends DbObject
      * @param $firm
      */
     public function __construct(
-        int $id = 0,
+      ?int $id = 0,
         $wfs_name = null,
         $wfs_createdBy = null,
         $wfs_inserted = null,

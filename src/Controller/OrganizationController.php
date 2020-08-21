@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Model\ActivityM;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManager;
@@ -139,55 +141,54 @@ class OrganizationController extends MasterController
      * @throws OptimisticLockException
      * @Route("/organization/administrators/validate", name="validateAdmins")
      */
-    public function validateAdminsAction(Request $request, Application $app){
+    public function validateAdminsAction(Request $request){
 
 
         $admins = $request->get('users');
 
         if(!$admins){
             return new JsonResponse(['error' => "You need to select at least one person who will be administrator"], 500);
-        } else {
-
-            $repoU = $this->em->getRepository(User::class);
-            $orgPreviousAdminUsers = new ArrayCollection($repoU->findBy(['orgId' => $this->user->getOrgId(),'role' => 1]));
-            $settings = [];
-            $recipients = [];
-
-            foreach($admins as $admin){
-                $adminUser = $repoU->find($admin['id']);
-                if($adminUser != $this->user){
-                    $recipients[] = $adminUser;
-                    $settings['tokens'][] = $adminUser->getToken();
-                    $orgPreviousAdminUsers->removeElement($adminUser);
-                } else {
-                    $this->user->setRole(USER::ROLE_ADMIN);
-                }
-            }
-
-            if(sizeof($recipients) > 0){
-                $settings['rootCreation'] = true;
-                MasterController::sendMail($app, $recipients, 'registration', $settings);
-            }
-
-            $settings = [];
-            $settings['rootCreation'] = false;
-            $settings['adminFullName'] = $this->user->getFullName();
-
-            $recipients = [];
-            foreach($orgPreviousAdminUsers as $orgPreviousAdminUser){
-                $orgPreviousAdminUser->setRole(USER::ROLE_AM);
-                $this->em->persist($orgPreviousAdminUser);
-                $recipients[] = $orgPreviousAdminUser;
-                $settings['tokens'][] = $orgPreviousAdminUser->getToken();
-            }
-            if(sizeof($recipients) > 0){
-                MasterController::sendMail($app, $recipients, 'registration', $settings);
-            }
-
-            $this->em->flush();
-
-            return new JsonResponse(['msg' => "Success"], 200);
         }
+
+        $repoU = $this->em->getRepository(User::class);
+        $orgPreviousAdminUsers = new ArrayCollection($repoU->findBy(['organization' => $this->user->getOrganization(),'role' => 1]));
+        $settings = [];
+        $recipients = [];
+
+        foreach($admins as $admin){
+            $adminUser = $repoU->find($admin['id']);
+            if($adminUser != $this->user){
+                $recipients[] = $adminUser;
+                $settings['tokens'][] = $adminUser->getToken();
+                $orgPreviousAdminUsers->removeElement($adminUser);
+            } else {
+                $this->user->setRole(USER::ROLE_ADMIN);
+            }
+        }
+
+        if(sizeof($recipients) > 0){
+            $settings['rootCreation'] = true;
+            MasterController::sendMail($app, $recipients, 'registration', $settings);
+        }
+
+        $settings = [];
+        $settings['rootCreation'] = false;
+        $settings['adminFullName'] = $this->user->getFullName();
+
+        $recipients = [];
+        foreach($orgPreviousAdminUsers as $orgPreviousAdminUser){
+            $orgPreviousAdminUser->setRole(USER::ROLE_AM);
+            $this->em->persist($orgPreviousAdminUser);
+            $recipients[] = $orgPreviousAdminUser;
+            $settings['tokens'][] = $orgPreviousAdminUser->getToken();
+        }
+//        if(sizeof($recipients) > 0){
+//            MasterController::sendMail($app, $recipients, 'registration', $settings);
+//        }
+
+        $this->em->flush();
+
+        return new JsonResponse(['msg' => "Success"], 200);
     }
 
     /**
@@ -238,7 +239,7 @@ class OrganizationController extends MasterController
         return json_encode($weights, 200);
     }
 
-    public function abstractActivityConfigurationAction(Request $request, string $elmtType, int $id)
+    public function abstractActivityConfigurationAction(Request $request, string $elmtType,?int $id)
     {
         if (!$this->user) {
             return $this->redirectToRoute('login');
@@ -340,10 +341,10 @@ class OrganizationController extends MasterController
 
                     // 2 - Updating activity status if necessary
 
-                    $tomorrowDate = new \DateTime;
+                    $tomorrowDate = new DateTime;
                     $tomorrowDate->add(new \DateInterval('P1D'));
 
-                    $yesterdayDate = new \DateTime;
+                    $yesterdayDate = new DateTime;
                     $yesterdayDate->sub(new \DateInterval('P1D'));
                     $k = 0;
                     $p = 0;
@@ -452,7 +453,7 @@ class OrganizationController extends MasterController
         $stage->setProgress($progressStatus);
         if($progressStatus == -2){
             $stage->setReopened(true)
-                ->setLastReopened(new \DateTime());
+                ->setLastReopened(new DateTime());
         }
         $em->persist($stage);
         $em->flush();
@@ -533,7 +534,7 @@ class OrganizationController extends MasterController
             $newStage
                 ->setMasterUserId($currentUser->getId())
                 ->setCreatedBy($currentUser->getId())
-                ->setInserted(new \DateTime())
+                ->setInserted(new DateTime())
                 ->setName($stage->getName()." - 2");
 
             if($stage->getSurvey()){
@@ -544,7 +545,7 @@ class OrganizationController extends MasterController
                 $clonedCriterion = clone $criterion;
                 $clonedCriterion
                     ->setCreatedBy($currentUser->getId())
-                    ->setInserted(new \DateTime());
+                    ->setInserted(new DateTime());
                 $newStage->addCriterion($clonedCriterion);
 
                 foreach($criterion->getParticipants() as $participant){
@@ -552,7 +553,7 @@ class OrganizationController extends MasterController
                     $clonedParticipant
                         ->setStatus(0)
                         ->setCreatedBy($currentUser->getId())
-                        ->setInserted(new \DateTime())
+                        ->setInserted(new DateTime())
                         ->setStage($newStage);
                     $clonedCriterion->addParticipant($clonedParticipant);
                 }
@@ -564,7 +565,7 @@ class OrganizationController extends MasterController
                     $clonedParticipant
                         ->setStatus(0)
                         ->setCreatedBy($currentUser->getId())
-                        ->setInserted(new \DateTime());
+                        ->setInserted(new DateTime());
                     $newStage->addParticipant($clonedParticipant);
                 }
             }
@@ -679,7 +680,7 @@ class OrganizationController extends MasterController
             } else {
 
                 $stage->setMasterUserId($currentUser->getId());
-                $now = new \DateTime();
+                $now = new DateTime();
 
                 // Setting initial progress status
                 if(!$stage->getProgress()){
@@ -700,8 +701,8 @@ class OrganizationController extends MasterController
 
                 //$now = clone new \DateTime();
 
-                if(date_diff($stage->getStartdate(), new \DateTime())->d == 0){
-                    $stage->setStartdate(new \DateTime());
+                if(date_diff($stage->getStartdate(), new DateTime())->d == 0){
+                    $stage->setStartdate(new DateTime());
                 }
 
                 $sumNewWeights = 0;
@@ -725,7 +726,7 @@ class OrganizationController extends MasterController
 
                     if($element->getStatus() != $element::STATUS_INCOMPLETE){
 
-                        $stage->setStatus((int) ($stage->getGStartDate() < new \DateTime));
+                        $stage->setStatus((int) ($stage->getGStartDate() < new DateTime));
 
                         if($element->getStatus() == $element::STATUS_FUTURE && $stage->getStatus() == $stage::STAGE_ONGOING){
                             $element->setStatus($element::STATUS_ONGOING);
@@ -738,7 +739,7 @@ class OrganizationController extends MasterController
                         }
                     }
 
-                    $stage->setProgress($stage->getStartdate() > new \DateTime && $stage->getProgress() < STAGE::PROGRESS_COMPLETED ? STAGE::PROGRESS_UPCOMING : STAGE::PROGRESS_ONGOING);
+                    $stage->setProgress($stage->getStartdate() > new DateTime && $stage->getProgress() < STAGE::PROGRESS_COMPLETED ? STAGE::PROGRESS_UPCOMING : STAGE::PROGRESS_ONGOING);
 
                 }
 
@@ -1243,7 +1244,7 @@ class OrganizationController extends MasterController
                         $firstCriterionExistingParticipations = $repoAU->findBy(['stage' => $element, 'criterion' => $element->getCriteria()->first()]);
                         foreach($firstCriterionExistingParticipations as $firstCriterionExistingParticipation){
                             $newParticipation = clone $firstCriterionExistingParticipation;
-                            $newParticipation->setInserted(new \DateTime())
+                            $newParticipation->setInserted(new DateTime())
                                 ->setCreatedBy($currentUser->getId());
                             $criterion->addParticipant($newParticipation);
                         }
@@ -1640,8 +1641,8 @@ class OrganizationController extends MasterController
                 $clientOrganization
                     ->setCommname($workerFirm->getName())
                     ->setType($client->getType())
-                    ->setValidated(new \DateTime)
-                    ->setExpired(new \DateTime('2100-01-01 00:00:00'))
+                    ->setValidated(new DateTime)
+                    ->setExpired(new DateTime('2100-01-01 00:00:00'))
                     ->setWeight_type('role')
                     ->setWorkerFirm($workerFirm);
                 $em->persist($clientOrganization);
@@ -2470,8 +2471,8 @@ class OrganizationController extends MasterController
                         ->setCommname($clientUser['firstname']->getData() . ' ' . $clientUser['lastname']->getData())
                         ->setWeight_type('role')
                         ->setCreatedBy($currentUser->getId())
-                        ->setValidated(new \DateTime)
-                        ->setExpired(new \DateTime('2100-01-01 00:00:00'));
+                        ->setValidated(new DateTime)
+                        ->setExpired(new DateTime('2100-01-01 00:00:00'));
                     $client = new Client;
                     $client->setOrganization($organization)->setClientOrganization($clientOrganization);
                     $organization->addClient($client);
@@ -3408,28 +3409,28 @@ class OrganizationController extends MasterController
 
     /**
      * @param Request $request
-     * @param Application $app
      * @param $actId
-     * @return bool
-     * @throws ORMException
-     * @throws OptimisticLockException
+     * @return RedirectResponse
      * @Route("/ajax/activity/delete/{actId}", name="ajaxActivityDelete")
      */
-    public function deleteActivityAction(Request $request, Application $app, $actId)
+    public function deleteActivityAction(Request $request, $actId): RedirectResponse
     {
-        $em       = self::getEntityManager();
-        $activity = $em->getRepository(Activity::class)->find($actId);
-        $user     = self::getAuthorizedUser();
-        if (!$user instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
-        }
-        if ($activity->isDeletable()) {
+        $activity = $this->em->getRepository(Activity::class)->find($actId);
+        $activityM = new ActivityM($this->em, $this->stack, $this->security);
+        if ($activityM->isDeletable($activity)) {
             $organization = $activity->getOrganization();
             $organization->removeActivity($activity);
-            $em->persist($organization);
-            $em->flush();
+            try {
+                $this->em->persist($organization);
+            } catch (ORMException $e) {
+            }
+            try {
+                $this->em->flush();
+            } catch (OptimisticLockException $e) {
+            } catch (ORMException $e) {
+            }
         }
-        return true;
+        return $this->redirectToRoute("myActivities");
     }
 
     /**
@@ -3468,7 +3469,7 @@ class OrganizationController extends MasterController
 
         $em       = self::getEntityManager();
         $activity = $em->getRepository(Activity::class)->find($actId);
-        $activity->setArchived(new \DateTime);
+        $activity->setArchived(new DateTime);
         $em->persist($activity);
         $em->flush();
         return $app->json(['status' => 'done', 'message' => 'archived', 'aid' => $actId]);
@@ -5477,7 +5478,7 @@ class OrganizationController extends MasterController
 
         // Output the generated PDF to Browser
 
-        $d = new \DateTime;
+        $d = new DateTime;
 
         $reportType = isset($_POST['print_-1']) ? 'Full' : (isset($_POST['print_0']) ? 'Activity' : (isset($_POST['print_1']) ? '|' : 'Criterion'));
 
@@ -5615,7 +5616,7 @@ class OrganizationController extends MasterController
             $position      = $repoP->find($posId);
             $positionUsers = $position->getUsers($app);
             if (count($positionUsers) == 1) {
-                $position->setDeleted(new \DateTime);
+                $position->setDeleted(new DateTime);
                 $em->persist($position);
             }
         }
@@ -5624,7 +5625,7 @@ class OrganizationController extends MasterController
             $department      = $repoD->find($dptId);
             $departmentUsers = $department->getUsers($app);
             if (count($departmentUsers) == 1) {
-                $department->setDeleted(new \DateTime);
+                $department->setDeleted(new DateTime);
                 $em->persist($departement);
             }
         }
@@ -5634,7 +5635,7 @@ class OrganizationController extends MasterController
         if ($repoAU->findOneByUsrId($user->getId()) == null) {
             $em->remove($user);
         } else {
-            $user->setDeleted(new \DateTime);
+            $user->setDeleted(new DateTime);
             $em->persist($user);
         }
         $em->flush();
@@ -5714,7 +5715,7 @@ class OrganizationController extends MasterController
         if(sizeof($externalUserParticipations) == 0){
             $em->remove($externalUser);
         } else {
-            $externalUser->setDeleted(new \DateTime);
+            $externalUser->setDeleted(new DateTime);
             $em->persist($externalUser);
         }
 
@@ -5956,7 +5957,7 @@ class OrganizationController extends MasterController
                     // We delete all his participations on activities which have not started.
                     //If one activity has started, we remove all his participations on future stages, and keep ongoing ones.
                     $deletedUsrIds[] = $allTeamUsersId[$key];
-                    $teamUser->setDeleted(new \DateTime);
+                    $teamUser->setDeleted(new DateTime);
                     $teamUser->setIsDeleted(true);
                     $removedRecipients[] = $repoU->find($teamUser->getUsrId());
                     $em->persist($teamUser);
@@ -6130,7 +6131,7 @@ class OrganizationController extends MasterController
 
         // We choose to delete team previously, but we will keep it in database instead and set him a deleted timestamp
 
-        $team->setDeleted(new \DateTime);
+        $team->setDeleted(new DateTime);
         // $teamName .= "(Deleted)";
         // $team->setName($teamName);
         $organization->removeTeam($team);
@@ -6193,7 +6194,7 @@ class OrganizationController extends MasterController
                     ->setLegalname($orgCommercialName)
                     ->setIsClient(false)
                     ->setMasterUserId(0)
-                    ->setExpired(new \DateTime("+1 month"));
+                    ->setExpired(new DateTime("+1 month"));
                 $em->persist($organization);
 
                 // Setting organization options
@@ -6421,7 +6422,6 @@ class OrganizationController extends MasterController
     }
     /**
      * @param Request $request
-     * @param Application $app
      * @param $elmtType
      * @param $elmtId
      * @return string|RedirectResponse|Response
@@ -6429,55 +6429,46 @@ class OrganizationController extends MasterController
      * @throws OptimisticLockException
      * @Route("/{elmtType}/{elmtId}", name="manageActivityElement")
      */
-    public function manageActivityElementAction(Request $request, Application $app, $elmtType, $elmtId)
+    public function manageActivityElementAction(Request $request, $elmtType, $elmtId)
     {
-        $currentUser = self::getAuthorizedUser();
-        if (!$currentUser) {
-            return $this->redirectToRoute('login');
-        }
 
-        $em = self::getEntityManager();
-        $organization = $currentUser->getOrganization();
+        $organization = $this->user->getOrganization();
         $orgId = $organization->getId();
 
         switch ($elmtType) {
             case 'iprocess':
-                $repoE = $em->getRepository(InstitutionProcess::class);
+                $repoE = $this->em->getRepository(InstitutionProcess::class);
                 $redirect = $this->redirectToRoute('manageProcesses', ['orgId' => $orgId]);
                 break;
             case 'process':
-                $repoE = $em->getRepository(Process::class);
+                $repoE = $this->em->getRepository(Process::class);
                 $redirect = $this->redirectToRoute('manageProcesses', ['orgId' => $orgId]);
                 break;
-            case 'template':
-                $repoE = $em->getRepository(TemplateActivity::class);
-                $redirect = $this->redirectToRoute('manageTemplates');
-                break;
             case 'activity':
-                $repoE = $em->getRepository(Activity::class);
-                $repoU = $em->getRepository(ActivityUser::class);
+                $repoE = $this->em->getRepository(Activity::class);
+                $repoU = $this->em->getRepository(ActivityUser::class);
                 $redirect = $this->redirectToRoute('myActivities');
                 break;
             default:
                 return new Response(null, Response::HTTP_BAD_REQUEST);
         }
         $element = $repoE->find($elmtId);
-        $formFactory = $app['form.factory'];
-        $activityElementForm = $formFactory->create(
+        $element->currentUser = $this->user;
+        $activityElementForm = $this->createForm(
             ActivityElementForm::class,
             $element,
-            ['elmtType' => $elmtType]
+            ['elmtType' => $elmtType, 'currentUser' => $this->user]
         );
-        $stageElementForm = $formFactory->create(
+        $stageElementForm = $this->createForm(
             StageType::class,
             null,
             ['elmtType' => $elmtType, 'standalone' => true]
         );
 
-        $criterionElementForm = $formFactory->create(
+        $criterionElementForm = $this->createForm(
             CriterionType::class,
             null,
-            ['elmtType' => $elmtType, 'standalone' => true]
+            ['elmtType' => $elmtType, 'standalone' => true, 'currentUser' => $this->user]
         );
 
         $activityElementForm->handleRequest($request);
@@ -6487,7 +6478,7 @@ class OrganizationController extends MasterController
 
         if($activityElementForm->isSubmitted()){
 
-            if($_POST['clicked-btn'] == "save" && !$activityElementForm->isValid()){
+            if($_POST['clicked-btn'] === "save" && !$activityElementForm->isValid()){
                 $element->setStatus(ACTIVITY::STATUS_INCOMPLETE);
                 $this->em->persist($element);
                 $this->em->flush();
@@ -6496,7 +6487,7 @@ class OrganizationController extends MasterController
 
             if ($activityElementForm->isValid()) {
 
-                if ($_POST['clicked-btn'] == "update" && $elmtType == 'activity') {
+                if ($_POST['clicked-btn'] === "update" && $elmtType === 'activity') {
 
                     $nbTotalStages = count($element->getStages());
 
@@ -6519,11 +6510,11 @@ class OrganizationController extends MasterController
                             $recipients[] = $participant->getDirectUser();
                             $participant->setStatus(1);
                             $participant->setIsMailed(true);
-                            $em->persist($participant);
+                            $this->em->persist($participant);
                         }
 
-                        self::sendMail($app, $recipients, 'activityParticipation', $mailSettings);
-                        $em->flush();
+//                        self::sendMail($app, $recipients, 'activityParticipation', $mailSettings);
+                        $this->em->flush();
                     }
 
 
@@ -6531,26 +6522,33 @@ class OrganizationController extends MasterController
                     foreach($element->getActiveModifiableStages() as $stage){
                         //Output status
                         if($stage->isComplete()){
-                            $stage->setStatus((int) ($stage->getGStartDate() <= new \DateTime));
+                            $stage->setStatus((int) ($stage->getGStartDate() <= new DateTime));
                         } else {
                             $stage->setStatus($stage::STAGE_INCOMPLETE);
                         }
 
                         //Progress status
-                        if(!$stage->getProgress() == -1){
-                            $now = new \DateTime();
-                            $stage->setProgress(
-                                $stage->getEnddate() < $now ? STAGE::PROGRESS_COMPLETED :
-                                    ($stage->getStartdate() < $now ? STAGE::PROGRESS_ONGOING : STAGE::PROGRESS_UPCOMING)
-                            );
+                        if(!$stage->getProgress() === -1){
+                            $now = new DateTime();
+                            if ($stage->getStartdate() < $now) {
+                                $stage->setProgress(
+                                    $stage->getEnddate() < $now ? STAGE::PROGRESS_COMPLETED :
+                                        (STAGE::PROGRESS_ONGOING)
+                                );
+                            } else {
+                                $stage->setProgress(
+                                    $stage->getEnddate() < $now ? STAGE::PROGRESS_COMPLETED :
+                                        (STAGE::PROGRESS_UPCOMING)
+                                );
+                            }
                         }
 
-                        $em->persist($stage);
+                        $this->em->persist($stage);
                     }
 
                     if($element->isComplete()){
-                        if($element->getActiveModifiableStages()->forAll(function(int $i,Stage $s){
-                            return $s->getStatus() == $s::STAGE_UNSTARTED;
+                        if($element->getActiveModifiableStages()->forAll(static function(int $i, Stage $s){
+                            return $s->getStatus() === $s::STAGE_UNSTARTED;
                         })){
                             $element->setStatus($element::STATUS_FUTURE);
                         } else {
@@ -6561,18 +6559,15 @@ class OrganizationController extends MasterController
                     }
 
                     if (!$element->getIsFinalized()){$element->setIsFinalized(true);}
-                    $em->persist($element);
-                    $em->flush();
+                    $this->em->persist($element);
+                    $this->em->flush();
                 }
                 return $redirect;
 
             }
 
         }
-
-
-        /** @var UserRepository */
-        $userRepo        = $em->getRepository(User::class);
+        $userRepo        = $this->em->getRepository(User::class);
         $usersWithPic[0] = '/lib/img/no-picture.png';
         foreach ($userRepo->usersWithPicture() as $u) {
             $id                = $u->getId();
@@ -6588,17 +6583,6 @@ class OrganizationController extends MasterController
                 'criterionElementForm' => $criterionElementForm->createView(),
             ]
         );
-
-        /*
-        return $app['twig']->render('activity_element.html.twig',
-            [
-                'form'                 => $activityElementForm->createView(),
-                'stageElementForm'     => $stageElementForm->createView(),
-                'criterionElementForm' => $criterionElementForm->createView(),
-                'userPics'             => json_encode($usersWithPic),
-                'survey'               => $surveys,
-            ]
-        );*/
     }
 
 }

@@ -52,182 +52,181 @@ class Stage extends DbObject
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(name="stg_id", type="integer",nullable=false, length=10)
-     * @var int
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="stg_complete", type="boolean", nullable=true)
      */
-    public $complete;
+    public bool $complete;
 
     /**
      * @ORM\Column(name="stg_name", type="string", length=255, nullable=true)
      */
-    public $name;
+    public string $name;
 
     /**
      * @ORM\Column(name="stg_mode", type="integer", nullable=true)
      */
-    public $mode;
+    public int $mode;
 
     /**
      * @ORM\Column(name="stG_visibility", type="integer", nullable=true)
      */
-    public $visibility;
+    public int $visibility;
 
     /**
      * @ORM\Column(name="stg_access_link", type="string", length=255, nullable=true)
      */
-    public $accessLink;
+    public ?string $accessLink;
 
     /**
      * @ORM\Column(name="stg_status", type="integer", nullable=true)
      */
-    public $status;
+    public int $status;
 
     /**
      * @ORM\Column(name="stg_desc", type="string", length=255, nullable=true)
      */
-    public $description;
+    public ?string $description;
 
     /**
      * @ORM\Column(name="stg_progress", type="integer", nullable=true)
      */
-    public $progress;
+    public int $progress;
 
     /**
      * @ORM\Column(name="stg_weight", type="float", nullable=true)
      */
-    public $weight;
+    public float $weight;
 
     /**
      * @ORM\Column(name="stg_definite_dates", type="boolean", nullable=true)
      */
-    public $definiteDates;
+    public bool $definiteDates;
 
     /**
      * @ORM\Column(name="stg_dperiod", type="integer", nullable=true)
      */
-    public $dPeriod;
+    public int $dPeriod;
 
     /**
      * @ORM\Column(name="stg_dfrequency", type="string", length=255, nullable=true)
      */
-    public $dFrequency;
+    public string $dFrequency;
 
     /**
      * @ORM\Column(name="stg_dorigin", type="integer", nullable=true)
      */
-    public $dOrigin;
+    public int $dOrigin;
 
     /**
      * @ORM\Column(name="stg_fperiod",type="integer", nullable=true)
      */
-    public $fPeriod;
+    public int $fPeriod;
 
     /**
      * @ORM\Column(name="stg_ffrequency", type="string", length=255, nullable=true)
      */
-    public $fFrequency;
+    public string $fFrequency;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    public $fOrigin;
+    public int $fOrigin;
 
     /**
      * @ORM\Column(name="stg_startdate", type="datetime", nullable=true)
      */
-    public $startdate;
+    public DateTime $startdate;
 
     /**
      * @ORM\Column(name="stg_enddate", type="datetime", nullable=true)
      */
-    public $enddate;
+    public DateTime $enddate;
 
     /**
      * @ORM\Column(name="stg_gstartdate", type="datetime", nullable=true)
      */
-    public $gstartdate;
+    public DateTime $gstartdate;
 
     /**
      * @ORM\Column(name=" $stg_genddate", type="datetime", nullable=true)
      */
-    public $genddate;
+    public DateTime $genddate;
 
     /**
      * @ORM\Column(name="stg_dealine_nb_days", type="integer", nullable=true)
      */
-    public $deadlineNbDays;
+    public int $deadlineNbDays;
 
     /**
      * @ORM\Column(name="stg_deadline_mailSent", type="boolean", nullable=true)
      */
-    public $deadlineMailSent;
+    public ?bool $deadlineMailSent;
 
     /**
      * @ORM\Column(name="stg_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="stg_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ORM\Column(name="stg_reopened", type="boolean", nullable=true)
      */
-    public $reopened;
+    public bool $reopened;
 
     /**
      * @ORM\Column(name="stg_last_reopened", type="datetime", nullable=true)
      */
-    public $lastReopened;
+    public ?DateTime $lastReopened;
 
     /**
      * @ORM\Column(name="stg_unstarted_notif", type="boolean", nullable=true)
      */
-    public $unstartedNotif;
+    public ?bool $unstartedNotif;
 
     /**
      * @ORM\Column(name="stg_uncompleted_notif", type="boolean", nullable=true)
      */
-    public $uncompletedNotif;
+    public ?bool $uncompletedNotif;
 
     /**
      * @ORM\Column(name="stg_unfinished_notif", type="boolean", nullable=true)
      */
-    public $unfinishedNotif;
+    public ?bool $unfinishedNotif;
 
     /**
      * @ORM\Column(name="stg_isFinalized", type="boolean", nullable=true)
      */
-    public $isFinalized;
+    public ?bool $isFinalized;
 
     /**
-     * @Column(name="stg_finalized", type="datetime")
+     * @Column(name="stg_finalized", type="datetime", nullable=true)
      * @var DateTime
      */
-    protected $finalized;
+    protected ?DateTime $finalized;
 
     /**
      * @ORM\Column(name="stg_deleted", type="datetime", nullable=true)
      */
-    public $deleted;
+    public ?DateTime $deleted;
 
     /**
      * @ORM\Column(name="stg_gcompleted", type="datetime", nullable=true)
      */
-    public $gcompleted;
+    public ?DateTime $gcompleted;
 
     /**
      * @OneToOne(targetEntity="Survey")
      * @JoinColumn(name="survey_sur_id", referencedColumnName="sur_id",nullable=true)
      * @var Survey
      */
-    protected $survey;
+    protected ?Survey $survey;
 
     /**
      * @ManyToOne(targetEntity=Activity::class, inversedBy="stages")
@@ -240,7 +239,7 @@ class Stage extends DbObject
      * @JoinColumn(name="organization_org_id", referencedColumnName="org_id",nullable=true)
      * @var Organization
      */
-    protected $organization;
+    protected Organization $organization;
 
     /**
      * @OneToMany(targetEntity="Criterion", mappedBy="stage", cascade={"persist", "remove"}, orphanRemoval=true)
@@ -300,20 +299,17 @@ class Stage extends DbObject
      */
     public $historicalRankingTeams;
 
-    /**
-     * @OneToOne(targetEntity="Template", mappedBy="stage",cascade={"persist","remove"}, orphanRemoval=true)
-     */
-    public $template;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="stagesWhereMaster")
-     * @JoinColumn(name="usr_id", referencedColumnName="usr_id")
+     * @JoinColumn(name="usr_id", referencedColumnName="usr_id", nullable=true)
      */
-    public $masterUser;
+    public ?User $masterUser;
 
+    public ?User $currentUser = null;
     /**
      * Stage constructor.
-     * @param int $id
+     * @param ?int$id
      * @param bool $complete
      * @param null $activity
      * @param int $visibility
@@ -554,7 +550,7 @@ class Stage extends DbObject
         return $this;
     }
 
-    public function getReopened(): ?bool
+    public function isReopened(): ?bool
     {
         return $this->reopened;
     }
@@ -605,7 +601,7 @@ class Stage extends DbObject
     /**
      * @return Survey
      */
-    public function getSurvey(): Survey
+    public function getSurvey(): ?Survey
     {
         return $this->survey;
     }
@@ -827,6 +823,133 @@ class Stage extends DbObject
     }
 
     /**
+     * @return bool
+     */
+    public function isDefiniteDates(): bool
+    {
+        return $this->definiteDates;
+    }
+
+    /**
+     * @param bool $definiteDates
+     * @return Stage
+     */
+    public function setDefiniteDates(bool $definiteDates): Stage
+    {
+        $this->definiteDates = $definiteDates;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getDPeriod(): int
+    {
+        return $this->dPeriod;
+    }
+
+    /**
+     * @param int $dPeriod
+     * @return Stage
+     */
+    public function setDPeriod(int $dPeriod): Stage
+    {
+        $this->dPeriod = $dPeriod;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDFrequency(): string
+    {
+        return $this->dFrequency;
+    }
+
+    /**
+     * @param string $dFrequency
+     * @return Stage
+     */
+    public function setDFrequency(string $dFrequency): Stage
+    {
+        $this->dFrequency = $dFrequency;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getDOrigin(): int
+    {
+        return $this->dOrigin;
+    }
+
+    /**
+     * @param int $dOrigin
+     * @return Stage
+     */
+    public function setDOrigin(int $dOrigin): Stage
+    {
+        $this->dOrigin = $dOrigin;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getFPeriod(): int
+    {
+        return $this->fPeriod;
+    }
+
+    /**
+     * @param int $fPeriod
+     * @return Stage
+     */
+    public function setFPeriod(int $fPeriod): Stage
+    {
+        $this->fPeriod = $fPeriod;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFFrequency(): string
+    {
+        return $this->fFrequency;
+    }
+
+    /**
+     * @param string $fFrequency
+     * @return Stage
+     */
+    public function setFFrequency(string $fFrequency): Stage
+    {
+        $this->fFrequency = $fFrequency;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getFOrigin(): int
+    {
+        return $this->fOrigin;
+    }
+
+    /**
+     * @param int $fOrigin
+     * @return Stage
+     */
+    public function setFOrigin(int $fOrigin): Stage
+    {
+        $this->fOrigin = $fOrigin;
+        return $this;
+    }
+
+
+    /**
      * @return mixed
      */
     public function getTemplate()
@@ -873,34 +996,7 @@ class Stage extends DbObject
         }
         $this->weight = round((1 - $sumWeightCompletedStages) * $activeWeight, 3);
     }
-    /**
-     * @return Collection|ActivityUser[]
-     */
-    public function getUniqueParticipations()
-    {
 
-        // Depends on whether current user is part of a team
-        $eligibleParticipants = null;
-        $uniqueParticipants = new ArrayCollection;
-        $teams = [];
-
-        $eligibleParticipants = count($this->criteria) === 0 ? $this->participants : $this->criteria->first()->getParticipants();
-
-        $myParticipations = $this->getSelfParticipations();
-        $myTeam = $myParticipations->count() === 0 ? null : $myParticipations->first()->getTeam();
-
-        foreach ($eligibleParticipants as $eligibleParticipant) {
-            $currentTeam = $eligibleParticipant->getTeam();
-            if ($currentTeam === null || $currentTeam == $myTeam) {
-                $uniqueParticipants->add($eligibleParticipant);
-            } else if (!in_array($currentTeam, $teams, true)) {
-                $uniqueParticipants->add($eligibleParticipant);
-                $teams[] = $currentTeam;
-            }
-        }
-
-        return $uniqueParticipants;
-    }
     /**
      * @return Collection|ActivityUser[]
      */
@@ -979,14 +1075,6 @@ class Stage extends DbObject
     public function getUniqueGradableParticipations()
     {
         return $this->getUniqueParticipations()->matching(Criteria::create()->where(Criteria::expr()->neq("type", 0)));
-    }
-
-    /**
-     * @return Collection|ActivityUser[]
-     */
-    public function getUniqueGraderParticipations()
-    {
-        return $this->getUniqueParticipations()->matching(Criteria::create()->where(Criteria::expr()->neq("type", -1)));
     }
 
     public function addUniqueGradableParticipation(ActivityUser $participant): Stage
@@ -1370,10 +1458,6 @@ class Stage extends DbObject
         return null;
     }
 
-    public function hasMinimumParticipationConfig(): bool
-    {
-        return $this->getUniqueGraderParticipations()->count() > 0 && $this->getUniqueGradableParticipations()->count() > 0;
-    }
 
     public function hasMinimumOutputConfig(): bool
     {
@@ -1400,6 +1484,189 @@ class Stage extends DbObject
             return $p->getStatus() === 3;
         });
     }
+    /**
+     * @return Collection|Client[]
+     */
+    public function getIndependantUniqueParticipatingClients()
+    {
+
+        return $this->getActivity()->getOrganization()->getClients()->filter(function(Client $c){
+            return $c->getExternalUsers()->exists(function(int $i, ExternalUser $e) {
+
+                $contains = false;
+                foreach($this->participants as $participant){
+                    if($participant->getExtUsrId() == $e->getId()){
+                        $contains = true;
+                        break;
+                    }
+                }
+                return $contains;
+
+                /*return $this->participants->exists(function(int $i, ActivityUser $p) use ($e){
+                    $p->getExtUsrId() == $e->getId();
+                });
+                */
+            });
+        });
+    }
+
+    public function isModifiable(Stage $stage): bool
+    {
+        $connectedUser = $this->currentUser;
+        $connectedUserRole = $connectedUser->getRole();
+        if ($connectedUserRole === 4) {
+            return true;
+        }
+
+        if ($stage->status >= 2) {
+            return false;
+        }
+
+        if ($connectedUserRole === 1) {
+            return true;
+        }
+
+        if ($stage->getMasterUser() == $connectedUser && ($stage->getUniqueGraderParticipations() === null || !$stage->getUniqueGraderParticipations()->exists(static function(int $i, ActivityUser $p){return $p->isLeader();}))) {
+            return true;
+        }
+
+        return $stage->getUniqueGraderParticipations()->exists(
+            static function (int $i, ActivityUser $p) use ($connectedUser) { return $p->getUser() === $connectedUser && $p->isLeader(); }
+        );
+    }
+
+    /**
+     * @return Collection|ActivityUser[]
+     */
+    public function getUniqueGraderParticipations()
+    {
+        return $this->getUniqueParticipations()->matching(Criteria::create()->where(Criteria::expr()->neq("type", -1)));
+    }
+
+    public function hasMinimumParticipationConfig(): bool
+    {
+        return $this->getUniqueGraderParticipations()->count() > 0 && $this->getUniqueGradableParticipations()->count() > 0;
+    }
+    public function getUniqueParticipations(): ArrayCollection
+    {
+
+        // Depends on whether current user is part of a team
+        $eligibleParticipants = null;
+        $uniqueParticipants = new ArrayCollection;
+        $teams = [];
+
+        $eligibleParticipants = count($this->criteria) === 0 ? $this->participants : $this->criteria->first()->getParticipants();
+
+        $myParticipations = $this->getSelfParticipations();
+        $myTeam = $myParticipations->count() === 0 ? null : $myParticipations->first()->getTeam();
+
+        foreach ($eligibleParticipants as $eligibleParticipant) {
+            $currentTeam = $eligibleParticipant->getTeam();
+            if ($currentTeam === null || $currentTeam == $myTeam) {
+                $uniqueParticipants->add($eligibleParticipant);
+            } else if (!in_array($currentTeam, $teams, true)) {
+                $uniqueParticipants->add($eligibleParticipant);
+                $teams[] = $currentTeam;
+            }
+        }
+
+        return $uniqueParticipants;
+    }
+
+    /**
+     * @return Collection|ActivityUser[]
+     */
+    public function getUniqueIndivParticipations()
+    {
+        $indivParticipants = new ArrayCollection;
+        $myParticipations = $this->getSelfParticipations();
+        $myTeam = $myParticipations->count() === 0 ? null : $myParticipations->first()->getTeam();
+
+        foreach ($this->getUniqueParticipations() as $participant) {
+            $team = $participant->getTeam();
+            if ($team === null || $team == $myTeam) {
+                $indivParticipants->add($participant);
+            }
+        };
+        return count($indivParticipants) > 0 ? $indivParticipants : null;
+    }
+
+    /**
+     * @return Collection|ActivityUser[]
+     */
+    public function getIndependantUniqueIntParticipations()
+    {
+        $uniqueIndivParticipations = $this->getUniqueIndivParticipations();
+
+        return $uniqueIndivParticipations === null ?
+            null :
+            new ArrayCollection(array_values(array_filter($this->getUniqueIndivParticipations()->toArray(),
+                    function(ActivityUser $p){
+                        return $p->getUser()->getOrganization() == $this->currentUser->getOrganization() && $p->getTeam() === null;
+                    })
+            ));
+    }
+    public function getSelfParticipations(): ArrayCollection
+    {
+        return $this->participants->filter(function(ActivityUser $p){
+            return $p->getUser() == $this->currentUser;
+        });
+    }
+
+    /**
+     * @return Collection|ActivityUser[]
+     */
+    public function getUniqueExtParticipations()
+    {
+        $uniqueIndivParticipations = $this->getUniqueIndivParticipations();
+
+        if ($uniqueIndivParticipations === null) {
+            return null;
+        }
+
+        return new ArrayCollection(
+            array_values(
+                array_filter($this->getUniqueIndivParticipations()->toArray(), function (ActivityUser $p) {
+                    return $p->getUser()->getOrganization() != $this->currentUser->getOrganization();
+                })
+            )
+        );
+    }
+
+    /**
+     * @return Collection|ActivityUser[]
+     */
+    public function getIndependantUniqueExtParticipations()
+    {
+
+        $uniqueIndivParticipations = $this->getUniqueIndivParticipations();
+
+        return $uniqueIndivParticipations === null ?
+            null :
+            new ArrayCollection(array_values(array_filter($this->getUniqueIndivParticipations()->toArray(),
+                function(ActivityUser $p){
+                    return $p->getUser()->getOrganization() != $this->currentUser->getOrganization() && $p->getTeam() === null;
+                })
+            ));
+    }
+
+    /**
+     * @return Collection|ActivityUser[]
+     */
+    public function getIndependantUniqueTeamParticipations()
+    {
+        $teamParticipants = new ArrayCollection;
+        $currentTeam = null;
+        foreach ($this->getIndependantUniqueParticipations() as $participant) {
+            $pTeam = $participant->getTeam();
+            if ($pTeam !== null && $pTeam != $currentTeam) {
+                $currentTeam = $pTeam;
+                $teamParticipants->add($participant);
+            }
+        };
+        return $teamParticipants;
+    }
+
     //TODO remove CRitetrion et isModifiable SelfParticipation et getAllSelfGrades
     //TODO indivParticipation
 

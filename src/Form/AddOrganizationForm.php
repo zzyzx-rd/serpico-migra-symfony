@@ -12,7 +12,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\App\FormExtension\Core\Type\ChoiceType;
 use Symfony\Component\App\FormExtension\Core\Type\TextType;
 use Symfony\Component\App\FormExtension\Core\Type\SubmitType;
-use Validator\UniquePerOrganization;
+use App\Validator\UniquePerOrganization;
 
 class AddOrganizationForm extends AbstractType
 {
@@ -241,7 +241,6 @@ class AddOrganizationForm extends AbstractType
             'standalone' => false,
             'toValidate' => false,
             'request' => false,
-            'app' => $app
         ])
         ->setRequired([
             'orgId'

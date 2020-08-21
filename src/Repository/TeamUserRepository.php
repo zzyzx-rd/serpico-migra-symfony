@@ -20,8 +20,9 @@ class TeamUserRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, TeamUser::class);
     }
-    public function findByUser(User $user){
-        return new ArrayCollection($this->_em->getRepository(TeamUser::class)->findBy(["user_usr" =>$user]));
+    public function findByUser(User $user): ArrayCollection
+    {
+        return new ArrayCollection($this->_em->getRepository(TeamUser::class)->findBy(["user" =>$user]));
     }
     // /**
     //  * @return TeamUser[] Returns an array of TeamUser objects

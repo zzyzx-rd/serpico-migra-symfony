@@ -24,7 +24,7 @@ class Position extends DbObject
      * @ORM\Column(name="pos_id", type="integer", length=10, nullable=false)
      * @var int
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="pos_name", type="string", length=255, nullable=true)
@@ -64,12 +64,12 @@ class Position extends DbObject
     /**
      * @ORM\Column(name="pos_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="pos_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ORM\Column(name="pos_deleted", type="datetime", nullable=true)
@@ -106,7 +106,7 @@ class Position extends DbObject
 
     /**
      * Position constructor.
-     * @param int $id
+     * @param ?int$id
      * @param $pos_name
      * @param $pos_weight_ini
      * @param $pos_weight_1y
@@ -124,7 +124,7 @@ class Position extends DbObject
      * @param $targets
      */
     public function __construct(
-        int $id = 0,
+      ?int $id = 0,
         $pos_name = '',
         $pos_weight_ini = 0.0,
         $pos_weight_1y = 0.0,

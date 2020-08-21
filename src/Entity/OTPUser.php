@@ -22,7 +22,7 @@ class OTPUser extends DbObject
      * @ORM\Column(name="otp_id", type="integer", nullable=false, length=10)
      * @var int
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="otp_type", type="string", length=1)
@@ -47,12 +47,12 @@ class OTPUser extends DbObject
     /**
      * @ORM\Column(name="otp_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="otp_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      *@ManyToOne(targetEntity="Organization")
@@ -62,7 +62,7 @@ class OTPUser extends DbObject
 
     /**
      * OTPUser constructor.
-     * @param int $id
+     * @param ?int$id
      * @param $otp_type
      * @param $otp_fullname
      * @param $otp_tipe
@@ -72,7 +72,7 @@ class OTPUser extends DbObject
      * @param $organization
      */
     public function __construct(
-        int $id = 0,
+      ?int $id = 0,
         $otp_type = null,
         $otp_fullname = null,
         $otp_tipe = null,

@@ -20,13 +20,13 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
-use Validator\EDGreaterThanSD;
-use Validator\GEDGreaterThanED;
-use Validator\GEDGreaterThanGSD;
-use Validator\GSDGreaterThanSD;
-use Validator\UniquePerOrganization;
-use Validator\Step;
-use Validator\UBGreaterThanLB;
+use App\Validator\EDGreaterThanSD;
+use App\Validator\GEDGreaterThanED;
+use App\Validator\GEDGreaterThanGSD;
+use App\Validator\GSDGreaterThanSD;
+use App\Validator\UniquePerOrganization;
+use App\Validator\Step;
+use App\Validator\UBGreaterThanLB;
 
 class AddActivityCriteriaForm extends AbstractType
 {
@@ -341,7 +341,6 @@ class AddActivityCriteriaForm extends AbstractType
         ])
         ->setDefaults([
             'standalone' => false,
-            'app' => null
         ])
         ->addAllowedTypes('standalone', 'bool');
     }

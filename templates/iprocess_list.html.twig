@@ -16,14 +16,14 @@
   <link rel="stylesheet" href="{{ asset('css/activity_list_item.css') }}">
   <link rel="stylesheet" href="{{ asset('css/iprocess_list.css') }}">
   <script>
-    var ipurl = "{{ url('getAllProcessesFromInstitution',{orgId : 0}) }}";
-    var gcurl = "{{ url('getElementConfig', {elmtType:'activity', elmtId : 0}) }}";
-    var gsurl = "{{ url('getGradableStages', {actId : 0}) }}";
-    var aurl = "{{ url('createUserProcessActivity', { inpId: 0 }) }}";
-    var adurl = "{{ url('activityDelegate') }}";
-    var adeleteUrl="{{ url('ajaxActivityDelete', {'actId' : 0}) }}";
-    var usurl= "{{ url('updateStageStatus', {stgId : 0}) }}";
-    var cpurl = "{{ url('createProcessRequest', {orgId : global.currentuser.organization.id}) }}";
+      const ipurl = "{{ url('getAllProcessesFromInstitution',{orgId : 0}) }}";
+      const gcurl = "{{ url('getElementConfig', {elmtType:'activity', elmtId : 0}) }}";
+      const gsurl = "{{ url('getGradableStages', {actId : 0}) }}";
+      const aurl = "{{ url('createUserProcessActivity', { inpId: 0 }) }}";
+      const adurl = "{{ url('activityDelegate') }}";
+      const adeleteUrl = "{{ url('ajaxActivityDelete', {'actId' : 0}) }}";
+      const usurl = "{{ url('updateStageStatus', {stgId : 0}) }}";
+      const cpurl = "{{ url('createProcessRequest', {orgId : global.currentuser.organization.id}) }}";
   </script>
   <style>
       .elmts{
@@ -889,7 +889,7 @@
 
     {% if global.currentuser.role != 3 %}
       <div id="fixedButton" class="fixed-action-btn">
-          <a class="btn-floating blue darken-2 modal-trigger" href="#createActivity" onclick="onAddProcessClick('{{ global.currentuser.organization_org }}')" data-oid="{{global.currentuser.organization_org}}"><i class="material-icons">add</i></a>
+          <a class="btn-floating blue darken-2 modal-trigger" href="#createActivity" onclick="onAddProcessClick('{{ global.currentuser.organization}}')" data-oid="{{global.currentuser.organization}}"><i class="material-icons">add</i></a>
           {#}
           <ul>
               <li><a class="btn-floating orange lighten-2 tooltipped modal-trigger" data-position="left" data-delay="50" data-tooltip="{% trans %}tooltip.template.create_from_scratch{% endtrans %}" href="{{ path('activityInitialisation',{'elmt' : 'template'}) }}">
@@ -922,7 +922,7 @@
               {% if global.currentuser.role != 1 %}
                 <a class="modal-trigger" href="#requestNewProcess" onclick="onAddProcessClick('{{global.currentuser.organization.id}}')">
               {% else %}
-                <a href="{{url('manageProcesses',{orgId: global.currentuser.organization_org})}}">
+                <a href="{{url('manageProcesses',{orgId: global.currentuser.organization})}}">
               {% endif %}
                   <i class="fas fa-plus modal-close"></i>
                   {% trans %} activities.request_process{% endtrans %}

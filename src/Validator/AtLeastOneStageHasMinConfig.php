@@ -5,7 +5,7 @@
  * Date: 26/12/2017
  * Time: 22:38
  */
-namespace Validator;
+namespace App\Validator;
 use Symfony\Component\Validator\Constraint;
 
 /**

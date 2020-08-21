@@ -25,21 +25,20 @@ abstract class DbObject
      * @Id()
      * @GeneratedValue()
      * @Column(name="id", type="integer", nullable=true) @GeneratedValue
-     * @var int
      */
-    protected $id;
+    protected ?int $id;
 
     /**
      * @Column(name="created_by", type="integer", nullable=true)
      * @var int
      */
-    protected $createdBy;
+    protected ?int $createdBy;
 
     /**
      * @Column(name="inserted", type="datetime", nullable=true)
      * @var DateTime
      */
-    protected $inserted;
+    protected ?DateTime $inserted;
 
     public function __construct($id = 0, $createdBy = null, $inserted = null)
     {

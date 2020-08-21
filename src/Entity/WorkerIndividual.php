@@ -23,7 +23,7 @@ class WorkerIndividual extends DbObject
      * @ORM\Column(name="win_id", type="integer", nullable=false)
      * @var int
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="win_lk_country", type="string", length=10, nullable=true)
@@ -83,12 +83,12 @@ class WorkerIndividual extends DbObject
     /**
      * @ORM\Column(name="win_createdBy", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="win_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @OneToMany(targetEntity="WorkerExperience", mappedBy="individual", cascade={"persist", "remove"}, orphanRemoval=true)
@@ -103,7 +103,7 @@ class WorkerIndividual extends DbObject
 
     /**
      * WorkerIndividual constructor.
-     * @param int $id
+     * @param ?int$id
      * @param $win_lk_country
      * @param $win_lk_url
      * @param $win_lk_fullName
@@ -121,7 +121,7 @@ class WorkerIndividual extends DbObject
      * @param $mails
      */
     public function __construct(
-        int $id = 0,
+      ?int $id = 0,
         $win_lk_country = null,
         $win_lk_url = null,
         $win_lk_fullName = null,

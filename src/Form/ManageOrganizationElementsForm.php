@@ -49,7 +49,6 @@ class ManageOrganizationElementsForm extends AbstractType
         $resolver->setDefault('data_class', Organization::class);
         $resolver->setDefault('standalone', false);
         $resolver->addAllowedTypes('standalone', 'bool');
-        $resolver->setDefault('app', null);
         $resolver->setDefault('elmtType', null);
     }
 }

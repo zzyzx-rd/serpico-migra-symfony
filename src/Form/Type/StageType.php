@@ -16,7 +16,6 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\OptionsResolver\Options;
-use App\Entity\TemplateStage;
 use App\Entity\Stage;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -26,9 +25,9 @@ use Symfony\Component\Form\Extension\Core\Type\PercentType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Validator\Constraints as Assert;
-use Validator\StagePeriodPositive;
-use Validator\UniqueStageName;
-use Validator\SumWeightEqualToHundredPct;
+use App\Validator\StagePeriodPositive;
+use App\Validator\UniqueStageName;
+use App\Validator\SumWeightEqualToHundredPct;
 
 
 class StageType extends AbstractType
@@ -66,7 +65,7 @@ class StageType extends AbstractType
                 'attr' => ['class' => 'weight-input']
             ]);
 
-            if($options['elmtType'] != 'activity'){
+            if($options['elmtType'] !== 'activity'){
 
                 $builder->add('definiteDates', CheckboxType::class,
                 [
@@ -241,16 +240,16 @@ class StageType extends AbstractType
         $resolver
         ->setDefaults([
             'elmtType' => 'activity',
-            'data_class' => function(Options $options) {
-                if($options['elmtType'] === 'template'){
-                    return TemplateStage::class;
-                } else if ($options['elmtType'] === 'iprocess') {
+            'data_class' => static function(Options $options) {
+                if ($options['elmtType'] === 'iprocess') {
                     return IProcessStage::class;
-                } else if ($options['elmtType'] === 'process') {
-                    return ProcessStage::class;
-                } else {
-                    return Stage::class;
                 }
+
+                if ($options['elmtType'] === 'process') {
+                    return ProcessStage::class;
+                }
+
+                return Stage::class;
             },
             'standalone' => false,
             'element' => null

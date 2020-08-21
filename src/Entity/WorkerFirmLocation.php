@@ -20,7 +20,7 @@ class WorkerFirmLocation extends DbObject
      * @ORM\Column(name="wfl_id", type="integer", nullable=false)
      * @var int
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="wfl_hq_city", type="string", length=255, nullable=true)
@@ -40,16 +40,16 @@ class WorkerFirmLocation extends DbObject
     /**
      * @ORM\Column(name="wfl_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="wfl_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * WorkerFirmLocation constructor.
-     * @param int $id
+     * @param ?int$id
      * @param $wfl_hq_city
      * @param $wfl_hq_state
      * @param $wfl_hq_country
@@ -57,7 +57,7 @@ class WorkerFirmLocation extends DbObject
      * @param $wfl_inserted
      */
     public function __construct(
-        int $id = 0,
+      ?int $id = 0,
         $wfl_createdBy = null,
         $wfl_inserted = null,
         $wfl_hq_city = null,

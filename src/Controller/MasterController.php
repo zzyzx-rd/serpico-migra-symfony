@@ -86,6 +86,10 @@ abstract class MasterController extends AbstractController
     private $loader;
 
     /**
+     * @var User
+     */
+    protected $user;
+    /**
      * MasterController constructor.
      * @param EntityManagerInterface $em
      * @param Security $security

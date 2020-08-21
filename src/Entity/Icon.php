@@ -22,7 +22,8 @@ class Icon extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="ico_id", type="integer", nullable=false)
      */
-    protected $id;
+    protected ?int $id;
+
 
     /**
      * @ORM\Column(name="ico_type", type="string", length=255, nullable=true)
@@ -42,16 +43,17 @@ class Icon extends DbObject
     /**
      * @ORM\Column(name="ico_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="ico_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @OneToMany(targetEntity="CriterionName", mappedBy="icon", cascade={"persist", "remove"}, orphanRemoval=true)
-     * @var Collection<CriterionName>
+     * @var Collec
+     * tion<CriterionName>
      */
     public $criterionNames;
 

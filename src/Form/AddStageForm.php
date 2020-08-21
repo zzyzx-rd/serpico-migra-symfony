@@ -21,7 +21,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Twig\Extension\StagingExtension;
 use App\Form\Type\StageType;
-use Validator\SumWeightEqualToHundredPct;
+use App\Validator\SumWeightEqualToHundredPct;
 
 
 

@@ -25,7 +25,8 @@ class InstitutionProcess extends DbObject
      * @ORM\Column(name="inp_id", type="integer", length=10, nullable=true)
      * @var int
      */
-    protected $id;
+    protected ?int $id;
+
 
     /**
      * @ORM\Column(name="inp_name", type="string", length=255, nullable=true)
@@ -45,12 +46,12 @@ class InstitutionProcess extends DbObject
     /**
      * @ORM\Column(name="inp_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="inp_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ORM\Column(name="inp_deleted", type="datetime", nullable=true)
@@ -93,7 +94,7 @@ class InstitutionProcess extends DbObject
 
     /**
      * InstitutionProcess constructor.
-     * @param int $id
+     * @param ?int$id
      * @param $inp_name
      * @param $inp_approvable
      * @param $inp_gradable
@@ -109,7 +110,7 @@ class InstitutionProcess extends DbObject
      * @param $activities
      */
     public function __construct(
-        int $id = 0,
+      ?int $id = 0,
         $inp_name = '',
         $inp_createdBy = null,
         $inp_approvable = false,

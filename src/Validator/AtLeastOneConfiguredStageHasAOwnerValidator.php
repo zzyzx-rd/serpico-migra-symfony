@@ -6,7 +6,7 @@
  * Time: 22:41
  */
 
-namespace Validator;
+namespace App\Validator;
 
 use Model\ActivityUser;
 use Model\Stage;

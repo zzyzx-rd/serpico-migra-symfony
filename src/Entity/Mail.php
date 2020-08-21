@@ -21,7 +21,7 @@ class Mail extends DbObject
      * @ORM\Column(name="mail_id", type="integer", length=10, nullable=false)
      * @var int
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="mail_persona", type="string", length=1)
@@ -41,12 +41,12 @@ class Mail extends DbObject
     /**
      * @ORM\Column(name="mail_createdBy", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="mail_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @Column(name="mail_type", length= 255, type="string", nullable=true)
@@ -92,7 +92,7 @@ class Mail extends DbObject
 
     /**
      * Mail constructor.
-     * @param int $id
+     * @param ?int$id
      * @param $type
      * @param $mail_persona
      * @param $mail_token
@@ -108,7 +108,7 @@ class Mail extends DbObject
      * @param Stage $stage
      */
     public function __construct(
-        int $id,
+      ?int $id,
         $type = null,
         $mail_persona = null,
         $mail_token = null,

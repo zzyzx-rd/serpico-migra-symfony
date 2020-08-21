@@ -32,8 +32,8 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvents;
 use App\Entity\Stage;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Validator\ForcedComment;
-use Validator\UniquePerOrganization;
+use App\Validator\ForcedComment;
+use App\Validator\UniquePerOrganization;
 
 class SurveyFieldType extends AbstractType
 {

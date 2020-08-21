@@ -1,8 +1,8 @@
 {% extends "layout.html.twig" %}
 
 
-{% set elmtType = app.request_stack.currentrequest.get('elmtType') %}
-{% set elmtId = app.request_stack.currentrequest.get('elmtId') %}
+{% set elmtType = global.request.get('elmtType') %}
+{% set elmtId = global.request.get('elmtId') %}
 
 {% macro visibility_icon(v) %}
   {% if v == 1 %}
@@ -30,7 +30,7 @@
   {% endif %}
 {% endmacro %}
 
-{% set elmt = app.request_stack.currentrequest.get('elmtType') %}
+{% set elmt = global.request.get('elmtType') %}
 {% set colors = ["purple", "green", "orange", "blue-grey", "light-blue", "pink", "teal", "deep-purple", "lime", "grey", "light-green","red"] %}
 
 
@@ -170,10 +170,10 @@
 
                 <div class="stage-dates">
                   <i class="fa fa-calendar"></i>
-                  {{ stage.vars.data.startdate|localizeddate('short', 'none', null, null, 'dd/MM') }}
+                  {{ stage.vars.data.startdate|date('d/m') }}
                   {% if stage.vars.data.startdate != stage.vars.data.enddate %}
                     -
-                    {{ stage.vars.data.enddate|localizeddate('short', 'none', null, null, 'dd/MM') }}
+                    {{ stage.vars.data.enddate|date('d/m') }}
                   {% endif %}
 
                 </div>
@@ -201,10 +201,10 @@
             <div class="meta">
               <div class="grading-dates">
                 <i class="fa fa-paper-plane"></i>
-                {{ stage.vars.data.gstartdate|localizeddate('short', 'none', null, null, 'dd/MM') }}
+                {{ stage.vars.data.gstartdate|date('d/m')}}
                 {% if stage.vars.data.gstartdate != stage.vars.data.genddate %}
                   -
-                  {{ stage.vars.data.genddate|localizeddate('short', 'none', null, null, 'dd/MM') }}
+                  {{ stage.vars.data.genddate|date('d/m')}}
                 {% endif %}
               </div>
             </div>

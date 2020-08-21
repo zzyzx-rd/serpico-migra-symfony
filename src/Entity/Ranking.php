@@ -22,7 +22,7 @@ class Ranking extends DbObject
      * @ORM\Column(name="rnk_id", type="integer", nullable=false, length=10)
      * @var int
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="rnk_dtype", type="string", length=1)
@@ -67,12 +67,12 @@ class Ranking extends DbObject
     /**
      * @ORM\Column(name="rnk_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="rnk_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ORM\Column(name="rnk_updated", type="datetime", nullable=true)
@@ -111,7 +111,7 @@ class Ranking extends DbObject
 
     /**
      * Ranking constructor.
-     * @param int $id
+     * @param ?int$id
      * @param $rnk_dtype
      * @param $rnk_wtype
      * @param $rnk_abs_result
@@ -130,7 +130,7 @@ class Ranking extends DbObject
      * @param $rnk_user_usr
      */
     public function __construct(
-        int $id = 0,
+      ?int $id = 0,
         $rnk_dtype = null,
         $rnk_wtype = null,
         $rnk_user_usr = null,

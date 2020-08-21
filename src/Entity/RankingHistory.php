@@ -22,7 +22,7 @@ class RankingHistory extends DbObject
      * @ORM\Column(name="rkh_id", type="integer", nullable=false, length=10)
      *@var int
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="rkh_wtype", type="string", length=1)
@@ -62,12 +62,12 @@ class RankingHistory extends DbObject
     /**
      * @ORM\Column(name="rkh_createdBy", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="rkh_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="Activity", inversedBy="historicalRankings")
@@ -95,7 +95,7 @@ class RankingHistory extends DbObject
 
     /**
      * RankingHistory constructor.
-     * @param int $id
+     * @param ?int$id
      * @param $rkh_wtype
      * @param $rkh_abs_result
      * @param $rkh_rel_result
@@ -111,7 +111,7 @@ class RankingHistory extends DbObject
      * @param $rhk_user_usr
      */
     public function __construct(
-        int $id = 0,
+      ?int $id = 0,
         $rkh_wtype = null,
         $rkh_abs_result = null,
         $rkh_rel_result = null,

@@ -20,7 +20,8 @@ class Grade extends DbObject
      * @ORM\Column(name="grd_id", length=10, type="integer", nullable=true)
      * @var int
      */
-    protected $id;
+    protected ?int $id;
+
 
     /**
      * @ORM\Column(name="grd_type", type="integer", nullable=true)
@@ -50,12 +51,12 @@ class Grade extends DbObject
     /**
      * @ORM\Column(name="grd_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="grd_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="Team", inversedBy="grades")
@@ -86,7 +87,7 @@ class Grade extends DbObject
 
     /**
      * Grade constructor.
-     * @param int $id
+     * @param ?int$id
      * @param $grd_type
      * @param $grd_graded_usr_id
      * @param $grd_graded_tea_id
@@ -102,7 +103,7 @@ class Grade extends DbObject
      */
     //TODO gérer les controllers
     public function __construct(
-        int $id = 0,
+      ?int $id = 0,
         $grd_type = 1,
         $grd_graded_usr_id = null,
         $grd_graded_tea_id = null,

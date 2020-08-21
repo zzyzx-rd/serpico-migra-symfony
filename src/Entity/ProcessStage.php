@@ -37,7 +37,7 @@ class ProcessStage extends DbObject
      * @ORM\Column(name="stg_id", type="integer",nullable=false, length=10)
      * @var int
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="stg_complete", type="boolean", nullable=true)
@@ -147,12 +147,12 @@ class ProcessStage extends DbObject
     /**
      * @ORM\Column(name="stg_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="stg_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ORM\Column(name="stg_isFinalized", type="datetime", nullable=true)
@@ -248,7 +248,7 @@ class ProcessStage extends DbObject
 
     /**
      * ProcessStage constructor.
-     * @param int $id
+     * @param ?int$id
      * @param $stg_complete
      * @param $stg_name
      * @param $stg_mode
@@ -290,7 +290,7 @@ class ProcessStage extends DbObject
      * @param $stg_master_usr
      */
     public function __construct(
-        int $id = 0,
+      ?int $id = 0,
         $stg_complete = false,
         $stg_visibility = 3,
         $stg_definite_dates = false,

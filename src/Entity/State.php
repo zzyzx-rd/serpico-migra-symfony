@@ -22,7 +22,7 @@ class State extends DbObject
      * @ORM\Column(name="sta_id", type="integer", nullable=false)
      * @var int
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="sta_abbr", type="string", length=255, nullable=true)
@@ -42,12 +42,12 @@ class State extends DbObject
     /**
      * @ORM\Column(name="sta_createdBy", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="sta_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="Country", inversedBy="states")
@@ -67,7 +67,7 @@ class State extends DbObject
 
     /**
      * State constructor.
-     * @param int $id
+     * @param ?int$id
      * @param $sta_abbr
      * @param $sta_fullname
      * @param $sta_name
@@ -78,7 +78,7 @@ class State extends DbObject
      * @param $firms
      */
     public function __construct(
-        int $id = 0,
+      ?int $id = 0,
         $sta_abbr = null,
         $sta_fullname = null,
         $sta_name = null,

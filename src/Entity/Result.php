@@ -22,7 +22,7 @@ class Result extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="res_id", type="integer", nullable=false)
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="res_type", type="integer", nullable=true)
@@ -112,12 +112,12 @@ class Result extends DbObject
     /**
      * @ORM\Column(name="res_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="res_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="Activity", inversedBy="results")
@@ -152,7 +152,7 @@ class Result extends DbObject
 
     /**
      * Result constructor.
-     * @param int $id
+     * @param ?int$id
      * @param $res_type
      * @param $res_war
      * @param $res_ear

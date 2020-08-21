@@ -7,7 +7,6 @@ use App\Repository\ActivityRepository;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\JoinColumn;
@@ -36,70 +35,70 @@ class Activity extends DbObject
      * @Column(name="act_id", type="integer", nullable=false)
      * @var int
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="act_complete", type="boolean", nullable=false)
      */
-    public $complete;
+    public bool $complete;
 
     /**
      * @ORM\Column(name="act_magnitude", type="integer", nullable=true)
      */
-    public $magnitude;
+    public int $magnitude;
 
     /**
      * @ORM\Column(name="act_simplified", type="boolean", nullable=false)
      */
-    public $simplified;
+    public bool $simplified;
 
     /**
      * @ORM\Column(name="act_name", type="string", length=255, nullable=true)
      */
-    public $name;
+    public string $name;
 
     /**
      * @ORM\Column(name="act_visibility", type="string", length=255, nullable=true)
      */
-    public $visibility;
+    public string $visibility;
 
     /**
      * @ORM\Column(name="act_startDate", type="datetime", nullable=true)
      */
-    public $startdate;
+    public ?DateTime $startdate;
 
     /**
      * @ORM\Column(name="act_endDate", type="datetime", nullable=true)
      */
-    public $enddate;
+    public ?DateTime $enddate;
 
     /**
      * @ORM\Column(name="act_objectives", type="string", length=255, nullable=true)
      */
-    public $objectives;
+    public string $objectives;
 
     /**
      * @ORM\Column(name="act_status", type="integer", nullable=true)
      */
-    public $status;
+    public ?int $status;
 
     /**
      * @ManyToOne(targetEntity="Process", inversedBy="activities")
      * @JoinColumn(name="process_pro_id", referencedColumnName="pro_id", nullable=true)
      */
-    protected $process;
+    protected ?Process $process;
 
     /**
      * @ORM\ManyToOne(targetEntity=InstitutionProcess::class, inversedBy="activities")
      * @JoinColumn(name="institution_process_id", referencedColumnName="inp_id", nullable=true)
      */
-    public $institutionProcess;
+    public ?InstitutionProcess $institutionProcess;
 
     /**
      * @ManyToOne(targetEntity="Organization", inversedBy="activities")
      * @JoinColumn(name="organization_org_id", referencedColumnName="org_id",nullable=false)
      */
-    protected $organization;
+    protected ?Organization $organization;
     /**
      * @OneToMany(targetEntity="Stage", mappedBy="activity", cascade={"persist", "remove"}, orphanRemoval=true)
      */
@@ -142,113 +141,109 @@ class Activity extends DbObject
      * @OneToMany(targetEntity="RankingTeamHistory", mappedBy="activity",cascade={"persist", "remove"}, orphanRemoval=true)
      */
     public $historicalRankingTeams;
-    /**
-     * @ManyToOne(targetEntity="TemplateActivity")
-     * @JoinColumn(name="template_activity_act_id", referencedColumnName="act_id",nullable=true)
-     */
-    public $template;
+
     /**
      * @OneToMany(targetEntity="ActivityUser", mappedBy="activity",cascade={"persist", "remove"}, orphanRemoval=true)
      * @OrderBy({"team" = "ASC"})
-     * @var ArrayCollection|ActivityUser[]
      */
     public $participants;
     /**
      * @Column(name="act_progress", type="float", nullable=false)
      * @var float
      */
-    protected $progress;
+    protected float $progress;
     /**
      * @Column(name="act_isRewarding", type="boolean", nullable=true)
      * @var bool
      */
-    protected $isRewarding;
+    protected bool $isRewarding;
     /**
      * @Column(name="act_distrAmount", length=10, type="float", nullable=true)
      * @var float
      */
-    protected $distrAmount;
+    protected float $distrAmount;
     /**
      * @Column(name="act_res_inertia", length= 10, type="float", nullable=true)
      * @var int
      */
-    protected $res_inertia;
+    protected int $res_inertia;
     /**
      * @Column(name="act_res_benefit_eff", length= 10, type="float", nullable=true)
      * @var int
      */
-    protected $res_benefit_eff;
+    protected int $res_benefit_eff;
     /**
      * @Column(name="act_created_by", type="integer", nullable=true)
      * @var int
      */
-    protected $createdBy;
+    protected ?int $createdBy;
     /**
      * @Column(name="act_inserted", type="datetime", nullable=true)
      * @var DateTime
      */
-    protected $inserted;
+    protected ?DateTime $inserted;
     /**
      * @Column(name="act_saved", type="datetime", nullable=true)
      * @var DateTime
      */
-    protected $saved;
+    protected ?DateTime $saved;
     /**
      * @Column(name="act_isFinalized", type="boolean", nullable=false)
      * @var bool
      */
-    protected $isFinalized;
+    protected bool $isFinalized;
     /**
      * @Column(name="act_finalized", type="datetime", nullable=true)
      * @var DateTime
      */
-    protected $finalized;
+    protected ?DateTime $finalized;
     /**
      * @Column(name="act_deleted", type="datetime", nullable=true)
      * @var DateTime
      */
-    protected $deleted;
+    protected ?DateTime $deleted;
     /**
      * @Column(name="act_completed", type="datetime", nullable=true)
      * @var DateTime
      */
-    protected $completed;
+    protected ?DateTime $completed;
     /**
      * @Column(name="act_released", type="datetime", nullable=true)
      * @var DateTime
      */
-    protected $released;
+    protected ?DateTime $released;
     /**
      * @Column(name="act_archived", type="datetime", nullable=true)
      * @var DateTime
      */
-    protected $archived;
+    protected ?DateTime $archived;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
      * @ORM\JoinColumn(name="act_master_usr_id", referencedColumnName="usr_id", nullable=false)
      */
-    public $master_usr;
+    public ?User $masterUser;
 
     /**
      * @ORM\Column(type="boolean", nullable=true)
      */
-    public $diffCriteria;
+    public bool $diffCriteria;
 
     /**
      * @ORM\Column(type="boolean", nullable=false)
      */
-    public $diffParticipants;
+    public bool $diffParticipants;
 
     /**
      * @ORM\Column(type="integer", nullable=false)
      */
-    public $nbParticipants;
+    public int $nbParticipants;
     /**
      * @var DateTime
      */
-    public $act_gEndDate;
+    public DateTime $act_gEndDate;
     public $act_gStartDate;
+    public ?User $currentUser = null;
 
     public function __toString()
     {
@@ -257,7 +252,7 @@ class Activity extends DbObject
 
     /**
      * Activity constructor.
-     * @param int $id
+     * @param ?int$id
      * @param int $magnitude
      * @param bool $complete
      * @param bool $simplified
@@ -285,7 +280,7 @@ class Activity extends DbObject
      * @param DateTime|null $archived
      */
     public function __construct(
-        int $id = 0,
+      ?int $id = 0,
         int $magnitude = 1,
         bool $complete = false,
         bool $simplified = true,
@@ -885,7 +880,7 @@ class Activity extends DbObject
     /**
      * @return DateTime
      */
-    public function getArchived(): DateTime
+    public function getArchived(): ?DateTime
     {
         return $this->archived;
     }
@@ -898,14 +893,14 @@ class Activity extends DbObject
         $this->archived = $archived;
     }
 
-    public function getMasterUsr(): ?User
+    public function getMasterUser(): ?User
     {
-        return $this->master_usr;
+        return $this->masterUser;
     }
 
-    public function setMasterUsr(?User $master_usr): self
+    public function setMasterUser(?User $master_usr): self
     {
-        $this->master_usr = $master_usr;
+        $this->masterUser = $master_usr;
 
         return $this;
     }
@@ -1240,26 +1235,7 @@ class Activity extends DbObject
                 });
             });
     }
-    public function userCanEdit(User $u): bool
-    {
-        $role = $u->getRole();
 
-        if (
-            $this->status != self::STATUS_ONGOING &&
-            $this->status != self::STATUS_FUTURE &&
-            $this->status != self::STATUS_INCOMPLETE &&
-            $this->status != self::STATUS_AWAITING_CREATION
-        ) {
-            return false;
-        }
-        if ($role == 4) {
-            return true;
-        }
-        if (($this->getInitiator()->getOrganization() == $u->getOrganization()) && ($role == 1 || $this->getActiveModifiableStages())) {
-            return true;
-        }
-        return false;
-    }
     public function userCanViewResults(User $u)
     {
 
@@ -1369,29 +1345,6 @@ class Activity extends DbObject
         return $actIndependantUniqueParticipatingClients;
     }
 
-    public function hasMinimumOutputConfig(){
-        return $this->getActiveModifiableStages()->forAll(static function(int $i, Stage $s){
-            return $s->hasMinimumOutputConfig() == 1;
-        });
-    }
-
-    public function hasMinimumParticipationConfig(){
-        return $this->getActiveModifiableStages()->forAll(function(int $i,Stage $s){
-            return $s->hasMinimumParticipationConfig() == 1;
-        });
-    }
-
-    public function hasFeedbackExpired(){
-        return $this->getActiveModifiableStages()->forAll(function(int $i,Stage $s){
-            return $s->hasFeedbackExpired() == 1;
-        });
-    }
-
-    public function getActiveConfiguredStages(){
-        return $this->getActiveModifiableStages()->filter(function(Stage $s){
-            return $s->hasMinimumOutputConfig() == 1 && $s->hasMinimumParticipationConfig() == 1;
-        });
-    }
     public function addStage(Stage $stage): Activity
     {
         $this->stages->add($stage);
@@ -1404,4 +1357,54 @@ class Activity extends DbObject
         $this->stages->removeElement($stage);
         return $this;
     }
+
+    public function hasFeedbackExpired(): bool
+    {
+        return $this->getActiveModifiableStages()->forAll(static function(int $i, Stage $s){
+            return $s->hasFeedbackExpired() === 1;
+        });
+    }
+
+    public function hasMinimumOutputConfig(): bool
+    {
+        return $this->getActiveModifiableStages()->forAll(static function(int $i, Stage $s){
+            return $s->hasMinimumOutputConfig() === 1;
+        });
+    }
+
+    public function hasMinimumParticipationConfig(): bool
+    {
+        return $this->getActiveModifiableStages()->forAll(function(int $i, Stage $s){
+            $stageM = new StageM($this->em, $this->requestStack, $this->security);
+            return $stageM->hasMinimumParticipationConfig($s) === 1;
+        });
+    }
+
+
+    public function getActiveConfiguredStages(){
+        return $this->getActiveModifiableStages()->filter(static function(Stage $s){
+            return $s->hasMinimumOutputConfig() === 1 && $s->hasMinimumParticipationConfig() === 1;
+        });
+    }
+
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getActiveModifiableStages()
+    {
+        if ($this->currentUser === null) {
+            return new ArrayCollection();
+        }
+
+        $activeStages = $this->getActiveStages();
+        foreach ($activeStages as $activeStage) {
+            $activeStage->currentUser = $this->currentUser;
+            if (!$activeStage->isModifiable($activeStage)) {
+                $activeStages->removeElement($activeStage);
+            }
+        }
+        return $activeStages;
+    }
+
 }

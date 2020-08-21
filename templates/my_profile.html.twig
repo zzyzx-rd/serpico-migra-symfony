@@ -710,7 +710,7 @@
               <label for="other_admin">{{'profile.first_connection.add_first_admin.give_ownership_option'|trans}}</label>
               <div class="admin-select-zone" style="display: none;">
                 <select id="userSelector" multiple>
-                  {% for user in global.currentuser.organization.activeUsers %}
+                  {% for user in global.activeUsers %}
                     {% if user != global.currentuser and user.lastname != "ZZ" %}
                       <option value="{{ user.id }}">{{ user.fullname }}</option>
                     {% endif %}

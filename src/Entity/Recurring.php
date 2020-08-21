@@ -23,7 +23,7 @@ class Recurring extends DbObject
      * @ORM\Column(name="rct_id", type="integer", length=10, nullable=true)
      * @var int
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="rct_name", type="string", length=255, nullable=true)
@@ -108,12 +108,12 @@ class Recurring extends DbObject
     /**
      * @ORM\Column(name="rct_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="rct_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ORM\Column(name="rct_deleted", type="datetime", nullable=true)

@@ -24,7 +24,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @ApiResource()
- * @ORM\Entity(repositoryClass=UserRepository::class)
+ * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  */
 // * @UniqueEntity(
 // *     fields={"email"},
@@ -43,7 +43,8 @@ class User extends DbObject implements  UserInterface, \Serializable
      * @Column(name="usr_id", type="integer", nullable=false)
      * @var int
      */
-    protected $id;
+    protected ?int $id;
+
 
     /**
      * @ORM\Column(name="usr_int", type="boolean", nullable=true)
@@ -153,12 +154,12 @@ class User extends DbObject implements  UserInterface, \Serializable
     /**
      * @ORM\Column(name="usr_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="usr_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ORM\Column(name="usr_last_connected", type="datetime", nullable=true)
@@ -171,8 +172,6 @@ class User extends DbObject implements  UserInterface, \Serializable
     public $deleted;
 
     /**
-     * @ManyToOne(targetEntity="Role")
-     * @JoinColumn(name="rol_id", referencedColumnName="role_rol_id")
      * @Column(name="role_rol_id", type="integer", nullable=true)
      * @var int
      */
@@ -232,7 +231,7 @@ class User extends DbObject implements  UserInterface, \Serializable
     public $stagesWhereMaster;
 
     /**
-     * @ORM\OneToMany(targetEntity=TeamUser::class, mappedBy="user_usr")
+     * @ORM\OneToMany(targetEntity=TeamUser::class, mappedBy="user")
      */
     public $teamUsers;
 
@@ -264,7 +263,7 @@ class User extends DbObject implements  UserInterface, \Serializable
      * @ORM\ManyToOne(targetEntity=Organization::class)
      * @ORM\JoinColumn(nullable=false, name="organization_org_id", referencedColumnName="org_id", nullable=true)
      */
-    public $organization_org;
+    public $organization;
 
     /**
      * @OneToMany(targetEntity="Department", mappedBy="masterUser",cascade={"persist", "remove"}, orphanRemoval=true)
@@ -278,7 +277,7 @@ class User extends DbObject implements  UserInterface, \Serializable
 
     /**
      * User constructor.
-     * @param int $id
+     * @param ?int$id
      * @param bool $usr_int
      * @param string $usr_firstname
      * @param string $usr_lastname
@@ -324,7 +323,7 @@ class User extends DbObject implements  UserInterface, \Serializable
      * @param $organization_org
      */
     public function __construct(
-        int $id = null,
+      ?int $id = null,
         $usr_int = true,
         $usr_firstname = '',
         $usr_lastname = '',
@@ -411,7 +410,7 @@ class User extends DbObject implements  UserInterface, \Serializable
         $this->position_pos = $position_pos;
         $this->departement_dpt = $departement_dpt;
         $this->title_tit = $title_tit;
-        $this->organization_org = $organization_org;
+        $this->organization = $organization_org;
         $this->leadingDepartments = new ArrayCollection();
     }
 
@@ -700,7 +699,7 @@ class User extends DbObject implements  UserInterface, \Serializable
     }
 
     /**
-     * @param int $id
+     * @param ?int$id
      * @return User
      */
     public function setId(int $id): User
@@ -972,7 +971,7 @@ class User extends DbObject implements  UserInterface, \Serializable
     {
         if (!$this->teamUsers->contains($teamUser)) {
             $this->teamUsers[] = $teamUser;
-            $teamUser->setUserUsr($this);
+            $teamUser->setUser($this);
         }
 
         return $this;
@@ -983,8 +982,8 @@ class User extends DbObject implements  UserInterface, \Serializable
         if ($this->teamUsers->contains($teamUser)) {
             $this->teamUsers->removeElement($teamUser);
             // set the owning side to null (unless already changed)
-            if ($teamUser->getUserUsr() === $this) {
-                $teamUser->setUserUsr(null);
+            if ($teamUser->getUser() === $this) {
+                $teamUser->setUser(null);
             }
         }
 
@@ -1039,14 +1038,14 @@ class User extends DbObject implements  UserInterface, \Serializable
         return $this;
     }
 
-    public function getOrganization(): ?Organization
+    public function getOrganization(): Organization
     {
-        return $this->organization_org;
+        return $this->organization;
     }
 
-    public function setOrganization(?Organization $organization_org): self
+    public function setOrganization(Organization $organization_org): self
     {
-        $this->organization_org = $organization_org;
+        $this->organization = $organization_org;
 
         return $this;
     }

@@ -22,17 +22,17 @@ class CriterionGroup extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="cgp_id", type="integer", nullable=false)
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="cgp_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="cgp_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ORM\Column(name="cgp_name", type="string", length=255, nullable=true)

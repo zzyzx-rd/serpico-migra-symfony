@@ -22,7 +22,7 @@ class SurveyFieldParameter extends DbObject
      * @ORM\Column(name="sfp_id", type="integer", length=10, nullable=false)
      * @var int
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="sfp_value", type="string", length=255, nullable=true)
@@ -47,12 +47,12 @@ class SurveyFieldParameter extends DbObject
     /**
      * @ORM\Column(name="sfp_createdBy", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="sfp_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="SurveyField", inversedBy="parameters")
@@ -62,7 +62,7 @@ class SurveyFieldParameter extends DbObject
 
     /**
      * SurveyFieldParameter constructor.
-     * @param int $id
+     * @param ?int$id
      * @param $sfp_value
      * @param $sfp_lowerbound
      * @param $sfp_upperbound
@@ -72,7 +72,7 @@ class SurveyFieldParameter extends DbObject
      * @param $field
      */
     public function __construct(
-        int $id = 0,
+      ?int $id = 0,
         $sfp_value = null,
         $sfp_lowerbound = true,
         $sfp_upperbound = null,

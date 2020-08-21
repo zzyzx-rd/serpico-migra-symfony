@@ -21,7 +21,7 @@ class Answer extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="asw_id", type="integer", length=11, nullable=false)
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="asw_text", type="string", length=255, nullable=true)
@@ -31,12 +31,12 @@ class Answer extends DbObject
     /**
      * @ORM\Column(name="asw_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="asw_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
     /**
      * @ManyToOne(targetEntity="SurveyField", inversedBy="answers")
      * @JoinColumn(name="survey_field_sfi_id", referencedColumnName="sfi_id", nullable=true)

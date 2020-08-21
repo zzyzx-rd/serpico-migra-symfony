@@ -16,7 +16,6 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\OptionsResolver\Options;
-use App\Entity\TemplateStage;
 use App\Entity\Stage;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -26,10 +25,10 @@ use Symfony\Component\Form\Extension\Core\Type\PercentType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Validator\Constraints as Assert;
-use Validator\StagePeriodPositive;
-use Validator\UBGreaterThanLB;
-use Validator\SumWeightEqualToHundredPct;
-use Validator\UniquePerOrganization;
+use App\Validator\StagePeriodPositive;
+use App\Validator\UBGreaterThanLB;
+use App\Validator\SumWeightEqualToHundredPct;
+use App\Validator\UniquePerOrganization;
 
 
 class StageCriterionType extends AbstractType
@@ -40,7 +39,7 @@ class StageCriterionType extends AbstractType
             [
                 'entry_type' => CriterionType::class,
                 'entry_options' => [
-                    'app' => $options['app'],
+                    'currentUser' => $options["currentUser"],
                     'organization' => $options['organization'],
                     'elmtType' => $options['elmtType'],
                 ],
@@ -91,7 +90,7 @@ class StageCriterionType extends AbstractType
                 'attr' => ['class' => 'weight-input']
             ]);
 
-            if($options['elmtType'] != "activity"){
+            if($options['elmtType'] !== "activity"){
 
                 $builder->add('definiteDates', CheckboxType::class,
                 [
@@ -255,7 +254,7 @@ class StageCriterionType extends AbstractType
                 ]
             );
 
-            if($options['elmtType'] != 'process'){
+            if($options['elmtType'] !== 'process'){
 
                 $builder->add('independantUniqueIntParticipations', CollectionType::class,
                     [
@@ -263,6 +262,7 @@ class StageCriterionType extends AbstractType
                         'entry_type' => ParticipantManageType::class,
                         'entry_options' => [
                             'organization' => $options['organization'],
+                            'currentUser' => $options['currentUser'],
                             'elmt' => $options['elmtType'],
                             'query' => 'internal',
                         ],
@@ -282,6 +282,7 @@ class StageCriterionType extends AbstractType
                         'entry_type' => ParticipantManageType::class,
                         'entry_options' => [
                             'organization' => $options['organization'],
+                            'currentUser' => $options['currentUser'],
                             'elmt' => $options['elmtType'],
                             'query' => 'external',
                         ],
@@ -299,6 +300,7 @@ class StageCriterionType extends AbstractType
                         'entry_type' => ParticipantManageType::class,
                         'entry_options' => [
                             'organization' => $options['organization'],
+                            'currentUser' => $options['currentUser'],
                             'elmt' => $options['elmtType'],
                             'query' => 'team',
                         ],
@@ -341,8 +343,8 @@ class StageCriterionType extends AbstractType
                     return Stage::class;
                 }
             },
-            'app' => null,
             'organization' => null,
         ]);
+        $resolver->setRequired("currentUser");
     }
 }

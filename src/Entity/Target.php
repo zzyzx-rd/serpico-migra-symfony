@@ -22,7 +22,7 @@ class Target extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="tgt_id", type="integer", nullable=false)
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="tgt_sign", type="integer", nullable=true)
@@ -37,12 +37,12 @@ class Target extends DbObject
     /**
      * @ORM\Column(name="tgt_createdBy", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="tgt_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="Organization", inversedBy="targets")

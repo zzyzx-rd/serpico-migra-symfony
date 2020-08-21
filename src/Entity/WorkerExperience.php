@@ -22,7 +22,7 @@ class WorkerExperience extends DbObject
      * @ORM\Column(name="wex_id", type="integer", nullable=false)
      * @var int
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="wex_active", type="boolean", nullable=true)
@@ -52,12 +52,12 @@ class WorkerExperience extends DbObject
     /**
      * @ORM\Column(name="wex_createdBy", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="wex_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="WorkerIndividual", inversedBy="experiences")
@@ -73,7 +73,7 @@ class WorkerExperience extends DbObject
 
     /**
      * WorkerExperience constructor.
-     * @param int $id
+     * @param ?int$id
      * @param $wex_active
      * @param $wex_position
      * @param $wex_location
@@ -85,7 +85,7 @@ class WorkerExperience extends DbObject
      * @param $firm
      */
     public function __construct(
-        int $id = 0,
+      ?int $id = 0,
         $wex_active = null,
         $wex_position = null,
         $wex_location = null,

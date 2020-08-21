@@ -2,5 +2,6 @@ twig:
     default_path: '%kernel.project_dir%/templates'
     globals:
         global: '@App\globalVar'
+        activityM: '@App\Model\ActivityM'
         freeAccessRoutes: '/fr'
         userRepo: '@App\Repository\UserRepository'

@@ -21,7 +21,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Twig\Extension\StagingExtension;
 use App\Form\Type\StageCriterionType;
-use Validator\AtLeastOneStageHasAOwner;
+use App\Validator\AtLeastOneStageHasAOwner;
 
 class AddCriterionForm extends AbstractType
 {
@@ -31,7 +31,6 @@ class AddCriterionForm extends AbstractType
             [
                 'entry_type' => StageCriterionType::class,
                 'entry_options' => [
-                    'app' => $options['app'],
                     'organization' => $options['organization'],
                     'elmt' => $options['elmt'],
                 ],
@@ -76,7 +75,6 @@ class AddCriterionForm extends AbstractType
         $resolver->addAllowedTypes('standalone', 'bool');
         $resolver->setDefault('multiple_active_stages', false);
         $resolver->setDefault('diff_stages_criteria', false);
-        $resolver->setDefault('app', null);
         $resolver->setDefault('organization', null);
     }
 

@@ -2,7 +2,10 @@
 
 namespace App\Controller;
 
+use App\Model\ActivityM;
+use App\Model\StageM;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
@@ -484,23 +487,18 @@ class UserController extends MasterController
 
     /**
      * @param Request $request
-     * @param Application $app
      * @param $elmtType
      * @param $elmtId
      * @return JsonResponse|Response
      * @Route("/institution/{elmtType}/config/{elmtId}", name="getElementConfig")
      */
-    public function getElementConfigAction(Request $request, Application $app, $elmtType, $elmtId){
-        $this->em = self::getEntityManager();
-        $currentUser = self::getAuthorizedUser();
+    public function getElementConfigAction($elmtType, $elmtId){
         switch ($elmtType) {
             case 'iprocess':
                 $repoE    = $this->em->getRepository(InstitutionProcess::class);
                 break;
             case 'process':
                 $repoE    = $this->em->getRepository(Process::class);
-            case 'template':
-                $repoE    = $this->em->getRepository(TemplateActivity::class);
                 break;
             case 'activity':
                 $repoE    = $this->em->getRepository(Activity::class);
@@ -513,21 +511,24 @@ class UserController extends MasterController
         $elmtConfig = [];
         $elmtConfig['id'] = $element->getId();
         $elmtConfig['name'] = $element->getName();
-        /** @var Collection|Stage[]|Collection|TemplateStage[]|Collection|IProcessStage */
-        $stages =
-            ($currentUser->getOrganization() == $element->getOrganization()) ?
-
-                (($currentUser->getRole() == USER::ROLE_ADMIN || $currentUser->getRole() == USER::ROLE_ROOT) ?
-                $element->getActiveStages() : $element->getActiveModifiableStages())
-                :
-                $element->getStages()->filter(function($s) use($currentUser){
-                    return $s->getParticipants()->filter(function($p) use ($currentUser){
-                        return $p->getDirectUser() == $currentUser;
+        $currentUser = $this->user;
+        if (($this->user->getOrganization() == $element->getOrganization())) {
+            if (($this->user->getRole() === USER::ROLE_ADMIN || $this->user->getRole() === USER::ROLE_ROOT)) {
+                $stages =
+                    ($element->getActiveStages());
+            } else {
+                $stages =
+                    ($element->getActiveModifiableStages());
+            }
+        } else {
+            $stages = $element->getStages()->filter(static function ($s) use ($currentUser) {
+                    return $s->getParticipants()->filter(static function ($p) use ($currentUser) {
+                        return $p->getUser() == $currentUser;
                     });
                 });
-            ;
+        }
 
-        if($elmtType == 'activity'){
+        if($elmtType === 'activity'){
             $elmtConfig['pStatus'] = $element->getProgress();
             $elmtConfig['oStatus'] = $element->getStatus();
             $elmtConfig['nbOCompletedStages'] = $element->getOCompletedStages()->count();
@@ -535,21 +536,27 @@ class UserController extends MasterController
         }
 
         $repoU = $this->em->getRepository(User::class);
-        $masterUser = $elmtType == 'activity' ?  $repoU->find($element->getMasterUserId()) : ($element->getMasterUser() ?: $repoU->find($element->getCreatedBy()));
+        if ($element->getMasterUser()) {
+            $masterUser = $elmtType === 'activity' ? $repoU->find($element->getMasterUser()) : ($element->getMasterUser());
+        } else {
+            $masterUser = $elmtType === 'activity' ? $repoU->find($element->getMasterUser()) : ($repoU->find($element->getCreatedBy()));
+        }
         $elmtConfig['masterUserFullname'] = $masterUser->getFullname();
         $elmtConfig['masterUserPicture'] = $masterUser->getPicture();
         $elmtConfig['masterFNFL'] = $masterUser->getFirstName()[0];
-        $elmtConfig['canEdit'] = $element->userCanEdit($currentUser);
-        $elmtConfig['isDeletable'] = ($elmtType == 'activity') ? $element->isDeletable() && $elmtConfig['canEdit'] : false;
+        $activityM = new ActivityM($this->em, $this->stack, $this->security);
+        $stageM = new StageM($this->em, $this->stack, $this->security);
+        $elmtConfig['canEdit'] = $activityM->userCanEdit($element, $this->user);
+        $elmtConfig['isDeletable'] = ($elmtType === 'activity') ? $activityM->isDeletable($element) && $elmtConfig['canEdit'] : false;
         foreach($stages as $stage){
             $sData = [];
             $sData['id'] = $stage->getId();
-            if($elmtType == 'activity'){
+            if($elmtType === 'activity'){
                 $sData['r'] = $stage->isReopened();
             }
             $sData['name'] = $stage->getName();
-            $sData['pReadiness'] = sizeof($stage->getUniqueGradableParticipations()) >= 1 && sizeof($stage->getUniqueGraderParticipations()) >= 1;
-            $sData['oReadiness'] = sizeof($stage->getCriteria()) >= 1 || $stage->getSurvey() != null;
+            $sData['pReadiness'] = sizeof($stageM->getUniqueGradableParticipations($stage)) >= 1 && sizeof($stageM->getUniqueGraderParticipations($stage)) >= 1;
+            $sData['oReadiness'] = sizeof($stage->getCriteria()) >= 1 || $stage->getSurvey() !== null;
             $sData['progress'] = $stage->getProgress();
             $sData['ddates'] = $stage->isDefiniteDates();
             $sData['startdate'] = $stage->getStartdate();
@@ -577,7 +584,7 @@ class UserController extends MasterController
             $team = null;
             foreach($stage->getIndependantUniqueParticipations() as $participant){
                 $pData = [];
-                if($participant->getTeam() != null){
+                if($participant->getTeam() !== null){
 
                     $team = $participant->getTeam();
                     $tData = [];
@@ -600,7 +607,7 @@ class UserController extends MasterController
 
                     $user = $participant->getDirectUser();
                     $pData['img'] = $user->getPicture();
-                    $name = $user->getFirstname() == 'ZZ' ? $user->getOrganization()->getCommname() :  $user->getFullName();
+                    $name = $user->getFirstname() === 'ZZ' ? $user->getOrganization()->getCommname() :  $user->getFullName();
                     $pData['name'] = $name;
                     $pData['fnfl'] = $name[0];
                     $pData['type'] = $participant->getType();
@@ -1571,7 +1578,7 @@ class UserController extends MasterController
 //        $user->setRememberMeToken($_COOKIE['REMEMBERME']);
         $this->em->persist($user);
         $this->em->flush();
-        $totalParticipations = new ArrayCollection($repoAU->findBy(['user_usr' => $user], ['status' => 'ASC', 'activity' => 'ASC', 'stage' => 'ASC']));
+        $totalParticipations = new ArrayCollection($repoAU->findBy(['user' => $user], ['status' => 'ASC', 'activity' => 'ASC', 'stage' => 'ASC']));
 
         // We consider each graded activity as having at least one releasable criterion an nothing more
         $nbPublishedActivities = 0;
@@ -1793,7 +1800,7 @@ class UserController extends MasterController
             'wRelPerfRelRanking' => isset($userWPerfRanking) ? $userWPerfRanking->getRelResult() : null,
             'wDevRatioRelRanking' => isset($userWDevRatioRanking) ? $userWDevRatioRanking->getRelResult() : null,
             'wDevRatioAbsRanking' => isset($userWDevRatioRanking) ? $userWDevRatioRanking->getAbsResult() : null,
-            'nbOrgUsers' => count($repoU->findBy(['organization_org'=> $organization, 'deleted' => null, 'internal' => 1])),
+            'nbOrgUsers' => count($repoU->findBy(['organization'=> $organization, 'deleted' => null, 'internal' => 1])),
             'nbEvaluatedPerfUsers' => count($repoRK->findBy(['organization' => $organization, 'dType' => 'P', 'wType' => 'W', 'period' => 0, 'frequency' => 'D'])),
             'nbEvaluatedDistUsers' => count($repoRK->findBy(['organization' => $organization, 'dType' => 'D', 'wType' => 'W', 'period' => 0, 'frequency' => 'D'])),
             'myHotStageParticipations' => $myHotStageParticipations,

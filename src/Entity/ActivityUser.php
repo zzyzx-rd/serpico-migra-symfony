@@ -28,7 +28,7 @@ class ActivityUser extends DbObject
      * @ORM\GeneratedValue()
      * @Column(name="a_u_id", type="integer", nullable=false)
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="a_u_status", type="integer", nullable=true)
@@ -83,12 +83,12 @@ class ActivityUser extends DbObject
     /**
      * @ORM\Column(name="a_u_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="a_u_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ORM\Column(name="a_u_confirmed", type="datetime", nullable=true)
@@ -152,7 +152,7 @@ class ActivityUser extends DbObject
 
     /**
      * ActivityUser constructor.
-     * @param int $id
+     * @param ?int$id
      * @param int $a_u_status
      * @param bool $a_u_leader
      * @param int $a_u_type
@@ -178,7 +178,7 @@ class ActivityUser extends DbObject
      * @param ExternalUser $external_user_ext_usr
      */
     public function __construct(
-        int $id = 0,
+      ?int $id = 0,
         int $a_u_status= 0,
         bool $a_u_leader = false,
         int $a_u_type = 1,

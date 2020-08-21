@@ -24,7 +24,7 @@ class ExternalUser extends DbObject
      * @ORM\Column(name="ext_id", type="integer", nullable=false)
      * @var int
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="ext_fisrtname", type="string", length=255, nullable=true)
@@ -59,12 +59,12 @@ class ExternalUser extends DbObject
     /**
      * @ORM\Column(name="ext_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="ext_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ORM\Column(name="ext_last_connected", type="datetime", nullable=true)
@@ -100,7 +100,7 @@ class ExternalUser extends DbObject
 
     /**
      * ExternalUser constructor.
-     * @param int $id
+     * @param ?int$id
      * @param string $ext_fisrtname
      * @param string $ext_lastname
      * @param $ext_email
@@ -117,7 +117,7 @@ class ExternalUser extends DbObject
      * @param TeamUser $teamUsers
      */
     public function __construct(
-        int $id = 0,
+      ?int $id = 0,
         $ext_fisrtname = '',
         $ext_lastname = '',
         $ext_email = null,

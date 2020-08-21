@@ -12,6 +12,7 @@ use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\OrderBy;
+use phpDocumentor\Reflection\Types\This;
 
 /**
  * @ApiResource()
@@ -24,7 +25,8 @@ class Department extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="dpt_id", type="integer", length=10, nullable=false)
      */
-    protected $id;
+    protected ?int $id;
+
 
     /**
      * @ORM\Column(type="string", length=45)
@@ -34,12 +36,12 @@ class Department extends DbObject
     /**
      * @ORM\Column(name="dpt_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="dpt_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ORM\Column(name="dpt_deleted", type="datetime", nullable=true)
@@ -57,12 +59,6 @@ class Department extends DbObject
      */
 //     * @OrderBy({"name" = "ASC"})
     public $positions;
-
-    /**
-     * @OneToMany(targetEntity="TemplateActivity", mappedBy="department", cascade={"persist", "remove"},orphanRemoval=true)
-     */
-//     * @OrderBy({"name" = "ASC"})
-    public $templateActivities;
 
     /**
      * @OneToMany(targetEntity="OrganizationUserOption", mappedBy="department", cascade={"persist","remove"}, orphanRemoval=true)
@@ -177,9 +173,10 @@ class Department extends DbObject
     /**
      * @param mixed $masterUser
      */
-    public function setMasterUser($masterUser): void
+    public function setMasterUser($masterUser): Department
     {
         $this->masterUser = $masterUser;
+        return $this;
     }
 
     /**
@@ -241,9 +238,10 @@ class Department extends DbObject
     /**
      * @param mixed $organization
      */
-    public function setOrganization($organization): void
+    public function setOrganization($organization): Department
     {
         $this->organization = $organization;
+        return $this;
     }
 
     /**
@@ -292,18 +290,6 @@ class Department extends DbObject
         return $this;
     }
 
-    public function addTemplateActivity(TemplateActivity $templateActivity): Department
-    {
-        $this->templateActivities->add($templateActivity);
-        $templateActivity->setDepartment($this);
-        return $this;
-    }
-
-    public function removeTemplateActivity(TemplateActivity $templateActivity): Department
-    {
-        $this->templateActivities->removeElement($templateActivity);
-        return $this;
-    }
     //TODO l'histoire du getUSers et viewable users
 
     public function toArray(): array

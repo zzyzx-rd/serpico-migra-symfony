@@ -19,7 +19,7 @@ class Country extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="cou_id", type="integer", nullable=false)
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="cou_abbr", type="string", length=255, nullable=true)
@@ -39,12 +39,12 @@ class Country extends DbObject
     /**
      * @ORM\Column(name="cou_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="cou_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @OneToMany(targetEntity="State", mappedBy="country",cascade={"persist", "remove"}, orphanRemoval=true)

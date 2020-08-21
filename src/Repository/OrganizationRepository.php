@@ -21,15 +21,16 @@ class OrganizationRepository extends ServiceEntityRepository
         parent::__construct($registry, Organization::class);
     }
 
-    public function hasActiveAdmin(Organization $organization){
-        return $this->getActiveUsers($organization->getId())
-            ->exists(function(int $i, User $u){
-                return $u->getRole() == USER::ROLE_ADMIN && $u->getLastConnected() != null;
-            });
+    public function hasActiveAdmin(?Organization $organization){
+        return $organization?$this->getActiveUsers($organization->getId())
+            ->exists(static function(int $i, User $u){
+                return $u->getRole() == USER::ROLE_ADMIN && $u->getLastConnected() !== null;
+            }): false;
     }
 
-    public function getActiveUsers(int $orgId){
-        return new ArrayCollection($this->_em->getRepository(User::class)->findBy(['organization_org' => $orgId, 'deleted' => null],['lastname' => 'ASC']));
+    public function getActiveUsers(int $orgId): ArrayCollection
+    {
+        return new ArrayCollection($this->_em->getRepository(User::class)->findBy(['organization' => $orgId, 'deleted' => null],['lastname' => 'ASC']));
     }
     // /**
     //  * @return Organization[] Returns an array of Organization objects

@@ -20,7 +20,7 @@ use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Validator\Constraints as Assert;
-use Validator\MTGreaterThanToday;
+use App\Validator\MTGreaterThanToday;
 use Controller\MasterController;
 
 class ContactForm extends AbstractType

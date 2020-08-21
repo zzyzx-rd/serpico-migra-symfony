@@ -34,7 +34,7 @@ use Twig\Extension\StagingExtension;
 use App\Form\Type\StageCriterionType;
 use Symfony\Component\Validator\Constraints\Choice;
 use Symfony\Component\Validator\Constraints\NotNull;
-use Validator\UniquePerOrganization;
+use App\Validator\UniquePerOrganization;
 use Symfony\Component\Validator\Constraints as Assert;
 
 

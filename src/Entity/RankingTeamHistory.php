@@ -22,7 +22,7 @@ class RankingTeamHistory extends DbObject
      * @ORM\Column(name="rth_id", type="integer", nullable=false, length=10)
      * @var int
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="rth_dtype", type="string", length=1)
@@ -67,12 +67,12 @@ class RankingTeamHistory extends DbObject
     /**
      * @ORM\Column(name="rth_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="rth_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      *@ManyToOne(targetEntity="Activity", inversedBy="historicalRankingTeams")

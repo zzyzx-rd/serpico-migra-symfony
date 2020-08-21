@@ -20,34 +20,31 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use App\Entity\Client;
+use App\Entity\Organization;
 
 class ParticipantManageType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-
-        $currentUser = MasterController::getAuthorizedUser();
-        if (!$currentUser instanceof User) {
-            throw 'Authentication issue: no authorized user found';
-        }
         $organization = $options['organization'];
         $query = $options['query'];
-
-        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($organization, $query, $currentUser) {
+        $currentUser = $options["currentUser"];
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, static function (FormEvent $event) use ($organization, $query, $currentUser) {
 
             $form = $event->getForm();
 
-            if ($query == 'internal') {
+            if ($query === 'internal') {
                 $form->add(
                     'directUser', EntityType::class,
                     [
                         'label_format' => 'participants.%name%',
                         'class' => User::class,
                         'choice_label' => 'invertedFullName',
-                        'query_builder' => function (EntityRepository $er) use ($organization, $currentUser) {
-                            $orgId = $organization ? $organization->getId() : $currentUser->getOrganization()->getId();
+                        'query_builder' => static function (EntityRepository $er) use ($organization, $currentUser) {
+                            $organization = $organization ? : $currentUser->getOrganization();
                             return $er->createQueryBuilder('u')
-                                ->where("u.orgId = $orgId")
+                                ->where("u.organization= $organization")
                                 ->andWhere("u.deleted is NULL")
                                 ->andWhere("u.lastname != 'ZZ'")
                                 ->orderBy('u.lastname', 'asc');
@@ -58,27 +55,27 @@ class ParticipantManageType extends AbstractType
                         ],
                     ]
                 );
-            } else if ($query == 'external') {
+            } else if ($query === 'external') {
                 $form->add('directUser', EntityType::class,
                     [
                         'label_format' => 'participants.%name%',
                         'class' => User::class,
-                        'choice_label' => function (User $u) {
-                            if ($u->getLastname() == 'ZZ') {
+                        'choice_label' => static function (User $u) {
+                            if ($u->getLastname() === 'ZZ') {
                                 return $u->getOrganization()->getCommname();
-                            } else {
-                                return $u->getInvertedFullName();
                             }
+
+                            return $u->getInvertedFullName();
                         },
-                        'choice_attr' => function(User $u) {
-                            return $u->getLastname() == 'ZZ' ? ['class' => 'synth'] : [];
+                        'choice_attr' => static function(User $u) {
+                            return $u->getLastname() === 'ZZ' ? ['class' => 'synth'] : [];
                         },
-                        'query_builder' => function (EntityRepository $er) use ($organization, $currentUser) {
-                            $orgId = $organization ? $organization->getId() : $currentUser->getOrganization()->getId();
+                        'query_builder' => static function (EntityRepository $er) use ($organization, $currentUser) {
+                            $organization = $organization ?: $currentUser->getOrganization();
                             return $er->createQueryBuilder('u')
-                                ->innerJoin('App\Entity\Client', 'c', 'WITH', 'c.clientOrganization = u.orgId')
-                                ->innerJoin('App\Entity\Organization', 'o', 'WITH', 'o.id = c.clientOrganization')
-                                ->where("c.organization = $orgId")
+                                ->innerJoin(Client::class, 'c', 'WITH', 'c.clientOrganization = u.organization')
+                                ->innerJoin(Organization::class, 'o', 'WITH', 'o.id = c.clientOrganization')
+                                ->where("c.organization = $organization")
                                 ->andWhere('u.deleted is NULL')
                                 ->orderBy('o.commname', 'asc')
                                 ->addOrderBy('u.lastname', 'asc');
@@ -87,7 +84,7 @@ class ParticipantManageType extends AbstractType
                             'class' => 'select-with-fa',
                         ],
                     ]);
-            } else if ($query == 'team') {
+            } else if ($query === 'team') {
                 $form->add(
                     'team', EntityType::class,
                     [
@@ -108,7 +105,7 @@ class ParticipantManageType extends AbstractType
             }
         });
 
-        if ($query != 'external') {
+        if ($query !== 'external') {
             $builder->add('leader', CheckboxType::class,
                 [
                     'attr' => [
@@ -150,13 +147,14 @@ class ParticipantManageType extends AbstractType
     {
         $resolver->setDefault('elmt', 'activity');
         $resolver->setDefault('data_class', function (Options $options) {
-            if ($options['elmt'] == 'iprocess') {
+            if ($options['elmt'] === 'iprocess') {
                 return IProcessActivityUser::class;
-            } else if ($options['elmt'] == 'template') {
+            } else if ($options['elmt'] === 'template') {
                 return TemplateActivityUser::class;
             }
             return ActivityUser::class;
         });
+        $resolver->setRequired("currentUser");
         $resolver->setDefault('organization', null);
         $resolver->setDefault('query', null);
         $resolver->setDefault('standalone', false);

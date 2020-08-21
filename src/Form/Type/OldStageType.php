@@ -21,10 +21,10 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Form\FormBuilderInterface;
 use App\Entity\Stage;
 use App\Entity\TemplateStage;
-use Validator\EDGreaterThanSD;
-use Validator\GEDGreaterThanED;
-use Validator\GEDGreaterThanGSD;
-use Validator\GSDGreaterThanSD;
+use App\Validator\EDGreaterThanSD;
+use App\Validator\GEDGreaterThanED;
+use App\Validator\GEDGreaterThanGSD;
+use App\Validator\GSDGreaterThanSD;
 
 class OldStageType extends AbstractType
 {

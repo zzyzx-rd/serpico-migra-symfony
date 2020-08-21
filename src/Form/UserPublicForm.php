@@ -24,7 +24,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Validator\Constraints as Assert;
-use Validator\UniquePerOrganization;
+use App\Validator\UniquePerOrganization;
 use Controller\MasterController;
 use Symfony\Bridge\Doctrine\App\Form\Type\EntityType;
 use Doctrine\ORM\EntityRepository;

@@ -22,7 +22,7 @@ class RankingTeam extends DbObject
      * @ORM\Column(name="rkt_id", type="integer", nullable=false, length=10)
      * @var int
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="rkt_dtype", type="string", length=1)
@@ -67,12 +67,12 @@ class RankingTeam extends DbObject
     /**
      * @ORM\Column(name="rkt_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="rkt_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ORM\Column(name="rkt_updated", type="datetime", nullable=true)

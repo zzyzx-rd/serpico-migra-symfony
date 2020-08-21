@@ -25,7 +25,7 @@ class IProcessActivityUser extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="a_u_id", type="integer", nullable=false)
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="a_u_status", type="integer", nullable=true)
@@ -55,12 +55,12 @@ class IProcessActivityUser extends DbObject
     /**
      * @ORM\Column(name="a_u_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="a_u_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ORM\Column(name="a_u_deleted", type="datetime", nullable=true)
@@ -122,7 +122,7 @@ class IProcessActivityUser extends DbObject
      * @param $external_user_ext_usr
      */
     public function __construct(
-        int $id = 0,
+      ?int $id = 0,
         User $user_usr = null,
         ExternalUser $external_user_ext_usr = null,
         bool $a_u_leader = false,

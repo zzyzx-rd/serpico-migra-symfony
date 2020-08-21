@@ -15,7 +15,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Validator\Constraints as Assert;
-use Validator\UniquePerOrganization;
+use App\Validator\UniquePerOrganization;
 
 
 class SignUpForm extends AbstractType {

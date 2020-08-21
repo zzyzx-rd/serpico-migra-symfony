@@ -28,7 +28,7 @@ class WorkerFirm extends DbObject
      * @ORM\Column(name="wfi_id", type="integer", nullable=false)
      * @var int
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="wfi_hq_location", type="string", length=255, nullable=true)
@@ -134,12 +134,12 @@ class WorkerFirm extends DbObject
     /**
      * @ORM\Column(name="wfi_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="wfi_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @OneToOne(targetEntity="WorkerFirmSector", inversedBy="firm")
@@ -184,7 +184,7 @@ class WorkerFirm extends DbObject
 
     /**
      * WorkerFirm constructor.
-     * @param int $id
+     * @param ?int$id
      * @param $wfi_active
      * @param $wfi_hq_city
      * @param $wfi_hq_state
@@ -215,7 +215,7 @@ class WorkerFirm extends DbObject
      * @param $mails
      */
     public function __construct(
-        int $id = 0,
+      ?int $id = 0,
         $wfi_active = null,
         $wfi_hq_city = null,
         $wfi_hq_state = null,

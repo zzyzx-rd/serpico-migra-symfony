@@ -6,7 +6,6 @@ use App\Form\Type\StageCriterionType;
 use App\Entity\Activity;
 use App\Entity\InstitutionProcess;
 use App\Entity\Process;
-use App\Entity\TemplateActivity;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
@@ -16,10 +15,10 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
-use Validator\AtLeastOneConfiguredStageHasAOwner;
-use Validator\AtLeastOneStageHasMinConfig;
-use Validator\SumWeightEqualToHundredPct;
-use Validator\UniquePerOrganization;
+use App\Validator\AtLeastOneConfiguredStageHasAOwner;
+use App\Validator\AtLeastOneStageHasMinConfig;
+use App\Validator\SumWeightEqualToHundredPct;
+use App\Validator\UniquePerOrganization;
 
 class ActivityElementForm extends AbstractType
 {
@@ -34,8 +33,8 @@ class ActivityElementForm extends AbstractType
                 'entry_type'    => StageCriterionType::class,
                 'entry_options' => [
                     'label'        => false,
-                    'app'          => $options['app'],
                     'organization' => $organization,
+                    "currentUser" => $options["currentUser"],
                     'elmtType'         => $options['elmtType'],
                 ],
                 'prototype'     => true,
@@ -46,8 +45,8 @@ class ActivityElementForm extends AbstractType
 
                 'constraints'   => [
                     new SumWeightEqualToHundredPct,
-                    $options['elmtType'] == 'activity' ? new AtLeastOneStageHasMinConfig : '',
-                    $options['elmtType'] == 'activity' ? new AtLeastOneConfiguredStageHasAOwner : '',
+                    $options['elmtType'] === 'activity' ? new AtLeastOneStageHasMinConfig : '',
+                    $options['elmtType'] === 'activity' ? new AtLeastOneConfiguredStageHasAOwner : '',
                 ],
                 'error_bubbling' => false,
             ])
@@ -65,7 +64,7 @@ class ActivityElementForm extends AbstractType
                     'label' => false,
                 ]);
 
-        if ($options['elmtType'] == 'iprocess') {
+        if ($options['elmtType'] === 'iprocess') {
             $builder->add(
                 'approvable',
                 CheckboxType::class,
@@ -77,7 +76,7 @@ class ActivityElementForm extends AbstractType
             );
         }
 
-        if($options['elmtType'] == 'activity' && !$element->getIsFinalized()){
+        if($options['elmtType'] === 'activity' && !$element->isFinalized()){
 
             $builder->add(
                 'save',
@@ -91,17 +90,31 @@ class ActivityElementForm extends AbstractType
             );
         }
 
-        $builder->add(
-            'update',
-            SubmitType::class,
-            [
-                'label_format' => $options['elmtType'] != 'activity' ? 'activity_elements.save' : (!$element->getIsFinalized() ? 'activity_elements.finalize' : 'activity_elements.%name%'),
+        if (!$element->isFinalized()) {
+            $builder->add(
+                'update',
+                SubmitType::class,
+                [
+                    'label_format' => $options['elmtType'] !== 'activity' ? 'activity_elements.save' : ('activity_elements.finalize'),
 
-                'attr'         => [
-                    'class' => 'btn-large waves-effect waves-light blue darken-4 activity-element-update',
-                ],
-            ]
-        );
+                    'attr' => [
+                        'class' => 'btn-large waves-effect waves-light blue darken-4 activity-element-update',
+                    ],
+                ]
+            );
+        } else {
+            $builder->add(
+                'update',
+                SubmitType::class,
+                [
+                    'label_format' => $options['elmtType'] !== 'activity' ? 'activity_elements.save' : ('activity_elements.%name%'),
+
+                    'attr' => [
+                        'class' => 'btn-large waves-effect waves-light blue darken-4 activity-element-update',
+                    ],
+                ]
+            );
+        }
 
     }
 
@@ -110,7 +123,7 @@ class ActivityElementForm extends AbstractType
         $resolver
             ->setDefaults([
                 'elmtType' => 'iprocess',
-                'data_class'   => function (Options $options) {
+                'data_class'   => static function (Options $options) {
                     switch ($options['elmtType']) {
                         case 'iprocess':
                             return InstitutionProcess::class;
@@ -118,16 +131,13 @@ class ActivityElementForm extends AbstractType
                         case 'process':
                             return Process::class;
                             break;
-                        case 'template':
-                            return TemplateActivity::class;
-                            break;
                         case 'activity':
                             return Activity::class;
                             break;
                     }
                 },
-                'app'          => null,
                 'organization' => null,
             ]);
+        $resolver->setRequired("currentUser");
     }
 }

@@ -7,6 +7,7 @@ use App\Repository\OrganizationUserOptionRepository;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToOne;
@@ -23,7 +24,7 @@ class OrganizationUserOption extends DbObject
      * @ORM\Column(name="opt_id", type="integer", nullable=false)
      * @var int
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="opt_bool_value", type="boolean", nullable=true)
@@ -58,12 +59,12 @@ class OrganizationUserOption extends DbObject
     /**
      * @ORM\Column(name="opt_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="opt_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @OneToOne(targetEntity="OptionName")
@@ -102,14 +103,13 @@ class OrganizationUserOption extends DbObject
     protected $user;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Role::class)
-     * @ORM\JoinColumn(name="role_rol_id", referencedColumnName="rol_id", nullable=false)
+     * @Column(name="org_role", nullable=true)
      */
     public $role;
 
     /**
      * OrganizationUserOption constructor.
-     * @param int $id
+     * @param ?int$id
      * @param bool $opt_enabled
      * @param $opt_createdBy
      */

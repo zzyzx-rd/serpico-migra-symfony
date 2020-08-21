@@ -15,13 +15,11 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\App\FormFormBuilderInterface;
 use Symfony\Component\OptionsResolver\Options;
-use Symfony\Component\App\FormAbstractType;
 use Doctrine\ORM\EntityRepository;
 use App\Entity\InstitutionProcess;
 use App\Entity\Process;
-use Validator\UniquePerOrganization;
+use App\Validator\UniquePerOrganization;
 
 class AddProcessForm extends AbstractType
 {
@@ -75,7 +73,6 @@ class AddProcessForm extends AbstractType
                        : Process::class;
             },
             
-            'app' => null,
             'organization' => null,
             'standalone' => true,
         ]);

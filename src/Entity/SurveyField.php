@@ -24,7 +24,7 @@ class SurveyField extends DbObject
      * @ORM\Column(name="sfi_id", type="integer", length=10, nullable=false)
      * @var int
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="sfi_type", type="string", length=255, nullable=true)
@@ -54,12 +54,12 @@ class SurveyField extends DbObject
     /**
      * @ORM\Column(name="sfi_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="sfi_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ORM\Column(name="sfi_upperbound", type="integer", nullable=true)
@@ -95,7 +95,7 @@ class SurveyField extends DbObject
 
     /**
      * SurveyField constructor.
-     * @param int $id
+     * @param ?int$id
      * @param $sfi_type
      * @param $sfi_isMandatory
      * @param $sfi_title
@@ -111,7 +111,7 @@ class SurveyField extends DbObject
      * @param $answers
      */
     public function __construct(
-        int $id = 0,
+      ?int $id = 0,
         $sfi_type = null,
         $sfi_isMandatory = true,
         $sfi_title = null,

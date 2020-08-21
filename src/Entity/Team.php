@@ -25,7 +25,7 @@ class Team extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="tea_id", type="integer", nullable=false, length=10)
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="tea_name", type="string", length=255, nullable=true)
@@ -45,12 +45,12 @@ class Team extends DbObject
     /**
      * @ORM\Column(name="tea_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="tea_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ORM\Column(name="tea_deleted", type="datetime", nullable=true)

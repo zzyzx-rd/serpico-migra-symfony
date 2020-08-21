@@ -18,7 +18,7 @@ class OptionName extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="ona_id", type="integer", nullable=false)
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="ona_type", type="integer", nullable=true)
@@ -38,12 +38,12 @@ class OptionName extends DbObject
     /**
      * @ORM\Column(name="ona_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="ona_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * OptionName constructor.

@@ -20,7 +20,7 @@ class ProcessCriterion extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="crt_id", type="integer", nullable=false)
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="crt_type", type="integer", nullable=true)
@@ -75,12 +75,12 @@ class ProcessCriterion extends DbObject
     /**
      * @ORM\Column(name="crt_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="crt_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="ProcessStage", inversedBy="criteria")

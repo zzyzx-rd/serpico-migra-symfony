@@ -6,7 +6,7 @@
  * Time: 17:38
  */
 
-namespace Validator;
+namespace App\Validator;
 
 
 use Model\Activity;

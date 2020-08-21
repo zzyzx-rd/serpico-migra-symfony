@@ -20,9 +20,9 @@ use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Validator\Constraints as Assert;
-use Validator\EDGreaterThanSD;
-use Validator\UBGreaterThanLB;
-use Validator\Step;
+use App\Validator\EDGreaterThanSD;
+use App\Validator\UBGreaterThanLB;
+use App\Validator\Step;
 
 class AddActivityForm extends AbstractType
 {

@@ -31,7 +31,7 @@ class UserRepository extends ServiceEntityRepository
 
     public function findByOrganization(Organization $organization): ArrayCollection
     {
-        return new ArrayCollection($this->_em->getRepository(User::class)->findBy(["organization_org" => $organization->id]));
+        return new ArrayCollection($this->_em->getRepository(User::class)->findBy(["organization" => $organization->id]));
     }
 
     public function findUserTopPerformingCriteria(User $u, int $precision = 0, int $count = 0)
@@ -300,5 +300,14 @@ class UserRepository extends ServiceEntityRepository
             }
         }
         return $externalActivities;
+    }
+    /**
+     * @return User[]
+     */
+    public function usersWithPicture(): array
+    {
+        $qb = $this->createQueryBuilder('u')->where('u.picture is not null');
+
+        return $qb->getQuery()->getResult();
     }
 }

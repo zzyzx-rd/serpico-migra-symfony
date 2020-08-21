@@ -454,7 +454,6 @@ class UpdateWorkerFirmForm extends AbstractType
         $resolver->setDefault('standalone', false);
         $resolver->addAllowedTypes('standalone', 'bool');
         $resolver->setDefault('organization', null);
-        $resolver->setRequired('app');
         $resolver->setRequired('workerFirm');
 
     }

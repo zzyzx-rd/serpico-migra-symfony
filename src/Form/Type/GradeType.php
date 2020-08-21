@@ -22,7 +22,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvents;
 use App\Entity\Stage;
-use Validator\ForcedComment;
+use App\Validator\ForcedComment;
 
 class GradeType extends AbstractType
 {

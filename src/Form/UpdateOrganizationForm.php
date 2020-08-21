@@ -153,7 +153,6 @@ class UpdateOrganizationForm extends AbstractType
         $resolver->setDefault('standalone', false);
         $resolver->addAllowedTypes('standalone', 'bool');
         $resolver->setDefault('organization', null);
-        $resolver->setDefault('app', null);
         //$resolver->setRequired('totalweights');
         //$resolver->setRequired('nbweights');
 

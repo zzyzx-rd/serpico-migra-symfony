@@ -17,7 +17,7 @@ class UserTempo implements UserInterface, \Serializable
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer", nullable=true)
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)

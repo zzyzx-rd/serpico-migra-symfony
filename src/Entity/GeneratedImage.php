@@ -21,9 +21,8 @@ class GeneratedImage extends DbObject
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(name="gim_id", type="integer", nullable=false)
-     * @var int
      */
-    protected $id;
+    protected ?int $id;
 
     /**
      * @ORM\Column(name="gim_all", type="integer", nullable=true)
@@ -74,7 +73,7 @@ class GeneratedImage extends DbObject
     /**
      * @ORM\Column(name="gim_createdBy", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="gim_val", type="string", length=255, nullable=true)
@@ -84,7 +83,7 @@ class GeneratedImage extends DbObject
     /**
      * @ORM\Column(name="gim_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @OneToOne(targetEntity="CriterionName")
@@ -94,7 +93,7 @@ class GeneratedImage extends DbObject
 
     /**
      * GeneratedImage constructor.
-     * @param int $id
+     * @param ?int$id
      * @param int $gim_type
      * @param $gim_tid
      * @param $gim_uid
@@ -110,7 +109,7 @@ class GeneratedImage extends DbObject
      * @param $cName
      */
     public function __construct(
-        int $id = 0,
+      ?int $id = 0,
         $gim_type = 0,
         $gim_tid = null,
         $gim_uid = null,

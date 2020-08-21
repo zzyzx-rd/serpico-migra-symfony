@@ -25,7 +25,7 @@ class Process extends DbObject
      * @ORM\Column(name="pro_id", type="integer", length=10, nullable=false)
      * @var int
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="pro_name", type="string", length=255, nullable=true)
@@ -45,12 +45,12 @@ class Process extends DbObject
     /**
      * @ORM\Column(name="pro_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="pro_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ORM\Column(name="pro_deleted", type="datetime", nullable=true)
@@ -102,7 +102,7 @@ class Process extends DbObject
 
     /**
      * Process constructor.
-     * @param int $id
+     * @param ?int$id
      * @param $pro_name
      * @param $pro_approvable
      * @param $pro_gradable
@@ -113,7 +113,7 @@ class Process extends DbObject
      * @param $stages
      */
     public function __construct(
-        int $id = 0,
+      ?int $id = 0,
         $pro_name = '',
         $pro_createdBy = null,
         $pro_gradable = true,

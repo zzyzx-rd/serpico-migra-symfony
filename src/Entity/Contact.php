@@ -19,7 +19,7 @@ class Contact extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="con_id", type="integer", nullable=true)
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="con_locale", type="string", length=255, nullable=true)
@@ -104,7 +104,7 @@ class Contact extends DbObject
     /**
      * @ORM\Column(name="con_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ORM\Column(name="con_confirmed", type="datetime", nullable=true)
@@ -114,7 +114,7 @@ class Contact extends DbObject
     /**
      * @ORM\Column(name="con_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * Contact constructor.

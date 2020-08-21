@@ -26,7 +26,7 @@ class Survey extends DbObject
      * @ORM\Column(name="sur_id", type="integer", length=10, nullable=false)
      * @var int
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="sur_name", type="string", length=45)
@@ -36,12 +36,12 @@ class Survey extends DbObject
     /**
      * @ORM\Column(name="sur_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="sur_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ORM\Column(name="sur_state", type="integer", nullable=true)
@@ -82,7 +82,7 @@ class Survey extends DbObject
 
     /**
      * Survey constructor.
-     * @param int $id
+     * @param ?int$id
      * @param $sur_name
      * @param $sur_createdBy
      * @param $sur_inserted
@@ -94,7 +94,7 @@ class Survey extends DbObject
      * @param Answer[]|ArrayCollection $answers
      */
     public function __construct(
-        int $id = 0,
+      ?int $id = 0,
         $sur_state = null,
         $sur_name = '',
         $sur_createdBy = null,

@@ -21,14 +21,13 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Form\FormBuilderInterface;
-use Validator\UBEmpGreaterThanLBEmp;
+use App\Validator\UBEmpGreaterThanLBEmp;
 
 class SearchWorkerForm extends AbstractType
 {
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $em = $options['app']['orm.em'];
         $workerFirmSectors = $em->getRepository(WorkerFirmSector::class)->findAll();
         $existingCountries = $em->getRepository(Country::class)->findAll();
         $existingStates = $em->getRepository(State::class)->findAll();
@@ -299,7 +298,6 @@ class SearchWorkerForm extends AbstractType
         //$resolver->setRequired('startdate');
         //$resolver->setRequired('enddate');
         //$resolver->setRequired('gstartdate');
-        $resolver->setRequired('app');
     }
 
     /*

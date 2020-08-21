@@ -22,7 +22,7 @@ class Weight extends DbObject
      * @ORM\Column(name="wgt_id", type="integer", length=10, nullable=false)
      * @var int
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="wgt_interval", type="integer", nullable=true)
@@ -47,12 +47,12 @@ class Weight extends DbObject
     /**
      * @ORM\Column(name="wgt_createdBy", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="wgt_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ORM\Column(name="wgt_deleted", type="datetime", nullable=true)
@@ -79,7 +79,7 @@ class Weight extends DbObject
 
     /**
      * Weight constructor.
-     * @param int $id
+     * @param ?int$id
      * @param $wgt_interval
      * @param $wgt_titleframe
      * @param $wgt_value
@@ -92,7 +92,7 @@ class Weight extends DbObject
      * @param $user
      */
     public function __construct(
-        int $id = 0,
+      ?int $id = 0,
         $user = null,
         $wgt_interval = 0,
         $wgt_titleframe = '',

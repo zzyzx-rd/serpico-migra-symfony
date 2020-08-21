@@ -24,7 +24,7 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
-use Validator\UniquePerOrganization;
+use App\Validator\UniquePerOrganization;
 
 class OrganizationElementType extends AbstractType
 {

@@ -272,7 +272,7 @@ class CriterionGroupController extends MasterController
 
     /**
      * @param Request $request
-     * @param int $id
+     * @param ?int$id
      * @return Response
      * @throws ORMException
      * @throws OptimisticLockException
@@ -280,7 +280,7 @@ class CriterionGroupController extends MasterController
      */
     public function updateCriterionGroupName(
         Request $request,
-        int $id
+      ?int $id
     ) {
         if (!self::isAuthenticated()) {
             return self::unauthorized();
@@ -316,7 +316,7 @@ class CriterionGroupController extends MasterController
 
     /**
      * @param Request $request
-     * @param int $id
+     * @param ?int$id
      * @return Response
      * @throws ORMException
      * @throws OptimisticLockException
@@ -324,7 +324,7 @@ class CriterionGroupController extends MasterController
      */
     public function updateCriterionName(
         Request $request,
-        int $id
+      ?int $id
     ) {
         if (!self::isAuthenticated()) {
             return self::unauthorized();
@@ -419,14 +419,14 @@ class CriterionGroupController extends MasterController
 
 
     /**
-     * @param int $id
+     * @param ?int$id
      * @return Response
      * @throws ORMException
      * @throws OptimisticLockException
      * @Route("/settings/criteriongroup/delete/{id}",name="deleteCriterionGroup")
      */
     public function deleteCriterionGroup(
-        int $id
+      ?int $id
     ) {
         if (!self::isAuthenticated()) {
             return self::unauthorized();

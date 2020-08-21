@@ -20,7 +20,7 @@ class ResultProject extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="rsp_id", type="integer", nullable=false)
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="rsp_type", type="integer", nullable=true)
@@ -110,12 +110,12 @@ class ResultProject extends DbObject
     /**
      * @ORM\Column(name="rsp_createdBy", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="rsp_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="Activity", inversedBy="projectResults")

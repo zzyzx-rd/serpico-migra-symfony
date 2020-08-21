@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\CriterionRepository;
+use DateTime;
 use DateTimeInterface;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -25,7 +26,7 @@ class Criterion extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="crt_id", type="integer", nullable=false)
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="cri_complete", type="boolean", nullable=true)
@@ -90,12 +91,12 @@ class Criterion extends DbObject
     /**
      * @ORM\Column(name="cri_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="cri_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ORM\Column(name="cri_deleted", type="datetime", nullable=true)
@@ -158,10 +159,7 @@ class Criterion extends DbObject
      * @OneToMany(targetEntity="RankingTeamHistory", mappedBy="criterion",cascade={"persist", "remove"}, orphanRemoval=true)
      */
     public $historicalRankingTeams;
-    /**
-     * @OneToOne(targetEntity="Template", mappedBy="criterion",cascade={"persist","remove"}, orphanRemoval=true)
-     */
-    public $template;
+
 
     /**
      * Criterion constructor.

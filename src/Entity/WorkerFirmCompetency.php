@@ -22,7 +22,7 @@ class WorkerFirmCompetency extends DbObject
      * @ORM\Column(name="wfc_id", type="integer", nullable=false)
      * @var int
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="wfc_name", type="string", length=255, nullable=true)
@@ -32,12 +32,12 @@ class WorkerFirmCompetency extends DbObject
     /**
      * @ORM\Column(name="wfc_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="wfc_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="WorkerFirm")
@@ -47,14 +47,14 @@ class WorkerFirmCompetency extends DbObject
 
     /**
      * WorkerFirmCompetency constructor.
-     * @param int $id
+     * @param ?int$id
      * @param $wfc_name
      * @param $wfc_createdBy
      * @param $wfc_inserted
      * @param $firm
      */
     public function __construct(
-        int $id = 0,
+      ?int $id = 0,
         $wfc_name = null,
         $wfc_createdBy = null,
         $wfc_inserted = null,

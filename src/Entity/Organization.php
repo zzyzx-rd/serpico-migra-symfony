@@ -28,7 +28,7 @@ class Organization extends DbObject
      * @ORM\Column(name="org_id", type="integer", nullable=false)
      * @var int
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="org_legalname", type="string", length=255, nullable=true)
@@ -63,12 +63,12 @@ class Organization extends DbObject
     /**
      * @ORM\Column(name="org_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="org_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ORM\Column(name="org_validated", type="datetime", nullable=true)
@@ -140,11 +140,7 @@ class Organization extends DbObject
      */
 //     * @OrderBy({", type" = "ASC", "inserted" = "ASC"})
     public $criteria;
-    /**
-     * @OneToMany(targetEntity="TemplateActivity", mappedBy="organization", cascade={"persist", "remove"},orphanRemoval=true)
-     */
-//     * @OrderBy({"name" = "ASC"})
-    public $templateActivities;
+
     /**
      * @OneToMany(targetEntity="Client", mappedBy="organization", cascade={"persist", "remove"},orphanRemoval=true)
      * @var ArrayCollection|Client[]
@@ -204,11 +200,17 @@ class Organization extends DbObject
      * @JoinColumn(name="worker_firm_wfi_id", referencedColumnName="wfi_id", nullable=true)
      */
     private $worker_firm_wfi;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class)
+     * @JoinColumn(name="master_user_id", referencedColumnName="usr_id", nullable=true)
+     */
+    private $masterUser;
     
 
     /**
      * Organization constructor.
-     * @param int $id
+     * @param ?int$id
      * @param $org_legalname
      * @param $org_commname
      * @param $org_type
@@ -231,7 +233,6 @@ class Organization extends DbObject
      * @param $decisions
      * @param $activities
      * @param $criteria
-     * @param $templateActivities
      * @param Client[]|ArrayCollection $clients
      * @param $criterionNames
      * @param $usersCSV
@@ -246,7 +247,7 @@ class Organization extends DbObject
      * @param $workerFirm
      */
     public function __construct(
-        int $id = 0,
+      ?int $id = 0,
         $org_isClient = null,
         $org_legalname = '',
         $org_commname = '',
@@ -271,7 +272,6 @@ class Organization extends DbObject
         $decisions = null,
         $activities = null,
         $criteria = null,
-        $templateActivities = null,
         $clients = null,
         $criterionNames = null,
         $teams = null,
@@ -305,7 +305,6 @@ class Organization extends DbObject
         $this->decisions = $decisions?: new ArrayCollection();
         $this->activities = $activities?: new ArrayCollection();
         $this->criteria = $criteria;
-        $this->templateActivities = $templateActivities?:new ArrayCollection();
         $this->clients = $clients?: new ArrayCollection();
         $this->criterionNames = $criterionNames?: new ArrayCollection();
         $this->usersCSV = $usersCSV;
@@ -500,8 +499,8 @@ class Organization extends DbObject
         if ($this->activities->contains($activity)) {
             $this->activities->removeElement($activity);
             // set the owning side to null (unless already changed)
-            if ($activity->getanization() === $this) {
-                $activity->setanization(null);
+            if ($activity->getOrganization() == $this) {
+                $activity->setOrganization(null);
             }
         }
 
@@ -620,21 +619,6 @@ class Organization extends DbObject
         $this->criteria = $criteria;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getTemplateActivities()
-    {
-        return $this->templateActivities;
-    }
-
-    /**
-     * @param mixed $templateActivities
-     */
-    public function setTemplateActivities($templateActivities): void
-    {
-        $this->templateActivities = $templateActivities;
-    }
 
     /**
      * @return Client[]|ArrayCollection
@@ -817,15 +801,17 @@ class Organization extends DbObject
      */
     public function getWorkerFirm()
     {
-        return $this->workerFirm;
+        return $this->worker_firm_wfi;
     }
 
     /**
      * @param mixed $workerFirm
+     * @return Organization
      */
-    public function setWorkerFirm($workerFirm): void
+    public function setWorkerFirm($workerFirm): Organization
     {
-        $this->workerFirm = $workerFirm;
+        $this->worker_firm_wfi = $workerFirm;
+        return $this;
     }
     public function addDepartment(Department $department): Organization
     {
@@ -992,18 +978,7 @@ class Organization extends DbObject
         $this->criterionNames->removeElement($criterionName);
         return $this;
     }
-    public function addTemplateActivity(TemplateActivity $templateActivity): Organization
-    {
-        $this->templateActivities->add($templateActivity);
-        $templateActivity->setOrganization($this);
-        return $this;
-    }
 
-    public function removeTemplateActivity(TemplateActivity $templateActivity): Organization
-    {
-        $this->templateActivities->removeElement($templateActivity);
-        return $this;
-    }
     public function addStage(Stage $stage): Organization
     {
 
@@ -1110,16 +1085,17 @@ class Organization extends DbObject
 
     //TODO userSortedDepartement et le removePosition
 
-    public function getWorkerFirmWfi(): ?WorkerFirm
+    public function getMasterUser(): ?User
     {
-        return $this->worker_firm_wfi;
+        return $this->masterUser;
     }
 
-    public function setWorkerFirmWfi(?WorkerFirm $worker_firm_wfi): self
+    public function setMasterUser(?User $masterUser): self
     {
-        $this->worker_firm_wfi = $worker_firm_wfi;
+        $this->masterUser = $masterUser;
 
         return $this;
     }
+
 
 }

@@ -21,7 +21,7 @@ class City extends DbObject
      * @ORM\GeneratedValue()
      * @ORM\Column(name="cit_id", type="integer", nullable=false)
      */
-    public $id;
+    public ?int $id;
 
     /**
      * @ORM\Column(name="cit_abbr", type="string", length=255, nullable=true)
@@ -41,12 +41,12 @@ class City extends DbObject
     /**
      * @ORM\Column(name="cit_created_by", type="integer", nullable=true)
      */
-    public $createdBy;
+    public ?int $createdBy;
 
     /**
      * @ORM\Column(name="cit_inserted", type="datetime", nullable=true)
      */
-    public $inserted;
+    public ?DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="State", inversedBy="cities")
@@ -78,7 +78,7 @@ class City extends DbObject
      * @param $firms
      */
     public function __construct(
-        int $id = 0,
+      ?int $id = 0,
         $cit_abbr = null,
         $cit_fullname = null,
         $cit_name = null ,

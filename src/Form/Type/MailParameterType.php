@@ -24,7 +24,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Validator\Constraints as Assert;
-use Validator\EmailUniqueness;
+use App\Validator\EmailUniqueness;
 
 class MailParameterType extends AbstractType
 {

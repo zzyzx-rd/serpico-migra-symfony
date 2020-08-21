@@ -1,10 +1,8 @@
 <?php
 namespace App\Form\Type;
 
-use Controller\MasterController;
 use Doctrine\ORM\EntityRepository;
 use App\Entity\ProcessCriterion;
-use App\Entity\TemplateCriterion;
 use App\Entity\Criterion;
 use App\Entity\CriterionName;
 use App\Entity\IProcessCriterion;
@@ -24,8 +22,8 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
-use Validator\Step;
-use Validator\UBGreaterThanLB;
+use App\Validator\Step;
+use App\Validator\UBGreaterThanLB;
 
 
 class CriterionType extends AbstractType
@@ -35,34 +33,31 @@ class CriterionType extends AbstractType
         /** @var Organization */
         $organization = $options['organization'];
 
-        $currentUser = MasterController::getAuthorizedUser();
-        if (!$currentUser instanceof User) {
-            throw 'Authentication issue: no authorized user found';
-        }
+        $currentUser =$options['currentUser'];
 
-        $builder->addEventListener(FormEvents::PRE_SET_DATA, function(FormEvent $event) use ($organization, $currentUser) {
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, static function(FormEvent $event) use ($organization, $currentUser) {
             $form = $event->getForm();
 
             $form->add('cName', EntityType::class,
                 [
                     'label_format' => 'criteria.criterion.%name%',
                     'class' => CriterionName::class,
-                    'choice_label' => function(CriterionName $c) {
+                    'choice_label' => static function(CriterionName $c) {
                         $iconObj = $c->getIcon();
-                        $icon = ($iconObj and $iconObj->getType() != 'm') ? '~'.$iconObj->getUnicode().'~ ' : '~f1b2~ ';
+                        $icon = ($iconObj and $iconObj->getType() !== 'm') ? '~'.$iconObj->getUnicode().'~ ' : '~f1b2~ ';
                         return $icon . $c->getName();
                     },               
-                    'choice_attr' => function(CriterionName $c) {
+                    'choice_attr' => static function(CriterionName $c) {
                         $iconObj = $c->getIcon();
                         return $iconObj ? 
                             [
-                                'class' => ($iconObj->getType() != 'm') ? $c->getIcon()->getType() . ' fa-'.$c->getIcon()->getName() : $c->getIcon()->getName(), 
-                                'data-icon' => ($iconObj->getType() != 'm') ? $iconObj : '',
+                                'class' => ($iconObj->getType() !== 'm') ? $c->getIcon()->getType() . ' fa-'.$c->getIcon()->getName() : $c->getIcon()->getName(),
+                                'data-icon' => ($iconObj->getType() !== 'm') ? $iconObj : '',
                             ]
                             : [];
                     },       
                     'group_by' => 'criterionGroup',
-                    'query_builder' => function(EntityRepository $er) use ($organization, $currentUser) {
+                    'query_builder' => static function(EntityRepository $er) use ($organization, $currentUser) {
                         $orgId = $organization
                                  ? $organization->getId()
                                  : $currentUser->getOrganization()->getId();
@@ -192,25 +187,26 @@ class CriterionType extends AbstractType
         return FormType::class;
     }
 
-    public function getName(){
+    public function getName(): string
+    {
         return 'criterion';
     }
 
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefault('elmtType', 'activity');
-        $resolver->setDefault('data_class',function (Options $options){
-            if($options['elmtType'] == 'template'){
-                return TemplateCriterion::class;
-            } else if($options['elmtType'] == 'iprocess'){
+        $resolver->setDefault('data_class', static function (Options $options){
+            if($options['elmtType'] === 'iprocess'){
                 return IProcessCriterion::class;
-            } else if($options['elmtType'] == 'process'){
-                return ProcessCriterion::class;
-            } else {
-                return Criterion::class;
             }
+
+            if($options['elmtType'] === 'process'){
+                return ProcessCriterion::class;
+            }
+
+            return Criterion::class;
         });
-        $resolver->setDefault('app', null);
+        $resolver->setRequired('currentUser');
         $resolver->setDefault('organization', null);
         $resolver->setDefault('parentBuilder', null);
         $resolver->setDefault('standalone', false);

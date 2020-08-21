@@ -6,9 +6,10 @@
  * Time: 17:38
  */
 
-namespace Validator;
+namespace App\Validator;
 
 
+use Doctrine\ORM\EntityManagerInterface;
 use Model\User;
 use Silex\Application;
 use Symfony\Component\Validator\ConstraintValidator;
@@ -23,12 +24,13 @@ class EmailUniquenessValidator extends ConstraintValidator
      */
 
     protected $em;
-    public function __construct(EntityManager $entityManager)
+    public function __construct(EntityManagerInterface $entityManager)
     {
         $this->em = $entityManager;
     }
 
-    public function validate($value, Constraint $constraint){
+    public function validate($value, Constraint $constraint): bool
+    {
 
         if($this->em->getRepository(User::class)->findByEmail($value)->isEmpty()){
             $this->context->buildViolation($constraint->message)->addViolation();
