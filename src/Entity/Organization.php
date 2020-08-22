@@ -184,6 +184,10 @@ class Organization extends DbObject
      */
     public $processes;
     /**
+     * @OneToMany(targetEntity="User", mappedBy="organization", cascade={"persist","remove"}, orphanRemoval=true)
+     */
+    public $users;
+    /**
      * @OneToMany(targetEntity="InstitutionProcess", mappedBy="organization", cascade={"persist","remove"}, orphanRemoval=true)
      * @var ArrayCollection|InstitutionProcess[]
      */
@@ -264,6 +268,7 @@ class Organization extends DbObject
         $org_deleted = null,
         $org_routine_pstatus = null,
         $org_routine_greminders = null,
+        $users = null,
         $stages = null,
         $departments = null,
         $positions = null,
@@ -532,27 +537,11 @@ class Organization extends DbObject
     }
 
     /**
-     * @param mixed $departments
-     */
-    public function setDepartments($departments): void
-    {
-        $this->departments = $departments;
-    }
-
-    /**
      * @return mixed
      */
     public function getPositions()
     {
         return $this->positions;
-    }
-
-    /**
-     * @param mixed $positions
-     */
-    public function setPositions($positions): void
-    {
-        $this->positions = $positions;
     }
 
     /**
@@ -741,27 +730,11 @@ class Organization extends DbObject
     }
 
     /**
-     * @param mixed $options
-     */
-    public function setOptions($options): void
-    {
-        $this->options = $options;
-    }
-
-    /**
      * @return mixed
      */
     public function getProcesses()
     {
         return $this->processes;
-    }
-
-    /**
-     * @param mixed $processes
-     */
-    public function setProcesses($processes): void
-    {
-        $this->processes = $processes;
     }
 
     /**
@@ -773,27 +746,11 @@ class Organization extends DbObject
     }
 
     /**
-     * @param InstitutionProcess[]|ArrayCollection $institutionProcesses
-     */
-    public function setInstitutionProcesses($institutionProcesses): void
-    {
-        $this->institutionProcesses = $institutionProcesses;
-    }
-
-    /**
      * @return CriterionGroup[]
      */
     public function getCriterionGroups(): array
     {
         return $this->criterionGroups;
-    }
-
-    /**
-     * @param CriterionGroup[] $criterionGroups
-     */
-    public function setCriterionGroups(array $criterionGroups): void
-    {
-        $this->criterionGroups = $criterionGroups;
     }
 
     /**
@@ -1094,6 +1051,27 @@ class Organization extends DbObject
     {
         $this->masterUser = $masterUser;
 
+        return $this;
+    }
+
+    /**
+     * @return Collection|User[]
+     */
+    public function getUsers()
+    {
+        return $this->users;
+    }
+
+    public function addUser(User $user): Organization
+    {
+        $this->users->add($user);
+        $user->setOrganization($this);
+        return $this;
+    }
+
+    public function removeUser(User $user): Organization
+    {
+        $this->users->removeElement($user);
         return $this;
     }
 

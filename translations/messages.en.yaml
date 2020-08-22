@@ -2639,6 +2639,12 @@ create_user:
   add_button: Add user
   user: User
   fullname: Fullname
+  provide_department: Provide department
+  provide_position: Provide position
+  provide_title: Provide title
+  provide_email: Provide email
+  undefined_department: Undefined department
+  undefined_position: Undefined position
 
 team_manage:
   page_title_create: Team creation

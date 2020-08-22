@@ -70,6 +70,7 @@ $(function () {
     pid = $(this).data('eid') ? $(this).data('eid') : 0;
     urlToPieces[urlToPieces.length - 1] = eid;
     url = urlToPieces.join('/');
+    $('.errorModal .error-msg').empty();
 
     $.post(url, params)
       .done(function (data) {

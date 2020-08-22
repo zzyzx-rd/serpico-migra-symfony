@@ -65,7 +65,7 @@ class TeamUser extends DbObject
      * @ORM\ManyToOne(targetEntity=ExternalUser::class, inversedBy="teamUsers")
      * @ORM\JoinColumn(name="external_user_ext_usr_id", referencedColumnName="ext_id", nullable=false)
      */
-    public $external_user_ext_id;
+    public $externalUser;
 
     /**
      * TeamUser constructor.
@@ -77,12 +77,12 @@ class TeamUser extends DbObject
      * @param $tus_is_deleted
      * @param $team
      * @param $user_usr
-     * @param $external_user_ext_id
+     * @param $externalUser
      */
     public function __construct(
       ?int $id = 0,
         $user_usr = null,
-        $external_user_ext_id = null,
+        $externalUser = null,
         $tus_createdBy = null,
         $tus_leader = false,
         $tus_inserted = null,
@@ -97,7 +97,7 @@ class TeamUser extends DbObject
         $this->isDeleted = $tus_is_deleted;
         $this->team = $team;
         $this->user = $user_usr;
-        $this->external_user_ext_id = $external_user_ext_id;
+        $this->externalUser = $externalUser;
     }
 
     public function getLeader(): ?bool
@@ -171,15 +171,14 @@ class TeamUser extends DbObject
         return $this;
     }
 
-    public function getExternalUserExtId(): ?ExternalUser
+    public function getExternalUser(): ?ExternalUser
     {
-        return $this->external_user_ext_id;
+        return $this->externalUser;
     }
 
-    public function setExternalUserExtId(?ExternalUser $external_user_ext_id): self
+    public function setExternalUser(?ExternalUser $externalUser): self
     {
-        $this->external_user_ext_id = $external_user_ext_id;
-
+        $this->external_User = $externalUser;
         return $this;
     }
     public function toggleIsDeleted(): TeamUser

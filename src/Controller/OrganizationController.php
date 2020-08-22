@@ -1704,7 +1704,6 @@ class OrganizationController extends MasterController
      * @return JsonResponse
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/settings/user/{usrId}", name="validateClientUser")
      */
     public function validateClientUserAction(Request $request, Application $app, $cliId, $extId){
 
@@ -3101,15 +3100,13 @@ class OrganizationController extends MasterController
      * @Route("/settings/users", name="manageUsers")
      * @Route("/colleagues-teams", name="seeColleaguesTeams")
      */
-    public function getAllUsersAction(Application $app)
+    public function getAllUsersAction(Request $request)
     {
-        $user = self::getAuthorizedUser();
+        $user = $this->user;
         if (!$user) {
             return $this->redirectToRoute('login');
         }
 
-        /** @var FormFactory */
-        $formFactory                       = $app['form.factory'];
         $entityManager                     = self::getEntityManager();
         $repoU                             = $entityManager->getRepository(User::class);
         $organization                      = $user->getOrganization();
@@ -3183,11 +3180,11 @@ class OrganizationController extends MasterController
             $totalClientUsers += count($client->getExternalUsers()) - 1;
         }
 
-        $nbViewableInternalUsers = count($organization->getUsers($app));
+        $nbViewableInternalUsers = count($this->em->getRepository(Organization::class)->getActiveUsers($organization));
 
-        $users           = new ArrayCollection($repoU->findBy(['orgId' => $organization->getId(), 'deleted' => null], ['dptId' => 'ASC', 'posId' => 'ASC']));
-        $usersWithDpt    = $users->matching(Criteria::create()->where(Criteria::expr()->neq('dptId', null)));
-        $usersWithoutDpt = $users->matching(Criteria::create()->where(Criteria::expr()->eq('dptId', null))->andWhere(Criteria::expr()->neq('lastname', 'ZZ')));
+        $users           = new ArrayCollection($repoU->findBy(['organization' => $organization, 'deleted' => null], ['department' => 'ASC', 'position' => 'ASC']));
+        $usersWithDpt    = $users->matching(Criteria::create()->where(Criteria::expr()->neq('department', null)));
+        $usersWithoutDpt = $users->matching(Criteria::create()->where(Criteria::expr()->eq('department', null))->andWhere(Criteria::expr()->neq('lastname', 'ZZ')));
 
         $viewableUsersWithoutDpt = [];
         $viewableUsersWithoutDpt = $usersWithoutDpt;
@@ -3198,21 +3195,22 @@ class OrganizationController extends MasterController
 
         $viewableTeams = $organization->getTeams()->filter(function (Team $t) {return $t->getDeleted() == null;});
 
-        $dealingFirms = $organization->getDealingFirms();
-        $dealingTeams = $organization->getDealingTeams();
+        //$dealingFirms = $organization->getDealingFirms();
+        //$dealingTeams = $organization->getDealingTeams();
+        $dealingTeams = $this->em->getRepository(Organization::class)->getDealingTeams($organization);
 
-        return $app['twig']->render(
+        return $this->render(
             'user_list.html.twig',
             [
                 'rootDisplay'                       => false,
-                'dealingFirms'                      => $dealingFirms,
+                //'dealingFirms'                      => $dealingFirms,
                 'clientFirms'                       => $clientFirms,
                 'clientTeams'                       => $clientTeams,
                 'clientIndividuals'                 => $clientIndividuals,
-                'setClientIconForm'                 => $formFactory->create(SetClientIconForm::class),
+                'setClientIconForm'                 => $this->createForm(SetClientIconForm::class),
                 'usersWithDpt'                      => $usersWithDpt,
                 'organization'                      => $organization,
-                'viewableDepartments'               => $organization->getUserSortedDepartments(),
+                'viewableDepartments'               => $this->em->getRepository(Organization::class)->getUserSortedDepartments($this->user),
                 'viewableTeams'                     => $viewableTeams,
                 'dealingTeams'                      => $dealingTeams,
                 'totalClientUsers'                  => $totalClientUsers,
@@ -3754,105 +3752,6 @@ class OrganizationController extends MasterController
         return new JsonResponse(['message' => "Success"], 200);
     }
 
-    // Display user info, enables modification. Note : root user can modify users from other organizations
-
-    /**
-     * @param Request $request
-     * @param Application $app
-     * @param $usrId
-     * @return mixed
-     * @Route("/settings/user/{usrId}", name="updateUser")
-     */
-    public function updateUserAction(Request $request, Application $app, $usrId)
-    {
-
-        $em            = self::getEntityManager();
-        $repoO         = $em->getRepository(Organization::class);
-        $repoOC        = $em->getRepository(Client::class);
-        $searchedUser  = $em->getRepository(User::class)->find($usrId);
-        $connectedUser = self::getAuthorizedUser();
-        if (!$connectedUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
-        }
-        $searchedUserOrganization  = $repoO->find($searchedUser->getOrgId());
-        $orgOptions                = $searchedUserOrganization->getOptions();
-        $enabledCreatingUserOption = false;
-        foreach ($orgOptions as $orgOption) {
-            if ($orgOption->getOName()->getName() == 'enabledUserCreatingUser') {
-                $enabledCreatingUserOption = $orgOption->isOptionTrue();
-            }
-        }
-
-        $formFactory = $app['form.factory'];
-        $departments = ($searchedUser->getOrgId() == $connectedUser->getOrgId() || $connectedUser->getRole() == 4) ? $searchedUserOrganization->getDepartments() : null;
-
-        // Look through organization clients if user belongs to org clients
-        if ($searchedUser->getOrgId() != $connectedUser->getOrgId()) {
-
-            $connectedUserOrganization = $repoO->find($connectedUser->getOrgId());
-            $connectedUserOrgClients   = $repoOC->findByOrganization($connectedUserOrganization);
-            $connectedUserClients      = [];
-            foreach ($connectedUserOrgClients as $connectedUserOrgClient) {
-                $connectedUserClients[] = $connectedUserOrgClient->getClientOrganization();
-            }
-
-            if (!in_array($searchedUserOrganization, $connectedUserClients) && $connectedUser->getRole() != 4) {
-                return $app['twig']->render('errors/403.html.twig');
-            }
-
-            if (in_array($searchedUserOrganization, $connectedUserClients)) {
-                $modifyIntern = false;
-                $userForm     = $formFactory->create(ClientUserType::class, null, ['standalone' => true, 'user' => $searchedUser, 'app' => $app, 'clients' => $connectedUserClients]);
-            } else {
-                // This case only applies to root users
-                $modifyIntern = true;
-                $userForm     = $formFactory->create(UserType::class, null, ['standalone' => true, 'app' => $app, 'departments' => $departments, 'user' => $searchedUser]);
-            }
-
-        } else {
-            if ($connectedUser->getRole() == 2 || $connectedUser->getRole() == 3) {
-                return $app['twig']->render('errors/403.html.twig');
-            }
-
-            $modifyIntern = true;
-            //$userForm = $formFactory->create(UserType::class, null, ['standalone' => true, 'organization' => $searchedUserOrganization, 'user' => $searchedUser, 'enabledCreatingUser' => $enabledCreatingUserOption]);
-        }
-
-        //$userForm->handleRequest($request);
-        /*} catch (\Exception $e) {
-        print_r($e->getMessage());
-        die;
-        }*/
-
-        if ($modifyIntern) {
-
-            $updateUserForm          = $formFactory->create(UserType::class, $searchedUser, ['standalone' => true, 'standalone' => true, 'organization' => $searchedUserOrganization]);
-            $organizationElementForm = $formFactory->create(OrganizationElementType::class, null, ['usedForUserCreation' => false, 'standalone' => true, 'organization' => $searchedUserOrganization]);
-            $updateUserForm->handleRequest($request);
-            $organizationElementForm->handleRequest($request);
-
-            return $app['twig']->render('user_create.html.twig',
-                [
-                    'form'                    => $updateUserForm->createView(),
-                    'organizationElementForm' => $organizationElementForm->createView(),
-                    'orgId'                   => $searchedUserOrganization->getId(),
-                    'enabledCreatingUser'     => $enabledCreatingUserOption,
-                    'creationPage'            => false,
-                ]);
-        }
-
-        return $app['twig']->render('user_update.html.twig',
-            [
-                'modifyIntern'        => $modifyIntern,
-                'form'                => $userForm->createView(),
-                'user'                => $searchedUser,
-                'orgId'               => $searchedUserOrganization->getId(),
-                'clientForm'          => ($modifyIntern) ? null : $formFactory->create(AddClientForm::class, null, ['standalone' => true])->createView(),
-                'enabledCreatingUser' => $enabledCreatingUserOption,
-            ]);
-
-    }
-
     /**
      * @param Request $request
      * @param Application $app
@@ -3860,7 +3759,6 @@ class OrganizationController extends MasterController
      * @return JsonResponse
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/settings/user/{usrId}",name="updateUserAJAX")
      */
     public function updateUserActionAJAX(Request $request, Application $app, $usrId)
     {
@@ -5585,7 +5483,6 @@ class OrganizationController extends MasterController
      * @return JsonResponse
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/settings/user/{usrId}", name="ajaxUserDelete")
      */
     public function deleteUserAction(Request $request, Application $app, $usrId)
     {

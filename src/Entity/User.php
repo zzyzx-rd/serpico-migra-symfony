@@ -182,10 +182,9 @@ class User extends DbObject implements  UserInterface, \Serializable
      */
     public $externalUsers;
 
-    /** @ManyToOne(targetEntity="User", inversedBy="subordinates")
-     * @JoinColumn(name="usr_superior", referencedColumnName="usr_id", nullable=true)
-     * @Column(name="usr_superior", type="integer", nullable=true)
-     * @var int
+    /** 
+     * @ManyToOne(targetEntity="User", inversedBy="subordinates")
+     * @JoinColumn(name="usr_superior", referencedColumnName="usr_id")
      */
     protected $superior;
 
@@ -239,25 +238,25 @@ class User extends DbObject implements  UserInterface, \Serializable
      * @ORM\OneToOne(targetEntity=Weight::class, inversedBy="user", cascade={"persist", "remove"})
      * @ORM\JoinColumn(name="weight_wgt_id",referencedColumnName="wgt_id", nullable=true)
      */
-    public $weight_wgt;
+    public $weight;
 
     /**
      * @ORM\ManyToOne(targetEntity=Position::class)
      * @JoinColumn(name="position_pos_id", referencedColumnName="pos_id", nullable=true)
      */
-    public $position_pos;
+    public $position;
 
     /**
      * @ORM\ManyToOne(targetEntity=Department::class)
      * @JoinColumn(name="department_dpt_id", referencedColumnName="dpt_id", nullable=true)
      */
-    public $departement_dpt;
+    public $department;
 
     /**
      * @ORM\ManyToOne(targetEntity=Title::class)
      * @JoinColumn(name="title_tit_id", referencedColumnName="tit_id", nullable=true)
      */
-    public $title_tit;
+    public $title;
 
     /**
      * @ORM\ManyToOne(targetEntity=Organization::class)
@@ -269,6 +268,12 @@ class User extends DbObject implements  UserInterface, \Serializable
      * @OneToMany(targetEntity="Department", mappedBy="masterUser",cascade={"persist", "remove"}, orphanRemoval=true)
      */
     public $leadingDepartments;
+
+    /**
+     * @ORM\OneToMany(targetEntity="User", mappedBy="superior")
+     */
+    public $subordinates;
+
     
     /**
      * @var UploadedFile
@@ -316,11 +321,11 @@ class User extends DbObject implements  UserInterface, \Serializable
      * @param $results
      * @param $stagesWhereMaster
      * @param $teamUsers
-     * @param $weight_wgt
-     * @param $position_pos
-     * @param $departement_dpt
-     * @param $title_tit
-     * @param $organization_org
+     * @param $weight
+     * @param $position
+     * @param $department
+     * @param $title
+     * @param $organization
      */
     public function __construct(
       ?int $id = null,
@@ -342,10 +347,10 @@ class User extends DbObject implements  UserInterface, \Serializable
         $usr_weight_4y = 0.0,
         $usr_weight_5y = 0.0,
         int $role = null,
-        $departement_dpt = null,
-        $position_pos = null,
+        $department = null,
+        $position = null,
         $usr_positionName = null,
-        $organization_org = null,
+        $organization = null,
         $usr_act_archive_nbDays = 7,
         $usr_rm_token = null,
         int $superior = null,
@@ -365,8 +370,8 @@ class User extends DbObject implements  UserInterface, \Serializable
         $results = null,
         $stagesWhereMaster = null,
         $teamUsers = null,
-        $weight_wgt = null,
-        $title_tit = null)
+        $weight = null,
+        $title = null)
     {
         parent::__construct($id, $usr_createdBy, new DateTime());
         $this->pictureFile = $pictureFile;
@@ -406,12 +411,13 @@ class User extends DbObject implements  UserInterface, \Serializable
         $this->results = $results;
         $this->stagesWhereMaster = $stagesWhereMaster;
         $this->teamUsers = $teamUsers;
-        $this->weight_wgt = $weight_wgt;
-        $this->position_pos = $position_pos;
-        $this->departement_dpt = $departement_dpt;
-        $this->title_tit = $title_tit;
-        $this->organization = $organization_org;
+        $this->weight = $weight;
+        $this->position = $position;
+        $this->department = $department;
+        $this->title = $title;
+        $this->organization = $organization;
         $this->leadingDepartments = new ArrayCollection();
+        $this->subordinates = $subordinates?:new ArrayCollection();
     }
 
 
@@ -746,22 +752,21 @@ class User extends DbObject implements  UserInterface, \Serializable
     }
 
     /**
-     * @return int
+     * @return User
      */
-    public function getSuperior(): int
+    public function getSuperior()
     {
         return $this->superior;
     }
 
     /**
-     * @param int $superior
+     * @param User $superior
      * @return User
      */
-    public function setSuperior(int $superior): User
+    public function setSuperior(User $superior)
     {
         $this->superior = $superior;
         return $this;
-
     }
 
     /**
@@ -990,50 +995,49 @@ class User extends DbObject implements  UserInterface, \Serializable
         return $this;
     }
 
-    public function getWeightWgt(): ?Weight
+    public function getWeight(): ?Weight
     {
-        return $this->weight_wgt;
+        return $this->weight;
     }
 
-    public function setWeightWgt(Weight $weight_wgt): self
+    public function setWeight(Weight $weight): self
     {
-        $this->weight_wgt = $weight_wgt;
-
+        $this->weight = $weight;
         return $this;
     }
 
     public function getPosition(): ?Position
     {
-        return $this->position_pos;
+        return $this->position;
     }
 
-    public function setPosition(?Position $position_pos): self
+    public function setPosition(?Position $position): self
     {
-        $this->position_pos = $position_pos;
+        $this->position = $position;
 
         return $this;
     }
 
     public function getDepartment(): ?Department
     {
-        return $this->departement_dpt;
+        return $this->department;
     }
 
-    public function setDepartment(?Department $departement_dpt): self
+    public function setDepartment(?Department $department): self
     {
-        $this->departement_dpt = $departement_dpt;
+        $this->department = $department;
 
         return $this;
     }
 
-    public function getTitleTit(): ?Title
+    public function getTitle(): ?Title
     {
-        return $this->title_tit;
+        return $this->title;
     }
 
-    public function setTitleTit(?Title $title_tit): self
+    public function setTitle(?Title $title): self
     {
-        $this->title_tit = $title_tit;
+        $this->title = $title;
 
         return $this;
     }
@@ -1043,9 +1047,9 @@ class User extends DbObject implements  UserInterface, \Serializable
         return $this->organization;
     }
 
-    public function setOrganization(Organization $organization_org): self
+    public function setOrganization(Organization $organization): self
     {
-        $this->organization = $organization_org;
+        $this->organization = $organization;
 
         return $this;
     }
@@ -1054,8 +1058,7 @@ class User extends DbObject implements  UserInterface, \Serializable
         if ($this->deleted) {
             return (string) $this->id;
         }
-
-        return "$this->firstname . $this->lastname";
+        return "$this->firstname $this->lastname";
     }
 
     public function getInvertedFullName(): string
@@ -1174,8 +1177,8 @@ class User extends DbObject implements  UserInterface, \Serializable
 
     public function toArray(): array
     {
-        if ($this->position_pos !== null) {
-            $posName = $this->position_pos->getName();
+        if ($this->position !== null) {
+            $posName = $this->position->getName();
         } else {
             $posName = "";
         }
@@ -1241,7 +1244,7 @@ class User extends DbObject implements  UserInterface, \Serializable
             'firstname' => $this->firstname,
             'lastname' => $this->lastname,
             'picture' => $this->picture,
-            'weight' => $this->weight_wgt?$this->weight_wgt->getValue():null,
+            'weight' => $this->weight?$this->weight->getValue():null,
             'inserted' => $this->inserted,
             'internal' => $this->internal,
             'position' => $posName,
@@ -1273,4 +1276,26 @@ class User extends DbObject implements  UserInterface, \Serializable
     {
         return $this->role === 3;
     }
+
+     /**
+     * @return Collection|User[]
+     */
+    public function getSubordinates(): Collection
+    {
+        return $this->subordinates;
+    }
+
+    public function addSubordinate(User $user): User
+    {
+        $this->subordinates->add($user);
+        $user->setSuperior($this);
+        return $this;
+    }
+
+    public function removeSubordinate(User $user): User
+    {
+        $this->subordinates->removeElement($user);
+        return $this;
+    }
+
 }

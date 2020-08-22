@@ -4,6 +4,59 @@ $(function(){
 
     $('select').material_select();
 
+    $('select').on('change',function(){
+        const $userElmt = $(this).closest('.user-elmt');
+        const $this = $(this);
+        const $input = $userElmt;
+        const inputVal = $this.find('option:selected').text();
+        //$userElmt.find('.user-input').hide();
+        $userElmt.find('a>span').empty().append($this.val() ? $userElmt.data('prefix-w')+''+ inputVal : $userElmt.data('prefix-wo'));
+        //$userElmt.find('a').show();
+        //$(this).val()
+    });
+
+    $(document).on('click',function(e){
+        var $this = $(e.target);
+        if(
+            $this.is('.btn:not(.user-btn,.client-btn)') ||
+            $this.parent().is('.btn:not(.user-btn,.client-btn)') ||
+            $this.hasClass('insert-individual-btn') || 
+            $this.parent().hasClass('insert-individual-btn')
+        ) {return ;}
+        var $targetedUserEl = $this.closest('.user-elmt');
+        var $targetedUserInput = $targetedUserEl ? $targetedUserEl.find('.user-input') : null;
+
+        $('.user-input:visible').not($targetedUserInput).each(function(i,e){
+            if($(e).hasClass('user-select-fullname') && (!$(e).find('[name*="firstname"]').val().length || !$(e).find('[name*="lastname"]').val().length )
+            || $(e).hasClass('user-select-email') && !$(e).find('[name*="email"]').val().length){
+                return;
+            }
+            var $userEl = $(e).closest('.user-elmt');    
+            const $input = $userEl.find('input.select-dropdown').length ? $userEl.find('select') : $userEl.find('input');
+            
+            if($userEl.find('input.select-dropdown').length){
+                    inputVal = $userEl.find('select option:selected').text();
+            } else {
+                if($(e).hasClass('user-select-fullname')){
+                    inputVal = $userEl.find('[name*="firstname"]').val() + ' ' + $userEl.find('[name*="lastname"]').val();
+                } else {
+                    inputVal = $userEl.find('input').val();
+                }
+            }
+
+            //const inputVal = $userEl.find('input.select-dropdown').length ? $userEl.find('select option:selected').text() : $userEl.find('input').val();
+            $userEl.find('.user-input').hide();
+            $userEl.find('a>span').empty().append($input.val().length ? $userEl.data('prefix-w')+''+ inputVal : $userEl.data('prefix-wo'));
+            $userEl.find('a').show();
+        })
+        
+    });
+
+    $(document).on('click','.user-modify',function(e){
+        $(this).closest('.element-data').hide();
+        $(this).closest('.element-data').next().show();
+    });
+
     $('.modal').modal();
 
     setTimeout(function (){

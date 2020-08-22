@@ -6,12 +6,11 @@
 {% set tleader = tleader is defined ? tleader : false %}
 {% set displayOrg = displayOrg is defined ? orgName : false %}
 {% set myself = user == currentuser %}
-{% set perf = user.ranking('A','P','W', true) %}
-{% set dev = user.ranking('A','D','W', true) %}
+{% set perf = userM.ranking(user,'A','P','W', true) %}
+{% set dev = userM.ranking(user,'A','D','W', true) %}
 {% set weight = user.weight %}
-{% set picture_url = asset(user_picture_url(user)) %}
-{% set hasCompletedActivities = user.nbCompletedActivities > 0 %}
-
+{% set picture_url = asset(global.userPicture(user)) %}
+{% set hasCompletedActivities = userM.NbCompletedActivities(user) > 0 %}
 
 
 <li class="users-list--item hierarchized-item {{ not stats ? 'no-stats' }}">
@@ -53,7 +52,7 @@
           {% if is_admin or user.createdBy == currentuser.id %}
             {% set path = is_root ? 'rootUpdateUser' : 'updateUser' %}
             <a class="material-icons"
-                href="{{ url(path, { usrId: user.id, orgId: user.orgId }) }}"
+                href="{{ url(path, { usrId: user.id, orgId: user.organization.id }) }}"
                 tooltip="{{ 'user_list.modify'|trans }}">settings</a>
           {% endif %}
         
@@ -91,7 +90,7 @@
       <div class="user-info tiles-container">
         <div class="tile activity-count">
           {% set text %}
-            {{ user.nbCompletedActivities(app) }} + {{ user.nbScheduledActivities(app) }}
+            {{ userM.nbCompletedActivities(user) }} + {{ userM.nbScheduledActivities(user) }}
           {% endset %}
           {{ macros.render_tile(
             'tooltip.user.activity_ongoing_futur'|trans, 'fa fa-briefcase', text

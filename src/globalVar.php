@@ -1,6 +1,8 @@
 <?php
 namespace App;
 use App\Entity\Activity;
+use App\Entity\Client;
+use App\Entity\Organization;
 use App\Entity\Stage;
 use App\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -42,10 +44,31 @@ class globalVar {
         return ["_locale" =>"fr"];
     }
 
-    public function userpicture(): string
+    public function userPicture(): string
     {
-        $userPicture = $this->CurrentUser()?$this->CurrentUser()->getPicture(): null;
+        $userPicture = $this->CurrentUser() ? $this->CurrentUser()->getPicture() : null;
         return 'lib/img/' . ($userPicture ?: 'no-picture.png');
+    }
+
+    
+    public function organizationLogo(Organization $o): string
+    {
+        if($o->getLogo()){
+            return 'lib/img/org/'. $o->getLogo();
+        } else if ($o->getWorkerFirm() && $o->getWorkerFirm()->getLogo()){
+            return 'lib/img/org/' . $o->getWorkerFirm()->getLogo();
+        } else {
+            return 'lib/img/org/no-picture.png';
+        }
+    }
+    
+    public function clientLogo(Client $c): string
+    {
+        if($c->getLogo()){
+            return 'lib/img/org/' . $c->getLogo();
+        } else {
+            return $this->organizationLogo($c->getClientOrganization());
+        }
     }
 
     public function request(): ?\Symfony\Component\HttpFoundation\Request

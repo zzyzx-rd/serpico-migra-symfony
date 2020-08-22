@@ -259,6 +259,15 @@ class Team extends DbObject
     {
         $this->targets = $targets;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getTeamUsers()
+    {
+    return $this->teamUsers;
+    }
+
     function addTeamUser(TeamUser $teamUser){
 
         $this->teamUsers->add($teamUser);

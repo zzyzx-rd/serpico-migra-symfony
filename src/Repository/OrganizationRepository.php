@@ -3,6 +3,8 @@
 namespace App\Repository;
 
 use App\Entity\Organization;
+use App\Entity\Team;
+use App\Entity\TeamUser;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -22,16 +24,42 @@ class OrganizationRepository extends ServiceEntityRepository
     }
 
     public function hasActiveAdmin(?Organization $organization){
-        return $organization?$this->getActiveUsers($organization->getId())
+        return $organization?$this->getActiveUsers($organization)
             ->exists(static function(int $i, User $u){
                 return $u->getRole() == USER::ROLE_ADMIN && $u->getLastConnected() !== null;
             }): false;
     }
 
-    public function getActiveUsers(int $orgId): ArrayCollection
+    public function getActiveUsers(Organization $organization): ArrayCollection
     {
-        return new ArrayCollection($this->_em->getRepository(User::class)->findBy(['organization' => $orgId, 'deleted' => null],['lastname' => 'ASC']));
+        return new ArrayCollection($this->_em->getRepository(User::class)->findBy(['organization' => $organization, 'deleted' => null],['lastname' => 'ASC']));
     }
+
+    public function getUsers(Organization $organization)
+    {
+        global $app;
+        return new ArrayCollection($this->_em->getRepository(User::class)->findBy(['organization' => $organization],['lastname' => 'ASC']));
+    }
+
+    /**
+     * @return Collection|Department[]
+     */
+    public function getUserSortedDepartments(User $user)
+    {
+        $orgDepartments = $user->getOrganization()->getDepartments();
+        $userSortedDepartments = new ArrayCollection;
+        $userDpt = $user->getDepartment();
+        if($orgDepartments->contains($userDpt)){
+            $userSortedDepartments->add($userDpt);
+        }
+        foreach($orgDepartments as $orgDepartment){
+            if($orgDepartment != $userDpt){
+                $userSortedDepartments->add($orgDepartment);
+            }
+        }
+        return $userSortedDepartments;
+    }
+
     // /**
     //  * @return Organization[] Returns an array of Organization objects
     //  */
@@ -60,4 +88,18 @@ class OrganizationRepository extends ServiceEntityRepository
         ;
     }
     */
+
+    public function getDealingTeams(Organization $organization){
+        
+        $repoT = $this->_em->getRepository(Team::class);
+        $teams = new ArrayCollection($repoT->findAll());
+        return $teams->filter(function(Team $t) use ($organization){ 
+            return $t->getTeamUsers()->exists(function(int $i, TeamUser $tu) use ($organization){
+                if(!$tu->getExternalUser()){
+                    return false;
+                }
+                return $organization->getUsers()->contains($tu->getExternalUser()->getUser());
+            });
+        });
+    }
 }

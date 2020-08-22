@@ -5,7 +5,7 @@
       {% for firm in firms %}
           {% if firm.clientOrganization is defined %}
         
-              {% set logo_url = asset(client_logo_url(firm)) %}
+              {% set logo_url = asset(global.clientLogo(firm)) %}
               <li class="firms-list--item hierarchized-item" data-id="{{ firm.id }}">
                 <header class="flex-center">
                   <img src="{{ logo_url }}" alt="" class="client-logo">
@@ -35,7 +35,7 @@
 
               {# we have a dealing organization #}
 
-              {% set logo_url = asset(organization_logo_url(firm)) %}
+              {% set logo_url = asset(global.organizationLogo(firm)) %}
               <li class="firms-list--item hierarchized-item" data-id="{{ firm.id }}">
                 <header class="flex-center">
                   <img src="{{ logo_url }}" alt="" class="client-logo">

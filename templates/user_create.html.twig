@@ -11,11 +11,7 @@
     <!-- Dropify -->
     <link href="{{ asset('css/dropify.min.css') }}" rel="stylesheet" type="text/css">
     <script type="text/javascript">
-        var url = "{{ url('ajaxUserAdd',{'locale' : 'fr'}) }}";
         var eurl = "{{ url('validateOrganizationElement',{orgId: orgId, elmtType: 'department', elmtId : 0 }) }}";
-        var rpurl = "{{ url('retrievePosFromDpt',{'dptId': 0}) }}";
-        var rwurl = "{{ url('retrieveWgtFromPos',{'posId': 0}) }}";
-        var wurl = "{{ url('addWeight',{'orgId': orgId, 'posId': 0,'usrId':0}) }}";
         var vcurl = "{{ url('insertCheckedCSV',{'fileName': 'a','headerParameters':'b'}) }}";
         var posTitleMsg = "{% trans %}create_position.title_msg{% endtrans %}";
         var dptTitleMsg = "{% trans %}create_department.title_msg{% endtrans %}";
@@ -181,7 +177,7 @@
 
       {% if creationPage %}
 
-        <ul class="users collection" data-prototype="{% filter escape %}{% include 'prototype_user.twig' with { 'item': form.users.vars.prototype, 'enabledCreatingUser' : enabledCreatingUser } %}{% endfilter %}">
+        <ul class="users collection" data-prototype="{{ form_widget(form.users.vars.prototype)|e('html_attr') }}">
 
         {% for key, user in form.users %}
             {% set userData = user.vars.data %}
@@ -207,8 +203,8 @@
                               <span class="m-right">{{'create_user.influence'|trans}} : {{userData.wgtId.value}}</span>
                           </a>
                           <div class="user-select-weight" style="display: none;">
-                              {{ form_label(user.wgtId) }}
-                              {{ form_widget(user.wgtId) }}
+                              {{ form_label(user.weight) }}
+                              {{ form_widget(user.weight) }}
                               <a href="#addElement" class="add-weight modal-trigger" data-wid="0"><i class="fa fa-plus"></i> {% trans %}create_weight.open_modal_msg{% endtrans %}</a>
                           </div>
                       </div>
@@ -236,7 +232,7 @@
                               </span>
                           </a>
                           <div class="user-select-superior" style="display: none;">
-                              {{ form_row(user.superiorUser) }}
+                              {{ form_row(user.superior) }}
                           </div>
                       </div>
                   </div>
@@ -282,7 +278,7 @@
                           {% endif %}
                               <i class="fa fa-bezier-curve m-right"></i>
                               <span class="m-right">
-                                {% if userData.dptId is not null %}
+                                {% if userData.department is not null %}
                                   {{'create_user.department_short'|trans}} : {{ isTooLong ? departmentName|slice(0,truncVal) ~ '...' : departmentName }}
                                 {% else %}
                                   {{'create_user.link_to_department'|trans}}
@@ -290,7 +286,7 @@
                               </span>
                           </a>
                           <div class="user-select-department" style="display: none;">
-                              {{ form_row(user.dptId) }}
+                              {{ form_row(user.department) }}
                               <a href="#addElement" class="add-department modal-trigger" data-did="0"><i class="fa fa-plus"></i> {% trans %}create_department.open_modal_msg{% endtrans %}</a>
                           </div>
                       </div>
@@ -298,7 +294,7 @@
           
                   <div class="col s12 m4">
                       <div class="user-position">
-                        {% if userData.posId is not null %}
+                        {% if userData.position is not null %}
                           {% set positionName = userData.position.name %}
                           {% set isTooLong = positionName|length > truncVal %}
                         {% else %}
@@ -311,7 +307,7 @@
                           {% endif %}
                               <i class="fa fa-bezier-curve m-right"></i>
                               <span class="m-right">
-                                {% if userData.posId is not null %}
+                                {% if userData.position is not null %}
                                   {{'create_user.position'|trans}} : {{ isTooLong ? positionName|slice(0,truncVal) ~ '...' : positionName }}
                                 {% else %}
                                   {{'create_user.link_to_position'|trans}}
@@ -319,7 +315,7 @@
                               </span>
                           </a>
                           <div class="user-select-position" style="display: none;">
-                              {{ form_row(user.posId) }}
+                              {{ form_row(user.position) }}
                               <a href="#addElement" class="add-position modal-trigger" data-pid="0"><i class="fa fa-plus"></i> {% trans %}create_position.open_modal_msg{% endtrans %}</a>
                           </div>
                       </div>
@@ -331,7 +327,7 @@
                           <a class="btn user-btn user-info-utitle flex-center">
                               <i class="fa fa-bezier-curve m-right"></i>
                               <span class="m-right">
-                                {% if userData.titId is not null %}
+                                {% if userData.title is not null %}
                                   {{'create_user.title'|trans}} : {{ userData.title.name|slice(0,truncVal) ~ '...' }}
                                 {% else %}
                                   {{'create_user.link_to_title'|trans}}
@@ -339,7 +335,7 @@
                               </span>
                           </a>
                           <div class="user-select-utitle" style="display: none;">
-                              {{ form_row(user.titId) }}
+                              {{ form_row(user.title) }}
                               <a href="#addElement" class="add-utitle modal-trigger" data-tid="0"><i class="fa fa-plus"></i> {% trans %}create_title.open_modal_msg{% endtrans %}</a>
                           </div>
                       </div>
@@ -481,8 +477,8 @@
                           <span class="m-right">{{'create_user.influence'|trans}} : {{userData.weight.value}}</span>
                       </a>
                       <div class="user-select-weight" style="display: none;">
-                          {{ form_label(user.wgtId) }}
-                          {{ form_widget(user.wgtId) }}
+                          {{ form_label(user.weight) }}
+                          {{ form_widget(user.weight) }}
                           <a href="#addElement" class="add-weight modal-trigger" data-wid="0"><i class="fa fa-plus"></i> {% trans %}create_weight.open_modal_msg{% endtrans %}</a>
                       </div>
                   </div>
@@ -510,7 +506,7 @@
                           </span>
                       </a>
                       <div class="user-select-superior" style="display: none;">
-                          {{ form_row(user.superiorUser) }}
+                          {{ form_row(user.superior) }}
                       </div>
                   </div>
               </div>
@@ -519,7 +515,7 @@
           <div class="row no-margin">
               <div class="col s12 m4">
                   <div class="user-department">
-                    {% if userData.dptId is not null %}
+                    {% if userData.department is not null %}
                       {% set departmentName = userData.department.name %}
                       {% set isTooLong = departmentName|length > truncVal %}
                     {% else %}
@@ -532,7 +528,7 @@
                       {% endif %}
                           <i class="fa fa-bezier-curve m-right"></i>
                           <span class="m-right">
-                            {% if userData.dptId is not null %}
+                            {% if userData.department is not null %}
                               {{'create_user.department_short'|trans}} : {{ isTooLong ? departmentName|slice(0,truncVal) ~ '...' : departmentName }}
                             {% else %}
                               {{'create_user.link_to_department'|trans}}
@@ -540,7 +536,7 @@
                           </span>
                       </a>
                       <div class="user-select-department" style="display: none;">
-                          {{ form_row(user.dptId) }}
+                          {{ form_row(user.department) }}
                           <a href="#addElement" class="add-department modal-trigger" data-did="0"><i class="fa fa-plus"></i> {% trans %}create_department.open_modal_msg{% endtrans %}</a>
                       </div>
                   </div>
@@ -548,7 +544,7 @@
       
               <div class="col s12 m4">
                   <div class="user-position">
-                    {% if userData.posId is not null %}
+                    {% if userData.position is not null %}
                       {% set positionName = userData.position.name %}
                       {% set isTooLong = positionName|length > truncVal %}
                     {% else %}
@@ -561,7 +557,7 @@
                       {% endif %}
                           <i class="fa fa-bezier-curve m-right"></i>
                           <span class="m-right">
-                            {% if userData.posId is not null %}
+                            {% if userData.position is not null %}
                               {{'create_user.position'|trans}} : {{ isTooLong ? positionName|slice(0,truncVal) ~ '...' : positionName }}
                             {% else %}
                               {{'create_user.link_to_position'|trans}}
@@ -569,7 +565,7 @@
                           </span>
                       </a>
                       <div class="user-select-position" style="display: none;">
-                          {{ form_row(user.posId) }}
+                          {{ form_row(user.position) }}
                           <a href="#addElement" class="add-position modal-trigger" data-pid="0"><i class="fa fa-plus"></i> {% trans %}create_position.open_modal_msg{% endtrans %}</a>
                       </div>
                   </div>
@@ -581,7 +577,7 @@
                       <a class="btn user-btn user-info-utitle flex-center">
                           <i class="fa fa-bezier-curve m-right"></i>
                           <span class="m-right">
-                            {% if userData.titId is not null %}
+                            {% if userData.title is not null %}
                               {{'create_user.title'|trans}} : {{ userData.title.name|slice(0,truncVal) ~ '...' }}
                             {% else %}
                               {{'create_user.link_to_title'|trans}}
@@ -589,7 +585,7 @@
                           </span>
                       </a>
                       <div class="user-select-utitle" style="display: none;">
-                          {{ form_row(user.titId) }}
+                          {{ form_row(user.title) }}
                           <a href="#addElement" class="add-utitle modal-trigger" data-tid="0"><i class="fa fa-plus"></i> {% trans %}create_title.open_modal_msg{% endtrans %}</a>
                       </div>
                   </div>
@@ -682,7 +678,7 @@
     <div id="deleteModal" class="modal">
       <div class="modal-content">
           <h4>{% trans %}user_update.delete_modal.title{% endtrans %}</h4>
-          <p>{% trans %}user_update.delete_modal.content_1{% endtrans %} {{ userData.firstname }} {{ userData.lastname }}{% if currentuser.orgId == userData.orgId or currentuser.role == 4 %} {% trans %}user_update.delete_modal.content_2{% endtrans %}{% else %} {% trans %}user_update.delete_modal.content_ext_user{% endtrans %}{% endif %}</p>
+          <p>{% trans %}user_update.delete_modal.content_1{% endtrans %} {{ userData.firstname }} {{ userData.lastname }}{% if currentuser.organization == userData.organization or currentuser.role == 4 %} {% trans %}user_update.delete_modal.content_2{% endtrans %}{% else %} {% trans %}user_update.delete_modal.content_ext_user{% endtrans %}{% endif %}</p>
       </div>
       <div class="modal-footer">
           <a class=" modal-action modal-close submit-button waves-effect waves-green btn-large delete-button">{% trans %}user_update.delete_modal.confirm{% endtrans %}</a>

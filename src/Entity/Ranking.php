@@ -107,7 +107,7 @@ class Ranking extends DbObject
      * @ORM\ManyToOne(targetEntity=User::class)
      * @JoinColumn(name="rnk_user_usr_id", referencedColumnName="usr_id")
      */
-    public $user_usr;
+    public $user;
 
     /**
      * Ranking constructor.
@@ -127,13 +127,13 @@ class Ranking extends DbObject
      * @param $stage
      * @param $criterion
      * @param $organization
-     * @param $rnk_user_usr
+     * @param $rnk_user
      */
     public function __construct(
       ?int $id = 0,
         $rnk_dtype = null,
         $rnk_wtype = null,
-        $rnk_user_usr = null,
+        $rnk_user = null,
         $organization = null,
         $rnk_abs_result = null,
         $rnk_rel_result = null,
@@ -163,7 +163,7 @@ class Ranking extends DbObject
         $this->stage = $stage;
         $this->criterion = $criterion;
         $this->organization = $organization;
-        $this->user_usr = $rnk_user_usr;
+        $this->user = $rnk_user;
     }
 
 
@@ -347,14 +347,14 @@ class Ranking extends DbObject
         $this->organization = $organization;
     }
 
-    public function getUserUsr(): ?User
+    public function getUser(): ?User
     {
-        return $this->user_usr;
+        return $this->user;
     }
 
-    public function setUserUsr(?User $user_usr): self
+    public function setUser(?User $user): self
     {
-        $this->user_usr = $user_usr;
+        $this->user = $user;
 
         return $this;
     }

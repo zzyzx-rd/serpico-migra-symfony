@@ -29,9 +29,9 @@ class Department extends DbObject
 
 
     /**
-     * @ORM\Column(type="string", length=45)
+     * @ORM\Column(name="dpt_name", type="string", length=45)
      */
-    public $dpt_name;
+    public $name;
 
     /**
      * @ORM\Column(name="dpt_created_by", type="integer", nullable=true)
@@ -85,7 +85,7 @@ class Department extends DbObject
     /**
      * Department constructor.
      * @param $id
-     * @param $dpt_name
+     * @param $name
      * @param $dpt_createdBy
      * @param $dpt_inserted
      * @param $dpt_deleted
@@ -100,7 +100,7 @@ class Department extends DbObject
     //TODO Set correctement dans les controlleurs
     public function __construct(
         $id = 0,
-        $dpt_name = '',
+        $name = '',
         $dpt_createdBy = null,
         $dpt_inserted = null,
         $dpt_deleted = null,
@@ -113,7 +113,7 @@ class Department extends DbObject
         ArrayCollection $targets = null)
     {
         parent::__construct($id, $dpt_createdBy, new DateTime());
-        $this->dpt_name = $dpt_name;
+        $this->name = $name;
         $this->inserted = $dpt_inserted;
         $this->deleted = $dpt_deleted;
         $this->masterUser = $masterUser;
@@ -133,12 +133,12 @@ class Department extends DbObject
 
     public function getName(): ?string
     {
-        return $this->dpt_name;
+        return $this->name;
     }
 
-    public function setName(string $dpt_name): self
+    public function setName(string $name): self
     {
-        $this->dpt_name = $dpt_name;
+        $this->name = $name;
 
         return $this;
     }
@@ -296,7 +296,7 @@ class Department extends DbObject
     {
         return [
             'id' => $this->id,
-            'name' => $this->dpt_name
+            'name' => $this->name
         ];
     }
     public function addOption(OrganizationUserOption $option): Department
@@ -314,6 +314,6 @@ class Department extends DbObject
 
     public function __toString()
     {
-        return $this->dpt_name;
+        return $this->name;
     }
 }

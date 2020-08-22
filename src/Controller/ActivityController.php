@@ -131,8 +131,10 @@ class ActivityController extends MasterController
 
         $this->em->persist($activity);
         $this->em->flush();
-        return $this->redirectToRoute('manageActivityElement', ['elmtType' => 'activity', 'elmtId' => $activity->getId()] );
-//        return new JsonResponse(['message' => 'success to create activity', 'redirect' => $this->redirectToRoute('manageActivityElement', ['elmtType' => 'activity', 'elmtId' => $activity->getId()])], 200);
+//        return $this->redirectToRoute('manageActivityElement', ['elmtType' => 'activity', 'elmtId' => $activity->getId()] );
+        return $this->json(['message' => 'success to create activity', 'redirect' => $this->generateUrl('manageActivityElement', ['elmtType' => 'activity', 'elmtId' => $activity->getId()])], 200);
+        //return $this->redirectToRoute('manageActivityElement', ['elmtType' => 'activity', 'elmtId' => $activity->getId()]);
+        //return new JsonResponse(['message' => 'success to create activity', 'redirect' => $this->redirectToRoute('manageActivityElement', ['elmtType' => 'activity', 'elmtId' => $activity->getId()])], 200);
 
 
     }

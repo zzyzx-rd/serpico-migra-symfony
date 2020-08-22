@@ -2748,6 +2748,12 @@ create_user:
   add_button: Ajouter un utilisateur
   user: Utilisateur
   fullname: Nom complet
+  provide_department: Préciser département
+  provide_position: Préciser poste
+  provide_title: Préciser titre
+  provide_email: Renseigner email
+  undefined_department: Département indéfini
+  undefined_position: Poste indéfini
 
 team_manage:
   page_title_create: Création déquipe

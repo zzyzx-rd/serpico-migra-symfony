@@ -4,7 +4,7 @@
 
 
 {% block data_params %}
-  {{ html_data_params({
+  {{ global.html_data_params({
     'set-client-icon': url('setClientIcon', { clientId: 0 })|raw
   }) }}
 {% endblock %}
@@ -92,7 +92,7 @@
 
       <section id="clients">
         <ul class="client-type-list">
-          {% include "components/user_list__firms_item.html.twig" with { firms: clientFirms|merge(dealingFirms) } %}
+          {% include "components/user_list__firms_item.html.twig" with { firms: clientFirms|merge(organizationM.dealingFirms(organization)) } %}
         </ul>
         <ul class="client-type-list">
           {% include "components/user_list__ext_team_item.html.twig" with { firms: clientTeams } %}

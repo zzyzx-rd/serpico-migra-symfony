@@ -103,7 +103,7 @@ class UserType extends AbstractType
                     'multiple' => false,
                 ])
 
-            ->add('dptId', EntityType::class,
+            ->add('department', EntityType::class,
                 [
                     'class' => Department::class,
                     'choice_label' => 'name',
@@ -137,7 +137,7 @@ class UserType extends AbstractType
                 'required' => true,
             ])*/
 
-            ->add('posId', EntityType::class,
+            ->add('position', EntityType::class,
                 [
                     'class' => Position::class,
                     'choice_label' => 'name',
@@ -157,7 +157,7 @@ class UserType extends AbstractType
                     'required' => false,
                 ])
 
-                ->add('titId', EntityType::class,
+                ->add('title', EntityType::class,
                 [
                     'class' => Title::class,
                     'choice_label' => 'name',
@@ -177,7 +177,7 @@ class UserType extends AbstractType
                     'required' => false,
                 ])
 
-                ->add('wgtId', EntityType::class,
+                ->add('weight', EntityType::class,
                 [
                     'class' => Weight::class,
                     'choice_label' => 'value',
@@ -220,7 +220,7 @@ class UserType extends AbstractType
 
             //if($user != null){
 
-            ->add('superiorUser', EntityType::class,
+            ->add('superior', EntityType::class,
             [
                 'class' => User::class,
                 'choice_label' => 'invertedFullname',
@@ -229,7 +229,7 @@ class UserType extends AbstractType
                     // Data is null when a new form is added, so we needed to find a way to add correct users
                     if($user != null){
                         return $er->createQueryBuilder('u')
-                        ->where('u.orgId ='. $user->getOrganization()->getId())
+                        ->where('u.organization ='. $user->getOrganization())
                         ->andWhere("u.lastname != 'ZZ'")
                         ->andWhere("u.id != ". $user->getId())
                         ->andWhere('u.deleted is NULL')
@@ -237,7 +237,7 @@ class UserType extends AbstractType
 
                     } else {
                         return $er->createQueryBuilder('u')
-                        ->where('u.orgId ='. $organization->getId())
+                        ->where('u.organization ='. $organization)
                         ->andWhere("u.lastname != 'ZZ'")
                         ->andWhere('u.deleted is NULL')
                         ->orderBy('u.lastname', 'ASC');

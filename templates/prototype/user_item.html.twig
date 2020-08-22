@@ -1,0 +1,254 @@
+{% set user = item.vars is defined ? (item.vars.data ? item.vars.data : null) : item %}
+{% set mailTruncVal = 30 %}
+{% set userTruncVal = 30 %}
+{% set truncVal = 15 %}
+
+
+{% if item.parent is defined and item.parent is not null %}
+    <li class="user collection-item">
+{% else %}
+    <div class="user">
+{% endif %}
+
+    {% if item.parent is not defined or item.parent is null %}
+    
+        <div class="element-data" {% if item.vars is defined and (not user or not item.vars.valid) %}style="display:none"{% endif %}>
+
+                <div class="row flex-center user-credentials">
+
+                    <img class="user-profile-picture clickable-image" src="{{ asset(global.userPicture(user))}}" width="150px" height="150px" style="border-radius: 100%">
+                    
+                    <div class="user-info">
+                    
+                        <div class="flex-center">
+                                {% set fullname = user.fullname %}
+                                {% set isTooLong = fullname|length > userTruncVal %}
+                                <h4> {{ fullname }}</h4>
+                                <i class="fa lime-text text-darken-3 fa-envelope m-left tooltipped" data-tooltip="{{ user.email }}"></i>
+                        </div>
+
+                        <div class="flex-center">   
+            
+                            <div class>
+                                {{ user.position ? user.position.name : 'create_user.undefined_position'|trans  }}
+                            </div>
+                            <a class="btn-flat m-left user-btn">
+                                {{ user.department ? user.department.name : 'create_user.undefined_department'|trans }}
+                            </a>
+                            <div class>
+                                {{ user.title ? user.title.name : '' }}
+                            </div>                
+                        </div>
+                        <div class="user-role user-elmt" data-prefix-w="{{'create_user.role'|trans ~ ' : '}}">
+                            <a class="btn-flat no-padding user-info-role flex-center">
+                                <i class="fa fa-user-cog m-right"></i>
+                                <span class="m-right">{{ 'create_user.role'|trans }} : {{ user.role == 1 ? 'create_user.administrator'|trans : (user.role == 2 ? 'create_user.contributor'|trans : 'create_user.collaborator'|trans) }}</span>
+                            </a>
+                        </div>
+                    
+                    
+                        <div class="user-weight user-elmt" data-prefix-w="{{'create_user.influence'|trans ~ ' : '}}">
+                            <a class="btn-flat no-padding user-info-weight flex-center">
+                                <i class="fa fa-vote-yea m-right"></i>
+                                <span class="m-right">{{'create_user.influence'|trans}} : {{user.weight.value}}</span>
+                            </a>
+                        </div>
+                
+                        <div class="user-superior user-elmt">
+                            {% if user.superior is not null %}
+                                {% set superiorName = user.superiorUser.fullname %}
+                                {% set isTooLong = superiorName|length > truncVal %}
+                                <i class="fa fa-user-circle m-right"></i>
+                                <span class="m-right">
+                                    {% if user.superior is not null %}
+                                    {{'create_user.superior_short'|trans}} : {{ isTooLong ? superiorName|slice(0,truncVal) ~ '...' : superiorName }}
+                                    {% else %}
+                                    {{'create_user.define_superior'|trans}}
+                                    {% endif %}
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if item.vars is defined %}
+                    
+                        <div class="user-modify">
+                            <a class="btn-flat"><i class="fa fa-pencil-alt"></i></a>
+                        </div>
+                    
+                    {% endif %}
+                
+                </div>
+
+                    
+            
+        </div>
+
+    {% endif %}
+
+    {% if item.vars is defined %}
+    
+        <div class="element-input" {% if user and item.vars.valid %}style="display:none"{% endif %}>
+
+            <div class="row flex-center">
+                <div class="user-title">
+                    <h4 class="no-margin">
+                        {% if item.parent is not null %}
+                            {{ 'create_user.user'|trans }} <span class="user-number">{{ not item ? '__nb__' : key + 1 }}</span></h4>
+                        {% endif %}
+                </div>
+        
+                <div class="user-action-buttons">
+                    {% if not user or not user.id %}
+                        <a class="remove-user btn-flat"><i class="fa fa-trash"></i></a>
+                    {% else %}
+                        <a class="btn-flat modal-trigger" href="#deleteModal"><i class="fa fa-trash"></i></a>
+                    {% endif %}
+                    {% if item.parent is null %}
+                        {% set submitBtn %}
+                            {{form_widget(item.submit)}}
+                        {% endset %}
+                        {{submitBtn|replace({'[link]' : '<i class="fa fa-check"></i>'})|raw}}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row flex-center">
+                <div class="user-fullname col s12 m6 user-elmt" data-prefix-wo="" data-prefix-w="{{'create_user.fullname'|trans ~ ' : '}}" user-elmt>
+                    <a class="btn user-btn user-info-fullname flex-center" {% if not user or not item.firstname.vars.valid or not item.lastname.vars.valid %}style="display: none;"{% endif %}>
+                        <span>{{ user ? 'create_user.fullname'|trans ~ ' : ' ~ user.fullname : '' }}</span>
+                    </a>
+                    <div class="user-select-fullname user-input row no-margin flex-center" {% if user and item.firstname.vars.valid and item.lastname.vars.valid %}style="display: none;"{% endif %}>
+                        <div class="input-field user-firstname col s12 m6">
+                            {{ form_label(item.firstname) }}
+                            {{ form_widget(item.firstname) }}
+                        </div>
+                        <div class="input-field user-lastname col s12 m6">
+                            {{ form_label(item.lastname) }}
+                            {{ form_widget(item.lastname) }}
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="user-email col s12 m6 user-elmt" data-prefix-wo="{{'create_user.provide_email'|trans }}" data-prefix-w="{{'create_user.email_short'|trans ~ ' : '}}">
+                                
+                    {% set isTooLong = user and user.email|length > mailTruncVal %}
+                    {% if not isTooLong %}
+                    <a class="btn user-btn user-info-email flex-center" {% if not user or not item.email.vars.valid %}style="display: none;"{% endif %}>
+                    {% else %}
+                    <a class="btn-flat user-btn user-info-email flex-center tooltipped" data-position="top" data-tooltip="{{user.email}}" {% if not user or not item.email.vars.valid %}style="display: none;"{% endif %}>
+                    {% endif %}
+                        <i class="fa lime-text text-darken-3 fa-envelope m-right"></i>
+                        <span>{{ user and user.email is not null ? 'create_user.email_short'|trans ~ ' : ' ~ (isTooLong ? user.email|slice(0,mailTruncVal) ~ '...' : user.email) : 'create_user.provide_email'|trans }}</span>
+                    </a>
+                    <div class="user-select-email user-input input-field" {% if user and item.email.vars.valid %} style="display: none;"{% endif %}>
+                        {{ form_label(item.email) }}
+                        {{ form_widget(item.email) }}
+                    </div>
+                </div>
+        
+                {#<div class="input-field col s12 m4 user-input" {% if not user %} style="display: none;"{% endif %}>
+                    {{ form_row(item.email) }}
+                </div>#}
+            </div>
+            <div class="row">
+                <div class="col s12 m4">
+                    <div class="user-department user-elmt" data-prefix-wo="{{'create_user.provide_department'|trans }}" data-prefix-w="{{'create_user.department_short'|trans ~ ' : '}}">
+                        <a class="btn user-btn user-info-department flex-center">
+                            <i class="fa fa-bezier-curve m-right"></i>
+                            <span class="m-right">{{ not user or not user.department ? 'create_user.provide_department'|trans : 'create_user.department_short'|trans ~ ' : ' ~ user.department.name }}</span>
+                        </a>
+                        <div class="user-select-department user-input" style="display: none;">
+                            {{ form_label(item.department) }}
+                            {{ form_widget(item.department) }}
+                            <a href="#addElement" class="add-department modal-trigger" data-did="{{ user ? (item.parent ? key : 0) : '__nb__' }}"><i class="fa fa-plus"></i> {% trans %}create_department.open_modal_msg{% endtrans %}</a>
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="col s12 m4">
+                    <div class="user-position user-elmt" data-prefix-wo="{{'create_user.provide_position'|trans }}" data-prefix-w="{{'create_user.position'|trans ~ ' : '}}">
+                        <a class="btn user-btn user-info-position flex-center">
+                            <i class="fa fa-bezier-curve m-right"></i>
+                            <span class="m-right">{{ not user or not user.position ? 'create_user.provide_position'|trans : 'create_user.position'|trans ~ ' : ' ~ user.position.name }}</span>
+                        </a>
+                        <div class="user-select-position user-input" style="display: none;">
+                            {{ form_label(item.position) }}
+                            {{ form_widget(item.position) }}
+                            <a href="#addElement" class="add-position modal-trigger" data-pid="{{ user ? (item.parent ? key : 0) : '__nb__' }}"><i class="fa fa-plus"></i> {% trans %}create_position.open_modal_msg{% endtrans %}</a>
+                        </div>
+                    </div>
+                </div>
+        
+        
+                <div class="col s12 m4">
+                    <div class="user-utitle user-elmt" data-prefix-wo="{{'create_user.provide_title'|trans }}" data-prefix-w="{{'create_user.title'|trans ~ ' : '}}">
+                        <a class="btn user-btn user-info-utitle flex-center">
+                            <i class="fa fa-bezier-curve m-right"></i>
+                            <span class="m-right">{{ not user or not user.title ? 'create_user.provide_title'|trans : 'create_user.title'|trans ~ ' : ' ~ user.title.name }}</span>
+                        </a>
+                        <div class="user-select-utitle user-input" style="display: none;">
+                            {{ form_label(item.title) }}
+                            {{ form_widget(item.title) }}
+                            <a href="#addElement" class="add-utitle modal-trigger" data-tid="{{ user ? (item.parent ? key : 0) : '__nb__' }}"><i class="fa fa-plus"></i> {% trans %}create_title.open_modal_msg{% endtrans %}</a>
+                        </div>
+                    </div>
+        
+                </div>
+            </div>
+            <div class="row no-margin">
+                <div class="col s12 m4">
+                    <div class="user-role user-elmt" data-prefix-wo="" data-prefix-w="{{'create_user.role'|trans ~ ' : '}}">
+                        <a class="btn user-btn user-info-role flex-center">
+                            <i class="fa fa-user-cog m-right"></i>
+                            <span class="m-right">{{ not user ? 'create_user.contributor'|trans : 'create_user.role'|trans ~ ' : ' ~ (user.role == 1 ? 'create_user.administrator'|trans : (user.role == 2 ? 'create_user.contributor'|trans : 'create_user.collaborator'|trans )) }}</span>
+                        </a>
+                        <div class="user-select-role user-input" style="display: none;">
+                            {{ form_label(item.role) }}
+                            {{ form_widget(item.role) }}
+                        </div>
+                    </div>
+                </div>
+                <div class="col s12 m4">
+                    <div class="user-weight user-elmt" data-prefix-wo="{{'create_user.influence'|trans ~ ' : 100'}}" data-prefix-w="{{'create_user.influence'|trans ~ ' : '}}">
+                        <a class="btn user-btn user-info-weight flex-center">
+                            <i class="fa fa-vote-yea m-right"></i>
+                            <span class="m-right">{{ not user or not user.weight ? 'create_user.provide_title'|trans : 'create_user.influence'|trans ~ ' : ' ~ user.weight.value }}</span>
+                        </a>
+                        <div class="user-select-weight user-input" style="display: none;">
+                            {{ form_label(item.weight) }}
+                            {{ form_widget(item.weight) }}
+                            <a href="#addElement" class="add-weight modal-trigger" data-wid="{{ user ? (item.parent ? key : 0) : '__nb__' }}"><i class="fa fa-plus"></i> {% trans %}create_weight.open_modal_msg{% endtrans %}</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col s12 m4">
+                    <div class="user-superior user-elmt" >
+                        <a class="btn user-btn user-info-superior flex-center" data-prefix-wo="{{'create_user.define_superior'|trans}}" data-prefix-w="{{'create_user.superior'|trans ~ ' : '}}">
+                            <i class="fa fa-user-circle m-right"></i>
+                            <span class="m-right">{{ not user or not user.superior ? 'create_user.define_superior'|trans : 'create_user.superior'|trans ~ ' : ' ~ user.superior.fullname }}</span>
+                        </a>
+                        <div class="user-select-superior user-input" style="display: none;">
+                            {{ form_label(item.superior) }}
+                            {{ form_widget(item.superior) }}
+                        </div>
+                    </div>
+                </div>   
+            </div>
+            
+            {% if enabledCreatingUser is defined and enabledCreatingUser == true and currentuser.role != 2 and currentuser.role != 3 %}
+                <div class="row">
+                    <div class="col s12 m12">
+                        {{ form_widget(item.enabledCreatingUser) }}
+                        {{ form_label(item.enabledCreatingUser) }}
+                    </div>
+                </div>
+            {% endif %}
+
+        </div>
+    {% endif %}
+
+{% if item.parent is defined and item.parent is not null %}
+</li>
+{% else %}
+</div>
+{% endif %}

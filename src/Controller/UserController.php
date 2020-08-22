@@ -645,6 +645,8 @@ class UserController extends MasterController
     public function createUserProcessActivity(Request $request, $inpId){
         $repoIP = $this->em->getRepository(InstitutionProcess::class);
         $repoU = $this->em->getRepository(User::class);
+        var_dump($this->security);
+        die;
         $currentUser = $this->security->getUser();
         // If not fresh new internal activity, institution is null. If activity request by citizen/external, then is necessarily linked to an (i)process
         $institutionProcess = $inpId != 0 ? $repoIP->findOneById($inpId) : null;
