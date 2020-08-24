@@ -117,13 +117,12 @@ class Department extends DbObject
         ArrayCollection $criterionGroups = null,
         ArrayCollection $targets = null)
     {
-        parent::__construct($id, $createdBy, new \DateTime);
+        parent::__construct($id, $createdBy, new DateTime);
         $this->name = $name;
         $this->inserted = $inserted;
         $this->deleted = $deleted;
         $this->masterUser = $masterUser;
         $this->positions = $positions?:new ArrayCollection();
-        $this->templateActivities = $templateActivities;
         $this->options = $options?:new ArrayCollection();
         $this->organization = $organization;
         $this->criterionGroups = $criterionGroups;

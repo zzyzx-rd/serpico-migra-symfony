@@ -48,7 +48,7 @@ class CriterionGroupType extends AbstractType
           'entry_type' => CriteriaListType::class,
           'entry_options' => [
             'organization' => count($departments) ? $departments->first()->getOrganization() : 
-            MasterController::getAuthorizedUser()->getOrganization(),
+            $options["currentUser"]->getOrganization(),
           ],
           'prototype' => true,
           'by_reference' => false,
@@ -64,7 +64,7 @@ class CriterionGroupType extends AbstractType
   {
     $resolver
     ->setRequired([
-      'departments'
+      'departments', "currentUser"
     ])
     ->setAllowedTypes('departments', PersistentCollection::class)
     ->setDefaults([

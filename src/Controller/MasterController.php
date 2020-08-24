@@ -177,7 +177,7 @@ abstract class MasterController extends AbstractController
 
     public static function hideResultsFromStages(Collection $stages): array
     {
-        $currentUser = self::getAuthorizedUser();
+
         if (!$currentUser) {
             throw new Exception('unauthorized');
         }
@@ -819,7 +819,7 @@ abstract class MasterController extends AbstractController
     // TimeFrame can be either 'D', 'W', 'M', 'Y'
     public static function createRecurringActivities($app, Organization $organization, Recurring $recurring, User $masterUser, $name, $frequency, \DateTime $definedStartDate, $timeFrame, $gStartDateInterval, $gStartDateTimeFrame, $gEndDateInterval, $gEndDateTimeFrame, $type, $lowerbound = 0, $upperbound = 5, $step = 0.5, $maxTimeFrame = '1Y', \DateTime $definedEndDate = null)
     {
-        $currentUser = self::getAuthorizedUser();
+
         if (!$currentUser instanceof User) {
             return new Response(null, 401);
         }

@@ -391,7 +391,7 @@ class UserController extends MasterController
      * @Route("/profile", name="manageProfile")
      */
     public function manageProfileAction(Request $request, Application $app){
-        $currentUser = self::getAuthorizedUser();
+
         $organization = $currentUser->getOrganization();
         if (!$currentUser /*|| $organization->getCommname() != "Public"*/) {
             return $this->redirectToRoute('login');
@@ -980,7 +980,7 @@ class UserController extends MasterController
     // Display all activities for current user
     public function getAllUserActivitiesAction(Request $request, Application $app)
     {
-        $currentUser = self::getAuthorizedUser();
+
         if (!$currentUser) {
             return $this->redirectToRoute('login');
         }

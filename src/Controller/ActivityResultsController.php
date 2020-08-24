@@ -394,7 +394,7 @@ final class ActivityResultsController extends MasterController
      */
     private static function getPerfResults(int $actId, int $stgId = null, int $crtId = null, bool $aggregated = false): array
     {
-        $currentUser = self::getAuthorizedUser();
+
         if (!$currentUser) {
             throw new Exception('unauthorized');
         }
@@ -721,7 +721,7 @@ final class ActivityResultsController extends MasterController
 
     private static function getActivitiesAccessAndResultsView(): array
     {
-        $currentUser = self::getAuthorizedUser();
+
         if (!$currentUser) {
             throw new Exception('unauthorized');
         }
@@ -747,7 +747,7 @@ final class ActivityResultsController extends MasterController
 
     public function getActivityPerfResultsPerStage(int $actId)
     {
-        $currentUser = self::getAuthorizedUser();
+
         $activity = self::$activityRepo->find($actId);
 
         if (!($activity instanceof Activity)) {
@@ -817,7 +817,7 @@ final class ActivityResultsController extends MasterController
      */
     public function getCriterionPerfResultsChart(int $crtId)
     {
-        $currentUser = self::getAuthorizedUser();
+
         if (!$currentUser) {
             throw new Exception;
         }
@@ -906,7 +906,7 @@ final class ActivityResultsController extends MasterController
 
     public function getStagePerfResultsChart(int $stgId, bool $aggregate = true)
     {
-        $currentUser = self::getAuthorizedUser();
+
         if (!$currentUser) {
             throw new Exception;
         }

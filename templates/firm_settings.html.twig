@@ -58,21 +58,21 @@
                     <div class="row no-margin">
                         <div class="col s12 m12">
                             <h5>{% trans %}firm_settings.other.departments.section_title{% endtrans %}</h5>
-                            <a class="waves-effect waves-light btn modify-button" href="{{ url('updateOrganizationElements', {'orgId' : currentuser.orgId, 'elmtType' : 'department' }) }}">{% trans %}firm_settings.other.departments.manage_btn{% endtrans %}</a>
+                            <a class="waves-effect waves-light btn modify-button" href="{{ url('updateOrganizationElements', {'orgId' : currentuser.organization.id, 'elmtType' : 'department' }) }}">{% trans %}firm_settings.other.departments.manage_btn{% endtrans %}</a>
                         </div>
                     </div>
 
                     <div class="row no-margin">
                         <div class="col s12 m12">
                             <h5>{% trans %}firm_settings.other.positions.section_title{% endtrans %}</h5>
-                            <a class="waves-effect waves-light btn modify-button" href="{{ url('updateOrganizationElements', {'orgId' : currentuser.orgId, 'elmtType' : 'position' }) }}">{% trans %}firm_settings.other.positions.manage_btn{% endtrans %}</a>
+                            <a class="waves-effect waves-light btn modify-button" href="{{ url('updateOrganizationElements', {'orgId' : currentuser.organization.id, 'elmtType' : 'position' }) }}">{% trans %}firm_settings.other.positions.manage_btn{% endtrans %}</a>
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col s12 m12">
                             <h5>{% trans %}firm_settings.other.titles.section_title{% endtrans %}</h5>
-                            <a class="waves-effect waves-light btn modify-button" href="{{ url('updateOrganizationElements', {'orgId' : currentuser.orgId, 'elmtType' : 'title' }) }}">{% trans %}firm_settings.other.positions.manage_btn{% endtrans %}</a>
+                            <a class="waves-effect waves-light btn modify-button" href="{{ url('updateOrganizationElements', {'orgId' : currentuser.organization.id, 'elmtType' : 'title' }) }}">{% trans %}firm_settings.other.positions.manage_btn{% endtrans %}</a>
                         </div>
                     </div>
                 </div>
@@ -85,7 +85,7 @@
                     <div class="row">
 
                         <div class="col s12 m12">
-                            <a class="waves-effect waves-light btn modify-button" href="{{ url('updateElementTargets', {'elmtType' : 'organization', 'elmtId' : currentuser.orgId }) }}" style="margin-top:15px">{% trans %}firm_settings.users.criterion.organization_targets{% endtrans %}</a>
+                            <a class="waves-effect waves-light btn modify-button" href="{{ url('updateElementTargets', {'elmtType' : 'organization', 'elmtId' : currentuser.organization.id }) }}" style="margin-top:15px">{% trans %}firm_settings.users.criterion.organization_targets{% endtrans %}</a>
                         </div>
 
                         <div class="col s12 m12">
@@ -101,8 +101,8 @@
                 <div style="margin-left:30px">
                     <div class="row">
                         {% set existingAccessResultsOptions = false %}
-                        {% for key, option in form.aliveOptions if not existingAccessResultsOptions %}
-                            {% if option.vars.data.oName.name == 'activitiesAccessAndResultsView' %}
+                        {% for key, option in form.aliveOptions %}
+                            {% if option.vars.data.oName.name == 'activitiesAccessAndResultsView' and not existingAccessResultsOptions%}
                                 {% set existingAccessResultsOptions = true %}
                             {% endif %}
                         {% endfor %}
@@ -163,7 +163,7 @@
                 <div style="margin-left:30px">
                     <div class="row">
                         <div class="col s12">
-                                <a class="waves-effect waves-light btn modify-button" href="{{ url('manageProcesses', {'orgId' : currentuser.orgId }) }}">{% trans %}firm_settings.other.departments.manage_btn{% endtrans %}</a>
+                                <a class="waves-effect waves-light btn modify-button" href="{{ url('manageProcesses', {'orgId' : currentuser.organization.id }) }}">{% trans %}firm_settings.other.departments.manage_btn{% endtrans %}</a>
                         </div>
                     </div>
             </section>

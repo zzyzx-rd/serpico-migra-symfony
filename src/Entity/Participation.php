@@ -152,7 +152,6 @@ class Participation extends DbObject
 
     /**
      * Participation constructor.
-     * @param ?int$id
      * @param int $a_u_status
      * @param bool $a_u_leader
      * @param int $a_u_type

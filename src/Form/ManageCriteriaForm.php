@@ -23,7 +23,8 @@ class ManageCriteriaForm extends AbstractType
         [
           'entry_type' => CriterionGroupType::class,
           'entry_options' => [
-            'departments' => $organization->getDepartments()
+              'departments' => $organization->getDepartments(),
+              "currentUser" => $options["currentUser"]
           ],
           'prototype' => true,
           'by_reference' => false,
@@ -39,6 +40,8 @@ class ManageCriteriaForm extends AbstractType
     $resolver
     ->setDefaults([
       'data_class' => Organization::class
-    ]);
+    ])
+    ->setRequired("currentUser");
+
   }
 }

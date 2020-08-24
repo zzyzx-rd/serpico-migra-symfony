@@ -76,7 +76,7 @@ class CriterionGroup extends DbObject
         $id = null,
         array $criteria = [])
     {
-        parent::__construct($id, $cgp_createdBy, null);
+        parent::__construct($id, $cgp_createdBy, new DateTime());
         $this->name = $cgp_name;
         $this->criteria = $criteria;
         $this->organization = $organization;
@@ -103,10 +103,7 @@ class CriterionGroup extends DbObject
         return $this;
     }
 
-    /**
-     * @return CriterionName[]
-     */
-    public function getCriteria(): array
+    public function getCriteria()
     {
         return $this->criteria;
     }
@@ -138,7 +135,7 @@ class CriterionGroup extends DbObject
     /**
      * @return Department
      */
-    public function getDepartment(): Department
+    public function getDepartment(): ?Department
     {
         return $this->department;
     }
@@ -151,7 +148,7 @@ class CriterionGroup extends DbObject
         $this->department = $department;
     }
 
-    public function addCriterion(CriterionName $criterion): CriterionGroup
+    public function addCriterion(CriterionName $criterion): ?CriterionGroup
     {
         if (!$criterion->getCriterionGroup()) {
             $this->criteria[] = $criterion;
@@ -160,7 +157,7 @@ class CriterionGroup extends DbObject
         return $this;
     }
 
-    public function removeCriterion(CriterionName $criterion): CriterionGroup
+    public function removeCriterion(CriterionName $criterion): ?CriterionGroup
     {
         $this->criteria->removeElement($criterion);
         return $this;
@@ -169,7 +166,8 @@ class CriterionGroup extends DbObject
         return $this->criteria->isEmpty();
     }
 
-    public function toArray() {
+    public function toArray()
+    {
         $criteria = $this->criteria->map(static function(CriterionName $e) {
             return [
                 'id' => $e->getId(),

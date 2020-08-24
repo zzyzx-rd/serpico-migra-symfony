@@ -30,7 +30,7 @@ class SecurityController extends MasterController
     //Logs current user
 //    public function loginAction(Request $request, Application $app)
 //    {
-//        $currentUser = self::getAuthorizedUser();
+//
 //        if ($currentUser) {
 //            return $this->redirectToRoute('home');
 //        }

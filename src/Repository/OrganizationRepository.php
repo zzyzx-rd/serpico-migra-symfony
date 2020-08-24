@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\CriterionName;
 use App\Entity\Organization;
 use App\Entity\Team;
 use App\Entity\TeamUser;
@@ -60,6 +61,25 @@ class OrganizationRepository extends ServiceEntityRepository
         return $userSortedDepartments;
     }
 
+    public function findUsedCriterionNames(Organization $organization): array
+    {
+        $em = $this->getEntityManager();
+        /** @var CriterionNameRepository */
+        $cnRepo = $em->getRepository(CriterionName::class);
+
+        $criterionNames = $cnRepo->findBy([ 'organization' => $organization ]);
+
+        $usedCriteria = [];
+        foreach ($criterionNames as $cn) {
+            $count = $cnRepo->findCriterionNameUsage($cn);
+            if ($count) {
+                $cnId = $cn->getId();
+                $usedCriteria[$cnId] = $count;
+            }
+        }
+
+        return $usedCriteria;
+    }
     // /**
     //  * @return Organization[] Returns an array of Organization objects
     //  */

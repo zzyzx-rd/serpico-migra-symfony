@@ -180,9 +180,10 @@ class CriterionName extends DbObject
     /**
      * @param Organization $organization
      */
-    public function setOrganization(Organization $organization): void
+    public function setOrganization(Organization $organization)
     {
         $this->organization = $organization;
+        return $this;
     }
 
     /**
@@ -193,12 +194,10 @@ class CriterionName extends DbObject
         return $this->department;
     }
 
-    /**
-     * @param Department|null $department
-     */
-    public function setDepartment(?Department $department): void
+    public function setDepartment(?Department $department): CriterionName
     {
         $this->department = $department;
+        return $this;
     }
 
     /**
@@ -209,12 +208,10 @@ class CriterionName extends DbObject
         return $this->criterionGroup;
     }
 
-    /**
-     * @param CriterionGroup $criterionGroup
-     */
-    public function setCriterionGroup(CriterionGroup $criterionGroup): void
+    public function setCriterionGroup(CriterionGroup $criterionGroup)
     {
         $this->criterionGroup = $criterionGroup;
+        return $this;
     }
     public function __toString()
     {

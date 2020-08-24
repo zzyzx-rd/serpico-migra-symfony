@@ -17,13 +17,6 @@ class CriteriaListType extends AbstractType
   public function buildForm(FormBuilderInterface $builder, array $options)
   {
 
-    $currentUser = MasterController::getAuthorizedUser();
-    if (!$currentUser instanceof User) {
-        throw 'Authentication issue: no authorized user found';
-    }
-    /**
-     * @var Organization[]
-     */
     $organization = $options['organization'];
 
     $cNames = [];

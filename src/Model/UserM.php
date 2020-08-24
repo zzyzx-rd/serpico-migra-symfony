@@ -1,6 +1,7 @@
 <?php
 namespace App\Model;
 use App\Entity\Activity;
+use App\Entity\Participation;
 use App\Entity\Stage;
 use App\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -9,18 +10,18 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\User\UserInterface;
+use App\Entity\Ranking;
 
 class UserM extends ModelEntity {
     
     public function getRanking(User $user, $seriesType, $resType, $methodType, $fullAccess = false)
     {
         $qb = $this->em->createQueryBuilder();
-        if ($fullAccess == true) {
-
+        if ($fullAccess) {
             switch ($seriesType) {
                 case 'A':
                     return $qb->select('rnk')
-                        ->from('App\Entity\Ranking', 'rnk')
+                        ->from(Ranking::class, 'rnk')
                         ->where("rnk.dType = '" . $resType . "'")
                         ->andWhere("rnk.wType = '" . $methodType . "'")
                         ->andWhere($qb->expr()->isNull('rnk.stage'))
@@ -31,7 +32,7 @@ class UserM extends ModelEntity {
                     break;
                 case 'S':
                     return $qb->select('rnk')
-                        ->from('Entity\Ranking', 'rnk')
+                        ->from(Ranking::class, 'rnk')
                         ->where("rnk.dType = '" . $resType . "'")
                         ->andWhere("rnk.wType = '" . $methodType . "'")
                         ->andWhere($qb->expr()->isNotNull('rnk.stage'))
@@ -42,7 +43,7 @@ class UserM extends ModelEntity {
                     break;
                 case 'C':
                     return $qb->select('rnk')
-                        ->from('Entity\Ranking', 'rnk')
+                        ->from(Ranking::class, 'rnk')
                         ->where("rnk.dType = '" . $resType . "'")
                         ->andWhere("rnk.wType = '" . $methodType . "'")
                         ->andWhere($qb->expr()->isNotNull('rnk.criterion'))
@@ -55,59 +56,59 @@ class UserM extends ModelEntity {
         } else {
 
             $lastReleasedParticipation = $qb->select('au')
-                ->from('Model\Participation', 'au')
+                ->from(Participation::class, 'au')
                 ->where('au.usrId = ' . $user->getId())
                 ->andWhere('au.status = 4')
                 ->orderBy('au.inserted', 'DESC')
                 ->getQuery()
                 ->getResult();
 
-            if ($lastReleasedParticipation == null) {
+            if ($lastReleasedParticipation === null) {
                 return null;
-            } else {
-                switch ($seriesType) {
-                    case 'A':
-                        return
-                        $qb->select('rkh')
-                            ->from('Entity\RankingHistory', 'rkh')
-                            ->where("rkh.dType = '" . $resType . "'")
-                            ->andWhere("rkh.wType = '" . $methodType . "'")
-                            ->andWhere($qb->expr()->isNull('rkh.stage'))
-                            ->andWhere($qb->expr()->isNull('rkh.criterion'))
-                            ->andWhere('rkh.usrId = ' . $user->getId())
-                            ->andWhere('rkh.activity = ' . $lastReleasedParticipation[0]->getActivity())
-                            ->getQuery()
-                            ->getResult();
-                        break;
-                    case 'S':
-                        return
-                        $qb->select('rkh')
-                            ->from('Entity\RankingHistory', 'rkh')
-                            ->where("rkh.dType = '" . $resType . "'")
-                            ->andWhere("rkh.wType = '" . $methodType . "'")
-                            ->andWhere($qb->expr()->isNull('rkh.stage'))
-                            ->andWhere($qb->expr()->isNull('rkh.criterion'))
-                            ->andWhere('rkh.usrId = ' . $user->getId())
-                            ->andWhere('rkh.stage = ' . $lastReleasedParticipation[0]->getStage())
-                            ->getQuery()
-                            ->getResult();
-                        break;
-                    case 'C':
-                        return
-                        $qb->select('rkh')
-                            ->from('Entity\RankingHistory', 'rkh')
-                            ->where("rkh.dType = '" . $resType . "'")
-                            ->andWhere("rkh.wType = '" . $methodType . "'")
-                            ->andWhere($qb->expr()->isNull('rkh.stage'))
-                            ->andWhere($qb->expr()->isNull('rkh.criterion'))
-                            ->andWhere('rkh.usrId = ' . $user->getId())
-                            ->andWhere('rkh.criterion = ' . $lastReleasedParticipation[0]->getCriterion())
-                            ->getQuery()
-                            ->getResult();
-                        break;
-                    default:
-                        break;
-                }
+            }
+
+            switch ($seriesType) {
+                case 'A':
+                    return
+                    $qb->select('rkh')
+                        ->from('Entity\RankingHistory', 'rkh')
+                        ->where("rkh.dType = '" . $resType . "'")
+                        ->andWhere("rkh.wType = '" . $methodType . "'")
+                        ->andWhere($qb->expr()->isNull('rkh.stage'))
+                        ->andWhere($qb->expr()->isNull('rkh.criterion'))
+                        ->andWhere('rkh.usrId = ' . $user->getId())
+                        ->andWhere('rkh.activity = ' . $lastReleasedParticipation[0]->getActivity())
+                        ->getQuery()
+                        ->getResult();
+                    break;
+                case 'S':
+                    return
+                    $qb->select('rkh')
+                        ->from('Entity\RankingHistory', 'rkh')
+                        ->where("rkh.dType = '" . $resType . "'")
+                        ->andWhere("rkh.wType = '" . $methodType . "'")
+                        ->andWhere($qb->expr()->isNull('rkh.stage'))
+                        ->andWhere($qb->expr()->isNull('rkh.criterion'))
+                        ->andWhere('rkh.usrId = ' . $user->getId())
+                        ->andWhere('rkh.stage = ' . $lastReleasedParticipation[0]->getStage())
+                        ->getQuery()
+                        ->getResult();
+                    break;
+                case 'C':
+                    return
+                    $qb->select('rkh')
+                        ->from('Entity\RankingHistory', 'rkh')
+                        ->where("rkh.dType = '" . $resType . "'")
+                        ->andWhere("rkh.wType = '" . $methodType . "'")
+                        ->andWhere($qb->expr()->isNull('rkh.stage'))
+                        ->andWhere($qb->expr()->isNull('rkh.criterion'))
+                        ->andWhere('rkh.usrId = ' . $user->getId())
+                        ->andWhere('rkh.criterion = ' . $lastReleasedParticipation[0]->getCriterion())
+                        ->getQuery()
+                        ->getResult();
+                    break;
+                default:
+                    break;
             }
         }
     }
@@ -117,10 +118,10 @@ class UserM extends ModelEntity {
         $connection = $this->em->getConnection();
         $sql =
             'SELECT a_u_id
-         FROM activity_user
-         INNER JOIN activity ON activity_user.activity_act_id = activity.act_id
+         FROM participation
+         INNER JOIN activity ON participation.activity_act_id = activity.act_id
          WHERE activity.act_status >= :status
-         AND activity_user.user_usr_id = :usrId GROUP BY activity_user.activity_act_id';
+         AND participation.user_usr_id = :usrId GROUP BY participation.activity_act_id';
 
         $pdoStatement = $connection->prepare($sql);
         $pdoStatement->bindValue(':status', 2);
@@ -135,11 +136,11 @@ class UserM extends ModelEntity {
         $connection = $this->em->getConnection();
         $sql =
             'SELECT a_u_id
-         FROM activity_user
-         INNER JOIN activity ON activity_user.activity_act_id = activity.act_id
+         FROM participation
+         INNER JOIN activity ON participation.activity_act_id = activity.act_id
          WHERE activity.act_status IN (:status_1, :status_2)
-         AND activity_user.user_usr_id = :usrId
-         GROUP BY activity_user.activity_act_id';
+         AND participation.user_usr_id = :usrId
+         GROUP BY participation.activity_act_id';
 
         $pdoStatement = $connection->prepare($sql);
         $pdoStatement->bindValue(':status_1', 0);

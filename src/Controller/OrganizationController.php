@@ -2641,7 +2641,6 @@ class OrganizationController extends MasterController
 
     /**
      * @param Request $request
-     * @param Application $app
      * @param $elmtType
      * @param $orgId
      * @return mixed
@@ -2649,7 +2648,7 @@ class OrganizationController extends MasterController
      * @throws OptimisticLockException
      * @Route("/settings/organization/{orgId}/{elmtType}s", name="updateOrganizationElements")
      */
-    public function updateOrganizationElementsAction(Request $request, Application $app, $elmtType, $orgId)
+    public function updateOrganizationElementsAction(Request $request, $elmtType, $orgId)
     {
         $em    = $this->em;
         $repoO = $em->getRepository(Organization::class);
@@ -2664,47 +2663,44 @@ class OrganizationController extends MasterController
                 $repoE = $em->getRepository(Title::class);
                 break;
             default:
+                dd($elmtType);
                 break;
         }
         $currentUser = $this->user;
-        if (!$currentUser instanceof User) {
-            return $this->redirectToRoute('login');
-        }
-        $currentUserOrganization = $repoO->find($currentUser->getOrgId());
+        $organization = $repoO->findOneBy(["id" => $orgId]);
         $role                    = $currentUser->getRole();
         $organization            = $repoO->find($orgId);
-        $elements                = $repoE->findBy(['organization' => $orgId]);
+        $elements                = $repoE->findBy(['organization' => $currentUser->getOrganization()]);
 
         $hasPageAccess = true;
 
         if (
-            $role == 3 or $role == 2
+            $role === 3 or $role === 2
             or
-            ($role == 1 and $orgId != $currentUser->getOrgId())
+            ($role === 1 and $organization != $currentUser->getOrganization())
         ) {
             $hasPageAccess = false;
         }
 
         if (!$hasPageAccess) {
             return $this->render('errors/403.html.twig');
-        } else {
-            $formFactory                    = $app['form.factory'];
-            $manageOrganizationElementsForm = $this->createForm(ManageOrganizationElementsForm::class, $organization, ['standalone' => true, 'elmtType' => $elmtType]);
-            $manageOrganizationElementsForm->handleRequest($request);
-
-            if ($manageOrganizationElementsForm->isValid()) {
-                $em->persist($organization);
-                $em->flush();
-                return $app->redirect($app['url_generator']->generate('firmSettings'));
-            }
-
-            return $this->render('organization_element_list.html.twig',
-                [
-                    'elmtType' => $elmtType,
-                    'elements' => $elements,
-                    'form'     => $manageOrganizationElementsForm->createView(),
-                ]);
         }
+
+        $manageOrganizationElementsForm = $this->createForm(ManageOrganizationElementsForm::class, $organization, ['standalone' => true, 'elmtType' => $elmtType]);
+        $manageOrganizationElementsForm->handleRequest($request);
+
+        if ($manageOrganizationElementsForm->isValid()) {
+            $em->persist($organization);
+            $em->flush();
+            return $app->redirect($app['url_generator']->generate('firmSettings'));
+        }
+
+        return $this->render('organization_element_list.html.twig',
+            [
+                'elmtType' => $elmtType,
+                'elements' => $elements,
+                'form'     => $manageOrganizationElementsForm->createView(),
+            ]);
     }
 
     /**

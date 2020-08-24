@@ -230,7 +230,6 @@ class ActivityController extends MasterController
     {
         $em = self::getEntityManager();
         $repoU = $em->getRepository(User::class);
-        $currentUser = self::getAuthorizedUser();
         if (!$currentUser) {
             return $this->redirectToRoute('login');
         }
@@ -321,7 +320,6 @@ class ActivityController extends MasterController
 
         $em = self::getEntityManager();
         $repoU = $em->getRepository(User::class);
-        $currentUser = self::getAuthorizedUser();
         if (!$currentUser) {
             return $this->redirectToRoute('login');
         }
@@ -554,7 +552,6 @@ class ActivityController extends MasterController
      */
     public function oldAddActivityDefinitionAJAX(Request $request, $elmt, $elmtId, $actionType, $returnJSON = true)
     {
-        $currentUser = self::getAuthorizedUser();
         if (!$currentUser) {
             return $this->redirectToRoute('login');
         }
@@ -912,7 +909,6 @@ class ActivityController extends MasterController
         // Get all participants (users)
 
         $em = self::getEntityManager();
-        $currentUser = self::getAuthorizedUser();
         if (!$currentUser) {
             return $this->redirectToRoute('login');
         }
@@ -1343,7 +1339,7 @@ class ActivityController extends MasterController
         string $elmtType,
         int $elmtId
     ) {
-        $currentUser = self::getAuthorizedUser();
+
         if (!$currentUser) {
             throw new Exception('current user is null');
         }
@@ -1708,7 +1704,7 @@ class ActivityController extends MasterController
         int $teaId,
         int $tusId
     ) {
-        $currentUser = self::getAuthorizedUser();
+
         if (!$currentUser) {
             throw new Exception('current user is null');
         }
@@ -1895,7 +1891,7 @@ class ActivityController extends MasterController
                 $stageOrganization = $stage->getInstitutionProcess()->getOrganization();
                 break;
         }
-        $currentUser = self::getAuthorizedUser();
+
         $currentUserOrganization = $repoO->find($currentUser->getOrgId());
         $stageLeader = $repoAU->findOneBy(['stage' => $stage,'leader' => true]);
         $userStageLeader = $repoAU->findOneBy(['stage' => $stage,'leader' => true, 'usrId' => $currentUser->getId()]);
@@ -1949,7 +1945,7 @@ class ActivityController extends MasterController
         /** @var Team */
         $team = $teamUser->getTeam();
         $teamOrganization = $team->getOrganization();
-        $currentUser = self::getAuthorizedUser();
+
         $currentUserOrganization = $repoO->find($currentUser->getOrgId());
         $teamLeader = $repoTU->findOneBy(['team' => $team,'leader' => true]);
         $userTeamLeader = $repoTU->findOneBy(['team' => $team, 'leader' => true, 'usrId' => $currentUser->getId()]);
@@ -1998,7 +1994,7 @@ class ActivityController extends MasterController
             $repoAU = $em->getRepository(TemplateParticipation::class);
         }
 
-        $currentUser = self::getAuthorizedUser();
+
         if (!$currentUser) {
             return $this->redirectToRoute('login');
         }
@@ -2044,7 +2040,7 @@ class ActivityController extends MasterController
                 $repoAU = $em->getRepository(TemplateParticipation::class);
             }
 
-            $currentUser = self::getAuthorizedUser();
+
             if (!$currentUser) {
                 return $this->redirectToRoute('login');
             }
@@ -3067,7 +3063,7 @@ class ActivityController extends MasterController
 //        $stageForm->handleRequest($request);
 //
 //        $repoCN = $em->getRepository(CriterionName::class);
-//        $currentUser = self::getAuthorizedUser();
+//
 //        if (!$currentUser) {
 //            return $this->redirectToRoute('login');
 //        }
@@ -3379,7 +3375,7 @@ class ActivityController extends MasterController
      */
     public function createOrganizationCriterionAction(Request $request)
     {
-        $currentUser = self::getAuthorizedUser();
+
         if (!$currentUser) {
             return $this->redirectToRoute('login');
         }
@@ -3452,7 +3448,7 @@ class ActivityController extends MasterController
 //        $originalCriteria = new ArrayCollection;
 //        $stageNames = [];
 //        $repoO = $em->getRepository(Organization::class);
-//        $currentUser = self::getAuthorizedUser();
+//
 //        if (!$currentUser) {
 //            return $this->redirectToRoute('login');
 //        }
@@ -3827,7 +3823,7 @@ class ActivityController extends MasterController
     //Modify Action
     public function modifyAction(Request $request, Application $app, $actId)
     {
-        $currentUser = self::getAuthorizedUser();
+
         if (!$currentUser) {
             return $this->redirectToRoute('login');
         }
@@ -3910,7 +3906,7 @@ class ActivityController extends MasterController
     public function getGradableStagesAction(Request $request, $actId)
     {
         $em = self::getEntityManager();
-        $currentUser = self::getAuthorizedUser();
+
         if (!$currentUser) {
             return new JsonResponse('error', 500);
         }
@@ -4094,7 +4090,7 @@ class ActivityController extends MasterController
     {
         $em = self::getEntityManager();
         
-        $currentUser = self::getAuthorizedUser();
+
         if (!$currentUser) {
             return $this->redirectToRoute('login');
         }
@@ -4151,7 +4147,7 @@ class ActivityController extends MasterController
     {
 
         $em = self::getEntityManager();
-        $currentUser = self::getAuthorizedUser();
+
         if (!$currentUser) {
             return $this->redirectToRoute('login');
         }
@@ -4400,7 +4396,7 @@ class ActivityController extends MasterController
     {
 
         $em = self::getEntityManager();
-        $currentUser = self::getAuthorizedUser();
+
         $repoAU = $em->getRepository(Participation::class);
         $repoG = $em->getRepository(Grade::class);
 
@@ -7780,7 +7776,7 @@ class ActivityController extends MasterController
     public function releaseStage(Application $app, $stgId)
     {
 
-        $currentUser = self::getAuthorizedUser();
+
         if (!$currentUser) {
             return $this->redirectToRoute('login');
         }
@@ -7879,7 +7875,7 @@ class ActivityController extends MasterController
      */
     public function releaseActivity(Application $app, $actId)
     {
-        $currentUser = self::getAuthorizedUser();
+
         if (!$currentUser) {
             return $this->redirectToRoute('login');
         }
@@ -7977,7 +7973,7 @@ class ActivityController extends MasterController
     public function saveTemplateAction(Request $request, Application $app, $actStep, $elmtId)
     {
 
-        $currentUser = self::getAuthorizedUser();
+
         if (!$currentUser) {
             return $this->redirectToRoute('login');
         }
@@ -8105,7 +8101,7 @@ class ActivityController extends MasterController
     public function createFromTemplateAction(Request $request, Application $app, $tmpId)
     {
 
-        $currentUser = self::getAuthorizedUser();
+
         if (!$currentUser) {
             return $this->redirectToRoute('login');
         }

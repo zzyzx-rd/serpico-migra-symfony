@@ -745,10 +745,7 @@ class Organization extends DbObject
         return $this->institutionProcesses;
     }
 
-    /**
-     * @return CriterionGroup[]
-     */
-    public function getCriterionGroups(): array
+    public function getCriterionGroups()
     {
         return $this->criterionGroups;
     }
