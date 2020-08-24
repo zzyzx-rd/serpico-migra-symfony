@@ -6,21 +6,16 @@ use DateInterval;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Criteria;
-use Doctrine\Common\Persistence\Mapping\MappingException;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Exception;
 use App\Form\ActivityReportForm;
 use App\Form\AddActivityCriteriaForm;
-use App\Form\AddActivityForm;
-use App\Form\AddCriterionForm;
-use App\Form\AddStageForm;
 use App\Form\AddSurveyForm;
 use App\Form\AddTemplateForm;
 use App\Form\CreateCriterionForm;
 use App\Form\DelegateActivityForm;
-use App\Form\ManageStageParticipantsForm;
 use App\Form\RequestActivityForm;
 use App\Form\Type\StageUniqueParticipationsType;
 use App\Entity\Activity;
@@ -38,16 +33,12 @@ use App\Entity\Grade;
 use App\Entity\Icon;
 use App\Entity\InstitutionProcess;
 use App\Entity\IProcessParticipation;
-use App\Entity\IProcessCriterion;
 use App\Entity\IProcessStage;
 use App\Entity\Organization;
 use App\Entity\OrganizationUserOption;
-use App\Entity\ProcessStage;
-use App\Entity\Recurring;
 use App\Entity\Result;
 use App\Entity\Stage;
 use App\Entity\Survey;
-use App\Entity\Target;
 use App\Entity\Team;
 use App\Entity\TeamUser;
 use App\Entity\User;
@@ -66,17 +57,14 @@ class ActivityController extends MasterController
      * @param string $elmtType
      * @param int $inpId
      * @param string $actName
+     * @return JsonResponse|RedirectResponse
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/{elmt}/create",name="activityInitialisation")
+     * @Route("/{elmtType}/create",name="activityInitialisation")
      */
-    public function addActivityId(string $elmtType, $inpId = 0, $actName = '')
+    public function addActivityId(string $elmtType, int $inpId = 0, string $actName = '')
     {
         $currentUser = $this->security->getUser();
-        if (!$currentUser) {
-            return $this->redirectToRoute('login');
-        }
-
         $usrId = $currentUser->getId();
         $usrOrg = $currentUser->getOrganization();
         $isActivity = $elmtType === 'activity';
@@ -106,7 +94,7 @@ class ActivityController extends MasterController
             ->setCreatedBy($currentUser->getId())
             ->addStage($stage);
 
-        if ($inpId != 0) {
+        if ($inpId !== 0) {
             $activity->setInstitutionProcess($this->em->getRepository(InstitutionProcess::class)->find($inpId));
         }
 
@@ -135,8 +123,6 @@ class ActivityController extends MasterController
         return $this->json(['message' => 'success to create activity', 'redirect' => $this->generateUrl('manageActivityElement', ['elmtType' => 'activity', 'elmtId' => $activity->getId()])], 200);
         //return $this->redirectToRoute('manageActivityElement', ['elmtType' => 'activity', 'elmtId' => $activity->getId()]);
         //return new JsonResponse(['message' => 'success to create activity', 'redirect' => $this->redirectToRoute('manageActivityElement', ['elmtType' => 'activity', 'elmtId' => $activity->getId()])], 200);
-
-
     }
 
     // Delegation of activity creation

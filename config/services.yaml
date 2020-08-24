@@ -25,9 +25,12 @@ services:
     # as action arguments even if you don't extend any base controller class
     App\Controller\:
         resource: '../src/Controller/'
+        public: true
         tags: ['controller.service_arguments']
         calls:
-          - [setContainer, ['@service_container']]
+            - [setContainer, ['@service_container']]
+            - [setContainer, ["@service_container"]]
+
 #    twig.extension.intl:
 #        class: Twig\Extensions\IntlExtension
 #        tags:
