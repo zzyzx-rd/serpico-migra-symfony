@@ -36,6 +36,10 @@ class Firm extends Fixture
          $icon2 = (new Icon)->setType('fa')->setName('gem')->setUnicode('f3a5');
          $icon3 = (new Icon)->setType('fa')->setName('hourglass-end')->setUnicode('f253');
 
+         $manager->persist($icon1);
+         $manager->persist($icon2);
+         $manager->persist($icon3);
+
 
          // Defining some criterion names (only 6)
 
@@ -167,6 +171,7 @@ class Firm extends Fixture
          // Settling default options
         /** @var OptionName[] */
         $options = $manager->getRepository(OptionName::class)->findAll();
+        
         foreach ($options as $option) {
 
             $optionValid = (new OrganizationUserOption)
@@ -191,7 +196,7 @@ class Firm extends Fixture
 
                 $optionAdmin = $optionValid;
                 $optionAdmin->setRole(1)->setOptionTrue(true)->setOptionIValue(1)->setOptionSecondaryIValue(2)->setOptionFValue(1)->setOptionSValue('none');
-                $manager->persist($optionAdmin);
+                $serpico->addOption($optionAdmin);
 
                 $optionAM = (new OrganizationUserOption)
                     ->setOName($option)
@@ -247,8 +252,6 @@ class Firm extends Fixture
             $serpico->addCriterionName($criterion);
             //$em->persist($criterion);
         }
-
-        $manager->flush();
         
         /** @var Weight */
         $weight = new Weight();

@@ -225,7 +225,7 @@ class Criterion extends DbObject
         RankingTeamHistory $historicalRankingTeams = null,
         $template = null)
     {
-        parent::__construct($id, $cri_createdBy, $cri_inserted);
+        parent::__construct($id, $cri_createdBy, new DateTime());
         $this->complete = $cri_complete;
         $this->type = $cri_type;
         $this->name = $cri_name;
