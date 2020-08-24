@@ -1,4 +1,5 @@
 # Version symfony 5 de Serpico
+
 ## Installation la première fois
 * Pour [Api Platform](https://api-platform.com/)
     ```
@@ -28,12 +29,30 @@ Cette partie suppose que tu possèdes une base vide qui tourne, et correctement 
     php bin/console doctrine:migrations:migrate
     ```
 (Il faut tester, mais normalement c'est bon)
-```
-    php bin/console make:fixtures
-    UserFixtures
-```
+* Peupler la base : çà se fait à partir des fixtures
+    ```
+    php bin/console doctrine:fixtures:load
+    y
+    ```
+## L'architecture du projet
+#### config : 
+Contient tous les .yaml de configuration
+
+#### Deprecated
+contient des vielles entité (à supprimer une fois la migra faite)
+
+#### Public :
+Contient les CSS, les JS, build et bundles. Correspond en gros au webapp de silex.
+
+#### src
+
 Pour jetbrains
 SET GLOBAL time_zone = '+8:00';
+
+## Lancer le serveur de test
+    ```
+    php -S 127.0.0.1:8111 -t public
+    ```
 
 ## A tester
 ```

@@ -100,7 +100,6 @@ class IProcessCriterion extends DbObject
 
     /**
      * @OneToMany(targetEntity="IProcessActivityUser", mappedBy="criterion", cascade={"persist", "remove"}, orphanRemoval=true)
-     * @var Collection
      */
 //     * @OrderBy({"leader" = "DESC"})
     public $participants;
@@ -128,7 +127,7 @@ class IProcessCriterion extends DbObject
      * @param $crt_inserted
      * @param $stage
      * @param $institutionProcess
-     * @param Collection $participants
+     * @param $participants
      * @param $cName
      */
     public function __construct(
@@ -328,16 +327,13 @@ class IProcessCriterion extends DbObject
         $this->institutionProcess = $institutionProcess;
     }
 
-    /**
-     * @return Collection
-     */
     public function getParticipants(): Collection
     {
         return $this->participants;
     }
 
     /**
-     * @param Collection $participants
+     * @param $participants
      */
     public function setParticipants(Collection $participants): void
     {

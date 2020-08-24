@@ -243,7 +243,6 @@ class Stage extends DbObject
 
     /**
      * @OneToMany(targetEntity="Criterion", mappedBy="stage", cascade={"persist", "remove"}, orphanRemoval=true)
-     * @var Collection
      */
 //     * @OrderBy({"weight" = "DESC"})
     public $criteria;

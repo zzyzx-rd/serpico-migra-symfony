@@ -189,7 +189,6 @@ class ProcessStage extends DbObject
 
     /**
      * @OneToMany(targetEntity="ProcessCriterion", mappedBy="stage", cascade={"persist", "remove"}, orphanRemoval=true)
-     * @var Collection
      */
 //     * @OrderBy({"weight" = "DESC"})
     public $criteria;
@@ -277,7 +276,7 @@ class ProcessStage extends DbObject
      * @param $stg_dcompleted
      * @param $process
      * @param Organization $organization
-     * @param Collection $criteria
+     * @param $criteria
      * @param $participants
      * @param $decisions
      * @param $grades

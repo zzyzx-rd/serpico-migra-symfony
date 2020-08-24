@@ -3593,13 +3593,13 @@ class OrganizationController extends MasterController
     public function displayFirmSettingsAction(Request $request)
     {
 
-        $connectedUser = self::getAuthorizedUser();
+        $connectedUser = $this->user;
         $repoO                     = $this->em->getRepository(Organization::class);
-        $organization              = $repoO->find($connectedUser->getOrgId());
+        $organization              = $repoO->find($connectedUser->getOrganization());
         $enabledCreatingUserOption = false;
         $orgOptions                = $organization->getOptions();
         foreach ($orgOptions as $orgOption) {
-            if ($orgOption->getOName()->getName() == 'enabledUserCreatingUser') {
+            if ($orgOption->getOName()->getName() === 'enabledUserCreatingUser') {
                 $enabledCreatingUserOption = $orgOption->isOptionTrue();
             }
         }

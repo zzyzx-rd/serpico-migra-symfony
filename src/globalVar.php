@@ -48,6 +48,10 @@ class globalVar {
         return 'lib/img/' . ($userPicture ?: 'no-picture.png');
     }
 
+    public function teampicture(){
+        $teamPicture = $this->CurrentUser()?$this->CurrentUser()->getPicture(): null;
+        return 'lib/img/team/' . ($teamPicture ?: 'no-picture.png');
+    }
     public function request(): ?\Symfony\Component\HttpFoundation\Request
     {
         return $this->requestStack->getCurrentRequest();
@@ -78,5 +82,6 @@ class globalVar {
         return new ArrayCollection($this->em->getRepository(User::class)
             ->findBy(['organization' => $org, 'deleted' => null],['lastname' => 'ASC']));
     }
+
 
 }

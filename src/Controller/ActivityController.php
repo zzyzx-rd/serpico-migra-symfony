@@ -66,17 +66,14 @@ class ActivityController extends MasterController
      * @param string $elmtType
      * @param int $inpId
      * @param string $actName
+     * @return RedirectResponse
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/{elmt}/create",name="activityInitialisation")
+     * @Route("/{elmtType}/create",name="activityInitialisation")
      */
-    public function addActivityId(string $elmtType, $inpId = 0, $actName = '')
+    public function addActivityId(string $elmtType, int $inpId = 0, string $actName = ''): RedirectResponse
     {
         $currentUser = $this->security->getUser();
-        if (!$currentUser) {
-            return $this->redirectToRoute('login');
-        }
-
         $usrId = $currentUser->getId();
         $usrOrg = $currentUser->getOrganization();
         $isActivity = $elmtType === 'activity';
@@ -131,6 +128,9 @@ class ActivityController extends MasterController
 
         $this->em->persist($activity);
         $this->em->flush();
+//        return $this->render('landing.html.twig',
+//            ['controller_name' => 'SecurityController']);
+//        return $this->redirectToRoute('home');
         return $this->redirectToRoute('manageActivityElement', ['elmtType' => 'activity', 'elmtId' => $activity->getId()] );
 //        return new JsonResponse(['message' => 'success to create activity', 'redirect' => $this->redirectToRoute('manageActivityElement', ['elmtType' => 'activity', 'elmtId' => $activity->getId()])], 200);
 

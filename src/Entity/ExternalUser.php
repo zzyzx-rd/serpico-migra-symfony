@@ -316,10 +316,6 @@ class ExternalUser extends DbObject
         return $this;
     }
 
-
-    /**
-     * @return Collection|TeamUser[]
-     */
     public function getTeamUsers(): Collection
     {
         return $this->teamUsers;

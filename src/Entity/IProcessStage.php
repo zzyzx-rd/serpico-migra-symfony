@@ -891,7 +891,7 @@ class IProcessStage extends DbObject
     }
 
     /**
-     * @return Collection|IProcessActivityUser[]
+     * @return IProcessActivityUser[]
      */
     public function getUniqueExtParticipations()
     {

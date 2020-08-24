@@ -102,6 +102,7 @@ abstract class MasterController extends AbstractController
         $this->stack = $stack;
         $this->user = $security->getUser();
 //        if ($this->user === null) {
+//            dd('erreur de user');
 //            $this->redirectToRoute('login');
 //        }
         if ($this->user){
