@@ -24,7 +24,6 @@ class Icon extends DbObject
      */
     protected ?int $id;
 
-
     /**
      * @ORM\Column(name="ico_type", type="string", length=255, nullable=true)
      */

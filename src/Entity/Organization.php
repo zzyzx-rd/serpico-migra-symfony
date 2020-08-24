@@ -316,10 +316,11 @@ class Organization extends DbObject
         $this->teams = $teams;
         $this->mails = $mails;
         $this->targets = $targets?: new ArrayCollection();
-        $this->options = $options;
+        $this->options = new ArrayCollection;
         $this->processes = $processes?: new ArrayCollection();
         $this->institutionProcesses = $institutionProcesses?: new ArrayCollection();
-        $this->criterionGroups = $criterionGroups;
+        $this->criterionGroups = $criterionGroups?: new ArrayCollection();
+        $this->users = $users?: new ArrayCollection();
         $this->workerFirm = $workerFirm;
     }
 

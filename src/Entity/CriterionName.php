@@ -117,7 +117,6 @@ class CriterionName extends DbObject
     public function setType(int $cna_type): self
     {
         $this->type = $cna_type;
-
         return $this;
     }
 
@@ -141,7 +140,6 @@ class CriterionName extends DbObject
     public function setUnit(string $unit): self
     {
         $this->unit = $unit;
-
         return $this;
     }
 
@@ -163,9 +161,10 @@ class CriterionName extends DbObject
     /**
      * @param Icon $icon
      */
-    public function setIcon(Icon $icon): void
+    public function setIcon(Icon $icon): self
     {
-        $this->icon = $icon;
+        $this->icon = $icon;    
+        return $this;
     }
 
     /**
