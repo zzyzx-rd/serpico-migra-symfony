@@ -92,7 +92,6 @@ class TeamUser extends DbObject
     {
         parent::__construct($id,$tus_createdBy , new DateTime());
         $this->leader = $tus_leader;
-        $this->inserted = $tus_inserted;
         $this->deleted = $tus_deleted;
         $this->isDeleted = $tus_is_deleted;
         $this->team = $team;

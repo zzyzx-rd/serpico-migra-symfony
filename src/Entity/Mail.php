@@ -128,7 +128,6 @@ class Mail extends DbObject
         $this->persona = $mail_persona;
         $this->token = $mail_token;
         $this->read = $mail_read;
-        $this->inserted = $mail_inserted;
         $this->language = $mail_language;
         $this->user = $user;
         $this->workerIndividual = $workerIndividual;

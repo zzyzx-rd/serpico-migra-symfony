@@ -126,7 +126,6 @@ class Target extends DbObject
         parent::__construct($id, $tgt_createdBy, new DateTime());
         $this->sign = $tgt_sign;
         $this->value = $tgt_value;
-        $this->inserted = $tgt_inserted;
         $this->organization = $organization;
         $this->department = $department;
         $this->position = $position;

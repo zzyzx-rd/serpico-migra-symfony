@@ -92,7 +92,6 @@ class City extends DbObject
         $this->abbr = $cit_abbr;
         $this->fullname = $cit_fullname;
         $this->cit_name = $cit_name;
-        $this->inserted = $cit_inserted;
         $this->state = $state;
         $this->country = $country;
         $this->firms = $firms?:new ArrayCollection();

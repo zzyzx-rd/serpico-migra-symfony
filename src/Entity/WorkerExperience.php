@@ -102,7 +102,6 @@ class WorkerExperience extends DbObject
         $this->location = $wex_location;
         $this->startdate = $wex_startdate;
         $this->enddate = $wex_enddate;
-        $this->inserted = $wex_inserted;
         $this->individual = $individual;
         $this->firm = $firm;
     }

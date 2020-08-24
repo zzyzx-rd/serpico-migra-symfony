@@ -150,7 +150,6 @@ class WorkerIndividual extends DbObject
         $this->gdpr = $win_gdpr;
         $this->nbConnections = $win_lk_nbConnections;
         $this->contacted = $win_lk_contacted;
-        $this->inserted = $win_inserted;
         $this->experiences = $experiences?$experiences: new ArrayCollection();
         $this->mails = $mails?$mails: new ArrayCollection();
     }

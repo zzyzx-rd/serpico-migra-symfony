@@ -70,7 +70,6 @@ class WorkerFirmSector extends DbObject
     {
         parent::__construct($id, $wfs_createdBy, new DateTime());
         $this->name = $wfs_name;
-        $this->inserted = $wfs_inserted;
         $this->icon = $icon;
         $this->firm = $firm;
     }

@@ -88,7 +88,6 @@ class Icon extends DbObject
         $this->type = $ico_type;
         $this->name = $ico_name;
         $this->unicode = $ico_unicode;
-        $this->inserted = $ico_inserted;
         $this->criterionNames = $criterionNames;
         $this->workerFirmSectors = $workerFirmSectors;
     }

@@ -75,7 +75,6 @@ class Answer extends DbObject
     {
         parent::__construct($id, $createdBy, new DateTime());
         $this->desc = $desc;
-        $this->inserted = $asw_inserted;
         $this->field = $field;
         $this->survey = $survey;
         $this->participant = $participant;

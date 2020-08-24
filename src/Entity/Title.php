@@ -103,7 +103,6 @@ class Title extends DbObject
         parent::__construct($id, $createdBy, new DateTime());
         $this->name = $name;
         $this->weightIni = $weightIni;
-        $this->inserted = $inserted;
         $this->deleted = $deleted;
         $this->organization = $organization;
         $this->weight = $weight;

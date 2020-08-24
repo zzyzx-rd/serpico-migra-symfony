@@ -134,7 +134,6 @@ class RankingHistory extends DbObject
         $this->rkh_freq = $rkh_freq;
         $this->value = $rkh_value;
         $this->seriesPopulation = $rkh_series_pop;
-        $this->inserted = $rkh_inserted;
         $this->activity = $activity;
         $this->stage = $stage;
         $this->criterion = $criterion;

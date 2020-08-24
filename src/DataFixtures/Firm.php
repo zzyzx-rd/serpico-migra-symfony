@@ -32,7 +32,6 @@ class Firm extends Fixture
             ->setLastname("Chatelain")
             ->setPassword($this->encoder->encodePassword($user, "Serpico2019"))
             ->setRole(1);
-        $manager->persist($user);
 
         $serpico = new Organization();
         $serpico->setType('f')
@@ -63,6 +62,7 @@ class Firm extends Fixture
             ->setOrganization($serpico)
             ->setPassword($this->encoder->encodePassword($user, "Serpico2019"));
 
+        $manager->persist($user);
         $manager->persist($user);
         $manager->persist($gdbdg);
         $manager->flush();

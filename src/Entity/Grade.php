@@ -123,7 +123,6 @@ class Grade extends DbObject
         $this->graded_tea_id = $grd_graded_tea_id;
         $this->value = $grd_value;
         $this->comment = $grd_comment;
-        $this->inserted = $grd_inserted;
         $this->team = $team;
         $this->participant = $participant;
         $this->activity = $activity;

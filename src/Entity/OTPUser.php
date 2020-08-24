@@ -86,7 +86,6 @@ class OTPUser extends DbObject
         $this->fullname = $otp_fullname;
         $this->tipe = $otp_tipe;
         $this->email = $otp_email;
-        $this->inserted = $otp_inserted;
         $this->organization = $organization;
     }
 

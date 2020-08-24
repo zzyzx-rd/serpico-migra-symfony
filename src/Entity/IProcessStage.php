@@ -346,7 +346,6 @@ class IProcessStage extends DbObject
         $this->deadline_nbDays = $stg_deadline_nbDays;
         $this->deadline_mailSent = $stg_deadline_mailSent;
         $this->createdBy = $stg_createdBy;
-        $this->inserted = $stg_inserted;
         $this->isFinalized = $stg_isFinalized;
         $this->finalized = $stg_finalized;
         $this->deleted = $stg_deleted;

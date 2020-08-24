@@ -149,7 +149,6 @@ class ProcessCriterion extends DbObject
         $this->upperbound = $crt_upperbound;
         $this->step = $crt_step;
         $this->comment = $crt_comment;
-        $this->inserted = $crt_inserted;
         $this->stage = $stage;
         $this->process = $process;
         $this->cName = $cName;

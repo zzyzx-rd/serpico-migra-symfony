@@ -86,7 +86,6 @@ class SurveyFieldParameter extends DbObject
         $this->lowerbound = $sfp_lowerbound;
         $this->upperbound = $sfp_upperbound;
         $this->step = $sfp_step;
-        $this->inserted = $sfp_inserted;
         $this->field = $field;
     }
 

@@ -364,7 +364,6 @@ class User extends DbObject implements  UserInterface, \Serializable
         $this->rememberMeToken = $usr_rm_token;
         $this->validated = $usr_validated;
         $this->enabledCreatingUser = $usr_enabledCreatingUser;
-        $this->inserted = $usr_inserted;
         $this->lastConnected = $lastConnected;
         $this->deleted = $deleted;
         $this->role = $role;

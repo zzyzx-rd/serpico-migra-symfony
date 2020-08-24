@@ -157,7 +157,6 @@ class Ranking extends DbObject
         $this->frequency = $rnk_freq;
         $this->value = $rnk_value;
         $this->seriesPopulation = $rnk_series_pop;
-        $this->inserted = $rnk_inserted;
         $this->updated = $rnk_updated;
         $this->activity = $activity;
         $this->stage = $stage;

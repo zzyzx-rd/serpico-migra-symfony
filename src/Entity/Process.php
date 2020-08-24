@@ -127,7 +127,6 @@ class Process extends DbObject
         $this->name = $pro_name;
         $this->approvable = $pro_approvable;
         $this->gradable = $pro_gradable;
-        $this->inserted = $pro_inserted;
         $this->deleted = $pro_deleted;
         $this->children = $children?:new ArrayCollection();
         $this->stages = $stages?:new ArrayCollection();

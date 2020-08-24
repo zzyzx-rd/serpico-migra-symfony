@@ -135,7 +135,6 @@ class GeneratedImage extends DbObject
         $this->crtId = $crtId;
         $this->role = $gim_role;
         $this->val = $gim_val;
-        $this->inserted = $gim_inserted;
         $this->cName = $cName;
     }
 

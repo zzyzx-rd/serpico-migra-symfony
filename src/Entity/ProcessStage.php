@@ -352,7 +352,6 @@ class ProcessStage extends DbObject
         $this->genddate = $stg_genddate;
         $this->dealineNbDays = $stg_dealine_nbDays;
         $this->stgDeadlineMailSent = $stg_deadline_mailSent;
-        $this->inserted = $stg_inserted;
         $this->isFinalized = $stg_isFinalized;
         $this->deleted = $stg_deleted;
         $this->dcompleted = $stg_dcompleted;

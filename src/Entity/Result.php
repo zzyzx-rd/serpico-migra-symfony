@@ -235,7 +235,6 @@ class Result extends DbObject
         $this->equalInertiaMax = $equalInertiaMax;
         $this->weightedDistanceRatio = $weightedDistanceRatio;
         $this->equalDistanceRatio = $equalDistanceRatio;
-        $this->inserted = $res_inserted;
         $this->activity = $activity;
         $this->stage = $stage;
         $this->criterion = $criterion;
