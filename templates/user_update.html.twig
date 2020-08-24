@@ -142,13 +142,9 @@
         </header>
 
         <div class="profile">
-            {{ form_start(form) }}
             {% include "prototype/user_item.html.twig" with { item: form, enabledCreatingUser : false, key: 0 } %}        
       </div>
     </main>
-
-    {{ form_rest(form) }}
-    {{ form_end(form) }}
 
     <div id="addElement" class="modal">
         {{ form_start(organizationElementForm) }}
@@ -193,6 +189,24 @@
           <a class=" modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
       </div>
     </div>
+
+    {% if not form.vars.valid %}
+        <div id="errors" class="modal">
+            <div class="modal-content">
+                <h5>{{ 'activities.modal_error_creation_title'|trans }}</h5>
+                {% for child in form.children %}
+                    {% if child.vars.valid is defined and not child.vars.valid %}
+                    <div style="margin-left: 20px;">{{ form_label(child) }}<span style="display:inline-block;width: 30%;"></span> {{ form_errors(child) }}</div>
+                    {% endif %}
+                {% endfor %}
+
+            </div>
+
+            <div class="modal-footer">
+                <a class=" modal-action modal-close waves-effect waves-green btn-large notifyModalClose">Ok</a>
+            </div>
+        </div>
+	{% endif %}
     
 {% endblock %}
 

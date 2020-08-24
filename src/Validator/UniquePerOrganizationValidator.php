@@ -8,27 +8,33 @@
 
 namespace App\Validator;
 
-
-use Model\Activity;
-use Model\CriterionName;
-use Model\Department;
-use Model\InstitutionProcess;
-use Model\Organization;
-use Model\Client;
-use Model\Position;
-use Model\Title;
-use Model\User;
-use Model\Weight;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\Activity;
+use App\Entity\CriterionName;
+use App\Entity\Department;
+use App\Entity\InstitutionProcess;
+use App\Entity\Organization;
+use App\Entity\Client;
+use App\Entity\Position;
+use App\Entity\Title;
+use App\Entity\User;
+use App\Entity\Weight;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Constraint;
 
 
 class UniquePerOrganizationValidator extends ConstraintValidator
 {
+
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        $this->em = $entityManager;
+    }
+
     public function validate($value, Constraint $constraint){
         if($value != null){
-            global $app;
-            $em = $app['orm.em'];
+            $em = $this->em;
             switch($constraint->entity){
                 case 'activity' :
                     $possibleDuplicateElement = $em->getRepository(Activity::class)->findOneBy(['organization' => $constraint->organization, $constraint->property => $value]);
@@ -56,7 +62,7 @@ class UniquePerOrganizationValidator extends ConstraintValidator
                     break;
                 case 'user' :
                     $possibleDuplicateElement = ($constraint->organization != null) ? 
-                        $em->getRepository(User::class)->findOneBy(['orgId' => $constraint->organization->getId(), $constraint->property => $value]) :
+                        $em->getRepository(User::class)->findOneBy(['organization' => $constraint->organization, $constraint->property => $value]) :
                         $em->getRepository(User::class)->findOneBy([$constraint->property => $value]);
                     break;
                 default:

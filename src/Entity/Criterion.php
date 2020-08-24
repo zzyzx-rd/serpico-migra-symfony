@@ -116,7 +116,7 @@ class Criterion extends DbObject
     protected $organization;
 
     /**
-     * @OneToMany(targetEntity="ActivityUser", mappedBy="criterion",cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="Participation", mappedBy="criterion",cascade={"persist", "remove"}, orphanRemoval=true)
      * @var Collection
      */
 //     * @OrderBy({"leader" = "DESC"})
@@ -642,7 +642,7 @@ class Criterion extends DbObject
         return $this;
     }
 
-    public function addParticipant(ActivityUser $participant): Criterion
+    public function addParticipant(Participation $participant): Criterion
     {
         $this->participants->add($participant);
         $participant->setCriterion($this);
@@ -650,7 +650,7 @@ class Criterion extends DbObject
     }
 
 
-    public function removeParticipant(ActivityUser $participant): Criterion
+    public function removeParticipant(Participation $participant): Criterion
     {
         // Remove this participant
         $this->participants->removeElement($participant);

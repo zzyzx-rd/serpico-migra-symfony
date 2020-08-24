@@ -39,7 +39,7 @@ use App\Form\Type\StageType;
 use App\Form\Type\UserType;
 use League\Csv\Reader;
 use App\Entity\Activity;
-use App\Entity\ActivityUser;
+use App\Entity\Participation;
 use App\Entity\Answer;
 use App\Entity\Client;
 use App\Entity\Criterion;
@@ -113,7 +113,7 @@ class OrganizationController extends MasterController
     public function addFirstAdminAction(Request $request, Application $app){
         $formFactory = self::getFormFactory();
         $user = new User;
-        $addFirstAdminForm = $formFactory->create(AddFirstAdminForm::class,$user);
+        $addFirstAdminForm = $this->createForm(AddFirstAdminForm::class,$user);
         $addFirstAdminForm->handleRequest($request);
         if($addFirstAdminForm->isValid()){
             $defaultOrgWeight = $this->user->getOrganization()->getWeights()->filter(function(Weight $w){
@@ -220,9 +220,9 @@ class OrganizationController extends MasterController
     public function retrieveWgtFromPosAction(Request $request, Application $app, $posId)
     {
         $repoP       = $this->em->getRepository(Position::class);
-        $currentUser = self::getAuthorizedUser();
+        $currentUser = $this->user;
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
         $orgId    = $currentUser->getOrgId();
         $position = $repoP->find($posId);
@@ -282,11 +282,11 @@ class OrganizationController extends MasterController
 
         global $app;
         $formFactory = self::getFormFactory();
-        $activityForm = $formFactory->create(
+        $activityForm = $this->createForm(
             ActivityElementForm::class, $element, ['elmtType' => $elmtType]
         );
-        $stageElementForm = $formFactory->create(StageType::class,null,['elmtType' => $elmtType, 'element' => $element, 'standalone' => true]);
-        $criterionElementForm = $formFactory->create(CriterionType::class,null,['elmtType' => $elmtType, 'standalone' => true]);
+        $stageElementForm = $this->createForm(StageType::class,null,['elmtType' => $elmtType, 'element' => $element, 'standalone' => true]);
+        $criterionElementForm = $this->createForm(CriterionType::class,null,['elmtType' => $elmtType, 'standalone' => true]);
 
         $activityForm->handleRequest($request);
         $stageElementForm->handleRequest($request);
@@ -296,7 +296,7 @@ class OrganizationController extends MasterController
 
         if ($activityForm->isValid()) {
 
-            $em = self::getEntityManager();
+            $em = $this->em;
 
             if ($_POST['clicked-btn'] == "update" && $elmtType == 'activity') {
 
@@ -312,10 +312,10 @@ class OrganizationController extends MasterController
                         $mailSettings['activity'] = $element;
                     }
 
-                    $notYetMailedParticipants = $stage->getDistinctParticipations()->filter(function (ActivityUser $p) {
+                    $notYetMailedParticipants = $stage->getDistinctParticipations()->filter(function (Participation $p) {
                         return !$p->getisMailed();
                     });
-                    /** @var ActivityUser[] */
+                    /** @var Participation[] */
                     $participants = $notYetMailedParticipants->getValues();
                     $recipients   = [];
                     foreach ($participants as $participant) {
@@ -393,7 +393,7 @@ class OrganizationController extends MasterController
     private function iprocessConfigurationAction(InstitutionProcess $iprocess, User $user)
     {
         $formFactory = self::getFormFactory();
-        $activityForm = $formFactory->create(
+        $activityForm = $this->createForm(
             ActivityElementForm::class, $iprocess, ['elmt' => 'iprocess']
         );
 
@@ -409,7 +409,7 @@ class OrganizationController extends MasterController
     private function processConfigurationAction(Process $process, User $user)
     {
         $formFactory = self::getFormFactory();
-        $activityForm = $formFactory->create(
+        $activityForm = $this->createForm(
             ActivityElementForm::class, $process, ['elmt' => 'process']
         );
 
@@ -432,11 +432,11 @@ class OrganizationController extends MasterController
      * @Route("/stage/{stgId}/status/update", name="updateStageStatus")
      */
     public function updateStageStatusAction(Request $request, Application $app, $stgId){
-        $currentUser = self::getAuthorizedUser();
+        $currentUser = $this->user;
         if (!$currentUser) {
             return $this->redirectToRoute('login');
         }
-        $em = self::getEntityManager();
+        $em = $this->em;
         $repoS = $em->getRepository(Stage::class);
         /** @var Stage */
         $stage = $repoS->find($stgId);
@@ -471,29 +471,29 @@ class OrganizationController extends MasterController
      * @Route("/{elmtType}/stage/duplicate/{elmtId}", name="duplicateStage")
      */
     public function duplicateElementStageAction(Request $request, Application $app, $elmtType, $elmtId){
-        $em    = self::getEntityManager();
+        $em    = $this->em;
         $repoO = $em->getRepository(Organization::class);
-        $currentUser = self::getAuthorizedUser();
+        $currentUser = $this->user;
         $currentUserOrganization = $repoO->find($currentUser->getOrgId());
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
 
         switch($elmtType){
             case 'iprocess':
                 $repoS = $em->getRepository(IProcessStage::class);
-                $repoAU = $em->getRepository(IProcessActivityUser::class);
+                $repoAU = $em->getRepository(IProcessParticipation::class);
                 break;
             case 'process':
                 $repoS = $em->getRepository(ProcessStage::class);
                 break;
             case 'template':
                 $repoS = $em->getRepository(TemplateStage::class);
-                $repoAU = $em->getRepository(TemplateActivityUser::class);
+                $repoAU = $em->getRepository(TemplateParticipation::class);
                 break;
             case 'activity':
                 $repoS = $em->getRepository(Stage::class);
-                $repoAU = $em->getRepository(ActivityUser::class);
+                $repoAU = $em->getRepository(Participation::class);
                 break;
         }
         /** @var Stage|TemplateStage|ProcessStage|IProcessStage */
@@ -596,13 +596,13 @@ class OrganizationController extends MasterController
      */
     public function validateElementStageAction(Request $request, Application $app, $elmtType, $elmtId, $stgId)
     {
-        $em    = self::getEntityManager();
+        $em    = $this->em;
         $repoO = $em->getRepository(Organization::class);
         switch ($elmtType) {
             case 'iprocess':
                 $repoE = $em->getRepository(InstitutionProcess::class);
                 $repoS = $em->getRepository(IProcessStage::class);
-                $repoAU = $em->getRepository(IProcessActivityUser::class);
+                $repoAU = $em->getRepository(IProcessParticipation::class);
                 $stage = new IProcessStage;
                 break;
             case 'process':
@@ -613,20 +613,20 @@ class OrganizationController extends MasterController
             case 'template':
                 $repoE = $em->getRepository(TemplateActivity::class);
                 $repoS = $em->getRepository(TemplateStage::class);
-                $repoAU = $em->getRepository(TemplateActivityUser::class);
+                $repoAU = $em->getRepository(TemplateParticipation::class);
                 $stage = new TemplateStage;
                 break;
             case 'activity':
                 $repoE = $em->getRepository(Activity::class);
                 $repoS = $em->getRepository(Stage::class);
-                $repoAU = $em->getRepository(ActivityUser::class);
+                $repoAU = $em->getRepository(Participation::class);
                 $stage = new Stage;
                 break;
         }
 
-        $currentUser = self::getAuthorizedUser();
+        $currentUser = $this->user;
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
         $currentUserOrganization = $repoO->find($currentUser->getOrgId());
         /** @var Activity|TemplateActivity|InstitutionProcess|Process */
@@ -667,11 +667,11 @@ class OrganizationController extends MasterController
         }
 
         if (!$hasPageAccess) {
-            return $app['twig']->render('errors/403.html.twig');
+            return $this->render('errors/403.html.twig');
         } else {
 
-            $formFactory = $app['form.factory'];
-            $stageForm   = $formFactory->create(StageType::class, $stage, ['elmtType' => $elmtType, 'element' => $element, 'standalone' => true]);
+            
+            $stageForm   = $this->createForm(StageType::class, $stage, ['elmtType' => $elmtType, 'element' => $element, 'standalone' => true]);
             $stageForm->handleRequest($request);
 
             if (!$stageForm->isValid()) {
@@ -764,7 +764,7 @@ class OrganizationController extends MasterController
      */
     public function CreateFieldRequestActionAJAX (Request $request, Application $app,$surId)
     {
-        $em          = self::getEntityManager();
+        $em          = $this->em;
         $repoE       = $em->getRepository(Survey::class);
         $redirect = $request->get('redirect');
         $surveyfield= new SurveyField;
@@ -792,7 +792,7 @@ class OrganizationController extends MasterController
     {
 
 
-        $em          = self::getEntityManager();
+        $em          = $this->em;
         $repoE       = $em->getRepository(Survey::class);
         $survey = $repoE->find($surId);
         $surveyfields = $survey->getFields();
@@ -832,7 +832,7 @@ class OrganizationController extends MasterController
      */
     public function copyFieldRequestActionAJAX (Request $request, Application $app,$surId)
     {
-        $em          = self::getEntityManager();
+        $em          = $this->em;
         $repoE       = $em->getRepository(Survey::class);
         $repoR       = $em->getRepository(SurveyField::class);
         $redirect = $request->get('redirect');
@@ -905,7 +905,7 @@ class OrganizationController extends MasterController
     public function saveFieldRequestActionAJAX (Request $request, Application $app,$surId)
     {
 
-        $em          = self::getEntityManager();
+        $em          = $this->em;
         $repoE       = $em->getRepository(Survey::class);
         $redirect = $request->get('redirect');
         $survey=$repoE->find($surId);
@@ -955,7 +955,7 @@ class OrganizationController extends MasterController
      */
     public function DeleteFieldRequestActionAJAX(Request $request, Application $app, $surId){
 
-        $em = self::getEntityManager();
+        $em = $this->em;
         $repo1 = $em->getRepository(Survey::class);
         $survey= $repo1->find($surId);
         $surveyfield=$survey->getFields();
@@ -980,7 +980,7 @@ class OrganizationController extends MasterController
      */
     public function DeleteParameterRequestActionAJAX(Request $request, Application $app, $surId){
 
-        $em = self::getEntityManager();
+        $em = $this->em;
         $redirect = $request->get('redirect');
         $repo1 = $em->getRepository(Survey::class);
         $survey= $repo1->find($surId);
@@ -1006,7 +1006,7 @@ class OrganizationController extends MasterController
      */
     public function DeleteAllParameterRequestActionAJAX(Request $request, Application $app, $surId){
 
-        $em = self::getEntityManager();
+        $em = $this->em;
         $redirect = $request->get('redirect');
         $repo1 = $em->getRepository(Survey::class);
         $survey= $repo1->find($surId);
@@ -1038,7 +1038,7 @@ class OrganizationController extends MasterController
      */
     public function validateElementNameAction(Request $request, Application $app, $elmtType, $elmtId){
 
-        $em = self::getEntityManager();
+        $em = $this->em;
         /** @var string */
         $name = $request->get('name');
         switch ($elmtType) {
@@ -1090,13 +1090,13 @@ class OrganizationController extends MasterController
      */
     public function validateElementCriterionAction(Request $request, Application $app, $elmtType, $elmtId, $stgId, $crtId)
     {
-        $em = self::getEntityManager();
+        $em = $this->em;
         $repoO = $em->getRepository(Organization::class);
         switch ($elmtType) {
             case 'iprocess':
                 $repoE     = $em->getRepository(IProcessStage::class);
                 $repoC     = $em->getRepository(IProcessCriterion::class);
-                $repoAU    = $em->getRepository(IProcessActivityUser::class);
+                $repoAU    = $em->getRepository(IProcessParticipation::class);
                 $criterion = new IProcessCriterion;
                 break;
             case 'process':
@@ -1107,20 +1107,20 @@ class OrganizationController extends MasterController
             case 'template':
                 $repoE     = $em->getRepository(TemplateStage::class);
                 $repoC     = $em->getRepository(TemplateCriterion::class);
-                $repoAU    = $em->getRepository(TemplateActivityUser::class);
+                $repoAU    = $em->getRepository(TemplateParticipation::class);
                 $criterion = new TemplateCriterion;
                 break;
             case 'activity':
                 $repoE     = $em->getRepository(Stage::class);
                 $repoC     = $em->getRepository(Criterion::class);
-                $repoAU    = $em->getRepository(ActivityUser::class);
+                $repoAU    = $em->getRepository(Participation::class);
                 $criterion = new Criterion;
                 break;
         }
 
-        $currentUser = self::getAuthorizedUser();
+        $currentUser = $this->user;
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
         $currentUserOrganization = $repoO->find($currentUser->getOrgId());
         $element                 = $repoE->find($stgId);
@@ -1159,11 +1159,11 @@ class OrganizationController extends MasterController
         }
 
         if (!$hasPageAccess) {
-            return $app['twig']->render('errors/403.html.twig');
+            return $this->render('errors/403.html.twig');
         } else {
 
             $formFactory   = $app['form.factory'];
-            $criterionForm = $formFactory->create(CriterionType::class, $criterion, ['elmtType' => $elmtType, 'standalone' => true]);
+            $criterionForm = $this->createForm(CriterionType::class, $criterion, ['elmtType' => $elmtType, 'standalone' => true]);
             $criterionForm->handleRequest($request);
 
             if (!$criterionForm->isValid()) {
@@ -1174,7 +1174,7 @@ class OrganizationController extends MasterController
                 if($elmtType == 'activity' && ($crtId == 0 || ($criterionBeforeUpgrade->getCName() != $criterion->getCName() || $criterionBeforeUpgrade->getType() != $criterion->getType()))){
 
                     // Checking if we need to unvalidate participations (we decide to unlock all stage participations and not only the modified one)
-                    $completedStageParticipations = $element->getParticipants()->filter(function(ActivityUser $p){
+                    $completedStageParticipations = $element->getParticipants()->filter(function(Participation $p){
                         return $p->getStatus() == 3;
                     });
 
@@ -1276,18 +1276,18 @@ class OrganizationController extends MasterController
         $entityManager = $this->getEntityManager($app);
         $repo0         = $entityManager->getRepository(Stage::class);
         $repo1         = $entityManager->getRepository(Survey::class);
-        $repo2         = $entityManager->getRepository(ActivityUser::class);
+        $repo2         = $entityManager->getRepository(Participation::class);
         $stage         = $repo0->find($stgId);
         $currentUser = MasterController::getAuthorizedUser();
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
         /*
         $act_user      = $repo2->findBy(['stage'=>$stgId,'user'=>$currentUser]);
         */
         $redirect      = $request->get('redirect');
         //$stage = $repo1->find($_GET[$stgId]);
-        $formFactory = $app['form.factory'];
+        
         $edit=false;
         if ($repo1->findBy(['stage' => $stage]) == null) {
             $survey = new Survey;
@@ -1299,12 +1299,12 @@ class OrganizationController extends MasterController
             $activities=$repo2->findBy(array('stage' => $stage));
             if(empty($activities)){
 
-                $activityUser= new ActivityUser();
-                $activityUser->setStage($stage);
-                $activityUser->setSurvey($survey);
-                $activityUser->setUsrId($currentUser->getId());
-                $activityUser->setActivity($stage->getActivity());
-                $entityManager->persist($activityUser);
+                $Participation= new Participation();
+                $Participation->setStage($stage);
+                $Participation->setSurvey($survey);
+                $Participation->setUsrId($currentUser->getId());
+                $Participation->setActivity($stage->getActivity());
+                $entityManager->persist($Participation);
             }
             else{
             foreach ($activities as $activity) {
@@ -1313,11 +1313,11 @@ class OrganizationController extends MasterController
 
             $entityManager->persist($survey);
             $entityManager->flush();
-            $surveyForm = $formFactory->create(AddSurveyForm::class, $survey);
+            $surveyForm = $this->createForm(AddSurveyForm::class, $survey);
         } else {
             $survey     = $repo1->findOneBy(['stage' => $stage]);
 
-            $surveyForm = $formFactory->create(AddSurveyForm::class, $survey);
+            $surveyForm = $this->createForm(AddSurveyForm::class, $survey);
             $edit=true;
         }
 
@@ -1343,9 +1343,9 @@ class OrganizationController extends MasterController
             return $this->redirectToRoute('manageActivityElement',['elmtType' => 'activity','elmtId' => $stage->getActivity()]);
         }
 
-        $surveyForm = $formFactory->create(AddSurveyForm::class, $survey);
+        $surveyForm = $this->createForm(AddSurveyForm::class, $survey);
 
-        return $app['twig']->render('create_survey.html.twig',
+        return $this->render('create_survey.html.twig',
             ['surId' => $survey->getId(),
                 'form' => $surveyForm->createView(),
                 'survey' => $survey,
@@ -1366,7 +1366,7 @@ class OrganizationController extends MasterController
         $currentUser = MasterController::getAuthorizedUser();
         $em = $this->getEntityManager($app);
         $redirect = $request->get('redirect');
-        $repo2 = $em->getRepository(ActivityUser::class);
+        $repo2 = $em->getRepository(Participation::class);
         $repo0 = $em->getRepository(Survey::class);
         $survey =$repo0->find($surId);
         $activity=$repo2->findOneBy((array('survey' => $survey->getId(),  'usrId' => $currentUser->getId())));
@@ -1388,7 +1388,7 @@ class OrganizationController extends MasterController
 
         $em = $this->getEntityManager($app);
         $redirect = $request->get('redirect');
-        $repo2 = $em->getRepository(ActivityUser::class);
+        $repo2 = $em->getRepository(Participation::class);
         $repo0 = $em->getRepository(Survey::class);
         $survey =$repo0->find($surId);
         $activities=$repo2->findBy(array('survey' => $survey->getId()));
@@ -1415,22 +1415,22 @@ class OrganizationController extends MasterController
     public function answerShowAction(Request $request, Application $app, $surId)
     {
         $em = $this->getEntityManager($app);
-        $formFactory = $app['form.factory'];
+        
         $currentUser = MasterController::getAuthorizedUser();
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
         $repo0 = $em->getRepository(Survey::class);
         $repo1 = $em->getRepository(Answer::class);
         $survey = $repo0->find($surId);
         $answer = $repo1->findBy(['survey' => $survey]);
-        $answerForm = $formFactory->create(AddSurveyForm::class, $survey, ['edition' => true, 'survey' => $survey, 'user' => $currentUser]);
+        $answerForm = $this->createForm(AddSurveyForm::class, $survey, ['edition' => true, 'survey' => $survey, 'user' => $currentUser]);
         $surveyfield = $survey->getFields();
         for ($i = 0; $i < count($surveyfield); $i++) {
         }
         $nbquestions = count($survey->getFields());
         $nbanswers = count($survey->getAnswers())/$nbquestions;
-        return $app['twig']->render('answer_sent.html.twig',
+        return $this->render('answer_sent.html.twig',
             [
                 'surId' => $survey->getId(),
                 'survey' => $survey,
@@ -1453,11 +1453,11 @@ class OrganizationController extends MasterController
     public function deleteSurveyAction(Request $request, Application $app, $surId)
     {
         $redirect = $request->get('redirect');
-        $em       = self::getEntityManager();
+        $em       = $this->em;
         $survey   = $em->getRepository(Survey::class)->find($surId);
         $survey->getStage()->setSurvey(null);
         $survey->setStage(null);
-        $activities   = $em->getRepository(ActivityUser::class)->findBy(array('survey' => $survey->getId()));
+        $activities   = $em->getRepository(Participation::class)->findBy(array('survey' => $survey->getId()));
         foreach ($activities as $activity) {
             $activity->setStatus(0);
             $activity->setSurvey(null);
@@ -1482,8 +1482,8 @@ class OrganizationController extends MasterController
     public function surveyRequestFinalized(Request $request ,Application $app, $stgId)
     {
         $redirect = $request->get('redirect');
-        $em       = self::getEntityManager();
-        $activities   = $em->getRepository(ActivityUser::class)->findBy(array('stage' => $stgId));
+        $em       = $this->em;
+        $activities   = $em->getRepository(Participation::class)->findBy(array('stage' => $stgId));
         foreach ($activities as $activity) {
             $activity->setStatus(1);
         }
@@ -1509,15 +1509,15 @@ class OrganizationController extends MasterController
         //TODO : get current language dynamically
         $locale = 'fr';
 
-        $currentUser = self::getAuthorizedUser();
+        $currentUser = $this->user;
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
 
         $adminFullName = $currentUser->getFirstname() . " " . $currentUser->getLastname();
         $id            = $currentUser->getId();
         $orgId         = $currentUser->getOrgId();
-        $em            = self::getEntityManager();
+        $em            = $this->em;
         $repoO         = $em->getRepository(Organization::class);
         //$repoP = $em->getRepository(Position::class);
         $repoU = $em->getRepository(User::class);
@@ -1535,12 +1535,12 @@ class OrganizationController extends MasterController
         }
 
         if ($currentUser->getRole() != 4 && $currentUser->getRole() != 1 && !($currentUser->getDepartment($app)->getMasterUser() == $currentUser || $orgEnabledCreatingUser && $currentUser->isEnabledCreatingUser())) {
-            return $app['twig']->render('errors/403.html.twig');
+            return $this->render('errors/403.html.twig');
         }
 
         $formFactory             = $app['form.factory'];
-        $userForm                = $formFactory->create(AddUserForm::class, null, ['standalone' => true, 'organization' => $organization, 'enabledCreatingUser' => $orgEnabledCreatingUser]);
-        $organizationElementForm = $formFactory->create(OrganizationElementType::class, null, ['standalone' => true]);
+        $userForm                = $this->createForm(AddUserForm::class, null, ['standalone' => true, 'organization' => $organization, 'enabledCreatingUser' => $orgEnabledCreatingUser]);
+        $organizationElementForm = $this->createForm(OrganizationElementType::class, null, ['standalone' => true]);
         $userForm->handleRequest($request);
 
         if ($userForm->isSubmitted() && $userForm->isValid()) {
@@ -1586,7 +1586,7 @@ class OrganizationController extends MasterController
             return $app->redirect($app['url_generator']->generate('manageUsers'));
         }
 
-        return $app['twig']->render('user_create.html.twig',
+        return $this->render('user_create.html.twig',
             [
                 'form'                    => $userForm->createView(),
                 'organizationElementForm' => $organizationElementForm->createView(),
@@ -1607,18 +1607,18 @@ class OrganizationController extends MasterController
      */
     public function validateClientAction(Request $request, Application $app, $cliId){
 
-        $em = self::getEntityManager();
-        $currentUser = self::getAuthorizedUser();
+        $em = $this->em;
+        $currentUser = $this->user;
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
-        $formFactory = $app['form.factory'];
+        
         $repoC = $em->getRepository(Client::class);
         $repoO = $em->getRepository(Organization::class);
 
         $organization = $repoO->find($currentUser->getOrgId());
         $client = $cliId == 0 ? new Client : $repoC->find($cliId);
-        $clientForm = $formFactory->create(ClientType::class, $client, [ 'standalone' => false, 'hasChildrenElements' => false ]);
+        $clientForm = $this->createForm(ClientType::class, $client, [ 'standalone' => false, 'hasChildrenElements' => false ]);
         $clientForm->handleRequest($request);
 
         if ($clientForm->isValid()) {
@@ -1707,18 +1707,18 @@ class OrganizationController extends MasterController
      */
     public function validateClientUserAction(Request $request, Application $app, $cliId, $extId){
 
-        $em = self::getEntityManager();
-        $currentUser = self::getAuthorizedUser();
+        $em = $this->em;
+        $currentUser = $this->user;
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
-        $formFactory = $app['form.factory'];
+        
         $repoC = $em->getRepository(Client::class);
         $repoE = $em->getRepository(ExternalUser::class);
         /** @var Client */
         $client = $repoC->find($cliId);
         $externalUser = $extId == 0 ? new ExternalUser : $repoE->find($extId);
-        $individualForm = $formFactory->create(ExternalUserType::class, $externalUser, ['standalone' => true]);
+        $individualForm = $this->createForm(ExternalUserType::class, $externalUser, ['standalone' => true]);
         $individualForm->handleRequest($request);
         if ($individualForm->isValid()) {
             if($extId == 0){
@@ -1763,11 +1763,11 @@ class OrganizationController extends MasterController
      */
     public function addClientAction(Request $request, Application $app)
     {
-        $currentUser = self::getAuthorizedUser();
+        $currentUser = $this->user;
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
-        $em           = self::getEntityManager();
+        $em           = $this->em;
         $repoO        = $em->getRepository(Organization::class);
         $repoC        = $em->getRepository(Client::class);
         $organization = $repoO->find($currentUser->getOrgId());
@@ -1780,7 +1780,7 @@ class OrganizationController extends MasterController
         }
 
         if ($currentUser->getRole() != 4 && $currentUser->getRole() != 1 && !($currentUser->getDepartment($app)->getMasterUser() == $currentUser || $orgEnabledCreatingUser && $currentUser->isEnabledCreatingUser())) {
-            return $app['twig']->render('errors/403.html.twig');
+            return $this->render('errors/403.html.twig');
         }
 
         $organizationClients = $organization->getClients();
@@ -1788,11 +1788,11 @@ class OrganizationController extends MasterController
         foreach ($organizationClients as $organizationClient) {
             $clients[] = $organizationClient->getClientOrganization();
         }
-        $formFactory = $app['form.factory'];
+        
 
-        $clientsForm = $formFactory->create(AddClientForm::class, null, ['standalone' => true, 'organization' => $organization]);
-        $clientForm = $formFactory->create(ClientType::class, null, [ 'standalone' => false, 'hasChildrenElements' => false]);
-        $individualForm = $formFactory->create(ExternalUserType::class, null, ['standalone' => true]);
+        $clientsForm = $this->createForm(AddClientForm::class, null, ['standalone' => true, 'organization' => $organization]);
+        $clientForm = $this->createForm(ClientType::class, null, [ 'standalone' => false, 'hasChildrenElements' => false]);
+        $individualForm = $this->createForm(ExternalUserType::class, null, ['standalone' => true]);
 
         $clientsForm->handleRequest($request);
         $clientForm->handleRequest($request);
@@ -1856,7 +1856,7 @@ class OrganizationController extends MasterController
 
         }
 
-        return $app['twig']->render('user_external_create.html.twig',
+        return $this->render('user_external_create.html.twig',
             [
                 'form'                   => $clientsForm->createView(),
                 'multipleClientCreation' => true,
@@ -1876,20 +1876,20 @@ class OrganizationController extends MasterController
      */
     public function addClientUserAction(Request $request, Application $app, $cliId)
     {
-        $currentUser = self::getAuthorizedUser();
+        $currentUser = $this->user;
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
-        $em    = self::getEntityManager();
+        $em    = $this->em;
         $repoC = $em->getRepository(Client::class);
 
         $client             = $repoC->find($cliId);
         $clientOrganization = $client->getClientOrganization();
 
         $formFactory    = $app['form.factory'];
-        $clientUserForm = $formFactory->create(ClientType::class, $client, ['standalone' => true]);
-        $clientForm = $formFactory->create(ClientType::class, null, [ 'standalone' => true, 'hasChildrenElements' => false ]);
-        $individualForm = $formFactory->create(ExternalUserType::class, null, ['standalone' => true]);
+        $clientUserForm = $this->createForm(ClientType::class, $client, ['standalone' => true]);
+        $clientForm = $this->createForm(ClientType::class, null, [ 'standalone' => true, 'hasChildrenElements' => false ]);
+        $individualForm = $this->createForm(ExternalUserType::class, null, ['standalone' => true]);
         $clientUserForm->handleRequest($request);
         $clientForm->handleRequest($request);
         $individualForm->handleRequest($request);
@@ -1941,7 +1941,7 @@ class OrganizationController extends MasterController
             return $app->redirect($app['url_generator']->generate('manageUsers'));
         }
 
-        return $app['twig']->render('user_external_create.html.twig',
+        return $this->render('user_external_create.html.twig',
             [
                 'form'                   => $clientUserForm->createView(),
                 'multipleClientCreation' => false,
@@ -1968,10 +1968,10 @@ class OrganizationController extends MasterController
         $header = $csv->getHeader();
 
         $headerOrderEntries = explode("-", $headerParameters);
-        $em                 = self::getEntityManager();
-        $currentUser        = self::getAuthorizedUser();
+        $em                 = $this->em;
+        $currentUser        = $this->user;
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
         $orgId = $currentUser->getOrgId();
         $repoO = $em->getRepository(Organization::class);
@@ -2193,13 +2193,13 @@ class OrganizationController extends MasterController
         //TODO : get current language dynamically
 
         $locale      = 'fr';
-        $currentUser = self::getAuthorizedUser();
+        $currentUser = $this->user;
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
         $adminFullName = $currentUser->getFirstname() . " " . $currentUser->getLastname();
         $orgId         = $currentUser->getOrgId();
-        $em            = self::getEntityManager();
+        $em            = $this->em;
         $repoO         = $em->getRepository(Organization::class);
         $repoU         = $em->getRepository(User::class);
         $repoW         = $em->getRepository(Weight::class);
@@ -2216,7 +2216,7 @@ class OrganizationController extends MasterController
             }
         }
 
-        $userForm = $formFactory->create(AddUserForm::class, null, ['standalone' => true, 'organization' => $organization, 'app' => $app, 'enabledCreatingUser' => $orgEnabledCreatingUser]);
+        $userForm = $this->createForm(AddUserForm::class, null, ['standalone' => true, 'organization' => $organization, 'app' => $app, 'enabledCreatingUser' => $orgEnabledCreatingUser]);
         $userForm->handleRequest($request);
 
         $recipients = [];
@@ -2364,13 +2364,13 @@ class OrganizationController extends MasterController
     {
         //TODO : get current language dynamically
         $locale      = 'fr';
-        $currentUser = self::getAuthorizedUser();
+        $currentUser = $this->user;
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
         $adminFullName = $currentUser->getFirstname() . " " . $currentUser->getLastname();
         $orgId         = $currentUser->getOrgId();
-        $em            = self::getEntityManager();
+        $em            = $this->em;
         $repoU         = $em->getRepository(User::class);
         $repoO         = $em->getRepository(Organization::class);
         $repoW         = $em->getRepository(Weight::class);
@@ -2383,7 +2383,7 @@ class OrganizationController extends MasterController
             $clients[] = $organizationClient->getClientOrganization();
         }
         $formFactory    = $app['form.factory'];
-        $clientUserForm = $formFactory->create(AddClientForm::class, null, ['standalone' => true, 'clients' => $clients, 'app' => $app]);
+        $clientUserForm = $this->createForm(AddClientForm::class, null, ['standalone' => true, 'clients' => $clients, 'app' => $app]);
         $clientUserForm->handleRequest($request);
 
         $recipients = [];
@@ -2532,11 +2532,11 @@ class OrganizationController extends MasterController
      */
     public function updateElementTargetsAction(Request $request, Application $app, $elmtType, $elmtId)
     {
-        $em          = self::getEntityManager();
+        $em          = $this->em;
         $repoO       = $em->getRepository(Organization::class);
-        $currentUser = self::getAuthorizedUser();
+        $currentUser = $this->user;
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
         $currentUserOrganization = $repoO->find($currentUser->getOrgId());
         $targets                 = [];
@@ -2593,11 +2593,11 @@ class OrganizationController extends MasterController
         }
 
         if (!$hasPageAccess) {
-            return $app['twig']->render('errors/403.html.twig');
+            return $this->render('errors/403.html.twig');
         } else {
 
             $formFactory          = $app['form.factory'];
-            $addElementTargetForm = $formFactory->create(AddElementTargetForm::class, $element, ['standalone' => true, 'elmtType' => $elmtType, 'app' => $app, 'organization' => $organization]);
+            $addElementTargetForm = $this->createForm(AddElementTargetForm::class, $element, ['standalone' => true, 'elmtType' => $elmtType, 'app' => $app, 'organization' => $organization]);
             $addElementTargetForm->handleRequest($request);
 
             if ($addElementTargetForm->isValid()) {
@@ -2628,7 +2628,7 @@ class OrganizationController extends MasterController
                 }
             }
 
-            return $app['twig']->render('element_targets.html.twig',
+            return $this->render('element_targets.html.twig',
                 [
                     'targets'     => $targets,
                     'elementName' => $elementName,
@@ -2651,7 +2651,7 @@ class OrganizationController extends MasterController
      */
     public function updateOrganizationElementsAction(Request $request, Application $app, $elmtType, $orgId)
     {
-        $em    = self::getEntityManager();
+        $em    = $this->em;
         $repoO = $em->getRepository(Organization::class);
         switch ($elmtType) {
             case 'department':
@@ -2666,9 +2666,9 @@ class OrganizationController extends MasterController
             default:
                 break;
         }
-        $currentUser = self::getAuthorizedUser();
+        $currentUser = $this->user;
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
         $currentUserOrganization = $repoO->find($currentUser->getOrgId());
         $role                    = $currentUser->getRole();
@@ -2686,10 +2686,10 @@ class OrganizationController extends MasterController
         }
 
         if (!$hasPageAccess) {
-            return $app['twig']->render('errors/403.html.twig');
+            return $this->render('errors/403.html.twig');
         } else {
             $formFactory                    = $app['form.factory'];
-            $manageOrganizationElementsForm = $formFactory->create(ManageOrganizationElementsForm::class, $organization, ['standalone' => true, 'elmtType' => $elmtType]);
+            $manageOrganizationElementsForm = $this->createForm(ManageOrganizationElementsForm::class, $organization, ['standalone' => true, 'elmtType' => $elmtType]);
             $manageOrganizationElementsForm->handleRequest($request);
 
             if ($manageOrganizationElementsForm->isValid()) {
@@ -2698,7 +2698,7 @@ class OrganizationController extends MasterController
                 return $app->redirect($app['url_generator']->generate('firmSettings'));
             }
 
-            return $app['twig']->render('organization_element_list.html.twig',
+            return $this->render('organization_element_list.html.twig',
                 [
                     'elmtType' => $elmtType,
                     'elements' => $elements,
@@ -2709,20 +2709,21 @@ class OrganizationController extends MasterController
 
     /**
      * @param Request $request
-     * @param Application $app
-     * @param $elmtType
+     * @param $elmtName
      * @param $elmtId
      * @param $orgId
      * @return JsonResponse
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/settings/organization/{orgId}/{elmtType}/validate/{elmtId}", name="validateOrganizationElement")
+     * @Route("/settings/organization/element/validate", name="validateOrganizationElement")
      */
-    public function validateOrganizationElementAction(Request $request, Application $app, $elmtType, $elmtId, $orgId)
+    public function validateOrganizationElementAction(Request $request)
     {
-        $em    = self::getEntityManager();
+        $em    = $this->em;
+        $elmtId = $request->get('id');
+        $entity = $request->get('e');
         $repoO = $em->getRepository(Organization::class);
-        switch ($elmtType) {
+        switch ($entity) {
             case 'department':
                 $repoE   = $em->getRepository(Department::class);
                 $element = new Department;
@@ -2742,11 +2743,13 @@ class OrganizationController extends MasterController
             default:
                 break;
         }
-        $currentUser = self::getAuthorizedUser();
+        $currentUser = $this->user;
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
-        $currentUserOrganization = $repoO->find($currentUser->getOrgId());
+        $organization = $currentUser->getOrganization();
+        /*
+        $currentUserOrganization = $repoO->find($currentUser->getOrganization());
         $organization            = $repoO->find($orgId);
         $hasPageAccess           = true;
 
@@ -2755,17 +2758,17 @@ class OrganizationController extends MasterController
         }
 
         if (!$hasPageAccess) {
-            return $app['twig']->render('errors/403.html.twig');
+            return $this->render('errors/403.html.twig');
         } else {
-
-            $formFactory = $app['form.factory'];
+            */
+            
             if ($elmtId != 0) {
                 $element = $repoE->find($elmtId);
             } else {
                 $element->setOrganization($organization)->setCreatedBy($this->user->getId());
             }
 
-            $organizationElmtForm = $formFactory->create(OrganizationElementType::class, $element, ['standalone' => false, 'elmtType' => $elmtType, 'organization' => $organization]);
+            $organizationElmtForm = $this->createForm(OrganizationElementType::class, $element, ['standalone' => false, 'entity' => $entity, 'organization' => $organization]);
             $organizationElmtForm->handleRequest($request);
 
             if ($organizationElmtForm->isValid()) {
@@ -2773,7 +2776,7 @@ class OrganizationController extends MasterController
                 $em->persist($element);
                 $em->flush();
                 $output = ['message' => 'Success!', 'id' => $element->getId()];
-                if($elmtType != 'weight'){
+                if($entity != 'weight'){
                     $output['name'] = $element->getName();
                 }
                 return new JsonResponse($output, 200);
@@ -2782,27 +2785,7 @@ class OrganizationController extends MasterController
                 //$errors = $this->buildErrorArray($organizationElmtForm);
                 //return new JsonResponse($errors, 500);
             }
-
-            /*if ($_POST['name'] == "") {
-        return new JsonResponse(['errorMsg' => 'The '.$elmtType.' must have a name'], 500);
-        }
-
-        $doublonElmt = $repoE->findOneBy(['organization' => $organization, 'name' => $_POST['name']]);
-
-        if (($doublonElmt == null) || ($doublonElmt == $element)) {
-        $element->setName($_POST['name']);
-        if ($elmtType == 'department') {
-        $repoU = $em->getRepository(User::class);
-        $selectedMasterUser = $repoU->find($_POST['masterUser']);
-        $element->setMasterUser($selectedMasterUser);
-        }
-        $em->persist($element);
-        $em->flush();
-        return new JsonResponse(['message' => 'Success!','name' => $element->getName(), 'id' => $element->getId()], 200);
-        } else {
-        return new JsonResponse(['errorMsg' => 'There is already a '.$elmtType.' having the same name in the organization'], 500);
-        }*/
-        }
+        //}
     }
 
     /**
@@ -2819,11 +2802,11 @@ class OrganizationController extends MasterController
     public function deleteOrganizationElementAction(Request $request, Application $app, $elmtType, $elmtId, $orgId)
     {
 
-        $em                      = self::getEntityManager();
+        $em                      = $this->em;
         $repoO                   = $em->getRepository(Organization::class);
         $repoU                   = $em->getRepository(User::class);
         $organization            = $repoO->find($orgId);
-        $currentUser             = self::getAuthorizedUser();
+        $currentUser             = $this->user;
         $currentUserOrganization = $repoO->find($currentUser->getOrgId());
         $hasPageAccess           = true;
 
@@ -2832,7 +2815,7 @@ class OrganizationController extends MasterController
         }
 
         if (!$hasPageAccess) {
-            return $app['twig']->render('errors/403.html.twig');
+            return $this->render('errors/403.html.twig');
         } else {
             // $organization = $target->getOrganization();
 
@@ -2872,12 +2855,12 @@ class OrganizationController extends MasterController
      */
     public function updateCriterionNamesAction(Request $request, Application $app, $orgId)
     {
-        $em          = self::getEntityManager();
+        $em          = $this->em;
         $repoO       = $em->getRepository(Organization::class);
         $repoC       = $em->getRepository(CriterionName::class);
-        $currentUser = self::getAuthorizedUser();
+        $currentUser = $this->user;
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
         $currentUserOrganization = $repoO->find($currentUser->getOrgId());
         $organization            = $repoO->find($orgId);
@@ -2890,11 +2873,11 @@ class OrganizationController extends MasterController
         }
 
         if (!$hasPageAccess) {
-            return $app['twig']->render('errors/403.html.twig');
+            return $this->render('errors/403.html.twig');
         } else {
 
             $formFactory         = $app['form.factory'];
-            $addNewCriterionForm = $formFactory->create(ManageCriterionNameForm::class, $organization, ['standalone' => true]);
+            $addNewCriterionForm = $this->createForm(ManageCriterionNameForm::class, $organization, ['standalone' => true]);
             $addNewCriterionForm->handleRequest($request);
 
             if ($addNewCriterionForm->isValid()) {
@@ -2913,7 +2896,7 @@ class OrganizationController extends MasterController
                 }
             }
 
-            return $app['twig']->render('organization_criterion_names.html.twig',
+            return $this->render('organization_criterion_names.html.twig',
                 [
                     'unremovableCriterionNameIds' => $unremovableCriterionNameIds,
                     'criterionNames'              => $criterionNames,
@@ -2924,11 +2907,11 @@ class OrganizationController extends MasterController
 
     public function updateOrganizationTargetsAction(Request $request, Application $app)
     {
-        $em          = self::getEntityManager();
+        $em          = $this->em;
         $repoO       = $em->getRepository(Organization::class);
-        $currentUser = self::getAuthorizedUser();
+        $currentUser = $this->user;
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
         $currentUserOrganization = $repoO->find($currentUser->getOrgId());
 
@@ -2939,11 +2922,11 @@ class OrganizationController extends MasterController
         }
 
         if (!$hasPageAccess) {
-            return $app['twig']->render('errors/403.html.twig');
+            return $this->render('errors/403.html.twig');
         } else {
 
             $formFactory          = $app['form.factory'];
-            $addElementTargetForm = $formFactory->create(AddOrganizationTargetForm::class, $organization, ['standalone' => true, 'app' => $app, 'organization' => $organization]);
+            $addElementTargetForm = $this->createForm(AddOrganizationTargetForm::class, $organization, ['standalone' => true, 'app' => $app, 'organization' => $organization]);
             $addElementTargetForm->handleRequest($request);
 
             if ($addElementTargetForm->isValid()) {
@@ -2958,7 +2941,7 @@ class OrganizationController extends MasterController
                 return $app->redirect($app['url_generator']->generate('manageUsers'));
             }
 
-            return $app['twig']->render('element_targets.html.twig',
+            return $this->render('element_targets.html.twig',
                 [
                     'username' => ($elmtType == 'user') ? $user->getFullName() : $team->getName(),
                     'form'     => $addElementTargetForm->createView(),
@@ -2969,14 +2952,14 @@ class OrganizationController extends MasterController
 
     public function deleteTargetAction(Request $request, Application $app, $tgtId)
     {
-        $em          = self::getEntityManager();
+        $em          = $this->em;
         $repoT       = $em->getRepository(Target::class);
         $repoO       = $em->getRepository(Organization::class);
         $repoU       = $em->getRepository(User::class);
         $target      = $repoT->find($tgtId);
-        $currentUser = self::getAuthorizedUser();
+        $currentUser = $this->user;
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
         if ($target->getUser() != null) {
             $currentUserTarget = $repoU->find($target->getUser());
@@ -3002,13 +2985,13 @@ class OrganizationController extends MasterController
      */
     public function convertAccountAction(Request $request, Application $app)
     {
-        $entityManager = self::getEntityManager();
+        $entityManager = $this->em;
         $repoO         = $entityManager->getRepository(Organization::class);
         $repoU         = $entityManager->getRepository(User::class);
 
-        $currentUser = self::getAuthorizedUser();
+        $currentUser = $this->user;
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
         $orgId        = $currentUser->getOrgId();
         $organization = $repoO->find($orgId);
@@ -3079,7 +3062,7 @@ class OrganizationController extends MasterController
      */
     public function defineSuperior(int $usrId, $superior)
     {
-        $em   = self::getEntityManager();
+        $em   = $this->em;
         /** @var User|null */
         $user = $em->getRepository(User::class)->find($usrId);
         if (!$user) {
@@ -3107,7 +3090,7 @@ class OrganizationController extends MasterController
             return $this->redirectToRoute('login');
         }
 
-        $entityManager                     = self::getEntityManager();
+        $entityManager                     = $this->em;
         $repoU                             = $entityManager->getRepository(User::class);
         $organization                      = $user->getOrganization();
         $orgEnabledUserCreatingUser        = false;
@@ -3230,7 +3213,7 @@ class OrganizationController extends MasterController
 
     public function deleteIProcessStage(int $id)
     {
-        $em        = self::getEntityManager();
+        $em        = $this->em;
         $stageRepo = $em->getRepository(IProcessStage::class);
         /** @var IProcessStage|null */
         $stage = $stageRepo->find($id);
@@ -3261,7 +3244,7 @@ class OrganizationController extends MasterController
             return $this->deleteIProcessStage($stgId);
         }*/
 
-        $em = self::getEntityManager();
+        $em = $this->em;
 
         $stageRepo = null;
         switch ($elmtType) {
@@ -3332,7 +3315,7 @@ class OrganizationController extends MasterController
      * @Route("/ajax/{elmtType}/stage/{stgId}/clear-output", name= "clearStageOutput")
      */
     public function clearStageOutputAction(Request $request, Application $app, $elmtType, $stgId){
-        $em       = self::getEntityManager();
+        $em       = $this->em;
         $stage = $em->getRepository(Stage::class)->find($stgId);
         $survey = $stage->getSurvey();
         $surveyDeletion = false;
@@ -3361,7 +3344,7 @@ class OrganizationController extends MasterController
     public function deleteCriterionAction(Request $request, Application $app, $elmtType, $criId)
     {
 
-        $em = self::getEntityManager();
+        $em = $this->em;
         switch($elmtType){
             case 'activity' :
                 $criterion = $em->getRepository(Criterion::class)->find($criId);
@@ -3443,7 +3426,7 @@ class OrganizationController extends MasterController
     public function deleteRecurringAction(Request $request, Application $app, $rctId)
     {
 
-        $em           = self::getEntityManager();
+        $em           = $this->em;
         $recurring    = $em->getRepository(Recurring::class)->find($rctId);
         $organization = $recurring->getOrganization();
         $organization->removeRecurring($recurring);
@@ -3465,7 +3448,7 @@ class OrganizationController extends MasterController
     public function archiveActivityAction(Request $request, Application $app, $actId)
     {
 
-        $em       = self::getEntityManager();
+        $em       = $this->em;
         $activity = $em->getRepository(Activity::class)->find($actId);
         $activity->setArchived(new DateTime);
         $em->persist($activity);
@@ -3475,7 +3458,7 @@ class OrganizationController extends MasterController
 
     public function restoreActivityAction(Request $request, Application $app, $actId)
     {
-        $em       = self::getEntityManager();
+        $em       = $this->em;
         $activity = $em->getRepository(Activity::class)->find($actId);
         $activity->setArchived(null);
         $em->persist($activity);
@@ -3493,22 +3476,22 @@ class OrganizationController extends MasterController
      */
     public function getAllActivitiesAction(Request $request, Application $app)
     {
-        $entityManager = self::getEntityManager();
+        $entityManager = $this->em;
         $repoO         = $entityManager->getRepository(Organization::class);
         $repoDec       = $entityManager->getRepository(Decision::class);
-        $currentUser   = self::getAuthorizedUser();
+        $currentUser   = $this->user;
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
         $currentUsrId         = $currentUser->getId();
         $orgId                = $currentUser->getOrgId();
         $organization         = $repoO->find($orgId);
         $formFactory          = $app['form.factory'];
-        $delegateActivityForm = $formFactory->create(DelegateActivityForm::class, null, ['app' => $app, 'standalone' => true]);
+        $delegateActivityForm = $this->createForm(DelegateActivityForm::class, null, ['app' => $app, 'standalone' => true]);
         $delegateActivityForm->handleRequest($request);
-        $validateRequestForm = $formFactory->create(DelegateActivityForm::class, null, ['app' => $app, 'standalone' => true, 'request' => true]);
+        $validateRequestForm = $this->createForm(DelegateActivityForm::class, null, ['app' => $app, 'standalone' => true, 'request' => true]);
         $validateRequestForm->handleRequest($request);
-        $requestActivityForm = $formFactory->create(RequestActivityForm::class, null, ['app' => $app, 'standalone' => true]);
+        $requestActivityForm = $this->createForm(RequestActivityForm::class, null, ['app' => $app, 'standalone' => true]);
         $requestActivityForm->handleRequest($request);
 
         $userActivities = $organization->getActivities();
@@ -3556,7 +3539,7 @@ class OrganizationController extends MasterController
         $releasedActivities     = $userActivities->matching(Criteria::create()->where(Criteria::expr()->eq("status", 3)));
         $archivedActivities     = $userActivities->matching(Criteria::create()->where(Criteria::expr()->eq("status", 4)));
 
-        return $app['twig']->render('activity_list.html.twig',
+        return $this->render('activity_list.html.twig',
             [
                 'organization'                       => $organization,
                 'user_activities'                    => $userActivities,
@@ -3591,7 +3574,7 @@ class OrganizationController extends MasterController
     public function displayFirmSettingsAction(Request $request)
     {
 
-        $connectedUser = self::getAuthorizedUser();
+        $connectedUser = $this->user;
         $repoO                     = $this->em->getRepository(Organization::class);
         $organization              = $repoO->find($connectedUser->getOrgId());
         $enabledCreatingUserOption = false;
@@ -3621,11 +3604,11 @@ class OrganizationController extends MasterController
     public function updateFirmSettingsAction(Request $request, Application $app)
     {
 
-        $connectedUser = self::getAuthorizedUser();
+        $connectedUser = $this->user;
         if (!$connectedUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
-        $em                        = self::getEntityManager();
+        $em                        = $this->em;
         $repoO                     = $em->getRepository(Organization::class);
         $repoOUO                   = $em->getRepository(OrganizationUserOption::class);
         $repoON                    = $em->getRepository(OptionName::class);
@@ -3638,7 +3621,7 @@ class OrganizationController extends MasterController
                 $enabledCreatingUserOption = $orgOption->isOptionTrue();
             }
         }
-        $settingsOrganizationForm = $formFactory->create(SettingsOrganizationForm::class, $organization, ['standalone' => true]);
+        $settingsOrganizationForm = $this->createForm(SettingsOrganizationForm::class, $organization, ['standalone' => true]);
         $settingsOrganizationForm->handleRequest($request);
 
         if ($settingsOrganizationForm->isValid()) {
@@ -3685,22 +3668,22 @@ class OrganizationController extends MasterController
      */
     public function manageTemplatesAction(Request $request, Application $app)
     {
-        $connectedUser = self::getAuthorizedUser();
+        $connectedUser = $this->user;
         if (!$connectedUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
 
         if ($connectedUser->getRole() == 3) {
-            return $app['twig']->render('errors/403.html.twig');
+            return $this->render('errors/403.html.twig');
         }
 
-        $em           = self::getEntityManager();
+        $em           = $this->em;
         $repoTA       = $em->getRepository(TemplateActivity::class);
         $repoO        = $em->getRepository(Organization::class);
         $organization = $repoO->find($connectedUser->getOrgId());
         $templates    = $repoTA->findByOrganization($organization);
 
-        return $app['twig']->render('template_manage.html.twig',
+        return $this->render('template_manage.html.twig',
             [
                 'templates' => $templates,
                 'app'       => $app,
@@ -3720,16 +3703,16 @@ class OrganizationController extends MasterController
     public function deleteTemplateAction(Request $request, Application $app, $tmpId)
     {
 
-        $connectedUser = self::getAuthorizedUser();
+        $connectedUser = $this->user;
         if (!$connectedUser instanceof User) {
             throw new Exception('unauthorized');
         }
 
         if ($connectedUser->getRole() == 3) {
-            return $app['twig']->render('errors/403.html.twig');
+            return $this->render('errors/403.html.twig');
         }
 
-        $em     = self::getEntityManager();
+        $em     = $this->em;
         $repoTA = $em->getRepository(TemplateActivity::class);
         $repoO  = $em->getRepository(Organization::class);
         $repoA  = $em->getRepository(Activity::class);
@@ -3762,15 +3745,15 @@ class OrganizationController extends MasterController
      */
     public function updateUserActionAJAX(Request $request, Application $app, $usrId)
     {
-        $em            = self::getEntityManager();
+        $em            = $this->em;
         $repoO         = $em->getRepository(Organization::class);
         $repoOC        = $em->getRepository(Client::class);
         $searchedUser  = $em->getRepository(User::class)->find($usrId);
-        $connectedUser = self::getAuthorizedUser();
+        $connectedUser = $this->user;
         if (!$connectedUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
-        $formFactory = $app['form.factory'];
+        
 
         $searchedUserOrganization  = $repoO->find($searchedUser->getOrgId());
         $orgOptions                = $searchedUserOrganization->getOptions();
@@ -3794,19 +3777,19 @@ class OrganizationController extends MasterController
             }
 
             if (!in_array($searchedUserOrganization, $connectedUserClients) && $connectedUser->getRole() != 4) {
-                return $app['twig']->render('errors/403.html.twig');
+                return $this->render('errors/403.html.twig');
             }
 
             $userForm = (!in_array($searchedUserOrganization, $connectedUserClients)) ?
-                $formFactory->create(UserType::class, $searchedUser, ['standalone' => true, 'organization' => $searchedUserOrganization]) :
-                $formFactory->create(ClientUserType::class, $searchedUser, ['standalone' => true, 'clients' => $connectedUserOrgClients]);
+                $this->createForm(UserType::class, $searchedUser, ['standalone' => true, 'organization' => $searchedUserOrganization]) :
+                $this->createForm(ClientUserType::class, $searchedUser, ['standalone' => true, 'clients' => $connectedUserOrgClients]);
 
         } else {
             if ($connectedUser->getRole() == 2 || $connectedUser->getRole() == 3) {
-                return $app['twig']->render('errors/403.html.twig');
+                return $this->render('errors/403.html.twig');
             }
 
-            $userForm = $formFactory->create(UserType::class, $searchedUser, ['standalone' => true, 'organization' => $searchedUserOrganization, 'enabledCreatingUser' => $enabledCreatingUserOption]);
+            $userForm = $this->createForm(UserType::class, $searchedUser, ['standalone' => true, 'organization' => $searchedUserOrganization, 'enabledCreatingUser' => $enabledCreatingUserOption]);
         }
 
         $userForm->handleRequest($request);
@@ -3937,13 +3920,13 @@ class OrganizationController extends MasterController
      */
     public function elementAvgResultPerCriterionAction(Application $app, string $elmtType)
     {
-        $currentUser = self::getAuthorizedUser();
+        $currentUser = $this->user;
         if (!$currentUser) {
             return $this->redirectToRoute('login');
         }
 
         $org = $currentUser->getOrganization();
-        $em  = self::getEntityManager();
+        $em  = $this->em;
 
         /** @var \Repository\OrganizationRepository */
         $orgRepo = $em->getRepository(Organization::class);
@@ -3954,7 +3937,7 @@ class OrganizationController extends MasterController
             return "$name ($count)";
         }, $orgRepo->findCriteriaWithPublishedStages($org));
 
-        return $app['twig']->render('element_result_per_criterion.html.twig', [
+        return $this->render('element_result_per_criterion.html.twig', [
             'criterionChoices' => $criteria,
         ]);
     }
@@ -3970,16 +3953,16 @@ class OrganizationController extends MasterController
     public function elementOverviewAction(
         Application $app, $elmtType, $elmtId, $orgEnabledCreatingUser = false
     ) {
-        $em          = self::getEntityManager();
-        $repoAU      = $em->getRepository(ActivityUser::class);
+        $em          = $this->em;
+        $repoAU      = $em->getRepository(Participation::class);
         $repoG       = $em->getRepository(Grade::class);
         $repoT       = $em->getRepository(Team::class);
         $repoO       = $em->getRepository(Organization::class);
         $repoRP      = $em->getRepository(ResultProject::class);
         $repoS       = $em->getRepository(Stage::class);
-        $currentUser = self::getAuthorizedUser();
+        $currentUser = $this->user;
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
         $currentUserOrganization = $repoO->find($currentUser->getOrgId());
 
@@ -4005,7 +3988,7 @@ class OrganizationController extends MasterController
         $hasPageAccess = true;
         if ($elmtType == 'user') {
             if (($currentUser->getRole() != 4 && $currentUser->getRole() != 1 && !($user->getDepartment($app)->getMasterUser() == $currentUser) && ($currentUser->getOrgId() != $organization->getId()) || ($orgEnabledCreatingUser && $currentUser->isEnabledCreatingUser()))) {
-                return $app['twig']->render('errors/403.html.twig');
+                return $this->render('errors/403.html.twig');
             }
         } else {
             foreach ($team->getTeamUsers() as $teamUser) {
@@ -4017,12 +4000,12 @@ class OrganizationController extends MasterController
         }
 
         if (!$hasPageAccess) {
-            return $app['twig']->render('errors/403.html.twig');
+            return $this->render('errors/403.html.twig');
         } else {
 
-            $currentUser = self::getAuthorizedUser();
+            $currentUser = $this->user;
             if (!$currentUser instanceof User) {
-                return $app->redirect($app['url_generator']->generate('login'));
+                return $this->redirectToRoute('login');
             }
             $hasContribActivities          = false;
             $elementParticipations         = $repoAU->findBy([$resultParticipantProperty => $resultParticipantValue, 'status' => [3, 4]], ['inserted' => 'ASC']);
@@ -4237,7 +4220,7 @@ class OrganizationController extends MasterController
                 }
             }
 
-            return $app['twig']->render('element_overview.html.twig',
+            return $this->render('element_overview.html.twig',
                 [
                     'indivGrades'               => $elementIndivGrades,
                     'projectGrades'             => $elementProjectGrades,
@@ -4271,13 +4254,13 @@ class OrganizationController extends MasterController
      */
     public function getElementResPerCrtGraphAction(string $elmtType, int $participationType, int $cName)
     {
-        $currentUser = self::getAuthorizedUser();
+        $currentUser = $this->user;
         if (!$currentUser) {
             throw new \Exception;
         }
 
         $organization = $currentUser->getOrganization();
-        $em           = self::getEntityManager();
+        $em           = $this->em;
 
         // data fields for graph/chart
         $graphData             = [];
@@ -4344,14 +4327,14 @@ class OrganizationController extends MasterController
     public function getElementGraphAction(
         Application $app, $elmtType, $actElmt, $mode, $elmtId, $participationType, $cName
     ) {
-        $em          = self::getEntityManager();
-        $repoAU      = $em->getRepository(ActivityUser::class);
+        $em          = $this->em;
+        $repoAU      = $em->getRepository(Participation::class);
         $repoG       = $em->getRepository(Grade::class);
         $repoU       = $em->getRepository(User::class);
         $repoO       = $em->getRepository(Organization::class);
-        $currentUser = self::getAuthorizedUser();
+        $currentUser = $this->user;
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
         $organization = $repoO->find($currentUser->getOrgId());
 
@@ -4874,8 +4857,8 @@ class OrganizationController extends MasterController
     public function oldGetElementGraphAction(Request $request, Application $app, $elmtType, $actElmt, $participationType, $elmtId, $cName)
     {
 
-        $em     = self::getEntityManager();
-        $repoAU = $em->getRepository(ActivityUser::class);
+        $em     = $this->em;
+        $repoAU = $em->getRepository(Participation::class);
         $repoG  = $em->getRepository(Grade::class);
         $repoU  = $em->getRepository(User::class);
 
@@ -4892,9 +4875,9 @@ class OrganizationController extends MasterController
             $elementValue    = $repoE->find($elmtId);
         }
 
-        $currentUser = self::getAuthorizedUser();
+        $currentUser = $this->user;
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
         $hasContribActivities = false;
         switch ($participationType) {
@@ -5052,7 +5035,7 @@ class OrganizationController extends MasterController
      */
     public function saveImageElementReportAction(Request $request, Application $app, $elmtType, $elmtId, $type, $cName)
     {
-        $em            = self::getEntityManager();
+        $em            = $this->em;
         $repoI         = $em->getRepository(GeneratedImage::class);
         $criterionName = null;
         if ($cName != 0) {
@@ -5088,8 +5071,8 @@ class OrganizationController extends MasterController
                 '_feedbacks' : ((!isset($_POST['settings_graphs']) && !isset($_POST['settings_comments']) && isset($_POST['settings_results_tables'])) ?
                     '_detailed_tables' : '')));
 
-        $em     = self::getEntityManager();
-        $repoAU = $em->getRepository(ActivityUser::class);
+        $em     = $this->em;
+        $repoAU = $em->getRepository(Participation::class);
         $repoG  = $em->getRepository(Grade::class);
         $repoI  = $em->getRepository(GeneratedImage::class);
 
@@ -5114,9 +5097,9 @@ class OrganizationController extends MasterController
             $gradedElmtId              = 'gradedTeaId';
         }
 
-        $currentUser = self::getAuthorizedUser();
+        $currentUser = $this->user;
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
         $hasContribActivities     = false;
         $elementParticipations    = $repoAU->findBy([$resultParticipantProperty => $resultParticipantValue, 'status' => [3, 4]], ['inserted' => 'ASC']);
@@ -5343,7 +5326,7 @@ class OrganizationController extends MasterController
 
         $elmtName = ($elmtType == 'user') ? $element->getFirstname() . ' ' . $element->getLastname() : $element->getName();
 
-        $html2 = $app['twig']->render('element_report.html.twig', [
+        $html2 = $this->render('element_report.html.twig', [
             'criterionResults'     => $criterionResults,
             'stageResults'         => $stageResults,
             'activityResults'      => $activityResults,
@@ -5404,8 +5387,8 @@ class OrganizationController extends MasterController
     public function viewUserReportAction(Request $request, Application $app, $usrId)
     {
 
-        $em                   = self::getEntityManager();
-        $repoAU               = $em->getRepository(ActivityUser::class);
+        $em                   = $this->em;
+        $repoAU               = $em->getRepository(Participation::class);
         $repoG                = $em->getRepository(Grade::class);
         $repoU                = $em->getRepository(User::class);
         $repoR                = $em->getRepository(Result::class);
@@ -5455,7 +5438,7 @@ class OrganizationController extends MasterController
             }
         }
 
-        return $app['twig']->render('user_report.html.twig', [
+        return $this->render('user_report.html.twig', [
             'results'              => $userResults,
             'grades'               => $userGrades,
             'user'                 => $user,
@@ -5486,17 +5469,17 @@ class OrganizationController extends MasterController
      */
     public function deleteUserAction(Request $request, Application $app, $usrId)
     {
-        $em          = self::getEntityManager();
-        $repoAU      = $em->getRepository(ActivityUser::class);
+        $em          = $this->em;
+        $repoAU      = $em->getRepository(Participation::class);
         $repoU       = $em->getRepository(User::class);
         $repoO       = $em->getRepository(Organization::class);
         $repoD       = $em->getRepository(Department::class);
         $repoP       = $em->getRepository(Position::class);
         $repoW       = $em->getRepository(Weight::class);
         $user        = $repoU->find($usrId);
-        $currentUser = self::getAuthorizedUser();
+        $currentUser = $this->user;
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
         $currentUserOrgId = $currentUser->getOrgId();
         if ($currentUserOrgId != $user->getOrgId()) {
@@ -5550,11 +5533,11 @@ class OrganizationController extends MasterController
      * @Route("/settings/client/{cliId}/delete", name="clientDelete")
      */
     public function deleteClientAction(Request $request, Application $app, $cliId){
-        $em = self::getEntityManager();
+        $em = $this->em;
         $repoC  = $em->getRepository(Client::class);
-        $currentUser = self::getAuthorizedUser();
+        $currentUser = $this->user;
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
         /** @var Client */
         $client = $repoC->find($cliId);
@@ -5595,10 +5578,10 @@ class OrganizationController extends MasterController
      */
     public function deleteClientUserAction(Request $request, Application $app, $extId)
     {
-        $em          = self::getEntityManager();
-        $currentUser = self::getAuthorizedUser();
+        $em          = $this->em;
+        $currentUser = $this->user;
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
         $repoO       = $em->getRepository(Organization::class);
         $organization = $repoO->find($currentUser->getOrgId());
@@ -5606,7 +5589,7 @@ class OrganizationController extends MasterController
         $externalUser = $repoEU->find($extId);
         /** @var User */
         $relatedInternalUser = $externalUser->getUser();
-        $repoAU = $em->getRepository(ActivityUser::class);
+        $repoAU = $em->getRepository(Participation::class);
         $externalUserParticipations = $repoAU->findBy(['activity' => $organization->getActivities()->getValues(), 'usrId' => $relatedInternalUser->getId()]);
 
         if(sizeof($externalUserParticipations) == 0){
@@ -5637,17 +5620,17 @@ class OrganizationController extends MasterController
      */
     public function manageTeamAction(Request $request, Application $app, $teaId = null)
     {
-        $em = self::getEntityManager();
+        $em = $this->em;
         $repoT = $em->getRepository(Team::class);
         $team = $teaId ? $repoT->find($teaId) : new Team;
 
-        $currentUser = self::getAuthorizedUser();
+        $currentUser = $this->user;
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
 
         if (!$team->isModifiable()) {
-            return $app['twig']->render('errors/403.html.twig');
+            return $this->render('errors/403.html.twig');
         }
 
         if($teaId == null){
@@ -5655,14 +5638,14 @@ class OrganizationController extends MasterController
             $team->setOrganization($organization);
             $team->setName($organization->getTeams()->count() + 1);
         }
-        $formFactory = $app['form.factory'];
-        $manageTeamForm = $formFactory->create(AddTeamForm::class, $team, ['standalone' => true]);
+        
+        $manageTeamForm = $this->createForm(AddTeamForm::class, $team, ['standalone' => true]);
         $manageTeamForm->handleRequest($request);
         if($manageTeamForm->isValid()){
             $em->flush();
             return $app->redirect($app['url_generator']->generate('manageUsers'));
         }
-        return $app['twig']->render('team_manage.html.twig',
+        return $this->render('team_manage.html.twig',
             [
                 'form' => $manageTeamForm->createView(),
             ]);
@@ -5671,13 +5654,13 @@ class OrganizationController extends MasterController
     public function addAjaxTeamAction(Request $request, Application $app)
     {
 
-        $em          = self::getEntityManager();
+        $em          = $this->em;
         $repoU       = $em->getRepository(User::class);
         $repoO       = $em->getRepository(Organization::class);
         $repoT       = $em->getRepository(Team::class);
-        $currentUser = self::getAuthorizedUser();
+        $currentUser = $this->user;
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
         $organization = $repoO->find($currentUser->getOrgId());
 
@@ -5726,21 +5709,21 @@ class OrganizationController extends MasterController
     public function updateTeamAction(Request $request, Application $app, $teaId)
     {
 
-        $currentUser = self::getAuthorizedUser();
+        $currentUser = $this->user;
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
         $adminFullName = $currentUser->getFirstname() . " " . $currentUser->getLastname();
         $id            = $currentUser->getId();
         $orgId         = $currentUser->getOrgId();
-        $em            = self::getEntityManager();
+        $em            = $this->em;
         $repoO         = $em->getRepository(Organization::class);
         $repoT         = $em->getRepository(Team::class);
         $team          = $repoT->find($teaId);
         $organization  = $repoO->find($orgId);
 
         if ($currentUser->getRole() != 4 && $team->getOrganization() != $organization) {
-            return $app['twig']->render('/errors/403.html.twig');
+            return $this->render('/errors/403.html.twig');
         }
 
         $teamUsers   = $team->getActiveTeamUsers();
@@ -5749,7 +5732,7 @@ class OrganizationController extends MasterController
             $teamUsersId[] = $teamUser->getUser($app)->getId();
         }
 
-        return $app['twig']->render('team_manage.html.twig',
+        return $this->render('team_manage.html.twig',
             [
                 'team'         => $team,
                 'organization' => $organization,
@@ -5762,14 +5745,14 @@ class OrganizationController extends MasterController
     public function updateAjaxTeamAction(Request $request, Application $app, $teaId)
     {
 
-        $em          = self::getEntityManager();
+        $em          = $this->em;
         $repoU       = $em->getRepository(User::class);
         $repoO       = $em->getRepository(Organization::class);
         $repoT       = $em->getRepository(Team::class);
-        $repoAU      = $em->getRepository(ActivityUser::class);
-        $currentUser = self::getAuthorizedUser();
+        $repoAU      = $em->getRepository(Participation::class);
+        $currentUser = $this->user;
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
         $organization      = $repoO->find($currentUser->getOrgId());
         $team              = $repoT->find($teaId);
@@ -5870,7 +5853,7 @@ class OrganizationController extends MasterController
 
             if (count($addedUsersFullName) > 0) {
 
-                $uncompletedTeamParticipations = $teamParticipations->filter(function (ActivityUser $participation) {
+                $uncompletedTeamParticipations = $teamParticipations->filter(function (Participation $participation) {
                     return $participation->getActivity()->getStatus() < 2;
                 });
 
@@ -5918,8 +5901,8 @@ class OrganizationController extends MasterController
                         $consideredActivity = $activity;
                         $linesToDuplicate   = $teamParticipations->matching(Criteria::create()->where(Criteria::expr()->eq("activity", $activity))->andWhere(Criteria::expr()->eq("usrId", $teamParticipation->getUsrId())));
                         foreach ($linesToDuplicate as $line) {
-                            $activityUser = new ActivityUser;
-                            $activityUser->setLeader($line->isLeader())
+                            $Participation = new Participation;
+                            $Participation->setLeader($line->isLeader())
                                 ->setType($line->getType())
                                 ->setActivity($line->getActivity())
                                 ->setUsrId($usrId)
@@ -5931,7 +5914,7 @@ class OrganizationController extends MasterController
                                 ->setMWeight($line->getMWeight())
                                 ->setPrecomment($line->getPrecomment())
                                 ->setIsMailed($line->getIsMailed());
-                            $em->persist($activityUser);
+                            $em->persist($Participation);
                         }
                     }
                 }
@@ -6010,12 +5993,12 @@ class OrganizationController extends MasterController
      */
     public function deleteTeamAction(Request $request, Application $app, $teaId)
     {
-        $currentUser = self::getAuthorizedUser();
+        $currentUser = $this->user;
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
         $orgId        = $currentUser->getOrgId();
-        $em           = self::getEntityManager();
+        $em           = $this->em;
         $repoO        = $em->getRepository(Organization::class);
         $repoT        = $em->getRepository(Team::class);
         $team         = $repoT->find($teaId);
@@ -6023,7 +6006,7 @@ class OrganizationController extends MasterController
         $teamName     = $team->getName();
 
         if ($team->getOrganization() != $organization) {
-            return $app['twig']->render('/errors/403.html.twig');
+            return $this->render('/errors/403.html.twig');
         }
 
         // We choose to delete team previously, but we will keep it in database instead and set him a deleted timestamp
@@ -6052,9 +6035,9 @@ class OrganizationController extends MasterController
 
         $locale = 'fr';
 
-        $em               = self::getEntityManager();
+        $em               = $this->em;
         $formFactory      = $app['form.factory'];
-        $organizationForm = $formFactory->create(AddOrganizationForm::class, null, ['standalone' => true, 'orgId' => 0, 'app' => $app, 'isFromClient' => true]);
+        $organizationForm = $this->createForm(AddOrganizationForm::class, null, ['standalone' => true, 'orgId' => 0, 'app' => $app, 'isFromClient' => true]);
         $organizationForm->handleRequest($request);
         $errorMessage = '';
         $organization = new Organization;
@@ -6227,12 +6210,12 @@ class OrganizationController extends MasterController
                 $settings['orgName'] = $orgCommercialName;
                 self::sendMail($app, $recipients, 'subscriptionAcknowledgmentReceipt', $settings);
 
-                return $app->redirect($app['url_generator']->generate('login'));
+                return $this->redirectToRoute('login');
             }
 
         }
 
-        return $app['twig']->render('organization_add.html.twig',
+        return $this->render('organization_add.html.twig',
             [
                 'form'        => $organizationForm->createView(),
                 'message'     => $errorMessage,
@@ -6293,13 +6276,13 @@ class OrganizationController extends MasterController
         $id = $request->get('id');
         $type = $request->get('type');
         $organization = MasterController::getAuthorizedUser()->getOrganization();
-        $formFactory = $app['form.factory'];
+        
         /** @var InstitutionProcess|Process */
         $element = $type == 'p' ? $this->em->getRepository(Process::class)->find($id) : $this->em->getRepository(InstitutionProcess::class)->find($id);
         $elementInitialName = $element->getName();
         $elementInitialParent = $element->getParent();
         $elmtType = $type == 'p' ? 'process' : 'iprocess';
-        $validateProcessForm = $formFactory->create(AddProcessForm::class, $element, ['standalone' => true, 'organization' => $organization, 'elmt' => $elmtType]);
+        $validateProcessForm = $this->createForm(AddProcessForm::class, $element, ['standalone' => true, 'organization' => $organization, 'elmt' => $elmtType]);
         $validateProcessForm->handleRequest($request);
         if($validateProcessForm->isValid()){
             $element->setApprovable(false);
@@ -6343,7 +6326,7 @@ class OrganizationController extends MasterController
                 break;
             case 'activity':
                 $repoE = $this->em->getRepository(Activity::class);
-                $repoU = $this->em->getRepository(ActivityUser::class);
+                $repoU = $this->em->getRepository(Participation::class);
                 $redirect = $this->redirectToRoute('myActivities');
                 break;
             default:
@@ -6397,10 +6380,10 @@ class OrganizationController extends MasterController
                             $mailSettings['activity'] = $element;
                         }
 
-                        $notYetMailedParticipants = $stage->getDistinctParticipations()->filter(function (ActivityUser $p) {
+                        $notYetMailedParticipants = $stage->getDistinctParticipations()->filter(function (Participation $p) {
                             return !$p->getisMailed();
                         });
-                        /** @var ActivityUser[] */
+                        /** @var Participation[] */
                         $participants = $notYetMailedParticipants->getValues();
                         $recipients   = [];
                         foreach ($participants as $participant) {

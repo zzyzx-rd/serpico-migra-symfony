@@ -188,7 +188,7 @@ class IProcessStage extends DbObject
     public $criteria;
 
     /**
-     * @OneToMany(targetEntity="IProcessActivityUser", mappedBy="stage",cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="IProcessParticipation", mappedBy="stage",cascade={"persist", "remove"}, orphanRemoval=true)
      * @OrderBy({"team" = "ASC"})
      */
     public $participants;
@@ -875,7 +875,7 @@ class IProcessStage extends DbObject
 
 
     /**
-     * @return Collection|IProcessActivityUser[]
+     * @return Collection|IProcessParticipation[]
      */
     public function getUniqueIntParticipations()
     {
@@ -891,7 +891,7 @@ class IProcessStage extends DbObject
     }
 
     /**
-     * @return Collection|IProcessActivityUser[]
+     * @return Collection|IProcessParticipation[]
      */
     public function getUniqueExtParticipations()
     {
@@ -906,7 +906,7 @@ class IProcessStage extends DbObject
     }
 
     /**
-     * @return Collection|IProcessActivityUser[]
+     * @return Collection|IProcessParticipation[]
      */
     public function getUniqueTeamParticipations()
     {
@@ -980,7 +980,7 @@ class IProcessStage extends DbObject
         return $this;
     }
 
-    public function addParticipant(IProcessActivityUser $participant): IProcessStage
+    public function addParticipant(IProcessParticipation $participant): IProcessStage
     {
 
         $this->participants->add($participant);
@@ -988,13 +988,13 @@ class IProcessStage extends DbObject
         return $this;
     }
 
-    public function removeParticipant(IProcessActivityUser $participant): IProcessStage
+    public function removeParticipant(IProcessParticipation $participant): IProcessStage
     {
         $this->participants->removeElement($participant);
         return $this;
     }
 
-    public function addUniqueParticipation(IProcessActivityUser $participant): IProcessStage
+    public function addUniqueParticipation(IProcessParticipation $participant): IProcessStage
     {
         foreach($this->criteria as $criterion){
             $criterion->addParticipant($participant);
@@ -1003,7 +1003,7 @@ class IProcessStage extends DbObject
         return $this;
     }
 
-    public function removeUniqueParticipation(IProcessActivityUser $participant): IProcessStage
+    public function removeUniqueParticipation(IProcessParticipation $participant): IProcessStage
     {
         $participantUsrId = $participant->getUsrId();
         foreach ($this->participants as $theParticipant) {
@@ -1039,7 +1039,7 @@ class IProcessStage extends DbObject
     }
 
     /**
-     * @return Collection|IProcessActivityUser[]
+     * @return Collection|IProcessParticipation[]
      */
     public function getIndependantUniqueParticipations()
     {
@@ -1061,37 +1061,37 @@ class IProcessStage extends DbObject
         }
         return $uniqueParticipants;
     }
-    public function addIndependantUniqueIntParticipation(IProcessActivityUser $participant): IProcessStage
+    public function addIndependantUniqueIntParticipation(IProcessParticipation $participant): IProcessStage
     {
         $this->addUniqueParticipation($participant);
         return $this;
     }
 
-    public function removeIndependantUniqueIntParticipation(IProcessActivityUser $participant): IProcessStage
+    public function removeIndependantUniqueIntParticipation(IProcessParticipation $participant): IProcessStage
     {
         $this->removeUniqueParticipation($participant);
         return $this;
     }
 
-    public function addIndependantUniqueExtParticipation(IProcessActivityUser $participant): IProcessStage
+    public function addIndependantUniqueExtParticipation(IProcessParticipation $participant): IProcessStage
     {
         $this->addUniqueParticipation($participant);
         return $this;
     }
 
-    public function removeIndependantUniqueExtParticipation(IProcessActivityUser $participant): IProcessStage
+    public function removeIndependantUniqueExtParticipation(IProcessParticipation $participant): IProcessStage
     {
         $this->removeUniqueParticipation($participant);
         return $this;
     }
 
-    public function addIndependantUniqueTeamParticipation(ActivityUser $participant): IProcessStage
+    public function addIndependantUniqueTeamParticipation(Participation $participant): IProcessStage
     {
         $this->addUniqueTeamParticipation($participant);
         return $this;
     }
 
-    public function removeIndependantUniqueTeamParticipation(ActivityUser $participant): IProcessStage
+    public function removeIndependantUniqueTeamParticipation(Participation $participant): IProcessStage
     {
         $this->removeUniqueTeamParticipation($participant);
         return $this;

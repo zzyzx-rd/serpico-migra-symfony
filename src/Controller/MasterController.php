@@ -14,7 +14,7 @@ use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException as ORMExceptionAlias;
 use Exception;
 use App\Entity\Activity;
-use App\Entity\ActivityUser;
+use App\Entity\Participation;
 use App\Entity\Criterion;
 use App\Entity\Department;
 use App\Entity\Mail;
@@ -33,7 +33,7 @@ use App\Entity\ResultTeam;
 use App\Entity\Stage;
 use App\Entity\Team;
 use App\Entity\User;
-use App\Repository\ActivityUserRepository;
+use App\Repository\ParticipationRepository;
 use App\Repository\UserRepository;
 use Swift_Image;
 use Swift_Mailer;
@@ -216,7 +216,7 @@ abstract class MasterController extends AbstractController
 
         if ($cond == 'participant') {
             return $stages->filter(function (Stage $s) use ($id) {
-                return $s->getParticipants()->forAll(function (int $i, ActivityUser $p) use ($id) {
+                return $s->getParticipants()->forAll(function (int $i, Participation $p) use ($id) {
                     return $p->getUsrId() != $id;
                 });
             })->map(function (Stage $s) {
@@ -308,7 +308,7 @@ abstract class MasterController extends AbstractController
                     $notifiedUsers = new ArrayCollection;
                     $settings['stages'] = [];
                     foreach($notifyingGroupStage as $notifyingStage){
-                        $owner = $notifyingStage->getUniqueParticipations()->filter(function(ActivityUser $p){
+                        $owner = $notifyingStage->getUniqueParticipations()->filter(function(Participation $p){
                             return $p->isLeader();
                         })->first();
 
@@ -597,7 +597,7 @@ abstract class MasterController extends AbstractController
     public function sendStageDeadlineMails($forAllFirms = true)
     {
         $repoS = $this->em->getRepository(Stage::class);
-        $repoAU = $this->em->getRepository(ActivityUser::class);
+        $repoAU = $this->em->getRepository(Participation::class);
         $repoON = $this->em->getRepository(OptionName::class);
         $repoOP = $this->em->getRepository(OrganizationUserOption::class);
         $deadlineOption = $repoON->findOneByName('mailDeadlineNbDays');
@@ -1129,7 +1129,7 @@ abstract class MasterController extends AbstractController
 
         $em = self::getEntityManager();
         $entityManager = $this->getEntityManager($app);
-        /** @var ActivityUser[] */
+        /** @var Participation[] */
 
         $uniqueNonPassiveParticipations = $stage->getUniqueGraderParticipations();
         $computable = (count($uniqueNonPassiveParticipations) > 0);
@@ -1198,13 +1198,13 @@ abstract class MasterController extends AbstractController
 
             if ($completedActivity) {
                 $activityStage = false;
-                $activityUser = false;
+                $Participation = false;
                 // Recalculate all the data (but not update the database)
                 if (count($stage->getCriteria()) > 0) {//
                     foreach ($activity->getStages() as $stage) {
                         if ($stage->getMode() != MasterController::STAGE_ONLY) {
-                            $dataActivityUser[$stage->getId()] = $this->computeStageResults($stage, MasterController::USERS_ONLY, false);
-                            $activityUser = true;
+                            $dataParticipation[$stage->getId()] = $this->computeStageResults($stage, MasterController::USERS_ONLY, false);
+                            $Participation = true;
                         }
                         if ($stage->getMode() != MasterController::USERS_ONLY) {
                             $dataActivityStage[$stage->getId()] = $this->computeStageResults($stage, MasterController::STAGE_ONLY, false);
@@ -1212,8 +1212,8 @@ abstract class MasterController extends AbstractController
                         }
 
                     }
-                    if ($activityUser) {
-                        MasterController::computeActivityResult($activity, $dataActivityUser, MasterController::USERS_ONLY, $addInDb);
+                    if ($Participation) {
+                        MasterController::computeActivityResult($activity, $dataParticipation, MasterController::USERS_ONLY, $addInDb);
                     }
                     if ($activityStage) {
                         MasterController::computeActivityResult($activity, $dataActivityStage, MasterController::STAGE_ONLY, $addInDb);
@@ -1259,14 +1259,14 @@ abstract class MasterController extends AbstractController
     {
         $em = self::getEntityManager();
         # The repos to access the data in the database
-        $repoAU = $em->getRepository(ActivityUser::class);
+        $repoAU = $em->getRepository(Participation::class);
         # The user who created the activity
         $currentUser = MasterController::getAuthorizedUser();
         $criteria = $stage->getCriteria();
 
 
         $activity = $stage->getActivity();
-        $activityUsers = new ArrayCollection($repoAU->findBy(['criterion' => $criteria->first()], ['type' => 'ASC', 'team' => 'ASC']));
+        $participations = new ArrayCollection($repoAU->findBy(['criterion' => $criteria->first()], ['type' => 'ASC', 'team' => 'ASC']));
         # the data send to the framework for the criteria calculation
         $jsonData = [];
         $jsonData["userWeights"] = [];
@@ -1281,7 +1281,7 @@ abstract class MasterController extends AbstractController
         # Build the users and teams lists
         $concernedTeam = null;
 
-        foreach ($activityUsers as $au) {
+        foreach ($participations as $p) {
             $jsonData["userWeights"][$au->getUsrId()] = $au->getDirectUser()->getWeight()->getValue();
             $jsonGlobalDataStage["user"][] = $au->getUsrId();
             # if new team
@@ -1320,7 +1320,7 @@ abstract class MasterController extends AbstractController
             $jsonGlobalDataStage[$criterion->getId()] = $calculatedValues[$criterion->getId()];
             $jsonGlobalDataStage[$criterion->getId()]["weight"] = $criterion->getWeight();
             if ($addInDB) {
-                MasterController::addDataInDataBase($em, $activity, $stage, $criterion, $activityUsers, $currentUser, $resultType, $calculatedValues, $stageMode);
+                MasterController::addDataInDataBase($em, $activity, $stage, $criterion, $participations, $currentUser, $resultType, $calculatedValues, $stageMode);
             }
         }
 
@@ -1334,7 +1334,7 @@ abstract class MasterController extends AbstractController
         # Add all the calculated data about the stage in the data base
 
         if ($addInDB) {
-            MasterController::addDataInDataBase($em, $activity, $stage, null, $activityUsers, $currentUser, 0, $calculatedValues, $stageMode);
+            MasterController::addDataInDataBase($em, $activity, $stage, null, $participations, $currentUser, 0, $calculatedValues, $stageMode);
         }
 
         return $calculatedValues;
@@ -1355,7 +1355,7 @@ abstract class MasterController extends AbstractController
     public static function prepareJsonDataCriteria(int $stageMode, $criteria, $repoAU, $jsonData)
     {
         foreach ($criteria as $criterion) {
-            $activityUsers = new ArrayCollection($repoAU->findBy(['criterion' => $criterion], ['type' => 'ASC', 'team' => 'ASC']));
+            $participations = new ArrayCollection($repoAU->findBy(['criterion' => $criterion], ['type' => 'ASC', 'team' => 'ASC']));
             $jsonData["criterias"][$criterion->getId()] = [];
             $jsonData["criterias"][$criterion->getId()]["userGrades"] = [];
             $jsonData["criterias"][$criterion->getId()]["teamGrades"] = [];
@@ -1365,7 +1365,7 @@ abstract class MasterController extends AbstractController
                 $jsonData["criterias"][$criterion->getId()]["upperBound"] = $criterion->getUpperbound();
             }
             # Loop on the graders
-            foreach ($activityUsers as $au) {
+            foreach ($participations as $p) {
                 #  Loop on the graded
                 $nbTeamMember = 0;
                 foreach ($au->getGrades() as $grade) {
@@ -1432,7 +1432,7 @@ abstract class MasterController extends AbstractController
      * @param Activity $activity : current activity
      * @param Stage|null $stage : current stage, is null if the function compute the global data for an activity
      * @param Criterion|null $criterion : can be null if the function compute the global data for an activity or a stage
-     * @param $activityUsers : liste of the activityUsers, used for individual data computation
+     * @param $participations : liste of the Participations, used for individual data computation
      * @param $currentUser : the one who created the activity
      * @param $resultType : ??
      * @param $calculatedValues : values send by the  framework of result calculation
@@ -1442,12 +1442,12 @@ abstract class MasterController extends AbstractController
      * add all the values in the database (set the global data, and the individual with setIndividualData
      */
     public static function addDataInDataBase(
-        EntityManager $em, Activity $activity, ?Stage $stage, ?Criterion $criterion, $activityUsers, $currentUser, $resultType, $calculatedValues, int $stageMode
+        EntityManager $em, Activity $activity, ?Stage $stage, ?Criterion $criterion, $participations, $currentUser, $resultType, $calculatedValues, int $stageMode
     )
     {
         if ($stageMode != MasterController::STAGE_ONLY) {
             # Compute the individual results for all users
-            foreach ($activityUsers as $user) {
+            foreach ($participations as $user) {
                 try {
                     MasterController::setIndividualData($em, $activity, $stage, $criterion, $currentUser, "users", $calculatedValues, $user->getUsrId(), $user->getType(),$user->getExtUsrId(), "user", $stageMode,);
                 } catch (ORMExceptionAlias $e) {
@@ -1455,7 +1455,7 @@ abstract class MasterController extends AbstractController
             }
             # Compute the teams results
             $concernedTeam = null;
-            foreach ($activityUsers as $au) {
+            foreach ($participations as $p) {
                 if ($au->getTeam() !== null && $au->getTeam() != $concernedTeam) {
                     $concernedTeam = $au->getTeam();
                     try {
@@ -1608,7 +1608,7 @@ abstract class MasterController extends AbstractController
         }
         $result->setCreatedBy($currentUser->getId());
         # Add the results (weighted, equal, relative)
-        if ($entityType != ActivityUser::PARTICIPATION_THIRD_PARTY && $stageMode != MasterController::STAGE_ONLY) {
+        if ($entityType != Participation::PARTICIPATION_THIRD_PARTY && $stageMode != MasterController::STAGE_ONLY) {
             $result->setCriterion($criteria)
                 ->setStage($stage)
                 ->setActivity($activity)
@@ -1621,7 +1621,7 @@ abstract class MasterController extends AbstractController
 
         }
         # add the deviation information
-        if ($entityType != ActivityUser::PARTICIPATION_PASSIVE && $stageMode != MasterController::STAGE_ONLY) {
+        if ($entityType != Participation::PARTICIPATION_PASSIVE && $stageMode != MasterController::STAGE_ONLY) {
             $result->setCriterion($criteria)
                 ->setStage($stage)
                 ->setActivity($activity)
@@ -1697,9 +1697,9 @@ abstract class MasterController extends AbstractController
     public static function computeActivityResult(Activity $activity, $dataActivity, int $stageMode, bool $addInDb = true)
     {
         $em = self::getEntityManager();
-        $repoAU = $em->getRepository(ActivityUser::class);
+        $repoAU = $em->getRepository(Participation::class);
         $repoRT = $em->getRepository(ResultTeam::class);
-        $activityUsers = new ArrayCollection($repoAU->findBy(['criterion' => $activity->getStages()->first()->getCriteria()->first()], ['type' => 'ASC', 'team' => 'ASC']));
+        $participations = new ArrayCollection($repoAU->findBy(['criterion' => $activity->getStages()->first()->getCriteria()->first()], ['type' => 'ASC', 'team' => 'ASC']));
         # refactor the dataActivity, to correspond to the framework
         foreach ($dataActivity as $key => $step) {
             $dataActivity[$key] = $step["step"];
@@ -1708,7 +1708,7 @@ abstract class MasterController extends AbstractController
         $dataActivity["user"] = [];
         $dataActivity["team"] = [];
         $concernedTeam = null;
-        foreach ($activityUsers as $au) {
+        foreach ($participations as $p) {
             $dataActivity["user"][] = $au->getUsrId();
             # if new team
             if ($au->getTeam() !== null && $au->getTeam() != $concernedTeam && $stageMode != MasterController::STAGE_ONLY) {
@@ -1735,7 +1735,7 @@ abstract class MasterController extends AbstractController
         $calculatedValues = MasterController::callFramework($jsonFile, MasterController::ACTIVITY);
         # Add the data in the database
         if ($addInDb){
-            MasterController::addDataInDataBase($em, $activity, null, null, $activityUsers, $currentUser, 0, $calculatedValues, $stageMode);
+            MasterController::addDataInDataBase($em, $activity, null, null, $participations, $currentUser, 0, $calculatedValues, $stageMode);
         }
 
     }

@@ -48,6 +48,10 @@ class UniquePerOrganization extends Constraint
         return $this->message;
     }
 
+    public function getEntityManager(){
+        return $this->em;
+    }
+
     /**
      * Get class constraints and properties
      *

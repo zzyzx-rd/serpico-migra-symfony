@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
-use Model\Client;
+use App\Entity\Client;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;

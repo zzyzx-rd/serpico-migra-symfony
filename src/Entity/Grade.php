@@ -64,9 +64,9 @@ class Grade extends DbObject
      */
     protected $team;
     /**
-     * @ManyToOne(targetEntity="ActivityUser", inversedBy="grades")
+     * @ManyToOne(targetEntity="Participation", inversedBy="grades")
      * @JoinColumn(name="activity_user_user_usr_id", referencedColumnName="a_u_id",nullable=false)
-     * @var ActivityUser
+     * @var Participation
      */
     protected $participant;
     /**
@@ -96,7 +96,7 @@ class Grade extends DbObject
      * @param $grd_createdBy
      * @param $grd_inserted
      * @param $team
-     * @param ActivityUser $participant
+     * @param Participation $participant
      * @param $activity
      * @param $criterion
      * @param $stage
@@ -112,7 +112,7 @@ class Grade extends DbObject
         $grd_createdBy = null,
         $grd_inserted = null,
         Team $team = null,
-        ActivityUser $participant = null,
+        Participation $participant = null,
         Activity$activity = null,
         Criterion $criterion = null,
         Stage $stage = null)
@@ -215,17 +215,17 @@ class Grade extends DbObject
     }
 
     /**
-     * @return ActivityUser
+     * @return Participation
      */
-    public function getGradedParticipant(): ActivityUser
+    public function getGradedParticipant(): Participation
     {
         return $this->participant;
     }
 
     /**
-     * @param ActivityUser $participant
+     * @param Participation $participant
      */
-    public function setParticipant(ActivityUser $participant): void
+    public function setParticipant(Participation $participant): void
     {
         $this->participant = $participant;
     }

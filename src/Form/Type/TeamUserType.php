@@ -50,9 +50,9 @@ class TeamUserType extends AbstractType
                     'class' => User::class,
                     'choice_label' => 'invertedFullName',
                     'query_builder' => function (EntityRepository $er) use ($organization, $currentUser) {
-                        $orgId = $organization ? $organization->getId() : $currentUser->getOrganization()->getId();
+                        $theOrganization = $organization ?: $currentUser->getOrganization();
                         return $er->createQueryBuilder('u')
-                            ->where("u.orgId = $orgId")
+                            ->where("u.organization = $theOrganization")
                             ->andWhere("u.deleted is NULL")
                             ->andWhere("u.lastname != 'ZZ'")
                             ->orderBy('u.lastname', 'asc');

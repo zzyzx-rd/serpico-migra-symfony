@@ -107,31 +107,6 @@ class User extends DbObject implements  UserInterface, \Serializable
     public $weight_ini;
 
     /**
-     * @ORM\Column(name="usr_usr_weight_1y", type="float", nullable=true)
-     */
-    public $weight_1y;
-
-    /**
-     * @ORM\Column(name="usr_weight_2y", type="float", nullable=true)
-     */
-    public $weight_2y;
-
-    /**
-     * @ORM\Column(name="usr_weight_3y", type="float", nullable=true)
-     */
-    public $weight_3y;
-
-    /**
-     * @ORM\Column(name="usr_weight_4y", type="float", nullable=true)
-     */
-    public $weight_4y;
-
-    /**
-     * @ORM\Column(name="usr_weight_5y", type="float", nullable=true)
-     */
-    public $weight_5y;
-
-    /**
      * @ORM\Column(name="usr_act_archive_nb_days", type="integer", nullable=true)
      */
     public $activitiesArchivingNbDays;
@@ -210,9 +185,9 @@ class User extends DbObject implements  UserInterface, \Serializable
     public $workerIndividual;
 
     /**
-     * @ORM\OneToMany(targetEntity=ActivityUser::class, mappedBy="user")
+     * @ORM\OneToMany(targetEntity=Participation::class, mappedBy="user")
      */
-    public $activity_user_act_usr;
+    public $participations;
 
     /**
      * @ORM\OneToMany(targetEntity=Recurring::class, mappedBy="rec_master_user")
@@ -220,7 +195,7 @@ class User extends DbObject implements  UserInterface, \Serializable
     public $Reccuring;
 
     /**
-     * @ORM\OneToMany(targetEntity=Result::class, mappedBy="user_usr")
+     * @ORM\OneToMany(targetEntity=Result::class, mappedBy="user")
      */
     public $results;
 
@@ -235,19 +210,19 @@ class User extends DbObject implements  UserInterface, \Serializable
     public $teamUsers;
 
     /**
-     * @ORM\OneToOne(targetEntity=Weight::class, inversedBy="user", cascade={"persist", "remove"})
+     * @ORM\ManyToOne(targetEntity=Weight::class, inversedBy="users")
      * @ORM\JoinColumn(name="weight_wgt_id",referencedColumnName="wgt_id", nullable=true)
      */
     public $weight;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Position::class)
+     * @ORM\ManyToOne(targetEntity=Position::class, inversedBy="users")
      * @JoinColumn(name="position_pos_id", referencedColumnName="pos_id", nullable=true)
      */
     public $position;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Department::class)
+     * @ORM\ManyToOne(targetEntity=Department::class, inversedBy="users")
      * @JoinColumn(name="department_dpt_id", referencedColumnName="dpt_id", nullable=true)
      */
     public $department;
@@ -259,7 +234,7 @@ class User extends DbObject implements  UserInterface, \Serializable
     public $title;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Organization::class)
+     * @ORM\ManyToOne(targetEntity=Organization::class, inversedBy="users")
      * @ORM\JoinColumn(nullable=false, name="organization_org_id", referencedColumnName="org_id", nullable=true)
      */
     public $organization;
@@ -284,8 +259,8 @@ class User extends DbObject implements  UserInterface, \Serializable
      * User constructor.
      * @param ?int$id
      * @param bool $usr_int
-     * @param string $usr_firstname
-     * @param string $usr_lastname
+     * @param string $firstname
+     * @param string $lastname
      * @param string $usr_username
      * @param string $usr_nickname
      * @param $usr_birthdate
@@ -307,8 +282,8 @@ class User extends DbObject implements  UserInterface, \Serializable
      * @param $usr_enabledCreatingUser
      * @param $usr_createdBy
      * @param $usr_inserted
-     * @param $usr_last_connected
-     * @param $usr_deleted
+     * @param $lastConnected
+     * @param $deleted
      * @param int $role
      * @param $externalUsers
      * @param int $superior
@@ -316,7 +291,6 @@ class User extends DbObject implements  UserInterface, \Serializable
      * @param $targets
      * @param $options
      * @param $workerIndividual
-     * @param $activity_user_usr
      * @param $Reccuring
      * @param $results
      * @param $stagesWhereMaster
@@ -330,8 +304,8 @@ class User extends DbObject implements  UserInterface, \Serializable
     public function __construct(
       ?int $id = null,
         $usr_int = true,
-        $usr_firstname = '',
-        $usr_lastname = '',
+        $firstname = '',
+        $lastname = '',
         $usr_username = '',
         $usr_nickname = '',
         $usr_birthdate = null,
@@ -357,15 +331,14 @@ class User extends DbObject implements  UserInterface, \Serializable
         $usr_createdBy = null,
         $usr_inserted = null,
         $usr_validated = null,
-        $usr_last_connected = null,
-        $usr_deleted = null,
+        $lastConnected = null,
+        $deleted = null,
         $usr_enabledCreatingUser = null,
         $externalUsers = null,
         $mails = null,
         $targets = null,
         $options = null,
         $workerIndividual = null,
-        $activity_user_usr = null,
         $Reccuring = null,
         $results = null,
         $stagesWhereMaster = null,
@@ -376,8 +349,8 @@ class User extends DbObject implements  UserInterface, \Serializable
         parent::__construct($id, $usr_createdBy, new DateTime());
         $this->pictureFile = $pictureFile;
         $this->internal = $usr_int;
-        $this->firstname = $usr_firstname;
-        $this->lastname = $usr_lastname;
+        $this->firstname = $firstname;
+        $this->lastname = $lastname;
         $this->username = $usr_username;
         $this->nickname = $usr_nickname;
         $this->birthdate = $usr_birthdate;
@@ -387,28 +360,22 @@ class User extends DbObject implements  UserInterface, \Serializable
         $this->picture = $usr_picture;
         $this->token = $usr_token;
         $this->weight_ini = $usr_weight_ini;
-        $this->weight_1y = $usr_usr_weight_1y;
-        $this->weight_2y = $usr_weight_2y;
-        $this->weight_3y = $usr_weight_3y;
-        $this->weight_4y = $usr_weight_4y;
-        $this->weight_5y = $usr_weight_5y;
         $this->activitiesArchivingNbDays = $usr_act_archive_nbDays;
         $this->rememberMeToken = $usr_rm_token;
         $this->validated = $usr_validated;
         $this->enabledCreatingUser = $usr_enabledCreatingUser;
         $this->inserted = $usr_inserted;
-        $this->lastConnected = $usr_last_connected;
-        $this->deleted = $usr_deleted;
+        $this->lastConnected = $lastConnected;
+        $this->deleted = $deleted;
         $this->role = $role;
-        $this->externalUsers = $externalUsers?:new ArrayCollection();
+        $this->externalUsers = new ArrayCollection();
         $this->superior = $superior;
         $this->mails = $mails?:new ArrayCollection();
         $this->targets = $targets?:new ArrayCollection();
         $this->options = $options?:new ArrayCollection();
         $this->workerIndividual = $workerIndividual;
-        $this->activity_user_act_usr = $activity_user_usr;
         $this->Reccuring = $Reccuring;
-        $this->results = $results;
+        $this->results = new ArrayCollection();
         $this->stagesWhereMaster = $stagesWhereMaster;
         $this->teamUsers = $teamUsers;
         $this->weight = $weight;
@@ -417,7 +384,8 @@ class User extends DbObject implements  UserInterface, \Serializable
         $this->title = $title;
         $this->organization = $organization;
         $this->leadingDepartments = new ArrayCollection();
-        $this->subordinates = $subordinates?:new ArrayCollection();
+        $this->subordinates = new ArrayCollection();
+        $this->participations = new ArrayCollection();
     }
 
 
@@ -438,10 +406,9 @@ class User extends DbObject implements  UserInterface, \Serializable
         return $this->firstname;
     }
 
-    public function setFirstname(string $usr_firstname): self
+    public function setFirstname(string $firstname): self
     {
-        $this->firstname = $usr_firstname;
-
+        $this->firstname = $firstname;
         return $this;
     }
 
@@ -450,10 +417,9 @@ class User extends DbObject implements  UserInterface, \Serializable
         return $this->lastname;
     }
 
-    public function setLastname(string $usr_lastname): self
+    public function setLastname(?string $lastname): self
     {
-        $this->lastname = $usr_lastname;
-
+        $this->lastname = $lastname;
         return $this;
     }
 
@@ -565,65 +531,7 @@ class User extends DbObject implements  UserInterface, \Serializable
         return $this;
     }
 
-    public function getUsrWeight1y(): ?float
-    {
-        return $this->weight_1y;
-    }
 
-    public function setUsrWeight1y(float $usr_usr_weight_1y): self
-    {
-        $this->weight_1y = $usr_usr_weight_1y;
-
-        return $this;
-    }
-
-    public function getWeight2y(): ?float
-    {
-        return $this->weight_2y;
-    }
-
-    public function setWeight2y(float $usr_weight_2y): self
-    {
-        $this->weight_2y = $usr_weight_2y;
-
-        return $this;
-    }
-
-    public function getWeight3y(): ?float
-    {
-        return $this->weight_3y;
-    }
-
-    public function setWeight3y(float $usr_weight_3y): self
-    {
-        $this->weight_3y = $usr_weight_3y;
-
-        return $this;
-    }
-
-    public function getWeight4y(): ?float
-    {
-        return $this->weight_4y;
-    }
-
-    public function setWeight4y(float $usr_weight_4y): self
-    {
-        $this->weight_4y = $usr_weight_4y;
-
-        return $this;
-    }
-
-    public function getWeight5y(): ?float
-    {
-        return $this->weight_5y;
-    }
-
-    public function setWeight5y(float $usr_weight_5y): self
-    {
-        $this->weight_5y = $usr_weight_5y;
-
-        return $this;
-    }
 
     public function getActivitiesArchivingNbDays(): ?int
     {
@@ -669,7 +577,6 @@ class User extends DbObject implements  UserInterface, \Serializable
     public function setEnabledCreatingUser(bool $usr_enabledCreatingUser): self
     {
         $this->enabledCreatingUser = $usr_enabledCreatingUser;
-
         return $this;
     }
 
@@ -685,10 +592,9 @@ class User extends DbObject implements  UserInterface, \Serializable
         return $this->lastConnected;
     }
 
-    public function setLastConnected(?DateTimeInterface $usr_last_connected): self
+    public function setLastConnected(?DateTimeInterface $lastConnected): self
     {
-        $this->lastConnected = $usr_last_connected;
-
+        $this->lastConnected = $lastConnected;
         return $this;
     }
 
@@ -697,10 +603,9 @@ class User extends DbObject implements  UserInterface, \Serializable
         return $this->deleted;
     }
 
-    public function setDeleted(DateTimeInterface $usr_deleted): self
+    public function setDeleted(DateTimeInterface $deleted): self
     {
-        $this->deleted = $usr_deleted;
-
+        $this->deleted = $deleted;
         return $this;
     }
 
@@ -730,25 +635,6 @@ class User extends DbObject implements  UserInterface, \Serializable
     {
         $this->role = $role;
         return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getExternalUsers()
-    {
-        return $this->externalUsers;
-    }
-
-    /**
-     * @param mixed $externalUsers
-     * @return User
-     */
-    public function setExternalUsers($externalUsers): User
-    {
-        $this->externalUsers = $externalUsers;
-        return $this;
-
     }
 
     /**
@@ -795,14 +681,6 @@ class User extends DbObject implements  UserInterface, \Serializable
         return $this->targets;
     }
 
-    /**
-     * @param mixed $targets
-     */
-    public function setTargets($targets): User
-    {
-        $this->targets = $targets;
-        return $this;
-    }
 
     /**
      * @return mixed
@@ -810,16 +688,6 @@ class User extends DbObject implements  UserInterface, \Serializable
     public function getOptions()
     {
         return $this->options;
-    }
-
-    /**
-     * @param mixed $options
-     * @return User
-     */
-    public function setOptions($options): User
-    {
-        $this->options = $options;
-        return $this;
     }
 
     /**
@@ -841,33 +709,43 @@ class User extends DbObject implements  UserInterface, \Serializable
     }
 
     /**
-     * @return Collection|ActivityUser[]
+     * @return Collection|Participation[]
      */
-    public function getExternalUser(): Collection
-    {
-        return $this->activity_user_act_usr;
+    public function getParticipations(){
+        return $this->participations;
     }
 
-    public function addExternalUser(ActivityUser $externalUser): self
+    public function addParticipation(Participation $participation): self
     {
-        if (!$this->activity_user_act_usr->contains($externalUser)) {
-            $this->activity_user_act_usr[] = $externalUser;
-            $externalUser->setUser($this);
-        }
-
+        $this->participations->add($participation);
+        $participation->setUser($this);
         return $this;
     }
 
-    public function removeExternalUser(ActivityUser $externalUser): self
+    public function removeParticipation(Participation $participation): self
     {
-        if ($this->activity_user_act_usr->contains($externalUser)) {
-            $this->activity_user_act_usr->removeElement($externalUser);
-            // set the owning side to null (unless already changed)
-            if ($externalUser->getUser() === $this) {
-                $externalUser->setUser(null);
-            }
-        }
+        $this->participations->removeElement($participation);
+        return $this;
+    }
 
+    /**
+     * @return Collection|ExternalUser[]
+     */
+    public function getExternalUsers(): Collection
+    {
+        return $this->externalUsers;
+    }
+
+    public function addExternalUser(ExternalUser $externalUser): self
+    {
+        $this->externalUsers->add($externalUser);
+        $externalUser->setUser($this);
+        return $this;
+    }
+
+    public function removeExternalUser(ExternalUser $externalUser): self
+    {
+        $this->externalUsers->removeElement($externalUser);
         return $this;
     }
 
@@ -1132,7 +1010,7 @@ class User extends DbObject implements  UserInterface, \Serializable
 
     /**
      * @param Stage $stage
-     * @return Collection|ActivityUser[]
+     * @return Collection|Participation[]
      */
     public function getStageParticipations(Stage $stage)
     {

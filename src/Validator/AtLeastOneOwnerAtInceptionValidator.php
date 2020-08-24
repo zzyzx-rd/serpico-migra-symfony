@@ -9,9 +9,9 @@
 namespace App\Validator;
 
 use Doctrine\Common\Collections\ArrayCollection;
-use Model\ActivityUser;
-use Model\ExternalUser;
-use Model\Stage;
+use App\Entity\Participation;
+use App\Entity\ExternalUser;
+use App\Entity\Stage;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Constraint;

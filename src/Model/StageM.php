@@ -4,7 +4,7 @@
 namespace App\Model;
 
 
-use App\Entity\ActivityUser;
+use App\Entity\Participation;
 use App\Entity\Stage;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -14,14 +14,14 @@ class StageM extends ModelEntity
 {
     public function getSelfParticipations(Stage $stage): ArrayCollection
     {
-        return $stage->participants->filter(function(ActivityUser $p){
+        return $stage->participants->filter(function(Participation $p){
             return $p->getUser() == $this->currentUser;
         });
     }
 
     /**
      * @param Stage $stage
-     * @return Collection|ActivityUser[]
+     * @return Collection|Participation[]
      */
     public function getUniqueParticipations(Stage $stage)
     {
@@ -67,18 +67,18 @@ class StageM extends ModelEntity
             return true;
         }
 
-        if ($stage->getMasterUser() == $connectedUser && ($stage->getUniqueGraderParticipations() === null || !$stage->getUniqueGraderParticipations()->exists(static function(int $i, ActivityUser $p){return $p->isLeader();}))) {
+        if ($stage->getMasterUser() == $connectedUser && ($stage->getUniqueGraderParticipations() === null || !$stage->getUniqueGraderParticipations()->exists(static function(int $i, Participation $p){return $p->isLeader();}))) {
             return true;
         }
 
         return $stage->getUniqueGraderParticipations()->exists(
-            static function (int $i, ActivityUser $p) use ($connectedUser) { return $p->getUser() === $connectedUser && $p->isLeader(); }
+            static function (int $i, Participation $p) use ($connectedUser) { return $p->getUser() === $connectedUser && $p->isLeader(); }
         );
     }
 
     /**
      * @param Stage $stage
-     * @return Collection|ActivityUser[]
+     * @return Collection|Participation[]
      */
     public function getUniqueGraderParticipations(Stage $stage)
     {
@@ -87,7 +87,7 @@ class StageM extends ModelEntity
 
     /**
      * @param Stage $stage
-     * @return Collection|ActivityUser[]
+     * @return Collection|Participation[]
      */
     public function getUniqueGradableParticipations(Stage $stage)
     {

@@ -292,9 +292,9 @@ class UserType extends AbstractType
 
         if ($options['standalone']){
             $builder->add('submit', SubmitType::class,[
-                'label_format' => 'update',
+                'label' => '[link]',
                 'attr' => [
-                    'class' => 'btn-large waves-effect waves-light teal lighten-1 user-submit',
+                    'class' => 'btn waves-effect waves-light blue darken-2 user-submit',
                 ]
             ]);
         }

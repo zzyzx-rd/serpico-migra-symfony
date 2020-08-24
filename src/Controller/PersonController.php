@@ -33,7 +33,7 @@ class PersonController extends MasterController
      */
     public function elementOverviewAction($elmtType, $elmtId, $orgEnabledCreatingUser = false) {
         $em          = $this->em;
-        $repoAU      = $em->getRepository(ActivityUser::class);
+        $repoAU      = $em->getRepository(Participation::class);
         $repoG       = $em->getRepository(Grade::class);
         $repoT       = $em->getRepository(Team::class);
         $repoO       = $em->getRepository(Organization::class);
@@ -327,7 +327,7 @@ class PersonController extends MasterController
      * @param Application $app
      * @param $usrId
      * @return mixed
-     * @Route("/settings/user/{usrId}", name="updateUser")
+     * @Route("/settings/user/{usrId}", name="updateUser", methods={"GET","POST"})
      */
     public function updateUserAction(Request $request, $usrId)
     {
@@ -391,6 +391,12 @@ class PersonController extends MasterController
             $organizationElementForm = $this->createForm(OrganizationElementType::class, null, ['usedForUserCreation' => false, 'standalone' => true, 'organization' => $searchedUserOrganization]);
             $updateUserForm->handleRequest($request);
             $organizationElementForm->handleRequest($request);
+
+            if($updateUserForm->isSubmitted() && $updateUserForm->isValid()){
+                $em->persist($searchedUser);
+                $em->flush();
+                return $this->redirectToRoute('manageUsers');
+            }
 
             return $this->render('user_update.html.twig',
                 [

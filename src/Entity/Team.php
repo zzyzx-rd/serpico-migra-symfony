@@ -69,7 +69,7 @@ class Team extends DbObject
     protected $teamUsers;
 
     /**
-     * @OneToMany(targetEntity="ActivityUser", mappedBy="team", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="Participation", mappedBy="team", cascade={"persist", "remove"}, orphanRemoval=true)
      */
     protected $participations;
 

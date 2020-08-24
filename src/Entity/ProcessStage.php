@@ -195,7 +195,7 @@ class ProcessStage extends DbObject
     public $criteria;
 
     /**
-     * @OneToMany(targetEntity="IProcessActivityUser", mappedBy="stage",cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="IProcessParticipation", mappedBy="stage",cascade={"persist", "remove"}, orphanRemoval=true)
      * @OrderBy({"team" = "ASC"})
      */
     public $participants;
@@ -932,7 +932,7 @@ class ProcessStage extends DbObject
         return $this;
     }
 
-    public function addParticipant(IProcessActivityUser $participant): ProcessStage
+    public function addParticipant(IProcessParticipation $participant): ProcessStage
     {
 
         $this->participants->add($participant);
@@ -940,13 +940,13 @@ class ProcessStage extends DbObject
         return $this;
     }
 
-    public function removeParticipant(IProcessActivityUser $participant): ProcessStage
+    public function removeParticipant(IProcessParticipation $participant): ProcessStage
     {
         $this->participants->removeElement($participant);
         return $this;
     }
 
-    public function addUniqueParticipation(IProcessActivityUser $participant): ProcessStage
+    public function addUniqueParticipation(IProcessParticipation $participant): ProcessStage
     {
         foreach($this->criteria as $criterion){
             $criterion->addParticipant($participant);
@@ -955,7 +955,7 @@ class ProcessStage extends DbObject
         return $this;
     }
 
-    public function removeUniqueParticipation(IProcessActivityUser $participant): ProcessStage
+    public function removeUniqueParticipation(IProcessParticipation $participant): ProcessStage
     {
         foreach($this->criteria as $criterion){
             $criterion->getParticipants()->removeElement($participant);

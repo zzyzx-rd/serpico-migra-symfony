@@ -15,7 +15,7 @@ use App\Entity\SurveyField;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormTypeInterface;
-use App\Entity\ActivityUser;
+use App\Entity\Participation;
 use App\Entity\Grade;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;

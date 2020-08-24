@@ -24,7 +24,7 @@ use App\Form\ManageStageParticipantsForm;
 use App\Form\RequestActivityForm;
 use App\Form\Type\StageUniqueParticipationsType;
 use App\Entity\Activity;
-use App\Entity\ActivityUser;
+use App\Entity\Participation;
 use App\Entity\Answer;
 use App\Entity\Client;
 use App\Entity\Criterion;
@@ -37,7 +37,7 @@ use App\Entity\GeneratedImage;
 use App\Entity\Grade;
 use App\Entity\Icon;
 use App\Entity\InstitutionProcess;
-use App\Entity\IProcessActivityUser;
+use App\Entity\IProcessParticipation;
 use App\Entity\IProcessCriterion;
 use App\Entity\IProcessStage;
 use App\Entity\Organization;
@@ -84,7 +84,7 @@ class ActivityController extends MasterController
         $activity = new Activity ;
         $stage = new Stage ;
         //$criterion = $isActivity ? new Criterion : new TemplateCriterion;
-        //$participant = $isActivity ? new ActivityUser : new TemplateActivityUser;
+        //$participant = $isActivity ? new Participation : new TemplateParticipation;
 
         $startDate = new DateTime;
         $activityStartDate = clone $startDate;
@@ -1219,10 +1219,10 @@ class ActivityController extends MasterController
 //
 //                foreach ($activity->getActiveModifiableStages() as $stage) {
 //                    // add newly added people that were not AJAX-added
-//                    $newlyAddedParticipantsCollection = $stage->getUniqueParticipations()->filter(function (ActivityUser $u) {
+//                    $newlyAddedParticipantsCollection = $stage->getUniqueParticipations()->filter(function (Participation $u) {
 //                        return !$u->getId();
 //                    });
-//                    /** @var ActivityUser[] */
+//                    /** @var Participation[] */
 //                    $newlyAddedParticipants = $newlyAddedParticipantsCollection->getValues();
 //
 //                    foreach ($newlyAddedParticipants as $participant) {
@@ -1242,10 +1242,10 @@ class ActivityController extends MasterController
 //                        $mailSettings['activity'] = $activity;
 //                    }
 //
-//                    $notYetMailedParticipants = $stage->getUniqueParticipations()->filter(function (ActivityUser $u) {
+//                    $notYetMailedParticipants = $stage->getUniqueParticipations()->filter(function (Participation $u) {
 //                        return !$u->getisMailed();
 //                    });
-//                    /** @var ActivityUser[] */
+//                    /** @var Participation[] */
 //                    $participants = $notYetMailedParticipants->getValues();
 //
 //                    foreach ($participants as $participant) {
@@ -1377,11 +1377,11 @@ class ActivityController extends MasterController
         switch($elmtType){
             case 'iprocess' :
                 $repoS = $em->getRepository(IProcessStage::class);
-                $repoAU = $em->getRepository(IProcessActivityUser::class);
+                $repoAU = $em->getRepository(IProcessParticipation::class);
                 break;
             case 'activity' :
                 $repoS = $em->getRepository(Stage::class);
-                $repoAU = $em->getRepository(ActivityUser::class);
+                $repoAU = $em->getRepository(Participation::class);
                 break;
         }
         $repoU = $em->getRepository(User::class);
@@ -1401,7 +1401,7 @@ class ActivityController extends MasterController
             throw new Exception('unauthorized');
         }
 
-        /** @var ActivityUser|IProcessActivityUser|TemplateActivityUser|null */
+        /** @var Participation|IProcessParticipation|TemplateParticipation|null */
         $participant = $repoAU->find($elmtId);
 
 
@@ -1455,14 +1455,14 @@ class ActivityController extends MasterController
 
             // Getting participations depending of part elmt type
             if($pElmtType == 'user'){
-                /** @var ActivityUser[]|IProcessActivityUser[]|TemplateActivityUser[] */
+                /** @var Participation[]|IProcessParticipation[]|TemplateParticipation[] */
                 $participations = $repoAU->findBy([
                     'stage' => $stage,
                     'usrId' => $participant->getUsrId(),
                     'team' => null,
                 ]);
             } else {
-                 /** @var ActivityUser[]|IProcessActivityUser[]|TemplateActivityUser[] */
+                 /** @var Participation[]|IProcessParticipation[]|TemplateParticipation[] */
                  $participations = $repoAU->findBy([
                     'stage' => $stage,
                     'team' => $participant->getTeam(),
@@ -1474,7 +1474,7 @@ class ActivityController extends MasterController
         if($elmtType == 'activity' && ($participant == null || $participant->getType() == 0 && $type != 0)){
 
             // Checking if we need to unvalidate participations (we decide to unlock all stage participations and not only the modified one)
-            $completedStageParticipations = $stage->getParticipants()->filter(function(ActivityUser $p){
+            $completedStageParticipations = $stage->getParticipants()->filter(function(Participation $p){
                 return $p->getStatus() == 3;
             });
 
@@ -1506,7 +1506,7 @@ class ActivityController extends MasterController
         foreach ($iterableElements as $iterableElement) {
 
             // If participations are existing for submitted participant
-            if ($iterableElement instanceof ActivityUser || $iterableElement instanceof IProcessActivityUser || $iterableElement instanceof TemplateActivityUser) {
+            if ($iterableElement instanceof Participation || $iterableElement instanceof IProcessParticipation || $iterableElement instanceof TemplateParticipation) {
                 $participation = $iterableElement;
                 $criterion = $participation->getCriterion();
                 $consideredParticipations[] = $participation;
@@ -1518,12 +1518,12 @@ class ActivityController extends MasterController
                 switch($elmtType){
                     case 'activity' :
                         if($pElmtType == 'user'){
-                            $participation = new ActivityUser;
+                            $participation = new Participation;
                             $consideredParticipations[] = $participation;
                         } else {
                             foreach($pElement->getCurrentTeamUsers() as $currentTeamUser){
 //                                var_dump($currentTeamUser->getUsrId());
-                                $participation = new ActivityUser;
+                                $participation = new Participation;
                                 $participation->setUsrId($currentTeamUser->getUsrId())
                                     ->setExtUsrId($currentTeamUser->getExtUsrId());
                                 $consideredParticipations[] = $participation;
@@ -1532,11 +1532,11 @@ class ActivityController extends MasterController
                         break;
                     case 'iprocess' :
                         if($pElmtType == 'user'){
-                            $participation = new IProcessActivityUser;
+                            $participation = new IProcessParticipation;
                             $consideredParticipations[] = $participation;
                         } else {
                             foreach($pElement->getCurrentTeamUsers() as $currentTeamUser){
-                                $participation = new IProcessActivityUser;
+                                $participation = new IProcessParticipation;
                                 $participation->setUsrId($currentTeamUser->getUsrId())
                                     ->setExtUsrId($currentTeamUser->getExtUsrId());
                                 $consideredParticipations[] = $participation;
@@ -1545,11 +1545,11 @@ class ActivityController extends MasterController
                         break;
                     case 'template' :
                         if($pElmtType == 'user'){
-                            $participation = new TemplateActivityUser;
+                            $participation = new TemplateParticipation;
                             $consideredParticipations[] = $participation;
                         } else {
                             foreach($pElement->getCurrentTeamUsers() as $currentTeamUser){
-                                $participation = new TemplateActivityUser;
+                                $participation = new TemplateParticipation;
                                 $participation->setUsrId($currentTeamUser->getUsrId())
                                     ->setExtUsrId($currentTeamUser->getExtUsrId());
                                 $consideredParticipations[] = $participation;
@@ -1595,7 +1595,7 @@ class ActivityController extends MasterController
 
                 if($leader){$consideredParticipation->setLeader($leader);}
 
-                if ($consideredParticipation instanceof IProcessActivityUser) {
+                if ($consideredParticipation instanceof IProcessParticipation) {
                     $consideredParticipation->setInstitutionProcess($element);
                 } else {
                     $consideredParticipation->setActivity($element);
@@ -1607,7 +1607,7 @@ class ActivityController extends MasterController
                     $consideredParticipation->setPrecomment(null);
                 }
 
-                if ($consideredParticipation instanceof ActivityUser) {
+                if ($consideredParticipation instanceof Participation) {
                     //$consideredParticipation->setIsMailed(false);
 
                     if ($leader) {
@@ -1616,7 +1616,7 @@ class ActivityController extends MasterController
                         /** @var Criterion|Stage */
                         $queryableElmt = $criterion ?: $stage;
 
-                        $previousOwningParticipants = $queryableElmt->getParticipants()->filter(function(ActivityUser $p) use ($consideredParticipation){
+                        $previousOwningParticipants = $queryableElmt->getParticipants()->filter(function(Participation $p) use ($consideredParticipation){
                             return ($consideredParticipation->getTeam() ?
                                 $p->getTeam() != $consideredParticipation->getTeam() :
                                 $p->getUsrId() != $consideredParticipation->getUsrId())
@@ -1736,7 +1736,7 @@ class ActivityController extends MasterController
         $repoU = $em->getRepository(User::class);
         $repoT = $em->getRepository(Team::class);
         $repoTU = $em->getRepository(TeamUser::class);
-        $repoAU = $em->getRepository(ActivityUser::class);
+        $repoAU = $em->getRepository(Participation::class);
 
         /** @var Team */
         $team = $teaId != 0 ? $repoT->find($teaId) : new Team;
@@ -1774,7 +1774,7 @@ class ActivityController extends MasterController
 
             //We unvalidate team user participations of non-completed activities, in order for them to grade team newcomer
             $teamParticipations = new ArrayCollection($repoAU->findBy(['team' => $teaId], ['activity' => 'ASC']));
-            $uncompletedTeamParticipations = $teamParticipations->filter(function (ActivityUser $participation) {
+            $uncompletedTeamParticipations = $teamParticipations->filter(function (Participation $participation) {
                 return $participation->getActivity()->getStatus() < 2;
             });
 
@@ -1822,8 +1822,8 @@ class ActivityController extends MasterController
                     $consideredActivity = $activity;
                     $linesToDuplicate   = $teamParticipations->matching(Criteria::create()->where(Criteria::expr()->eq("activity", $activity))->andWhere(Criteria::expr()->eq("usrId", $teamParticipation->getUsrId())));
                     foreach ($linesToDuplicate as $line) {
-                        $activityUser = new ActivityUser;
-                        $activityUser->setLeader($line->isLeader())
+                        $Participation = new Participation;
+                        $Participation->setLeader($line->isLeader())
                             ->setType($line->getType())
                             ->setActivity($line->getActivity())
                             ->setUsrId($usrId)
@@ -1835,7 +1835,7 @@ class ActivityController extends MasterController
                             ->setMWeight($line->getMWeight())
                             ->setPrecomment($line->getPrecomment())
                             ->setIsMailed($line->getIsMailed());
-                        $em->persist($activityUser);
+                        $em->persist($Participation);
                     }
                 }
             }
@@ -1892,19 +1892,19 @@ class ActivityController extends MasterController
         switch ($elmtType) {
             case 'activity':
                 $repoS = $em->getRepository(Stage::class);
-                $repoAU = $em->getRepository(ActivityUser::class);
+                $repoAU = $em->getRepository(Participation::class);
                 $stage = $repoS->find($stgId);
                 $stageOrganization = $stage->getActivity()->getOrganization();
                 break;
             case 'template':
                 $repoS = $em->getRepository(TemplateStage::class);
-                $repoAU = $em->getRepository(TemplateActivityUser::class);
+                $repoAU = $em->getRepository(TemplateParticipation::class);
                 $stage = $repoS->find($stgId);
                 $stageOrganization = $stage->getActivity()->getOrganization();
                 break;
             case 'iprocess':
                 $repoS = $em->getRepository(IProcessStage::class);
-                $repoAU = $em->getRepository(IProcessActivityUser::class);
+                $repoAU = $em->getRepository(IProcessParticipation::class);
                 $stage = $repoS->find($stgId);
                 $stageOrganization = $stage->getInstitutionProcess()->getOrganization();
                 break;
@@ -1929,7 +1929,7 @@ class ActivityController extends MasterController
             $em->persist($stage);
             $em->flush();
             if ($elmtType == 'activity') {
-                $activeParticipants = $stage->getParticipants()->filter(function (ActivityUser $p) {
+                $activeParticipants = $stage->getParticipants()->filter(function (Participation $p) {
                     return $p->getType() != 0;
                 });
                 $finalizable = count($activeParticipants) > 0 && (count($stage->getCriteria()) > 0 || $stage->getSurvey() != null);
@@ -2005,11 +2005,11 @@ class ActivityController extends MasterController
 
         if ($elmt == 'activity') {
             $activity = $em->getRepository(Activity::class)->find($elmtId);
-            $repoAU = $em->getRepository(ActivityUser::class);
+            $repoAU = $em->getRepository(Participation::class);
             $repoG = $em->getRepository(Grade::class);
         } else {
             $activity = $em->getRepository(TemplateActivity::class)->find($elmtId);
-            $repoAU = $em->getRepository(TemplateActivityUser::class);
+            $repoAU = $em->getRepository(TemplateParticipation::class);
         }
 
         $currentUser = self::getAuthorizedUser();
@@ -2051,11 +2051,11 @@ class ActivityController extends MasterController
 
             if ($elmt == 'activity') {
                 $activity = $em->getRepository(Activity::class)->find($elmtId);
-                $repoAU = $em->getRepository(ActivityUser::class);
+                $repoAU = $em->getRepository(Participation::class);
                 $repoG = $em->getRepository(Grade::class);
             } else {
                 $activity = $em->getRepository(TemplateActivity::class)->find($elmtId);
-                $repoAU = $em->getRepository(TemplateActivityUser::class);
+                $repoAU = $em->getRepository(TemplateParticipation::class);
             }
 
             $currentUser = self::getAuthorizedUser();
@@ -2331,9 +2331,9 @@ class ActivityController extends MasterController
                             $participant = $existingParticipant;
                         } else {
                             if ($elmt == 'template') {
-                                $participant = new TemplateActivityUser;
+                                $participant = new TemplateParticipation;
                             } else {
-                                $participant = new ActivityUser;
+                                $participant = new Participation;
                                 $stageUser = $repoU->find($userData['usrId']);
                                 if ($stageUser->getEmail() !== null) {
                                     $addedStageUsers[] = $repoU->find($userData['usrId']);
@@ -2409,7 +2409,7 @@ class ActivityController extends MasterController
 
                                             if ($elmt == 'activity') {
                                                 if ($teamUserParticipant == null) {
-                                                    $teamUserParticipant = new ActivityUser;
+                                                    $teamUserParticipant = new Participation;
                                                     $addedStageTeamUsers[] = $user;
                                                     // If a user has recently been added to a team while some team members have already locked their grades, we "unlock" their participation (note they will only be able to grade these fresh new added team users)
                                                     if (!$unvalidateTeamGradesTrigger && $teamData['ttype'] == 1) {
@@ -2440,7 +2440,7 @@ class ActivityController extends MasterController
 
                                             } else {
                                                 if ($teamUserParticipant == null) {
-                                                    $teamUserParticipant = new TemplateActivityUser;
+                                                    $teamUserParticipant = new TemplateParticipation;
                                                 }
                                             }
 
@@ -2498,7 +2498,7 @@ class ActivityController extends MasterController
 
                                 if ($elmt == 'activity') {
 
-                                    $teamUserParticipant = new ActivityUser;
+                                    $teamUserParticipant = new Participation;
 
                                     // If a nonTP participant team is added while a participant has already locked his grades, we "unlock" his participation (note he will only be able to grade these fresh new added participants)
                                     if (!$unvalidateGradesTrigger && $teamData['ttype'] == 1) {
@@ -2517,7 +2517,7 @@ class ActivityController extends MasterController
                                     $mailTeamSettings['addedParticipants'][] = $user;
 
                                 } else {
-                                    $teamUserParticipant = new TemplateActivityUser;
+                                    $teamUserParticipant = new TemplateParticipation;
                                 }
 
                                 $teamUserParticipant->setTeam($team)->setStage($stage)->setActivity($activity)->setUsrId($teamUserId)->setType($teamType)->setLeader($teamLeader);
@@ -3504,8 +3504,8 @@ class ActivityController extends MasterController
 //                if ($newCriteria) {
 //                    // criteria were added, invalidate all grades from participants in the stage
 //                    // who have *confirmed* their grading (status == 3) and notify them by email
-//                    /** @var ActivityUser[] */
-//                    $participations = $formStage->getParticipants()->filter(function (ActivityUser $a) {
+//                    /** @var Participation[] */
+//                    $participations = $formStage->getParticipants()->filter(function (Participation $a) {
 //                        return $a->getStatus() === 3;
 //                    })->getValues();
 //                    foreach ($participations as $participation) {
@@ -3955,7 +3955,7 @@ class ActivityController extends MasterController
         $em = $this->getEntityManager($app);
         
         $repo0 = $em->getRepository(Survey::class);
-        $repo2 = $em->getRepository(ActivityUser::class);
+        $repo2 = $em->getRepository(Participation::class);
         $repo1 = $em->getRepository(Answer::class);
         $survey = $repo0->findOneBy(array('stage' => $stgId));
         $currentUser = MasterController::getAuthorizedUser();
@@ -4113,7 +4113,7 @@ class ActivityController extends MasterController
             return $this->redirectToRoute('login');
         }
 
-        $repoAU = $em->getRepository(ActivityUser::class);
+        $repoAU = $em->getRepository(Participation::class);
         $repo1 = $em->getRepository(Answer::class);
         $stage = $em->getRepository(Stage::class)->find($stgId);
         if($stage->getSurvey()!=null){
@@ -4170,7 +4170,7 @@ class ActivityController extends MasterController
             return $this->redirectToRoute('login');
         }
         $repoO = $em->getRepository(Organization::class);
-        $repoAU = $em->getRepository(ActivityUser::class);
+        $repoAU = $em->getRepository(Participation::class);
         $repoG = $em->getRepository(Grade::class);
         $stage = $em->getRepository(Stage::class)->find($stgId);
         $organization = $repoO->find($currentUser->getOrgId());
@@ -4415,7 +4415,7 @@ class ActivityController extends MasterController
 
         $em = self::getEntityManager();
         $currentUser = self::getAuthorizedUser();
-        $repoAU = $em->getRepository(ActivityUser::class);
+        $repoAU = $em->getRepository(Participation::class);
         $repoG = $em->getRepository(Grade::class);
 
         //Get all participants
@@ -4638,7 +4638,7 @@ class ActivityController extends MasterController
     {
         set_time_limit(300);
         $repoA = $em->getRepository(Activity::class);
-        $repoAU = $em->getRepository(ActivityUser::class);
+        $repoAU = $em->getRepository(Participation::class);
         $repoGI = $em->getRepository(GeneratedImage::class);
         $user = self::getAuthorizedUser();
         if (!$user instanceof User) {
@@ -4827,7 +4827,7 @@ class ActivityController extends MasterController
     {
         $em = self::getEntityManager();
         $repoA = $em->getRepository(Activity::class);
-        $repoAU = $em->getRepository(ActivityUser::class);
+        $repoAU = $em->getRepository(Participation::class);
         $repoR = $em->getRepository(Result::class);
         $repoG = $em->getRepository(Grade::class);
         $repoU = $em->getRepository(User::class);
@@ -4926,10 +4926,10 @@ class ActivityController extends MasterController
         }
 
         if ($stgIndex == -1) {
-            $hasAccess = $activity->getParticipants()->exists(function(int $i, ActivityUser $p) use ($subordinates){return in_array($p->getDirectUser(), $subordinates);});
+            $hasAccess = $activity->getParticipants()->exists(function(int $i, Participation $p) use ($subordinates){return in_array($p->getDirectUser(), $subordinates);});
         } else {
             $stage = $activity->getStages()[$stgIndex];
-            $hasAccess = $stage->getParticipants()->exists(function(int $i, ActivityUser $p) use ($subordinates){return in_array($p->getDirectUser(), $subordinates);});
+            $hasAccess = $stage->getParticipants()->exists(function(int $i, Participation $p) use ($subordinates){return in_array($p->getDirectUser(), $subordinates);});
         }
 
         if (!$hasAccess) {
@@ -6381,7 +6381,7 @@ class ActivityController extends MasterController
                     $nbFBCriteria = 0;
 
                     foreach ($activityParticipants as $activityParticipant) {
-                        if ($activityParticipant instanceof ActivityUser) {
+                        if ($activityParticipant instanceof Participation) {
                             if ($activityParticipant->getType() == -1) {
                                 continue;
                             }
@@ -6396,7 +6396,7 @@ class ActivityController extends MasterController
                     }
 
                     foreach ($uniqueActivityParticipants as $uniqueActivityParticipant) {
-                        if ($uniqueActivityParticipant instanceof ActivityUser) {
+                        if ($uniqueActivityParticipant instanceof Participation) {
                             $dataParticipant = [];
                             $dataParticipant['label'] = $uniqueActivityParticipant->getUser()->getFullname() ?: $uniqueActivityParticipant->getUser()->getOrganization()->getCommname();
                             $dataParticipant['type'] = 'number';
@@ -6667,18 +6667,18 @@ class ActivityController extends MasterController
                 if ($stgIndex == -1) {
                     $userId = $user->getId();
 
-                    return $activity->getParticipants()->filter(function (ActivityUser $e) use ($userId) {
+                    return $activity->getParticipants()->filter(function (Participation $e) use ($userId) {
                         return $e->getUsrId() == $userId;
-                    })->forAll(function (int $i, ActivityUser $e) {
+                    })->forAll(function (int $i, Participation $e) {
                         return $e->isLeader();
                     });
                 } else {
                     /** @var Stage */
                     $stage = $activity->getStages()->get($stgIndex);
-                    /** @var ActivityUser */
-                    $activityUser = $repoAU->findOneBy(['stage' => $stage, 'usrId' => $user->getId()]);
+                    /** @var Participation */
+                    $Participation = $repoAU->findOneBy(['stage' => $stage, 'usrId' => $user->getId()]);
 
-                    return $activityUser and $activityUser->isLeader();
+                    return $Participation and $Participation->isLeader();
                 }
             }
 
@@ -6756,7 +6756,7 @@ class ActivityController extends MasterController
 
         //Get users associated to activity
         $em = self::getEntityManager();
-        $repoAU = $em->getRepository(ActivityUser::class);
+        $repoAU = $em->getRepository(Participation::class);
         $repoA = $em->getRepository(Activity::class);
         $repoU = $em->getRepository(User::class);
         $repoG = $em->getRepository(Grade::class);
@@ -6823,23 +6823,23 @@ class ActivityController extends MasterController
                     $gradeValues = [];
 
                     //getting all activity users results (old : ordered by result, not by DB entry to keep same user at same place)
-                    //$activityUsers = $repoAU->findBy(['criterion' => $criterion], ['absoluteWeightedResult' => 'DESC']);
-                    $activityUsers = $repoAU->findBy(['criterion' => $criterion], ['type' => 'DESC']);
+                    //$participations = $repoAU->findBy(['criterion' => $criterion], ['absoluteWeightedResult' => 'DESC']);
+                    $participations = $repoAU->findBy(['criterion' => $criterion], ['type' => 'DESC']);
 
                     //$results = $repoR->find
 
                     //get participant id order in a array to sort criterionData by the same method used in sorting participants
                     $orderedIds = [];
-                    foreach ($activityUsers as $activityUser) {
-                        $orderedIds[] = $activityUser->getUsrId();
+                    foreach ($participations as $Participation) {
+                        $orderedIds[] = $Participation->getUsrId();
                     }
 
                     //Get participants feedbacks on his performance, sorted accordingly to retrieve relevant results
-                    foreach ($activityUsers as $key => $activityUser) {
+                    foreach ($participations as $key => $Participation) {
 
                         $userGrades = $repoG->findBy(
                             ['criterion' => $criterion,
-                                'participant' => $activityUser],
+                                'participant' => $Participation],
                             ['tp' => 'ASC']);
 
                         $userOrderedGrades = [];
@@ -6869,9 +6869,9 @@ class ActivityController extends MasterController
                     //print_r($commentsMatrix);
                     //die;
 
-                    for ($i = 0; $i < count($activityUsers); $i++) {
+                    for ($i = 0; $i < count($participations); $i++) {
                         $comments[$i] = [];
-                        for ($j = 0; $j < count($activityUsers); $j++) {
+                        for ($j = 0; $j < count($participations); $j++) {
                             $comments[$i][] = $commentsMatrix[$j][$i];
                             $gradeValues[$i][] = $gradesMatrix[$j][$i];
                         }
@@ -6879,17 +6879,17 @@ class ActivityController extends MasterController
 
                     $renderedData = [];
 
-                    foreach ($activityUsers as $key => $activityUser) {
+                    foreach ($participations as $key => $Participation) {
 
-                        $id = $activityUser->getUsrId();
+                        $id = $Participation->getUsrId();
                         $user = $repoU->find($id);
                         $firstname = $user->getFirstname();
                         $lastname = $user->getLastname();
-                        $isNotTP = $activityUser->getType();
-                        $wResult = $activityUser->getAbsoluteWeightedResult();
-                        $eResult = $activityUser->getAbsoluteEqualResult();
-                        $wDevRatio = $activityUser->getWeightedDevRatio();
-                        $eDevRatio = $activityUser->getEqualDevRatio();
+                        $isNotTP = $Participation->getType();
+                        $wResult = $Participation->getAbsoluteWeightedResult();
+                        $eResult = $Participation->getAbsoluteEqualResult();
+                        $wDevRatio = $Participation->getWeightedDevRatio();
+                        $eDevRatio = $Participation->getEqualDevRatio();
 
                         $renderedData[] =
                             [
@@ -7059,7 +7059,7 @@ class ActivityController extends MasterController
         $repoS = $em->getRepository(Stage::class);
         $repoC = $em->getRepository(Criterion::class);
         $repoI = $em->getRepository(GeneratedImage::class);
-        $repoAU = $em->getRepository(ActivityUser::class);
+        $repoAU = $em->getRepository(Participation::class);
         $repoG = $em->getRepository(Grade::class);
         $user = self::getAuthorizedUser();
         if (!$user instanceof User) {
@@ -7485,7 +7485,7 @@ class ActivityController extends MasterController
 
         //Get users associated to activity
         $em = self::getEntityManager();
-        $repoAU = $em->getRepository(ActivityUser::class);
+        $repoAU = $em->getRepository(Participation::class);
         $repoS = $em->getRepository(Stage::class);
         $repoG = $em->getRepository(Grade::class);
         $repoU = $em->getRepository(User::class);
@@ -7499,22 +7499,22 @@ class ActivityController extends MasterController
             $gradeValues = [];
 
             //getting all activity users results, ordered by result
-            $activityUsers = $repoAU->findBy(['criterion' => $criterion], ['absoluteWeightedResult' => 'DESC']);
+            $participations = $repoAU->findBy(['criterion' => $criterion], ['absoluteWeightedResult' => 'DESC']);
 
             //$results = $repoR->find
 
             //get participant id order in a array to sort comments by the same method used in sorting participants
             $orderedIds = [];
-            foreach ($activityUsers as $activityUser) {
-                $orderedIds[] = $activityUser->getUsrId();
+            foreach ($participations as $Participation) {
+                $orderedIds[] = $Participation->getUsrId();
             }
 
             //Get participants feedbacks on his performance, sorted accordingly to retrieve relevant results
-            foreach ($activityUsers as $key => $activityUser) {
+            foreach ($participations as $key => $Participation) {
 
                 $userGrades = $repoG->findBy(
                     ['criterion' => $criterion,
-                        'participant' => $activityUser],
+                        'participant' => $Participation],
                     ['tp' => 'ASC']);
 
                 $userOrderedGrades = [];
@@ -7544,9 +7544,9 @@ class ActivityController extends MasterController
             //print_r($commentsMatrix);
             //die;
 
-            for ($i = 0; $i < count($activityUsers); $i++) {
+            for ($i = 0; $i < count($participations); $i++) {
                 $comments[$i] = [];
-                for ($j = 0; $j < count($activityUsers); $j++) {
+                for ($j = 0; $j < count($participations); $j++) {
                     $comments[$i][] = $commentsMatrix[$j][$i];
                     $gradeValues[$i][] = $gradesMatrix[$j][$i];
                 }
@@ -7554,17 +7554,17 @@ class ActivityController extends MasterController
 
             $renderedData = [];
 
-            foreach ($activityUsers as $key => $activityUser) {
+            foreach ($participations as $key => $Participation) {
 
-                $id = $activityUser->getUsrId();
+                $id = $Participation->getUsrId();
                 $user = $repoU->find($id);
                 $firstname = $user->getFirstname();
                 $lastname = $user->getLastname();
-                $isNotTP = $activityUser->getType();
-                $wResult = $activityUser->getAbsoluteWeightedResult();
-                $eResult = $activityUser->getAbsoluteEqualResult();
-                $wDevRatio = $activityUser->getWeightedDevRatio();
-                $eDevRatio = $activityUser->getEqualDevRatio();
+                $isNotTP = $Participation->getType();
+                $wResult = $Participation->getAbsoluteWeightedResult();
+                $eResult = $Participation->getAbsoluteEqualResult();
+                $wDevRatio = $Participation->getWeightedDevRatio();
+                $eDevRatio = $Participation->getEqualDevRatio();
 
                 $renderedData[] =
                     [
@@ -7647,7 +7647,7 @@ class ActivityController extends MasterController
         $id = $app['security.token_storage']->getToken()->getUser()->getId();
         $em = self::getEntityManager();
         $repoG = $em->getRepository(Grade::class);
-        $repoAU = $em->getRepository(ActivityUser::class);
+        $repoAU = $em->getRepository(Participation::class);
         $repoU = $em->getRepository(User::class);
         $repoS = $em->getRepository(Stage::class);
         $repoC = $em->getRepository(Criterion::class);
@@ -7900,7 +7900,7 @@ class ActivityController extends MasterController
 
         $em = self::getEntityManager();
         $repoA = $em->getRepository(Activity::class);
-        $repoAU = $em->getRepository(ActivityUser::class);
+        $repoAU = $em->getRepository(Participation::class);
 
         /** @var Activity|null */
         $activity = $repoA->find($actId);
@@ -7908,7 +7908,7 @@ class ActivityController extends MasterController
             throw new \Exception("activity with id $actId doesn't exist");
         }
 
-        /** @var ActivityUser[] */
+        /** @var Participation[] */
         $participants = $repoAU->findBy(['activity' => $activity, 'status' => 3]);
         /** @var ArrayCollection<User> */
         $totalUsers = new ArrayCollection;
@@ -8071,7 +8071,7 @@ class ActivityController extends MasterController
 
                     foreach ($copiedCriterion->getParticipants() as $copiedParticipant) {
 
-                        $templateParticipant = new TemplateActivityUser;
+                        $templateParticipant = new TemplateParticipation;
                         $templateParticipant
                             ->setUsrId($copiedParticipant->getUsrId())
                             ->setTeam($copiedParticipant->getTeam())
@@ -8207,7 +8207,7 @@ class ActivityController extends MasterController
                     $copiedTemplateStage->addCriterion($copiedTemplateCriterion);
 
                     foreach ($templateCriterion->getParticipants() as $templateParticipant) {
-                        $copiedTemplateParticipant = new ActivityUser;
+                        $copiedTemplateParticipant = new Participation;
                         $copiedTemplateParticipant
                             ->setStatus(0)
                             ->setActivity($copiedTemplateActivity)

@@ -32,10 +32,10 @@ class OrganizationElementType extends AbstractType
     {
 
         $organization = $options['organization'];
-        $elmtType = $options['elmtType'];
+        $entity = $options['entity'];
         $element = $builder->getData();
 
-        if (!$options['standalone'] && $elmtType == 'department') {
+        if (!$options['standalone'] && $entity == 'department') {
 
             $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($builder, $organization) {
 
@@ -52,13 +52,13 @@ class OrganizationElementType extends AbstractType
                             // Data is null when a new form is added, so we needed to find a way to add correct users
                             if ($data != null) {
                                 return $er->createQueryBuilder('u')
-                                    ->where('u.orgId =' . $data->getOrganization()->getId())
+                                    ->where('u.organization =' . $data->getOrganization())
                                     ->andWhere('u.deleted is NULL')
                                     ->orderBy('u.lastname', 'ASC');
 
                             } else {
                                 return $er->createQueryBuilder('u')
-                                    ->where('u.orgId =' . $organization->getId())
+                                    ->where('u.organization =' . $organization)
                                     ->andWhere('u.deleted is NULL')
                                     ->orderBy('u.lastname', 'ASC');
                             }
@@ -77,7 +77,7 @@ class OrganizationElementType extends AbstractType
 
         // Field/entry property
 
-        if ($elmtType != 'weight') {
+        if ($entity != 'weight') {
 
             $builder->add('name', TextType::class,
                 [
@@ -87,10 +87,10 @@ class OrganizationElementType extends AbstractType
                         ]),
                         new UniquePerOrganization([
                             'organization' => $organization,
-                            'entity' => $elmtType,
+                            'entity' => $entity,
                             'element' => $element,
                             'property' => 'name',
-                            'message' => 'doublon_' . $elmtType,
+                            'message' => 'doublon_' . $entity,
                         ]
                         ),
                     ],
@@ -106,10 +106,10 @@ class OrganizationElementType extends AbstractType
                         new Assert\GreaterThan(0),
                         new UniquePerOrganization([
                             'organization' => $organization,
-                            'entity' => $elmtType,
+                            'entity' => $entity,
                             'element' => $element,
                             'property' => 'value',
-                            'message' => 'doublon_' . $elmtType,
+                            'message' => 'doublon_' . $entity,
                         ]
                         ),
                     ],
@@ -131,9 +131,9 @@ class OrganizationElementType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefault('usedForUserCreation', false);
-        $resolver->setDefault('elmtType', 'department');
+        $resolver->setDefault('entity', 'department');
         $resolver->setDefault('data_class', function (Options $options) {
-            switch ($options['elmtType']) {
+            switch ($options['entity']) {
                 case 'department':
                     return Department::class;
                     break;

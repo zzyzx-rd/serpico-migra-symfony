@@ -32,36 +32,6 @@ class Position extends DbObject
     public $name;
 
     /**
-     * @ORM\Column(name="pos_weight_ini", type="float", nullable=true)
-     */
-    public $weight_ini;
-
-    /**
-     * @ORM\Column(name="pos_weight_1y", type="float", nullable=true)
-     */
-    public $weight_1y;
-
-    /**
-     * @ORM\Column(name="pos_weight_2y", type="float", nullable=true)
-     */
-    public $weight_2y;
-
-    /**
-     * @ORM\Column(name="pos_weight_3y", type="float", nullable=true)
-     */
-    public $weight_3y;
-
-    /**
-     * @ORM\Column(name="pos_weight_4y", type="float", nullable=true)
-     */
-    public $weight_4y;
-
-    /**
-     * @ORM\Column(name="pos_weight_5y", type="float", nullable=true)
-     */
-    public $weight_5y;
-
-    /**
      * @ORM\Column(name="pos_created_by", type="integer", nullable=true)
      */
     public ?int $createdBy;
@@ -89,9 +59,10 @@ class Position extends DbObject
     protected $department;
 
     /**
-     * @OneToMany(targetEntity="Weight", mappedBy="position", cascade={"persist", "remove"})
+     * @ORM\ManyToOne(targetEntity=Weight::class, inversedBy="positions")
+     * @ORM\JoinColumn(name="weight_wgt_id",referencedColumnName="wgt_id", nullable=true)
      */
-    public $weights;
+    public $weight;
 
     /**
      * @OneToMany(targetEntity="OrganizationUserOption", mappedBy="position", cascade={"persist","remove"}, orphanRemoval=true)
@@ -102,60 +73,42 @@ class Position extends DbObject
      * @OneToMany(targetEntity="Target", mappedBy="position",cascade={"persist", "remove"}, orphanRemoval=true)
      */
     public $targets;
+
+    /**
+     * @OneToMany(targetEntity="User", mappedBy="position",cascade={"persist", "remove"}, orphanRemoval=true)
+     */
     private $users;
 
     /**
      * Position constructor.
      * @param ?int$id
-     * @param $pos_name
-     * @param $pos_weight_ini
-     * @param $pos_weight_1y
-     * @param $pos_weight_2y
-     * @param $pos_weight_3y
-     * @param $pos_weight_4y
-     * @param $pos_weight_5y
-     * @param $pos_createdBy
-     * @param $pos_inserted
-     * @param $pos_deleted
+     * @param $name
+     * @param $createdBy
+     * @param $inserted
+     * @param $deleted
      * @param $organization
      * @param $department
-     * @param $weights
+     * @param $weight
      * @param $options
      * @param $targets
      */
     public function __construct(
       ?int $id = 0,
-        $pos_name = '',
-        $pos_weight_ini = 0.0,
-        $pos_weight_1y = 0.0,
-        $pos_weight_2y = 0.0,
-        $pos_weight_3y = 0.0,
-        $pos_weight_4y = 0.0,
-        $pos_weight_5y = 0.0,
-        $organization = 0,
+        $name = '',
+        $organization = null,
         $department = null,
-        $pos_createdBy = null,
-        $pos_inserted = null,
-        $pos_deleted = null,
-        $weights = null,
-        $options = null,
-        $targets = null)
+        $createdBy = null,
+        $inserted = null,
+        $deleted = null)
     {
-        parent::__construct($id, $pos_createdBy, new DateTime());
-        $this->name = $pos_name;
-        $this->weight_ini = $pos_weight_ini;
-        $this->weight_1y = $pos_weight_1y;
-        $this->weight_2y = $pos_weight_2y;
-        $this->weight_3y = $pos_weight_3y;
-        $this->weight_4y = $pos_weight_4y;
-        $this->weight_5y = $pos_weight_5y;
-        $this->inserted = $pos_inserted;
-        $this->deleted = $pos_deleted;
+        parent::__construct($id, $createdBy, new DateTime());
+        $this->name = $name;
+        $this->inserted = $inserted;
+        $this->deleted = $deleted;
         $this->organization = $organization;
         $this->department = $department;
-        $this->weights = $weights?:new ArrayCollection();
-        $this->options = $options?:new ArrayCollection();
-        $this->targets = $targets?:new ArrayCollection();
+        $this->options = new ArrayCollection();
+        $this->targets = new ArrayCollection();
         $this->users = new ArrayCollection();
     }
 
@@ -165,82 +118,20 @@ class Position extends DbObject
         return $this->name;
     }
 
-    public function setName(string $name): self
+    public function setName(?string $name): self
     {
         $this->name = $name;
-
         return $this;
     }
 
-    public function getWeightIni(): ?float
+    public function getWeight(): ?Weight
     {
-        return $this->weight_ini;
+        return $this->weight;
     }
 
-    public function setWeightIni(float $weight_ini): self
+    public function setWeight(Weight $weight): self
     {
-        $this->weight_ini = $weight_ini;
-
-        return $this;
-    }
-
-    public function getWeight1Y(): ?float
-    {
-        return $this->weight_1y;
-    }
-
-    public function setWeight1Y(float $weight_1y): self
-    {
-        $this->weight_1y = $weight_1y;
-
-        return $this;
-    }
-
-    public function getWeight2Y(): ?float
-    {
-        return $this->weight_2y;
-    }
-
-    public function setWeight2Y(float $weight_2y): self
-    {
-        $this->weight_2y = $weight_2y;
-
-        return $this;
-    }
-
-    public function getWeight3Y(): ?float
-    {
-        return $this->weight_3y;
-    }
-
-    public function setWeight3Y(float $weight_3y): self
-    {
-        $this->weight_3y = $weight_3y;
-
-        return $this;
-    }
-
-    public function getWeight4Y(): ?float
-    {
-        return $this->weight_4y;
-    }
-
-    public function setWeight4Y(float $weight_4y): self
-    {
-        $this->weight_4y = $weight_4y;
-
-        return $this;
-    }
-
-    public function getWeight5Y(): ?float
-    {
-        return $this->weight_5y;
-    }
-
-    public function setWeight5Y(float $weight_5y): self
-    {
-        $this->weight_5y = $weight_5y;
-
+        $this->weight = $weight;
         return $this;
     }
 
@@ -274,9 +165,10 @@ class Position extends DbObject
     /**
      * @param mixed $organization
      */
-    public function setOrganization($organization): void
+    public function setOrganization($organization)
     {
         $this->organization = $organization;
+        return $this;
     }
 
     /**
@@ -290,9 +182,10 @@ class Position extends DbObject
     /**
      * @param mixed $department
      */
-    public function setDepartment($department): void
+    public function setDepartment($department)
     {
         $this->department = $department;
+        return $this;
     }
 
     /**
@@ -304,27 +197,11 @@ class Position extends DbObject
     }
 
     /**
-     * @param mixed $weights
-     */
-    public function setWeights($weights): void
-    {
-        $this->weights = $weights;
-    }
-
-    /**
      * @return mixed
      */
     public function getOptions()
     {
         return $this->options;
-    }
-
-    /**
-     * @param mixed $options
-     */
-    public function setOptions($options): void
-    {
-        $this->options = $options;
     }
 
     /**
@@ -336,18 +213,17 @@ class Position extends DbObject
     }
 
     /**
-     * @param mixed $targets
+     * @return Collection|User[]
      */
-    public function setTargets($targets): void
+    public function getUsers()
     {
-        $this->targets = $targets;
+        return $this->users;
     }
 
     public function addUser(User $user): Position
     {
-
         $this->users->add($user);
-        // $user->setPosition($this);
+        $user->setPosition($this);
         return $this;
     }
     public function removeUser(User $user): Position

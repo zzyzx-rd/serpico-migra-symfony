@@ -2,7 +2,7 @@
 
 namespace App\Repository;
 
-use App\Entity\ActivityUser;
+use App\Entity\Participation;
 use App\Entity\Criterion;
 use App\Entity\CriterionName;
 use App\Entity\Organization;
@@ -53,7 +53,7 @@ class UserRepository extends ServiceEntityRepository
             ->select('cn as criterion, avg(r.weightedRelativeResult * 100) as performance, count(distinct(r)) as count')
             ->from(Result::class, 'r')
             ->innerJoin(Stage::class, 's',          'with', 's  = r.stage')
-            ->innerJoin(ActivityUser::class, 'p',   'with', 's  = p.stage')
+            ->innerJoin(Participation::class, 'p',   'with', 's  = p.stage')
             ->innerJoin(Criterion::class, 'c',      'with', 'c  = r.criterion')
             ->innerJoin(CriterionName::class, 'cn', 'with', 'cn = c.cName')
             ->where('s.status = :status')
@@ -118,7 +118,7 @@ class UserRepository extends ServiceEntityRepository
         // Query for retrieving criterion names associated with criteria which have grades
         $q2 = $em->createQueryBuilder();
         $q2->select('identity(c.cName)')->from(Criterion::class, 'c')
-            ->innerJoin(ActivityUser::class, 'p', 'with', 'c = p.criterion')
+            ->innerJoin(Participation::class, 'p', 'with', 'c = p.criterion')
             ->where($q2->expr()->in('c.id', $q1->getDQL()))
             ->andWhere("p.id = $usrId");
 
@@ -205,7 +205,7 @@ class UserRepository extends ServiceEntityRepository
         } else {
 
             $lastReleasedParticipation = $qb->select('au')
-                ->from(ActivityUser::class, 'au')
+                ->from(Participation::class, 'au')
                 ->where('au.user_usr = ' . $user)
                 ->andWhere('au.status = 4')
                 ->orderBy('au.inserted', 'DESC')
@@ -290,7 +290,7 @@ class UserRepository extends ServiceEntityRepository
     public function getExternalActivities(Organization $organization = null, User $user)
     {
         $externalActivities = new ArrayCollection;
-        $userParticipations = $this->_em->getRepository(ActivityUser::class)->findBy(['id' => $user->getId()]);
+        $userParticipations = $this->_em->getRepository(Participation::class)->findBy(['id' => $user->getId()]);
         foreach ($userParticipations as $userParticipation) {
             $activity = $userParticipation->getStage()->getActivity();
             if (($organization != null && $activity->getOrganization() == $organization) || ($organization == null && $activity->getOrganization() != $user->getOrganization())) {

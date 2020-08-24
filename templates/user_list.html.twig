@@ -55,7 +55,7 @@
               </header>
               <div class="item-body">
                 <ul class="users-list">
-                  {% for user in dpt.viewableUsers(orgEnabledUserSeeAllUsers) %}
+                  {% for user in departmentM.viewableUsers(dpt) %}
                     {% include "components/user_list__item.html.twig" with { user: user } %}
                   {% endfor %}
                   {# placeholder for no user in list #}

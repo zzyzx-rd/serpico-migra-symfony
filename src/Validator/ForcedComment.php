@@ -7,7 +7,7 @@
  */
 namespace App\Validator;
 
-use Model\Criterion;
+use App\Entity\Criterion;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Exception\MissingOptionsException;
 

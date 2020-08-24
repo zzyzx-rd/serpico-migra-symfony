@@ -139,15 +139,15 @@ class Result extends DbObject
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="results")
-     * @JoinColumn(name="user_usr_id", referencedColumnName="usr_id")
+     * @JoinColumn(name="user_id", referencedColumnName="usr_id")
      */
-    public $user_usr;
+    public $user;
 
     /**
      * @ORM\ManyToOne(targetEntity=ExternalUser::class)
-     * @JoinColumn(name="external_user_ext_usr_id", referencedColumnName="ext_id")
+     * @JoinColumn(name="externalUser_id", referencedColumnName="ext_id")
      */
-    private $external_user_ext_usr;
+    private $externalUser;
 
 
     /**
@@ -179,8 +179,8 @@ class Result extends DbObject
      * @param Activity $activity
      * @param Stage $stage
      * @param Criterion $criterion
-     * @param User $user_usr
-     * @param null $external_user_ext_usr
+     * @param User $user
+     * @param null $externalUser
      */
     public function __construct(
         $id = 0,
@@ -210,8 +210,8 @@ class Result extends DbObject
         Activity $activity= null,
         Stage $stage= null,
         Criterion $criterion= null,
-        User $user_usr= null,
-        $external_user_ext_usr= null)
+        User $user= null,
+        ExternalUser $externalUser= null)
     {
         parent::__construct($id, $res_createdBy, new DateTime());
         $this->type = $res_type;
@@ -239,8 +239,8 @@ class Result extends DbObject
         $this->activity = $activity;
         $this->stage = $stage;
         $this->criterion = $criterion;
-        $this->user_usr = $user_usr;
-        $this->external_user_ext_usr = $external_user_ext_usr;
+        $this->user = $user;
+        $this->externalUser = $externalUser;
     }
 
     public function getType(): ?int
@@ -527,28 +527,26 @@ class Result extends DbObject
         return $this;
     }
 
-    public function getUserUsr(): ?User
+    public function getUser(): ?User
     {
-        return $this->user_usr;
+        return $this->user;
     }
 
-    public function setUserUsr(?User $user_usr): self
+    public function setUser(?User $user): self
     {
-        $this->user_usr = $user_usr;
-
+        $this->user = $user;
         return $this;
     }
 
 
-    public function getExternalUserExtUsr(): ?ExternalUser
+    public function getExternalUser(): ?ExternalUser
     {
-        return $this->external_user_ext_usr;
+        return $this->externalUser;
     }
 
-    public function setExternalUserExtUsr(?ExternalUser $external_user_ext_usr): self
+    public function setExternalUser(?ExternalUser $externalUser): self
     {
-        $this->external_user_ext_usr = $external_user_ext_usr;
-
+        $this->externalUser = $externalUser;
         return $this;
     }
 }

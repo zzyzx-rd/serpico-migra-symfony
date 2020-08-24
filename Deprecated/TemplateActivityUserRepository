@@ -2,25 +2,25 @@
 //
 //namespace App\Repository;
 //
-//use App\Entity\TemplateActivityUser;
+//use App\Entity\TemplateParticipation;
 //use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 //use Doctrine\Persistence\ManagerRegistry;
 //
 ///**
-// * @method TemplateActivityUser|null find($id, $lockMode = null, $lockVersion = null)
-// * @method TemplateActivityUser|null findOneBy(array $criteria, array $orderBy = null)
-// * @method TemplateActivityUser[]    findAll()
-// * @method TemplateActivityUser[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+// * @method TemplateParticipation|null find($id, $lockMode = null, $lockVersion = null)
+// * @method TemplateParticipation|null findOneBy(array $criteria, array $orderBy = null)
+// * @method TemplateParticipation[]    findAll()
+// * @method TemplateParticipation[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
 // */
-//class TemplateActivityUserRepository extends ServiceEntityRepository
+//class TemplateParticipationRepository extends ServiceEntityRepository
 //{
 //    public function __construct(ManagerRegistry $registry)
 //    {
-//        parent::__construct($registry, TemplateActivityUser::class);
+//        parent::__construct($registry, TemplateParticipation::class);
 //    }
 //
 //    // /**
-//    //  * @return TemplateActivityUser[] Returns an array of TemplateActivityUser objects
+//    //  * @return TemplateParticipation[] Returns an array of TemplateParticipation objects
 //    //  */
 //    /*
 //    public function findByExampleField($value)
@@ -37,7 +37,7 @@
 //    */
 //
 //    /*
-//    public function findOneBySomeField($value): ?TemplateActivityUser
+//    public function findOneBySomeField($value): ?TemplateParticipation
 //    {
 //        return $this->createQueryBuilder('t')
 //            ->andWhere('t.exampleField = :val')

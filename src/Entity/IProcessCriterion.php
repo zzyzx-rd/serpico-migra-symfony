@@ -99,7 +99,7 @@ class IProcessCriterion extends DbObject
     protected $institutionProcess;
 
     /**
-     * @OneToMany(targetEntity="IProcessActivityUser", mappedBy="criterion", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="IProcessParticipation", mappedBy="criterion", cascade={"persist", "remove"}, orphanRemoval=true)
      * @var Collection
      */
 //     * @OrderBy({"leader" = "DESC"})
@@ -365,7 +365,7 @@ class IProcessCriterion extends DbObject
         return (string) $this->id;
     }
 
-    public function addParticipant(IProcessActivityUser $participant): IProcessCriterion
+    public function addParticipant(IProcessParticipation $participant): IProcessCriterion
     {
         $this->participants->add($participant);
         $participant->setCriterion($this);
@@ -373,7 +373,7 @@ class IProcessCriterion extends DbObject
     }
 
 
-    public function removeParticipant(IProcessActivityUser $participant): IProcessCriterion
+    public function removeParticipant(IProcessParticipation $participant): IProcessCriterion
     {
         // Remove this participant
         $this->participants->removeElement($participant);

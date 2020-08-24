@@ -7,10 +7,12 @@
 {% if item.parent is defined and item.parent is not null %}
     <li class="user collection-item">
 {% else %}
+    {{ form_start(item) }}
     <div class="user">
 {% endif %}
 
     {% if item.parent is not defined or item.parent is null %}
+
     
         <div class="element-data" {% if item.vars is defined and (not user or not item.vars.valid) %}style="display:none"{% endif %}>
 
@@ -250,5 +252,7 @@
 {% if item.parent is defined and item.parent is not null %}
 </li>
 {% else %}
+{{ form_rest(item) }}
+{{ form_end(item) }}
 </div>
 {% endif %}

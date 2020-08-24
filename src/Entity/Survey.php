@@ -61,8 +61,8 @@ class Survey extends DbObject
     protected $organization;
 
     /**
-     * @OneToMany(targetEntity="ActivityUser", mappedBy="survey", cascade={"persist"})
-     * @var ArrayCollection<ActivityUser>
+     * @OneToMany(targetEntity="Participation", mappedBy="survey", cascade={"persist"})
+     * @var ArrayCollection<Participation>
      */
 //     * @OrderBy({"leader" = "DESC"})
     public $participants;
@@ -227,14 +227,14 @@ class Survey extends DbObject
     {
         $this->answers = $answers;
     }
-    public function addParticipant(ActivityUser $participant)
+    public function addParticipant(Participation $participant)
     {
         $this->participants->add($participant);
         $participant->setSurvey($this);
         return $this;
     }
 
-    public function removeParticipant(ActivityUser $participant)
+    public function removeParticipant(Participation $participant)
     {
         // Remove this participant
         $this->participants->removeElement($participant);

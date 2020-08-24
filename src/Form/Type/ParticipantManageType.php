@@ -4,10 +4,10 @@ namespace App\Form\Type;
 
 use Controller\MasterController;
 use Doctrine\ORM\EntityRepository;
-use App\Entity\ActivityUser;
-use App\Entity\IProcessActivityUser;
+use App\Entity\Participation;
+use App\Entity\IProcessParticipation;
 use App\Entity\Team;
-use App\Entity\TemplateActivityUser;
+use App\Entity\TemplateParticipation;
 use App\Entity\User;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -148,11 +148,11 @@ class ParticipantManageType extends AbstractType
         $resolver->setDefault('elmt', 'activity');
         $resolver->setDefault('data_class', function (Options $options) {
             if ($options['elmt'] === 'iprocess') {
-                return IProcessActivityUser::class;
+                return IProcessParticipation::class;
             } else if ($options['elmt'] === 'template') {
-                return TemplateActivityUser::class;
+                return TemplateParticipation::class;
             }
-            return ActivityUser::class;
+            return Participation::class;
         });
         $resolver->setRequired("currentUser");
         $resolver->setDefault('organization', null);

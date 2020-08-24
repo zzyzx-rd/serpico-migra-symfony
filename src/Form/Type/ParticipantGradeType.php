@@ -13,7 +13,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
-use App\Entity\ActivityUser;
+use App\Entity\Participation;
 use App\Entity\User;
 
 class ParticipantGradeType extends AbstractType
@@ -48,7 +48,7 @@ class ParticipantGradeType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefault('data_class',ActivityUser::class);
+        $resolver->setDefault('data_class',Participation::class);
         $resolver->setDefault('standalone', false);
         $resolver->setDefault('stageMode', 1);
         $resolver->addAllowedTypes('standalone', 'bool');

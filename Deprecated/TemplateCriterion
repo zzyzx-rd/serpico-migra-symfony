@@ -94,7 +94,7 @@
 //    protected $stage;
 //
 //    /**
-//     * @OneToMany(targetEntity="TemplateActivityUser", mappedBy="criterion",cascade={"persist", "remove"},orphanRemoval=true)
+//     * @OneToMany(targetEntity="TemplateParticipation", mappedBy="criterion",cascade={"persist", "remove"},orphanRemoval=true)
 //     * @JoinColumn(name="")
 //     */
 ////     * @OrderBy({"leader" = "ASC"})
@@ -216,14 +216,14 @@
 //    {
 //        $this->cName = $cName;
 //    }
-//    function addParticipant(TemplateActivityUser $participant){
+//    function addParticipant(TemplateParticipation $participant){
 //        $this->participants->add($participant);
 //        $participant->setCriterion($this);
 //        return $this;
 //    }
 //
 //
-//    public function removeParticipant(TemplateActivityUser $participant): TemplateCriterion
+//    public function removeParticipant(TemplateParticipation $participant): TemplateCriterion
 //    {
 //        // Remove this participant
 //        $this->participants->removeElement($participant);

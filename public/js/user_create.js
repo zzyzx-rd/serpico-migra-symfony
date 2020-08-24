@@ -139,25 +139,22 @@ $(function(){
 
     $('.element-submit').on('click',function(e){
         e.preventDefault();
-        urlToPieces = eurl.split('/');
         if($(this).data('did') != null){
-            elmtName = "department";
+            e = "department";
             trig = $('[data-did="'+$(this).data("did")+'"]');
         } else if ($(this).data('pid') != null) {
-            elmtName = "position";
+            e = "position";
             trig = $('[data-pid="'+$(this).data("pid")+'"]');
         } else if ($(this).data('tid') != null) {
-            elmtName = "title";
+            e = "title";
             trig = $('[data-tid="'+$(this).data("tid")+'"]');
         } else if ($(this).data('wid') != null) {
-            elmtName = "weight";
+            e = "weight";
             trig = $('[data-wid="'+$(this).data("wid")+'"]');
-
         }
         s = trig.closest('.col').find('select');
-        urlToPieces[urlToPieces.length-3] =  elmtName;
-        url = urlToPieces.join('/');
-        $.post(url,$(this).closest('form').serialize())
+        const params = {e: e, id: 0};
+        $.post(eurl,$(this).closest('form').serialize() + '&' + $.param(params))
             .done(function(data) {
                 $.each($('.red-text'),function(){
                     $(this).remove();

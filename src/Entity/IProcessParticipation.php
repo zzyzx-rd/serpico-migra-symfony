@@ -3,7 +3,7 @@
 namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
-use App\Repository\IProcessActivityUserRepository;
+use App\Repository\IProcessParticipationRepository;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
@@ -12,9 +12,9 @@ use Doctrine\ORM\Mapping\ManyToOne;
 
 /**
  * @ApiResource()
- * @ORM\Entity(repositoryClass=IProcessActivityUserRepository::class)
+ * @ORM\Entity(repositoryClass=IProcessParticipationRepository::class)
  */
-class IProcessActivityUser extends DbObject
+class IProcessParticipation extends DbObject
 {
     public const PARTICIPATION_ACTIVE       = 1;
     public const PARTICIPATION_THIRD_PARTY  = 0;
@@ -104,7 +104,7 @@ class IProcessActivityUser extends DbObject
     public $external_user_ext_usr;
 
     /**
-     * IProcessActivityUser constructor.
+     * IProcessParticipation constructor.
      * @param $id
      * @param $a_u_status
      * @param $a_u_leader

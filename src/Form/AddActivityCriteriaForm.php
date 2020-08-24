@@ -5,7 +5,7 @@ use Doctrine\ORM\EntityRepository;
 use App\Entity\Activity;
 use App\Entity\CriterionName;
 use App\Entity\OrganizationUserOption;
-use Model\TemplateActivity;
+use App\Entity\TemplateActivity;
 use Symfony\Bridge\Doctrine\App\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;

@@ -89,12 +89,12 @@ class ExternalUser extends DbObject
     protected $client;
 
     /**
-     * @ORM\OneToMany(targetEntity=ActivityUser::class, mappedBy="external_user_ext_usr")
+     * @ORM\OneToMany(targetEntity=Participation::class, mappedBy="externalUser")
      */
-    public $activity_user_act_usr;
+    public $participations;
 
     /**
-     * @ORM\OneToMany(targetEntity=TeamUser::class, mappedBy="external_user_ext_id")
+     * @ORM\OneToMany(targetEntity=TeamUser::class, mappedBy="externalUser")
      */
     public $teamUsers;
 
@@ -113,7 +113,7 @@ class ExternalUser extends DbObject
      * @param $ext_deleted
      * @param User $user
      * @param Client $client
-     * @param ActivityUser $activity_user_act_usr
+     * @param Participation $participation
      * @param TeamUser $teamUsers
      */
     public function __construct(
@@ -129,9 +129,8 @@ class ExternalUser extends DbObject
         $ext_last_connected = null,
         $ext_deleted = null,
         User $user = null,
-        Client $client = null,
-        ActivityUser $activity_user_act_usr = null,
-        TeamUser $teamUsers = null)
+        Client $client = null
+    )
     {
         parent::__construct($id, $ext_createdBy, new DateTime());
         $this->fisrtname = $ext_fisrtname;
@@ -145,8 +144,8 @@ class ExternalUser extends DbObject
         $this->deleted = $ext_deleted;
         $this->user = $user;
         $this->client = $client;
-        $this->activity_user_act_usr = $activity_user_act_usr;
-        $this->teamUsers = $teamUsers;
+        $this->participations = new ArrayCollection;
+        $this->teamUsers = new ArrayCollection;
     }
 
 
@@ -286,36 +285,25 @@ class ExternalUser extends DbObject
     }
 
     /**
-     * @return ActivityUser
+     * @return Collection|Participation[]
      */
-    public function getActivityUserActUsr(): ActivityUser
+    public function getParticipations()
     {
-        return $this->activity_user_act_usr;
+        return $this->participations;
     }
 
-    public function addActivityUserActUsr(ActivityUser $activityUserActUsr): self
+    public function addParticipation(Participation $participation): self
     {
-        if (!$this->activity_user_act_usr->contains($activityUserActUsr)) {
-            $this->activity_user_act_usr[] = $activityUserActUsr;
-            $activityUserActUsr->seternalUserExtUsr($this);
-        }
-
+        $this->participations->add($participation);
+        $participation->setExternalUser($this);
         return $this;
     }
 
-    public function removeActivityUserActUsr(ActivityUser $activityUserActUsr): self
+    public function removeParticipation(Participation $participation): self
     {
-        if ($this->activity_user_act_usr->contains($activityUserActUsr)) {
-            $this->activity_user_act_usr->removeElement($activityUserActUsr);
-            // set the owning side to null (unless already changed)
-            if ($activityUserActUsr->geternalUserExtUsr() === $this) {
-                $activityUserActUsr->seternalUserExtUsr(null);
-            }
-        }
-
+        $this->participations->removeElement($participation);
         return $this;
     }
-
 
     /**
      * @return Collection|TeamUser[]

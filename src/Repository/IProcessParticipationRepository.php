@@ -2,25 +2,25 @@
 
 namespace App\Repository;
 
-use App\Entity\IProcessActivityUser;
+use App\Entity\IProcessParticipation;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @method IProcessActivityUser|null find($id, $lockMode = null, $lockVersion = null)
- * @method IProcessActivityUser|null findOneBy(array $criteria, array $orderBy = null)
- * @method IProcessActivityUser[]    findAll()
- * @method IProcessActivityUser[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method IProcessParticipation|null find($id, $lockMode = null, $lockVersion = null)
+ * @method IProcessParticipation|null findOneBy(array $criteria, array $orderBy = null)
+ * @method IProcessParticipation[]    findAll()
+ * @method IProcessParticipation[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class IProcessActivityUserRepository extends ServiceEntityRepository
+class IProcessParticipationRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, IProcessActivityUser::class);
+        parent::__construct($registry, IProcessParticipation::class);
     }
 
     // /**
-    //  * @return IProcessActivityUser[] Returns an array of IProcessActivityUser objects
+    //  * @return IProcessParticipation[] Returns an array of IProcessParticipation objects
     //  */
     /*
     public function findByExampleField($value)
@@ -37,7 +37,7 @@ class IProcessActivityUserRepository extends ServiceEntityRepository
     */
 
     /*
-    public function findOneBySomeField($value): ?IProcessActivityUser
+    public function findOneBySomeField($value): ?IProcessParticipation
     {
         return $this->createQueryBuilder('i')
             ->andWhere('i.exampleField = :val')

@@ -143,7 +143,7 @@ class Activity extends DbObject
     public $historicalRankingTeams;
 
     /**
-     * @OneToMany(targetEntity="ActivityUser", mappedBy="activity",cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="Participation", mappedBy="activity",cascade={"persist", "remove"}, orphanRemoval=true)
      * @OrderBy({"team" = "ASC"})
      */
     public $participants;
@@ -676,7 +676,7 @@ class Activity extends DbObject
     }
 
     /**
-     * @return ActivityUser[]|ArrayCollection
+     * @return Participation[]|ArrayCollection
      */
     public function getParticipants()
     {
@@ -684,7 +684,7 @@ class Activity extends DbObject
     }
 
     /**
-     * @param ActivityUser[]|ArrayCollection $participants
+     * @param Participation[]|ArrayCollection $participants
      */
     public function setParticipants($participants): void
     {
@@ -1008,7 +1008,7 @@ class Activity extends DbObject
         // We retrieve all stages where current user can grade
         return $this->getActiveStages()->filter(static function(Stage $s) use ($u){
             $participations = $s->getUniqueIntParticipations();
-            return $participations && $participations->exists(static function(int $i, ActivityUser $p) use ($s, $u){
+            return $participations && $participations->exists(static function(int $i, Participation $p) use ($s, $u){
                     return ($p->getUser() == $u) && ($s->getUniqueGradableParticipations()->count() > 0);
                 });
         });
@@ -1163,7 +1163,7 @@ class Activity extends DbObject
     public function hasParticipant(User $u)
     {
         return $this->participants->exists(
-            static function (int $i, ActivityUser $p) use ($u) { return $p->getUser() == $u; }
+            static function (int $i, Participation $p) use ($u) { return $p->getUser() == $u; }
         );
     }
 
@@ -1203,7 +1203,7 @@ class Activity extends DbObject
                     return false;
                 }
 
-                return $survey->getParticipants()->exists(static function (int $i, ActivityUser $p) use ($u) {
+                return $survey->getParticipants()->exists(static function (int $i, Participation $p) use ($u) {
                     if($p->getUser() === $u){
                         return $p->getStatus() == 2 || $p->getStatus() == 1;
                     }
@@ -1223,7 +1223,7 @@ class Activity extends DbObject
                     return false;
                 }
 
-                return $survey->getParticipants()->exists(function (int $i,ActivityUser $p) use ($u) {
+                return $survey->getParticipants()->exists(function (int $i,Participation $p) use ($u) {
                     if($p->getUser() === $u){
                         if($p->getStatus()!=2){
                             return false;
@@ -1318,7 +1318,7 @@ class Activity extends DbObject
         }
 
         return $canSeeResults && $this->participants->exists(
-                static function (int $i, ActivityUser $p) use ($u) { return $p->getUser() == $u && $p->isLeader(); }
+                static function (int $i, Participation $p) use ($u) { return $p->getUser() == $u && $p->isLeader(); }
             );
     }
 

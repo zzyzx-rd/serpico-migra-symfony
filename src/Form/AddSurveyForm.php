@@ -29,7 +29,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Twig\Extension\StagingExtension;
 use App\Form\Type\StageCriterionType;
-use App\Entity\ActivityUser;
+use App\Entity\Participation;
 use App\Validator\UniquePerOrganization;
 
 class AddSurveyForm extends AbstractType
@@ -98,7 +98,7 @@ class AddSurveyForm extends AbstractType
             'data_class' => Survey::class,
             'edition' => true,
             'survey' => new Survey,
-            'user' => new ActivityUser,
+            'user' => new Participation,
         ]);
     }
 }

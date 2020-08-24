@@ -39,7 +39,7 @@ class Department extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="dpt_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="dpt_inserted", type="datetime")
      */
     public ?DateTime $inserted;
 
@@ -83,12 +83,17 @@ class Department extends DbObject
     public $targets;
 
     /**
+     * @OneToMany(targetEntity="User", mappedBy="department",cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    public $users;
+
+    /**
      * Department constructor.
      * @param $id
      * @param $name
-     * @param $dpt_createdBy
-     * @param $dpt_inserted
-     * @param $dpt_deleted
+     * @param $createdBy
+     * @param $inserted
+     * @param $deleted
      * @param $masterUser
      * @param $positions
      * @param $templateActivities
@@ -101,9 +106,9 @@ class Department extends DbObject
     public function __construct(
         $id = 0,
         $name = '',
-        $dpt_createdBy = null,
-        $dpt_inserted = null,
-        $dpt_deleted = null,
+        $createdBy = null,
+        $inserted = null,
+        $deleted = null,
         $masterUser = null,
         $positions = null,
         $templateActivities = null,
@@ -112,10 +117,10 @@ class Department extends DbObject
         ArrayCollection $criterionGroups = null,
         ArrayCollection $targets = null)
     {
-        parent::__construct($id, $dpt_createdBy, new DateTime());
+        parent::__construct($id, $createdBy, new \DateTime);
         $this->name = $name;
-        $this->inserted = $dpt_inserted;
-        $this->deleted = $dpt_deleted;
+        $this->inserted = $inserted;
+        $this->deleted = $deleted;
         $this->masterUser = $masterUser;
         $this->positions = $positions?:new ArrayCollection();
         $this->templateActivities = $templateActivities;
@@ -143,10 +148,9 @@ class Department extends DbObject
         return $this;
     }
 
-    public function setInserted(DateTimeInterface $dpt_inserted): self
+    public function setInserted(DateTime $inserted): self
     {
-        $this->inserted = $dpt_inserted;
-
+        $this->inserted = $inserted;
         return $this;
     }
 
@@ -155,9 +159,9 @@ class Department extends DbObject
         return $this->deleted;
     }
 
-    public function setDeleted(?DateTimeInterface $dpt_deleted): self
+    public function setDeleted(?DateTimeInterface $deleted): self
     {
-        $this->deleted = $dpt_deleted;
+        $this->deleted = $deleted;
 
         return $this;
     }
@@ -309,6 +313,26 @@ class Department extends DbObject
     public function removeOption(OrganizationUserOption $option): Department
     {
         $this->options->removeElement($option);
+        return $this;
+    }
+
+    /**
+     * @return Collection|User[]
+     */
+    public function getUsers()
+    {
+        return $this->users;
+    }
+
+    public function addUser(User $user): Department
+    {
+        $this->users->add($user);
+        $user->setDepartment($this);
+        return $this;
+    }
+    public function removeUser(User $user): Department
+    {
+        $this->users->removeElement($user);
         return $this;
     }
 

@@ -10,7 +10,7 @@ namespace App\Validator;
 
 
 use Doctrine\ORM\EntityManagerInterface;
-use Model\User;
+use App\Entity\User;
 use Silex\Application;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Constraint;

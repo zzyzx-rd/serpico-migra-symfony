@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Activity;
-use App\Entity\ActivityUser;
+use App\Entity\Participation;
 use App\Entity\Decision;
 use App\Entity\Department;
 use App\Entity\OrganizationUserOption;
@@ -101,7 +101,7 @@ final class InstitutionController extends MasterController
 
         $em = $this->getEntityManager();
         $repoA = $em->getRepository(Activity::class);
-        $repoAU = $em->getRepository(ActivityUser::class);
+        $repoAU = $em->getRepository(Participation::class);
         $repoDec = $em->getRepository(Decision::class);
         $role = $this->user->getRole();
         $currentUsrId = $this->user->getId();
@@ -186,9 +186,9 @@ final class InstitutionController extends MasterController
 
             // IDs of activities in which at least one *graded* participant is a direct or indirect subordinate
             $subordinates = $this->em->getRepository(User::class)->subordinatesOf($this->user);
-            /** @var ActivityUser[] */
+            /** @var Participation[] */
             $subordinatesParticipations = $repoAU->findBy(['id' => $subordinates, 'type' => [ -1, 1 ] ]);
-            $activitiesWithSubordinates_IDs = array_map(static function (ActivityUser $p) {
+            $activitiesWithSubordinates_IDs = array_map(static function (Participation $p) {
                 return $p->getStage()->getActivity()->getId();
             }, $subordinatesParticipations);
 

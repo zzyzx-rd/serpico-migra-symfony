@@ -3,7 +3,7 @@
 namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
-use App\Repository\ActivityUserRepository;
+use App\Repository\ParticipationRepository;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -16,9 +16,9 @@ use Doctrine\ORM\Mapping\OneToMany;
 
 /**
  * @ApiResource()
- * @ORM\Entity(repositoryClass=ActivityUserRepository::class)
+ * @ORM\Entity(repositoryClass=ParticipationRepository::class)
  */
-class ActivityUser extends DbObject
+class Participation extends DbObject
 {
     public const PARTICIPATION_ACTIVE      = 1;
     public const PARTICIPATION_THIRD_PARTY = 0;
@@ -138,20 +138,20 @@ class ActivityUser extends DbObject
     protected $answers;
 
     /**
-     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="activity_user_act_usr")
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="participations")
      * @JoinColumn(name="user_usr_id", referencedColumnName="usr_id", nullable=false)
      */
     public $user;
 
     /**
-     * @ORM\ManyToOne(targetEntity=ExternalUser::class, inversedBy="activity_user_act_usr")
+     * @ORM\ManyToOne(targetEntity=ExternalUser::class, inversedBy="participations")
      * @JoinColumn(name="external_user_ext_usr_id", referencedColumnName="ext_id", nullable=true)
      */
-    public $external_user_ext_usr;
+    public $externalUser;
 
 
     /**
-     * ActivityUser constructor.
+     * Participation constructor.
      * @param ?int$id
      * @param int $a_u_status
      * @param bool $a_u_leader
@@ -174,8 +174,8 @@ class ActivityUser extends DbObject
      * @param Criterion $criterion
      * @param Survey|null $survey
      * @param Answer $answers
-     * @param User $user_usr
-     * @param ExternalUser $external_user_ext_usr
+     * @param User $user
+     * @param ExternalUser $externalUser
      */
     public function __construct(
       ?int $id = 0,
@@ -200,8 +200,8 @@ class ActivityUser extends DbObject
         Criterion $criterion = null,
         Survey $survey = null,
         Answer $answers = null,
-        User $user_usr = null,
-        ExternalUser $external_user_ext_usr = null)
+        User $user = null,
+        ExternalUser $externalUser = null)
     {
         parent::__construct($id, $a_u_createdBy, new DateTime());
         $this->status = $a_u_status;
@@ -224,8 +224,8 @@ class ActivityUser extends DbObject
         $this->criterion = $criterion;
         $this->survey = $survey;
         $this->answers = $answers;
-        $this->user = $user_usr;
-        $this->external_user_ext_usr = $external_user_ext_usr;
+        $this->user = $user;
+        $this->externalUser = $externalUser;
         $this->id = $id;
     }
 
@@ -489,35 +489,34 @@ class ActivityUser extends DbObject
         return $this;
     }
 
-    public function getExternalUserExtUsr(): ?ExternalUser
+    public function getExternalUser(): ?ExternalUser
     {
-        return $this->external_user_ext_usr;
+        return $this->externalUser;
     }
 
-    public function setExternalUserExtUsr(?ExternalUser $external_user_ext_usr): self
+    public function setExternalUser(?ExternalUser $externalUser): self
     {
-        $this->external_user_ext_usr = $external_user_ext_usr;
-
+        $this->externalUser = $externalUser;
         return $this;
     }
 
     /** Add of not default methods
      * @param Answer $answer
-     * @return ActivityUser
+     * @return Participation
      */
-    public function addAnswer(Answer $answer): ActivityUser
+    public function addAnswer(Answer $answer): Participation
     {
         $this->answers->add($answer);
         $answer->setParticipant($this);
         return $this;
     }
 
-    public function removeAnswer(Answer $answer): ActivityUser
+    public function removeAnswer(Answer $answer): Participation
     {
         $this->answers->removeElement($answer);
         return $this;
     }
-    public function addGrade(Grade $grade): ActivityUser
+    public function addGrade(Grade $grade): Participation
     {
 
         $this->grades->add($grade);
@@ -525,7 +524,7 @@ class ActivityUser extends DbObject
         return $this;
     }
 
-    public function removeGrade(Grade $grade): ActivityUser
+    public function removeGrade(Grade $grade): Participation
     {
         $this->grades->removeElement($grade);
         return $this;
@@ -564,14 +563,14 @@ class ActivityUser extends DbObject
 
         return $receivedGrades->getValues();
     }
-    public function addReceivedGrade(Grade $grade): ActivityUser
+    public function addReceivedGrade(Grade $grade): Participation
     {
         $this->grades->add($grade);
         $grade->setParticipant($this);
         return $this;
     }
 
-    public function removeReceivedGrade(Grade $grade): ActivityUser
+    public function removeReceivedGrade(Grade $grade): Participation
     {
         $this->grades->removeElement($grade);
         return $this;

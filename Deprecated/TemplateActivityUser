@@ -3,7 +3,7 @@
 //namespace App\Entity;
 //
 //use ApiPlatform\Core\Annotation\ApiResource;
-//use App\Repository\TemplateActivityUserRepository;
+//use App\Repository\TemplateParticipationRepository;
 //use DateTime;
 //use DateTimeInterface;
 //use Doctrine\ORM\Mapping as ORM;
@@ -12,9 +12,9 @@
 //
 ///**
 // * @ApiResource()
-// * @ORM\Entity(repositoryClass=TemplateActivityUserRepository::class)
+// * @ORM\Entity(repositoryClass=TemplateParticipationRepository::class)
 // */
-//class TemplateActivityUser extends DbObject
+//class TemplateParticipation extends DbObject
 //{
 //    /**
 //     * @ORM\Id()
@@ -90,7 +90,7 @@
 //    public $ext_user;
 //
 //    /**
-//     * TemplateActivityUser constructor.
+//     * TemplateParticipation constructor.
 //     * @param $id
 //     * @param $a_u_leader
 //     * @param $a_u_type

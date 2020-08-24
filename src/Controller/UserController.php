@@ -15,7 +15,7 @@ use App\Form\DelegateActivityForm;
 use App\Form\FinalizeUserForm;
 use App\Form\RequestActivityForm;
 use App\Form\ContactForm;
-use App\Entity\ActivityUser;
+use App\Entity\Participation;
 use App\Entity\TeamUser;
 use App\Entity\Decision;
 use App\Entity\Department;
@@ -823,7 +823,7 @@ class UserController extends MasterController
                         $pParticipations = count($IProcessStages) != 0 ? $pCriterion->getParticipants() : null;
                         if(count($IProcessStages) != 0 && count($pParticipations) != 0){
                             foreach($pParticipations as $pParticipation){
-                                $participation = new ActivityUser;
+                                $participation = new Participation;
                                 $participation->setLeader($pParticipation->isLeader())
                                     ->setMWeight($pParticipation->getMWeight())
                                     ->setPrecomment($pParticipation->getPrecomment())
@@ -835,7 +835,7 @@ class UserController extends MasterController
                             }
 
                         } else {
-                            $synthParticipation = new ActivityUser;
+                            $synthParticipation = new Participation;
                             $institutionSynthUser = $repoU->findOneBy(['firstname' => 'ZZ','lastname' => 'ZZ','orgId' => $institution->getId()]);
 
                             $synthParticipation->setLeader(true)
@@ -848,7 +848,7 @@ class UserController extends MasterController
 
                         // If comes from an external request, we create external participation
                         if(!$fromInternal){
-                            $userParticipation = new ActivityUser;
+                            $userParticipation = new Participation;
                             $userParticipation->setLeader(false)
                                 ->setUsrId($currentUser->getId())
                                 ->setType(0);
@@ -872,7 +872,7 @@ class UserController extends MasterController
                             $mailSettings['activity'] = $activity;
                         }
 
-                        /** @var ActivityUser[] */
+                        /** @var Participation[] */
                         $uniqueParticipations = $stage->getUniqueParticipations();
                         if(count($uniqueParticipations) > 0){
                             foreach($uniqueParticipations as $uniqueParticipation){
@@ -986,7 +986,7 @@ class UserController extends MasterController
 
         $this->em = $this->getEntityManager();
         $repoA = $this->em->getRepository(Activity::class);
-        $repoAU = $this->em->getRepository(ActivityUser::class);
+        $repoAU = $this->em->getRepository(Participation::class);
         $repoO = $this->em->getRepository(Organization::class);
         $repoDec = $this->em->getRepository(Decision::class);
         $role = $currentUser->getRole();
@@ -1059,9 +1059,9 @@ class UserController extends MasterController
 
             // IDs of activities in which at least one *graded* participant is a direct or indirect subordinate
             $subordinates = $currentUser->getSubordinatesRecursive();
-            /** @var ActivityUser[] */
+            /** @var Participation[] */
             $subordinatesParticipations = $repoAU->findBy([ 'usrId' => $subordinates, 'type' => [ -1, 1 ] ]);
-            $activitiesWithSubordinates_IDs = array_map(function (ActivityUser $p) {
+            $activitiesWithSubordinates_IDs = array_map(function (Participation $p) {
                 return $p->getActivity()->getId();
             }, $subordinatesParticipations);
 
@@ -1526,7 +1526,7 @@ class UserController extends MasterController
         $repoO = $this->em->getRepository(Organization::class);
         /** @var UserRepository */
         $repoU = $this->em->getRepository(User::class);
-        $repoAU = $this->em->getRepository(ActivityUser::class);
+        $repoAU = $this->em->getRepository(Participation::class);
         $repoR = $this->em->getRepository(Result::class);
         $repoRK = $this->em->getRepository(Ranking::class);
         $repoRT = $this->em->getRepository(RankingTeam::class);
@@ -1844,7 +1844,7 @@ class UserController extends MasterController
     public function displayProfile(Application $app)
     {
         $entityManager = $this->getEntityManager();
-        $repoAU = $entityManager->getRepository(ActivityUser::class);
+        $repoAU = $entityManager->getRepository(Participation::class);
         $repoO = $entityManager->getRepository(Organization::class);
         $user = self::getAuthorizedUser();
         $organization = $repoO->find($user->getOrgId());
