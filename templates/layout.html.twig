@@ -1,7 +1,10 @@
 {% set locale = app.request.getLocale() in ['fr','en'] ? app.request.getLocale() : en %}
 {% set currentuser = global.currentuser %}
-{% set is_admin = currentuser.role == 4 or currentuser.role == 1 %}
-{% set is_root = currentuser.role == 4 %}
+{% if currentuser != null %}
+  {% set is_admin = currentuser.role == 4 or currentuser.role == 1 %}
+  {% set is_root = currentuser.role == 4 %}
+{% endif %}
+
 
 <!DOCTYPE html>
 <html id="serpicoapp" {% block data_params %}{% endblock %}>

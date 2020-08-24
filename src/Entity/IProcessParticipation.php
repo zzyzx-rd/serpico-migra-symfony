@@ -95,13 +95,13 @@ class IProcessParticipation extends DbObject
      * @ORM\ManyToOne(targetEntity=User::class)
      * @JoinColumn(name="user_usr_id", referencedColumnName="usr_id",nullable=true)
      */
-    public $user_usr;
+    public ?User $user;
 
     /**
      * @ORM\ManyToOne(targetEntity=ExternalUser::class)
      * @ORM\JoinColumn(name="external_useR_ext_usr_id", referencedColumnName="ext_id", nullable=true)
      */
-    public $external_user_ext_usr;
+    public ?ExternalUser $external_user;
 
     /**
      * IProcessParticipation constructor.
@@ -151,8 +151,8 @@ class IProcessParticipation extends DbObject
         $this->institutionProcess = $institutionProcess;
         $this->stage = $stage;
         $this->criterion = $criterion;
-        $this->user_usr = $user_usr;
-        $this->external_user_ext_usr = $external_user_ext_usr;
+        $this->user = $user_usr;
+        $this->external_user = $external_user_ext_usr;
     }
 
 
@@ -299,26 +299,26 @@ class IProcessParticipation extends DbObject
         $this->criterion = $criterion;
     }
 
-    public function getUserUsr(): ?User
+    public function getUser(): ?User
     {
-        return $this->user_usr;
+        return $this->user;
     }
 
-    public function setUserUsr(?User $user_usr): self
+    public function setUser(?User $user): self
     {
-        $this->user_usr = $user_usr;
+        $this->user = $user;
 
         return $this;
     }
 
-    public function getExternalUserExtUsr(): ?ExternalUser
+    public function getExternalUser(): ?ExternalUser
     {
-        return $this->external_user_ext_usr;
+        return $this->external_user;
     }
 
-    public function setExternalUserExtUsr(?ExternalUser $external_user_ext_usr): self
+    public function setExternalUser(?ExternalUser $external_user): self
     {
-        $this->external_user_ext_usr = $external_user_ext_usr;
+        $this->external_user = $external_user;
 
         return $this;
     }

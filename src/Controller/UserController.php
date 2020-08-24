@@ -682,8 +682,9 @@ class UserController extends MasterController
         }
 
         if($isUnlinkedToAnyProcess || $institutionProcess->isApprovable()){
-            $activityController = new ActivityController($this->em, $this->security, $this->stack);
-            return $activityController->addActivityId('activity', $inpId, $actName);
+            return $this->redirectToRoute("activityInitialisation", ["elmtType" => 'activity', "inpId" => $inpId, "actName" => $actName]);
+            //$activityController = new ActivityController($this->em, $this->security, $this->stack);
+            //return $activityController->addActivityId('activity', $inpId, $actName);
         }
 
 // We duplicate activity process/iprocess
@@ -1710,7 +1711,7 @@ class UserController extends MasterController
         }
 
         // If user is a external, no ranking is computed for him
-        if ($user->isInternal() && $repoR->findOneBy(['type' => 1, 'user_usr' => $user]) != null) {
+        if ($user->isInternal() && $repoR->findOneBy(['type' => 1, 'user' => $user]) != null) {
             $userWPerfRanking = $repoRK->findOneBy(['dType' => 'P', 'wType' => 'W', 'usrId' => $user->getId(), 'period' => 0, 'frequency' => 'D']);
             $userWDevRatioRanking = $repoRK->findOneBy(['dType' => 'D', 'wType' => 'W', 'usrId' => $user->getId(), 'period' => 0, 'frequency' => 'D']);
         }
@@ -1729,8 +1730,8 @@ class UserController extends MasterController
             $teamParticipation['nbParticipants'] = count($team->getActiveTeamUsers());
             $teamMeanPerf = $repoRT->findOneBy(['dType' => 'P', 'wType' => 'W', 'team' => $team, 'period' => 0, 'frequency' => 'D']);
             $teamMeanDist = $repoRT->findOneBy(['dType' => 'D', 'wType' => 'W', 'team' => $team, 'period' => 0, 'frequency' => 'D']);
-            $teamParticipation['meanPerf'] = ($teamMeanPerf == null) ?: $teamMeanPerf->getValue();
-            $teamParticipation['meanDist']= ($teamMeanDist == null) ?: $teamMeanDist->getValue();
+            $teamParticipation['meanPerf'] = ($teamMeanPerf === null) ?: $teamMeanPerf->getValue();
+            $teamParticipation['meanDist']= ($teamMeanDist === null) ?: $teamMeanDist->getValue();
             $teamParticipations[] = $teamParticipation;
         }
         $topCriteria=[];
@@ -1740,9 +1741,9 @@ class UserController extends MasterController
         $topCritIds = [];
         $topCriterionIds = [];
 
-        $topCriteriaResults = $repoR->findBy(['user_usr' => $user], ['weightedRelativeResult'=>'DESC']);
+        $topCriteriaResults = $repoR->findBy(['user' => $user], ['weightedRelativeResult'=>'DESC']);
         foreach($topCriteriaResults as $topCriteriaResult){
-            if ($topCriteriaResult->getCriterion() != null && $topCriteriaResult->getWeightedRelativeResult() != null){
+            if ($topCriteriaResult->getCriterion() != null && $topCriteriaResult->getWeightedRelativeResult() !== null){
                 $topCritNameIds = $repoC->findBy(['id' => $topCriteriaResult->getCriterion()]);
                 foreach($topCritNameIds as $topCritNameId){
                     $topCritIds[]=$topCritNameId->getCName();
@@ -1750,7 +1751,7 @@ class UserController extends MasterController
                 }
                 $topCNameIds = array_unique($topCritIds);
                 foreach($topCNameIds as $topCNameId){
-                    if(in_array($topCNameId, $topUsedCrits) == false){
+                    if(!in_array($topCNameId, $topUsedCrits)){
                         $topUsedCrits[]=$topCNameId;
                         $topCritSum=0;
                         $topCritAvg = 0;

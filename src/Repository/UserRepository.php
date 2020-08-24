@@ -40,7 +40,7 @@ class UserRepository extends ServiceEntityRepository
         $usrDpt = $u->getDepartment();
         $usrOrg = $u->getOrganization();
 
-        $targetMapCallback = function (Target $t) use ($precision) {
+        $targetMapCallback = static function (Target $t) use ($precision) {
             return [
                 'cnId' => $t->getCName()->getId(),
                 'sign' => $t->getSign(),
@@ -57,7 +57,7 @@ class UserRepository extends ServiceEntityRepository
             ->innerJoin(Criterion::class, 'c',      'with', 'c  = r.criterion')
             ->innerJoin(CriterionName::class, 'cn', 'with', 'cn = c.cName')
             ->where('s.status = :status')
-            ->andWhere('r.user_usr = :user')
+            ->andWhere('r.user = :user')
             ->andWhere('p.type != 0')
             ->andWhere('r.weightedRelativeResult is not null')
             ->groupBy('cn')

@@ -60,7 +60,7 @@ class ActivityController extends MasterController
      * @return JsonResponse|RedirectResponse
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/{elmtType}/create",name="activityInitialisation")
+     * @Route("/{elmtType}/{inpId}/{actName}/create",name="activityInitialisation")
      */
     public function addActivityId(string $elmtType, int $inpId = 0, string $actName = '')
     {
