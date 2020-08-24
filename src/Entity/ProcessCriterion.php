@@ -293,9 +293,10 @@ class ProcessCriterion extends DbObject
     /**
      * @param mixed $stage
      */
-    public function setStage($stage): void
+    public function setStage($stage)
     {
         $this->stage = $stage;
+
     }
 
     /**
@@ -309,9 +310,10 @@ class ProcessCriterion extends DbObject
     /**
      * @param mixed $process
      */
-    public function setProcess($process): void
+    public function setProcess($process)
     {
         $this->process = $process;
+        return $this;
     }
 
     /**
@@ -325,9 +327,10 @@ class ProcessCriterion extends DbObject
     /**
      * @param mixed $cName
      */
-    public function setCName($cName): void
+    public function setCName($cName)
     {
         $this->cName = $cName;
+        return $this;
     }
     public function __toString()
     {

@@ -245,9 +245,10 @@ class IProcessParticipation extends DbObject
     /**
      * @param mixed $team
      */
-    public function setTeam($team): void
+    public function setTeam($team)
     {
         $this->team = $team;
+        return $this;
     }
 
     /**
@@ -261,9 +262,10 @@ class IProcessParticipation extends DbObject
     /**
      * @param mixed $institutionProcess
      */
-    public function setInstitutionProcess($institutionProcess): void
+    public function setInstitutionProcess($institutionProcess)
     {
         $this->institutionProcess = $institutionProcess;
+        return $this;
     }
 
     /**

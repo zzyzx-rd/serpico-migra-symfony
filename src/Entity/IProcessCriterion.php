@@ -306,9 +306,10 @@ class IProcessCriterion extends DbObject
     /**
      * @param mixed $stage
      */
-    public function setStage($stage): void
+    public function setStage($stage)
     {
         $this->stage = $stage;
+        return $this;
     }
 
     /**
@@ -322,9 +323,10 @@ class IProcessCriterion extends DbObject
     /**
      * @param mixed $institutionProcess
      */
-    public function setInstitutionProcess($institutionProcess): void
+    public function setInstitutionProcess($institutionProcess)
     {
         $this->institutionProcess = $institutionProcess;
+        return $this;
     }
 
     public function getParticipants(): Collection
@@ -335,9 +337,10 @@ class IProcessCriterion extends DbObject
     /**
      * @param $participants
      */
-    public function setParticipants(Collection $participants): void
+    public function setParticipants(Collection $participants)
     {
         $this->participants = $participants;
+        return $this;
     }
 
     /**
@@ -351,9 +354,10 @@ class IProcessCriterion extends DbObject
     /**
      * @param mixed $cName
      */
-    public function setCName($cName): void
+    public function setCName($cName)
     {
         $this->cName = $cName;
+        return $this;
     }
 
     public function __toString()

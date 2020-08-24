@@ -155,9 +155,10 @@ class SurveyFieldParameter extends DbObject
     /**
      * @param mixed $field
      */
-    public function setField($field): void
+    public function setField($field)
     {
         $this->field = $field;
+        return $this;
     }
 
     public function jsonSerialize(): array

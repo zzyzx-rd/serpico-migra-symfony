@@ -391,9 +391,10 @@ class Participation extends DbObject
     /**
      * @param ArrayCollection $grades
      */
-    public function setGrades(ArrayCollection $grades): void
+    public function setGrades(ArrayCollection $grades)
     {
         $this->grades = $grades;
+        return $this;
     }
 
     /**
@@ -407,9 +408,9 @@ class Participation extends DbObject
     /**
      * @param mixed $team
      */
-    public function setTeam($team): void
+    public function setTeam($team)
     {
-        $this->team = $team;
+        $this->team = $team; return $this;
     }
 
     /**
@@ -423,9 +424,10 @@ class Participation extends DbObject
     /**
      * @param mixed $activity
      */
-    public function setActivity($activity): void
+    public function setActivity($activity)
     {
         $this->activity = $activity;
+        return $this;
     }
 
     /**
@@ -439,9 +441,10 @@ class Participation extends DbObject
     /**
      * @param mixed $stage
      */
-    public function setStage($stage): void
+    public function setStage($stage)
     {
         $this->stage = $stage;
+        return $this;
     }
 
     /**
@@ -455,9 +458,10 @@ class Participation extends DbObject
     /**
      * @param mixed $criterion
      */
-    public function setCriterion($criterion): void
+    public function setCriterion($criterion)
     {
         $this->criterion = $criterion;
+        return $this;
     }
 
     /**
@@ -471,9 +475,10 @@ class Participation extends DbObject
     /**
      * @param Answer[]|ArrayCollection $answers
      */
-    public function setAnswers($answers): void
+    public function setAnswers($answers)
     {
         $this->answers = $answers;
+        return $this;
     }
 
     public function getUser(): ?User

@@ -153,9 +153,10 @@ class TeamUser extends DbObject
     /**
      * @param mixed $team
      */
-    public function setTeam($team): void
+    public function setTeam($team)
     {
         $this->team = $team;
+        return $this;
     }
 
     public function getUser(): ?User

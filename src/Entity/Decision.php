@@ -258,9 +258,10 @@ class Decision extends DbObject
     /**
      * @param mixed $organization
      */
-    public function setOrganization($organization): void
+    public function setOrganization($organization)
     {
         $this->organization = $organization;
+        return $this;
     }
 
     /**
@@ -274,9 +275,11 @@ class Decision extends DbObject
     /**
      * @param mixed $activity
      */
-    public function setActivity($activity): void
+    public function setActivity($activity)
     {
         $this->activity = $activity;
+        return $this;
+
     }
 
     /**
@@ -290,9 +293,10 @@ class Decision extends DbObject
     /**
      * @param mixed $stage
      */
-    public function setStage($stage): void
+    public function setStage($stage)
     {
         $this->stage = $stage;
+        return $this;
     }
 
     /**
@@ -306,9 +310,10 @@ class Decision extends DbObject
     /**
      * @param int $requester
      */
-    public function setRequester(int $requester): void
+    public function setRequester(int $requester)
     {
         $this->requester = $requester;
+        return $this;
     }
 
     /**
@@ -322,9 +327,10 @@ class Decision extends DbObject
     /**
      * @param int $decider
      */
-    public function setider(int $decider): void
+    public function setider(int $decider)
     {
         $this->decider = $decider;
+        return $this;
     }
 
 }

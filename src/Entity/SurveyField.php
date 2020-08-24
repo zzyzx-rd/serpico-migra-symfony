@@ -242,9 +242,10 @@ class SurveyField extends DbObject
     /**
      * @param mixed $criterion
      */
-    public function setCriterion($criterion): void
+    public function setCriterion($criterion)
     {
         $this->criterion = $criterion;
+        return $this;
     }
 
     /**
@@ -258,9 +259,9 @@ class SurveyField extends DbObject
     /**
      * @param mixed $survey
      */
-    public function setSurvey($survey): void
+    public function setSurvey($survey)
     {
-        $this->survey = $survey;
+        $this->survey = $survey; return $this;
     }
 
     /**
@@ -274,9 +275,11 @@ class SurveyField extends DbObject
     /**
      * @param mixed $parameters
      */
-    public function setParameters($parameters): void
+    public function setParameters($parameters)
     {
         $this->parameters = $parameters;
+        return $this;
+
     }
 
     /**
@@ -290,9 +293,10 @@ class SurveyField extends DbObject
     /**
      * @param mixed $answers
      */
-    public function setAnswers($answers): void
+    public function setAnswers($answers)
     {
         $this->answers = $answers;
+        return $this;
     }
 
     public function addParameter(SurveyFieldParameter $parameter): SurveyField

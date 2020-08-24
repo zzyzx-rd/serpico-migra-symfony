@@ -204,9 +204,10 @@ class Mail extends DbObject
     /**
      * @param mixed $user
      */
-    public function setUser($user): void
+    public function setUser($user)
     {
         $this->user = $user;
+        return $this;
     }
 
     /**
@@ -220,9 +221,10 @@ class Mail extends DbObject
     /**
      * @param mixed $workerIndividual
      */
-    public function setWorkerIndividual($workerIndividual): void
+    public function setWorkerIndividual($workerIndividual)
     {
         $this->workerIndividual = $workerIndividual;
+        return $this;
     }
 
     /**
@@ -236,9 +238,10 @@ class Mail extends DbObject
     /**
      * @param mixed $organization
      */
-    public function setOrganization($organization): void
+    public function setOrganization($organization)
     {
         $this->organization = $organization;
+        return $this;
     }
 
     /**
@@ -252,9 +255,10 @@ class Mail extends DbObject
     /**
      * @param mixed $workerFirm
      */
-    public function setWorkerFirm($workerFirm): void
+    public function setWorkerFirm($workerFirm)
     {
         $this->workerFirm = $workerFirm;
+        return $this;
     }
 
     /**
@@ -268,9 +272,10 @@ class Mail extends DbObject
     /**
      * @param mixed $activity
      */
-    public function setActivity($activity): void
+    public function setActivity($activity)
     {
         $this->activity = $activity;
+        return $this;
     }
 
     /**
@@ -284,9 +289,10 @@ class Mail extends DbObject
     /**
      * @param mixed $stage
      */
-    public function setStage($stage): void
+    public function setStage($stage)
     {
         $this->stage = $stage;
+        return $this;
     }
 
 }

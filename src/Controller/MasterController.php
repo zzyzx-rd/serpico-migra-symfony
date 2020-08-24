@@ -35,6 +35,7 @@ use App\Entity\Team;
 use App\Entity\User;
 use App\Repository\ParticipationRepository;
 use App\Repository\UserRepository;
+use RuntimeException;
 use Swift_Image;
 use Swift_Mailer;
 use Swift_Message;
@@ -175,11 +176,11 @@ abstract class MasterController extends AbstractController
 //        return md5(uniqid());
 //    }
 
-    public static function hideResultsFromStages(Collection $stages): array
+    public function hideResultsFromStages(Collection $stages): array
     {
-
+        $currentUser = $this->user;
         if (!$currentUser) {
-            throw new Exception('unauthorized');
+            throw new RuntimeException('unauthorized');
         }
 
         $role = $currentUser->getRole();
@@ -188,11 +189,10 @@ abstract class MasterController extends AbstractController
             return [];
         }
 
-        $em = self::getEntityManager();
         $id = $currentUser->getId();
         $org = $currentUser->getOrganization();
-        $optNameRepo = $em->getRepository(OptionName::class);
-        $orgUsrOptRepo = $em->getRepository(OrganizationUserOption::class);
+        $optNameRepo = $this->em->getRepository(OptionName::class);
+        $orgUsrOptRepo = $this->em->getRepository(OrganizationUserOption::class);
 
         /** @var OptionName|null */
         $activitiesAccessAndResultsView = $optNameRepo->findOneBy([

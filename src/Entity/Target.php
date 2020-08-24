@@ -178,9 +178,10 @@ class Target extends DbObject
     /**
      * @param mixed $organization
      */
-    public function setOrganization($organization): void
+    public function setOrganization($organization)
     {
         $this->organization = $organization;
+        return $this;
     }
 
     /**
@@ -194,9 +195,10 @@ class Target extends DbObject
     /**
      * @param mixed $department
      */
-    public function setDepartment($department): void
+    public function setDepartment($department)
     {
         $this->department = $department;
+        return $this;
     }
 
     /**
@@ -210,9 +212,10 @@ class Target extends DbObject
     /**
      * @param mixed $position
      */
-    public function setPosition($position): void
+    public function setPosition($position)
     {
         $this->position = $position;
+        return $this;
     }
 
     /**
@@ -226,9 +229,10 @@ class Target extends DbObject
     /**
      * @param mixed $title
      */
-    public function setTitle($title): void
+    public function setTitle($title)
     {
         $this->title = $title;
+        return $this;
     }
 
     /**
@@ -242,9 +246,10 @@ class Target extends DbObject
     /**
      * @param mixed $user
      */
-    public function setUser($user): void
+    public function setUser($user)
     {
         $this->user = $user;
+        return $this;
     }
 
     /**
@@ -258,9 +263,10 @@ class Target extends DbObject
     /**
      * @param mixed $team
      */
-    public function setTeam($team): void
+    public function setTeam($team)
     {
         $this->team = $team;
+        return $this;
     }
 
     /**
@@ -274,9 +280,10 @@ class Target extends DbObject
     /**
      * @param mixed $cName
      */
-    public function setCName($cName): void
+    public function setCName($cName)
     {
         $this->cName = $cName;
+        return $this;
     }
 
     /**
@@ -290,9 +297,10 @@ class Target extends DbObject
     /**
      * @param mixed $criterion
      */
-    public function setCriterion($criterion): void
+    public function setCriterion($criterion)
     {
         $this->criterion = $criterion;
+        return $this;
     }
 
     public function __toString()

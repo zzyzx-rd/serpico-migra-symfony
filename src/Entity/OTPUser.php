@@ -156,9 +156,10 @@ class OTPUser extends DbObject
     /**
      * @param mixed $organization
      */
-    public function setOrganization($organization): void
+    public function setOrganization($organization)
     {
         $this->organization = $organization;
+        return $this;
     }
 
 }

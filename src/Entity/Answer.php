@@ -104,9 +104,10 @@ class Answer extends DbObject
     /**
      * @param mixed $field
      */
-    public function setField($field): void
+    public function setField($field)
     {
         $this->field = $field;
+        return $this;
     }
 
     /**
@@ -120,9 +121,10 @@ class Answer extends DbObject
     /**
      * @param mixed $survey
      */
-    public function setSurvey($survey): void
+    public function setSurvey($survey)
     {
         $this->survey = $survey;
+        return $this;
     }
 
     /**

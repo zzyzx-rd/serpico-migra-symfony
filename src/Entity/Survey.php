@@ -158,9 +158,9 @@ class Survey extends DbObject
     /**
      * @param mixed $stage
      */
-    public function setStage($stage): void
+    public function setStage($stage)
     {
-        $this->stage = $stage;
+        $this->stage = $stage; return $this;
     }
 
     /**
@@ -174,7 +174,7 @@ class Survey extends DbObject
     /**
      * @param mixed $organization
      */
-    public function setOrganization($organization): void
+    public function setOrganization($organization)
     {
         $this->organization = $organization;
     }
@@ -190,9 +190,10 @@ class Survey extends DbObject
     /**
      * @param ArrayCollection $participants
      */
-    public function setParticipants(ArrayCollection $participants): void
+    public function setParticipants(ArrayCollection $participants)
     {
         $this->participants = $participants;
+        return $this;
     }
 
     /**
@@ -206,9 +207,9 @@ class Survey extends DbObject
     /**
      * @param SurveyField[] $fields
      */
-    public function setFields(array $fields): void
+    public function setFields(array $fields)
     {
-        $this->fields = $fields;
+        $this->fields = $fields; return $this;
     }
 
     /**
@@ -222,9 +223,9 @@ class Survey extends DbObject
     /**
      * @param Answer[]|ArrayCollection $answers
      */
-    public function setAnswers($answers): void
+    public function setAnswers($answers)
     {
-        $this->answers = $answers;
+        $this->answers = $answers; return $this;
     }
     public function addParticipant(Participation $participant)
     {

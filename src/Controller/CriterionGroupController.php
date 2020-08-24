@@ -85,11 +85,10 @@ class CriterionGroupController extends MasterController
 
     /**
      * @param Request $request
-     * @param int $cgpId
      * @return Response
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route(name="setCgpDepartment")
+     * @Route(name="setCgpDepartment", path="/settings/criteriongroup/department/{cgpId}")
      */
     public function setCgpDepartment(Request $request, int $cgpId)
     {

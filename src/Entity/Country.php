@@ -140,9 +140,10 @@ class Country extends DbObject
     /**
      * @param mixed $states
      */
-    public function setStates($states): void
+    public function setStates($states)
     {
         $this->states = $states;
+        return $this;
     }
 
     /**
@@ -156,9 +157,10 @@ class Country extends DbObject
     /**
      * @param mixed $firms
      */
-    public function setFirms($firms): void
+    public function setFirms($firms)
     {
         $this->firms = $firms;
+        return $this;
     }
     public function addFirm(WorkerFirm $firm): Country
     {

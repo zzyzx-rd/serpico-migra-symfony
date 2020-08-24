@@ -329,7 +329,6 @@ class User extends DbObject implements  UserInterface, \Serializable
         $usr_rm_token = null,
         int $superior = null,
         $usr_createdBy = null,
-        $usr_inserted = null,
         $usr_validated = null,
         $lastConnected = null,
         $deleted = null,

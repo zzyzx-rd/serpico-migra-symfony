@@ -219,9 +219,10 @@ class InstitutionProcess extends DbObject
     /**
      * @param mixed $organization
      */
-    public function setOrganization($organization): void
+    public function setOrganization($organization)
     {
         $this->organization = $organization;
+        return $this;
     }
 
     /**
@@ -235,9 +236,10 @@ class InstitutionProcess extends DbObject
     /**
      * @param mixed $process
      */
-    public function setProcess($process): void
+    public function setProcess($process)
     {
         $this->process = $process;
+        return $this;
     }
 
     /**
@@ -251,9 +253,10 @@ class InstitutionProcess extends DbObject
     /**
      * @param mixed $masterUser
      */
-    public function setMasterUser($masterUser): void
+    public function setMasterUser($masterUser)
     {
         $this->masterUser = $masterUser;
+        return $this;
     }
 
     /**
@@ -267,9 +270,10 @@ class InstitutionProcess extends DbObject
     /**
      * @param mixed $parent
      */
-    public function setParent($parent): void
+    public function setParent($parent)
     {
         $this->parent = $parent;
+        return $this;
     }
 
     /**
@@ -283,9 +287,10 @@ class InstitutionProcess extends DbObject
     /**
      * @param mixed $children
      */
-    public function setChildren($children): void
+    public function setChildren($children)
     {
         $this->children = $children;
+        return $this;
     }
 
     /**
@@ -299,9 +304,10 @@ class InstitutionProcess extends DbObject
     /**
      * @param mixed $stages
      */
-    public function setStages($stages): void
+    public function setStages($stages)
     {
         $this->stages = $stages;
+        return $this;
     }
 
     public function addChildren(InstitutionProcess $child): InstitutionProcess

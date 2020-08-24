@@ -520,9 +520,10 @@ class WorkerFirm extends DbObject
     /**
      * @param mixed $mainSector
      */
-    public function setMainSector($mainSector): void
+    public function setMainSector($mainSector)
     {
         $this->mainSector = $mainSector;
+        return $this;
     }
 
     /**
@@ -536,9 +537,10 @@ class WorkerFirm extends DbObject
     /**
      * @param mixed $city
      */
-    public function setCity($city): void
+    public function setCity($city)
     {
         $this->city = $city;
+        return $this;
     }
 
     /**
@@ -552,9 +554,10 @@ class WorkerFirm extends DbObject
     /**
      * @param mixed $state
      */
-    public function setState($state): void
+    public function setState($state)
     {
         $this->state = $state;
+        return $this;
     }
 
     /**
@@ -568,9 +571,10 @@ class WorkerFirm extends DbObject
     /**
      * @param mixed $country
      */
-    public function setCountry($country): void
+    public function setCountry($country)
     {
         $this->country = $country;
+        return $this;
     }
 
     /**
@@ -584,9 +588,10 @@ class WorkerFirm extends DbObject
     /**
      * @param mixed $experiences
      */
-    public function setExperiences($experiences): void
+    public function setExperiences($experiences)
     {
         $this->experiences = $experiences;
+        return $this;
     }
 
     /**
@@ -600,9 +605,10 @@ class WorkerFirm extends DbObject
     /**
      * @param mixed $mails
      */
-    public function setMails($mails): void
+    public function setMails($mails)
     {
         $this->mails = $mails;
+        return $this;
     }
     public function getActiveExperiences(): array
     {

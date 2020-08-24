@@ -189,9 +189,10 @@ class WorkerExperience extends DbObject
     /**
      * @param mixed $individual
      */
-    public function setIndividual($individual): void
+    public function setIndividual($individual)
     {
         $this->individual = $individual;
+        return $this;
     }
 
     /**
@@ -205,9 +206,10 @@ class WorkerExperience extends DbObject
     /**
      * @param mixed $firm
      */
-    public function setFirm($firm): void
+    public function setFirm($firm)
     {
         $this->firm = $firm;
+        return $this;
     }
 
 }

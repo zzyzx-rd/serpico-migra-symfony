@@ -190,9 +190,10 @@ class Team extends DbObject
     /**
      * @param mixed $organization
      */
-    public function setOrganization($organization): void
+    public function setOrganization($organization)
     {
         $this->organization = $organization;
+        return $this;
     }
 
     /**
@@ -206,9 +207,10 @@ class Team extends DbObject
     /**
      * @param mixed $teamUsers
      */
-    public function setmUsers($teamUsers): void
+    public function setmUsers($teamUsers)
     {
         $this->teamUsers = $teamUsers;
+        return $this;
     }
 
     /**
@@ -222,9 +224,10 @@ class Team extends DbObject
     /**
      * @param mixed $participations
      */
-    public function setParticipations($participations): void
+    public function setParticipations($participations)
     {
         $this->participations = $participations;
+        return $this;
     }
 
     /**
@@ -238,9 +241,10 @@ class Team extends DbObject
     /**
      * @param mixed $grades
      */
-    public function setGrades($grades): void
+    public function setGrades($grades)
     {
         $this->grades = $grades;
+        return $this;
     }
 
     /**
@@ -254,9 +258,10 @@ class Team extends DbObject
     /**
      * @param mixed $targets
      */
-    public function setTargets($targets): void
+    public function setTargets($targets)
     {
         $this->targets = $targets;
+        return $this;
     }
 
     /**

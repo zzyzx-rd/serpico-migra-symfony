@@ -152,9 +152,10 @@ class Icon extends DbObject
     /**
      * @param Collection $criterionNames
      */
-    public function setCriterionNames(Collection $criterionNames): void
+    public function setCriterionNames(Collection $criterionNames)
     {
         $this->criterionNames = $criterionNames;
+        return $this;
     }
 
     /**
@@ -168,9 +169,10 @@ class Icon extends DbObject
     /**
      * @param Collection $workerFirmSectors
      */
-    public function setWorkerFirmSectors(Collection $workerFirmSectors): void
+    public function setWorkerFirmSectors(Collection $workerFirmSectors)
     {
         $this->workerFirmSectors = $workerFirmSectors;
+        return $this;
     }
 
     public function addCriterionName(CriterionName $criterionName): Icon

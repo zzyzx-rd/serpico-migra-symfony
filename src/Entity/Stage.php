@@ -608,9 +608,9 @@ class Stage extends DbObject
     /**
      * @param Survey $survey
      */
-    public function setSurvey(Survey $survey): void
+    public function setSurvey(Survey $survey)
     {
-        $this->survey = $survey;
+        $this->survey = $survey; return $this;
     }
 
     /**
@@ -624,9 +624,9 @@ class Stage extends DbObject
     /**
      * @param mixed $activity
      */
-    public function setActivity($activity): void
+    public function setActivity($activity)
     {
-        $this->activity = $activity;
+        $this->activity = $activity; return $this;
     }
 
     /**
@@ -640,9 +640,9 @@ class Stage extends DbObject
     /**
      * @param Organization $organization
      */
-    public function setOrganization(Organization $organization): void
+    public function setOrganization(Organization $organization)
     {
-        $this->organization = $organization;
+        $this->organization = $organization; return $this;
     }
 
     /**
@@ -656,9 +656,9 @@ class Stage extends DbObject
     /**
      * @param Collection $criteria
      */
-    public function setCriteria(Collection $criteria): void
+    public function setCriteria(Collection $criteria)
     {
-        $this->criteria = $criteria;
+        $this->criteria = $criteria; return $this;
     }
 
     /**
@@ -672,9 +672,9 @@ class Stage extends DbObject
     /**
      * @param mixed $participants
      */
-    public function setParticipants($participants): void
+    public function setParticipants($participants)
     {
-        $this->participants = $participants;
+        $this->participants = $participants; return $this;
     }
 
     /**
@@ -688,9 +688,9 @@ class Stage extends DbObject
     /**
      * @param mixed $decisions
      */
-    public function setDecisions($decisions): void
+    public function setDecisions($decisions)
     {
-        $this->decisions = $decisions;
+        $this->decisions = $decisions; return $this;
     }
 
     /**
@@ -704,9 +704,9 @@ class Stage extends DbObject
     /**
      * @param mixed $grades
      */
-    public function setGrades($grades): void
+    public function setGrades($grades)
     {
-        $this->grades = $grades;
+        $this->grades = $grades; return $this;
     }
 
     /**
@@ -720,9 +720,9 @@ class Stage extends DbObject
     /**
      * @param mixed $projectResults
      */
-    public function setProjectResults($projectResults): void
+    public function setProjectResults($projectResults)
     {
-        $this->projectResults = $projectResults;
+        $this->projectResults = $projectResults; return $this;
     }
 
     /**
@@ -736,9 +736,9 @@ class Stage extends DbObject
     /**
      * @param mixed $results
      */
-    public function setResults($results): void
+    public function setResults($results)
     {
-        $this->results = $results;
+        $this->results = $results; return $this;
     }
 
     /**
@@ -752,9 +752,9 @@ class Stage extends DbObject
     /**
      * @param mixed $resultTeams
      */
-    public function setResultTeams($resultTeams): void
+    public function setResultTeams($resultTeams)
     {
-        $this->resultTeams = $resultTeams;
+        $this->resultTeams = $resultTeams; return $this;
     }
 
     /**
@@ -768,9 +768,9 @@ class Stage extends DbObject
     /**
      * @param mixed $rankings
      */
-    public function setRankings($rankings): void
+    public function setRankings($rankings)
     {
-        $this->rankings = $rankings;
+        $this->rankings = $rankings; return $this;
     }
 
     /**
@@ -784,9 +784,9 @@ class Stage extends DbObject
     /**
      * @param mixed $rankingTeams
      */
-    public function setRankingTeams($rankingTeams): void
+    public function setRankingTeams($rankingTeams)
     {
-        $this->rankingTeams = $rankingTeams;
+        $this->rankingTeams = $rankingTeams; return $this;
     }
 
     /**
@@ -800,9 +800,9 @@ class Stage extends DbObject
     /**
      * @param mixed $historicalRankings
      */
-    public function setHistoricalRankings($historicalRankings): void
+    public function setHistoricalRankings($historicalRankings)
     {
-        $this->historicalRankings = $historicalRankings;
+        $this->historicalRankings = $historicalRankings; return $this;
     }
 
     /**
@@ -816,9 +816,9 @@ class Stage extends DbObject
     /**
      * @param mixed $historicalRankingTeams
      */
-    public function setHistoricalRankingTeams($historicalRankingTeams): void
+    public function setHistoricalRankingTeams($historicalRankingTeams)
     {
-        $this->historicalRankingTeams = $historicalRankingTeams;
+        $this->historicalRankingTeams = $historicalRankingTeams; return $this;
     }
 
     /**
@@ -959,9 +959,9 @@ class Stage extends DbObject
     /**
      * @param mixed $template
      */
-    public function setTemplate($template): void
+    public function setTemplate($template)
     {
-        $this->template = $template;
+        $this->template = $template; return $this;
     }
 
     public function getMasterUser(): ?User

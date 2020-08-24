@@ -265,9 +265,10 @@ class GeneratedImage extends DbObject
     /**
      * @param mixed $cName
      */
-    public function setCName($cName): void
+    public function setCName($cName)
     {
         $this->cName = $cName;
+        return $this;
     }
 
 }

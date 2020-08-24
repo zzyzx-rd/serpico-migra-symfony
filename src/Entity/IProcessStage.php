@@ -672,9 +672,10 @@ class IProcessStage extends DbObject
     /**
      * @param InstitutionProcess $institutionProcess
      */
-    public function setInstitutionProcess(InstitutionProcess $institutionProcess): void
+    public function setInstitutionProcess(InstitutionProcess $institutionProcess)
     {
         $this->institutionProcess = $institutionProcess;
+        return $this;
     }
 
     /**
@@ -688,9 +689,10 @@ class IProcessStage extends DbObject
     /**
      * @param Organization $organization
      */
-    public function setOrganization(Organization $organization): void
+    public function setOrganization(Organization $organization)
     {
         $this->organization = $organization;
+        return $this;
     }
 
     /**
@@ -704,9 +706,10 @@ class IProcessStage extends DbObject
     /**
      * @param mixed $criteria
      */
-    public function setCriteria($criteria): void
+    public function setCriteria($criteria)
     {
         $this->criteria = $criteria;
+        return $this;
     }
 
     /**
@@ -720,9 +723,10 @@ class IProcessStage extends DbObject
     /**
      * @param mixed $participants
      */
-    public function setParticipants($participants): void
+    public function setParticipants($participants)
     {
         $this->participants = $participants;
+        return $this;
     }
 
     /**
@@ -736,9 +740,10 @@ class IProcessStage extends DbObject
     /**
      * @param mixed $decisions
      */
-    public function setDecisions($decisions): void
+    public function setDecisions($decisions)
     {
         $this->decisions = $decisions;
+        return $this;
     }
 
     /**
@@ -752,9 +757,10 @@ class IProcessStage extends DbObject
     /**
      * @param mixed $grades
      */
-    public function setGrades($grades): void
+    public function setGrades($grades)
     {
         $this->grades = $grades;
+        return $this;
     }
 
     /**
@@ -768,9 +774,10 @@ class IProcessStage extends DbObject
     /**
      * @param mixed $results
      */
-    public function setResults($results): void
+    public function setResults($results)
     {
         $this->results = $results;
+        return $this;
     }
 
     /**
@@ -784,9 +791,10 @@ class IProcessStage extends DbObject
     /**
      * @param mixed $resultTeams
      */
-    public function setResultTeams($resultTeams): void
+    public function setResultTeams($resultTeams)
     {
         $this->resultTeams = $resultTeams;
+        return $this;
     }
 
     /**
@@ -800,9 +808,10 @@ class IProcessStage extends DbObject
     /**
      * @param mixed $rankings
      */
-    public function setRankings($rankings): void
+    public function setRankings($rankings)
     {
         $this->rankings = $rankings;
+        return $this;
     }
 
     /**
@@ -816,9 +825,10 @@ class IProcessStage extends DbObject
     /**
      * @param mixed $rankingTeams
      */
-    public function setRankingTeams($rankingTeams): void
+    public function setRankingTeams($rankingTeams)
     {
         $this->rankingTeams = $rankingTeams;
+        return $this;
     }
 
     /**
@@ -832,9 +842,10 @@ class IProcessStage extends DbObject
     /**
      * @param mixed $historicalRankings
      */
-    public function setHistoricalRankings($historicalRankings): void
+    public function setHistoricalRankings($historicalRankings)
     {
         $this->historicalRankings = $historicalRankings;
+        return $this;
     }
 
     /**
@@ -848,9 +859,10 @@ class IProcessStage extends DbObject
     /**
      * @param mixed $historicalRankingTeams
      */
-    public function setHistoricalRankingTeams($historicalRankingTeams): void
+    public function setHistoricalRankingTeams($historicalRankingTeams)
     {
         $this->historicalRankingTeams = $historicalRankingTeams;
+        return $this;
     }
 
     public function getMasterUsr(): ?User

@@ -702,9 +702,10 @@ class ProcessStage extends DbObject
     /**
      * @param mixed $process
      */
-    public function setProcess($process): void
+    public function setProcess($process)
     {
         $this->process = $process;
+        return $this;
     }
 
     /**
@@ -718,9 +719,10 @@ class ProcessStage extends DbObject
     /**
      * @param Organization $organization
      */
-    public function setOrganization(Organization $organization): void
+    public function setOrganization(Organization $organization)
     {
         $this->organization = $organization;
+        return $this;
     }
 
     /**
@@ -734,9 +736,10 @@ class ProcessStage extends DbObject
     /**
      * @param Collection $criteria
      */
-    public function setCriteria(Collection $criteria): void
+    public function setCriteria(Collection $criteria)
     {
         $this->criteria = $criteria;
+        return $this;
     }
 
     /**
@@ -750,9 +753,10 @@ class ProcessStage extends DbObject
     /**
      * @param mixed $participants
      */
-    public function setParticipants($participants): void
+    public function setParticipants($participants)
     {
         $this->participants = $participants;
+        return $this;
     }
 
     /**
@@ -766,9 +770,10 @@ class ProcessStage extends DbObject
     /**
      * @param mixed $decisions
      */
-    public function setDecisions($decisions): void
+    public function setDecisions($decisions)
     {
         $this->decisions = $decisions;
+        return $this;
     }
 
     /**
@@ -782,9 +787,9 @@ class ProcessStage extends DbObject
     /**
      * @param mixed $grades
      */
-    public function setGrades($grades): void
+    public function setGrades($grades)
     {
-        $this->grades = $grades;
+        $this->grades = $grades; return $this;
     }
 
     /**
@@ -798,9 +803,10 @@ class ProcessStage extends DbObject
     /**
      * @param mixed $results
      */
-    public function setResults($results): void
+    public function setResults($results)
     {
         $this->results = $results;
+        return $this;
     }
 
     /**
@@ -814,9 +820,9 @@ class ProcessStage extends DbObject
     /**
      * @param mixed $resultTeams
      */
-    public function setResultTeams($resultTeams): void
+    public function setResultTeams($resultTeams)
     {
-        $this->resultTeams = $resultTeams;
+        $this->resultTeams = $resultTeams; return $this;
     }
 
     /**
@@ -830,9 +836,9 @@ class ProcessStage extends DbObject
     /**
      * @param mixed $rankings
      */
-    public function setRankings($rankings): void
+    public function setRankings($rankings)
     {
-        $this->rankings = $rankings;
+        $this->rankings = $rankings; return $this;
     }
 
     /**
@@ -846,9 +852,9 @@ class ProcessStage extends DbObject
     /**
      * @param mixed $rankingTeams
      */
-    public function setRankingTeams($rankingTeams): void
+    public function setRankingTeams($rankingTeams)
     {
-        $this->rankingTeams = $rankingTeams;
+        $this->rankingTeams = $rankingTeams; return $this;
     }
 
     /**
@@ -862,9 +868,9 @@ class ProcessStage extends DbObject
     /**
      * @param mixed $historicalRankings
      */
-    public function setHistoricalRankings($historicalRankings): void
+    public function setHistoricalRankings($historicalRankings)
     {
-        $this->historicalRankings = $historicalRankings;
+        $this->historicalRankings = $historicalRankings; return $this;
     }
 
     /**
@@ -878,9 +884,9 @@ class ProcessStage extends DbObject
     /**
      * @param mixed $historicalRankingTeams
      */
-    public function setHistoricalRankingTeams($historicalRankingTeams): void
+    public function setHistoricalRankingTeams($historicalRankingTeams)
     {
-        $this->historicalRankingTeams = $historicalRankingTeams;
+        $this->historicalRankingTeams = $historicalRankingTeams; return $this;
     }
 
     public function getMasterUsr(): ?User

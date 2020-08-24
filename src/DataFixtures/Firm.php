@@ -70,6 +70,6 @@ class Firm extends Fixture
         $departement = new Department();
         $departement->setOrganization($serpico)
             ->setMasterUser($user)
-            ->setName("developement");
+            ->setName("development");
     }
 }

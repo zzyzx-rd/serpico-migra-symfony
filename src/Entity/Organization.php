@@ -522,9 +522,10 @@ class Organization extends DbObject
     /**
      * @param mixed $stages
      */
-    public function setStages($stages): void
+    public function setStages($stages)
     {
         $this->stages = $stages;
+        return $this;
     }
 
     /**
@@ -554,9 +555,10 @@ class Organization extends DbObject
     /**
      * @param mixed $titles
      */
-    public function setTitles($titles): void
+    public function setTitles($titles)
     {
         $this->titles = $titles;
+        return $this;
     }
 
     /**
@@ -570,9 +572,10 @@ class Organization extends DbObject
     /**
      * @param mixed $weights
      */
-    public function setWeights($weights): void
+    public function setWeights($weights)
     {
         $this->weights = $weights;
+        return $this;
     }
 
     /**
@@ -586,9 +589,10 @@ class Organization extends DbObject
     /**
      * @param mixed $decisions
      */
-    public function setDecisions($decisions): void
+    public function setDecisions($decisions)
     {
         $this->decisions = $decisions;
+        return $this;
     }
 
     /**
@@ -602,9 +606,10 @@ class Organization extends DbObject
     /**
      * @param mixed $criteria
      */
-    public function setCriteria($criteria): void
+    public function setCriteria($criteria)
     {
         $this->criteria = $criteria;
+        return $this;
     }
 
 
@@ -619,9 +624,10 @@ class Organization extends DbObject
     /**
      * @param Client[]|ArrayCollection $clients
      */
-    public function setClients($clients): void
+    public function setClients($clients)
     {
         $this->clients = $clients;
+        return $this;
     }
 
     /**
@@ -635,9 +641,10 @@ class Organization extends DbObject
     /**
      * @param mixed $criterionNames
      */
-    public function setCriterionNames($criterionNames): void
+    public function setCriterionNames($criterionNames)
     {
         $this->criterionNames = $criterionNames;
+        return $this;
     }
 
     /**
@@ -651,9 +658,10 @@ class Organization extends DbObject
     /**
      * @param mixed $usersCSV
      */
-    public function setUsersCSV($usersCSV): void
+    public function setUsersCSV($usersCSV)
     {
         $this->usersCSV = $usersCSV;
+        return $this;
     }
 
     /**
@@ -667,9 +675,10 @@ class Organization extends DbObject
     /**
      * @param string $logo
      */
-    public function setLogo(string $logo): void
+    public function setLogo(string $logo)
     {
         $this->logo = $logo;
+        return $this;
     }
 
     /**
@@ -683,9 +692,10 @@ class Organization extends DbObject
     /**
      * @param mixed $teams
      */
-    public function setTeams($teams): void
+    public function setTeams($teams)
     {
         $this->teams = $teams;
+        return $this;
     }
 
     /**
@@ -699,9 +709,10 @@ class Organization extends DbObject
     /**
      * @param mixed $mails
      */
-    public function setMails($mails): void
+    public function setMails($mails)
     {
         $this->mails = $mails;
+        return $this;
     }
 
     /**
@@ -715,9 +726,10 @@ class Organization extends DbObject
     /**
      * @param mixed $targets
      */
-    public function setTargets($targets): void
+    public function setTargets($targets)
     {
         $this->targets = $targets;
+        return $this;
     }
 
     /**

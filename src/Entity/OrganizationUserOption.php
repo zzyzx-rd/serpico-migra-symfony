@@ -67,7 +67,7 @@ class OrganizationUserOption extends DbObject
     public DateTime $inserted;
 
     /**
-     * @OneToOne(targetEntity="OptionName")
+     * @ManyToOne(targetEntity="OptionName")
      * @JoinColumn(name="option_name_ona_id", referencedColumnName="ona_id")
      */
     protected $oName;
@@ -103,13 +103,13 @@ class OrganizationUserOption extends DbObject
     protected $user;
 
     /**
-     * @Column(name="org_role", nullable=true)
+     * @Column(name="org_role", nullable=true, type="integer")
      */
     public $role;
 
     /**
      * OrganizationUserOption constructor.
-     * @param ?int$id
+     * @param int $id
      * @param bool $opt_enabled
      * @param $opt_createdBy
      */
@@ -126,7 +126,7 @@ class OrganizationUserOption extends DbObject
         return $this->optionTrue;
     }
 
-    public function setOptionValue(bool $opt_bool_value): self
+    public function setOptionTrue(bool $opt_bool_value): self
     {
         $this->optionTrue = $opt_bool_value;
 
@@ -208,12 +208,10 @@ class OrganizationUserOption extends DbObject
         return $this->oName;
     }
 
-    /**
-     * @param mixed $oName
-     */
-    public function setOName($oName): void
+    public function setOName($oName): OrganizationUserOption
     {
         $this->oName = $oName;
+        return $this;
     }
 
     /**
@@ -244,9 +242,10 @@ class OrganizationUserOption extends DbObject
     /**
      * @param mixed $department
      */
-    public function setDepartment($department): void
+    public function setDepartment($department): OrganizationUserOption
     {
         $this->department = $department;
+        return $this;
     }
 
     /**
@@ -260,9 +259,10 @@ class OrganizationUserOption extends DbObject
     /**
      * @param mixed $position
      */
-    public function setPosition($position): void
+    public function setPosition($position): OrganizationUserOption
     {
         $this->position = $position;
+        return $this;
     }
 
     /**
@@ -276,9 +276,10 @@ class OrganizationUserOption extends DbObject
     /**
      * @param mixed $title
      */
-    public function setTitle($title): void
+    public function setTitle($title)
     {
         $this->title = $title;
+        return $this;
     }
 
     /**
@@ -292,17 +293,18 @@ class OrganizationUserOption extends DbObject
     /**
      * @param mixed $user
      */
-    public function setUser($user): void
+    public function setUser($user)
     {
         $this->user = $user;
+        return $this;
     }
 
-    public function getRole(): ?Role
+    public function getRole():?int
     {
         return $this->role;
     }
 
-    public function setRole(?Role $role): self
+    public function setRole(?int $role): self
     {
         $this->role = $role;
 

@@ -194,9 +194,9 @@ class Weight extends DbObject
     /**
      * @param mixed $organization
      */
-    public function setOrganization($organization): void
+    public function setOrganization($organization)
     {
-        $this->organization = $organization;
+        $this->organization = $organization;return $this;
     }
 
     /**
@@ -210,9 +210,10 @@ class Weight extends DbObject
     /**
      * @param mixed $position
      */
-    public function setPosition($position): void
+    public function setPosition($position)
     {
         $this->position = $position;
+        return $this;
     }
 
     /**

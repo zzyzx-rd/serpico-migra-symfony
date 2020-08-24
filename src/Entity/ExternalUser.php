@@ -262,9 +262,10 @@ class ExternalUser extends DbObject
     /**
      * @param mixed $user
      */
-    public function setUser($user): void
+    public function setUser($user)
     {
         $this->user = $user;
+        return $this;
     }
 
     /**
@@ -278,9 +279,10 @@ class ExternalUser extends DbObject
     /**
      * @param mixed $client
      */
-    public function setClient($client): void
+    public function setClient($client)
     {
         $this->client = $client;
+        return $this;
     }
 
     /**

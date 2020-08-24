@@ -16,7 +16,7 @@ use phpDocumentor\Reflection\Types\This;
 
 /**
  * @ApiResource()
- * @ORM\Entity(repositoryClass=DepartmentRepository::class)
+ * @ORM\Entity(repositoryClass="App\Repository\DepartmentRepository", repositoryClass=DepartmentRepository::class)
  */
 class Department extends DbObject
 {
@@ -192,9 +192,10 @@ class Department extends DbObject
     /**
      * @param mixed $positions
      */
-    public function setPositions($positions): void
+    public function setPositions($positions)
     {
         $this->positions = $positions;
+        return $this;
     }
 
     /**
@@ -208,9 +209,10 @@ class Department extends DbObject
     /**
      * @param mixed $templateActivities
      */
-    public function setTemplateActivities($templateActivities): void
+    public function setTemplateActivities($templateActivities)
     {
         $this->templateActivities = $templateActivities;
+        return $this;
     }
 
     /**
@@ -224,9 +226,10 @@ class Department extends DbObject
     /**
      * @param mixed $options
      */
-    public function setOptions($options): void
+    public function setOptions($options)
     {
         $this->options = $options;
+        return $this;
     }
 
     /**
@@ -257,9 +260,10 @@ class Department extends DbObject
     /**
      * @param ArrayCollection $criterionGroups
      */
-    public function setCriterionGroups(ArrayCollection $criterionGroups): void
+    public function setCriterionGroups(ArrayCollection $criterionGroups)
     {
         $this->criterionGroups = $criterionGroups;
+        return $this;
     }
 
     /**
@@ -273,9 +277,10 @@ class Department extends DbObject
     /**
      * @param mixed $targets
      */
-    public function setTargets($targets): void
+    public function setTargets($targets)
     {
         $this->targets = $targets;
+        return $this;
     }
 
     public function addPosition(Position $position): Department

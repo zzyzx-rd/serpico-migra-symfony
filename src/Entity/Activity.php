@@ -510,9 +510,10 @@ class Activity extends DbObject
     /**
      * @param mixed $stages
      */
-    public function setStages($stages): void
+    public function setStages($stages)
     {
         $this->stages = $stages;
+        return $this;
     }
 
     /**
@@ -526,9 +527,10 @@ class Activity extends DbObject
     /**
      * @param mixed $decisions
      */
-    public function setDecisions($decisions): void
+    public function setDecisions($decisions): Activity
     {
         $this->decisions = $decisions;
+        return $this;
     }
 
     /**
@@ -542,9 +544,10 @@ class Activity extends DbObject
     /**
      * @param Grade[]|ArrayCollection $grades
      */
-    public function setGrades($grades): void
+    public function setGrades($grades)
     {
         $this->grades = $grades;
+        return $this;
     }
 
     /**
@@ -558,9 +561,10 @@ class Activity extends DbObject
     /**
      * @param mixed $results
      */
-    public function setResults($results): void
+    public function setResults($results)
     {
         $this->results = $results;
+        return $this;
     }
 
     /**
@@ -574,9 +578,10 @@ class Activity extends DbObject
     /**
      * @param mixed $projectResults
      */
-    public function setProjectResults($projectResults): void
+    public function setProjectResults($projectResults)
     {
         $this->projectResults = $projectResults;
+        return $this;
     }
 
     /**
@@ -590,9 +595,10 @@ class Activity extends DbObject
     /**
      * @param mixed $resultTeams
      */
-    public function setResultTeams($resultTeams): void
+    public function setResultTeams($resultTeams)
     {
         $this->resultTeams = $resultTeams;
+        return $this;
     }
 
     /**
@@ -606,9 +612,10 @@ class Activity extends DbObject
     /**
      * @param mixed $rankings
      */
-    public function setRankings($rankings): void
+    public function setRankings($rankings)
     {
         $this->rankings = $rankings;
+        return $this;
     }
 
     /**
@@ -622,9 +629,10 @@ class Activity extends DbObject
     /**
      * @param mixed $rankingTeams
      */
-    public function setRankingTeams($rankingTeams): void
+    public function setRankingTeams($rankingTeams)
     {
         $this->rankingTeams = $rankingTeams;
+        return $this;
     }
 
     /**
@@ -638,9 +646,10 @@ class Activity extends DbObject
     /**
      * @param mixed $historicalRankings
      */
-    public function setHistoricalRankings($historicalRankings): void
+    public function setHistoricalRankings($historicalRankings)
     {
         $this->historicalRankings = $historicalRankings;
+        return $this;
     }
 
     /**
@@ -654,9 +663,10 @@ class Activity extends DbObject
     /**
      * @param mixed $historicalRankingTeams
      */
-    public function setHistoricalRankingTeams($historicalRankingTeams): void
+    public function setHistoricalRankingTeams($historicalRankingTeams)
     {
         $this->historicalRankingTeams = $historicalRankingTeams;
+        return $this;
     }
 
     /**
@@ -670,9 +680,10 @@ class Activity extends DbObject
     /**
      * @param mixed $template
      */
-    public function setTemplate($template): void
+    public function setTemplate($template)
     {
         $this->template = $template;
+        return $this;
     }
 
     /**
@@ -686,9 +697,10 @@ class Activity extends DbObject
     /**
      * @param Participation[]|ArrayCollection $participants
      */
-    public function setParticipants($participants): void
+    public function setParticipants($participants)
     {
         $this->participants = $participants;
+        return $this;
     }
 
     /**
@@ -702,9 +714,10 @@ class Activity extends DbObject
     /**
      * @param float $progress
      */
-    public function setProgress(float $progress): void
+    public function setProgress(float $progress)
     {
         $this->progress = $progress;
+        return $this;
     }
 
     /**
@@ -718,9 +731,10 @@ class Activity extends DbObject
     /**
      * @param bool $isRewarding
      */
-    public function setIsRewarding(bool $isRewarding): void
+    public function setIsRewarding(bool $isRewarding)
     {
         $this->isRewarding = $isRewarding;
+        return $this;
     }
 
     /**
@@ -734,9 +748,10 @@ class Activity extends DbObject
     /**
      * @param float $distrAmount
      */
-    public function setDistrAmount(float $distrAmount): void
+    public function setDistrAmount(float $distrAmount)
     {
         $this->distrAmount = $distrAmount;
+        return $this;
     }
 
     /**
@@ -750,9 +765,10 @@ class Activity extends DbObject
     /**
      * @param int $res_inertia
      */
-    public function setResInertia(int $res_inertia): void
+    public function setResInertia(int $res_inertia)
     {
         $this->res_inertia = $res_inertia;
+        return $this;
     }
 
     /**
@@ -766,17 +782,19 @@ class Activity extends DbObject
     /**
      * @param int $res_benefit_eff
      */
-    public function setResBenefitEff(int $res_benefit_eff): void
+    public function setResBenefitEff(int $res_benefit_eff)
     {
         $this->res_benefit_eff = $res_benefit_eff;
+        return $this;
     }
 
     /**
      * @param DateTime $inserted
      */
-    public function setInserted(DateTime $inserted): void
+    public function setInserted(DateTime $inserted)
     {
         $this->inserted = $inserted;
+        return $this;
     }
 
     /**
@@ -790,9 +808,10 @@ class Activity extends DbObject
     /**
      * @param DateTime $saved
      */
-    public function setSaved(DateTime $saved): void
+    public function setSaved(DateTime $saved)
     {
         $this->saved = $saved;
+        return $this;
     }
 
     /**
@@ -806,9 +825,10 @@ class Activity extends DbObject
     /**
      * @param bool $isFinalized
      */
-    public function setIsFinalized(bool $isFinalized): void
+    public function setIsFinalized(bool $isFinalized)
     {
         $this->isFinalized = $isFinalized;
+        return $this;
     }
 
     /**
@@ -822,9 +842,10 @@ class Activity extends DbObject
     /**
      * @param DateTime $finalized
      */
-    public function setFinalized(DateTime $finalized): void
+    public function setFinalized(DateTime $finalized)
     {
         $this->finalized = $finalized;
+        return $this;
     }
 
     /**
@@ -856,9 +877,10 @@ class Activity extends DbObject
     /**
      * @param DateTime $completed
      */
-    public function setCompleted(DateTime $completed): void
+    public function setCompleted(DateTime $completed)
     {
         $this->completed = $completed;
+        return $this;
     }
 
     /**
@@ -872,9 +894,10 @@ class Activity extends DbObject
     /**
      * @param DateTime $released
      */
-    public function setReleased(DateTime $released): void
+    public function setReleased(DateTime $released)
     {
         $this->released = $released;
+        return $this;
     }
 
     /**
@@ -888,9 +911,10 @@ class Activity extends DbObject
     /**
      * @param DateTime $archived
      */
-    public function setArchived(DateTime $archived): void
+    public function setArchived(DateTime $archived)
     {
         $this->archived = $archived;
+        return $this;
     }
 
     public function getMasterUser(): ?User

@@ -155,7 +155,7 @@ class CriterionName extends DbObject
     /**
      * @return Icon
      */
-    public function getIcon(): Icon
+    public function getIcon(): ?Icon
     {
         return $this->icon;
     }
@@ -163,9 +163,10 @@ class CriterionName extends DbObject
     /**
      * @param Icon $icon
      */
-    public function setIcon(Icon $icon): void
+    public function setIcon(Icon $icon)
     {
         $this->icon = $icon;
+        return $this;
     }
 
     /**

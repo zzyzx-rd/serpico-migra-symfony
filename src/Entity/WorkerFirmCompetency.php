@@ -95,7 +95,7 @@ class WorkerFirmCompetency extends DbObject
     /**
      * @param mixed $firm
      */
-    public function setFirm($firm): void
+    public function setFirm($firm)
     {
         $this->firm = $firm;
     }

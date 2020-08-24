@@ -225,7 +225,7 @@ class Criterion extends DbObject
         RankingTeamHistory $historicalRankingTeams = null,
         $template = null)
     {
-        parent::__construct($id, $cri_createdBy, $cri_inserted);
+        parent::__construct($id, $cri_createdBy, new DateTime());
         $this->complete = $cri_complete;
         $this->type = $cri_type;
         $this->name = $cri_name;
@@ -430,9 +430,10 @@ class Criterion extends DbObject
     /**
      * @param mixed $stage
      */
-    public function setStage($stage): void
+    public function setStage($stage)
     {
         $this->stage = $stage;
+        return $this;
     }
 
     /**
@@ -446,9 +447,10 @@ class Criterion extends DbObject
     /**
      * @param mixed $organization
      */
-    public function setOrganization($organization): void
+    public function setOrganization($organization)
     {
         $this->organization = $organization;
+        return $this;
     }
 
     /**
@@ -462,9 +464,10 @@ class Criterion extends DbObject
     /**
      * @param Collection $participants
      */
-    public function setParticipants(Collection $participants): void
+    public function setParticipants(Collection $participants)
     {
         $this->participants = $participants;
+        return $this;
     }
 
     /**
@@ -478,7 +481,7 @@ class Criterion extends DbObject
     /**
      * @param mixed $cName
      */
-    public function setCName($cName): void
+    public function setCName($cName)
     {
         $this->cName = $cName;
     }

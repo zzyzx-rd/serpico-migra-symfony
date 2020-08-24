@@ -243,9 +243,9 @@ class RankingHistory extends DbObject
     /**
      * @param mixed $activity
      */
-    public function setActivity($activity): void
+    public function setActivity($activity)
     {
-        $this->activity = $activity;
+        $this->activity = $activity; return $this;
     }
 
     /**
@@ -259,9 +259,9 @@ class RankingHistory extends DbObject
     /**
      * @param mixed $stage
      */
-    public function setStage($stage): void
+    public function setStage($stage)
     {
-        $this->stage = $stage;
+        $this->stage = $stage; return $this;
     }
 
     /**
@@ -275,9 +275,9 @@ class RankingHistory extends DbObject
     /**
      * @param mixed $criterion
      */
-    public function setCriterion($criterion): void
+    public function setCriterion($criterion)
     {
-        $this->criterion = $criterion;
+        $this->criterion = $criterion; return $this;
     }
 
     public function getUserUsr(): ?User

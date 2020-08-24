@@ -109,9 +109,10 @@ class WorkerFirmSector extends DbObject
     /**
      * @param mixed $icon
      */
-    public function setIcon($icon): void
+    public function setIcon($icon)
     {
         $this->icon = $icon;
+        return $this;
     }
 
     /**
@@ -125,9 +126,10 @@ class WorkerFirmSector extends DbObject
     /**
      * @param mixed $firm
      */
-    public function setFirm($firm): void
+    public function setFirm($firm)
     {
         $this->firm = $firm;
+        return $this;
     }
 
 }

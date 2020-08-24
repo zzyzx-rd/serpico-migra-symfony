@@ -50,9 +50,9 @@ class Record
     /**
      * @param string $entity
      */
-    public function setEntity(string $entity): void
+    public function setEntity(string $entity)
     {
-        $this->entity = $entity;
+        $this->entity = $entity; return $this;
     }
 
 

@@ -186,9 +186,10 @@ class Client extends DbObject
     /**
      * @param mixed $organization
      */
-    public function setOrganization($organization): void
+    public function setOrganization($organization)
     {
         $this->organization = $organization;
+        return $this;
     }
 
     /**
@@ -202,9 +203,10 @@ class Client extends DbObject
     /**
      * @param Organization $clientOrganization
      */
-    public function setClientOrganization(Organization $clientOrganization): void
+    public function setClientOrganization(Organization $clientOrganization)
     {
         $this->clientOrganization = $clientOrganization;
+        return $this;
     }
 
     /**
@@ -218,9 +220,10 @@ class Client extends DbObject
     /**
      * @param mixed $workerFirm
      */
-    public function setWorkerFirm($workerFirm): void
+    public function setWorkerFirm($workerFirm)
     {
         $this->workerFirm = $workerFirm;
+        return $this;
     }
 
     /**
@@ -234,9 +237,10 @@ class Client extends DbObject
     /**
      * @param $externalUsers
      */
-    public function setExternalUsers($externalUsers): void
+    public function setExternalUsers($externalUsers)
     {
         $this->externalUsers = $externalUsers;
+        return $this;
     }
 
     public function addExternalUser(ExternalUser $externalUser): Client
