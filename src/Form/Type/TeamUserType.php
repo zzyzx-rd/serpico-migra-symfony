@@ -82,7 +82,7 @@ class TeamUserType extends AbstractType
                     'query_builder' => function (EntityRepository $er) use ($organization, $currentUser) {
                         $orgId = $organization ? $organization->getId() : $currentUser->getOrganization()->getId();
                         return $er->createQueryBuilder('u')
-                            ->innerJoin('App\Entity\Client', 'c', 'WITH', 'c.clientOrganization = u.orgId')
+                            ->innerJoin('App\Entity\Client', 'c', 'WITH', 'c.clientOrganization = u.organization')
                             ->innerJoin('App\Entity\Organization', 'o', 'WITH', 'o.id = c.clientOrganization')
                             ->where("c.organization = $orgId")
                             ->andWhere('u.deleted is NULL')
