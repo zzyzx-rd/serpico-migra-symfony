@@ -46,7 +46,7 @@ class City extends DbObject
     /**
      * @ORM\Column(name="cit_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="State", inversedBy="cities")
@@ -92,7 +92,6 @@ class City extends DbObject
         $this->abbr = $cit_abbr;
         $this->fullname = $cit_fullname;
         $this->cit_name = $cit_name;
-        $this->inserted = $cit_inserted;
         $this->state = $state;
         $this->country = $country;
         $this->firms = $firms?:new ArrayCollection();

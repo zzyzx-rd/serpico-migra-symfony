@@ -38,7 +38,7 @@ class WorkerFirmSector extends DbObject
     /**
      * @ORM\Column(name="wfs_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="Icon", inversedBy="workerFirmSectors")
@@ -70,7 +70,6 @@ class WorkerFirmSector extends DbObject
     {
         parent::__construct($id, $wfs_createdBy, new DateTime());
         $this->name = $wfs_name;
-        $this->inserted = $wfs_inserted;
         $this->icon = $icon;
         $this->firm = $firm;
     }

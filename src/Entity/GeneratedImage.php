@@ -83,7 +83,7 @@ class GeneratedImage extends DbObject
     /**
      * @ORM\Column(name="gim_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @OneToOne(targetEntity="CriterionName")
@@ -135,7 +135,6 @@ class GeneratedImage extends DbObject
         $this->crtId = $crtId;
         $this->role = $gim_role;
         $this->val = $gim_val;
-        $this->inserted = $gim_inserted;
         $this->cName = $cName;
     }
 

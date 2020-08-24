@@ -67,7 +67,7 @@ class RankingHistory extends DbObject
     /**
      * @ORM\Column(name="rkh_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="Activity", inversedBy="historicalRankings")
@@ -134,7 +134,6 @@ class RankingHistory extends DbObject
         $this->rkh_freq = $rkh_freq;
         $this->value = $rkh_value;
         $this->seriesPopulation = $rkh_series_pop;
-        $this->inserted = $rkh_inserted;
         $this->activity = $activity;
         $this->stage = $stage;
         $this->criterion = $criterion;

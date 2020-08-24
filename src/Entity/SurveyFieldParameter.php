@@ -52,7 +52,7 @@ class SurveyFieldParameter extends DbObject
     /**
      * @ORM\Column(name="sfp_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="SurveyField", inversedBy="parameters")
@@ -86,7 +86,6 @@ class SurveyFieldParameter extends DbObject
         $this->lowerbound = $sfp_lowerbound;
         $this->upperbound = $sfp_upperbound;
         $this->step = $sfp_step;
-        $this->inserted = $sfp_inserted;
         $this->field = $field;
     }
 

@@ -134,7 +134,7 @@ class User extends DbObject implements  UserInterface, \Serializable
     /**
      * @ORM\Column(name="usr_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="usr_last_connected", type="datetime", nullable=true)
@@ -364,7 +364,6 @@ class User extends DbObject implements  UserInterface, \Serializable
         $this->rememberMeToken = $usr_rm_token;
         $this->validated = $usr_validated;
         $this->enabledCreatingUser = $usr_enabledCreatingUser;
-        $this->inserted = $usr_inserted;
         $this->lastConnected = $lastConnected;
         $this->deleted = $deleted;
         $this->role = $role;
@@ -1062,7 +1061,7 @@ class User extends DbObject implements  UserInterface, \Serializable
         }
 
 //        $sql =
-//            'SELECT a_u_id
+//            'SELECT par_id
 //         FROM activity_user
 //         INNER JOIN activity ON activity_user.activity_act_id = activity.act_id
 //         WHERE activity.act_status >= :status
@@ -1074,7 +1073,7 @@ class User extends DbObject implements  UserInterface, \Serializable
 //        $nbCompletedActivities = count($pdoStatement->fetchAll());
 
 //        $sql =
-//            'SELECT a_u_id
+//            'SELECT par_id
 //         FROM activity_user
 //         INNER JOIN activity ON activity_user.activity_act_id = activity.act_id
 //         WHERE activity.act_status IN (:status_1, :status_2)

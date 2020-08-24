@@ -41,7 +41,7 @@ class Department extends DbObject
     /**
      * @ORM\Column(name="dpt_inserted", type="datetime")
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="dpt_deleted", type="datetime", nullable=true)
@@ -119,7 +119,6 @@ class Department extends DbObject
     {
         parent::__construct($id, $createdBy, new DateTime);
         $this->name = $name;
-        $this->inserted = $inserted;
         $this->deleted = $deleted;
         $this->masterUser = $masterUser;
         $this->positions = $positions?:new ArrayCollection();

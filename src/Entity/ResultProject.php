@@ -115,7 +115,7 @@ class ResultProject extends DbObject
     /**
      * @ORM\Column(name="rsp_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="Activity", inversedBy="projectResults")
@@ -202,7 +202,6 @@ class ResultProject extends DbObject
         $this->equalInertiaMax = $equalInertiaMax;
         $this->weightedDistanceRatio = $weightedDistanceRatio;
         $this->equalDistanceRatio = $equalDistanceRatio;
-        $this->inserted = $rsp_inserted;
         $this->activity = $activity;
         $this->stage = $stage;
         $this->criterion = $criterion;

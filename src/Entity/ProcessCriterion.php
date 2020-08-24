@@ -80,7 +80,7 @@ class ProcessCriterion extends DbObject
     /**
      * @ORM\Column(name="crt_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="ProcessStage", inversedBy="criteria")
@@ -149,7 +149,6 @@ class ProcessCriterion extends DbObject
         $this->upperbound = $crt_upperbound;
         $this->step = $crt_step;
         $this->comment = $crt_comment;
-        $this->inserted = $crt_inserted;
         $this->stage = $stage;
         $this->process = $process;
         $this->cName = $cName;

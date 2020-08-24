@@ -45,7 +45,7 @@ class WorkerFirmLocation extends DbObject
     /**
      * @ORM\Column(name="wfl_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * WorkerFirmLocation constructor.
@@ -68,7 +68,6 @@ class WorkerFirmLocation extends DbObject
         $this->HQCity = $wfl_hq_city;
         $this->HQState = $wfl_hq_state;
         $this->HQCountry = $wfl_hq_country;
-        $this->inserted = $wfl_inserted;
     }
 
     public function getHQCity(): ?string

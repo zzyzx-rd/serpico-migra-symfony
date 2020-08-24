@@ -145,7 +145,7 @@ class IProcessStage extends DbObject
     /**
      * @ORM\Column(name="stg_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="stg_isFinalized", type="boolean", nullable=true)
@@ -346,7 +346,6 @@ class IProcessStage extends DbObject
         $this->deadline_nbDays = $stg_deadline_nbDays;
         $this->deadline_mailSent = $stg_deadline_mailSent;
         $this->createdBy = $stg_createdBy;
-        $this->inserted = $stg_inserted;
         $this->isFinalized = $stg_isFinalized;
         $this->finalized = $stg_finalized;
         $this->deleted = $stg_deleted;

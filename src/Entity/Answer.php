@@ -36,7 +36,7 @@ class Answer extends DbObject
     /**
      * @ORM\Column(name="asw_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
     /**
      * @ManyToOne(targetEntity="SurveyField", inversedBy="answers")
      * @JoinColumn(name="survey_field_sfi_id", referencedColumnName="sfi_id", nullable=true)
@@ -50,7 +50,7 @@ class Answer extends DbObject
     protected $survey;
     /**
      * @ManyToOne(targetEntity="Participation", inversedBy="answers")
-     * @JoinColumn(name="activity_user_a_u_id", referencedColumnName="a_u_id", nullable=true)
+     * @JoinColumn(name="activity_user_par_id", referencedColumnName="par_id", nullable=true)
      */
     protected $participant;
 
@@ -75,7 +75,6 @@ class Answer extends DbObject
     {
         parent::__construct($id, $createdBy, new DateTime());
         $this->desc = $desc;
-        $this->inserted = $asw_inserted;
         $this->field = $field;
         $this->survey = $survey;
         $this->participant = $participant;

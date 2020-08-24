@@ -181,7 +181,7 @@ class Activity extends DbObject
      * @Column(name="act_inserted", type="datetime", nullable=true)
      * @var DateTime
      */
-    protected ?DateTime $inserted;
+    protected DateTime $inserted;
     /**
      * @Column(name="act_saved", type="datetime", nullable=true)
      * @var DateTime

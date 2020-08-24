@@ -41,7 +41,7 @@ class Survey extends DbObject
     /**
      * @ORM\Column(name="sur_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="sur_state", type="integer", nullable=true)
@@ -107,7 +107,6 @@ class Survey extends DbObject
     {
         parent::__construct($id, $sur_createdBy, new DateTime());
         $this->name = $sur_name;
-        $this->inserted = $sur_inserted;
         $this->state = $sur_state;
         $this->stage = $stage;
         $this->organization = $organization;

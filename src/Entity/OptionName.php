@@ -43,7 +43,7 @@ class OptionName extends DbObject
     /**
      * @ORM\Column(name="ona_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * OptionName constructor.
@@ -67,7 +67,6 @@ class OptionName extends DbObject
         $this->type = $ona_type;
         $this->name = $ona_name;
         $this->description = $ona_description;
-        $this->inserted = $ona_inserted;
     }
 
 

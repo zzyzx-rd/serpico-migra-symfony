@@ -58,7 +58,7 @@ class Decision extends DbObject
     /**
      * @ORM\Column(name="dec_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="dec_decided", type="datetime", nullable=true)
@@ -146,7 +146,6 @@ class Decision extends DbObject
         $this->anonymousDecision = $dec_anon;
         $this->validator = $validator;
         $this->result = $dec_result;
-        $this->inserted = $dec_inserted;
         $this->decided = $dec_decided;
         $this->validated = $dec_validated;
         $this->organization = $organization;

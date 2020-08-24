@@ -45,7 +45,7 @@ class Title extends DbObject
     /**
      * @ORM\Column(name="tit_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="tit_deleted", type="datetime", nullable=true)
@@ -103,7 +103,6 @@ class Title extends DbObject
         parent::__construct($id, $createdBy, new DateTime());
         $this->name = $name;
         $this->weightIni = $weightIni;
-        $this->inserted = $inserted;
         $this->deleted = $deleted;
         $this->organization = $organization;
         $this->weight = $weight;

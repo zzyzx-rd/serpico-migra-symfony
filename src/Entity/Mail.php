@@ -46,7 +46,7 @@ class Mail extends DbObject
     /**
      * @ORM\Column(name="mail_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @Column(name="mail_type", length= 255, type="string", nullable=true)
@@ -128,7 +128,6 @@ class Mail extends DbObject
         $this->persona = $mail_persona;
         $this->token = $mail_token;
         $this->read = $mail_read;
-        $this->inserted = $mail_inserted;
         $this->language = $mail_language;
         $this->user = $user;
         $this->workerIndividual = $workerIndividual;

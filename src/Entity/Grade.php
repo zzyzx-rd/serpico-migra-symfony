@@ -56,7 +56,7 @@ class Grade extends DbObject
     /**
      * @ORM\Column(name="grd_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="Team", inversedBy="grades")
@@ -65,7 +65,7 @@ class Grade extends DbObject
     protected $team;
     /**
      * @ManyToOne(targetEntity="Participation", inversedBy="grades")
-     * @JoinColumn(name="activity_user_user_usr_id", referencedColumnName="a_u_id",nullable=false)
+     * @JoinColumn(name="activity_user_user_usr_id", referencedColumnName="par_id",nullable=false)
      * @var Participation
      */
     protected $participant;
@@ -123,7 +123,6 @@ class Grade extends DbObject
         $this->graded_tea_id = $grd_graded_tea_id;
         $this->value = $grd_value;
         $this->comment = $grd_comment;
-        $this->inserted = $grd_inserted;
         $this->team = $team;
         $this->participant = $participant;
         $this->activity = $activity;

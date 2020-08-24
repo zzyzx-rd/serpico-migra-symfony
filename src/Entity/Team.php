@@ -50,7 +50,7 @@ class Team extends DbObject
     /**
      * @ORM\Column(name="tea_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="tea_deleted", type="datetime", nullable=true)
@@ -116,7 +116,6 @@ class Team extends DbObject
         $this->name = $tea_name;
         $this->weightIni = $tea_weight_ini;
         $this->picture = $tea_picture;
-        $this->inserted = $tea_inserted;
         $this->deleted = $tea_deleted;
         $this->organization = $organization;
         $this->teamUsers = $teamUsers?:new ArrayCollection();

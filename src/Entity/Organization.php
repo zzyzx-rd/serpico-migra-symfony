@@ -68,7 +68,7 @@ class Organization extends DbObject
     /**
      * @ORM\Column(name="org_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="org_validated", type="datetime", nullable=true)
@@ -295,7 +295,6 @@ class Organization extends DbObject
         $this->isClient = $org_isClient;
         $this->oth_language = $org_oth_language;
         $this->weight_type = $org_weight_type;
-        $this->inserted = $org_inserted;
         $this->validated = $org_validated;
         $this->expired = $org_expired;
         $this->reminderMailSent = $org_testing_reminder_sent;

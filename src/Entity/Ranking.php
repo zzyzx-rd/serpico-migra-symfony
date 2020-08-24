@@ -72,7 +72,7 @@ class Ranking extends DbObject
     /**
      * @ORM\Column(name="rnk_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="rnk_updated", type="datetime", nullable=true)
@@ -157,7 +157,6 @@ class Ranking extends DbObject
         $this->frequency = $rnk_freq;
         $this->value = $rnk_value;
         $this->seriesPopulation = $rnk_series_pop;
-        $this->inserted = $rnk_inserted;
         $this->updated = $rnk_updated;
         $this->activity = $activity;
         $this->stage = $stage;

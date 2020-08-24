@@ -37,7 +37,7 @@ class WorkerFirmCompetency extends DbObject
     /**
      * @ORM\Column(name="wfc_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="WorkerFirm")
@@ -62,7 +62,6 @@ class WorkerFirmCompetency extends DbObject
     {
         parent::__construct($id, $wfc_createdBy, new DateTime());
         $this->name = $wfc_name;
-        $this->inserted = $wfc_inserted;
         $this->firm = $firm;
     }
 

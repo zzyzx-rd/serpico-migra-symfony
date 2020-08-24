@@ -64,7 +64,7 @@ class ExternalUser extends DbObject
     /**
      * @ORM\Column(name="ext_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="ext_last_connected", type="datetime", nullable=true)
@@ -139,7 +139,6 @@ class ExternalUser extends DbObject
         $this->positionName = $ext_positionName;
         $this->weight_value = $ext_weight_value;
         $this->owner = $ext_owner;
-        $this->inserted = $ext_inserted;
         $this->last_connected = $ext_last_connected;
         $this->deleted = $ext_deleted;
         $this->user = $user;

@@ -37,7 +37,7 @@ class TeamUser extends DbObject
     /**
      * @ORM\Column(name="tus_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="tus_deleted", type="datetime", nullable=true)
@@ -92,7 +92,6 @@ class TeamUser extends DbObject
     {
         parent::__construct($id,$tus_createdBy , new DateTime());
         $this->leader = $tus_leader;
-        $this->inserted = $tus_inserted;
         $this->deleted = $tus_deleted;
         $this->isDeleted = $tus_is_deleted;
         $this->team = $team;

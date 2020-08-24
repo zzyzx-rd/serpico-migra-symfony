@@ -52,7 +52,7 @@ class OTPUser extends DbObject
     /**
      * @ORM\Column(name="otp_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      *@ManyToOne(targetEntity="Organization")
@@ -86,7 +86,6 @@ class OTPUser extends DbObject
         $this->fullname = $otp_fullname;
         $this->tipe = $otp_tipe;
         $this->email = $otp_email;
-        $this->inserted = $otp_inserted;
         $this->organization = $organization;
     }
 

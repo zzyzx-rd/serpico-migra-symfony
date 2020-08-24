@@ -54,7 +54,7 @@ class Client extends DbObject
     /**
      * @ORM\Column(name="cli_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="Organization", inversedBy="clients")
@@ -113,7 +113,6 @@ class Client extends DbObject
         $this->type = $cli_type;
         $this->logo = $cli_logo;
         $this->email = $cli_email;
-        $this->inserted = $cli_inserted;
         $this->organization = $organization;
         $this->clientOrganization = $clientOrganization;
         $this->workerFirm = $workerFirm;

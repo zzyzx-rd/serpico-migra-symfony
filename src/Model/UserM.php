@@ -117,7 +117,7 @@ class UserM extends ModelEntity {
 
         $connection = $this->em->getConnection();
         $sql =
-            'SELECT a_u_id
+            'SELECT par_id
          FROM participation
          INNER JOIN activity ON participation.activity_act_id = activity.act_id
          WHERE activity.act_status >= :status
@@ -135,7 +135,7 @@ class UserM extends ModelEntity {
 
         $connection = $this->em->getConnection();
         $sql =
-            'SELECT a_u_id
+            'SELECT par_id
          FROM participation
          INNER JOIN activity ON participation.activity_act_id = activity.act_id
          WHERE activity.act_status IN (:status_1, :status_2)

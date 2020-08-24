@@ -47,7 +47,7 @@ class State extends DbObject
     /**
      * @ORM\Column(name="sta_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="Country", inversedBy="states")
@@ -92,7 +92,6 @@ class State extends DbObject
         $this->abbr = $sta_abbr;
         $this->fullname = $sta_fullname;
         $this->name = $sta_name;
-        $this->inserted = $sta_inserted;
         $this->country = $country;
         $this->cities = $cities?:new ArrayCollection();
         $this->firms = $firms?:new ArrayCollection();

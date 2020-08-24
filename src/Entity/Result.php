@@ -117,7 +117,7 @@ class Result extends DbObject
     /**
      * @ORM\Column(name="res_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="Activity", inversedBy="results")
@@ -235,7 +235,6 @@ class Result extends DbObject
         $this->equalInertiaMax = $equalInertiaMax;
         $this->weightedDistanceRatio = $weightedDistanceRatio;
         $this->equalDistanceRatio = $equalDistanceRatio;
-        $this->inserted = $res_inserted;
         $this->activity = $activity;
         $this->stage = $stage;
         $this->criterion = $criterion;

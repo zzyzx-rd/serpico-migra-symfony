@@ -96,7 +96,7 @@ class Criterion extends DbObject
     /**
      * @ORM\Column(name="cri_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="cri_deleted", type="datetime", nullable=true)
@@ -239,7 +239,6 @@ class Criterion extends DbObject
         $this->grade_type = $cri_grade_type;
         $this->comment = $cri_comment;
         $this->createdBy = $cri_createdBy;
-        $this->inserted = $cri_inserted;
         $this->deleted = $cri_deleted;
         $this->stage = $stage;
         $this->organization = $organization;

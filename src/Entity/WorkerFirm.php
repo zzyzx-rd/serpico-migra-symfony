@@ -139,7 +139,7 @@ class WorkerFirm extends DbObject
     /**
      * @ORM\Column(name="wfi_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @OneToOne(targetEntity="WorkerFirmSector", inversedBy="firm")
@@ -266,7 +266,6 @@ class WorkerFirm extends DbObject
         $this->suffix = $wfi_suffix;
         $this->nbActiveExp = $wfi_nb_active_exp;
         $this->created = $wfi_created;
-        $this->inserted = $wfi_inserted;
         $this->mainSector = $mainSector;
         $this->city = $city;
         $this->state = $state;

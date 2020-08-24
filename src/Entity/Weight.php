@@ -53,7 +53,7 @@ class Weight extends DbObject
     /**
      * @ORM\Column(name="wgt_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="wgt_deleted", type="datetime", nullable=true)
@@ -78,19 +78,18 @@ class Weight extends DbObject
 
     /**
      * Weight constructor.
-     * @param ?int$id
-     * @param $interval
-     * @param $titleframe
-     * @param $value
-     * @param $modified
+     * @param int|null $id
+     * @param int $interval
+     * @param string $titleframe
+     * @param int $value
+     * @param DateTime $modified
      * @param $createdBy
-     * @param $inserted
-     * @param $deleted
+     * @param DateTime $inserted
+     * @param DateTime $deleted
      * @param $organization
-     * @param $position
      */
     public function __construct(
-      ?int $id = 0,
+        ?int $id = 0,
         $interval = 0,
         $titleframe = '',
         $value = 100,
@@ -106,7 +105,6 @@ class Weight extends DbObject
         $this->titleframe = $titleframe;
         $this->value = $value;
         $this->modified = $modified;
-        $this->inserted = $inserted;
         $this->deleted = $deleted;
         $this->organization = $organization;
         $this->positions = new ArrayCollection;
@@ -237,9 +235,6 @@ class Weight extends DbObject
         return $this;
     }
 
-    /**
-     * @return Collection|Position[]
-     */
     public function getPositions(){
         return $this->positions;
     }
