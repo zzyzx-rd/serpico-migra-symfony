@@ -252,7 +252,7 @@ class Activity extends DbObject
 
     /**
      * Activity constructor.
-     * @param ?int$id
+     * @param int $id
      * @param int $magnitude
      * @param bool $complete
      * @param bool $simplified
@@ -280,7 +280,7 @@ class Activity extends DbObject
      * @param DateTime|null $archived
      */
     public function __construct(
-      ?int $id = 0,
+        int $id = 0,
         int $magnitude = 1,
         bool $complete = false,
         bool $simplified = true,

@@ -253,7 +253,7 @@
                 <div id="stage-{{s}}-type--criteria">
                   <ul class="criteria-list">
                     <template class="criteria-list--item__proto">
-                      {% include "modals/stage_criterion.html.twig" with { s: '__stgNb__', c: '__crtNb__', criterion: stage.criteria.vars.prototype } %}
+{#                      {% include "modals/stage_criterion.html.twig" with { s: '__stgNb__', c: '__crtNb__', criterion: stage.criteria.vars.prototype } %}#}
                     </template>
                     {% for c, criterion in stage.criteria %}
                       {% include "components/activity_page__criterion_item.html.twig" with { s: s, c: c, criterion: criterion } %}
@@ -331,11 +331,11 @@
                       <i class="fa fa-question-circle tooltipped" data-position="top"></i>
                     </h6>
 
-                    <a
-                      href="{{ url('surveyRequest',{'stgId' : stage.vars.data.id}) }}?redirect={{ url(route,routeParams)|e('url') }}"
-                      class="btn insert-survey-btn">
-                      <span>{% trans %}survey.add_btn_internal{% endtrans %}</span>
-                    </a>
+{#                    <a#}
+{#                      href="{{ url('surveyRequest',{'stgId' : stage.vars.data.id}) }}?redirect={{ url(global.route,global.routeParams)|e('url') }}"#}
+{#                      class="btn insert-survey-btn">#}
+{#                      <span>{% trans %}survey.add_btn_internal{% endtrans %}</span>#}
+{#                    </a>#}
                   {% endif %}
                 </div>
               </section>

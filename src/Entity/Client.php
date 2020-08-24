@@ -93,7 +93,7 @@ class Client extends DbObject
      * @param $organization
      * @param Organization $clientOrganization
      * @param $workerFirm
-     * @param ExternalUser[]|ArrayCollection $externalUsers
+     * @param $externalUsers
      */
     public function __construct(
       ?int $id = null,
@@ -225,7 +225,7 @@ class Client extends DbObject
     }
 
     /**
-     * @return ExternalUser[]|ArrayCollection
+     * @return
      */
     public function getExternalUsers()
     {
@@ -233,7 +233,7 @@ class Client extends DbObject
     }
 
     /**
-     * @param ExternalUser[]|ArrayCollection $externalUsers
+     * @param $externalUsers
      */
     public function setExternalUsers($externalUsers): void
     {

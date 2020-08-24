@@ -107,7 +107,7 @@
   {% endif %}>
 
   <div class="user-info">
-    <img class="user-picture" src="{{ element ? (entity == 'user' ? asset(user_picture_url(element)) : asset(team_picture_url(element))) }}" alt="{{ elmtName }}">
+    <img class="user-picture" src="{{ element ? (entity == 'user' ? asset(global.user_picture(element)) : asset(global.teampicture(element))) }}" alt="{{ elmtName }}">
     <span class="elmt-name">{{ elmtName }}</span>
     {{ _self.badges(participation) }}
   </div>

@@ -50,7 +50,7 @@ class globalVar {
         return 'lib/img/' . ($userPicture ?: 'no-picture.png');
     }
 
-    
+
     public function organizationLogo(Organization $o): string
     {
         if($o->getLogo()){
@@ -66,11 +66,14 @@ class globalVar {
     {
         if($c->getLogo()){
             return 'lib/img/org/' . $c->getLogo();
-        } else {
-            return $this->organizationLogo($c->getClientOrganization());
         }
-    }
 
+        return $this->organizationLogo($c->getClientOrganization());
+    }
+    public function teampicture(){
+        $teamPicture = $this->CurrentUser()?$this->CurrentUser()->getPicture(): null;
+        return 'lib/img/team/' . ($teamPicture ?: 'no-picture.png');
+    }
     public function request(): ?\Symfony\Component\HttpFoundation\Request
     {
         return $this->requestStack->getCurrentRequest();
@@ -101,5 +104,6 @@ class globalVar {
         return new ArrayCollection($this->em->getRepository(User::class)
             ->findBy(['organization' => $org, 'deleted' => null],['lastname' => 'ASC']));
     }
+
 
 }
