@@ -64,7 +64,7 @@ class ExternalUser extends DbObject
     /**
      * @ORM\Column(name="ext_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="ext_last_connected", type="datetime", nullable=true)

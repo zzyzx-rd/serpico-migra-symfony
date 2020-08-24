@@ -59,7 +59,7 @@ class SurveyField extends DbObject
     /**
      * @ORM\Column(name="sfi_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="sfi_upperbound", type="integer", nullable=true)

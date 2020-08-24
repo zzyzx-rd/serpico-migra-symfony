@@ -104,7 +104,7 @@ class Contact extends DbObject
     /**
      * @ORM\Column(name="con_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="con_confirmed", type="datetime", nullable=true)

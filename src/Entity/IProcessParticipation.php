@@ -60,7 +60,7 @@ class IProcessParticipation extends DbObject
     /**
      * @ORM\Column(name="a_u_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="a_u_deleted", type="datetime", nullable=true)

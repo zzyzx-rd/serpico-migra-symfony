@@ -38,7 +38,7 @@ class WorkerFirmSector extends DbObject
     /**
      * @ORM\Column(name="wfs_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="Icon", inversedBy="workerFirmSectors")

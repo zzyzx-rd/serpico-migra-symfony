@@ -58,7 +58,7 @@ class Decision extends DbObject
     /**
      * @ORM\Column(name="dec_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="dec_decided", type="datetime", nullable=true)

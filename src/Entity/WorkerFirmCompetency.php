@@ -37,7 +37,7 @@ class WorkerFirmCompetency extends DbObject
     /**
      * @ORM\Column(name="wfc_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="WorkerFirm")

@@ -53,7 +53,7 @@ class Weight extends DbObject
     /**
      * @ORM\Column(name="wgt_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="wgt_deleted", type="datetime", nullable=true)

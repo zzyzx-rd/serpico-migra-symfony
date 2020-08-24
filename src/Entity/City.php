@@ -46,7 +46,7 @@ class City extends DbObject
     /**
      * @ORM\Column(name="cit_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="State", inversedBy="cities")

@@ -51,7 +51,7 @@ class InstitutionProcess extends DbObject
     /**
      * @ORM\Column(name="inp_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="inp_deleted", type="datetime", nullable=true)

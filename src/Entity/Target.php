@@ -42,7 +42,7 @@ class Target extends DbObject
     /**
      * @ORM\Column(name="tgt_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="Organization", inversedBy="targets")

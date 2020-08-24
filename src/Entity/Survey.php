@@ -41,7 +41,7 @@ class Survey extends DbObject
     /**
      * @ORM\Column(name="sur_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="sur_state", type="integer", nullable=true)

@@ -83,7 +83,7 @@ class GeneratedImage extends DbObject
     /**
      * @ORM\Column(name="gim_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @OneToOne(targetEntity="CriterionName")

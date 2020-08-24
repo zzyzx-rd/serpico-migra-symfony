@@ -52,7 +52,7 @@ class SurveyFieldParameter extends DbObject
     /**
      * @ORM\Column(name="sfp_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="SurveyField", inversedBy="parameters")

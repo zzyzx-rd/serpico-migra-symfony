@@ -36,7 +36,7 @@ class Answer extends DbObject
     /**
      * @ORM\Column(name="asw_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
     /**
      * @ManyToOne(targetEntity="SurveyField", inversedBy="answers")
      * @JoinColumn(name="survey_field_sfi_id", referencedColumnName="sfi_id", nullable=true)

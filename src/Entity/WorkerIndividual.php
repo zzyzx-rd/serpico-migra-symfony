@@ -88,7 +88,7 @@ class WorkerIndividual extends DbObject
     /**
      * @ORM\Column(name="win_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @OneToMany(targetEntity="WorkerExperience", mappedBy="individual", cascade={"persist", "remove"}, orphanRemoval=true)

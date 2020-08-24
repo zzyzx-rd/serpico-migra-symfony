@@ -139,7 +139,7 @@ class WorkerFirm extends DbObject
     /**
      * @ORM\Column(name="wfi_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @OneToOne(targetEntity="WorkerFirmSector", inversedBy="firm")

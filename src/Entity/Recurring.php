@@ -113,7 +113,7 @@ class Recurring extends DbObject
     /**
      * @ORM\Column(name="rct_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="rct_deleted", type="datetime", nullable=true)

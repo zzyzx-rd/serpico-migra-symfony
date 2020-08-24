@@ -39,7 +39,7 @@ class Position extends DbObject
     /**
      * @ORM\Column(name="pos_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="pos_deleted", type="datetime", nullable=true)

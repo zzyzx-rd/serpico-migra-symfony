@@ -134,7 +134,7 @@ class User extends DbObject implements  UserInterface, \Serializable
     /**
      * @ORM\Column(name="usr_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="usr_last_connected", type="datetime", nullable=true)

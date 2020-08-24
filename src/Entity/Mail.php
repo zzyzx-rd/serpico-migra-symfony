@@ -46,7 +46,7 @@ class Mail extends DbObject
     /**
      * @ORM\Column(name="mail_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @Column(name="mail_type", length= 255, type="string", nullable=true)

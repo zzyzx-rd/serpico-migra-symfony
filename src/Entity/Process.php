@@ -50,7 +50,7 @@ class Process extends DbObject
     /**
      * @ORM\Column(name="pro_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="pro_deleted", type="datetime", nullable=true)

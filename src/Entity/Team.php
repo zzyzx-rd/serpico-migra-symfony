@@ -50,7 +50,7 @@ class Team extends DbObject
     /**
      * @ORM\Column(name="tea_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="tea_deleted", type="datetime", nullable=true)

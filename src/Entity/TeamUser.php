@@ -37,7 +37,7 @@ class TeamUser extends DbObject
     /**
      * @ORM\Column(name="tus_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="tus_deleted", type="datetime", nullable=true)

@@ -43,7 +43,7 @@ class OptionName extends DbObject
     /**
      * @ORM\Column(name="ona_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * OptionName constructor.

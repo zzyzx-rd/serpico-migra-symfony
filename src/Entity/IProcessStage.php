@@ -145,7 +145,7 @@ class IProcessStage extends DbObject
     /**
      * @ORM\Column(name="stg_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="stg_isFinalized", type="boolean", nullable=true)

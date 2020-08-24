@@ -48,7 +48,7 @@ class Icon extends DbObject
     /**
      * @ORM\Column(name="ico_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @OneToMany(targetEntity="CriterionName", mappedBy="icon", cascade={"persist", "remove"}, orphanRemoval=true)

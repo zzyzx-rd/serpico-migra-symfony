@@ -84,7 +84,7 @@ class IProcessCriterion extends DbObject
     /**
      * @ORM\Column(name="crt_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="IProcessStage", inversedBy="criteria")

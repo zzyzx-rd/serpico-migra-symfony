@@ -35,16 +35,16 @@ abstract class DbObject
     protected ?int $createdBy;
 
     /**
-     * @Column(name="inserted", type="datetime", nullable=true)
+     * @Column(name="inserted", type="datetime")
      * @var DateTime
      */
-    protected ?DateTime $inserted;
+    protected DateTime $inserted;
 
     public function __construct($id = 0, $createdBy = null, $inserted = null)
     {
         $this->id = $id;
         $this->createdBy = $createdBy;
-        $this->inserted = $inserted;
+        $this->inserted = $inserted?:new DateTime();
     }
 
     /**

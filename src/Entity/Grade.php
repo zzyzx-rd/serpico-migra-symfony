@@ -56,7 +56,7 @@ class Grade extends DbObject
     /**
      * @ORM\Column(name="grd_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="Team", inversedBy="grades")

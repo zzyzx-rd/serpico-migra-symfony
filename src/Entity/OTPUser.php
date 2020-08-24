@@ -52,7 +52,7 @@ class OTPUser extends DbObject
     /**
      * @ORM\Column(name="otp_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      *@ManyToOne(targetEntity="Organization")

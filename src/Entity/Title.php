@@ -45,7 +45,7 @@ class Title extends DbObject
     /**
      * @ORM\Column(name="tit_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="tit_deleted", type="datetime", nullable=true)

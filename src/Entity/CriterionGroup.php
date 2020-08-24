@@ -32,7 +32,7 @@ class CriterionGroup extends DbObject
     /**
      * @ORM\Column(name="cgp_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="cgp_name", type="string", length=255, nullable=true)

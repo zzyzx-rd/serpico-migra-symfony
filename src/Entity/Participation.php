@@ -26,77 +26,77 @@ class Participation extends DbObject
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @Column(name="a_u_id", type="integer", nullable=false)
+     * @Column(name="par_id", type="integer", nullable=false)
      */
     public ?int $id;
 
     /**
-     * @ORM\Column(name="a_u_status", type="integer", nullable=true)
+     * @ORM\Column(name="par_status", type="integer", nullable=true)
      */
     public $status;
 
     /**
-     * @ORM\Column(name="a_u_leader", type="boolean", nullable=true)
+     * @ORM\Column(name="par_leader", type="boolean", nullable=true)
      */
     public $leader;
 
     /**
-     * @ORM\Column(name="a_u_type", type="integer", nullable=true)
+     * @ORM\Column(name="par_type", type="integer", nullable=true)
      */
     public $type;
 
     /**
-     * @ORM\Column(name="a_u_mWeight", type="float", nullable=true)
+     * @ORM\Column(name="par_mWeight", type="float", nullable=true)
      */
     public $mWeight;
 
     /**
-     * @ORM\Column(name="a_u_precomment", type="string", length=10, nullable=true)
+     * @ORM\Column(name="par_precomment", type="string", length=10, nullable=true)
      */
     public $precomment;
 
     /**
-     * @ORM\Column(name="a_u_ivp_bonus", type="float", nullable=true)
+     * @ORM\Column(name="par_ivp_bonus", type="float", nullable=true)
      */
     public $ivp_bonus;
 
     /**
-     * @ORM\Column(name="a_u_ivp_penalty", type="float", nullable=true)
+     * @ORM\Column(name="par_ivp_penalty", type="float", nullable=true)
      */
     public $ivp_penalty;
 
     /**
-     * @ORM\Column(name="a_u_of_bonus", type="float", nullable=true)
+     * @ORM\Column(name="par_of_bonus", type="float", nullable=true)
      */
     public $of_bonus;
 
     /**
-     * @ORM\Column(name="a_u_of_penalty", type="float", nullable=true)
+     * @ORM\Column(name="par_of_penalty", type="float", nullable=true)
      */
     public $of_penalty;
 
     /**
-     * @ORM\Column(name="a_u_mailed", type="boolean", nullable=true)
+     * @ORM\Column(name="par_mailed", type="boolean", nullable=true)
      */
     public $mailed;
 
     /**
-     * @ORM\Column(name="a_u_created_by", type="integer", nullable=true)
+     * @ORM\Column(name="par_created_by", type="integer", nullable=true)
      */
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="a_u_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="par_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
-     * @ORM\Column(name="a_u_confirmed", type="datetime", nullable=true)
+     * @ORM\Column(name="par_confirmed", type="datetime", nullable=true)
      */
     public $confirmed;
 
     /**
-     * @ORM\Column(name="a_u_deleted", type="datetime", nullable=true)
+     * @ORM\Column(name="par_deleted", type="datetime", nullable=true)
      */
     public $deleted;
 
@@ -152,20 +152,21 @@ class Participation extends DbObject
 
     /**
      * Participation constructor.
-     * @param int $a_u_status
-     * @param bool $a_u_leader
-     * @param int $a_u_type
-     * @param float $a_u_mWeight
-     * @param string $a_u_precomment
-     * @param float $a_u_ivp_bonus
-     * @param float $a_u_ivp_penalty
-     * @param float $a_u_of_bonus
-     * @param float $a_u_of_penalty
-     * @param bool $a_u_mailed
-     * @param int $a_u_createdBy
-     * @param DateTime $a_u_inserted
-     * @param DateTime $a_u_confirmed
-     * @param DateTime $a_u_deleted
+     * @param int|null $id
+     * @param int $parstatus
+     * @param bool $parleader
+     * @param int $partype
+     * @param float $parmWeight
+     * @param string $precomment
+     * @param float|null $ivp_bonus
+     * @param float|null $ivp_penalty
+     * @param float|null $of_bonus
+     * @param float|null $of_penalty
+     * @param bool|null $mailed
+     * @param int|null $createdBy
+     * @param DateTime|null $inserted
+     * @param DateTime|null $confirmed
+     * @param DateTime|null $deleted
      * @param ArrayCollection $grades
      * @param Team $team
      * @param Activity $activity
@@ -177,21 +178,21 @@ class Participation extends DbObject
      * @param ExternalUser $externalUser
      */
     public function __construct(
-      ?int $id = 0,
-        int $a_u_status= 0,
-        bool $a_u_leader = false,
-        int $a_u_type = 1,
-        float $a_u_mWeight = 0.0,
-        string $a_u_precomment = "",
-        float $a_u_ivp_bonus = null,
-        float $a_u_ivp_penalty = null,
-        float $a_u_of_bonus = null,
-        float $a_u_of_penalty = null,
-        bool $a_u_mailed = null,
-        int $a_u_createdBy = null,
-        DateTime $a_u_inserted = null,
-        DateTime $a_u_confirmed = null,
-        DateTime $a_u_deleted = null,
+        ?int $id = 0,
+        int $status= 0,
+        bool $leader = false,
+        int $type = 1,
+        float $mWeight = 0.0,
+        string $precomment = "",
+        float $ivp_bonus = null,
+        float $ivp_penalty = null,
+        float $of_bonus = null,
+        float $of_penalty = null,
+        bool $mailed = null,
+        int $createdBy = null,
+        DateTime $inserted = null,
+        DateTime $confirmed = null,
+        DateTime $deleted = null,
         ArrayCollection $grades = null,
         Team $team = null,
         Activity $activity = null,
@@ -202,20 +203,20 @@ class Participation extends DbObject
         User $user = null,
         ExternalUser $externalUser = null)
     {
-        parent::__construct($id, $a_u_createdBy, new DateTime());
-        $this->status = $a_u_status;
-        $this->leader = $a_u_leader;
-        $this->type = $a_u_type;
-        $this->mWeight = $a_u_mWeight;
-        $this->precomment = $a_u_precomment;
-        $this->ivp_bonus = $a_u_ivp_bonus;
-        $this->ivp_penalty = $a_u_ivp_penalty;
-        $this->of_bonus = $a_u_of_bonus;
-        $this->of_penalty = $a_u_of_penalty;
-        $this->mailed = $a_u_mailed;
-        $this->inserted = $a_u_inserted;
-        $this->confirmed = $a_u_confirmed;
-        $this->deleted = $a_u_deleted;
+        parent::__construct($id, $createdBy, new DateTime());
+        $this->status = $status;
+        $this->leader = $leader;
+        $this->type = $type;
+        $this->mWeight = $mWeight;
+        $this->precomment = $precomment;
+        $this->ivp_bonus = $ivp_bonus;
+        $this->ivp_penalty = $ivp_penalty;
+        $this->of_bonus = $of_bonus;
+        $this->of_penalty = $of_penalty;
+        $this->mailed = $mailed;
+        $this->inserted = $inserted;
+        $this->confirmed = $confirmed;
+        $this->deleted = $deleted;
         $this->grades = $grades;
         $this->team = $team;
         $this->activity = $activity;
@@ -234,9 +235,9 @@ class Participation extends DbObject
         return $this->status;
     }
 
-    public function setStatus(int $a_u_status): self
+    public function setStatus(int $status): self
     {
-        $this->status = $a_u_status;
+        $this->status = $status;
 
         return $this;
     }
@@ -246,9 +247,9 @@ class Participation extends DbObject
         return $this->leader;
     }
 
-    public function setLeader(bool $a_u_leader): self
+    public function setLeader(bool $leader): self
     {
-        $this->leader = $a_u_leader;
+        $this->leader = $leader;
 
         return $this;
     }
@@ -258,9 +259,9 @@ class Participation extends DbObject
         return $this->type;
     }
 
-    public function setType(int $a_u_type): self
+    public function setType(int $type): self
     {
-        $this->type = $a_u_type;
+        $this->type = $type;
 
         return $this;
     }
@@ -270,9 +271,9 @@ class Participation extends DbObject
         return $this->mWeight;
     }
 
-    public function setMWeight(float $a_u_mWeight): self
+    public function setMWeight(float $mWeight): self
     {
-        $this->mWeight = $a_u_mWeight;
+        $this->mWeight = $mWeight;
 
         return $this;
     }
@@ -282,9 +283,9 @@ class Participation extends DbObject
         return $this->precomment;
     }
 
-    public function setPrecomment(?string $a_u_precomment): self
+    public function setPrecomment(?string $precomment): self
     {
-        $this->precomment = $a_u_precomment;
+        $this->precomment = $precomment;
 
         return $this;
     }
@@ -294,9 +295,9 @@ class Participation extends DbObject
         return $this->ivp_bonus;
     }
 
-    public function setIvpBonus(float $a_u_ivp_bonus): self
+    public function setIvpBonus(float $ivp_bonus): self
     {
-        $this->ivp_bonus = $a_u_ivp_bonus;
+        $this->ivp_bonus = $ivp_bonus;
 
         return $this;
     }
@@ -306,9 +307,9 @@ class Participation extends DbObject
         return $this->ivp_penalty;
     }
 
-    public function setIvpPenalty(float $a_u_ivp_penalty): self
+    public function setIvpPenalty(float $ivp_penalty): self
     {
-        $this->ivp_penalty = $a_u_ivp_penalty;
+        $this->ivp_penalty = $ivp_penalty;
 
         return $this;
     }
@@ -318,9 +319,9 @@ class Participation extends DbObject
         return $this->of_bonus;
     }
 
-    public function setOfBonus(float $a_u_of_bonus): self
+    public function setOfBonus(float $of_bonus): self
     {
-        $this->of_bonus = $a_u_of_bonus;
+        $this->of_bonus = $of_bonus;
 
         return $this;
     }
@@ -330,9 +331,9 @@ class Participation extends DbObject
         return $this->of_penalty;
     }
 
-    public function setOfPenalty(float $a_u_of_penalty): self
+    public function setOfPenalty(float $of_penalty): self
     {
-        $this->of_penalty = $a_u_of_penalty;
+        $this->of_penalty = $of_penalty;
 
         return $this;
     }
@@ -342,16 +343,16 @@ class Participation extends DbObject
         return $this->mailed;
     }
 
-    public function setIsMailed(?bool $a_u_mailed): self
+    public function setIsMailed(?bool $mailed): self
     {
-        $this->mailed = $a_u_mailed;
+        $this->mailed = $mailed;
 
         return $this;
     }
 
-    public function setInserted(?DateTimeInterface $a_u_inserted): self
+    public function setInserted(?DateTimeInterface $inserted): self
     {
-        $this->inserted = $a_u_inserted;
+        $this->inserted = $inserted;
 
         return $this;
     }
@@ -361,9 +362,9 @@ class Participation extends DbObject
         return $this->confirmed;
     }
 
-    public function setConfirmed(?DateTimeInterface $a_u_confirmed): self
+    public function setConfirmed(?DateTimeInterface $confirmed): self
     {
-        $this->confirmed = $a_u_confirmed;
+        $this->confirmed = $confirmed;
 
         return $this;
     }
@@ -373,9 +374,9 @@ class Participation extends DbObject
         return $this->deleted;
     }
 
-    public function setDeleted(?DateTimeInterface $a_u_deleted): self
+    public function setDeleted(?DateTimeInterface $deleted): self
     {
-        $this->deleted = $a_u_deleted;
+        $this->deleted = $deleted;
 
         return $this;
     }

@@ -57,7 +57,7 @@ class WorkerExperience extends DbObject
     /**
      * @ORM\Column(name="wex_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="WorkerIndividual", inversedBy="experiences")

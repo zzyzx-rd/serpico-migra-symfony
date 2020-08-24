@@ -68,7 +68,7 @@ class Organization extends DbObject
     /**
      * @ORM\Column(name="org_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="org_validated", type="datetime", nullable=true)

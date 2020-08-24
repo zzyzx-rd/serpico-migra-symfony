@@ -96,7 +96,7 @@ class Criterion extends DbObject
     /**
      * @ORM\Column(name="cri_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="cri_deleted", type="datetime", nullable=true)

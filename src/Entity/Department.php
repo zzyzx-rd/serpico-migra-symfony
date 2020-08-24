@@ -41,7 +41,7 @@ class Department extends DbObject
     /**
      * @ORM\Column(name="dpt_inserted", type="datetime")
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="dpt_deleted", type="datetime", nullable=true)

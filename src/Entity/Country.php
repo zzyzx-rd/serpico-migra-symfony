@@ -44,7 +44,7 @@ class Country extends DbObject
     /**
      * @ORM\Column(name="cou_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @OneToMany(targetEntity="State", mappedBy="country",cascade={"persist", "remove"}, orphanRemoval=true)

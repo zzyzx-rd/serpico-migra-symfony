@@ -117,7 +117,7 @@ class ResultTeam extends DbObject
      * @Column(name="rst_inserted", type="datetime")
      * @var DateTime
      */
-    protected ?DateTime $inserted;
+    protected DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="Activity", inversedBy="resultTeams")

@@ -45,7 +45,7 @@ class WorkerFirmLocation extends DbObject
     /**
      * @ORM\Column(name="wfl_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * WorkerFirmLocation constructor.

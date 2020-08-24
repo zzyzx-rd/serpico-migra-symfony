@@ -72,7 +72,7 @@ class RankingTeam extends DbObject
     /**
      * @ORM\Column(name="rkt_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="rkt_updated", type="datetime", nullable=true)

@@ -173,7 +173,7 @@ class Stage extends DbObject
     /**
      * @ORM\Column(name="stg_inserted", type="datetime", nullable=true)
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="stg_reopened", type="boolean", nullable=true)

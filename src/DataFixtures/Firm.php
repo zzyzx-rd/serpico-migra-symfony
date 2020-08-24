@@ -27,9 +27,9 @@ class Firm extends Fixture
         $user = new User();
         $user->setRole(3)
             ->setEmail("gchatelain@yopmail.com")
-            ->setUsername("Guillaume Chatelin")
+            ->setUsername("Guillaume Chatelain")
             ->setFirstname("Guillaume")
-            ->setLastname("Chatelin")
+            ->setLastname("Chatelain")
             ->setPassword($this->encoder->encodePassword($user, "Serpico2019"))
             ->setRole(1);
         $manager->persist($user);
