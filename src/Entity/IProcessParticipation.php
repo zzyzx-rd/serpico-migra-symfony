@@ -23,47 +23,47 @@ class IProcessParticipation extends DbObject
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(name="a_u_id", type="integer", nullable=false)
+     * @ORM\Column(name="par_id", type="integer", nullable=false)
      */
     public ?int $id;
 
     /**
-     * @ORM\Column(name="a_u_status", type="integer", nullable=true)
+     * @ORM\Column(name="par_status", type="integer", nullable=true)
      */
     public $status;
 
     /**
-     * @ORM\Column(name="a_u_leader", type="boolean", nullable=true)
+     * @ORM\Column(name="par_leader", type="boolean", nullable=true)
      */
     public $leader;
 
     /**
-     * @ORM\Column(name="a_u_type", type="integer", nullable=true)
+     * @ORM\Column(name="par_type", type="integer", nullable=true)
      */
     public $type;
 
     /**
-     * @ORM\Column(name="a_u_mWeight", type="float", nullable=true)
+     * @ORM\Column(name="par_mWeight", type="float", nullable=true)
      */
     public $mWeight;
 
     /**
-     * @ORM\Column(name="a_u_precomment", type="string", length=255, nullable=true)
+     * @ORM\Column(name="par_precomment", type="string", length=255, nullable=true)
      */
     public $precomment;
 
     /**
-     * @ORM\Column(name="a_u_created_by", type="integer", nullable=true)
+     * @ORM\Column(name="par_created_by", type="integer", nullable=true)
      */
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="a_u_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="par_inserted", type="datetime", nullable=true)
      */
     public DateTime $inserted;
 
     /**
-     * @ORM\Column(name="a_u_deleted", type="datetime", nullable=true)
+     * @ORM\Column(name="par_deleted", type="datetime", nullable=true)
      */
     public $deleted;
 
@@ -106,14 +106,14 @@ class IProcessParticipation extends DbObject
     /**
      * IProcessParticipation constructor.
      * @param $id
-     * @param $a_u_status
-     * @param $a_u_leader
-     * @param $a_u_type
-     * @param $a_u_mWeight
-     * @param $a_u_precomment
-     * @param $a_u_createdBy
-     * @param $a_u_inserted
-     * @param $a_u_deleted
+     * @param $par_status
+     * @param $par_leader
+     * @param $par_type
+     * @param $par_mWeight
+     * @param $par_precomment
+     * @param $par_createdBy
+     * @param $par_inserted
+     * @param $par_deleted
      * @param $team
      * @param $institutionProcess
      * @param $stage
@@ -125,28 +125,27 @@ class IProcessParticipation extends DbObject
       ?int $id = 0,
         User $user_usr = null,
         ExternalUser $external_user_ext_usr = null,
-        bool $a_u_leader = false,
-        int $a_u_type = 1,
-        int $a_u_status = 0,
-        float $a_u_mWeight = 0.0,
-        $a_u_precomment = '',
-        $a_u_createdBy = null,
-        DateTime $a_u_inserted = null,
-        DateTime $a_u_deleted = null,
+        bool $par_leader = false,
+        int $par_type = 1,
+        int $par_status = 0,
+        float $par_mWeight = 0.0,
+        $par_precomment = '',
+        $par_createdBy = null,
+        DateTime $par_inserted = null,
+        DateTime $par_deleted = null,
         Team $team = null,
         InstitutionProcess $institutionProcess = null,
         Stage $stage = null,
         Criterion $criterion = null
      )
     {
-        parent::__construct($id, $a_u_createdBy, new DateTime());
-        $this->status = $a_u_status;
-        $this->leader = $a_u_leader;
-        $this->type = $a_u_type;
-        $this->mWeight = $a_u_mWeight;
-        $this->precomment = $a_u_precomment;
-        $this->inserted = $a_u_inserted;
-        $this->deleted = $a_u_deleted;
+        parent::__construct($id, $par_createdBy, new DateTime());
+        $this->status = $par_status;
+        $this->leader = $par_leader;
+        $this->type = $par_type;
+        $this->mWeight = $par_mWeight;
+        $this->precomment = $par_precomment;
+        $this->deleted = $par_deleted;
         $this->team = $team;
         $this->institutionProcess = $institutionProcess;
         $this->stage = $stage;
@@ -161,9 +160,9 @@ class IProcessParticipation extends DbObject
         return $this->status;
     }
 
-    public function setStatus(int $a_u_status): self
+    public function setStatus(int $par_status): self
     {
-        $this->status = $a_u_status;
+        $this->status = $par_status;
 
         return $this;
     }
@@ -173,9 +172,9 @@ class IProcessParticipation extends DbObject
         return $this->leader;
     }
 
-    public function setLeader(bool $a_u_leader): self
+    public function setLeader(bool $par_leader): self
     {
-        $this->leader = $a_u_leader;
+        $this->leader = $par_leader;
 
         return $this;
     }
@@ -185,9 +184,9 @@ class IProcessParticipation extends DbObject
         return $this->type;
     }
 
-    public function setType(int $a_u_type): self
+    public function setType(int $par_type): self
     {
-        $this->type = $a_u_type;
+        $this->type = $par_type;
 
         return $this;
     }
@@ -197,9 +196,9 @@ class IProcessParticipation extends DbObject
         return $this->mWeight;
     }
 
-    public function setMWeight(float $a_u_mWeight): self
+    public function setMWeight(float $par_mWeight): self
     {
-        $this->mWeight = $a_u_mWeight;
+        $this->mWeight = $par_mWeight;
 
         return $this;
     }
@@ -209,16 +208,16 @@ class IProcessParticipation extends DbObject
         return $this->precomment;
     }
 
-    public function setPrecomment(string $a_u_precomment): self
+    public function setPrecomment(string $par_precomment): self
     {
-        $this->precomment = $a_u_precomment;
+        $this->precomment = $par_precomment;
 
         return $this;
     }
 
-    public function setInserted(?DateTimeInterface $a_u_inserted): self
+    public function setInserted(?DateTimeInterface $par_inserted): self
     {
-        $this->inserted = $a_u_inserted;
+        $this->inserted = $par_inserted;
 
         return $this;
     }
@@ -228,9 +227,9 @@ class IProcessParticipation extends DbObject
         return $this->deleted;
     }
 
-    public function setDeleted(string $a_u_deleted): self
+    public function setDeleted(string $par_deleted): self
     {
-        $this->deleted = $a_u_deleted;
+        $this->deleted = $par_deleted;
 
         return $this;
     }

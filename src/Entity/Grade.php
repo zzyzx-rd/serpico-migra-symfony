@@ -65,7 +65,7 @@ class Grade extends DbObject
     protected $team;
     /**
      * @ManyToOne(targetEntity="Participation", inversedBy="grades")
-     * @JoinColumn(name="activity_user_user_usr_id", referencedColumnName="a_u_id",nullable=false)
+     * @JoinColumn(name="activity_user_user_usr_id", referencedColumnName="par_id",nullable=false)
      * @var Participation
      */
     protected $participant;

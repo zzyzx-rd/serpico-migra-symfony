@@ -103,7 +103,6 @@ class Position extends DbObject
     {
         parent::__construct($id, $createdBy, new DateTime());
         $this->name = $name;
-        $this->inserted = $inserted;
         $this->deleted = $deleted;
         $this->organization = $organization;
         $this->department = $department;

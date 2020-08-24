@@ -81,7 +81,6 @@ class Country extends DbObject
         $this->abbr = $cou_abbr;
         $this->fullname = $cou_fullname;
         $this->name = $cou_name;
-        $this->inserted = $cou_inserted;
         $this->states = $states?$states:new ArrayCollection();
         $this->firms = $firms?$firms:new ArrayCollection();
     }

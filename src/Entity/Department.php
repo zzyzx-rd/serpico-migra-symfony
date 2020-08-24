@@ -119,7 +119,6 @@ class Department extends DbObject
     {
         parent::__construct($id, $createdBy, new DateTime);
         $this->name = $name;
-        $this->inserted = $inserted;
         $this->deleted = $deleted;
         $this->masterUser = $masterUser;
         $this->positions = $positions?:new ArrayCollection();

@@ -67,7 +67,6 @@ class OptionName extends DbObject
         $this->type = $ona_type;
         $this->name = $ona_name;
         $this->description = $ona_description;
-        $this->inserted = $ona_inserted;
     }
 
 

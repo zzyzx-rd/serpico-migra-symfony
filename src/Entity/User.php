@@ -1061,7 +1061,7 @@ class User extends DbObject implements  UserInterface, \Serializable
         }
 
 //        $sql =
-//            'SELECT a_u_id
+//            'SELECT par_id
 //         FROM activity_user
 //         INNER JOIN activity ON activity_user.activity_act_id = activity.act_id
 //         WHERE activity.act_status >= :status
@@ -1073,7 +1073,7 @@ class User extends DbObject implements  UserInterface, \Serializable
 //        $nbCompletedActivities = count($pdoStatement->fetchAll());
 
 //        $sql =
-//            'SELECT a_u_id
+//            'SELECT par_id
 //         FROM activity_user
 //         INNER JOIN activity ON activity_user.activity_act_id = activity.act_id
 //         WHERE activity.act_status IN (:status_1, :status_2)

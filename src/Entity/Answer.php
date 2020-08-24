@@ -50,7 +50,7 @@ class Answer extends DbObject
     protected $survey;
     /**
      * @ManyToOne(targetEntity="Participation", inversedBy="answers")
-     * @JoinColumn(name="activity_user_a_u_id", referencedColumnName="a_u_id", nullable=true)
+     * @JoinColumn(name="activity_user_par_id", referencedColumnName="par_id", nullable=true)
      */
     protected $participant;
 

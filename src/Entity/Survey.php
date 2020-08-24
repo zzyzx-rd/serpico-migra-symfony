@@ -107,7 +107,6 @@ class Survey extends DbObject
     {
         parent::__construct($id, $sur_createdBy, new DateTime());
         $this->name = $sur_name;
-        $this->inserted = $sur_inserted;
         $this->state = $sur_state;
         $this->stage = $stage;
         $this->organization = $organization;

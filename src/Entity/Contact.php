@@ -178,7 +178,6 @@ class Contact extends DbObject
         $this->doc = $con_doc;
         $this->mdate = $con_mdate;
         $this->mtime = $con_mtime;
-        $this->inserted = $con_inserted;
         $this->confirmed = $con_confirmed;
     }
 

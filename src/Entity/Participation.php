@@ -214,7 +214,6 @@ class Participation extends DbObject
         $this->of_bonus = $of_bonus;
         $this->of_penalty = $of_penalty;
         $this->mailed = $mailed;
-        $this->inserted = $inserted;
         $this->confirmed = $confirmed;
         $this->deleted = $deleted;
         $this->grades = $grades;

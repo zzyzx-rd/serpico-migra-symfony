@@ -97,7 +97,7 @@
 //
 //    /**
 //     * @OneToMany(targetEntity="TemplateParticipation", mappedBy="activity",cascade={"persist", "remove"}, orphanRemoval=true)
-//     * @JoinColumn(name="a_u_participant", referencedColumnName="a_u_id")
+//     * @JoinColumn(name="par_participant", referencedColumnName="par_id")
 //     */
 ////     * @OrderBy({"team" = "ASC"})
 //    public $participants;
