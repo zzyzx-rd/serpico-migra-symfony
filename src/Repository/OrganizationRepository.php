@@ -43,7 +43,7 @@ class OrganizationRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return Collection|Department[]
+     * @return ArrayCollection|Department[]
      */
     public function getUserSortedDepartments(User $user)
     {

@@ -66,7 +66,7 @@ class OptionName extends Fixture
         $optName11->setType(0)
             ->setName("enabledUserSeeRanking")
             ->setDescription("Enables users to see their ranking, based on their previous finished activities in the organization");
-
+        
         $manager->persist($optName1);
         $manager->persist($optName2);
         $manager->persist($optName3);

@@ -6,6 +6,7 @@ use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\InstitutionProcessRepository;
 use DateTime;
 use DateTimeInterface;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
@@ -99,7 +100,7 @@ class InstitutionProcess extends DbObject
      * @param $inp_approvable
      * @param $inp_gradable
      * @param $inp_createdBy
-     * @param $inp_isnerted
+     * @param $inp_inserted
      * @param $inp_deleted
      * @param $organization
      * @param $process
@@ -115,7 +116,7 @@ class InstitutionProcess extends DbObject
         $inp_createdBy = null,
         $inp_approvable = false,
         $inp_gradable = true,
-        $inp_isnerted = null,
+        $inp_inserted = null,
         $inp_deleted = null,
         Organization $organization = null,
         Process $process = null,
@@ -134,9 +135,9 @@ class InstitutionProcess extends DbObject
         $this->process = $process;
         $this->masterUser = $masterUser;
         $this->parent = $parent;
-        $this->children = $children;
-        $this->stages = $stages;
-        $this->activities = $activities;
+        $this->children = new ArrayCollection();
+        $this->stages = new ArrayCollection();
+        $this->activities = new ArrayCollection();
     }
 
 
@@ -176,14 +177,14 @@ class InstitutionProcess extends DbObject
         return $this;
     }
 
-    public function getIsnerted(): ?DateTimeInterface
+    public function getInserted(): ?DateTimeInterface
     {
         return $this->inserted;
     }
 
-    public function setIsnerted(DateTimeInterface $inp_isnerted): self
+    public function setInserted(DateTimeInterface $inp_inserted): self
     {
-        $this->inserted = $inp_isnerted;
+        $this->inserted = $inp_inserted;
 
         return $this;
     }
@@ -201,9 +202,9 @@ class InstitutionProcess extends DbObject
     }
 
     /**
-     * @return Collection|Activity[]
+     * @return ArrayCollection|Activity[]
      */
-    public function getActivities(): Collection
+    public function getActivities()
     {
         return $this->activities;
     }
@@ -324,7 +325,7 @@ class InstitutionProcess extends DbObject
     }
 
     /**
-     * @return Collection|InstitutionProcess[]
+     * @return ArrayCollection|InstitutionProcess[]
      */
     public function getValidatedChildren() {
         return $this->children->filter(static function(InstitutionProcess $p){
@@ -369,7 +370,7 @@ class InstitutionProcess extends DbObject
         return $this;
     }
     /**
-     * @return Collection|IProcessStage[]
+     * @return ArrayCollection|IProcessStage[]
      */
     public function getActiveStages()
     {

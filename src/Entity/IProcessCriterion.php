@@ -329,7 +329,7 @@ class IProcessCriterion extends DbObject
         return $this;
     }
 
-    public function getParticipants(): Collection
+    public function getParticipants()
     {
         return $this->participants;
     }
