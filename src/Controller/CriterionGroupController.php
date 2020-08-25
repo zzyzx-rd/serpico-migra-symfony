@@ -89,7 +89,7 @@ class CriterionGroupController extends MasterController
      * @return Response
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route(name="setCgpDepartment")
+     * @Route(name="setCgpDepartment", path="/settings/criteriongroup/department/{cgpId}")
      */
     public function setCgpDepartment(Request $request, int $cgpId)
     {

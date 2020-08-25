@@ -92,7 +92,7 @@ class Icon extends DbObject
     }
 
 
-    public function etType(): ?string
+    public function getType(): ?string
     {
         return $this->type;
     }
@@ -104,7 +104,7 @@ class Icon extends DbObject
         return $this;
     }
 
-    public function etName(): ?string
+    public function getName(): ?string
     {
         return $this->name;
     }
@@ -116,7 +116,7 @@ class Icon extends DbObject
         return $this;
     }
 
-    public function etUnicode(): ?string
+    public function getUnicode(): ?string
     {
         return $this->unicode;
     }
@@ -128,7 +128,7 @@ class Icon extends DbObject
         return $this;
     }
 
-    public function etInserted(): ?DateTimeInterface
+    public function getInserted(): ?DateTimeInterface
     {
         return $this->inserted;
     }
@@ -207,8 +207,8 @@ class Icon extends DbObject
         return IntlChar::chr(hexdec($this->unicode));
     }
 
-//    public function __toString()
-//    {
-//        return $this->getChar();
-//    }
+    public function __toString()
+    {
+        return $this->getChar();
+    }
 }

@@ -31,7 +31,7 @@ class DepartmentM extends ModelEntity {
         $departmentUsers = $department->getUsers();
         $viewableUsers = new ArrayCollection;
 
-        if($user->getRole() == 1 || $user->getRole() == 4 || $this->masterUser == $user || $orgFullViewOption){
+        if($user->getRole() == 1 || $user->getRole() == 4 || $department->getMasterUser() == $user || $orgFullViewOption){
 
             $viewableUsers = $departmentUsers;
 
@@ -67,7 +67,7 @@ class DepartmentM extends ModelEntity {
                 }
 
                 // and if superior lies outside user's department, and has not been added
-                if($user->getSuperior() != null && $user->getSuperior()->getDepartment() == $department && !in_array($user->getSuperior(), $viewableUsers)){
+                if($user->getSuperior() != null && $user->getSuperior()->getDepartment() == $department && !$viewableUsers->contains($user->getSuperior())){
                     $viewableUsers->add($user->getSuperior());
                 }
 
