@@ -497,9 +497,10 @@ class Criterion extends DbObject
     /**
      * @param mixed $target
      */
-    public function setTarget($target): void
+    public function setTarget($target)
     {
         $this->target = $target;
+        return $this;
     }
 
     /**
@@ -513,9 +514,10 @@ class Criterion extends DbObject
     /**
      * @param mixed $grades
      */
-    public function setGrades($grades): void
+    public function setGrades($grades)
     {
         $this->grades = $grades;
+        return $this;
     }
 
     /**
@@ -529,9 +531,10 @@ class Criterion extends DbObject
     /**
      * @param mixed $results
      */
-    public function setResults($results): void
+    public function setResults($results)
     {
         $this->results = $results;
+        return $this;
     }
 
     /**
@@ -545,9 +548,10 @@ class Criterion extends DbObject
     /**
      * @param mixed $resultTeams
      */
-    public function setResultTeams($resultTeams): void
+    public function setResultTeams($resultTeams)
     {
         $this->resultTeams = $resultTeams;
+        return $this;
     }
 
     /**
@@ -561,9 +565,10 @@ class Criterion extends DbObject
     /**
      * @param mixed $rankings
      */
-    public function setRankings($rankings): void
+    public function setRankings($rankings)
     {
         $this->rankings = $rankings;
+        return $this;
     }
 
     /**
@@ -577,9 +582,10 @@ class Criterion extends DbObject
     /**
      * @param mixed $rankingTeams
      */
-    public function setRankingTeams($rankingTeams): void
+    public function setRankingTeams($rankingTeams)
     {
         $this->rankingTeams = $rankingTeams;
+        return $this;
     }
 
     /**
@@ -593,9 +599,10 @@ class Criterion extends DbObject
     /**
      * @param mixed $historicalRankings
      */
-    public function setHistoricalRankings($historicalRankings): void
+    public function setHistoricalRankings($historicalRankings)
     {
         $this->historicalRankings = $historicalRankings;
+        return $this;
     }
 
     /**
@@ -609,9 +616,10 @@ class Criterion extends DbObject
     /**
      * @param mixed $historicalRankingTeams
      */
-    public function setHistoricalRankingTeams($historicalRankingTeams): void
+    public function setHistoricalRankingTeams($historicalRankingTeams)
     {
         $this->historicalRankingTeams = $historicalRankingTeams;
+        return $this;
     }
 
     /**
@@ -625,9 +633,10 @@ class Criterion extends DbObject
     /**
      * @param mixed $template
      */
-    public function setTemplate($template): void
+    public function setTemplate($template)
     {
         $this->template = $template;
+        return $this;
     }
 
     public function addGrade(Grade $grade): Criterion

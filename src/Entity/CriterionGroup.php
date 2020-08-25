@@ -111,9 +111,10 @@ class CriterionGroup extends DbObject
     /**
      * @param CriterionName[] $criteria
      */
-    public function setCriteria(array $criteria): void
+    public function setCriteria(array $criteria)
     {
         $this->criteria = $criteria;
+        return $this;
     }
 
     /**
@@ -127,9 +128,10 @@ class CriterionGroup extends DbObject
     /**
      * @param Organization $organization
      */
-    public function setOrganization(Organization $organization): void
+    public function setOrganization(Organization $organization)
     {
         $this->organization = $organization;
+        return $this;
     }
 
     /**
@@ -143,9 +145,10 @@ class CriterionGroup extends DbObject
     /**
      * @param Department $department
      */
-    public function setDepartment(Department $department): void
+    public function setDepartment(Department $department)
     {
         $this->department = $department;
+        return $this;
     }
 
     public function addCriterion(CriterionName $criterion): ?CriterionGroup
