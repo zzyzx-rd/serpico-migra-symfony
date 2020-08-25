@@ -18,7 +18,7 @@
         </a> 
       {% endif %}
       {% if team.overviewable %}
-      <a class="btn-flat" href="{{ url('elementOverview', { elmtId: team.id, elmtType: 'team' }) }}">
+      <a class="btn-flat" href="{{ url('elementOverview', { elmtId: team.id, entity: 'team' }) }}">
         <i class="material-icons left">show_chart</i>
         {{ 'user_list.overview'|trans }}
       </a>

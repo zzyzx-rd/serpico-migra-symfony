@@ -273,7 +273,7 @@
 {% block javascripts %}
     <script src="{{ asset('js/team_manage.js') }}"></script>
     <script>
-        var vnurl = "{{ url('validateElementName',{elmtType: 'team', elmtId: teaId}) }}";
+        var vnurl = "{{ url('validateElementName',{entity: 'team', elmtId: teaId}) }}";
         const validateTeamUserUrl = '{{ url("validateTeamUser", { teaId: teaId != 0 ? teaId : "__teaId__", tusId: "__tusId__" }) }}'; 
         const deleteTeamUserUrl = '{{ url("deleteTeamUser", { tusId: 0}) }}'; 
         const deleteTeamUrl = '{{ url("deleteTeam", {teaId: teaId}) }}'; 

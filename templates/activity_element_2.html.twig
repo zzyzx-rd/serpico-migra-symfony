@@ -1,7 +1,7 @@
 {% extends "layout.html.twig" %}
 
 
-{% set elmtType = global.request.get('elmtType') %}
+{% set entity = global.request.get('entity') %}
 {% set elmtId = global.request.get('elmtId') %}
 
 {% macro visibility_icon(v) %}
@@ -48,9 +48,9 @@
 <main>
     {{ form_start(form, { attr: { autocomplete: "off" } }) }}
     <header id="main-header">
-      {% if elmtType == 'activity' %}
+      {% if entity == 'activity' %}
         <a class="waves-effect waves-green btn back-btn" href="{{ url('myActivities')}}">{{ 'activity_elements.go_back_activities'|trans }}</a>
-      {% elseif elmtType == 'iprocess' %}
+      {% elseif entity == 'iprocess' %}
       <a class="waves-effect waves-green btn back-btn" href="{{ url('manageProcesses',{orgId: currentuser.id}) }}">{{ 'activity_elements.go_back_processes'|trans }}</a>
       {% endif %}
       <div class="flex-center" style="flex-direction: column">
@@ -70,7 +70,7 @@
           <div class="actions">
           </div>
         </div>
-        {% if elmtType == 'iprocess' %}
+        {% if entity == 'iprocess' %}
         <div>
           <a class="btn-flat iprocess-name flex-center">
             <i class="material-icons">layers</i>
@@ -82,7 +82,7 @@
       </div>
     </header>
 
-    {% if elmtType == 'iprocess' or elmtType == 'process' %}
+    {% if entity == 'iprocess' or entity == 'process' %}
       <div>
         {{ form_widget(form.approvable) }}
         {{ form_label(form.approvable) }}
@@ -92,7 +92,9 @@
 
     <ol id="{{ form.activeModifiableStages.vars.id }}" class="stages">
 
-      {% if elmtType == 'activity' %}
+      <template class="stages-list--item__proto">{% include "prototype/stage_item.html.twig" with { entity: entity, stage: form.activeModifiableStages.vars.prototype } %}</template>
+
+      {% if entity == 'activity' %}
 
       {% set completedStages = form.vars.data.oCompletedStages %}
       {% if completedStages|length > 0 %}
@@ -159,14 +161,14 @@
           {% set progressIcon = 'done_all' %}
         {% endif %}
 
-
+        
 
         <li id="{{ stage.vars.id }}" class="stage-element stage" data-id="{{ stage.vars.data.id }}">
-          {% include "modals/stage_settings.html.twig" with { elmtType: elmtType, s: s, sNb: s + 1, stage: stage, progressMsg: progressMsg is defined ? progressMsg : null } %}
+          {% include "modals/stage_settings.html.twig" with { entity: entity, s: s, sNb: s + 1, stage: stage, progressMsg: progressMsg is defined ? progressMsg : null } %}
 
           <div class="stage-item-name">
             <div class="meta">
-              {% if definite_dates or elmtType == 'activity' %}
+              {% if definite_dates or entity == 'activity' %}
 
                 <div class="stage-dates">
                   <i class="fa fa-calendar"></i>
@@ -191,7 +193,7 @@
               <div class="name-and-progress">
                 <span class="stage-name-field">{{ stage.vars.data.name }}</span>
                 <span class="s-weighting">({{ (stage.vars.data.activeWeight * 100)|round }} %)</span>
-                {% if elmtType == 'activity' %}
+                {% if entity == 'activity' %}
                   <span class="stage-progress-status tooltipped" data-position="top" data-tooltip="{{ progressMsg }}">
                       <i class="material-icons">{{progressIcon}}</i>
                   </span>
@@ -219,7 +221,7 @@
                   <span class="s-weighting">{{ (stage.vars.data.activeWeight * 100)|round }} %</span>
                 </a>
               </div>
-              {% if elmtType == 'activity' %}
+              {% if entity == 'activity' %}
                 <div class="stage-progress-status">
                   <a href="#" class="btn-flat">
                     <span>{{ 'stages.stage.progress.title'|trans}} :</span>
@@ -234,12 +236,14 @@
               </div>
 
               <section class="criteria">
+                {#
                 <template class="criteria-list--item__proto">
                   {%
                     include "components/activity_page__criterion_item.html.twig"
                     with { s: s, c: "__crtNb__", criterion: stage.criteria.vars.prototype }
                   %}
                 </template>
+                #}
                 <header>
                   <ul class="tabs output-tabs tabs-fixed-width">
                     <li class="tab criteria-tab">
@@ -341,23 +345,23 @@
               </section>
               <section class="participants">
                 <template class="participants-list--item__proto-i">
-                  {% include "components/activity_page__participant_item.html.twig" with { participant: stage.independantUniqueIntParticipations.vars.prototype, leadingOption: true, entity: 'user' } %}
+                  {% include "components/activity_page__participant_item.html.twig" with { participant: stage.intParticipants.vars.prototype, leadingOption: true, entity: 'user' } %}
                 </template>
                 <template class="participants-list--item__proto-t">
-                  {% include "components/activity_page__participant_item.html.twig" with { participant: stage.independantUniqueTeamParticipations.vars.prototype, leadingOption: true, entity: 'team' } %}
+                  {% include "components/activity_page__participant_item.html.twig" with { participant: stage.independantTeamParticipants.vars.prototype, leadingOption: true, entity: 'team' } %}
                 </template>
                 <template class="participants-list--item__proto-e">
-                  {% include "components/activity_page__participant_item.html.twig" with { participant: stage.independantUniqueExtParticipations.vars.prototype, leadingOption: false, entity: 'user' } %}
+                  {% include "components/activity_page__participant_item.html.twig" with { participant: stage.extParticipants.vars.prototype, leadingOption: false, entity: 'user' } %}
                 </template>
                 <header>{{ 'activity_elements.participants'|trans }}</header>
                 <ul class="participants-list">
-                  {% for participant in stage.independantUniqueIntParticipations %}
+                  {% for participant in stage.intParticipants %}
                     {% include "components/activity_page__participant_item.html.twig" with { participant: participant, leadingOption: true, mode: 'i', entity: 'user' } %}
                   {% endfor %}
-                  {% for participant in stage.independantUniqueTeamParticipations %}
+                  {% for participant in stage.independantTeamParticipants %}
                     {% include "components/activity_page__participant_item.html.twig" with { participant: participant, leadingOption: true, mode: 't', entity: 'team' } %}
                   {% endfor %}
-                  {% for participant in stage.independantUniqueExtParticipations %}
+                  {% for participant in stage.extParticipants %}
                     {% include "components/activity_page__participant_item.html.twig" with { participant: participant, leadingOption: false, mode: 'e', entity: 'user' } %}
                   {% endfor %}
                 </ul>
@@ -439,7 +443,6 @@
         </div>
       </div>
     </div>
-    <template class="stages-list--item__proto">{% include "prototype/stage_item.html.twig" with { elmtType: elmtType, stage: form.activeModifiableStages.vars.prototype } %}</template>
     <input type="hidden" name="clicked-btn" value="">
 
       {% if not form.vars.valid %}
@@ -694,15 +697,15 @@
     window.usrId = '{{ currentuser.id }}';
     window.usrRole = '{{ currentuser.role }}';
 
-    const validateParticipantUrl = '{{ url("validateParticipant", { elmtType: elmtType, stgId: "__stgId__", elmtId: "__elmtId__" }) }}';    //const removeCriterionUrl = '{{ url("ajaxCriterionDelete", { elmtType: elmtType, criId: "__criId__" }) }}';
-    const removeParticipantUrl = '{{ url("deleteParticipant", { elmtType: elmtType, stgId: "__stgId__", elmtId: "__elmtId__" }) }}';
-    const courl = "{{ url('clearStageOutput', {'elmtType' : elmtType, 'stgId' : 0}) }}"
-    var dcurl = "{{ url('ajaxCriterionDelete',{'elmtType' : elmtType, 'criId' : 0}) }}";
-    var dsurl = "{{ url('ajaxStageDelete',{'elmtType' : elmtType, 'stgId' : 0}) }}";
-    var dpsurl = "{{ url('duplicateStage',{'elmtType' : elmtType, 'elmtId' : 0}) }}";
-    var vcurl = "{{ url('validateCriterionElement',{'elmtType' : elmtType, 'elmtId': elmtId, 'stgId' : 0, 'crtId' : 0}) }}";
-    var vsurl = "{{ url('validateStageElement',{'elmtType' : elmtType, 'elmtId': elmtId, 'stgId' : 0}) }}";
-    var vnurl = "{{ url('validateElementName',{'elmtType' : elmtType, 'elmtId': elmtId}) }}";
+    const validateParticipantUrl = '{{ url("validateParticipant", { entity: entity, stgId: "__stgId__", elmtId: "__elmtId__" }) }}';    //const removeCriterionUrl = '{{ url("ajaxCriterionDelete", { entity: entity, criId: "__criId__" }) }}';
+    const removeParticipantUrl = '{{ url("deleteParticipant", { entity: entity, stgId: "__stgId__", elmtId: "__elmtId__" }) }}';
+    const courl = "{{ url('clearStageOutput', {'entity' : entity, 'stgId' : 0}) }}"
+    var dcurl = "{{ url('ajaxCriterionDelete',{'entity' : entity, 'criId' : 0}) }}";
+    var dsurl = "{{ url('ajaxStageDelete',{'entity' : entity, 'stgId' : 0}) }}";
+    var dpsurl = "{{ url('duplicateStage',{'entity' : entity, 'elmtId' : 0}) }}";
+    var vcurl = "{{ url('validateCriterionElement',{'entity' : entity, 'elmtId': elmtId, 'stgId' : 0, 'crtId' : 0}) }}";
+    var vsurl = "{{ url('validateStageElement',{'entity' : entity, 'elmtId': elmtId, 'stgId' : 0}) }}";
+    var vnurl = "{{ url('validateElementName',{'entity' : entity, 'elmtId': elmtId}) }}";
 
   </script>
 {% endblock %}

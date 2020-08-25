@@ -1,4 +1,5 @@
 {% macro badge(letter,participation) %}
+  {% set currentuser = global.currentuser %}
   {% set colors = { A: 'lightseagreen', T: 'purple', P: 'orange', 'E': 'darkcyan' } %}
   {% set tooltipMsg = { 
       L: 'participants.leader', 
@@ -19,7 +20,7 @@
             {% if letter == 'A' and participation.type == 1 or
                   letter == 'T' and participation.type == 0 or 
                   letter == 'P' and participation.type == -1 or 
-                  letter == 'E' and participation.user.orgId != currentuser.orgId 
+                  letter == 'E' and participation.user.organization != currentuser.organization
             %}
               <div class="badge-container badge-participation-{{ letter|lower }} tooltipped" data-position="top" data-tooltip="{{ tooltipMsg[letter]|trans }}">
                 <div {{ 'style' }}="background: {{ colors[letter] }}">
@@ -75,7 +76,7 @@
 {% set participation = participant.vars.data %}
 {% set participation_type = participation ? participation.type : null %}
 {% if entity == 'user' %}
-  {% set element = participant.directUser.vars.data %}
+  {% set element = participant.user.vars.data %}
 {% else %}
   {% set element = participant.team.vars.data %}
 {% endif %}
@@ -107,7 +108,7 @@
   {% endif %}>
 
   <div class="user-info">
-    <img class="user-picture" src="{{ element ? (entity == 'user' ? asset(global.user_picture(element)) : asset(global.teampicture(element))) }}" alt="{{ elmtName }}">
+    <img class="user-picture" src="{{ element ? (entity == 'user' ? asset(global.userpicture(element)) : asset(global.teampicture(element))) }}" alt="{{ elmtName }}">
     <span class="elmt-name">{{ elmtName }}</span>
     {{ _self.badges(participation) }}
   </div>
@@ -115,8 +116,8 @@
   <div class="user-edit">
     {% if entity == 'user'%}
       <div class="user">
-        {{ form_label(participant.directUser) }}
-        {{ form_widget(participant.directUser, { attr: { class: 'elmt-select' } }) }}
+        {{ form_label(participant.user) }}
+        {{ form_widget(participant.user, { attr: { class: 'elmt-select' } }) }}
       </div>
     {% else %}
       <div class="team">

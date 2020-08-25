@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\GradeRepository;
+use ApiPlatform\Core\Annotation\ApiResource;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
@@ -10,6 +11,7 @@ use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 
 /**
+ * @ApiResource()
  * @ORM\Entity(repositoryClass=GradeRepository::class)
  */
 class Grade extends DbObject
@@ -31,12 +33,12 @@ class Grade extends DbObject
     /**
      * @ORM\Column(name="grd_graded_usr_id", type="integer", nullable=true)
      */
-    public $graded_usr_id;
+    public $gradedUsrId;
 
     /**
      * @ORM\Column(name="grd_graded_tea_id", type="integer", nullable=true)
      */
-    public $graded_tea_id;
+    public $gradedTeaId;
 
     /**
      * @ORM\Column(name="grd_value", type="float", nullable=true)
@@ -68,7 +70,7 @@ class Grade extends DbObject
      * @JoinColumn(name="activity_user_user_usr_id", referencedColumnName="par_id",nullable=false)
      * @var Participation
      */
-    protected $participant;
+    protected $participation;
     /**
      * @ManyToOne(targetEntity="Activity", inversedBy="grades")
      * @JoinColumn(name="activity_act_id", referencedColumnName="act_id",nullable=false)
@@ -88,15 +90,15 @@ class Grade extends DbObject
     /**
      * Grade constructor.
      * @param ?int$id
-     * @param $grd_type
-     * @param $grd_graded_usr_id
-     * @param $grd_graded_tea_id
-     * @param $grd_value
-     * @param $grd_comment
-     * @param $grd_createdBy
-     * @param $grd_inserted
+     * @param $type
+     * @param $gradedUsrId
+     * @param $gradedTeaId
+     * @param $value
+     * @param $comment
+     * @param $createdBy
+     * @param $inserted
      * @param $team
-     * @param Participation $participant
+     * @param Participation $participation
      * @param $activity
      * @param $criterion
      * @param $stage
@@ -104,27 +106,27 @@ class Grade extends DbObject
     //TODO gérer les controllers
     public function __construct(
       ?int $id = 0,
-        $grd_type = 1,
-        $grd_graded_usr_id = null,
-        $grd_graded_tea_id = null,
-        $grd_value = null,
-        $grd_comment = null,
-        $grd_createdBy = null,
-        $grd_inserted = null,
+        $type = 1,
+        $gradedUsrId = null,
+        $gradedTeaId = null,
+        $value = null,
+        $comment = null,
+        $createdBy = null,
+        $inserted = null,
         Team $team = null,
-        Participation $participant = null,
+        Participation $participation = null,
         Activity$activity = null,
         Criterion $criterion = null,
         Stage $stage = null)
     {
-        parent::__construct($id, $grd_createdBy, new DateTime());
-        $this->type = $grd_type;
-        $this->graded_usr_id = $grd_graded_usr_id;
-        $this->graded_tea_id = $grd_graded_tea_id;
-        $this->value = $grd_value;
-        $this->comment = $grd_comment;
+        parent::__construct($id, $createdBy, new DateTime());
+        $this->type = $type;
+        $this->gradedUsrId = $gradedUsrId;
+        $this->gradedTeaId = $gradedTeaId;
+        $this->value = $value;
+        $this->comment = $comment;
         $this->team = $team;
-        $this->participant = $participant;
+        $this->participation = $participation;
         $this->activity = $activity;
         $this->criterion = $criterion;
         $this->stage = $stage;
@@ -135,33 +137,33 @@ class Grade extends DbObject
         return $this->type;
     }
 
-    public function setType(int $grd_type): self
+    public function setType(int $type): self
     {
-        $this->type = $grd_type;
+        $this->type = $type;
 
         return $this;
     }
 
     public function getGradedUsrId(): ?int
     {
-        return $this->graded_usr_id;
+        return $this->gradedUsrId;
     }
 
-    public function setGradedUsrId(int $grd_graded_usr_id): self
+    public function setGradedUsrId(int $gradedUsrId): self
     {
-        $this->graded_usr_id = $grd_graded_usr_id;
+        $this->gradedUsrId = $gradedUsrId;
 
         return $this;
     }
 
     public function getGradedTeaId(): ?int
     {
-        return $this->graded_tea_id;
+        return $this->gradedTeaId;
     }
 
-    public function setGradedTeaId(int $grd_graded_tea_id): self
+    public function setGradedTeaId(int $gradedTeaId): self
     {
-        $this->graded_tea_id = $grd_graded_tea_id;
+        $this->gradedTeaId = $gradedTeaId;
 
         return $this;
     }
@@ -171,9 +173,9 @@ class Grade extends DbObject
         return $this->value;
     }
 
-    public function setValue(float $grd_value): self
+    public function setValue(float $value): self
     {
-        $this->value = $grd_value;
+        $this->value = $value;
 
         return $this;
     }
@@ -183,16 +185,16 @@ class Grade extends DbObject
         return $this->comment;
     }
 
-    public function setComment(?string $grd_comment): self
+    public function setComment(?string $comment): self
     {
-        $this->comment = $grd_comment;
+        $this->comment = $comment;
 
         return $this;
     }
 
-    public function setInserted(DateTimeInterface $grd_inserted): self
+    public function setInserted(DateTimeInterface $inserted): self
     {
-        $this->inserted = $grd_inserted;
+        $this->inserted = $inserted;
 
         return $this;
     }
@@ -200,7 +202,7 @@ class Grade extends DbObject
     /**
      * @return mixed
      */
-    public function getGradedTeam()
+    public function getTeam()
     {
         return $this->team;
     }
@@ -216,17 +218,17 @@ class Grade extends DbObject
     /**
      * @return Participation
      */
-    public function getGradedParticipant(): Participation
-    {
-        return $this->participant;
+    public function getParticipation(){
+        return $this->participation;
     }
 
     /**
-     * @param Participation $participant
+     * @param Participation $participation
      */
-    public function setParticipant(Participation $participant): void
+    public function setParticipation(Participation $participation): self
     {
-        $this->participant = $participant;
+        $this->participant = $participation;
+        return $this;
     }
 
     /**
@@ -240,9 +242,10 @@ class Grade extends DbObject
     /**
      * @param mixed $activity
      */
-    public function setActivity($activity): void
+    public function setActivity($activity): self
     {
         $this->activity = $activity;
+        return $this;
     }
 
     /**
@@ -256,9 +259,10 @@ class Grade extends DbObject
     /**
      * @param mixed $criterion
      */
-    public function setCriterion($criterion): void
+    public function setCriterion($criterion): self
     {
         $this->criterion = $criterion;
+        return $this;
     }
 
     /**
@@ -272,9 +276,10 @@ class Grade extends DbObject
     /**
      * @param mixed $stage
      */
-    public function setStage($stage): void
+    public function setStage($stage): self
     {
         $this->stage = $stage;
+        return $this;
     }
 
 }

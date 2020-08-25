@@ -19,11 +19,11 @@ $(function() {
 
     $('.stage').each(function(key,value){
         pValues = [];
-        $(value).find('select[name*="directUser"] option:selected').each(function(key,value){
+        $(value).find('select[name*="user"] option:selected').each(function(key,value){
             pValues.push($(value).val());
         })
 
-        $(value).find('select[name*="directUser"]').each(function(key,value){
+        $(value).find('select[name*="user"]').each(function(key,value){
             $(value).find('option:not(:selected)').each(function(key,value){
                 if($.inArray($(value).val(),pValues) != -1){
                     $(value).prop('disabled',true);

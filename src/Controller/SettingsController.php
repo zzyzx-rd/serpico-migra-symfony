@@ -74,13 +74,13 @@ class SettingsController extends MasterController
      * @return mixed
      * @Route("/settings/testingmails", name="displayTestingMails")
      */
-    public function displayTestingMails(Request $request, Application $app)
+    public function displayTestingMails(Request $request)
     {
 
 
         $em = $this->getEntityManager($app);
         $repoU = $em->getRepository(User::class);
-        $formFactory = $app['form.factory'];
+        
         $sendMailForm = $formFactory->create(SendMailForm::class, null, ['standalone' => true]);
         $sendMailForm->handleRequest($request);
         //$user = $em->getRepository(User::class)->findOneById(9);
@@ -102,13 +102,13 @@ class SettingsController extends MasterController
      * @return string|JsonResponse
      * @Route("/settings/testingmails", name="sendTestingMails")
      */
-    public function sendTestingMails(Request $request, Application $app)
+    public function sendTestingMails(Request $request)
     {
 
 
         $em = $this->getEntityManager($app);
         $repoU = $em->getRepository(User::class);
-        $formFactory = $app['form.factory'];
+        
         $sendMailForm = $formFactory->create(SendMailForm::class, null, ['standalone' => true]);
         $sendMailForm->handleRequest($request);
         //$user = $em->getRepository(User::class)->findOneById(9);
@@ -148,7 +148,7 @@ class SettingsController extends MasterController
      * @return mixed
      * @Route("/settings/root-management", name="rootManagement")
      */
-    public function rootManagementAction(Request $request, Application $app){
+    public function rootManagementAction(Request $request){
 
         return $app['twig']->render('root_management.html.twig',[]);
 
@@ -160,7 +160,7 @@ class SettingsController extends MasterController
      * @return mixed
      * @Route("/settings/organizations", name="manageOrganizations")
      */
-    public function manageOrganizationsAction(Request $request, Application $app){
+    public function manageOrganizationsAction(Request $request){
         $entityManager = $this->getEntityManager($app) ;
         $repoO = $entityManager->getRepository(Organization::class);
         $organizations = [];
@@ -191,7 +191,7 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/settings/organization/{orgId}/processes", name="manageProcesses")
      */
-    public function manageProcessesAction(Request $request, Application $app){
+    public function manageProcessesAction(Request $request){
         $em = $this->getEntityManager($app);
         $repoP = $em->getRepository(Process::class);
         $repoO = $em->getRepository(Organization::class);
@@ -200,7 +200,7 @@ class SettingsController extends MasterController
         $organization = $currentUser->getOrganization();
         $process = $isRoot ?  new Process : new InstitutionProcess();
         $elmtType = $isRoot ? 'process' :'iprocess';
-        $formFactory = $app['form.factory'];
+        
         $manageForm = $formFactory->create(ManageProcessForm::class, $organization, ['standalone' => true, 'isRoot' => $isRoot]);
         $manageForm->handleRequest($request);
         $createForm = $formFactory->create(AddProcessForm::class, $process, ['standalone' => true, 'organization' => $organization,'elmt' => $elmtType]);
@@ -244,9 +244,9 @@ class SettingsController extends MasterController
      * @return JsonResponse
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/settings/organization/{orgId}/{elmtType}/pvalidate/{elmtId}", name="validateProcess")
+     * @Route("/settings/organization/{orgId}/{entity}/pvalidate/{elmtId}", name="validateProcess")
      */
-    public function validateProcessAction(Request $request, Application $app, $elmtId, $elmtType, $orgId) {
+    public function validateProcessAction(Request $request, $elmtId, $elmtType, $orgId) {
         $em = $this->getEntityManager($app);
         $repoO = $em->getRepository(Organization::class);
         
@@ -254,7 +254,7 @@ class SettingsController extends MasterController
         if (!$currentUser instanceof User) {
             return $app->redirect($app['url_generator']->generate('login'));
         }
-        $currentUserOrganization = $repoO->find($currentUser->getOrgId());
+        $currentUserOrganization = $currentUser->getOrganization();
         $organization = $repoO->find($orgId);
         $repoE = ($currentUser->getRole() == 4) ? $em->getRepository(Process::class) : $em->getRepository(InstitutionProcess::class);
 
@@ -312,9 +312,9 @@ class SettingsController extends MasterController
      * @return JsonResponse
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/settings/organization/{orgId}/{elmtType}/delete", name="deleteProcess")
+     * @Route("/settings/organization/{orgId}/{entity}/delete", name="deleteProcess")
      */
-    public function deleteProcessAction(Request $request, Application $app, $orgId, $elmtType) {
+    public function deleteProcessAction(Request $request, $orgId, $elmtType) {
 
         $em = $this->getEntityManager($app);
         $repoO = $em->getRepository(Organization::class);
@@ -322,7 +322,7 @@ class SettingsController extends MasterController
         $repoU = $em->getRepository(User::class);
         $organization = $repoO->find($orgId);
         $currentUser = MasterController::getAuthorizedUser($app);
-        $currentUserOrganization = $repoO->find($currentUser->getOrgId());
+        $currentUserOrganization = $currentUser->getOrganization();
         $hasPageAccess = true;
 
         if ($currentUser->getRole() != 4 && ($organization != $currentUserOrganization || $currentUser->getRole() != 1)) {
@@ -371,7 +371,7 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/settings/organization/users/{orgId}/create", name="rootCreateUser")
      */
-    public function rootAddUserAction(Request $request, Application $app, $orgId) {
+    public function rootAddUserAction(Request $request, $orgId) {
 
         $currentUser = MasterController::getAuthorizedUser($app);
         if (!$currentUser instanceof User) {
@@ -438,7 +438,7 @@ class SettingsController extends MasterController
 
 
     //Modifies organization (limited to root master)
-    public function modifyOrganizationAction(Request $request, Application $app){
+    public function modifyOrganizationAction(Request $request){
 
     }
 
@@ -451,7 +451,7 @@ class SettingsController extends MasterController
      * @return mixed
      * @Route("/settings/organization/activities/{orgId}", name="organizationActivities")
      */
-    public function getAllOrganizationActivitiesAction(Request $request, Application $app, $orgId)
+    public function getAllOrganizationActivitiesAction(Request $request, $orgId)
     {
         try{
             $entityManager = $this->getEntityManager($app) ;
@@ -540,7 +540,7 @@ class SettingsController extends MasterController
      * @return mixed
      * @Route("/settings/organization/users/{orgId}", name="rootManageUsers")
      */
-    public function getAllOrganizationUsersAction(Request $request, Application $app, $orgId){
+    public function getAllOrganizationUsersAction(Request $request, $orgId){
 
 
         $entityManager = $this->getEntityManager($app);
@@ -661,11 +661,11 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/settings/organization/create", name="createOrganization")
      */
-    public function addOrganizationAction(Request $request, Application $app)
+    public function addOrganizationAction(Request $request)
     {
         $em = self::getEntityManager();
         /** @var FormFactory */
-        $formFactory = $app['form.factory'];
+        
         $organizationForm = $formFactory->create(AddOrganizationForm::class, null,['standalone' => true, 'orgId' => 0, 'app' => $app]);
         $organizationForm->handleRequest($request);
         $errorMessage = '';
@@ -900,7 +900,7 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/organizations/{orgId}/validate", name="validateOrganization")
      */
-    public function validateOrganizationAction(Request $request, Application $app, $orgId){
+    public function validateOrganizationAction(Request $request, $orgId){
 
         $currentUser = self::getAuthorizedUser($app);
         if($currentUser->getRole() != 4){
@@ -911,7 +911,7 @@ class SettingsController extends MasterController
         $repoO = $em->getRepository(Organization::class);
         $repoU = $em->getRepository(User::class);
         $organization = $repoO->findOneById($orgId);
-        $formFactory = $app['form.factory'];
+        
         $organizationForm = $formFactory->create(AddOrganizationForm::class, null,['standalone' => true, 'orgId' => $orgId, 'app' => $app, 'toValidate' => true]);
         $organizationForm->handleRequest($request);
 
@@ -954,7 +954,7 @@ class SettingsController extends MasterController
             ]);
     }
 
-    public function deleteOrganizationActivityAction(Request $request, Application $app, $orgId, $actId){
+    public function deleteOrganizationActivityAction(Request $request, $orgId, $actId){
         $em = $this->getEntityManager($app);
         $activity = $em->getRepository(Activity::class)->findOneById($actId);
         $user = self::getAuthorizedUser($app);
@@ -974,11 +974,11 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/settings/organization/{orgId}/update", name="updateOrganization")
      */
-    public function updateOrganizationAction(Request $request, Application $app, $orgId){
+    public function updateOrganizationAction(Request $request, $orgId){
 
         $em = $this->getEntityManager($app);
         $repoO = $em->getRepository(Organization::class);
-        $formFactory = $app['form.factory'];
+        
         $organizationForm = $formFactory->create(AddOrganizationForm::class, null,['standalone' => true, 'orgId' => $orgId, 'app' => $app]);
         $organizationForm->handleRequest($request);
         $errorMessage = '';
@@ -1058,7 +1058,7 @@ class SettingsController extends MasterController
      * @return mixed
      * @Route("/settings/organization/{orgId}/user/{usrId}", name="rootUpdateUser")
      */
-    public function updateUserAction(Request $request, Application $app, $orgId, $usrId)
+    public function updateUserAction(Request $request, $orgId, $usrId)
     {
 
         $em = $this->getEntityManager($app);
@@ -1068,7 +1068,7 @@ class SettingsController extends MasterController
         $connectedUser = MasterController::getAuthorizedUser($app);
         $searchedUserOrganization = $repoO->findOneById($searchedUser->getOrgId());
         $orgOptions = $searchedUserOrganization->getOptions();
-        $formFactory = $app['form.factory'];
+        
         $departments = ($searchedUser->getOrgId() == $connectedUser->getOrgId() || $connectedUser->getRole() == 4) ? $searchedUserOrganization->getDepartments() : null;
         $enabledCreatingUserOption = false;
         foreach($orgOptions as $orgOption){
@@ -1140,7 +1140,7 @@ class SettingsController extends MasterController
      * @return JsonResponse
      * @Route("/settings/organization/{orgId}/user/{usrId}", name="rootUpdateUserAJAX")
      */
-    public function updateUserActionAJAX(Request $request, Application $app, $orgId, $usrId)
+    public function updateUserActionAJAX(Request $request, $orgId, $usrId)
     {
 
         try{
@@ -1149,7 +1149,7 @@ class SettingsController extends MasterController
         $repoOC = $em->getRepository(Client::class);
         $searchedUser = $em->getRepository(User::class)->findOneById($usrId);
         $connectedUser = MasterController::getAuthorizedUser($app);
-        $formFactory = $app['form.factory'];
+        
 
         $searchedUserOrganization = $repoO->findOneById($searchedUser->getOrgId());
 
@@ -1277,9 +1277,9 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/ajax/settings/organization/{orgId}/user/{usrId}", name="rootAjaxUserDelete")
      */
-    public function deleteUserAction(Request $request, Application $app, $orgId, $usrId){
+    public function deleteUserAction(Request $request, $orgId, $usrId){
         $em = $this->getEntityManager($app);
-        $repoAU = $em->getRepository(Participation::class);
+        $repoP = $em->getRepository(Participation::class);
         $repoU = $em->getRepository(User::class);
         $repoO = $em->getRepository(Organization::class);
         $repoD = $em->getRepository(Department::class);
@@ -1292,7 +1292,7 @@ class SettingsController extends MasterController
         $posId = $user->getPosId();
         $dptId = $user->getDptId();
         $wgtId = $user->getWgtId();
-        $nbUserParticipations = count($repoAU->findByUsrId($usrId));
+        $nbUserParticipations = count($repoP->findByUsrId($usrId));
 
         if($posId != null){
             $position = $repoP->findOneById($posId);
@@ -1361,15 +1361,15 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/ajax/settings/organization/{orgId}/client/user/{usrId}", name="rootAjaxClientUserDelete")
      */
-    public function deleteClientUserAction(Request $request, Application $app, $orgId, $usrId){
+    public function deleteClientUserAction(Request $request, $orgId, $usrId){
         $em = $this->getEntityManager($app);
-        $repoAU = $em->getRepository(Participation::class);
+        $repoP = $em->getRepository(Participation::class);
         $repoEU = $em->getRepository(ExternalUser::class);
         $repoU = $em->getRepository(User::class);
         $repoO = $em->getRepository(Organization::class);
         $em->flush();
         $organization = $repoO->findOneById($orgId);
-        $nbUserParticipations = count($repoAU->findByUsrId($usrId));
+        $nbUserParticipations = count($repoP->findByUsrId($usrId));
         $internalUser = $repoU->findOneById($usrId);
         $externalUser = $repoEU->findOneBy(['user' => $internalUser, 'organization' => $organization]);
         if($nbUserParticipations == 0){
@@ -1452,9 +1452,9 @@ class SettingsController extends MasterController
         $em->flush();
     }
 
-    /*public function searchWorkerElmts(Request $request, Application $app){
+    /*public function searchWorkerElmts(Request $request){
 
-        $formFactory = $app['form.factory'];
+        
         $searchWorkerForm = $formFactory->create(SearchWorkerForm::class, null);
         $searchWorkerForm->handleRequest($request);
 
@@ -1474,7 +1474,7 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/settings/organization/{orgId}/duplicate", name="duplicateOrganization")
      */
-    public function duplicateOrganizationAction(Request $request, Application $app,$orgId){
+    public function duplicateOrganizationAction(Request $request,$orgId){
         set_time_limit(240);
         ini_set('memory_limit', '500M');
         $em = $this->getEntityManager($app);
@@ -1815,12 +1815,12 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/settings/organization/{orgId}/mupdate", name="massiveUpdateOrganization")
      */
-    public function massiveUpdateOrganizationAction(Request $request, Application $app, $orgId){
+    public function massiveUpdateOrganizationAction(Request $request, $orgId){
 
         $em = $this->getEntityManager($app);
         $repoO = $em->getRepository(Organization::class);
         $organization = $repoO->findOneById($orgId);
-        $formFactory = $app['form.factory'];
+        
         $organizationUsersForm = $formFactory->create(UpdateOrganizationForm::class, $organization, ['standalone' =>true,'organization' => $organization,'app'=> $app]);
         $organizationUsersForm->handleRequest($request);
 
@@ -1864,11 +1864,11 @@ class SettingsController extends MasterController
 
     }
 
-    public function displayWorkerElmts(Request $request, Application $app, $currentPage = 1, $limit = 100){
+    public function displayWorkerElmts(Request $request, $currentPage = 1, $limit = 100){
 
         $em = $this->getEntityManager($app);
         $repoWE = $em->getRepository(WorkerExperience::class);
-        $formFactory = $app['form.factory'];
+        
         $searchWorkerForm = $formFactory->create(SearchWorkerForm::class, null,['app' => $app]);
         $validateFirmForm = $formFactory->create(ValidateFirmForm::class, null, ['standalone' => true]);
         $validateMailForm = $formFactory->create(ValidateMailForm::class, null, ['standalone' => true]);
@@ -1902,11 +1902,11 @@ class SettingsController extends MasterController
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @Route("/workers/search", name="findWorkerElmts")
      */
-    public function findWorkerElmts(Request $request, Application $app, $currentPage = 1, $limit = 500){
+    public function findWorkerElmts(Request $request, $currentPage = 1, $limit = 500){
 
         $em = $this->getEntityManager($app);
         $repoWE = $em->getRepository(WorkerExperience::class);
-        $formFactory = $app['form.factory'];
+        
         $searchWorkerForm = $formFactory->create(SearchWorkerForm::class, null,['app' => $app]);
         $validateFirmForm = $formFactory->create(ValidateFirmForm::class, null, ['standalone' => true]);
         $validateMailForm = $formFactory->create(ValidateMailForm::class, null, ['standalone' => true]);
@@ -2231,7 +2231,7 @@ class SettingsController extends MasterController
      * @return JsonResponse
      * @Route("/workers/states/{couId}", name="getStatesFromCountry")
      */
-    public function getStatesFromCountry(Request $request, Application $app, $couId){
+    public function getStatesFromCountry(Request $request, $couId){
         $em = $this->getEntityManager($app);
         $repoC = $em->getRepository(Country::class);
         $repoS = $em->getRepository(State::class);
@@ -2270,7 +2270,7 @@ class SettingsController extends MasterController
      * @return JsonResponse
      * @Route("/workers/cities/{staId}", name="getCitiesFromState")
      */
-    public function getCitiesFromState(Request $request, Application $app, $staId){
+    public function getCitiesFromState(Request $request, $staId){
         $em = $this->getEntityManager($app);
         $repoS = $em->getRepository(State::class);
         $repoC = $em->getRepository(City::class);
@@ -2299,7 +2299,7 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/validate-mail/{mid}", name="validateMailSent")
      */
-    public function validateMailSent(Request $request, Application $app, $mid){
+    public function validateMailSent(Request $request, $mid){
         $em = $this->getEntityManager($app);
         $repoM = $em->getRepository(Mail::class);
         $mail = $repoM->findOneById($mid);
@@ -2318,7 +2318,7 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/deactivate-mail/{mid}", name="deactivateMail")
      */
-    public function deactivateMail(Request $request, Application $app, $mid){
+    public function deactivateMail(Request $request, $mid){
         $em = $this->getEntityManager($app);
         $repoM = $em->getRepository(Mail::class);
         $mail = $repoM->findOneById($mid);
@@ -2338,7 +2338,7 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/delete-mail/{mid}", name="deleteMailSent")
      */
-    public function deleteMailSent(Request $request, Application $app, $mid){
+    public function deleteMailSent(Request $request, $mid){
         $em = $this->getEntityManager($app);
         $repoM = $em->getRepository(Mail::class);
         $mail = $repoM->findOneById($mid);
@@ -2355,7 +2355,7 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/workers/firm/create", name="createWorkerFirm")
      */
-    public function createWorkerFirm(Request $request, Application $app){
+    public function createWorkerFirm(Request $request){
         $em = $this->getEntityManager($app);
         $name = $request->get('name');
         $workerFirm = new WorkerFirm;
@@ -2376,7 +2376,7 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/workers/firms/update/{wfId}", name="updateWorkerFirm")
      */
-    public function updateWorkerFirm(Request $request, Application $app, $wfId)
+    public function updateWorkerFirm(Request $request, $wfId)
     {
         $currentUser = MasterController::getAuthorizedUser($app);
         if (!$currentUser instanceof User) {
@@ -2389,7 +2389,7 @@ class SettingsController extends MasterController
         if($workerFirm == null){
             $workerFirm = new WorkerFirm;
         }
-        $formFactory = $app['form.factory'];
+        
         $updateWorkerFirmForm = $formFactory->create(UpdateWorkerFirmForm::class, $workerFirm, ['standalone' => true, 'app' => $app, 'workerFirm' => $workerFirm]);
         $updateWorkerFirmForm->handleRequest($request);
 
@@ -2453,7 +2453,7 @@ class SettingsController extends MasterController
      * @return JsonResponse
      * @Route("/workers/firm/search", name="dynamicSearchParentFirm")
      */
-    public function dynamicSearchParentFirm(Request $request, Application $app){
+    public function dynamicSearchParentFirm(Request $request){
 
 
         $firmName = $request->get('name');
@@ -2499,7 +2499,7 @@ class SettingsController extends MasterController
      * @return JsonResponse
      * @Route("/workers/get-firm-from-id/{wfiId}", name="getFirmFromId")
      */
-    public function getFirmFromId(Request $request, Application $app, $wfiId){
+    public function getFirmFromId(Request $request, $wfiId){
         $em = $this->getEntityManager($app);
         $repoWF = $em->getRepository(WorkerFirm::class);
         $firm = $repoWF->findOneById($wfiId);
@@ -2515,13 +2515,13 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/workers/individual/update/{wiId}", name="updateWorkerIndividual")
      */
-    public function updateWorkerIndividual(Request $request, Application $app, $wiId){
+    public function updateWorkerIndividual(Request $request, $wiId){
 
         $em = $this->getEntityManager($app);
         $repoWI = $em->getRepository(WorkerIndividual::class);
         $repoWF = $em->getRepository(WorkerFirm::class);
         $workerIndividual = $repoWI->findOneById($wiId);
-        $formFactory = $app['form.factory'];
+        
         $expFirm = null;
         $mailPrefix = null;
         $mailSuffix = null;
@@ -2573,7 +2573,7 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/lib/img/void1x1.png/{mailId}", name="setReadEmail")
      */
-    public function setReadEmail(Request $request, Application $app, $mailId){
+    public function setReadEmail(Request $request, $mailId){
         $em = $this->getEntityManager($app);
         $repoM = $em->getRepository(Mail::class);
         $mail = $repoM->findOneBy($mailId);
@@ -2590,12 +2590,12 @@ class SettingsController extends MasterController
      * @return JsonResponse
      * @Route("/workers/individual/send-prospect-mail/{winId}", name="sendProspectMail")
      */
-    public function sendProspectMail(Request $request, Application $app, $winId){
+    public function sendProspectMail(Request $request, $winId){
         $em = $this->getEntityManager($app);
         $repoWI = $em->getRepository(WorkerIndividual::class);
         $workerIndividual = $repoWI->findOneById($winId);
         $firmLocation = $workerIndividual->getExperiences()->first()->getFirm()->getCountry()->getAbbr();
-        $formFactory = $app['form.factory'];
+        
         $sendMailProspectForm = $formFactory->create(SendMailProspectForm::class, null, ['standalone' => true]);
         $sendMailProspectForm->handleRequest($request);
         if($sendMailProspectForm->isValid()){
@@ -2623,7 +2623,7 @@ class SettingsController extends MasterController
      * @return mixed
      * @Route("/settings/mails", name="checkMails")
      */
-    public function checkMails(Request $request, Application $app){
+    public function checkMails(Request $request){
         $em = $this->getEntityManager($app);
         $repoM = $em->getRepository(Mail::class);
         $mails = $repoM->findBy([],['inserted' => 'DESC']);
@@ -2643,7 +2643,7 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/workers/individual/add/{wfId}", name="addWorkerFirmIndividual")
      */
-    public function addWorkerFirmIndividual(Request $request, Application $app, $wfId){
+    public function addWorkerFirmIndividual(Request $request, $wfId){
         $em = $this->getEntityManager($app);
         $workerIndividual = new WorkerIndividual;
         $workerExperience = new WorkerExperience;
@@ -2661,7 +2661,7 @@ class SettingsController extends MasterController
 
         //$em->persist($workerExperience)
         //$em->flush()
-        $formFactory = $app['form.factory'];
+        
         $workerIndividualForm = $formFactory->create(UpdateWorkerIndividualForm::class, $workerIndividual, ['standalone' => true]);
         $sendMailProspectForm = $formFactory->create(SendMailProspectForm::class, null, ['standalone' => true]);
         $sendMailProspectForm->handleRequest($request);
@@ -2701,7 +2701,7 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/workers/individual/add", name="addWorkerIndividual")
      */
-    public function addWorkerIndividual(Request $request, Application $app){
+    public function addWorkerIndividual(Request $request){
 
         $em = $this->getEntityManager($app);
         $workerIndividual = new WorkerIndividual;
@@ -2710,7 +2710,7 @@ class SettingsController extends MasterController
         $workerExperience->setActive(true);
         $workerIndividual->setCreated(1)->addExperience($workerExperience);
 
-        $formFactory = $app['form.factory'];
+        
         $workerIndividualForm = $formFactory->create(UpdateWorkerIndividualForm::class, $workerIndividual, ['standalone' => true]);
         $sendMailProspectForm = $formFactory->create(SendMailProspectForm::class, null, ['standalone' => true]);
         $sendMailProspectForm->handleRequest($request);
@@ -2746,7 +2746,7 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/workers/individual/delete/{wiId}", name="deleteWorkerIndividual")
      */
-    public function deleteWorkerIndividual(Request $request, Application $app, $wiId){
+    public function deleteWorkerIndividual(Request $request, $wiId){
 
         $connectedUser = MasterController::getAuthorizedUser($app);
         if($connectedUser->getRole() != 4){
@@ -2769,7 +2769,7 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/workers/firm/delete/{wfId}", name="deleteWorkerFirm")
      */
-    public function deleteWorkerFirm(Request $request, Application $app, $wfId){
+    public function deleteWorkerFirm(Request $request, $wfId){
 
         $connectedUser = MasterController::getAuthorizedUser($app);
         if($connectedUser->getRole() != 4){
@@ -2792,11 +2792,11 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/workers/individual/validate-mail/{wiId}", name="validateWorkerEmail")
      */
-    public function validateWorkerEmail(Request $request, Application $app, $wiId){
+    public function validateWorkerEmail(Request $request, $wiId){
         $em = $this->getEntityManager($app);
         $repoWI = $em->getRepository(WorkerIndividual::class);
         $workerIndividual = $repoWI->findOneById($wiId);
-        $formFactory = $app['form.factory'];
+        
         $validateMailForm = $formFactory->create(ValidateMailForm::class, $workerIndividual, ['standalone' => true]);
         $validateMailForm->handleRequest($request);
 
@@ -2820,10 +2820,10 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/workers/firm/validate-mails/{wfId}", name="validateMassWorkerEmails")
      */
-    public function validateMassWorkerEmails(Request $request, Application $app, $wfId){
+    public function validateMassWorkerEmails(Request $request, $wfId){
         $em = $this->getEntityManager($app);
 
-        $formFactory = $app['form.factory'];
+        
         $validateMassMailForm = $formFactory->create(ValidateMassMailForm::class, null, ['standalone' => true]);
         $validateMassMailForm->handleRequest($request);
 
@@ -2861,7 +2861,7 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/organization/{orgId}/set-organization-to-criteria", name="setOrganizationToCriteriaAndStages")
      */
-    public function setOrganizationToCriteriaAndStages(Request $request, Application $app, $orgId){
+    public function setOrganizationToCriteriaAndStages(Request $request, $orgId){
 
         $em = $this->getEntityManager($app);
         $repoC = $em->getRepository(Criterion::class);
@@ -2892,14 +2892,14 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/workers/firm/validate-firms/{isSearchByLocation}/{wfIdsSeq}", name="validateMassFirm")
      */
-    public function validateMassFirm(Request $request, Application $app, $isSearchByLocation, $wfIdsSeq)
+    public function validateMassFirm(Request $request, $isSearchByLocation, $wfIdsSeq)
     {
         $currentUser = MasterController::getAuthorizedUser($app);
         if (!$currentUser instanceof User) {
             return $this->redirectToRoute('login');
         }
 
-        $formFactory = $app['form.factory'];
+        
 
         $workerFirmIds = explode("-",$wfIdsSeq);
         $em = $this->getEntityManager($app);
@@ -3000,7 +3000,7 @@ class SettingsController extends MasterController
      * @return JsonResponse
      * @Route("/workers/firm/get-mailable-individuals/{wfId}", name="getMailableIndividualsFromFirm")
      */
-    public function getMailableIndividualsFromFirm(Request $request, Application $app, $wfId){
+    public function getMailableIndividualsFromFirm(Request $request, $wfId){
         $em = $this->getEntityManager($app);
         $repoWF = $em->getRepository(WorkerFirm::class);
         $workerFirm = $repoWF->findOneById($wfId);
@@ -3029,11 +3029,11 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/workers/firm/validate/{wfId}", name="validateFirm")
      */
-    public function validateFirm(Request $request, Application $app, $wfId){
+    public function validateFirm(Request $request, $wfId){
         $em = $this->getEntityManager($app);
         $repoWF = $em->getRepository(WorkerFirm::class);
         $workerFirm = $repoWF->findOneById($wfId);
-        $formFactory = $app['form.factory'];
+        
         $validateFirmForm = $formFactory->create(ValidateFirmForm::class, $workerFirm, ['standalone' => true]);
         $validateFirmForm->handleRequest($request);
 
@@ -3063,7 +3063,7 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/workers/individual/validate-mail/{wiId}/{firstname}/{lastname}/{male}/{wiEmail}", name="validateWorkerEmailFromSelfPage")
      */
-    public function validateWorkerEmailFromSelfPage(Request $request, Application $app, $wiId, $firstname, $lastname, $male, $wiEmail){
+    public function validateWorkerEmailFromSelfPage(Request $request, $wiId, $firstname, $lastname, $male, $wiEmail){
         $em = $this->getEntityManager($app);
         $repoWI = $em->getRepository(WorkerIndividual::class);
         if(!preg_match("/^(?:[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*|\"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])*$/",$wiEmail)){
@@ -3091,7 +3091,7 @@ class SettingsController extends MasterController
      * @throws Exception
      * @Route("/workers/firm/{wfId}", name="displayWorkerFirm")
      */
-    public function displayWorkerFirm(Request $request, Application $app, $wfId){
+    public function displayWorkerFirm(Request $request, $wfId){
 
         $em = $this->getEntityManager($app);
         $repoWF = $em->getRepository(WorkerFirm::class);
@@ -3099,7 +3099,7 @@ class SettingsController extends MasterController
         $wFirm = $repoWF->findOneById($wfId);
         $searchedIndividuals = [];
         $searchedFirmExperiences = $repoWE->findByFirm($wFirm);
-        $formFactory = $app['form.factory'];
+        
         $validateMailForm = $formFactory->create(ValidateMailForm::class, null, ['standalone' => true]);
         $sendMailProspectForm = $formFactory->create(SendMailProspectForm::class, null, ['standalone' => true]);
 
@@ -3156,7 +3156,7 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/workers/firms/{from}/{to}/experiences/update", name="updateNbExpsInAllFirms")
      */
-    public function updateNbExpsInAllFirms(Request $request, Application $app,$from,$to){
+    public function updateNbExpsInAllFirms(Request $request,$from,$to){
 
         $em = $this->getEntityManager($app);
         $repoWF = $em->getRepository(WorkerFirm::class);
@@ -3192,7 +3192,7 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/workers/firms/{from}/{to}/mails/create", name="createMostPossibleMails")
      */
-    public function createMostPossibleMails(Request $request, Application $app, $from, $to){
+    public function createMostPossibleMails(Request $request, $from, $to){
 
         $em = $this->getEntityManager($app);
         $repoWF = $em->getRepository(WorkerFirm::class);
@@ -3244,7 +3244,7 @@ class SettingsController extends MasterController
      * @return bool
      * @Route("/insert/json", name="insertLKJSONData")
      */
-    public function insertLKJSONData(Request $request, Application $app){
+    public function insertLKJSONData(Request $request){
 
         try {
         $em = $this->getEntityManager($app);
@@ -3429,7 +3429,7 @@ class SettingsController extends MasterController
      * @return JsonResponse
      * @Route("/workers/firms/{from}/{to}/json-encode", name="transformFirmsIntoJSONVector")
      */
-    public function transformFirmsIntoJSONVector(Request $request, Application $app, $from, $to){
+    public function transformFirmsIntoJSONVector(Request $request, $from, $to){
         $em = $this->getEntityManager($app);
         $repoWF = $em->getRepository(WorkerFirm::class);
         $firmsIdsToSearch = [];

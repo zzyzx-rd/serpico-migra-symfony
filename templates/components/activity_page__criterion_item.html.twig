@@ -19,7 +19,90 @@
     style="visibility: hidden;"
   {% endif %}>
 
-  {% include "modals/stage_criterion.html.twig" with { s: s, c: c, criterion: criterion } %}
+  {#{% include "modals/stage_criterion.html.twig" with { s: s, c: c, criterion: criterion } %}#}
+
+  <div id="criterion_{{s}}_{{c}}" class="modal criterion-modal" data-cweight="{{criterion_model ? criterion_model.weight : 0}}">
+    <div class="modal-content">
+      <div class="row first-data-row">
+        <div class="col s5 criterion-label">
+            {# "c" is a string if criterion does not exists, prevent from creating a bug "non-numeric value encountered" #}
+            <h4>{% trans %}criteria.criterion.title{% endtrans %} {{ criterion.vars.data is not empty ? c + 1 : c }}</h4>
+        </div>
+        <div class="col s4">
+          <div class="input-field weight" {% if criterion_model and criterion_model.stage.criteria|length == 1 %}style="display:none"{% endif %}>
+            {{ form_label(criterion.weight) }}
+            <div class="weight-criterion-slider" style="margin-top:10px;"></div>
+            <div class="weight-criterion-slider-range-value center" style="font-size:1.2rem;padding-top: 5px"></div>
+            {{ form_widget(criterion.weight, { attr: { hidden: '' } }) }}
+            {{ form_errors(criterion.weight) }}
+          </div>
+        </div>
+        <div class="col s3">
+          <a href="#deleteCriterion" class="btn-flat modal-trigger right" data-cid="{{ criterion.vars.data ? criterion.vars.data.id : 0 }}">
+            <i class="material-icons left">delete</i> {{ 'criteria.delete_criterion_btn'|trans }}
+          </a>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col s12">
+          <div class="input-field criterion-name select-with-fa">
+            {{ form_widget(criterion.cName, { attr: { class: "criterion-name-select" } }) }}
+            {{ form_label(criterion.cName) }}
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col s12">
+          {{ form_label(criterion.type) }}
+          {{ form_widget(criterion.type) }}
+          {{ form_errors(criterion.type) }}
+        </div>
+      </div>
+      <div class="row flex-center force-comments">
+        <div class="col m5 s12 force-choice" style="margin-left: 0">
+          {{ form_widget(criterion.forceCommentCompare) }}
+          {{ form_label(criterion.forceCommentCompare) }}
+          {{ form_errors(criterion.forceCommentCompare) }}
+        </div>
+        <div class="input-field col m4 s6 force-sign" style="margin-top: 0">
+          {{ form_widget(criterion.forceCommentSign) }}
+          {{ form_errors(criterion.forceCommentSign) }}
+        </div>
+        <div class="input-field col m3 s6 force-value" style="margin-top: 0">
+          {{ form_label(criterion.forceCommentValue) }}
+          {{ form_widget(criterion.forceCommentValue) }}
+          {{ form_errors(criterion.forceCommentValue) }}
+        </div>
+      </div>
+      <div class="row scale">
+        <div class="input-field col s6 m4">
+          {{ form_label(criterion.lowerbound) }}
+          {{ form_widget(criterion.lowerbound) }}
+          {{ form_errors(criterion.lowerbound) }}
+        </div>
+        <div class="input-field col s6 m4">
+          {{ form_label(criterion.upperbound) }}
+          {{ form_widget(criterion.upperbound) }}
+          {{ form_errors(criterion.upperbound) }}
+        </div>
+        <div class="input-field col s6 m4">
+          {{ form_label(criterion.step) }}
+          {{ form_widget(criterion.step) }}
+          {{ form_errors(criterion.step) }}
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      {% set checkBeforeValidation = criterion_model and criterion.vars.data.stage.hasCompletedOutput == 1 %}
+      <button type="button"
+        class="c-validate{{checkBeforeValidation ? '-prior-check'}} btn blue darken-2" 
+        data-cid="{{criterion_model ? criterion.vars.data.id : 0}}"
+      >
+        <i class="material-icons left">done</i> {{ 'criteria.tooltip.validate'|trans }}
+      </button>
+    </div>
+  </div>
+
   {% include "modals/stage_criterion_target.html.twig" with { s: s, c: c, criterion: criterion } %}
 
   <div class="cname cn-icon" data-icon="{{ icon }}" data-icon-type="{{ icon ? icon.type }}" data-uc="{{icon ? icon.unicode }}">

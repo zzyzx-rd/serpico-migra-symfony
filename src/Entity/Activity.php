@@ -143,10 +143,10 @@ class Activity extends DbObject
     public $historicalRankingTeams;
 
     /**
-     * @OneToMany(targetEntity="Participation", mappedBy="activity",cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="Participation", mappedBy="activity", cascade={"persist", "remove"}, orphanRemoval=true)
      * @OrderBy({"team" = "ASC"})
      */
-    public $participants;
+    public $participations;
     /**
      * @Column(name="act_progress", type="float", nullable=false)
      * @var float
@@ -676,19 +676,11 @@ class Activity extends DbObject
     }
 
     /**
-     * @return Participation[]|ArrayCollection
+     * @return ArrayCollection|Participation[]
      */
-    public function getParticipants()
+    public function getParticipations()
     {
         return $this->participants;
-    }
-
-    /**
-     * @param Participation[]|ArrayCollection $participants
-     */
-    public function setParticipants($participants): void
-    {
-        $this->participants = $participants;
     }
 
     /**
@@ -1007,9 +999,9 @@ class Activity extends DbObject
     {
         // We retrieve all stages where current user can grade
         return $this->getActiveStages()->filter(static function(Stage $s) use ($u){
-            $participations = $s->getUniqueIntParticipations();
+            $participations = $s->getIntParticipants();
             return $participations && $participations->exists(static function(int $i, Participation $p) use ($s, $u){
-                    return ($p->getUser() == $u) && ($s->getUniqueGradableParticipations()->count() > 0);
+                    return ($p->getUser() == $u) && ($s->getGradableParticipants()->count() > 0);
                 });
         });
     }
@@ -1345,7 +1337,7 @@ class Activity extends DbObject
         return $actIndependantUniqueParticipatingClients;
     }
 
-    public function addStage(Stage $stage): Activity
+    public function addStage(Stage $stage): self
     {
         $this->stages->add($stage);
         $stage->setActivity($this);
@@ -1389,7 +1381,7 @@ class Activity extends DbObject
 
 
     /**
-     * @return ArrayCollection
+     * @return ArrayCollection|Stage[]
      */
     public function getActiveModifiableStages()
     {
@@ -1405,6 +1397,38 @@ class Activity extends DbObject
             }
         }
         return $activeStages;
+    }
+
+    public function addActiveModifiableStage(Stage $stage)
+    {
+        if (!$stage->getActivity()) {
+            $this->stages->add($stage);
+            $stage->setActivity($this);
+        }
+        return $this;
+    }
+
+    public function removeActiveModifiableStage(Stage $stage)
+    {
+        $this->stages->removeElement($stage);
+        return $this;
+    }
+
+    /**
+     * @return Collection|Stage[]
+     */
+    public function getSortedStagesPerPeriod($consideredEl = 'self'){
+        
+        $array = $this->stages->getValues();
+        usort($array, function($first, $second) use ($consideredEl) {
+            if($consideredEl == 'self'){
+                return (date_diff($first->getGEnddate(),$first->getGStartdate())->format('%r%a') >= date_diff($second->getEnddate(),$second->getStartdate())->format('%r%a')) ? 1 : -1;
+            } else {
+                return (date_diff($first->getGEnddate(),$first->getGStartdate())->format('%r%a') >= date_diff($second->getGEnddate(),$second->getGStartdate())->format('%r%a')) ? 1 : -1;
+            }
+        });
+        $orderedStages = new ArrayCollection($array);
+        return $orderedStages;
     }
 
 }

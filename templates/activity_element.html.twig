@@ -218,7 +218,7 @@
     {% endif %}
 
     <ul class="stages"
-        data-prototype="{% filter escape %}{% include 'prototype_process_stage.twig' with {elmtType : elmtType, 'item': form.stages.vars.prototype ,activity : form.vars.data.id  } %}{% endfilter %}">
+        data-prototype="{% filter escape %}{% include 'prototype_process_stage.twig' with {entity : elmtType, 'item': form.stages.vars.prototype ,activity : form.vars.data.id  } %}{% endfilter %}">
       {% for s, stage in form.stages %}
       {% set isFeedbackTypeSettled = stage.vars.data.isFeedbackTypeSettled %}
         <li class="stage">
@@ -840,8 +840,8 @@
                               <li class="element-input" style="display: none;">
                                 <ul class="flex-center-sb">
                                   <li class="input-field participant-name">
-                                    {{ form_widget(participant.directUser) }}
-                                    {{ form_label(participant.directUser) }}
+                                    {{ form_widget(participant.user) }}
+                                    {{ form_label(participant.user) }}
                                   </li>
                                   {% if participant not in stage.uniqueExtParticipations %}
                                     <li>

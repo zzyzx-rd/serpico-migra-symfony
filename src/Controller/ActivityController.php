@@ -54,20 +54,20 @@ class ActivityController extends MasterController
 {
     // Creating activity V1 : attributing leadership to current user and redirecting to parameters
     /**
-     * @param string $elmtType
+     * @param string $entity
      * @param int $inpId
      * @param string $actName
      * @return JsonResponse|RedirectResponse
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/{elmtType}/{inpId}/{actName}/create",name="activityInitialisation")
+     * @Route("/{entity}/{inpId}/{actName}/create",name="activityInitialisation")
      */
-    public function addActivityId(string $elmtType, int $inpId = 0, string $actName = '')
+    public function addActivityId(string $entity, int $inpId = 0, string $actName = '')
     {
-        $currentUser = $this->security->getUser();
+        $currentUser = $this->user;
         $usrId = $currentUser->getId();
         $usrOrg = $currentUser->getOrganization();
-        $isActivity = $elmtType === 'activity';
+        $isActivity = $entity === 'activity';
 
         $activity = new Activity ;
         $stage = new Stage ;
@@ -119,10 +119,10 @@ class ActivityController extends MasterController
 
         $this->em->persist($activity);
         $this->em->flush();
-//        return $this->redirectToRoute('manageActivityElement', ['elmtType' => 'activity', 'elmtId' => $activity->getId()] );
-        return $this->json(['message' => 'success to create activity', 'redirect' => $this->generateUrl('manageActivityElement', ['elmtType' => 'activity', 'elmtId' => $activity->getId()])], 200);
-        //return $this->redirectToRoute('manageActivityElement', ['elmtType' => 'activity', 'elmtId' => $activity->getId()]);
-        //return new JsonResponse(['message' => 'success to create activity', 'redirect' => $this->redirectToRoute('manageActivityElement', ['elmtType' => 'activity', 'elmtId' => $activity->getId()])], 200);
+//        return $this->redirectToRoute('manageActivityElement', ['entity' => 'activity', 'elmtId' => $activity->getId()] );
+        return $this->json(['message' => 'success to create activity', 'redirect' => $this->generateUrl('manageActivityElement', ['entity' => 'activity', 'elmtId' => $activity->getId()])], 200);
+        //return $this->redirectToRoute('manageActivityElement', ['entity' => 'activity', 'elmtId' => $activity->getId()]);
+        //return new JsonResponse(['message' => 'success to create activity', 'redirect' => $this->redirectToRoute('manageActivityElement', ['entity' => 'activity', 'elmtId' => $activity->getId()])], 200);
     }
 
     // Delegation of activity creation
@@ -136,12 +136,12 @@ class ActivityController extends MasterController
      */
     public function delegateActivityAction(Request $request)
     {
-        $currentUser = $this->getAuthorizedUser();
+        $currentUser = $this->user;
         if (!$currentUser) {
             throw new Exception('unauthorized');
         }
         $currentUserId = $currentUser->getId();
-        $em = self::getEntityManager();
+        $em = $this->em;
         /** @var UserRepository */
         $repoU = $em->getRepository(User::class);
         $repoCN = $em->getRepository(CriterionName::class);
@@ -228,7 +228,7 @@ class ActivityController extends MasterController
      */
     public function requestActivityAction(Request $request)
     {
-        $em = self::getEntityManager();
+        $em = $this->em;
         $repoU = $em->getRepository(User::class);
         if (!$currentUser) {
             return $this->redirectToRoute('login');
@@ -318,7 +318,7 @@ class ActivityController extends MasterController
     public function resolveActivityRequest(Request $request, $actId, $action)
     {
 
-        $em = self::getEntityManager();
+        $em = $this->em;
         $repoU = $em->getRepository(User::class);
         if (!$currentUser) {
             return $this->redirectToRoute('login');
@@ -427,14 +427,14 @@ class ActivityController extends MasterController
 //     * @return RedirectResponse
 //     * @Route("/{elmt}/{elmtId}/parameters", name="oldActivityDefinition")
 //     */
-//    public function oldAddActivityDefinition(Request $request, Application $app, $elmt, $elmtId)
+//    public function oldAddActivityDefinition(Request $request, $elmt, $elmtId)
 //    {
 //        $user = self::getAuthorizedUser();
 //        if (!$user) {
 //            return $this->redirectToRoute('login');
 //        }
 //
-//        $em = self::getEntityManager();
+//        $em = $this->em;
 //        $userRole = $user->getRole();
 //        $organization = $user->getOrganization();
 //        /** @var Activity|TemplateActivity|null */
@@ -531,7 +531,7 @@ class ActivityController extends MasterController
     public function complexifyActivity(Request $request, $actId)
     {
         $elmt = strpos($_SERVER['HTTP_REFERER'], 'activity');
-        $em = self::getEntityManager();
+        $em = $this->em;
         $activity = $em->getRepository(Activity::class)->find($actId);
         $activity->setSimplified(false);
         $em->persist($activity);
@@ -572,7 +572,7 @@ class ActivityController extends MasterController
             $em->persist($stage);
         }
 
-        $em = self::getEntityManager();
+        $em = $this->em;
         /** @var FormFactory */
         
 
@@ -908,7 +908,7 @@ class ActivityController extends MasterController
 
         // Get all participants (users)
 
-        $em = self::getEntityManager();
+        $em = $this->em;
         if (!$currentUser) {
             return $this->redirectToRoute('login');
         }
@@ -1136,14 +1136,14 @@ class ActivityController extends MasterController
 //     * @throws OptimisticLockException
 //     * @Route("/{elmt}/{elmtId}/participants", name="activityParticipants")
 //     */
-//    public function newAddActivityParticipant(Request $request, Application $app, $elmt, $elmtId)
+//    public function newAddActivityParticipant(Request $request, $elmt, $elmtId)
 //    {
 //        $user = self::getAuthorizedUser();
 //        if (!$user) {
 //            return $this->redirectToRoute('login');
 //        }
 //        $userRole = $user->getRole();
-//        $em = self::getEntityManager();
+//        $em = $this->em;
 //        $elmtIsActivity = $elmt === 'activity';
 //        /** @var Activity|TemplateActivity */
 //        $activity = $em->getRepository(
@@ -1326,19 +1326,21 @@ class ActivityController extends MasterController
     /**
      * @param Request $request
      * @param int $stgId
-     * @param string $elmtType
+     * @param string $entity
      * @param int $elmtId
      * @return JsonResponse|void
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/{elmtType}/stage/{stgId}/participant/validate/{elmtId}", name="validateParticipant")
+     * @Route("/{entity}/stage/{stgId}/participant/validate/{elmtId}", name="validateParticipant")
      */
     public function validateParticipantAction(
         Request $request,
         int $stgId,
-        string $elmtType,
+        string $entity,
         int $elmtId
     ) {
+
+        $currentUser = $this->user;
 
         if (!$currentUser) {
             throw new Exception('current user is null');
@@ -1351,49 +1353,52 @@ class ActivityController extends MasterController
         /** @var bool */
         $leader = $request->get('leader');
         /** @var string */
-        $pElmtType = $request->get('pElmtType');
+        $pEntity = $request->get('pEntity');
         /** @var int */
-        $pElmtId = $request->get('pElmtId');
+        $pId = $request->get('pId');
 
-        $em = self::getEntityManager();
-        switch($elmtType){
+        $em = $this->em;
+        switch($entity){
             case 'iprocess' :
                 $repoS = $em->getRepository(IProcessStage::class);
-                $repoAU = $em->getRepository(IProcessParticipation::class);
+                $repoP = $em->getRepository(IProcessParticipation::class);
                 break;
             case 'activity' :
                 $repoS = $em->getRepository(Stage::class);
-                $repoAU = $em->getRepository(Participation::class);
+                $repoP = $em->getRepository(Participation::class);
                 break;
         }
         $repoU = $em->getRepository(User::class);
-        $repoPEntity = $pElmtType == 'user' ? $repoU : $em->getRepository(Team::class);
+        $repoPEntity = $pEntity == 'user' ? $repoU : $em->getRepository(Team::class);
         /** @var User|Team */
-        $pElement = $repoPEntity->find($pElmtId);
+        $pElement = $repoPEntity->find($pId);
 
         $repoG = $em->getRepository(Grade::class);
 
         /** @var Stage|TemplateStage|IProcessStage */
         $stage = $repoS->find($stgId);
         /** @var Activity|TemplateActivity|InstitutionProcess */
-        $element = $elmtType != 'iprocess' ? $stage->getActivity() : $stage->getInstitutionProcess();
+        $element = $entity != 'iprocess' ? $stage->getActivity() : $stage->getInstitutionProcess();
         $activityOrganization = $element->getOrganization();
+
+        $stage->currentUser = $currentUser;
+        $element->currentUser = $currentUser;
 
         if (!$stage->isModifiable()) {
             throw new Exception('unauthorized');
         }
 
         /** @var Participation|IProcessParticipation|TemplateParticipation|null */
-        $participant = $repoAU->find($elmtId);
+        $participation = $repoP->find($elmtId);
 
 
-        if (!$participant) {
+        if (!$participation) {
 
             // Checking if there is compatibility user/team, otherwise return exception
-            if($pElmtType == 'user'){
+            if($pEntity == 'user'){
 
-                $doublonParticipant = $stage->getParticipants()->filter(function($p) use ($pElmtId){
-                    return $p->getUsrId() == $pElmtId;
+                $doublonParticipant = $stage->getParticipants()->filter(function($p) use ($pId){
+                    return $p->getUser()->getId() == $pId;
                 })->first();
 
                 if($doublonParticipant){
@@ -1404,7 +1409,7 @@ class ActivityController extends MasterController
 
                 $doublonParticipant = $stage->getParticipants()->filter(function($p) use ($pElement){
                         return $pElement->getTeamUsers()->exists(function(int $i, TeamUser $tu) use ($p){
-                            return $tu->getUsrId() == $p->getUsrId();
+                            return $tu->getUser() == $p->getUsrId();
                         });
                     })->first();
 
@@ -1421,8 +1426,8 @@ class ActivityController extends MasterController
             // If we do not change related type, it will alter results computation !!!
             $gradedPElementGrades = $repoG->findBy([
                 'stage' => $stage,
-                'gradedUsrId' => $participant->getUsrId(),
-                'gradedTeaId' => $participant->getTeam() ? $participant->getTeam()->getId() : null
+                'gradedUsrId' => $participation->getUser()->getId(),
+                'gradedTeaId' => $participation->getTeam() ? $participation->getTeam()->getId() : null
             ]);
 
             foreach ($gradedPElementGrades as $gradedPElementGrade) {
@@ -1436,24 +1441,24 @@ class ActivityController extends MasterController
 
 
             // Getting participations depending of part elmt type
-            if($pElmtType == 'user'){
+            if($pEntity == 'user'){
                 /** @var Participation[]|IProcessParticipation[]|TemplateParticipation[] */
-                $participations = $repoAU->findBy([
+                $participations = $repoP->findBy([
                     'stage' => $stage,
-                    'usrId' => $participant->getUsrId(),
+                    'user' => $participation->getUser(),
                     'team' => null,
                 ]);
             } else {
                  /** @var Participation[]|IProcessParticipation[]|TemplateParticipation[] */
-                 $participations = $repoAU->findBy([
+                 $participations = $repoP->findBy([
                     'stage' => $stage,
-                    'team' => $participant->getTeam(),
+                    'team' => $participation->getTeam(),
                 ]);
             }
             $iterableElements = $participations;
         }
 
-        if($elmtType == 'activity' && ($participant == null || $participant->getType() == 0 && $type != 0)){
+        if($entity == 'activity' && ($participation == null || $participation->getType() == 0 && $type != 0)){
 
             // Checking if we need to unvalidate participations (we decide to unlock all stage participations and not only the modified one)
             $completedStageParticipations = $stage->getParticipants()->filter(function(Participation $p){
@@ -1497,36 +1502,36 @@ class ActivityController extends MasterController
 
                 $consideredParticipations = [];
 
-                switch($elmtType){
+                switch($entity){
                     case 'activity' :
-                        if($pElmtType == 'user'){
+                        if($pEntity == 'user'){
                             $participation = new Participation;
                             $consideredParticipations[] = $participation;
                         } else {
                             foreach($pElement->getCurrentTeamUsers() as $currentTeamUser){
 //                                var_dump($currentTeamUser->getUsrId());
                                 $participation = new Participation;
-                                $participation->setUsrId($currentTeamUser->getUsrId())
-                                    ->setExtUsrId($currentTeamUser->getExtUsrId());
+                                $participation->setUser($currentTeamUser)
+                                    ->setExternalUser($currentTeamUser->getExternalUser());
                                 $consideredParticipations[] = $participation;
                             }
                         }
                         break;
                     case 'iprocess' :
-                        if($pElmtType == 'user'){
+                        if($pEntity == 'user'){
                             $participation = new IProcessParticipation;
                             $consideredParticipations[] = $participation;
                         } else {
                             foreach($pElement->getCurrentTeamUsers() as $currentTeamUser){
                                 $participation = new IProcessParticipation;
-                                $participation->setUsrId($currentTeamUser->getUsrId())
-                                    ->setExtUsrId($currentTeamUser->getExtUsrId());
+                                $participation->setUser($currentTeamUser)
+                                    ->setExternalUser($currentTeamUser->getExternalUser());
                                 $consideredParticipations[] = $participation;
                             }
                         }
                         break;
                     case 'template' :
-                        if($pElmtType == 'user'){
+                        if($pEntity == 'user'){
                             $participation = new TemplateParticipation;
                             $consideredParticipations[] = $participation;
                         } else {
@@ -1552,10 +1557,10 @@ class ActivityController extends MasterController
                     ->setStage($stage)
                     ->setCreatedBy($currentUser->getId());
 
-                if($pElmtType == 'team'){
+                if($pEntity == 'team'){
                     $consideredParticipation->setTeam($pElement);
                 } else {
-                    $consideredParticipation->setUsrId($pElement->getId());
+                    $consideredParticipation->setUser($pElement);
                 }
 
 
@@ -1598,10 +1603,10 @@ class ActivityController extends MasterController
                         /** @var Criterion|Stage */
                         $queryableElmt = $criterion ?: $stage;
 
-                        $previousOwningParticipants = $queryableElmt->getParticipants()->filter(function(Participation $p) use ($consideredParticipation){
+                        $previousOwningParticipants = $queryableElmt->getParticipations()->filter(function(Participation $p) use ($consideredParticipation){
                             return ($consideredParticipation->getTeam() ?
                                 $p->getTeam() != $consideredParticipation->getTeam() :
-                                $p->getUsrId() != $consideredParticipation->getUsrId())
+                                $p->getUser() != $consideredParticipation->getUser())
                                 && $p->isLeader();
                         });
 
@@ -1615,7 +1620,7 @@ class ActivityController extends MasterController
                     }
                 }
 
-                $criterion ? $criterion->addParticipant($consideredParticipation) : $stage->addParticipant($consideredParticipation);
+                $criterion ? $criterion->addParticipation($consideredParticipation) : $stage->addParticipation($consideredParticipation);
 
             }
 
@@ -1628,13 +1633,13 @@ class ActivityController extends MasterController
         /*
         $mailed = null;
         $finalizable = (
-            $elmtType == 'activity'
+            $entity == 'activity'
             && $participation && $participation->getType() != 0
             && (count($stage->getCriteria()) > 0 || count($stage->getCriteria()) > 0)
         );
         */
 
-        if ($elmtType == 'activity' and $element->getStatus() === 1) {
+        if ($entity == 'activity' and $element->getStatus() === 1) {
             $mailedUsrIds = [];
             $recipients = [];
 
@@ -1682,7 +1687,7 @@ class ActivityController extends MasterController
             'eid' => $consideredParticipations[0]->getId(),
             //'finalizable' => $finalizable,
             'pElement' => [
-                'picture' => $pElmtType == 'user' ?
+                'picture' => $pEntity == 'user' ?
                     ($pElement->getPicture() ?? 'no-picture.png') :
                     ($pElement->getPicture() ? 'team/'.$pElement->getPicture() : 'team/no-picture.png')
             ],
@@ -1714,11 +1719,11 @@ class ActivityController extends MasterController
         /** @var bool */
         $leader = (bool) $request->get('leader');
 
-        $em = self::getEntityManager();
+        $em = $this->em;
         $repoU = $em->getRepository(User::class);
         $repoT = $em->getRepository(Team::class);
         $repoTU = $em->getRepository(TeamUser::class);
-        $repoAU = $em->getRepository(Participation::class);
+        $repoP = $em->getRepository(Participation::class);
 
         /** @var Team */
         $team = $teaId != 0 ? $repoT->find($teaId) : new Team;
@@ -1755,7 +1760,7 @@ class ActivityController extends MasterController
             }
 
             //We unvalidate team user participations of non-completed activities, in order for them to grade team newcomer
-            $teamParticipations = new ArrayCollection($repoAU->findBy(['team' => $teaId], ['activity' => 'ASC']));
+            $teamParticipations = new ArrayCollection($repoP->findBy(['team' => $teaId], ['activity' => 'ASC']));
             $uncompletedTeamParticipations = $teamParticipations->filter(function (Participation $participation) {
                 return $participation->getActivity()->getStatus() < 2;
             });
@@ -1858,44 +1863,44 @@ class ActivityController extends MasterController
     /**
      * @param Request $request
      * @param $stgId
-     * @param $elmtType
+     * @param $entity
      * @param $elmtId
      * @return JsonResponse
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/{_locale}/{elmtType}/stage/{stgId}/participant/delete/{elmtId}", name="deleteParticipant")
+     * @Route("/{_locale}/{entity}/stage/{stgId}/participant/delete/{elmtId}", name="deleteParticipant")
      */
-    public function deleteParticipantAction(Request $request, $stgId, $elmtType, $elmtId)
+    public function deleteParticipantAction(Request $request, $stgId, $entity, $elmtId)
     {
 
-        $em = self::getEntityManager();
-        $repoO = $em->getRepository(Organization::class);
+        $em = $this->em;
+        $currentUser = $this->user;
 
-        switch ($elmtType) {
+        switch ($entity) {
             case 'activity':
                 $repoS = $em->getRepository(Stage::class);
-                $repoAU = $em->getRepository(Participation::class);
+                $repoP = $em->getRepository(Participation::class);
                 $stage = $repoS->find($stgId);
                 $stageOrganization = $stage->getActivity()->getOrganization();
                 break;
             case 'template':
                 $repoS = $em->getRepository(TemplateStage::class);
-                $repoAU = $em->getRepository(TemplateParticipation::class);
+                $repoP = $em->getRepository(TemplateParticipation::class);
                 $stage = $repoS->find($stgId);
                 $stageOrganization = $stage->getActivity()->getOrganization();
                 break;
             case 'iprocess':
                 $repoS = $em->getRepository(IProcessStage::class);
-                $repoAU = $em->getRepository(IProcessParticipation::class);
+                $repoP = $em->getRepository(IProcessParticipation::class);
                 $stage = $repoS->find($stgId);
                 $stageOrganization = $stage->getInstitutionProcess()->getOrganization();
                 break;
         }
 
-        $currentUserOrganization = $repoO->find($currentUser->getOrgId());
-        $stageLeader = $repoAU->findOneBy(['stage' => $stage,'leader' => true]);
-        $userStageLeader = $repoAU->findOneBy(['stage' => $stage,'leader' => true, 'usrId' => $currentUser->getId()]);
-        $hasUserInfGrantedRights = ($stageLeader && $userStageLeader || !$stageLeader && $stage->getMasterUserId() == $currentUser->getId());
+        $currentUserOrganization = $currentUser->getOrganization();
+        $stageLeader = $repoP->findOneBy(['stage' => $stage,'leader' => true]);
+        $userStageLeader = $repoP->findOneBy(['stage' => $stage,'leader' => true, 'user' => $currentUser]);
+        $hasUserInfGrantedRights = ($stageLeader && $userStageLeader || !$stageLeader && $stage->getMasterUser() == $currentUser);
         $hasPageAccess = true;
 
         if ($currentUser->getRole() != 4 && ($stageOrganization != $currentUserOrganization || $currentUser->getRole() != 1 && !$hasUserInfGrantedRights)) {
@@ -1906,11 +1911,11 @@ class ActivityController extends MasterController
             return $this->render('errors/403.html.twig');
         } else {
 
-            $participant = $repoAU->find($elmtId);
-            $stage->removeUniqueParticipation($participant);
+            $participation = $repoP->find($elmtId);
+            $stage->removeParticipant($participation);
             $em->persist($stage);
             $em->flush();
-            if ($elmtType == 'activity') {
+            if ($entity == 'activity') {
                 $activeParticipants = $stage->getParticipants()->filter(function (Participation $p) {
                     return $p->getType() != 0;
                 });
@@ -1935,18 +1940,19 @@ class ActivityController extends MasterController
     public function deleteTeamUserAction(Request $request, $tusId)
     {
 
-        $em = self::getEntityManager();
+        $em = $this->em;
         $repoO = $em->getRepository(Organization::class);
         $repoU = $em->getRepository(User::class);
         $repoTU = $em->getRepository(TeamUser::class);
         /** @var TeamUser */
         $teamUser = $repoTU->find($tusId);
-        $teamUserUsrId = $teamUser->getUsrId();
+        $teamUserUsrId = $teamUser->getUser()->getId();
         /** @var Team */
         $team = $teamUser->getTeam();
         $teamOrganization = $team->getOrganization();
+        $currentUser = $this->user;
 
-        $currentUserOrganization = $repoO->find($currentUser->getOrgId());
+        $currentUserOrganization = $currentUser->getOrganization();
         $teamLeader = $repoTU->findOneBy(['team' => $team,'leader' => true]);
         $userTeamLeader = $repoTU->findOneBy(['team' => $team, 'leader' => true, 'usrId' => $currentUser->getId()]);
         $hasUserInfGrantedRights = ($teamLeader && $userTeamLeader || !$teamLeader && $team->getCreatedBy() == $currentUser->getId());
@@ -1976,1396 +1982,6 @@ class ActivityController extends MasterController
     }
 
 
-
-    public function newInsertParticipantsAction(Request $request,  $elmt, $elmtId, $actionType, $returnJSON = true)
-    {
-
-        // Get all participants (users)
-        $em = self::getEntityManager();
-        $repoU = $em->getRepository(User::class);
-        $repoT = $em->getRepository(Team::class);
-
-        if ($elmt == 'activity') {
-            $activity = $em->getRepository(Activity::class)->find($elmtId);
-            $repoAU = $em->getRepository(Participation::class);
-            $repoG = $em->getRepository(Grade::class);
-        } else {
-            $activity = $em->getRepository(TemplateActivity::class)->find($elmtId);
-            $repoAU = $em->getRepository(TemplateParticipation::class);
-        }
-
-
-        if (!$currentUser) {
-            return $this->redirectToRoute('login');
-        }
-        $mailSettings = [];
-        $mailSettings['addedParticipants'] = [];
-
-        // Insert saved timestamp in case activity is saved
-        if ($actionType == 'save') {
-            $activity->setSaved(new DateTime);
-            $em->persist($activity);
-        }
-    }
-
-    //AJAX call which inserts users in created stages
-
-    /**
-     * @param Request $request
-     * @param $elmt
-     * @param $elmtId
-     * @param $actionType
-     * @param bool $returnJSON
-     * @return JsonResponse|RedirectResponse
-     * @throws ORMException
-     * @throws OptimisticLockException
-     * @Route("/ajax/{elmt}/{elmtId}/participants/{actionType}", name="ajaxParticipantsAdd")
-     */
-    public function oldInsertParticipantsAction(Request $request, $elmt, $elmtId, $actionType, $returnJSON = true)
-    {
-        $firstFinalization = false;
-        if ($actionType != 'back' && $actionType != 'previous') {
-
-            // Get all participants (users)
-            $em = self::getEntityManager();
-            $repoU = $em->getRepository(User::class);
-            $repoT = $em->getRepository(Team::class);
-
-            if ($elmt == 'activity') {
-                $activity = $em->getRepository(Activity::class)->find($elmtId);
-                $repoAU = $em->getRepository(Participation::class);
-                $repoG = $em->getRepository(Grade::class);
-            } else {
-                $activity = $em->getRepository(TemplateActivity::class)->find($elmtId);
-                $repoAU = $em->getRepository(TemplateParticipation::class);
-            }
-
-
-            if (!$currentUser) {
-                return $this->redirectToRoute('login');
-            }
-            $mailSettings = [];
-            $mailSettings['addedParticipants'] = [];
-
-            // Insert saved timestamp in case activity is saved
-            if ($actionType == 'save') {
-                $activity->setSaved(new DateTime);
-                $em->persist($activity);
-            }
-
-            //print_r($_POST['stages']);
-            //die;
-
-            $activityData = json_decode($_POST['activity'], true);
-
-            $unvalidatedElmts = [];
-            $nbStageParticipantsPbs = 0;
-
-            foreach ($activityData['stages'] as $stageDataJSON) {
-
-                $addedStageUsers = [];
-
-                $stageData = json_decode($stageDataJSON, true);
-
-                $stgId = $stageData['stgId'];
-
-                // Get submitted stage
-                $stage = ($elmt == 'activity') ?
-                $em->getRepository(Stage::class)->find($stgId) :
-                $em->getRepository(TemplateStage::class)->find($stgId);
-                $k = 0;
-
-                $usersData = [];
-                $teamsData = [];
-                $teams = [];
-                $teamsUsrIds = [];
-                $allParticipants = [];
-                $teamUsersIds = [];
-                $gradingParticipantsTrigger = false;
-                $validatedParticipantTypes = false;
-                $hasTPs = false;
-                $hasT = false;
-                $hasP = false;
-                $mode = $stageData['mode'];
-
-                // Get submitted teams
-
-                foreach ($stageData['participants'][1] as $teamJSON) {
-
-                    // If team has no grading type, means that it's a pure phase grading, we set its type as TP
-                    if (!isset($teamData['ttype'])) {
-                        $teamData['ttype'] = 0;
-                    }
-
-                    $teamData = json_decode($teamJSON, true);
-                    $teamsData[] = $teamData;
-                    $allParticipants[] = $teamData;
-                    if (!$hasTPs && $teamData['ttype'] == 0) {
-                        $hasTPs = true;
-                    }
-                    if ($teamData['ttype'] == 1 || ($teamData['ttype'] == -1 && $hasTPs)) {
-                        $gradingParticipantsTrigger = true;
-                    }
-                    $team = $repoT->find($teamData['teaId']);
-                    $teams[] = $team;
-                    foreach ($team->getActiveTeamUsers() as $teamUser) {
-
-                        if (in_array($teamUser->getUsrId(), $teamsUsrIds)) {
-                            $user = $teamUser->getUser();
-                            $team1 = $teamUser->getTeam()->getName();
-                            $team2 = $em->getRepository(TeamUser::class)->find($teamUsersIds[array_search($teamUser->getUsrId(), $teamsUsrIds)])->getTeam()->getName();
-                            return new JsonResponse(['message' => 'duplicityTeamError', 'firstname' => $user->getFirstName(), 'lastname' => $user->getLastName(), 'team1' => $team1, 'team2' => $team2, 'stageName' => $stage->getName()], 200);
-                        }
-
-                        $teamsUsrIds[] = $teamUser->getUsrId();
-                        $teamUsersIds[] = $teamUser->getId();
-
-                    }
-                }
-
-                // Get submitted participants
-
-                foreach ($stageData['participants'][0] as $userJSON) {
-
-                    $userData = json_decode($userJSON, true);
-
-                    // If user has no grading type, means that it's a pure phase grading, we set its type as TP
-                    if (!isset($userData['utype'])) {
-                        $userData['utype'] = 0;
-                    }
-                    //return $userData;
-                    $usersData[] = $userData;
-                    $allParticipants[] = $userData;
-                    if (!$hasTPs && $userData['utype'] == 0) {
-                        $hasT = true;
-                    }
-                    if (!$hasTPs && $userData['utype'] == -1) {
-                        $hasP = true;
-                    }
-                    if ($hasP && $hasT) {
-                        $hasTPs = true;
-                    }
-                    if ($userData['utype'] == 1 || ($userData['utype'] <= 0 && $hasTPs) || $mode == 0) {
-                        $gradingParticipantsTrigger = true;
-                    }
-                }
-
-                if ($elmt == 'activity' && count($teamsData) + count($usersData) < 1) {
-                    if ($actionType == 'next') {
-                        return new JsonResponse(['message' => 'missingParticipants', 'stageName' => $stage->getName()], 200);
-                    }
-                }
-
-                if (!$gradingParticipantsTrigger) {
-                    if ($actionType == 'next') {
-                        return new JsonResponse(['message' => 'missingGradingParticipants', 'stageName' => $stage->getName()], 200);
-                    }
-                }
-
-                // Test if there is a possible duplicate, acting as team member and individual
-                if (MasterController::array_doublon($teamsUsrIds)) {
-                    $user = $repoU->find(MasterController::array_doublon($teamsUsrIds)[0]);
-                    return new JsonResponse(['message' => 'duplicityError', 'firstname' => $user->getFirstName(), 'lastname' => $user->getLastName()], 200);
-                }
-
-                foreach ($teams as $team) {
-                    foreach ($team->getActiveTeamUsers() as $teamUsr) {
-                        foreach ($usersData as $userData) {
-                            if ($userData['usrId'] == $teamUsr->getUsrId()) {
-                                $user = $repoU->find($userData['usrId']);
-                                return new JsonResponse(['message' => 'duplicityError', 'firstname' => $user->getFirstName(), 'lastname' => $user->getLastName()], 200);
-                            }
-                        }
-                    }
-                }
-
-                //Set deleted date for removed participants
-                foreach ($stage->getParticipants() as $existingParticipant) {
-                    if ($existingParticipant->getTeam() == null) {
-
-                        $deleted = 1;
-
-                        foreach ($usersData as $userData) {
-                            if ($userData['usrId'] == $existingParticipant->getUsrId()) {
-                                $deleted = 0;
-                                break;
-                            }
-                        }
-                        if ($deleted == 1) {
-
-                            foreach ($stage->getCriteria() as $criterion) {
-
-                                // Remove deleted user (and associated grades intented to the participant)
-
-                                if ($elmt == 'activity') {
-
-                                    $removableGrades = $repoG->findBy(['criterion' => $criterion, 'gradedUsrId' => $existingParticipant->getUsrId()]);
-
-                                    foreach ($removableGrades as $removableGrade) {
-                                        $criterion->removeGrade($removableGrade);
-                                    }
-                                }
-
-                                $criterion->removeParticipant($existingParticipant);
-                                $em->persist($criterion);
-                            }
-                            $em->flush();
-                        }
-                    } else {
-                        $deleted = 1;
-                        foreach ($teams as $team) {
-                            if ($team->getId() == $existingParticipant->getTeam()->getId()) {
-                                $deleted = 0;
-                                break;
-                            }
-                        }
-                        if ($deleted == 1) {
-
-                            foreach ($stage->getCriteria() as $criterion) {
-
-                                // Remove deleted team user (and associated grades intented to the participant)
-
-                                $removableTeamGrades = new ArrayCollection($repoG->findBy(['criterion' => $criterion, 'gradedTeaId' => $existingParticipant->getTeam()->getId()]));
-                                if (!$removableTeamGrades->isEmpty()) {
-                                    foreach ($removableTeamGrades as $removableTeamGrade) {
-                                        $criterion->removeGrade($removableTeamGrade);
-                                    }
-                                    $em->persist($criterion);
-                                }
-
-                                $removableGrades = $repoG->findBy(['criterion' => $criterion, 'gradedUsrId' => $existingParticipant->getUsrId()]);
-
-                                foreach ($removableGrades as $removableGrade) {
-                                    $criterion->removeGrade($removableGrade);
-                                }
-
-                                $criterion->removeParticipant($existingParticipant);
-                                $em->persist($criterion);
-
-                            }
-                        }
-                    }
-
-                    // Check whether the stage is computable after these removals
-                    if ($elmt == 'activity') {
-                        $this->checkStageComputability($request, $app, $stage);
-                    }
-                }
-
-                $em->flush();
-
-                $nbLeaders = 0;
-
-                // We ensure that there is at least one stage leader
-                foreach ($allParticipants as $participant) {
-                    if (isset($participant['uleader'])) {
-                        if ($participant['uleader']) {
-                            $nbLeaders = 1;
-                            break;
-                        }
-                    } else {
-                        if ($participant['tleader']) {
-                            $nbLeaders = 1;
-                            break;
-                        }
-                    }
-                }
-
-                // No participants were added in any stages, meaning that the stage has just been created
-
-                if ($actionType == 'next' && $nbLeaders == 0) {
-                    return new JsonResponse(['message' => 'missingLeader'], 200);
-                }
-
-                $unvalidatedElmt = [];
-
-                foreach ($stage->getCriteria() as $criterion) {
-
-                    $criterionParticipants = $criterion->getParticipants();
-                    $unvalidatedParticipantUserIds = [];
-                    $unvalidatedParticipantTeamUserIds = [];
-
-                    // Get submitted participants
-
-                    $unvalidateGradesTrigger = false;
-                    $unvalidateTeamGradesTrigger = false;
-
-                    foreach ($usersData as $userData) {
-
-                        // $participant = json_decode($participantJSON, true);
-                        $j = 0;
-
-                        foreach ($criterionParticipants as $existingParticipant) {
-                            if ($existingParticipant->getUsrId() == $userData['usrId'] && $existingParticipant->getCriterion() == $criterion) {
-                                $j = 1;
-                                $k = 1;
-                                if ($elmt == 'activity') {
-                                    if ($existingParticipant->getType() != -1 && $existingParticipant->getIsMailed() == false) {
-                                        $addedStageUsers[] = $repoU->find($userData['usrId']);
-                                        $mailSettings['addedParticipants'][] = $existingParticipant;
-                                    }
-                                }
-                                break;
-                            }
-                        }
-
-                        if ($j == 1) {
-                            $participant = $existingParticipant;
-                        } else {
-                            if ($elmt == 'template') {
-                                $participant = new TemplateParticipation;
-                            } else {
-                                $participant = new Participation;
-                                $stageUser = $repoU->find($userData['usrId']);
-                                if ($stageUser->getEmail() !== null) {
-                                    $addedStageUsers[] = $repoU->find($userData['usrId']);
-                                    $mailSettings['addedParticipants'][] = $participant;
-                                    $participant->setIsMailed(false);
-                                }
-
-                                // If a nonTP participant is added while a participant has already locked his grades, we "unlock" his participation (note he will only be able to grade these fresh new added participants)
-                                if (!$unvalidateGradesTrigger && $userData['utype'] == 1) {
-                                    $unvalidateGradesTrigger = true;
-                                    $validatedParticipations = $criterionParticipants->matching(Criteria::create()->where(Criteria::expr()->eq("status", 3)));
-                                    if ($validatedParticipations != null) {
-
-                                        foreach ($validatedParticipations as $validatedParticipation) {
-                                            $unvalidatedParticipantUserIds[] = $validatedParticipation->getUsrId();
-                                            $validatedParticipation->setStatus(2);
-                                            $em->persist($validatedParticipation);
-                                        }
-                                    }
-                                }
-                            }
-                        };
-                        $participant->setActivity($activity)->setStage($stage)->setUsrId($userData['usrId'])->setType($userData['utype'])->setLeader($userData['uleader'])->setCriterion($criterion);
-
-                        if ($elmt == 'activity') {
-                            $grades = $repoG->findBy(['criterion' => $criterion, 'gradedUsrId' => $userData['usrId']]);
-                            foreach ($grades as $grade) {
-                                $grade->setType($userData['utype']);
-                                $em->persist($grade);
-                            }
-                        }
-
-                        $participant->setPrecomment((isset($userData['uprecomment'])) ? $userData['uprecomment'] : null);
-
-                        $criterion->addParticipant($participant);
-
-                        //$criterion->addParticipant($participant);
-                        //$em->persist($criterion);
-
-                    }
-
-                    $mailTeamSettings['addedParticipants'] = [];
-                    $addedStageTeamUsers = [];
-
-                    // TODO : corriger la fonction add Team Participants
-                    foreach ($teamsData as $teamData) {
-
-                        //$teamData = json_decode($teamJSON, true);
-                        $teamId = $teamData['teaId'];
-                        $team = $repoT->find($teamId);
-                        $concernedTeam = null;
-                        $teamPrecomment = isset($teamData['tprecomment']) ? $teamData['tprecomment'] : null;
-                        $teamType = $teamData['ttype'];
-                        $teamLeader = $teamData['tleader'];
-                        $j = 0;
-
-                        // Modifying existing teams
-
-                        foreach ($criterionParticipants as $existingParticipant) {
-
-                            if ($existingParticipant->getTeam() != null) {
-
-                                if ($existingParticipant->getCriterion() == $criterion && $team != $concernedTeam) {
-
-                                    $concernedTeam = $team;
-                                    $teamUserParticipants = new ArrayCollection;
-
-                                    foreach ($team->getActiveTeamUsers() as $teamUser) {
-                                        if ($teamUser->isDeleted() == false) {
-                                            $user = $teamUser->getUser();
-                                            $teamUserId = $user->getId();
-                                            $teamUserParticipant = $repoAU->findOneBy(['criterion' => $criterion, 'team' => $team, 'usrId' => $teamUserId]);
-
-                                            if ($elmt == 'activity') {
-                                                if ($teamUserParticipant == null) {
-                                                    $teamUserParticipant = new Participation;
-                                                    $addedStageTeamUsers[] = $user;
-                                                    // If a user has recently been added to a team while some team members have already locked their grades, we "unlock" their participation (note they will only be able to grade these fresh new added team users)
-                                                    if (!$unvalidateTeamGradesTrigger && $teamData['ttype'] == 1) {
-                                                        $unvalidateTeamGradesTrigger = true;
-                                                        $validatedTeamParticipations = $criterionParticipants->matching(Criteria::create()->where(Criteria::expr()->eq("status", 3))->andWhere(Criteria::expr()->eq("team", $team)));
-                                                        if ($validatedTeamParticipations != null) {
-
-                                                            foreach ($validatedTeamParticipations as $validatedTeamParticipation) {
-                                                                $validatedParticipantTeamUserIds[] = $validatedParticipation->getUsrId();
-                                                                $validatedTeamParticipation->setStatus(2);
-                                                                $em->persist($validatedTeamParticipation);
-                                                            }
-                                                        }
-                                                    }
-                                                    $teamUserParticipant->setIsMailed(false);
-                                                    $mailTeamSettings['addedParticipants'][] = $user;
-                                                    $mailTeamSettings['teamParticipation'] = true;
-
-                                                    $criterion->addParticipant($teamUserParticipant);
-
-                                                } else {
-                                                    if ($teamUserParticipant->getType() != -1 && $teamUserParticipant->getIsMailed() == false) {
-                                                        $addedStageTeamUsers[] = $user;
-                                                        $mailTeamSettings['addedParticipants'][] = $user;
-                                                        $mailTeamSettings['teamParticipation'] = true;
-                                                    }
-                                                }
-
-                                            } else {
-                                                if ($teamUserParticipant == null) {
-                                                    $teamUserParticipant = new TemplateParticipation;
-                                                }
-                                            }
-
-                                            $teamUserParticipant
-                                                ->setTeam($team)
-                                                ->setStage($stage)
-                                                ->setActivity($activity)
-                                                ->setUsrId($teamUserId)
-                                                ->setCreatedBy($currentUser->getId())
-                                                ->setType($teamType)
-                                                ->setLeader($teamLeader);
-
-                                            if ($elmt == 'activity') {
-                                                $grades = $repoG->findBy(['criterion' => $criterion, 'gradedTeaId' => $teamUserId]);
-                                                foreach ($grades as $grade) {
-                                                    $grade->setType($teamData['ttype']);
-                                                    $em->persist($grade);
-                                                }
-                                            }
-
-                                            if ($teamPrecomment != "") {
-                                                $teamUserParticipant->setPrecomment(($teamPrecomment != "") ? $teamData['tprecommment'] : null);
-                                            }
-
-                                            $teamUserParticipants->add($teamUserParticipant);
-                                        }
-                                    }
-
-                                    $existingTeamUserParticipants = new ArrayCollection($repoAU->findBy(['criterion' => $criterion, 'team' => $team]));
-                                    $removableTeamUserParticipants = clone $existingTeamUserParticipants;
-                                    // Removing extra team participants
-
-                                    foreach ($teamUserParticipants as $teamUserParticipant) {
-                                        if ($removableTeamUserParticipants->contains($teamUserParticipant)) {
-                                            $removableTeamUserParticipants->removeElement($teamUserParticipant);
-                                        }
-                                    }
-
-                                    foreach ($removableTeamUserParticipants as $removableTeamUserParticipant) {
-                                        $criterion->removeParticipant($removableTeamUserParticipant);
-                                    }
-
-                                    $em->persist($criterion);
-                                }
-                            }
-                        }
-
-                        if ($team != $concernedTeam) {
-
-                            $concernedTeam = $team;
-                            foreach ($team->getActiveTeamUsers() as $teamUser) {
-                                $user = $teamUser->getUser();
-                                $addedStageTeamUsers[] = $user;
-                                $teamUserId = $user->getId();
-
-                                if ($elmt == 'activity') {
-
-                                    $teamUserParticipant = new Participation;
-
-                                    // If a nonTP participant team is added while a participant has already locked his grades, we "unlock" his participation (note he will only be able to grade these fresh new added participants)
-                                    if (!$unvalidateGradesTrigger && $teamData['ttype'] == 1) {
-                                        $unvalidateGradesTrigger = true;
-                                        $validatedParticipations = $criterionParticipants->matching(Criteria::create()->where(Criteria::expr()->eq("status", 3)));
-                                        if ($validatedParticipations != null) {
-
-                                            foreach ($validatedParticipations as $validatedParticipation) {
-                                                $unvalidatedParticipantUserIds[] = $validatedParticipation->getUsrId();
-                                                $validatedParticipation->setStatus(2);
-                                                $em->persist($validatedParticipation);
-                                            }
-                                        }
-                                    }
-
-                                    $mailTeamSettings['addedParticipants'][] = $user;
-
-                                } else {
-                                    $teamUserParticipant = new TemplateParticipation;
-                                }
-
-                                $teamUserParticipant->setTeam($team)->setStage($stage)->setActivity($activity)->setUsrId($teamUserId)->setType($teamType)->setLeader($teamLeader);
-
-                                if ($elmt == 'activity') {
-                                    $teamUserParticipant->setIsMailed(false);
-                                    $grades = $repoG->findBy(['criterion' => $criterion, 'gradedTeaId' => $teamUserId]);
-                                    foreach ($grades as $grade) {
-                                        $grade->setType($teamData['ttype']);
-                                        $em->persist($grade);
-                                    }
-                                }
-
-                                if ($teamPrecomment != null) {
-                                    $teamUserParticipant->setPrecomment($teamData['tprecomment']);
-                                }
-                                $criterion->addParticipant($teamUserParticipant);
-                            }
-
-                        }
-
-                        //$em->flush();
-                    }
-
-                    $em->persist($criterion);
-                    $em->flush();
-
-                    // Encapsulating unvalidated users/teams in array
-                    if (count($unvalidatedParticipantUserIds) + count($unvalidatedParticipantTeamUserIds) > 0) {
-                        $unvalidatedElmt['stage'] = $stage;
-                        $unvalidatedElmt['usrIds'] = array_unique($unvalidatedParticipantUserIds);
-                        $unvalidatedElmt['teaIds'] = array_unique($unvalidatedParticipantTeamUserIds);
-                        $unvalidatedElmts[] = $unvalidatedElmt;
-                    }
-
-                }
-
-                if ($gradingParticipantsTrigger == false) {
-                    $nbStageParticipantsPbs++;
-                }
-            }
-
-            if ($elmt == 'activity') {
-
-                $mailSettings['stage'] = null;
-                $mailSettings['activity'] = null;
-                $mailTeamSettings['activity'] = null;
-                $mailTeamSettings['stage'] = null;
-
-                /* Sending mails to participants */
-
-                if ($actionType == 'next') {
-                    $sendingUsers = array_unique($addedStageUsers);
-                    if ($sendingUsers) {
-                        if (count($activity->getStages()) > 1) {
-                            foreach ($activity->getActiveStages() as $stage) {
-                                $mailSettings['stage'] = $stage;
-                                MasterController::sendMail($app, $sendingUsers, 'activityParticipation', $mailSettings);
-                            }
-                        } else {
-                            $mailSettings['activity'] = $activity;
-                            MasterController::sendMail($app, $sendingUsers, 'activityParticipation', $mailSettings);
-                        }
-                    }
-
-                    $sendingTeamUsers = array_unique($addedStageTeamUsers);
-                    if ($sendingTeamUsers) {
-                        $mailTeamSettings['teamParticipation'] = true;
-                        if (count($activity->getStages()) > 1) {
-                            foreach ($activity->getActiveStages() as $stage) {
-                                $mailTeamSettings['stage'] = $stage;
-                                MasterController::sendMail($app, $sendingTeamUsers, 'activityParticipation', $mailTeamSettings);
-                            }
-                        } else {
-                            $mailTeamSettings['activity'] = $activity;
-                            MasterController::sendMail($app, $sendingTeamUsers, 'activityParticipation', $mailTeamSettings);
-                        }
-                    }
-
-                    // Set mail parameter to true to all participants (except passive participants) as they will not be spammed again
-
-                    foreach ($stage->getCriteria() as $stageCriterion) {
-                        foreach ($stageCriterion->getParticipants() as $criterionParticipant) {
-                            if ($criterionParticipant->getType() != -1 && $criterionParticipant->getIsMailed() == false) {
-                                $criterionParticipant->setIsMailed(true);
-                                $em->persist($criterionParticipant);
-                            }
-                        }
-                    }
-
-                    // foreach ($mailSettings['addedParticipants'] as $participant) {
-                    //     $participant->setIsMailed(true);
-                    //     $em->persist($participant);
-                    // }
-
-                    // foreach ($mailTeamSettings['addedParticipants'] as $teamParticipant) {
-                    //     $teamParticipant->setIsMailed(true);
-                    //     $em->persist($teamParticipant);
-                    // }
-
-                }
-
-                if (($actionType == 'next' || $actionType == 'save') && count($unvalidatedElmts) > 0) {
-
-                    if (count($activity->getStages()) > 1) {
-                        $unvalidatingMailSettings['stage'] = $unvalidatedElmt['stage'];
-                        $unvalidatingTeamMailSettings['stage'] = $unvalidatedElmt['stage'];
-                    } else {
-                        $unvalidatingMailSettings['activity'] = $unvalidatedElmt['stage']->getActivity();
-                        $unvalidatingTeamMailSettings['activity'] = $unvalidatedElmt['stage']->getActivity();
-
-                    }
-
-                    foreach ($unvalidatedElmts as $unvalidatedElmt) {
-
-                        $userRecipients = [];
-                        $teamUserRecipients = [];
-
-                        if (count($unvalidatedElmt['usrIds']) > 0) {
-                            $userRecipients = $repoU->findBy(['id' => $unvalidatedElmt['usrIds']]);
-                            $unvalidatingMailSettings['newTeamJoiner'] = false;
-                            MasterController::sendMail($app, $userRecipients, 'unvalidatedGradesStageJoiner', $unvalidatingMailSettings);
-                        }
-
-                        if (count($unvalidatedElmt['teaIds']) > 0) {
-                            $teamUserRecipients = $repoU->findBy(['id' => $unvalidatedElmt['teaIds']]);
-                            $unvalidatingTeamMailSettings['newTeamJoiner'] = true;
-                            MasterController::sendMail($app, $teamUserRecipients, 'unvalidatedGradesStageJoiner', $unvalidatingTeamMailSettings);
-                        }
-                    }
-                }
-            }
-
-            //TODO : finir la copie des participants pour toutes les activités
-            if ($activity->getRecurring()) {
-                if ($_POST['replicate']) {
-
-                    $firstActiveRecurringActivity = $activity->getRecurring()->getOngoingFutCurrActivities()->first();
-
-                    foreach ($firstActiveRecurringActivity->getStages() as $stageKey => $firstActiveRecurringActivityStage) {
-                        foreach ($firstActiveRecurringActivityStage->getCriteria() as $criterionKey => $firstActiveRecurringActivityStageCriterion) {
-
-                            //Submitted participants
-                            $firstActiveRecurringActivityStageCriterionParticipants = $firstActiveRecurringActivityStageCriterion->getParticipants();
-
-                            $participantstoAdd = new ArrayCollection;
-                            $keysParticipantsToRemove = [];
-                            $toCopy = false;
-
-                            foreach ($activity->getRecurring()->getOngoingFutCurrActivities() as $ongoingFutCurrActivity) {
-
-                                // For all activities following first one, we copy participants of each stage
-                                if ($ongoingFutCurrActivity != $firstActiveRecurringActivity) {
-
-                                    //2 cases : no added participants to criterion yet, or existing participants already
-                                    $ongoingFutCurrActivityStageCriterion = $ongoingFutCurrActivity->getStages()->get($stageKey)->getCriteria()->get($criterionKey);
-
-                                    if (count($ongoingFutCurrActivityStageCriterion->getParticipants()) == 0) {
-
-                                        foreach ($firstActiveRecurringActivityStageCriterionParticipants as $participantKey => $participant) {
-
-                                            $newParticipant = clone $participant;
-                                            $newParticipant->setCriterion($ongoingFutCurrActivityStageCriterion);
-                                            $ongoingFutCurrActivityStageCriterion->getParticipants()->add($newParticipant);
-                                        }
-
-                                        //$em->persist($ongoingFutCurrActivityStageCriterion);
-                                        //$em->flush();
-
-                                    } else {
-                                        //In case current FutCurrActStage criterion has already some participants...
-                                        if (!$toCopy) {
-
-                                            //.. then we fall into 3 cases : or submitted participant is new, or exists, or has been removed
-
-                                            $copiedFutCurrActivityStageCriterionParticipants = clone $ongoingFutCurrActivityStageCriterion->getParticipants();
-
-                                            //return count($copiedFutCurrActivityStageCriterionParticipants);
-
-                                            foreach ($firstActiveRecurringActivityStageCriterionParticipants as $participantKey => $participant) {
-                                                $partExists = false;
-                                                foreach ($ongoingFutCurrActivityStageCriterion->getParticipants() as $ongoingFutCurrActivityStageCriterionParticipant) {
-                                                    if ($ongoingFutCurrActivityStageCriterionParticipant->getUsrId() == $participant->getUsrId()) {
-                                                        $partExists = true;
-                                                        $copiedFutCurrActivityStageCriterionParticipants->removeElement($ongoingFutCurrActivityStageCriterionParticipant);
-                                                        break;
-                                                    }
-                                                }
-                                                if ($partExists == false) {
-                                                    //It means that it is a new element to add
-                                                    $participantstoAdd->add($participant);
-                                                }
-
-                                            }
-                                            //Defining keys of which participants to remove, if necessary
-                                            foreach ($copiedFutCurrActivityStageCriterionParticipants as $participantToRemove) {
-                                                $keysParticipantsToRemove[] = $copiedFutCurrActivityStageCriterionParticipants->key($participantToRemove);
-                                            }
-
-                                            foreach ($participantstoAdd as $participantToAdd) {
-                                                $newParticipant = clone $participantToAdd;
-                                                $newParticipant->setCriterion($ongoingFutCurrActivityStageCriterion);
-                                                $em->persist($newParticipant);
-                                            }
-
-                                            foreach ($keysParticipantsToRemove as $participantKey) {
-                                                $ongoingFutCurrActivityStageCriterion->getParticipants()->remove($participantKey);
-                                            }
-
-                                            $toCopy = true;
-                                        } else {
-
-                                            foreach ($keysParticipantsToRemove as $participantKey) {
-                                                $ongoingFutCurrActivityStageCriterion->getParticipants()->remove($participantKey);
-                                            }
-
-                                            foreach ($participantstoAdd as $participantToAdd) {
-
-                                                $newParticipant = clone $participantToAdd;
-                                                $newParticipant->setCriterion($ongoingFutCurrActivityStageCriterion);
-                                                $em->persist($newParticipant);
-                                                //$ongoingFutCurrActivityStageCriterion->getParticipants()->add($newParticipant);
-                                            }
-                                        }
-                                    }
-                                }
-
-                                $em->persist($ongoingFutCurrActivity);
-
-                                /*
-                                if (count($keysParticipantsToRemove) == 0 )
-
-                                $ongoingFutCurrActivityStageCriterion = $ongoingFutCurrActivity->getStages()->get($stageKey)->getCriteria()->get($criterionKey);
-
-                                if ($ongoingFutCurrActivityStageCriterionParticipant->getUsrId() != )
-
-                                if ($ongoingFutCurrActivityStageCriterionParticipant->getUsrId() == $participant->getUsrId()) {
-                                $partExists = true;
-                                break;
-                                }
-                                }
-
-                                if ($partExists) {continue;} else {}
-
-                                if ($ongoingFutCurrActivity->getStages()->get($stageKey))
-                                $clonedParticipant = clone $participant;
-                                $participant->removeCriterion($participant->getCriterion());
-                                $ongoingFutCurrActivityStageCriterion->addParticipant($clonedParticipant);
-                                $em->persist($ongoingFutCurrActivityStageCriterion);
-                                }
-                                }
-                                }
-                                }*/
-
-                                if ($ongoingFutCurrActivity->getStatus() == -1) {
-
-                                    $ongoingFutCurrActivity->setStatus(0);
-                                    $em->persist($ongoingFutCurrActivity);
-                                }
-
-                            }
-
-                        }
-
-                    }
-
-                    $em->flush();
-                }
-
-                /*
-
-                //$firstStageOngoingFutCurrActivity = $ongoingFutCurrActivity->getStages()->first();
-
-                $participants = $activity->getRecurring()->getOngoingFutCurrActivities()->first()->getStages()->first()->
-
-                foreach ($participants as $participant) {
-
-                $firstStageOngoingFutCurrActivity->addParticipant($participant);
-                $em->persist($firstStageOngoingFutCurrActivity);*/
-                /*
-                $participant->setStage($ongoingFutCurrActivity->getStages()->first());
-                $em->persist($participant);
-                $em->flush();*/
-
-                //        }
-                //    }
-
-                //$participants = clone $ongoingFutCurrActivity->getStages()->first()->getParticipants();
-                //$participants = new ArrayCollection;
-                //foreach ($ongoingFutCurrActivity->getStages()->first()->getParticipants() as $participant) {
-                //    $participants->add(clone $participant);
-                //}
-                //print_r(count($participants));
-
-                //Activity has now all parameters, we can put its status to 1
-
-                //}
-
-                //}
-
-            }
-
-            if ($elmt == 'activity') {
-
-                // Sending creation mail if first time activity creator finalizes the activity
-
-                $mailSettings['activity'] = null;
-                $mailSettings['stage'] = null;
-
-                if ($actionType == 'next') {
-
-                    if (count($activity->getStages()) > 1) {
-
-                        foreach ($activity->getActiveStages() as $stage) {
-
-                            if ($stage->getIsFinalized() == false) {
-                                $mailSettings['stage'] = $stage;
-                                $mailSettings['isCreatorAdministrator'] = false;
-                                $recipients = [];
-                                $recipients[] = $currentUser;
-                                $firmAdministrators = $repoU->findBy(['orgId' => $currentUser->getOrgId(), 'role' => 1, 'deleted' => null]);
-                                foreach ($firmAdministrators as $firmAdministrator) {
-                                    if ($firmAdministrator != $currentUser) {
-                                        // $recipients[] = $firmAdministrator;
-                                    } else {
-                                        $mailSettings['isCreatorAdministrator'] = true;
-                                    }
-                                }
-
-                                MasterController::sendMail($app, $recipients, 'activityCreation', $mailSettings);
-                                $stage->setFinalized(new DateTime)->setIsFinalized(true);
-                                if ($activity->getIsFinalized() === false) {
-                                    $activity->setFinalized(new DateTime)->setIsFinalized(true);
-                                    $firstFinalization = true;
-                                }
-                                $em->persist($stage);
-                            }
-                        }
-
-                    } else {
-
-                        $mailSettings['activity'] = $activity;
-                        $mailSettings['isCreatorAdministrator'] = false;
-                        $recipients = [];
-                        $recipients[] = $currentUser;
-                        $firmAdministrators = $repoU->findBy(['orgId' => $currentUser->getOrgId(), 'role' => 1, 'deleted' => null]);
-                        foreach ($firmAdministrators as $firmAdministrator) {
-                            if ($firmAdministrator != $currentUser) {
-                                // $recipients[] = $firmAdministrator;
-                            } else {
-                                $mailSettings['isCreatorAdministrator'] = true;
-                            }
-                        }
-
-                        if ($activity->getIsFinalized() === false) {
-
-                            MasterController::sendMail($app, $recipients, 'activityCreation', $mailSettings);
-                            $activity->setFinalized(new DateTime)->setIsFinalized(true);
-                            $firstFinalization = true;
-                        }
-
-                    }
-                }
-            }
-
-            $tomorrowDate = new DateTime;
-            $tomorrowDate->add(new \DateInterval('P1D'));
-
-            $yesterdayDate = new DateTime;
-            $yesterdayDate->sub(new \DateInterval('P1D'));
-
-            $k = 0;
-            $p = 0;
-
-            foreach ($activity->getActiveStages() as $stage) {
-                if ($stage->getGStartDate() > $tomorrowDate) {
-                    $k++;
-                }
-                if ($stage->getGEndDate() <= $yesterdayDate) {
-                    $p++;
-                }
-            }
-
-            if ($elmt == 'activity') {
-
-                $nbActiveStages = count($activity->getActiveStages());
-                $nbActiveModifiableStages = count($activity->getActiveModifiableStages());
-
-                if ($nbActiveStages != 0) {
-
-                    // Updating activity status, only processed if remaining active stages
-
-                    // Activity is not considered incomplete if at least one active stage has a participant
-                    if ($nbStageParticipantsPbs != $nbActiveModifiableStages) {
-
-                        if ($firstFinalization || $activity->getIsFinalized() == true) {
-
-                            // If every grading stage starts in the future...
-                            if ($k == $nbActiveStages) {
-                                $activity->setStatus(0);
-                            } else {
-                                //..else if not every grading stage ends in the past...
-                                if ($p != $nbActiveStages) {
-                                    $activity->setStatus(1);
-                                } else {
-                                    $activity->setStatus(-1);
-                                }
-                            }
-                        }
-
-                    } else {
-                        $activity->setStatus(-1);
-                    }
-
-                    $em->persist($activity);
-                    $em->flush();
-                }
-                if ($returnJSON) {
-                    if ($actionType != 'enrich') {
-                        return new JsonResponse(['message' => 'validate', 'savedAsIncomplete' => ($activity->getFinalized() === null)], 200);
-                    } else {
-                        return new JsonResponse(['message' => 'enrich'], 200);
-                    }
-                }
-
-            } else {
-
-                $em->persist($activity);
-                $em->flush();
-                if ($returnJSON) {
-                    if ($actionType != 'enrich') {
-                        return new JsonResponse(['message' => 'validate'], 200);
-                    } else {
-                        return new JsonResponse(['message' => 'enrich'], 200);
-                    }
-                }
-            }
-        } else if ($actionType == 'previous') {
-            return new JsonResponse(['message' => 'goPrev'], 200);
-        } else if ($actionType == 'back') {
-            return new JsonResponse(['message' => 'goBack'], 200);
-        }
-
-    }
-
-
-    // ACTIVITY CREATION (V1)
-
-    // 1st step - Activity definition (limited to activity manager)
-
-    // 2 - Create stages
-
-//    /**
-//     * @param Request $request
-//     * @param Application $app
-//     * @param $elmt
-//     * @param $elmtId
-//     * @return RedirectResponse
-//     * @Route("/{elmt}/{elmtId}/stages", name="activityStages")
-//     */
-//    public function displayActivityStages(Request $request, Application $app, $elmt, $elmtId)
-//    {
-//        $user = self::getAuthorizedUser();
-//        if (!$user instanceof User) {
-//            return $this->redirectToRoute('login');
-//        }
-//        $userRole = $user->getRole();
-//        $em = self::getEntityManager();
-//        $elmtIsActivity = $elmt === 'activity';
-//        /** @var Activity|TemplateActivity */
-//        $activity = $em->getRepository(
-//            $elmtIsActivity ? Activity::class : TemplateActivity::class
-//        )->find($elmtId);
-//        $organization = $user->getOrganization();
-//        $actOrganization = $activity->getOrganization();
-//        $createTemplateForm = null;
-//        
-//        if ($elmt == 'activity' && $activity->getTemplate() == null) {
-//            $createTemplateForm = $this->createForm(AddTemplateForm::class, null, ['standalone' => true]);
-//            $createTemplateForm->handleRequest($request);
-//        }
-//
-//        $sumWeightModifiableStages = 0;
-//        $activeModifiableStages = $activity->getActiveModifiableStages();
-//        foreach ($activeModifiableStages as $activeModifiableStage) {
-//            $sumWeightModifiableStages += $activeModifiableStage->getWeight();
-//        }
-//
-//        $userIsNotRoot = $userRole != 4;
-//        $userIsAdmin = $userRole == 1;
-//        $userIsAM = $userRole == 2;
-//        $userIsCollab = $userRole == 3;
-//        $actBelongsToDifferentOrg = $organization != $actOrganization;
-//        $actHasNoActiveModifiableStages = count($activeModifiableStages) == 0;
-//        $hasPageAccess = true;
-//        if ($elmtIsActivity) {
-//            if ($userIsNotRoot and ($actBelongsToDifferentOrg or !$userIsAdmin and $actHasNoActiveModifiableStages)) {
-//                $hasPageAccess = false;
-//            }
-//        } else {
-//            if ($userIsCollab or ($userIsAM or $userIsAdmin) and $actBelongsToDifferentOrg) {
-//                $hasPageAccess = false;
-//            }
-//        }
-//
-//        if (!$hasPageAccess) {
-//            return $this->render('errors/403.html.twig');
-//        } else {
-//            
-//            $stageForm = $this->createForm(AddStageForm::class, $activity, ['standalone' => true, 'elmt' => $elmt]);
-//            $stageForm->handleRequest($request);
-//
-//            return $this->render('activity_define_stages.twig',
-//                [
-//                    'form' => $stageForm->createView(),
-//                    'elmt' => $elmt,
-//                    'activity' => $activity,
-//                    'createTemplateForm' => ($createTemplateForm === null) ?: $createTemplateForm->createView(),
-//                    'sumWeightModifiableStages' => $sumWeightModifiableStages,
-//                ]);
-//        }
-//
-//    }
-
-//    /**
-//     * @param Request $request
-//     * @param Application $app
-//     * @param $elmt
-//     * @param $elmtId
-//     * @param $actionType
-//     * @param bool $returnJSON
-//     * @return JsonResponse|RedirectResponse
-//     * @throws ORMException
-//     * @throws OptimisticLockException
-//     * @Route("/ajax/{elmt}/{elmtId}/stages/{actionType}", name=")
-//     */
-//    public function saveActivityStages(Request $request, Application $app, $elmt, $elmtId, $actionType, $returnJSON = true)
-//    {
-//
-//        $em = self::getEntityManager();
-//        if ($elmt == 'activity') {
-//            $activity = $em->getRepository(Activity::class)->find($elmtId);
-//            $completedStages = $activity->getOCompletedStages();
-//            $sumWeightModifiableStages = 0;
-//            $activeModifiableStages = $activity->getActiveModifiableStages();
-//            foreach ($activeModifiableStages as $activeModifiableStage) {
-//                $sumWeightModifiableStages += $activeModifiableStage->getWeight();
-//            }
-//
-//        } else {
-//            $activity = $em->getRepository(TemplateActivity::class)->find($elmtId);
-//        }
-//
-//        $activityStages = $activity->getActiveModifiableStages();
-//
-//        $theOriginalStages = clone $activityStages;
-//        $submittedStages = new ArrayCollection;
-//
-//        
-//        $stageForm = $this->createForm(AddStageForm::class, $activity, ['standalone' => true, 'elmt' => $elmt]);
-//        $stageForm->handleRequest($request);
-//
-//        $repoCN = $em->getRepository(CriterionName::class);
-//
-//        if (!$currentUser) {
-//            return $this->redirectToRoute('login');
-//        }
-//
-//        $orgId = $currentUser->getOrgId();
-//        $repoO = $em->getRepository(Organization::class);
-//        $organization = $repoO->findOneById($orgId);
-//
-//        if ($actionType == 'next' || $actionType == 'prev') {
-//
-//            if ($stageForm->isValid()) {
-//
-//                $formStages = $stageForm->getData()->getActiveModifiableStages();
-//                $k = 0;
-//                foreach ($formStages as $stage) {
-//                    //We create at least a criterion per stage in case there are none
-//
-//                    if ($theOriginalStages->contains($stage) === false) {
-//                        $criterion = ($elmt == 'activity') ? new Criterion : new TemplateCriterion;
-//                        $criterion->setCName($organization->getCriterionNames()->first());
-//                        $criterion->setWeight(1);
-//                        $criterion->setName('General evaluation');
-//                        $stage->setActivity($activity);
-//                        $stage->setMasterUserId($currentUser->getId());
-//                        $stage->addCriterion($criterion);
-//                        $stage->setCreatedBy($currentUser->getId());
-//                        $em->persist($stage);
-//                    }
-//                    if ($elmt == 'activity') {
-//                        $stage->setWeight($stage->getWeight() * $sumWeightModifiableStages);
-//                    }
-//                }
-//
-//                //In case a stage has been removed, we remove its relationship with its related activity
-//
-//                // As the form is valid, the stage has been correctly inserted, we need to put the complete prop to true
-//                // to display it as by default, a created stage is incomplete
-//
-//                //$totalWeight = 0;
-//                /*foreach ($submittedStages as $submittedStage) {
-//
-//                //$totalWeight = $totalWeight + $submittedStage->getWeight();
-//
-//                if ($submittedStage->getMasterUserId() == null) {
-//                $submittedStage->setMasterUserId(MasterController::getAuthorizedUser($app)->getId());
-//                }
-//
-//                if ($activityStages->contains($submittedStage) === false) {
-//                $submittedStage->setWeight($submittedStage->getWeight() * (1 - $completedStagesWeight));
-//                }
-//
-//                $em->persist($submittedStage);
-//                }*/
-//
-//                /*foreach ($activityStages as $stage) {
-//                if ($submittedStages->contains($stage) === false) {
-//                $activity->removeStage($stage);
-//                }
-//                }*/
-//
-//                // See if activity status needs to get updated
-//                if ($elmt == 'activity') {
-//                    if ($activity->getStatus() == 1) {
-//                        $k = 0;
-//                        foreach ($activityStages as $stage) {
-//                            if ($stage->getGStartDate() > new \DateTime) {
-//                                $stage->setStatus(0);
-//                                $k++;
-//                            } else {
-//                                $stage->setStatus(1);
-//                            }
-//                            $em->persist($stage);
-//                        }
-//                        if ($k == count($activity->getActiveModifiableStages())) {
-//                            $activity->setStatus(0);
-//                        }
-//                        if ($activity->getStatus() == 0) {
-//
-//                            $tomorrowDate = new \DateTime;
-//                            $tomorrowDate->add(new \DateInterval('P1D'));
-//                            foreach ($activity->getActiveModifiableStages() as $stage) {
-//                                if ($stage->getGStartDate() < $tomorrowDate) {
-//                                    $activity->setStatus(1);
-//                                    break;
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//
-//                $em->persist($activity);
-//                $em->flush();
-//
-//                /*
-//                if ($totalWeight > 1 || $totalWeight < 1) {
-//
-//                return new JsonResponse(['message' => 'Total Weight is below or above 1']);
-//                }
-//                 */
-//
-//                return new JsonResponse(['message' => 'goNext'], 200);
-//
-//            } else {
-//                $errors = $this->buildErrorArray($stageForm);
-//                return $errors;
-//            }
-//
-//        } else {
-//
-//            $k = 0;
-//            $activity->setSaved(new \DateTime);
-//            $em->persist($activity);
-//            $totalWeight = 0;
-//            // We try to save stages which are correctly inserted
-//            foreach ($stageForm->get('activeModifiableStages') as $individualStageForm) {
-//                $totalWeight = $totalWeight + $individualStageForm->get('weight')->getData();
-//            }
-//
-//            foreach ($stageForm->get('activeModifiableStages') as $individualStageForm) {
-//
-//                $stage = $individualStageForm->getData();
-//
-//                if ($individualStageForm->get('name')->isValid()) {$stage->setName($individualStageForm->get('name')->getData());} else {
-//                    if ($stage->getName() == null) {
-//                        $stage->setName('Phase ' . ($activity->getStages()->indexOf($stage) + 1));
-//                    }
-//                    $k++;
-//                };
-//                if ($individualStageForm->get('startdate')->isValid()) {$stage->setStartdate($individualStageForm->get('startdate')->getData());} else { $k++;};
-//                if ($individualStageForm->get('enddate')->isValid()) {$stage->setEnddate($individualStageForm->get('enddate')->getData());} else { $k++;};
-//                if ($individualStageForm->get('gstartdate')->isValid()) {$stage->setGstartdate($individualStageForm->get('gstartdate')->getData());} else { $k++;};
-//                if ($individualStageForm->get('genddate')->isValid()) {$stage->setGenddate($individualStageForm->get('genddate')->getData());} else { $k++;};
-//                if ($totalWeight == 100) {$stage->setGenddate($individualStageForm->get('weight')->getData());} else { $k++;};
-//
-//                if ($elmt == 'activity' && $stage->setOrganization() == null) {$stage->setOrganization($organization);}
-//                if ($stage->getMasterUserId() == null) {$stage->setMasterUserId($currentUser->getId());}
-//
-//                if (count($stage->getCriteria()) == 0) {
-//                    $criterion = ($elmt == 'activity') ? new Criterion : new TemplateCriterion;
-//                    $criterion->setCName($organization->getCriterionNames()->first());
-//                    $stage->addCriterion($criterion);
-//                }
-//
-//                $em->persist($stage);
-//
-//            }
-//
-//            // See if activity status needs to be updated, will only be if activity is not incomplete
-//            if ($elmt == 'activity') {
-//                if ($activity->getStatus() != -1) {
-//                    $k = 0;
-//                    foreach ($activityStages as $stage) {
-//                        if ($stage->getGStartDate() > new \DateTime) {
-//                            $stage->setStatus(0);
-//                            $k++;
-//                        } else {
-//                            $stage->setStatus(1);
-//                        }
-//                        $em->persist($stage);
-//                    }
-//                    if ($k == count($activity->getActiveModifiableStages())) {
-//                        $activity->setStatus(0);
-//                    }
-//                    if ($activity->getStatus() == 0) {
-//
-//                        $tomorrowDate = new \DateTime;
-//                        $tomorrowDate->add(new \DateInterval('P1D'));
-//                        foreach ($activity->getActiveModifiableStages() as $stage) {
-//                            if ($stage->getGStartDate() < $tomorrowDate) {
-//                                $activity->setStatus(1);
-//                                break;
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//
-//            $em->persist($activity);
-//            $em->flush();
-//
-//            switch ($actionType) {
-//                case 'back':
-//                case 'save':
-//                    $message = 'goBack';
-//                    break;
-//                case 'stage':
-//                    $message = 'stages';
-//                    break;
-//                case 'parameter':
-//                    $message = 'parameters';
-//                    break;
-//                case 'criterion':
-//                    $message = 'criteria';
-//                    break;
-//                case 'participant':
-//                    $message = 'participants';
-//                    break;
-//            }
-//
-//            return new JsonResponse(['message' => $message], 200);
-//
-//        }
-//
-//    }
-
-    // 3 - Create criteria
-
-//    /**
-//     * @param Request $request
-//     * @param Application $app
-//     * @param $elmt
-//     * @param $elmtId
-//     * @return RedirectResponse
-//     * @Route("/{elmt}/{elmtId}/criteria", name="activityCriteria")
-//     */
-//    public function addActivityCriterion(Request $request, Application $app, $elmt, $elmtId)
-//    {
-//        $user = self::getAuthorizedUser();
-//        if (!$user instanceof User) {
-//            return $this->redirectToRoute('login');
-//        }
-//        $userRole = $user->getRole();
-//        $em = self::getEntityManager();
-//        $elmtIsActivity = $elmt === 'activity';
-//        /** @var Activity|TemplateActivity */
-//        $activity = $em->getRepository(
-//            $elmtIsActivity ? Activity::class : TemplateActivity::class
-//        )->find($elmtId);
-//        $repoI = $em->getRepository(Icon::class);
-//        $icons = $repoI->findAll();
-//        $organization = $user->getOrganization();
-//        $actOrganization = $activity->getOrganization();
-//        $activeModifiableStages = $activity->getActiveModifiableStages();
-//
-//        $userIsNotRoot = $userRole != 4;
-//        $userIsAdmin = $userRole == 1;
-//        $userIsAM = $userRole == 2;
-//        $userIsCollab = $userRole == 3;
-//        $actBelongsToDifferentOrg = $organization != $actOrganization;
-//        $actHasNoActiveModifiableStages = count($activeModifiableStages) == 0;
-//        $hasPageAccess = true;
-//        if ($elmtIsActivity) {
-//            if ($userIsNotRoot and ($actBelongsToDifferentOrg or !$userIsAdmin and $actHasNoActiveModifiableStages)) {
-//                $hasPageAccess = false;
-//            }
-//        } else {
-//            if ($userIsCollab or ($userIsAM or $userIsAdmin) and $actBelongsToDifferentOrg) {
-//                $hasPageAccess = false;
-//            }
-//        }
-//
-//        if (!$hasPageAccess) {
-//            return $this->render('errors/403.html.twig');
-//        } else {
-//            $stages = ($elmt == 'activity') ?
-//            $activity->getActiveStages() :
-//            $activity->getStages();
-//            $diffStagesCriteria = true;
-//            // We get the collection of current stages objects in the database (names and associated criteria)
-//            // We also check whether criteria are differentiated among stages
-//
-//            $multActiveStages = (count($stages) > 1) ?: false;
-//
-//            
-//            $createCriterionForm = $this->createForm(CreateCriterionForm::class, null, ['standalone' => true]);
-//            $addCriterionForm = $this->createForm(
-//                AddCriterionForm::class,
-//                $activity,
-//                [
-//                    'standalone' => true,
-//                    'multiple_active_stages' => $multActiveStages,
-//                    'diff_stages_criteria' => $diffStagesCriteria,
-//                    'app' => $app,
-//                    'elmt' => $elmt,
-//                    'attr' => [
-//                        'autocomplete' => 'off',
-//                    ],
-//                ]
-//            );
-//            $createCriterionForm->handleRequest($request);
-//            $addCriterionForm->handleRequest($request);
-//            $createTemplateForm = null;
-//            if ($elmt == 'activity' && $activity->getTemplate() == null) {
-//                $createTemplateForm = $this->createForm(AddTemplateForm::class, null, ['standalone' => true]);
-//                $createTemplateForm->handleRequest($request);
-//            }
-//
-//            $csrfToken = $app['csrf.token_manager']->getToken('token_id');
-//
-//            return $this->render('activity_define_criteria.twig',
-//                [
-//                    'createCriterionForm' => $createCriterionForm->createView(),
-//                    'form' => $addCriterionForm->createView(),
-//                    'elmt' => $elmt,
-//                    'activity' => $activity,
-//                    'diffStagesCriteria' => $diffStagesCriteria,
-//                    'createTemplateForm' => ($createTemplateForm === null) ?: $createTemplateForm->createView(),
-//                    'icons' => $icons,
-//                ]);
-//        }
-//    }
-
     /**
      * @param Request $request
      * @return false|string|JsonResponse|RedirectResponse
@@ -3381,7 +1997,7 @@ class ActivityController extends MasterController
         }
 
         $organization = $currentUser->getOrganization();
-        $em = self::getEntityManager();
+        $em = $this->em;
         /** @var FormFactory */
         
         $repoCL = $em->getRepository(CriterionName::class);
@@ -3429,473 +2045,6 @@ class ActivityController extends MasterController
 
     }
 
-//    /**
-//     * @param Request $request
-//     * @param Application $app
-//     * @param $elmt
-//     * @param $elmtId
-//     * @param $actionType
-//     * @param bool $returnJSON
-//     * @return JsonResponse|RedirectResponse
-//     * @throws ORMException
-//     * @throws OptimisticLockException
-//     * @Route("}/ajax/{elmt}/{elmtId}/criteria/{actionType}", name="saveActivityCriteria")
-//     */
-//    public function saveActivityCriteria(Request $request, Application $app, $elmt, $elmtId, $actionType, $returnJSON = true)
-//    {
-//
-//        $em = self::getEntityManager();
-//        $originalCriteria = new ArrayCollection;
-//        $stageNames = [];
-//        $repoO = $em->getRepository(Organization::class);
-//
-//        if (!$currentUser) {
-//            return $this->redirectToRoute('login');
-//        }
-//        $organization = $repoO->find($currentUser->getOrgId());
-//
-//        // Get all submitted criteria
-//
-//        $activity = ($elmt == 'activity') ?
-//        $em->getRepository(Activity::class)->find($elmtId) :
-//        $em->getRepository(TemplateActivity::class)->find($elmtId);
-//        
-//        $activeStages = clone $activity->getActiveStages();
-//        $multActiveStages = (count($activity->getActiveStages()) > 1) ?: false;
-//        $criterionForm = $this->createForm(AddCriterionForm::class, $activity, ['standalone' => true, 'multiple_active_stages' => $multActiveStages, 'diff_stages_criteria' => false, 'app' => $app, 'organization' => $organization, 'elmt' => $elmt]);
-//        $criterionForm->handleRequest($request);
-//
-//        /** @var Stage[] */
-//        $criterionFormStages = $criterionForm->getData()->getActiveModifiableStages();
-//
-//        foreach ($criterionForm->get('activeModifiableStages') as $activeStageForm) {
-//            foreach ($activeStageForm->get('criteria') as $activeStageCriterionForm) {
-//                $criteriaForm[] = $activeStageCriterionForm;
-//            }
-//        }
-//
-//        if ($elmt == 'activity') {
-//
-//            $mailRecipients = [];
-//
-//            foreach ($criterionFormStages as $formStage) {
-//                $newCriteria = $formStage->getCriteria()->exists(function (int $i, Criterion $c) {
-//                    return $c->getId() === 0;
-//                });
-//
-//                if ($newCriteria) {
-//                    // criteria were added, invalidate all grades from participants in the stage
-//                    // who have *confirmed* their grading (status == 3) and notify them by email
-//                    /** @var Participation[] */
-//                    $participations = $formStage->getParticipants()->filter(function (Participation $a) {
-//                        return $a->getStatus() === 3;
-//                    })->getValues();
-//                    foreach ($participations as $participation) {
-//                        $participation->setStatus(2); // 2 means saved but not confirmed
-//                    };
-//                }
-//            }
-//
-//            if (count($mailRecipients)) {
-//                self::sendMail(
-//                    $app,
-//                    $mailRecipients,
-//                    'stageCriteriaAdded',
-//                    []
-//                );
-//            }
-//        }
-//
-//        $activeStageCriteria = [];
-//        foreach ($activeStages as $activeStage) {
-//            $activeStageCriteria[] = $activeStage->getCriteria();
-//        }
-//
-//        // We get the collection of current stages objects in the database (names and associated criteria)
-//        foreach ($activeStages as $stage) {
-//            foreach ($stage->getCriteria() as $criterion) {
-//                $originalCriteria->add($criterion);
-//            }
-//            $stageNames[] = $stage->getName();
-//        }
-//
-//        if (($actionType == 'next') || ($actionType == 'prev')) {
-//
-//            if ($criterionForm->isSubmitted()) {
-//
-//                foreach ($criterionFormStages as $stage) {
-//                    $stageTotalCriteriaWeight = 0;
-//                    foreach ($stage->getCriteria() as $criterion) {
-//                        $stageTotalCriteriaWeight += $criterion->getWeight();
-//                    }
-//
-//                    if (round($stageTotalCriteriaWeight, 4) != 1) {
-//                        return new JsonResponse(['message' => 'supHundredPct', 'stageName' => $stage->getName(), 'totalWeights' => round(100 * $stageTotalCriteriaWeight, 1)], 200);
-//                    }
-//                }
-//            }
-//
-//            if ($criterionForm->isValid()) {
-//
-//                // check values already set in DB and dissociate those which are different
-//                $submittedCriteria = new ArrayCollection;
-//
-//                foreach ($criterionFormStages as $stage) {
-//                    foreach ($stage->getCriteria() as $criterion) {
-//                        $submittedCriteria->add($criterion);
-//                    }
-//                }
-//
-//                //return [count($submittedCriteria),count($originalCriteria)];
-//
-//                foreach ($submittedCriteria as $submittedCriterion) {
-//                    if ($submittedCriterion->getType() == 3) {
-//                        $submittedCriterion->setLowerbound(0)->setUpperbound(1);
-//                    }
-//
-//                    foreach ($criteriaForm as $key => $criterionForm) {
-//                        if ($criterionForm->getData() == $submittedCriterion) {
-//                            $criterionKey = $key;
-//                            break;
-//                        }
-//                    }
-//
-//                    $targetValueField = $criteriaForm[$criterionKey]->get('targetValue');
-//                    //return [$targetValueField->getData()];
-//                    $targetValue = ($targetValueField->getData() == null) ? null : $targetValueField->getData();
-//
-//                    if ($targetValue != null) {
-//                        if ($submittedCriterion->getTarget() != null) {
-//                            $target = $submittedCriterion->getTarget();
-//                        } else {
-//                            $target = new Target;
-//                            $target->setCriterion($submittedCriterion);
-//                            $submittedCriterion->setTarget($target);
-//                        }
-//                        $target->setValue($targetValue);
-//                    } else {
-//                        $target = $submittedCriterion->getTarget();
-//                        if ($target !== null) {
-//                            $criterion->setTarget(null);
-//                            $target->setCriterion(null);
-//                            $removableTargets[] = $target;
-//                        }
-//                    }
-//
-//                    $em->persist($submittedCriterion);
-//                }
-//
-//                /*
-//                foreach ($originalCriteria as $originalCriterion) {
-//                if ($submittedCriteria->contains($originalCriterion) === false) {
-//                //$originalCriterion->setStage(null);
-//                $currentStage = $originalCriterion->getStage();
-//                $currentStage->removeCriterion($originalCriterion);
-//                //$originalCriterion->setDeleted(new \DateTime);
-//                $em->persist($currentStage);
-//                }
-//                }*/
-//
-//                foreach ($submittedCriteria as $submittedCriterion) {
-//
-//                    if (count($submittedCriterion->getParticipants()) == 0) {
-//
-//                        foreach ($submittedCriteria as $theSubmittedCriterion) {
-//                            if (count($theSubmittedCriterion->getParticipants()) != 0 && $theSubmittedCriterion->getStage() == $submittedCriterion->getStage()) {
-//                                break;
-//                            }
-//                        }
-//
-//                        foreach ($theSubmittedCriterion->getParticipants() as $participant) {
-//                            $newCriterionParticipant = clone $participant;
-//                            $newCriterionParticipant->setInserted(new \DateTime);
-//                            $submittedCriterion->addParticipant($newCriterionParticipant);
-//                            $em->persist($submittedCriterion);
-//                        }
-//                    }
-//                }
-//
-//                $em->flush();
-//                if (isset($removableTargets)) {
-//
-//                    foreach ($removableTargets as $removableTarget) {
-//                        $em->remove($removableTarget);
-//                        $em->flush();
-//                    }
-//                }
-//
-//                $message = ($actionType == 'next') ? 'goNext' : 'goPrev';
-//                return new JsonResponse(['message' => $message], 200);
-//
-//            } else {
-//
-//                //print_r($criterionForm->getErrors());
-//                //die;
-//
-//                $errors = $this->buildErrorArray($criterionForm);
-//                return $errors;
-//            }
-//
-//        } else {
-//
-//            foreach ($criterionFormStages as $stage) {
-//                $stageTotalCriteriaWeight = 0;
-//                foreach ($stage->getCriteria() as $criterion) {
-//                    $stageTotalCriteriaWeight += $criterion->getWeight();
-//                }
-//
-//                if (round($stageTotalCriteriaWeight, 4) != 1) {
-//                    return new JsonResponse(['message' => 'supHundredPct', 'stageName' => $stage->getName(), 'totalWeights' => round(100 * $stageTotalCriteriaWeight, 1)], 200);
-//                }
-//            }
-//
-//            //$k = 0;
-//            $activity->setSaved(new \DateTime);
-//            $em->persist($activity);
-//
-//            // We insert each individual criteria which is correctly inputed
-//            // In case a already existing criterion has been modified and becomes unvalid, then we do not modify it
-//
-//            $criterionGeneralFormElement = $criterionForm->get('activeModifiableStages');
-//
-//            foreach ($criterionGeneralFormElement as $activeStageForm) {
-//
-//                foreach ($activeStageForm->get('criteria') as $activeStageCriterionForm) {
-//                    $k = 0;
-//                    $criterion = $activeStageCriterionForm->getData();
-//
-//                    if ($activeStageCriterionForm->get('cName')->isValid()) {
-//                        $repoCN = $em->getRepository(CriterionName::class);
-//                        $criterion->setCName($repoCN->find($activeStageCriterionForm->get('cName')->getData()));}
-//                    if ($activeStageCriterionForm->get('type')->isValid()) {$criterion->setType($activeStageCriterionForm->get('type')->getData());} else { $k++;}
-//                    if ($activeStageCriterionForm->get('lowerbound')->isValid()) {$criterion->setLowerbound($activeStageCriterionForm->get('lowerbound')->getData());} else { $k++;}
-//                    if ($activeStageCriterionForm->get('upperbound')->isValid()) {$criterion->setUpperbound($activeStageCriterionForm->get('upperbound')->getData());} else { $k++;}
-//                    if ($activeStageCriterionForm->get('step')->isValid()) {$criterion->setStep($activeStageCriterionForm->get('step')->getData());} else { $k++;}
-//                    if ($activeStageCriterionForm->get('weight')->isValid()) {$criterion->setWeight($activeStageCriterionForm->get('weight')->getData());} else { $k++;}
-//                    if ($elmt == 'activity') {
-//                        $criterion->setComplete(($k == 0));
-//                    }
-//
-//                    // We only add new participants in case considered stage had participants
-//
-//                    if (count($criterion->getParticipants()) == 0) {
-//                        $l = 0;
-//                        foreach ($activeStageForm->get('criteria')->getData() as $theSubmittedCriterion) {
-//                            if (count($theSubmittedCriterion->getParticipants()) != 0) {
-//                                $l = 1;
-//                                break;
-//                            }
-//                        }
-//
-//                        // We only add new participants in case considered stage had participants
-//
-//                        if ($l == 1) {
-//                            $existingCriterionParticipants = $theSubmittedCriterion->getParticipants();
-//
-//                            foreach ($existingCriterionParticipants as $existingCriterionParticipant) {
-//                                $participant = clone $existingCriterionParticipant;
-//                                $participant->setInserted(new \DateTime);
-//                                $criterion->addParticipant($participant);
-//                            }
-//                        }
-//                    }
-//
-//                    $em->persist($criterion);
-//
-//                    /*if ($activeStageCriterionForm->get('cName')->isValid() && $activeStageCriterionForm->get('type')->isValid() && $activeStageCriterionForm->get('lowerbound')->isValid() && $activeStageCriterionForm->get('upperbound')->isValid() && $activeStageCriterionForm->get('step')->isValid() && $activeStageCriterionForm->get('weight')->isValid()) {
-//
-//                $concernedCriterion = $activeStageCriterionForm->getData();
-//
-//                $concernedCriterion->setStage($activeStageForm->getData())
-//                ->setCName($activeStageCriterionForm->get('cName')->getData())
-//                ->setType($activeStageCriterionForm->get('type')->getData())
-//                ->setLowerbound($activeStageCriterionForm->get('lowerbound')->getData())
-//                ->setUpperbound($activeStageCriterionForm->get('upperbound')->getData())
-//                ->setStep($activeStageCriterionForm->get('step')->getData())
-//                ->setWeight($activeStageCriterionForm->get('weight')->getData());
-//
-//                if ($elmt == 'activity') {
-//                $concernedCriterion->setComplete(true);
-//                }
-//
-//                if (count($concernedCriterion->getParticipants()) == 0) {
-//                $k = 0;
-//                foreach ($activeStageForm->get('criteria')->getData() as $theSubmittedCriterion) {
-//                if (count($theSubmittedCriterion->getParticipants()) != 0) {
-//                $k = 1;
-//                break;
-//                }
-//                }
-//
-//                // We only add new participants in case considered stage had participants
-//
-//                if ($k == 1) {
-//                $existingCriterionParticipants = $theSubmittedCriterion->getParticipants();
-//
-//                foreach ($existingCriterionParticipants as $existingCriterionParticipant) {
-//                $participant = clone $existingCriterionParticipant;
-//                $participant->setInserted(new \DateTime);
-//                $concernedCriterion->addParticipant($participant);
-//                }
-//                }
-//
-//                }
-//
-//                $em->persist($concernedCriterion);
-//
-//                }*/
-//
-//                }
-//
-//                //$k++;
-//
-//            }
-//
-//            $em->flush();
-//
-//            switch ($actionType) {
-//                case 'back':
-//                case 'save':
-//                    $message = 'goBack';
-//                    break;
-//                case 'stage':
-//                    $message = 'stages';
-//                    break;
-//                case 'parameter':
-//                    $message = 'parameters';
-//                    break;
-//                case 'criterion':
-//                    $message = 'criteria';
-//                    break;
-//                case 'participant':
-//                    $message = 'participants';
-//                    break;
-//            }
-//
-//            return new JsonResponse(['message' => $message], 200);
-//
-//        }
-//
-//        /*} elseif ($actionType == 'back') {
-//
-//    return new JsonResponse(['message' => 'goBack'], 200);
-//    } elseif ($actionType == 'previous') {
-//
-//    return new JsonResponse(['message' => 'goPrev'], 200);
-//    }*/
-//    }
-
-    // 4 - Display participants to be added
-
-    // Display all participants (after Activity Mgr sets activities parameters)
-    public function addParticipantsAction(Request $request, $elmt, $elmtId)
-    {
-        RouteDumper::dump($app);
-        $em = self::getEntityManager();
-        $repoU = $em->getRepository(User::class);
-        $result = [];
-        $orgId = $app['security.token_storage']->getToken()->getUser()->getOrgId();
-
-        foreach ($repoU->findAllActiveByOrganization($orgId) as $user) {
-
-            $result[] = $user->toArray();
-            print_r($result);
-            die;
-        }
-
-        return $this->render('participants_list.html.twig',
-            [
-                'stages' => $stages,
-                'actId' => $actId,
-                'participants' => $result,
-            ]);
-
-    }
-
-    //Update activity (limited to activity manager)
-    public function modifyActivityAction(Request $request, Application $app)
-    {
-
-    }
-
-    /*********** ADDITION, MODIFICATION, DELETION AND DISPLAY OF PARTICIPANTS *****************/
-
-    //Modify Action
-    public function modifyAction(Request $request, Application $app, $actId)
-    {
-
-        if (!$currentUser) {
-            return $this->redirectToRoute('login');
-        }
-
-        $organization = $currentUser->getOrganization();
-
-        //Get the data about the activity selected
-        $activity = new Activity;
-        $em = self::getEntityManager();
-        $repoA = $em->getRepository(Activity::class);
-        $activity = $repoA->find($actId);
-
-        //Get the criteria of the activity
-        $criterion = new Criterion;
-        $em = self::getEntityManager();
-        $repoC = $em->getRepository(Criterion::class);
-        $criterion = $repoC->findOneByActId($actId);
-
-        /** @var FormFactory */
-        
-        $modifyActivityForm = $this->createForm(
-            AddActivityCriteriaForm::class,
-            $criterion,
-            [
-                'standalone' => true,
-                'organization' => $organization,
-            ]
-        );
-        $modifyActivityForm->handleRequest($request);
-
-        if ($modifyActivityForm->isSubmitted()) {
-            //Update the activity
-            $activity->setDeadline($modifyActivityForm->get('deadline')->getData());
-            $activity->setVisibility($modifyActivityForm->get('visibility')->getData());
-            $activity->setObjectives($modifyActivityForm->get('objectives')->getData());
-            $activity->setName($modifyActivityForm->get('name')->getData());
-            $em->persist($activity);
-            $em->persist($criterion);
-            $em->flush();
-
-            $em = self::getEntityManager();
-            $repository = $em->getRepository(\App\Entity\User::class);
-            $allUsers = [];
-            foreach ($repository->findAll() as $user) {
-                $allUsers[] = $user->toArray($app);
-            }
-
-            //Get the participants linked to the activity
-            $sql = "SELECT usr_id FROM user INNER JOIN activity_user ON activity_user.user_usr_id=user.usr_id WHERE activity_user.activity_act_id=:actId";
-            $pdoStatement = $app['db']->prepare($sql);
-            $pdoStatement->bindValue(':actId', $actId);
-            $pdoStatement->execute();
-            $list = $pdoStatement->fetchAll();
-            $activeId = [];
-            foreach ($list as $key => $value) {
-                $activeId[] = $value['usr_id'];
-            }
-
-            return $this->render('participants_list.html.twig',
-                [
-                    'participants' => $allUsers,
-                    'activeId' => $activeId,
-                    'actId' => $actId,
-                    'update' => true,
-                ]);
-        }
-        return $this->render('activity_modify.html.twig',
-            [
-                'form' => $modifyActivityForm->createView(),
-            ]);
-
-    }
 
     /**
      * @param Request $request
@@ -3905,7 +2054,7 @@ class ActivityController extends MasterController
      */
     public function getGradableStagesAction(Request $request, $actId)
     {
-        $em = self::getEntityManager();
+        $em = $this->em;
 
         if (!$currentUser) {
             return new JsonResponse('error', 500);
@@ -4088,14 +2237,14 @@ class ActivityController extends MasterController
      */
     public function gradeAction(Request $request, $stgId)
     {
-        $em = self::getEntityManager();
+        $em = $this->em;
         
 
         if (!$currentUser) {
             return $this->redirectToRoute('login');
         }
 
-        $repoAU = $em->getRepository(Participation::class);
+        $repoP = $em->getRepository(Participation::class);
         $repo1 = $em->getRepository(Answer::class);
         $stage = $em->getRepository(Stage::class)->find($stgId);
         if($stage->getSurvey()!=null){
@@ -4107,7 +2256,7 @@ class ActivityController extends MasterController
         } else {
             $this->updateStageGrades($stage);
 
-            $userParticipations = $repoAU->findBy(['stage' => $stage, 'usrId' => $currentUser->getId()]);
+            $userParticipations = $repoP->findBy(['stage' => $stage, 'usrId' => $currentUser->getId()]);
             
             $stageUniqueParticipationsForm = $this->createForm(StageUniqueParticipationsType::class, $stage, ['standalone' => true, 'mode' => 'grade']);
             $stageUniqueParticipationsForm->handleRequest($request);
@@ -4146,21 +2295,21 @@ class ActivityController extends MasterController
     public function newGradeAction(Request $request, $stgId)
     {
 
-        $em = self::getEntityManager();
+        $em = $this->em;
 
         if (!$currentUser) {
             return $this->redirectToRoute('login');
         }
         $repoO = $em->getRepository(Organization::class);
-        $repoAU = $em->getRepository(Participation::class);
+        $repoP = $em->getRepository(Participation::class);
         $repoG = $em->getRepository(Grade::class);
         $stage = $em->getRepository(Stage::class)->find($stgId);
-        $organization = $repoO->find($currentUser->getOrgId());
+        $organization = $currentUser->getOrganization();
         $id = $currentUser->getId();
         $actOrganization = $stage->getActivity()->getOrganization();
         $userIsParticipant = false;
 
-        $existingParticipants = new ArrayCollection($repoAU->findBy(['stage' => $stage], ['criterion' => 'DESC', 'type' => 'DESC']));
+        $existingParticipants = new ArrayCollection($repoP->findBy(['stage' => $stage], ['criterion' => 'DESC', 'type' => 'DESC']));
         foreach ($existingParticipants as $existingParticipant) {
             if ($existingParticipant->getUsrId() == $currentUser->getId()) {
                 $userIsParticipant = true;
@@ -4174,12 +2323,12 @@ class ActivityController extends MasterController
 
             //Get all participants
 
-            $existingParticipants = new ArrayCollection($repoAU->findBy(['stage' => $stage], ['criterion' => 'DESC', 'type' => 'DESC']));
+            $existingParticipants = new ArrayCollection($repoP->findBy(['stage' => $stage], ['criterion' => 'DESC', 'type' => 'DESC']));
 
             $existingTeamParticipants = $existingParticipants->matching(Criteria::create()->where(Criteria::expr()->neq("team", null))->orderBy(['team' => Criteria::ASC]));
             $existingUserParticipants = $existingParticipants->matching(Criteria::create()->where(Criteria::expr()->eq("team", null)));
-            //$existingTeamParticipants = $repoAU->findBy(['stage' => $stage, 'usrId' => null], ['criterion' => 'DESC', 'type' => 'DESC']);
-            //$existingUserParticipants = $repoAU->findBy(['stage' => $stage, 'team' => null], ['criterion' => 'DESC', 'type' => 'DESC']);
+            //$existingTeamParticipants = $repoP->findBy(['stage' => $stage, 'usrId' => null], ['criterion' => 'DESC', 'type' => 'DESC']);
+            //$existingUserParticipants = $repoP->findBy(['stage' => $stage, 'team' => null], ['criterion' => 'DESC', 'type' => 'DESC']);
             $userTeam = null;
 
             $foundUserTeam = false;
@@ -4300,7 +2449,7 @@ class ActivityController extends MasterController
                     if ($criterionStageGrade == null) {
                         $criterionStageGrade = new Grade;
                         $criterionStageGrade
-                            ->setParticipant($currentUserParticipation)
+                            ->setParticipation($currentUserParticipation)
                             ->setTeam($currentUserParticipation->getTeam())
                             ->setGradedUsrId(null)
                             ->setGradedTeaId(null)
@@ -4330,7 +2479,7 @@ class ActivityController extends MasterController
                             if ($criterionUserGrade == null) {
                                 $criterionUserGrade = new Grade;
                                 $criterionUserGrade
-                                    ->setParticipant($currentUserParticipation)
+                                    ->setParticipation($currentUserParticipation)
                                     ->setTeam($currentUserParticipation->getTeam())
                                     ->setGradedUsrId($existingParticipantUserId)
                                     ->setGradedTeaId($existingParticipantUsersId['teaId'][$key])
@@ -4395,19 +2544,19 @@ class ActivityController extends MasterController
     public function updateStageGrades($stage)
     {
 
-        $em = self::getEntityManager();
+        $em = $this->em;
 
-        $repoAU = $em->getRepository(Participation::class);
+        $repoP = $em->getRepository(Participation::class);
         $repoG = $em->getRepository(Grade::class);
 
         //Get all participants
 
-        $totalParticipants = new ArrayCollection($repoAU->findBy(['stage' => $stage], ['criterion' => 'DESC', 'type' => 'DESC']));
+        $totalParticipants = new ArrayCollection($repoP->findBy(['stage' => $stage], ['criterion' => 'DESC', 'type' => 'DESC']));
         $existingParticipants = $totalParticipants->matching(Criteria::create()->where(Criteria::expr()->neq("criterion", null))->orWhere(Criteria::expr()->neq("survey", null)));
         $existingTeamParticipants = $existingParticipants->matching(Criteria::create()->where(Criteria::expr()->neq("team", null))->orderBy(['team' => Criteria::ASC]));
         $existingUserParticipants = $existingParticipants->matching(Criteria::create()->where(Criteria::expr()->eq("team", null)));
-        //$existingTeamParticipants = $repoAU->findBy(['stage' => $stage, 'usrId' => null], ['criterion' => 'DESC', 'type' => 'DESC']);
-        //$existingUserParticipants = $repoAU->findBy(['stage' => $stage, 'team' => null], ['criterion' => 'DESC', 'type' => 'DESC']);
+        //$existingTeamParticipants = $repoP->findBy(['stage' => $stage, 'usrId' => null], ['criterion' => 'DESC', 'type' => 'DESC']);
+        //$existingUserParticipants = $repoP->findBy(['stage' => $stage, 'team' => null], ['criterion' => 'DESC', 'type' => 'DESC']);
         $userTeam = null;
 
         $foundUserTeam = false;
@@ -4620,7 +2769,7 @@ class ActivityController extends MasterController
     {
         set_time_limit(300);
         $repoA = $em->getRepository(Activity::class);
-        $repoAU = $em->getRepository(Participation::class);
+        $repoP = $em->getRepository(Participation::class);
         $repoGI = $em->getRepository(GeneratedImage::class);
         $user = self::getAuthorizedUser();
         if (!$user instanceof User) {
@@ -4660,7 +2809,7 @@ class ActivityController extends MasterController
                     $stageBinaryWeights = 0;
                     $stageEvaluationWeights = 0;
                     $stageContributionWeights = 0;
-                    $userParticipation = $repoAU->findOneBy(['criterion' => $stage->getCriteria()->first(), 'usrId' => $userId]);
+                    $userParticipation = $repoP->findOneBy(['criterion' => $stage->getCriteria()->first(), 'usrId' => $userId]);
 
                     // We get current participant status : null if is not involved in the process, otherwise its stage status
                     $participantStatus = $userParticipation ? $userParticipation->getStatus() : null;
@@ -4734,10 +2883,10 @@ class ActivityController extends MasterController
      * @param $usrId
      * @Route("/stage/{stgId}/request/{usrId}/results", name="requestResults")
      */
-    public function requestResultsAction(Request $request, Application $app, $stgId, $usrId)
+    public function requestResultsAction(Request $request, $stgId, $usrId)
     {
 
-        $em = self::getEntityManager();
+        $em = $this->em;
         $repoS = $em->getRepository(Stage::class);
 
     }
@@ -4759,10 +2908,10 @@ class ActivityController extends MasterController
      * @throws OptimisticLockException
      * @Route("/settings/report/save/{actId}/{stgId}/{crtId}/{type}/{overview}/{equalEntries}", name="saveImageActivityReport")
      */
-    public function saveImageActivityReportAction(Request $request, Application $app, $actId, $stgId, $crtId, $type, $overview, $equalEntries)
+    public function saveImageActivityReportAction(Request $request, $actId, $stgId, $crtId, $type, $overview, $equalEntries)
     {
 
-        $em = self::getEntityManager();
+        $em = $this->em;
         $repoI = $em->getRepository(GeneratedImage::class);
         $actValue = ($actId != -1) ? $actId : null;
         $stgValue = ($stgId >= 0) ? $stgId : null;
@@ -4807,9 +2956,9 @@ class ActivityController extends MasterController
      */
     public function provideGraphDataAction(Application $app, Request $request, $actId, $stgIndex, $crtIndex, $equalEntries)
     {
-        $em = self::getEntityManager();
+        $em = $this->em;
         $repoA = $em->getRepository(Activity::class);
-        $repoAU = $em->getRepository(Participation::class);
+        $repoP = $em->getRepository(Participation::class);
         $repoR = $em->getRepository(Result::class);
         $repoG = $em->getRepository(Grade::class);
         $repoU = $em->getRepository(User::class);
@@ -5018,9 +3167,9 @@ class ActivityController extends MasterController
             // Two cases : if (stgIndex,crtIndex) = (-1,-2) a computed stage (released stage) is enough to view results for admin/am (collaborator),
             // otherwise switch to the only other case (s,c) = (-1, -1)
 
-            $isPublished = $repoAU->findBy(['activity' => $activity, 'status' => [0, 1, 2, 3]]) == null;
+            $isPublished = $repoP->findBy(['activity' => $activity, 'status' => [0, 1, 2, 3]]) == null;
             // if ($crtIndex == -1) {
-            //     $isViewable = $isPublished || $user->getRole() != 3 && $repoAU->findBy(['activity' => $activity, 'status' => [0,1,2], 'type' => [0,1]]) == null;
+            //     $isViewable = $isPublished || $user->getRole() != 3 && $repoP->findBy(['activity' => $activity, 'status' => [0,1,2], 'type' => [0,1]]) == null;
             // } else {
             //     $isViewable = ($user->getRole() != 3 && $oneComputedStage || $user->getRole() == 3 && $oneReleasedStage);
             // }
@@ -5034,7 +3183,7 @@ class ActivityController extends MasterController
                     $rowData = [];
                     $rowData[] = 'Participants';
 
-                    $activityParticipants = $repoAU->findBy(['activity' => $activity], ['usrId' => 'ASC']);
+                    $activityParticipants = $repoP->findBy(['activity' => $activity], ['usrId' => 'ASC']);
 
                     $uniqueActivityParticipants = [];
                     $actualId = 0;
@@ -5638,7 +3787,7 @@ class ActivityController extends MasterController
                         $rowData = [];
                         $rowData[] = 'Participants';
 
-                        $stageParticipants = $repoAU->findBy(['stage' => $stage], ['usrId' => 'ASC']);
+                        $stageParticipants = $repoP->findBy(['stage' => $stage], ['usrId' => 'ASC']);
                         $uniqueActivityParticipants = [];
                         $actualId = 0;
                         $nbTPs = 0;
@@ -6353,7 +4502,7 @@ class ActivityController extends MasterController
                     $rowData = [];
                     $rowData[] = 'Participants';
 
-                    $activityParticipants = $repoAU->findBy(
+                    $activityParticipants = $repoP->findBy(
                         ['activity' => $activity],
                         ['usrId' => 'ASC']
                     );
@@ -6541,7 +4690,7 @@ class ActivityController extends MasterController
                     $rowData[] = 'Criteria';
                     $stage = $activity->getStages()->get($stgIndex);
 
-                    $stageParticipants = $repoAU->findBy(['stage' => $stage], ['usrId' => 'ASC']);
+                    $stageParticipants = $repoP->findBy(['stage' => $stage], ['usrId' => 'ASC']);
 
                     $uniqueStageParticipants = [];
                     $actualId = 0;
@@ -6644,7 +4793,7 @@ class ActivityController extends MasterController
 
             $userRole = $user->getRole();
 
-            function actManagerCanPublish(EntityRepository $repoAU, Activity $activity, User $user, int $stgIndex = -1)
+            function actManagerCanPublish(EntityRepository $repoP, Activity $activity, User $user, int $stgIndex = -1)
             {
                 if ($stgIndex == -1) {
                     $userId = $user->getId();
@@ -6658,7 +4807,7 @@ class ActivityController extends MasterController
                     /** @var Stage */
                     $stage = $activity->getStages()->get($stgIndex);
                     /** @var Participation */
-                    $Participation = $repoAU->findOneBy(['stage' => $stage, 'usrId' => $user->getId()]);
+                    $Participation = $repoP->findOneBy(['stage' => $stage, 'usrId' => $user->getId()]);
 
                     return $Participation and $Participation->isLeader();
                 }
@@ -6669,7 +4818,7 @@ class ActivityController extends MasterController
                  or
                 $userRole == 1// admin
                  or
-                ($userRole == 2 and actManagerCanPublish($repoAU, $activity, $user, $stgIndex)) // AM & is stage leader
+                ($userRole == 2 and actManagerCanPublish($repoP, $activity, $user, $stgIndex)) // AM & is stage leader
             );
 
             $data['displayablePerfGraph'] = count($perfGraphData) > 1;
@@ -6737,8 +4886,8 @@ class ActivityController extends MasterController
         //Accessing all repositories
 
         //Get users associated to activity
-        $em = self::getEntityManager();
-        $repoAU = $em->getRepository(Participation::class);
+        $em = $this->em;
+        $repoP = $em->getRepository(Participation::class);
         $repoA = $em->getRepository(Activity::class);
         $repoU = $em->getRepository(User::class);
         $repoG = $em->getRepository(Grade::class);
@@ -6764,7 +4913,7 @@ class ActivityController extends MasterController
             $userStatus = [];
             $totalData = [];
             //foreach ($stages as $stage) {
-            $userParticipation = $repoAU->findOneBy(['criterion' => $stage->getCriteria()->first(), 'usrId' => $userId]);
+            $userParticipation = $repoP->findOneBy(['criterion' => $stage->getCriteria()->first(), 'usrId' => $userId]);
 
             // We get current participant status : null if is not involved in the process, otherwise its stage status
             $participantStatus = $userParticipation ? $userParticipation->getStatus() : null;
@@ -6784,7 +4933,7 @@ class ActivityController extends MasterController
                     //getting all stage participants
 
                     //getting current participant status, and insert it in array for all stages
-                    //$participantStatus = $repoAU->findOneBy(['criterion' => $criterion, 'usrId' => $userId])->getStatus();
+                    //$participantStatus = $repoP->findOneBy(['criterion' => $criterion, 'usrId' => $userId])->getStatus();
                     //$participantStatuses[] = $participantStatus;
                     $commentsMatrix = [];
                     $gradesMatrix = [];
@@ -6805,8 +4954,8 @@ class ActivityController extends MasterController
                     $gradeValues = [];
 
                     //getting all activity users results (old : ordered by result, not by DB entry to keep same user at same place)
-                    //$participations = $repoAU->findBy(['criterion' => $criterion], ['absoluteWeightedResult' => 'DESC']);
-                    $participations = $repoAU->findBy(['criterion' => $criterion], ['type' => 'DESC']);
+                    //$participations = $repoP->findBy(['criterion' => $criterion], ['absoluteWeightedResult' => 'DESC']);
+                    $participations = $repoP->findBy(['criterion' => $criterion], ['type' => 'DESC']);
 
                     //$results = $repoR->find
 
@@ -6975,7 +5124,7 @@ class ActivityController extends MasterController
         }
         //$commentCrtValue = ($crtIndex != -1) ? (($stgIndex != -1) ? $activity->getStages()->get($stgIndex)->getCriteria()->get($crtIndex)->getId() : $activity->getStages()->first()->getCriteria()->get($crtIndex)->getId()) : ($stgIndex != -1) ? $activity->getStages()->get($stgIndex)->getCriteria()->first()->getId() : null;
 
-        $comments = $repoAU->findBy(['criterion' => $commentCrtValue]);
+        $comments = $repoP->findBy(['criterion' => $commentCrtValue]);
 
         try {
             $html = $this->render('activity_report.html.twig',
@@ -7036,12 +5185,12 @@ class ActivityController extends MasterController
     {
 
         $printingElmts = [];
-        $em = self::getEntityManager();
+        $em = $this->em;
         $repoA = $em->getRepository(Activity::class);
         $repoS = $em->getRepository(Stage::class);
         $repoC = $em->getRepository(Criterion::class);
         $repoI = $em->getRepository(GeneratedImage::class);
-        $repoAU = $em->getRepository(Participation::class);
+        $repoP = $em->getRepository(Participation::class);
         $repoG = $em->getRepository(Grade::class);
         $user = self::getAuthorizedUser();
         if (!$user instanceof User) {
@@ -7171,7 +5320,7 @@ class ActivityController extends MasterController
                                 $trigger = false;
                                 if ($criterion == null && $stage == null && $trigger == false) {
                                     $grades = (isset($_POST['settings_comments'])) ? $repoG->findBy(['activity' => $activity], ['team' => 'ASC', 'participant' => 'ASC', 'gradedTeaId' => 'ASC', 'gradedUsrId' => 'ASC']) : null;
-                                    $participants = (isset($_POST['settings_objectives'])) ? $repoAU->findBy(['activity' => $activity], ['usrId' => 'ASC']) : null;
+                                    $participants = (isset($_POST['settings_objectives'])) ? $repoP->findBy(['activity' => $activity], ['usrId' => 'ASC']) : null;
                                     $trigger = true;
                                 }
                             } else {
@@ -7180,12 +5329,12 @@ class ActivityController extends MasterController
                                     $trigger = false;
                                     if ($criterion == null && $trigger == false) {
                                         $grades = (isset($_POST['settings_comments'])) ? $repoG->findBy(['stage' => $stage], ['team' => 'ASC', 'participant' => 'ASC', 'gradedTeaId' => 'ASC', 'gradedUsrId' => 'ASC']) : null;
-                                        $participants = (isset($_POST['settings_objectives'])) ? $repoAU->findBy(['stage' => $stage], ['usrId' => 'ASC']) : null;
+                                        $participants = (isset($_POST['settings_objectives'])) ? $repoP->findBy(['stage' => $stage], ['usrId' => 'ASC']) : null;
                                         $trigger = true;
                                     }
                                 } else {
                                     $grades = (isset($_POST['settings_comments'])) ? $repoG->findBy(['criterion' => $criterion], ['team' => 'ASC', 'participant' => 'ASC', 'gradedTeaId' => 'ASC', 'gradedUsrId' => 'ASC']) : null;
-                                    $participants = (isset($_POST['settings_objectives'])) ? $repoAU->findBy(['criterion' => $criterion], ['usrId' => 'ASC']) : null;
+                                    $participants = (isset($_POST['settings_objectives'])) ? $repoP->findBy(['criterion' => $criterion], ['usrId' => 'ASC']) : null;
                                 }
                             }
 
@@ -7194,12 +5343,12 @@ class ActivityController extends MasterController
                             if ($isPrintableActivity) {
                                 if ($stage == null && $criterion == null) {
                                     $grades = (isset($_POST['settings_comments'])) ? $repoG->findBy(['activity' => $activity], ['team' => 'ASC', 'participant' => 'ASC', 'gradedTeaId' => 'ASC', 'gradedUsrId' => 'ASC']) : null;
-                                    $participants = (isset($_POST['settings_objectives'])) ? $repoAU->findBy(['activity' => $activity], ['usrId' => 'ASC']) : null;
+                                    $participants = (isset($_POST['settings_objectives'])) ? $repoP->findBy(['activity' => $activity], ['usrId' => 'ASC']) : null;
                                 }
                             } else {
                                 if ($criterion == null) {
                                     $grades = (isset($_POST['settings_comments'])) ? $repoG->findBy(['stage' => $stage], ['team' => 'ASC', 'participant' => 'ASC', 'gradedTeaId' => 'ASC', 'gradedUsrId' => 'ASC']) : null;
-                                    $participants = (isset($_POST['settings_objectives'])) ? $repoAU->findBy(['stage' => $stage], ['usrId' => 'ASC']) : null;
+                                    $participants = (isset($_POST['settings_objectives'])) ? $repoP->findBy(['stage' => $stage], ['usrId' => 'ASC']) : null;
                                 }
                             }
                         }
@@ -7219,7 +5368,7 @@ class ActivityController extends MasterController
 
                                 $trigger = false;
                                 if ($criterion == null && $stage == null && $trigger == false) {
-                                    $participants = (isset($_POST['settings_objectives'])) ? $repoAU->findBy(['activity' => $activity, 'usrId' => $user->getId()], ['usrId' => 'ASC']) : null;
+                                    $participants = (isset($_POST['settings_objectives'])) ? $repoP->findBy(['activity' => $activity, 'usrId' => $user->getId()], ['usrId' => 'ASC']) : null;
 
                                     $grades = (isset($_POST['settings_comments'])) ? (
                                         ($participants[0]->getTeam() == null) ?
@@ -7233,7 +5382,7 @@ class ActivityController extends MasterController
                                 if ($printAllBelowStage) {
                                     $trigger = false;
                                     if ($criterion == null && $trigger == false) {
-                                        $participants = (isset($_POST['settings_objectives'])) ? $repoAU->findBy(['stage' => $stage, 'usrId' => $user->getId()], ['usrId' => 'ASC']) : null;
+                                        $participants = (isset($_POST['settings_objectives'])) ? $repoP->findBy(['stage' => $stage, 'usrId' => $user->getId()], ['usrId' => 'ASC']) : null;
                                         $grades = (isset($_POST['settings_comments'])) ? (
                                             ($participants[0]->getTeam() == null) ?
                                             $repoG->findBy(['stage' => $stage, 'gradedUsrId' => $user->getId()]) :
@@ -7242,7 +5391,7 @@ class ActivityController extends MasterController
                                         $trigger = true;
                                     }
                                 } else {
-                                    $participants = (isset($_POST['settings_objectives'])) ? $repoAU->findBy(['criterion' => $criterion, 'usrId' => $user->getId()], ['usrId' => 'ASC']) : null;
+                                    $participants = (isset($_POST['settings_objectives'])) ? $repoP->findBy(['criterion' => $criterion, 'usrId' => $user->getId()], ['usrId' => 'ASC']) : null;
                                     $grades = (isset($_POST['settings_comments'])) ? (
                                         ($participants[0]->getTeam() == null) ?
                                         $repoG->findBy(['criterion' => $criterion, 'gradedUsrId' => $user->getId()]) :
@@ -7253,7 +5402,7 @@ class ActivityController extends MasterController
                             }
                         } else {
 
-                            $participants = (isset($_POST['settings_objectives']) && $criterion == null) ? $repoAU->findBy(['criterion' => $criterion, 'usrId' => $user->getId()], ['usrId' => 'ASC']) : null;
+                            $participants = (isset($_POST['settings_objectives']) && $criterion == null) ? $repoP->findBy(['criterion' => $criterion, 'usrId' => $user->getId()], ['usrId' => 'ASC']) : null;
                             $grades = (isset($_POST['settings_comments']) && $criterion == null) ? (
                                 ($participants[0]->getTeam() == null) ?
                                 $repoG->findBy(['criterion' => $criterion, 'gradedUsrId' => $user->getId()]) :
@@ -7466,8 +5615,8 @@ class ActivityController extends MasterController
     {
 
         //Get users associated to activity
-        $em = self::getEntityManager();
-        $repoAU = $em->getRepository(Participation::class);
+        $em = $this->em;
+        $repoP = $em->getRepository(Participation::class);
         $repoS = $em->getRepository(Stage::class);
         $repoG = $em->getRepository(Grade::class);
         $repoU = $em->getRepository(User::class);
@@ -7481,7 +5630,7 @@ class ActivityController extends MasterController
             $gradeValues = [];
 
             //getting all activity users results, ordered by result
-            $participations = $repoAU->findBy(['criterion' => $criterion], ['absoluteWeightedResult' => 'DESC']);
+            $participations = $repoP->findBy(['criterion' => $criterion], ['absoluteWeightedResult' => 'DESC']);
 
             //$results = $repoR->find
 
@@ -7623,13 +5772,13 @@ class ActivityController extends MasterController
      * @throws OptimisticLockException
      * @Route("/myactivities/{action}", name="afterGrading")
      */
-    public function newSaveGradesAction(Request $request, Application $app, $action)
+    public function newSaveGradesAction(Request $request, $action)
     {
 
         $id = $app['security.token_storage']->getToken()->getUser()->getId();
-        $em = self::getEntityManager();
+        $em = $this->em;
         $repoG = $em->getRepository(Grade::class);
-        $repoAU = $em->getRepository(Participation::class);
+        $repoP = $em->getRepository(Participation::class);
         $repoU = $em->getRepository(User::class);
         $repoS = $em->getRepository(Stage::class);
         $repoC = $em->getRepository(Criterion::class);
@@ -7666,10 +5815,10 @@ class ActivityController extends MasterController
 
             if ($gradedElmtId != null) {
                 $grade = ($dataType == 'value' || $dataType == 'comment' || $dataType == 'tpcomment') ?
-                $repoG->findOneBy(['participant' => $repoAU->find($parId), 'criterion' => $criterion, 'gradedUsrId' => $gradedElmtId]) :
-                $repoG->findOneBy(['participant' => $repoAU->find($parId), 'criterion' => $criterion, 'gradedTeaId' => $gradedElmtId, 'gradedUsrId' => $gradedUsrId]);
+                $repoG->findOneBy(['participant' => $repoP->find($parId), 'criterion' => $criterion, 'gradedUsrId' => $gradedElmtId]) :
+                $repoG->findOneBy(['participant' => $repoP->find($parId), 'criterion' => $criterion, 'gradedTeaId' => $gradedElmtId, 'gradedUsrId' => $gradedUsrId]);
             } else {
-                $grade = $repoG->findOneBy(['participant' => $repoAU->find($parId), 'criterion' => $criterion, 'gradedUsrId' => null, 'gradedTeaId' => null]);
+                $grade = $repoG->findOneBy(['participant' => $repoP->find($parId), 'criterion' => $criterion, 'gradedUsrId' => null, 'gradedTeaId' => null]);
             }
 
             if ($dataType == 'value' || $dataType == 'tvalue' || $dataType == 'svalue') {
@@ -7747,7 +5896,7 @@ class ActivityController extends MasterController
         $stage = $criterion->getStage();
 
         // Set current user status
-        $currentUserParticipations = $repoAU->findBy(['stage' => $stage, 'usrId' => $id]);
+        $currentUserParticipations = $repoP->findBy(['stage' => $stage, 'usrId' => $id]);
         foreach ($currentUserParticipations as $currentUserParticipation) {
             $currentUserParticipation->setStatus($participantStatus);
             if ($action == "confirm") {
@@ -7780,7 +5929,7 @@ class ActivityController extends MasterController
         if (!$currentUser) {
             return $this->redirectToRoute('login');
         }
-        $em = self::getEntityManager();
+        $em = $this->em;
 
         $stage = $em->getRepository(Stage::class)->find($stgId);
         $activity = $stage->getActivity();
@@ -7880,9 +6029,9 @@ class ActivityController extends MasterController
             return $this->redirectToRoute('login');
         }
 
-        $em = self::getEntityManager();
+        $em = $this->em;
         $repoA = $em->getRepository(Activity::class);
-        $repoAU = $em->getRepository(Participation::class);
+        $repoP = $em->getRepository(Participation::class);
 
         /** @var Activity|null */
         $activity = $repoA->find($actId);
@@ -7891,7 +6040,7 @@ class ActivityController extends MasterController
         }
 
         /** @var Participation[] */
-        $participants = $repoAU->findBy(['activity' => $activity, 'status' => 3]);
+        $participants = $repoP->findBy(['activity' => $activity, 'status' => 3]);
         /** @var ArrayCollection<User> */
         $totalUsers = new ArrayCollection;
         /** @var User[] */
@@ -7970,14 +6119,14 @@ class ActivityController extends MasterController
      * @throws OptimisticLockException
      * @Route("/templates/{actStep}/{elmtId}/save", name="saveTemplate")
      */
-    public function saveTemplateAction(Request $request, Application $app, $actStep, $elmtId)
+    public function saveTemplateAction(Request $request, $actStep, $elmtId)
     {
 
 
         if (!$currentUser) {
             return $this->redirectToRoute('login');
         }
-        $em = self::getEntityManager();
+        $em = $this->em;
         $repoO = $em->getRepository(Organization::class);
         $repoD = $em->getRepository(Department::class);
         $repoTA = $em->getRepository(TemplateActivity::class);
@@ -8002,7 +6151,7 @@ class ActivityController extends MasterController
         }
 
         // Check if there is already a template with such name in user organization
-        if ($repoTA->findOneBy(['organization' => $repoO->find($currentUser->getOrgId()), 'name' => $createTemplateForm->get('name')->getData()]) != null) {
+        if ($repoTA->findOneBy(['organization' => $currentUser->getOrganization(), 'name' => $createTemplateForm->get('name')->getData()]) != null) {
             $createTemplateForm->get('name')->addError(new FormError('There is already a template with such name in your organization. Please choose another one or select this template'));
         }
 
@@ -8098,7 +6247,7 @@ class ActivityController extends MasterController
      * @throws OptimisticLockException
      * @Route("/activity/create/template/{tmpId}", name="createFromTemplate")
      */
-    public function createFromTemplateAction(Request $request, Application $app, $tmpId)
+    public function createFromTemplateAction(Request $request, $tmpId)
     {
 
 
@@ -8106,7 +6255,7 @@ class ActivityController extends MasterController
             return $this->redirectToRoute('login');
         }
 
-        $em = self::getEntityManager();
+        $em = $this->em;
         $repoA = $em->getRepository(Activity::class);
         $organization = $currentUser->getOrganization();
         $repoTA = $em->getRepository(TemplateActivity::class);

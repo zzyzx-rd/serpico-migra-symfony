@@ -73,7 +73,7 @@
                     {% if uniqueParticipant in form.teamGradableParticipations %}
                         {% set partElmt = uniqueParticipant.vars.data.team %}
                     {% else %}
-                        {% set partElmt = uniqueParticipant.vars.data.directUser %}
+                        {% set partElmt = uniqueParticipant.vars.data.user %}
                     {% endif %}
                     <li>
                         <ul class="user-content collection" style="justify-content:space-between">
@@ -362,7 +362,7 @@
                     <div class="modal-content">
                         {% for uniqueParticipant in form.userGradableParticipations %}
                             {% if not uniqueParticipant.vars.valid %}
-                                <div>{{uniqueParticipant.vars.data.directUser.fullname}}
+                                <div>{{uniqueParticipant.vars.data.user.fullname}}
                                     <div style="padding: 15px 0px">
                                         {% for grade in uniqueParticipant.receivedGrades %}
                                             {% if not grade.vars.valid %}

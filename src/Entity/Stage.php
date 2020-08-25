@@ -248,10 +248,10 @@ class Stage extends DbObject
     public $criteria;
 
     /**
-     * @OneToMany(targetEntity="Participation", mappedBy="stage",cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="Participation", mappedBy="stage", cascade={"persist", "remove"}, orphanRemoval=true)
      * @OrderBy({"team" = "ASC"})
      */
-    public $participants;
+    public $participations;
 
     /**
      * @OneToMany(targetEntity="Decision", mappedBy="stage",cascade={"persist","remove"}, orphanRemoval=true)
@@ -379,7 +379,7 @@ class Stage extends DbObject
         $this->reopened = false;
         $this->lastReopened = $lastReopened;
         $this->criteria = new ArrayCollection;
-        $this->participants = new ArrayCollection;
+        $this->participations = new ArrayCollection;
         $this->decisions = new ArrayCollection;
         $this->grades = new ArrayCollection;
         $this->results = new ArrayCollection;
@@ -614,9 +614,9 @@ class Stage extends DbObject
     }
 
     /**
-     * @return mixed
+     * @return Activity
      */
-    public function getActivity()
+    public function getActivity(): Activity
     {
         return $this->activity;
     }
@@ -624,9 +624,10 @@ class Stage extends DbObject
     /**
      * @param mixed $activity
      */
-    public function setActivity($activity): void
+    public function setActivity($activity): self
     {
         $this->activity = $activity;
+        return $this;
     }
 
     /**
@@ -640,13 +641,14 @@ class Stage extends DbObject
     /**
      * @param Organization $organization
      */
-    public function setOrganization(Organization $organization): void
+    public function setOrganization(Organization $organization): self
     {
         $this->organization = $organization;
+        return $this;
     }
 
     /**
-     * @return Collection
+     * @return ArrayCollection|Criterion[]
      */
     public function getCriteria()
     {
@@ -654,47 +656,23 @@ class Stage extends DbObject
     }
 
     /**
-     * @param Collection $criteria
+     * @return ArrayCollection|Participation[]
      */
-    public function setCriteria(Collection $criteria): void
+    public function getParticipations()
     {
-        $this->criteria = $criteria;
+        return $this->participations;
     }
 
     /**
-     * @return mixed
-     */
-    public function getParticipants()
-    {
-        return $this->participants;
-    }
-
-    /**
-     * @param mixed $participants
-     */
-    public function setParticipants($participants): void
-    {
-        $this->participants = $participants;
-    }
-
-    /**
-     * @return mixed
+     * @return ArrayCollection|Decision[]
      */
     public function getDecisions()
     {
         return $this->decisions;
     }
 
-    /**
-     * @param mixed $decisions
-     */
-    public function setDecisions($decisions): void
-    {
-        $this->decisions = $decisions;
-    }
-
-    /**
-     * @return mixed
+     /**
+     * @return ArrayCollection|Grade[]
      */
     public function getGrades()
     {
@@ -702,15 +680,7 @@ class Stage extends DbObject
     }
 
     /**
-     * @param mixed $grades
-     */
-    public function setGrades($grades): void
-    {
-        $this->grades = $grades;
-    }
-
-    /**
-     * @return mixed
+     * @return ArrayCollection|ResultProject[]
      */
     public function getProjectResults()
     {
@@ -718,31 +688,15 @@ class Stage extends DbObject
     }
 
     /**
-     * @param mixed $projectResults
-     */
-    public function setProjectResults($projectResults): void
-    {
-        $this->projectResults = $projectResults;
-    }
-
-    /**
-     * @return mixed
+     * @return ArrayCollection|Result[]
      */
     public function getResults()
     {
         return $this->results;
     }
 
-    /**
-     * @param mixed $results
-     */
-    public function setResults($results): void
-    {
-        $this->results = $results;
-    }
-
-    /**
-     * @return mixed
+     /**
+     * @return ArrayCollection|ResultTeam[]
      */
     public function getResultTeams()
     {
@@ -750,15 +704,7 @@ class Stage extends DbObject
     }
 
     /**
-     * @param mixed $resultTeams
-     */
-    public function setResultTeams($resultTeams): void
-    {
-        $this->resultTeams = $resultTeams;
-    }
-
-    /**
-     * @return mixed
+     * @return ArrayCollection|Ranking[]
      */
     public function getRankings()
     {
@@ -766,15 +712,7 @@ class Stage extends DbObject
     }
 
     /**
-     * @param mixed $rankings
-     */
-    public function setRankings($rankings): void
-    {
-        $this->rankings = $rankings;
-    }
-
-    /**
-     * @return mixed
+     * @return ArrayCollection|RankingTeam[]
      */
     public function getRankingTeams()
     {
@@ -782,15 +720,7 @@ class Stage extends DbObject
     }
 
     /**
-     * @param mixed $rankingTeams
-     */
-    public function setRankingTeams($rankingTeams): void
-    {
-        $this->rankingTeams = $rankingTeams;
-    }
-
-    /**
-     * @return mixed
+     * @return ArrayCollection|RankingHistory[]
      */
     public function getHistoricalRankings()
     {
@@ -798,27 +728,11 @@ class Stage extends DbObject
     }
 
     /**
-     * @param mixed $historicalRankings
-     */
-    public function setHistoricalRankings($historicalRankings): void
-    {
-        $this->historicalRankings = $historicalRankings;
-    }
-
-    /**
-     * @return mixed
+     * @return ArrayCollection|RankingTeamHistory[]
      */
     public function getHistoricalRankingTeams()
     {
         return $this->historicalRankingTeams;
-    }
-
-    /**
-     * @param mixed $historicalRankingTeams
-     */
-    public function setHistoricalRankingTeams($historicalRankingTeams): void
-    {
-        $this->historicalRankingTeams = $historicalRankingTeams;
     }
 
     /**
@@ -997,101 +911,101 @@ class Stage extends DbObject
     }
 
     /**
+     * Get distinct participants, independant from current user
      * @return ArrayCollection|Participation[]
      */
-    public function getIndependantUniqueParticipations()
+    public function getIndependantParticipants()
     {
-        $eligibleParticipants = null;
-        $uniqueParticipants = new ArrayCollection;
+        $eligibleParticipations = null;
+        $independantParticipants = new ArrayCollection;
         $teams = [];
 
+        $eligibleParticipations = count($this->criteria) === 0 ? $this->participations : $this->criteria->first()->getParticipations();
 
-        $eligibleParticipants = count($this->criteria) === 0 ? $this->participants : $this->criteria->first()->getParticipants();
-
-
-        foreach ($eligibleParticipants as $eligibleParticipant) {
-            $team = $eligibleParticipant->getTeam();
+        foreach ($eligibleParticipations as $eligibleParticipation) {
+            $team = $eligibleParticipation->getTeam();
             if ($team === null) {
-                $uniqueParticipants->add($eligibleParticipant);
+                $independantParticipants->add($eligibleParticipation);
             } else {
                 if (!in_array($team, $teams)) {
-                    $uniqueParticipants->add($eligibleParticipant);
+                    $independantParticipants->add($eligibleParticipation);
                     $teams[] = $team;
                 }
             }
         }
-        return $uniqueParticipants;
+        return $independantParticipants;
     }
     /**
      * @return ArrayCollection|Participation[]
      */
-    public function getUniqueTeamParticipations()
+    public function getTeamParticipants()
     {
         $myParticipations = $this->getSelfParticipations();
         $myTeam = $myParticipations->count() === 0 ? null : $myParticipations->first()->getTeam();
-        return $this->getUniqueParticipations()->filter(static function(Participation $p) use ($myTeam){
+        return $this->getParticipants()->filter(static function(Participation $p) use ($myTeam){
             return $p->getTeam() !== null && $p->getTeam() != $myTeam;
         });
     }
     /**
      * @return ArrayCollection|Participation[]
      */
-    public function getUserGradableParticipations()
+    public function getUserGradableParticipants()
     {
         // We get all non-third party user participations, except those of people who are part of a team we don't belong to
         if ($this->mode == STAGE::GRADED_STAGE) {
             return null;
         } else {
 
-            $userGradableParticipations = new ArrayCollection;
+            $userGradableParticipants = new ArrayCollection;
 
-            $unorderedGradableParticipations = $this->getUniqueIndivParticipations()->filter(function(Participation $p){
+            $unorderedGradableParticipants = $this->getIndivParticipants()->filter(function(Participation $p){
                 return $p->getType() != Participation::PARTICIPATION_THIRD_PARTY;
             });
 
-            foreach($unorderedGradableParticipations as $unorderedGradableParticipation){
-                $userGradableParticipations->add($unorderedGradableParticipation);
+            foreach($unorderedGradableParticipants as $unorderedGradableParticipant){
+                $userGradableParticipants->add($unorderedGradableParticipant);
             }
 
-            return $userGradableParticipations;
+            return $userGradableParticipants;
         }
     }
+
     public function addTeamGradableParticipation(Participation $participant): Stage
     {
-        $this->participants->add($participant);
+        $this->participations->add($participant);
         return $this;
     }
 
     public function removeTeamGradableParticipation(Participation $participant): Stage
     {
-        $this->participants->removeElement($participant);
+        $this->participations->removeElement($participant);
         return $this;
     }
 
     /**
      * @return ArrayCollection|Participation[]
      */
-    public function getUniqueGradableParticipations()
+    public function getGradableParticipants()
     {
-        return $this->getUniqueParticipations()->matching(Criteria::create()->where(Criteria::expr()->neq("type", 0)));
+        return $this->getParticipants()->matching(Criteria::create()->where(Criteria::expr()->neq("type", 0)));
     }
 
-    public function addUniqueGradableParticipation(Participation $participant): Stage
+    public function addGradableParticipant(Participation $participant): Stage
     {
-        if ($this->participants->exists(function (Participation $u) use ($participant) {
+        if ($this->participations->exists(function (Participation $u) use ($participant) {
             return $u->getUser()->getId() === $participant->getUser()->getId();
         })) {
             return $this;
         }
 
         foreach ($this->criteria as $criterion) {
-            $criterion->addParticipant($participant);
+            $criterion->addParticipation($participant);
             $participant->setCriterion($criterion)->setStage($this);
         }
         return $this;
     }
 
-    public function removeUniqueGradableParticipation(Participation $participant): Stage
+    public function removeGradableParticipant(Participation $participant): Stage
     {
         foreach ($this->criteria as $criterion) {
             $criterion->participants->removeElement($participant);
@@ -1099,9 +1013,9 @@ class Stage extends DbObject
         return $this;
     }
 
-    public function getUniqueGradingParticipants()
+    public function getGradingParticipants()
     {
-        return count($this->getUniqueParticipations()->matching(
+        return count($this->getParticipants()->matching(
             Criteria::create()->where(Criteria::expr()->neq("type", -1))
         ));
     }
@@ -1135,11 +1049,11 @@ class Stage extends DbObject
 
     public function userHasGivenOutput(User $u): ?bool
     {
-        if($this->participants->isEmpty()){
+        if($this->participations->isEmpty()){
             return false;
         }
 
-        $userParticipations = $this->participants->filter(static function(Participation $p) use ($u){return $p->getDirectUser() === $u;});
+        $userParticipations = $this->participations->filter(static function(Participation $p) use ($u){return $p->getDirectUser() === $u;});
         if($userParticipations->count() > 0){
             return $userParticipations->forAll(static function(int $i, Participation $p) {
                 return $p->getStatus() >= 3;
@@ -1149,124 +1063,100 @@ class Stage extends DbObject
         return false;
     }
 
-    public function addParticipant(Participation $participant): Stage
+    public function addParticipation(Participation $participation): Stage
     {
 
-        $this->participants->add($participant);
-        $participant->setStage($this);
+        $this->participations->add($participation);
+        $participation->setStage($this);
         return $this;
     }
 
-    public function removeParticipant(Participation $participant): Stage
+    public function removeParticipation(Participation $participation): Stage
     {
-        $this->participants->removeElement($participant);
+        $this->participations->removeElement($participation);
         return $this;
     }
 
-    public function addUniqueParticipation(Participation $participant): Stage
+    public function addParticipant(Participation $participation): Stage
     {
         if (count($this->criteria) !== 0) {
             foreach ($this->criteria as $criterion) {
-                $criterion->addParticipant($participant);
-                $participant->setCriterion($criterion)->setStage($this)->setActivity($this->getActivity());
+                $criterion->addParticipation($participation);
+                $participation->setCriterion($criterion)->setStage($this)->setActivity($this->getActivity());
             }
         } else {
-            $this->addParticipant($participant);
+            $this->addParticipation($participation);
         }
         return $this;
     }
 
-    public function removeUniqueParticipation(Participation $participant): Stage
+    public function removeParticipant(Participation $participation): Stage
     {
-        $participantUsrId = $participant->getUsrId();
-        $participantTeam = $participant->getTeam();
-        foreach ($this->participants as $theParticipant) {
-            if ($participantUsrId == $theParticipant->getUsrId() || $participantTeam == $theParticipant->getTeam()) {
-                $this->removeParticipant($theParticipant);
+        $participantUser = $participation->getUser();
+        $participantTeam = $participation->getTeam();
+        foreach ($this->participations as $theParticipant) {
+            if ($participantUser == $theParticipant->getUser() || ($participantTeam && $participantTeam == $theParticipant->getTeam())) {
+                $this->removeParticipation($theParticipant);
             }
         }
         return $this;
     }
 
-    public function addIndependantUniqueParticipation(Participation $participant): Stage
+    public function addIndependantParticipant(Participation $participant): Stage
     {
-        return $this->addUniqueParticipation($participant);
+        return $this->addParticipant($participant);
     }
 
-    public function removeIndependantUniqueParticipation(Participation $participant): Stage
+    public function removeIndependantParticipant(Participation $participant): Stage
     {
-        return $this->removeUniqueParticipation($participant);
+        return $this->removeParticipant($participant);
     }
 
-    public function addUniqueIntParticipation(Participation $participant): Stage
+    public function addIntParticipant(Participation $participant): Stage
     {
-        $this->addUniqueParticipation($participant);
+        $this->addParticipant($participant);
         return $this;
     }
 
-    public function removeUniqueIntParticipation(Participation $participant): Stage
+    public function removeIntParticipant(Participation $participant): Stage
     {
-        $this->removeUniqueParticipation($participant);
+        $this->removeParticipant($participant);
         return $this;
     }
 
-    public function addIndependantUniqueIntParticipation(Participation $participant): Stage
+    public function addExtParticipant(Participation $participant): Stage
     {
-        $this->addIndependantUniqueParticipation($participant);
+        $this->addParticipant($participant);
         return $this;
     }
 
-    public function removeIndependantUniqueIntParticipation(Participation $participant): Stage
+    public function removeExtParticipant(Participation $participant): Stage
     {
-        $this->removeIndependantUniqueParticipation($participant);
+        $this->removeParticipant($participant);
         return $this;
     }
 
-    public function addUniqueExtParticipation(Participation $participant): Stage
+    public function addTeamParticipant(Participation $participant): Stage
     {
-        $this->addUniqueParticipation($participant);
+        $this->addParticipant($participant);
         return $this;
     }
 
-    public function removeUniqueExtParticipation(Participation $participant): Stage
+    public function removeTeamParticipant(Participation $participant): Stage
     {
-        $this->removeUniqueParticipation($participant);
+        $this->removeParticipant($participant);
         return $this;
     }
 
-    public function addIndependantUniqueExtParticipation(Participation $participant): Stage
+    public function addIndependantTeamParticipant(Participation $participant): Stage
     {
-        $this->addIndependantUniqueExtParticipation($participant);
+        $this->addTeamParticipant($participant);
         return $this;
     }
 
-    public function removeIndependantUniqueExtParticipation(Participation $participant): Stage
+    public function removeIndependantTeamParticipant(Participation $participant): Stage
     {
-        $this->removeIndependantUniqueParticipation($participant);
-        return $this;
-    }
-
-    public function addUniqueTeamParticipation(Participation $participant): Stage
-    {
-        $this->addUniqueParticipation($participant);
-        return $this;
-    }
-
-    public function removeUniqueTeamParticipation(Participation $participant): Stage
-    {
-        $this->removeUniqueParticipation($participant);
-        return $this;
-    }
-
-    public function addIndependantUniqueTeamParticipation(Participation $participant): Stage
-    {
-        $this->addUniqueTeamParticipation($participant);
-        return $this;
-    }
-
-    public function removeIndependantUniqueTeamParticipation(Participation $participant): Stage
-    {
-        $this->removeUniqueTeamParticipation($participant);
+        $this->removeTeamParticipant($participant);
         return $this;
     }
 
@@ -1372,8 +1262,8 @@ class Stage extends DbObject
     {
         $k = 0;
         $l = 0;
-        if (count($this->participants) > 0) {
-            foreach ($this->participants as $participant) {
+        if (count($this->participations) > 0) {
+            foreach ($this->participations as $participant) {
                 if ($participant->getStatus() >= 3) {
                     $k++;
                 }
@@ -1394,9 +1284,9 @@ class Stage extends DbObject
      */
     public function getGraderUsers()
     {
-        return $this->getUniqueGraderParticipations()->map(
+        return $this->getGraderParticipants()->map(
             static function (Participation $p) {
-                return $p->getDirectUser();
+                return $p->getUser();
             }
         );
     }
@@ -1409,6 +1299,16 @@ class Stage extends DbObject
     {
         return count($this->getCriteria()->matching(Criteria::create()->where(Criteria::expr()->eq("type", 1))));
     }
+
+    public function getAllSelfGrades()
+    {
+        if ($this->mode == 1) {
+            return null;
+        } else {
+            return $this->getGrades()->matching(Criteria::create()->where(Criteria::expr()->eq("gradedTeaId", null))->andWhere(Criteria::expr()->eq("gradedUsrId", null)));
+        }
+    }
+
     public function getSelfGrades()
     {
         return $this->getAllSelfGrades()->matching(Criteria::create()->where(Criteria::expr()->in("participant", $this->getSelfParticipations()->getValues())));
@@ -1434,8 +1334,8 @@ class Stage extends DbObject
     public function userCanGiveOutput(User $u)
     {
         if($this->status == $this::STAGE_ONGOING){
-            return $this->getUniqueGraderParticipations()->exists(function (int $i,Participation $p) use ($u) {
-                return $p->getDirectUser() === $u && $p->getType() !== -1 && $p->getStatus() < 3;
+            return $this->getGraderParticipants()->exists(function (int $i,Participation $p) use ($u) {
+                return $p->getUser() === $u && $p->getType() !== -1 && $p->getStatus() < 3;
             }
             );
         }
@@ -1445,11 +1345,11 @@ class Stage extends DbObject
     }
 
     public function getOwnerUserId(){
-        $uniqueIntParticipations = $this->getUniqueIntParticipations();
+        $uniqueIntParticipations = $this->getIntParticipants();
         if($uniqueIntParticipations){
             foreach($uniqueIntParticipations as $uniqueIntParticipation){
                 if($uniqueIntParticipation->isLeader()){
-                    return $uniqueIntParticipation->getUsrId();
+                    return $uniqueIntParticipation->getUser()->getId();
                 }
             }
             return null;
@@ -1479,7 +1379,7 @@ class Stage extends DbObject
 
     public function hasCompletedOutput(): int
     {
-        return (int) $this->participants->exists(static function(int $i, Participation $p){
+        return (int) $this->participations->exists(static function(int $i, Participation $p){
             return $p->getStatus() === 3;
         });
     }
@@ -1493,7 +1393,7 @@ class Stage extends DbObject
             return $c->getExternalUsers()->exists(function(int $i, ExternalUser $e) {
 
                 $contains = false;
-                foreach($this->participants as $participant){
+                foreach($this->participations as $participant){
                     if($participant->getExtUsrId() == $e->getId()){
                         $contains = true;
                         break;
@@ -1501,7 +1401,7 @@ class Stage extends DbObject
                 }
                 return $contains;
 
-                /*return $this->participants->exists(function(int $i, Participation $p) use ($e){
+                /*return $this->participations->exists(function(int $i, Participation $p) use ($e){
                     $p->getExtUsrId() == $e->getId();
                 });
                 */
@@ -1509,7 +1409,7 @@ class Stage extends DbObject
         });
     }
 
-    public function isModifiable(Stage $stage): bool
+    public function isModifiable(): bool
     {
         $connectedUser = $this->currentUser;
         $connectedUserRole = $connectedUser->getRole();
@@ -1517,7 +1417,7 @@ class Stage extends DbObject
             return true;
         }
 
-        if ($stage->status >= 2) {
+        if ($this->status >= 2) {
             return false;
         }
 
@@ -1525,11 +1425,11 @@ class Stage extends DbObject
             return true;
         }
 
-        if ($stage->getMasterUser() == $connectedUser && ($stage->getUniqueGraderParticipations() === null || !$stage->getUniqueGraderParticipations()->exists(static function(int $i, Participation $p){return $p->isLeader();}))) {
+        if ($this->getMasterUser() == $connectedUser && ($this->getGraderParticipants() === null || !$this->getGraderParticipants()->exists(static function(int $i, Participation $p){return $p->isLeader();}))) {
             return true;
         }
 
-        return $stage->getUniqueGraderParticipations()->exists(
+        return $this->getGraderParticipants()->exists(
             static function (int $i, Participation $p) use ($connectedUser) { return $p->getUser() === $connectedUser && $p->isLeader(); }
         );
     }
@@ -1537,51 +1437,52 @@ class Stage extends DbObject
     /**
      * @return ArrayCollection|Participation[]
      */
-    public function getUniqueGraderParticipations()
+    public function getGraderParticipants()
     {
-        return $this->getUniqueParticipations()->matching(Criteria::create()->where(Criteria::expr()->neq("type", -1)));
+        return $this->getParticipants()->matching(Criteria::create()->where(Criteria::expr()->neq("type", -1)));
     }
 
     public function hasMinimumParticipationConfig(): bool
     {
-        return $this->getUniqueGraderParticipations()->count() > 0 && $this->getUniqueGradableParticipations()->count() > 0;
+        return $this->getGraderParticipants()->count() > 0 && $this->getUniqueGradableParticipations()->count() > 0;
     }
-    public function getUniqueParticipations(): ArrayCollection
+
+    public function getParticipants(): ArrayCollection
     {
 
         // Depends on whether current user is part of a team
-        $eligibleParticipants = null;
-        $uniqueParticipants = new ArrayCollection;
+        $eligibleParticipations = null;
+        $participants = new ArrayCollection;
         $teams = [];
 
-        $eligibleParticipants = count($this->criteria) === 0 ? $this->participants : $this->criteria->first()->getParticipants();
+        $eligibleParticipations = count($this->criteria) === 0 ? $this->participations : $this->criteria->first()->getParticipations();
 
         $myParticipations = $this->getSelfParticipations();
         $myTeam = $myParticipations->count() === 0 ? null : $myParticipations->first()->getTeam();
 
-        foreach ($eligibleParticipants as $eligibleParticipant) {
-            $currentTeam = $eligibleParticipant->getTeam();
+        foreach ($eligibleParticipations as $eligibleParticipation) {
+            $currentTeam = $eligibleParticipation->getTeam();
             if ($currentTeam === null || $currentTeam == $myTeam) {
-                $uniqueParticipants->add($eligibleParticipant);
+                $participants->add($eligibleParticipation);
             } else if (!in_array($currentTeam, $teams, true)) {
-                $uniqueParticipants->add($eligibleParticipant);
+                $participants->add($eligibleParticipation);
                 $teams[] = $currentTeam;
             }
         }
 
-        return $uniqueParticipants;
+        return $participants;
     }
 
     /**
      * @return ArrayCollection|Participation[]
      */
-    public function getUniqueIndivParticipations()
+    public function getIndivParticipants()
     {
         $indivParticipants = new ArrayCollection;
         $myParticipations = $this->getSelfParticipations();
         $myTeam = $myParticipations->count() === 0 ? null : $myParticipations->first()->getTeam();
 
-        foreach ($this->getUniqueParticipations() as $participant) {
+        foreach ($this->getParticipants() as $participant) {
             $team = $participant->getTeam();
             if ($team === null || $team == $myTeam) {
                 $indivParticipants->add($participant);
@@ -1593,21 +1494,25 @@ class Stage extends DbObject
     /**
      * @return ArrayCollection|Participation[]
      */
-    public function getIndependantUniqueIntParticipations()
-    {
-        $uniqueIndivParticipations = $this->getUniqueIndivParticipations();
-
-        return $uniqueIndivParticipations === null ?
-            null :
-            new ArrayCollection(array_values(array_filter($this->getUniqueIndivParticipations()->toArray(),
-                    function(Participation $p){
-                        return $p->getUser()->getOrganization() == $this->currentUser->getOrganization() && $p->getTeam() === null;
-                    })
-            ));
+    public function getIntParticipants(){
+        return $this->getParticipants()->filter(function(Participation $p){
+            return $p->getTeam() === null && $p->getUser()->getOrganization() == $this->currentUser->getOrganization();
+        });
     }
+
+    /**
+     * @return ArrayCollection|Participation[]
+     */
+    public function getExtParticipants()
+    {
+        return $this->getParticipants()->filter(function(Participation $p){
+            return $p->getTeam() === null && $p->getUser()->getOrganization() != $this->currentUser->getOrganization();
+        });
+    }
+
     public function getSelfParticipations(): ArrayCollection
     {
-        return $this->participants->filter(function(Participation $p){
+        return $this->participations->filter(function(Participation $p){
             return $p->getUser() == $this->currentUser;
         });
     }
@@ -1615,48 +1520,11 @@ class Stage extends DbObject
     /**
      * @return ArrayCollection|Participation[]
      */
-    public function getUniqueExtParticipations()
-    {
-        $uniqueIndivParticipations = $this->getUniqueIndivParticipations();
-
-        if ($uniqueIndivParticipations === null) {
-            return null;
-        }
-
-        return new ArrayCollection(
-            array_values(
-                array_filter($this->getUniqueIndivParticipations()->toArray(), function (Participation $p) {
-                    return $p->getUser()->getOrganization() != $this->currentUser->getOrganization();
-                })
-            )
-        );
-    }
-
-    /**
-     * @return ArrayCollection|Participation[]
-     */
-    public function getIndependantUniqueExtParticipations()
-    {
-
-        $uniqueIndivParticipations = $this->getUniqueIndivParticipations();
-
-        return $uniqueIndivParticipations === null ?
-            null :
-            new ArrayCollection(array_values(array_filter($this->getUniqueIndivParticipations()->toArray(),
-                function(Participation $p){
-                    return $p->getUser()->getOrganization() != $this->currentUser->getOrganization() && $p->getTeam() === null;
-                })
-            ));
-    }
-
-    /**
-     * @return ArrayCollection|Participation[]
-     */
-    public function getIndependantUniqueTeamParticipations()
+    public function getIndependantTeamParticipants()
     {
         $teamParticipants = new ArrayCollection;
         $currentTeam = null;
-        foreach ($this->getIndependantUniqueParticipations() as $participant) {
+        foreach ($this->getIndependantParticipants() as $participant) {
             $pTeam = $participant->getTeam();
             if ($pTeam !== null && $pTeam != $currentTeam) {
                 $currentTeam = $pTeam;
@@ -1666,7 +1534,41 @@ class Stage extends DbObject
         return $teamParticipants;
     }
 
-    //TODO remove CRitetrion et isModifiable SelfParticipation et getAllSelfGrades
-    //TODO indivParticipation
+    public function getStartdateDay($consideredEl = 'self')
+    {
+        $startDate = $consideredEl == 'self' ? $this->startdate : $this->gstartdate;
+        $year = $startDate->format('Y');
+        $month = $startDate->format('m');
+        $day = $startDate->format('d');
+        return (int) date("z",mktime("12","00","00",(int)$month,(int)$day,(int)$year));
+    }
+
+    public function getPeriod($consideredEl = 'self')
+    {
+        $startDate = $consideredEl == 'self' ? $this->startdate : $this->gstartdate;
+        $endDate = $consideredEl == 'self' ? $this->enddate : $this->genddate;
+        $diff = $startDate->diff($endDate)->format("%a");
+        return $diff;
+    }
+
+    /**
+     * @return Collection|Stage[]
+     */
+    public function getEmbeddedStages($consideredEl = 'self'){
+        $sortedByPeriodStages = $this->activity->getSortedStagesPerPeriod($consideredEl);
+        $embeddedStages = new ArrayCollection;
+        foreach($sortedByPeriodStages as $key => $sortedByPeriodStage){
+            if($key <= $sortedByPeriodStages->indexOf($this)){
+                continue;
+            } else {
+                if($this->getStartdateDay() - 3 < $sortedByPeriodStage->getStartdateDay($consideredEl) && $sortedByPeriodStage->getStartdateDay($consideredEl) + $sortedByPeriodStage->getPeriod($consideredEl) < $this->getStartdateDay($consideredEl) + $this->getPeriod($consideredEl) + 3){
+                    $embeddedStages->add($sortedByPeriodStage);
+                } else {
+                    break;
+                }
+            }
+        }
+        return $embeddedStages;
+    }
 
 }

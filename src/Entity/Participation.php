@@ -101,7 +101,7 @@ class Participation extends DbObject
     public $deleted;
 
     /**
-     * @OneToMany(targetEntity="Grade", mappedBy="participant",cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="Grade", mappedBy="participation",cascade={"persist", "remove"}, orphanRemoval=true)
      * @var ArrayCollection
      */
     public $grades;
@@ -111,28 +111,28 @@ class Participation extends DbObject
      */
     protected $team;
     /**
-     * @ManyToOne(targetEntity="Activity", inversedBy="participants")
+     * @ManyToOne(targetEntity="Activity", inversedBy="participations")
      * @JoinColumn(name="activity_act_id", referencedColumnName="act_id",nullable=false)
      */
     protected $activity;
     /**
-     * @ManyToOne(targetEntity="Stage", inversedBy="participants")
+     * @ManyToOne(targetEntity="Stage", inversedBy="participations")
      * @JoinColumn(name="stage_stg_id", referencedColumnName="stg_id",nullable=false)
      */
     protected $stage;
     /**
-     * @ManyToOne(targetEntity="Criterion", inversedBy="participants")
+     * @ManyToOne(targetEntity="Criterion", inversedBy="participations")
      * @JoinColumn(name="criterion_crt_id", referencedColumnName="crt_id",nullable=true)
      */
     protected $criterion;
     /**
-     * @ManyToOne(targetEntity="Survey", inversedBy="participants")
+     * @ManyToOne(targetEntity="Survey", inversedBy="participations")
      * @JoinColumn(name="survey_sur_id", referencedColumnName="sur_id",nullable=true)
      */
     protected $survey;
     /**
      *
-     * @OneToMany(targetEntity="Answer", mappedBy="participant",cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="Answer", mappedBy="participation", cascade={"persist", "remove"}, orphanRemoval=true)
      * @var ArrayCollection|Answer[] $answers
      */
     protected $answers;
@@ -389,14 +389,6 @@ class Participation extends DbObject
     }
 
     /**
-     * @param ArrayCollection $grades
-     */
-    public function setGrades(ArrayCollection $grades): void
-    {
-        $this->grades = $grades;
-    }
-
-    /**
      * @return mixed
      */
     public function getTeam()
@@ -407,9 +399,10 @@ class Participation extends DbObject
     /**
      * @param mixed $team
      */
-    public function setTeam($team): void
+    public function setTeam($team): self
     {
         $this->team = $team;
+        return $this;
     }
 
     /**
@@ -423,9 +416,10 @@ class Participation extends DbObject
     /**
      * @param mixed $activity
      */
-    public function setActivity($activity): void
+    public function setActivity($activity): self
     {
         $this->activity = $activity;
+        return $this;
     }
 
     /**
@@ -439,9 +433,10 @@ class Participation extends DbObject
     /**
      * @param mixed $stage
      */
-    public function setStage($stage): void
+    public function setStage($stage): self
     {
         $this->stage = $stage;
+        return $this;
     }
 
     /**
@@ -455,9 +450,10 @@ class Participation extends DbObject
     /**
      * @param mixed $criterion
      */
-    public function setCriterion($criterion): void
+    public function setCriterion($criterion): self
     {
         $this->criterion = $criterion;
+        return $this;
     }
 
     /**
@@ -468,14 +464,6 @@ class Participation extends DbObject
         return $this->answers;
     }
 
-    /**
-     * @param Answer[]|ArrayCollection $answers
-     */
-    public function setAnswers($answers): void
-    {
-        $this->answers = $answers;
-    }
-
     public function getUser(): ?User
     {
         return $this->user;
@@ -484,7 +472,6 @@ class Participation extends DbObject
     public function setUser(?User $user): self
     {
         $this->user = $user;
-
         return $this;
     }
 

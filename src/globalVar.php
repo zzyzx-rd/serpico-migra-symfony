@@ -70,10 +70,12 @@ class globalVar {
 
         return $this->organizationLogo($c->getClientOrganization());
     }
+
     public function teampicture(){
         $teamPicture = $this->CurrentUser()?$this->CurrentUser()->getPicture(): null;
         return 'lib/img/team/' . ($teamPicture ?: 'no-picture.png');
     }
+    
     public function request(): ?\Symfony\Component\HttpFoundation\Request
     {
         return $this->requestStack->getCurrentRequest();
