@@ -14,7 +14,6 @@
 //use Doctrine\ORM\Mapping\OneToOne;
 //
 ///**
-// * @ApiResource()
 // * @ORM\Entity(repositoryClass=TemplateRepository::class)
 // */
 //class Template extends DbObject
