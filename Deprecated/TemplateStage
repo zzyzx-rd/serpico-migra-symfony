@@ -16,7 +16,6 @@
 //use Doctrine\ORM\Mapping\OrderBy;
 //
 ///**
-// * @ApiResource()
 // * @ORM\Entity(repositoryClass=TemplateStageRepository::class)
 // */
 //class TemplateStage extends DbObject

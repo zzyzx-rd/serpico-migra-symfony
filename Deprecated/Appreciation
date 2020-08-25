@@ -11,7 +11,7 @@
 //use Doctrine\ORM\Mapping\ManyToOne;
 //
 ///**
-// * @ApiResource()
+// * @source()
 // * @ORM\Entity(repositoryClass="App\Repository\AppreciationRepository", repositoryClass=AppreciationRepository::class)
 // */
 //class Appreciation extends DbObject
