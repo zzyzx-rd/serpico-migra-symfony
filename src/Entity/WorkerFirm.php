@@ -641,7 +641,7 @@ class WorkerFirm extends DbObject
     }
 
     /**
-     * @return Collection|WorkerIndividual[]
+     * @return ArrayCollection|WorkerIndividual[]
      * @throws Exception
      */
     public function getWorkingIndividuals(){

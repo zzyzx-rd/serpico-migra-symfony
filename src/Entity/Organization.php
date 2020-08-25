@@ -482,9 +482,9 @@ class Organization extends DbObject
     }
 
     /**
-     * @return Collection|Activity[]
+     * @return ArrayCollection|Activity[]
      */
-    public function getActivities(): Collection
+    public function getActivities()
     {
         return $this->activities;
     }
@@ -1024,7 +1024,7 @@ class Organization extends DbObject
         return $this;
     }
     /**
-     * @return Collection|Process[]
+     * @return ArrayCollection|Process[]
      */
     public function getParentValidatedProcesses() {
         return $this->processes->filter(static function(Process $p){
@@ -1064,7 +1064,7 @@ class Organization extends DbObject
     }
 
     /**
-     * @return Collection|User[]
+     * @return ArrayCollection|User[]
      */
     public function getUsers()
     {

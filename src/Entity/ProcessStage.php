@@ -728,7 +728,7 @@ class ProcessStage extends DbObject
     /**
      * @return Collection
      */
-    public function getCriteria(): Collection
+    public function getCriteria()
     {
         return $this->criteria;
     }
@@ -971,7 +971,7 @@ class ProcessStage extends DbObject
         return (string) $this->id;
     }
     /**
-     * @return Collection|User[]
+     * @return ArrayCollection|User[]
      */
     public function getGraderUsers(){
         $graderUsers = new ArrayCollection;

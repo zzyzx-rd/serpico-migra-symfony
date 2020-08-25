@@ -274,11 +274,7 @@ class Firm extends Fixture
             ->setPassword($this->encoder->encodePassword($gdbdg, "Serpico2019"));
 
         $departement = new Department();
-<<<<<<< HEAD
-        $departement->setOrganization($serpico)
-            ->setMasterUser($user)
-            ->setName("development");
-=======
+
         $departement->setMasterUser($masterUser)
             ->setName("Development");
 
@@ -288,6 +284,5 @@ class Firm extends Fixture
         $serpico->addDepartment($departement);
         $manager->persist($serpico);
         $manager->flush();
->>>>>>> origin/faventyne
     }
 }

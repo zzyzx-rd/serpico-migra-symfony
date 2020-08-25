@@ -190,9 +190,9 @@ class Process extends DbObject
     }
 
     /**
-     * @return Collection|Activity[]
+     * @return ArrayCollection|Activity[]
      */
-    public function getActivities(): Collection
+    public function getActivities()
     {
         return $this->activities;
     }
@@ -378,9 +378,9 @@ class Process extends DbObject
     }
 
     /**
-     * @return Collection|ProcessCriterion[]
+     * @return ArrayCollection|ProcessCriterion[]
      */
-    public function getCriteria(): Collection
+    public function getCriteria()
     {
         return $this->criteria;
     }

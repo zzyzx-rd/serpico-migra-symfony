@@ -648,7 +648,7 @@ class Stage extends DbObject
     /**
      * @return Collection
      */
-    public function getCriteria(): Collection
+    public function getCriteria()
     {
         return $this->criteria;
     }
@@ -997,7 +997,7 @@ class Stage extends DbObject
     }
 
     /**
-     * @return Collection|Participation[]
+     * @return ArrayCollection|Participation[]
      */
     public function getIndependantUniqueParticipations()
     {
@@ -1023,7 +1023,7 @@ class Stage extends DbObject
         return $uniqueParticipants;
     }
     /**
-     * @return Collection|Participation[]
+     * @return ArrayCollection|Participation[]
      */
     public function getUniqueTeamParticipations()
     {
@@ -1034,7 +1034,7 @@ class Stage extends DbObject
         });
     }
     /**
-     * @return Collection|Participation[]
+     * @return ArrayCollection|Participation[]
      */
     public function getUserGradableParticipations()
     {
@@ -1069,7 +1069,7 @@ class Stage extends DbObject
     }
 
     /**
-     * @return Collection|Participation[]
+     * @return ArrayCollection|Participation[]
      */
     public function getUniqueGradableParticipations()
     {
@@ -1392,7 +1392,7 @@ class Stage extends DbObject
     /**
      * @return Collection
      */
-    public function getGraderUsers(): Collection
+    public function getGraderUsers()
     {
         return $this->getUniqueGraderParticipations()->map(
             static function (Participation $p) {
@@ -1484,7 +1484,7 @@ class Stage extends DbObject
         });
     }
     /**
-     * @return Collection|Client[]
+     * @return ArrayCollection|Client[]
      */
     public function getIndependantUniqueParticipatingClients()
     {
@@ -1535,7 +1535,7 @@ class Stage extends DbObject
     }
 
     /**
-     * @return Collection|Participation[]
+     * @return ArrayCollection|Participation[]
      */
     public function getUniqueGraderParticipations()
     {
@@ -1573,7 +1573,7 @@ class Stage extends DbObject
     }
 
     /**
-     * @return Collection|Participation[]
+     * @return ArrayCollection|Participation[]
      */
     public function getUniqueIndivParticipations()
     {
@@ -1591,7 +1591,7 @@ class Stage extends DbObject
     }
 
     /**
-     * @return Collection|Participation[]
+     * @return ArrayCollection|Participation[]
      */
     public function getIndependantUniqueIntParticipations()
     {
@@ -1613,7 +1613,7 @@ class Stage extends DbObject
     }
 
     /**
-     * @return Collection|Participation[]
+     * @return ArrayCollection|Participation[]
      */
     public function getUniqueExtParticipations()
     {
@@ -1633,7 +1633,7 @@ class Stage extends DbObject
     }
 
     /**
-     * @return Collection|Participation[]
+     * @return ArrayCollection|Participation[]
      */
     public function getIndependantUniqueExtParticipations()
     {
@@ -1650,7 +1650,7 @@ class Stage extends DbObject
     }
 
     /**
-     * @return Collection|Participation[]
+     * @return ArrayCollection|Participation[]
      */
     public function getIndependantUniqueTeamParticipations()
     {
