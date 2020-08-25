@@ -258,30 +258,30 @@ class User extends DbObject implements  UserInterface, \Serializable
     /**
      * User constructor.
      * @param ?int$id
-     * @param bool $usr_int
+     * @param bool $int
      * @param string $firstname
      * @param string $lastname
-     * @param string $usr_username
-     * @param string $usr_nickname
-     * @param $usr_birthdate
-     * @param string $usr_email
-     * @param string $usr_password
-     * @param $usr_picture
+     * @param string $username
+     * @param string $nickname
+     * @param $birthdate
+     * @param string $email
+     * @param string $password
+     * @param $picture
      * @param null $pictureFile
-     * @param $usr_positionName
-     * @param $usr_token
-     * @param $usr_weight_ini
-     * @param $usr_usr_weight_1y
-     * @param $usr_weight_2y
-     * @param $usr_weight_3y
-     * @param $usr_weight_4y
-     * @param $usr_weight_5y
-     * @param $usr_act_archive_nbDays
-     * @param $usr_rm_token
-     * @param $usr_validated
-     * @param $usr_enabledCreatingUser
-     * @param $usr_createdBy
-     * @param $usr_inserted
+     * @param $positionName
+     * @param $token
+     * @param $weight_ini
+     * @param $usr_weight_1y
+     * @param $weight_2y
+     * @param $weight_3y
+     * @param $weight_4y
+     * @param $weight_5y
+     * @param $activitiesArchivingNbDays
+     * @param $rememberMeToken
+     * @param $validated
+     * @param $enabledCreatingUser
+     * @param $createdBy
+     * @param $inserted
      * @param $lastConnected
      * @param $deleted
      * @param int $role
@@ -303,36 +303,32 @@ class User extends DbObject implements  UserInterface, \Serializable
      */
     public function __construct(
       ?int $id = null,
-        $usr_int = true,
+        $int = true,
         $firstname = '',
         $lastname = '',
-        $usr_username = '',
-        $usr_nickname = '',
-        $usr_birthdate = null,
-        $usr_email = '',
-        $usr_password = '',
-        $usr_picture = null,
+        $username = '',
+        $nickname = '',
+        $birthdate = null,
+        $email = '',
+        $password = '',
+        $picture = null,
         $pictureFile = null,
-        $usr_token ='',
-        $usr_weight_ini = null,
-        $usr_usr_weight_1y = 0.0,
-        $usr_weight_2y = 0.0,
-        $usr_weight_3y = 0.0,
-        $usr_weight_4y = 0.0,
-        $usr_weight_5y = 0.0,
+        $token ='',
+        $weight_ini = null,
         int $role = null,
         $department = null,
         $position = null,
-        $usr_positionName = null,
+        $positionName = null,
         $organization = null,
-        $usr_act_archive_nbDays = 7,
-        $usr_rm_token = null,
-        int $superior = null,
-        $usr_createdBy = null,
-        $usr_validated = null,
+        $activitiesArchivingNbDays = 7,
+        $rememberMeToken = null,
+        $superior = null,
+        $createdBy = null,
+        $inserted = null,
+        $validated = null,
         $lastConnected = null,
         $deleted = null,
-        $usr_enabledCreatingUser = null,
+        $enabledCreatingUser = null,
         $externalUsers = null,
         $mails = null,
         $targets = null,
@@ -345,24 +341,24 @@ class User extends DbObject implements  UserInterface, \Serializable
         $weight = null,
         $title = null)
     {
-        parent::__construct($id, $usr_createdBy, new DateTime());
+        parent::__construct($id, $createdBy, new DateTime());
         $this->pictureFile = $pictureFile;
-        $this->internal = $usr_int;
+        $this->internal = $int;
         $this->firstname = $firstname;
         $this->lastname = $lastname;
-        $this->username = $usr_username;
-        $this->nickname = $usr_nickname;
-        $this->birthdate = $usr_birthdate;
-        $this->email = $usr_email;
-        $this->password = $usr_password;
-        $this->positionName = $usr_positionName;
-        $this->picture = $usr_picture;
-        $this->token = $usr_token;
-        $this->weight_ini = $usr_weight_ini;
-        $this->activitiesArchivingNbDays = $usr_act_archive_nbDays;
-        $this->rememberMeToken = $usr_rm_token;
-        $this->validated = $usr_validated;
-        $this->enabledCreatingUser = $usr_enabledCreatingUser;
+        $this->username = $username;
+        $this->nickname = $nickname;
+        $this->birthdate = $birthdate;
+        $this->email = $email;
+        $this->password = $password;
+        $this->positionName = $positionName;
+        $this->picture = $picture;
+        $this->token = $token;
+        $this->weight_ini = $weight_ini;
+        $this->activitiesArchivingNbDays = $activitiesArchivingNbDays;
+        $this->rememberMeToken = $rememberMeToken;
+        $this->validated = $validated;
+        $this->enabledCreatingUser = $enabledCreatingUser;
         $this->lastConnected = $lastConnected;
         $this->deleted = $deleted;
         $this->role = $role;
@@ -392,9 +388,9 @@ class User extends DbObject implements  UserInterface, \Serializable
         return $this->internal;
     }
 
-    public function setInt(bool $usr_int): self
+    public function setInt(bool $int): self
     {
-        $this->internal = $usr_int;
+        $this->internal = $int;
 
         return $this;
     }
@@ -426,9 +422,9 @@ class User extends DbObject implements  UserInterface, \Serializable
         return $this->username;
     }
 
-    public function setUsername(string $usr_username): self
+    public function setUsername(string $username): self
     {
-        $this->username = $usr_username;
+        $this->username = $username;
 
         return $this;
     }
@@ -438,9 +434,9 @@ class User extends DbObject implements  UserInterface, \Serializable
         return $this->nickname;
     }
 
-    public function setNickname(string $usr_nickname): self
+    public function setNickname(string $nickname): self
     {
-        $this->nickname = $usr_nickname;
+        $this->nickname = $nickname;
 
         return $this;
     }
@@ -450,9 +446,9 @@ class User extends DbObject implements  UserInterface, \Serializable
         return $this->birthdate;
     }
 
-    public function setBirthdate(DateTimeInterface $usr_birthdate): self
+    public function setBirthdate(DateTimeInterface $birthdate): self
     {
-        $this->birthdate = $usr_birthdate;
+        $this->birthdate = $birthdate;
 
         return $this;
     }
@@ -462,9 +458,9 @@ class User extends DbObject implements  UserInterface, \Serializable
         return $this->email;
     }
 
-    public function setEmail(?string $usr_email): self
+    public function setEmail(?string $email): self
     {
-        $this->email = $usr_email;
+        $this->email = $email;
 
         return $this;
     }
@@ -474,9 +470,9 @@ class User extends DbObject implements  UserInterface, \Serializable
         return $this->password;
     }
 
-    public function setPassword(?string $usr_password): self
+    public function setPassword(?string $password): self
     {
-        $this->password = $usr_password;
+        $this->password = $password;
 
         return $this;
     }
@@ -486,9 +482,9 @@ class User extends DbObject implements  UserInterface, \Serializable
         return $this->positionName;
     }
 
-    public function setPositionName(?string $usr_positionName): self
+    public function setPositionName(?string $positionName): self
     {
-        $this->positionName = $usr_positionName;
+        $this->positionName = $positionName;
 
         return $this;
     }
@@ -498,9 +494,9 @@ class User extends DbObject implements  UserInterface, \Serializable
         return $this->picture;
     }
 
-    public function setPicture(string $usr_picture): self
+    public function setPicture(string $picture): self
     {
-        $this->picture = $usr_picture;
+        $this->picture = $picture;
 
         return $this;
     }
@@ -510,9 +506,9 @@ class User extends DbObject implements  UserInterface, \Serializable
         return $this->token;
     }
 
-    public function setToken(string $usr_token): self
+    public function setToken(string $token): self
     {
-        $this->token = $usr_token;
+        $this->token = $token;
 
         return $this;
     }
@@ -522,9 +518,9 @@ class User extends DbObject implements  UserInterface, \Serializable
         return $this->weight_ini;
     }
 
-    public function setWeightIni(float $usr_weight_ini): self
+    public function setWeightIni(float $weight_ini): self
     {
-        $this->weight_ini = $usr_weight_ini;
+        $this->weight_ini = $weight_ini;
 
         return $this;
     }
@@ -536,9 +532,9 @@ class User extends DbObject implements  UserInterface, \Serializable
         return $this->activitiesArchivingNbDays;
     }
 
-    public function setActivitiesArchivingNbDays(int $usr_act_archive_nbDays): self
+    public function setActivitiesArchivingNbDays(int $activitiesArchivingNbDays): self
     {
-        $this->activitiesArchivingNbDays = $usr_act_archive_nbDays;
+        $this->activitiesArchivingNbDays = $activitiesArchivingNbDays;
 
         return $this;
     }
@@ -548,9 +544,9 @@ class User extends DbObject implements  UserInterface, \Serializable
         return $this->rememberMeToken;
     }
 
-    public function setRememberMeToken(string $usr_rm_token): self
+    public function setRememberMeToken(string $rememberMeToken): self
     {
-        $this->rememberMeToken = $usr_rm_token;
+        $this->rememberMeToken = $rememberMeToken;
 
         return $this;
     }
@@ -560,9 +556,9 @@ class User extends DbObject implements  UserInterface, \Serializable
         return $this->validated;
     }
 
-    public function setValidated(DateTimeInterface $usr_validated): self
+    public function setValidated(DateTimeInterface $validated): self
     {
-        $this->validated = $usr_validated;
+        $this->validated = $validated;
 
         return $this;
     }
@@ -572,15 +568,15 @@ class User extends DbObject implements  UserInterface, \Serializable
         return $this->enabledCreatingUser;
     }
 
-    public function setEnabledCreatingUser(bool $usr_enabledCreatingUser): self
+    public function setEnabledCreatingUser(bool $enabledCreatingUser): self
     {
-        $this->enabledCreatingUser = $usr_enabledCreatingUser;
+        $this->enabledCreatingUser = $enabledCreatingUser;
         return $this;
     }
 
-    public function setInserted(DateTimeInterface $usr_inserted): self
+    public function setInserted(DateTimeInterface $inserted): self
     {
-        $this->inserted = $usr_inserted;
+        $this->inserted = $inserted;
 
         return $this;
     }

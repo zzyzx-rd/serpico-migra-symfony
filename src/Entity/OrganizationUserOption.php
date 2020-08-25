@@ -110,14 +110,14 @@ class OrganizationUserOption extends DbObject
     /**
      * OrganizationUserOption constructor.
      * @param int $id
-     * @param bool $opt_enabled
-     * @param $opt_createdBy
+     * @param bool $enabled
+     * @param $createdBy
      */
-    public function __construct($id = 0, $opt_enabled = true, $opt_createdBy = null)
+    public function __construct($id = 0, $enabled = true, $createdBy = null)
     {
-        parent::__construct($id,$opt_createdBy , new DateTime());
-        $this->enabled = $opt_enabled;
-        $this->createdBy = $opt_createdBy;
+        parent::__construct($id,$createdBy , new DateTime());
+        $this->enabled = $enabled;
+        $this->createdBy = $createdBy;
     }
 
 
@@ -126,10 +126,9 @@ class OrganizationUserOption extends DbObject
         return $this->optionTrue;
     }
 
-    public function setOptionTrue(bool $opt_bool_value): self
+    public function setOptionTrue(bool $optionTrue): self
     {
-        $this->optionTrue = $opt_bool_value;
-
+        $this->optionTrue = $optionTrue;
         return $this;
     }
 
@@ -138,10 +137,9 @@ class OrganizationUserOption extends DbObject
         return $this->optionIValue;
     }
 
-    public function setIntValue(float $opt_int_value): self
+    public function setOptionIValue(float $optionIValue): self
     {
-        $this->optionIValue = $opt_int_value;
-
+        $this->optionIValue = $optionIValue;
         return $this;
     }
 
@@ -150,22 +148,20 @@ class OrganizationUserOption extends DbObject
         return $this->optionSecondaryIValue;
     }
 
-    public function setIntValue2(float $opt_int_value_2): self
+    public function setOptionSecondaryIValue(float $optionSecondaryIValue): self
     {
-        $this->optionSecondaryIValue = $opt_int_value_2;
-
+        $this->optionSecondaryIValue = $optionSecondaryIValue;
         return $this;
     }
 
-    public function getFloatValue(): ?float
+    public function getOptionFValue(): ?float
     {
         return $this->optionFValue;
     }
 
-    public function setFloatValue(float $opt_float_value): self
+    public function setOptionFValue(float $optionFValue): self
     {
-        $this->optionFValue = $opt_float_value;
-
+        $this->optionFValue = $optionFValue;
         return $this;
     }
 
@@ -177,7 +173,6 @@ class OrganizationUserOption extends DbObject
     public function setOptionSValue(string $optionSValue): self
     {
         $this->optionSValue = $optionSValue;
-
         return $this;
     }
 
@@ -186,24 +181,22 @@ class OrganizationUserOption extends DbObject
         return $this->enabled;
     }
 
-    public function setEnabled(bool $opt_enabled): self
+    public function setEnabled(bool $enabled): self
     {
-        $this->enabled = $opt_enabled;
-
+        $this->enabled = $enabled;
         return $this;
     }
 
-    public function setInserted(DateTimeInterface $opt_inserted): self
+    public function setInserted(DateTimeInterface $inserted): self
     {
-        $this->inserted = $opt_inserted;
-
+        $this->inserted = $inserted;
         return $this;
     }
 
     /**
      * @return mixed
      */
-    public function getOName()
+    public function getOName(): OptionName
     {
         return $this->oName;
     }
@@ -225,7 +218,7 @@ class OrganizationUserOption extends DbObject
     /**
      * @param mixed $organization
      */
-    public function setOrganization($organization): OrganizationUserOption
+    public function setOrganization($organization): self
     {
         $this->organization = $organization;
         return $this;
@@ -259,7 +252,7 @@ class OrganizationUserOption extends DbObject
     /**
      * @param mixed $position
      */
-    public function setPosition($position): OrganizationUserOption
+    public function setPosition($position): self
     {
         $this->position = $position;
         return $this;
@@ -273,10 +266,8 @@ class OrganizationUserOption extends DbObject
         return $this->title;
     }
 
-    /**
-     * @param mixed $title
-     */
-    public function setTitle($title)
+
+    public function setTitle($title): self
     {
         $this->title = $title;
         return $this;
@@ -285,21 +276,21 @@ class OrganizationUserOption extends DbObject
     /**
      * @return mixed
      */
-    public function getUser()
+    public function getUser(): ?User
     {
         return $this->user;
     }
 
     /**
-     * @param mixed $user
+     * @param User $user
      */
-    public function setUser($user)
+    public function setUser(User $user): self
     {
         $this->user = $user;
         return $this;
     }
 
-    public function getRole():?int
+    public function getRole(): ?int
     {
         return $this->role;
     }
@@ -307,7 +298,6 @@ class OrganizationUserOption extends DbObject
     public function setRole(?int $role): self
     {
         $this->role = $role;
-
         return $this;
     }
     public function __toString()
