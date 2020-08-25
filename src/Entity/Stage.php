@@ -1509,7 +1509,7 @@ class Stage extends DbObject
         });
     }
 
-    public function isModifiable(Stage $stage): bool
+    public function isModifiable(): bool
     {
         $connectedUser = $this->currentUser;
         $connectedUserRole = $connectedUser->getRole();
@@ -1517,7 +1517,7 @@ class Stage extends DbObject
             return true;
         }
 
-        if ($stage->status >= 2) {
+        if ($this->status >= 2) {
             return false;
         }
 
@@ -1525,11 +1525,11 @@ class Stage extends DbObject
             return true;
         }
 
-        if ($stage->getMasterUser() == $connectedUser && ($stage->getUniqueGraderParticipations() === null || !$stage->getUniqueGraderParticipations()->exists(static function(int $i, Participation $p){return $p->isLeader();}))) {
+        if ($this->getMasterUser() == $connectedUser && ($this->getUniqueGraderParticipations() === null || !$this->getUniqueGraderParticipations()->exists(static function(int $i, Participation $p){return $p->isLeader();}))) {
             return true;
         }
 
-        return $stage->getUniqueGraderParticipations()->exists(
+        return $this->getUniqueGraderParticipations()->exists(
             static function (int $i, Participation $p) use ($connectedUser) { return $p->getUser() === $connectedUser && $p->isLeader(); }
         );
     }
@@ -1664,6 +1664,24 @@ class Stage extends DbObject
             }
         };
         return $teamParticipants;
+    }
+
+    /**
+     * @return User|null
+     */
+    public function getCurrentUser(): ?User
+    {
+        return $this->currentUser;
+    }
+
+    /**
+     * @param User|null $currentUser
+     * @return Stage
+     */
+    public function setCurrentUser(?User $currentUser): Stage
+    {
+        $this->currentUser = $currentUser;
+        return $this;
     }
 
     //TODO remove CRitetrion et isModifiable SelfParticipation et getAllSelfGrades

@@ -19,7 +19,7 @@
             {% if letter == 'A' and participation.type == 1 or
                   letter == 'T' and participation.type == 0 or 
                   letter == 'P' and participation.type == -1 or 
-                  letter == 'E' and participation.user.orgId != currentuser.orgId 
+                  letter == 'E' and participation.user.organization != global.currentuser.organization
             %}
               <div class="badge-container badge-participation-{{ letter|lower }} tooltipped" data-position="top" data-tooltip="{{ tooltipMsg[letter]|trans }}">
                 <div {{ 'style' }}="background: {{ colors[letter] }}">
@@ -107,7 +107,7 @@
   {% endif %}>
 
   <div class="user-info">
-    <img class="user-picture" src="{{ element ? (entity == 'user' ? asset(global.user_picture(element)) : asset(global.teampicture(element))) }}" alt="{{ elmtName }}">
+    <img class="user-picture" src="{{ element ? (entity == 'user' ? asset(global.userPicture(element)) : asset(global.teampicture(element))) }}" alt="{{ elmtName }}">
     <span class="elmt-name">{{ elmtName }}</span>
     {{ _self.badges(participation) }}
   </div>

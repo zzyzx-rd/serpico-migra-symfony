@@ -43,6 +43,7 @@ use App\Entity\Team;
 use App\Entity\TeamUser;
 use App\Entity\User;
 use App\Repository\UserRepository;
+use RuntimeException;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormFactory;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -1329,68 +1330,50 @@ class ActivityController extends MasterController
      * @param string $elmtType
      * @param int $elmtId
      * @return JsonResponse|void
-     * @throws ORMException
-     * @throws OptimisticLockException
+     * @throws Exception|Exception
+     * @throws Exception
      * @Route("/{elmtType}/stage/{stgId}/participant/validate/{elmtId}", name="validateParticipant")
      */
     public function validateParticipantAction(
         Request $request,
         int $stgId,
         string $elmtType,
-        int $elmtId
-    ) {
-
-        if (!$currentUser) {
-            throw new Exception('current user is null');
-        }
-
-        /** @var int */
+        int $elmtId)
+    {
+        $currentUser = $this->user;
         $type = $request->get('type');
-        /** @var string */
         $precomment = $request->get('precomment');
-        /** @var bool */
         $leader = $request->get('leader');
-        /** @var string */
         $pElmtType = $request->get('pElmtType');
-        /** @var int */
         $pElmtId = $request->get('pElmtId');
-
-        $em = self::getEntityManager();
         switch($elmtType){
             case 'iprocess' :
-                $repoS = $em->getRepository(IProcessStage::class);
-                $repoAU = $em->getRepository(IProcessParticipation::class);
+                $repoS = $this->em->getRepository(IProcessStage::class);
+                $repoAU = $this->em->getRepository(IProcessParticipation::class);
                 break;
             case 'activity' :
-                $repoS = $em->getRepository(Stage::class);
-                $repoAU = $em->getRepository(Participation::class);
+                $repoS = $this->em->getRepository(Stage::class);
+                $repoAU = $this->em->getRepository(Participation::class);
                 break;
         }
-        $repoU = $em->getRepository(User::class);
-        $repoPEntity = $pElmtType == 'user' ? $repoU : $em->getRepository(Team::class);
-        /** @var User|Team */
+        $repoU = $this->em->getRepository(User::class);
+        $repoPEntity = $pElmtType === 'user' ? $repoU : $this->em->getRepository(Team::class);
         $pElement = $repoPEntity->find($pElmtId);
-
-        $repoG = $em->getRepository(Grade::class);
-
-        /** @var Stage|TemplateStage|IProcessStage */
+        $repoG = $this->em->getRepository(Grade::class);
         $stage = $repoS->find($stgId);
-        /** @var Activity|TemplateActivity|InstitutionProcess */
-        $element = $elmtType != 'iprocess' ? $stage->getActivity() : $stage->getInstitutionProcess();
+        $stage->setCurrentUser($this->user);
+        $element = $elmtType !== 'iprocess' ? $stage->getActivity() : $stage->getInstitutionProcess();
         $activityOrganization = $element->getOrganization();
-
         if (!$stage->isModifiable()) {
-            throw new Exception('unauthorized');
+            throw new RuntimeException('unauthorized');
         }
-
-        /** @var Participation|IProcessParticipation|TemplateParticipation|null */
         $participant = $repoAU->find($elmtId);
 
 
         if (!$participant) {
 
             // Checking if there is compatibility user/team, otherwise return exception
-            if($pElmtType == 'user'){
+            if($pElmtType === 'user'){
 
                 $doublonParticipant = $stage->getParticipants()->filter(function($p) use ($pElmtId){
                     return $p->getUsrId() == $pElmtId;
@@ -1402,9 +1385,9 @@ class ActivityController extends MasterController
 
             } else {
 
-                $doublonParticipant = $stage->getParticipants()->filter(function($p) use ($pElement){
-                        return $pElement->getTeamUsers()->exists(function(int $i, TeamUser $tu) use ($p){
-                            return $tu->getUsrId() == $p->getUsrId();
+                $doublonParticipant = $stage->getParticipants()->filter(static function($p) use ($pElement){
+                        return $pElement->getTeamUsers()->exists(static function(int $i, TeamUser $tu) use ($p){
+                            return $tu->getUser() == $p->getUser();
                         });
                     })->first();
 
@@ -1437,14 +1420,12 @@ class ActivityController extends MasterController
 
             // Getting participations depending of part elmt type
             if($pElmtType == 'user'){
-                /** @var Participation[]|IProcessParticipation[]|TemplateParticipation[] */
                 $participations = $repoAU->findBy([
                     'stage' => $stage,
                     'usrId' => $participant->getUsrId(),
                     'team' => null,
                 ]);
             } else {
-                 /** @var Participation[]|IProcessParticipation[]|TemplateParticipation[] */
                  $participations = $repoAU->findBy([
                     'stage' => $stage,
                     'team' => $participant->getTeam(),
@@ -1453,7 +1434,7 @@ class ActivityController extends MasterController
             $iterableElements = $participations;
         }
 
-        if($elmtType == 'activity' && ($participant == null || $participant->getType() == 0 && $type != 0)){
+        if($elmtType == 'activity' && ($participant == null || ($participant->getType() == 0 && $type != 0))){
 
             // Checking if we need to unvalidate participations (we decide to unlock all stage participations and not only the modified one)
             $completedStageParticipations = $stage->getParticipants()->filter(function(Participation $p){
@@ -1474,12 +1455,12 @@ class ActivityController extends MasterController
                 }
                 $em->flush();
 
-                self::sendMail(
-                    $app,
-                    $mailRecipients,
-                    'unvalidateOutputDueToChange',
-                    ['stage' => $stage, 'actElmt' => 'participant']
-                );
+//                self::sendMail(
+//                    $app,
+//                    $mailRecipients,
+//                    'unvalidateOutputDueToChange',
+//                    ['stage' => $stage, 'actElmt' => 'participant']
+//                );
             }
         }
 
@@ -1499,7 +1480,7 @@ class ActivityController extends MasterController
 
                 switch($elmtType){
                     case 'activity' :
-                        if($pElmtType == 'user'){
+                        if($pElmtType === 'user'){
                             $participation = new Participation;
                             $consideredParticipations[] = $participation;
                         } else {
@@ -1513,25 +1494,12 @@ class ActivityController extends MasterController
                         }
                         break;
                     case 'iprocess' :
-                        if($pElmtType == 'user'){
+                        if($pElmtType === 'user'){
                             $participation = new IProcessParticipation;
                             $consideredParticipations[] = $participation;
                         } else {
                             foreach($pElement->getCurrentTeamUsers() as $currentTeamUser){
                                 $participation = new IProcessParticipation;
-                                $participation->setUsrId($currentTeamUser->getUsrId())
-                                    ->setExtUsrId($currentTeamUser->getExtUsrId());
-                                $consideredParticipations[] = $participation;
-                            }
-                        }
-                        break;
-                    case 'template' :
-                        if($pElmtType == 'user'){
-                            $participation = new TemplateParticipation;
-                            $consideredParticipations[] = $participation;
-                        } else {
-                            foreach($pElement->getCurrentTeamUsers() as $currentTeamUser){
-                                $participation = new TemplateParticipation;
                                 $participation->setUsrId($currentTeamUser->getUsrId())
                                     ->setExtUsrId($currentTeamUser->getExtUsrId());
                                 $consideredParticipations[] = $participation;
@@ -1555,7 +1523,7 @@ class ActivityController extends MasterController
                 if($pElmtType == 'team'){
                     $consideredParticipation->setTeam($pElement);
                 } else {
-                    $consideredParticipation->setUsrId($pElement->getId());
+                    $consideredParticipation->setUser($pElement);
                 }
 
 
@@ -1563,7 +1531,6 @@ class ActivityController extends MasterController
                 $currentUserOrganization = $currentUser->getOrganization();
 
                 if($userOrganization != $currentUserOrganization){
-                    /** @var Client */
                     $client = $currentUserOrganization->getClients()->filter(function(Client $c) use ($userOrganization){
                         return $c->getClientOrganization() == $userOrganization;
                     })->first();
@@ -1610,8 +1577,6 @@ class ActivityController extends MasterController
                             $queryableElmt->addParticipant($previousOwningParticipant);
                         }
                         //$consideredParticipation->setLeader(true);
-                    } else {
-                        //$consideredParticipation->setLeader(false);
                     }
                 }
 
@@ -1657,21 +1622,21 @@ class ActivityController extends MasterController
                 }
             }
 
-            if(sizeof($recipients) > 0){
-                $sendMail = self::sendMail(
-                    $app,
-                    $recipients,
-                    'activityParticipation',
-                    [
-                        'activity' => $element,
-                        'stage' => $stage,
-                    ]
-                );
-            }
+//            if(sizeof($recipients) > 0){
+//                $sendMail = self::sendMail(
+//                    $app,
+//                    $recipients,
+//                    'activityParticipation',
+//                    [
+//                        'activity' => $element,
+//                        'stage' => $stage,
+//                    ]
+//                );
+//            }
         }
 
-        $em->persist($stage);
-        $em->flush();
+        $this->em->persist($stage);
+        $this->em->flush();
 
         /*$user = $participation->getDirectUser();
         if ( !($user instanceof User) ) {

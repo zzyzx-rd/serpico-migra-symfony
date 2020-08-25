@@ -485,6 +485,9 @@ class Participation extends DbObject
     {
         return $this->user;
     }
+    public function getDirectUser(){
+        return $this->user;
+    }
 
     public function setUser(?User $user): self
     {

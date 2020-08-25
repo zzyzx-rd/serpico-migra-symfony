@@ -608,7 +608,7 @@ class UserController extends MasterController
 
                 } else {
 
-                    $user = $participant->getDirectUser();
+                    $user = $participant->getUser();
                     $pData['img'] = $user->getPicture();
                     $name = $user->getFirstname() === 'ZZ' ? $user->getOrganization()->getCommname() :  $user->getFullName();
                     $pData['name'] = $name;

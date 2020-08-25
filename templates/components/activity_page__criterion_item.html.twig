@@ -19,7 +19,9 @@
     style="visibility: hidden;"
   {% endif %}>
 
-  {% include "modals/stage_criterion.html.twig" with { s: s, c: c, criterion: criterion } %}
+  {% if c == 0 %}
+    {% include "modals/stage_criterion.html.twig" with { s: s, c: c, criterion: criterion } %}
+  {% endif %}
   {% include "modals/stage_criterion_target.html.twig" with { s: s, c: c, criterion: criterion } %}
 
   <div class="cname cn-icon" data-icon="{{ icon }}" data-icon-type="{{ icon ? icon.type }}" data-uc="{{icon ? icon.unicode }}">

@@ -24,10 +24,6 @@ use Symfony\Component\Security\Core\Security;
 
 final class InstitutionController extends MasterController
 {
-    protected $user;
-    protected $org;
-    /** @var ActivityRepository */
-    protected $activityRepo;
 
     /**
      * @Route("/settings/institution/processes", name="processesList")
@@ -194,7 +190,7 @@ final class InstitutionController extends MasterController
 
             foreach($orgActivities as $orgActivity){
                 if (
-                    ($orgActivity->getStatus() === -2 && in_array($orgActivity->getMasterUserId(), $checkingIds, true)) ||
+                    ($orgActivity->getStatus() === -2 && in_array($orgActivity->getMasterUser()->getId(), $checkingIds, true)) ||
                     in_array($orgActivity->getId(), $activitiesWithSubordinates_IDs, true)
                 ){
                     $userActivities->add($orgActivity);
@@ -209,7 +205,7 @@ final class InstitutionController extends MasterController
                         $isMasterUserId = 0;
                         foreach ($orgActivity->getStages() as $orgStage){
                             foreach ($orgStage->getParticipants() as $orgParticipant){
-                                if (in_array($orgParticipant->getUsrId(), $checkingIds, true)){
+                                if (in_array($orgParticipant->getUser()->getId(), $checkingIds, true)){
                                     $isParticipant = 1;
                                     ($orgParticipant->getStatus() !== 5) ? $userActivities->add($orgActivity) : $userArchivedActivities->add($orgActivity);
                                     break;
