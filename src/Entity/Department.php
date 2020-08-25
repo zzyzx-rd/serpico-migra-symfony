@@ -315,7 +315,7 @@ class Department extends DbObject
     }
 
     /**
-     * @return Collection|User[]
+     * @return ArrayCollection|User[]
      */
     public function getUsers()
     {

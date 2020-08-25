@@ -426,7 +426,7 @@
 //        return 0;
 //    }
 //    /**
-//     * @return Collection|TemplateParticipation[]
+//     * @return ArrayCollection|TemplateParticipation[]
 //     */
 //    public function getUniqueParticipations()
 //    {

@@ -454,7 +454,7 @@ class Criterion extends DbObject
     /**
      * @return Collection
      */
-    public function getParticipants(): Collection
+    public function getParticipants()
     {
         return $this->participants;
     }

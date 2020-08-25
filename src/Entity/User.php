@@ -703,7 +703,7 @@ class User extends DbObject implements  UserInterface, \Serializable
     }
 
     /**
-     * @return Collection|Participation[]
+     * @return ArrayCollection|Participation[]
      */
     public function getParticipations(){
         return $this->participations;
@@ -723,9 +723,9 @@ class User extends DbObject implements  UserInterface, \Serializable
     }
 
     /**
-     * @return Collection|ExternalUser[]
+     * @return ArrayCollection|ExternalUser[]
      */
-    public function getExternalUsers(): Collection
+    public function getExternalUsers()
     {
         return $this->externalUsers;
     }
@@ -744,9 +744,9 @@ class User extends DbObject implements  UserInterface, \Serializable
     }
 
     /**
-     * @return Collection|Recurring[]
+     * @return ArrayCollection|Recurring[]
      */
-    public function getReccuring(): Collection
+    public function getReccuring()
     {
         return $this->Reccuring;
     }
@@ -775,9 +775,9 @@ class User extends DbObject implements  UserInterface, \Serializable
     }
 
     /**
-     * @return Collection|Result[]
+     * @return ArrayCollection|Result[]
      */
-    public function getResults(): Collection
+    public function getResults()
     {
         return $this->results;
     }
@@ -806,9 +806,9 @@ class User extends DbObject implements  UserInterface, \Serializable
     }
 
     /**
-     * @return Collection|Stage[]
+     * @return ArrayCollection|Stage[]
      */
-    public function getStagesWhereMaster(): Collection
+    public function getStagesWhereMaster()
     {
         return $this->stagesWhereMaster;
     }
@@ -837,9 +837,9 @@ class User extends DbObject implements  UserInterface, \Serializable
     }
 
     /**
-     * @return Collection|TeamUser[]
+     * @return ArrayCollection|TeamUser[]
      */
-    public function getTeamUsers(): Collection
+    public function getTeamUsers()
     {
         return $this->teamUsers;
     }
@@ -984,7 +984,7 @@ class User extends DbObject implements  UserInterface, \Serializable
     /**
      * @param Stage $stage
      * @param User $gradingUser
-     * @return Collection|Grade[]
+     * @return ArrayCollection|Grade[]
      */
     public function getGrades(Stage $stage, User $gradingUser)
     {
@@ -1004,7 +1004,7 @@ class User extends DbObject implements  UserInterface, \Serializable
 
     /**
      * @param Stage $stage
-     * @return Collection|Participation[]
+     * @return ArrayCollection|Participation[]
      */
     public function getStageParticipations(Stage $stage)
     {
@@ -1150,9 +1150,9 @@ class User extends DbObject implements  UserInterface, \Serializable
     }
 
      /**
-     * @return Collection|User[]
+     * @return ArrayCollection|User[]
      */
-    public function getSubordinates(): Collection
+    public function getSubordinates()
     {
         return $this->subordinates;
     }

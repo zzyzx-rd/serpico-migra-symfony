@@ -44,7 +44,7 @@ class ActivityM extends ModelEntity {
 
     /**
      * @param Activity $activity
-     * @return Collection|Stage[]
+     * @return ArrayCollection|Stage[]
      */
     public function getActiveModifiableStages(Activity $activity)
     {

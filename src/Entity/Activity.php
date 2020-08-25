@@ -985,7 +985,7 @@ class Activity extends DbObject
         return $endDate;
     }
     /**
-     * @return Collection|Stage[]
+     * @return ArrayCollection|Stage[]
      */
     public function getActiveStages()
     {
@@ -1001,7 +1001,7 @@ class Activity extends DbObject
 
     /**
      * @param User $u
-     * @return Collection|Stage[]
+     * @return ArrayCollection|Stage[]
      */
     public function getUserActiveGradableStages(User $u)
     {
@@ -1014,7 +1014,7 @@ class Activity extends DbObject
         });
     }
     /**
-     * @return Collection|Stage[]
+     * @return ArrayCollection|Stage[]
      */
     public function getActiveGradableStages()
     {
@@ -1035,7 +1035,7 @@ class Activity extends DbObject
         });
     }
     /**
-     * @return Collection|Stage[]
+     * @return ArrayCollection|Stage[]
      */
     public function getOCompletedStages()
     {
@@ -1046,7 +1046,7 @@ class Activity extends DbObject
     }
 
     /**
-     * @return Collection|Stage[]
+     * @return ArrayCollection|Stage[]
      */
     public function getPCompletedStages()
     {

@@ -21,7 +21,7 @@ class StageM extends ModelEntity
 
     /**
      * @param Stage $stage
-     * @return Collection|Participation[]
+     * @return ArrayCollection|Participation[]
      */
     public function getUniqueParticipations(Stage $stage)
     {
@@ -78,7 +78,7 @@ class StageM extends ModelEntity
 
     /**
      * @param Stage $stage
-     * @return Collection|Participation[]
+     * @return ArrayCollection|Participation[]
      */
     public function getUniqueGraderParticipations(Stage $stage)
     {
@@ -87,7 +87,7 @@ class StageM extends ModelEntity
 
     /**
      * @param Stage $stage
-     * @return Collection|Participation[]
+     * @return ArrayCollection|Participation[]
      */
     public function getUniqueGradableParticipations(Stage $stage)
     {

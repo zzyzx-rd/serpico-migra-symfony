@@ -143,7 +143,7 @@ class Icon extends DbObject
     /**
      * @return Collection
      */
-    public function getCriterionNames(): Collection
+    public function getCriterionNames()
     {
         return $this->criterionNames;
     }
@@ -159,7 +159,7 @@ class Icon extends DbObject
     /**
      * @return Collection
      */
-    public function getWorkerFirmSectors(): Collection
+    public function getWorkerFirmSectors()
     {
         return $this->workerFirmSectors;
     }

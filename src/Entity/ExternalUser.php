@@ -284,7 +284,7 @@ class ExternalUser extends DbObject
     }
 
     /**
-     * @return Collection|Participation[]
+     * @return ArrayCollection|Participation[]
      */
     public function getParticipations()
     {
@@ -305,9 +305,9 @@ class ExternalUser extends DbObject
     }
 
     /**
-     * @return Collection|TeamUser[]
+     * @return ArrayCollection|TeamUser[]
      */
-    public function getTeamUsers(): Collection
+    public function getTeamUsers()
     {
         return $this->teamUsers;
     }

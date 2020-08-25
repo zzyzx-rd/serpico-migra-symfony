@@ -327,7 +327,7 @@ class IProcessCriterion extends DbObject
         $this->institutionProcess = $institutionProcess;
     }
 
-    public function getParticipants(): Collection
+    public function getParticipants()
     {
         return $this->participants;
     }

@@ -874,7 +874,7 @@ class IProcessStage extends DbObject
 
 
     /**
-     * @return Collection|IProcessParticipation[]
+     * @return ArrayCollection|IProcessParticipation[]
      */
     public function getUniqueIntParticipations()
     {
@@ -890,7 +890,7 @@ class IProcessStage extends DbObject
     }
 
     /**
-     * @return Collection|IProcessParticipation[]
+     * @return ArrayCollection|IProcessParticipation[]
      */
     public function getUniqueExtParticipations()
     {
@@ -905,7 +905,7 @@ class IProcessStage extends DbObject
     }
 
     /**
-     * @return Collection|IProcessParticipation[]
+     * @return ArrayCollection|IProcessParticipation[]
      */
     public function getUniqueTeamParticipations()
     {
@@ -1018,7 +1018,7 @@ class IProcessStage extends DbObject
     }
     // Defines which users can grade
     /**
-     * @return Collection|User[]
+     * @return ArrayCollection|User[]
      */
     public function getGraderUsers(){
         $graderUsers = new ArrayCollection;
@@ -1038,7 +1038,7 @@ class IProcessStage extends DbObject
     }
 
     /**
-     * @return Collection|IProcessParticipation[]
+     * @return ArrayCollection|IProcessParticipation[]
      */
     public function getIndependantUniqueParticipations()
     {
