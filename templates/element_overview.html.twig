@@ -11,8 +11,8 @@
 {% block css %}
     <!-- CSS Materialize -->
     <script> var lg = '{% trans %}curr_language{% endtrans %}';
-    var surl = "{{ url('saveImageElementReport',{'elmtType' : elmtType, 'elmtId' :  elmtId, 'type' : 2, 'cName': 0}) }}";
-    var speUrl = "{{ url('getElementGraph',{'mode' : 1, 'elmtType' : elmtType, 'actElmt' : 'criterion', 'participationType' : 1, 'elmtId' : elmtId, 'cName' : 0}) }}";
+    var surl = "{{ url('saveImageElementReport',{entity: elmtType, 'elmtId' :  elmtId, 'type' : 2, 'cName': 0}) }}";
+    var speUrl = "{{ url('getElementGraph',{'mode' : 1, entity: elmtType, 'actElmt' : 'criterion', 'participationType' : 1, 'elmtId' : elmtId, 'cName' : 0}) }}";
     </script>
 
 {% endblock %}
@@ -472,7 +472,7 @@
         </div>
 
         <div id="printingChoices" class="modal">
-            <form action="{{ url('generateElementReport',{'elmtType' : elmtType, 'elmtId' : elmtId}) }}" method="post">
+            <form action="{{ url('generateElementReport',{entity: elmtType, 'elmtId' : elmtId}) }}" method="post">
                 <div class="modal-content">
                     <h4>{% trans %}results.printing.modal_title{% endtrans %}</h4>
                     <h5>{% trans %}results.printing.content{% endtrans %}</h5>
@@ -722,7 +722,7 @@
         </div>
 
         <div id="printingChoices" class="modal">
-            <form action="{{ url('generateElementReport',{'elmtType' : elmtType, 'elmtId' : elmtId}) }}" method="post">
+            <form action="{{ url('generateElementReport',{entity: elmtType, 'elmtId' : elmtId}) }}" method="post">
                 <div class="modal-content">
                     <h4>{% trans %}results.printing.modal_title{% endtrans %}</h4>
                     <h5>{% trans %}results.printing.content{% endtrans %}</h5>

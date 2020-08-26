@@ -62,7 +62,7 @@
     </div>
 
 
-    <ul class="elements" data-prototype="{% filter escape %}{% include 'prototype_organization_element.twig' with { 'item': elements.vars.prototype, 'elmtType' : elmtType, 'nbFields' : nbFields } %}{% endfilter %}" style="margin-top:50px">
+    <ul class="elements" data-prototype="{% filter escape %}{% include 'prototype_organization_element.twig' with { 'item': elements.vars.prototype, entity: elmtType, 'nbFields' : nbFields } %}{% endfilter %}" style="margin-top:50px">
 
         {% if currentuser.organization.usersWithoutOrgElement(elmtType) %}
         <li class="element">
@@ -118,7 +118,7 @@
                   <h5>{{elmtName|capitalize}} {{ key + 1}}</h5>
               </li>
               <li style="margin-left:auto;margin-right:10px"><a class="validate waves-effect waves-light btn-flat"><i class="fa fa-pencil-alt"></i></a></li>
-              <li style="margin-right:10px"><a class="validate waves-effect waves-light btn" href="{{ url('updateElementTargets',{'elmtType' : elmtType, 'elmtId' : element.vars.value.id}) }}" data-tooltip="{% trans %}organization_elements.targets{% endtrans %}"><i class="fa fa-bullseye"></i></a></li>
+              <li style="margin-right:10px"><a class="validate waves-effect waves-light btn" href="{{ url('updateElementTargets',{entity: elmtType, 'elmtId' : element.vars.value.id}) }}" data-tooltip="{% trans %}organization_elements.targets{% endtrans %}"><i class="fa fa-bullseye"></i></a></li>
               <li><a href="#deleteDepartment" class="waves-effect waves-light accent-4 btn-flat red-text modal-trigger tooltip" data-did="{{ element.vars.id }}" data-tooltip="{% trans %}organization_elements.delete_btn{% endtrans %}"><i class="fa fa-trash"></i></a></li>
           </ul>
           #}
@@ -168,7 +168,7 @@
                       </a>
                     {% endif %}
                   </li>
-                  <li style="margin-right:10px"><a class="validate waves-effect waves-light btn tooltipped" href="{{ url('updateElementTargets',{'elmtType' : elmtType, 'elmtId' : element.vars.data.id}) }}" data-position="top" data-tooltip="{% trans %}organization_elements.targets{% endtrans %}" style="padding:0px 14px;display:flex;justify-content:center;width:75px"><i class="fa fa-bullseye"></i>{% if element.vars.data.targets|length > 0 %}<span style="margin-left:3px">{{ element.vars.data.targets|length }}</span>{% endif %}</a></li>
+                  <li style="margin-right:10px"><a class="validate waves-effect waves-light btn tooltipped" href="{{ url('updateElementTargets',{entity: elmtType, 'elmtId' : element.vars.data.id}) }}" data-position="top" data-tooltip="{% trans %}organization_elements.targets{% endtrans %}" style="padding:0px 14px;display:flex;justify-content:center;width:75px"><i class="fa fa-bullseye"></i>{% if element.vars.data.targets|length > 0 %}<span style="margin-left:3px">{{ element.vars.data.targets|length }}</span>{% endif %}</a></li>
                   <li><a href="#deleteElement" class="waves-effect waves-light accent-4 btn-flat modal-trigger tooltipped" data-eid="{{ element.vars.data.id }}" data-position="top" data-tooltip="{% trans %}organization_elements.delete_btn{% endtrans %} {{elmtName}}"><i class="fa fa-trash"></i></a></li>
                 </ul>
               </div>
