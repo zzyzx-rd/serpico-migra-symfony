@@ -151,12 +151,12 @@ class UserController extends MasterController
      * @throws OptimisticLockException
      * @Route("/password/{token}", name="definePassword")
      */
-    public function definePasswordAction(Request $request, Application $app, $token)
+    public function definePasswordAction(Request $request, $token)
     {
         $entityManager = $this->getEntityManager();
         $repository = $entityManager->getRepository(User::class);
         $user = $repository->findOneByToken($token);
-        $formFactory = $app['form.factory'];
+        
         $pwdForm = $formFactory->create(PasswordDefinitionForm::class, $user, ['standalone' => true]);
         $pwdForm->handleRequest($request);
 
@@ -194,11 +194,11 @@ class UserController extends MasterController
      * @throws OptimisticLockException
      *
      */
-    public function signupAction(Request $request, Application $app)
+    public function signupAction(Request $request)
     {
         $entityManager = $this->getEntityManager();
 
-        $formFactory = $app['form.factory'];
+        
         $user = new User;
         $signupForm = $formFactory->create(SignUpForm::class, $user, ['standalone' => true]);
         $signupForm->handleRequest($request);
@@ -254,12 +254,12 @@ class UserController extends MasterController
      * @return mixed
      * @Route("/institutions/all", name="displayAllInstitutions")
      */
-    public function displayAllInstitutionsAction(Request $request, Application $app){
+    public function displayAllInstitutionsAction(Request $request){
 
         $entityManager = $this->getEntityManager($app);
         $repoO = $entityManager->getRepository(Organization::class);
         $institutions = $repoO->findBy(['type' => 'P'],['commname' => 'ASC']);
-        $formFactory = $app['form.factory'];
+        
 
         $addInstitutionProcessForm = $formFactory->create(AddProcessForm::class, null, ['standalone' => true]);
         $addInstitutionProcessForm->handleRequest($request);
@@ -290,7 +290,7 @@ class UserController extends MasterController
      * @throws OptimisticLockException
      * @Route("/process/create/institution/{orgId}", name="createProcessRequest")
      */
-    public function createProcessRequestAction(Request $request, Application $app, $orgId)
+    public function createProcessRequestAction(Request $request, $orgId)
     {
         $entityManager = $this->getEntityManager();
         $repoO = $entityManager->getRepository(Organization::class);
@@ -311,7 +311,7 @@ class UserController extends MasterController
             return new JsonResponse(null, Response::HTTP_NOT_FOUND);
         }
 
-        $formFactory = $app['form.factory'];
+        
         $createProcessRequestForm = $formFactory->create(AddProcessForm::class, $element, ['standalone' => true, 'organization' => $organization, 'elmt' => $formParam]);
         $createProcessRequestForm->handleRequest($request);
 
@@ -351,13 +351,13 @@ class UserController extends MasterController
      * @throws OptimisticLockException
      * @Route("/ajax/password/{token}", name="createPasswordAJAX")
      */
-    public function createPwdActionAJAX(Request $request, Application $app, $token)
+    public function createPwdActionAJAX(Request $request, $token)
     {
         //try{
         $entityManager = $this->getEntityManager($app);
         $repoU = $entityManager->getRepository(User::class);
         $user = $repoU->findOneByToken($token);
-            $formFactory = $app['form.factory'];
+            
             $pwdForm = $formFactory->create(PasswordDefinitionForm::class, $user, ['standalone' => true]);
             $pwdForm->handleRequest($request);
 
@@ -390,7 +390,7 @@ class UserController extends MasterController
      * @throws OptimisticLockException
      * @Route("/profile", name="manageProfile")
      */
-    public function manageProfileAction(Request $request, Application $app){
+    public function manageProfileAction(Request $request){
 
         $organization = $currentUser->getOrganization();
         if (!$currentUser /*|| $organization->getCommname() != "Public"*/) {
@@ -404,7 +404,7 @@ class UserController extends MasterController
         }
 
         $entityManager = $this->getEntityManager($app);
-        $formFactory = $app['form.factory'];
+        
         $workerIndividual = $currentUser->getWorkerIndividual();
         $workerIndividualForm = $formFactory->create(UpdateWorkerIndividualForm::class, $workerIndividual, ['standalone' => true]);
         $workerIndividualForm->handleRequest($request);
@@ -490,13 +490,13 @@ class UserController extends MasterController
 
     /**
      * @param Request $request
-     * @param $elmtType
+     * @param $entity
      * @param $elmtId
      * @return JsonResponse|Response
-     * @Route("/institution/{elmtType}/config/{elmtId}", name="getElementConfig")
+     * @Route("/institution/{entity}/config/{elmtId}", name="getElementConfig")
      */
-    public function getElementConfigAction($elmtType, $elmtId){
-        switch ($elmtType) {
+    public function getElementConfigAction($entity, $elmtId){
+        switch ($entity) {
             case 'iprocess':
                 $repoE    = $this->em->getRepository(InstitutionProcess::class);
                 break;
@@ -531,7 +531,7 @@ class UserController extends MasterController
                 });
         }
 
-        if($elmtType === 'activity'){
+        if($entity === 'activity'){
             $elmtConfig['pStatus'] = $element->getProgress();
             $elmtConfig['oStatus'] = $element->getStatus();
             $elmtConfig['nbOCompletedStages'] = $element->getOCompletedStages()->count();
@@ -540,9 +540,9 @@ class UserController extends MasterController
 
         $repoU = $this->em->getRepository(User::class);
         if ($element->getMasterUser()) {
-            $masterUser = $elmtType === 'activity' ? $repoU->find($element->getMasterUser()) : ($element->getMasterUser());
+            $masterUser = $entity === 'activity' ? $repoU->find($element->getMasterUser()) : ($element->getMasterUser());
         } else {
-            $masterUser = $elmtType === 'activity' ? $repoU->find($element->getMasterUser()) : ($repoU->find($element->getCreatedBy()));
+            $masterUser = $entity === 'activity' ? $repoU->find($element->getMasterUser()) : ($repoU->find($element->getCreatedBy()));
         }
         $elmtConfig['masterUserFullname'] = $masterUser->getFullname();
         $elmtConfig['masterUserPicture'] = $masterUser->getPicture();
@@ -550,15 +550,15 @@ class UserController extends MasterController
         $activityM = new ActivityM($this->em, $this->stack, $this->security);
         $stageM = new StageM($this->em, $this->stack, $this->security);
         $elmtConfig['canEdit'] = $activityM->userCanEdit($element, $this->user);
-        $elmtConfig['isDeletable'] = ($elmtType === 'activity') ? $activityM->isDeletable($element) && $elmtConfig['canEdit'] : false;
+        $elmtConfig['isDeletable'] = ($entity === 'activity') ? $activityM->isDeletable($element) && $elmtConfig['canEdit'] : false;
         foreach($stages as $stage){
             $sData = [];
             $sData['id'] = $stage->getId();
-            if($elmtType === 'activity'){
+            if($entity === 'activity'){
                 $sData['r'] = $stage->isReopened();
             }
             $sData['name'] = $stage->getName();
-            $sData['pReadiness'] = sizeof($stageM->getUniqueGradableParticipations($stage)) >= 1 && sizeof($stageM->getUniqueGraderParticipations($stage)) >= 1;
+            $sData['pReadiness'] = sizeof($stageM->getGradableParticipants($stage)) >= 1 && sizeof($stageM->getGraderParticipants($stage)) >= 1;
             $sData['oReadiness'] = sizeof($stage->getCriteria()) >= 1 || $stage->getSurvey() !== null;
             $sData['progress'] = $stage->getProgress();
             $sData['ddates'] = $stage->isDefiniteDates();
@@ -585,7 +585,7 @@ class UserController extends MasterController
             }
 
             $team = null;
-            foreach($stage->getIndependantUniqueParticipations() as $participant){
+            foreach($stage->getIndependantParticipants() as $participant){
                 $pData = [];
                 if($participant->getTeam() !== null){
 
@@ -648,7 +648,7 @@ class UserController extends MasterController
     public function createUserProcessActivity(Request $request, $inpId){
         $repoIP = $this->em->getRepository(InstitutionProcess::class);
         $repoU = $this->em->getRepository(User::class);
-        $currentUser = $this->security->getUser();
+        $currentUser = $this->user;
         // If not fresh new internal activity, institution is null. If activity request by citizen/external, then is necessarily linked to an (i)process
         $institutionProcess = $inpId !== 0 ? $repoIP->findOneById($inpId) : null;
         $institution = ((int)$_POST['fi'] === 1) ? $currentUser->getOrganization() : $institutionProcess->getOrganization();
@@ -682,7 +682,7 @@ class UserController extends MasterController
         }
 
         if($isUnlinkedToAnyProcess || $institutionProcess->isApprovable()){
-            return $this->redirectToRoute("activityInitialisation", ["elmtType" => 'activity', "inpId" => $inpId, "actName" => $actName]);
+            return $this->redirectToRoute("activityInitialisation", ['entity' => 'activity', 'inpId' => $inpId, 'actName' => $actName]);
             //$activityController = new ActivityController($this->em, $this->security, $this->stack);
             //return $activityController->addActivityId('activity', $inpId, $actName);
         }
@@ -904,7 +904,7 @@ class UserController extends MasterController
      * @throws OptimisticLockException
      * @Route("/rpassword", name="resetPassword")
      */
-    public function resetPwdAction(Request $request, Application $app)
+    public function resetPwdAction(Request $request)
     {
 
         $entityManager = $this->getEntityManager($app);
@@ -936,7 +936,7 @@ class UserController extends MasterController
      * @return mixed
      * @Route("/mpassword/{token}", name="modifyPassword")
      */
-    public function modifyPwdAction(Request $request, Application $app, $token)
+    public function modifyPwdAction(Request $request, $token)
     {
 
 
@@ -978,7 +978,7 @@ class UserController extends MasterController
     }
 
     // Display all activities for current user
-    public function getAllUserActivitiesAction(Request $request, Application $app)
+    public function getAllUserActivitiesAction(Request $request)
     {
 
         if (!$currentUser) {
@@ -987,12 +987,12 @@ class UserController extends MasterController
 
         $this->em = $this->getEntityManager();
         $repoA = $this->em->getRepository(Activity::class);
-        $repoAU = $this->em->getRepository(Participation::class);
+        $repoP = $this->em->getRepository(Participation::class);
         $repoO = $this->em->getRepository(Organization::class);
         $repoDec = $this->em->getRepository(Decision::class);
         $role = $currentUser->getRole();
         $currentUsrId = $currentUser->getId();
-        $organization = $repoO->find($currentUser->getOrgId());
+        $organization = $currentUser->getOrganization();
 
         $userArchivingPeriod = $currentUser->getActivitiesArchivingNbDays();
 
@@ -1061,7 +1061,7 @@ class UserController extends MasterController
             // IDs of activities in which at least one *graded* participant is a direct or indirect subordinate
             $subordinates = $currentUser->getSubordinatesRecursive();
             /** @var Participation[] */
-            $subordinatesParticipations = $repoAU->findBy([ 'usrId' => $subordinates, 'type' => [ -1, 1 ] ]);
+            $subordinatesParticipations = $repoP->findBy([ 'usrId' => $subordinates, 'type' => [ -1, 1 ] ]);
             $activitiesWithSubordinates_IDs = array_map(function (Participation $p) {
                 return $p->getActivity()->getId();
             }, $subordinatesParticipations);
@@ -1177,7 +1177,7 @@ class UserController extends MasterController
         $nbActivitiesCategories = (count($completedActivities) + count($releasedActivities) > 0) ? $nbActivitiesCategories + 1 : $nbActivitiesCategories;
         $archivedActivities = $userActivities->matching(Criteria::create()->where(Criteria::expr()->eq("status", 4)));
 
-        $formFactory = $app['form.factory'];
+        
 
         $delegateActivityForm = $formFactory->create(DelegateActivityForm::class, null, ['standalone' => true, 'app' => $app]) ;
         $delegateActivityForm->handleRequest($request);
@@ -1228,7 +1228,7 @@ class UserController extends MasterController
      * @return mixed
      * @Route("mysettings", name="mySettings")
      */
-    public function getUserSettingsAction(Request $request, Application $app){
+    public function getUserSettingsAction(Request $request){
 
 
         $entityManager = $this->getEntityManager($app);
@@ -1252,7 +1252,7 @@ class UserController extends MasterController
      * @throws OptimisticLockException
      * @Route("/profile/picture", name="updatePicture")
      */
-    public function updatePictureAction(Request $request, Application $app)
+    public function updatePictureAction(Request $request)
     {
         $user = self::getAuthorizedUser();
         if (!$user) {
@@ -1261,7 +1261,7 @@ class UserController extends MasterController
 
         $this->em = self::getEntityManager();
         /** @var App\FormFactoryInterface */
-        $formFactory = $app['form.factory'];
+        
         $pictureForm = $formFactory->create(AddUserPictureForm::class);
         $pictureForm->handleRequest($request);
         $userPicture = $user->getPicture();
@@ -1283,7 +1283,7 @@ class UserController extends MasterController
     }
 
     // Delete user (ajax call)
-    public function deleteUserAction(Request $request, Application $app, $id){
+    public function deleteUserAction(Request $request, $id){
         $manager = $app['orm.em'];
         $repository = $manager->getRepository(User::class);
         $user = $repository->find($id);
@@ -1302,7 +1302,7 @@ class UserController extends MasterController
 
     /************ CONTACT PAGE **********************************/
 
-    public function displayContactAction(Request $request, Application $app){
+    public function displayContactAction(Request $request){
 
             return $app['twig']->render('contact.html.twig',[
                 'last_username' => $app['session']->get('security.last_username'),
@@ -1314,7 +1314,7 @@ class UserController extends MasterController
 
     /************ NEWS PAGE **********************************/
 
-    public function displayNewsAction(Request $request, Application $app){
+    public function displayNewsAction(Request $request){
 
         return $app['twig']->render('news.html.twig',[
             'error' => $app['security.last_error']($request),
@@ -1395,7 +1395,7 @@ class UserController extends MasterController
         $contact = new Contact;
         $repoO = $entityManager->getRepository(Organization::class);
         $repoU = $entityManager->getRepository(User::class);
-        $formFactory = $app['form.factory'];
+        
         $csrf_token = $app['csrf.token_manager']->getToken('token_id');
         $contactForm = $formFactory->create(ContactForm::class,$contact,['standalone' => true]);
         $contactForm->handleRequest($request);
@@ -1457,11 +1457,11 @@ class UserController extends MasterController
      * @throws OptimisticLockException
      * @Route("/settings/user/{usrId}/finalize", name="finalizeUser")
      */
-    public function finalizeUserAction(Request $request, Application $app, $usrId)
+    public function finalizeUserAction(Request $request, $usrId)
     {
         $entityManager = $this->getEntityManager($app);
         $repoO = $entityManager->getRepository(Organization::class);
-        $formFactory = $app['form.factory'];
+        
         $user = MasterController::getAuthorizedUser($app);
         $orgId = $user->getOrgId();
         $organization = $repoO->findOneById($orgId);
@@ -1524,7 +1524,7 @@ class UserController extends MasterController
         $repoO = $this->em->getRepository(Organization::class);
         /** @var UserRepository */
         $repoU = $this->em->getRepository(User::class);
-        $repoAU = $this->em->getRepository(Participation::class);
+        $repoP = $this->em->getRepository(Participation::class);
         $repoR = $this->em->getRepository(Result::class);
         $repoRK = $this->em->getRepository(Ranking::class);
         $repoRT = $this->em->getRepository(RankingTeam::class);
@@ -1578,7 +1578,7 @@ class UserController extends MasterController
 //        $user->setRememberMeToken($_COOKIE['REMEMBERME']);
         $this->em->persist($user);
         $this->em->flush();
-        $totalParticipations = new ArrayCollection($repoAU->findBy(['user' => $user], ['status' => 'ASC', 'activity' => 'ASC', 'stage' => 'ASC']));
+        $totalParticipations = new ArrayCollection($repoP->findBy(['user' => $user], ['status' => 'ASC', 'activity' => 'ASC', 'stage' => 'ASC']));
 
         // We consider each graded activity as having at least one releasable criterion an nothing more
         $nbPublishedActivities = 0;
@@ -1842,11 +1842,11 @@ class UserController extends MasterController
     public function displayProfile(Application $app)
     {
         $entityManager = $this->getEntityManager();
-        $repoAU = $entityManager->getRepository(Participation::class);
+        $repoP = $entityManager->getRepository(Participation::class);
         $repoO = $entityManager->getRepository(Organization::class);
         $user = self::getAuthorizedUser();
         $organization = $repoO->find($user->getOrgId());
-        $totalParticipations = $repoAU->findBy([ 'usrId' => $user->getId(), 'activity' => 'ASC' ]);
+        $totalParticipations = $repoP->findBy([ 'usrId' => $user->getId(), 'activity' => 'ASC' ]);
 
         // We consider each graded activity as having at least one releasable criterion an nothing more
         $totalGradedActivity = 0;
@@ -1889,7 +1889,7 @@ class UserController extends MasterController
      * @return mixed
      * @Route("/help", name="help")
      */
-    public function helpAction(Request $request, Application $app)
+    public function helpAction(Request $request)
     {
         return $app['twig']->render('help.html.twig',
             [

@@ -25,10 +25,10 @@
     var upaurl = "{{ url('createUserProcessActivity',{inpId : 0}) }}";
     var cpurl = "{{ url('createProcessRequest',{orgId : 0}) }}";
     var dpurl = "{{ url('rejectProcessRequest') }}";
-    var vpurl = "{{ url('validateProcessRequest',{elmtType: currentuser.role == 4 ? 'process' : 'iprocess'}) }}";
+    var vpurl = "{{ url('validateProcessRequest',{entity: currentuser.role == 4 ? 'process' : 'iprocess'}) }}";
     var ipurl = "{{ url('getAllProcessesFromInstitution',{orgId : 0}) }}";
     var orgId = "{{ currentuser.orgId }}";
-    const durl = "{{ url('deleteProcess',{orgId: orgId, elmtType : currentuser.role == 4 ? 'process' : 'iprocess'}) }}";
+    const durl = "{{ url('deleteProcess',{orgId: orgId, entity : currentuser.role == 4 ? 'process' : 'iprocess'}) }}";
 
     async function onAddProcessClick(selectId) {
         const url = ipurl;
@@ -256,7 +256,7 @@
                   </li>
                   {% if process.vars.data.gradable %}
                     <li style="margin-right:10px"> 
-                      <a class="validate waves-effect waves-light {% if process.vars.data.stages|length > 0 %}btn lime darken-3{% else %}btn-flat lime-text text-darken-3{% endif %} tooltipped" href="{{ url('manageActivityElement',{elmtType: elmtType, elmtId: process.vars.data.id}) }}" data-position="top" data-tooltip="{% trans %}processes.followup_settings{% endtrans %}" style="padding:0px 14px;display:flex;justify-content:center;width:75px">
+                      <a class="validate waves-effect waves-light {% if process.vars.data.stages|length > 0 %}btn lime darken-3{% else %}btn-flat lime-text text-darken-3{% endif %} tooltipped" href="{{ url('manageActivityElement',{entity: elmtType, elmtId: process.vars.data.id}) }}" data-position="top" data-tooltip="{% trans %}processes.followup_settings{% endtrans %}" style="padding:0px 14px;display:flex;justify-content:center;width:75px">
                         <i class="fa fa-users-cog"></i>
                       </a>
                     </li>
@@ -335,7 +335,7 @@
                   </li>
                   {% if child.vars.data.gradable %}  
                     <li style="margin-right:10px">
-                      <a class="validate waves-effect waves-light {% if child.vars.data.stages|length > 0 %}btn lime darken-3{% else %}btn-flat lime-text text-darken-3{% endif %} tooltipped" href="{{ url('manageActivityElement',{elmtType: elmtType, elmtId: child.vars.data.id}) }}" data-position="top" data-tooltip="{% trans %}processes.followup_settings{% endtrans %}" style="padding:0px 14px;display:flex;justify-content:center;width:75px">
+                      <a class="validate waves-effect waves-light {% if child.vars.data.stages|length > 0 %}btn lime darken-3{% else %}btn-flat lime-text text-darken-3{% endif %} tooltipped" href="{{ url('manageActivityElement',{entity: elmtType, elmtId: child.vars.data.id}) }}" data-position="top" data-tooltip="{% trans %}processes.followup_settings{% endtrans %}" style="padding:0px 14px;display:flex;justify-content:center;width:75px">
                         <i class="fa fa-users-cog"></i>
                       </a>
                     </li>
@@ -418,7 +418,7 @@
                     </li>
                     {% if subchild.vars.data.gradable %}
                       <li style="margin-right:10px">
-                        <a class="validate waves-effect waves-light {% if subchild.vars.data.stages|length > 0 %}btn lime darken-3{% else %}btn-flat lime-text text-darken-3{% endif %} tooltipped" href="{{ url('manageActivityElement',{elmtType: elmtType, elmtId: subchild.vars.data.id}) }}" data-position="top" data-tooltip="{% trans %}processes.followup_settings{% endtrans %}" style="padding:0px 14px;display:flex;justify-content:center;width:75px">
+                        <a class="validate waves-effect waves-light {% if subchild.vars.data.stages|length > 0 %}btn lime darken-3{% else %}btn-flat lime-text text-darken-3{% endif %} tooltipped" href="{{ url('manageActivityElement',{entity: elmtType, elmtId: subchild.vars.data.id}) }}" data-position="top" data-tooltip="{% trans %}processes.followup_settings{% endtrans %}" style="padding:0px 14px;display:flex;justify-content:center;width:75px">
                           <i class="fa fa-users-cog"></i>
                           {#}
                           {% if subchild.vars.data.stages|length > 0 %}

@@ -1,0 +1,42 @@
+ 
+password_definition: 
+  unmatching_msg: Les mots de passe ne correspondent pas
+
+activity_elements: 
+  stages: 
+    sum_weight_equal_to_hundred_pct: La somme des poids des phases doit être égale à 100%
+    unique_stage_name: Il existe déjà une phase qui porte le même nom
+    missing_owners: Assurez-vous qu'au moins une phase configurée ait un participant owner, en droit de la configurer
+    min_config: Assurez-vous qu'au moins une phase possède au minimum un participant qui donne ses retours et un participant qui en reçoit, sur base d'un sondage ou d'un ou plusieurs critères d'évaluation
+  criteria: 
+    sum_weight_equal_to_hundred_pct: La somme des poids des critères doit être égale à 100%
+
+create_client: 
+  missing_owner: Ayant renseigné une ou plusieurs addresses email d'utilisateurs du partenaire, assurez-vous que l'un dentre eux soit owner du compte afin qu'il puisse configurer celui de son entreprise (le client se chargera des droits d'administration par la suite)
+  doublon_client: Vérifiez que ce partenaire n'existe pas au sein de votre entreprise, car il nous semble que vous souhaitez créer un doublon !
+  owner_without_email: L'owner ne doit avoir une adresse email vide
+
+create_parameters: 
+  step: Lintervalle de notation doit être un diviseur de l'échelle de notes
+  ub_greater_than_lb: La note maximale doit être supérieure à la note minimale
+  sum_weight_equal_to_hundred_pct: La somme des poids des phases doit être égale à 100%
+  doublon_activity_name: Il y a déjà eu une activité créée avec ce nom, choisissez-en un autre
+  doublon_department: Il y a déjà eu un départment créé avec ce nom, choisissez-en un autre
+  doublon_position: Il y a déjà eu une position créée avec ce nom, choisissez-en un autre
+  doublon_title: Il y a déjà eu un titre créé avec ce nom, choisissez-en un autre
+
+stage: 
+  period_positive: Vous devez rentrer une valeur positive pour la période de déroulement
+
+signup: 
+  password: Le mot de passe doit contenir au moins 8 caractères dont au moins une majuscule et un chiffre
+  email: Votre adresse email doit être valide (exemple ":" toto@tutu.com)
+
+create_user: 
+  email: Oops... cet email existe déjà, l'utilisateur a certainement déjà un compte !
+
+worker_search: 
+  ub_greater_than_lb: Le nombre maximal d'employés doit être supérieur au nombre minimal
+
+grades: 
+  force_comment: Vous devez commenter ce critère

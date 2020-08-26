@@ -155,72 +155,36 @@
               </li>
             {% endif %}
             <li class="lg-icon">
-{#              <div class="collapsible" data-collapsible="accordion">#}
-{#                <div class="collapsible-header">#}
-{#                  {% set currentlocale = global.request.get('_locale') %}#}
-{#                  {% set locales = ["en", "fr"] %}#}
-{#                  <div class="flag locale-flag {{ currentlocale }}"></div>#}
-{#                  <span class="country">{{ global.request.get('_locale')|upper }}</span>#}
-{#                </div>#}
-{#                <ul class="collapsible-body lang-menu">#}
-{#                  {% for locale in locales %}#}
-{#                    {% if locale != currentlocale %}#}
-{#                      <li>#}
-{#                        <a href="{{ path(global.route, global.routeParams|merge({ _locale: locale })) }}">#}
-{#                          <div class="flag {{ locale }}"></div>#}
-{#                          <span class="country">{{ locale|upper }}</span>#}
-{#                        </a>#}
-{#                      </li>#}
-{#                    {% endif %}#}
-{#                  {% endfor %}#}
-{#                </ul>#}
-{#              </div>#}
-              <ul class="collapsible flags" data-collapsible="accordion">
-                <li>
-                  <div class="collapsible-header">
-                    <ul class="flex-center">
-                      <li>
-                        <div class="flag {{ locale }}"></div>
-                      </li>
-                      <li>
-                        <span class="country">{{ locale|upper }}</span>
-                      </li>
-                    </ul>
-                  </div>
-                  <div class="collapsible-body language-collapsible-body">
-                    <ul class="lang-menu">
-                      {% if locale != 'en' %}
-                        <li>
-                          <ul class="flex-center">
-                            <a href="{{ path('change_locale', {'locale': 'en'}) }}" class="flex-center">
-                              <li>
-                                <div class="flag en"></div>
-                              </li>
-                              <li>
-                                <span class="country">EN</span>
-                              </li>
-                            </a>
-                          </ul>
-                        </li>
-                      {% endif %}
-                      {% if locale != 'fr' %}
-                        <li>
-                          <ul class="flex-center">
-                            <a href="{{ path('change_locale', {'locale': 'fr'}) }}" class="flex-center">
-                              <li>
-                                <div class="flag fr"></div>
-                              </li>
-                              <li>
-                                <span class="country">FR</span>
-                              </li>
-                            </a>
-                          </ul>
-                        </li>
-                      {% endif %}
-                    </ul>
-                  </div>
-                </li>
-              </ul>
+              <div class="collapsible" data-collapsible="accordion">
+                <div class="collapsible-header">
+                  <ul class="flex-center">
+                    <li>
+                      <div class="flag sm-right {{ locale }}"></div>
+                    </li>
+                    <li>
+                      <span class="country">{{ locale|upper }}</span>
+                    </li>
+                  </ul>
+                </div>
+                <ul class="collapsible-body lang-menu">
+                  {% if locale != 'en' %}
+                    <li>
+                      <a href="{{ path('change_locale', {'locale': 'en'}) }}" class="flex-center">
+                          <div class="flag en"></div>
+                          <span class="country">EN</span>
+                      </a>
+                    </li>
+                  {% endif %}
+                  {% if locale != 'fr' %}
+                    <li>
+                      <a href="{{ path('change_locale', {'locale': 'fr'}) }}" class="flex-center">
+                          <div class="flag fr"></div>
+                          <span class="country">FR</span>
+                      </a>
+                    </li>
+                  {% endif %}
+                </ul>
+              </div>
             </li>
           </ul>
         </div>

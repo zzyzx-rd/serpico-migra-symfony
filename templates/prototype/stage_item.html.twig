@@ -58,9 +58,11 @@
         </header>
         <div id="stage-__stgNb__-type--criteria">
           <ul class="criteria-list">
+            {#
             <template class="criteria-list--item__proto">
               {% include "modals/stage_criterion.html.twig" with { s: '__stgNb__', c: '__crtNb__', criterion: stage.criteria.vars.prototype } %}
             </template>
+            #}
             {#
               This item only displays when not preceeded with any element,
               through CSS direct sibling selector.
@@ -89,7 +91,8 @@
             </h6>
 
             <a
-{#              href="{{ url('surveyRequest',{'stgId' : 0}) }}?redirect={{ url(global.route, global.routeParams)|e('url') }}"#}
+              {#href="{{ url('surveyRequest',{'stgId' : 0}) }}?redirect={{ url(route,routeParams)|e('url') }}"#}
+              href="{{ url('surveyRequest',{'stgId' : 0}) }}"
               class="btn insert-survey-btn">
               <span>{% trans %}survey.add_btn_internal{% endtrans %}</span>
             </a>
@@ -98,13 +101,13 @@
       </section>
       <section class="participants">
         <template class="participants-list--item__proto-i">
-          {% include "components/activity_page__participant_item.html.twig" with { participant: stage.independantUniqueIntParticipations.vars.prototype, leadingOption: true, mode: 'i', entity: 'user' } %}
+          {% include "components/activity_page__participant_item.html.twig" with { participant: stage.intParticipants.vars.prototype, leadingOption: true, mode: 'i', entity: 'user' } %}
         </template>
         <template class="participants-list--item__proto-t">
-          {% include "components/activity_page__participant_item.html.twig" with { participant: stage.independantUniqueTeamParticipations.vars.prototype, leadingOption: true, mode: 't', entity: 'team' } %}
+          {% include "components/activity_page__participant_item.html.twig" with { participant: stage.independantTeamParticipants.vars.prototype, leadingOption: true, mode: 't', entity: 'team' } %}
         </template>
         <template class="participants-list--item__proto-e">
-          {% include "components/activity_page__participant_item.html.twig" with { participant: stage.independantUniqueExtParticipations.vars.prototype, leadingOption: false, mode: 'e', entity: 'user' } %}
+          {% include "components/activity_page__participant_item.html.twig" with { participant: stage.extParticipants.vars.prototype, leadingOption: false, mode: 'e', entity: 'user' } %}
         </template>
         <header>{{ 'activity_elements.participants'|trans }}</header>
 

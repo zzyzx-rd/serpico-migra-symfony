@@ -160,7 +160,7 @@ class CriterionType extends AbstractType
                 ],
                 'attr' => [
                     'style' => 'margin-bottom:0px'
-                ]
+                ],
             ]
         )
         ->add('comment', TextareaType::class,
@@ -194,13 +194,13 @@ class CriterionType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefault('elmtType', 'activity');
+        $resolver->setDefault('entity', 'activity');
         $resolver->setDefault('data_class', static function (Options $options){
-            if($options['elmtType'] === 'iprocess'){
+            if($options['entity'] === 'iprocess'){
                 return IProcessCriterion::class;
             }
 
-            if($options['elmtType'] === 'process'){
+            if($options['entity'] === 'process'){
                 return ProcessCriterion::class;
             }
 

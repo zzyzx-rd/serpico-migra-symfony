@@ -381,7 +381,7 @@ abstract class MasterController extends AbstractController
 
 
     // Compute (user) rankings
-    public static function computeRankingAction(Request $request, Application $app, $entityType, $dType, $wType, $orgId, $elmtType, $maxLastResults = 1000000, $from = '2018-01-01 00:00', $to = null, $period = 0, $frequency = 'D')
+    public static function computeRankingAction(Request $request, $entityType, $dType, $wType, $orgId, $elmtType, $maxLastResults = 1000000, $from = '2018-01-01 00:00', $to = null, $period = 0, $frequency = 'D')
     {
         $em = self::getEntityManager();
         $repoO = $em->getRepository(Organization::class);
@@ -412,9 +412,9 @@ abstract class MasterController extends AbstractController
             $rType = 'C';
         }
 
-        $activity = ($rType == 'A') ? $elmtType : (($rType == 'S') ? $elmtType->getActivity() : $elmtType->getStage()->getActivity());
-        $stage = ($rType == 'A') ? null : (($rType == 'S') ? $elmtType : $elmtType->getStage());
-        $criterion = ($rType == 'C') ? $elmtType : null;
+        $activity = ($rType == 'A') ? $entity : (($rType == 'S') ? $elmtType->getActivity() : $elmtType->getStage()->getActivity());
+        $stage = ($rType == 'A') ? null : (($rType == 'S') ? $entity : $elmtType->getStage());
+        $criterion = ($rType == 'C') ? $entity : null;
 
         foreach ($population as $popElmt) {
             $popData = $popElmt->getAverage($app, true, $dType, $wType, $rType, $maxLastResults, $from, $to)[0];
@@ -606,7 +606,7 @@ abstract class MasterController extends AbstractController
     public function sendStageDeadlineMails($forAllFirms = true)
     {
         $repoS = $this->em->getRepository(Stage::class);
-        $repoAU = $this->em->getRepository(Participation::class);
+        $repoP = $this->em->getRepository(Participation::class);
         $repoON = $this->em->getRepository(OptionName::class);
         $repoOP = $this->em->getRepository(OrganizationUserOption::class);
         $deadlineOption = $repoON->findOneByName('mailDeadlineNbDays');
@@ -651,7 +651,7 @@ abstract class MasterController extends AbstractController
 
             if ($deadlineDiff->invert == 1) {
                 // We find by first criterion in order to avoid doublon
-                $lateParticipants = $repoAU->findBy(['criterion' => $stage->getCriteria()->first(), 'status' => [0, 1, 2]]);
+                $lateParticipants = $repoP->findBy(['criterion' => $stage->getCriteria()->first(), 'status' => [0, 1, 2]]);
                 $recipients = [];
                 foreach ($lateParticipants as $lateParticipant) {
                     $recipientUser = $lateParticipant->getUser();
@@ -1129,7 +1129,7 @@ abstract class MasterController extends AbstractController
     }
 
     // Function which checks if stage is computable, if it is the case sends mail to activity manager to access results
-    public function checkStageComputability(Request $request, Application $app, Stage $stage, bool $addInDb = true)
+    public function checkStageComputability(Request $request, Stage $stage, bool $addInDb = true)
     {
 
         $em = self::getEntityManager();
@@ -1264,14 +1264,14 @@ abstract class MasterController extends AbstractController
     {
         $em = self::getEntityManager();
         # The repos to access the data in the database
-        $repoAU = $em->getRepository(Participation::class);
+        $repoP = $em->getRepository(Participation::class);
         # The user who created the activity
         $currentUser = MasterController::getAuthorizedUser();
         $criteria = $stage->getCriteria();
 
 
         $activity = $stage->getActivity();
-        $participations = new ArrayCollection($repoAU->findBy(['criterion' => $criteria->first()], ['type' => 'ASC', 'team' => 'ASC']));
+        $participations = new ArrayCollection($repoP->findBy(['criterion' => $criteria->first()], ['type' => 'ASC', 'team' => 'ASC']));
         # the data send to the framework for the criteria calculation
         $jsonData = [];
         $jsonData["userWeights"] = [];
@@ -1309,7 +1309,7 @@ abstract class MasterController extends AbstractController
             $jsonGlobalDataStage["user"][] = -1;
         }
         # build the criteria data
-        $jsonData = MasterController::prepareJsonDataCriteria($stageMode, $criteria, $repoAU, $jsonData);
+        $jsonData = MasterController::prepareJsonDataCriteria($stageMode, $criteria, $repoP, $jsonData);
         # call the microframework for the criteria results
         $jsonFile = json_encode($jsonData);
         $calculatedValues = MasterController::callFramework($jsonFile, MasterController::CRITERIA);
@@ -1350,17 +1350,17 @@ abstract class MasterController extends AbstractController
     /**
      * @param int $stageMode value : USER_ONLY or STAGE_ONLY
      * @param $criteria criteria of a stage
-     * @param $repoAU
+     * @param $repoP
      * @param $jsonData jsondata in computeStageResult, in construction
      * @return mixed
      *
      * Add all information about the grades for all criterion in a stage, to be sent to the framework
      * Should be only called by computeStageResult
      */
-    public static function prepareJsonDataCriteria(int $stageMode, $criteria, $repoAU, $jsonData)
+    public static function prepareJsonDataCriteria(int $stageMode, $criteria, $repoP, $jsonData)
     {
         foreach ($criteria as $criterion) {
-            $participations = new ArrayCollection($repoAU->findBy(['criterion' => $criterion], ['type' => 'ASC', 'team' => 'ASC']));
+            $participations = new ArrayCollection($repoP->findBy(['criterion' => $criterion], ['type' => 'ASC', 'team' => 'ASC']));
             $jsonData["criterias"][$criterion->getId()] = [];
             $jsonData["criterias"][$criterion->getId()]["userGrades"] = [];
             $jsonData["criterias"][$criterion->getId()]["teamGrades"] = [];
@@ -1702,9 +1702,9 @@ abstract class MasterController extends AbstractController
     public static function computeActivityResult(Activity $activity, $dataActivity, int $stageMode, bool $addInDb = true)
     {
         $em = self::getEntityManager();
-        $repoAU = $em->getRepository(Participation::class);
+        $repoP = $em->getRepository(Participation::class);
         $repoRT = $em->getRepository(ResultTeam::class);
-        $participations = new ArrayCollection($repoAU->findBy(['criterion' => $activity->getStages()->first()->getCriteria()->first()], ['type' => 'ASC', 'team' => 'ASC']));
+        $participations = new ArrayCollection($repoP->findBy(['criterion' => $activity->getStages()->first()->getCriteria()->first()], ['type' => 'ASC', 'team' => 'ASC']));
         # refactor the dataActivity, to correspond to the framework
         foreach ($dataActivity as $key => $step) {
             $dataActivity[$key] = $step["step"];

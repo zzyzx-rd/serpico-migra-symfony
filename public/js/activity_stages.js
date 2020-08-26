@@ -554,11 +554,11 @@ $(document).on(
       $modalDeletionBtn.data('id',$participantItem.data('id'));
       $modalDeletionBtn.on('click',async function(){
         await $.post(dpurl);
-        $userVal = $participantItem.find('select[name*="directUser"]').val();
+        $userVal = $participantItem.find('select[name*="user"]').val();
         $participantList = $participantItem.closest('.participants-list');
         $participantItem.remove();
         $participantList.find('.participants-list--item').each(function(i,e){
-          $select = $(e).find('select[name*="directUser"]');
+          $select = $(e).find('select[name*="user"]');
           $select.find(`option[value="${$userVal}"]`).prop('disabled',false);
           $select.material_select();
         });
@@ -577,7 +577,7 @@ $(document).on(
       return;
     }
 
-    if($participantsList.find(`.participants-list--item[mode="${pType}"]`).length && $participantsList.find(`.participants-list--item[mode="${pType}"]`).find('select[name*="directUser"] option:not(:disabled)').length == $participantsList.children().length){
+    if($participantsList.find(`.participants-list--item[mode="${pType}"]`).length && $participantsList.find(`.participants-list--item[mode="${pType}"]`).find('select[name*="user"] option:not(:disabled)').length == $participantsList.children().length){
       $('#noRemainingParticipant').modal('open');
       return false;
     };
@@ -647,7 +647,7 @@ $(document).on(
     const $stageItem = $this.closest(STAGE_ITEM);
     const trigger = e.target;
     /** @type {JQuery<HTMLSelectElement>} */
-    const $elmtSelect = $participantItem.find('select[name*="directUser"],select[name*="team"]');
+    const $elmtSelect = $participantItem.find('select[name*="user"],select[name*="team"]');
     const $elmtName = $participantItem.find('.elmt-name');
     /** @type {JQuery<HTMLInputElement>} */
     const $elmtIsLeader = $participantItem.find('.elmt-is-leader');
@@ -664,12 +664,12 @@ $(document).on(
 
         if($.inArray(+usrRole,[2,3]) !== -1
         && !$potentialDifferentLeader.length && $elmtSelect.val() != usrId
-        || $potentialDifferentLeader.length && $potentialDifferentLeader.closest('.participants-list--item').find('select[name*="directUser"]').val() == usrId){
+        || $potentialDifferentLeader.length && $potentialDifferentLeader.closest('.participants-list--item').find('select[name*="user"]').val() == usrId){
           $('#setOwnershipLoseSetup').modal('open').data('id',$this.closest('.stage').data('id'));
           return false;
         } else if($potentialDifferentLeader.length){
           $('#changeOwner').find('.sName').empty().append($this.closest('.stage').find('.stage-name-field').text())
-          $('#changeOwner').find('#oldLeader').empty().append($potentialDifferentLeader.closest('.participants-list--item').find('select[name*="directUser"] option:selected').text())
+          $('#changeOwner').find('#oldLeader').empty().append($potentialDifferentLeader.closest('.participants-list--item').find('select[name*="user"] option:selected').text())
           $('#changeOwner').find('#newLeader').empty().append($elmtName.text());
           $('#changeOwner').modal('open').data('id',$this.closest('.stage').data('id'));
           return false;
@@ -687,8 +687,8 @@ $(document).on(
     );
 
     const params = {
-      pElmtType: $elmtSelect.filter((_i, e) => /directUser/gi.test(e.name)).length ? 'user' : 'team',
-      pElmtId: $elmtSelect[0].value,
+      pEntity: $elmtSelect.filter((_i, e) => /user/gi.test(e.name)).length ? 'user' : 'team',
+      pId: $elmtSelect[0].value,
       type: userParticipantType,
       precomment: null,
     };
@@ -925,14 +925,14 @@ function handleCNSelectElems (target) {
  * @param {JQuery|HTMLElement} [target]
  */
 function handleParticipantsSelectElems (target) {
-  const isParticipant = (_i, e) => /_\d+_(directuser|team)/gi.test(e.id);
+  const isParticipant = (_i, e) => /_\d+_(user|team)/gi.test(e.id);
   //const isExtParticipant = (_i, e) => /_\d+_ext/gi.test(e.id);
 
   const $partElems = target
     ? target.closest('.participants-list')
     : $('.participants-list');
   const $selects = $partElems.find('select').filter(isParticipant);
-  const $extSelects = [$partElems.find('select[name*="ExtPart"][name*="directUser"]')];
+  const $extSelects = [$partElems.find('select[name*="ExtPart"][name*="user"]')];
 
   $selects.find('option').prop('disabled', false);
 
@@ -1589,7 +1589,7 @@ $(document).on('click','.s-validate', function(e) {
   }
 
   mSerializedForm = tmp.join('&');
-  $li = $(this).closest('li.stage').find('a.insert-survey-btn')
+  //$li = $(this).closest('li.stage').find('a.insert-survey-btn')
   $.post(url, mSerializedForm)
     .done(function(data) {
       var startCal =  $curRow.find('.dp-start');
@@ -1608,8 +1608,8 @@ $(document).on('click','.s-validate', function(e) {
       gradingDatesText = gstartdateDDMM == genddateDDMM ? gstartdateDDMM : gstartdateDDMM + ' - ' + genddateDDMM;
       $curRow.closest('.stage').find('.stage-dates').contents().last().replaceWith(stageDatesText);
       $curRow.closest('.stage').find('.grading-dates').contents().last().replaceWith(gradingDatesText);
-      const href=$li.attr('href').replace('0', data['sid']);
-      $li.attr('href',href);
+      //const href=$li.attr('href').replace('0', data['sid']);
+      //$li.attr('href',href);
       $removeBtn = $curRow.find('[href="#deleteStage"]');
       $removeBtn.attr('data-sid',data.sid);
       $curRow.closest('.stage').attr('data-id',data.sid);

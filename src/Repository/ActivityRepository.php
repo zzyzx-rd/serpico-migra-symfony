@@ -63,32 +63,76 @@ class ActivityRepository extends ServiceEntityRepository
      * @param Organization $org an organization
      * @return Activity[]
      */
-    public function getOrgProcessActivities(Organization $org)
+    public function getOrgProcessActivities(Organization $org, $viewType)
     {
-        foreach (self::ACTIVITY_STATUS as $s) {
+
+        $return = [];
+
+        if($viewType == 'd'){
+            foreach (self::ACTIVITY_STATUS as $s) {
+                /** @var Activity[] */
+                $activities = $this->createQueryBuilder('a')
+                    ->innerJoin(InstitutionProcess::class, 'ip')
+                    ->where('a.institutionProcess is not null')
+                    ->andWhere('ip.parent is null')
+                    ->andWhere('a.organization = :org')
+                    ->andWhere('a.status = :status')
+                    ->orderBy('a.name')
+                    ->getQuery()
+                    ->execute([
+                        'org'    => $org,
+                        'status' => $s,
+                    ]);
+    
+                $return[$s] = [];
+                foreach ($activities as $activity) {
+                    $institutionProcess = $activity->getInstitutionProcess()->getName();
+                    $return[$s][$institutionProcess][] = $activity;
+                }
+            }
+        } else {
+
             /** @var Activity[] */
             $activities = $this->createQueryBuilder('a')
-                ->innerJoin(InstitutionProcess::class, 'ip')
-                ->where('a.institutionProcess is not null')
-                ->andWhere('ip.parent is null')
-                ->andWhere('a.organization = :org')
-                ->andWhere('a.status = :status')
-                ->orderBy('a.name')
-                ->getQuery()
-                ->execute([
-                    'org'    => $org,
-                    'status' => $s,
-                ]);
+            ->innerJoin(InstitutionProcess::class, 'ip')
+            ->where('a.institutionProcess is not null')
+            ->andWhere('ip.parent is null')
+            ->andWhere('a.organization = :org')
+            ->orderBy('ip.name')
+            ->addOrderBy('a.status')
+            ->addOrderBy('a.name')
+            ->getQuery()
+            ->execute([
+                'org'    => $org,
+            ]);
 
-            $return[$s] = [];
+            $institutionProcess = null;
+
             foreach ($activities as $activity) {
-                $institutionProcess = $activity->getInstitutionProcess()->getName();
-                $return[$s][$institutionProcess][] = $activity;
-            }
+                if($activity->getInstitutionProcess() != $institutionProcess){
+                    $institutionProcess = $activity->getInstitutionProcess();
+                    $IPName = $institutionProcess->getName();
+                    $return[$IPName] = [];
+                    $s = null;
+                }
+
+                if($activity->getStatus() != $s){
+                    $s = $activity->getStatus();
+                    $return[$IPName][$s] = [];
+                }
+
+                $return[$IPName][$s][] = $activity;
+
+            }            
+
         }
 
         return $return;
     }
+
+
+
+
     // /**
     //  * @return Activity[] Returns an array of Activity objects
     //  */

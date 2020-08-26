@@ -65,7 +65,7 @@ class StageType extends AbstractType
                 'attr' => ['class' => 'weight-input']
             ]);
 
-            if($options['elmtType'] !== 'activity'){
+            if($options['entity'] !== 'activity'){
 
                 $builder->add('definiteDates', CheckboxType::class,
                 [
@@ -239,13 +239,13 @@ class StageType extends AbstractType
     {
         $resolver
         ->setDefaults([
-            'elmtType' => 'activity',
+            'entity' => 'activity',
             'data_class' => static function(Options $options) {
-                if ($options['elmtType'] === 'iprocess') {
+                if ($options['entity'] === 'iprocess') {
                     return IProcessStage::class;
                 }
 
-                if ($options['elmtType'] === 'process') {
+                if ($options['entity'] === 'process') {
                     return ProcessStage::class;
                 }
 

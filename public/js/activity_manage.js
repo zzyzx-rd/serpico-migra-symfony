@@ -1,4 +1,21 @@
 $(function () {
+
+  function setCookie(key, value, expiry) {
+    var expires = new Date();
+    expires.setTime(expires.getTime() + (expiry * 24 * 60 * 60 * 1000));
+    document.cookie = key + '=' + value + ';expires=' + expires.toUTCString();
+  }
+
+  function getCookie(key) {
+      var keyValue = document.cookie.match('(^|;) ?' + key + '=([^;]*)(;|$)');
+      return keyValue ? keyValue[2] : null;
+  }
+
+  function eraseCookie(key) {
+      var keyValue = getCookie(key);
+      setCookie(key, keyValue, '-1');
+  }
+
   $('a:has(.fa-plus)').on('click', function () {
     $('.process-name').empty().append($(this).closest('ul').find('header').text())
     $('.start-btn,.launch-btn,.modify-btn').removeData().data('pid', $(this).data('pid'));
@@ -8,53 +25,75 @@ $(function () {
   var annee   = now.getFullYear();
   $('.dmin').append(annee +'<div class="line"></div>');
   $('.dmax').append(annee + 1 + '<div class="line"></div>');
-  var actContentStage = $('.activity-content-stage')[0];
-  var widthElement = $(actContentStage).width();
-  const $arrow = $('.arrow');
-  var width = ($arrow.width() / 2);
+  var centralElWidth = $('.activity-content-stage:visible').eq(0).width();
   var now = new Date();
-  var annee   = now.getFullYear();
-  var nbDay = getDay();
-  var jour = ndDayPerYears(annee);
-  var echelle = widthElement / jour;
-  var dayWidth = ( nbDay * echelle ) /* + ( widthElement / 2 )*/;
-  //dayWidth = getPercentage( dayWidth , actContentStage );
-  var currentDate = $('.currentDate');
-  currentDate.css({'margin-left': Math.round(10000 * (currentDate.prev().width() + dayWidth) / $arrow.width()) / 100 + '%'});
+  var annee = now.getFullYear();
+  var c = getDay();
+  var tDays = ndDayPerYears(annee);
+  var dateChevron = $('.chevron');
+  var actCurDate = $('.curDate');
+
+  var echelle = centralElWidth / tDays;
+  dateChevron.css({'left': 'calc('+Math.round(10000 * (c / tDays )) / 100 + '% - 10px)' });
+  actCurDate.each(function(i,e){
+    $(e).css({'left': Math.round(10000 * (c / tDays )) / 100 + '%' });
+  });
   $('.activity-content-stage').css({
-    'background' : 'repeating-linear-gradient(90deg, #0096882b, #0096886b '+ widthElement / 12 +'px, #ffffff '+ widthElement / 12 +'px, #ffffff '+ widthElement / 6 +'px)'
+    'background' : 'repeating-linear-gradient(90deg, #0096882b, #0096886b '+ centralElWidth / 12 +'px, #ffffff '+ centralElWidth / 12 +'px, #ffffff '+ centralElWidth / 6 +'px)'
   });
 
-  $.each($('.activity-component'), function () {
-    var margLeft = (parseInt($(this).css('margin-left').split("px")[0]));
-    var widthComp = (parseInt($(this).css('width').split("px")[0]));
-    console.log(margLeft);
-    console.log(widthComp);
-    var widthCircle = (parseInt($(this).find('.completed-stages').css('width').split("px")[0]));
-    widthCompEche = widthComp * echelle;
-
-    if ( ( nbDay  )  > margLeft){
-
-      var widthGrayPeriod = ( nbDay   -  margLeft)  ;
-      var widthBluePeriod = widthComp - widthGrayPeriod;
-      widthBluePeriod = widthBluePeriod * echelle;
-      widthBluePeriod=getPercentage( widthBluePeriod , widthCompEche );
-      $(this).children().css({'width':widthBluePeriod + "%" });
-
- }
-    margLeft = margLeft * echelle;
-    margLeft = getPercentage( margLeft  , widthElement );
-    widthComp = getPercentage( widthCompEche , widthElement) ;
-
-    $(this).css({'margin-left':margLeft + "%" });
-    $(this).css({'width':widthComp + "%" });
-    if ( ( nbDay  )  < margLeft){
-
-      $(this).find('.blue-periode').css({'width':widthComp + "%" });
-
-    }
-
+  $(window).on('resize',function(){
+    //setTimeout(function(){
+      var centralElWidth = $('.activity-content-stage:visible').eq(0).width();  
+      var dateChevron = $('.chevron');
+      var actCurDate = $('.curDate');
+      dateChevron.css({'left': 'calc('+Math.round(10000 * (c / tDays )) / 100 + '% - 10px)' });
+      actCurDate.each(function(i,e){
+        $(e).css({'left': Math.round(10000 * (c / tDays )) / 100 + '%' });
+      });
+      $('.activity-content-stage').css({
+        'background' : 'repeating-linear-gradient(90deg, #0096882b, #0096886b '+ centralElWidth / 12 +'px, #ffffff '+ centralElWidth / 12 +'px, #ffffff '+ centralElWidth / 6 +'px)'
+      });
+    //}, 200);
   });
+
+  $.each($('.activity-component'), function (){
+    var $this = $(this);
+    var sd = $this.data("sd");
+    var p =  $this.data("p");
+    var id = $this.data("id");
+    pxWidthP = (p + 1) * echelle;
+    pxWidthSD = sd * echelle;
+    pctWidthSD = getPercentage(pxWidthSD, centralElWidth);
+    pctWidthP = getPercentage(pxWidthP, centralElWidth) ;
+
+    $this.css({'margin-left': pctWidthSD + "%" });
+    $this.css({'width': pctWidthP + "%" });
+
+    $this.find('.stage-element').each(function(){
+      var ssd = $(this).data("sd");
+      var sp =  $(this).data("p");
+      
+      sPctWidthSD = (ssd - sd) / p;
+      sPctWidthP = Math.max(3,(sp + 1)) / (p + 1);
+
+      $(this).css({'margin-left': Math.round(10000 * sPctWidthSD) / 100 + "%",
+        'width': Math.round(10000 * sPctWidthP) / 100 + "%",
+        'background' : ssd >= c ? '#5CD08F' : (ssd + sp > c ? 'linear-gradient(to right, transparent, transparent ' + Math.round(10000 * (c - ssd) / sp) / 100 + '%, #16AFB7 '+ Math.round(10000 * (c - ssd) / sp) / 100 +'%), repeating-linear-gradient(61deg, #16AFB7, #16AFB7 0.5rem, transparent 0.5px, transparent 1rem)' : 'gray'),
+        'height' : '7px',
+        'border-radius' : '0.3rem',  
+      });
+    });
+  });
+
+  $('.stage-item-button').on('mouseenter',function(){
+      var $this = $(this);
+      $this.parent().css('z-index',999);
+  }).on('mouseleave',function(){
+      var $this = $(this);
+      $this.parent().css('z-index',1);
+  })
+
   $('.start-btn,.launch-btn,.modify-btn').on('click', function (e) {
     e.preventDefault();
     $.each($('.red-text'), function () {
@@ -70,7 +109,6 @@ $(function () {
     pid = $(this).data('eid') ? $(this).data('eid') : 0;
     urlToPieces[urlToPieces.length - 1] = eid;
     url = urlToPieces.join('/');
-    $('.errorModal .error-msg').empty();
 
     $.post(url, params)
       .done(function (data) {
@@ -98,8 +136,6 @@ $(function () {
         console.log(data);
       });
   });
-
-
 
   $('[href="#chooseGradableStage"]').on('click', function () {
     $('#stageSelect').empty();
@@ -153,7 +189,56 @@ $(function () {
   });
   */
 
+  $('.status-selector:not(.showable) .stage-item-button').css('background-color','transparent');
 
+  $('.tabs-t-view .stage-item-button').on('mouseenter',function(){
+    $(this).parent().hasClass('showable') ? ($(this).find('.to-hide').show(), $(this).css('background-color','transparent')) : ($(this).find('.to-show').show(), $(this).css('background-color',""));
+  }).on('mouseleave',function(){
+    $(this).parent().hasClass('showable') ? ($(this).find('.to-hide').hide(), $(this).css('background-color',"")) : ($(this).find('.to-show').hide(),$(this).css('background-color','transparent'));
+  });
+
+  $('.change-date-type').on('click',function(){
+
+    $this = $(this);
+    $visibleChoiceEls = $this.prev().find('>:visible');
+    $invisibleChoiceEls = $this.prev().find('>:not(:visible)');
+    $visibleChoiceEls.hide();
+    $invisibleChoiceEls.show();
+
+    getCookie('date_type') == 's' ? 
+      (eraseCookie('date_type'), setCookie('date_type','o',365), $('.stage-element.o-dates:not(.embedded)').show(), $('.stage-element.s-dates').hide()) : 
+      (eraseCookie('date_type'), setCookie('date_type','s',365), $('.stage-element.o-dates').hide(), $('.stage-element.s-dates:not(.embedded)').show());
+  })
+
+  $('.tabs-t-view .stage-item-button').on('click',function(){
+    var $this = $(this);
+    var status = $this.parent().data('o-status') ? $this.parent().data('o-status') : $this.parent().data('p-status');
+    if($this.parent().hasClass('showable')){
+      setCookie('r_s_' + getCookie('sorting_type') + '_' + status,0,365);
+      $('.activity-list').each(function(i,e){
+        $(e).find(`.row[class*="${status}"]:visible`).hide();
+        if(!$(e).find('>.row:visible').length){
+          $(e).closest('.process-list--item').hide();
+        }
+      });
+
+      $this.parent().removeClass('showable');
+    } else {
+      eraseCookie('r_s_' + getCookie('sorting_type') + '_' + status);
+      $this.parent().addClass('showable');
+      $(`.row[class*="${status}"]`).show();
+      $(`.row[class*="${status}"]`).closest('.process-list--item').show();
+    }
+
+    $this.find('i').hide();
+
+  })
+
+  $('.process-list-t .activity-list').each(function(i,e){
+    if(!$(e).find('> .row:visible').length){
+      $(e).closest('.process-list--item').hide();
+    }
+  });
 
   $('.validate-btn').on('click', function (e) {
     e.preventDefault();
@@ -244,3 +329,33 @@ $('.process-request').on('click',function(e){
 
 
 });
+
+$('.stages-holder').on('mouseenter',function(){
+    
+    $(this).closest('.activity-holder').find('.act-info .fixed-action-btn').css('visibility','');
+    //$(this).closest('.activity-holder').find('.stages-holder').off('mouseenter');
+}).on('mouseleave',function(){
+  var $this = $(this);
+    /*
+    if(!$this.closest('.activity-holder').find('.act-info .fixed-action-btn').is(':hover')){
+      $this.closest('.activity-holder').find('.act-info .fixed-action-btn').css('visibility','hidden');
+    }*/
+    
+    var interval = setInterval(function(){
+      if(!$this.closest('.activity-holder').find('.act-info .fixed-action-btn').is(':hover')) {
+        $this.closest('.activity-holder').find('.act-info .fixed-action-btn').css('visibility','hidden');
+        clearInterval(interval);
+      }
+    },50);
+})
+
+/*$('.fixed-action-btn').on('mouseenter',function(){
+  $(this).closest('.activity-holder').find('.stages-holder').off('mouseenter');
+}).on('mouseleave',function(){
+  $(this).closest('.activity-holder').find('.stages-holder').on('mouseenter',function(){
+      $(this).closest('.activity-holder').find('.act-info .fixed-action-btn').show();
+  }).on('mouseleave',function(){
+      $(this).closest('.activity-holder').find('.act-info .fixed-action-btn').hide();
+  });
+})
+*/

@@ -29,11 +29,11 @@ class PersonController extends MasterController
 
     /**
      * @param Request $request
-     * @Route("/settings/{elmtType}/{elmtId}/overview", name="elementOverview")
+     * @Route("/settings/{entity}/{elmtId}/overview", name="elementOverview")
      */
     public function elementOverviewAction($elmtType, $elmtId, $orgEnabledCreatingUser = false) {
         $em          = $this->em;
-        $repoAU      = $em->getRepository(Participation::class);
+        $repoP      = $em->getRepository(Participation::class);
         $repoG       = $em->getRepository(Grade::class);
         $repoT       = $em->getRepository(Team::class);
         $repoO       = $em->getRepository(Organization::class);
@@ -83,7 +83,7 @@ class PersonController extends MasterController
         } else {
 
             $hasContribActivities          = false;
-            $elementParticipations         = $repoAU->findBy([$resultParticipantProperty => $resultParticipantValue, 'status' => [3, 4]], ['inserted' => 'ASC']);
+            $elementParticipations         = $repoP->findBy([$resultParticipantProperty => $resultParticipantValue, 'status' => [3, 4]], ['inserted' => 'ASC']);
             $nbGradedIndivActivities       = 0;
             $nbGradedIndivStages           = 0;
             $nbGradedIndivCriteria         = 0;
@@ -223,7 +223,7 @@ class PersonController extends MasterController
                         $projectCriteria[] = $criterion;
                     }
                 }
-                $elementProjectParticipations = $repoAU->findBy([$resultParticipantProperty => $resultParticipantValue, 'stage' => $projectStages]);
+                $elementProjectParticipations = $repoP->findBy([$resultParticipantProperty => $resultParticipantValue, 'stage' => $projectStages]);
                 foreach ($elementProjectParticipations as $elementProjectParticipation) {
                     $elementProjectActivities[] = $elementProjectParticipation->getActivity();
                 }

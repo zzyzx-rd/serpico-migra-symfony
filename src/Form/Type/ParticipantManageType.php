@@ -36,7 +36,7 @@ class ParticipantManageType extends AbstractType
 
             if ($query === 'internal') {
                 $form->add(
-                    'directUser', EntityType::class,
+                    'user', EntityType::class,
                     [
                         'label_format' => 'participants.%name%',
                         'class' => User::class,
@@ -56,7 +56,7 @@ class ParticipantManageType extends AbstractType
                     ]
                 );
             } else if ($query === 'external') {
-                $form->add('directUser', EntityType::class,
+                $form->add('user', EntityType::class,
                     [
                         'label_format' => 'participants.%name%',
                         'class' => User::class,
@@ -145,11 +145,11 @@ class ParticipantManageType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefault('elmt', 'activity');
+        $resolver->setDefault('entity', 'activity');
         $resolver->setDefault('data_class', function (Options $options) {
-            if ($options['elmt'] === 'iprocess') {
+            if ($options['entity'] === 'iprocess') {
                 return IProcessParticipation::class;
-            } else if ($options['elmt'] === 'template') {
+            } else if ($options['entity'] === 'template') {
                 return TemplateParticipation::class;
             }
             return Participation::class;

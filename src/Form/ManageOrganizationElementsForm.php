@@ -25,7 +25,7 @@ class ManageOrganizationElementsForm extends AbstractType
                 'entry_options' => [
                     'label' => false,
                     'organization' => $organization,
-                    'elmtType' => $options['elmtType'],
+                    'entity' => $options['elmtType'],
                     'standalone' => false,
                 ],
                 'prototype' => true,

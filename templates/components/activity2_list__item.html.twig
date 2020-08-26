@@ -1,144 +1,116 @@
-{% set approvable = s == -3 and activity.decisions is not empty and activity.decisions|first.deciderUser == currentuser %}
-<div class="row no-margin">
-  <div class="col s8 center no-padding activity-content-stage" style="background-color: #feffe9;">
-    <ol class='gray-periode stages activity-component' style="margin-left:{{activity.getStartdateDay()}}px ; width:{{activity.getPeriod()}}px">
-    <ol class="stages blue-periode" style="margin-left: auto;" >
-      {%  for stage in activity.stages %}
-      {% if stage.getEnddate() <  date() %}
-      <li class="stage-element completed-stages-element">
-        <a href={{ url("manageActivityElement",{elmtType:"activity", elmtId: activity.id }) }} style="color:black !important" class="tooltipped stage-item-button-past completed-stages" data-position="top" data-html="true" data-tooltip='
-        <div class="stage-name">
-          <ul style="display: inline-flex; color: #2196F3; margin-right:3px" class="no-margin no-padding">
-            <li>
-              <i class="fa fa-cube" style="position: relative;top: -6%;left: 0%;font-size: 0.85rem;"></i>
-            </li>
-            <li>
-              <i class="fa fa-cube" style="position: relative;top: 6%;left: -41%;font-size: 0.85rem;"></i>
-            </li>
-          </ul>
-          <span>{{stage.name}}</span>
-        </div>
-        {% if stage.survey == null %}
-        {% for criterion in stage.criteria %}
-        <div class="criterion">
-          <span class="cn-icon"  style="width:15px"><i class="{{criterion.cName.icon.type}} {{criterion.cName.icon.name}}"></i></span>
-          <span>{{criterion.cName.name}} </span>
-          </div>
-          {% endfor %}
-          {% else %}
-          <div class="survey">
-            <span class="cn-icon" style="width:15px"> Titre : {{stage.survey.name}}</span>
-        </div>
+{% set approvable = activity.status == -3 and activity.decisions is not empty and activity.decisions|first.deciderUser == currentuser %}
+{% set visible = showable is defined ? showable : true %}
 
+<div class="row no-margin flex-center {{actStatus}} activity-holder" {% if not visible %}style="display:none"{% endif %}>
+  <div class="col s9 center no-padding activity-content-stage" style="background-color: #feffe9;">
+    
+    <div class="curDate"></div>
+    <ul class="stages-holder">
+      
+        {#{% if activity.pastStages|length > 0 %}#}
 
+        {#{% set simultClass = activity.nbSimultaneousStages('p') > 2 ? "too-many-simult" : (activity.nbSimultaneousStages('p') == 2 ? "simult" : "") %}#}
 
-          {% endif %}
+          <ol class="stages activity-component" data-sd="{{ activity.startdateDay }}" data-p="{{ activity.period }}" data-id="{{random(1,1000000)}}">
+            
+            {% set checkingIndex = -1 %}
 
+            {% for s, stage in activity.sortedStagesPerPeriod %}
+                
+              {% set embeddedStages = null %}
 
-        '>
-        </a>
-        <section class="stage-container completed-stages-container"></section>
-      </li>
+              {% if s > checkingIndex %}
+                {% set isEmbedded = false %}
+                {% set embeddedStages = stage.embeddedStages %}
+                {% if embeddedStages is not empty %}
+                  {% set checkingIndex = s + embeddedStages|length %}
+                {% endif %}
+                {% set visibleEl = dateTypeCookie == 's' %}
+              {% else %}
+                {% set isEmbedded = true %}
+                {% set visibleEl = false %}
+              {% endif %}
 
-      {% else %}
-      <li class="stage-element completed-stages-element">
+              {% include "components/stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: isEmbedded, startdateDay: stage.startdateDay, period: stage.period, embeddedStages: embeddedStages, visibleEl: visibleEl } %}
+            
+            {% endfor %}
+            
+            {% set checkingIndex = -1 %}
 
-        <a href={{ url("manageActivityElement",{elmtType:"activity", elmtId: activity.id }) }} style="color:black !important" class=" tooltipped stage-item-button completed-stages" data-position="top" data-html="true" data-tooltip='
-        <div class="stage-name">
-          <ul style="display: inline-flex; color: #2196F3; margin-right:3px" class="no-margin no-padding">
-            <li>
-              <i class="fa fa-cube" style="position: relative;top: -6%;left: 0%;font-size: 0.85rem;"></i>
-            </li>
-            <li>
-              <i class="fa fa-cube" style="position: relative;top: 6%;left: -41%;font-size: 0.85rem;"></i>
-            </li>
-          </ul>
-          <span>{{stage.name}}</span>
-        </div>
-        {% if stage.survey == null %}
-        {% for criterion in stage.criteria %}
-        <div class="criterion">
-          <span class="cn-icon"  style="width:15px"><i class="{{criterion.cName.icon.type}} {{criterion.cName.icon.name}}"></i></span>
-          <span>{{criterion.cName.name}} </span>
-          </div>
-          {% endfor %}
-          {% else %}
-          <div class="survey">
-            <span class="cn-icon" style="width:15px"> Titre : {{stage.survey.name}}</span>
-        </div>
+            {% for s, stage in activity.sortedStagesPerPeriod('output') %}
+              
+              {% set embeddedStages = null %}
+            
+              {% if s > checkingIndex %}
+                {% set isEmbedded = false %}
+                {% set embeddedStages = stage.embeddedStages('output') %}
+                {% if embeddedStages is not empty %}  
+                  {% set checkingIndex = s + embeddedStages|length %}
+                {% endif %}
+                {% set visibleEl = dateTypeCookie == 'o' %}
+              {% else %}
+                {% set isEmbedded = true %}
+                {% set visibleEl = false %}
+              {% endif %}
 
-  {% endif %}
+              {% include "components/stage_temporal__item.html.twig" with { dateType: 'o', isEmbedded: isEmbedded, startdateDay: stage.startdateDay('output'), period: stage.period('output'), embeddedStages: embeddedStages, visibleEl: visibleEl } %}
+            
+            {% endfor %}
+          </ol>
 
-
-
-        '></a>
-        <section class="stage-container completed-stages-container"></section>
-      </li>
-
-      {% endif %}
-    {% endfor %}
-<!---<li class="collection-item activity-list--item">-->
-  {#
-  <div class="activity-actions">
-    {% if approvable %}
-      <a class="material-icons" href="">gavel</a>
-    {% endif %}
-
-    {% if activity.userCanGiveOutput(currentuser) %}
-        {% if activity.userCanSendAnswerSurvey(currentuser) %}
-          <a class="modal-trigger tooltipped btn-floating pulse" data-tooltip="Envoyer mes réponses" data-position="bottom" href="#sendDataModal">
-            <i class="material-icons">send</i>
-          </a>
-          <a class="modal-trigger tooltipped btn-floating pulse" data-tooltip="Envoyer mes réponses" data-position="bottom" href="{{ path('sendAnswer', { surId: activity.activeGradableStages.first.survey.id }) }}?redirect={{ url(route,routeParams)|e('url') }}">
-            <i class="material-icons">send</i>
-          </a>
-        {% endif %}
-    {% endif %}
-
-
-
-    {% if activity.userCanGiveOutput(currentuser) %}
-      {% set userActiveGradableStages = activity.userActiveGradableStages(currentuser) %}
-      {% if userActiveGradableStages %}
-        {% if userActiveGradableStages|length > 1 %}
-          <a class="material-icons tooltipped modal-trigger" data-tooltip={{ "activities.grade"|trans}} data-position="bottom" data-aid="{{activity.id}}" href="#chooseGradableStage">edit</a>
-        {% else %}
-
-            {% if userActiveGradableStages.first.survey is not null %}
-                <a class="material-icons tooltipped" data-tooltip={{ "activities.grade"|trans}} data-position="bottom" href="{{ path('answerSurvey', { stgId: userActiveGradableStages.first.id }) }}">edit</a>
-            {% else %}
-              <a class="material-icons tooltipped" data-tooltip={{ "activities.grade"|trans}} data-position="bottom" href="{{ path('newStageGrade', { stgId: userActiveGradableStages.first.id }) }}">edit</a>
-            {% endif %}
-
-        {% endif %}
-      {% endif %}
-    {% endif %}
-
-    {% if activity.userCanSeeOutput(currentuser) %}
-      <a class="material-icons tooltipped" data-tooltip="{% trans %}activities.see_input{% endtrans %}" data-position="bottom" href="{{ path('newStageGrade', { stgId: activity.stages.first.id }) }}">remove_red_eye</a>
-    {% endif %}
-
-
-    {% if activity.userCanViewResults(currentuser) %}
-      <a class="material-icons tooltipped" data-tooltip={ "result"|trans}} data-position="bottom" href="{{ path('activityResults', { actId: activity.id  }) }}">show_chart</a>
-    {% endif %}
-
-    {% if activity.userCanEdit(currentuser) %}
-      <a class="material-icons tooltipped modal-trigger" data-tooltip={ "activities.modify"|trans}} href="#activityInfo" data-eid="{{activity.id}}" data-position="bottom">settings</a>
-    {% else %}
-      {% if activity.userCanAccessInfo(currentuser) %}
-        <a class="material-icons tooltipped modal-trigger" href="#activityInfo" data-eid="{{activity.id}}" data-tooltip="{% trans %}activity_elements.access_activity_details{% endtrans %}" data-position="bottom">info_outline</a>
-      {% endif %}
-    {% endif %}
+    </ul>
   </div>
-  #}
-      </li>
-    </ol>
-    </ol>
-</div>
 
-  <div class="col s4">
-    {{ activity.name }}
+  <div class="col s3 act-info">
+
+    <div class="{{sortingType ~ '-' ~ actStatus}}" style="display: inline-block;">
+      <div class="stage-item-button"></div>
+    </div>
+    
+    
+    <div class="fixed-action-btn modified-fixed-btn" style="visibility: hidden;">
+              
+      <a class="btn-floating">
+          <i class="material-icons">create</i>
+      </a>
+      
+      <ul class="flex-center">
+          <li>
+            <a class="btn-floating act-btn tooltipped" data-tooltip="{{ 'activities.instant_add'|trans }}" data-position="top" href="#addEvent"><i class="material-icons">offline_bolt</i></a>
+          </li>
+        {% if activityM.userCanEdit(activity,currentuser) %}  
+          <li>
+            <a class="btn-floating act-btn tooltipped modal-trigger" href="#updateStageProgressStatus" data-position="top" data-html="true" data-tooltip="{{ 'activities.update_status'|trans}}" data-eid="{{ activity.id }}"><i class="material-icons">update</i></a>
+          </li>
+          <li>
+            <a class="btn-floating act-btn tooltipped" href={{ url("manageActivityElement",{entity:"activity", elmtId: activity.id }) }} data-position="top" data-html="true" data-tooltip="{{ 'activities.modify'|trans}}"><i class="material-icons">settings</i></a>
+          </li>
+        {% endif %}
+        {% if activityM.userCanGiveOutput(activity,currentuser) %}
+          <li>
+            {% if activity.userActiveGradableStages(currentuser).first.survey is not null %}
+              <a class="btn-floating act-btn tooltipped" data-tooltip="{{ 'activities.provide_my_feedbacks'|trans }}" data-position="top" href="{{ path('answerSurvey', { stgId: activity.userActiveGradableStages(currentuser).first.id }) }}"><i class="fa fa-pen-alt"></i></a>
+            {% else %}
+              <a class="btn-floating act-btn tooltipped" data-tooltip="{{ 'activities.provide_my_feedbacks'|trans }}" data-position="top" href="{{ path('newStageGrade', { stgId: activity.userActiveGradableStages(currentuser).first.id }) }}"><i class="fa fa-pen-alt"></i></a>
+            {% endif %}
+          </li>
+        {% endif %}
+        {% if activityM.userCanViewResults(activity,currentuser) %}
+          <li>
+            <a class="btn-floating act-btn tooltipped" data-tooltip="{{ 'result'|trans }}" data-position="top" href="{{ path('activityResults', { actId: activity.id }) }}"><i class="material-icons">show_chart</i></a>
+          </li>
+        {% endif %}
+      </ul>
+    
+    </div>
+
+    {% set actName = activity.name %}
+    {% set isTooLong = actName|length > actNameTruncVal %}
+    {% if isTooLong %}
+        <span class="tooltipped" data-tooltip="{{actName}}">{{actName|slice(0,actNameTruncVal) ~ '...' }}</span>
+    {% else %}
+        <span>{{ actName }}</span>
+    {% endif %}
 
     {% set activityClients =  activity.independantUniqueParticipatingClients %}
     {% if activityClients|length != 0 %}
@@ -155,20 +127,24 @@
             <small> - {{ 'with'|trans }}</small>
 
             {% set k = 0 %}
-            {% for client in activityClients if k < 2 %}
+            {% for client in activityClients %}
+              {% if k < 2 %}
 
                   <a class="badge-container activity-client-name tooltipped" data-tooltip="{{client.commname}}">
-                    <img class="client-logo" src="{{ asset(client_logo_url(client)) }}" alt="">
+                    <img class="client-logo" src="{{ asset(global.clientLogo(client)) }}" alt="">
                   </a>
 
                 {% set k = k + 1 %}
+              {% endif %}
             {% endfor %}
 
             {% if activityClients|length - k > 0 %}
                   {{'and '|trans }}
                   <span class="activity-client-name tooltipped" data-position="top" data-html="true" data-tooltip="
-                  {% for c, client in activityClients if c >= k %}
-                      {{ activityClients[c].commname }} <br>
+                  {% for c, client in activityClients %}
+                      {% if c >= k %}
+                        {{ activityClients[c].commname }} <br>
+                      {% endif %}
                   {% endfor %}
                   "
                   >{{ (activityClients|length - k) ~ ' other'|trans ~ (activityClients|length - k > 1 ? 's' : '')}}</span>
