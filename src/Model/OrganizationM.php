@@ -5,7 +5,7 @@ use App\Entity\Client;
 use App\Entity\Organization;
 use App\Entity\Stage;
 use App\Entity\Team;
-use App\Entity\TeamUser;
+use App\Entity\Member;
 use App\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -22,7 +22,7 @@ class OrganizationM extends ModelEntity {
         $teams = new ArrayCollection($repoT->findAll());
         $currentOrg = $this->currentUser->getOrganization();
         return $teams->filter(function(Team $t) use ($currentOrg){ 
-            return $t->getTeamUsers()->exists(function(int $i, TeamUser $tu) use ($currentOrg){
+            return $t->getMembers()->exists(function(int $i, TeamUser $tu) use ($currentOrg){
                 if(!$tu->getExternalUser()){
                     return false;
                 }

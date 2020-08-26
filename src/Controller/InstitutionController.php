@@ -293,7 +293,7 @@ final class InstitutionController extends MasterController
         }*/
 
         $orphanActivities = [];
-        $processActivities = [];
+        $structuredProcessesActivities = [];
 
         if($viewType == 'd'){
 

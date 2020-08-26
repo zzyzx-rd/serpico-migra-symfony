@@ -20,13 +20,13 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityRepository;
-use App\Entity\TeamUser;
+use App\Entity\Member;
 use App\Entity\User;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 
-class TeamUserType extends AbstractType
+class MemberType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
@@ -118,7 +118,7 @@ class TeamUserType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefault('data_class', TeamUser::class);
+        $resolver->setDefault('data_class', Member::class);
         $resolver->setDefault('standalone', false);
         $resolver->setDefault('query','internal');
         $resolver->setDefault('organization',null);

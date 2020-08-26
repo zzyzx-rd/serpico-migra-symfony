@@ -1633,12 +1633,12 @@ class SettingsController extends MasterController
             $clonedFirm->addTeam($clonedTeam);
             $clonedTeams[] = $clonedTeam;
             $originalTeams[] = $team;
-            foreach($team->getTeamUsers() as $teamUser){
-                $clonedTeamUser = clone $teamUser;
-                $clonedTeamUser->setUsrId($clonedUsers[array_search($repoU->findOneById($teamUser->getUsrId()),$originalUsers)]->getId());
-                $clonedTeam->addTeamUser($clonedTeamUser);
+            foreach($team->getMembers() as $member){
+                $clonedTeamUser = clone $member;
+                $clonedTeamUser->setUsrId($clonedUsers[array_search($repoU->findOneById($member->getUsrId()),$originalUsers)]->getId());
+                $clonedTeam->addMember($clonedTeamUser);
                 $clonedTeamUsers[] = $clonedTeamUser;
-                $originalTeamUsers[] = $teamUser;
+                $originalTeamUsers[] = $member;
             }
         }
 
@@ -1663,7 +1663,7 @@ class SettingsController extends MasterController
                 foreach($stage->getCriteria() as $criterion){
                     $clonedCriterion = clone $criterion;
                     $clonedStage->addCriterion($clonedCriterion)
-                        ->setMasterUserId($clonedUsers[array_search($repoU->findOneById($stage->getMasterUserId()),$originalUsers)]->getId());
+                        ->setMasterUserId($clonedUsers[array_search($stage->getMasterUser(),$originalUsers)]->getId());
                     $clonedCriteria[] = $clonedCriterion;
                     $originalCriteria[] = $criterion;
 
@@ -1671,7 +1671,7 @@ class SettingsController extends MasterController
                         $clonedParticipant = clone $participant;
                         $clonedParticipant->setActivity($clonedActivity)
                             ->setStage($clonedStage)
-                            ->setUsrId($clonedUsers[array_search($repoU->findOneById($participant->getUsrId()),$originalUsers)]->getId());
+                            ->setUsrId($clonedUsers[array_search($participant->getUserId(),$originalUsers)]->getId());
                         if($participant->getTeam() != null){
                             $clonedParticipant->setTeam($clonedTeams[array_search($participant->getTeam(),$originalTeams)]);
                         }

@@ -40,7 +40,7 @@ use App\Entity\Result;
 use App\Entity\Stage;
 use App\Entity\Survey;
 use App\Entity\Team;
-use App\Entity\TeamUser;
+use App\Entity\Member;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use RuntimeException;
@@ -902,428 +902,6 @@ class ActivityController extends MasterController
         }
     }
 
-    // 2 - Display participants to be added
-
-    public function oldAddActivityParticipant(Request $request, $elmt, $elmtId)
-    {
-
-        // Get all participants (users)
-
-        $em = $this->em;
-        if (!$currentUser) {
-            return $this->redirectToRoute('login');
-        }
-        $usrId = $currentUser->getId();
-        $orgId = $currentUser->getOrgId();
-        $repoO = $em->getRepository(Organization::class);
-        $organization = $repoO->find($orgId);
-        $orgEnabledCreatingUser = false;
-        $activity = ($elmt == 'activity') ?
-        $em->getRepository(Activity::class)->find($elmtId) :
-        $em->getRepository(TemplateActivity::class)->find($elmtId);
-        $activeModifiableStages = $activity->getActiveModifiableStages();
-
-        // Only administrators or roots can create/update users who have the ability to create users themselves
-
-        $orgOptions = $organization->getOptions();
-        foreach ($orgOptions as $orgOption) {
-            if ($orgOption->getOName()->getName() == 'enabledUserCreatingUser') {
-                $orgEnabledCreatingUser = $orgOption->isOptionTrue();
-            }
-        }
-
-        $user = $currentUser;
-        if ($elmt == 'activity') {
-            $activity = $em->getRepository(Activity::class)->find($elmtId);
-            $stages = $activity->getActiveModifiableStages();
-        } else {
-            $activity = $em->getRepository(TemplateActivity::class)->find($elmtId);
-            $stages = $activity->getStages();
-        }
-        $actOrganization = $activity->getOrganization();
-        $createTemplateForm = null;
-        if ($elmt == 'activity' && $activity->getTemplate() == null) {
-            
-            $createTemplateForm = $this->createForm(AddTemplateForm::class, null, ['standalone' => true]);
-            $createTemplateForm->handleRequest($request);
-        }
-
-        /* Page is fordidden if, by order of importance :
-         * 1. User is not root
-         * 2. User is not belonging to the same activity organization
-         * 3. User is not administrator
-         * 4. User is not leader
-         * 5. User is not a participant manager
-         */
-
-        $hasPageAccess = true;
-        if ($elmt == 'activity') {
-            if ($user->getRole() != 4 && ($organization != $actOrganization || $user->getRole() != 1 && count($activeModifiableStages) == 0)) {
-                $hasPageAccess = false;
-            }
-        } else {
-            if ($user->getRole() != 4 && ($organization != $actOrganization || $user->getRole() != 1)) {
-                $hasPageAccess = false;
-            }
-        }
-
-        if (!$hasPageAccess) {
-            return $this->render('errors/403.html.twig');
-        } else {
-            /** @var UserRepository $repoU */
-            $repoU = $em->getRepository(User::class);
-            $repoT = $em->getRepository(Team::class);
-
-            $results = [];
-            $orgUsers = $repoU->findAllActiveByOrgId($orgId);
-            $clients = $organization->getClients();
-            $clientUsers = [];
-
-            foreach ($clients as $client) {
-                foreach ($client->getClientOrganization()->getUsers($app) as $clientUser) {
-                    $clientUsers[] = $clientUser;
-                }
-            }
-
-            $orgTeams = $repoT->findBy(['organization' => $organization]);
-
-            foreach ($stages as $stage) {
-
-                // Get all users (from organization)
-                $internalUsers = [];
-                $externalUsers = [];
-                $teams = [];
-                foreach ($clientUsers as $user) {
-                    $currentUser = $user->toArray($app);
-                    $currentUser['participant'] = 0;
-                    $currentUser['precomment'] = "";
-                    $currentUser['type'] = 1;
-                    $currentUser['leader'] = false;
-                    $externalUsers[] = $currentUser;
-                }
-
-                foreach ($orgUsers as $user) {
-                    $currentUser = $user->toArray($app);
-                    $currentUser['participant'] = 0;
-                    $currentUser['precomment'] = "";
-                    $currentUser['type'] = 1;
-                    $currentUser['leader'] = false;
-                    $internalUsers[] = $currentUser;
-                }
-                foreach ($orgTeams as $team) {
-                    $currentTeam = $team->toArray($app);
-                    $currentTeam['participant'] = 0;
-                    $currentTeam['precomment'] = "";
-                    $currentTeam['type'] = 1;
-                    $currentTeam['leader'] = false;
-                    $currentTeam['nbRemaining'] = 0;
-                    $k = 0;
-                    $firstnames = '';
-                    $teamUsers = $team->getActiveTeamUsers();
-                    $nbTeamUsers = count($teamUsers);
-                    foreach ($teamUsers as $teamUser) {
-                        if ($k <= $nbTeamUsers - 1 && $k < 3) {
-                            $firstnames = ($k == 0) ? $repoU->find($teamUser->getUsrId())->getFirstname() : $firstnames . ', ' . $repoU->find($teamUser->getUsrId())->getFirstname();
-                        } elseif ($k == 3 and $nbTeamUsers >= 4) {
-                            $currentTeam['nbRemaining'] = $nbTeamUsers - 3;
-                            break;
-                        }
-                        $k++;
-                    }
-                    $currentTeam['firstnames'] = $firstnames;
-                    $teams[] = $currentTeam;
-                }
-
-                // Get all participants and associated status
-                foreach ($stage->getParticipants() as $participant) {
-
-                    if ($elmt == 'template') {
-                        $terminalCondition = true;
-                    } else if ($participant->getDeleted() == null) {
-                        $terminalCondition = true;
-                    } else {
-                        $terminalCondition = false;
-                    }
-
-                    if ($participant->getTeam()) {
-
-                        foreach ($teams as $key => $value) {
-
-                            if (($participant->getTeam()->getId() == $teams[$key]['id']) && $terminalCondition) {
-                                $teams[$key]['participant'] = 1;
-                                $teams[$key]['precomment'] = $participant->getPrecomment();
-                                $teams[$key]['type'] = $participant->getType();
-                                $teams[$key]['leader'] = $participant->isLeader();
-
-                                break;
-                            }
-                        }
-
-                    } else {
-
-                        foreach ($internalUsers as $key => $value) {
-
-                            if (($participant->getUsrId() == $internalUsers[$key]['id']) && $terminalCondition) {
-                                $internalUsers[$key]['participant'] = 1;
-                                $internalUsers[$key]['precomment'] = $participant->getPrecomment();
-                                $internalUsers[$key]['type'] = $participant->getType();
-                                $internalUsers[$key]['leader'] = $participant->isLeader();
-                                break;
-                            }
-                        }
-
-                        foreach ($externalUsers as $key => $value) {
-
-                            if (($participant->getUsrId() == $externalUsers[$key]['id']) && $terminalCondition) {
-                                $externalUsers[$key]['participant'] = 1;
-                                $externalUsers[$key]['precomment'] = $participant->getPrecomment();
-                                $externalUsers[$key]['type'] = $participant->getType();
-                                $externalUsers[$key]['leader'] = $participant->isLeader();
-                                break;
-                            }
-                        }
-
-                    }
-                }
-
-                // Place activity participants above (sort on the participant subkey)
-                MasterController::sksort($internalUsers, 'participant');
-                if ($externalUsers != null) {
-                    MasterController::sksort($externalUsers, 'participant');
-                }
-
-                $results[] = [
-                    'id' => $stage->getId(),
-                    'name' => $stage->getName(),
-                    'internalUsers' => $internalUsers,
-                    'teams' => $teams,
-                    'externalUsers' => $externalUsers,
-                    'mode' => $stage->getMode(),
-                ];
-
-            }
-
-            try {
-                return $this->render('participants_list.html.twig',
-                    [
-                        'stages' => $results,
-                        'actName' => $activity->getName(),
-                        'activity' => $activity,
-                        'elmt' => $elmt,
-                        'createTemplateForm' => ($createTemplateForm === null) ?: $createTemplateForm->createView(),
-                        'orgEnabledCreatingUser' => $orgEnabledCreatingUser,
-                    ]);} catch (\Exception $e) {
-                print_r($e->getMessage());
-                die;
-            }
-        }
-    }
-    /*
-    try {
-
-    } catch (\Eception $e) {
-    print_r($e->getMessage());
-    die;
-    }
-     */
-
-//    /**
-//     * @param Request $request
-//     * @param Application $app
-//     * @param $elmt
-//     * @param $elmtId
-//     * @return RedirectResponse
-//     * @throws ORMException
-//     * @throws OptimisticLockException
-//     * @Route("/{elmt}/{elmtId}/participants", name="activityParticipants")
-//     */
-//    public function newAddActivityParticipant(Request $request, $elmt, $elmtId)
-//    {
-//        $user = self::getAuthorizedUser();
-//        if (!$user) {
-//            return $this->redirectToRoute('login');
-//        }
-//        $userRole = $user->getRole();
-//        $em = $this->em;
-//        $elmtIsActivity = $elmt === 'activity';
-//        /** @var Activity|TemplateActivity */
-//        $activity = $em->getRepository(
-//            $elmt === 'activity' ? Activity::class : TemplateActivity::class
-//        )->find($elmtId);
-//
-//        $organization = $user->getOrganization();
-//        /** @var Organization */
-//        $actOrganization = $activity->getOrganization();
-//        $activeModifiableStages = $activity->getActiveModifiableStages();
-//
-//        $userIsNotRoot = $userRole != 4;
-//        $userIsAdmin = $userRole == 1;
-//        $userIsAM = $userRole == 2;
-//        $userIsCollab = $userRole == 3;
-//        $actBelongsToDifferentOrg = $organization != $actOrganization;
-//        $actHasNoActiveModifiableStages = count($activeModifiableStages) == 0;
-//        $hasPageAccess = true;
-//        if ($elmtIsActivity) {
-//            if ($userIsNotRoot and ($actBelongsToDifferentOrg or !$userIsAdmin and $actHasNoActiveModifiableStages)) {
-//                $hasPageAccess = false;
-//            }
-//        } else {
-//            if ($userIsCollab or ($userIsAM or $userIsAdmin) and $actBelongsToDifferentOrg) {
-//                $hasPageAccess = false;
-//            }
-//        }
-//
-//        if (!$hasPageAccess) {
-//            return $this->render('errors/403.html.twig');
-//        }
-//
-//        $mailSettings = [];
-//
-//        /** @var FormFactory */
-//        
-//        $manageStageParticipantsForm = $this->createForm(ManageStageParticipantsForm::class, $activity, ['standalone' => true, 'elmt' => $elmt, 'organization' => $organization]);
-//        $manageStageParticipantsForm->handleRequest($request);
-//        $createTemplateForm = null;
-//        if ($elmt == 'activity' && $activity->getTemplate() == null) {
-//            $createTemplateForm = $this->createForm(AddTemplateForm::class, null, ['standalone' => true]);
-//            $createTemplateForm->handleRequest($request);
-//        }
-//
-//        if ($manageStageParticipantsForm->isSubmitted()) {
-//
-//            // If user has clicked in a button, but activity has been finalized (due to participant deletion)
-//            if ($elmt == 'activity' && $activity->getStatus() >= 2) {
-//                return $this->redirectToRoute('myActivities');
-//            }
-//
-//            if ($manageStageParticipantsForm->get('finalize')->isClicked() && $elmt == 'activity') {
-//
-//                $nbTotalStages = count($activity->getStages());
-//
-//                foreach ($activity->getActiveModifiableStages() as $stage) {
-//                    // add newly added people that were not AJAX-added
-//                    $newlyAddedParticipantsCollection = $stage->getUniqueParticipations()->filter(function (Participation $u) {
-//                        return !$u->getId();
-//                    });
-//                    /** @var Participation[] */
-//                    $newlyAddedParticipants = $newlyAddedParticipantsCollection->getValues();
-//
-//                    foreach ($newlyAddedParticipants as $participant) {
-//                        foreach ($stage->getCriteria() as $c) {
-//                            $theParticipant = clone $participant;
-//                            $theParticipant->setCriterion($c);
-//                            $em->persist($theParticipant);
-//                        }
-//                    }
-//                    $em->flush();
-//
-//                    // 1 - Sending participants mails if necessary
-//                    // Parameter for subject mail title
-//                    if ($nbTotalStages > 1) {
-//                        $mailSettings['stage'] = $stage;
-//                    } else {
-//                        $mailSettings['activity'] = $activity;
-//                    }
-//
-//                    $notYetMailedParticipants = $stage->getUniqueParticipations()->filter(function (Participation $u) {
-//                        return !$u->getisMailed();
-//                    });
-//                    /** @var Participation[] */
-//                    $participants = $notYetMailedParticipants->getValues();
-//
-//                    foreach ($participants as $participant) {
-//                        self::sendMail($app, [$participant->getDirectUser()], 'activityParticipation', $mailSettings);
-//                        $participant->setIsMailed(true);
-//                        $em->persist($participant);
-//                    }
-//                    $em->flush();
-//                }
-//
-//                if ($activity->getIsFinalized() == false) {
-//                    $activity->setIsFinalized(true);
-//                    $em->persist($activity);
-//                }
-//                $em->flush();
-//
-//            }
-//
-//            if ($elmt == 'activity') {
-//                if ($activity->getIsFinalized()) {
-//
-//                    // 2 - Updating activity status if necessary
-//
-//                    $tomorrowDate = new \DateTime;
-//                    $tomorrowDate->add(new \DateInterval('P1D'));
-//
-//                    $yesterdayDate = new \DateTime;
-//                    $yesterdayDate->sub(new \DateInterval('P1D'));
-//                    $k = 0;
-//                    $p = 0;
-//
-//                    foreach ($activity->getActiveStages() as $stage) {
-//                        if ($stage->getGStartDate() > $tomorrowDate) {
-//                            $k++;
-//                        }
-//                        if ($stage->getGEndDate() <= $yesterdayDate) {
-//                            $p++;
-//                        }
-//                    }
-//
-//                    $nbActiveStages = count($activity->getActiveStages());
-//
-//                    // If every grading stage starts in the future...
-//                    if ($k == $nbActiveStages) {
-//                        $activity->setStatus(0);
-//                    } else {
-//                        //..else if not every grading stage ends in the past...
-//                        if ($p != $nbActiveStages) {
-//                            $activity->setStatus(1);
-//                        } else {
-//                            $activity->setStatus(-1);
-//                        }
-//                    }
-//
-//                }
-//            }
-//
-//            $em->flush();
-//
-//            $parameters = ['elmt' => $elmt, 'elmtId' => $elmtId];
-//            if (array_key_exists('participant', $_POST['manage_stage_participants_form'])) {
-//                $path = 'activityParticipants';
-//            } else if (array_key_exists('parameter', $_POST['manage_stage_participants_form'])) {
-//                $path = 'oldActivityDefinition';
-//            } else if ($manageStageParticipantsForm->get('back')->isClicked() || array_key_exists('save', $_POST['manage_stage_participants_form']) || $manageStageParticipantsForm->get('finalize')->isClicked()) {
-//                $path = ($elmt == 'activity') ? 'myActivities' : 'manageTemplates';
-//                $parameters = [];
-//            } else if (array_key_exists('stage', $_POST['manage_stage_participants_form'])) {
-//                $path = 'activityStages';
-//            } else if ($manageStageParticipantsForm->get('previous')->isClicked() || array_key_exists('criterion', $_POST['manage_stage_participants_form'])) {
-//                $path = 'activityCriteria';
-//            }
-//
-//            return $app->redirect($app['url_generator']->generate($path, $parameters));
-//        }
-//
-//        /** @var UserRepository */
-//        $userRepo = $em->getRepository(User::class);
-//        $usersWithPic[0] = '/lib/img/no-picture.png';
-//        foreach ($userRepo->usersWithPicture() as $u) {
-//            $id = $u->getId();
-//            $pic = $u->getPicture();
-//            $usersWithPic[$id] = "/lib/img/$pic";
-//        }
-//
-//        return $this->render(
-//            'activity_define_participants.twig',
-//            [
-//                'form' => $manageStageParticipantsForm->createView(),
-//                'createTemplateForm' => ($createTemplateForm === null) ?: $createTemplateForm->createView(),
-//                'userPics' => json_encode($usersWithPic),
-//            ]
-//        );
-//    }
-
     /**
      * @param Request $request
      * @param int $stgId
@@ -1401,7 +979,7 @@ class ActivityController extends MasterController
 
             } else {
                 $doublonParticipant = $stage->getParticipants()->filter(function($p) use ($pElement){
-                        return $pElement->getTeamUsers()->exists(function(int $i, TeamUser $tu) use ($p){
+                        return $pElement->getMembers()->exists(function(int $i, Member $tu) use ($p){
                             return $tu->getUser() == $p->getUsrId();
                         });
                     })->first();
@@ -1501,11 +1079,11 @@ class ActivityController extends MasterController
                             $participation = new Participation;
                             $consideredParticipations[] = $participation;
                         } else {
-                            foreach($pElement->getCurrentTeamUsers() as $currentTeamUser){
-//                                var_dump($currentTeamUser->getUsrId());
+                            foreach($pElement->getCurrentMembers() as $currentMember){
+//                                var_dump($currentMember->getUsrId());
                                 $participation = new Participation;
-                                $participation->setUser($currentTeamUser)
-                                    ->setExternalUser($currentTeamUser->getExternalUser());
+                                $participation->setUser($currentMember)
+                                    ->setExternalUser($currentMember->getExternalUser());
                                 $consideredParticipations[] = $participation;
                             }
                         }
@@ -1515,10 +1093,10 @@ class ActivityController extends MasterController
                             $participation = new IProcessParticipation;
                             $consideredParticipations[] = $participation;
                         } else {
-                            foreach($pElement->getCurrentTeamUsers() as $currentTeamUser){
+                            foreach($pElement->getCurrentMembers() as $currentMember){
                                 $participation = new IProcessParticipation;
-                                $participation->setUser($currentTeamUser)
-                                    ->setExternalUser($currentTeamUser->getExternalUser());
+                                $participation->setUser($currentMember)
+                                    ->setExternalUser($currentMember->getExternalUser());
                                 $consideredParticipations[] = $participation;
                             }
                         }
@@ -1675,25 +1253,28 @@ class ActivityController extends MasterController
     /**
      * @param Request $request
      * @param int $teaId
-     * @param int $tusId
+     * @param int $memId
      * @return JsonResponse
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/team/{teaId}/team-user/validate/{tusId}", name="validateTeamUser")
+     * @Route("/team/{teaId}/team-user/validate/{memId}", name="validateMember")
      */
-    public function validateTeamUserAction(
+    public function validateMemberAction(
         Request $request,
         int $teaId,
-        int $tusId
+        int $memId
     ) {
         $currentUser = $this->user;
+
         $usrId = $request->get('user');
         $leader = (bool) $request->get('leader');
 
+        $em = $this->em;
         $repoU = $this->em->getRepository(User::class);
         $repoT = $this->em->getRepository(Team::class);
-        $repoTU = $this->em->getRepository(TeamUser::class);
-        $repoAU = $this->em->getRepository(Participation::class);
+        $repoM = $this->em->getRepository(Member::class);
+        $repoP = $this->em->getRepository(Participation::class);
+        $concernedUser = $repoU->find($usrId);
 
         /** @var Team */
         $team = $teaId != 0 ? $repoT->find($teaId) : new Team;
@@ -1707,20 +1288,19 @@ class ActivityController extends MasterController
         if (!$team->isModifiable() && $teaId != 0) {
             throw new Exception('unauthorized');
         }
+        /** @var Member|null */
+        $member = null;
 
-        /** @var TeamUser|null */
-        $teamUser = null;
-        $user = $repoU->findOneBy(["id" => $usrId]);
-        if($tusId != 0){
-            $teamUser = $repoTU->find($tusId);
+        if($memId != 0){
+            $member = $repoM->find($memId);
         } else {
-            $teamUser = $repoTU->findOneBy(['user' => $user, 'team' => $team]) ?: new TeamUser;
+            $member = $repoM->findOneBy(['user' => $concernedUser, 'team' => $team]) ?: new Member;
         }
 
         /** @var User */
         $addedUser = $user;
 
-        if($tusId == 0 || $teamUser->isDeleted()){
+        if($memId == 0 || $member->isDeleted()){
 
             // Sending a welcome to the new team joiner
             $settings = [];
@@ -1784,7 +1364,7 @@ class ActivityController extends MasterController
                         $Participation->setLeader($line->isLeader())
                             ->setType($line->getType())
                             ->setActivity($line->getActivity())
-                            ->setUsrId($usrId)
+                            ->setUser($concernedUser)
                             ->setCreatedBy($currentUser->getId())
                             ->setTeam($repoT->findOneBy(['id' => $teaId]))
                             ->setStage($line->getStage())
@@ -1799,30 +1379,30 @@ class ActivityController extends MasterController
             }
         }
 
-        $teamUser->setLeader($leader)
+        $member->setLeader($leader)
         ->setUsrId($usrId)
         ->setCreatedBy($currentUser->getId());
 
-        if($teamUser->isDeleted()){
-            $teamUser->toggleIsDeleted();
+        if($member->isDeleted()){
+            $member->toggleIsDeleted();
         }
 
-        if($addedUser->getOrgId() != $currentUser->getOrgId()){
+        if($addedUser->getOrganization() != $currentUser){
             $repoC = $em->getRepository(Client::class);
             $externalUser = $repoC->findOneBy(['organization' => $currentUser->getOrganization(), 'clientOrganization' => $addedUser->getOrganization()])
                 ->getExternalUsers()->filter(function(ExternalUser $e) use ($addedUser){
                     return $e->getUser() == $addedUser;
                 })->first();
-            $teamUser->setExtUsrId($externalUser->getId());
+            $member->setExtUsrId($externalUser->getId());
         }
 
-        $team->addTeamUser($teamUser);
+        $team->addMember($member);
         $em->persist($team);
         $em->flush();
 
         return new JsonResponse([
             'tid' => $team->getId(),
-            'eid' => $teamUser->getId(),
+            'eid' => $member->getId(),
             'user' => [
                 'picture' => $addedUser->getPicture() ?? 'no-picture.png'
             ],
@@ -1902,30 +1482,30 @@ class ActivityController extends MasterController
 
     /**
      * @param Request $request
-     * @param $tusId
+     * @param $memId
      * @return JsonResponse
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/remove-team-user/{tusId}", name="deleteTeamUser")
+     * @Route("/remove-team-user/{memId}", name="deleteMember")
      */
-    public function deleteTeamUserAction(Request $request, $tusId)
+    public function deleteMemberAction(Request $request, $memId)
     {
 
         $em = $this->em;
         $repoO = $em->getRepository(Organization::class);
         $repoU = $em->getRepository(User::class);
-        $repoTU = $em->getRepository(TeamUser::class);
-        /** @var TeamUser */
-        $teamUser = $repoTU->find($tusId);
-        $teamUserUsrId = $teamUser->getUser()->getId();
+        $repoM = $em->getRepository(Member::class);
+        /** @var Member */
+        $member = $repoM->find($memId);
+        $memberUsrId = $member->getUser()->getId();
         /** @var Team */
-        $team = $teamUser->getTeam();
+        $team = $member->getTeam();
         $teamOrganization = $team->getOrganization();
         $currentUser = $this->user;
 
         $currentUserOrganization = $currentUser->getOrganization();
-        $teamLeader = $repoTU->findOneBy(['team' => $team,'leader' => true]);
-        $userTeamLeader = $repoTU->findOneBy(['team' => $team, 'leader' => true, 'usrId' => $currentUser->getId()]);
+        $teamLeader = $repoM->findOneBy(['team' => $team,'leader' => true]);
+        $userTeamLeader = $repoM->findOneBy(['team' => $team, 'leader' => true, 'usrId' => $currentUser->getId()]);
         $hasUserInfGrantedRights = ($teamLeader && $userTeamLeader || !$teamLeader && $team->getCreatedBy() == $currentUser->getId());
         $hasPageAccess = true;
 
@@ -1937,14 +1517,14 @@ class ActivityController extends MasterController
             return $this->render('errors/403.html.twig');
         } else {
 
-            $teamUser
+            $member
                 ->setDeleted(new DateTime)
                 ->setIsDeleted(true);
-            $em->persist($teamUser);
+            $em->persist($member);
             $em->flush();
 
             $settings['team'] = $team;
-            $removedUser = $repoU->find($teamUserUsrId);
+            $removedUser = $repoU->find($memberUsrId);
             self::sendMail($app, [$removedUser], 'teamUserRemoval', $settings);
 
             return new JsonResponse(['message' => 'Success!'], 200);
@@ -2324,13 +1904,13 @@ class ActivityController extends MasterController
                         $selectedTeam = $existingTeamParticipant->getTeam();
 
                         // Check if current user belongs to the team
-                        foreach ($selectedTeam->getActiveTeamUsers() as $participantTeamUser) {
+                        foreach ($selectedTeam->getActiveMembers() as $participantTeamUser) {
 
                             if ($participantTeamUser->getUser() == $currentUser) {
 
-                                foreach ($selectedTeam->getActiveTeamUsers() as $teamUser) {
+                                foreach ($selectedTeam->getActiveMembers() as $member) {
                                     $existingParticipantUsersId['teaId'][] = $selectedTeam->getId();
-                                    $existingParticipantUsersId['usrId'][] = $teamUser->getUsrId();
+                                    $existingParticipantUsersId['usrId'][] = $member->getUsrId();
                                     $existingParticipantUsersId['type'][] = $existingTeamParticipant->getType();
                                 }
                                 $userBelongsToTeam = true;
@@ -2552,13 +2132,13 @@ class ActivityController extends MasterController
                     $selectedTeam = $existingTeamParticipant->getTeam();
 
                     // Check if current user belongs to the team
-                    foreach ($selectedTeam->getActiveTeamUsers() as $participantTeamUser) {
+                    foreach ($selectedTeam->getActiveMembers() as $participantTeamUser) {
 
                         if ($participantTeamUser->getUser() == $currentUser) {
 
-                            foreach ($selectedTeam->getActiveTeamUsers() as $teamUser) {
+                            foreach ($selectedTeam->getActiveMembers() as $member) {
                                 $existingParticipantUsersId['teaId'][] = $selectedTeam->getId();
-                                $existingParticipantUsersId['usrId'][] = $teamUser->getUsrId();
+                                $existingParticipantUsersId['usrId'][] = $member->getUsrId();
                                 $existingParticipantUsersId['type'][] = $existingTeamParticipant->getType();
                             }
                             $userBelongsToTeam = true;

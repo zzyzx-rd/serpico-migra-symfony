@@ -58,21 +58,21 @@
                     <div class="row no-margin">
                         <div class="col s12 m12">
                             <h5>{% trans %}firm_settings.other.departments.section_title{% endtrans %}</h5>
-                            <a class="waves-effect waves-light btn modify-button" href="{{ url('updateOrganizationElements', {'orgId' : currentuser.organization.id, 'elmtType' : 'department' }) }}">{% trans %}firm_settings.other.departments.manage_btn{% endtrans %}</a>
+                            <a class="waves-effect waves-light btn modify-button" href="{{ url('updateOrganizationElements', {'orgId' : currentuser.organization.id, entity: 'department' }) }}">{% trans %}firm_settings.other.departments.manage_btn{% endtrans %}</a>
                         </div>
                     </div>
 
                     <div class="row no-margin">
                         <div class="col s12 m12">
                             <h5>{% trans %}firm_settings.other.positions.section_title{% endtrans %}</h5>
-                            <a class="waves-effect waves-light btn modify-button" href="{{ url('updateOrganizationElements', {'orgId' : currentuser.organization.id, 'elmtType' : 'position' }) }}">{% trans %}firm_settings.other.positions.manage_btn{% endtrans %}</a>
+                            <a class="waves-effect waves-light btn modify-button" href="{{ url('updateOrganizationElements', {'orgId' : currentuser.organization.id, entity: 'position' }) }}">{% trans %}firm_settings.other.positions.manage_btn{% endtrans %}</a>
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col s12 m12">
                             <h5>{% trans %}firm_settings.other.titles.section_title{% endtrans %}</h5>
-                            <a class="waves-effect waves-light btn modify-button" href="{{ url('updateOrganizationElements', {'orgId' : currentuser.organization.id, 'elmtType' : 'title' }) }}">{% trans %}firm_settings.other.positions.manage_btn{% endtrans %}</a>
+                            <a class="waves-effect waves-light btn modify-button" href="{{ url('updateOrganizationElements', {'orgId' : currentuser.organization.id, entity: 'title' }) }}">{% trans %}firm_settings.other.positions.manage_btn{% endtrans %}</a>
                         </div>
                     </div>
                 </div>
@@ -85,11 +85,11 @@
                     <div class="row">
 
                         <div class="col s12 m12">
-                            <a class="waves-effect waves-light btn modify-button" href="{{ url('updateElementTargets', {'elmtType' : 'organization', 'elmtId' : currentuser.organization.id }) }}" style="margin-top:15px">{% trans %}firm_settings.users.criterion.organization_targets{% endtrans %}</a>
+                            <a class="waves-effect waves-light btn modify-button" href="{{ url('updateElementTargets', {entity: 'organization', 'elmtId' : currentuser.organization.id }) }}" style="margin-top:15px">{% trans %}firm_settings.users.criterion.organization_targets{% endtrans %}</a>
                         </div>
 
                         <div class="col s12 m12">
-                            <a class="waves-effect waves-light cyan darken-1 btn modify-button" href="{{ url('elementAvgResultPerCriterion',{'elmtType' : 'user'}) }}" style="margin-top:15px">{% trans %}firm_settings.users.criterion.avg_results{% endtrans %}</a>
+                            <a class="waves-effect waves-light cyan darken-1 btn modify-button" href="{{ url('elementAvgResultPerCriterion',{entity: 'user'}) }}" style="margin-top:15px">{% trans %}firm_settings.users.criterion.avg_results{% endtrans %}</a>
                         </div>
                     </div>
                 </div>

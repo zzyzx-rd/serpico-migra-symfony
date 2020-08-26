@@ -18,7 +18,7 @@ use App\Form\FinalizeUserForm;
 use App\Form\RequestActivityForm;
 use App\Form\ContactForm;
 use App\Entity\Participation;
-use App\Entity\TeamUser;
+use App\Entity\Member;
 use App\Entity\Decision;
 use App\Entity\Department;
 use App\Entity\Organization;
@@ -594,8 +594,8 @@ class UserController extends MasterController
                     $tData['name'] = $team->getName();
                     $tData['picture'] = $team->getPicture();
 
-                    foreach($team->getTeamUsers() as $teamUser){
-                        $user = $teamUser->getUser();
+                    foreach($team->getMembers() as $member){
+                        $user = $member->getUser();
                         $pData['img'] = $user->getPicture();
                         $pData['name'] = $user->getFullName();
                         $pData['fnfl'] = $user->getFirstName()[0];
@@ -1528,7 +1528,7 @@ class UserController extends MasterController
         $repoR = $this->em->getRepository(Result::class);
         $repoRK = $this->em->getRepository(Ranking::class);
         $repoRT = $this->em->getRepository(RankingTeam::class);
-        $repoTU = $this->em->getRepository(TeamUser::class);
+        $repoM = $this->em->getRepository(Member::class);
         $repoC = $this->em->getRepository(Criterion::class);
         $repoCN = $this->em->getRepository(CriterionName::class);
         $organization = $user->getOrganization();
@@ -1721,10 +1721,10 @@ class UserController extends MasterController
 //        MasterController::updateProgressStatus();
 
         $teamParticipations = [];
-        $teamUserInclusions = $repoTU->findByUser($user);
-        foreach($teamUserInclusions as $teamUserInclusion){
-//            dd( $teamUserInclusion instanceof TeamUser);
-            $team = $teamUserInclusion->getTeam();
+        $memberInclusions = $repoM->findByUser($user);
+        foreach($memberInclusions as $memberInclusion){
+//            dd( $memberInclusion instanceof TeamUser);
+            $team = $memberInclusion->getTeam();
             $teamParticipation['name'] = $team->getName();
             $teamParticipation['id'] = $team->getId();
             $teamParticipation['nbParticipants'] = count($team->getActiveTeamUsers());

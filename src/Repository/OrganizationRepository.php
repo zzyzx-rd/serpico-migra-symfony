@@ -5,7 +5,7 @@ namespace App\Repository;
 use App\Entity\CriterionName;
 use App\Entity\Organization;
 use App\Entity\Team;
-use App\Entity\TeamUser;
+use App\Entity\Member;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -114,7 +114,7 @@ class OrganizationRepository extends ServiceEntityRepository
         $repoT = $this->_em->getRepository(Team::class);
         $teams = new ArrayCollection($repoT->findAll());
         return $teams->filter(function(Team $t) use ($organization){ 
-            return $t->getTeamUsers()->exists(function(int $i, TeamUser $tu) use ($organization){
+            return $t->getMembers()->exists(function(int $i, TeamUser $tu) use ($organization){
                 if(!$tu->getExternalUser()){
                     return false;
                 }

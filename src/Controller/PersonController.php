@@ -70,8 +70,8 @@ class PersonController extends MasterController
                 return $this->render('errors/403.html.twig');
             }
         } else {
-            foreach ($team->getTeamUsers() as $teamUser) {
-                $teamUsrIds[] = $teamUser->getUser()->getId();
+            foreach ($team->getMembers() as $member) {
+                $teamUsrIds[] = $member->getUser()->getId();
             }
             if ($currentUser->getRole() != 4 && ($organization != $currentUserOrganization || $currentUser->getRole() != 1 && !in_array($currentUser->getId(), $teamUsrIds))) {
                 $hasPageAccess = false;

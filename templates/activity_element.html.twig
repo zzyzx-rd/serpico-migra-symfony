@@ -165,9 +165,9 @@
     var precommentUpdateMsg = '{% trans %}participants.guidelines.modify{% endtrans %}';
     var precommentNoneMsg = '{% trans %}participants.guidelines.no_guidelines{% endtrans %}';
     var mp = 1;
-    var dcurl = "{{ url('ajaxCriterionDelete',{'elmtType' : elmtType, 'criId' : 0}) }}";
-    var dsurl = "{{ url('ajaxStageDelete',{'elmtType' : elmtType, 'stgId' : 0}) }}";
-    var courl = "{{ url('clearStageOutput', {'elmtType' : elmtType, 'stgId' : 0}) }}"
+    var dcurl = "{{ url('ajaxCriterionDelete',{entity: elmtType, 'criId' : 0}) }}";
+    var dsurl = "{{ url('ajaxStageDelete',{entity: elmtType, 'stgId' : 0}) }}";
+    var courl = "{{ url('clearStageOutput', {entity: elmtType, 'stgId' : 0}) }}"
 
   </script>
 {% endblock %}

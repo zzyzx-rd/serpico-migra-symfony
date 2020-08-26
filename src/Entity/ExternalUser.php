@@ -27,9 +27,9 @@ class ExternalUser extends DbObject
     public ?int $id;
 
     /**
-     * @ORM\Column(name="ext_fisrtname", type="string", length=255, nullable=true)
+     * @ORM\Column(name="ext_firstname", type="string", length=255, nullable=true)
      */
-    public $fisrtname;
+    public $firstname;
 
     /**
      * @ORM\Column(name="ext_lastname", type="string", length=255, nullable=true)
@@ -69,7 +69,7 @@ class ExternalUser extends DbObject
     /**
      * @ORM\Column(name="ext_last_connected", type="datetime", nullable=true)
      */
-    public $last_connected;
+    public $lastConnected;
 
     /**
      * @ORM\Column(name="ext_deleted", type="datetime", nullable=true)
@@ -94,68 +94,68 @@ class ExternalUser extends DbObject
     public $participations;
 
     /**
-     * @ORM\OneToMany(targetEntity=TeamUser::class, mappedBy="externalUser")
+     * @ORM\OneToMany(targetEntity=Member::class, mappedBy="externalUser")
      */
-    public $teamUsers;
+    public $members;
 
     /**
      * ExternalUser constructor.
      * @param ?int$id
-     * @param string $ext_fisrtname
-     * @param string $ext_lastname
-     * @param $ext_email
-     * @param float $ext_weight_value
-     * @param $ext_positionName
-     * @param $ext_owner
-     * @param $ext_createdBy
-     * @param $ext_inserted
-     * @param $ext_last_connected
-     * @param $ext_deleted
+     * @param string $firstname
+     * @param string $lastname
+     * @param $email
+     * @param float $weight_value
+     * @param $positionName
+     * @param $owner
+     * @param $createdBy
+     * @param $inserted
+     * @param $lastConnected
+     * @param $deleted
      * @param User $user
      * @param Client $client
      * @param Participation $participation
-     * @param TeamUser $teamUsers
+     * @param TeamUser $members
      */
     public function __construct(
       ?int $id = 0,
-        $ext_fisrtname = '',
-        $ext_lastname = '',
-        $ext_email = null,
-        $ext_weight_value = 0.0,
-        $ext_positionName = null,
-        $ext_owner = null,
-        $ext_createdBy = null,
-        $ext_inserted = null,
-        $ext_last_connected = null,
-        $ext_deleted = null,
+        $firstname = '',
+        $lastname = '',
+        $email = null,
+        $weight_value = 0.0,
+        $positionName = null,
+        $owner = null,
+        $createdBy = null,
+        $inserted = null,
+        $lastConnected = null,
+        $deleted = null,
         User $user = null,
         Client $client = null
     )
     {
-        parent::__construct($id, $ext_createdBy, new DateTime());
-        $this->fisrtname = $ext_fisrtname;
-        $this->lastname = $ext_lastname;
-        $this->email = $ext_email;
-        $this->positionName = $ext_positionName;
-        $this->weight_value = $ext_weight_value;
-        $this->owner = $ext_owner;
-        $this->last_connected = $ext_last_connected;
-        $this->deleted = $ext_deleted;
+        parent::__construct($id, $createdBy, new DateTime());
+        $this->firstname = $firstname;
+        $this->lastname = $lastname;
+        $this->email = $email;
+        $this->positionName = $positionName;
+        $this->weight_value = $weight_value;
+        $this->owner = $owner;
+        $this->last_connected = $lastConnected;
+        $this->deleted = $deleted;
         $this->user = $user;
         $this->client = $client;
         $this->participations = new ArrayCollection;
-        $this->teamUsers = new ArrayCollection;
+        $this->members = new ArrayCollection;
     }
 
 
-    public function getFisrtname(): ?string
+    public function getFirstname(): ?string
     {
-        return $this->fisrtname;
+        return $this->firstname;
     }
 
-    public function setFisrtname(string $ext_fisrtname): self
+    public function setFirstname(string $firstname): self
     {
-        $this->fisrtname = $ext_fisrtname;
+        $this->firstname = $firstname;
 
         return $this;
     }
@@ -165,9 +165,9 @@ class ExternalUser extends DbObject
         return $this->lastname;
     }
 
-    public function setLastname(string $ext_lastname): self
+    public function setLastname(string $lastname): self
     {
-        $this->lastname = $ext_lastname;
+        $this->lastname = $lastname;
 
         return $this;
     }
@@ -177,9 +177,9 @@ class ExternalUser extends DbObject
         return $this->email;
     }
 
-    public function setEmail(?string $ext_email): self
+    public function setEmail(?string $email): self
     {
-        $this->email = $ext_email;
+        $this->email = $email;
 
         return $this;
     }
@@ -189,9 +189,9 @@ class ExternalUser extends DbObject
         return $this->positionName;
     }
 
-    public function setPositionName(string $ext_positionName): self
+    public function setPositionName(string $positionName): self
     {
-        $this->positionName = $ext_positionName;
+        $this->positionName = $positionName;
 
         return $this;
     }
@@ -201,9 +201,9 @@ class ExternalUser extends DbObject
         return $this->weight_value;
     }
 
-    public function setWeightValue(float $ext_weight_value): self
+    public function setWeightValue(float $weight_value): self
     {
-        $this->weight_value = $ext_weight_value;
+        $this->weight_value = $weight_value;
 
         return $this;
     }
@@ -213,16 +213,16 @@ class ExternalUser extends DbObject
         return $this->owner;
     }
 
-    public function setOwner(bool $ext_owner): self
+    public function setOwner(bool $owner): self
     {
-        $this->owner = $ext_owner;
+        $this->owner = $owner;
 
         return $this;
     }
 
-    public function setInserted(DateTimeInterface $ext_inserted): self
+    public function setInserted(DateTimeInterface $inserted): self
     {
-        $this->inserted = $ext_inserted;
+        $this->inserted = $inserted;
 
         return $this;
     }
@@ -232,9 +232,9 @@ class ExternalUser extends DbObject
         return $this->last_connected;
     }
 
-    public function setLastConnected(?DateTimeInterface $ext_last_connected): self
+    public function setLastConnected(?DateTimeInterface $lastConnected): self
     {
-        $this->last_connected = $ext_last_connected;
+        $this->last_connected = $lastConnected;
 
         return $this;
     }
@@ -244,9 +244,9 @@ class ExternalUser extends DbObject
         return $this->deleted;
     }
 
-    public function setDeleted(?DateTimeInterface $ext_deleted): self
+    public function setDeleted(?DateTimeInterface $deleted): self
     {
-        $this->deleted = $ext_deleted;
+        $this->deleted = $deleted;
 
         return $this;
     }
@@ -262,7 +262,7 @@ class ExternalUser extends DbObject
     /**
      * @param mixed $user
      */
-    public function setUser($user)
+    public function setUser($user): self
     {
         $this->user = $user;
         return $this;
@@ -279,7 +279,7 @@ class ExternalUser extends DbObject
     /**
      * @param mixed $client
      */
-    public function setClient($client)
+    public function setClient($client): self
     {
         $this->client = $client;
         return $this;
@@ -307,30 +307,30 @@ class ExternalUser extends DbObject
     }
 
     /**
-     * @return ArrayCollection|TeamUser[]
+     * @return ArrayCollection|Member[]
      */
-    public function getTeamUsers()
+    public function getMembers()
     {
-        return $this->teamUsers;
+        return $this->members;
     }
 
-    public function addTeamUser(TeamUser $teamUser): self
+    public function addMember(Member $member): self
     {
-        if (!$this->teamUsers->contains($teamUser)) {
-            $this->teamUsers[] = $teamUser;
-            $teamUser->seternalUserExtId($this);
+        if (!$this->members->contains($member)) {
+            $this->members[] = $member;
+            $member->setExternalUser($this);
         }
 
         return $this;
     }
 
-    public function removeTeamUser(TeamUser $teamUser): self
+    public function removeMember(Member $member): self
     {
-        if ($this->teamUsers->contains($teamUser)) {
-            $this->teamUsers->removeElement($teamUser);
+        if ($this->members->contains($member)) {
+            $this->members->removeElement($member);
             // set the owning side to null (unless already changed)
-            if ($teamUser->geternalUserExtId() === $this) {
-                $teamUser->seternalUserExtId(null);
+            if ($member->getExternalUser() === $this) {
+                $member->setExternalUser(null);
             }
         }
 
