@@ -33,7 +33,7 @@ class CriterionType extends AbstractType
         /** @var Organization */
         $organization = $options['organization'];
 
-        $currentUser =$options['currentUser'];
+        $currentUser = $options['currentUser'];
 
         $builder->addEventListener(FormEvents::PRE_SET_DATA, static function(FormEvent $event) use ($organization, $currentUser) {
             $form = $event->getForm();

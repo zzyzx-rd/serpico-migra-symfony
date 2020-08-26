@@ -33,7 +33,7 @@ class TeamUserType extends AbstractType
             
         $organization = $options['organization'];
         $query = $options['query'];
-        $currentUser = MasterController::getAuthorizedUser();
+        $currentUser = $options["currentUser"];
         if (!$currentUser instanceof User) {
             throw 'Authentication issue: no authorized user found';
         }
@@ -122,6 +122,7 @@ class TeamUserType extends AbstractType
         $resolver->setDefault('standalone', false);
         $resolver->setDefault('query','internal');
         $resolver->setDefault('organization',null);
+        $resolver->setRequired("currentUser");
         $resolver->addAllowedTypes('standalone', 'bool');
     }
 

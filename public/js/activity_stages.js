@@ -360,7 +360,8 @@ $(document).on(
   }
 ).on(
   'click', '.btn-add-criterion',
-  function() {
+  function(e) {
+      e.preventDefault();
     const $this = $(this);
     const $section = $this.closest('section');
     const $criteriaList = $section.find('ul.criteria-list');

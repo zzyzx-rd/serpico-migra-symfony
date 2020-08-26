@@ -49,6 +49,8 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Generator\UrlGenerator;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Translation\Translator;
@@ -91,12 +93,17 @@ abstract class MasterController extends AbstractController
      */
     protected $user;
     /**
+     * @var MailerInterface
+     */
+    private MailerInterface $mailer;
+
+    /**
      * MasterController constructor.
      * @param EntityManagerInterface $em
      * @param Security $security
      * @param RequestStack $stack
      */
-    public function __construct(EntityManagerInterface $em, Security $security, RequestStack $stack)
+    public function __construct(EntityManagerInterface $em, Security $security, RequestStack $stack, MailerInterface $mailer)
     {
         $this->em = $em;
         $this->security = $security;
@@ -120,6 +127,7 @@ abstract class MasterController extends AbstractController
 //        $twig->addGlobal("routeParams", ["_locale" =>"fr"]);
 //        $twig->addGlobal("request", $this->stack->getCurrentRequest());
 //        $twig->addGlobal("currentUser", $this->user);
+        $this->mailer = $mailer;
     }
 
 //    public static function getTwig(): \Twig\Environment
@@ -973,14 +981,11 @@ abstract class MasterController extends AbstractController
     /**
      * @param User[] $recipients
      */
-    public static function sendMail($_, array $recipients, $actionType, $settings)
+    public function sendMail($_, array $recipients, $actionType, $settings)
     {
-        global $app;
-
         $data = $settings;
-        $em = $app['orm.em'];
         $data['actionType'] = $actionType;
-        $data['currentuser'] = self::getAuthorizedUser();
+        $data['currentuser'] = $this->user;
         $recipientUsers = true;
 
         if (isset($data['recipientUsers'])) {
@@ -988,9 +993,8 @@ abstract class MasterController extends AbstractController
         }
 
         foreach ($recipients as $key => $recipient) {
-            $message = Swift_Message::newInstance();
-            $mail = new Mail;
-            $mail->setType($actionType);
+            $mail = new Email;
+//            $mail->setType($actionType);
             $token = md5(rand());
             $mail
                 ->setUser($recipient)

@@ -39,6 +39,7 @@ class AddTeamForm extends AbstractType
                 'entry_options' => [
                     'organization' => $team->getOrganization(),
                     'query' => 'external',
+                    'currentUser' => $options["currentUser"],
                 ],
                 'prototype' => true,
                 'prototype_name' => '__extTUIndex__',
@@ -55,6 +56,7 @@ class AddTeamForm extends AbstractType
             'entry_options' => [
                 'organization' => $team->getOrganization(),
                 'query' => 'internal',
+                'currentUser' => $options["currentUser"],
             ],
             'prototype' => true,
             'prototype_name' => '__intTUIndex__',
@@ -79,6 +81,7 @@ class AddTeamForm extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefault('standalone', false);
+        $resolver->setRequired('currentUser');
         $resolver->addAllowedTypes('standalone', 'bool');
     }
 }

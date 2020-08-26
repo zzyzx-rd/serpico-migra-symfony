@@ -11,7 +11,7 @@
   
   <div class="user-info">
     <img
-      class="user-picture" src="{{ existingUser ? asset(user_picture_url(existingUser)) }}"
+      class="user-picture" src="{{ existingUser ? asset(global.userPicture(existingUser)) }}"
       alt="{{ existingUser ? existingUser.fullname }}">
     <span class="user-name">{{ existingUser ? existingUser.fullname : '__user.fullname__' }}</span>
     <div class="badges">

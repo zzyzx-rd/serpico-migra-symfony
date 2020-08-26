@@ -82,6 +82,7 @@ use App\Entity\WorkerFirm;
 use App\Repository\OrganizationRepository;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Translation\Translator;
@@ -97,8 +98,8 @@ class OrganizationController extends MasterController
 {
     private $notFoundResponse;
 
-    public function __construct(EntityManagerInterface $em, Security $security, RequestStack $stack) {
-        parent::__construct($em, $security, $stack);
+    public function __construct(EntityManagerInterface $em, Security $security, RequestStack $stack, MailerInterface $mailer) {
+        parent::__construct($em, $security, $stack, $mailer);
         $this->notFoundResponse = new Response(null, Response::HTTP_NOT_FOUND);
     }
 
@@ -280,8 +281,6 @@ class OrganizationController extends MasterController
     private function activityConfigurationAction(Request $request, $element, User $user, $elmtType, $redirectLink)
     {
 
-        global $app;
-        $formFactory = self::getFormFactory();
         $activityForm = $this->createForm(
             ActivityElementForm::class, $element, ['elmtType' => $elmtType]
         );
@@ -1497,26 +1496,17 @@ class OrganizationController extends MasterController
 
     /**
      * @param Request $request
-     * @param Application $app
      * @return mixed
      * @throws ORMException
      * @throws OptimisticLockException
      * @Route("/settings/users/create", name="createUser")
      */
-    public function addUserAction(Request $request, Application $app)
+    public function addUserAction(Request $request)
     {
-
-        //TODO : get current language dynamically
-        $locale = 'fr';
-
         $currentUser = $this->user;
-        if (!$currentUser instanceof User) {
-            return $this->redirectToRoute('login');
-        }
-
         $adminFullName = $currentUser->getFirstname() . " " . $currentUser->getLastname();
         $id            = $currentUser->getId();
-        $orgId         = $currentUser->getOrgId();
+        $orgId         = $currentUser->getOrganization()->getId();
         $em            = $this->em;
         $repoO         = $em->getRepository(Organization::class);
         //$repoP = $em->getRepository(Position::class);
@@ -1529,16 +1519,15 @@ class OrganizationController extends MasterController
         // Only administrators or roots canKey "0" in object with ArrayAccess of class "Doctrine\ORM\PersistentCollection" does not exist. create/update users who have the ability to create users themselves
         $orgOptions = $organization->getOptions();
         foreach ($orgOptions as $orgOption) {
-            if ($orgOption->getOName()->getName() == 'enabledUserCreatingUser') {
+            if ($orgOption->getOName()->getName() === 'enabledUserCreatingUser') {
                 $orgEnabledCreatingUser = $orgOption->isOptionTrue();
             }
         }
 
-        if ($currentUser->getRole() != 4 && $currentUser->getRole() != 1 && !($currentUser->getDepartment($app)->getMasterUser() == $currentUser || $orgEnabledCreatingUser && $currentUser->isEnabledCreatingUser())) {
+        if ($currentUser->getRole() !== 4 && $currentUser->getRole() !== 1 && !($currentUser->getDepartment()->getMasterUser() == $currentUser || ($orgEnabledCreatingUser && $currentUser->isEnabledCreatingUser()))) {
             return $this->render('errors/403.html.twig');
         }
 
-        $formFactory             = $app['form.factory'];
         $userForm                = $this->createForm(AddUserForm::class, null, ['standalone' => true, 'organization' => $organization, 'enabledCreatingUser' => $orgEnabledCreatingUser]);
         $organizationElementForm = $this->createForm(OrganizationElementType::class, null, ['standalone' => true]);
         $userForm->handleRequest($request);
@@ -1552,22 +1541,18 @@ class OrganizationController extends MasterController
                 // Les lignes qui suivent sont horribles mais sont un hack au fait qu'a priori on ne puisse pas lier position et département à User (mais à vérifier, peut-être que ça remarche...)
                 // $user->getPosId() renvoie une Position, et $user->getDptId() un département.
 
-                $posId = $user->getPosId() ? $user->getPosId()->getId() : null;
-                $dptId = $user->getDptId() ? $user->getDptId()->getId() : null;
-                $titId = $user->getTitId() ? $user->getTitId()->getId() : null;
-                $wgtId = $user->getWgtId() ? $user->getWgtId()->getId() : null;
-                $user->setWeightIni($user->getWgtId()->getValue());
-                $token = md5(rand());
+                $user->setWeightIni($user->getWeight()->getValue());
+                $token = md5(mt_rand());
 
-                $user->setOrgId($orgId)
-                    ->setPosId($posId)
-                    ->setDptId($dptId)
-                    ->setTitId($titId)
-                    ->setWgtId($wgtId)
+                $user->setOrganization($organization)
+                    ->setPosition($user->getPosition())
+                    ->setDepartment($user->getDepartment())
+                    ->setTitle($user->getTitle())
+                    ->setWeight($user->getWeight())
                     ->setToken($token)
                     ->setCreatedBy($currentUser->getId());
 
-                if ($user->getSuperior() != null) {
+                if ($user->getSuperior() !== null) {
                     $user->setSuperior($user->getSuperior());
                 }
                 else {
@@ -1582,8 +1567,8 @@ class OrganizationController extends MasterController
             $settings['adminFullName'] = $currentUser->getFullName();
             $settings['rootCreation']  = false;
             $em->flush();
-            self::sendMail($app, $recipients, 'registration', $settings);
-            return $app->redirect($app['url_generator']->generate('manageUsers'));
+//            self::sendMail($app, $recipients, 'registration', $settings);
+            return $this->redirectToRoute('manageUsers');
         }
 
         return $this->render('user_create.html.twig',
@@ -5607,39 +5592,34 @@ class OrganizationController extends MasterController
 
     /**
      * @param Request $request
-     * @param Application $app
      * @param null $teaId
      * @return mixed
      * @throws ORMException
      * @throws OptimisticLockException
      * @Route("/settings/teams/manage/{teaId}", name="manageTeam")
      */
-    public function manageTeamAction(Request $request, Application $app, $teaId = null)
+    public function manageTeamAction(Request $request, $teaId = null)
     {
         $em = $this->em;
         $repoT = $em->getRepository(Team::class);
         $team = $teaId ? $repoT->find($teaId) : new Team;
-
+        $team->setCurrentUser($this->user);
         $currentUser = $this->user;
-        if (!$currentUser instanceof User) {
-            return $this->redirectToRoute('login');
-        }
-
         if (!$team->isModifiable()) {
             return $this->render('errors/403.html.twig');
         }
 
-        if($teaId == null){
+        if($teaId === null){
             $organization = $currentUser->getOrganization();
             $team->setOrganization($organization);
             $team->setName($organization->getTeams()->count() + 1);
         }
         
-        $manageTeamForm = $this->createForm(AddTeamForm::class, $team, ['standalone' => true]);
+        $manageTeamForm = $this->createForm(AddTeamForm::class, $team, ['standalone' => true, 'currentUser' => $this->user]);
         $manageTeamForm->handleRequest($request);
-        if($manageTeamForm->isValid()){
+        if($manageTeamForm->isSubmitted() && $manageTeamForm->isValid()){
             $em->flush();
-            return $app->redirect($app['url_generator']->generate('manageUsers'));
+            return $this->redirectToRoute('manageUsers');
         }
         return $this->render('team_manage.html.twig',
             [

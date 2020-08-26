@@ -82,6 +82,7 @@ class Team extends DbObject
      * @OneToMany(targetEntity="Target", mappedBy="team",cascade={"persist", "remove"}, orphanRemoval=true)
      */
     public $targets;
+    private $currentUser;
 
     /**
      * Team constructor.
@@ -397,6 +398,65 @@ class Team extends DbObject
     public function __toString()
     {
         return (string)$this->id;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCurrentUser()
+    {
+        return $this->currentUser;
+    }
+
+    /**
+     * @param mixed $currentUser
+     * @return Team
+     */
+    public function setCurrentUser($currentUser)
+    {
+        $this->currentUser = $currentUser;
+        return $this;
+    }
+
+    public function isModifiable()
+    {
+        $connectedUser = $this->currentUser;
+        $connectedUserRole = $connectedUser->getRole();
+        $connectedUserId = $connectedUser->getId();
+
+        if($connectedUserRole == USER::ROLE_ROOT){
+            return true;
+        }
+
+        $teamLeader = $this->getTeamUsers()->filter(function(TeamUser $tu){return $tu->isLeader();})->first();
+        $teamOrganization = $this->getOrganization();
+        $grantedRights =
+            ($teamLeader && $teamLeader->getUser() == $connectedUser) ||
+            (!$teamLeader && $this->getCreatedBy() == $connectedUser->getId()) ||
+            ($teamOrganization == $connectedUser->getOrganization() && $connectedUser->getRole() == USER::ROLE_ADMIN);
+        // Or if there is an option giving you such right (currently unexisting)
+
+        return $grantedRights;
+    }
+
+    public function getTeamExtUsers()
+    {
+
+        $teamExtUsers = new ArrayCollection(array_values(array_filter($this->teamUsers->toArray(), function(TeamUser $tu){
+            return $tu->getUser()->getOrganization() != $this->currentUser->getOrganization();
+        })));
+
+        return $teamExtUsers;
+
+    }
+
+    public function getTeamIntUsers()
+    {
+        $teamIntUsers = new ArrayCollection(array_values(array_filter($this->teamUsers->toArray(),function(TeamUser $tu){
+            return $tu->getUser()->getOrganization() ==$this->currentUser->getOrganization();
+        })));
+
+        return $teamIntUsers;
     }
 
     //TODO getIntTeamUser et le get Average et les trucs qui suivent

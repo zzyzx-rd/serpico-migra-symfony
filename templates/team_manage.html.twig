@@ -1,6 +1,6 @@
 {% extends "layout.html.twig" %}
 
-{% set teaId = app.request_stack.currentrequest.get('teaId') ?: 0 %}
+{% set teaId = global.request.get('teaId') ?: 0 %}
 {% set hasPastTeamUsers = form.vars.data.pastTeamIntUsers|length > 0 or form.vars.data.pastTeamExtUsers|length > 0 %}
 
 {% block title %}
@@ -198,13 +198,13 @@
                     {% for teamUser in form.vars.data.pastTeamIntUsers %}
                         <li class="flex-center-sb">
                             <span>{{ teamUser.user.fullname }}</span>
-                            <span>{{ 'team.team_user_from'|trans ~ ' ' ~ teamUser.inserted|localizeddate('long','none') ~ ' ' ~ 'team.team_user_to'|trans ~ ' ' ~ teamUser.deleted|localizeddate('long','none') }}</span>    
+{#                            <span>{{ 'team.team_user_from'|trans ~ ' ' ~ teamUser.inserted|localizeddate('long','none') ~ ' ' ~ 'team.team_user_to'|trans ~ ' ' ~ teamUser.deleted|localizeddate('long','none') }}</span>    #}
                         </li>
                     {% endfor %}
                     {% for teamUser in form.vars.data.pastTeamExtUsers %}
                         <li class="flex-center-sb">
                             <span>{{ teamUser.user.fullname }}</span>
-                            <span>{{ 'team.team_user_from'|trans ~ ' ' ~ teamUser.inserted|localizeddate('long','none') ~ ' ' ~ 'team.team_user_to'|trans ~ ' ' ~ teamUser.deleted|localizeddate('long','none') }}</span>    
+{#                            <span>{{ 'team.team_user_from'|trans ~ ' ' ~ teamUser.inserted|localizeddate('long','none') ~ ' ' ~ 'team.team_user_to'|trans ~ ' ' ~ teamUser.deleted|localizeddate('long','none') }}</span>    #}
                         </li>
                     {% endfor %}
                 </ul>

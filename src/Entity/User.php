@@ -639,11 +639,7 @@ class User extends DbObject implements  UserInterface, \Serializable
         return $this->superior;
     }
 
-    /**
-     * @param User $superior
-     * @return User
-     */
-    public function setSuperior(User $superior)
+    public function setSuperior(?User $superior)
     {
         $this->superior = $superior;
         return $this;

@@ -1376,7 +1376,7 @@ class ActivityController extends MasterController
             if($pElmtType === 'user'){
 
                 $doublonParticipant = $stage->getParticipants()->filter(function($p) use ($pElmtId){
-                    return $p->getUsrId() == $pElmtId;
+                    return $p->getUser()->getId() == $pElmtId;
                 })->first();
 
                 if($doublonParticipant){
@@ -1669,24 +1669,18 @@ class ActivityController extends MasterController
         int $teaId,
         int $tusId
     ) {
-
-        if (!$currentUser) {
-            throw new Exception('current user is null');
-        }
-
-        /** @var int */
+        $currentUser = $this->user;
         $usrId = $request->get('user');
-        /** @var bool */
         $leader = (bool) $request->get('leader');
 
-        $em = self::getEntityManager();
-        $repoU = $em->getRepository(User::class);
-        $repoT = $em->getRepository(Team::class);
-        $repoTU = $em->getRepository(TeamUser::class);
-        $repoAU = $em->getRepository(Participation::class);
+        $repoU = $this->em->getRepository(User::class);
+        $repoT = $this->em->getRepository(Team::class);
+        $repoTU = $this->em->getRepository(TeamUser::class);
+        $repoAU = $this->em->getRepository(Participation::class);
 
         /** @var Team */
         $team = $teaId != 0 ? $repoT->find($teaId) : new Team;
+        $team->setCurrentUser($this->user);
         if($teaId == 0){
             $organization = $currentUser->getOrganization();
             $team->setOrganization($organization)
@@ -1699,15 +1693,15 @@ class ActivityController extends MasterController
 
         /** @var TeamUser|null */
         $teamUser = null;
-
+        $user = $repoU->findOneBy(["id" => $usrId]);
         if($tusId != 0){
             $teamUser = $repoTU->find($tusId);
         } else {
-            $teamUser = $repoTU->findOneBy(['usrId' => $usrId, 'team' => $team]) ?: new TeamUser;
+            $teamUser = $repoTU->findOneBy(['user' => $user, 'team' => $team]) ?: new TeamUser;
         }
 
         /** @var User */
-        $addedUser = $repoU->find($usrId);
+        $addedUser = $user;
 
         if($tusId == 0 || $teamUser->isDeleted()){
 
@@ -1716,12 +1710,12 @@ class ActivityController extends MasterController
             $addedRecipients = [$addedUser];
             if (count($addedRecipients) > 0) {
                 $settings['team'] = $team;
-                self::sendMail($app, $addedRecipients, 'teamCreation', $settings);
+//                self::sendMail($app, $addedRecipients, 'teamCreation', $settings);
             }
 
             //We unvalidate team user participations of non-completed activities, in order for them to grade team newcomer
             $teamParticipations = new ArrayCollection($repoAU->findBy(['team' => $teaId], ['activity' => 'ASC']));
-            $uncompletedTeamParticipations = $teamParticipations->filter(function (Participation $participation) {
+            $uncompletedTeamParticipations = $teamParticipations->filter(static function (Participation $participation) {
                 return $participation->getActivity()->getStatus() < 2;
             });
 
