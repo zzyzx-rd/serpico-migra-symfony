@@ -141,12 +141,12 @@ $(function(){
     
             if($.inArray(+usrRole,[2,3]) !== -1 
             && !$potentialDifferentLeader.length && $userSelect.val() != usrId
-            || $potentialDifferentLeader.length && $potentialDifferentLeader.closest('.participants-list--item').find('select[name*="directUser"]').val() == usrId){
+            || $potentialDifferentLeader.length && $potentialDifferentLeader.closest('.participants-list--item').find('select[name*="user"]').val() == usrId){
             $('#setOwnershipLoseSetup').modal('open').data('id',$this.closest('.stage').data('id'));
             return false;
             } else if($potentialDifferentLeader.length){
             $('#changeOwner').find('.sName').empty().append($this.closest('.stage').find('.stage-name-field').text())
-            $('#changeOwner').find('#oldLeader').empty().append($potentialDifferentLeader.closest('.participants-list--item').find('select[name*="directUser"] option:selected').text())
+            $('#changeOwner').find('#oldLeader').empty().append($potentialDifferentLeader.closest('.participants-list--item').find('select[name*="user"] option:selected').text())
             $('#changeOwner').find('#newLeader').empty().append($userName.text());
             $('#changeOwner').modal('open').data('id',$this.closest('.stage').data('id'));
             return false;

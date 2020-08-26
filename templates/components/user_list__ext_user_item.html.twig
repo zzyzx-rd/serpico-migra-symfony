@@ -55,14 +55,14 @@
           {% endif %}
         
           <a class="fa fa-bullseye"
-              href="{{ url('updateElementTargets', { elmtType: 'user', elmtId: user.id }) }}"
+              href="{{ url('updateElementTargets', { entity: 'user', elmtId: user.id }) }}"
               tooltip="{{ 'user_list.targets'|trans }}">
           </a>
           
         {% endif %}
 
         <a class="material-icons {{ not hasCompletedActivities ? 'disabled' }}"
-            href="{{ url('elementOverview', { elmtType: 'user', elmtId: user.id }) }}"
+            href="{{ url('elementOverview', { entity: 'user', elmtId: user.id }) }}"
             tooltip="{{ 'user_list.overview'|trans }}">show_chart</a>
       </div>
     

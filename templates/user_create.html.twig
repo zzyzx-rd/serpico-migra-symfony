@@ -11,7 +11,7 @@
     <!-- Dropify -->
     <link href="{{ asset('css/dropify.min.css') }}" rel="stylesheet" type="text/css">
     <script type="text/javascript">
-        var eurl = "{{ url('validateOrganizationElement',{orgId: orgId, elmtType: 'department', elmtId : 0 }) }}";
+        var eurl = "{{ url('validateOrganizationElement',{orgId: orgId, entity: 'department', elmtId : 0 }) }}";
         var vcurl = "{{ url('insertCheckedCSV',{'fileName': 'a','headerParameters':'b'}) }}";
         var posTitleMsg = "{% trans %}create_position.title_msg{% endtrans %}";
         var dptTitleMsg = "{% trans %}create_department.title_msg{% endtrans %}";

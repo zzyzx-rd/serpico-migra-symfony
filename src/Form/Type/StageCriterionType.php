@@ -41,7 +41,7 @@ class StageCriterionType extends AbstractType
                 'entry_options' => [
                     'currentUser' => $options["currentUser"],
                     'organization' => $options['organization'],
-                    'elmtType' => $options['elmtType'],
+                    'entity' => $options['entity'],
                 ],
                 'prototype' => true,
                 'prototype_name' => '__crtIndex__',
@@ -73,7 +73,7 @@ class StageCriterionType extends AbstractType
             */
         ]);
 
-        //if($options['elmtType'] == 'process' || $options['elmtType'] == 'iprocess' ){
+        //if($options['entity'] == 'process' || $options['entity'] == 'iprocess' ){
             $builder->add('name', TextType::class,
             [
                 'constraints' => [
@@ -90,7 +90,7 @@ class StageCriterionType extends AbstractType
                 'attr' => ['class' => 'weight-input']
             ]);
 
-            if($options['elmtType'] !== "activity"){
+            if($options['entity'] !== "activity"){
 
                 $builder->add('definiteDates', CheckboxType::class,
                 [
@@ -254,16 +254,16 @@ class StageCriterionType extends AbstractType
                 ]
             );
 
-            if($options['elmtType'] !== 'process'){
+            if($options['entity'] !== 'process'){
 
-                $builder->add('independantUniqueIntParticipations', CollectionType::class,
+                $builder->add('intParticipants', CollectionType::class,
                     [
                         'label' => false,
                         'entry_type' => ParticipantManageType::class,
                         'entry_options' => [
                             'organization' => $options['organization'],
                             'currentUser' => $options['currentUser'],
-                            'elmt' => $options['elmtType'],
+                            'entity' => $options['entity'],
                             'query' => 'internal',
                         ],
 
@@ -276,14 +276,14 @@ class StageCriterionType extends AbstractType
                     ]
                 )
 
-                ->add('independantUniqueExtParticipations', CollectionType::class,
+                ->add('extParticipants', CollectionType::class,
                     [
                         'label' => false,
                         'entry_type' => ParticipantManageType::class,
                         'entry_options' => [
                             'organization' => $options['organization'],
                             'currentUser' => $options['currentUser'],
-                            'elmt' => $options['elmtType'],
+                            'entity' => $options['entity'],
                             'query' => 'external',
                         ],
                         'prototype' => true,
@@ -294,14 +294,14 @@ class StageCriterionType extends AbstractType
                     ]
                 )
 
-                ->add('independantUniqueTeamParticipations', CollectionType::class,
+                ->add('independantTeamParticipants', CollectionType::class,
                     [
                         'label' => false,
                         'entry_type' => ParticipantManageType::class,
                         'entry_options' => [
                             'organization' => $options['organization'],
                             'currentUser' => $options['currentUser'],
-                            'elmt' => $options['elmtType'],
+                            'entity' => $options['entity'],
                             'query' => 'team',
                         ],
                         'prototype' => true,
@@ -331,13 +331,13 @@ class StageCriterionType extends AbstractType
     {
         $resolver
         ->setDefaults([
-            'elmtType' => 'activity',
+            'entity' => 'activity',
             'data_class' => function(Options $options) {
-                if($options['elmtType'] === 'template'){
+                if($options['entity'] === 'template'){
                     return TemplateStage::class;
-                } else if ($options['elmtType'] === 'iprocess') {
+                } else if ($options['entity'] === 'iprocess') {
                     return IProcessStage::class;
-                } else if ($options['elmtType'] === 'process') {
+                } else if ($options['entity'] === 'process') {
                     return ProcessStage::class;
                 } else {
                     return Stage::class;

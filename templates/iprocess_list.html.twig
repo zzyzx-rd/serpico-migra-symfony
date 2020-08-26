@@ -10,20 +10,48 @@
   {{ 'iprocesses.title'|trans }}
 {% endblock title %}
 
-{% set sortingType = global.request.get('sortingType') %}
+{% set actNameTruncVal = 13 %}
+
+
+
+{% set actStatuses = 
+  { 'o' : {
+        '-5' : 'cancelled',
+        '-4' : 'discarded', 
+        '-3' : 'requested',
+        '-2' : 'attributed',
+        '-1' : 'incomplete',
+        '0' : 'future',
+        '1' : 'current',
+        '2' : 'completed',
+        '3' : 'published',
+        },
+    'p' : {
+        '-5' : 'stopped',
+        '-4' : 'postponed', 
+        '-3' : 'suspended',
+        '-2' : 'reopened',
+        '-1' : 'unstarted',
+        '0' : 'upcoming',
+        '1' : 'ongoing',
+        '2' : 'completed',
+        '3' : 'finalized',
+    }
+  }
+  %}
 
 {% block css %}
   <link rel="stylesheet" href="{{ asset('css/activity_list_item.css') }}">
   <link rel="stylesheet" href="{{ asset('css/iprocess_list.css') }}">
   <script>
-      const ipurl = "{{ url('getAllProcessesFromInstitution',{orgId : 0}) }}";
-      const gcurl = "{{ url('getElementConfig', {elmtType:'activity', elmtId : 0}) }}";
-      const gsurl = "{{ url('getGradableStages', {actId : 0}) }}";
-      const aurl = "{{ url('createUserProcessActivity', { inpId: 0 }) }}";
-      const adurl = "{{ url('activityDelegate') }}";
-      const adeleteUrl = "{{ url('ajaxActivityDelete', {'actId' : 0}) }}";
-      const usurl = "{{ url('updateStageStatus', {stgId : 0}) }}";
-      const cpurl = "{{ url('createProcessRequest', {orgId : global.currentuser.organization.id}) }}";
+    var ipurl = "{{ url('getAllProcessesFromInstitution',{orgId : 0}) }}";
+    var gcurl = "{{ url('getElementConfig', {entity:'activity', elmtId : 0}) }}";
+    var gsurl = "{{ url('getGradableStages', {actId : 0}) }}";
+    var aurl = "{{ url('createUserProcessActivity', { inpId: 0 }) }}";
+    var adurl = "{{ url('activityDelegate') }}";
+    var adeleteUrl="{{ url('ajaxActivityDelete', {'actId' : 0}) }}";
+    var usurl= "{{ url('updateStageStatus', {stgId : 0}) }}";
+    var cpurl = "{{ url('createProcessRequest', {orgId : currentuser.organization.id}) }}";
   </script>
   <style>
       .elmts{
@@ -225,11 +253,11 @@
         flex-direction: column;
         align-items: flex-end;
       }
-      .change-view-type, .change-status-type{
+      .change-view-type, .change-status-type, .change-date-type{
         display: flex;
         flex-direction: column;
       }
-      .change-view-type>i, .change-status-type>i{
+      .change-view-type>i, .change-status-type>i, .change-date-type>i{
         line-height: 10px;
       }
 
@@ -242,12 +270,237 @@
         margin-right: .25em;
       }
 
-      ol.stages{
-        --button-size:1.5em;
+      ol.simult.stages{
+        --button-size:1em;
       }
+
+      ol.stages:not(.simult){
+        --button-size:1.3em;
+      }
+
       ol.stages::before{
         z-index: 0;
       }
+
+      ol.stages{
+        position: relative;
+      }
+
+      ol.stages.past-period{
+        z-index: 1;
+      }
+
+      .simult{
+        flex-direction: column;
+      }
+
+      .simult > li{
+        margin-top: 0.25rem;
+        margin-bottom: 0.25rem;
+      }
+
+      .process-list--item{
+        border-bottom: 1px dashed black;
+        padding: 0.5rem 0;
+      }
+
+      .process-detail{
+        justify-content: center;
+      }
+
+      .months-ref{
+        position: relative;
+      }
+
+      .months-ref .col{
+        text-align: center;
+      }
+
+      .past-period,.ongoing-period {
+        position: relative;
+      }
+
+      .stages.simult .s-day {
+        position: absolute;
+        left: -1rem;
+        top: -0.3rem;
+        font-size: 10px;
+      }
+
+      .stages.simult .e-day {
+        position: absolute;
+        right: -1rem;
+        top: -0.3rem;
+        font-size: 10px;
+      }
+      .stages:not(.simult) .s-day {
+        position: absolute;
+        left: 0%;
+        top: 7px;
+        font-size: 14px;
+      }
+
+      .stages:not(.simult) .e-day {
+        position: absolute;
+        right: 0%;
+        bottom: 7px;
+        font-size: 14px;
+      }
+
+      .stages:not(.simult) .single-date{
+        right: calc(var(--button-size) * -1/5);
+        top: calc(var(--button-size) * -1);
+      }
+
+      .stages.simult .single-date{
+        left: -2.5rem;
+        top: -0.4rem;
+      }
+
+      .stages:not(.simult) .m-days{
+        width: 50px;
+        right: -1.5rem;
+      }
+
+      .stages-holder{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 52px;
+        border-bottom: 1px dashed lightgray;
+      }
+
+      .fixed-action-btn ul{
+        bottom: calc(var(--button-size) * 0.7);
+        left: calc(var(--button-size) * -0.4);
+        min-width: 50px;
+      }
+
+      .fixed-action-btn ul > li > a{
+        background-color: #1976D2;
+      }
+
+      .fixed-action-btn ul > li > a:hover{
+        background-color: white;
+      }
+
+      .fixed-action-btn ul > li > a > i:hover{
+        color: #1976D2;
+      }
+
+
+
+      .tabs-t-view{
+        height: 48px;
+        justify-content: center;
+        text-align: center;
+      }
+
+      .tabs-t-view,.modified-fixed-btn{
+          --button-size:1.3em;
+          --strike-width: .2em;
+      }
+
+      .act-info{
+         --button-size: .7em;
+         --strike-width: .35em;
+      }
+
+      .tabs-t-view > li{
+        -webkit-box-flex: 1;
+        flex-grow: 1;
+        text-transform: uppercase;
+        font-size: 14px;
+        justify-content: center;
+      }
+
+      .tabs-t-view li.incomplete.showable .stage-item-button{
+        background-color: orange;
+      }
+
+      .tabs-t-view li.current.showable .stage-item-button{
+        background-color: #16AFB7;
+      }
+
+      .tabs-t-view li.completed.showable .stage-item-button{
+        background-color:#4CAF50;
+      }
+
+      .modified-fixed-btn{
+        display:inline-block;
+      }
+
+      .nb-stages{
+        font-size: 15px;
+      }
+
+      .timescale{
+        position: -webkit-sticky; /* Safari */
+        position: sticky;
+        top: 0;
+        background-color: white;
+        z-index: 2;
+      }
+
+      .act-info{
+        position: relative;
+      }
+
+      .act-info > .fixed-action-btn{
+        position: absolute;
+        right: calc(100% + 0.7rem);
+      }
+      
+      .modified-fixed-btn ul{
+        text-align: right;
+        margin-right: 2.5rem;
+        top: 50%;
+        -webkit-transform: translateY(-50%);
+        transform: translateY(-50%);
+        height: 3rem;
+        left: auto;
+      }
+
+      .modified-fixed-btn ul li{
+        margin: 0px 15px 0 0;
+        display: inline-block;
+      }
+
+      .multiple-stages{
+        background-color: white;
+        border: 1px solid black;
+        position: absolute;
+        top: -0.5rem;
+        left: calc(50% - 0.5rem);
+        padding: 2px;
+        line-height: 11px;
+        z-index: 1;
+        font-size: 15px;
+      }
+
+      .participants-t-holder, .criteria-t-holder{
+        flex-direction: column;
+        justify-content: flex-start;
+      }
+
+      .t-users-barred, .t-fb-barred{
+        left: 0.2rem;
+        top:0.1rem;
+        color: red;
+      }
+
+      .t-stage-info{
+        justify-content: space-between;
+      }
+
+      .t-stage-dates{
+        font-size: 13px;
+      }
+
+      .act-action-button{
+        border : calc(var(--button-size) / 2) solid 
+      }
+
 
   </style>
 {% endblock %}
@@ -450,7 +703,7 @@
                         <i class="material-icons">layers</i>
                         <span>${data.name}</span>
                       </a>
-                      ${data.canEdit ? '<a class="btn-flat tooltipped" href="{{ url("manageActivityElement",{elmtType:"iprocess", elmtId: "~" }) }}" data-position="top" data-tooltip="{% trans %}processes.modify_prior_launching_act{% endtrans %}"><i class="fa fa-cog"></i></a>' : ''}
+                      ${data.canEdit ? '<a class="btn-flat tooltipped" href="{{ url("manageActivityElement",{entity:"iprocess", elmtId: "~" }) }}" data-position="top" data-tooltip="{% trans %}processes.modify_prior_launching_act{% endtrans %}"><i class="fa fa-cog"></i></a>' : ''}
                     </div>`;
                   actIPInfoHmtl = actIPInfoHmtl.replace('~',eid);
                   const $actIPInfo = $(actIPInfoHmtl);
@@ -650,7 +903,7 @@
 
                     if(data.canEdit){
                       $btnElmt = $('<div class="button-field"></div>');
-                      editHtml = /*html*/`<a class="modal-close btn" href="{{ path('manageActivityElement', { elmtType: 'activity', elmtId: '~'}) }}">Modifier</a>`;
+                      editHtml = /*html*/`<a class="modal-close btn" href="{{ path('manageActivityElement', { entity: 'activity', elmtId: '~'}) }}">Modifier</a>`;
                       editHtml = editHtml.replace('~',data.id);
                       $btnElmt.append($(editHtml));
                       $('#activityInfo .action-buttons').append($btnElmt);
@@ -717,7 +970,7 @@
 {% block content %}
   <main>
 
-    {% if global.currentuser.role == 1 %}
+    {% if currentuser.role == 1 %}
       <div class="modal-footer action-buttons">
         <div class="button-field">
           {% if global.route == "myActivities" %}
@@ -729,22 +982,7 @@
       </div>
     {% endif %}
 
-    {% if displayedStatuses is empty %}
-      <div class="container">
-        <div class="center" style="margin-top: 20px;">
-            <i class="fa fa-clipboard fa-3x"></i>
-            {% if global.currentuser.organization.commname != "Public" %}
-                <h4>{% trans %}activities.no_activities_title{% endtrans %}</h4>
-                <p>{% if global.currentuser.role == 3 %}{% trans %}activities.no_activities_msg_collaborator{% endtrans %}{% else %}{% trans %}activities.no_activities_msg_activity_manager{% endtrans %}{% endif %}</p>
-            {% else %}
-                <h4>{% trans %}activities.no_registered_activities_title{% endtrans %}</h4>
-                <p>{% trans %}activities.no_registered_activities_msg{% endtrans %}</p>
-                <a href="{{ url('displayAllInstitutions') }}" class="btn-large waves-effect waves-light teal lighten-1" style="margin:20px 0px 0px 0px">{% trans %}institutions.add_process.btn_modal{% endtrans %}</a>
-            {% endif %}
-        </div>
-      </div>
-    {% endif %}
-    <div class="sorting-type flex-center" >
+    <div class="sorting-type flex-center">
       <ul class="flex-center view-settings">
         <li class="flex-center">
           <a class="btn-flat no-padding flex-center">
@@ -765,7 +1003,7 @@
           </a>
         </li>
 
-        {% if viewTypeCookie == "d" %}
+        {#{% if viewTypeCookie == "d" %}#}
           <li class="flex-center">
             <a class="btn-flat no-padding flex-center">
               <div class="sorting-type-value flex-center">
@@ -783,20 +1021,58 @@
               </ul>
             </a>
           </li>
-        {% endif %}
+          {% if viewTypeCookie == 't' %}
+          <li class="flex-center">
+            <a class="btn-flat no-padding flex-center">
+              <div class="sorting-type-value flex-center">
+                  <i class="material-icons" {% if dateTypeCookie != 's' %}style="display:none"{% endif %}>settings_ethernet</i>
+                  <span class="sm-left sm-right" {% if dateTypeCookie != 's' %}style="display:none"{% endif %}>{{ 'activities.self_date_type'|trans }}</span>
+                  <i class="material-icons" {% if dateTypeCookie == 's' %}style="display:none"{% endif %}>send</i>
+                  <span class="sm-left sm-right" {% if dateTypeCookie == 's' %}style="display:none"{% endif %}>{{ 'activities.output_date_type'|trans }}</span>
+              </div>
+              <ul class="change-date-type" data-type="{{dateTypeCookie}}">
+                <i class="fa fa-caret-up"></i>
+                <i class="fa fa-caret-down"></i>
+              </ul>
+            </a>
+          </li>
+          
+          
+          {% endif %}
+        {#{% endif %}#}
       </ul>
     </div>
-    <div id="activities-tabs-container">
-      <ul class="tabs tabs-fixed-width activity-status">
-        {% for s, status in displayedStatuses %}
-          {% set nbActivities = processesActivities[s]|length + orphanActivities[s]|length %}
-          {% set disabledClass = nbActivities == 0 ? ' disabled' : '' %}
-          {% set nbActivitiesInfo = nbActivities ? '(' ~ nbActivities ~ ')' : '' %}
-          <li class="tab status-{{ status }}{{disabledClass}}">
-            <a href="#{{ status }}">{{ ('activities.' ~ sortingTypeCookie ~ '_status.' ~ status)|trans }} {{ nbActivitiesInfo }}</a>
-          </li>
-        {% endfor %}
-      </ul>
+
+    <div id="activities-container">
+      {% if viewTypeCookie == 'd' %} 
+        <ul class="tabs tabs-fixed-width">
+          {% for s, status in displayedStatuses %}
+            
+            {% set nbActivities = processesActivities[s]|length + orphanActivities[s]|length %}
+            {% set disabledClass = nbActivities == 0 ? ' disabled' : '' %}
+            {% set nbActivitiesInfo = nbActivities ? '(' ~ nbActivities ~ ')' : '' %}
+            <li class="tab status-{{ status }}{{disabledClass}}">
+              <a href="#{{ status }}">{{ ('activities.' ~ sortingTypeCookie ~ '_status.' ~ status)|trans }} {{ nbActivitiesInfo }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <ul class="tabs-t-view flex-center">
+
+          {% for s, status in displayedStatuses %}
+            {% set outputStatusCookie = global.request.cookies.get('r_s_' ~ sortingTypeCookie ~ '_' ~ status) %}
+            
+            <li class="flex-center status-selector {{ sortingTypeCookie ~'-'~ status }} {% if outputStatusCookie is null %}showable{% endif %}" data-{{sortingTypeCookie}}-status="{{ status }}">
+              <div class="stage-item-button no-margin">
+                <i class="material-icons white-text tooltipped to-hide" data-position="top" data-tooltip="{{ 'activities.hide_group'|trans }}" style="display: none;color:inherit!important">clear</i>
+                <i class="material-icons white-text tooltipped to-show" data-position="top" data-tooltip="{{ 'activities.display_group'|trans }}" style="display: none;">check</i>
+              </div>
+              <span class="m-left">{{ ('activities.' ~ sortingTypeCookie ~ '_status.' ~ status)|trans }}</span>
+            </li>
+
+          {% endfor %}
+        </ul>
+      {% endif %}
 
       {% if viewTypeCookie == 'd' %}
 
@@ -835,46 +1111,76 @@
         {% endfor %}
 
       {% else %}
+        <div class="timescale">
+          <div class="row no-margin date">
+            <div class="col s4 dmin center no-padding"></div>
+            <div class="col s3 center no-padding"></div>
+            <div class="col s5 dmax center no-padding">
+            </div>
+          </div>
+          <div class="row no-margin">
+            <div class="arrow">
+              <div class="col s3"> </div>
+            </div>
+            <i class="arr right"></i>
+          </div>
+          <div class="row no-padding no-margin">
+            <div class="col s2"></div>
+            <div class="col s10 no-padding">
+              <div class="row no-padding no-margin">
+                <div class="col s9 no-padding">
+                  <div class="row no-padding no-margin months-ref">
+                      <div class="col s1">J</div>
+                      <div class="col s1">F</div>
+                      <div class="col s1">M</div>
+                      <div class="col s1">A</div>
+                      <div class="col s1">M</div>
+                      <div class="col s1">J</div>
+                      <div class="col s1">J</div>
+                      <div class="col s1">A</div>
+                      <div class="col s1">S</div>
+                      <div class="col s1">O</div>
+                      <div class="col s1">N</div>
+                      <div class="col s1">D</div>
+                      <div class="chevron">
+                        <i class="fa fa-location-arrow"></i>
+                      </div>
+                  </div>
+                </div>
+                <div class="col s3"></div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-        <div class="row date">
-          <div class="col s6 dmin center no-padding"></div>
-          <div class="col s6 dmax center no-padding"></div>
-        </div>
-        <div class="row">
-        <div class="arrow ">
-          <div class="col s3"> </div>
-          <div class="currentDate"></div>
-        </div>
-          <i class="arr right"></i>
-        </div>
+        {#}
         {% for s, status in displayedStatuses %}
           <div id="{{ status }}">
-            <ul class="process-list  process-list-t">
+            <ul class="process-list process-list-t no-margin">
               {% if orphanActivities is not empty %}
-          <div class="gray-line">
                 <li class="process-list--item hierarchized-item">
-                  <div class="row">
-                    <div class="col s3 center">
-                      <i class="material-icons">layers</i></br><span> {{ 'activities.orphans'|trans }}</span>
+                  <div class="row no-margin flex-center">
+                    <div class="col s2 center">
+                      <div class="flex-center process-detail">
+                        <i class="material-icons">layers</i>
+                        <span class="m-left">{{ 'activities.orphans'|trans }}</span>
+                      </div>
                     </div>
+                    <div class="col s10 no-padding">
+                      <div class="item-body">
+                        <ul class="activity-list">
+                          {% for activity in orphanActivities[s] %}
+                          {% if activity.getStartdate() <  date() %}
+                          {% endif %}
 
-                  <div class="col s9 no-padding">
-                  <div class="item-body">
-                    <ul class="activity-list">
-                      {% for activity in orphanActivities[s] %}
-                      {% if activity.getStartdate() <  date() %}
-                      {% endif %}
+                            {% include "components/activity2_list__item.html.twig" with { activity: activity } %}
 
-                        {% include "components/activity2_list__item.html.twig" with { activity: activity } %}
-
-                        {% endfor %}
-                    </ul>
-                  </div>
-                  </div>
-
+                            {% endfor %}
+                        </ul>
+                      </div>
+                    </div>
                   </div>
                 </li>
-          </div>
               {% endif %}
 
               {% for process_name, activities in processesActivities[s] %}
@@ -883,13 +1189,113 @@
             </ul>
           </div>
         {% endfor %}
+        #}
 
+        
+        <ul class="process-list process-list-t no-margin">
+          {% if orphanActivities is not empty %}
+            <li class="process-list--item hierarchized-item">
+              <div class="row no-margin flex-center">
+                <div class="col s2 center">
+                  <div class="flex-center process-detail">
+                    <i class="material-icons">layers</i>
+                    <span class="m-left">{{ 'activities.orphans'|trans }}</span>
+                  </div>
+                </div>
+                <div class="col s10 no-padding">
+                  <div class="item-body">
+                    <ul class="activity-list">
+                      {% for s, status in orphanActivities %}
+                        {% set actStatus = null %}
+                        {% set showable = false %}
+                        {% for activity in orphanActivities[s] %}
+                          {% if activity.status != actStatus %}
+                            {% set actStatus = sortingTypeCookie == 'o' ? activity.status : activity.progress %}
+                            {% set actStatusName = actStatuses[sortingTypeCookie][actStatus] %}
+                            {% set showable = global.request.cookies.get('r_s_' ~ sortingTypeCookie ~ '_' ~ actStatusName) is null %}
+                          {% endif %}
+                          {% include "components/activity2_list__item.html.twig" with { activity: activity, showable: showable, sortingType: sortingTypeCookie, actStatus: actStatusName } %}
+                        {% endfor %}
+                      {% endfor %}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </li>
+          {% endif %}
+
+          {% for process_name, processActivities in processesActivities %}
+            {% set actStatus = -10 %}
+            {% set showable = false %}
+            <li class="process-list--item hierarchized-item">
+              <div class="row no-margin flex-center">
+                <div class="col s2 center">
+                  <div class="flex-center process-detail">
+                    <i class="material-icons">layers</i>
+                    <span class="m-left">{{ process_name }}</span>
+                  </div>
+                </div>
+                <div class="col s10 no-padding">
+                  <div class="item-body">
+                    <ul class="activity-list">
+          
+                      {% for status, processStatusActivities in processActivities %}
+                        
+                        {% if status != actStatus %}
+                          {% set actStatus = status %}
+                          {% set actStatusName = actStatuses[sortingTypeCookie][status] %}
+                          {% set showable = app.request_stack.currentrequest.cookies.get('r_s_' ~ sortingTypeCookie ~ '_' ~ actStatusName) is null %}
+                          
+                        {% endif %}
+
+                        {% for activity in processStatusActivities %}
+
+                          {% include "components/activity2_list__item.html.twig" with { activity: activity, showable: showable, sortingType: sortingTypeCookie, dateType: dateTypeCookie, actStatus: actStatusName } %}
+                          
+                        {% endfor %}
+                      {% endfor %}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </li>
+          {% endfor %}
+
+        </ul>
+
+        
+
+
+              {#
+              {% for process_name, activities in processesActivities[s] %}
+                {% include "components/iprocess_list__item.html.twig" with { process_name: process_name, activities: activities } %}
+              {% endfor %}
+                
+        {% endfor %}
+
+        #}
       {% endif %}
     </div>
 
-    {% if global.currentuser.role != 3 %}
-      <div id="fixedButton" class="fixed-action-btn">
-          <a class="btn-floating blue darken-2 modal-trigger" href="#createActivity" onclick="onAddProcessClick('{{ global.currentuser.organization}}')" data-oid="{{global.currentuser.organization}}"><i class="material-icons">add</i></a>
+    {% if orphanActivities is empty and processesActivities is empty %}
+      <div class="container">
+        <div class="center" style="margin-top: 20px;">
+            <i class="fa fa-clipboard fa-3x"></i>
+            {% if currentuser.organization.commname != "Public" %}
+                <h4>{% trans %}activities.no_activities_title{% endtrans %}</h4>
+                <p>{% if currentuser.role == 3 %}{% trans %}activities.no_activities_msg_collaborator{% endtrans %}{% else %}{% trans %}activities.no_activities_msg_activity_manager{% endtrans %}{% endif %}</p>
+            {% else %}
+                <h4>{% trans %}activities.no_registered_activities_title{% endtrans %}</h4>
+                <p>{% trans %}activities.no_registered_activities_msg{% endtrans %}</p>
+                <a href="{{ url('displayAllInstitutions') }}" class="btn-large waves-effect waves-light teal lighten-1" style="margin:20px 0px 0px 0px">{% trans %}institutions.add_process.btn_modal{% endtrans %}</a>
+            {% endif %}
+        </div>
+      </div>
+    {% endif %}
+
+    {% if currentuser.role != 3 %}
+      <div id="fixedButton create-act-btn" class="fixed-action-btn">
+          <a class="btn-floating blue darken-2 modal-trigger" href="#createActivity" onclick="onAddProcessClick('{{ currentuser.organization.id }}')" data-oid="{{currentuser.organization.id}}"><i class="material-icons">add</i></a>
           {#}
           <ul>
               <li><a class="btn-floating orange lighten-2 tooltipped modal-trigger" data-position="left" data-delay="50" data-tooltip="{% trans %}tooltip.template.create_from_scratch{% endtrans %}" href="{{ path('activityInitialisation',{'elmt' : 'template'}) }}">
@@ -899,8 +1305,8 @@
                   </div>
                   </a>
               </li>
-              <li><a class="btn-floating tooltipped {% if global.currentuser.organization.templateActivities|length == 0 %}grey{% else %} cyan darken-2 modal-trigger" href="#selectTemplate{% endif %}" data-position="left" data-delay="50" data-tooltip="{% trans %}tooltip.activity.create_from_template{% endtrans %}"><i class="material-icons">view_headline</i></a></li>
-              <li><a class="btn-floating teal accent-4 tooltipped" data-position="left" data-delay="50" data-tooltip="{% trans %}tooltip.activity.create_from_scratch{% endtrans %}" href="#createActivity" onclick="onAddProcessClick('{{ global.currentuser.orgId }}')" data-oid="{{global.currentuser.orgId}}"><i class="material-icons">create</i></a></li>
+              <li><a class="btn-floating tooltipped {% if currentuser.organization.templateActivities|length == 0 %}grey{% else %} cyan darken-2 modal-trigger" href="#selectTemplate{% endif %}" data-position="left" data-delay="50" data-tooltip="{% trans %}tooltip.activity.create_from_template{% endtrans %}"><i class="material-icons">view_headline</i></a></li>
+              <li><a class="btn-floating teal accent-4 tooltipped" data-position="left" data-delay="50" data-tooltip="{% trans %}tooltip.activity.create_from_scratch{% endtrans %}" href="#createActivity" onclick="onAddProcessClick('{{ currentuser.orgId }}')" data-oid="{{currentuser.orgId}}"><i class="material-icons">create</i></a></li>
           </ul>
           #}
       </div>
@@ -919,10 +1325,10 @@
               </div>
           </div>
           <div>
-              {% if global.currentuser.role != 1 %}
-                <a class="modal-trigger" href="#requestNewProcess" onclick="onAddProcessClick('{{global.currentuser.organization.id}}')">
+              {% if currentuser.role != 1 %}
+                <a class="modal-trigger" href="#requestNewProcess" onclick="onAddProcessClick('{{currentuser.orgId}}')">
               {% else %}
-                <a href="{{url('manageProcesses',{orgId: global.currentuser.organization})}}">
+                <a href="{{url('manageProcesses',{orgId: currentuser.organization.id})}}">
               {% endif %}
                   <i class="fas fa-plus modal-close"></i>
                   {% trans %} activities.request_process{% endtrans %}

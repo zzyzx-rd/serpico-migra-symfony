@@ -35,7 +35,7 @@ class ActivityElementForm extends AbstractType
                     'label'        => false,
                     'organization' => $organization,
                     "currentUser" => $options["currentUser"],
-                    'elmtType'         => $options['elmtType'],
+                    'entity'         => $options['entity'],
                 ],
                 'prototype'     => true,
                 'prototype_name' => '__stgIndex__',
@@ -45,8 +45,8 @@ class ActivityElementForm extends AbstractType
 
                 'constraints'   => [
                     new SumWeightEqualToHundredPct,
-                    $options['elmtType'] === 'activity' ? new AtLeastOneStageHasMinConfig : '',
-                    $options['elmtType'] === 'activity' ? new AtLeastOneConfiguredStageHasAOwner : '',
+                    $options['entity'] === 'activity' ? new AtLeastOneStageHasMinConfig : '',
+                    $options['entity'] === 'activity' ? new AtLeastOneConfiguredStageHasAOwner : '',
                 ],
                 'error_bubbling' => false,
             ])
@@ -64,7 +64,7 @@ class ActivityElementForm extends AbstractType
                     'label' => false,
                 ]);
 
-        if ($options['elmtType'] === 'iprocess') {
+        if ($options['entity'] === 'iprocess') {
             $builder->add(
                 'approvable',
                 CheckboxType::class,
@@ -76,7 +76,7 @@ class ActivityElementForm extends AbstractType
             );
         }
 
-        if($options['elmtType'] === 'activity' && !$element->isFinalized()){
+        if($options['entity'] === 'activity' && !$element->isFinalized()){
 
             $builder->add(
                 'save',
@@ -95,7 +95,7 @@ class ActivityElementForm extends AbstractType
                 'update',
                 SubmitType::class,
                 [
-                    'label_format' => $options['elmtType'] !== 'activity' ? 'activity_elements.save' : ('activity_elements.finalize'),
+                    'label_format' => $options['entity'] !== 'activity' ? 'activity_elements.save' : ('activity_elements.finalize'),
 
                     'attr' => [
                         'class' => 'btn-large waves-effect waves-light blue darken-4 activity-element-update',
@@ -107,7 +107,7 @@ class ActivityElementForm extends AbstractType
                 'update',
                 SubmitType::class,
                 [
-                    'label_format' => $options['elmtType'] !== 'activity' ? 'activity_elements.save' : ('activity_elements.%name%'),
+                    'label_format' => $options['entity'] !== 'activity' ? 'activity_elements.save' : ('activity_elements.%name%'),
 
                     'attr' => [
                         'class' => 'btn-large waves-effect waves-light blue darken-4 activity-element-update',
@@ -122,9 +122,9 @@ class ActivityElementForm extends AbstractType
     {
         $resolver
             ->setDefaults([
-                'elmtType' => 'iprocess',
+                'entity' => 'iprocess',
                 'data_class'   => static function (Options $options) {
-                    switch ($options['elmtType']) {
+                    switch ($options['entity']) {
                         case 'iprocess':
                             return InstitutionProcess::class;
                             break;

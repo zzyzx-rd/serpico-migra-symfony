@@ -38,7 +38,7 @@
         var wgtSuccessMsg = "{% trans %}create_weight.success_msg{% endtrans %}";
         var wgtLabel = "{% trans %}create_user.weight_label{% endtrans %}";
         var nonWgtLabel = "{% trans %}create_user.non_weight_label{% endtrans %}";
-        var eurl = "{{ url('validateOrganizationElement',{orgId: orgId, elmtType: 'department', elmtId : 0 }) }}";
+        var eurl = "{{ url('validateOrganizationElement',{orgId: orgId, entity: 'department', elmtId : 0 }) }}";
         const usersUrl = "{{ url('manageUsers') }}";
     </script>
 

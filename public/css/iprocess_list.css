@@ -44,6 +44,11 @@ main {
   color:#26a69a;
 }
 
+.activity-content-stage{
+  border-left : 1px dashed black;
+  border-right : 1px dashed black;
+}
+
 
 
 .process-body {
@@ -95,10 +100,11 @@ main {
   font-weight: 300;
 }
 
+/*
 .item-body {
   overflow: hidden;
 
-}
+}*/
 
 
 .gray-line{
@@ -112,7 +118,7 @@ margin-bottom: 0;
   margin-top: 2%;
 }
 .arrow{
-  width: 90%;
+  width: 95%;
   text-align: center;
   margin: auto;
   height: 5px;
@@ -125,7 +131,7 @@ margin-bottom: 0;
   position: relative;
   top: -8px;
   padding: 3px;
-  margin-right: 5%;
+  margin-right: 2.5%;
 
 
 }
@@ -139,8 +145,10 @@ margin-bottom: 0;
 ol.stages > li:not(.completed-stages-element) {
   counter-increment: stageCounter;
 }
-ol.stages > li {
+
+ol.stages > .stage-element {
   width: 100%;
+  position: absolute;
 }
 
 .line{
@@ -150,11 +158,29 @@ ol.stages > li {
   margin-left: auto;
   margin-right: auto;
 }
-.currentDate{
 
+.activity-content-stage{
+  position: relative;
+}
+
+.curDate{
+  position: absolute;
+  border-left: 1px dashed black;
+  height: 100%;
+}
+
+.chevron{
+  position: absolute;
+  top:-46px;
+  /*
   background-color: black;
   width: 2px;
   height: 45px;
+  */
+}
+
+.chevron i{
+  transform: rotate(135deg);
 }
 
 
@@ -169,7 +195,4 @@ ol.stages > li {
 }
 ol.stages > li:not(.completed-stages-element) {
   counter-increment: stageCounter;
-}
-ol.stages > li {
-  width: 100%;
 }

@@ -28,14 +28,14 @@ class SecurityController extends MasterController
     }
 
     //Logs current user
-//    public function loginAction(Request $request, Application $app)
+//    public function loginAction(Request $request)
 //    {
 //
 //        if ($currentUser) {
 //            return $this->redirectToRoute('home');
 //        }
 //
-//        $formFactory = $app['form.factory'];
+//        
 //        $csrf_token = $app['csrf.token_manager']->getToken('token_id');
 //        $contact = new Contact;
 //        $contactForm = $formFactory->create(

@@ -128,7 +128,6 @@ class CriterionName extends DbObject
     public function setName(string $cna_name): self
     {
         $this->name = $cna_name;
-
         return $this;
     }
 
@@ -146,7 +145,6 @@ class CriterionName extends DbObject
     public function setInserted(DateTimeInterface $inserted): self
     {
         $this->inserted = $inserted;
-
         return $this;
     }
 

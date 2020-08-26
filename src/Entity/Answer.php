@@ -52,7 +52,7 @@ class Answer extends DbObject
      * @ManyToOne(targetEntity="Participation", inversedBy="answers")
      * @JoinColumn(name="activity_user_par_id", referencedColumnName="par_id", nullable=true)
      */
-    protected $participant;
+    protected $participation;
 
     /**
      * Answer constructor.
@@ -62,7 +62,7 @@ class Answer extends DbObject
      * @param $field
      * @param Survey $survey
      * @param $asw_inserted
-     * @param Participation $participant
+     * @param Participation $participation
      */
     public function __construct(
         $id = null,
@@ -71,13 +71,13 @@ class Answer extends DbObject
         $field = null,
         Survey $survey = null,
         $asw_inserted = null,
-        Participation $participant = null)
+        Participation $participation = null)
     {
         parent::__construct($id, $createdBy, new DateTime());
         $this->desc = $desc;
         $this->field = $field;
         $this->survey = $survey;
-        $this->participant = $participant;
+        $this->participation = $participation;
     }
 
     public function setDesc(string $desc): self
@@ -130,18 +130,18 @@ class Answer extends DbObject
     /**
      * @return mixed
      */
-    public function getParticipant()
+    public function getParticipation()
     {
-        return $this->participant;
+        return $this->participation;
     }
 
     /**
-     * @param mixed $participant
-     * @return Answer
+     * @param mixed $participation
+     * @return self
      */
-    public function setParticipant(Participation $participant): Answer
+    public function setParticipant(Participation $participation): self
     {
-        $this->participant = $participant;
+        $this->participation = $participation;
         return $this;
     }
 

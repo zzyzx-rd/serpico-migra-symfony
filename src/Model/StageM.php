@@ -14,7 +14,7 @@ class StageM extends ModelEntity
 {
     public function getSelfParticipations(Stage $stage): ArrayCollection
     {
-        return $stage->participants->filter(function(Participation $p){
+        return $stage->participations->filter(function(Participation $p){
             return $p->getUser() == $this->currentUser;
         });
     }
@@ -23,30 +23,30 @@ class StageM extends ModelEntity
      * @param Stage $stage
      * @return ArrayCollection|Participation[]
      */
-    public function getUniqueParticipations(Stage $stage)
+    public function getParticipants(Stage $stage)
     {
 
         // Depends on whether current user is part of a team
-        $eligibleParticipants = null;
-        $uniqueParticipants = new ArrayCollection;
+        $eligibleParticipations = null;
+        $participants = new ArrayCollection;
         $teams = [];
 
-        $eligibleParticipants = count($stage->criteria) === 0 ? $stage->participants : $stage->criteria->first()->getParticipants();
+        $eligibleParticipations = count($stage->criteria) === 0 ? $stage->participations : $stage->criteria->first()->getParticipations();
 
         $myParticipations = $this->getSelfParticipations($stage);
         $myTeam = $myParticipations->count() === 0 ? null : $myParticipations->first()->getTeam();
 
-        foreach ($eligibleParticipants as $eligibleParticipant) {
-            $currentTeam = $eligibleParticipant->getTeam();
+        foreach ($eligibleParticipations as $eligibleParticipation) {
+            $currentTeam = $eligibleParticipation->getTeam();
             if ($currentTeam === null || $currentTeam == $myTeam) {
-                $uniqueParticipants->add($eligibleParticipant);
+                $participants->add($eligibleParticipation);
             } else if (!in_array($currentTeam, $teams, true)) {
-                $uniqueParticipants->add($eligibleParticipant);
+                $participants->add($eligibleParticipation);
                 $teams[] = $currentTeam;
             }
         }
 
-        return $uniqueParticipants;
+        return $participants;
     }
 
     public function isModifiable(Stage $stage): bool
@@ -67,11 +67,11 @@ class StageM extends ModelEntity
             return true;
         }
 
-        if ($stage->getMasterUser() == $connectedUser && ($stage->getUniqueGraderParticipations() === null || !$stage->getUniqueGraderParticipations()->exists(static function(int $i, Participation $p){return $p->isLeader();}))) {
+        if ($stage->getMasterUser() == $connectedUser && ($stage->getGraderParticipants() === null || !$stage->getGraderParticipants()->exists(static function(int $i, Participation $p){return $p->isLeader();}))) {
             return true;
         }
 
-        return $stage->getUniqueGraderParticipations()->exists(
+        return $stage->getGraderParticipants()->exists(
             static function (int $i, Participation $p) use ($connectedUser) { return $p->getUser() === $connectedUser && $p->isLeader(); }
         );
     }
@@ -80,23 +80,23 @@ class StageM extends ModelEntity
      * @param Stage $stage
      * @return ArrayCollection|Participation[]
      */
-    public function getUniqueGraderParticipations(Stage $stage)
+    public function getGraderParticipants(Stage $stage)
     {
-        return $this->getUniqueParticipations($stage)->matching(Criteria::create()->where(Criteria::expr()->neq("type", -1)));
+        return $this->getParticipants($stage)->matching(Criteria::create()->where(Criteria::expr()->neq("type", -1)));
     }
 
     /**
      * @param Stage $stage
      * @return ArrayCollection|Participation[]
      */
-    public function getUniqueGradableParticipations(Stage $stage)
+    public function getGradableParticipants(Stage $stage)
     {
-        return $this->getUniqueParticipations($stage)->matching(Criteria::create()->where(Criteria::expr()->neq("type", 0)));
+        return $this->getParticipants($stage)->matching(Criteria::create()->where(Criteria::expr()->neq("type", 0)));
     }
 
     public function hasMinimumParticipationConfig(Stage $stage): bool
     {
-        return $this->getUniqueGraderParticipations($stage)->count() > 0 && $this->getUniqueGradableParticipations($stage)->count() > 0;
+        return $this->getGraderParticipants($stage)->count() > 0 && $this->getGradableParticipants($stage)->count() > 0;
     }
 
 }
