@@ -127,7 +127,7 @@ class Participation extends DbObject
     protected $criterion;
     /**
      * @ManyToOne(targetEntity="Survey", inversedBy="participations")
-     * @JoinColumn(name="survey_sur_id", referencedColumnName="sur_id",nullable=true)
+     * @JoinColumn(name="survey_sur_id", referencedColumnName="sur_id", nullable=true)
      */
     protected $survey;
     /**
@@ -457,7 +457,7 @@ class Participation extends DbObject
     }
 
     /**
-     * @return Answer[]|ArrayCollection
+     * @return ArrayCollection|Answer[]
      */
     public function getAnswers()
     {
@@ -493,7 +493,7 @@ class Participation extends DbObject
     public function addAnswer(Answer $answer): Participation
     {
         $this->answers->add($answer);
-        $answer->setParticipant($this);
+        $answer->setParticipation($this);
         return $this;
     }
 
@@ -506,7 +506,7 @@ class Participation extends DbObject
     {
 
         $this->grades->add($grade);
-        $grade->setParticipant($this);
+        $grade->setParticipation($this);
         return $this;
     }
 
@@ -552,13 +552,24 @@ class Participation extends DbObject
     public function addReceivedGrade(Grade $grade): Participation
     {
         $this->grades->add($grade);
-        $grade->setParticipant($this);
+        $grade->setParticipation($this);
         return $this;
     }
 
     public function removeReceivedGrade(Grade $grade): Participation
     {
         $this->grades->removeElement($grade);
+        return $this;
+    }
+
+    public function getSurvey(): ?Survey
+    {
+        return $this->survey;
+    }
+
+    public function setSurvey(?Survey $survey): self
+    {
+        $this->survey = $survey;
         return $this;
     }
 }

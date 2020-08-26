@@ -94,9 +94,9 @@ class ExternalUser extends DbObject
     public $participations;
 
     /**
-     * @ORM\OneToMany(targetEntity=TeamUser::class, mappedBy="externalUser")
+     * @ORM\OneToMany(targetEntity=Member::class, mappedBy="externalUser")
      */
-    public $teamUsers;
+    public $members;
 
     /**
      * ExternalUser constructor.
@@ -114,7 +114,7 @@ class ExternalUser extends DbObject
      * @param User $user
      * @param Client $client
      * @param Participation $participation
-     * @param TeamUser $teamUsers
+     * @param TeamUser $members
      */
     public function __construct(
       ?int $id = 0,
@@ -144,7 +144,7 @@ class ExternalUser extends DbObject
         $this->user = $user;
         $this->client = $client;
         $this->participations = new ArrayCollection;
-        $this->teamUsers = new ArrayCollection;
+        $this->members = new ArrayCollection;
     }
 
 
@@ -305,30 +305,30 @@ class ExternalUser extends DbObject
     }
 
     /**
-     * @return ArrayCollection|TeamUser[]
+     * @return ArrayCollection|Member[]
      */
-    public function getTeamUsers()
+    public function getMembers()
     {
-        return $this->teamUsers;
+        return $this->members;
     }
 
-    public function addTeamUser(TeamUser $teamUser): self
+    public function addTeamUser(TeamUser $member): self
     {
-        if (!$this->teamUsers->contains($teamUser)) {
-            $this->teamUsers[] = $teamUser;
-            $teamUser->seternalUserExtId($this);
+        if (!$this->members->contains($member)) {
+            $this->members[] = $member;
+            $member->seternalUserExtId($this);
         }
 
         return $this;
     }
 
-    public function removeTeamUser(TeamUser $teamUser): self
+    public function removeTeamUser(TeamUser $member): self
     {
-        if ($this->teamUsers->contains($teamUser)) {
-            $this->teamUsers->removeElement($teamUser);
+        if ($this->members->contains($member)) {
+            $this->members->removeElement($member);
             // set the owning side to null (unless already changed)
-            if ($teamUser->geternalUserExtId() === $this) {
-                $teamUser->seternalUserExtId(null);
+            if ($member->geternalUserExtId() === $this) {
+                $member->seternalUserExtId(null);
             }
         }
 

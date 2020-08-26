@@ -1633,12 +1633,12 @@ class SettingsController extends MasterController
             $clonedFirm->addTeam($clonedTeam);
             $clonedTeams[] = $clonedTeam;
             $originalTeams[] = $team;
-            foreach($team->getTeamUsers() as $teamUser){
-                $clonedTeamUser = clone $teamUser;
-                $clonedTeamUser->setUsrId($clonedUsers[array_search($repoU->findOneById($teamUser->getUsrId()),$originalUsers)]->getId());
+            foreach($team->getMembers() as $member){
+                $clonedTeamUser = clone $member;
+                $clonedTeamUser->setUsrId($clonedUsers[array_search($repoU->findOneById($member->getUsrId()),$originalUsers)]->getId());
                 $clonedTeam->addTeamUser($clonedTeamUser);
                 $clonedTeamUsers[] = $clonedTeamUser;
-                $originalTeamUsers[] = $teamUser;
+                $originalTeamUsers[] = $member;
             }
         }
 

@@ -205,9 +205,9 @@ class User extends DbObject implements  UserInterface, \Serializable
     public $stagesWhereMaster;
 
     /**
-     * @ORM\OneToMany(targetEntity=TeamUser::class, mappedBy="user")
+     * @ORM\OneToMany(targetEntity=Member::class, mappedBy="user")
      */
-    public $teamUsers;
+    public $members;
 
     /**
      * @ORM\ManyToOne(targetEntity=Weight::class, inversedBy="users")
@@ -294,7 +294,7 @@ class User extends DbObject implements  UserInterface, \Serializable
      * @param $Reccuring
      * @param $results
      * @param $stagesWhereMaster
-     * @param $teamUsers
+     * @param $members
      * @param $weight
      * @param $position
      * @param $department
@@ -337,7 +337,7 @@ class User extends DbObject implements  UserInterface, \Serializable
         $Reccuring = null,
         $results = null,
         $stagesWhereMaster = null,
-        $teamUsers = null,
+        $members = null,
         $weight = null,
         $title = null)
     {
@@ -371,7 +371,7 @@ class User extends DbObject implements  UserInterface, \Serializable
         $this->Reccuring = $Reccuring;
         $this->results = new ArrayCollection();
         $this->stagesWhereMaster = $stagesWhereMaster;
-        $this->teamUsers = $teamUsers;
+        $this->members = $members;
         $this->weight = $weight;
         $this->position = $position;
         $this->department = $department;
@@ -837,30 +837,30 @@ class User extends DbObject implements  UserInterface, \Serializable
     }
 
     /**
-     * @return ArrayCollection|TeamUser[]
+     * @return ArrayCollection|Member[]
      */
-    public function getTeamUsers()
+    public function getMembers()
     {
-        return $this->teamUsers;
+        return $this->members;
     }
 
-    public function addTeamUser(TeamUser $teamUser): self
+    public function addMember(Member $member): self
     {
-        if (!$this->teamUsers->contains($teamUser)) {
-            $this->teamUsers[] = $teamUser;
-            $teamUser->setUser($this);
+        if (!$this->members->contains($member)) {
+            $this->members[] = $member;
+            $member->setUser($this);
         }
 
         return $this;
     }
 
-    public function removeTeamUser(TeamUser $teamUser): self
+    public function removeMember(Member $member): self
     {
-        if ($this->teamUsers->contains($teamUser)) {
-            $this->teamUsers->removeElement($teamUser);
+        if ($this->members->contains($member)) {
+            $this->members->removeElement($member);
             // set the owning side to null (unless already changed)
-            if ($teamUser->getUser() === $this) {
-                $teamUser->setUser(null);
+            if ($member->getUser() === $this) {
+                $member->setUser(null);
             }
         }
 

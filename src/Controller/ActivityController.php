@@ -40,7 +40,7 @@ use App\Entity\Result;
 use App\Entity\Stage;
 use App\Entity\Survey;
 use App\Entity\Team;
-use App\Entity\TeamUser;
+use App\Entity\Member;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use Symfony\Component\Form\FormError;
@@ -1018,11 +1018,11 @@ class ActivityController extends MasterController
                     $currentTeam['nbRemaining'] = 0;
                     $k = 0;
                     $firstnames = '';
-                    $teamUsers = $team->getActiveTeamUsers();
-                    $nbTeamUsers = count($teamUsers);
-                    foreach ($teamUsers as $teamUser) {
+                    $members = $team->getActiveTeamUsers();
+                    $nbTeamUsers = count($members);
+                    foreach ($members as $member) {
                         if ($k <= $nbTeamUsers - 1 && $k < 3) {
-                            $firstnames = ($k == 0) ? $repoU->find($teamUser->getUsrId())->getFirstname() : $firstnames . ', ' . $repoU->find($teamUser->getUsrId())->getFirstname();
+                            $firstnames = ($k == 0) ? $repoU->find($member->getUsrId())->getFirstname() : $firstnames . ', ' . $repoU->find($member->getUsrId())->getFirstname();
                         } elseif ($k == 3 and $nbTeamUsers >= 4) {
                             $currentTeam['nbRemaining'] = $nbTeamUsers - 3;
                             break;
@@ -1408,7 +1408,7 @@ class ActivityController extends MasterController
             } else {
 
                 $doublonParticipant = $stage->getParticipants()->filter(function($p) use ($pElement){
-                        return $pElement->getTeamUsers()->exists(function(int $i, TeamUser $tu) use ($p){
+                        return $pElement->getMembers()->exists(function(int $i, TeamUser $tu) use ($p){
                             return $tu->getUser() == $p->getUsrId();
                         });
                     })->first();
@@ -1722,7 +1722,7 @@ class ActivityController extends MasterController
         $em = $this->em;
         $repoU = $em->getRepository(User::class);
         $repoT = $em->getRepository(Team::class);
-        $repoTU = $em->getRepository(TeamUser::class);
+        $repoTU = $em->getRepository(Member::class);
         $repoP = $em->getRepository(Participation::class);
 
         /** @var Team */
@@ -1738,18 +1738,18 @@ class ActivityController extends MasterController
         }
 
         /** @var TeamUser|null */
-        $teamUser = null;
+        $member = null;
 
         if($tusId != 0){
-            $teamUser = $repoTU->find($tusId);
+            $member = $repoTU->find($tusId);
         } else {
-            $teamUser = $repoTU->findOneBy(['usrId' => $usrId, 'team' => $team]) ?: new TeamUser;
+            $member = $repoTU->findOneBy(['usrId' => $usrId, 'team' => $team]) ?: new TeamUser;
         }
 
         /** @var User */
         $addedUser = $repoU->find($usrId);
 
-        if($tusId == 0 || $teamUser->isDeleted()){
+        if($tusId == 0 || $member->isDeleted()){
 
             // Sending a welcome to the new team joiner
             $settings = [];
@@ -1828,12 +1828,12 @@ class ActivityController extends MasterController
             }
         }
 
-        $teamUser->setLeader($leader)
+        $member->setLeader($leader)
         ->setUsrId($usrId)
         ->setCreatedBy($currentUser->getId());
 
-        if($teamUser->isDeleted()){
-            $teamUser->toggleIsDeleted();
+        if($member->isDeleted()){
+            $member->toggleIsDeleted();
         }
 
         if($addedUser->getOrgId() != $currentUser->getOrgId()){
@@ -1842,16 +1842,16 @@ class ActivityController extends MasterController
                 ->getExternalUsers()->filter(function(ExternalUser $e) use ($addedUser){
                     return $e->getUser() == $addedUser;
                 })->first();
-            $teamUser->setExtUsrId($externalUser->getId());
+            $member->setExtUsrId($externalUser->getId());
         }
 
-        $team->addTeamUser($teamUser);
+        $team->addTeamUser($member);
         $em->persist($team);
         $em->flush();
 
         return new JsonResponse([
             'tid' => $team->getId(),
-            'eid' => $teamUser->getId(),
+            'eid' => $member->getId(),
             'user' => [
                 'picture' => $addedUser->getPicture() ?? 'no-picture.png'
             ],
@@ -1943,12 +1943,12 @@ class ActivityController extends MasterController
         $em = $this->em;
         $repoO = $em->getRepository(Organization::class);
         $repoU = $em->getRepository(User::class);
-        $repoTU = $em->getRepository(TeamUser::class);
+        $repoTU = $em->getRepository(Member::class);
         /** @var TeamUser */
-        $teamUser = $repoTU->find($tusId);
-        $teamUserUsrId = $teamUser->getUser()->getId();
+        $member = $repoTU->find($tusId);
+        $memberUsrId = $member->getUser()->getId();
         /** @var Team */
-        $team = $teamUser->getTeam();
+        $team = $member->getTeam();
         $teamOrganization = $team->getOrganization();
         $currentUser = $this->user;
 
@@ -1966,14 +1966,14 @@ class ActivityController extends MasterController
             return $this->render('errors/403.html.twig');
         } else {
 
-            $teamUser
+            $member
                 ->setDeleted(new DateTime)
                 ->setIsDeleted(true);
-            $em->persist($teamUser);
+            $em->persist($member);
             $em->flush();
 
             $settings['team'] = $team;
-            $removedUser = $repoU->find($teamUserUsrId);
+            $removedUser = $repoU->find($memberUsrId);
             self::sendMail($app, [$removedUser], 'teamUserRemoval', $settings);
 
             return new JsonResponse(['message' => 'Success!'], 200);
@@ -2357,9 +2357,9 @@ class ActivityController extends MasterController
 
                             if ($participantTeamUser->getUser() == $currentUser) {
 
-                                foreach ($selectedTeam->getActiveTeamUsers() as $teamUser) {
+                                foreach ($selectedTeam->getActiveTeamUsers() as $member) {
                                     $existingParticipantUsersId['teaId'][] = $selectedTeam->getId();
-                                    $existingParticipantUsersId['usrId'][] = $teamUser->getUsrId();
+                                    $existingParticipantUsersId['usrId'][] = $member->getUsrId();
                                     $existingParticipantUsersId['type'][] = $existingTeamParticipant->getType();
                                 }
                                 $userBelongsToTeam = true;
@@ -2585,9 +2585,9 @@ class ActivityController extends MasterController
 
                         if ($participantTeamUser->getUser() == $currentUser) {
 
-                            foreach ($selectedTeam->getActiveTeamUsers() as $teamUser) {
+                            foreach ($selectedTeam->getActiveTeamUsers() as $member) {
                                 $existingParticipantUsersId['teaId'][] = $selectedTeam->getId();
-                                $existingParticipantUsersId['usrId'][] = $teamUser->getUsrId();
+                                $existingParticipantUsersId['usrId'][] = $member->getUsrId();
                                 $existingParticipantUsersId['type'][] = $existingTeamParticipant->getType();
                             }
                             $userBelongsToTeam = true;

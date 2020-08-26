@@ -2,30 +2,30 @@
 
 namespace App\Repository;
 
-use App\Entity\TeamUser;
+use App\Entity\Member;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @method TeamUser|null find($id, $lockMode = null, $lockVersion = null)
- * @method TeamUser|null findOneBy(array $criteria, array $orderBy = null)
- * @method TeamUser[]    findAll()
- * @method TeamUser[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Member|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Member|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Member[]    findAll()
+ * @method Member[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class TeamUserRepository extends ServiceEntityRepository
+class MemberRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, TeamUser::class);
+        parent::__construct($registry, Member::class);
     }
     public function findByUser(User $user): ArrayCollection
     {
-        return new ArrayCollection($this->_em->getRepository(TeamUser::class)->findBy(["user" =>$user]));
+        return new ArrayCollection($this->_em->getRepository(Member::class)->findBy(["user" =>$user]));
     }
     // /**
-    //  * @return TeamUser[] Returns an array of TeamUser objects
+    //  * @return Member[] Returns an array of Member objects
     //  */
     /*
     public function findByExampleField($value)
@@ -42,7 +42,7 @@ class TeamUserRepository extends ServiceEntityRepository
     */
 
     /*
-    public function findOneBySomeField($value): ?TeamUser
+    public function findOneBySomeField($value): ?Member
     {
         return $this->createQueryBuilder('t')
             ->andWhere('t.exampleField = :val')

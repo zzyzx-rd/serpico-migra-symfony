@@ -2,7 +2,7 @@
 //
 //namespace App\Repository;
 //
-//use App\Entity\TeamUser;
+//use App\Entity\Member;
 //use App\Entity\User;
 //use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 //use Doctrine\Common\Collections\ArrayCollection;
@@ -11,20 +11,20 @@
 ///**
 // * @method TeamUser|null find($id, $lockMode = null, $lockVersion = null)
 // * @method TeamUser|null findOneBy(array $criteria, array $orderBy = null)
-// * @method TeamUser[]    findAll()
-// * @method TeamUser[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+// * @method Member[]    findAll()
+// * @method Member[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
 // */
 //class TeamUserRepository extends ServiceEntityRepository
 //{
 //    public function __construct(ManagerRegistry $registry)
 //    {
-//        parent::__construct($registry, TeamUser::class);
+//        parent::__construct($registry, Member::class);
 //    }
 //    public function findByUser(User $user){
-//        return new ArrayCollection($this->_em->getRepository(TeamUser::class)->findBy(["user_usr" =>$user]));
+//        return new ArrayCollection($this->_em->getRepository(Member::class)->findBy(["user_usr" =>$user]));
 //    }
 //    // /**
-//    //  * @return TeamUser[] Returns an array of TeamUser objects
+//    //  * @return Member[] Returns an array of TeamUser objects
 //    //  */
 //    /*
 //    public function findByExampleField($value)

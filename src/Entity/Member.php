@@ -3,7 +3,7 @@
 namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
-use App\Repository\TeamUserRepository;
+use App\Repository\MemberRepository;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
@@ -12,57 +12,57 @@ use Doctrine\ORM\Mapping\ManyToOne;
 
 /**
  * @ApiResource()
- * @ORM\Entity(repositoryClass=TeamUserRepository::class)
+ * @ORM\Entity(repositoryClass=MemberRepository::class)
  */
-class TeamUser extends DbObject
+class Member extends DbObject
 {
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(name="tus_id", type="integer", length=10, nullable=true)
+     * @ORM\Column(name="mem_id", type="integer", length=10, nullable=true)
      * @var int
      */
     public ?int $id;
 
     /**
-     * @ORM\Column(name="tus_leader", type="boolean", nullable=true)
+     * @ORM\Column(name="mem_leader", type="boolean", nullable=true)
      */
     public $leader;
 
     /**
-     * @ORM\Column(name="tus_created_by", type="integer", nullable=true)
+     * @ORM\Column(name="mem_created_by", type="integer", nullable=true)
      */
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="tus_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="mem_inserted", type="datetime", nullable=true)
      */
     public DateTime $inserted;
 
     /**
-     * @ORM\Column(name="tus_deleted", type="datetime", nullable=true)
+     * @ORM\Column(name="mem_deleted", type="datetime", nullable=true)
      */
     public $deleted;
 
     /**
-     * @ORM\Column(name="tus_is_deleted", type="boolean", nullable=true)
+     * @ORM\Column(name="mem_is_deleted", type="boolean", nullable=true)
      */
     public $isDeleted;
 
     /**
-     *@ManyToOne(targetEntity="Team", inversedBy="teamUsers")
+     *@ManyToOne(targetEntity="Team", inversedBy="members")
      *@JoinColumn(name="team_tea_id", referencedColumnName="tea_id", nullable=false)
      */
     protected $team;
 
     /**
-     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="teamUsers")
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="members")
      * @JoinColumn(name="user_usr_id", referencedColumnName="usr_id")
      */
     public $user;
 
     /**
-     * @ORM\ManyToOne(targetEntity=ExternalUser::class, inversedBy="teamUsers")
+     * @ORM\ManyToOne(targetEntity=ExternalUser::class, inversedBy="members")
      * @ORM\JoinColumn(name="external_user_ext_usr_id", referencedColumnName="ext_id", nullable=false)
      */
     public $externalUser;
@@ -70,63 +70,60 @@ class TeamUser extends DbObject
     /**
      * TeamUser constructor.
      * @param ?int$id
-     * @param $tus_leader
-     * @param $tus_createdBy
-     * @param $tus_inserted
-     * @param $tus_deleted
-     * @param $tus_is_deleted
+     * @param $leader
+     * @param $createdBy
+     * @param $inserted
+     * @param $deleted
+     * @param $isDeleted
      * @param $team
-     * @param $user_usr
+     * @param $user
      * @param $externalUser
      */
     public function __construct(
       ?int $id = 0,
-        $user_usr = null,
+        $user = null,
         $externalUser = null,
-        $tus_createdBy = null,
-        $tus_leader = false,
-        $tus_inserted = null,
-        $tus_deleted = null,
-        $tus_is_deleted = false,
+        $createdBy = null,
+        $leader = false,
+        $inserted = null,
+        $deleted = null,
+        $isDeleted = false,
         $team = null)
     {
-        parent::__construct($id,$tus_createdBy , new DateTime());
-        $this->leader = $tus_leader;
-        $this->deleted = $tus_deleted;
-        $this->isDeleted = $tus_is_deleted;
+        parent::__construct($id,$createdBy , new DateTime());
+        $this->leader = $leader;
+        $this->deleted = $deleted;
+        $this->isDeleted = $isDeleted;
         $this->team = $team;
-        $this->user = $user_usr;
+        $this->user = $user;
         $this->externalUser = $externalUser;
     }
 
-    public function getLeader(): ?bool
+    public function isLeader(): ?bool
     {
         return $this->leader;
     }
 
-    public function setLeader(bool $tus_leader): self
+    public function setLeader(bool $leader): self
     {
-        $this->leader = $tus_leader;
-
+        $this->leader = $leader;
         return $this;
     }
 
-    public function setInserted(DateTimeInterface $tus_inserted): self
+    public function setInserted(DateTimeInterface $inserted): self
     {
-        $this->inserted = $tus_inserted;
-
+        $this->inserted = $inserted;
         return $this;
     }
 
-    public function getDeleted(): ?DateTimeInterface
+    public function isDeleted(): ?DateTimeInterface
     {
         return $this->deleted;
     }
 
-    public function setDeleted(?DateTimeInterface $tus_deleted): self
+    public function setDeleted(?DateTimeInterface $deleted): self
     {
-        $this->deleted = $tus_deleted;
-
+        $this->deleted = $deleted;
         return $this;
     }
 
@@ -135,10 +132,9 @@ class TeamUser extends DbObject
         return $this->isDeleted;
     }
 
-    public function setIsDeleted(bool $tus_is_deleted): self
+    public function setIsDeleted(bool $is_deleted): self
     {
-        $this->isDeleted = $tus_is_deleted;
-
+        $this->isDeleted = $is_deleted;
         return $this;
     }
 
@@ -166,7 +162,6 @@ class TeamUser extends DbObject
     public function setUser(?User $user): self
     {
         $this->user = $user;
-
         return $this;
     }
 
@@ -180,7 +175,7 @@ class TeamUser extends DbObject
         $this->external_User = $externalUser;
         return $this;
     }
-    public function toggleIsDeleted(): TeamUser
+    public function toggleIsDeleted(): self
     {
         $this->isDeleted = !$this->isDeleted;
         return $this;

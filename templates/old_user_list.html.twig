@@ -659,7 +659,7 @@
                                   <li style="margin-left: 10px;">
                                     <div class="user-title">{{ team.name }}</div>
                                     <ul class="user-position flex-center">
-                                      {% for teamUser in team.teamUsers %}
+                                      {% for teamUser in team.members %}
 
                                         {% if teamUser.isDeleted == 0 %}
 

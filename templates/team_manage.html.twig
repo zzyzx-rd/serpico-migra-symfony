@@ -4,7 +4,7 @@
 {% set hasPastTeamUsers = form.vars.data.pastTeamIntUsers|length > 0 or form.vars.data.pastTeamExtUsers|length > 0 %}
 
 {% block title %}
-    {% if teamUsersId is defined %}{% trans %}team_manage.page_title_modify{% endtrans %}{% else %}{% trans %}team_manage.page_title_create{% endtrans %}{% endif %}
+    {% if membersId is defined %}{% trans %}team_manage.page_title_modify{% endtrans %}{% else %}{% trans %}team_manage.page_title_create{% endtrans %}{% endif %}
 {% endblock %}
 {% block css %}
 <link rel="stylesheet" href="{{ asset('css/activity.css') }}">
@@ -97,7 +97,7 @@
 {% endblock %}
 
 {% block pagename %}
-    <span>{% if teamUsersId is defined %}{% trans %}team_manage.mobile_header_description_modify{% endtrans %}{% else %}{% trans %}team_manage.mobile_header_description_create{% endtrans %}{% endif %}</span>
+    <span>{% if membersId is defined %}{% trans %}team_manage.mobile_header_description_modify{% endtrans %}{% else %}{% trans %}team_manage.mobile_header_description_create{% endtrans %}{% endif %}</span>
 {% endblock %}
 
 {% block username %}

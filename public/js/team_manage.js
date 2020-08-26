@@ -89,13 +89,13 @@ $(function(){
           const $this = $(this);
           const type = $this.hasClass('btn-add-user-i') ? 'i' : 'e';
           const $section = $('section');
-          const $teamUsersList = $section.children('ul.teamusers-list');
+          const $membersList = $section.children('ul.teamusers-list');
       
-          if ($teamUsersList.children('.new').length) {
+          if ($membersList.children('.new').length) {
             return;
           }
       
-          if($teamUsersList.find(`.teamusers-list--item[type="${type}"]`).length && $teamUsersList.find(`.teamusers-list--item[mode="${type}"]`).find('select[name*="user"] option:not(:disabled)').length == $teamUsersList.children().length){
+          if($membersList.find(`.teamusers-list--item[type="${type}"]`).length && $membersList.find(`.teamusers-list--item[mode="${type}"]`).find('select[name*="user"] option:not(:disabled)').length == $membersList.children().length){
             $('#noRemainingParticipant').modal('open');
             return false;
           };
@@ -105,12 +105,12 @@ $(function(){
           protoHtml = proto.innerHTML.trim();
       
           protoHtml = type == 'i' ? 
-            protoHtml.replace(/__intTUIndex__/g, $teamUsersList.find(`.teamusers-list--item[mode="${type}"]`).length) :
-            protoHtml.replace(/__extTUIndex__/g, $teamUsersList.find(`.teamusers-list--item[mode="${type}"]`).length);
+            protoHtml.replace(/__intTUIndex__/g, $membersList.find(`.teamusers-list--item[mode="${type}"]`).length) :
+            protoHtml.replace(/__extTUIndex__/g, $membersList.find(`.teamusers-list--item[mode="${type}"]`).length);
             
           $newProtoHtml = $(protoHtml);
           $newProtoHtml.attr('type',type);
-          $teamUsersList.append($newProtoHtml);
+          $membersList.append($newProtoHtml);
           handleTUSelectElems($newProtoHtml);
 
         }
@@ -125,17 +125,17 @@ $(function(){
     'click', '.edit-mode .edit-user-btn', // edit button, only when in edit mode (check icon is shown)
     async function () {
         const $this = $(this);
-        const $teamUserItem = $this.closest('.teamusers-list--item');
+        const $memberItem = $this.closest('.teamusers-list--item');
         /** @type {JQuery<HTMLSelectElement>} */
-        const $userSelect = $teamUserItem.find('select.user-select');
-        const $userName = $teamUserItem.find('.user-name');
+        const $userSelect = $memberItem.find('select.user-select');
+        const $userName = $memberItem.find('.user-name');
         /** @type {JQuery<HTMLInputElement>} */
-        const $userIsOwner = $teamUserItem.find('.user-is-owner');
+        const $userIsOwner = $memberItem.find('.user-is-owner');
         const userIsOwner = $userIsOwner.length > 0 ? $userIsOwner[0].checked : null;
     
         if(!$('.add-owner-lose-setup,.change-owner-button').hasClass('clicked')){   
         // Change ownership management
-        $potentialDifferentLeader = $teamUserItem.closest('.participants-list').find('.badge-participation-l:visible');
+        $potentialDifferentLeader = $memberItem.closest('.participants-list').find('.badge-participation-l:visible');
         
         if(userIsOwner == true){
     
@@ -157,7 +157,7 @@ $(function(){
     
         const url = validateTeamUserUrl
         .replace('__teaId__', $('section').attr('data-id'))
-        .replace('__tusId__', $teamUserItem.data('id') || 0)
+        .replace('__tusId__', $memberItem.data('id') || 0)
     
         $userName.html(
         $userSelect.children(':checked').first().html()
@@ -171,14 +171,14 @@ $(function(){
         params.leader = true;
         }
     
-        if(!$this.hasClass('warned') && $teamUserItem.closest('.participants-list').find('.badge-participation-validated').length){
+        if(!$this.hasClass('warned') && $memberItem.closest('.participants-list').find('.badge-participation-validated').length){
         
-        if(userParticipantType != 0 && ($teamUserItem.hasClass('new') || $userParticipantType.find('option[selected="selected"]').val() == 0)){
+        if(userParticipantType != 0 && ($memberItem.hasClass('new') || $userParticipantType.find('option[selected="selected"]').val() == 0)){
             
             $('#unvalidatingOutput').modal('open');
             $('.unvalidate-btn').addClass('p-validate').removeClass('c-validate');
             $('.unvalidate-btn').removeData()
-                .data('pid',$teamUserItem.closest('.participants-list--item').data('id'))
+                .data('pid',$memberItem.closest('.participants-list--item').data('id'))
             
             $(document).on('click','.p-validate',function(){
                 $clickingBtn = $(this).data('pid') ? 
@@ -193,7 +193,7 @@ $(function(){
         const { tid, eid, user, canSetup } = await $.post(url, params);
     
         if($this.hasClass('warned')){
-        $teamUserItem.closest('.participants-list').find('.badge-participation-validated').attr('style','display:none;');
+        $memberItem.closest('.participants-list').find('.badge-participation-validated').attr('style','display:none;');
         $this.removeClass('warned');
         }
     
@@ -203,13 +203,13 @@ $(function(){
     
         $('section').attr('data-id', tid);
 
-        $teamUserItem
+        $memberItem
         .removeClass('edit-mode new')
         .attr('data-id', eid)
         .attr('is-leader', userIsOwner)
         .find('img.user-picture').prop('src', `/lib/img/${user.picture}`);
         
-        $tuElmt = $teamUserItem;
+        $tuElmt = $memberItem;
         //$partElmt = $(this).closest('.participants-list--item');
         //if(!$partElmt.hasClass('edit-mode')){
         if($tuElmt.find('.remove-team-user-btn').length){
@@ -320,9 +320,9 @@ function handleTUSelectElems (target) {
     
     $(document).on('click','[href="#deleteTeamUser"]',function(e){
         const $this = $(this);
-        const $teamUserItem = $this.closest('.teamusers-list--item');
+        const $memberItem = $this.closest('.teamusers-list--item');
         const $modalDeletionBtn = $('#deleteTeamUser .remove-team-user-btn');
-        $modalDeletionBtn.data('id',$teamUserItem.data('id'));
+        $modalDeletionBtn.data('id',$memberItem.data('id'));
         $(document).on('click','.remove-team-user-btn',function(e){
             e.preventDefault();
             urlToPieces = deleteTeamUserUrl.split('/');
@@ -330,7 +330,7 @@ function handleTUSelectElems (target) {
             url = urlToPieces.join('/');
             $.post(url,null)
                 .done(function(data){
-                    $teamUserItem.remove();
+                    $memberItem.remove();
                 })
                 .fail(function(data){
                     console.log(data);
