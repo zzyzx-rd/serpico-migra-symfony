@@ -52,7 +52,7 @@
   <div class="menu">
     <div class="container background-container" style="position:relative">
       {% if nbResultsStages > 0 and global.currentuser.role != 3 or nbPublishedStages > 0 and global.currentuser.role == 3 %}
-        <a href="{{ path('elementOverview', {'elmtType' : 'user', 'elmtId' : global.currentuser.id}) }}" class="btn btn-large white-text waves-effect waves-light teal lighten-1"><ul class="flex-center" style="margin: 0;justify-content:center;"><i class="fa fa-chart-bar" style="margin-right: 17px;"></i><span>{{ 'profile.my_results'|trans }}</span></ul></a>
+        <a href="{{ path('elementOverview', {entity: 'user', 'elmtId' : global.currentuser.id}) }}" class="btn btn-large white-text waves-effect waves-light teal lighten-1"><ul class="flex-center" style="margin: 0;justify-content:center;"><i class="fa fa-chart-bar" style="margin-right: 17px;"></i><span>{{ 'profile.my_results'|trans }}</span></ul></a>
       {% endif %}
     </div>
   </div>
@@ -515,7 +515,7 @@
                   <td>{% if teamParticipation.meanPerf is not null %}{{ (100 * teamParticipation.meanPerf)|round(0) }} %{% else %} - {% endif %}</td>
                   <td>{% if teamParticipation.meanDist is not null %}{{ (100 * teamParticipation.meanDist)|round(0) }} %{% else %} - {% endif %}</td>
                   <td>
-                    <a href="{{ url('elementOverview',{'elmtType' : 'team', 'elmtId' : teamParticipation.id})}}"
+                    <a href="{{ url('elementOverview',{entity: 'team', 'elmtId' : teamParticipation.id})}}"
                        class="btn white-text waves-effect waves-light teal lighten-1 team-results-btn"
                        style="padding: 0px 10px; display: flex; align-items: center; justify-content: center">
                       <div class="flex-center" style="margin: 0;justify-content:center;">

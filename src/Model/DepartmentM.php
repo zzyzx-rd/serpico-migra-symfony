@@ -7,7 +7,7 @@ use App\Entity\Organization;
 use App\Entity\OrganizationUserOption;
 use App\Entity\Stage;
 use App\Entity\Team;
-use App\Entity\TeamUser;
+use App\Entity\Member;
 use App\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;

@@ -89,7 +89,6 @@ class Answer extends DbObject
     public function setInserted(DateTimeInterface $inserted): self
     {
         $this->inserted = $inserted;
-
         return $this;
     }
 
@@ -104,7 +103,7 @@ class Answer extends DbObject
     /**
      * @param mixed $field
      */
-    public function setField($field)
+    public function setField($field): self
     {
         $this->field = $field;
         return $this;
@@ -121,7 +120,7 @@ class Answer extends DbObject
     /**
      * @param mixed $survey
      */
-    public function setSurvey($survey)
+    public function setSurvey($survey): self
     {
         $this->survey = $survey;
         return $this;
@@ -139,7 +138,7 @@ class Answer extends DbObject
      * @param mixed $participation
      * @return self
      */
-    public function setParticipant(Participation $participation): self
+    public function setParticipation(Participation $participation): self
     {
         $this->participation = $participation;
         return $this;

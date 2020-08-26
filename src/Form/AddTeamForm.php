@@ -3,7 +3,7 @@
 namespace App\Form;
 
 use Controller\MasterController;
-use App\Form\Type\TeamUserType;
+use App\Form\Type\MemberType;
 use App\Entity\Organization;
 use App\Entity\Team;
 use App\Entity\User;
@@ -35,7 +35,7 @@ class AddTeamForm extends AbstractType
     ->add('currentTeamExtUsers', CollectionType::class,
             [
                 'label' => false,
-                'entry_type' => TeamUserType::class,
+                'entry_type' => MemberType::class,
                 'entry_options' => [
                     'organization' => $team->getOrganization(),
                     'query' => 'external',
@@ -51,7 +51,7 @@ class AddTeamForm extends AbstractType
     ->add('currentTeamIntUsers', CollectionType::class,
         [
             'label' => false,
-            'entry_type' => TeamUserType::class,
+            'entry_type' => MemberType::class,
             'entry_options' => [
                 'organization' => $team->getOrganization(),
                 'query' => 'internal',

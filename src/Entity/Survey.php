@@ -64,12 +64,11 @@ class Survey extends DbObject
      * @OneToMany(targetEntity="Participation", mappedBy="survey", cascade={"persist"})
      * @var ArrayCollection<Participation>
      */
-//     * @OrderBy({"leader" = "DESC"})
-    public $participants;
+    public $participations;
 
     /**
      * @OneToMany(targetEntity="SurveyField", mappedBy="survey", cascade={"persist", "remove"}, orphanRemoval=true)
-     *  @var SurveyField[] $fields
+     *  @var ArrayCollection|SurveyField[] $fields
      */
 //     * @ORM\OrderBy({"sfi_position" = "ASC"})
     protected $fields;
@@ -89,7 +88,7 @@ class Survey extends DbObject
      * @param $sur_state
      * @param $stage
      * @param $organization
-     * @param ArrayCollection $participants
+     * @param ArrayCollection $participations
      * @param SurveyField[] $fields
      * @param Answer[]|ArrayCollection $answers
      */
@@ -101,8 +100,8 @@ class Survey extends DbObject
         $sur_inserted = null,
         Stage $stage = null,
         Organization $organization = null,
-        ArrayCollection $participants = null,
-        array $fields = [],
+        ArrayCollection $participations = null,
+        ArrayCollection $fields = null,
         $answers = null)
     {
         parent::__construct($id, $sur_createdBy, new DateTime());
@@ -110,7 +109,7 @@ class Survey extends DbObject
         $this->state = $sur_state;
         $this->stage = $stage;
         $this->organization = $organization;
-        $this->participants = $participants?: new ArrayCollection();
+        $this->participations = $participations?: new ArrayCollection();
         $this->fields = $fields?: new ArrayCollection();
         $this->answers = $answers?$fields: new ArrayCollection();
     }
@@ -180,36 +179,19 @@ class Survey extends DbObject
     }
 
     /**
-     * @return ArrayCollection
+     * @return ArrayCollection|Participation[]
      */
-    public function getParticipants(): ArrayCollection
+    public function getParticipations(): ArrayCollection
     {
-        return $this->participants;
+        return $this->participations;
     }
 
     /**
-     * @param ArrayCollection $participants
+     * @return ArrayCollection|SurveyField[]
      */
-    public function setParticipants(ArrayCollection $participants)
-    {
-        $this->participants = $participants;
-        return $this;
-    }
-
-    /**
-     * @return SurveyField[]
-     */
-    public function getFields(): array
+    public function getFields(): ArrayCollection
     {
         return $this->fields;
-    }
-
-    /**
-     * @param SurveyField[] $fields
-     */
-    public function setFields(array $fields)
-    {
-        $this->fields = $fields; return $this;
     }
 
     /**
@@ -220,24 +202,17 @@ class Survey extends DbObject
         return $this->answers;
     }
 
-    /**
-     * @param Answer[]|ArrayCollection $answers
-     */
-    public function setAnswers($answers)
+    public function addParticipation(Participation $participation)
     {
-        $this->answers = $answers; return $this;
-    }
-    public function addParticipant(Participation $participant)
-    {
-        $this->participants->add($participant);
-        $participant->setSurvey($this);
+        $this->participations->add($participation);
+        $participation->setSurvey($this);
         return $this;
     }
 
-    public function removeParticipant(Participation $participant)
+    public function removeParticipation(Participation $participant)
     {
         // Remove this participant
-        $this->participants->removeElement($participant);
+        $this->participations->removeElement($participant);
         return $this;
     }
     public function addField(SurveyField $field): Survey

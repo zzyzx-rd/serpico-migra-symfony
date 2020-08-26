@@ -70,7 +70,7 @@ use App\Entity\SurveyField;
 use App\Entity\SurveyFieldParameter;
 use App\Entity\Target;
 use App\Entity\Team;
-use App\Entity\TeamUser;
+use App\Entity\Member;
 use App\Entity\Template;
 use App\Entity\TemplateActivity;
 use App\Entity\TemplateCriterion;
@@ -2581,8 +2581,8 @@ class OrganizationController extends MasterController
                 $hasPageAccess = false;
             }
         } else {
-            foreach ($team->getTeamUsers() as $teamUser) {
-                $teamUsrIds[] = $teamUser->getUser()->getId();
+            foreach ($team->getMembers() as $member) {
+                $teamUsrIds[] = $member->getUser()->getId();
             }
             if ($currentUser->getRole() != 4 && ($organization != $currentUserOrganization || $currentUser->getRole() != 1 && !in_array($currentUser->getId(), $teamUsrIds))) {
                 $hasPageAccess = false;
@@ -3984,8 +3984,8 @@ class OrganizationController extends MasterController
                 return $this->render('errors/403.html.twig');
             }
         } else {
-            foreach ($team->getTeamUsers() as $teamUser) {
-                $teamUsrIds[] = $teamUser->getUser($app)->getId();
+            foreach ($team->getMembers() as $member) {
+                $teamUsrIds[] = $member->getUser($app)->getId();
             }
             if ($currentUser->getRole() != 4 && ($organization != $currentUserOrganization || $currentUser->getRole() != 1 && !in_array($currentUser->getId(), $teamUsrIds))) {
                 $hasPageAccess = false;
@@ -5677,9 +5677,9 @@ class OrganizationController extends MasterController
                 if ($key != 'team-name') {
                     $usrId     = substr($key, 14);
                     $usersId[] = $usrId;
-                    $teamUser  = new TeamUser;
-                    $teamUser->setTeam($team)->setUsrId($usrId);
-                    $em->persist($teamUser);
+                    $member  = new Member;
+                    $member->setTeam($team)->setUsrId($usrId);
+                    $em->persist($member);
                 }
             }
             $em->flush();
@@ -5708,7 +5708,7 @@ class OrganizationController extends MasterController
         }
         $adminFullName = $currentUser->getFirstname() . " " . $currentUser->getLastname();
         $id            = $currentUser->getId();
-        $orgId         = $currentUser->getOrgId();
+        $orgId         = $currentUser->getOrganization();
         $em            = $this->em;
         $repoO         = $em->getRepository(Organization::class);
         $repoT         = $em->getRepository(Team::class);
@@ -5719,17 +5719,17 @@ class OrganizationController extends MasterController
             return $this->render('/errors/403.html.twig');
         }
 
-        $teamUsers   = $team->getActiveTeamUsers();
-        $teamUsersId = [];
-        foreach ($teamUsers as $teamUser) {
-            $teamUsersId[] = $teamUser->getUser($app)->getId();
+        $members   = $team->getActiveMembers();
+        $membersId = [];
+        foreach ($members as $member) {
+            $membersId[] = $member->getUser()->getId();
         }
 
         return $this->render('team_manage.html.twig',
             [
                 'team'         => $team,
                 'organization' => $organization,
-                'teamUsersId'  => $teamUsersId,
+                'membersId'  => $membersId,
                 'delete'       => true,
             ]);
 
@@ -5761,15 +5761,15 @@ class OrganizationController extends MasterController
             return new JsonResponse(['incompleteTeam' => ''], 200);
         } else {
 
-            $teamUsers = clone $team->getTeamUsers();
-            foreach ($teamUsers as $teamUser) {
-                $teamUserId       = $teamUser->getUser($app)->getId();
-                $allTeamUsersId[] = $teamUserId;
+            $members = clone $team->getMembers();
+            foreach ($members as $member) {
+                $memberId       = $member->getUser($app)->getId();
+                $allTeamUsersId[] = $memberId;
 
-                if ($teamUser->isDeleted() == false) {
-                    $livingTeamUsersId[] = $teamUserId;
+                if ($member->isDeleted() == false) {
+                    $livingTeamUsersId[] = $memberId;
                 } else {
-                    $deletedTeamUsersId[] = $teamUserId;
+                    $deletedTeamUsersId[] = $memberId;
                 }
             }
 
@@ -5793,9 +5793,9 @@ class OrganizationController extends MasterController
 
                         // Condition below means added users used to belong to team, we remove his deleted condition
                         if (isset($deletedTeamUsersId) && array_search($usrId, $deletedTeamUsersId) !== false) {
-                            foreach ($teamUsers as $teamUser) {
-                                if ($teamUser->getUsrId() == $usrId) {
-                                    $deletedTeamUser = $teamUser;
+                            foreach ($members as $member) {
+                                if ($member->getUsrId() == $usrId) {
+                                    $deletedTeamUser = $member;
                                     break;
                                 }
                             }
@@ -5804,9 +5804,9 @@ class OrganizationController extends MasterController
 
                         } else {
 
-                            $teamUser = new TeamUser;
-                            $teamUser->setTeam($team)->setUsrId($usrId);
-                            $em->persist($teamUser);
+                            $member = new Member;
+                            $member->setTeam($team)->setUser($usrId);
+                            $em->persist($member);
 
                         }
 
@@ -5824,16 +5824,16 @@ class OrganizationController extends MasterController
 
             // 2 - ... and we look whether there are team leavers
 
-            foreach ($teamUsers as $key => $teamUser) {
+            foreach ($members as $key => $member) {
                 if (array_search($allTeamUsersId[$key], $usersId) === false) {
 
                     // We delete all his participations on activities which have not started.
                     //If one activity has started, we remove all his participations on future stages, and keep ongoing ones.
                     $deletedUsrIds[] = $allTeamUsersId[$key];
-                    $teamUser->setDeleted(new DateTime);
-                    $teamUser->setIsDeleted(true);
-                    $removedRecipients[] = $repoU->find($teamUser->getUsrId());
-                    $em->persist($teamUser);
+                    $member->setDeleted(new DateTime);
+                    $member->setIsDeleted(true);
+                    $removedRecipients[] = $repoU->find($member->getUsrId());
+                    $em->persist($member);
                 }
             }
 
@@ -5915,15 +5915,15 @@ class OrganizationController extends MasterController
 
             if (count($deletedUsrIds) > 0) {
                 $repoG                  = $em->getRepository(Grade::class);
-                $teamUserParticipations = new ArrayCollection($repoP->findBy(['usrId' => $deletedUsrIds, 'team' => $team], ['activity' => 'ASC']));
+                $memberParticipations = new ArrayCollection($repoP->findBy(['usrId' => $deletedUsrIds, 'team' => $team], ['activity' => 'ASC']));
                 $definedActivity        = null;
-                foreach ($teamUserParticipations as $teamUserParticipation) {
-                    $activity = $teamUserParticipation->getActivity();
+                foreach ($memberParticipations as $memberParticipation) {
+                    $activity = $memberParticipation->getActivity();
                     if ($activity != $definedActivity) {
                         $definedActivity = $activity;
 
                         if ($definedActivity->getStatus() < 1) {
-                            $deletableTeamUserParticipations = $teamUserParticipations->matching(Criteria::create()->where(Criteria::expr()->eq("activity", $activity)));
+                            $deletableTeamUserParticipations = $memberParticipations->matching(Criteria::create()->where(Criteria::expr()->eq("activity", $activity)));
                             foreach ($deletableTeamUserParticipations as $deletableTeamUserParticipation) {
                                 $activity->removeGrade($deletableTeamUserParticipation);
                             }
@@ -5931,7 +5931,7 @@ class OrganizationController extends MasterController
                         } else if ($definedActivity->getStatus() == 1) {
                             foreach ($activity->getActiveStages() as $stage) {
 
-                                $deletableTeamUserParticipations = $teamUserParticipations->matching(Criteria::create()->where(Criteria::expr()->eq("stage", $stage)));
+                                $deletableTeamUserParticipations = $memberParticipations->matching(Criteria::create()->where(Criteria::expr()->eq("stage", $stage)));
                                 $deletableTeamUserGivenGrades    = $repoG->findBy(['stage' => $stage, 'team' => $team, 'participant' => $deletableTeamUserParticipations->toArray()]);
                                 $deletableTeamUserReceivedGrades = $repoG->findBy(['stage' => $stage, 'gradedTeaId' => $team->getId(), 'gradedUsrId' => $deletedUsrIds]);
 
