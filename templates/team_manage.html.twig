@@ -231,7 +231,7 @@
         </div>
     </div>
 
-    <div id="deleteTeamUser" class="modal">
+    <div id="deleteMember" class="modal">
         <div class="modal-content">
           <h4>{% trans with {'%element%': 'participant'} %}organization_elements.delete_modal.title{% endtrans %}</h4>
           <p>{% trans with {'%conj_element%': 'participant'} %}organization_elements.delete_modal.content_1{% endtrans %}</p>
@@ -274,8 +274,8 @@
     <script src="{{ asset('js/team_manage.js') }}"></script>
     <script>
         var vnurl = "{{ url('validateElementName',{entity: 'team', elmtId: teaId}) }}";
-        const validateTeamUserUrl = '{{ url("validateTeamUser", { teaId: teaId != 0 ? teaId : "__teaId__", tusId: "__tusId__" }) }}'; 
-        const deleteTeamUserUrl = '{{ url("deleteTeamUser", { tusId: 0}) }}'; 
+        const validateMemberUrl = '{{ url("validateMember", { teaId: teaId != 0 ? teaId : "__teaId__", memId: "__memId__" }) }}'; 
+        const deleteMemberUrl = '{{ url("deleteMember", { memId: 0}) }}'; 
         const deleteTeamUrl = '{{ url("deleteTeam", {teaId: teaId}) }}'; 
         const manageUsersUrl = '{{ url("manageUsers")}}';
         window.usrRole = '{{ currentuser.role }}';

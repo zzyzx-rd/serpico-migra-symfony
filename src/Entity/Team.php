@@ -192,13 +192,14 @@ class Team extends DbObject
     /**
      * @param mixed $organization
      */
-    public function setOrganization($organization): void
+    public function setOrganization($organization): self
     {
         $this->organization = $organization;
+        return $this;
     }
 
     /**
-     * @return mixed
+     * @return ArrayCollection|Participation[]
      */
     public function getParticipations()
     {
@@ -206,15 +207,7 @@ class Team extends DbObject
     }
 
     /**
-     * @param mixed $participations
-     */
-    public function setParticipations($participations): void
-    {
-        $this->participations = $participations;
-    }
-
-    /**
-     * @return mixed
+     * @return ArrayCollection|Grade[]
      */
     public function getGrades()
     {
@@ -222,27 +215,11 @@ class Team extends DbObject
     }
 
     /**
-     * @param mixed $grades
-     */
-    public function setGrades($grades): void
-    {
-        $this->grades = $grades;
-    }
-
-    /**
-     * @return mixed
+     * @return ArrayCollection|Target[]
      */
     public function getTargets()
     {
         return $this->targets;
-    }
-
-    /**
-     * @param mixed $targets
-     */
-    public function setTargets($targets): void
-    {
-        $this->targets = $targets;
     }
 
     /**

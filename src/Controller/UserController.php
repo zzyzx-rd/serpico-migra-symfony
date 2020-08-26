@@ -1528,7 +1528,7 @@ class UserController extends MasterController
         $repoR = $this->em->getRepository(Result::class);
         $repoRK = $this->em->getRepository(Ranking::class);
         $repoRT = $this->em->getRepository(RankingTeam::class);
-        $repoTU = $this->em->getRepository(Member::class);
+        $repoM = $this->em->getRepository(Member::class);
         $repoC = $this->em->getRepository(Criterion::class);
         $repoCN = $this->em->getRepository(CriterionName::class);
         $organization = $user->getOrganization();
@@ -1721,7 +1721,7 @@ class UserController extends MasterController
 //        MasterController::updateProgressStatus();
 
         $teamParticipations = [];
-        $memberInclusions = $repoTU->findByUser($user);
+        $memberInclusions = $repoM->findByUser($user);
         foreach($memberInclusions as $memberInclusion){
 //            dd( $memberInclusion instanceof TeamUser);
             $team = $memberInclusion->getTeam();

@@ -155,9 +155,9 @@ $(function(){
         }
         }
     
-        const url = validateTeamUserUrl
+        const url = validateMemberUrl
         .replace('__teaId__', $('section').attr('data-id'))
-        .replace('__tusId__', $memberItem.data('id') || 0)
+        .replace('__memId__', $memberItem.data('id') || 0)
     
         $userName.html(
         $userSelect.children(':checked').first().html()
@@ -213,7 +213,7 @@ $(function(){
         //$partElmt = $(this).closest('.participants-list--item');
         //if(!$partElmt.hasClass('edit-mode')){
         if($tuElmt.find('.remove-team-user-btn').length){
-            $tuElmt.find('.remove-team-user-btn').removeClass('remove-team-user-btn').addClass('modal-trigger').attr('href','#deleteTeamUser');
+            $tuElmt.find('.remove-team-user-btn').removeClass('remove-team-user-btn').addClass('modal-trigger').attr('href','#deleteMember');
         }
         $badges = $tuElmt.find('.badges');
         $badges.children().attr('style','display:none;');
@@ -318,14 +318,14 @@ function handleTUSelectElems (target) {
         }
       });
     
-    $(document).on('click','[href="#deleteTeamUser"]',function(e){
+    $(document).on('click','[href="#deleteMember"]',function(e){
         const $this = $(this);
         const $memberItem = $this.closest('.teamusers-list--item');
-        const $modalDeletionBtn = $('#deleteTeamUser .remove-team-user-btn');
+        const $modalDeletionBtn = $('#deleteMember .remove-team-user-btn');
         $modalDeletionBtn.data('id',$memberItem.data('id'));
         $(document).on('click','.remove-team-user-btn',function(e){
             e.preventDefault();
-            urlToPieces = deleteTeamUserUrl.split('/');
+            urlToPieces = deleteMemberUrl.split('/');
             urlToPieces[urlToPieces.length - 1] = $(this).data('id');
             url = urlToPieces.join('/');
             $.post(url,null)

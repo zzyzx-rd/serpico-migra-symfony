@@ -5677,7 +5677,7 @@ class OrganizationController extends MasterController
                 if ($key != 'team-name') {
                     $usrId     = substr($key, 14);
                     $usersId[] = $usrId;
-                    $member  = new TeamUser;
+                    $member  = new Member;
                     $member->setTeam($team)->setUsrId($usrId);
                     $em->persist($member);
                 }
@@ -5708,7 +5708,7 @@ class OrganizationController extends MasterController
         }
         $adminFullName = $currentUser->getFirstname() . " " . $currentUser->getLastname();
         $id            = $currentUser->getId();
-        $orgId         = $currentUser->getOrgId();
+        $orgId         = $currentUser->getOrganization();
         $em            = $this->em;
         $repoO         = $em->getRepository(Organization::class);
         $repoT         = $em->getRepository(Team::class);
@@ -5719,10 +5719,10 @@ class OrganizationController extends MasterController
             return $this->render('/errors/403.html.twig');
         }
 
-        $members   = $team->getActiveTeamUsers();
+        $members   = $team->getActiveMembers();
         $membersId = [];
         foreach ($members as $member) {
-            $membersId[] = $member->getUser($app)->getId();
+            $membersId[] = $member->getUser()->getId();
         }
 
         return $this->render('team_manage.html.twig',
@@ -5804,8 +5804,8 @@ class OrganizationController extends MasterController
 
                         } else {
 
-                            $member = new TeamUser;
-                            $member->setTeam($team)->setUsrId($usrId);
+                            $member = new Member;
+                            $member->setTeam($team)->setUser($usrId);
                             $em->persist($member);
 
                         }
