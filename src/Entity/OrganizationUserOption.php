@@ -218,7 +218,7 @@ class OrganizationUserOption extends DbObject
     /**
      * @param mixed $organization
      */
-    public function setOrganization($organization): self
+    public function setOrganization(Organization $organization): self
     {
         $this->organization = $organization;
         return $this;

@@ -149,7 +149,7 @@ class Member extends DbObject
     /**
      * @param mixed $team
      */
-    public function setTeam($team)
+    public function setTeam($team): self
     {
         $this->team = $team;
         return $this;

@@ -30,7 +30,7 @@ stage:
 
 signup:
   password: Password should contain at least 8 characters with a capital letter and a number
-  email: Please provide a valid email adress in this field (example ':' some@thing.com).
+  email: "Please provide a valid email adress in this field (example : some@thing.com)."
 
 create_user:
   email: Oops... this email already exists, user may already have an account !

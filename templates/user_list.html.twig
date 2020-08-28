@@ -92,7 +92,7 @@
 
       <section id="clients">
         <ul class="client-type-list">
-          {% include "components/user_list__firms_item.html.twig" with { firms: clientFirms|merge(organizationM.dealingFirms(organization)) } %}
+          {% include "components/user_list__firms_item.html.twig" with { firms: clientFirms } %}
         </ul>
         <ul class="client-type-list">
           {% include "components/user_list__ext_team_item.html.twig" with { firms: clientTeams } %}

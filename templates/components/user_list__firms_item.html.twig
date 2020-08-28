@@ -24,7 +24,7 @@
                   </div>
                   #}
                   <ul class="user-list">
-                    {% for externalUser in firm.aliveExternalUsers %}
+                    {% for externalUser in firm.externalUsers %}
                       {% include "components/user_list__ext_user_item.html.twig" with { externalUser: externalUser, stats: false, roles: false, settings: false } %}
                     {% endfor %}
                   </ul>
@@ -46,7 +46,7 @@
                 </header>
                 <div class="item-body">
                   <ul class="user-list">
-                    {% for user in firm.orgUsers %}
+                    {% for user in firm.users|filter(user => user.lastname != 'ZZ' and user.deleted is null) %}
                       {% include "components/user_list__item.html.twig" with { user: user, stats: false, roles: false, settings: false } %}
                     {% endfor %}
                   </ul>

@@ -57,7 +57,7 @@ class UserM extends ModelEntity {
 
             $lastReleasedParticipation = $qb->select('au')
                 ->from(Participation::class, 'au')
-                ->where('au.usrId = ' . $user->getId())
+                ->where('au.user = ' . $user)
                 ->andWhere('au.status = 4')
                 ->orderBy('au.inserted', 'DESC')
                 ->getQuery()

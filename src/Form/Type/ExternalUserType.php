@@ -18,9 +18,11 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Validator\Constraints as Assert;
+use App\Validator\ExtUserOwnerHasValidEmailAddress;
 
 class ExternalUserType extends AbstractType
 {
@@ -58,9 +60,6 @@ class ExternalUserType extends AbstractType
                         'message' => '*Email is invalid, please enter a valid email adress in this field (example : some@thing.com).'
                     ]),
                 ],
-                'attr' => [
-                    'class' => 'no-margin',
-                ],
                 //'data' => ($user != null) ? $user->getEmail() : null,
             ])
             ->add('positionName', TextType::class, [
@@ -71,14 +70,14 @@ class ExternalUserType extends AbstractType
                 ],
                 //'data' => ($user != null) ? $extUser->getPositionName() : null,
             ])
-            ->add('weightValue', NumberType::class, [
-                'attr' => [
-                    'class' => 'no-margin',
-                ],
+            ->add('weightValue', IntegerType::class, [
                 //'data' => ($externalUser != null) ? $externalUser->getWeight() : null,
                 'label_format' => 'create_client.%name%',
                 'required' => false,
+                'empty_data' => 100,
                 //'data' => ($user != null) ? $extUser->getWeightValue() : null,
+            ])
+            ->add('id', HiddenType::class, [
             ]);
 
             if(!$hasClientActiveAdmin){
@@ -88,6 +87,9 @@ class ExternalUserType extends AbstractType
                         'class' => 'filled-in'
                     ],
                     'label_format' => 'create_client.%name%',
+                    'constraints' => [
+                        new ExtUserOwnerHasValidEmailAddress,
+                    ],
                     'required' => false,
                     //'data' => ($user != null) ? $extUser->getWeightValue() : null,
                 ]);

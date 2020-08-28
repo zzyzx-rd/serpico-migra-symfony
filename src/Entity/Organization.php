@@ -215,20 +215,20 @@ class Organization extends DbObject
     /**
      * Organization constructor.
      * @param ?int$id
-     * @param $org_legalname
-     * @param $org_commname
-     * @param $org_type
-     * @param $org_isClient
-     * @param $org_oth_language
-     * @param $org_weight_type
-     * @param $org_createdBy
-     * @param $org_inserted
-     * @param $org_validated
-     * @param $org_expired
-     * @param $org_testing_reminder_sent
-     * @param $org_deleted
-     * @param $org_routine_pstatus
-     * @param $org_routine_greminders
+     * @param $legalname
+     * @param $commname
+     * @param $type
+     * @param $isClient
+     * @param $oth_language
+     * @param $weight_type
+     * @param $createdBy
+     * @param $inserted
+     * @param $validated
+     * @param $expired
+     * @param $testing_reminder_sent
+     * @param $deleted
+     * @param $routine_pstatus
+     * @param $routine_greminders
      * @param $stages
      * @param $departments
      * @param $positions
@@ -252,22 +252,22 @@ class Organization extends DbObject
      */
     public function __construct(
       ?int $id = 0,
-        $org_isClient = null,
-        $org_legalname = '',
-        $org_commname = '',
-        $org_type = '',
-        $org_oth_language = 'FR',
-        string $logo = null,
-        $org_weight_type = "",
+        $isClient = null,
+        $legalname = '',
+        $commname = '',
+        $type = '',
+        $oth_language = 'FR',
+        ?string $logo = null,
+        $weight_type = "",
         $usersCSV = '',
-        $org_createdBy = null,
-        $org_inserted = null,
-        $org_validated = null,
-        $org_expired = null,
-        $org_testing_reminder_sent = null,
-        $org_deleted = null,
-        $org_routine_pstatus = null,
-        $org_routine_greminders = null,
+        $createdBy = null,
+        $inserted = null,
+        $validated = null,
+        $expired = null,
+        $testing_reminder_sent = null,
+        $deleted = null,
+        $routine_pstatus = null,
+        $routine_greminders = null,
         $users = null,
         $stages = null,
         $departments = null,
@@ -288,19 +288,19 @@ class Organization extends DbObject
         array $criterionGroups = null,
         $workerFirm = null)
     {
-        parent::__construct($id, $org_createdBy, new DateTime());
-        $this->legalname = $org_legalname;
-        $this->commname = $org_commname;
-        $this->type = $org_type;
-        $this->isClient = $org_isClient;
-        $this->oth_language = $org_oth_language;
-        $this->weight_type = $org_weight_type;
-        $this->validated = $org_validated;
-        $this->expired = $org_expired;
-        $this->reminderMailSent = $org_testing_reminder_sent;
-        $this->deleted = $org_deleted;
-        $this->orgRoutinePStatus = $org_routine_pstatus;
-        $this->routineGreminders = $org_routine_greminders;
+        parent::__construct($id, $createdBy, new DateTime());
+        $this->legalname = $legalname;
+        $this->commname = $commname;
+        $this->type = $type;
+        $this->isClient = $isClient;
+        $this->oth_language = $oth_language;
+        $this->weight_type = $weight_type;
+        $this->validated = $validated;
+        $this->expired = $expired;
+        $this->reminderMailSent = $testing_reminder_sent;
+        $this->deleted = $deleted;
+        $this->orgRoutinePStatus = $routine_pstatus;
+        $this->routineGreminders = $routine_greminders;
         $this->stages = $stages;
         $this->departments = $departments?: new ArrayCollection();
         $this->positions = $positions?: new ArrayCollection();
@@ -335,9 +335,9 @@ class Organization extends DbObject
         return $this->legalname;
     }
 
-    public function setLegalname(string $org_legalname): self
+    public function setLegalname(string $legalname): self
     {
-        $this->legalname = $org_legalname;
+        $this->legalname = $legalname;
 
         return $this;
     }
@@ -347,9 +347,9 @@ class Organization extends DbObject
         return $this->commname;
     }
 
-    public function setCommname(string $org_commname): self
+    public function setCommname(string $commname): self
     {
-        $this->commname = $org_commname;
+        $this->commname = $commname;
 
         return $this;
     }
@@ -359,21 +359,21 @@ class Organization extends DbObject
         return $this->type;
     }
 
-    public function setType(string $org_type): self
+    public function setType(string $type): self
     {
-        $this->type = $org_type;
+        $this->type = $type;
 
         return $this;
     }
 
-    public function getIsClient(): ?bool
+    public function isClient(): ?bool
     {
         return $this->isClient;
     }
 
-    public function setIsClient(bool $org_isClient): self
+    public function setIsClient(bool $isClient): self
     {
-        $this->isClient = $org_isClient;
+        $this->isClient = $isClient;
 
         return $this;
     }
@@ -383,9 +383,9 @@ class Organization extends DbObject
         return $this->oth_language;
     }
 
-    public function setOthLanguage(string $org_oth_language): self
+    public function setOthLanguage(string $oth_language): self
     {
-        $this->oth_language = $org_oth_language;
+        $this->oth_language = $oth_language;
 
         return $this;
     }
@@ -395,16 +395,16 @@ class Organization extends DbObject
         return $this->weight_type;
     }
 
-    public function setWeightType(string $org_weight_type): self
+    public function setWeightType(string $weight_type): self
     {
-        $this->weight_type = $org_weight_type;
+        $this->weight_type = $weight_type;
 
         return $this;
     }
 
-    public function setInserted(DateTimeInterface $org_inserted): self
+    public function setInserted(DateTimeInterface $inserted): self
     {
-        $this->inserted = $org_inserted;
+        $this->inserted = $inserted;
 
         return $this;
     }
@@ -414,9 +414,9 @@ class Organization extends DbObject
         return $this->validated;
     }
 
-    public function setValidated(DateTimeInterface $org_validated): self
+    public function setValidated(DateTimeInterface $validated): self
     {
-        $this->validated = $org_validated;
+        $this->validated = $validated;
 
         return $this;
     }
@@ -426,9 +426,9 @@ class Organization extends DbObject
         return $this->expired;
     }
 
-    public function setExpired(DateTimeInterface $org_expired): self
+    public function setExpired(DateTimeInterface $expired): self
     {
-        $this->expired = $org_expired;
+        $this->expired = $expired;
 
         return $this;
     }
@@ -438,9 +438,9 @@ class Organization extends DbObject
         return $this->reminderMailSent;
     }
 
-    public function setReminderMailSent(bool $org_testing_reminder_sent): self
+    public function setReminderMailSent(bool $testing_reminder_sent): self
     {
-        $this->reminderMailSent = $org_testing_reminder_sent;
+        $this->reminderMailSent = $testing_reminder_sent;
 
         return $this;
     }
@@ -450,9 +450,9 @@ class Organization extends DbObject
         return $this->deleted;
     }
 
-    public function setDeleted(?DateTimeInterface $org_deleted): self
+    public function setDeleted(?DateTimeInterface $deleted): self
     {
-        $this->deleted = $org_deleted;
+        $this->deleted = $deleted;
 
         return $this;
     }
@@ -462,9 +462,9 @@ class Organization extends DbObject
         return $this->orgRoutinePStatus;
     }
 
-    public function setRoutinePstatus(?DateTimeInterface $org_routine_pstatus): self
+    public function setRoutinePstatus(?DateTimeInterface $routine_pstatus): self
     {
-        $this->orgRoutinePStatus = $org_routine_pstatus;
+        $this->orgRoutinePStatus = $routine_pstatus;
 
         return $this;
     }
@@ -474,9 +474,9 @@ class Organization extends DbObject
         return $this->routineGreminders;
     }
 
-    public function setRoutineGreminders(?DateTimeInterface $org_routine_greminders): self
+    public function setRoutineGreminders(?DateTimeInterface $routine_greminders): self
     {
-        $this->routineGreminders = $org_routine_greminders;
+        $this->routineGreminders = $routine_greminders;
 
         return $this;
     }
@@ -668,7 +668,7 @@ class Organization extends DbObject
     /**
      * @return string
      */
-    public function getLogo(): string
+    public function getLogo(): ?string
     {
         return $this->logo;
     }
@@ -861,6 +861,7 @@ class Organization extends DbObject
         $this->aliveOptions->removeElement($option);
         return $this;
     }
+
     public function addCriterion(Criterion $criterion): Organization
     {
         $this->criteria->add($criterion);
@@ -873,6 +874,7 @@ class Organization extends DbObject
         $this->criteria->removeElement($criterion);
         return $this;
     }
+
     public function addWeight(Weight $weight): Organization
     {
 
@@ -1082,6 +1084,32 @@ class Organization extends DbObject
     {
         $this->users->removeElement($user);
         return $this;
+    }
+
+    public function addClient(Client $client): Organization
+    {
+        $this->clients->add($client);
+        $client->setOrganization($this);
+        return $this;
+    }
+
+    public function removeClient(Client $client): Organization
+    {
+        $this->clients->removeElement($client);
+        return $this;
+    }
+
+    public function getActiveUsers(){
+        return $this->users->filter(function(User $u){
+            return !$u->getDeleted();
+        });
+    }
+
+    public function hasActiveAdmin(){
+        return $this->getActiveUsers()
+        ->exists(function(int $i, User $u){
+            return $u->getRole() == USER::ROLE_ADMIN && $u->getLastConnected() != null;
+        });
     }
 
 

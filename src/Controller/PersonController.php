@@ -4,8 +4,12 @@
 namespace App\Controller;
 
 use App\Entity\Client;
+use App\Entity\ExternalUser;
 use App\Entity\Organization;
 use App\Entity\User;
+use App\Entity\WorkerFirm;
+use App\Form\Type\ClientType;
+use App\Form\Type\ExternalUserType;
 use App\Form\Type\OrganizationElementType;
 use App\Form\Type\UserType;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -13,6 +17,8 @@ use Doctrine\Common\Collections\Criteria;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Annotation\Route;
 
 class PersonController extends MasterController
@@ -418,6 +424,59 @@ class PersonController extends MasterController
                 'enabledCreatingUser' => $enabledCreatingUserOption,
             ]);
 
+    }
+
+    /**
+     * @param Request $request
+     * @param $cliId
+     * @param $extId
+     * @return mixed
+     * @Route("/client/{cliId}/user/validate/{extId}", name="validateClientUser")
+     */
+    public function validateClientUserAction(Request $request, $cliId, $extId){
+
+        $em = $this->em;
+        $currentUser = $this->user;
+        if (!$currentUser instanceof User) {
+            return $this->redirectToRoute('login');
+        }
+        $repoC = $em->getRepository(Client::class);
+        $repoE = $em->getRepository(ExternalUser::class);
+        /** @var Client */
+        $client = $repoC->find($cliId);
+        $externalUser = $extId == 0 ? new ExternalUser : $repoE->find($extId);
+        $individualForm = $this->createForm(ExternalUserType::class, $externalUser, ['standalone' => true]);
+        $individualForm->handleRequest($request);
+        if ($individualForm->isValid()) {
+            if($extId == 0){
+
+                $token = md5(rand());
+                $user = new User;
+                $user->setFirstname($externalUser->getFirstname())
+                    ->setLastname($externalUser->getLastname())
+                    ->setEmail($externalUser->getEmail())
+                    ->setCreatedBy($currentUser->getId())
+                    ->setOrganization($client->getClientOrganization())
+                    ->setRole(3)
+                    ->setToken($token);
+                $em->persist($user);
+                $em->flush();
+                $settings = [];
+                $settings['tokens'][] = $token;
+                $settings['invitingUser'] = $currentUser;
+                $settings['invitingOrganization'] = $currentUser->getOrganization();
+                $recipients[] = $user;
+                $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'externalInvitation']);
+                $externalUser->setClient($client)->setUser($user);
+            }
+            $em->persist($externalUser);
+            $em->flush();
+            return $extId == 0 ?
+                $this->json(['status' => 'done', 'extId' => $externalUser->getId()], 200) :
+                $this->json(['status' => 'done'], 200);
+        } else {
+            return $this->buildErrorArray($individualForm);
+        }
     }
 
 }

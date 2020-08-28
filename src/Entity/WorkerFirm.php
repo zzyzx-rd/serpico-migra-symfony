@@ -126,7 +126,7 @@ class WorkerFirm extends DbObject
     public $created;
 
     /**
-     *@Column(name="wfi_creation_date", type="datetime", nullable=false)
+     *@Column(name="wfi_creation_date", type="datetime", nullable=true)
      * @var DateTime
      */
     public $creationDate;
@@ -149,19 +149,19 @@ class WorkerFirm extends DbObject
 
     /**
      * @ManyToOne(targetEntity="City", inversedBy="firms")
-     * @JoinColumn(name="city_cit_id", referencedColumnName="cit_id",nullable=false)
+     * @JoinColumn(name="city_cit_id", referencedColumnName="cit_id", nullable=true)
      */
     public $city;
 
     /**
      * @ManyToOne(targetEntity="State", inversedBy="firms")
-     * @JoinColumn(name="state_sta_id", referencedColumnName="sta_id",nullable=false)
+     * @JoinColumn(name="state_sta_id", referencedColumnName="sta_id", nullable=true)
      */
     public $state;
 
     /**
      * @ManyToOne(targetEntity="Country", inversedBy="firms")
-     * @JoinColumn(name="country_cou_id", referencedColumnName="cou_id",nullable=false)
+     * @JoinColumn(name="country_cou_id", referencedColumnName="cou_id", nullable=true)
      */
     public $country;
 
@@ -535,9 +535,9 @@ class WorkerFirm extends DbObject
     }
 
     /**
-     * @param mixed $city
+     * @param City $city
      */
-    public function setCity($city)
+    public function setCity(?City $city): self
     {
         $this->city = $city;
         return $this;
@@ -552,9 +552,9 @@ class WorkerFirm extends DbObject
     }
 
     /**
-     * @param mixed $state
+     * @param State $state
      */
-    public function setState($state)
+    public function setState(?State $state): self
     {
         $this->state = $state;
         return $this;
@@ -569,16 +569,16 @@ class WorkerFirm extends DbObject
     }
 
     /**
-     * @param mixed $country
+     * @param Country $country
      */
-    public function setCountry($country)
+    public function setCountry(?Country $country): self
     {
         $this->country = $country;
         return $this;
     }
 
     /**
-     * @return mixed
+     * @return ArrayCollection|Experience[]
      */
     public function getExperiences()
     {
@@ -586,30 +586,13 @@ class WorkerFirm extends DbObject
     }
 
     /**
-     * @param mixed $experiences
-     */
-    public function setExperiences($experiences)
-    {
-        $this->experiences = $experiences;
-        return $this;
-    }
-
-    /**
-     * @return mixed
+     * @return ArrayCollection|Mail[]
      */
     public function getMails()
     {
         return $this->mails;
     }
 
-    /**
-     * @param mixed $mails
-     */
-    public function setMails($mails)
-    {
-        $this->mails = $mails;
-        return $this;
-    }
     public function getActiveExperiences(): array
     {
         $activeExperiences = [];

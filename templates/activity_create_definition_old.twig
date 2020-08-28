@@ -2,7 +2,7 @@
 
 {% form_theme form 'form/errors.html.twig' %}
 
-{% set elmt = app.request_stack.currentrequest.get('elmt') %}
+{% set elmt = global.request.get('elmt') %}
 {% set elmtIsComplex = activity.stages|length > 1 or activity.stages.first.criteria|length > 1 %}
 
 {% block title %}

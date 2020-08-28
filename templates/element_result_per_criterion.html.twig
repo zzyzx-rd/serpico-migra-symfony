@@ -1,6 +1,6 @@
 {% extends "layout.html.twig" %}
 
-{% set elmtType = app.request_stack.currentrequest.get('elmtType') %}
+{% set elmtType = global.request.get('elmtType') %}
 
 {% block title %}
     {{ ('results_per_criterion.title_' ~ elmtType)|trans }}

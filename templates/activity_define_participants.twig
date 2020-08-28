@@ -29,7 +29,7 @@
 {% endif %}
 {% endblock %}
 
-{% set elmt = app.request_stack.currentrequest.get('elmt') %}
+{% set elmt = global.request.get('elmt') %}
 {% set activity = form.vars.data %}
 
 {% block title %}
@@ -43,7 +43,7 @@
         var precommentCreationMsg = '{% trans %}participants.guidelines.create{% endtrans %}';
         var precommentUpdateMsg = '{% trans %}participants.guidelines.modify{% endtrans %}';
         var precommentNoneMsg = '{% trans %}participants.guidelines.no_guidelines{% endtrans %}';
-        var elmt = '{{app.request_stack.currentrequest.get("elmt")}}';
+        var elmt = '{{global.request.get("elmt")}}';
         var mp = 0;
     </script>
 {% endblock %}

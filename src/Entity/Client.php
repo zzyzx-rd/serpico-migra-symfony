@@ -27,9 +27,9 @@ class Client extends DbObject
     public ?int $id;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="cli_name", type="string", length=255, nullable=true)
      */
-    public $clicommname;
+    public $name;
 
     /**
      * @ORM\Column(name="cli_type", type="string", length=255, nullable=true)
@@ -84,12 +84,12 @@ class Client extends DbObject
     /**
      * Client constructor.
      * @param $id
-     * @param $clicommname
-     * @param $cli_type
-     * @param $cli_logo
-     * @param $cli_email
-     * @param $cli_createdBy
-     * @param $cli_inserted
+     * @param $name
+     * @param $type
+     * @param $logo
+     * @param $email
+     * @param $createdBy
+     * @param $inserted
      * @param $organization
      * @param Organization $clientOrganization
      * @param $workerFirm
@@ -97,22 +97,22 @@ class Client extends DbObject
      */
     public function __construct(
       ?int $id = null,
-        $cli_createdBy = null,
-        $cli_type = 'F',
-        $clicommname = null,
-        $cli_logo = null,
-        $cli_email = null,
-        $cli_inserted = null,
+        $createdBy = null,
+        $type = 'F',
+        $name = null,
+        $logo = null,
+        $email = null,
+        $inserted = null,
         $organization = null,
         Organization $clientOrganization = null,
         $workerFirm = null,
         $externalUsers = null)
     {
-        parent::__construct($id, $cli_createdBy, new DateTime());
-        $this->clicommname = $clicommname;
-        $this->type = $cli_type;
-        $this->logo = $cli_logo;
-        $this->email = $cli_email;
+        parent::__construct($id, $createdBy, new DateTime());
+        $this->name = $name;
+        $this->type = $type;
+        $this->logo = $logo;
+        $this->email = $email;
         $this->organization = $organization;
         $this->clientOrganization = $clientOrganization;
         $this->workerFirm = $workerFirm;
@@ -120,15 +120,14 @@ class Client extends DbObject
     }
 
 
-    public function getClicommname(): ?string
+    public function getName(): ?string
     {
-        return $this->clicommname;
+        return $this->name;
     }
 
-    public function setClicommname(string $clicommname): self
+    public function setName(string $name): self
     {
-        $this->clicommname = $clicommname;
-
+        $this->name = $name;
         return $this;
     }
 
@@ -140,7 +139,6 @@ class Client extends DbObject
     public function setType(string $type): self
     {
         $this->type = $type;
-
         return $this;
     }
 
@@ -152,7 +150,6 @@ class Client extends DbObject
     public function setLogo(string $logo): self
     {
         $this->logo = $logo;
-
         return $this;
     }
 
@@ -164,14 +161,12 @@ class Client extends DbObject
     public function setEmail(?string $email): self
     {
         $this->email = $email;
-
         return $this;
     }
 
     public function setInserted(DateTimeInterface $inserted): self
     {
         $this->inserted = $inserted;
-
         return $this;
     }
 
@@ -186,7 +181,7 @@ class Client extends DbObject
     /**
      * @param mixed $organization
      */
-    public function setOrganization($organization)
+    public function setOrganization(Organization $organization): self
     {
         $this->organization = $organization;
         return $this;
@@ -203,7 +198,7 @@ class Client extends DbObject
     /**
      * @param Organization $clientOrganization
      */
-    public function setClientOrganization(Organization $clientOrganization)
+    public function setClientOrganization(Organization $clientOrganization): self
     {
         $this->clientOrganization = $clientOrganization;
         return $this;
@@ -220,27 +215,18 @@ class Client extends DbObject
     /**
      * @param mixed $workerFirm
      */
-    public function setWorkerFirm($workerFirm)
+    public function setWorkerFirm($workerFirm): self
     {
         $this->workerFirm = $workerFirm;
         return $this;
     }
 
     /**
-     * @return
+     * @return ArrayCollection|ExternalUser[]
      */
     public function getExternalUsers()
     {
         return $this->externalUsers;
-    }
-
-    /**
-     * @param $externalUsers
-     */
-    public function setExternalUsers($externalUsers)
-    {
-        $this->externalUsers = $externalUsers;
-        return $this;
     }
 
     public function addExternalUser(ExternalUser $externalUser): Client
@@ -256,6 +242,9 @@ class Client extends DbObject
         return $this;
     }
 
+    /**
+     * @return ArrayCollection|ExternalUser[]
+     */
     public function getAliveExternalUsers(): ArrayCollection
     {
         $aliveExtUsers = new ArrayCollection;
@@ -278,5 +267,23 @@ class Client extends DbObject
     {
         $this->externalUsers->removeElement($externalUser);
         return $this;
+    }
+
+    public function isVirtual()
+    {
+        if (!$this->externalUsers){
+            return true;
+        } else {
+            $usersHavingEmailAddresses = $this->externalUsers->filter(function(ExternalUser $eu){
+                return $eu->getEmail() != null;
+            });
+            if($usersHavingEmailAddresses->count() == 0){
+                return true;
+            } else {
+                return !$usersHavingEmailAddresses->exists(function(int $i, ExternalUser $eu){
+                    return $eu->isOwner();
+                });
+            }
+        }
     }
 }

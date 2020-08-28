@@ -21,7 +21,7 @@ class ParticipantGradeType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         
-        $currentUser = MasterController::getAuthorizedUser();
+        $currentUser = $this->user;;
         if (!$currentUser instanceof User) {
             throw 'Authentication issue: no authorized user found';
         }

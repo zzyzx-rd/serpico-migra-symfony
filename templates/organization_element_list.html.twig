@@ -13,7 +13,7 @@
   {% set elmtNameConj = "organization_elements.title_conj"|trans  %}
   {% set nbFields = 1 %}
 {% endif %}
-{% set orgId = app.request_stack.currentrequest.get('orgId') %}
+{% set orgId = global.request.get('orgId') %}
 
 
 
