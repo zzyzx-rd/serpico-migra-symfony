@@ -36,7 +36,7 @@ class CriterionGroupController extends MasterController
         /**
          * @var User
          */
-        $currentUser = MasterController::getAuthorizedUser();
+        $currentUser = $this->user;;
         if (!$currentUser) {
             return self::unauthorized();
         }

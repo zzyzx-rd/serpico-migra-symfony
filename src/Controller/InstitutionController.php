@@ -199,7 +199,7 @@ final class InstitutionController extends MasterController
             // IDs of activities in which at least one *graded* participant is a direct or indirect subordinate
             $subordinates = $this->user->getSubordinates();
             /** @var Participation[] */
-            $subordinatesParticipations = $repoP->findBy(['user' => $subordinates, 'type' => [ -1, 1 ] ]);
+            $subordinatesParticipations = $repoP->findBy(['user' => $subordinates->toArray(), 'type' => [ -1, 1 ] ]);
             $activitiesWithSubordinates_IDs = array_map(function (Participation $p) {
                 return $p->getStage()->getActivity()->getId();
             }, $subordinatesParticipations);
@@ -246,7 +246,7 @@ final class InstitutionController extends MasterController
                 }
             }
             //Get activities where user is participating as external user
-            $externalActivities = $this->user->getExternalActivities();
+            $externalActivities = $externalActivities = $em->getRepository(User::class)->getExternalActivities($user);
             $userActivities = new ArrayCollection((array)$userActivities->toArray() + $externalActivities->toArray());
 
         }

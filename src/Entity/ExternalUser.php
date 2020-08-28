@@ -180,7 +180,6 @@ class ExternalUser extends DbObject
     public function setEmail(?string $email): self
     {
         $this->email = $email;
-
         return $this;
     }
 
@@ -189,10 +188,9 @@ class ExternalUser extends DbObject
         return $this->positionName;
     }
 
-    public function setPositionName(string $positionName): self
+    public function setPositionName(?string $positionName): self
     {
         $this->positionName = $positionName;
-
         return $this;
     }
 
@@ -204,7 +202,6 @@ class ExternalUser extends DbObject
     public function setWeightValue(float $weight_value): self
     {
         $this->weight_value = $weight_value;
-
         return $this;
     }
 

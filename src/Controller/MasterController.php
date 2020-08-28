@@ -39,6 +39,7 @@ use Swift_Image;
 use Swift_Mailer;
 use Swift_Message;
 use Swift_SpoolTransport;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\TwigBundle\TwigEngine;
 use Symfony\Component\Form\FormFactory;
@@ -48,7 +49,11 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Generator\UrlGenerator;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Translation\Translator;
 use Symfony\Component\Validator\Constraints\DateTime;
@@ -76,6 +81,10 @@ abstract class MasterController extends AbstractController
      * @var Security
      */
     protected $security;
+     /**
+     * @var UserPasswordEncoderInterface
+     */
+    protected $encoder;
     /**
      * @var RequestStack
      */
@@ -95,12 +104,14 @@ abstract class MasterController extends AbstractController
      * @param Security $security
      * @param RequestStack $stack
      */
-    public function __construct(EntityManagerInterface $em, Security $security, RequestStack $stack)
+    public function __construct(EntityManagerInterface $em, Security $security, RequestStack $stack, UserPasswordEncoderInterface $encoder, Environment $twig)
     {
         $this->em = $em;
         $this->security = $security;
         $this->stack = $stack;
         $this->user = $security->getUser();
+        $this->encoder = $encoder;
+        $this->twig = $twig;
 //        if ($this->user === null) {
 //            dd('erreur de user');
 //            $this->redirectToRoute('login');
@@ -968,162 +979,6 @@ abstract class MasterController extends AbstractController
         $em->flush();
     }
 
-    // Function which sends mail to user
-    // TestorNot parameter defines if the mail is sent is a testing mode (0) or live (1)
-    /**
-     * @param User[] $recipients
-     */
-    public static function sendMail($_, array $recipients, $actionType, $settings)
-    {
-        global $app;
-
-        $data = $settings;
-        $em = $app['orm.em'];
-        $data['actionType'] = $actionType;
-        $data['currentuser'] = self::getAuthorizedUser();
-        $recipientUsers = true;
-
-        if (isset($data['recipientUsers'])) {
-            $recipientUsers = false;
-        }
-
-        foreach ($recipients as $key => $recipient) {
-            $message = Swift_Message::newInstance();
-            $mail = new Mail;
-            $mail->setType($actionType);
-            $token = md5(rand());
-            $mail
-                ->setUser($recipient)
-                ->setOrganization($recipient->getOrganization());
-
-            if (isset($data['activity'])) {
-                $mail->setActivity($data['activity']);
-                if ($actionType == 'unvalidatedGradesStageJoiner') {
-                    $mail->setStage($data['activity']->getStages()->first());
-                }
-            }
-
-            if (isset($data['stage'])) {
-                $mail->setStage($data['stage'])->setActivity($data['stage']->getActivity());
-            }
-
-            if (isset($data['pType'])) {
-                switch ($data['pType']) {
-                    case 1:
-                        $mail->setPersona('C');
-                        break;
-                    case 2:
-                        $mail->setPersona('P');
-                        break;
-                    case 3:
-                        $mail->setPersona('M');
-                        break;
-                    case 4:
-                        $mail->setPersona('H');
-                        break;
-                    case 5:
-                        $mail->setPersona('U');
-                        break;
-                    default:
-                        break;
-                }
-            }
-            if (isset($data['language'])) {
-                switch ($data['language']) {
-                    case 1:
-                        $mail->setLanguage('Fr');
-                        break;
-                    case 2:
-                        $mail->setLanguage('En');
-                        break;
-                    default:
-                        $mail->setLanguage($data['language']);
-                        break;
-                }
-            }
-            if (isset($data['location'])) {
-                switch ($data['location']) {
-                    case "FR":
-                        $data['phone'] = '+33 6 60 62 94 08';
-                        break;
-                    default:
-                        $data['phone'] = '+352 621 207 642';
-                        break;
-                }
-            }
-
-            $organization = $recipient->getOrganization();
-
-            $mail->setToken($token);
-            $data['trkToken'] = $token;
-
-            $em->persist($mail);
-            $em->flush();
-
-            if ($organization->getId() == 86 || strpos($_SERVER['HTTP_HOST'], 'sg') !== false) {
-                $data['logo_img'] = $message->embed(\Swift_Image::frompath('lib/img/societe-generale-logo160.jpg'));
-                $data['logo_width_px'] = 160;
-                $data['company_name'] = 'SERPICO pour Société Générale Luxembourg';
-                $data['address'] = '28-32 Place de la Gare';
-                $data['zipcode_city'] = 'L-1616 Luxembourg';
-                $data['company_website'] = 'https://www.sgbt.lu/fr/';
-            } else {
-                $data['logo_img'] = $message->embed(Swift_Image::frompath('lib/img/logo_serpico_mail.png'));
-                $data['logo_width_px'] = 80;
-                $data['company_name'] = 'Serpico';
-                $data['address'] = '59, boulevard Royal';
-                $data['zipcode_city'] = 'L-2449 Luxembourg';
-                $data['phone'] = '+352 42 42 38 77';
-                $data['company_website'] = 'https://www.serpicoapp.com';
-                $data['incubator_logo'] = null;
-            }
-
-            $data['recipient'] = $recipient;
-            $data['mailId'] = $mail->getId();
-
-            if ($actionType == 'firstMailReminderTPeriod' || $actionType == 'prospecting_1') {
-                $data['people_working_logo'] = $message->embed(\Swift_Image::frompath('lib/img/people-working-logo.png'));
-            }
-
-            if ($actionType == 'activityParticipation') {
-
-            } else if ($actionType == 'registration' /*&& !$data['firstCreatedOrgUser']*/ || $actionType == 'externalInvitation') {
-                $data['token'] = $settings['tokens'][$key];
-            } else if ($actionType == 'updateProgressStatus'){
-                $data['stage'] = $settings['stages'][$key];
-            }
-
-            $mailTemplate = $app['twig']->loadTemplate('mails/' . $actionType . '.html.twig');
-
-            $mailingEmailAddress = $recipientUsers ? $recipient->getEmail() : $recipient;
-
-            $message->setTo($mailingEmailAddress)
-                ->setSubject($mailTemplate->renderBlock('subject', $data))
-                ->setFrom(array('no-reply@serpicoapp.com' => 'Serpico'))
-                ->setContentType("text/html")
-                ->setBody($mailTemplate->renderBlock('body', $data));
-            if (isset($data['addPresFR']) and $data['addPresFR'] == 1) {
-                $message->attach(\Swift_Attachment::frompath('lib/Data/Serpico_Presentation_FR.pdf'));
-            }
-            if (isset($data['addPresEN']) and $data['addPresEN'] == 1) {
-                $message->attach(\Swift_Attachment::frompath('lib/Data/Serpico_Presentation_EN.pdf'));
-            }
-
-            /** @var Swift_Mailer */
-            $mailer = $app['mailer'];
-            $mailer->send($message);
-        }
-
-        /** @var Swift_SpoolTransport */
-        $mailerSpoolTransport = $app['swiftmailer.spooltransport'];
-        $failures = null;
-        $return = $mailerSpoolTransport
-            ->getSpool()
-            ->flushQueue($app['swiftmailer.transport'], $failures);
-
-        return ['sentCount' => $return, 'failures' => $failures];
-    }
-
     // Function which checks if stage is computable, if it is the case sends mail to activity manager to access results
     public function checkStageComputability(Request $request, Stage $stage, bool $addInDb = true)
     {
@@ -1262,7 +1117,7 @@ abstract class MasterController extends AbstractController
         # The repos to access the data in the database
         $repoP = $em->getRepository(Participation::class);
         # The user who created the activity
-        $currentUser = MasterController::getAuthorizedUser();
+        $currentUser = $this->user;;
         $criteria = $stage->getCriteria();
 
 
@@ -1718,7 +1573,7 @@ abstract class MasterController extends AbstractController
             }
         }
         # the one who created the activity
-        $currentUser = MasterController::getAuthorizedUser();
+        $currentUser = $this->user;;
         $criteria = new ArrayCollection();
         # set the stages data correctly
         foreach ($activity->getStages() as $stage) {

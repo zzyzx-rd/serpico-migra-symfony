@@ -31,7 +31,7 @@
   {% endif %}
 {% endblock %}
 
-{% set elmtType = app.request_stack.currentrequest.get('elmtType') %}
+{% set elmtType = global.request.get('elmtType') %}
 {% set colors = ["purple", "green", "orange", "blue-grey", "light-blue", "pink", "teal", "deep-purple", "lime", "grey", "light-green","red"] %}
 
 

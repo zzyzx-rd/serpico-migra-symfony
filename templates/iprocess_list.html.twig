@@ -1244,7 +1244,7 @@
                         {% if status != actStatus %}
                           {% set actStatus = status %}
                           {% set actStatusName = actStatuses[sortingTypeCookie][status] %}
-                          {% set showable = app.request_stack.currentrequest.cookies.get('r_s_' ~ sortingTypeCookie ~ '_' ~ actStatusName) is null %}
+                          {% set showable = global.request.cookies.get('r_s_' ~ sortingTypeCookie ~ '_' ~ actStatusName) is null %}
                           
                         {% endif %}
 
@@ -1326,7 +1326,7 @@
           </div>
           <div>
               {% if currentuser.role != 1 %}
-                <a class="modal-trigger" href="#requestNewProcess" onclick="onAddProcessClick('{{currentuser.orgId}}')">
+                <a class="modal-trigger" href="#requestNewProcess" onclick="onAddProcessClick('{{currentuser.organization.id}}')">
               {% else %}
                 <a href="{{url('manageProcesses',{orgId: currentuser.organization.id})}}">
               {% endif %}

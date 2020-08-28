@@ -2673,8 +2673,9 @@ create_client:
   manual_description: "Add one or more clients below :"
   firstname: Firstname
   lastname: Lastname
-  commname: Partner name
+  name: Partner name
   workerFirm: Partner name
+  provide_name: Provide partner name
   role: Role
   positionName: Position
   weightValue: Grading weight
@@ -2883,46 +2884,4 @@ error_403:
 
 modal:
   logout: Are you sure you would you like to Log Out?
-validators:
-  password_definition:
-    unmatching_msg: Passwords do not match each other
 
-  activity_elements:
-    stages:
-      sum_weight_equal_to_hundred_pct: Sum of stage weights should be equal to 100%
-      unique_stage_name: There is alread'y a stage having the same name
-      missing_owners: Beware that at least one configured stage needs an participating owner, who has config rights
-      min_config: Beware that at least one stage should have at least one participant giving, and one participant receiving feedback based on a defined output (survey or evaluation criterion)
-
-    criteria:
-      sum_weight_equal_to_hundred_pct: Sum of criteria weights should be equal to 100%
-
-
-
-  create_client:
-    missing_owner: Make sure that the client has at least one owner with provided email address in order to set up its account
-
-  create_parameters:
-    step: Step should be a divider of grading range
-    ub_greater_than_lb: Upperbound should be higher than lowerbound
-    sum_weight_equal_to_hundred_pct: The sum of stage weights should be equal to 100%
-    doublon_activity_name: There is alread'y an existing activity with sich name, please choose another
-
-  stages:
-    missing_name: The stage must have a name
-
-  stage:
-    period_positive: You should enter a positive period value
-
-  signup:
-    password: Password should contain at least 8 characters with a capital letter and a number
-    email: "Please provide a valid email adress in this field (example : some@thing.com)."
-
-  create_user:
-    email: Oops... this email alread'y exists, user may alread'y have an account !
-
-  #worker_search:
-  #  ub_greater_than_lb: Max nb of employees should be superior to min nb of employees
-
-  grades:
-  force_comment: You are required to comment this criterion

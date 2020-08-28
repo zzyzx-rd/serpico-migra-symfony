@@ -38,13 +38,13 @@ class SecurityController extends MasterController
 //        
 //        $csrf_token = $app['csrf.token_manager']->getToken('token_id');
 //        $contact = new Contact;
-//        $contactForm = $formFactory->create(
+//        $contactForm = $this->createForm(
 //            ContactForm::class,
 //            $contact,
 //            [ 'standalone' => true ]
 //        )->handleRequest($request);
 //
-//        return $app['twig']->render('landing.html.twig',
+//        return $this->render('landing.html.twig',
 //            [
 //                'csrf_token' => $csrf_token,
 //                'error' => $app['security.last_error']($request),

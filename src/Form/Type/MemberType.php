@@ -33,7 +33,7 @@ class MemberType extends AbstractType
             
         $organization = $options['organization'];
         $query = $options['query'];
-        $currentUser = MasterController::getAuthorizedUser();
+        $currentUser = $this->user;;
         if (!$currentUser instanceof User) {
             throw 'Authentication issue: no authorized user found';
         }

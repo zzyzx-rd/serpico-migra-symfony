@@ -7,11 +7,8 @@
  */
 namespace App\Form\Type;
 
-use Doctrine\ORM\EntityRepository;
+use App\Validator\UniquePerOrganization;
 use App\Entity\Client;
-use App\Entity\Organization;
-use App\Entity\User;
-use App\Entity\ExternalUser;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -23,8 +20,8 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Validator\Constraints as Assert;
-use App\Validator\UniquePerOrganization;
 use App\Validator\AtLeastOneOwnerAtInception;
 
 class ClientType extends AbstractType
@@ -33,16 +30,27 @@ class ClientType extends AbstractType
     {
 
         $client = $builder->getData();
-        $organization = $options['organization'];
+        $currentUser = $options['currentUser'];
+        $organization = $options['organization'] ?: $currentUser->getOrganization();
 
     
-        $builder->add('commname', TextType::class,
+        $builder->add('name', TextType::class,
         [
             'label_format' => 'create_client.%name%',
             'required' => false,
             'constraints' => [
                 new Assert\NotBlank,
+                new UniquePerOrganization([
+                    'organization' => $organization,
+                    'entity' => 'client',
+                    'element' => $client,
+                    'property' => 'name',
+                    'message' => 'create_client.doublon_client',
+                ])
             ],
+            'attr' => [
+                'class' => 'client-input-name',
+            ]
 
             //'disabled' => ($user != null && $client->isClient()) ? true : false,
         ])
@@ -62,6 +70,22 @@ class ClientType extends AbstractType
                 'multiple' => false,
                 'placeholder' => false
             ])
+
+        ->add('workerFirm', HiddenType::class,
+            [
+                'constraints' => [
+                    new UniquePerOrganization([
+                    'organization' => $organization,
+                    'entity' => 'client',
+                    'element' => $client,
+                    'property' => 'workerFirm',
+                    'message' => 'create_client.doublon_client',
+                    ])
+                ]
+            ])   //'disabled' => ($user != null && $client->isClient()) ? true : false,
+        
+
+        ->add('id',HiddenType::class)
         /*
         ->add('email', EmailType::class, [
             'constraints' => [
@@ -89,13 +113,14 @@ class ClientType extends AbstractType
                     'entry_type' => ExternalUserType::class,
                     'entry_options' => [
                         //'organization' => $options['organization'],
-                        'hasClientActiveAdmin' => $client && $client->getClientOrganization()->hasActiveAdmin(),
+                        'hasClientActiveAdmin' => $client && !$client->isVirtual(),
                         'standalone' => false,
                     ],
                     'constraints' => [
-                        new AtLeastOneOwnerAtInception,
+                        new AtLeastOneOwnerAtInception(),
                     ],
                     'prototype'    => true,
+                    'prototype_name' => '__indIndex__',
                     'by_reference' => false,
                     'allow_delete' => 'true',
                     'allow_add' => 'true',
@@ -130,6 +155,7 @@ class ClientType extends AbstractType
         $resolver->addAllowedTypes('standalone', 'bool');
         $resolver->setDefault('usersLinked', true);
         $resolver->setDefault('hasChildrenElements', true);
+        $resolver->setDefault('currentUser', null);
 
     }
 

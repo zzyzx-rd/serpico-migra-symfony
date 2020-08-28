@@ -194,25 +194,10 @@ class Weight extends DbObject
     /**
      * @param mixed $organization
      */
-    public function setOrganization($organization): void
+    public function setOrganization(Organization $organization): self
     {
         $this->organization = $organization;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getPosition()
-    {
-        return $this->position;
-    }
-
-    /**
-     * @param mixed $position
-     */
-    public function setPosition($position): void
-    {
-        $this->position = $position;
+        return $this;
     }
 
     /**
@@ -235,6 +220,9 @@ class Weight extends DbObject
         return $this;
     }
 
+    /**
+     * @return ArrayCollection|Position[]
+     */
     public function getPositions(){
         return $this->positions;
     }

@@ -1,0 +1,374 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+    {% trans %}create_client.page_title{% endtrans %}
+{% endblock %}
+
+
+  {% block css %}
+    <!-- Dropify -->
+    <link href="{{ asset('css/dropify.min.css') }}" rel="stylesheet" type="text/css">
+    <script>
+        var url = "{{ url('ajaxClientUserAdd') }}";
+        var dcurl = "{{ url('clientDelete', {cliId : global.request.get('cliId') ?: 0 }) }}";
+        var diurl = "{{ url('clientUserDelete', {extId : 0}) }}";
+        var vcurl = "{{ url('validateClient', {cliId : global.request.get('cliId') ?: 0 }) }}";
+        var viurl = "{{ url('validateClientUser', {cliId : global.request.get('cliId') ?: 0, extId : 0}) }}";
+        var surl = "{{ path('dynamicSearchParentFirm')}}";
+        var noFirm = "{{ 'create_client.partner.unexisting_worker_firm'|trans }}";
+        var multCreation = "{{ global.request.get('cliId') ? 0 : 1 }}";
+    </script>
+    <style>
+
+
+      #main-header{
+        --actions-width: 200px;
+        --padding: 16px;
+        display: flex;
+        justify-content: center;
+        padding: 1em;
+        margin-bottom: 2em;
+        position: relative;
+      }
+
+      header .page-title{
+          display: inline-block;
+          text-align: center;
+      }
+
+      footer{
+      padding-bottom: 40px;
+      }
+
+      .collection{
+        overflow: unset;
+      }
+
+      .client-type{
+        display: inline-block;
+        min-width: 250px;
+      }
+      .client-info-type{
+        /*color: grey;*/
+        background-color: aliceblue;
+        color: black;
+        justify-content: center;
+      }
+
+      .client-btn {
+        background-color: aliceblue;
+        color: black;
+        display: inline-block;
+      }
+
+      /*.client-row{
+        margin: 1.4em auto;
+      }*/
+
+      .client-select-type{
+        padding: 0 2rem;
+      }
+
+      .selected-client-logo{
+        height: 15px;
+      }
+
+      .add-individual-btn-row{
+        display: flex;
+        justify-content:flex-end;
+        margin-top: 1em;
+      }
+
+      .firm-option-logo{
+          float: left!important;
+      }
+      .firm-input-logo{
+          position: absolute;
+          height: 20px;
+          margin: auto 0;
+          top: 0;
+          left: 0;
+          bottom: 0;
+      }
+
+      .client-commname{
+        width: 100%;
+        padding: 0 1em;
+      }
+
+      .w-firm .dropdown-content{
+        opacity: 1!important;
+        display: block!important;
+      }
+
+      .w-firm .select-wrapper input, .w-firm .select-wrapper .caret{
+          display: none!important;
+      }
+
+      .add-members{
+        display: flex;
+        justify-content: flex-end;
+        padding: 1em;
+      }
+
+      .add-partner-zone{
+        margin-top: 20px;
+      }
+
+      .client-logo-zone{
+        width: 75px;
+        height: 75px;
+        border-radius: 9999px;
+      }
+
+      .back-btn{
+        position: absolute;
+        left: 40px;
+      }
+
+      .client-zone{
+        margin: 0 auto;
+        width: 90%;
+      }
+
+      .page-title{
+        font-size: 30px;
+      }
+
+      .client{
+        overflow-y: unset;
+      }
+
+      .partner-action-buttons{
+        margin-left: auto;
+        display: flex;
+      }
+
+      [name*="firmSelector"]{
+        display: none!important;
+      }
+
+
+      .collection {
+        border: none!important;
+      }
+      .collection-item{
+        padding: 20px!important;
+        border: 1px solid #e0e0e0!important;
+        margin: 10px 0px!important;
+      }
+
+      .user-btn {
+          background-color: aliceblue;
+          color: black;
+      }
+      
+      .user-select-fullname, .user-email, .user-position{
+        width: 100%;
+      }
+
+      .user-email .input-field{
+        margin-top: 0;
+      }
+
+      .user-fullname .input-field, .user-position .input-field{
+        width: 100%;
+        margin: 0 1em;
+      }
+
+      .other-user-elmts{
+        padding: 0 1em;
+        width: 50%;
+      }
+
+      .user-position, .user-weight{
+        display: inline-block;
+      }
+
+      .gen-error, .child-error, .subchild-error{
+        margin-top: 15px;
+      }
+
+      .subchild-error{
+        padding-left: 15px;
+      }
+
+    </style>
+  {% endblock %}
+
+
+{% block pagename %}
+    {% trans %}create_client.mobile_header_title{% endtrans %}
+{% endblock %}
+
+{% block username %}
+  {{ currentuser.firstname }}
+  {{ currentuser.lastname }}
+{% endblock %}
+
+{% block content %}
+    <main>
+
+      <header id="main-header">
+        <a class="waves-effect waves-green btn back-btn" href="{{ url('manageUsers')}}">{{ 'team.go_back_users'|trans }}</a>
+        {% if multipleClientCreation %}
+          <span class="page-title">{{ 'create_client.page_title'|trans }}</span>
+        {% endif %}
+      </header>
+
+
+        <div class="client-zone">
+      
+            {{ form_start(form) }}
+        
+              <ul class="clients collection" data-prototype="{% apply escape %}{% include 'components/client__item.html.twig' with { item: form.clients.vars.prototype } %}{% endapply %}">
+              {#<ul class="clients collection" data-prototype="{{ form_widget(form.clients.vars.prototype)|e('html_attr') }}">#}
+                {% for ckey, client in form.clients %}
+                    {% include "prototype/client_item.html.twig" with { item: client } %}
+                {% endfor %}
+              </ul>
+              
+            
+              <div class="add-partner-zone" {% if form.clients|length == 0 %}style="display:none"{% endif %}>
+                <div class="button-field">
+                  <a class="btn waves-effect waves-light insert-client-btn">
+                    <span>{% trans %}create_client.partner.add_button{% endtrans %}</span>
+                  </a>
+                </div>
+              </div>
+        </div>
+      </div>
+
+      <footer>
+        <div class="button-field center-button">
+            {{ form_widget(form.submit) }}
+        </div>
+      </footer>
+        {{ form_rest(form) }}
+        {{ form_end(form)}}
+    </main>
+
+
+  <div class="c-form" style="display: none;">
+    {{ form_start(clientForm) }}
+    {{ form_rest(clientForm) }}
+    {{ form_end(clientForm) }}
+  </div>
+
+  <div class="i-form" style="display: none;">
+    {{ form_start(individualForm) }}
+    {{ form_rest(individualForm) }}
+    {{ form_end(individualForm) }}
+  </div>
+
+  <div id="deleteExternalUser" class="modal">
+    <div class="modal-title">
+      <h5 style="margin-left: 20px;">{% trans %}client.delete_external_user.modal_title{% endtrans %}</h5>
+    </div>
+    <div class="modal-content">
+      <p>{% trans %}client.delete_external_user.modal_content{% endtrans %}</p>
+    </div>
+    <div class="modal-footer">
+      <a
+        class="btn waves-effect waves-light modal-close remove-client-user">{% trans %}stages.deleteStage.accept{% endtrans %}</a>
+      <a
+        class="waves-effect waves-light modal-close btn-flat red-text">{% trans %}stages.deleteStage.cancel{% endtrans %}</a>
+    </div>
+  </div>
+
+  <div id="deleteClient" class="modal">
+    <div class="modal-title">
+      <h5 style="margin-left: 20px;">{% trans %}client.delete.modal_title{% endtrans %}</h5>
+    </div>
+    <div class="modal-content">
+      <p>{% trans %}client.delete.modal_content{% endtrans %}</p>
+    </div>
+    <div class="modal-footer">
+      <a
+        class="btn waves-effect waves-light modal-close remove-client">{% trans %}stages.deleteStage.accept{% endtrans %}</a>
+      <a
+        class="waves-effect waves-light modal-close btn-flat red-text">{% trans %}stages.deleteStage.cancel{% endtrans %}</a>
+    </div>
+  </div>
+  
+  <div id="addClientSuccess" class="modal">
+    <div class="modal-content">
+      <p>{% trans %}create_client.create_organization.success_msg{% endtrans %}</p>
+    </div>
+
+    <div class="modal-footer">
+      <div class="button-field">
+        <a class=" modal-action modal-close waves-effect btn btn-large">Ok</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="dynErrror" class="modal">
+    <div class="modal-content">
+      <h5>{{ 'activities.modal_error_creation_title'|trans }}</h5>
+      <p></p>
+    </div>
+
+    <div class="modal-footer">
+      <div class="button-field">
+        <a class=" modal-action modal-close waves-effect btn btn-large">Ok</a>
+      </div>
+    </div>
+  </div>
+
+
+
+  {% if not form.vars.valid %}
+
+
+
+
+	<div id="errors" class="modal">
+		<div class="modal-content">
+      <h5>{{ 'activities.modal_error_creation_title'|trans }}</h5>
+        <div class="gen-error">
+          {{form_errors(form)}}
+        </div>
+
+        {% for ckey, client in form.clients %}
+          {% if not client.vars.valid %}
+          <div class="child-error">
+            {{ 'partner'|trans ~ ' ' ~ (ckey + 1) ~ ' ('~ client.vars.data.commname|trans ~ ') :' }}
+            {% for child in client.children %}
+              {% if not child.vars.valid %}
+                {% if child != client.aliveExternalUsers %}
+                  <div style="margin-left: 20px;">{{form_label(child)}}<span style="display:inline-block;width: 30%;"></span> {{ form_errors(child) }}</div>
+                {% else %}
+                  <div class="subchild-error">
+                    {% for ikey, externalUser in client.aliveExternalUsers %}
+                        {{ 'user'|trans ~ ' ' ~ (ikey + 1) ~ ' (' ~ externalUser.vars.data.firstname|trans ~ ' ' ~ externalUser.vars.data.lastname|trans ~ ') :' }}
+                        {% for child in externalUser.children %}
+                          {% if not child.vars.valid %}
+                            <div style="margin-left: 20px;">{{form_label(child)}}<span style="display:inline-block;width: 30%;"></span> {{ form_errors(child) }}</div>
+                          {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                  </div>
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+          </div>
+          {% endif %}
+        {% endfor %}     
+
+		</div>
+		<div class="modal-footer">
+			<a class=" modal-action modal-close waves-effect waves-green btn notifyModalClose">Ok</a>
+		</div>
+	</div>
+{% endif %}
+
+{% endblock %}
+
+{% block javascripts %}
+  <script src="{{ asset('js/login.js') }}"></script>
+  <script src="{{ asset('js/dropify.min.js') }}"></script>
+  <script src="{{ asset('js/client_user_create.js') }}"></script>
+
+
+{% endblock %}

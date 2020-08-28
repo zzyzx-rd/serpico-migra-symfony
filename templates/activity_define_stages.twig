@@ -4,7 +4,7 @@
     {% trans %}stages.page_title{% endtrans %}
 {% endblock %}
 
-{% set elmt = app.request_stack.currentrequest.get('elmt') %}
+{% set elmt = global.request.get('elmt') %}
 
 {% block css %}
     <!-- CSS NoUISlider-->

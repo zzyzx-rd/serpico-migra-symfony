@@ -1,0 +1,75 @@
+{% set client = item.vars.data ? item.vars.data : null %}
+
+    <div class="client {% if item.parent is not null %}collection-item{% endif %}">
+    <div class="client-data-zone" {% if not client %}style="display:none"{% endif %}>
+        <ul class="flex-center">
+        <li style="margin-right: 20px;position:relative">
+            <img class="client-logo-zone" src="{{ client ? asset(global.clientlogo(client)) : asset('lib/img/org/no-picture.png') }}">
+        </li>
+        <li style="width: 100%;">
+            <ul class="flex-center-sb">
+            <h5 style="display: inline-block;" class="client-name">
+                {% if client and client.name is not empty %}
+                {{ client.name }}
+                {% endif %}
+            </h5>
+            {#<a href="#deleteClient" class="waves-effect waves-light accent-4 btn-flat modal-trigger" style="margin-left: auto;"><i class="fa fa-times"></i></a>#}
+            <div>
+                <a class="modify-client-btn btn-flat"><i class="fa fa-pencil-alt"></i></a>
+                <a class="insert-individual-btn waves-effect waves-light btn blue darken-2 tooltip" data-cid="{{ client ? client.id : 0 }}"><i class="fa fa-user-plus"></i></a>
+            </div>
+            </ul>
+            {#
+            <div>
+            Adresse générique : <span class="client-email"> {{ client.vars.data.email }} </span>
+            </div>
+            #}
+        </li>
+        </ul>   
+    </div>
+
+    <div class="client-input-zone" {% if client %}style="display:none"{% endif %}>
+        <ul class="flex-center-sb">
+        {#<h4 style="display:inline-block">{{'create_client.partner.prototype_title'|trans}} __clientNb__</h4>#}
+        <div class="client-commname client-elmt" data-prefix-wo="{{ 'create_client.provide_name'|trans }}" data-prefix-w="{{ 'partner'|trans ~ ' : ' }}">
+            <a class="btn client-btn client-info-commname flex-center">
+                <img class="selected-client-logo sm-right" src="{{ client ? asset(global.clientlogo(client)) : asset('lib/img/org/no-picture.png')}}" alt="">
+                <span class="m-right commname-value">
+                    {{ client ? 'partner'|trans ~ ' : ' ~ client.name|trans : 'create_client.provide_name'|trans }}
+                </span>
+                {#<span class="commname-value">{{ client ? item.vars.data.commname : '' }}</span>#}
+            </a>
+            <div class="w-firm input-field client-input" style="display:none">
+                {{ form_label(item.name) }}
+                {{ form_widget(item.name) }}
+                <select name="firmSelector" style="margin-top:45px"></select>
+                {{ form_widget(item.workerFirm) }}
+            </div>
+        </div>
+        <div class="partner-action-buttons">
+            <div class="client-type client-elmt" data-prefix-wo="" data-prefix-w="{{'type'|trans ~ ' : '}}">
+            <a class="btn client-btn client-info-type flex-center">
+                <i class="fa fa-industry m-right"></i>
+                <span class="">{{'type'|trans ~ ' : ' ~ 'create_client.type.firm'|trans}}</span>
+            </a>
+            <div class="client-select-type client-input" style="display: none;">
+                {{ form_label(item.type) }}
+                {{ form_widget(item.type) }}
+            </div>
+            </div>
+            <a class="validate-client-btn waves-effect waves-light btn tooltip" data-cid="{{client and client.id ? client.id : 0}}"><i class="fa fa-check"></i></a>
+            <a href="#deleteClient" class="waves-effect waves-light accent-4 btn-flat modal-trigger" data-cid="{{client and client.id ? client.id : 0}}"><i class="fa fa-trash"></i></a>
+        </div>
+        {{ form_widget(item.id) }}
+        </ul> 
+    </div>
+    <ul class="individuals collection no-padding" data-prototype="{% apply escape %}{% include 'components/client_external_user__item.html.twig' with { item: item.aliveExternalUsers.vars.prototype, client: item } %}{% endapply %}"
+    {% if not client or client.aliveExternalUsers|length == 0 %}style="display:none"{% endif %}
+    >
+        
+        {% for ikey, individual in item.aliveExternalUsers %}
+        {% include "components/client_external_user__item.html.twig" with { item: individual, client: item } %}
+        {% endfor %}
+    
+    </ul>
+    </div>

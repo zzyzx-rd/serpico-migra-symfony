@@ -31,37 +31,64 @@ $(function(){
         $('.client-select-type select').material_select();
     });
 
-    /*
-    $(document).on('focusout','input[name*="commname"]',function(event){
-        if(!$('select[name="firmSelector"]').closest('.select-wrapper').is(':visible')){
-            setTimeout(function(){
-                $this = $('input[name*="commname"]');
-                if(!$this.attr('value') && $this.val() != ""){
-                    const params = {name: $this.val()};
-                    $.post(curl,params)
-                        .done(function(data){
-                            $this.attr('value',data.wfId);
-                        })
-                        .fail(function(data){
-                            console.log(data);
-                        });
-    
-                }
-            },2000)
-        }
-    })
-    */
+   $(document).on('click',function(e){
+        var $this = $(e.target);
+        if(
+            $this.is('.btn:not(.user-btn,.client-btn)') ||
+            $this.parent().is('.btn:not(.user-btn,.client-btn)') ||
+            $this.hasClass('insert-individual-btn') || 
+            $this.parent().hasClass('insert-individual-btn')
+        ) {return ;}
+        var $targetedUserEl = $this.closest('.user-elmt');
+        var $targetedUserInput = $targetedUserEl ? $targetedUserEl.find('.user-input') : null;
 
-    $(document).on('change','select[name="firmSelector"]',function(){
-        const $this = $(this);
-        const clientNb = $('select[name="firmSelector"]').index($this);
-        $('input[name*="commname"]').eq(clientNb).attr('value',$this.val());
+        $('.user-input:visible:not(.user-owner)').not($targetedUserInput).each(function(i,e){
+            
+            if($(e).hasClass('user-select-fullname') && (!$(e).find('[name*="firstname"]').val().length || !$(e).find('[name*="lastname"]').val().length)){
+                return;
+            }
+            /*$userEl.find('a').is(':visible')){
+                return;
+            }*/
+    
+
+            var $userEl = $(e).closest('.user-elmt');    
+            const $input = $userEl.find('input.select-dropdown').length ? $userEl.find('select') : $userEl.find('input');
+            
+            if($userEl.find('input.select-dropdown').length){
+                    inputVal = $userEl.find('select option:selected').text();
+            } else {
+                if($(e).hasClass('user-select-fullname')){
+                    inputVal = $userEl.find('[name*="firstname"]').val() + ' ' + $userEl.find('[name*="lastname"]').val();
+                } else {
+                    inputVal = $userEl.find('input').val();
+                }
+            }
+
+            //const inputVal = $userEl.find('input.select-dropdown').length ? $userEl.find('select option:selected').text() : $userEl.find('input').val();
+            $userEl.find('.user-input').hide();
+            $userEl.find('a>span').empty().append($input.val().length ? $userEl.data('prefix-w')+''+ inputVal : $userEl.data('prefix-wo'));
+            $userEl.find('a').show();
+        })
+
+        var $targetedClientEl = $this.closest('.client-elmt');
+        var $targetedClientInput = $targetedClientEl ? $targetedClientEl.find('.client-input') : null;
+
+        $('.client-input:visible').not($targetedClientInput).each(function(i,e){
+            var $clientEl = $(e).closest('.client-elmt');
+            const $input = $clientEl.find('input.select-dropdown').length ? ($clientEl.find('.client-input-name') ? $clientEl.find('input').eq(0) : $clientEl.find('select')) : $clientEl.find('input').eq(0);
+            inputVal = $clientEl.find('input.select-dropdown').length ? ($clientEl.find('.client-input-name') ? $clientEl.find('input').eq(0).val()  : $clientEl.find('select option:selected').text()) : $clientEl.find('input').val();
+            $clientEl.find('.client-input').hide();
+            $clientEl.find('a>span').empty().append($input.val().length ? $clientEl.data('prefix-w')+''+ inputVal : $clientEl.data('prefix-wo'));
+            $clientEl.find('a').show();
+        })
+        
     });
 
-    $(document).on('keyup','input[name*="commname"]',function(event){
+    $(document).on('keyup','.client-input-name',function(event){
         var $this = $(this);
-        var index = $('input[name*="commname"]').index($(this));
-        var $selector = $('select[name="firmSelector"]').eq(index);
+        var index = $('.client-input-name').index($(this));
+        var $selector = $('[name*="firmSelector"]').eq(index);
         $selectorMElmts = $selector.closest('.select-wrapper');
 
         if($this.val().length >= 3 /*&& event.keyCode != 8*/){
@@ -100,7 +127,7 @@ $(function(){
                     //$selectorMElmts.prepend(`<img class="firm-input-logo" src="/lib/img/org/${data.workerFirms[0].logo ? data.workerFirms[0].logo : 'no-picture.png'}">`);
 
 
-                    //$('select[name="firmSelector"]').eq(index).show();
+                    //$('#firmSelector').eq(index).show();
                 })
                 .fail(function(data){
                    console.log(data);
@@ -112,87 +139,36 @@ $(function(){
         }
     })
 
-    $(document).on('change','select[name="firmSelector"]',function(){
+    $(document).on('click','.client-btn',function(){
+        const $this = $(this);
+        $this.hide();
+        $this.next().show();
+    })
+
+    $(document).on('change','[name*="firmSelector"]',function(){
         var $this = $(this);
-        var index = $('select[name="firmSelector"]').index($this);
+        var index = $('[name*="firmSelector"]').index($this);
         if($this.val() != ""){
-            $('input[name*="commname"]').eq(index).val($this.find(":selected").text());
-            $('input[name*="commname"]').eq(index).attr("value",$this.val());
+            $('.client-input-name').eq(index).val($this.find(":selected").text());
+            $('[name*="workerFirm"]').eq(index).val($this.val());
         } else {
-            $('input[name*="commname"]').eq(index).removeAttr('value');
+            $('[name*="workerFirm"]').eq(index).val("");
         }
-        $(this).prev().css('visibility','hidden');
+        $('.selected-client-logo').eq(index).attr('src', $this.prev().find('li').eq($this.find('option').index($this.find('option:selected'))).find('img').attr('src'));
+        if($this.val() != ""){
+            $('.commname-value').eq(index).empty().text($('.client-commname').eq(index).data('prefix-w') + '' + $this.find('option:selected').text());
+            $('.client-info-commname').show();
+            $('.w-firm').hide();
+        } else {
+            $(this).parent().hide();
+        }
     });
-    
-    /*
-    $('.client-submit').on('click', function(e){
-        e.preventDefault();
-
-        const $redText = $('.red-text');
-        $redText.remove();
-
-        $.post(eorurl, $(this).closest('form').serialize())
-        .done(function(_json) {
-            const json = JSON.parse(_json);
-
-            $('[name="add_client_user_form"] select[name$="[orgId]"]').append(`
-                <option value="${json.orgId}">${json.orgName}</option>
-            `).prop('value', json.orgId);
-            $('.modal').modal('close');
-            $('#addClientSuccess').modal('open');
-        })
-        .fail(function({ responseJSON }) {
-            if (responseJSON.hasOwnProperty("commname")) {
-                $('#addClient').find('input[type="text"]').after('<div class="red-text"><strong>' + responseJSON.commonName + '</strong></div>');
-                return false;
-            } else {
-                $('[id$="orgId"]').append('<option value="'+responseJSON.orgId+'">'+responseJSON.orgName+'</option>');
-                $('[id$="orgId"]:eq('+$("#addClient").find("button").data("selectedNb")+')').val(responseJSON.orgId);
-            }
-        });
-    });
-    */
-    
+        
 
     $collectionHolder = $('ul.clients');
     if(multCreation == "1" && !$('#errors').length){
         addClientForm();
     }
-
-    // Get the ul that holds the collection of users
-
-    $('.dropify').dropify({
-
-        messages:
-            (lg == 'fr') ? {
-                'default': 'Cliquez ou glissez-déposez un fichier CSV (max. 1 Mo) contenant :<br> <br>' +
-                'Champs nécessaires : Prenom, Nom, Mail & Position (ex : Senior Officer) <br>' +
-                'Champs optionnels : Role (dans la solution, par défault "Collaborateur", autres choix "Admin" ou "Activity_Manager") & Poids (par défaut, cela est géré dans la liste des utilisateurs))',
-                'replace': 'Cliquez ou glissez-déposer un fichier pour le remplacer',
-                'remove': 'Supprimer',
-                'error': 'Ooops, une erreur est survenue'
-            } : {
-                'default': 'Click or drag and drop a CSV file (max. 1 Mo) containing : <br> <br>' +
-                'Mandatory fields : First_Name, Last_Name, Mail & Position (ex : Senior Officer) <br>' +
-                'Optional fields : Role (by default "Collaborator", but it can also be "Admin" or "Activity_Manager") & Weight (by default, managed in user positions)',
-                'replace': 'Drag and drop or click to replace',
-                'remove': 'Remove',
-                'error': 'Ooops, something wrong happened.'
-            }
-
-    });
-
-    $('.dropify').on('change',function(e){
-        if($('.dropify-clear').length>0){
-            $('.create-users').attr('disabled',false);
-        }
-    })
-
-    $(document).on('click', '.dropify-clear', function(){
-        if($collectionHolder.children().length == 0){
-            $('.create-users').attr('disabled',true);
-        }
-    })
 
     $(document).on('click','.modify-client-btn, .modify-ext-user-btn',function(){
         $(this).closest('.element-data').next().show().prev().hide();
@@ -215,6 +191,12 @@ $(function(){
         });
     }
 
+    $(document).on('click','.modify-client-btn',function(){
+        const $dataZone = $(this).closest('.client-data-zone');
+        $dataZone.hide();
+        $dataZone.next().show();
+    });
+
     $('.remove-client').on('click',function(){
 
         urlToPieces = dcurl.split('/');
@@ -232,8 +214,13 @@ $(function(){
             })
     })
 
-    $('.remove-client-user').on('click',function(){
+    $(document).on('click','.remove-client-user',function(){
         
+        if($(this).data('eid') == 0){
+            $(this).closest('.individual').remove();
+            return false;
+        }
+
         urlToPieces = diurl.split('/');
         eid = $(this).data('eid');
         urlToPieces[urlToPieces.length - 2] = eid;
@@ -259,71 +246,94 @@ $(function(){
         
         e.preventDefault();
         btn = $(this);
-        $curRow = $(this).closest('.element-input');
+        $curRow = $(this).closest('.client');
         $curRow.find('.red-text').remove();
-        eid = $(this).data('sid');
-
-        inputName = $curRow.find('input[name*="commname"]').val();
-        wfiId = $curRow.find('input[name*="commname"]').attr('value') ?? "";
+        inputName = $curRow.find('.client-input-name').val();
+        workerFirm = $curRow.find('input[name*="workerFirm"]').val();
         inputType = $curRow.find('select[name*="type"] option:selected').val();
-        inputEmail = $curRow.find('input[name*="email"]').val();
+        inputId = $curRow.find('.client-input-zone input[name*="id"]').val();
 
-        const $form = $('.c-form form');
-        $form.find('[name*="commname"]').val(inputName);
-        $form.find('[name*="email"]').val(inputEmail);
-        $form.find('select[name*="type"]').val(inputType);
-
+        if($('.c-form').length){
+            $form = $('.c-form form');
+            $form.find('.client-input-name').val(inputName);
+            $form.find('input[name*="workerFirm"]').val(workerFirm);
+            $form.find('select[name*="type"]').val(inputType);
+            $form.find('input[name*="id"]').val(inputId);
+        } else {
+            $form = $('form[name*="client"]');
+        }
+       
         urlToPieces = vcurl.split('/');
-        urlToPieces[urlToPieces.length - 1] = $(this).data('cid');
+        urlToPieces[urlToPieces.length - 1] = $(this).attr('data-cid');
         vcurl = urlToPieces.join('/');
-        addParams = `&wfiId=${wfiId}`;
 
-        $.post(vcurl,$form.serialize().concat(addParams))
+        $.post(vcurl,$form.serialize())
             .done(function(data){
-                if(data.cliId){
-                    btn.attr('data-cid',data.cliId);
-                    btn.prev().attr('data-cid',data.cliId);
-                    btn.closest('.client').find('.insert-individual-btn').removeAttr('disabled');
-                }
-                let elmtData = btn.closest('.element-input').prev();
-                elmtData.find('.client-name').empty().append(inputName);
-                elmtData.find('.client-email').empty().append(inputEmail);
-                btn.closest('.element-input').prev().show().next().hide();
+
+                btn.attr('data-cid',data.cliId);
+                btn.prev().attr('data-cid',data.cliId);
+                $curRow.find('input[name*="id"]').val(data.cliId);
+                $curRow.find('input[name*="workerFirm"]').val(data.wfiId);
+                $('.add-partner-zone').show();
+                $curRow.find('.insert-individual-btn').attr('data-cid',data.cliId);
+                $curRow.find('[href="#deleteClient"]').attr('data-cid',data.cliId);
+                $curRow.find('.client-logo-zone').attr('src',$curRow.find('.selected-client-logo').attr('src'));
+                $curRow.find('.client-name').empty().append(inputName);
+                $curRow.find('.client-data-zone').show();
+                $curRow.find('.client-input-zone').hide();
 
             })
             .fail(function(data){
                 $.each(data.responseJSON, function (key, value) {
-                    $.each($curRow.find('input, select'),function(){
-                        if($(this).attr('name').indexOf(key) != -1){
-                            $(this).after(/*html*/`
-                            <div class="red-text">
-                                <strong>${value}</strong>
-                            </div>
-                            `);
-                        }
-                    })
+                    if(key == "#"){
+                        $('#dynErrror p').empty().append(value);
+                        $('#dynErrror').modal('open');
+                    } else {
+                        $.each($curRow.find('input, select').not('.select-dropdown'),function(i,e){
+                            if($(e).attr('name').indexOf(key) != -1){
+                                $(e).after(/*html*/`
+                                <div class="red-text">
+                                    <strong>${value}</strong>
+                                </div>
+                                `);
+                                $(e).closest('.client-input').prev().hide();
+                                $(e).closest('.client-input').show();
+                            }
+                        })
+                    }
                 })
             })
     })
 
+    $(document).on('click','.user-btn',function(){
+        const $this = $(this);
+        const $content = $(this).parent();
+        const $mZone = $content.children().eq(-1);
+        $this.hide();
+        $mZone.find('select').material_select();
+        $mZone.show();
+    });
+
     $(document).on('click','.validate-ext-user-btn',function(e){
         e.preventDefault();
         btn = $(this);
-        $curRow = $(this).closest('.element-input');
+        $curRow = $(this).closest('.individual');
         $curRow.find('.red-text').remove();
-        eid = btn.data('eid');
-        cid = btn.data('cid');
+        eid = btn.attr('data-eid');
+        cid = btn.attr('data-cid');
         inputFName = $curRow.find('input[name*="firstname"]').val();
         inputLName = $curRow.find('input[name*="lastname"]').val();
         inputEmail = $curRow.find('input[name*="email"]').val();
         inputPosition = $curRow.find('input[name*="positionName"]').val();
         inputWeight = $curRow.find('input[name*="weight"]').val();
+        inputId = $curRow.find('input[name*="id"]').val();
         const $form = $('.i-form form');
         $form.find('[name*="firstname"]').val(inputFName);
         $form.find('[name*="lastname"]').val(inputLName);
         $form.find('[name*="email"]').val(inputEmail);
         $form.find('[name*="positionName"]').val(inputPosition);
         $form.find('[name*="weight"]').val(inputWeight);
+        $form.find('[name*="id"]').val(inputId);
         urlToPieces = viurl.split('/');
         urlToPieces[urlToPieces.length - 4] = cid;
         urlToPieces[urlToPieces.length - 1] = eid;
@@ -334,12 +344,21 @@ $(function(){
             if(data.extId){
                 btn.attr('data-eid',data.extId);
                 btn.prev().attr('data-eid',data.extId);
+                if(btn.prev().hasClass('remove-client-user')){
+                    btn.prev().removeClass('remove-client-user').addClass('modal-trigger').attr('href','#deleteExternalUser');
+                }
+                $curRow.find('input[name*="id"]').val(data.extId);
             }
             let elmtData = btn.closest('.element-input').prev();
             elmtData.find('.user-ext-fullname').empty().append(inputFName+' '+inputLName);
             elmtData.find('.user-ext-position-name').empty().append(inputPosition);
             elmtData.find('.user-ext-weight').empty().append(inputWeight);
-            elmtData.find('.user-ext-email').empty().append(inputEmail);
+            if(inputEmail.length){
+                elmtData.find('.user-ext-email i').attr('data-tooltip',inputEmail).tooltip();
+                if(!elmtData.find('.user-ext-email i').hasClass('lime-text')){
+                    elmtData.find('.user-ext-email i').addClass('lime-text text-darken-3');
+                }
+            }
             btn.closest('.element-input').prev().show().next().hide();
 
         })
@@ -352,6 +371,9 @@ $(function(){
                             <strong>${value}</strong>
                         </div>
                         `);
+                        $(this).closest('.user-input').prev().hide();
+                        $(this).closest('.user-input').show();
+
                     }
                 })
             })
@@ -360,64 +382,14 @@ $(function(){
 
     })
 
-    //Setup rules when modifying existing stages
-    /*
-    $(document).on('click', '.remove-external-user, .insert-btn', function(e) {
-        // prevent the link from creating a "#" on the URL
-        e.preventDefault();
-        $collectionHolder = $('ul.clients');
-        var total = $collectionHolder.data('total');
-        var selectedIndex = ($(this).hasClass('insert-btn')) ? $collectionHolder.children().length : $collectionHolder.children().index($(this).closest('li'))+1;
-
-        if($(this).hasClass('remove-external-user')){
-
-            //$collectionHolder.data('total', $collectionHolder.data('total') - 1);
-            if($collectionHolder.children().length == 1){
-                $('.create-external-users').attr('disabled',true);
-            }
-
-
-            if(selectedIndex < $collectionHolder.children().length){
-                for(i = selectedIndex+1;i <= $collectionHolder.children().length;i++){
-
-                    $collectionHolder.find('h4:eq('+ (i-1) +')').text("User "+ (i-1));
-                }
-            }
-
-            $(this).closest('li').remove();
-            $collectionHolder.data('total',total-1);
-
-
-        } else if ($(this).hasClass('insert-btn')){
-            addClientUserForm($collectionHolder, $(this), selectedIndex);
-        }
-    });
-    */
-
-    $(document).on('click', '.remove-individual, .remove-orgteam', function(e) {
-            
-            var selectedClassSelector = '.' + $(this).attr('class').split(' ')[0].split('-')[1];
-            index = $(selectedClassSelector).index($(this).closest(selectedClassSelector)) + 1;
-            
-            for(i = index+1;i <= $(selectedClassSelector).length;i++){
-                titleElmt = $(selectedClassSelector).find('h4').eq(i-1);
-                oldTextArray = titleElmt.text().split(' ');
-                oldTextArray[oldTextArray.length - 1] = i - 1;
-                newText = oldTextArray.join(' ');
-                titleElmt.empty().append(newText);
-            }
-
-            $(this).closest(selectedClassSelector).remove();
-    })
-
     function addClientForm(){
         // Get the data-prototype
         var prototype = $('ul.clients').data('prototype');
         var total = $('.client').length;
         // Replacing prototype constants
         var newForm = prototype
-            .replace(/__clientNb__/g, total+1)
-            .replace(/__name__/g, total+1);
+            .replace(/__clientNb__/g, total)
+            .replace(/__name__/g, total);
         $newForm = $(newForm);
         $newForm.find('.tooltipped').tooltip();
         $collectionHolder.append($newForm);
@@ -433,16 +405,17 @@ $(function(){
         var total = $individualList.find('.individual').length;
         // Replacing prototype constants
         var newForm = prototype
-            .replace(/__indivNb__/g, total+1)
-            .replace(/__name__/g, total+1)
+            .replace(/__indivNb__/g, total)
+            .replace(/__indIndex__/g, total)
             .replace(/__DeleteIndivButton__/g, '<i class="remove-individual small material-icons" style="color: red">cancel</i>');
         
         $newForm = $(newForm);
-        if($newForm.find('.delete-ext-user-btn').attr('data-cid') == 0){
-            $newForm.find('.delete-ext-user-btn').attr('data-cid',$('.client').eq(index).find('.validate-client-btn').data('cid'));
-            $newForm.find('.validate-ext-user-btn').attr('data-cid',$('.client').eq(index).find('.validate-client-btn').data('cid'))
+        if($newForm.find('.validate-ext-user-btn').attr('data-cid') == 0){
+            $newForm.find('.validate-ext-user-btn').attr('data-cid',$('.client').eq(index).find('.insert-individual-btn').attr('data-cid'));
         }
+        $newForm.find('.user-select-weight input').val(100);
         $newForm.find('.tooltipped').tooltip();
+        if(!$individualList.is(':visible')){$individualList.show();}
         $individualList.append($newForm);
     }
 

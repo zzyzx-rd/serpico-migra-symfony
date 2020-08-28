@@ -38,6 +38,9 @@
             color: black;
         }
     </style>
+    <script>
+        var rurl = "{{ path('resetPassword') }}";
+    </script>
 {% endblock %}
 
 
@@ -127,7 +130,6 @@
 
 {% block javascripts %}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.5.9/slick.min.js" type="text/javascript"></script>
-
     <script type="text/javascript">
         $(document).ready(function () {
             $(".banner-title").not('.slick-initialized').slick({
