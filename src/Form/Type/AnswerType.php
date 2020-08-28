@@ -51,7 +51,7 @@ class AnswerType extends AbstractType
             function (FormEvent $event) use ($builder) {
                 $form = $event->getForm();
                 $child = $event->getData();
-                $currentUser = MasterController::getAuthorizedUser();
+                $currentUser = $this->user;;
 
                 if ($child instanceof Answer) {
                     $SF = $child->getField();

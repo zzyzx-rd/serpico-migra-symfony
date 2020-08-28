@@ -93,19 +93,23 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Twig\Environment;
 
 class OrganizationController extends MasterController
 {
     private $notFoundResponse;
 
-    public function __construct(EntityManagerInterface $em, Security $security, RequestStack $stack, MailerInterface $mailer) {
-        parent::__construct($em, $security, $stack, $mailer);
+
+    public function __construct(EntityManagerInterface $em, Security $security, RequestStack $stack, UserPasswordEncoderInterface $encoder, Environment $twig, MailerInterface $mailer) {
+        parent::__construct($em, $security, $stack, $encoder, $twig, $mailer);
         $this->notFoundResponse = new Response(null, Response::HTTP_NOT_FOUND);
     }
 
     /**
      * @param Request $request
-     * @param Application $app
      * @return JsonResponse
      * @throws ORMException
      * @throws OptimisticLockException
@@ -169,7 +173,8 @@ class OrganizationController extends MasterController
 
         if(sizeof($recipients) > 0){
             $settings['rootCreation'] = true;
-            MasterController::sendMail($app, $recipients, 'registration', $settings);
+            $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'registration']);
+            
         }
 
         $settings = [];
@@ -200,7 +205,7 @@ class OrganizationController extends MasterController
      * @Route("/team/create", name="createTeam")
      */
     public function createTeamAction(){
-        $currentUser = MasterController::getAuthorizedUser();
+        $currentUser = $this->user;;
         $team = new Team;
         $organization = $currentUser->getOrganization();
         $team->setOrganization($currentUser->getOrganization())
@@ -280,7 +285,6 @@ class OrganizationController extends MasterController
 
     private function activityConfigurationAction(Request $request, $element, User $user, $entity, $redirectLink)
     {
-
         $activityForm = $this->createForm(
             ActivityElementForm::class, $element, ['entity' => $entity]
         );
@@ -306,9 +310,9 @@ class OrganizationController extends MasterController
                     // 1 - Sending participants mails if necessary
                     // Parameter for subject mail title
                     if ($nbTotalStages > 1) {
-                        $mailSettings['stage'] = $stage;
+                        $settings['stage'] = $stage;
                     } else {
-                        $mailSettings['activity'] = $element;
+                        $settings['activity'] = $element;
                     }
 
                     $notYetMailedParticipants = $stage->getDistinctParticipations()->filter(function (Participation $p) {
@@ -318,13 +322,13 @@ class OrganizationController extends MasterController
                     $participants = $notYetMailedParticipants->getValues();
                     $recipients   = [];
                     foreach ($participants as $participant) {
-                        $recipients[] = $participant->getDirectUser();
+                        $recipients[] = $participant->getUser();
                         $participant->setStatus(1);
                         $participant->setIsMailed(true);
                         $em->persist($participant);
                     }
 
-                    self::sendMail($app, $recipients, 'activityParticipation', $mailSettings);
+                    $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'activityParticipation']);
                     $em->flush();
                 }
 
@@ -1176,24 +1180,21 @@ class OrganizationController extends MasterController
 
                     if($completedStageParticipations->count() > 0){
 
-                        $mailRecipients = [];
+                        $recipients = [];
                         $mailRecipientIds = [];
                         foreach($completedStageParticipations as $completedParticipation){
                             if(in_array($completedParticipation->getUsrId(),$mailRecipientIds) === false){
-                                $mailRecipients[] = $completedParticipation->getDirectUser();
+                                $recipients[] = $completedParticipation->getDirectUser();
                                 $mailRecipientIds[] = $completedParticipation->getUsrId();
                             }
                             $completedParticipation->setStatus(2);
                             $em->persist($completedParticipation);
                         }
                         $em->flush();
+                        $settings = ['stage' => $element, 'actElmt' => 'criterion'];
 
-                        self::sendMail(
-                            $app,
-                            $mailRecipients,
-                            'unvalidateOutputDueToChange',
-                            ['stage' => $element, 'actElmt' => 'criterion']
-                        );
+                        $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'unvalidateOutputDueToChange']);
+
                     }
                 }
 
@@ -1274,7 +1275,7 @@ class OrganizationController extends MasterController
         $repo1         = $entityManager->getRepository(Survey::class);
         $repo2         = $entityManager->getRepository(Participation::class);
         $stage         = $repo0->find($stgId);
-        $currentUser = MasterController::getAuthorizedUser();
+        $currentUser = $this->user;;
         if (!$currentUser instanceof User) {
             return $this->redirectToRoute('login');
         }
@@ -1359,8 +1360,8 @@ class OrganizationController extends MasterController
      * @Route("/activity/answer/send/{surId}", name="sendAnswer")
      */
     public function sendAnswerAction(Request $request,$surId){
-        $currentUser = MasterController::getAuthorizedUser();
-        $em = $this->getEntityManager($app);
+        $currentUser = $this->user;;
+        $em = $this->em;
         $redirect = $request->get('redirect');
         $repo2 = $em->getRepository(Participation::class);
         $repo0 = $em->getRepository(Survey::class);
@@ -1382,7 +1383,7 @@ class OrganizationController extends MasterController
      */
     public function sendResultAction(Request $request,$surId){
 
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $redirect = $request->get('redirect');
         $repo2 = $em->getRepository(Participation::class);
         $repo0 = $em->getRepository(Survey::class);
@@ -1410,9 +1411,9 @@ class OrganizationController extends MasterController
      */
     public function answerShowAction(Request $request, $surId)
     {
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         
-        $currentUser = MasterController::getAuthorizedUser();
+        $currentUser = $this->user;;
         if (!$currentUser instanceof User) {
             return $this->redirectToRoute('login');
         }
@@ -1564,7 +1565,7 @@ class OrganizationController extends MasterController
             $settings['adminFullName'] = $currentUser->getFullName();
             $settings['rootCreation']  = false;
             $em->flush();
-//            self::sendMail($app, $recipients, 'registration', $settings);
+            $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'registration']);
             return $this->redirectToRoute('manageUsers');
         }
 
@@ -1580,12 +1581,9 @@ class OrganizationController extends MasterController
 
     /**
      * @param Request $request
-     * @param Application $app
      * @param $cliId
-     * @return JsonResponse
-     * @throws ORMException
-     * @throws OptimisticLockException
-     * @Route("/ajax/client/validate/{cliId}", name="validateClient")
+     * @return mixed
+     * @Route("/client/validate/{cliId}", name="validateClient")
      */
     public function validateClientAction(Request $request, $cliId){
 
@@ -1594,85 +1592,55 @@ class OrganizationController extends MasterController
         if (!$currentUser instanceof User) {
             return $this->redirectToRoute('login');
         }
-        
-        $repoC = $em->getRepository(Client::class);
-        $repoO = $em->getRepository(Organization::class);
 
+        $repoC = $em->getRepository(Client::class);
         $organization = $currentUser->getOrganization();
+        /** @var Client */
         $client = $cliId == 0 ? new Client : $repoC->find($cliId);
-        $clientForm = $this->createForm(ClientType::class, $client, [ 'standalone' => false, 'hasChildrenElements' => false ]);
+        $clientForm = $this->createForm(ClientType::class, $client, [ 'standalone' => false, 'hasChildrenElements' => false, 'currentUser' => $currentUser ]);
         $clientForm->handleRequest($request);
 
         if ($clientForm->isValid()) {
 
-            $wfiId = $request->get('wfiId');
-            $repoWF = $em->getRepository(WorkerFirm::class);
             /** @var WorkerFirm */
-            $workerFirm = $wfiId ? $repoWF->find((int) $wfiId) : new WorkerFirm;
+            $workerFirm = $client->getWorkerFirm() ? $this->em->getRepository(WorkerFirm::class)->find($client->getWorkerFirm()) : ($this->em->getRepository(WorkerFirm::class)->findOneByCommonName($client->getName()) ?: new WorkerFirm);
+            $client->setWorkerFirm($workerFirm);
+            $em->persist($client);
 
-            if(!$wfiId){
+            if(!$workerFirm->getCommonName()){
                 $workerFirm
-                    ->setCommonName($client->getCommname())
-                    ->setName($client->getCommname());
+                    ->setCommonName($client->getName())
+                    ->setName($client->getName());
                 $em->persist($workerFirm);
             }
 
             if($cliId == 0){
-
+                
                 $clientOrganization = new Organization;
                 $clientOrganization
-                    ->setCommname($workerFirm->getName())
+                    ->setCommname($client->getName())
                     ->setType($client->getType())
-                    ->setValidated(new DateTime)
-                    ->setExpired(new DateTime('2100-01-01 00:00:00'))
-                    ->setWeight_type('role')
+                    ->setValidated(new \DateTime)
+                    ->setExpired(new \DateTime('2100-01-01 00:00:00'))
+                    ->setWeightType('role')
                     ->setWorkerFirm($workerFirm);
                 $em->persist($clientOrganization);
 
-                $defaultOrgWeight = new Weight;
-                $defaultOrgWeight->setOrganization($clientOrganization)
-                    ->setValue(100);
-                $clientOrganization->addWeight($defaultOrgWeight);
 
-                $em->flush();
-
+                $this->createFirmMinConfig($clientOrganization,true);
 
                 $client
-                ->setWorkerFirm($workerFirm)
                 ->setOrganization($organization)
                 ->setClientOrganization($clientOrganization)
                 ->setCreatedBy($currentUser->getId());
 
-                // Synth ZZ user creation
-                $em->flush();
-                $syntheticUser = new User;
-                $syntheticUser
-                    ->setFirstname('ZZ')
-                    ->setLastname('ZZ')
-                    ->setRole(3)
-                    ->setOrgId($clientOrganization->getId());
-                $em->persist($syntheticUser);
-
                 $em->persist($client);
-
-                // Synth ZZ ext user creation
-                $syntheticExtUser = new ExternalUser;
-                $syntheticExtUser
-                    ->setFirstname('ZZ')
-                    ->setLastname('ZZ')
-                    ->setWeightValue(100)
-                    ->setUser($syntheticUser)
-                    ->setCreatedBy($currentUser->getId())
-                    ->setClient($client);
-                $em->persist($syntheticExtUser);
 
             }
 
             $em->flush();
+            return $this->json(['status' => 'done', 'cliId' => $client->getId(), 'wfiId' => $workerFirm->getId()], 200);
 
-            return $cliId == 0 ?
-                $app->json(['status' => 'done', 'cliId' => $client->getId()], 200) :
-                $app->json(['status' => 'done'], 200);
         } else {
             return $this->buildErrorArray($clientForm);
         }
@@ -1721,15 +1689,16 @@ class OrganizationController extends MasterController
                 $settings['invitingUser'] = $currentUser;
                 $settings['invitingOrganization'] = $currentUser->getOrganization();
                 $recipients[] = $user;
-                MasterController::sendMail($app, $recipients, 'externalInvitation', $settings);
+                $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'externalInvitation']);
+
 
                 $externalUser->setClient($client)->setUser($user);
             }
             $em->persist($externalUser);
             $em->flush();
             return $extId == 0 ?
-                $app->json(['status' => 'done', 'extId' => $externalUser->getId()], 200) :
-                $app->json(['status' => 'done'], 200);
+                $this->json(['status' => 'done', 'extId' => $externalUser->getId()], 200) :
+                $this->json(['status' => 'done'], 200);
         } else {
             return $this->buildErrorArray($individualForm);
         }
@@ -1773,7 +1742,7 @@ class OrganizationController extends MasterController
         
 
         $clientsForm = $this->createForm(AddClientForm::class, null, ['standalone' => true, 'organization' => $organization]);
-        $clientForm = $this->createForm(ClientType::class, null, [ 'standalone' => false, 'hasChildrenElements' => false]);
+        $clientForm = $this->createForm(ClientType::class, null, [ 'standalone' => false, 'hasChildrenElements' => false, 'currentUser' => $currentUser]);
         $individualForm = $this->createForm(ExternalUserType::class, null, ['standalone' => true]);
 
         $clientsForm->handleRequest($request);
@@ -1833,12 +1802,12 @@ class OrganizationController extends MasterController
 
             $settings['invitingUser'] = $currentUser;
             $settings['invitingOrganization'] = $currentUser->getOrganization();
-            MasterController::sendMail($app, $recipients, 'externalInvitation', $settings);
-            return $app->redirect($app['url_generator']->generate('manageUsers'));
+            $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'externalInvitation']);
+            return $this->redirectToRoute('manageUsers');
 
         }
 
-        return $this->render('user_external_create.html.twig',
+        return $this->render('client_create.html.twig',
             [
                 'form'                   => $clientsForm->createView(),
                 'multipleClientCreation' => true,
@@ -1867,10 +1836,11 @@ class OrganizationController extends MasterController
 
         $client             = $repoC->find($cliId);
         $clientOrganization = $client->getClientOrganization();
+        $currentUser = $this->user;
 
         
-        $clientUserForm = $this->createForm(ClientType::class, $client, ['standalone' => true]);
-        $clientForm = $this->createForm(ClientType::class, null, [ 'standalone' => true, 'hasChildrenElements' => false ]);
+        $clientUserForm = $this->createForm(ClientType::class, $client, ['standalone' => true, 'currentUser' => $currentUser]);
+        $clientForm = $this->createForm(ClientType::class, null, [ 'standalone' => true, 'currentUser' => $currentUser, 'hasChildrenElements' => false ]);
         $individualForm = $this->createForm(ExternalUserType::class, null, ['standalone' => true]);
         $clientUserForm->handleRequest($request);
         $clientForm->handleRequest($request);
@@ -1879,13 +1849,17 @@ class OrganizationController extends MasterController
         if ($clientUserForm->isSubmitted() && $clientUserForm->isValid()) {
             $existingRecipients = [];
             $recipients         = [];
+
+            $client->setWorkerFirm($em->getRepository(WorkerFirm::class)->find($client->getWorkerFirm()));
+            $em->persist($client);
+
             foreach ($clientUserForm->get('aliveExternalUsers') as $externalUserForm) {
 
                 $externalUser = $externalUserForm->getData();
 
                 // Create internal user CPTY
 
-                $user = $em->getRepository(User::class)->findOneBy(['firstname' => $externalUser->getFirstname(), 'lastname' => $externalUser->getLastname(), 'orgId' => $clientOrganization->getId()]);
+                $user = $em->getRepository(User::class)->findOneBy(['firstname' => $externalUser->getFirstname(), 'lastname' => $externalUser->getLastname(), 'organization' => $clientOrganization]);
 
                 if ($externalUser->getEmail() != null && $user == null) {
                     $token                = md5(rand());
@@ -1900,7 +1874,7 @@ class OrganizationController extends MasterController
                         ->setRole(!$clientOrganization->hasActiveAdmin() ? 2 : 3)
                         ->setWeightIni($externalUser->getWeightValue() ?: 100)
                         ->setCreatedBy($currentUser->getId())
-                        ->setOrgId($clientOrganization->getId());
+                        ->setOrganization($clientOrganization);
                     $em->persist($user);
                     $recipients[] = $user;
                 } else {
@@ -1919,15 +1893,14 @@ class OrganizationController extends MasterController
 
             $settings['adminFullName'] = $currentUser->getFullName();
             $settings['rootCreation']  = false;
-            MasterController::sendMail($app, $recipients, 'registration', $settings);
-            return $app->redirect($app['url_generator']->generate('manageUsers'));
+            $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'registration']);
+
+            return $this->redirectToRoute('manageUsers');
         }
 
-        return $this->render('user_external_create.html.twig',
+        return $this->render('client_update.html.twig',
             [
-                'form'                   => $clientUserForm->createView(),
-                'multipleClientCreation' => false,
-                'clientForm' => $clientForm->createView(),
+                'client' => $clientUserForm->createView(),
                 'individualForm' => $individualForm->createView(),
             ]);
     }
@@ -1985,7 +1958,7 @@ class OrganizationController extends MasterController
             $department = null;
 
             // If user doesn't exist in the organization
-            if ($repoU->findOneBy(['firstname' => $firstName, 'lastname' => $lastName, 'email' => $email, 'orgId' => $organization->getId()]) == null) {
+            if ($repoU->findOneBy(['firstname' => $firstName, 'lastname' => $lastName, 'email' => $email, 'organization' => $organization]) == null) {
 
                 $userFullName = $record[$firstNamePos] . ' ' . $record[$lastNamePos];
 
@@ -2073,7 +2046,7 @@ class OrganizationController extends MasterController
                     if ($record[$superiorPos] != null) {
                         $superiorFirstName = explode(" ", $record[$superiorPos])[0];
                         $superiorLastName  = explode(" ", $record[$superiorPos])[1];
-                        $superior          = $repoU->findOneBy(['firstname' => $superiorFirstName, 'lastname' => $superiorLastName, 'orgId' => $organization->getId()]);
+                        $superior          = $repoU->findOneBy(['firstname' => $superiorFirstName, 'lastname' => $superiorLastName, 'organization' => $organization]);
                         if ($superior != null) {
                             $user->setSuperior($superior->getId());
                             $em->persist($user);
@@ -2154,7 +2127,6 @@ class OrganizationController extends MasterController
             }
             $em->flush();
         }
-        //self::sendMail($app, $recipients,'registration', $settings);
         return new JsonResponse(['message' => 'Success!'], 200);
         unlink($filePath);
 
@@ -2281,7 +2253,7 @@ class OrganizationController extends MasterController
             // Throwing error if any user is already in DB
             foreach ($userForm->get('users') as $userData) {
 
-                if ($repoU->findOneBy(['email' => $userData['email']->getData(), 'orgId' => $orgId])) {
+                if ($repoU->findOneBy(['email' => $userData['email']->getData(), 'organization' => $organization])) {
 
                     $userData->get('email')->addError(new FormError('There is already a user address with such email address in your organization. Please choose another one'));
                     $errors = $this->buildErrorArray($userForm);
@@ -2315,7 +2287,9 @@ class OrganizationController extends MasterController
                 $settings['rootCreation'] = false;
                 $recipients[]             = $user;
             }
-            self::sendMail($app, $recipients, 'registration', $settings);
+
+            $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'registration']);
+
             return new JsonResponse(['message' => 'Success!'], 200);
 
         } else {
@@ -2396,7 +2370,7 @@ class OrganizationController extends MasterController
             // Throwing error if any external user is already in DB or organization is not set for external client which is not an individual
 
             foreach ($clientUserForm->get('clientUsers') as $clientUser) {
-                if ($repoU->findOneBy(['email' => $clientUser->get('email')->getData(), 'orgId' => $clientUser->get('orgId')->getData()])) {
+                if ($repoU->findOneBy(['email' => $clientUser->get('email')->getData(), 'organization' => $repoO->find($clientUser->get('orgId')->getData())])) {
                     $clientUser->get('email')->addError(new FormError('There is already such a email address linked to this client'));
                     $errors = $this->buildErrorArray($clientUserForm);
                     return $errors;
@@ -2491,7 +2465,7 @@ class OrganizationController extends MasterController
             }
 
             if ($recipients != null) {
-                self::sendMail($app, $recipients, 'externalInvitation', $settings);
+                $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'externalInvitation']);
             }
             return new JsonResponse(['message' => 'Success!'], 200);
 
@@ -2674,7 +2648,7 @@ class OrganizationController extends MasterController
         if ($manageOrganizationElementsForm->isValid()) {
             $em->persist($organization);
             $em->flush();
-            return $app->redirect($app['url_generator']->generate('firmSettings'));
+            return $this->redirectToRoute('firmSettings');
         }
 
         return $this->render('organization_element_list.html.twig',
@@ -2861,7 +2835,7 @@ class OrganizationController extends MasterController
             if ($addNewCriterionForm->isValid()) {
                 $em->persist($organization);
                 $em->flush();
-                return $app->redirect($app['url_generator']->generate('firmSettings'));
+                return $this->redirectToRoute('firmSettings');
             }
 
             $unremovableCriterionNameIds = [];
@@ -2916,7 +2890,7 @@ class OrganizationController extends MasterController
                 }
                 $em->persist($element);
                 $em->flush();
-                return $app->redirect($app['url_generator']->generate('manageUsers'));
+                return $this->redirectToRoute('manageUsers');
             }
 
             return $this->render('element_targets.html.twig',
@@ -2950,7 +2924,7 @@ class OrganizationController extends MasterController
         $em->persist($currentUserTarget);
         $em->flush();
 
-        return $app->redirect($app['url_generator']->generate('firmSettings'));
+        return $this->redirectToRoute('firmSettings');
     }
 
     /**
@@ -3009,7 +2983,8 @@ class OrganizationController extends MasterController
                     $settings['rootCreation']  = false;
                     $recipients[]              = $addedUser;
 
-                    self::sendMail($app, $recipients, 'registration', $settings);
+                    $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'registration']);
+
 
                 } else {
                     return new JsonResponse(['message' => 'This user has already been created in your organization'], 200);
@@ -3804,7 +3779,8 @@ class OrganizationController extends MasterController
                     $token             = md5(rand());
                     $settings['token'] = $token;
                     $searchedUser->setPassword(null)->setToken($token)->setEmail($userForm->get('email')->getData());
-                    self::sendMail($app, $recipients, 'emailChangeNotif', $settings);
+                    $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'emailChangeNotif']);
+
                 }
 
                 $existingWeight = $repoW->find($userForm->get('wgtId')->getData());
@@ -3815,7 +3791,7 @@ class OrganizationController extends MasterController
 
             } else {
 
-                $externalUser = $searchedUser->getExternalUser($app);
+                $externalUser = $searchedUser->getExternalUser();
 
                 if ($externalUser->getEmail() != $userForm->get('email')->getData()) {
                     $repicients        = [];
@@ -3823,7 +3799,8 @@ class OrganizationController extends MasterController
                     $token             = md5(rand());
                     $settings['token'] = $token;
                     $searchedUser->setPassword(null)->setToken($token)->setEmail($userForm->get('email')->getData());
-                    self::sendMail($app, $recipients, 'emailChangeNotif', $settings);
+                    $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'emailChangeNotif']);
+
                 }
 
                 $externalUser
@@ -3881,7 +3858,7 @@ class OrganizationController extends MasterController
             //$submittedDptName = $userForm->get('department')->getData();
             //$submittedPosName = $userForm->get('position')->getData();
 
-            return $app->redirect($app['url_generator']->generate('manageUsers'));
+            return $this->redirectToRoute('manageUsers');
             //return new JsonResponse(['message' => 'Success!'], 200);
 
         } else {
@@ -5568,7 +5545,7 @@ class OrganizationController extends MasterController
         /** @var User */
         $relatedInternalUser = $externalUser->getUser();
         $repoP = $em->getRepository(Participation::class);
-        $externalUserParticipations = $repoP->findBy(['activity' => $organization->getActivities()->getValues(), 'usrId' => $relatedInternalUser->getId()]);
+        $externalUserParticipations = $repoP->findBy(['activity' => $organization->getActivities()->getValues(), 'user' => $relatedInternalUser]);
 
         if(sizeof($externalUserParticipations) == 0){
             $em->remove($externalUser);
@@ -5582,7 +5559,7 @@ class OrganizationController extends MasterController
         }
 
         $em->flush();
-        return $app->json(['status' => 'done'], 200);
+        return $this->json(['status' => 'done'], 200);
     }
 
     //Adds team(s) to current organization (limited to HR)
@@ -5672,7 +5649,7 @@ class OrganizationController extends MasterController
 
             $settings['team'] = $team;
 
-            self::sendMail($app, $recipients, 'teamCreation', $settings);
+            $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'teamCreation']);
 
             return true;
         }
@@ -5799,7 +5776,8 @@ class OrganizationController extends MasterController
 
             if (count($addedRecipients) > 0) {
                 $settings['team'] = $team;
-                self::sendMail($app, $addedRecipients, 'teamCreation', $settings);
+                $this->forward('App\Controller\MailController::sendMail', ['recipients' => $addedRecipients, 'settings' => $settings, 'actionType' => 'teamCreation']);
+
             }
 
             // 2 - ... and we look whether there are team leavers
@@ -5819,7 +5797,7 @@ class OrganizationController extends MasterController
 
             if (count($removedRecipients) > 0) {
                 $settings['team'] = $team;
-                self::sendMail($app, $removedRecipients, 'teamUserRemoval', $settings);
+                $this->forward('App\Controller\MailController::sendMail', ['recipients' => $removedRecipients, 'settings' => $settings, 'actionType' => 'teamUserRemoval']);
             }
 
             // We then manage some operations in case some users were added
@@ -5843,7 +5821,7 @@ class OrganizationController extends MasterController
                     if ($unvalidatingTeamParticipation->getActivity() != $consideredActivity) {
                         if (count($recipients) > 0) {
                             $settings['activity'] = $consideredActivity;
-                            $this->sendMail($app, $recipients, 'unvalidatedGradesTeamJoiner', $settings);
+                            $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'unvalidatedGradesTeamJoiner']);
                             $recipients = [];
                         }
                         $recipients[]       = $unvalidatingTeamParticipation->getUser($app);
@@ -5861,7 +5839,7 @@ class OrganizationController extends MasterController
                 // After last iteration we also need to send according mails to remaining team users
                 if (count($unvalidatingTeamParticipations) > 0) {
                     $settings['activity'] = $consideredActivity;
-                    $this->sendMail($app, $recipients, 'unvalidatedGradesTeamJoiner', $settings);
+                    $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'unvalidatedGradesTeamJoiner']);
                 }
 
                 // Adding new team user participations in these uncompleted activities
@@ -6164,8 +6142,8 @@ class OrganizationController extends MasterController
                 $em->flush();
 
                 //Sending mail to Serpico root users and administrators
-                $serpicoOrg           = $repoO->findOneByCommname('Serpico');
-                $serpiValidatingUsers = $repoU->findBy(['role' => 4, 'orgId' => $serpicoOrg->getId()]);
+                $serpicoOrg = $repoO->findOneByCommname('Serpico');
+                $recipients = $repoU->findBy(['role' => 4, 'organization' => $serpicoOrg]);
 
                 $settings['orgId']                = $organization->getId();
                 $settings['orgName']              = $orgCommercialName;
@@ -6174,14 +6152,15 @@ class OrganizationController extends MasterController
                 $settings['masterUserDepartment'] = $departmentName;
                 $settings['masterUserPosition']   = $positionName;
 
-                self::sendMail($app, $serpiValidatingUsers, 'validateOrgSubscription', $settings);
+                $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'validateOrgSubscription']);
 
                 //Sending mail acknowledgment receipt to the requester
                 $recipients          = [];
                 $recipients[]        = $user;
                 $settings            = [];
                 $settings['orgName'] = $orgCommercialName;
-                self::sendMail($app, $recipients, 'subscriptionAcknowledgmentReceipt', $settings);
+
+                $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'subscriptionAcknowledgmentReceipt']);
 
                 return $this->redirectToRoute('login');
             }
@@ -6264,8 +6243,8 @@ class OrganizationController extends MasterController
             $settings['process'] = $element;
             $settings['initialProcessName'] = $elementInitialName;
             $settings['initialProcessParent'] = $elementInitialParent;
-            $requester = [$this->em->getRepository(User::class)->find($element->getCreatedBy())];
-            MasterController::sendMail($app, $requester, 'validateProcess', $settings);
+            $recipients = [$this->em->getRepository(User::class)->find($element->getCreatedBy())];
+            $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'validateProcess']);
 
             return new JsonResponse(['msg' => 'success'], 200);
         } else {
@@ -6299,7 +6278,6 @@ class OrganizationController extends MasterController
                 break;
             case 'activity':
                 $repoE = $this->em->getRepository(Activity::class);
-                $repoU = $this->em->getRepository(Participation::class);
                 $redirect = $this->redirectToRoute('myActivities');
                 break;
             default:
@@ -6437,6 +6415,175 @@ class OrganizationController extends MasterController
                 'criterionElementForm' => $criterionElementForm->createView(),
             ]
         );
+    }
+
+    // Second parameters is there to create Ext users, who are users of the connected user organization,
+    // in order to enable inverse participation in activities
+    public function createFirmMinConfig(Organization $organization, $mirrorExtUsers = false){
+        $em = $this->em;
+
+        if($mirrorExtUsers){
+            $connectedUser = $this->user;
+            $connectedUserOrg = $connectedUser->getOrganization();
+            // Setting new client relationship
+            $client = new Client;
+            $client->setClientOrganization($connectedUserOrg)
+                ->setWorkerFirm($connectedUserOrg->getWorkerFirm())
+                ->setType($connectedUserOrg->getType())
+                ->setName($connectedUserOrg->getCommname())
+                ->setCreatedBy($connectedUser->getId());
+            
+                
+            /** @var Collection|User[] */
+            $orgUsers = $connectedUser->getOrganization()->getUsers();
+            foreach($orgUsers as $orgUser){
+                $externalUser = new ExternalUser;
+                $externalUser->setUser($orgUser)
+                    ->setWeightValue(100)
+                    ->setEmail($orgUser->getEmail())
+                    ->setPositionName($orgUser->getPosition() ? $orgUser->getPosition()->getName() : null)
+                    ->setFirstname($orgUser->getFirstname())
+                    ->setLastname($orgUser->getLastname());
+                $client->addExternalUser($externalUser);
+            }
+
+            $em->persist($client);
+            $organization->addClient($client);
+        }
+
+
+
+        $repoON = $em->getRepository(OptionName::class);
+
+        // Settling default organization weight
+        $defaultOrgWeight = new Weight();
+        $defaultOrgWeight->setOrganization($organization)
+            ->setValue(100);
+        $organization->addWeight($defaultOrgWeight);
+
+        // Settling default options
+        /** @var OptionName[] */
+        $options = $repoON->findAll();
+        foreach ($options as $option) {
+
+            $optionValid = (new OrganizationUserOption)
+            ->setOName($option);
+
+            // We set nb of days for reminding emails, very important otherwise if unset, if people create activities, can make system bug.
+            //  => Whenever someone logs in, this person triggers reminder mails to every person in every organization, organization thus should have this parameter date set.
+            if($option->getName() == 'mailDeadlineNbDays'){
+                $optionValid->setOptionFValue(2);
+            }
+            //$em->persist($optionValid);
+
+            // At least 3 options should exist for a new firm for activity & access results
+            if($option->getName() == 'activitiesAccessAndResultsView'){
+
+                // Visibility and access options has many options :
+                // * Scope (opt_bool_value in DB, optionTrue property) : defines whether user sees his own results (0), or all participant results (1)
+                // * Activities access (opt_int_value, optionIValue property) : defines whether user can access all organisation acts (1), his department activities (2) or his own activities (3)
+                // * Status access (opt_int_value_2, optionSecondaryIValue property) : defines whether user can access computed results (2), or released results (3)
+                // * Detail (opt_float_value, optionFValue property) : defines whether user accesses averaged/consolidated results (0), or detailed results (1)
+                // * Results Participation Condition (opt_string_value, optionSValue property) : defines whether user accesses activity results without condition ('none'), if he is activity owner ('owner'), or if he is participating ('participant')
+
+                $optionAdmin = $optionValid;
+                $optionAdmin->setRole(1)->setOptionTrue(true)->setOptionIValue(1)->setOptionSecondaryIValue(2)->setOptionFValue(1)->setOptionSValue('none');
+                $organization->addOption($optionAdmin);
+
+                $optionAM = (new OrganizationUserOption)
+                    ->setOName($option)
+                    ->setRole(2)
+                    ->setOptionTrue(true)
+                    ->setOptionIValue(2)
+                    ->setOptionSecondaryIValue(2)
+                    ->setOptionFValue(0)
+                    ->setOptionSValue('owner');
+                $organization->addOption($optionAM);
+
+                $optionC = (new OrganizationUserOption)
+                    ->setOName($option)
+                    ->setRole(3)
+                    ->setOptionTrue(false)
+                    ->setOptionIValue(3)
+                    ->setOptionSecondaryIValue(3)
+                    ->setOptionFValue(0)
+                    ->setOptionSValue('participant');
+                $organization->addOption($optionC);
+                //$em->persist($optionC);
+            } else {
+                $organization->addOption($optionValid);
+            }
+        }
+
+        //$em->persist($organization);
+
+        // Settling default criterion names
+        $repoCN = $em->getRepository(CriterionName::class);
+        $criterionGroups = [
+            1 => new CriterionGroup('Hard skills'),
+            2 => new CriterionGroup('Soft skills')
+        ];
+        foreach ($criterionGroups as $cg) {
+            $organization->addCriterionGroup($cg);
+            //$cg->setOrganization($organization);
+            //$em->persist($cg);
+        }
+
+        /**
+         * @var CriterionName[]
+         */
+        $defaultCriteria = $repoCN->findBy(['organization' => null]);
+        foreach ($defaultCriteria as $defaultCriterion) {
+            $criterion = clone $defaultCriterion;
+            // 1: hard skill
+            // 2: soft skill
+            $type = $criterion->getType();
+            $cg = $criterionGroups[$type];
+            $criterion
+                //->setOrganization($organization)
+                ->setCriterionGroup($cg);
+
+            $cg->addCriterion($criterion);
+            $organization->addCriterionName($criterion);
+            //$em->persist($criterion);
+        }
+
+        //Synthetic User Creation (for external, in case no consituted team has been created to grade a physical person for an activity)
+        $syntheticUser = new User;
+        $syntheticUser
+            ->setFirstname('ZZ')
+            ->setLastname('ZZ')
+            ->setRole(3);
+
+        $organization->addUser($syntheticUser);
+        
+        $em->persist($organization);
+        //$em->flush();
+
+    }
+
+     /**
+     * @Route("/email")
+     */
+    public function sendEmail(MailerInterface $mailer)
+    {
+
+        dd('couocu');
+        $email = (new Email())
+            ->from('no-reply@serpicoapp.com')
+            ->to('gchatelain@serpicoapp.com')
+            //->cc('cc@example.com')
+            //->bcc('bcc@example.com')
+            //->replyTo('fabien@example.com')
+            //->priority(Email::PRIORITY_HIGH)
+            ->subject('Time for Symfony Mailer!')
+            ->text('Sending emails is fun again!')
+            ->html('<p>See Twig integration for better HTML integration!</p>');
+
+        $mailer->send($email);
+        return $this->redirectToRoute('home');
+
+        // ...
     }
 
 }

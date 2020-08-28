@@ -33,7 +33,11 @@ class MemberType extends AbstractType
             
         $organization = $options['organization'];
         $query = $options['query'];
+<<<<<<< HEAD
         $currentUser = $options["currentUser"];
+=======
+        $currentUser = $this->user;;
+>>>>>>> origin/develop
         if (!$currentUser instanceof User) {
             throw 'Authentication issue: no authorized user found';
         }

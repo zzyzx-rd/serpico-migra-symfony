@@ -1634,13 +1634,13 @@ class ActivityController extends MasterController
     public function answerRequestAction(Request $request, $stgId, $usrId = null)
     {
         $error="";
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         
         $repo0 = $em->getRepository(Survey::class);
         $repo2 = $em->getRepository(Participation::class);
         $repo1 = $em->getRepository(Answer::class);
         $survey = $repo0->findOneBy(array('stage' => $stgId));
-        $currentUser = MasterController::getAuthorizedUser();
+        $currentUser = $this->user;;
         $surveyfield = $survey->getFields();
         $activity = $repo2->findOneBy(array('stage' => $survey->getStage(), 'usrId' => $currentUser->getId()));
         $tblId=[];
@@ -1831,7 +1831,6 @@ class ActivityController extends MasterController
                 $em->flush();
                 $val = $this->checkStageComputability($request, $app, $stage, false);
                 $val = $this->checkStageComputability($request, $app, $stage);
-                //return $app->redirect($app['url_generator']->generate('myActivities'));
                 return $this->redirectToRoute('myActivities',['sortingType' => 'p']);
             }
 
@@ -5460,7 +5459,6 @@ class ActivityController extends MasterController
 
         $val = $this->checkStageComputability($request, $app, $stage);
         return new JsonResponse(['message' => 'validate', 'redirect' => $app['url_generator']->generate('myActivities')], 200);
-        //$app->redirect($app['url_generator']->generate('myActivities'));
     }
 
     //Releases stage results to participants
@@ -5912,12 +5910,7 @@ class ActivityController extends MasterController
         }
         $em->flush();
 
-        //if ($copiedTemplateActivity->isSimplified() == true) {
         return new JsonResponse(['actId' => $copiedTemplateActivity->getId()], 200);
-        //return $app->redirect($app['url_generator']->generate('oldActivityDefinition', ['actId' => $copiedTemplateActivity->getId()]));
-        /* } else {
-    return $app->redirect($app['url_generator']->generate('oldActivityDefinition', ['actId' => $copiedTemplateActivity->getId()]));
-    }*/
     }
 
     public function sendActivityMail(Application $app, User $user, $actElmt, $actionType, Team $team = null)

@@ -206,7 +206,7 @@ class UserRepository extends ServiceEntityRepository
 
             $lastReleasedParticipation = $qb->select('au')
                 ->from(Participation::class, 'au')
-                ->where('au.user_usr = ' . $user)
+                ->where('au.user = ' . $user)
                 ->andWhere('au.status = 4')
                 ->orderBy('au.inserted', 'DESC')
                 ->getQuery()
@@ -287,7 +287,7 @@ class UserRepository extends ServiceEntityRepository
         return $return;
     }
 
-    public function getExternalActivities(Organization $organization = null, User $user)
+    public function getExternalActivities(User $user, Organization $organization = null)
     {
         $externalActivities = new ArrayCollection;
         $userParticipations = $this->_em->getRepository(Participation::class)->findBy(['id' => $user->getId()]);

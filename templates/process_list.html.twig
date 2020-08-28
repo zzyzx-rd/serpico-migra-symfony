@@ -10,7 +10,7 @@
   {% set elmtType = 'process' %}
 {% endif %}
 
-{% set orgId = app.request_stack.currentrequest.get('orgId') %}
+{% set orgId = global.request.get('orgId') %}
 
 
 {% block title %}

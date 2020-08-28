@@ -2784,10 +2784,11 @@ create_client:
   firstname: Prénom
   lastname: Nom
   workerFirm: Nom du partenaire
+  provide_name: Préciser le nom du partenaire
   commname: Nom du partenaire
   role: Role
   positionName: Poste/Fonction
-  commName: Nom du client
+  name: Nom du client
   weightValue: Poids de vote
   administrator: Administrateur
   activity_manager: Activity Manager
@@ -3028,48 +3029,3 @@ organization_criteriongroups:
   errors:
     criteria_duplicate: Il existe déjà un critère portant ce nom dans ce groupe
 
-
-validators:
-  password_definition:
-    unmatching_msg: Les mots de passe ne correspondent pas
-
-  activity_elements:
-    stages:
-      sum_weight_equal_to_hundred_pct: La somme des poids des phases doit être égale à 100%
-      unique_stage_name: Il existe déjà une phase qui porte le même nom
-      missing_owners: Assurez-vous quau moins une phase configurée ait un participant owner, en droit de la configurer
-      min_config: Assurez-vous quau moins une phase possède au minimum un participant qui donne ses retours et un participant qui en reçoit, sur base d'un sondage ou d'un ou plusieurs critères d'évaluation
-
-    criteria:
-      sum_weight_equal_to_hundred_pct: La somme des poids des critères doit être égale à 100%
-
-
-  create_client:
-    missing_owner: Assurez-vous que le partenaire ait au moins un owner avec une adresse mail renseignée afin qu'il puisse configurer son compte
-
-  create_parameters:
-    step: l'intervalle de notation doit être un diviseur de l'échelle de notes
-    ub_greater_than_lb: La note maximale doit être supérieure à la note minimale
-    sum_weight_equal_to_hundred_pct: La somme des poids des phases doit être égale à 100%
-    doublon_activity_name: Il y a déjà eu une activité créée avec ce nom, choisissez-en un autre
-    doublon_department: Il y a déjà eu un départment créé avec ce nom, choisissez-en un autre
-    doublon_position: Il y a déjà eu une position créée avec ce nom, choisissez-en un autre
-    doublon_title: Il y a déjà eu un titre créé avec ce nom, choisissez-en un autre
-
-
-  stage:
-    period_positive: Vous devez rentrer une valeur positive pour la période de déroulement
-
-
-  signup:
-    password: Le mot de passe doit contenir au moins 8 caractères dont au moins une majuscule et un chiffre
-    email: "Votre adresse email doit être valide (exemple : toto@tutu.com)"
-
-  create_user:
-    email: Oops... cet email existe déjà, l'utilisateur a certainement déjà un compte !
-
-  #worker_search:
-  #  ub_greater_than_lb: Le nombre maximal demployés doit être supérieur au nombre minimal
-
-  grades:
-    force_comment: Vous devez commenter ce critère

@@ -10,7 +10,7 @@
     {% trans %}worker_firm_data.mobile_header_title{% endtrans %}
 {% endblock %}
 
-{% set request = app.request_stack.currentrequest %}
+{% set request = global.request %}
 {% set wfId = request.get('wfId') %}
 
 {% block css %}

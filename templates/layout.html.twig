@@ -119,14 +119,14 @@
                 </a>
               </li>
             {% else %}
-              {% if global.routeParams|length == 1 and path(global.route) in freeAccessRoutes %}
+              {#{% if global.routeParams|length == 1 and path(global.route) in freeAccessRoutes %}#}
                 <li class="logo">
                   <a href="https://www.serpicoapp.com">
                     <img src="{{ asset('lib/img/logo_s.png') }}">
                   </a>
                   {% trans %}landing.serpico_alt_motto{% endtrans %}
                 </li>
-              {% endif %}
+              {#{% endif %}#}
               {% if global.route == "about" %}
                 <li>
                   <a href="https://www.serpicoapp.com">

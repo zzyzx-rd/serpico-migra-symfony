@@ -10,7 +10,7 @@
   {{ 'iprocesses.title'|trans }}
 {% endblock title %}
 
-{% set sortingType = app.request_stack.currentrequest.get('sortingType') %}
+{% set sortingType = global.request.get('sortingType') %}
 
 {% block css %}
   <link rel="stylesheet" href="{{ asset('css/iprocess_list.css') }}">

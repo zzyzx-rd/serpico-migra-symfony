@@ -62,7 +62,7 @@ class UserController extends MasterController
      * @Route("/terms-conditions", name= "displayTC")
      */
     public function displayTCAction(Request $request) {
-        return $app['twig']->render(
+        return $this->render(
             'terms_conditions.html.twig',
             [
                 'request' => $request
@@ -79,7 +79,7 @@ class UserController extends MasterController
      * @throws OptimisticLockException
      */
     public function trackMLinkClick(Application $app, $trkToken) {
-        $this->em = $this->getEntityManager($app);
+        $this->em = $this->em;
         $repoM = $this->em->getRepository(Mail::class);
         $clickedLinkMail = $repoM->findOneByToken($trkToken);
         if ($clickedLinkMail !== null) {
@@ -134,9 +134,9 @@ class UserController extends MasterController
             $clickedLinkMail->setRead(new DateTime);
             $this->em->persist($clickedLinkMail);
             $this->em->flush();
-            return $app->redirect($app['url_generator']->generate($path, $parameters));
+            return $this->redirectToRoute($path, $parameters);
         } else {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
     }
 
@@ -149,7 +149,7 @@ class UserController extends MasterController
      * @return mixed
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/password/{token}", name="definePassword")
+     * @Route("/password/define/{token}", name="definePassword")
      */
     public function definePasswordAction(Request $request, $token)
     {
@@ -157,7 +157,7 @@ class UserController extends MasterController
         $repository = $entityManager->getRepository(User::class);
         $user = $repository->findOneByToken($token);
         
-        $pwdForm = $formFactory->create(PasswordDefinitionForm::class, $user, ['standalone' => true]);
+        $pwdForm = $this->createForm(PasswordDefinitionForm::class, $user, ['standalone' => true]);
         $pwdForm->handleRequest($request);
 
         if ($pwdForm->isSubmitted() && $pwdForm->isValid()) {
@@ -168,14 +168,14 @@ class UserController extends MasterController
             $user->setToken('');
             $entityManager->persist($user);
             $entityManager->flush();
-            return $app->redirect($app['url_generator']->generate('home'));
+            return $this->redirectToRoute('home');
         }
 
         if (!$user) {
-            return $app['twig']->render('user_no_token.html.twig');
+            return $this->render('user_no_token.html.twig');
         } else {
 
-            return $app['twig']->render('password_definition.html.twig',
+            return $this->render('password_definition.html.twig',
                 [
                     'firstname' => $user->getFirstName(),
                     'form' => $pwdForm->createView(),
@@ -200,7 +200,7 @@ class UserController extends MasterController
 
         
         $user = new User;
-        $signupForm = $formFactory->create(SignUpForm::class, $user, ['standalone' => true]);
+        $signupForm = $this->createForm(SignUpForm::class, $user, ['standalone' => true]);
         $signupForm->handleRequest($request);
 
         if ($signupForm->isSubmitted() && $signupForm->isValid()) {
@@ -233,9 +233,10 @@ class UserController extends MasterController
             $recipients = [];
             $recipients[] = $user;
             $settings = [];
-            MasterController::sendMail($app,$recipients,'signup',$settings);
+            $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'signup']);
 
-            return $app->redirect($app['url_generator']->generate('home'));
+
+            return $this->redirectToRoute('home');
         }
 
 
@@ -256,24 +257,16 @@ class UserController extends MasterController
      */
     public function displayAllInstitutionsAction(Request $request){
 
-        $entityManager = $this->getEntityManager($app);
+        $entityManager = $this->em;
         $repoO = $entityManager->getRepository(Organization::class);
         $institutions = $repoO->findBy(['type' => 'P'],['commname' => 'ASC']);
         
 
-        $addInstitutionProcessForm = $formFactory->create(AddProcessForm::class, null, ['standalone' => true]);
+        $addInstitutionProcessForm = $this->createForm(AddProcessForm::class, null, ['standalone' => true]);
         $addInstitutionProcessForm->handleRequest($request);
-        $currentUser = MasterController::getAuthorizedUser();
+        $currentUser = $this->user;
 
-            /*
-            $recipients = [];
-            $recipients[] = $currentUser;
-            $settings = [];
-            MasterController::sendMail($app,$recipients,'InstitutionsAction',$settings);
-            */
-
-
-        return $app['twig']->render('institution_list.html.twig',
+        return $this->render('institution_list.html.twig',
             [
                 'institutions' => $institutions,
                 'processForm' => $addInstitutionProcessForm->createView(),
@@ -305,14 +298,14 @@ class UserController extends MasterController
             $formParam = 'iprocess';
         }
        
-        $currentUser = MasterController::getAuthorizedUser();
+        $currentUser = $this->user;;
 
         if (!$organization) {
             return new JsonResponse(null, Response::HTTP_NOT_FOUND);
         }
 
         
-        $createProcessRequestForm = $formFactory->create(AddProcessForm::class, $element, ['standalone' => true, 'organization' => $organization, 'elmt' => $formParam]);
+        $createProcessRequestForm = $this->createForm(AddProcessForm::class, $element, ['standalone' => true, 'organization' => $organization, 'elmt' => $formParam]);
         $createProcessRequestForm->handleRequest($request);
 
         if ($createProcessRequestForm->isValid()) {
@@ -331,7 +324,7 @@ class UserController extends MasterController
 
             $settings['process'] = $element;
             $settings['requester'] = $currentUser;
-            MasterController::sendMail($app, $recipientsAdministrators, 'requestProcess', $settings);
+            $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipientsAdministrators, 'settings' => $settings, 'actionType' => 'requestProcess']);
 
             return new JsonResponse(['id' => $element->getId()],200);
         } else {
@@ -354,23 +347,22 @@ class UserController extends MasterController
     public function createPwdActionAJAX(Request $request, $token)
     {
         //try{
-        $entityManager = $this->getEntityManager($app);
+        $entityManager = $this->em;
         $repoU = $entityManager->getRepository(User::class);
         $user = $repoU->findOneByToken($token);
             
-            $pwdForm = $formFactory->create(PasswordDefinitionForm::class, $user, ['standalone' => true]);
+            $pwdForm = $this->createForm(PasswordDefinitionForm::class, $user, ['standalone' => true]);
             $pwdForm->handleRequest($request);
 
-            if ($pwdForm->isValid()) {
-
-                $encoder = $app['security.encoder_factory']->getEncoder($user);
-                $password = $encoder->encodePassword($user->getPassword(), 'azerty');
+            if ($pwdForm->isValid()) 
+            {
+                $password = $this->encoder->encodePassword($user, $user->getPassword());
                 $user->setPassword($password);
                 $user->setToken('');
                 $entityManager->persist($user);
                 $entityManager->flush();
                 return new JsonResponse(['message' => 'Success!'], 200);
-                /*return $app->redirect($app['url_generator']->generate('login'))*/ ;
+                /*return $this->redirectToRoute('login')*/
             } else {
                 $errors = $this->buildErrorArray($pwdForm);
                 return $errors;
@@ -403,12 +395,12 @@ class UserController extends MasterController
                 ->setLastname($currentUser->getLastname());
         }
 
-        $entityManager = $this->getEntityManager($app);
+        $entityManager = $this->em;
         
         $workerIndividual = $currentUser->getWorkerIndividual();
-        $workerIndividualForm = $formFactory->create(UpdateWorkerIndividualForm::class, $workerIndividual, ['standalone' => true]);
+        $workerIndividualForm = $this->createForm(UpdateWorkerIndividualForm::class, $workerIndividual, ['standalone' => true]);
         $workerIndividualForm->handleRequest($request);
-        $pictureForm = $formFactory->create(AddUserPictureForm::class);
+        $pictureForm = $this->createForm(AddUserPictureForm::class);
         $pictureForm->handleRequest($request);
 
         if ($workerIndividualForm->isSubmitted() && $workerIndividualForm->isValid()) {
@@ -427,7 +419,7 @@ class UserController extends MasterController
             return $this->redirectToRoute('home');
         }
 
-        return $app['twig']->render('worker_individual_data.html.twig',
+        return $this->render('worker_individual_data.html.twig',
         [
             'form' => $workerIndividualForm->createView(),
             'pictureForm' => $pictureForm->createView()
@@ -751,7 +743,8 @@ class UserController extends MasterController
 
             $this->em->persist($activity);
 
-            MasterController::sendMail($app, $recipients, 'request', $settings);
+            $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'request']);
+
         }
 
 
@@ -884,7 +877,8 @@ class UserController extends MasterController
                                 $this->em->persist($uniqueParticipation);
                             }
                         }
-                        self::sendMail($app, $recipients, 'activityParticipation', $mailSettings);
+
+                        $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $mailSettings, 'actionType' => 'activityParticipation']);
                     }
                 }
             }
@@ -907,7 +901,8 @@ class UserController extends MasterController
     public function resetPwdAction(Request $request)
     {
 
-        $entityManager = $this->getEntityManager($app);
+        
+        $entityManager = $this->em;
         $repository = $entityManager->getRepository(User::class);
         $user = $repository->findOneByEmail($_POST['email']);
 
@@ -921,8 +916,8 @@ class UserController extends MasterController
 
             $recipients = [];
             $recipients[] = $user;
+            $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'passwordModify']);
 
-            MasterController::sendMail($app,$recipients,'passwordModify',$settings);
         }
         return new JsonResponse(['message' => 'success'],200);
     }
@@ -934,40 +929,31 @@ class UserController extends MasterController
      * @param Application $app
      * @param $token
      * @return mixed
-     * @Route("/mpassword/{token}", name="modifyPassword")
+     * @Route("/password/modify/{token}", name="modifyPassword")
      */
     public function modifyPwdAction(Request $request, $token)
     {
 
-
-        $entityManager = $this->getEntityManager($app) ;
+        $entityManager = $this->em;
         $repository = $entityManager->getRepository(User::class) ;
         $user = $repository->findOneByToken($token);
         if(!$user){
-            return $app['twig']->render('user_no_token.html.twig');
+            return $this->render('user_no_token.html.twig');
         }
-
-        $formFactory = $app['form.factory'] ;
-        $pwdForm = $formFactory->create(SignUpForm::class, $user, ['standalone' => true]) ;
+        
+        $pwdForm = $this->createForm(PasswordDefinitionForm::class, $user, ['standalone' => true]) ;
         $pwdForm->handleRequest($request);
 
-
-        /*
-        if ($pwdForm->isSubmitted() /*&& $pwdForm->isValid()) {
-            $encoder = $app['security.encoder_factory']->getEncoder($user);
-            $password = $encoder->encodePassword($user->getPassword(), 'azerty');
+        if($pwdForm->isSubmitted() && $pwdForm->isValid()){
+            $password = $this->encoder->encodePassword($user, $user->getPassword());
             $user->setPassword($password);
-
-            $user->setToken('');
+            $user->setToken(null);
             $entityManager->persist($user);
             $entityManager->flush();
-            return $app->redirect($app['url_generator']->generate('login')) ;
-        }*/
+            return $this->redirectToRoute('home');
+        }
 
-        //$errors = $this->buildErrorArray($pwdForm);
-        //return $errors;
-
-        return $app['twig']->render('password_modify.html.twig',
+        return $this->render('password_modify.html.twig',
             [
                 'firstname' => $user->getFirstName(),
                 'form' => $pwdForm->createView(),
@@ -1179,11 +1165,11 @@ class UserController extends MasterController
 
         
 
-        $delegateActivityForm = $formFactory->create(DelegateActivityForm::class, null, ['standalone' => true, 'app' => $app]) ;
+        $delegateActivityForm = $this->createForm(DelegateActivityForm::class, null, ['standalone' => true, 'app' => $app]) ;
         $delegateActivityForm->handleRequest($request);
-        $requestActivityForm = $formFactory->create(RequestActivityForm::class, null, ['standalone' => true, 'app' => $app]) ;
+        $requestActivityForm = $this->createForm(RequestActivityForm::class, null, ['standalone' => true, 'app' => $app]) ;
         $requestActivityForm->handleRequest($request);
-        $validateRequestForm = $formFactory->create(DelegateActivityForm::class, null,  ['app' => $app, 'standalone' => true, 'request' => true]);
+        $validateRequestForm = $this->createForm(DelegateActivityForm::class, null,  ['app' => $app, 'standalone' => true, 'request' => true]);
         $validateRequestForm->handleRequest($request);
 
         // In case they might access results depending on user participation, then we need to feed all stages and feed a collection which will be analysed therefore in hideResultsFromStages function
@@ -1196,7 +1182,7 @@ class UserController extends MasterController
             }
         }
 
-        return $app['twig']->render('activity_list.html.twig',
+        return $this->render('activity_list.html.twig',
             [
                 'organization' => $organization,
                 'user_activities' => $userActivities,
@@ -1231,10 +1217,10 @@ class UserController extends MasterController
     public function getUserSettingsAction(Request $request){
 
 
-        $entityManager = $this->getEntityManager($app);
-        $currentUser = MasterController::getAuthorizedUser($app);
+        $entityManager = $this->em;
+        $currentUser = $this->user;;
         // TODO : to create
-        return $app['twig']->render('user_settings.html.twig',
+        return $this->render('user_settings.html.twig',
             [
                 'settings' => true,
             ]);
@@ -1262,7 +1248,7 @@ class UserController extends MasterController
         $this->em = self::getEntityManager();
         /** @var App\FormFactoryInterface */
         
-        $pictureForm = $formFactory->create(AddUserPictureForm::class);
+        $pictureForm = $this->createForm(AddUserPictureForm::class);
         $pictureForm->handleRequest($request);
         $userPicture = $user->getPicture();
 
@@ -1304,7 +1290,7 @@ class UserController extends MasterController
 
     public function displayContactAction(Request $request){
 
-            return $app['twig']->render('contact.html.twig',[
+            return $this->render('contact.html.twig',[
                 'last_username' => $app['session']->get('security.last_username'),
                 'error' => $app['security.last_error']($request),
                 'request' => $request,
@@ -1316,7 +1302,7 @@ class UserController extends MasterController
 
     public function displayNewsAction(Request $request){
 
-        return $app['twig']->render('news.html.twig',[
+        return $this->render('news.html.twig',[
             'error' => $app['security.last_error']($request),
             'request' => $request,
         ]);
@@ -1335,7 +1321,7 @@ class UserController extends MasterController
 
             $csrf_token = $app['csrf.token_manager']->getToken('token_id');
 
-            return $app['twig']->render('about.html.twig',
+            return $this->render('about.html.twig',
             [
                 'csrf_token' => $csrf_token,
                 'error' => $app['security.last_error']($request),
@@ -1348,7 +1334,7 @@ class UserController extends MasterController
 
             $csrf_token = $app['csrf.token_manager']->getToken('token_id');
 
-            return $app['twig']->render('use_cases.html.twig',
+            return $this->render('use_cases.html.twig',
             [
                 'csrf_token' => $csrf_token,
                 'error' => $app['security.last_error']($request),
@@ -1367,7 +1353,7 @@ class UserController extends MasterController
 
         $csrf_token = $app['csrf.token_manager']->getToken('token_id');
 
-        return $app['twig']->render('use_cases.html.twig',
+        return $this->render('use_cases.html.twig',
         [
             'csrf_token' => $csrf_token,
             'error' => $app['security.last_error']($request),
@@ -1390,14 +1376,14 @@ class UserController extends MasterController
      */
     public function contactAction(Request $request,Application $app){
         //Insert Grades
-        $entityManager = $this->getEntityManager($app);
+        $entityManager = $this->em;
         //$repoR = $entityManager->getRepository(Contact::class);
         $contact = new Contact;
         $repoO = $entityManager->getRepository(Organization::class);
         $repoU = $entityManager->getRepository(User::class);
         
         $csrf_token = $app['csrf.token_manager']->getToken('token_id');
-        $contactForm = $formFactory->create(ContactForm::class,$contact,['standalone' => true]);
+        $contactForm = $this->createForm(ContactForm::class,$contact,['standalone' => true]);
         $contactForm->handleRequest($request);
 
         if($contactForm->isValid()){
@@ -1431,12 +1417,13 @@ class UserController extends MasterController
             $settings['recipientUsers'] = false;
             $recipients[] = $settings['email'];
             // Send mail acknowledgment to meeting requester
-            MasterController::sendMail($app,$recipients,'meetingValidation',$settings);
+            $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'meetingValidation']);
+
 
             // Notify Serpico administrators
             $serpicoOrg = $repoO->findOneByCommname('Serpico');
             $serpiValidatingUsers = $repoU->findBy(['role' => 4, 'orgId' => $serpicoOrg->getId()]);
-            MasterController::sendMail($app,$serpiValidatingUsers,'meetingProposition',$rootSettings);
+            $this->forward('App\Controller\MailController::sendMail', ['recipients' => $serpiValidatingUsers, 'settings' => $rootSettings, 'actionType' => 'meetingValidation']);
             return new JsonResponse(['message' => 'Success'],200);
         } else {
             $errors = $this->buildErrorArray($contactForm);
@@ -1459,13 +1446,13 @@ class UserController extends MasterController
      */
     public function finalizeUserAction(Request $request, $usrId)
     {
-        $entityManager = $this->getEntityManager($app);
+        $entityManager = $this->em;
         $repoO = $entityManager->getRepository(Organization::class);
         
         $user = MasterController::getAuthorizedUser($app);
         $orgId = $user->getOrgId();
         $organization = $repoO->findOneById($orgId);
-        $finalizeUserForm = $formFactory->create(FinalizeUserForm::class,null,['user' => $user]);
+        $finalizeUserForm = $this->createForm(FinalizeUserForm::class,null,['user' => $user]);
         $finalizeUserForm->handleRequest($request);
         if($finalizeUserForm->isValid()){
             $department = new Department;
@@ -1874,7 +1861,7 @@ class UserController extends MasterController
             }
         }
 
-        return $app['twig']->render('my_profile.html.twig',
+        return $this->render('my_profile.html.twig',
             [
                 'organization' => $organization->getCommname(),
                 'validatedActivities' => $totalGradedActivity,
@@ -1891,7 +1878,7 @@ class UserController extends MasterController
      */
     public function helpAction(Request $request)
     {
-        return $app['twig']->render('help.html.twig',
+        return $this->render('help.html.twig',
             [
                 'request' => $request
             ]

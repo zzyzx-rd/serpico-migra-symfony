@@ -6,5 +6,5 @@ twig:
         activityM: '@App\Model\ActivityM'
         userM: '@App\Model\UserM'
         departmentM: '@App\Model\DepartmentM'
-        freeAccessRoutes: '/fr'
+        freeAccessRoutes: '/'
         userRepo: '@App\Repository\UserRepository'

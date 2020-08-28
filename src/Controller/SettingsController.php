@@ -78,10 +78,10 @@ class SettingsController extends MasterController
     {
 
 
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoU = $em->getRepository(User::class);
         
-        $sendMailForm = $formFactory->create(SendMailForm::class, null, ['standalone' => true]);
+        $sendMailForm = $this->createForm(SendMailForm::class, null, ['standalone' => true]);
         $sendMailForm->handleRequest($request);
         //$user = $em->getRepository(User::class)->findOneById(9);
         $actionType = $sendMailForm->get('emailType')->getData();
@@ -89,7 +89,7 @@ class SettingsController extends MasterController
         $settings = [];
         $settings['locale'] = $sendMailForm->get('lang')->getData();
 
-        return $app['twig']->render('mail_testing.html.twig',
+        return $this->render('mail_testing.html.twig',
             [
                 'form' => $sendMailForm->createView(),
             ]);
@@ -106,10 +106,10 @@ class SettingsController extends MasterController
     {
 
 
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoU = $em->getRepository(User::class);
         
-        $sendMailForm = $formFactory->create(SendMailForm::class, null, ['standalone' => true]);
+        $sendMailForm = $this->createForm(SendMailForm::class, null, ['standalone' => true]);
         $sendMailForm->handleRequest($request);
         //$user = $em->getRepository(User::class)->findOneById(9);
 
@@ -131,7 +131,7 @@ class SettingsController extends MasterController
                     $recipients[] = $recipient;
                     $request->setLocale($sendMailForm->get('lang')->getData());
 
-                    MasterController::sendMail($app, $recipients, $actionType, $settings);
+                    $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => $actionType]);
                     return new JsonResponse(['message' => "Success"],200);
                 }
                 catch (Exception $e){
@@ -150,7 +150,7 @@ class SettingsController extends MasterController
      */
     public function rootManagementAction(Request $request){
 
-        return $app['twig']->render('root_management.html.twig',[]);
+        return $this->render('root_management.html.twig',[]);
 
     }
 
@@ -175,7 +175,7 @@ class SettingsController extends MasterController
         //MasterController::sksort($organizations, 'lastConnectedDateTime');
 
 
-        return $app['twig']->render('organization_list.html.twig',
+        return $this->render('organization_list.html.twig',
             [
                 'organizations' => $organizations,
                 'lkPath' => null,
@@ -192,18 +192,18 @@ class SettingsController extends MasterController
      * @Route("/settings/organization/{orgId}/processes", name="manageProcesses")
      */
     public function manageProcessesAction(Request $request){
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoP = $em->getRepository(Process::class);
         $repoO = $em->getRepository(Organization::class);
-        $currentUser = MasterController::getAuthorizedUser($app);
+        $currentUser = $this->user;;
         $isRoot = $currentUser->getRole() == 4;
         $organization = $currentUser->getOrganization();
         $process = $isRoot ?  new Process : new InstitutionProcess();
         $elmtType = $isRoot ? 'process' :'iprocess';
         
-        $manageForm = $formFactory->create(ManageProcessForm::class, $organization, ['standalone' => true, 'isRoot' => $isRoot]);
+        $manageForm = $this->createForm(ManageProcessForm::class, $organization, ['standalone' => true, 'isRoot' => $isRoot]);
         $manageForm->handleRequest($request);
-        $createForm = $formFactory->create(AddProcessForm::class, $process, ['standalone' => true, 'organization' => $organization,'elmt' => $elmtType]);
+        $createForm = $this->createForm(AddProcessForm::class, $process, ['standalone' => true, 'organization' => $organization,'elmt' => $elmtType]);
         $createForm->handleRequest($request);
 
         $validatingProcesses = $isRoot ? $organization->getProcesses()->filter(function(Process $p){return $p->isApprovable();}) :
@@ -212,7 +212,7 @@ class SettingsController extends MasterController
 
         if($validatingProcesses->count() > 0){
             $validatingProcess = $validatingProcesses->first();
-            $validateForm = $formFactory->create(AddProcessForm::class, $validatingProcess, ['standalone' => true, 'organization' => $organization,'elmt' => $elmtType]);
+            $validateForm = $this->createForm(AddProcessForm::class, $validatingProcess, ['standalone' => true, 'organization' => $organization,'elmt' => $elmtType]);
             $validateForm->handleRequest($request);
         } else {
             $validateForm = null;
@@ -221,10 +221,10 @@ class SettingsController extends MasterController
 
         if ($manageForm->isValid()) {
             $em->flush();
-            return $app->redirect($app['url_generator']->generate('firmSettings'));
+            return $this->redirectToRoute('firmSettings');
         }
 
-        return $app['twig']->render('process_list.html.twig',
+        return $this->render('process_list.html.twig',
             [
                 'isRoot' => $isRoot,
                 'form' => $manageForm->createView(),
@@ -247,12 +247,12 @@ class SettingsController extends MasterController
      * @Route("/settings/organization/{orgId}/{entity}/pvalidate/{elmtId}", name="validateProcess")
      */
     public function validateProcessAction(Request $request, $elmtId, $elmtType, $orgId) {
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoO = $em->getRepository(Organization::class);
         
-        $currentUser = MasterController::getAuthorizedUser($app);
+        $currentUser = $this->user;;
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
         $currentUserOrganization = $currentUser->getOrganization();
         $organization = $repoO->find($orgId);
@@ -267,7 +267,7 @@ class SettingsController extends MasterController
         }
 
         if (!$hasPageAccess) {
-            return $app['twig']->render('errors/403.html.twig');
+            return $this->render('errors/403.html.twig');
         } else {
 
             if ($_POST['name'] == "") {
@@ -316,12 +316,12 @@ class SettingsController extends MasterController
      */
     public function deleteProcessAction(Request $request, $orgId, $elmtType) {
 
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoO = $em->getRepository(Organization::class);
         $elmtId = $request->get('id');
         $repoU = $em->getRepository(User::class);
         $organization = $repoO->find($orgId);
-        $currentUser = MasterController::getAuthorizedUser($app);
+        $currentUser = $this->user;;
         $currentUserOrganization = $currentUser->getOrganization();
         $hasPageAccess = true;
 
@@ -330,7 +330,7 @@ class SettingsController extends MasterController
         }
 
         if (!$hasPageAccess) {
-            return $app['twig']->render('errors/403.html.twig');
+            return $this->render('errors/403.html.twig');
         } else {
         // $organization = $target->getOrganization();
             
@@ -373,21 +373,21 @@ class SettingsController extends MasterController
      */
     public function rootAddUserAction(Request $request, $orgId) {
 
-        $currentUser = MasterController::getAuthorizedUser($app);
+        $currentUser = $this->user;;
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
 
         if ($currentUser->getRole() != 4) {
-            return $app['twig']->render('errors/403.html.twig');
+            return $this->render('errors/403.html.twig');
         }
 
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoO = $em->getRepository(Organization::class);
         $organization = $repoO->find($orgId);
-        $formFactory = $app['form.factory'] ;
-        $createUserForm = $formFactory->create(AddUserForm::class, null, ['standalone'=>true,'organization' => $organization, 'enabledCreatingUser' => true]);
-        $organizationElementForm = $formFactory->create(OrganizationElementType::class, null, ['usedForUserCreation' => true, 'standalone' => true ]);
+        
+        $createUserForm = $this->createForm(AddUserForm::class, null, ['standalone'=>true,'organization' => $organization, 'enabledCreatingUser' => true]);
+        $organizationElementForm = $this->createForm(OrganizationElementType::class, null, ['usedForUserCreation' => true, 'standalone' => true ]);
         $createUserForm->handleRequest($request);
         $organizationElementForm->handleRequest($request);
 
@@ -421,11 +421,12 @@ class SettingsController extends MasterController
 
             $settings['rootCreation'] = true;
             $em->flush();
-            MasterController::sendMail($app, $recipients,'registration', $settings);
-            return $app->redirect($app['url_generator']->generate('rootManageUsers', ['orgId' => $orgId]));
+            $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'registration']);
+
+            return $this->redirectToRoute('rootManageUsers', ['orgId' => $orgId]);
         }
 
-        return $app['twig']->render('user_create.html.twig',
+        return $this->render('user_create.html.twig',
             [
                 'form' => $createUserForm->createView(),
                 'organizationElementForm' => $organizationElementForm->createView(),
@@ -456,12 +457,12 @@ class SettingsController extends MasterController
         try{
             $entityManager = $this->getEntityManager($app) ;
             $repoO = $entityManager->getRepository(Organization::class);
-            $currentUser = MasterController::getAuthorizedUser($app);
+            $currentUser = $this->user;;
             $organization = $repoO->findOneById($orgId);
-            $formFactory = $app['form.factory'] ;
-            $delegateActivityForm = $formFactory->create(DelegateActivityForm::class, null,  ['app' => $app, 'standalone' => true]);
+            
+            $delegateActivityForm = $this->createForm(DelegateActivityForm::class, null,  ['app' => $app, 'standalone' => true]);
             $delegateActivityForm->handleRequest($request);
-            $requestActivityForm = $formFactory->create(RequestActivityForm::class, null, ['app' => $app, 'standalone' => true]);
+            $requestActivityForm = $this->createForm(RequestActivityForm::class, null, ['app' => $app, 'standalone' => true]);
             $requestActivityForm->handleRequest($request);
             $userActivities = $organization->getActivities();
 
@@ -505,7 +506,7 @@ class SettingsController extends MasterController
         }
 
 
-        return $app['twig']->render('activity_list.html.twig',
+        return $this->render('activity_list.html.twig',
             [
                 'user_activities' => $userActivities,
                 'organization' => $organization,
@@ -594,7 +595,7 @@ class SettingsController extends MasterController
         $usersWithDpt = $users->matching(Criteria::create()->where(Criteria::expr()->neq("dptId", null)));
         $usersWithoutDpt = $users->matching(Criteria::create()->where(Criteria::expr()->eq("dptId", null))->andWhere(Criteria::expr()->neq("lastname", "ZZ")));
 
-        return $app['twig']->render('user_list.html.twig',
+        return $this->render('user_list.html.twig',
             [
                 'rootDisplay' => true,
                 'app' => $app,
@@ -647,7 +648,7 @@ class SettingsController extends MasterController
         }
         $em->flush();
 
-        return $app->redirect($app['url_generator']->generate('manageOrganizations'));
+        return $this->redirectToRoute('manageOrganizations');
     }
 
 
@@ -666,7 +667,7 @@ class SettingsController extends MasterController
         $em = self::getEntityManager();
         /** @var FormFactory */
         
-        $organizationForm = $formFactory->create(AddOrganizationForm::class, null,['standalone' => true, 'orgId' => 0, 'app' => $app]);
+        $organizationForm = $this->createForm(AddOrganizationForm::class, null,['standalone' => true, 'orgId' => 0, 'app' => $app]);
         $organizationForm->handleRequest($request);
         $errorMessage = '';
         $organization = new Organization;
@@ -874,15 +875,16 @@ class SettingsController extends MasterController
                     $recipients[] = $user;
                     $settings['rootCreation'] = true;
 
-                    MasterController::sendMail($app,$recipients,'registration',$settings);
+                    $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'registration']);
+
                 }
 
-                return $app->redirect($app['url_generator']->generate('manageOrganizations'));
+                return $this->redirectToRoute('manageOrganizations');
             }
 
         }
 
-        return $app['twig']->render('organization_add.html.twig',
+        return $this->render('organization_add.html.twig',
             [
                 'form' => $organizationForm->createView(),
                 'message' => $errorMessage,
@@ -904,15 +906,15 @@ class SettingsController extends MasterController
 
         $currentUser = self::getAuthorizedUser($app);
         if($currentUser->getRole() != 4){
-            return $app['twig']->render('errors/404.html.twig');
+            return $this->render('errors/404.html.twig');
         }
 
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoO = $em->getRepository(Organization::class);
         $repoU = $em->getRepository(User::class);
         $organization = $repoO->findOneById($orgId);
         
-        $organizationForm = $formFactory->create(AddOrganizationForm::class, null,['standalone' => true, 'orgId' => $orgId, 'app' => $app, 'toValidate' => true]);
+        $organizationForm = $this->createForm(AddOrganizationForm::class, null,['standalone' => true, 'orgId' => $orgId, 'app' => $app, 'toValidate' => true]);
         $organizationForm->handleRequest($request);
 
         if($organizationForm->isSubmitted()){
@@ -935,7 +937,8 @@ class SettingsController extends MasterController
                 $settings = [];
                 $settings['token'] = $masterUser->getToken();
 
-                MasterController::sendMail($app, $recipients,'subscriptionConfirmation', $settings);
+                $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'subscriptionConfirmation']);
+
 
             } else {
 
@@ -944,10 +947,10 @@ class SettingsController extends MasterController
             }
 
             $em->flush();
-            return $app->redirect($app['url_generator']->generate('manageOrgazations'));
+            return $this->redirectToRoute('manageOrgazations');
         }
 
-        return $app['twig']->render('organization_add.html.twig',
+        return $this->render('organization_add.html.twig',
             [
                 'form' => $organizationForm->createView(),
                 'toValidate' => true,
@@ -955,7 +958,7 @@ class SettingsController extends MasterController
     }
 
     public function deleteOrganizationActivityAction(Request $request, $orgId, $actId){
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $activity = $em->getRepository(Activity::class)->findOneById($actId);
         $user = self::getAuthorizedUser($app);
         $organization = $em->getRepository(Organization::class)->findOneById($orgId);
@@ -976,10 +979,10 @@ class SettingsController extends MasterController
      */
     public function updateOrganizationAction(Request $request, $orgId){
 
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoO = $em->getRepository(Organization::class);
         
-        $organizationForm = $formFactory->create(AddOrganizationForm::class, null,['standalone' => true, 'orgId' => $orgId, 'app' => $app]);
+        $organizationForm = $this->createForm(AddOrganizationForm::class, null,['standalone' => true, 'orgId' => $orgId, 'app' => $app]);
         $organizationForm->handleRequest($request);
         $errorMessage = '';
         $organization = $repoO->findOneById($orgId);
@@ -1031,14 +1034,14 @@ class SettingsController extends MasterController
                 $recipients[] = $user;
                 $settings = [];
 
-                MasterController::sendMail($app,$recipients,'orgMasterUserChange',$settings);
+                $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'orgMasterUserChange']);
 
-                return $app->redirect($app['url_generator']->generate('manageOrganizations'));
+                return $this->redirectToRoute('manageOrganizations');
             }
 
         }
 
-        return $app['twig']->render('organization_add.html.twig',
+        return $this->render('organization_add.html.twig',
             [
                 'form' => $organizationForm->createView(),
                 'message' => $errorMessage,
@@ -1061,7 +1064,7 @@ class SettingsController extends MasterController
     public function updateUserAction(Request $request, $orgId, $usrId)
     {
 
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoO = $em->getRepository(Organization::class);
         $repoOC = $em->getRepository(Client::class);
         $searchedUser = $em->getRepository(User::class)->findOneById($usrId);
@@ -1087,44 +1090,44 @@ class SettingsController extends MasterController
             }
 
             if(!in_array($searchedUserOrganization,$connectedUserClients) && $connectedUser->getRole() != 4){
-                return $app['twig']->render('errors/403.html.twig');
+                return $this->render('errors/403.html.twig');
             }
 
             if(in_array($searchedUserOrganization,$connectedUserClients)){
                 $modifyIntern = false;
-                $userForm = $formFactory->create(ClientUserType::class, null, ['standalone' => true, 'user' => $searchedUser, 'app' => $app, 'clients' => $connectedUserClients]);
+                $userForm = $this->createForm(ClientUserType::class, null, ['standalone' => true, 'user' => $searchedUser, 'app' => $app, 'clients' => $connectedUserClients]);
             } else {
                 // This case only applies to root users
                 $modifyIntern = true;
-                $userForm = $formFactory->create(UserType::class, null, ['standalone' => true, 'app' => $app, 'organization' => $searchedUserOrganization, 'user' => $searchedUser]);
+                $userForm = $this->createForm(UserType::class, null, ['standalone' => true, 'app' => $app, 'organization' => $searchedUserOrganization, 'user' => $searchedUser]);
             }
 
         } else {
             if($connectedUser->getRole() == 2 || $connectedUser->getRole() == 3){
-                return $app['twig']->render('errors/403.html.twig');
+                return $this->render('errors/403.html.twig');
             }
 
             $modifyIntern = true;
-            $userForm = $formFactory->create(UserType::class, $searchedUser, ['standalone' => true, 'organization' => $searchedUserOrganization]);
+            $userForm = $this->createForm(UserType::class, $searchedUser, ['standalone' => true, 'organization' => $searchedUserOrganization]);
         }
 
 
 
         $userForm->handleRequest($request);
-        $organizationElementForm = $formFactory->create(OrganizationElementType::class, null, ['usedForUserCreation' => false, 'standalone' => true, 'organization' => $searchedUserOrganization]);
+        $organizationElementForm = $this->createForm(OrganizationElementType::class, null, ['usedForUserCreation' => false, 'standalone' => true, 'organization' => $searchedUserOrganization]);
         $organizationElementForm->handleRequest($request);
         /*} catch (\Exception $e){
             print_r($e->getMessage());
             die;
         }*/
 
-        return $app['twig']->render('user_create.html.twig',
+        return $this->render('user_create.html.twig',
             [
                 'modifyIntern' => $modifyIntern,
                 'form' => $userForm->createView(),
                 'orgId' => $searchedUserOrganization->getId(),
                 'organizationElementForm' => $organizationElementForm->createView(),
-                'clientForm' => ($modifyIntern) ? null : $formFactory->create(AddClientForm::class, null, ['standalone'=>true])->createView(),
+                'clientForm' => ($modifyIntern) ? null : $this->createForm(AddClientForm::class, null, ['standalone'=>true])->createView(),
                 'enabledCreatingUser' => false,
                 'creationPage' => false,
 
@@ -1144,7 +1147,7 @@ class SettingsController extends MasterController
     {
 
         try{
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoO = $em->getRepository(Organization::class);
         $repoOC = $em->getRepository(Client::class);
         $searchedUser = $em->getRepository(User::class)->findOneById($usrId);
@@ -1166,19 +1169,19 @@ class SettingsController extends MasterController
             }
 
             if(!in_array($searchedUserOrganization,$connectedUserClients) && $connectedUser->getRole() != 4){
-                return $app['twig']->render('errors/403.html.twig');
+                return $this->render('errors/403.html.twig');
             }
 
             $userForm = (!in_array($searchedUserOrganization,$connectedUserClients)) ?
-            $formFactory->create(UserType::class, null, ['standalone' => true, 'app' => $app, 'departments' => $departments, 'user' => $searchedUser]) :
-            $formFactory->create(ClientUserType::class, null, ['standalone' => true, 'user' => $searchedUser, 'app' => $app, 'clients' => $connectedUserOrgClients]);
+            $this->createForm(UserType::class, null, ['standalone' => true, 'app' => $app, 'departments' => $departments, 'user' => $searchedUser]) :
+            $this->createForm(ClientUserType::class, null, ['standalone' => true, 'user' => $searchedUser, 'app' => $app, 'clients' => $connectedUserOrgClients]);
 
         } else {
             if($connectedUser->getRole() == 2 || $connectedUser->getRole() == 3){
-                return $app['twig']->render('errors/403.html.twig');
+                return $this->render('errors/403.html.twig');
             }
 
-            $userForm = $formFactory->create(UserType::class, null, ['standalone' => true, 'app' => $app, 'departments' => $departments, 'user' => $searchedUser]);
+            $userForm = $this->createForm(UserType::class, null, ['standalone' => true, 'app' => $app, 'departments' => $departments, 'user' => $searchedUser]);
         }
 
 
@@ -1205,7 +1208,7 @@ class SettingsController extends MasterController
                     $token = md5(rand());
                     $settings['token'] = $token;
                     $searchedUser->setPassword(null)->setToken($token)->setEmail($userForm->get('email')->getData());
-                    MasterController::sendMail($app,$recipients,'emailChangeNotif',$settings);
+                    $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'emailChangeNotif']);
                 }
 
                 $existingWeight = $repoW->findOneById($userForm->get('weightIni')->getData());
@@ -1224,7 +1227,7 @@ class SettingsController extends MasterController
                     $token = md5(rand());
                     $settings['token'] = $token;
                     $externalUser->setPassword(null)->setToken($token)->setEmail($userForm->get('email')->getData());
-                    MasterController::sendMail($app,$recipients,'emailChangeNotif',$settings);
+                    $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'emailChangeNotif']);
                 }
 
                 $externalUser
@@ -1278,7 +1281,7 @@ class SettingsController extends MasterController
      * @Route("/ajax/settings/organization/{orgId}/user/{usrId}", name="rootAjaxUserDelete")
      */
     public function deleteUserAction(Request $request, $orgId, $usrId){
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoP = $em->getRepository(Participation::class);
         $repoU = $em->getRepository(User::class);
         $repoO = $em->getRepository(Organization::class);
@@ -1362,7 +1365,7 @@ class SettingsController extends MasterController
      * @Route("/ajax/settings/organization/{orgId}/client/user/{usrId}", name="rootAjaxClientUserDelete")
      */
     public function deleteClientUserAction(Request $request, $orgId, $usrId){
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoP = $em->getRepository(Participation::class);
         $repoEU = $em->getRepository(ExternalUser::class);
         $repoU = $em->getRepository(User::class);
@@ -1455,10 +1458,10 @@ class SettingsController extends MasterController
     /*public function searchWorkerElmts(Request $request){
 
         
-        $searchWorkerForm = $formFactory->create(SearchWorkerForm::class, null);
+        $searchWorkerForm = $this->createForm(SearchWorkerForm::class, null);
         $searchWorkerForm->handleRequest($request);
 
-        return $app['twig']->render('worker_search.html.twig',
+        return $this->render('worker_search.html.twig',
         [
             'form' => $searchWorkerForm->createView(),
         ]);
@@ -1477,7 +1480,7 @@ class SettingsController extends MasterController
     public function duplicateOrganizationAction(Request $request,$orgId){
         set_time_limit(240);
         ini_set('memory_limit', '500M');
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoO = $em->getRepository(Organization::class);
         $repoA = $em->getRepository(Activity::class);
         $repoU = $em->getRepository(User::class);
@@ -1802,7 +1805,7 @@ class SettingsController extends MasterController
         $em->persist($clonedFirm);
         $em->flush();
 
-        return $app->redirect($app['url_generator']->generate('massiveUpdateOrganization', ['orgId' => $clonedFirm->getId()]));
+        return $this->redirectToRoute('massiveUpdateOrganization', ['orgId' => $clonedFirm->getId()]);
 
     }
 
@@ -1817,11 +1820,11 @@ class SettingsController extends MasterController
      */
     public function massiveUpdateOrganizationAction(Request $request, $orgId){
 
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoO = $em->getRepository(Organization::class);
         $organization = $repoO->findOneById($orgId);
         
-        $organizationUsersForm = $formFactory->create(UpdateOrganizationForm::class, $organization, ['standalone' =>true,'organization' => $organization,'app'=> $app]);
+        $organizationUsersForm = $this->createForm(UpdateOrganizationForm::class, $organization, ['standalone' =>true,'organization' => $organization,'app'=> $app]);
         $organizationUsersForm->handleRequest($request);
 
         if($organizationUsersForm->isValid()){
@@ -1851,12 +1854,12 @@ class SettingsController extends MasterController
             foreach ($repoO->findAll() as $organization) {
                 $organizations[] = $organization->toArray($app);
             }
-            return $app['twig']->render('organization_list.html.twig',['organizations' => $organizations]);
-            //return $app->redirect($app['url_generator']->generate('manageOrganizations'));
+            return $this->render('organization_list.html.twig',['organizations' => $organizations]);
+            //return $this->redirectToRoute('manageOrganizations');
 
         }
 
-        return $app['twig']->render('organization_massive_update.html.twig',
+        return $this->render('organization_massive_update.html.twig',
         [
             'form' => $organizationUsersForm->createView(),
             'organization' => $organization,
@@ -1866,19 +1869,19 @@ class SettingsController extends MasterController
 
     public function displayWorkerElmts(Request $request, $currentPage = 1, $limit = 100){
 
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoWE = $em->getRepository(WorkerExperience::class);
         
-        $searchWorkerForm = $formFactory->create(SearchWorkerForm::class, null,['app' => $app]);
-        $validateFirmForm = $formFactory->create(ValidateFirmForm::class, null, ['standalone' => true]);
-        $validateMailForm = $formFactory->create(ValidateMailForm::class, null, ['standalone' => true]);
-        $sendMailProspectForm = $formFactory->create(SendMailProspectForm::class, null, ['standalone' => true]);
+        $searchWorkerForm = $this->createForm(SearchWorkerForm::class, null,['app' => $app]);
+        $validateFirmForm = $this->createForm(ValidateFirmForm::class, null, ['standalone' => true]);
+        $validateMailForm = $this->createForm(ValidateMailForm::class, null, ['standalone' => true]);
+        $sendMailProspectForm = $this->createForm(SendMailProspectForm::class, null, ['standalone' => true]);
         $searchWorkerForm->handleRequest($request);
 
-        $validateMassFirmForm = $formFactory->create(ValidateMassFirmForm::class, null, ['standalone' => true, 'firms' => $searchedWorkerFirms]);
+        $validateMassFirmForm = $this->createForm(ValidateMassFirmForm::class, null, ['standalone' => true, 'firms' => $searchedWorkerFirms]);
             $validateMassFirmForm->handleRequest($request);
 
-        return $app['twig']->render('worker_search.html.twig',
+        return $this->render('worker_search.html.twig',
         [
             'form' => $searchWorkerForm->createView(),
             'validateFirmForm' => $validateFirmForm->createView(),
@@ -1904,13 +1907,13 @@ class SettingsController extends MasterController
      */
     public function findWorkerElmts(Request $request, $currentPage = 1, $limit = 500){
 
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoWE = $em->getRepository(WorkerExperience::class);
         
-        $searchWorkerForm = $formFactory->create(SearchWorkerForm::class, null,['app' => $app]);
-        $validateFirmForm = $formFactory->create(ValidateFirmForm::class, null, ['standalone' => true]);
-        $validateMailForm = $formFactory->create(ValidateMailForm::class, null, ['standalone' => true]);
-        $sendMailProspectForm = $formFactory->create(SendMailProspectForm::class, null, ['standalone' => true]);
+        $searchWorkerForm = $this->createForm(SearchWorkerForm::class, null,['app' => $app]);
+        $validateFirmForm = $this->createForm(ValidateFirmForm::class, null, ['standalone' => true]);
+        $validateMailForm = $this->createForm(ValidateMailForm::class, null, ['standalone' => true]);
+        $sendMailProspectForm = $this->createForm(SendMailProspectForm::class, null, ['standalone' => true]);
         $searchWorkerForm->handleRequest($request);
         $searchedWorkerFirms = null;
         $searchedWorkerIndividuals = null;
@@ -1929,9 +1932,9 @@ class SettingsController extends MasterController
 
 
                 $qb->select('we')
-                ->from('Model\WorkerExperience','we')
-                ->innerJoin('Model\WorkerFirm', 'wf', 'WITH', 'we.firm = wf.id')
-                ->innerJoin('Model\WorkerIndividual', 'wi', 'WITH', 'we.individual = wi.id')
+                ->from('App\Entity\WorkerExperience','we')
+                ->innerJoin('App\Entity\WorkerFirm', 'wf', 'WITH', 'we.firm = wf.id')
+                ->innerJoin('App\Entity\WorkerIndividual', 'wi', 'WITH', 'we.individual = wi.id')
                 //->where('au.status = 4')
                 ->where('we.position LIKE :position')
                 ->andWhere('wf.name LIKE :firm')
@@ -1977,9 +1980,9 @@ class SettingsController extends MasterController
 
                 $qb2 = $em->createQueryBuilder();
                 $qb2->select('count(we.id)')
-                ->from('Model\WorkerExperience','we')
-                ->innerJoin('Model\WorkerFirm', 'wf', 'WITH', 'we.firm = wf.id')
-                ->innerJoin('Model\WorkerIndividual', 'wi', 'WITH', 'we.individual = wi.id')
+                ->from('App\Entity\WorkerExperience','we')
+                ->innerJoin('App\Entity\WorkerFirm', 'wf', 'WITH', 'we.firm = wf.id')
+                ->innerJoin('App\Entity\WorkerIndividual', 'wi', 'WITH', 'we.individual = wi.id')
                 //->where('au.status = 4')
                 ->where('we.position LIKE :position')
                 ->andWhere('wf.name LIKE :firm')
@@ -2051,7 +2054,7 @@ class SettingsController extends MasterController
             /*if($searchWorkerForm->get('fullName')->getData() == '' && $searchWorkerForm->get('position')->getData() == '' && $searchWorkerForm->get('firmName')->getData() != ''){
 
                 $searchedWorkerFirms = new ArrayCollection($qb->select('wf')
-                ->from('Model\WorkerFirm', 'wf')
+                ->from('App\Entity\WorkerFirm', 'wf')
                 ->where('wf.name LIKE :firmName')
                 ->setParameter('firmName', '%'.$searchWorkerForm->get('firmName')->getData().'%')
                 ->getQuery()
@@ -2072,7 +2075,7 @@ class SettingsController extends MasterController
             if($searchWorkerForm->get('fullName')->getData() != '' && $searchWorkerForm->get('position')->getData() == '' && $searchWorkerForm->get('firmName')->getData() == ''){
 
                 $searchedWorkerIndividuals = new ArrayCollection($qb->select('wi')
-                ->from('Model\WorkerIndividual', 'wi')
+                ->from('App\Entity\WorkerIndividual', 'wi')
                 ->where('wi.fullName LIKE :fullName')
                 ->setParameter('fullName', '%'.$searchWorkerForm->get('fullName')->getData().'%')
                 ->getQuery()
@@ -2095,7 +2098,7 @@ class SettingsController extends MasterController
             if($searchWorkerForm->get('fullName')->getData() == '' && $searchWorkerForm->get('position')->getData() == ''){
 
                 $qb->select('wf')
-                ->from('Model\WorkerFirm', 'wf')
+                ->from('App\Entity\WorkerFirm', 'wf')
                 ->where('wf.name LIKE :firmName');
 
 
@@ -2203,10 +2206,10 @@ class SettingsController extends MasterController
 
         }
 
-        $validateMassFirmForm = $formFactory->create(ValidateMassFirmForm::class, null, ['standalone' => true, 'searchByLocation' => $isSearchByLocation, 'firms' => $searchedWorkerFirms]);
+        $validateMassFirmForm = $this->createForm(ValidateMassFirmForm::class, null, ['standalone' => true, 'searchByLocation' => $isSearchByLocation, 'firms' => $searchedWorkerFirms]);
             $validateMassFirmForm->handleRequest($request);
 
-        return $app['twig']->render('worker_search.html.twig',
+        return $this->render('worker_search.html.twig',
         [
             'form' => $searchWorkerForm->createView(),
             'searchedWorkerIndividuals' => $searchedWorkerIndividuals,
@@ -2232,7 +2235,7 @@ class SettingsController extends MasterController
      * @Route("/workers/states/{couId}", name="getStatesFromCountry")
      */
     public function getStatesFromCountry(Request $request, $couId){
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoC = $em->getRepository(Country::class);
         $repoS = $em->getRepository(State::class);
         $repoCI = $em->getRepository(City::class);
@@ -2271,7 +2274,7 @@ class SettingsController extends MasterController
      * @Route("/workers/cities/{staId}", name="getCitiesFromState")
      */
     public function getCitiesFromState(Request $request, $staId){
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoS = $em->getRepository(State::class);
         $repoC = $em->getRepository(City::class);
         if($staId != 0){
@@ -2300,7 +2303,7 @@ class SettingsController extends MasterController
      * @Route("/validate-mail/{mid}", name="validateMailSent")
      */
     public function validateMailSent(Request $request, $mid){
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoM = $em->getRepository(Mail::class);
         $mail = $repoM->findOneById($mid);
         $mail->setRead(new \DateTime);
@@ -2319,7 +2322,7 @@ class SettingsController extends MasterController
      * @Route("/deactivate-mail/{mid}", name="deactivateMail")
      */
     public function deactivateMail(Request $request, $mid){
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoM = $em->getRepository(Mail::class);
         $mail = $repoM->findOneById($mid);
         $workerIndividual = $mail->getWorkerIndividual();
@@ -2339,7 +2342,7 @@ class SettingsController extends MasterController
      * @Route("/delete-mail/{mid}", name="deleteMailSent")
      */
     public function deleteMailSent(Request $request, $mid){
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoM = $em->getRepository(Mail::class);
         $mail = $repoM->findOneById($mid);
         $em->remove($mail);
@@ -2356,7 +2359,7 @@ class SettingsController extends MasterController
      * @Route("/workers/firm/create", name="createWorkerFirm")
      */
     public function createWorkerFirm(Request $request){
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $name = $request->get('name');
         $workerFirm = new WorkerFirm;
         $workerFirm->setName($name)->setActive(true);
@@ -2378,11 +2381,11 @@ class SettingsController extends MasterController
      */
     public function updateWorkerFirm(Request $request, $wfId)
     {
-        $currentUser = MasterController::getAuthorizedUser($app);
+        $currentUser = $this->user;
         if (!$currentUser instanceof User) {
             return $this->redirectToRoute('login');
         }
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoWF = $em->getRepository(WorkerFirm::class);
 
         $workerFirm = $repoWF->findOneById($wfId);
@@ -2390,7 +2393,7 @@ class SettingsController extends MasterController
             $workerFirm = new WorkerFirm;
         }
         
-        $updateWorkerFirmForm = $formFactory->create(UpdateWorkerFirmForm::class, $workerFirm, ['standalone' => true, 'app' => $app, 'workerFirm' => $workerFirm]);
+        $updateWorkerFirmForm = $this->createForm(UpdateWorkerFirmForm::class, $workerFirm, ['standalone' => true, 'app' => $app, 'workerFirm' => $workerFirm]);
         $updateWorkerFirmForm->handleRequest($request);
 
         if($updateWorkerFirmForm->isValid()){
@@ -2436,10 +2439,10 @@ class SettingsController extends MasterController
             $em->persist($workerFirm);
             $em->flush();
 
-            return $app->redirect($app['url_generator']->generate('displayWorkerFirm',['wfId' => $workerFirm->getId()]));
+            return $this->redirectToRoute('displayWorkerFirm',['wfId' => $workerFirm->getId()]);
         }
 
-        return $app['twig']->render('worker_firm_data.html.twig',
+        return $this->render('worker_firm_data.html.twig',
         [
             'form' => $updateWorkerFirmForm->createView(),
             'wFirm' => $workerFirm,
@@ -2458,25 +2461,25 @@ class SettingsController extends MasterController
 
         $firmName = $request->get('name');
 
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoWF = $em->getRepository(WorkerFirm::class);
         $qb = $em->createQueryBuilder();
         $firms = new ArrayCollection($qb->select('wf')
-        ->from('Model\WorkerFirm', 'wf')
+        ->from('App\Entity\WorkerFirm', 'wf')
         ->where('wf.name LIKE :firmName')
-        ->andWhere('wf.active = true AND wf.nbActiveExperiences > 0')
+        ->andWhere('wf.active = true AND wf.nbActiveExp > 0')
         ->setParameter('firmName', '%'.$firmName.'%')
-        ->orderBy('wf.nbActiveExperiences','DESC')
+        ->orderBy('wf.nbActiveExp','DESC')
         ->getQuery()
         ->getResult());
 
         if(sizeof($firms) == 0){
             $firms = new ArrayCollection($qb/*->select('wf')
-            ->from('Model\WorkerFirm','wf')*/
+            ->from('App\Entity\WorkerFirm','wf')*/
             ->where('wf.name LIKE :firmName')
             ->andWhere('wf.active = true')
             ->setParameter('firmName', '%'.$firmName.'%')
-            ->orderBy('wf.nbActiveExperiences','DESC')
+            ->orderBy('wf.nbActiveExp','DESC')
             ->getQuery()
             ->getResult());
         }
@@ -2500,7 +2503,7 @@ class SettingsController extends MasterController
      * @Route("/workers/get-firm-from-id/{wfiId}", name="getFirmFromId")
      */
     public function getFirmFromId(Request $request, $wfiId){
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoWF = $em->getRepository(WorkerFirm::class);
         $firm = $repoWF->findOneById($wfiId);
         return new JsonResponse(['firmName' => $firm->getName()],200);
@@ -2517,7 +2520,7 @@ class SettingsController extends MasterController
      */
     public function updateWorkerIndividual(Request $request, $wiId){
 
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoWI = $em->getRepository(WorkerIndividual::class);
         $repoWF = $em->getRepository(WorkerFirm::class);
         $workerIndividual = $repoWI->findOneById($wiId);
@@ -2530,8 +2533,8 @@ class SettingsController extends MasterController
             $mailPrefix = $expFirm->getMailPrefix();
             $mailSuffix = $expFirm->getMailSuffix();
         }
-        $updateWorkerIndividualForm = $formFactory->create(UpdateWorkerIndividualForm::class, $workerIndividual, ['workerIndividual' => $workerIndividual, 'mailPrefix' => $mailPrefix, 'mailSuffix' => $mailSuffix, 'standalone' => true]);
-        $sendMailProspectForm = $formFactory->create(SendMailProspectForm::class, null, ['standalone' => true]);
+        $updateWorkerIndividualForm = $this->createForm(UpdateWorkerIndividualForm::class, $workerIndividual, ['workerIndividual' => $workerIndividual, 'mailPrefix' => $mailPrefix, 'mailSuffix' => $mailSuffix, 'standalone' => true]);
+        $sendMailProspectForm = $this->createForm(SendMailProspectForm::class, null, ['standalone' => true]);
         $updateWorkerIndividualForm->handleRequest($request);
         if($updateWorkerIndividualForm->isSubmitted()){
             if($updateWorkerIndividualForm->isValid()){
@@ -2546,9 +2549,9 @@ class SettingsController extends MasterController
                 $em->persist($workerIndividual);
                 $em->flush();
                 if($expFirm != null){
-                    return $app->redirect($app['url_generator']->generate('displayWorkerFirm',['wfId' => $expFirm->getId()]));
+                    return $this->redirectToRoute('displayWorkerFirm',['wfId' => $expFirm->getId()]);
                 } else {
-                    return $app->redirect($app['url_generator']->generate('findWorkerElmts'));
+                    return $this->redirectToRoute('findWorkerElmts');
                 }
             } else {
                 $errors = $this->buildErrorArray($updateWorkerIndividualForm);
@@ -2556,7 +2559,7 @@ class SettingsController extends MasterController
             }
         }
 
-        return $app['twig']->render('worker_individual_data.html.twig',
+        return $this->render('worker_individual_data.html.twig',
         [
             'workerIndividual' => $workerIndividual,
             'form' => $updateWorkerIndividualForm->createView(),
@@ -2574,7 +2577,7 @@ class SettingsController extends MasterController
      * @Route("/lib/img/void1x1.png/{mailId}", name="setReadEmail")
      */
     public function setReadEmail(Request $request, $mailId){
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoM = $em->getRepository(Mail::class);
         $mail = $repoM->findOneBy($mailId);
         $mail->setRead(new \DateTime);
@@ -2591,12 +2594,12 @@ class SettingsController extends MasterController
      * @Route("/workers/individual/send-prospect-mail/{winId}", name="sendProspectMail")
      */
     public function sendProspectMail(Request $request, $winId){
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoWI = $em->getRepository(WorkerIndividual::class);
         $workerIndividual = $repoWI->findOneById($winId);
         $firmLocation = $workerIndividual->getExperiences()->first()->getFirm()->getCountry()->getAbbr();
         
-        $sendMailProspectForm = $formFactory->create(SendMailProspectForm::class, null, ['standalone' => true]);
+        $sendMailProspectForm = $this->createForm(SendMailProspectForm::class, null, ['standalone' => true]);
         $sendMailProspectForm->handleRequest($request);
         if($sendMailProspectForm->isValid()){
             $settings = [];
@@ -2608,7 +2611,8 @@ class SettingsController extends MasterController
             $settings['addPresFR'] = $sendMailProspectForm->get('addPresentationFR')->getData();
             $settings['addPresEN'] = $sendMailProspectForm->get('addPresentationEN')->getData();
 
-            MasterController::sendMail($app, $recipients, 'prospecting_1', $settings);
+            $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'prospecting_1']);
+
             return new JsonResponse(['message' => 'success'],200);
         } else {
             $errors = $this->buildErrorArray($sendMailProspectForm);
@@ -2624,10 +2628,10 @@ class SettingsController extends MasterController
      * @Route("/settings/mails", name="checkMails")
      */
     public function checkMails(Request $request){
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoM = $em->getRepository(Mail::class);
         $mails = $repoM->findBy([],['inserted' => 'DESC']);
-        return $app['twig']->render('check_mails.html.twig',
+        return $this->render('check_mails.html.twig',
         [
             'mails' => $mails,
             'app' => $app,
@@ -2644,7 +2648,7 @@ class SettingsController extends MasterController
      * @Route("/workers/individual/add/{wfId}", name="addWorkerFirmIndividual")
      */
     public function addWorkerFirmIndividual(Request $request, $wfId){
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $workerIndividual = new WorkerIndividual;
         $workerExperience = new WorkerExperience;
         $workerExperience->setActive(true);
@@ -2662,8 +2666,8 @@ class SettingsController extends MasterController
         //$em->persist($workerExperience)
         //$em->flush()
         
-        $workerIndividualForm = $formFactory->create(UpdateWorkerIndividualForm::class, $workerIndividual, ['standalone' => true]);
-        $sendMailProspectForm = $formFactory->create(SendMailProspectForm::class, null, ['standalone' => true]);
+        $workerIndividualForm = $this->createForm(UpdateWorkerIndividualForm::class, $workerIndividual, ['standalone' => true]);
+        $sendMailProspectForm = $this->createForm(SendMailProspectForm::class, null, ['standalone' => true]);
         $sendMailProspectForm->handleRequest($request);
         $workerIndividualForm->handleRequest($request);
         if($workerIndividualForm->isSubmitted()){
@@ -2682,11 +2686,11 @@ class SettingsController extends MasterController
                 $em->persist($workerIndividual);
                 $em->persist($workerFirm);
                 $em->flush();
-                return $app->redirect($app['url_generator']->generate('displayWorkerFirm',['wfId' => $wfId]));
+                return $this->redirectToRoute('displayWorkerFirm',['wfId' => $wfId]);
             }
         }
 
-        return $app['twig']->render('worker_individual_data.html.twig',
+        return $this->render('worker_individual_data.html.twig',
         [
             'form' => $workerIndividualForm->createView(),
             'sendMailForm' => $sendMailProspectForm->createView(),
@@ -2703,7 +2707,7 @@ class SettingsController extends MasterController
      */
     public function addWorkerIndividual(Request $request){
 
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $workerIndividual = new WorkerIndividual;
         $repoWF = $em->getRepository(WorkerFirm::class);
         $workerExperience = new WorkerExperience;
@@ -2711,8 +2715,8 @@ class SettingsController extends MasterController
         $workerIndividual->setCreated(1)->addExperience($workerExperience);
 
         
-        $workerIndividualForm = $formFactory->create(UpdateWorkerIndividualForm::class, $workerIndividual, ['standalone' => true]);
-        $sendMailProspectForm = $formFactory->create(SendMailProspectForm::class, null, ['standalone' => true]);
+        $workerIndividualForm = $this->createForm(UpdateWorkerIndividualForm::class, $workerIndividual, ['standalone' => true]);
+        $sendMailProspectForm = $this->createForm(SendMailProspectForm::class, null, ['standalone' => true]);
         $sendMailProspectForm->handleRequest($request);
         $workerIndividualForm->handleRequest($request);
         if($workerIndividualForm->isSubmitted()){
@@ -2725,11 +2729,11 @@ class SettingsController extends MasterController
                 }
                 $em->persist($workerIndividual);
                 $em->flush();
-                return $app->redirect($app['url_generator']->generate('displayWorkerFirm',['wfId' => $wfId]));
+                return $this->redirectToRoute('displayWorkerFirm',['wfId' => $wfId]);
             }
         }
 
-        return $app['twig']->render('worker_individual_data.html.twig',
+        return $this->render('worker_individual_data.html.twig',
         [
             'form' => $workerIndividualForm->createView(),
             'sendMailForm' => $sendMailProspectForm->createView(),
@@ -2750,9 +2754,9 @@ class SettingsController extends MasterController
 
         $connectedUser = MasterController::getAuthorizedUser($app);
         if($connectedUser->getRole() != 4){
-            return $app['twig']->render('errors/403.html.twig');
+            return $this->render('errors/403.html.twig');
         }
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoWI = $em->getRepository(WorkerIndividual::class);
         $workerIndividual = $repoWI->findOneById($wiId);
         $em->remove($workerIndividual);
@@ -2773,9 +2777,9 @@ class SettingsController extends MasterController
 
         $connectedUser = MasterController::getAuthorizedUser($app);
         if($connectedUser->getRole() != 4){
-            return $app['twig']->render('errors/403.html.twig');
+            return $this->render('errors/403.html.twig');
         }
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoWF = $em->getRepository(WorkerFirm::class);
         $workerFirm = $repoWF->findOneById($wfId);
         $em->remove($workerFirm);
@@ -2793,11 +2797,11 @@ class SettingsController extends MasterController
      * @Route("/workers/individual/validate-mail/{wiId}", name="validateWorkerEmail")
      */
     public function validateWorkerEmail(Request $request, $wiId){
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoWI = $em->getRepository(WorkerIndividual::class);
         $workerIndividual = $repoWI->findOneById($wiId);
         
-        $validateMailForm = $formFactory->create(ValidateMailForm::class, $workerIndividual, ['standalone' => true]);
+        $validateMailForm = $this->createForm(ValidateMailForm::class, $workerIndividual, ['standalone' => true]);
         $validateMailForm->handleRequest($request);
 
         if($validateMailForm->isValid()){
@@ -2821,10 +2825,10 @@ class SettingsController extends MasterController
      * @Route("/workers/firm/validate-mails/{wfId}", name="validateMassWorkerEmails")
      */
     public function validateMassWorkerEmails(Request $request, $wfId){
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
 
         
-        $validateMassMailForm = $formFactory->create(ValidateMassMailForm::class, null, ['standalone' => true]);
+        $validateMassMailForm = $this->createForm(ValidateMassMailForm::class, null, ['standalone' => true]);
         $validateMassMailForm->handleRequest($request);
 
         if($validateMassMailForm->isValid()){
@@ -2863,7 +2867,7 @@ class SettingsController extends MasterController
      */
     public function setOrganizationToCriteriaAndStages(Request $request, $orgId){
 
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoC = $em->getRepository(Criterion::class);
         $repoO = $em->getRepository(Organization::class);
         $organization = $repoO->findOneById($orgId);
@@ -2879,7 +2883,7 @@ class SettingsController extends MasterController
             }
         }
         $em->flush();
-        return $app->redirect($app['url_generator']->generate('manageOrganizations'));
+        return $this->redirectToRoute('manageOrganizations');
     }
 
     /**
@@ -2894,7 +2898,7 @@ class SettingsController extends MasterController
      */
     public function validateMassFirm(Request $request, $isSearchByLocation, $wfIdsSeq)
     {
-        $currentUser = MasterController::getAuthorizedUser($app);
+        $currentUser = $this->user;;
         if (!$currentUser instanceof User) {
             return $this->redirectToRoute('login');
         }
@@ -2902,13 +2906,13 @@ class SettingsController extends MasterController
         
 
         $workerFirmIds = explode("-",$wfIdsSeq);
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoWF = $em->getRepository(WorkerFirm::class);
         $workerFirms = [];
         foreach($workerFirmIds as $workerFirmId){
             $workerFirms[] = $repoWF->findOneById($workerFirmId);
         }
-        $validateMassFirmForm = $formFactory->create(ValidateMassFirmForm::class, null, ['standalone' => true, 'searchByLocation' => $isSearchByLocation, 'firms' => $workerFirms]);
+        $validateMassFirmForm = $this->createForm(ValidateMassFirmForm::class, null, ['standalone' => true, 'searchByLocation' => $isSearchByLocation, 'firms' => $workerFirms]);
         $validateMassFirmForm->handleRequest($request);
 
         if($validateMassFirmForm->isValid()){
@@ -2961,7 +2965,7 @@ class SettingsController extends MasterController
 
                     $qb = $em->createQueryBuilder();
                     $qb->select('wf')
-                        ->from('Model\WorkerFirm', 'wf')
+                        ->from('App\Entity\WorkerFirm', 'wf')
                         ->where('wf.HQLocation LIKE :HQLocation');
 
                     $qb->setParameter('HQLocation', '%'.$workerFirm->getHQCity().'%');
@@ -3001,7 +3005,7 @@ class SettingsController extends MasterController
      * @Route("/workers/firm/get-mailable-individuals/{wfId}", name="getMailableIndividualsFromFirm")
      */
     public function getMailableIndividualsFromFirm(Request $request, $wfId){
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoWF = $em->getRepository(WorkerFirm::class);
         $workerFirm = $repoWF->findOneById($wfId);
         $activeExperiences = $workerFirm->getActiveExperiences();
@@ -3030,11 +3034,11 @@ class SettingsController extends MasterController
      * @Route("/workers/firm/validate/{wfId}", name="validateFirm")
      */
     public function validateFirm(Request $request, $wfId){
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoWF = $em->getRepository(WorkerFirm::class);
         $workerFirm = $repoWF->findOneById($wfId);
         
-        $validateFirmForm = $formFactory->create(ValidateFirmForm::class, $workerFirm, ['standalone' => true]);
+        $validateFirmForm = $this->createForm(ValidateFirmForm::class, $workerFirm, ['standalone' => true]);
         $validateFirmForm->handleRequest($request);
 
         if($validateFirmForm->isValid()){
@@ -3064,7 +3068,7 @@ class SettingsController extends MasterController
      * @Route("/workers/individual/validate-mail/{wiId}/{firstname}/{lastname}/{male}/{wiEmail}", name="validateWorkerEmailFromSelfPage")
      */
     public function validateWorkerEmailFromSelfPage(Request $request, $wiId, $firstname, $lastname, $male, $wiEmail){
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoWI = $em->getRepository(WorkerIndividual::class);
         if(!preg_match("/^(?:[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*|\"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])*$/",$wiEmail)){
             $message = "Email is not correctly formatted, reconsider email address";
@@ -3093,15 +3097,15 @@ class SettingsController extends MasterController
      */
     public function displayWorkerFirm(Request $request, $wfId){
 
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoWF = $em->getRepository(WorkerFirm::class);
         $repoWE = $em->getRepository(WorkerExperience::class);
         $wFirm = $repoWF->findOneById($wfId);
         $searchedIndividuals = [];
         $searchedFirmExperiences = $repoWE->findByFirm($wFirm);
         
-        $validateMailForm = $formFactory->create(ValidateMailForm::class, null, ['standalone' => true]);
-        $sendMailProspectForm = $formFactory->create(SendMailProspectForm::class, null, ['standalone' => true]);
+        $validateMailForm = $this->createForm(ValidateMailForm::class, null, ['standalone' => true]);
+        $sendMailProspectForm = $this->createForm(SendMailProspectForm::class, null, ['standalone' => true]);
 
         foreach($searchedFirmExperiences as $searchedFirmExperience){
             $searchedIndividuals[] = $searchedFirmExperience->getIndividual();
@@ -3124,7 +3128,7 @@ class SettingsController extends MasterController
         });
 
         $firmActiveIndividuals = new ArrayCollection(iterator_to_array($iterator));
-        $validateMassMailForm = $formFactory->create(ValidateMassMailForm::class, $wFirm, ['standalone' => true]);
+        $validateMassMailForm = $this->createForm(ValidateMassMailForm::class, $wFirm, ['standalone' => true]);
         $validateMassMailForm->handleRequest($request);
 
         $iterator = $firmInactiveIndividuals->getIterator();
@@ -3135,7 +3139,7 @@ class SettingsController extends MasterController
 
         $firmInactiveIndividuals = new ArrayCollection(iterator_to_array($iterator));
 
-        return $app['twig']->render('worker_firm_elements.html.twig',
+        return $this->render('worker_firm_elements.html.twig',
         [
             'wFirm' => $wFirm,
             'firmActiveIndividuals' => $firmActiveIndividuals,
@@ -3158,7 +3162,7 @@ class SettingsController extends MasterController
      */
     public function updateNbExpsInAllFirms(Request $request,$from,$to){
 
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoWF = $em->getRepository(WorkerFirm::class);
         $repoWE = $em->getRepository(WorkerExperience::class);
         $firmsIdsToSearch = [];
@@ -3194,7 +3198,7 @@ class SettingsController extends MasterController
      */
     public function createMostPossibleMails(Request $request, $from, $to){
 
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoWF = $em->getRepository(WorkerFirm::class);
         $firmsIdsToSearch = [];
         for($i = $from; $i < $to; $i++){
@@ -3247,7 +3251,7 @@ class SettingsController extends MasterController
     public function insertLKJSONData(Request $request){
 
         try {
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoWF = $em->getRepository(WorkerFirm::class);
 
         if(isset($_POST['individuals'])){
@@ -3430,7 +3434,7 @@ class SettingsController extends MasterController
      * @Route("/workers/firms/{from}/{to}/json-encode", name="transformFirmsIntoJSONVector")
      */
     public function transformFirmsIntoJSONVector(Request $request, $from, $to){
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoWF = $em->getRepository(WorkerFirm::class);
         $firmsIdsToSearch = [];
         for($i = $from; $i < $to; $i++){
