@@ -16,15 +16,7 @@
             {% set checkingIndex = -1 %}
 
             {% for s, stage in activity.sortedStagesPerPeriod %}
-
-              {% for e, event in stage.events %}
-
-                  <div class="event tooltipped" data-od="{{ event.onsetdateDay }}" data-p="{{ event.period }}">
-                    <i class="fa fa-{{event.eventType.icon.name}}"></i>
-                  </div>
-
-              {% endfor %}
-                
+ 
               {% set embeddedStages = null %}
 
               {% if s > checkingIndex %}

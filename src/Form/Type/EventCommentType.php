@@ -17,7 +17,7 @@ class EventCommentType extends AbstractType
 
         $builder->add('value', TextareaType::class,
             [
-                'label' => false,
+                'label' => 'Add comment',
                 'required' => true,
                 'attr' => [
                     'class' => 'no-margin',
