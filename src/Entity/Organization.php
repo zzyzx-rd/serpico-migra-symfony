@@ -159,10 +159,22 @@ class Organization extends DbObject
      */
     public $usersCSV;
     /**
+     * @ORM\OneToOne(targetEntity=WorkerFirm::class, inversedBy="organization", cascade={"persist", "remove"})
+     * @JoinColumn(name="worker_firm_wfi_id", referencedColumnName="wfi_id", nullable=true)
+     */
+    private $worker_firm_wfi;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class)
+     * @JoinColumn(name="master_user_id", referencedColumnName="usr_id", nullable=true)
+     */
+    private $masterUser;
+    /**
      * @Column(name="org_logo", type="string", nullable=true)
      * @var string
      */
     protected $logo;
+
     /**
      * @OneToMany(targetEntity="Team", mappedBy="organization",cascade={"persist", "remove"}, orphanRemoval=true)
      */
@@ -195,21 +207,23 @@ class Organization extends DbObject
 
     /**
      * @OneToMany(targetEntity="CriterionGroup", mappedBy="organization", cascade={"persist","remove"}, orphanRemoval=true)
-     * @var CriterionGroup[]
      */
     protected $criterionGroups;
 
     /**
-     * @ORM\OneToOne(targetEntity=WorkerFirm::class, inversedBy="organization", cascade={"persist", "remove"})
-     * @JoinColumn(name="worker_firm_wfi_id", referencedColumnName="wfi_id", nullable=true)
+     * @OneToMany(targetEntity="EventGroup", mappedBy="organization", cascade={"persist","remove"}, orphanRemoval=true)
      */
-    private $worker_firm_wfi;
+    protected $eventGroups;
 
     /**
-     * @ORM\ManyToOne(targetEntity=User::class)
-     * @JoinColumn(name="master_user_id", referencedColumnName="usr_id", nullable=true)
+     * @OneToMany(targetEntity="EventType", mappedBy="organization", cascade={"persist","remove"}, orphanRemoval=true)
      */
-    private $masterUser;
+    protected $eventTypes;
+
+    /**
+     * @OneToMany(targetEntity="Event", mappedBy="organization", cascade={"persist","remove"}, orphanRemoval=true)
+     */
+    protected $events;
     
 
     /**

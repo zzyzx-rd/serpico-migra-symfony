@@ -157,6 +157,11 @@ class User extends DbObject implements  UserInterface, \Serializable
      */
     public $externalUsers;
 
+    /**
+     * @OneToMany(targetEntity="EventComment", mappedBy="user",cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    public $eventComments;
+
     /** 
      * @ManyToOne(targetEntity="User", inversedBy="subordinates")
      * @JoinColumn(name="usr_superior", referencedColumnName="usr_id")
@@ -400,7 +405,7 @@ class User extends DbObject implements  UserInterface, \Serializable
         return $this->firstname;
     }
 
-    public function setFirstname(string $firstname): self
+    public function setFirstname(?string $firstname): self
     {
         $this->firstname = $firstname;
         return $this;
@@ -739,6 +744,27 @@ class User extends DbObject implements  UserInterface, \Serializable
     public function removeExternalUser(ExternalUser $externalUser): self
     {
         $this->externalUsers->removeElement($externalUser);
+        return $this;
+    }
+
+    /**
+     * @return ArrayCollection|EventComment[]
+     */
+    public function getEventComments()
+    {
+        return $this->eventComments;
+    }
+
+    public function addEventComment(EventComment $eventComment): self
+    {
+        $this->eventComments->add($eventComment);
+        $eventComment->setUser($this);
+        return $this;
+    }
+
+    public function removeEventComment(EventComment $eventComment): self
+    {
+        $this->eventComments->removeElement($eventComment);
         return $this;
     }
 

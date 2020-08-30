@@ -43,6 +43,7 @@
 {% block css %}
   <link rel="stylesheet" href="{{ asset('css/activity_list_item.css') }}">
   <link rel="stylesheet" href="{{ asset('css/iprocess_list.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/dropify.min.css') }}">
   <script>
     var ipurl = "{{ url('getAllProcessesFromInstitution',{orgId : 0}) }}";
     var gcurl = "{{ url('getElementConfig', {entity:'activity', elmtId : 0}) }}";
@@ -52,6 +53,7 @@
     var adeleteUrl="{{ url('ajaxActivityDelete', {'actId' : 0}) }}";
     var usurl= "{{ url('updateStageStatus', {stgId : 0}) }}";
     var cpurl = "{{ url('createProcessRequest', {orgId : currentuser.organization.id}) }}";
+    var eurl = "{{ url('updateEvent', {eveId : 0}) }}";
   </script>
   <style>
       .elmts{
@@ -387,7 +389,9 @@
       .fixed-action-btn ul > li > a > i:hover{
         color: #1976D2;
       }
-
+      .insert-document-btn, .insert-comment-btn{
+        background-color: #00acc1;
+      }
 
 
       .tabs-t-view{
@@ -499,6 +503,15 @@
 
       .act-action-button{
         border : calc(var(--button-size) / 2) solid 
+      }
+
+      .event-action-buttons{
+        margin-top: 20px
+      }
+
+      .event-notifications-header, .event-dates-header{
+        color: #00acc1;
+        cursor: pointer;
       }
 
 
@@ -957,6 +970,7 @@
     });
   </script>
   <script src="{{ asset('js/activity_manage.js') }}"></script>
+  <script src="{{ asset('js/dropify.min.js') }}"></script>
 {% endblock %}
 
 
@@ -1526,6 +1540,102 @@
       </div>
       {{ form_rest(addProcessForm)}}
       {{ form_end(addProcessForm)}}
+  </div>
+
+  <div id="updateEvent" class="modal">
+    <div class="modal-content">
+      {{ form_start(eventForm, {attr: {autocomplete: "off"}}) }}
+          <header class="flex-center-sb">
+            <h5 style="display:inline-block">
+            <span class="event-element-name"></span>
+            <span>{{' : ' ~ 'activity_elements.events.add_event.modal_new_title'|trans}}</span>
+            </h5>
+            {{ form_row(eventForm.submit)|replace({'[link]' : '<i class="fa fa-check"></i>'})|raw }}
+          </header>
+          <p>{{'activity_elements.events.add_event.modal_msg'|trans}}</p>
+          <div>
+              {{ form_row(eventForm.eventType) }}
+          </div>
+          <div class="row no-margin">
+            <a class="event-notifications-header flex-center">
+              <i class="fa fa-paper-plane sm-right"></i>
+              <span>{{'activity_elements.events.add_event.notify_participants'|trans}}</span>
+            </a>
+            <div class="event-notifications-content" style="display:none">
+              <input id="partNotification" type="checkbox" class="filled-in">
+              <label for="partNotification">
+                {{'activity_elements.events.add_event.notify_all_participants'|trans}}
+              </label>
+            </div>          
+          </div>
+
+          <div class="row no-margin">
+            <a class="event-dates-header flex-center">
+              <i class="fa fa-calendar-alt sm-right"></i>
+              <span>{{'activity_elements.events.add_event.manage_dates'|trans}}</span>
+            </a>
+            <div class="event-dates-content" style="display:none">
+              <div class="col m12 s12 onset-date-elmt">
+                  <div class="element-data">
+                    <i class="fa fa-clock"></i>
+                    <span>{{'activity_elements.events.add_event.onset_date'|trans }}</span>
+                  </div>
+                  <div class="element-input" style="display:none">
+                    {{ form_label(eventForm.onsetDate) }}
+                    {{ form_widget(eventForm.onsetDate) }}
+                  </div>
+              </div>
+              <div class="col m12 s12 exp-res-date-elmt">
+                  <div class="element-data">
+                    <i class="fa fa-clock"></i>
+                    <span>{{'activity_elements.events.add_event.exp_res_date'|trans }}</span>
+                  </div>
+                  <div class="element-input" style="display:none">
+                    {{ form_label(eventForm.expResDate) }}
+                    {{ form_widget(eventForm.expResDate) }}
+                  </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="event-action-buttons flex-center-sa">
+            
+              <a class="btn waves-effect waves-light insert-comment-btn">
+                <i class="fa fa-comment-medical sm-right"></i>
+                <span>{{ 'activity_elements.events.add_event.insert_comment'|trans }}</span>
+              </a>
+            
+            
+              <a class="btn waves-effect waves-light insert-document-btn">
+                <i class="fa fa-file-medical sm-right"></i>
+                <span>{{ 'activity_elements.events.add_event.insert_document'|trans }}</span>
+              </a>
+            
+          </div>
+          {#<ul class="comments" data-prototype="{% apply escape %}{% include 'components/client__item.html.twig' with { item: form.comments.vars.prototype } %}{% endapply %}">#}
+          <ul class="comments" data-prototype="{{ form_widget(eventForm.comments.vars.prototype)|e('html') }}">
+          {% for comment in eventForm.comments.vars.data %}
+          {% endfor %}
+          </ul>
+
+          {#<ul class="documents" data-prototype="{% apply escape %}{% include 'components/client__item.html.twig' with { item: form.comments.vars.prototype } %}{% endapply %}">#}
+          <ul class="documents" data-prototype="{{ form_widget(eventForm.documents.vars.prototype)|e('html') }}">
+          {% for document in eventForm.documents.vars.data %}
+          {% endfor %}
+          </ul>
+
+          {#}
+          <div class="action-buttons">
+              <div class="button-field">
+                  {{ form_row(eventForm.submit) }}
+              </div>
+          </div>
+          #}
+
+      </div>
+
+      {{ form_rest(eventForm)}}
+      {{ form_end(eventForm)}}
   </div>
 
   <div id="deleteActivity" class="modal">

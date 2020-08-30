@@ -78,6 +78,12 @@ class Department extends DbObject
     protected $criterionGroups;
 
     /**
+     * @OneToMany(targetEntity="EventGroup", mappedBy="department")
+     * @var ArrayCollection
+     */
+    protected $eventGroups;
+
+    /**
      * @OneToMany(targetEntity="Target", mappedBy="department",cascade={"persist", "remove"}, orphanRemoval=true)
      */
     public $targets;
@@ -100,6 +106,7 @@ class Department extends DbObject
      * @param $options
      * @param $organization
      * @param ArrayCollection $criterionGroups
+     * @param ArrayCollection $eventGroups
      * @param $targets
      */
     //TODO Set correctement dans les controlleurs
@@ -115,16 +122,18 @@ class Department extends DbObject
         ArrayCollection $options = null,
         $organization = null,
         ArrayCollection $criterionGroups = null,
+        ArrayCollection $eventGroups = null,
         ArrayCollection $targets = null)
     {
         parent::__construct($id, $createdBy, new DateTime);
         $this->name = $name;
         $this->deleted = $deleted;
         $this->masterUser = $masterUser;
+        $this->organization = $organization;
         $this->positions = $positions?:new ArrayCollection();
         $this->options = $options?:new ArrayCollection();
-        $this->organization = $organization;
-        $this->criterionGroups = $criterionGroups;
+        $this->criterionGroups = $criterionGroups?:new ArrayCollection();
+        $this->eventGroups = $eventGroups?:new ArrayCollection();
         $this->targets = $targets?:new ArrayCollection();
     }
 
@@ -255,27 +264,11 @@ class Department extends DbObject
     }
 
     /**
-     * @param ArrayCollection $criterionGroups
-     */
-    public function setCriterionGroups(ArrayCollection $criterionGroups): void
-    {
-        $this->criterionGroups = $criterionGroups;
-    }
-
-    /**
      * @return mixed
      */
     public function getTargets()
     {
         return $this->targets;
-    }
-
-    /**
-     * @param mixed $targets
-     */
-    public function setTargets($targets): void
-    {
-        $this->targets = $targets;
     }
 
     public function addPosition(Position $position): Department
@@ -289,6 +282,20 @@ class Department extends DbObject
     public function removePosition(Position $position): Department
     {
         $this->positions->removeElement($position);
+        return $this;
+    }
+
+    public function addCriterionGroup(CriterionGroup $criterionGroup): Department
+    {
+
+        $this->criterionGroups->add($criterionGroup);
+        $criterionGroup->setDepartment($this);
+        return $this;
+    }
+
+    public function removeCriterionGroup(CriterionGroup $criterionGroup): Department
+    {
+        $this->criterionGroups->removeElement($criterionGroup);
         return $this;
     }
 

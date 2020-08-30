@@ -11,6 +11,7 @@ back: Back
 next: Next
 delete: Delete
 save: Save
+create: Create
 update: Update
 pending_validation: Pending validation
 show_less: Show less
@@ -1801,6 +1802,8 @@ activities:
   progress_sorting_type: Sort by progress status
   status_view_type: Status view
   timeframe_view_type: Timeframe view
+  self_date_type: Duration dates
+  output_date_type: Feedback dates
   o_status:
     cancelled: Cancelled
     discarded: Discarded
@@ -1935,9 +1938,16 @@ activities:
   no_activities_msg_activity_manager: Create an activity to take part in an evaluation process
   no_registered_activities_title: No process added !
   no_registered_activities_msg: Enroll into a existing process to follow and update on its evolution !
+  hide_group: Hide these activities
+  display_group: Show these activities
+  instant_add: Instant add
+  update_status: Update progress status
+  provide_my_feedbacks: Provide my feedbacks
 
 activity_elements:
   parameters: Parameters
+  expected_output: Expected feedback
+  no_defined_output: No defined output
   stages: Stages
   criteria: Criteria
   participants: Participants
@@ -1976,6 +1986,22 @@ activity_elements:
   go_back_activities: Back to activities
   go_back_processes: Back to processes
   modify_stage_btn: Modify stage
+  events:
+    add_event:
+      modal_new_title: Event add
+      modal_update_title: Event update
+      modal_msg: What do you want to point out ?
+      insert_document: Share document
+      insert_comment: Provide description/comment
+      eventType: Event type
+      manage_dates: Manage dates
+      notify_participants: Participants notification
+      notify_all_articipants: Notify all
+      onset_date: Onset date
+      provide_onset_date: Provide an onset date
+      exp_res_date: Expected resolution date
+      provide_exp_res_date: Provide an expected resolution date
+
 
 create_parameters:
   page_title: Activity parameters

@@ -209,7 +209,6 @@ $(function(){
         });
     
         // Get the ul that holds the collection of users
-    
         //Setup rules when modifying existing stages
     
         $(document).on('click', '.remove-user, .insert-btn', function(e) {
@@ -219,24 +218,17 @@ $(function(){
             var selectedIndex = ($(this).hasClass('insert-btn')) ? $collectionHolder.children().length : $collectionHolder.children().index($(this).closest('li'))+1;
     
             if($(this).hasClass('remove-user')){
-    
-                //$collectionHolder.data('total', $collectionHolder.data('total') - 1);
-    
+        
                 if(selectedIndex < $collectionHolder.children().length){
                     for(i = selectedIndex+1;i <= $collectionHolder.children().length;i++){
-    
-                        $collectionHolder.find('h4:eq('+ (i-1) +')').text("User "+ (i-1));
+                        $collectionHolder.find('.user-number').eq(i-1).empty().append(i-1);
                     }
                 }
                 $(this).closest('li').remove();
-                $collectionHolder.data('total',total-1);
-    
+                $collectionHolder.data('total',total-1); 
     
             } else if ($(this).hasClass('insert-btn')){
                 addUserForm($collectionHolder, $(this), selectedIndex);
-                /*if($collectionHolder.data('total') == 1){
-                    $('.create-users').attr('disabled',false);
-                }*/
             }
         });
     
@@ -277,13 +269,7 @@ $(function(){
             }
     
             //Remove temporarily
-            $('.fixed-action-btn').addClass('floating-add').removeClass('fixed-action-btn');
-            
-            if($('.user').length % 2 == 1){
-                $newFormLi.find('.user-btn').css('background-color','#ebfffd');
-            }
-
-        
+            $('.fixed-action-btn').addClass('floating-add').removeClass('fixed-action-btn');        
 
             $collectionHolder.append($newFormLi);
             $newFormLi.find('select[name*="role"]').val(2);

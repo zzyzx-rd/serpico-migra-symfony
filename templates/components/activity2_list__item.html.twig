@@ -16,6 +16,14 @@
             {% set checkingIndex = -1 %}
 
             {% for s, stage in activity.sortedStagesPerPeriod %}
+
+              {% for e, event in stage.events %}
+
+                  <div class="event tooltipped" data-od="{{ event.onsetdateDay }}" data-p="{{ event.period }}">
+                    <i class="fa fa-{{event.eventType.icon.name}}"></i>
+                  </div>
+
+              {% endfor %}
                 
               {% set embeddedStages = null %}
 
@@ -76,7 +84,7 @@
       
       <ul class="flex-center">
           <li>
-            <a class="btn-floating act-btn tooltipped" data-tooltip="{{ 'activities.instant_add'|trans }}" data-position="top" href="#addEvent"><i class="material-icons">offline_bolt</i></a>
+            <a class="btn-floating act-btn tooltipped modal-trigger" href="#updateEvent" data-tooltip="{{ 'activities.instant_add'|trans }}" data-position="top" data-aid="{{ activity.id }}" data-sid="{{ activity.activeStages|length > 1 ? 0 : activity.activeStages.first.id }}"><i class="material-icons">offline_bolt</i></a>
           </li>
         {% if activityM.userCanEdit(activity,currentuser) %}  
           <li>
@@ -107,9 +115,9 @@
     {% set actName = activity.name %}
     {% set isTooLong = actName|length > actNameTruncVal %}
     {% if isTooLong %}
-        <span class="tooltipped" data-tooltip="{{actName}}">{{actName|slice(0,actNameTruncVal) ~ '...' }}</span>
+        <span class="act-info-name tooltipped" data-tooltip="{{actName}}">{{actName|slice(0,actNameTruncVal) ~ '...' }}</span>
     {% else %}
-        <span>{{ actName }}</span>
+        <span class="act-info-name">{{ actName }}</span>
     {% endif %}
 
     {% set activityClients =  activity.independantUniqueParticipatingClients %}

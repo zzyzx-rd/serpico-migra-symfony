@@ -147,6 +147,12 @@ class Activity extends DbObject
      * @OrderBy({"team" = "ASC"})
      */
     public $participations;
+
+    /**
+     * @OneToMany(targetEntity="Event", mappedBy="activity",cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    public $events;
+
     /**
      * @Column(name="act_progress", type="float", nullable=false)
      * @var float
@@ -1429,6 +1435,27 @@ class Activity extends DbObject
         });
         $orderedStages = new ArrayCollection($array);
         return $orderedStages;
+    }
+
+    /**
+    * @return ArrayCollection|Event[]
+    */
+    public function getEvents()
+    {
+        return $this->events;
+    }
+
+    public function addEvent(Event $event): Activity
+    {
+        $this->events->add($event);
+        $event->setActivity($this);
+        return $this;
+    }
+
+    public function removeEvent(Event $event): Activity
+    {
+        $this->events->removeElement($event);
+        return $this;
     }
 
 }

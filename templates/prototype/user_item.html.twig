@@ -92,11 +92,11 @@
     
         <div class="element-input" {% if user and item.vars.valid %}style="display:none"{% endif %}>
 
-            <div class="row flex-center">
+            <div class="row flex-center no-margin">
                 <div class="user-title">
                     <h4 class="no-margin">
                         {% if item.parent is not null %}
-                            {{ 'create_user.user'|trans }} <span class="user-number">{{ not item ? '__nb__' : key + 1 }}</span></h4>
+                            {{ 'create_user.user'|trans }} <span class="user-number">{{ not item.vars.valid ? key + 1 : '__nb__' }}</span></h4>
                         {% endif %}
                 </div>
         
@@ -114,8 +114,8 @@
                     {% endif %}
                 </div>
             </div>
-            <div class="row flex-center">
-                <div class="user-fullname col s12 m6 user-elmt" data-prefix-wo="" data-prefix-w="{{'create_user.fullname'|trans ~ ' : '}}" user-elmt>
+            <div class="row flex-center no-margin">
+                <div class="user-fullname col s12 m8 user-elmt" data-prefix-wo="" data-prefix-w="{{'create_user.fullname'|trans ~ ' : '}}" user-elmt>
                     <a class="btn user-btn user-info-fullname flex-center" {% if not user or not item.firstname.vars.valid or not item.lastname.vars.valid %}style="display: none;"{% endif %}>
                         <span>{{ user ? 'create_user.fullname'|trans ~ ' : ' ~ user.fullname : '' }}</span>
                     </a>
@@ -131,7 +131,7 @@
                     </div>
                 </div>
         
-                <div class="user-email col s12 m6 user-elmt" data-prefix-wo="{{'create_user.provide_email'|trans }}" data-prefix-w="{{'create_user.email_short'|trans ~ ' : '}}">
+                <div class="user-email col s12 m4 user-elmt" data-prefix-wo="{{'create_user.provide_email'|trans }}" data-prefix-w="{{'create_user.email_short'|trans ~ ' : '}}">
                                 
                     {% set isTooLong = user and user.email|length > mailTruncVal %}
                     {% if not isTooLong %}
@@ -224,8 +224,8 @@
                     </div>
                 </div>
                 <div class="col s12 m4">
-                    <div class="user-superior user-elmt" >
-                        <a class="btn user-btn user-info-superior flex-center" data-prefix-wo="{{'create_user.define_superior'|trans}}" data-prefix-w="{{'create_user.superior'|trans ~ ' : '}}">
+                    <div class="user-superior user-elmt" data-prefix-wo="{{'create_user.define_superior'|trans}}" data-prefix-w="{{'create_user.superior'|trans ~ ' : '}}">
+                        <a class="btn user-btn user-info-superior flex-center">
                             <i class="fa fa-user-circle m-right"></i>
                             <span class="m-right">{{ not user or not user.superior ? 'create_user.define_superior'|trans : 'create_user.superior'|trans ~ ' : ' ~ user.superior.fullname }}</span>
                         </a>

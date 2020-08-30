@@ -7,6 +7,7 @@
 
 namespace App\Entity;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\Column;
@@ -44,7 +45,7 @@ abstract class DbObject
     {
         $this->id = $id;
         $this->createdBy = $createdBy;
-        $this->inserted = $inserted?:new DateTime();
+        $this->inserted = $inserted ?: new DateTime();
     }
 
     /**

@@ -9,6 +9,7 @@ use App\Entity\Department;
 use App\Entity\OrganizationUserOption;
 use App\Entity\Survey;
 use App\Entity\User;
+use App\Form\AddEventForm;
 use App\Form\AddProcessForm;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Criteria;
@@ -80,6 +81,7 @@ final class InstitutionController extends MasterController
 
         $addProcessForm = $this->createForm(AddProcessForm::class, null, ['standalone' => true]);
         $delegateActivityForm = $this->createForm(DelegateActivityForm::class, null, ['standalone' => true, 'currentUser' => $this->user]);
+        $eventForm = $this->createForm(AddEventForm::class, null, ['standalone' => true, 'currentUser' => $this->user]);
 
         return $this->render(
             'iprocess_list.html.twig',
@@ -92,6 +94,7 @@ final class InstitutionController extends MasterController
                 'sortingTypeCookie' => $sortingType,
                 'viewTypeCookie' => $viewType,
                 'dateTypeCookie' => $dateType,
+                'eventForm' => $eventForm->createView(),
             ]
         );
     }
@@ -258,6 +261,8 @@ final class InstitutionController extends MasterController
         $requestActivityForm->handleRequest($request);
         $validateRequestForm = $this->createForm(DelegateActivityForm::class, null,  ['standalone' => true, 'request' => true, 'currentUser' => $user]);
         $validateRequestForm->handleRequest($request);
+        $eventForm = $this->createForm(AddEventForm::class, null, ['standalone' => true, 'currentUser' => $user]);
+        $eventForm->handleRequest($request);
 
         // In case they might access results depending on user participation, then we need to feed all stages and feed a collection which will be analysed therefore in hideResultsFromStages function
         if($existingAccessAndResultsViewOption && !$noParticipationRestriction){
@@ -399,6 +404,7 @@ final class InstitutionController extends MasterController
                 'sortingTypeCookie' => $sortingType,
                 'viewTypeCookie' => $viewType,
                 'dateTypeCookie' => $dateType,
+                'eventForm' => $eventForm->createView(),
             ]
         );
 

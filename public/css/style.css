@@ -389,6 +389,12 @@ td a {
   align-items: center;
 }
 
+.c-flex-center {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
 .flex-center {
   display: flex;
   align-items: center;
@@ -429,6 +435,8 @@ header h4 {
   display: none;
 }
 
+
+/*
 header h5 {
   position: absolute;
   color: white;
@@ -436,6 +444,7 @@ header h5 {
   margin-top: 0vh;
   margin-left: 50px;
 }
+*/
 
 .add-photo-btn {
   background-color: #15a6ae;
@@ -1796,15 +1805,6 @@ section h2 {
   margin-top: 10px;
 }
 
-.users li>div:first-child {
-  display: flex;
-  align-items: center;
-}
-
-.users li>div:first-child :last-child {
-  margin-left: auto;
-}
-
 .delete-btn {
   cursor: pointer;
 }
@@ -2828,9 +2828,11 @@ h2.header {
     margin-left: 80px;
     color: white;
   }
+
+  /*
   header h5 {
     display: none;
-  }
+  }*/
   #headerMenuDT {
     margin-top: -8vw;
     margin-left: 200px;

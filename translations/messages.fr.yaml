@@ -11,6 +11,7 @@ back: Retour
 next: Suivant
 delete: Supprimer
 save: Sauvegarder
+create: Créer
 update: Mettre à jour
 pending_validation: En attente de validation
 show_less: Afficher moins
@@ -1901,8 +1902,10 @@ activities:
   completed_title: Activités finalisées
   output_sorting_type: Tri par statut de retour
   progress_sorting_type: Tri par statut davancement
-  timeframe_view_type: Vue temporelle
   status_view_type: Vue par statut
+  timeframe_view_type: Vue temporelle
+  self_date_type: Dates de déroulement
+  output_date_type: Dates de retour
   o_status:
     cancelled: Annulées
     discarded: Rejetées
@@ -2039,10 +2042,17 @@ activities:
   no_activities_msg_activity_manager: Créez une activité afin de prendre part à une évaluation
   no_registered_activities_title: Aucune démarche ajoutée !
   no_registered_activities_msg: Inscrivez-vous à une démarche existante afin de suivre et renseigner son évolution !
+  hide_group: Masquer ces activités
+  display_group: Afficher ces activités
+  instant_add: Ajout spontané
+  update_status: Mettre à jour l'avancement
+  provide_my_feedbacks: Donner mes feedbacks
 
 
 activity_elements:
   parameters: Paramètres
+  expected_output: Retours attendus
+  no_defined_output: Pas de retours définis
   stages: Phases
   criteria: Critères
   participants: Participants
@@ -2081,6 +2091,22 @@ activity_elements:
   go_back_activities: Retour aux activités
   go_back_processes: Retour aux processes
   modify_stage_btn: Modifier la phase
+  events:
+    add_event:
+      modal_new_title: Ajout d'événement
+      modal_update_title: Mise à jour de l'événement
+      modal_msg: Que souhaitez-vous renseigner ?
+      insert_document: Partager un document
+      insert_comment: Commentaire/Description
+      eventType: Type d'événement
+      manage_dates: Gestion des dates
+      notify_participants: Notification des participants
+      notify_all_articipants: Notifier tous les participants
+      onset_date: Date de survenance
+      provide_onset_date: Indiquer une date de survenance
+      exp_res_date: Date de résolution espérée
+      provide_exp_res_date: Indiquer une date de résolution espérée
+
 
 
 create_parameters:

@@ -1,5 +1,18 @@
 <li class="stage-element {{dateType ~ '-dates' ~ (isEmbedded ? ' embedded' : '')}} tooltipped" data-sd="{{ startdateDay }}" data-p="{{ period }}" data-tooltip='{% include "components/stage_holder__item.html.twig" with { stage: stage, embeddedStages: embeddedStages } %}' data-position="top" data-html="true" {% if not visibleEl %}style="display:none"{% endif %}>
-  
+
+        {% if dateType == 's-date' %}
+        
+          {% for e, event in stage.events %}
+
+              <div class="event tooltipped" data-od="{{ event.onsetdateDay }}" data-p="{{ event.period }}">
+                <i class="fa fa-{{event.eventType.icon.name}}"></i>
+              </div>
+
+          {% endfor %}
+        
+        {% endif %}
+        
+
     <section class="stage-container completed-stages-container"></section>
     
       {% set startdate = dateType == 's' ? stage.startdate : stage.gstartdate %}

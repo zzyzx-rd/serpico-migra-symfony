@@ -254,6 +254,11 @@ class Stage extends DbObject
     public $participations;
 
     /**
+     * @OneToMany(targetEntity="Event", mappedBy="stage",cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    public $events;
+
+    /**
      * @OneToMany(targetEntity="Decision", mappedBy="stage",cascade={"persist","remove"}, orphanRemoval=true)
      */
     public $decisions;
@@ -1394,17 +1399,12 @@ class Stage extends DbObject
 
                 $contains = false;
                 foreach($this->participations as $participant){
-                    if($participant->getExtUsrId() == $e->getId()){
+                    if($participant->getExternalUser() == $e){
                         $contains = true;
                         break;
                     }
                 }
                 return $contains;
-
-                /*return $this->participations->exists(function(int $i, Participation $p) use ($e){
-                    $p->getExtUsrId() == $e->getId();
-                });
-                */
             });
         });
     }
@@ -1569,6 +1569,27 @@ class Stage extends DbObject
             }
         }
         return $embeddedStages;
+    }
+
+     /**
+    * @return ArrayCollection|Event[]
+    */
+    public function getEvents()
+    {
+        return $this->events;
+    }
+
+    public function addEvent(Event $event): Stage
+    {
+        $this->events->add($event);
+        $event->setStage($this);
+        return $this;
+    }
+
+    public function removeEvent(Event $event): Stage
+    {
+        $this->events->removeElement($event);
+        return $this;
     }
 
 }

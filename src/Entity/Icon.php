@@ -51,10 +51,15 @@ class Icon extends DbObject
 
     /**
      * @OneToMany(targetEntity="CriterionName", mappedBy="icon", cascade={"persist", "remove"}, orphanRemoval=true)
-     * @var Collec
-     * tion<CriterionName>
+     * @var ArrayCollection
      */
     public $criterionNames;
+
+    /**
+     * @OneToMany(targetEntity="EventType", mappedBy="icon", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection
+     */
+    public $eventTypes;
 
     /**
      * @OneToMany(targetEntity="WorkerFirmSector", mappedBy="icon", cascade={"persist", "remove"}, orphanRemoval=true)
@@ -141,35 +146,32 @@ class Icon extends DbObject
     }
 
     /**
-     * @return Collection
+     * @return ArrayCollection|EventType[]
+     */
+    public function getEventTypes()
+    {
+        return $this->eventTypes;
+    }
+
+    public function addEventType(EventType $eventType): Icon
+    {
+        $eventType->setIcon($this);
+        $this->eventTypes->add($eventType);
+        return $this;
+    }
+
+    public function removeEventType(EventType $eventType): Icon
+    {
+        $this->eventTypes->removeElement($eventType);
+        return $this;
+    }
+    
+    /**
+     * @return ArrayCollection|CriterionName[]
      */
     public function getCriterionNames()
     {
         return $this->criterionNames;
-    }
-
-    /**
-     * @param Collection $criterionNames
-     */
-    public function setCriterionNames(Collection $criterionNames): void
-    {
-        $this->criterionNames = $criterionNames;
-    }
-
-    /**
-     * @return Collection
-     */
-    public function getWorkerFirmSectors()
-    {
-        return $this->workerFirmSectors;
-    }
-
-    /**
-     * @param Collection $workerFirmSectors
-     */
-    public function setWorkerFirmSectors(Collection $workerFirmSectors): void
-    {
-        $this->workerFirmSectors = $workerFirmSectors;
     }
 
     public function addCriterionName(CriterionName $criterionName): Icon
@@ -184,6 +186,16 @@ class Icon extends DbObject
         $this->criterionNames->removeElement($criterionName);
         return $this;
     }
+
+
+    /**
+     * @return ArrayCollection|WorkerFirmSector[]
+     */
+    public function getWorkerFirmSectors()
+    {
+        return $this->workerFirmSectors;
+    }
+
 
     public function addWorkerFirmSector(WorkerFirmSector $workerFirmSector): Icon
     {
