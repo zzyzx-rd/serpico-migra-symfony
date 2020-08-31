@@ -165,6 +165,7 @@ class User extends DbObject implements  UserInterface, \Serializable
     /** 
      * @ManyToOne(targetEntity="User", inversedBy="subordinates")
      * @JoinColumn(name="usr_superior", referencedColumnName="usr_id")
+     * @var User|null
      */
     protected $superior;
 
@@ -647,7 +648,7 @@ class User extends DbObject implements  UserInterface, \Serializable
      * @param User $superior
      * @return User
      */
-    public function setSuperior(User $superior)
+    public function setSuperior(?User $superior)
     {
         $this->superior = $superior;
         return $this;

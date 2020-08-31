@@ -1546,31 +1546,14 @@ class OrganizationController extends MasterController
             $recipients = [];
             foreach ($userForm->get('users') as $userForm) {
                 $user = $userForm->getData();
-
-                // Les lignes qui suivent sont horribles mais sont un hack au fait qu'a priori on ne puisse pas lier position et département à User (mais à vérifier, peut-être que ça remarche...)
-                // $user->getPosId() renvoie une Position, et $user->getDptId() un département.
-
-                $posId = $user->getPosId() ? $user->getPosId()->getId() : null;
-                $dptId = $user->getDptId() ? $user->getDptId()->getId() : null;
-                $titId = $user->getTitId() ? $user->getTitId()->getId() : null;
-                $wgtId = $user->getWgtId() ? $user->getWgtId()->getId() : null;
-                $user->setWeightIni($user->getWgtId()->getValue());
+                $user->setWeightIni($user->getWeight()->getValue());
                 $token = md5(rand());
-
-                $user->setOrgId($orgId)
-                    ->setPosId($posId)
-                    ->setDptId($dptId)
-                    ->setTitId($titId)
-                    ->setWgtId($wgtId)
+                
+                $user->setOrganization($orgId)
                     ->setToken($token)
-                    ->setCreatedBy($currentUser->getId());
-
-                if ($user->getSuperior() != null) {
-                    $user->setSuperior($user->getSuperior());
-                }
-                else {
-                    $user->setSuperior(null);
-                }
+                    ->setCreatedBy($currentUser->getId())
+                    ->setSuperior($user->getSuperior() ?: null);
+              
                 $em->persist($user);
                 $settings['tokens'][] = $token;
                 $recipients[]         = $user;
@@ -6471,8 +6454,6 @@ class OrganizationController extends MasterController
             $em->persist($client);
             $organization->addClient($client);
         }
-
-
 
         $repoON = $em->getRepository(OptionName::class);
 

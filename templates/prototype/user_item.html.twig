@@ -114,7 +114,7 @@
                     {% endif %}
                 </div>
             </div>
-            <div class="row flex-center no-margin">
+            <div class="row flex-center">
                 <div class="user-fullname col s12 m8 user-elmt" data-prefix-wo="" data-prefix-w="{{'create_user.fullname'|trans ~ ' : '}}" user-elmt>
                     <a class="btn user-btn user-info-fullname flex-center" {% if not user or not item.firstname.vars.valid or not item.lastname.vars.valid %}style="display: none;"{% endif %}>
                         <span>{{ user ? 'create_user.fullname'|trans ~ ' : ' ~ user.fullname : '' }}</span>
