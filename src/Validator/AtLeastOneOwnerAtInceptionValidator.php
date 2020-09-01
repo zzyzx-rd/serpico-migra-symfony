@@ -25,7 +25,8 @@ class AtLeastOneOwnerAtInceptionValidator extends ConstraintValidator
         $client = $clientForm->getData();
 
         // When client connects for the first time, set administration to someone (self user or someone else, and then validation is always passed)
-        if($client->getId()){
+        if($client->getClientOrganization()){
+            //dd($client->getWorkerFirm()->getId());
             $clientHasGivenOwnerhship = $client->getClientOrganization()->isClient() == true;
             if($clientHasGivenOwnerhship){
                 return true;
@@ -42,9 +43,6 @@ class AtLeastOneOwnerAtInceptionValidator extends ConstraintValidator
         }
 
         if($clientOwners->count() == 0){
-            //print_r($this->context->getObject()->getName());
-            //die;
-            //$this->context->getObject()->addError(new FormError($constraint->message));
             $this->context->buildViolation($constraint->message)->addViolation();
             return false;
         } 

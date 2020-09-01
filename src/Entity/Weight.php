@@ -62,7 +62,7 @@ class Weight extends DbObject
 
     /**
      * @ORM\ManyToOne(targetEntity="Organization", inversedBy="weights")
-     * @JoinColumn(name="org_id", referencedColumnName="org_id",nullable=false)
+     * @JoinColumn(name="org_id", referencedColumnName="org_id", nullable=false, onDelete="CASCADE")
      */
     protected $organization;
 

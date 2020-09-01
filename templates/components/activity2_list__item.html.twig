@@ -15,7 +15,21 @@
             
             {% set checkingIndex = -1 %}
 
+            {% for stage in activity.stages %}
+              
+              {% for e, event in stage.events %}
+
+                  <div class="event tooltipped" data-od="{{ event.onsetdateDay }}" data-p="{{ event.period }}">
+                    <i class="fa fa-map-marker event-marker">
+                      <i class="fa fa-{{event.eventType.icon.name}} event-type"></i>
+                    </i>
+                  </div>
+
+              {% endfor %}
+            {% endfor %}
+
             {% for s, stage in activity.sortedStagesPerPeriod %}
+
  
               {% set embeddedStages = null %}
 
@@ -116,7 +130,7 @@
     {% if activityClients|length != 0 %}
 
 
-      <div class="activity-clients">
+      <div class="activity-clients flex-center">
         {% if activity.organization != currentuser.organization %}
           <small> - {{ 'from'|trans }}</small>
           <span class="activity-client-name">{{ activity.organization.commname }}</span>
@@ -124,13 +138,13 @@
         {% endif %}
         {% if activityClients|length != 0 %}
 
-            <small> - {{ 'with'|trans }}</small>
+            <small class="sm-right">{{ ' - ' ~ 'with'|trans }}</small>
 
             {% set k = 0 %}
             {% for client in activityClients %}
               {% if k < 2 %}
 
-                  <a class="badge-container activity-client-name tooltipped" data-tooltip="{{client.commname}}">
+                  <a class="badge-container activity-client-name tooltipped" data-tooltip="{{client.name}}">
                     <img class="client-logo" src="{{ asset(global.clientLogo(client)) }}" alt="">
                   </a>
 

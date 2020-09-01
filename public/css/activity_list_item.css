@@ -412,5 +412,6 @@ section li.no-items-placeholder {
 
 .event{
   position: absolute;
-  top: -1.8rem;
+  top: -1.6rem;
+  left:-0.3rem;
 }

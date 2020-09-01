@@ -35,11 +35,6 @@ main {
   user-select: none;
 }
 
-.activity-clients{
-  display: inline-block;
-  margin-left: 5px;
-}
-
 .activity-client-name{
   color:#26a69a;
 }

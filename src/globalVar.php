@@ -51,11 +51,11 @@ class globalVar {
     }
 
 
-    public function organizationLogo(Organization $o): string
+    public function organizationLogo(?Organization $o): string
     {
-        if($o->getLogo()){
+        if($o && $o->getLogo()){
             return 'lib/img/org/'. $o->getLogo();
-        } else if ($o->getWorkerFirm() && $o->getWorkerFirm()->getLogo()){
+        } else if ($o && $o->getWorkerFirm() && $o->getWorkerFirm()->getLogo()){
             return 'lib/img/org/' . $o->getWorkerFirm()->getLogo();
         } else {
             return 'lib/img/org/no-picture.png';
