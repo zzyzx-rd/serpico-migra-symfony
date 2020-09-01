@@ -218,7 +218,10 @@
 
 
         <div class="client-zone">
-      
+          <div class="help">
+            <h5 class=" center"> {{ 'create_client.help_title'|trans }}</h5>
+
+          </div>
             {{ form_start(form) }}
         
               <ul class="clients collection" data-prototype="{% apply escape %}{% include 'components/client__item.html.twig' with { item: form.clients.vars.prototype } %}{% endapply %}">
@@ -227,22 +230,22 @@
                     {% include "components/client__item.html.twig" with { item: client } %}
                 {% endfor %}
               </ul>
+
               
-            
-              <div class="add-partner-zone" {% if form.clients|length == 0 %}style="display:none"{% endif %}>
-                <div class="button-field">
-                  <a class="btn waves-effect waves-light insert-client-btn">
-                    <span>{% trans %}create_client.partner.add_button{% endtrans %}</span>
-                  </a>
-                </div>
-              </div>
+
+
+
+      <div class="add-partner-zone center" }>
+        <div class="button-field">
+          <a class="btn waves-effect waves-light new-partner center">
+            <span>Enregister le nouveau partenaire</span>
+          </a>
         </div>
       </div>
-
       <footer>
-        <div class="button-field center-button">
+       <!-- <div class="button-field center-button">
             {{ form_widget(form.submit) }}
-        </div>
+        </div> --->
       </footer>
         {{ form_rest(form) }}
         {{ form_end(form)}}

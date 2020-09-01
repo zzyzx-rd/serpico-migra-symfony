@@ -1598,7 +1598,7 @@ class OrganizationController extends MasterController
         $client = $cliId == 0 ? new Client : $repoC->find($cliId);
         $clientForm = $this->createForm(ClientType::class, $client, [ 'standalone' => false, 'hasChildrenElements' => false, 'currentUser' => $currentUser ]);
         $clientForm->handleRequest($request);
-
+        if ($clientForm->isSubmitted()) {
         if ($clientForm->isValid()) {
 
             /** @var WorkerFirm */
@@ -1656,7 +1656,7 @@ class OrganizationController extends MasterController
 
         } else {
             return $this->buildErrorArray($clientForm);
-        }
+        }}
     }
 
     /**
@@ -2565,9 +2565,9 @@ class OrganizationController extends MasterController
         } else {
 
             
-            $addElementTargetForm = $this->createForm(AddElementTargetForm::class, $element, ['standalone' => true, 'entity' => $entity, 'app' => $app, 'organization' => $organization]);
+            $addElementTargetForm = $this->createForm(AddElementTargetForm::class, $element, ['standalone' => true, 'elmtType' => $entity, 'organization' => $organization]);
             $addElementTargetForm->handleRequest($request);
-
+            if ($addElementTargetForm->isSubmitted()) {
             if ($addElementTargetForm->isValid()) {
                 /*foreach ($addElementTargetForm->get('targets')->getData() as $userTarget) {
                 if ($userTarget->getOrganization() == null) {
@@ -2594,7 +2594,7 @@ class OrganizationController extends MasterController
                     case 'criterion':
                         break;
                 }
-            }
+            }}
 
             return $this->render('element_targets.html.twig',
                 [

@@ -2825,6 +2825,8 @@ create_client:
   wgtValue: Poids de vote
   email: Adresse email (optionnel)
   owner: Owner
+  help_title: 1-Insérez le nom du partenaire
+  save_partner: Enregister le nouveau partenaire
   owner_tooltip: Définissez qui aura un droit initial de configuration coté partenaire. Cela ne vous sera demandé qu'une fois, votre partenaire s'en chargeant par la suite
   emailClientSmallText: Si l'adresse mail n'est pas renseignée ainsi que pour aucun de ses utilisateurs, le partenaire ne pourra pas participer ni accéder à un échange d'informations/d'évaluation
   emailSmallText: En laissant ce champ vide, l'utilisateur pourra être évalué mais ne pourra participer à aucune évaluation

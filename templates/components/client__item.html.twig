@@ -16,7 +16,6 @@
             {#<a href="#deleteClient" class="waves-effect waves-light accent-4 btn-flat modal-trigger" style="margin-left: auto;"><i class="fa fa-times"></i></a>#}
             <div>
                 <a class="modify-client-btn btn-flat"><i class="fa fa-pencil-alt"></i></a>
-                <a class="insert-individual-btn waves-effect waves-light btn blue darken-2 tooltip" data-cid="{{ client ? client.id : 0 }}"><i class="fa fa-user-plus"></i></a>
             </div>
             </ul>
             {#
@@ -72,4 +71,9 @@
         {% endfor %}
     
     </ul>
+        <div class="button-field add-user-zone" style="display:none ; position: absolute">
+            <a class="btn waves-effect waves-light  insert-individual-btn data-cid="{{ client ? client.id : 0 }}"">
+                <span>Ajouter utilisateur</span>
+            </a>
+        </div>
     </div>

@@ -2710,6 +2710,8 @@ create_client:
   collaborator: Collaborator
   internal: Internal
   department: Department
+  help_title: 1 - Insert partner name
+  save_partner: Save a new partner
   position: Position
   wgtValue: Voting power value
   email: Email address (optional)

@@ -50,8 +50,10 @@
     {% set elements = form.departments %}
     {% elseif form.positions is defined %}
     {% set elements = form.positions %}
-    {% else %}
-    {% set elements = form.titles %}  
+    {% elseif form.titles is defined %}
+    {% set elements = form.titles %}
+    {% else%}
+        {% set elements = form.processes %}
     {% endif %}
 
     <div style="position:relative;padding-top:20px">

@@ -1,4 +1,5 @@
 $(function(){
+    var proto =$('ul.clients');
     $('.modal').modal();
 
     setTimeout(function (){
@@ -241,7 +242,16 @@ $(function(){
     $(document).on('click','[href="#deleteClient"]',function(){
         $('.remove-client').data('cid',$(this).data('cid'));
     });
+    $(document).on('click','.new-partner',function(e){
+        client = $(this).closest('main').find('.client');
+        helpText = $(this).closest('main').find('.help');
+        help = helpText.children()[0];
+        help.style.display = 'block';
+        client.remove();
+        addClientForm();
+        $(this).css('display','none');
 
+    })
     $(document).on('click','.validate-client-btn',function(e){
         
         e.preventDefault();
@@ -252,6 +262,11 @@ $(function(){
         workerFirm = $curRow.find('input[name*="workerFirm"]').val();
         inputType = $curRow.find('select[name*="type"] option:selected').val();
         inputId = $curRow.find('.client-input-zone input[name*="id"]').val();
+        helpText = $curRow.closest('.client-zone').find('.help');
+        newPartner = $curRow.closest('main').find('.new-partner');
+        addUser = $curRow.find('.add-user-zone');
+        help = helpText.children()[0];
+
 
         if($('.c-form').length){
             $form = $('.c-form form');
@@ -269,7 +284,9 @@ $(function(){
 
         $.post(vcurl,$form.serialize())
             .done(function(data){
-
+                newPartner.css('display','inline-block');
+                addUser.css('display','block');
+                help.style.display = 'none';
                 btn.attr('data-cid',data.cliId);
                 btn.prev().attr('data-cid',data.cliId);
                 $curRow.find('input[name*="id"]').val(data.cliId);
@@ -384,13 +401,15 @@ $(function(){
 
     function addClientForm(){
         // Get the data-prototype
-        var prototype = $('ul.clients').data('prototype');
+        var prototype = proto.data('prototype');
         var total = $('.client').length;
         // Replacing prototype constants
         var newForm = prototype
             .replace(/__clientNb__/g, total)
             .replace(/__name__/g, total);
         $newForm = $(newForm);
+       
+
         $newForm.find('.tooltipped').tooltip();
         $collectionHolder.append($newForm);
         $newForm.find('select[name*="type"]').material_select();
