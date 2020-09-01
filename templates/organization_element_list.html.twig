@@ -62,7 +62,9 @@
     </div>
 
 
-    <ul class="elements" data-prototype="{% filter escape %}{% include 'prototype_organization_element.twig' with { 'item': elements.vars.prototype, entity: elmtType, 'nbFields' : nbFields } %}{% endfilter %}" style="margin-top:50px">
+
+
+    <ul class="elements" data-prototype="{% include 'prototype_organization_element.twig' with { 'item': elements.vars.prototype, 'elmtType': elmtType, 'nbFields' : nbFields } %}" style="margin-top:50px">
 
         {% if currentuser.organization.usersWithoutOrgElement(elmtType) %}
         <li class="element">

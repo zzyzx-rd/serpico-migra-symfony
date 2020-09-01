@@ -678,13 +678,15 @@
 
       if($btn.hasClass('final-step-btn')){
         $elmtContainer = $('#initializedActivity .elmts');
-        $idContainer = $('.modify-btn');
+        $idContainer = $('#activityInfo');
         eid = $('#processSelect').val();
+        
         setTimeout(function(){
           $("#initializedActivity").scrollTop(0);
         },50);
         $('.ip-info').empty();
       } else {
+
         $elmtContainer = $('#activityInfo .elmts');
         $idContainer = $('#activityInfo');
         setTimeout(function(){
@@ -692,7 +694,7 @@
         },50);
         eid = $btn.data('eid');
       }
-
+    
       if($idContainer.attr('data-eid') != eid){
 
         $idContainer.attr('data-eid',eid);
@@ -707,6 +709,7 @@
           urlToPieces[urlToPieces.length - 1] = eid;
           urlToPieces[urlToPieces.length - 3] = $btn.hasClass('final-step-btn') ? 'iprocess' : 'activity';
           url = urlToPieces.join('/');
+
           $.post(url,null)
             .done(function(data){
 
@@ -939,6 +942,7 @@
               console.log(data);
             })
         } else {
+
           $actName = $(`
             <div class="activity-name input-field">
               <input type="text" name="activity_name" required="required" placeholder="{{ 'activities.request.name_label'|trans }}">

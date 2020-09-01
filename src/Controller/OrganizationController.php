@@ -2607,6 +2607,7 @@ class OrganizationController extends MasterController
     {
         $em    = $this->em;
         $repoO = $em->getRepository(Organization::class);
+
         switch ($entity) {
             case 'department':
                 $repoE = $em->getRepository(Department::class);
@@ -2618,7 +2619,7 @@ class OrganizationController extends MasterController
                 $repoE = $em->getRepository(Title::class);
                 break;
             default:
-                dd($entity);
+                $repoE = $em->getRepository(Process::class);
                 break;
         }
         $currentUser = $this->user;
@@ -2641,18 +2642,19 @@ class OrganizationController extends MasterController
             return $this->render('errors/403.html.twig');
         }
 
-        $manageOrganizationElementsForm = $this->createForm(ManageOrganizationElementsForm::class, $organization, ['standalone' => true, 'entity' => $entity]);
+        $manageOrganizationElementsForm = $this->createForm(ManageOrganizationElementsForm::class, $organization, ['standalone' => true, 'elmtType' => $entity]);
         $manageOrganizationElementsForm->handleRequest($request);
-
-        if ($manageOrganizationElementsForm->isValid()) {
-            $em->persist($organization);
-            $em->flush();
-            return $this->redirectToRoute('firmSettings');
+        if ($manageOrganizationElementsForm->isSubmitted()) {
+            if ($manageOrganizationElementsForm->isValid()) {
+                $em->persist($organization);
+                $em->flush();
+                return $this->redirectToRoute('firmSettings');
+            }
         }
 
         return $this->render('organization_element_list.html.twig',
             [
-                'entity' => $entity,
+                'elmtType' => $entity,
                 'elements' => $elements,
                 'form'     => $manageOrganizationElementsForm->createView(),
             ]);
