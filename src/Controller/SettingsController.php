@@ -146,11 +146,11 @@ class SettingsController extends MasterController
      * @param Request $request
      * @param Application $app
      * @return mixed
-     * @Route("/settings/root-management", name="rootManagement")
+     * @Route("/settings/root/management", name="rootManagement")
      */
     public function rootManagementAction(Request $request){
 
-        return $this->render('root_management.html.twig',[]);
+        return $this->render('root_management.html.twig');
 
     }
 
@@ -158,22 +158,21 @@ class SettingsController extends MasterController
      * @param Request $request
      * @param Application $app
      * @return mixed
-     * @Route("/settings/organizations", name="manageOrganizations")
+     * @Route("/settings/root/organizations", name="manageOrganizations")
      */
     public function manageOrganizationsAction(Request $request){
-        $entityManager = $this->getEntityManager($app) ;
+        $entityManager = $this->em;
         $repoO = $entityManager->getRepository(Organization::class);
         $organizations = [];
 
-
+        /*
         foreach ($repoO->findAll() as $organization) {
-
-            $organizations[] = $organization->toArray($app);
-
+            $organizations[] = $organization->toArray();
         }
+        */
 
         //MasterController::sksort($organizations, 'lastConnectedDateTime');
-
+        $organizations = $repoO->findAll();
 
         return $this->render('organization_list.html.twig',
             [
@@ -630,22 +629,19 @@ class SettingsController extends MasterController
      * @return mixed
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/settings/organization/{orgId}/delete", name="deleteOrganization")
+     * @Route("/settings/root/organization/{orgId}/delete", name="deleteOrganization")
      */
-    public function deleteOrganizationAction(Application $app, $orgId) {
-        $em = self::getEntityManager();
+    public function deleteOrganizationAction($orgId) {
+        $em = $this->em;
         $repoO = $em->getRepository(Organization::class);
-        $repoU = $em->getRepository(User::class);
 
         /** @var Organization */
         $organization = $repoO->find($orgId);
+        // Problem of constraint key, deleting each weight elmy although cascading removals
+        /*foreach($organization->getWeights() as $weight){
+            $organization->removeWeight($weight);
+        }*/
         $em->remove($organization);
-
-        /** @var User[] */
-        $orgUsers = $repoU->findByOrgId($orgId);
-        foreach ($orgUsers as $orgUser) {
-            $em->remove($orgUser);
-        }
         $em->flush();
 
         return $this->redirectToRoute('manageOrganizations');

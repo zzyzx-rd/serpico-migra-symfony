@@ -37,10 +37,10 @@
   </style>
 {% endblock css %}
 
-{% set manage_procs = path('manageProcesses', { orgId: currentuser.orgId }) %}
-{% set manage_orgs = path('manageOrganizations') %}
 
 {% block content %}
+  {% set manage_procs = path('manageProcesses', { orgId: currentuser.organization.id }) %}
+  {% set manage_orgs = path('manageOrganizations') %}
   <section>
     <a class="btn-large waves-effect waves-light teal" href="{{ manage_procs }}">
       <i class="fa fa-bookmark"></i>

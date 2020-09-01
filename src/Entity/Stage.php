@@ -151,7 +151,7 @@ class Stage extends DbObject
     public DateTime $gstartdate;
 
     /**
-     * @ORM\Column(name=" $stg_genddate", type="datetime", nullable=true)
+     * @ORM\Column(name="stg_genddate", type="datetime", nullable=true)
      */
     public DateTime $genddate;
 
@@ -502,7 +502,6 @@ class Stage extends DbObject
     public function setStartdate(DateTimeInterface $startdate): self
     {
         $this->startdate = $startdate;
-
         return $this;
     }
 
@@ -514,7 +513,6 @@ class Stage extends DbObject
     public function setEnddate(DateTimeInterface $enddate): self
     {
         $this->enddate = $enddate;
-
         return $this;
     }
 
@@ -526,7 +524,6 @@ class Stage extends DbObject
     public function setGstartdate(DateTimeInterface $gstartdate): self
     {
         $this->gstartdate = $gstartdate;
-
         return $this;
     }
 
@@ -538,7 +535,6 @@ class Stage extends DbObject
     public function setGenddate(DateTimeInterface $genddate): self
     {
         $this->genddate = $genddate;
-
         return $this;
     }
 

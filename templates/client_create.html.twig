@@ -224,7 +224,7 @@
               <ul class="clients collection" data-prototype="{% apply escape %}{% include 'components/client__item.html.twig' with { item: form.clients.vars.prototype } %}{% endapply %}">
               {#<ul class="clients collection" data-prototype="{{ form_widget(form.clients.vars.prototype)|e('html_attr') }}">#}
                 {% for ckey, client in form.clients %}
-                    {% include "prototype/client_item.html.twig" with { item: client } %}
+                    {% include "components/client__item.html.twig" with { item: client } %}
                 {% endfor %}
               </ul>
               
@@ -333,7 +333,7 @@
         {% for ckey, client in form.clients %}
           {% if not client.vars.valid %}
           <div class="child-error">
-            {{ 'partner'|trans ~ ' ' ~ (ckey + 1) ~ ' ('~ client.vars.data.commname|trans ~ ') :' }}
+            {{ 'partner'|trans ~ ' ' ~ (ckey + 1) ~ ' ('~ client.vars.data.name|trans ~ ') :' }}
             {% for child in client.children %}
               {% if not child.vars.valid %}
                 {% if child != client.aliveExternalUsers %}

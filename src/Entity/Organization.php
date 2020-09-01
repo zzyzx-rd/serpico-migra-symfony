@@ -121,7 +121,7 @@ class Organization extends DbObject
 //     * @OrderBy({"name" = "ASC"})
     public $titles;
     /**
-     * @OneToMany(targetEntity="Weight", mappedBy="organization", cascade={"persist", "remove"},orphanRemoval=true)
+     * @OneToMany(targetEntity="Weight", mappedBy="organization", cascade={"persist", "remove"}, orphanRemoval=true)
      */
 //     * @OrderBy({"value" = "ASC"})
     public $weights;
@@ -159,10 +159,10 @@ class Organization extends DbObject
      */
     public $usersCSV;
     /**
-     * @ORM\OneToOne(targetEntity=WorkerFirm::class, inversedBy="organization", cascade={"persist", "remove"})
+     * @ORM\OneToOne(targetEntity=WorkerFirm::class, inversedBy="organization", cascade={"persist"})
      * @JoinColumn(name="worker_firm_wfi_id", referencedColumnName="wfi_id", nullable=true)
      */
-    private $worker_firm_wfi;
+    private $workerFirm;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
@@ -574,7 +574,7 @@ class Organization extends DbObject
     }
 
     /**
-     * @return mixed
+     * @return ArrayCollection|Weight[]
      */
     public function getWeights()
     {
@@ -582,15 +582,7 @@ class Organization extends DbObject
     }
 
     /**
-     * @param mixed $weights
-     */
-    public function setWeights($weights): void
-    {
-        $this->weights = $weights;
-    }
-
-    /**
-     * @return mixed
+     * @return Decision[]|ArrayCollection
      */
     public function getDecisions()
     {
@@ -598,29 +590,12 @@ class Organization extends DbObject
     }
 
     /**
-     * @param mixed $decisions
-     */
-    public function setDecisions($decisions): void
-    {
-        $this->decisions = $decisions;
-    }
-
-    /**
-     * @return mixed
+     * @return Criterion[]|ArrayCollection
      */
     public function getCriteria()
     {
         return $this->criteria;
     }
-
-    /**
-     * @param mixed $criteria
-     */
-    public function setCriteria($criteria): void
-    {
-        $this->criteria = $criteria;
-    }
-
 
     /**
      * @return Client[]|ArrayCollection
@@ -764,20 +739,20 @@ class Organization extends DbObject
     }
 
     /**
-     * @return mixed
+     * @return WorkerFirm
      */
     public function getWorkerFirm()
     {
-        return $this->worker_firm_wfi;
+        return $this->workerFirm;
     }
 
     /**
-     * @param mixed $workerFirm
+     * @param WorkerFirm|null $workerFirm
      * @return Organization
      */
-    public function setWorkerFirm($workerFirm): Organization
+    public function setWorkerFirm(?WorkerFirm $workerFirm): Organization
     {
-        $this->worker_firm_wfi = $workerFirm;
+        $this->workerFirm = $workerFirm;
         return $this;
     }
     public function addDepartment(Department $department): Organization
@@ -878,7 +853,6 @@ class Organization extends DbObject
 
     public function addWeight(Weight $weight): Organization
     {
-
         $this->weights->add($weight);
         $weight->setOrganization($this);
         return $this;
@@ -892,7 +866,6 @@ class Organization extends DbObject
 
     public function addDecision(Decision $decision): Organization
     {
-
         $this->decisions->add($decision);
         $decision->setOrganization($this);
         return $this;
@@ -1071,7 +1044,9 @@ class Organization extends DbObject
      */
     public function getUsers()
     {
-        return $this->users;
+        return $this->users->filter(function(User $u){
+            return $u->getLastname() != 'ZZ';
+        });
     }
 
     public function addUser(User $user): Organization
@@ -1102,7 +1077,7 @@ class Organization extends DbObject
 
     public function getActiveUsers(){
         return $this->users->filter(function(User $u){
-            return !$u->getDeleted();
+            return !$u->getDeleted() && $u->getLastname() == 'ZZ';
         });
     }
 
@@ -1111,6 +1086,30 @@ class Organization extends DbObject
         ->exists(function(int $i, User $u){
             return $u->getRole() == USER::ROLE_ADMIN && $u->getLastConnected() != null;
         });
+    }
+
+    public function getCompletedActivities(){
+        return $this->getActivities()->filter(function(Activity $a){
+            return $a->getStatus() >= ACTIVITY::STATUS_FINALIZED;
+        });
+    }
+
+    public function getActiveActivities(){
+        return $this->getActivities()->filter(function(Activity $a){
+            return $a->getStatus() >= ACTIVITY::STATUS_REQUESTED && $a->getStatus() < ACTIVITY::STATUS_FINALIZED;
+        });
+    }
+
+    public function getLastConnectedUser(){
+        $users = $this->getUsers()->filter(function(User $u){
+            return $u->getLastConnected() != null;
+        });
+        if($users->isEmpty()){return null;}
+        $users = $users->getValues();
+        uasort($users, function(User $a, User $b){
+            return $a->getLastConnected() <=> $b->getLastConnected();
+        });
+        return $users[0];
     }
 
 

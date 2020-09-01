@@ -65,7 +65,6 @@ class Client extends DbObject
     /**
      * @ManyToOne(targetEntity="Organization")
      * @JoinColumn(name="client_org_id", referencedColumnName="org_id",nullable=false)
-     * @var Organization
      */
     protected $clientOrganization;
 
@@ -91,7 +90,7 @@ class Client extends DbObject
      * @param $createdBy
      * @param $inserted
      * @param $organization
-     * @param Organization $clientOrganization
+     * @param $clientOrganization
      * @param $workerFirm
      * @param $externalUsers
      */
@@ -102,9 +101,6 @@ class Client extends DbObject
         $name = null,
         $logo = null,
         $email = null,
-        $inserted = null,
-        $organization = null,
-        Organization $clientOrganization = null,
         $workerFirm = null,
         $externalUsers = null)
     {
@@ -113,8 +109,6 @@ class Client extends DbObject
         $this->type = $type;
         $this->logo = $logo;
         $this->email = $email;
-        $this->organization = $organization;
-        $this->clientOrganization = $clientOrganization;
         $this->workerFirm = $workerFirm;
         $this->externalUsers = $externalUsers?:new ArrayCollection();
     }
@@ -190,7 +184,7 @@ class Client extends DbObject
     /**
      * @return Organization
      */
-    public function getClientOrganization(): Organization
+    public function getClientOrganization(): ?Organization
     {
         return $this->clientOrganization;
     }

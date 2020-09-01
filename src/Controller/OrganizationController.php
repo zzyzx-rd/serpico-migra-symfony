@@ -1614,21 +1614,35 @@ class OrganizationController extends MasterController
             }
 
             if($cliId == 0){
+              
+                $clientOrganization = $em->getRepository(Organization::class)->findOneByWorkerFirm($workerFirm);
+
+                if(!$clientOrganization){
+                    
+                    $clientOrganization = new Organization;
+                    $clientOrganization
+                        ->setCommname($client->getName())
+                        ->setType($client->getType())
+                        ->setValidated(new \DateTime)
+                        ->setExpired(new \DateTime('2100-01-01 00:00:00'))
+                        ->setWeightType('role')
+                        ->setWorkerFirm($workerFirm);
+                    $em->persist($clientOrganization);
+    
+                    $synthUser = $this->createFirmMinConfig($clientOrganization,true);
+    
+                } else {
+                    $synthUser = $em->getRepository(User::class)->findOneBy(['organization' => $clientOrganization, 'firstname' => 'ZZ', 'lastname' => 'ZZ']);
+                }
+
+                /** @var ExternalUser */
+                $externalSynthUser = new ExternalUser;
+                $externalSynthUser->setUser($synthUser)
+                ->setOwner(true)->setFirstname('ZZ')
+                ->setLastname('ZZ');
                 
-                $clientOrganization = new Organization;
-                $clientOrganization
-                    ->setCommname($client->getName())
-                    ->setType($client->getType())
-                    ->setValidated(new \DateTime)
-                    ->setExpired(new \DateTime('2100-01-01 00:00:00'))
-                    ->setWeightType('role')
-                    ->setWorkerFirm($workerFirm);
-                $em->persist($clientOrganization);
-
-
-                $this->createFirmMinConfig($clientOrganization,true);
-
                 $client
+                ->addExternalUser($externalSynthUser)
                 ->setOrganization($organization)
                 ->setClientOrganization($clientOrganization)
                 ->setCreatedBy($currentUser->getId());
@@ -1738,7 +1752,6 @@ class OrganizationController extends MasterController
         foreach ($organizationClients as $organizationClient) {
             $clients[] = $organizationClient->getClientOrganization();
         }
-        
 
         $clientsForm = $this->createForm(AddClientForm::class, null, ['standalone' => true, 'organization' => $organization]);
         $clientForm = $this->createForm(ClientType::class, null, [ 'standalone' => false, 'hasChildrenElements' => false, 'currentUser' => $currentUser]);
@@ -5496,8 +5509,8 @@ class OrganizationController extends MasterController
         /** @var Client */
         $client = $repoC->find($cliId);
         $clientOrganization = $client->getClientOrganization();
-        $isDeletable = true;
-        $orgUsers = $clientOrganization->getUsers($app);
+        $isDeletable = false;
+        $orgUsers = $clientOrganization->getUsers();
 
         foreach($orgUsers as $user){
             if($user->getLastConnected() != null){
@@ -5518,7 +5531,7 @@ class OrganizationController extends MasterController
 
         $em->remove($client);
         $em->flush();
-        return $app->json(['status' => 'done'], 200);
+        return $this->json(['status' => 'done'], 200);
     }
 
     /**
@@ -6561,6 +6574,9 @@ class OrganizationController extends MasterController
         
         $em->persist($organization);
         //$em->flush();
+        if($mirrorExtUsers){
+            return $syntheticUser;
+        }
 
     }
 

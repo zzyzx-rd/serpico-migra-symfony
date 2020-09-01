@@ -241,7 +241,7 @@ class User extends DbObject implements  UserInterface, \Serializable
 
     /**
      * @ORM\ManyToOne(targetEntity=Organization::class, inversedBy="users")
-     * @ORM\JoinColumn(nullable=false, name="organization_org_id", referencedColumnName="org_id", nullable=true)
+     * @ORM\JoinColumn(nullable=false, name="organization_org_id", referencedColumnName="org_id", nullable=true, onDelete="CASCADE")
      */
     public $organization;
 

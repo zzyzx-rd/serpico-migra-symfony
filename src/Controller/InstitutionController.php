@@ -224,7 +224,7 @@ final class InstitutionController extends MasterController
                         $isMasterUserId = 0;
                         foreach ($orgActivity->getStages() as $orgStage){
                             foreach ($orgStage->getParticipants() as $orgParticipant){
-                                if (in_array($orgParticipant->getUsrId(), $checkingIds)){
+                                if (in_array($orgParticipant->getUser()->getId(), $checkingIds)){
                                     $isParticipant = 1;
                                     ($orgParticipant->getStatus() != 5) ? $userActivities->add($orgActivity) : $userArchivedActivities->add($orgActivity);
                                     break;
@@ -233,7 +233,7 @@ final class InstitutionController extends MasterController
 
                             if ($isParticipant == 1){
                                 break;
-                            } elseif(in_array($orgStage->getMasterUserId(), $checkingIds) && (!$orgStage->getOwnerUserId() || in_array($orgStage->getOwnerUserId(), $checkingIds))){
+                            } elseif(in_array($orgStage->getMasterUser()->getId(), $checkingIds) && (!$orgStage->getOwnerUserId() || in_array($orgStage->getOwnerUserId(), $checkingIds))){
                                 $isMasterUserId = 1;
                                 break;
                             }

@@ -701,11 +701,11 @@ class ActivityController extends MasterController
                     $client = $currentUserOrganization->getClients()->filter(function(Client $c) use ($userOrganization){
                         return $c->getClientOrganization() == $userOrganization;
                     })->first();
-                    $externalUsrId = $client->getExternalUsers()->filter(function(ExternalUser $e) use ($pElement){
+                    $externalUser = $client->getExternalUsers()->filter(function(ExternalUser $e) use ($pElement){
                         return $e->getUser() == $pElement;
-                    })->first()->getId();
+                    })->first();
 
-                    $consideredParticipation->setExtUsrId($externalUsrId);
+                    $consideredParticipation->setExternalUser($externalUser);
                 }
 
 
