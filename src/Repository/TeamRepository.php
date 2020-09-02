@@ -20,7 +20,7 @@ class TeamRepository extends ServiceEntityRepository
         parent::__construct($registry, Team::class);
     }
 
-    public function getRanking($app, $seriesType, $resType, $methodType, $fullAccess = false){
+    public function getRanking( $seriesType, $resType, $methodType, $fullAccess = false){
         $qb = MasterController::getEntityManager()->createQueryBuilder();
         if($fullAccess == true){
 
