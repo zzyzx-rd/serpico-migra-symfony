@@ -192,6 +192,11 @@
       .subchild-error{
         padding-left: 15px;
       }
+      .bottom{
+        position: fixed;
+        bottom: 23px;
+        width: 100%;
+      }
 
     </style>
   {% endblock %}
@@ -233,15 +238,16 @@
 
               
 
-
-
-      <div class="add-partner-zone center" }>
-        <div class="button-field">
-          <a class="btn waves-effect waves-light new-partner center">
-            <span>Enregister le nouveau partenaire</span>
+</div>
+    <div class=" bottom " >
+      <div class="add-partner-zone "  >
+        <div class="button-field center">
+          <a class="btn waves-effect waves-light new-partner  " style=" display: none">
+            <span >{{ 'create_client.save_partner'|trans }}</span>
           </a>
         </div>
       </div>
+    </div>
       <footer>
        <!-- <div class="button-field center-button">
             {{ form_widget(form.submit) }}
