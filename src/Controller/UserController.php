@@ -1824,7 +1824,7 @@ class UserController extends MasterController
     /**
      * @param Application $app
      * @return mixed
-     * @Route("/the-solution", name="solution")
+     * @Route("/user/display/profile", name="displayProfile")
      */
     public function displayProfile(Application $app)
     {

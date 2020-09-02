@@ -8,6 +8,7 @@
     <!-- CSS custom -->
     <link rel="stylesheet" href="{{ asset('css/styleLanding.css') }}">
     <link rel="stylesheet" href="{{ asset('css/homepage.css') }}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap">
     <!-- CSS Materialize -->
     <link rel="stylesheet" href="{{ asset('css/materialize/css/materialize.css') }}">
     <!-- CSS JQuery UI-->
@@ -17,6 +18,7 @@
     <!-- Materialize icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
 
     <script>
         $(function () {
@@ -41,6 +43,7 @@
 {% endblock %}
 
 {% block content %}
+    {#
     <ul id="hero" class="banner">
         <li class="banner-background">
             <div class="video-container">
@@ -68,6 +71,47 @@
     </ul>
     <div class="parallax">
     </div>
+    #}
+    <ul id="hero" class="banner">
+        <div class="first-section-container row">
+            <div class="col m5">
+                <h3 class="motto">Drive your customer relations to the highest standard</h3> 
+            </div>
+            <div class="col m7 calendar-element">
+                <div class="row activity-holder">
+                    <div class="col no-padding m10 calendar-holder">
+                        {% set monthMinus3 = date('now')|date_modify("-3 months")|format_datetime('short','none',pattern='MMMMM') %}
+                        {% set monthMinus2 = date('now')|date_modify("-2 months")|format_datetime('short','none',pattern='MMMMM') %}
+                        {% set monthMinus1 = date('now')|date_modify("-1 months")|format_datetime('short','none',pattern='MMMMM') %}
+                        {% set monthMinus0 = date('now')|date_modify("+0 months")|format_datetime('short','none',pattern='MMMMM') %}
+                        {% set monthPlus1 = date('now')|date_modify("+1 months")|format_datetime('short','none',pattern='MMMMM') %}
+                        {% set monthPlus2 = date('now')|date_modify("+2 months")|format_datetime('short','none',pattern='MMMMM') %}
+                        {% set monthPlus3 = date('now')|date_modify("+3 months")|format_datetime('short','none',pattern='MMMMM') %}
+                        <ul class="months-holder">
+                            <li>{{monthMinus3}}</li>
+                            <li>{{monthMinus2}}</li>
+                            <li>{{monthMinus1}}</li>
+                            <li>{{monthMinus0}}</li>
+                            <li>{{monthPlus1}}</li>
+                            <li>{{monthPlus2}}</li>
+                            <li>{{monthPlus3}}</li>
+                        </ul>
+                    </div>
+
+                    {% for k in 0..2 %}
+                        <div class="curDate"></div>
+                        <ul class="stages-holder">
+                            <ol class="activity-component" data-sd="0" data-p="210" data-c="105">
+                                {% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateDay: 32, period: 45, embeddedStages: null, visibleEl: true} %}
+                            </ol>
+                        </ul>
+                    {% endfor %}
+
+                    <div class="col m2"></div>
+                </div>
+            </div>
+        </div>
+    </ul>
     <div class="" style="font-size:17px">
         <div class="row valign-wrapper" style="width:90%;flex-wrap:wrap-reverse;margin:50px auto">
             <div class="col m6 s12">

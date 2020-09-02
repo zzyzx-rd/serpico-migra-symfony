@@ -1,5 +1,5 @@
-{% set serpicoappHome = "https://app.serpicoapp.com/fr" %}
-{% set serpicoappSignup = "https://app.serpicoapp.com/fr/organizations/new" %}
+{% set serpicoappHome = path('home_welcome') %}
+{% set serpicoappSignup = path('userCreateOrganization') %}
 {% set atHome = current_path == '/' %}
 {% set locale = app.request.getLocale() in ['fr','en'] ? app.request.getLocale() : en %}
 <body>
@@ -7,7 +7,7 @@
   <nav id="nav">
     <div class="nav-wrapper">
       <a href="/" class="brand-logo">
-        <img src="{{ asset('lib/img/logo_l_white.png') }}" alt="Serpico">
+        <img src="{{ asset('lib/img/logo_l.svg') }}" alt="Serpico">
       </a>
       <a href="#" data-activates="mobile-menu" class="button-collapse">
         <i class="material-icons">menu</i>
@@ -28,7 +28,7 @@
         </li>
         
         <li>
-          <a class="btn waves-effect waves-light privileged" href="{{ serpicoappSignup }}">
+          <a class="btn cyan darken-4 waves-effect waves-light privileged" href="{{ serpicoappSignup }}">
             {% trans %}header.register.start{% endtrans %}
           </a>
         </li>

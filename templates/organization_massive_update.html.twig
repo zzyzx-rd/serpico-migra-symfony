@@ -1489,12 +1489,8 @@
 
 <div id="deleteOrganization" class="modal">
     <div class="modal-content">
-        {#{% if user_activities[k].stages|length > 1 %}#}
         <h4>{% trans %}create_organization.delete_modal.title{% endtrans %}</h4>
         <p>{% trans %}create_organization.delete_modal.content{% endtrans %}</p>
-        {#{% else %}
-            <p>{% trans %}activities.delete_activity_msg{% endtrans %}Are you sure you want to delete this activity ?</p>
-        {% endif %}#}
     </div>
     <div class="modal-footer">
         <a class="modal-action modal-close waves-effect waves-green btn-large odelete-button" data-oid="{{ organization.id }}">{% trans %}create_organization.delete_modal.confirm{% endtrans %}</a>

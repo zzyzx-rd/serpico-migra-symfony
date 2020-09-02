@@ -260,4 +260,26 @@ $(function() {
         $('html, body').animate( { scrollTop: $(page).offset().top }, speed ); // Go
         return false;
     });
+
+
+    $.each($('.activity-component'), function (){
+        var $this = $(this);
+        var sd = $this.data("sd");
+        var p =  $this.data("p");
+        var id = $this.data("id");
+        var c = 100;
+        $('.stage-element').each(function(){
+            var ssd = $(this).data("sd");
+            var sp =  $(this).data("p");
+            sPctWidthSD = (ssd - sd) / p;
+            sPctWidthP = Math.max(3,(sp + 1)) / (p + 1);
+    
+            $(this).css({'margin-left': Math.round(10000 * sPctWidthSD) / 100 + "%",
+            'width': Math.round(10000 * sPctWidthP) / 100 + "%",
+            'background' : ssd >= c ? '#5CD08F' : (ssd + sp > c ? 'linear-gradient(to right, transparent, transparent ' + Math.round(10000 * (c - ssd) / sp) / 100 + '%, #16AFB7 '+ Math.round(10000 * (c - ssd) / sp) / 100 +'%), repeating-linear-gradient(61deg, #16AFB7, #16AFB7 0.5rem, transparent 0.5px, transparent 1rem)' : 'gray'),
+            'height' : '7px',
+            'border-radius' : '0.3rem',  
+            });
+        });
+    });
 });

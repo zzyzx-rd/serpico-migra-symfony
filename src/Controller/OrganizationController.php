@@ -79,6 +79,7 @@ use App\Entity\Title;
 use App\Entity\User;
 use App\Entity\Weight;
 use App\Entity\WorkerFirm;
+use App\Form\AddOrganizationForm;
 use App\Repository\OrganizationRepository;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -6007,7 +6008,7 @@ class OrganizationController extends MasterController
 
         $em               = $this->em;
         
-        $organizationForm = $this->createForm(AddOrganizationForm::class, null, ['standalone' => true, 'orgId' => 0, 'app' => $app, 'isFromClient' => true]);
+        $organizationForm = $this->createForm(AddOrganizationForm::class, null, ['standalone' => true, 'orgId' => 0, 'em' => $em, 'isFromClient' => true]);
         $organizationForm->handleRequest($request);
         $errorMessage = '';
         $organization = new Organization;

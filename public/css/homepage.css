@@ -5,6 +5,39 @@
   justify-content: flex-end;
 }
 
+.first-section-container{
+  width: 90%;
+  margin:auto;
+}
+
+.calendar-element{
+  margin-left: auto;
+  width:400px;
+  height: 200px;
+}
+
+.stages-holder{
+  height: 33%;
+}
+
+.motto{
+  font-weight: 700;
+}
+
+.calendar-element .row{
+  height: 100%;
+}
+
+.calendar-holder{
+  height: 100%;
+  background: repeating-linear-gradient(90deg, rgba(0, 150, 136, 0.17), rgba(0, 150, 136, 0.42) 14.28%, rgb(255, 255, 255) 14.28%, rgb(255, 255, 255) 28.56%);
+}
+
+.months-holder{
+  display: flex;
+  justify-content: space-around;
+  margin-top: -2rem;
+}
 
 
 .landing-section-steps-elements {
