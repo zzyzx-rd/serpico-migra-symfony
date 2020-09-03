@@ -1631,17 +1631,18 @@ class OrganizationController extends MasterController
                     $em->persist($clientOrganization);
     
                     $synthUser = $this->createFirmMinConfig($clientOrganization,true);
+                    $externalSynthUser = new ExternalUser;
+                    $externalSynthUser->setUser($synthUser)
+                        ->setOwner(true)->setFirstname('ZZ')
+                        ->setLastname('ZZ');
     
                 } else {
                     $synthUser = $em->getRepository(User::class)->findOneBy(['organization' => $clientOrganization, 'firstname' => 'ZZ', 'lastname' => 'ZZ']);
                 }
 
                 /** @var ExternalUser */
-                $externalSynthUser = new ExternalUser;
-                $externalSynthUser->setUser($synthUser)
-                ->setOwner(true)->setFirstname('ZZ')
-                ->setLastname('ZZ');
-                
+
+
                 $client
                 ->addExternalUser($externalSynthUser)
                 ->setOrganization($organization)
@@ -2671,7 +2672,17 @@ class OrganizationController extends MasterController
                 'elmtType' => $entity,
                 'elements' => $elements,
                 'form'     => $manageOrganizationElementsForm->createView(),
+                'UsersWithoutOrgElement' => $this->getUsersWithoutOrgElement($entity,$orgId)
             ]);
+    }
+    public function getUsersWithoutOrgElement($elmtType , $orgId){
+        $em    = $this->em;
+
+        if($elmtType == 'department'){
+            return $em->getRepository(User::class)->findBy(['organization' =>$orgId, 'department' => null]);
+        } else {
+            return $em->getRepository(User::class)->findBy(['organization' => $orgId, 'position' => null]);
+        }
     }
 
     /**

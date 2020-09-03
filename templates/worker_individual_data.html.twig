@@ -130,7 +130,7 @@
                 </ul>
             </div>
 
-            <ul class="experiences" style="margin-top:3em" data-prototype="{% filter escape %}{% include 'prototype_experience.twig' with { 'item': form.experiences.vars.prototype } %}{% endfilter %}">
+            <ul class="experiences" style="margin-top:3em" data-prototype="{% include 'prototype_experience.twig' with { 'item': form.experiences.vars.prototype } %}">
                 {% set k = 0 %}
                 {% for key, experience in form.experiences %}
                     {% set k = k + 1 %}
@@ -148,12 +148,12 @@
 
                                 {% if startdate is not null and enddate is not null %}
                                     <span>
-                                        {{ experience.vars.data.startdate|localizeddate('short', 'none', null, null, 'MM/yy') }} -
-                                        {{ experience.vars.data.enddate|localizeddate('short', 'none', null, null, 'MM/yy') }}
+                                        {{ experience.vars.data.startdate|format_date('short', 'none', null, null, 'MM/yy') }} -
+                                        {{ experience.vars.data.enddate|format_date('short', 'none', null, null, 'MM/yy') }}
                                     </span>
                                 {% elseif enddate is null %}
                                     <span>
-                                        {{ experience.vars.data.startdate|localizeddate('short', 'none', null, null, 'MM/yy') }} -
+                                        {{ experience.vars.data.startdate|format_date('short', 'none', null, null, 'MM/yy') }} -
                                         Present
                                     </span>
                                 {% elseif startdate is null and enddate is null %}

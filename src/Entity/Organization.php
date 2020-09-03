@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
+use App\Controller\MasterController;
 use App\Repository\OrganizationRepository;
 use DateTime;
 use DateTimeInterface;
@@ -224,7 +225,7 @@ class Organization extends DbObject
      * @OneToMany(targetEntity="Event", mappedBy="organization", cascade={"persist","remove"}, orphanRemoval=true)
      */
     protected $events;
-    
+
 
     /**
      * Organization constructor.
@@ -337,6 +338,7 @@ class Organization extends DbObject
         $this->users = $users?: new ArrayCollection();
         $this->workerFirm = $workerFirm;
     }
+
 
 
     public function getOrgId(): ?int
