@@ -66,9 +66,9 @@
 
 
 
-    <ul class="elements" data-prototype="{% include 'prototype_organization_element.twig' with { 'item': elements.vars.prototype, 'elmtType': elmtType, 'nbFields' : nbFields } %}" style="margin-top:50px">
+    <ul class="elements" style="margin-top:50px" data-prototype='{% include 'prototype_organization_element.twig' with { 'item': elements.vars.prototype, 'elmtType': elmtType, 'nbFields' : nbFields } %}' >
 
-        {% if currentuser.organization.usersWithoutOrgElement(elmtType) %}
+        {% if UsersWithoutOrgElement %}
         <li class="element">
           <div class="row">
               <div class="col element-data element-name s12 m{{ 12/(nbFields + 1) }}" style="font-size: 17px;font-style:italic">
@@ -86,7 +86,7 @@
                   <li style="margin-left:auto;margin-right:10px"><a class="waves-effect waves-light btn-flat white-text" style="cursor: initial;"><i class="fa fa-pencil-alt"></i></a></li>
 
                   <li style="margin-right:10px">
-                    {% set nbUsers = currentuser.organization.usersWithoutOrgElement(elmtType)|length %}
+                    {% set nbUsers = UsersWithoutOrgElement|length %}
                     {% if nbUsers == 0 %}
                       <a class="waves-effect waves-light btn-flat tooltipped" data-position="top" data-tooltip="{% trans with {'%conj_element%' : elmtNameConj} %}organization_elements.no_users{% endtrans %}" style="width:75px">
                         {#<i class="fa fa-users"></i>#}

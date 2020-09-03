@@ -383,7 +383,7 @@ class UserController extends MasterController
      * @Route("/profile", name="manageProfile")
      */
     public function manageProfileAction(Request $request){
-
+        $currentUser = $this->user;
         $organization = $currentUser->getOrganization();
         if (!$currentUser /*|| $organization->getCommname() != "Public"*/) {
             return $this->redirectToRoute('login');
