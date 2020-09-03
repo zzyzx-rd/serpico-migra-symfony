@@ -121,7 +121,7 @@
             {% else %}
               {#{% if global.routeParams|length == 1 and path(global.route) in freeAccessRoutes %}#}
                 <li class="logo">
-                  <a href="https://www.serpicoapp.com">
+                  <a href="{{ path('home_welcome') }}">
                     <img src="{{ asset('lib/img/logo_s.png') }}">
                   </a>
                   {% trans %}landing.serpico_alt_motto{% endtrans %}
@@ -129,7 +129,7 @@
               {#{% endif %}#}
               {% if global.route == "about" %}
                 <li>
-                  <a href="https://www.serpicoapp.com">
+                  <a href="{{ path('home_welcome') }}">
                     <i class="fa fa-home"></i>
                     {% trans %}header.home{% endtrans %}
                   </a>
@@ -137,17 +137,17 @@
               {% endif %}
               <li>
                 {% if global.route == "solution" %}
-                  <a href="https://www.serpicoapp.com">
+                  <a href="{{ path('home_welcome') }}">
                     <i class="fa fa-home"></i>
                     {% trans %}header.home{% endtrans %}
                   </a>
                 {% else %}
-                  <a class="product" href="https://www.serpicoapp.com/solution">{% trans %}header.product{% endtrans %}</a>
+                  <a class="product" href="{{ path('solution') }}">{% trans %}header.product{% endtrans %}</a>
                 {% endif %}
               </li>
               {% if global.route != "about" %}
                 <li>
-                  <a href="https://www.serpicoapp.com/about">{% trans %}header.about{% endtrans %}</a>
+                  <a href="{{ path('about') }}">{% trans %}header.about{% endtrans %}</a>
                 </li>
               {% endif %}
               <li>
@@ -197,11 +197,13 @@
         </div>
       </div>
     </div>
-{#    <footer id="master-footer">#}
-{#      {% if null is null %}#}
-{#        {% include "not_authenticated_footer.html.twig" %}#}
-{#      {% endif %}#}
-{#    </footer>#}
+    {#}
+    <footer id="master-footer">
+      {% if not is_granted('IS_AUTHENTICATED_FULLY') or global.route == path('home_welcome') %}
+        {% include "not_authenticated_footer.html.twig" %}
+      {% endif %}
+    </footer>
+    #}
     <script src="{{ asset('build/runtime.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.js"></script>

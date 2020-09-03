@@ -62,7 +62,7 @@
 </div>
 {% block footer %}
     <footer>
-        {% if not is_granted('IS_AUTHENTICATED_REMEMBERED') and not noFooter is defined %}
+        {#{% if not is_granted('IS_AUTHENTICATED_REMEMBERED') and not noFooter is defined %}#}
 
             <div id="linkFooter">
                 <div style="width:85%;margin:auto;">
@@ -123,7 +123,7 @@
                 </div>
 
             </div>
-        {% endif %}
+        {#{% endif %}#}
     </footer>
 
 

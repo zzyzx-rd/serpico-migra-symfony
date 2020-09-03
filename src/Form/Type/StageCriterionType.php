@@ -187,7 +187,6 @@ class StageCriterionType extends AbstractType
                 'label_format' => 'stages.stage.%name%',
                 'html5' => false,
                 'attr' => ['class' => 'dp-start'],
-                //'data' => $options['startdate'],
                 'constraints' => [
                     new Assert\NotBlank([
                         'message' => 'A recurring activity must have a startdate'

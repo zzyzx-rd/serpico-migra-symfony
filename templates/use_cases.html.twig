@@ -209,52 +209,6 @@
     </div>
   </section>
 
-  <div id="login" class="modal {% if error %}error{% endif %}">
-    <form id="formLogin" action="{{ path('admin_login_check') }}" method="post" class="container">
-      <div class="modal-content row">
-        <h4>Login</h4>
-        {{ error }}
-        <div class="input-field">
-          <input type="text" name="_username" placeholder="{% trans %}landing.login_section.username{% endtrans %}" value="{{ last_username }}" required="required"/>
-        </div>
-        <div class="input-field">
-          <input type="password" name="_password" placeholder="{% trans %}landing.login_section.password{% endtrans %}" value="" required="required"/>
-        </div>
-        <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
-        <div>
-          <input type="checkbox" class="filled-in" id="remember_me" name="_remember_me" checked/>
-          <label for="remember_me">{% trans %}landing.keep_me_logged_in{% endtrans %}</label>
-        </div>
-      </div>
-      <div class="modal-footer row">
-        <a class="modal-trigger" href="#retrievePwd">{% trans %}landing.retrieve_pwd.link_msg{% endtrans %}</a>
-        <button class="btn waves-effect waves-light" type="submit" name="_target_path" value="home">{% trans %}landing.login_section.button_text{% endtrans %}</button>
-      </div>
-    </form>
-  </div>
-  <div id="retrievePwd" class="modal">
-    <div class="container">
-      <div class="modal-content">
-        <p>{% trans %}landing.retrieve_pwd.msg{% endtrans %}</p>
-        <p>{% trans %}landing.retrieve_pwd.msg_2{% endtrans %}</p>
-      </div>
-      <form id="retrievePwdForm" action="" method="post">
-        <input type="email" name="email" required="required"/>
-        <div class="modal-footer">
-          <button type="submit" name="" value="home" class="btn waves-effect waves-light modal-close">{% trans %}landing.retrieve_pwd.submit{% endtrans %}</button>
-        </div>
-      </form>
-    </div>
-  </div>
-  <div id="retrievePwdSuccess" class="modal">
-    <div class="modal-content">
-      <p>{% trans %}landing.retrieve_pwd.success_msg{% endtrans %}</p>
-    </div>
-    <div class="modal-footer">
-      <button class="btn waves-effect waves-light modal-close">{% trans %}Ok{% endtrans %}</button>
-    </div>
-  </div>
-
 {% endblock %}
 
 

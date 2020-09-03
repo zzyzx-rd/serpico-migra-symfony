@@ -230,7 +230,6 @@ help:
 #  register:
 #    free_signup: Essai gratuit
 #    title: Inscrivez-vous
-#    description: Inscrivez-vous dès à présent pour bénéficier de l'offre essai !
 #    label_full_name: Votre nom complet
 #    label_company: Entreprise/Institution
 #    label_position: Fonction
@@ -241,6 +240,7 @@ help:
 #    label_doc: Envoyez-moi de la documentation
 #    submit: OK
 #    success_msg: Votre inscription a bien été prise en compte ! Vous serez rapidement tenu au courant par notre équipe ;)
+#    description: Plus qu'un pas avant de booster votre relation client !
 
 
 footer:
@@ -475,6 +475,7 @@ header:
   register:
     public_evaluations: Evaluations publiques
     start: Démarrer
+    description: Plus qu'un pas avant de booster votre relation client !
   product: La solution
   about: A propos
   login: Connexion
@@ -2862,6 +2863,8 @@ create_client:
   submit: Rajouter les partenaires
 
 create_organization:
+  your_firm: Votre entreprise
+  letz_go: C'est parti
   workerFirm: Nom de l'entité
   legalName: Nom complet
   commercialName: Nom de l'entité

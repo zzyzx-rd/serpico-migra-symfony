@@ -46,7 +46,7 @@ class Grade extends DbObject
     public $value;
 
     /**
-     * @ORM\Column(name="grd_comment", type="string", length=255, nullable=true)
+     * @ORM\Column(name="grd_comment", type="string", nullable=true)
      */
     public $comment;
 

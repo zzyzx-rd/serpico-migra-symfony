@@ -4,6 +4,8 @@
     {% trans %}test{% endtrans %}
 {% endblock %}
 
+{% set truncVal = 30 %}
+
 
   {% block css %}
       <!-- Dropify -->
@@ -15,8 +17,24 @@
           var ourl = "{{ url('manageOrganizations') }}";
           var surl = "{{ path('dynamicSearchParentFirm')}}";
           var curl = "{{ path('createWorkerFirm')}}";
+          var noFirm = "{{ 'create_client.partner.unexisting_worker_firm'|trans }}";
       </script>
       <style>
+
+            #main-header{
+                --actions-width: 200px;
+                --padding: 16px;
+                display: flex;
+                justify-content: center;
+                padding: 1em;
+                margin-bottom: 2em;
+                position: relative;
+            }
+
+            #firmSelector{
+                display: none;
+            }
+
             .firm-option-logo{
                 float: left!important;
             }
@@ -29,10 +47,11 @@
                 bottom: 0;
             }
 
-            /*.w-firm .select-dropdown{
-                width: 90%!important;
-                padding-left: 25px!important; 
-            }*/
+            .organization-btn {
+                background-color: aliceblue;
+                color: black;
+            }
+
 
             .dropdown-content{
                 opacity: 1!important;
@@ -42,6 +61,46 @@
             .select-wrapper input, .select-wrapper .caret{
                 display: none!important;
             }
+
+            .signup-img{
+                width: 100%;
+            }
+            .page-title{
+                font-size: 30px;
+            }
+
+            .organization-department, .organization-position {
+                display: inline-block;
+            }
+
+            .org-info .col{
+                padding: 0 5%;
+            }
+
+            .organization-btn{
+               margin-top: 1rem;
+            }
+            .w-firm .dropdown-content{
+                opacity: 1!important;
+                display: block!important;
+            }
+
+            .w-firm .select-wrapper input, .w-firm .select-wrapper .caret{
+                display: none!important;
+            }
+
+            form{
+                margin: auto;
+            }
+
+            .selected-firm-logo{
+                height: 15px;
+            }
+
+            .user-fullname .input-field{
+                width: 40%;
+            }
+
       </style>
   {% endblock %}
 
@@ -56,16 +115,17 @@
 {% endblock %}
 
 {% block content %}
+    <main>
+        
+    
+        <header id="main-header" class="no-margin">
+            {% if toValidate is defined %}
+                <a class="waves-effect waves-green btn back-btn" href="{{ url('manageUsers')}}">{{ 'team.go_back_users'|trans }}</a>
+            {% endif %}
+            <span class="page-title">{#{{ toValidate is defined ? 'create_organization.validate_title'|trans : 'header.register.description'|trans }}#}</span>
+        </header>
 
-
-
-    <div class="container">
-
-        {% if addFromUser is defined %}
-        <h4>{% trans %}header.register.description{% endtrans %}</h4>
-        {% elseif toValidate is defined %}
-        <h4>{% trans %}create_organization.validate_title{% endtrans %}</h4>
-        {% endif %}
+        {% set organization = form.vars.data %}
 
         {{ form_start(form) }}
         {#
@@ -75,14 +135,13 @@
             {{ form_errors(form.legalName) }}
         </div>
         #}
-        {{ form_label(form.workerFirm) }}
-        {{ form_widget(form.workerFirm) }}
-        <select name="firmSelector" style="margin-top:45px"></select>
+
         
         {#
         {{ form_row(form.isFirm) }}
         #}
         {% if update is not defined %}
+            {#}
             <div>
                 {{ form_label(form.firstname) }}
                 {{ form_widget(form.firstname) }}
@@ -102,6 +161,144 @@
             <div class="errorMessage">
                 {{ form_errors(form.email) }}
             </div>
+            #}
+
+            <div class="row org-info flex-center">
+
+                <div class="col s12 m6">
+                    <img class="signup-img" src="{{asset('lib/img/performance-cocreation.png')}}" alt="">
+                </div>
+    
+                <div class="col s12 m6 no-margin">
+                    <span class="page-title">
+                        {{ toValidate is defined ? 'create_organization.validate_title'|trans : 'header.register.description'|trans }}
+                    </span>
+                    <div class="organization-commname">
+                        
+                        {% if organization and organization.commname is not null %}
+                            {% set commonName = organization.commname %}
+                            {% set isTooLong = commonName|length > truncVal %}
+                        {% else %}
+                            {% set isTooLong = false %}
+                        {% endif %}
+                        {% if not isTooLong %}
+                        <a class="btn organization-btn organization-info-commname flex-center" style="display:none">
+                        {% else %}
+                        <a class="btn organization-btn organization-info-commname flex-center tooltipped" data-position="top" data-tooltip="{{commonName}}" {% if not organization or not form.commname.vars.valid %} style="display:none" {% endif %}>
+                        {% endif %}
+                            {#<i class="fa fa-indu m-right"></i>#}
+                            <span class="m-right">
+                                {{'organization'|trans}} : 
+                            </span>
+                            {#<img class="selected-firm-logo sm-right" src="{{ organization ? organization_logo_url(organization) : asset('/lib/img/org/no-picture.png')}}" alt="">#}
+                            <img class="selected-firm-logo sm-right" src="{{ asset('/lib/img/org/no-picture.png')}}" alt="">
+                            <span class="commname-value">{{ organization ? (isTooLong ? commonName|slice(0,truncVal) ~ '...' : commonName) : 'undefined'|trans }}</span>
+                        </a>
+                        <div class="w-firm" {% if organization and form.commname.vars.valid %} style="display:none" {% endif %}>
+                            {{ form_row(form.commname) }}
+                            <select id="firmSelector" style="margin-top:45px"></select>
+                            <input type="hidden" name="wfiId">
+                        </div>
+                    </div>
+                    {#
+                    <div class="input-field w-firm">
+                        {{ form_row(form.commname) }}
+                        <input type="hidden" name="wfiId">
+                    </div>
+                    #}
+                    <div class="flex-center-sb user-fullname">
+                        <div class="input-field">
+                            {{ form_row(form.firstname) }}
+                        </div>
+                        <div class="input-field">
+                            {{ form_row(form.lastname) }}
+                        </div>
+                    </div>
+                    <div class="input-field">
+                        {{ form_row(form.email) }}
+                    </div>
+                    
+                    {% if currentuser and currentuser.role == 4 %}
+                        <div class="row no-margin">
+                            <div class="col s12 m6">
+                                <div class="organization-department">
+                                {% if organization and organization.department is not null %}
+                                    {% set departmentName = organization.department.name %}
+                                    {% set isTooLong = departmentName|length > truncVal %}
+                                {% else %}
+                                    {% set isTooLong = false %}
+                                {% endif %}
+                                    {% if not isTooLong %}
+                                    <a class="btn organization-btn organization-info-department flex-center">
+                                    {% else %}
+                                    <a class="btn organization-btn organization-info-department flex-center tooltipped" data-position="top" data-tooltip="{{departmentName}}">
+                                    {% endif %}
+                                        <i class="fa fa-bezier-curve m-right"></i>
+                                        <span class="m-right">
+                                        {% if organization and organization.department is not null %}
+                                            {{'create_user.department_short'|trans}} : {{ isTooLong ? departmentName|slice(0,truncVal) ~ '...' : departmentName }}
+                                        {% else %}
+                                            {{'create_user.link_to_department'|trans}}
+                                        {% endif %}
+                                        </span>
+                                    </a>
+                                    <div class="organization-select-department" style="display: none;">
+                                        {{ form_row(form.department) }}
+                                        <a href="#addElement" class="add-department modal-trigger" data-did="0"><i class="fa fa-plus"></i> {% trans %}create_department.open_modal_msg{% endtrans %}</a>
+                                    </div>
+                                </div>
+                            </div>
+                    
+                            <div class="col s12 m6">
+                                <div class="organization-position">
+                                {% if organization and organization.position is not null %}
+                                    {% set positionName = organization.position.name %}
+                                    {% set isTooLong = positionName|length > truncVal %}
+                                {% else %}
+                                    {% set isTooLong = false %}
+                                {% endif %}
+                                    {% if not isTooLong %}
+                                    <a class="btn organization-btn organization-info-position flex-center">
+                                    {% else %}
+                                    <a class="btn organization-btn organization-info-position flex-center tooltipped" data-position="top" data-tooltip="{{positionName}}">
+                                    {% endif %}
+                                        <i class="fa fa-bezier-curve m-right"></i>
+                                        <span class="m-right">
+                                        {% if organization and organization.position is not null %}
+                                            {{'create_user.position'|trans}} : {{ isTooLong ? positionName|slice(0,truncVal) ~ '...' : positionName }}
+                                        {% else %}
+                                            {{'create_user.link_to_position'|trans}}
+                                        {% endif %}
+                                        </span>
+                                    </a>
+                                    <div class="organization-select-position" style="display: none;">
+                                        {{ form_row(form.position) }}
+                                        <a href="#addElement" class="add-position modal-trigger" data-pid="0"><i class="fa fa-plus"></i> {% trans %}create_position.open_modal_msg{% endtrans %}</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="input-field">
+                                {{ form_label(form.type) }}
+                                {{ form_widget(form.type) }}
+                            </div>
+                        </div>
+                    {% endif %}
+                    {#}
+                    {% else %}
+                        <div class="row action-buttons">
+                            <div class="button-field">
+                                {{ form_row(form.submit) }}
+                            </div>
+                        </div>
+                    #}
+
+                </div>
+            </div>
+
+            
+            {#
             {{ form_label(form.position) }}
             {{ form_widget(form.position) }}
             <div class="errorMessage">
@@ -112,6 +309,7 @@
             <div class="errorMessage">
                 {{ form_errors(form.department) }}
             </div>
+            #}
         {#
         <div class="button-field">
             {{ form_row(form.genLanguage) }}
@@ -121,7 +319,7 @@
         {{ form_row(form.masterUser) }}
         {% endif %}
 
-        {% if not toValidate is defined %}
+        {#{% if not toValidate is defined %}#}
         <div class="row action-buttons">
             <div class="button-field">
                 {{ form_row(form.submit) }}
@@ -131,6 +329,8 @@
                 <a class="waves-effect waves-light btn-large red modal-trigger" href="#deleteOrganization">{% trans %}create_organization.delete{% endtrans %}</a>
             </div>
             {% endif %}
+        </div>
+        {#}
         {% else %}
         <div class="row action-buttons">
             <div class="button-field">
@@ -141,10 +341,11 @@
             </div>
         </div>
         {% endif %}
+        #}
         {{ form_rest(form) }}
         {{ form_end(form) }}
-    </div>
-</div>
+    
+    </main>
 
 {% if not form.vars.valid %}
 	<div id="errors" class="modal open">

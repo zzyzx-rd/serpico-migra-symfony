@@ -1,0 +1,25 @@
+<li class="stage-element" data-sd="{{ startdateDay }}" data-p="{{ period }}" data-position="top" data-html="true">
+
+    <section class="stage-container completed-stages-container"></section>
+    
+      {% set startdate = date('now')|date_modify("-1 months") %}
+      {% set enddate = date('now')|date_modify("+1 months") %}
+  
+      {% set diffDays = startdate.diff(enddate) %}
+  
+      {% if diffDays.days > 4 %}
+        <span class="s-day s-dates">{{startdate|format_datetime('short', 'none', pattern='dd')|number_format}}</span>
+        <span class="e-day s-dates">{{enddate|format_datetime('short', 'none', pattern='dd')|number_format}}</span>
+      {% else %}
+      {% if diffDays.days == 0 %}
+            <span class="e-day s-dates single-date">
+              {{enddate|format_datetime('short', 'none', pattern='dd')|number_format}}
+            </span>
+          {% else %}
+            <span class="e-day s-dates single-date m-days">
+              {{ startdate|format_datetime('short', 'none', pattern='dd')|number_format ~ ' - ' ~ enddate|format_datetime('short', 'none', pattern='dd')|number_format}}
+            </span>
+          {% endif %}
+      {% endif %}
+
+</li>
