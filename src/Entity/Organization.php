@@ -1112,5 +1112,9 @@ class Organization extends DbObject
         return $users[0];
     }
 
+    public function getDefaultWeight(){
+        return $this->weights->first();
+    }
+
 
 }

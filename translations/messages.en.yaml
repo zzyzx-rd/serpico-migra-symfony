@@ -1600,42 +1600,6 @@ create_activity_mail:
   outro: See you soon,
   team: The Serpico Team
 
-#create_organization:
-#  workerFirm: Entity name
-#  legalName: Legal name
-#  commercialName: Commercial name
-#  genLanguage: Preferred language
-#  isFirm: Organization type
-#  firstname: First name
-#  lastname: Last name
-#  email: Email
-#  position: Position
-#  department: Department
-#  recurringChoice: Create a recurring activity
-#  recurringStartDate: Start Date
-#  recurringEndDate: End Date
-#  recurringFrequency: Frequency
-#  recurringTimeFrame: Timeframe
-#  masterUser: Master user
-#  add_btn: Start now
-#  validate_title: Organization creation validation
-#  validate: Validate
-#  reject: Reject
-#  create: Create
-#  start_now: Start now
-#  update_btn: Modify
-#  delete: Delete
-#  delete_modal:
-#    title: Delete organization
-#    content: Are you sure you want to delete the organization ? All users, data and related activities will be erased from the database
-#    confirm: Confirm
-#    cancel: Cancel
-
-  type:
-    client: Entreprise
-    team_projet: Equipe / groupe dindividus
-    individual: Indépendant
-
 signup_mail:
   intro: Bonjour
   message1: Merci de vous être inscrit à Serpico, qui porte haut et fort lévaluation collaborative !
@@ -2755,6 +2719,36 @@ create_client:
 create_organization:
   your_firm: Your firm
   letz_go: Let's go
+  workerFirm: Entity name
+  legalName: Legal name
+  commname: Commercial name
+  genLanguage: Preferred language
+  isFirm: Organization type
+  firstname: First name
+  lastname: Last name
+  email: Email
+  position: Position
+  department: Department
+  masterUser: Master user
+  validate_title: Organization creation validation
+  validate: Validate
+  reject: Reject
+  create: Create
+  start_now: Start now
+  update_btn: Modify
+  delete: Delete
+  delete_modal:
+    title: Delete organization
+    content: Are you sure you want to delete the organization ? All users, data and related activities will be erased from the database
+    confirm: Confirm
+    cancel: Cancel
+
+  type:
+    label: Type de client
+    client: Firm
+    team_project: Team/group
+    individual: Independant
+    institution: Institution
 
 create_department:
   name: New department name

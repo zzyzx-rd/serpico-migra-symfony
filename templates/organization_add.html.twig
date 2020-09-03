@@ -223,15 +223,15 @@
                             <div class="col s12 m6">
                                 <div class="organization-department">
                                 {% if organization and organization.department is not null %}
-                                    {% set departmentName = organization.department.name %}
+                                    {% set departmentName = organization.department %}
                                     {% set isTooLong = departmentName|length > truncVal %}
                                 {% else %}
                                     {% set isTooLong = false %}
                                 {% endif %}
                                     {% if not isTooLong %}
-                                    <a class="btn organization-btn organization-info-department flex-center">
+                                    <a class="btn organization-btn organization-info-department flex-center" style="display: none;">
                                     {% else %}
-                                    <a class="btn organization-btn organization-info-department flex-center tooltipped" data-position="top" data-tooltip="{{departmentName}}">
+                                    <a class="btn organization-btn organization-info-department flex-center tooltipped" data-position="top" data-tooltip="{{departmentName}}" style="display: none;">
                                     {% endif %}
                                         <i class="fa fa-bezier-curve m-right"></i>
                                         <span class="m-right">
@@ -242,7 +242,7 @@
                                         {% endif %}
                                         </span>
                                     </a>
-                                    <div class="organization-select-department" style="display: none;">
+                                    <div class="organization-select-department">
                                         {{ form_row(form.department) }}
                                         <a href="#addElement" class="add-department modal-trigger" data-did="0"><i class="fa fa-plus"></i> {% trans %}create_department.open_modal_msg{% endtrans %}</a>
                                     </div>
@@ -252,15 +252,15 @@
                             <div class="col s12 m6">
                                 <div class="organization-position">
                                 {% if organization and organization.position is not null %}
-                                    {% set positionName = organization.position.name %}
+                                    {% set positionName = organization.position %}
                                     {% set isTooLong = positionName|length > truncVal %}
                                 {% else %}
                                     {% set isTooLong = false %}
                                 {% endif %}
                                     {% if not isTooLong %}
-                                    <a class="btn organization-btn organization-info-position flex-center">
+                                    <a class="btn organization-btn organization-info-position flex-center" style="display: none;">
                                     {% else %}
-                                    <a class="btn organization-btn organization-info-position flex-center tooltipped" data-position="top" data-tooltip="{{positionName}}">
+                                    <a class="btn organization-btn organization-info-position flex-center tooltipped" data-position="top" data-tooltip="{{positionName}}" style="display: none;">
                                     {% endif %}
                                         <i class="fa fa-bezier-curve m-right"></i>
                                         <span class="m-right">
@@ -271,7 +271,7 @@
                                         {% endif %}
                                         </span>
                                     </a>
-                                    <div class="organization-select-position" style="display: none;">
+                                    <div class="organization-select-position">
                                         {{ form_row(form.position) }}
                                         <a href="#addElement" class="add-position modal-trigger" data-pid="0"><i class="fa fa-plus"></i> {% trans %}create_position.open_modal_msg{% endtrans %}</a>
                                     </div>

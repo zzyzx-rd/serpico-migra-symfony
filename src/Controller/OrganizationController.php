@@ -6579,6 +6579,8 @@ class OrganizationController extends MasterController
         //$em->flush();
         if($mirrorExtUsers){
             return $syntheticUser;
+        } else {
+            return true;
         }
 
     }
