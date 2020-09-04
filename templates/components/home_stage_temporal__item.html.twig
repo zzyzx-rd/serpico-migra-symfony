@@ -1,9 +1,9 @@
-<li class="stage-element" data-sd="{{ startdateDay }}" data-p="{{ period }}" data-position="top" data-html="true">
+<li class="stage-element" data-sd="{{ startdateDay }}" data-p="{{ period }}" {#data-tooltip='{% include "components/stage_holder__item.html.twig" with { stage: stage, embeddedStages: embeddedStages } %}' data-position="top" data-html="true"#}>
 
     <section class="stage-container completed-stages-container"></section>
     
-      {% set startdate = date('now')|date_modify("-1 months") %}
-      {% set enddate = date('now')|date_modify("+1 months") %}
+      {% set startdate = date("first day of this month - 3 months")|date_modify("+" ~ startdateDay ~ "days") %}
+      {% set enddate = date("first day of this month - 3 months")|date_modify("+" ~ (startdateDay + period) ~ "days") %}
   
       {% set diffDays = startdate.diff(enddate) %}
   

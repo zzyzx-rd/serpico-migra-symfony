@@ -97,7 +97,8 @@ class Position extends DbObject
         $organization = null,
         $department = null,
         $createdBy = null,
-        $deleted = null)
+        $deleted = null,
+        $users=null)
     {
         parent::__construct($id, $createdBy, new DateTime());
         $this->name = $name;
@@ -106,7 +107,7 @@ class Position extends DbObject
         $this->department = $department;
         $this->options = new ArrayCollection();
         $this->targets = new ArrayCollection();
-        $this->users = new ArrayCollection();
+        $this->users = $users ?: new ArrayCollection();
     }
 
 

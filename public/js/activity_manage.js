@@ -109,7 +109,7 @@ $(function () {
     pxWidthP = (p + 1) * echelle;
     pxWidthSD = sd * echelle;
     pctWidthSD = getPercentage(pxWidthSD, centralElWidth);
-    pctWidthP = getPercentage(pxWidthP, centralElWidth) ;
+    pctWidthP = getPercentage(pxWidthP, centralElWidth);
 
     $this.css({'margin-left': pctWidthSD + "%" });
     $this.css({'width': pctWidthP + "%" });
@@ -368,7 +368,7 @@ $(function () {
 	return Math.floor((Aujourdhui - PremierJour) / (1000 * 60 * 60 * 24));
 }
 function getPercentage(min,max){
-  var result=min / max;
+  var result = min / max;
   return result * 100;
 }
 

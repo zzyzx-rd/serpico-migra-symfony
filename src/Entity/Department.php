@@ -121,7 +121,8 @@ class Department extends DbObject
         $organization = null,
         ArrayCollection $criterionGroups = null,
         ArrayCollection $eventGroups = null,
-        ArrayCollection $targets = null)
+        ArrayCollection $targets = null,
+        ArrayCollection $users = null)
     {
         parent::__construct($id, $createdBy, new DateTime);
         $this->name = $name;
@@ -133,6 +134,7 @@ class Department extends DbObject
         $this->criterionGroups = $criterionGroups?:new ArrayCollection();
         $this->eventGroups = $eventGroups?:new ArrayCollection();
         $this->targets = $targets?:new ArrayCollection();
+        $this->users = $users?:new ArrayCollection();
     }
 
 

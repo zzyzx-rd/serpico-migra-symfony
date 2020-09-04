@@ -982,42 +982,6 @@ create_activity_mail:
   outro: A très bientôt,
   team: l'équipe de Serpico
 
-#create_organization:
-#  legalName: Nom complet/juridique
-#  commercialName: Nom de l'entité
-#  genLanguage: Langue de préférence
-#  isFirm: Type d'entité
-#  firstname: Prénom
-#  lastname: Nom
-#  email: Email
-#  position: Fonction
-#  department: Département
-#  recurringChoice: Créer une activité récurrente
-#  recurringStartDate: Date de début
-#  recurringEndDate: Date de fin
-#  recurringFrequency: Fréquence
-#  recurringTimeFrame: Durée
-#  masterUser: Administrateur principal
-#  create: Créer
-#  start_now: Démarrez maintenant
-#  validate_title: Validation de la création d'entité
-#  validate: Valider
-#  reject: Rejeter
-#  update_btn: Modifier
-#  add_btn: Ajouter
-#  delete: Supprimer
-#  delete_modal:
-#    title: Supression d'une entité
-#    content: Etes-vous sûr de vouloir supprimer ce compte entreprise ? Tous les utilisateurs, données et activités associées seront supprimés
-#    confirm: Confirmer
-#    cancel: Annuler
-#
-#  type:
-#    client: Entreprise
-#    team_projet: Equipe / groupe dindividus
-#    individual: Indépendant
-
-
 signup_mail:
   intro: Bonjour
   message1: Merci de vous être inscrit à Serpico, qui porte haut et fort l'évaluation collaborative !
@@ -2867,7 +2831,7 @@ create_organization:
   letz_go: C'est parti
   workerFirm: Nom de l'entité
   legalName: Nom complet
-  commercialName: Nom de l'entité
+  commname: Nom de l'entité
   genLanguage: Preferred language
   isFirm: Type d'entité
   firstname: Prénom
@@ -2892,7 +2856,7 @@ create_organization:
   type:
     label: Type de client
     client: Entreprise
-    team_project: Equipe/groupe dindividus
+    team_project: Equipe/groupe d'individus
     individual: Indépendant
     institution: Institution
 

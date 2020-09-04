@@ -6,28 +6,28 @@ use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Exception;
-use Form\AddOrganizationForm;
-use Form\AddClientForm;
-use Form\DelegateActivityForm;
-use Form\RequestActivityForm;
-use Form\UpdateWorkerFirmForm;
-use Form\UpdateWorkerIndividualForm;
-use Form\SendMailProspectForm;
-use Form\AddUserForm;
-use Form\AddDepartmentForm;
-use Form\AddProcessForm;
-use Form\AddWeightForm;
-use Form\SendMailForm;
-use Form\SearchWorkerForm;
-use Form\UpdateOrganizationForm;
-use Form\ValidateFirmForm;
-use Form\ManageProcessForm;
-use Form\ValidateMassFirmForm;
-use Form\ValidateMailForm;
-use Form\ValidateMassMailForm;
-use Form\Type\UserType;
-use Form\Type\ClientUserType;
-use Form\Type\OrganizationElementType;
+use App\Form\AddOrganizationForm;
+use App\Form\AddClientForm;
+use App\Form\DelegateActivityForm;
+use App\Form\RequestActivityForm;
+use App\Form\UpdateWorkerFirmForm;
+use App\Form\UpdateWorkerIndividualForm;
+use App\Form\SendMailProspectForm;
+use App\Form\AddUserForm;
+use App\Form\AddDepartmentForm;
+use App\Form\AddProcessForm;
+use App\Form\AddWeightForm;
+use App\Form\SendMailForm;
+use App\Form\SearchWorkerForm;
+use App\Form\UpdateOrganizationForm;
+use App\Form\ValidateFirmForm;
+use App\Form\ManageProcessForm;
+use App\Form\ValidateMassFirmForm;
+use App\Form\ValidateMailForm;
+use App\Form\ValidateMassMailForm;
+use App\Form\Type\UserType;
+use App\Form\Type\ClientUserType;
+use App\Form\Type\OrganizationElementType;
 use App\Entity\Participation;
 use App\Entity\Criterion;
 use App\Entity\OrganizationUserOption;
@@ -660,10 +660,10 @@ class SettingsController extends MasterController
      */
     public function addOrganizationAction(Request $request)
     {
-        $em = self::getEntityManager();
+        $em = $this->em;
         /** @var FormFactory */
         
-        $organizationForm = $this->createForm(AddOrganizationForm::class, null,['standalone' => true, 'orgId' => 0, 'app' => $app]);
+        $organizationForm = $this->createForm(AddOrganizationForm::class, null, ['standalone' => true, 'orgId' => 0, 'em' => $em, 'isFromClient' => false]);
         $organizationForm->handleRequest($request);
         $errorMessage = '';
         $organization = new Organization;
@@ -674,6 +674,7 @@ class SettingsController extends MasterController
         $repoON = $em->getRepository(OptionName::class);
         /** @var OptionName[] */
         $options = $repoON->findAll();
+        $wfiId = $request->get('wfiId');
 
         if ($organizationForm->isSubmitted()) {
             /*
@@ -694,14 +695,35 @@ class SettingsController extends MasterController
                 $firstname = $organizationForm->get('firstname')->getData();
                 /** @var string */
                 $lastname = $organizationForm->get('lastname')->getData();
+                /** @var string */
+                $orgType = $organizationForm->get('type')->getData();
                 /** @var WorkerFirm */
-                $workerFirm = $repoWF->find((int) $organizationForm->get('workerFirm')->getData());
+                $workerFirm = $wfiId ? $repoWF->find($wfiId): new WorkerFirm;
+
+                if(!$wfiId){
+                    $workerFirm->setName($organizationForm->get('commname')->getData())
+                    ->setCommonName($organizationForm->get('commname')->getData());
+                    $em->persist($workerFirm);
+                    $em->flush();    
+                }
+
+                $organization
+                    ->setValidated(new \DateTime)
+                    ->setCommname($workerFirm->getName())
+                    ->setLegalname($workerFirm->getName())
+                    ->setIsClient(true)
+                    ->setType($orgType)
+                    ->setWeightType('role')
+                    ->setExpired(new \DateTime('2100-01-01 00:00:00'))
+                    ->setWorkerFirm($workerFirm);
+
+                $this->forward('App\Controller\OrganizationController::createFirmMinConfig', ['organization' => $organization, 'mirrorExtUsers' => false]);
+                
                 /** @var string */
                 $positionName = $organizationForm->get('position')->getData();
                 /** @var string */
                 $departmentName = $organizationForm->get('department')->getData();
-                /** @var string */
-                $orgType = $organizationForm->get('type')->getData();
+
                 $user = null;
 
                 $token = md5(rand());
@@ -714,155 +736,45 @@ class SettingsController extends MasterController
                         ->setEmail($email)
                         ->setRole(USER::ROLE_AM)
                         ->setToken($token)
-                        ->setWeightIni(100)
-                        ->setOrgId($organization->getId());
+                        ->setWeightIni(100);
                     $em->persist($user);
-                    $em->flush();
+                    //$em->flush();
                 }
-                
-                $defaultOrgWeight = new Weight;
-                $defaultOrgWeight->setOrganization($organization)
-                    ->setValue(100);
-                $organization->addWeight($defaultOrgWeight);
-
-                $organization
-                    ->setValidated(new \DateTime)
-                    ->setCommname($workerFirm->getName())
-                    ->setLegalname($workerFirm->getName())
-                    ->setIsClient(true)
-                    ->setType($orgType)
-                    ->setWeight_type('role')
-                    ->setExpired(new \DateTime('2100-01-01 00:00:00'))
-                    ->setWorkerFirm($workerFirm);
-
-                if($user){$organization->setMasterUserId($user->getId());}
-
-                $em->persist($organization);
-                $em->flush();
 
                 if($user){
 
                     if($departmentName != "") {
                         $department = new Department;
-                        $department
-                            ->setName($departmentName)
-                            ->setOrganization($organization);
-                        $em->persist($department);
-                        $em->flush();
+                        $department->setName($departmentName);
+                        $department->setMasterUser($user);
+                        $department->addUser($user);
+                        $organization->addDepartment($department);
                     }
 
                     if($positionName != "") {
                         $position = new Position;
-                        $position
-                            ->setName($positionName)
-                            ->setOrganization($organization);
-                        $em->persist($position);
-                        $em->flush();
+                        $position->setName($positionName);
+                        $position->addUser($user);
+                        $organization->addPosition($position);
                     }
-
-                    /*$weight = (new Weight)
-                        ->setInterval(0)
-                        ->setTimeframe('D')
-                        ->setOrganization($organization)
-                        ->setValue(100);
-
-                    if($positionName != ""){$weight->setPosition($position);}
-
-                    $em->persist($weight);
-                    $em->flush();*/
 
                     $user
-                        ->setOrgId($organization->getId())
-                        ->setDptId($department->getId())
-                        ->setPosId($position->getId())
-                        ->setWgtId($defaultOrgWeight->getId());
-                    $em->persist($user);
+                        ->setDepartment($department)
+                        ->setPosition($position)
+                        ->setWeight($organization->getDefaultWeight());
+                        
+                    //$em->persist($user);
+                    $organization->addUser($user);
+                    $em->persist($organization);
                     $em->flush();
 
-                }
-
-
-                foreach ($options as $option) {
-
-                    $optionValid = (new OrganizationUserOption)
-                    ->setOName($option)
-                    ->setOrganization($organization);
-
-                    // We set nb of days for reminding emails, very important otherwise if unset, if people create activities, can make system bug.
-                    //  => Whenever someone logs in, this person triggers reminder mails to every person in every organization, organization thus should have this parameter date set.
-                    if($option->getName() == 'mailDeadlineNbDays'){
-                        $optionValid->setOptionFValue(2);
+                    if($user){
+                        $organization->setMasterUser($user);
                     }
-                    $em->persist($optionValid);
 
-                    // At least 3 options should exist for a new firm for activity & access results
-                    if($option->getName() == 'activitiesAccessAndResultsView'){
-
-                        // Visibility and access options has many options :
-                        // * Scope (opt_bool_value in DB, optionTrue property) : defines whether user sees his own results (0), or all participant results (1)
-                        // * Activities access (opt_int_value, optionIValue property) : defines whether user can access all organisation acts (1), his department activities (2) or his own activities (3)
-                        // * Status access (opt_int_value_2, optionSecondaryIValue property) : defines whether user can access computed results (2), or released results (3)
-                        // * Detail (opt_float_value, optionFValue property) : defines whether user accesses averaged/consolidated results (0), or detailed results (1)
-                        // * Results Participation Condition (opt_string_value, optionSValue property) : defines whether user accesses activity results without condition ('none'), if he is activity owner ('owner'), or if he is participating ('participant')
-
-                        $optionAdmin = $optionValid;
-                        $optionAdmin->setRole(1)->setOptionTrue(true)->setOptionIValue(1)->setOptionSecondaryIValue(2)->setOptionFValue(1)->setOptionSValue('none');
-                        $em->persist($optionAdmin);
-
-                        $optionAM = (new OrganizationUserOption)
-                        ->setOName($option)
-                        ->setOrganization($organization);
-                        $optionAM->setRole(2)->setOptionTrue(true)->setOptionIValue(2)->setOptionSecondaryIValue(2)->setOptionFValue(0)->setOptionSValue('owner');
-                        $em->persist($optionAM);
-
-                        $optionC = (new OrganizationUserOption)
-                        ->setOName($option)
-                        ->setOrganization($organization);
-                        $optionC->setRole(3)->setOptionTrue(false)->setOptionIValue(3)->setOptionSecondaryIValue(3)->setOptionFValue(0)->setOptionSValue('participant');
-                        $em->persist($optionC);
-                    }
+                    $em->persist($organization);
+                    $em->flush();
                 }
-
-                $em->flush();
-
-                $repoCN = $em->getRepository(CriterionName::class);
-                $criterionGroups = [
-                    1 => new CriterionGroup('Hard skills', $organization),
-                    2 => new CriterionGroup('Soft skills', $organization)
-                ];
-                foreach ($criterionGroups as $cg) {
-                    $em->persist($cg);
-                }
-                $em->flush();
-
-                /**
-                 * @var CriterionName[]
-                 */
-                $defaultCriteria = $repoCN->findBy(['organization' => null]);
-                foreach ($defaultCriteria as $defaultCriterion) {
-                    $criterion = clone $defaultCriterion;
-                    // 1: hard skill
-                    // 2: soft skill
-                    $type = $criterion->getType();
-                    $cg = $criterionGroups[$type];
-                    $criterion
-                        ->setOrganization($organization)
-                        ->setCriterionGroup($cg);
-
-                    $cg->addCriterion($criterion);
-                    $em->persist($criterion);
-                }
-
-                //Synthetic User Creation (for external, in case no consituted team has been created to grade a physical person for an activity)
-                $syntheticUser = new User;
-                $syntheticUser
-                    ->setFirstname('ZZ')
-                    ->setLastname('ZZ')
-                    ->setRole(3)
-                    ->setOrgId($organization->getId());
-                $em->persist($syntheticUser);
-
-                $em->flush();
 
                 // Sending mail to created firm master user, if such user exists
                 if($user){
@@ -870,7 +782,6 @@ class SettingsController extends MasterController
                     $recipients = [];
                     $recipients[] = $user;
                     $settings['rootCreation'] = true;
-
                     $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'registration']);
 
                 }
@@ -2463,7 +2374,7 @@ class SettingsController extends MasterController
         $firms = new ArrayCollection($qb->select('wf')
         ->from('App\Entity\WorkerFirm', 'wf')
         ->where('wf.name LIKE :firmName')
-        ->andWhere('wf.active = true AND wf.nbActiveExp > 0')
+        ->andWhere('wf.active = true AND wf.nbActiveExp > 0 OR wf.organization IS NOT NULL')
         ->setParameter('firmName', '%'.$firmName.'%')
         ->orderBy('wf.nbActiveExp','DESC')
         ->getQuery()

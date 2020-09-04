@@ -223,13 +223,13 @@ class User extends DbObject implements  UserInterface, \Serializable
 
     /**
      * @ORM\ManyToOne(targetEntity=Position::class, inversedBy="users")
-     * @JoinColumn(name="position_pos_id", referencedColumnName="pos_id", nullable=true)
+     * @JoinColumn(name="position_pos_id", referencedColumnName="pos_id", nullable=true, onDelete="SET NULL")
      */
     public $position;
 
     /**
      * @ORM\ManyToOne(targetEntity=Department::class, inversedBy="users")
-     * @JoinColumn(name="department_dpt_id", referencedColumnName="dpt_id", nullable=true)
+     * @JoinColumn(name="department_dpt_id", referencedColumnName="dpt_id", nullable=true, onDelete="SET NULL")
      */
     public $department;
 
@@ -241,7 +241,7 @@ class User extends DbObject implements  UserInterface, \Serializable
 
     /**
      * @ORM\ManyToOne(targetEntity=Organization::class, inversedBy="users")
-     * @ORM\JoinColumn(nullable=false, name="organization_org_id", referencedColumnName="org_id", nullable=true, onDelete="CASCADE")
+     * @ORM\JoinColumn(name="organization_org_id", referencedColumnName="org_id", nullable=true, onDelete="CASCADE")
      */
     public $organization;
 
@@ -324,7 +324,6 @@ class User extends DbObject implements  UserInterface, \Serializable
         $department = null,
         $position = null,
         $positionName = null,
-        $organization = null,
         $activitiesArchivingNbDays = 7,
         $rememberMeToken = null,
         $superior = null,
@@ -380,7 +379,6 @@ class User extends DbObject implements  UserInterface, \Serializable
         $this->position = $position;
         $this->department = $department;
         $this->title = $title;
-        $this->organization = $organization;
         $this->leadingDepartments = new ArrayCollection();
         $this->subordinates = new ArrayCollection();
         $this->participations = new ArrayCollection();

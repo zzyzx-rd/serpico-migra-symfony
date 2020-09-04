@@ -262,24 +262,79 @@ $(function() {
     });
 
 
+    var l = Number($('.calendar-element').attr('data-l'));
+    var c = Number($('.calendar-element').attr('data-c'));
+
+    var calendarWidth = $('.calendar-holder').width();
+    var scale = calendarWidth / l;
+    function getPercentage(min,max){
+        var result = min / max;
+        return result * 100;
+    }
+
+    var sd = 0;
+
+
+    var actCurDate = $('.curDate');
+    actCurDate.each(function(i,e){
+      $(e).css({'left': Math.round(10000 * (c /l )) / 100 + '%' });
+    });
+
     $.each($('.activity-component'), function (){
         var $this = $(this);
-        var sd = $this.data("sd");
-        var p =  $this.data("p");
-        var id = $this.data("id");
-        var c = 100;
-        $('.stage-element').each(function(){
+        pxWidthSD = 0;
+        pxWidthP = scale;
+        pctWidthSD = getPercentage(pxWidthSD, calendarWidth);
+        pctWidthP = getPercentage(pxWidthP, calendarWidth);
+
+        //$this.css({'margin-left': pctWidthSD + "%" });
+        //$this.css({'width': pctWidthP + "%" });
+
+        $this.find('.stage-element').each(function(){
             var ssd = $(this).data("sd");
-            var sp =  $(this).data("p");
-            sPctWidthSD = (ssd - sd) / p;
-            sPctWidthP = Math.max(3,(sp + 1)) / (p + 1);
+            var p =  $(this).data("p");
+            sPctWidthSD = (ssd - sd) / l;
+            sPctWidthP = Math.max(3,(p + 1)) / (l + 1);
     
             $(this).css({'margin-left': Math.round(10000 * sPctWidthSD) / 100 + "%",
             'width': Math.round(10000 * sPctWidthP) / 100 + "%",
-            'background' : ssd >= c ? '#5CD08F' : (ssd + sp > c ? 'linear-gradient(to right, transparent, transparent ' + Math.round(10000 * (c - ssd) / sp) / 100 + '%, #16AFB7 '+ Math.round(10000 * (c - ssd) / sp) / 100 +'%), repeating-linear-gradient(61deg, #16AFB7, #16AFB7 0.5rem, transparent 0.5px, transparent 1rem)' : 'gray'),
+            'background' : ssd >= c ? '#5CD08F' : (ssd + p > c ? 'linear-gradient(to right, transparent, transparent ' + Math.round(10000 * (c - ssd) / p) / 100 + '%, #16AFB7 '+ Math.round(10000 * (c - ssd) / p) / 100 +'%), repeating-linear-gradient(61deg, #16AFB7, #16AFB7 0.5rem, transparent 0.5px, transparent 1rem)' : 'gray'),
             'height' : '7px',
             'border-radius' : '0.3rem',  
             });
         });
     });
+
+    /*
+    $('.stages-holder').on('mouseenter',function(){
+        $(this).closest('.activity-holder').find('.act-info .fixed-action-btn').css('visibility','');
+    }).on('mouseleave',function(){
+      var $this = $(this);
+        var interval = setInterval(function(){
+          if(!$this.closest('.activity-holder').find('.act-info .fixed-action-btn').is(':hover')) {
+            $this.closest('.activity-holder').find('.act-info .fixed-action-btn').css('visibility','hidden');
+            clearInterval(interval);
+          }
+        },50);
+    })*/
+
+    $('.stages-holder').on('mouseenter',function(){
+        var holderIndex = $('.stages-holder').index($(this));
+        const $fixedBtn = $('.act-info').find('.fixed-action-btn').eq(holderIndex);
+        $fixedBtn.css('visibility','');
+
+    }).on('mouseleave',function(){
+        var holderIndex = $('.stages-holder').index($(this));
+        var interval = setInterval(function(){
+          if(!$('.act-info').find('.fixed-action-btn').eq(holderIndex).is(':hover')) {
+            $('.act-info').find('.fixed-action-btn').eq(holderIndex).css('visibility','hidden');
+            clearInterval(interval);
+          }
+        },50);
+    })
+
+    $('.act-info .fixed-action-btn').each(function(i,e){
+        const $fixedBtns = $('.act-info .fixed-action-btn');
+        $(e).css('top', Math.round(100 * ($fixedBtns.index($(this)) / $fixedBtns.length)) + '%');
+    })
 });

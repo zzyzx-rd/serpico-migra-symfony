@@ -202,7 +202,7 @@ class AddOrganizationForm extends AbstractType
             if ($standalone) {
                 $builder->add('submit', SubmitType::class,
                     [
-                        'label' => $options['isFromClient'] ? 'create_organization.letz_go' : ($organization ? 'create_organization.update_btn' : 'create_organization.add_btn'),
+                        'label' => $options['isFromClient'] ? 'create_organization.letz_go' : ($organization ? 'create_organization.update_btn' : 'create_organization.create'),
                         'attr' => [
                             'class'=> 'btn btn-large'
                         ]
