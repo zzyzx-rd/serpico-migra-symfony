@@ -56,7 +56,7 @@ class Decision extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="dec_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="dec_inserted", type="datetime", nullable=false, options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -112,7 +112,6 @@ class Decision extends DbObject
      * @param $validator
      * @param $dec_result
      * @param $dec_createdBy
-     * @param $dec_inserted
      * @param $dec_decided
      * @param $dec_validated
      * @param $organization
@@ -130,7 +129,6 @@ class Decision extends DbObject
         $validator = 0,
         $dec_result = null,
         $dec_createdBy = null,
-        $dec_inserted = null,
         $dec_decided = null,
         $dec_validated = null,
         Organization $organization = null,

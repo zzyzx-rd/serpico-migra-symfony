@@ -44,7 +44,7 @@ class City extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="cit_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="cit_inserted", type="datetime", nullable=false, options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -72,7 +72,6 @@ class City extends DbObject
      * @param $cit_fullname
      * @param $cit_name
      * @param $cit_createdBy
-     * @param $cit_inserted
      * @param $state
      * @param $country
      * @param $firms
@@ -83,7 +82,6 @@ class City extends DbObject
         $cit_fullname = null,
         $cit_name = null ,
         $cit_createdBy = null,
-        $cit_inserted = null,
         $state = null,
         $country = null,
         $firms = null)
@@ -134,7 +132,7 @@ class City extends DbObject
         return $this;
     }
 
-    public function setInserted(DateTimeInterface $cit_inserted): self
+    public function setInserted(?DateTimeInterface $cit_inserted): self
     {
         $this->inserted = $cit_inserted;
 

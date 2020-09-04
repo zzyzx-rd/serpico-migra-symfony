@@ -65,7 +65,7 @@ class RankingHistory extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="rkh_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="rkh_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -104,7 +104,6 @@ class RankingHistory extends DbObject
      * @param $rkh_value
      * @param $rkh_series_pop
      * @param $rkh_createdBy
-     * @param $rkh_inserted
      * @param $activity
      * @param $stage
      * @param $criterion
@@ -120,7 +119,6 @@ class RankingHistory extends DbObject
         $rkh_value = null,
         $rkh_series_pop = null,
         $rkh_createdBy = null,
-        $rkh_inserted = null,
         $activity = null,
         $stage = null,
         $criterion = null,

@@ -43,7 +43,7 @@ class WorkerFirmLocation extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="wfl_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="wfl_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -54,12 +54,10 @@ class WorkerFirmLocation extends DbObject
      * @param $wfl_hq_state
      * @param $wfl_hq_country
      * @param $wfl_createdBy
-     * @param $wfl_inserted
      */
     public function __construct(
       ?int $id = 0,
         $wfl_createdBy = null,
-        $wfl_inserted = null,
         $wfl_hq_city = null,
         $wfl_hq_state = null,
         $wfl_hq_country = null)

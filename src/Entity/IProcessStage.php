@@ -143,7 +143,7 @@ class IProcessStage extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="stg_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="stg_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -262,7 +262,6 @@ class IProcessStage extends DbObject
      * @param $stg_deadline_nbDays
      * @param $stg_deadline_mailSent
      * @param $stg_createdBy
-     * @param $stg_inserted
      * @param $stg_isFinalized
      * @param $stg_finalized
      * @param $stg_deleted
@@ -302,7 +301,6 @@ class IProcessStage extends DbObject
         $stg_deadline_nbDays = 3,
         $stg_deadline_mailSent = null,
         $stg_createdBy = null,
-        $stg_inserted = null,
         $stg_isFinalized = False,
         $stg_finalized = null,
         $stg_deleted = null,

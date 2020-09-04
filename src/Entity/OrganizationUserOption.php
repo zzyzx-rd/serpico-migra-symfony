@@ -62,7 +62,7 @@ class OrganizationUserOption extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="opt_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="opt_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 

@@ -98,7 +98,7 @@ class Event extends DbObject
     public $resDate;
 
     /**
-     * @ORM\Column(name="eve_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="eve_inserted", type="datetime", nullable=true, options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -115,7 +115,6 @@ class Event extends DbObject
      * @param $name
      * @param $comment
      * @param $createdBy
-     * @param $inserted
      * @param $deleted
      * @param $stage
      * @param $activity

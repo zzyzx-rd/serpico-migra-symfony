@@ -48,7 +48,7 @@ class Team extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="tea_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="tea_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -92,7 +92,6 @@ class Team extends DbObject
      * @param $weight_ini
      * @param $picture
      * @param $createdBy
-     * @param $inserted
      * @param $deleted
      * @param $organization
      * @param $members
@@ -107,7 +106,6 @@ class Team extends DbObject
         $weight_ini = null,
         $organization = null,
         $createdBy = null,
-        $inserted = null,
         $deleted = null,
         $members = null,
         $participations = null,

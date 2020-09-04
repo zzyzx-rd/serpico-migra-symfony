@@ -52,7 +52,7 @@ class Client extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="cli_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="cli_inserted", type="datetime", nullable=true, options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -88,7 +88,6 @@ class Client extends DbObject
      * @param $logo
      * @param $email
      * @param $createdBy
-     * @param $inserted
      * @param $organization
      * @param $clientOrganization
      * @param $workerFirm
@@ -158,7 +157,7 @@ class Client extends DbObject
         return $this;
     }
 
-    public function setInserted(DateTimeInterface $inserted): self
+    public function setInserted(?DateTimeInterface $inserted): self
     {
         $this->inserted = $inserted;
         return $this;

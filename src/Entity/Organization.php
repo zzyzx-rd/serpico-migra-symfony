@@ -67,7 +67,7 @@ class Organization extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="org_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="org_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -237,7 +237,6 @@ class Organization extends DbObject
      * @param $oth_language
      * @param $weight_type
      * @param $createdBy
-     * @param $inserted
      * @param $validated
      * @param $expired
      * @param $testing_reminder_sent
@@ -276,7 +275,6 @@ class Organization extends DbObject
         $weight_type = "",
         $usersCSV = '',
         $createdBy = null,
-        $inserted = null,
         $validated = null,
         $expired = null,
         $testing_reminder_sent = null,

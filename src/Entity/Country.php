@@ -42,7 +42,7 @@ class Country extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="cou_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="cou_inserted", type="datetime", nullable=false, options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -63,7 +63,6 @@ class Country extends DbObject
      * @param $cou_fullname
      * @param $cou_name
      * @param $cou_createdBy
-     * @param $cou_inserted
      * @param $states
      * @param $firms
      */
@@ -73,7 +72,6 @@ class Country extends DbObject
         $cou_fullname = null,
         $cou_name = null,
         $cou_createdBy= null,
-        $cou_inserted = null,
         $states = null,
         $firms = null)
     {
@@ -122,7 +120,7 @@ class Country extends DbObject
         return $this;
     }
 
-    public function setInserted(DateTimeInterface $cou_inserted): self
+    public function setInserted(?DateTimeInterface $cou_inserted): self
     {
         $this->inserted = $cou_inserted;
 

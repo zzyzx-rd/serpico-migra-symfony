@@ -81,7 +81,7 @@ class GeneratedImage extends DbObject
     public $val;
 
     /**
-     * @ORM\Column(name="gim_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="gim_inserted", type="datetime",  options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -104,7 +104,6 @@ class GeneratedImage extends DbObject
      * @param $gim_role
      * @param $gim_createdBy
      * @param $gim_val
-     * @param $gim_inserted
      * @param $gim_all
      * @param $cName
      */
@@ -120,7 +119,6 @@ class GeneratedImage extends DbObject
         $gim_role = null,
         $gim_createdBy = null,
         $gim_val = null,
-        $gim_inserted = null,
         $gim_all = null,
         $cName = null)
     {

@@ -170,11 +170,12 @@ $(function () {
     params['im'] = $('#initializedActivity input[type="checkbox"]').is(':checked') ? 1 : 0;
     urlToPieces = aurl.split('/');
     pid = $(this).data('eid') ? $(this).data('eid') : 0;
-    urlToPieces[urlToPieces.length - 1] = eid;
+    urlToPieces[urlToPieces.length - 1] = pid;
     url = urlToPieces.join('/');
 
     $.post(url, params)
       .done(function (data) {
+
         $('[id*="initializedActivity"]').modal('close');
         $("#activityCreationSuccess").modal('open');
         setTimeout(function(){
@@ -192,6 +193,7 @@ $(function () {
         */
       })
       .fail(function (data) {
+        alert(data.responseJSON);
         errorHtmlMsg = '';
         $(data.responseJSON).each((i,e) => errorHtmlMsg +='<strong>'+Object.values(e)[0]+'</strong>')
         $('#errorModal').find('.error-msg').append($(errorHtmlMsg));

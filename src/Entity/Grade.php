@@ -56,7 +56,7 @@ class Grade extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="grd_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="grd_inserted", type="datetime",  options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -96,7 +96,6 @@ class Grade extends DbObject
      * @param $value
      * @param $comment
      * @param $createdBy
-     * @param $inserted
      * @param $team
      * @param Participation $participation
      * @param $activity
@@ -112,7 +111,6 @@ class Grade extends DbObject
         $value = null,
         $comment = null,
         $createdBy = null,
-        $inserted = null,
         Team $team = null,
         Participation $participation = null,
         Activity$activity = null,

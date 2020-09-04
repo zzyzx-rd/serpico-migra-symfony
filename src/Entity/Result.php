@@ -115,7 +115,7 @@ class Result extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="res_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="res_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -175,7 +175,6 @@ class Result extends DbObject
      * @param null $weightedDistanceRatio
      * @param null $equalDistanceRatio
      * @param $res_createdBy
-     * @param $res_inserted
      * @param Activity $activity
      * @param Stage $stage
      * @param Criterion $criterion
@@ -206,7 +205,6 @@ class Result extends DbObject
         $weightedDistanceRatio = null,
         $equalDistanceRatio = null,
         $res_createdBy= null,
-        $res_inserted= null,
         Activity $activity= null,
         Stage $stage= null,
         Criterion $criterion= null,

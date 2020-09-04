@@ -48,7 +48,7 @@ class Process extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="pro_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="pro_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -107,7 +107,6 @@ class Process extends DbObject
      * @param $pro_approvable
      * @param $pro_gradable
      * @param $pro_createdBy
-     * @param $pro_inserted
      * @param $pro_deleted
      * @param $children
      * @param $stages
@@ -117,7 +116,6 @@ class Process extends DbObject
         $pro_name = '',
         $pro_createdBy = null,
         $pro_gradable = true,
-        $pro_inserted = null,
         $pro_deleted = null,
         $pro_approvable = false,
         $children = null,
@@ -370,6 +368,8 @@ class Process extends DbObject
     {
         return $u->getRole() === 4;
     }
+
+
 
     /**
      * @return ArrayCollection|ProcessCriterion[]

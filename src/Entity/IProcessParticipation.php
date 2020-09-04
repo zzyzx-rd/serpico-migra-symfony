@@ -58,7 +58,7 @@ class IProcessParticipation extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="par_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="par_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -112,7 +112,6 @@ class IProcessParticipation extends DbObject
      * @param $par_mWeight
      * @param $par_precomment
      * @param $par_createdBy
-     * @param $par_inserted
      * @param $par_deleted
      * @param $team
      * @param $institutionProcess
@@ -131,7 +130,6 @@ class IProcessParticipation extends DbObject
         float $par_mWeight = 0.0,
         $par_precomment = '',
         $par_createdBy = null,
-        DateTime $par_inserted = null,
         DateTime $par_deleted = null,
         Team $team = null,
         InstitutionProcess $institutionProcess = null,

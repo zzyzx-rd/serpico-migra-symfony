@@ -95,7 +95,7 @@ class Criterion extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="cri_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="cri_inserted", type="datetime", nullable=false, options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -177,7 +177,6 @@ class Criterion extends DbObject
      * @param $gradeType
      * @param $comment
      * @param $createdBy
-     * @param $inserted
      * @param $deleted
      * @param $stage
      * @param $organization
@@ -208,7 +207,6 @@ class Criterion extends DbObject
         $gradeType = 1,
         $comment = '',
         $createdBy = null,
-        $inserted = null,
         $deleted = null,
         //TODO Gérer la création dans les controlleurs
         Stage $stage = null,

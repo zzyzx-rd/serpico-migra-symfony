@@ -42,7 +42,7 @@ class CriterionName extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="can_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="can_inserted", type="datetime", nullable=false , options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -81,7 +81,6 @@ class CriterionName extends DbObject
      * @param $cna_name
      * @param $can_unit
      * @param $can_createdBy
-     * @param $can_inserted
      * @param Icon $icon
      * @param Organization $organization
      * @param Department|null $department
@@ -93,7 +92,6 @@ class CriterionName extends DbObject
         $cna_name = '',
         $can_unit = '',
         $can_createdBy = null,
-        $can_inserted = null,
         Icon $icon = null,
         Organization $organization = null,
         ?Department $department = null,

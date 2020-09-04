@@ -35,7 +35,7 @@ class Member extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="mem_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="mem_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -72,7 +72,6 @@ class Member extends DbObject
      * @param ?int$id
      * @param $leader
      * @param $createdBy
-     * @param $inserted
      * @param $deleted
      * @param $isDeleted
      * @param $team
@@ -85,7 +84,6 @@ class Member extends DbObject
         $externalUser = null,
         $createdBy = null,
         $leader = false,
-        $inserted = null,
         $deleted = null,
         $isDeleted = false,
         $team = null)

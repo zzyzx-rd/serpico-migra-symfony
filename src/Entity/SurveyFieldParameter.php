@@ -50,7 +50,7 @@ class SurveyFieldParameter extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="sfp_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="sfp_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -68,7 +68,6 @@ class SurveyFieldParameter extends DbObject
      * @param $sfp_upperbound
      * @param $sfp_step
      * @param $sfp_createdBy
-     * @param $sfp_inserted
      * @param $field
      */
     public function __construct(
@@ -78,7 +77,6 @@ class SurveyFieldParameter extends DbObject
         $sfp_upperbound = null,
         $sfp_step = null,
         $sfp_createdBy = null,
-        $sfp_inserted = null,
         $field = null)
     {
         parent::__construct($id, $sfp_createdBy, new DateTime());

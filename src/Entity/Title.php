@@ -43,7 +43,7 @@ class Title extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="tit_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="tit_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -81,7 +81,6 @@ class Title extends DbObject
      * @param $name
      * @param $weightIni
      * @param $createdBy
-     * @param $inserted
      * @param $deleted
      * @param $organization
      * @param $weight
@@ -93,7 +92,6 @@ class Title extends DbObject
         $name = '',
         $weightIni = 0.0,
         $createdBy = null,
-        $inserted = null,
         $deleted = null,
         $organization = null,
         $weight = null,

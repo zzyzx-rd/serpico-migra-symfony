@@ -45,7 +45,7 @@ class Icon extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="ico_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="ico_inserted", type="datetime",  options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -74,7 +74,6 @@ class Icon extends DbObject
      * @param $ico_name
      * @param $ico_unicode
      * @param $ico_createdBy
-     * @param $ico_inserted
      * @param Collection $criterionNames
      * @param Collection $workerFirmSectors
      */
@@ -84,7 +83,6 @@ class Icon extends DbObject
         $ico_name = null,
         $ico_unicode = null,
         $ico_createdBy = null,
-        $ico_inserted = null,
         Collection $criterionNames = null,
         Collection $workerFirmSectors = null)
     {

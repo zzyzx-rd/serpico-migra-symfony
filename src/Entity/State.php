@@ -45,7 +45,7 @@ class State extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="sta_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="sta_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -72,7 +72,6 @@ class State extends DbObject
      * @param $sta_fullname
      * @param $sta_name
      * @param $sta_createdBy
-     * @param $sta_inserted
      * @param $country
      * @param $cities
      * @param $firms
@@ -83,7 +82,6 @@ class State extends DbObject
         $sta_fullname = null,
         $sta_name = null,
         $sta_createdBy = null,
-        $sta_inserted = null,
         $country = null,
         $cities = null,
         $firms = null)

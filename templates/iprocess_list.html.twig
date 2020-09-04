@@ -694,7 +694,7 @@
         $elmtContainer = $('#initializedActivity .elmts');
         $idContainer = $('#activityInfo');
         eid = $('#processSelect').val();
-        
+
         setTimeout(function(){
           $("#initializedActivity").scrollTop(0);
         },50);
@@ -718,11 +718,13 @@
         $elmtContainer.empty();
         const $actElmt = $('<div class="activity"></div>');
 
-        if(eid != 0){
+        if(eid != 0 && eid != null){
           urlToPieces = gcurl.split('/');
+          if(eid )
           urlToPieces[urlToPieces.length - 1] = eid;
           urlToPieces[urlToPieces.length - 3] = $btn.hasClass('final-step-btn') ? 'iprocess' : 'activity';
           url = urlToPieces.join('/');
+
 
           $.post(url,null)
             .done(function(data){

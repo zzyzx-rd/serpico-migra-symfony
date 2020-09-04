@@ -55,7 +55,7 @@ class WorkerExperience extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="wex_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="wex_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -80,7 +80,6 @@ class WorkerExperience extends DbObject
      * @param $wex_startdate
      * @param $wex_enddate
      * @param $wex_createdBy
-     * @param $wex_inserted
      * @param $individual
      * @param $firm
      */
@@ -92,7 +91,6 @@ class WorkerExperience extends DbObject
         $wex_startdate = null,
         $wex_enddate = null,
         $wex_createdBy = null,
-        $wex_inserted = null,
         $individual = null,
         $firm = null)
     {

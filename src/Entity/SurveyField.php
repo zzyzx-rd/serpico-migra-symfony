@@ -57,7 +57,7 @@ class SurveyField extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="sfi_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="sfi_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -102,7 +102,6 @@ class SurveyField extends DbObject
      * @param $sfi_position
      * @param $sfi_description
      * @param $sfi_createdBy
-     * @param $sfi_inserted
      * @param $sfi_upperbound
      * @param $sfi_lowerbound
      * @param $criterion
@@ -121,7 +120,6 @@ class SurveyField extends DbObject
         $sfi_lowerbound = null,
         $sfi_createdBy = null,
         $criterion = null,
-        $sfi_inserted = null,
         Survey $survey = null,
         $parameters = null,
         Answer $answers = null)

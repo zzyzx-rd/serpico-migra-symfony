@@ -50,7 +50,7 @@ class OTPUser extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="otp_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="otp_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -68,7 +68,6 @@ class OTPUser extends DbObject
      * @param $otp_tipe
      * @param $otp_email
      * @param $otp_createdBy
-     * @param $otp_inserted
      * @param $organization
      */
     public function __construct(
@@ -78,8 +77,7 @@ class OTPUser extends DbObject
         $otp_tipe = null,
         Organization $organization = null,
         $otp_email = null,
-        $otp_createdBy = null,
-        $otp_inserted = null)
+        $otp_createdBy = null)
     {
         parent::__construct($id,$otp_createdBy , new DateTime());
         $this->type = $otp_type;
