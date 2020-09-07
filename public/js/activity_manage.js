@@ -193,7 +193,6 @@ $(function () {
         */
       })
       .fail(function (data) {
-        alert(data.responseJSON);
         errorHtmlMsg = '';
         $(data.responseJSON).each((i,e) => errorHtmlMsg +='<strong>'+Object.values(e)[0]+'</strong>')
         $('#errorModal').find('.error-msg').append($(errorHtmlMsg));

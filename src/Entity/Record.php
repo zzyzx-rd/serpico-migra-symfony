@@ -38,6 +38,12 @@ class Record
      * @ORM\Column(name="rec_new", type="string", length=255, nullable=true)
      */
     public $new;
+    /**
+     * @Column(name="rec_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
+     * @var DateTime
+     */
+    protected DateTime $inserted;
+    /**
 
     /**
      * @return string
@@ -79,6 +85,23 @@ class Record
 
         return $this;
     }
+
+    /**
+     * @return DateTime
+     */
+    public function getInserted(): DateTime
+    {
+        return $this->inserted;
+    }
+
+    /**
+     * @param DateTime $inserted
+     */
+    public function setInserted(DateTime $inserted): void
+    {
+        $this->inserted = $inserted;
+    }
+
 
     public function getOld(): ?string
     {
