@@ -147,15 +147,6 @@ class Stage extends DbObject
      */
     public DateTime $enddate;
 
-    /**
-     * @ORM\Column(name="stg_gstartdate", type="datetime", nullable=true)
-     */
-    public DateTime $gstartdate;
-
-    /**
-     * @ORM\Column(name="stg_genddate", type="datetime", nullable=true)
-     */
-    public DateTime $genddate;
 
     /**
      * @ORM\Column(name="stg_dealine_nb_days", type="integer", nullable=true)
@@ -236,6 +227,10 @@ class Stage extends DbObject
      */
     protected $activity;
 
+    /**
+     * @OneToMany(targetEntity="Output", mappedBy="stage", cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    protected $outputs;
     /**
      * @ManyToOne(targetEntity="Organization", inversedBy="stages")
      * @JoinColumn(name="organization_org_id", referencedColumnName="org_id",nullable=true)
@@ -484,6 +479,22 @@ class Stage extends DbObject
     public function getProgress(): ?int
     {
         return $this->progress;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getOutputs()
+    {
+        return $this->outputs;
+    }
+
+    /**
+     * @param mixed $outputs
+     */
+    public function setOutputs($outputs): void
+    {
+        $this->outputs = $outputs;
     }
 
     public function setProgress(int $progress): self
