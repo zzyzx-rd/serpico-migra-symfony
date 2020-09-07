@@ -17,6 +17,8 @@ use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\OneToOne;
 use Doctrine\ORM\Mapping\OrderBy;
+use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @ApiResource()
@@ -310,7 +312,14 @@ class Stage extends DbObject
      */
     public ?User $masterUser;
 
-    public ?User $currentUser = null;
+    /**
+     * @var Security
+     */
+    protected Security $security;
+    /**
+     * @var UserInterface|null
+     */
+    public $currentUser;
     /**
      * Stage constructor.
      * @param ?int$id
@@ -350,7 +359,8 @@ class Stage extends DbObject
         $finalized = null,
         $lastReopened = null,
         $deleted = null,
-        $gcompleted = null)
+        $gcompleted = null,
+        $security)
     {
         parent::__construct($id, $createdBy, new DateTime);
         $this->complete = $complete;
@@ -394,6 +404,8 @@ class Stage extends DbObject
         $this->resultTeams = new ArrayCollection;
         $this->rankingTeams = new ArrayCollection;
         $this->historicalRankingTeams = new ArrayCollection;
+        $this->security = $security;
+        $this->currentUser = $this->security->getUser();
     }
 
 
@@ -1492,7 +1504,8 @@ class Stage extends DbObject
      */
     public function getIntParticipants(){
         return $this->getParticipants()->filter(function(Participation $p){
-            return $p->getTeam() === null && $p->getUser()->getOrganization() == $this->currentUser->getOrganization();
+            return $p->getTeam() === null && $p->getUser()->getOrganization() == 
+            $this->currentUser->getOrganization();
         });
     }
 

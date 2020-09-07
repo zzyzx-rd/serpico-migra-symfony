@@ -21,7 +21,8 @@ $(function () {
         e.preventDefault();
         $curRow = $(this).closest('.process-row');
         $curRow.find('.red-text').remove();
-        name = $curRow.find('input[name*="name"]').val();
+        $inputName = $curRow.find('input[name*="name"]').val();
+        name = $inpuName.val();
         gradable = $curRow.find('[name*="gradable"]').is(':checked') ? 1 : 0;
         masterUser = $curRow.find('select[name*="masterUser"]').val();
         parent = $curRow.find('select[name*="[parent]"]').val();

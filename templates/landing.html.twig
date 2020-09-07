@@ -77,8 +77,8 @@
             <div class="col m5">
                 <h3 class="motto">Drive your customer relations to the highest standard</h3> 
             </div>
-            {% set startCalDate = date("first day of " ~ date('now - 3 months')|format_datetime('short','none', pattern="MMMM") ~ " " ~ date('now - 3 months')|format_datetime('short','none',pattern='Y')) %}
-            {% set endCalDate = date("last day of " ~ date('now + 3 months')|format_datetime('short','none', pattern="MMMM") ~ " " ~ date('now + 3 months')|format_datetime('short','none',pattern='Y')) %}
+            {% set startCalDate = date("first day of " ~ date('now - 3 months')|format_datetime('short','none', pattern="MMMM", locale="en") ~ " " ~ date('now - 3 months')|format_datetime('short','none',pattern='Y')) %}
+            {% set endCalDate = date("last day of " ~ date('now + 3 months')|format_datetime('short','none', pattern="MMMM", locale="en") ~ " " ~ date('now + 3 months')|format_datetime('short','none',pattern='Y')) %}
             {% set currentDateDays = date('now').diff(startCalDate).days %}
             {% set lengthCalDays = endCalDate.diff(startCalDate).days %}
 

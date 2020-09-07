@@ -81,7 +81,7 @@ class Process extends DbObject
 
     /**
      * @ManyToOne(targetEntity="Icon")
-     * @JoinColumn(name="icon_ico_id", referencedColumnName="ico_id", nullable=false)
+     * @JoinColumn(name="icon_ico_id", referencedColumnName="ico_id", nullable=true)
      */
     protected $icon;
 
@@ -146,7 +146,7 @@ class Process extends DbObject
         return $this;
     }
 
-    public function gidApprovable(): ?bool
+    public function isApprovable(): ?bool
     {
         return $this->approvable;
     }
@@ -154,7 +154,6 @@ class Process extends DbObject
     public function setApprovable(bool $pro_approvable): self
     {
         $this->approvable = $pro_approvable;
-
         return $this;
     }
 
@@ -231,9 +230,10 @@ class Process extends DbObject
     /**
      * @param mixed $organization
      */
-    public function setOrganization($organization): void
+    public function setOrganization($organization): self
     {
         $this->organization = $organization;
+        return $this;
     }
 
     /**
@@ -247,9 +247,10 @@ class Process extends DbObject
     /**
      * @param mixed $parent
      */
-    public function setParent($parent): void
+    public function setParent($parent): self
     {
         $this->parent = $parent;
+        return $this;
     }
 
     /**
@@ -258,14 +259,6 @@ class Process extends DbObject
     public function getChildren()
     {
         return $this->children;
-    }
-
-    /**
-     * @param mixed $children
-     */
-    public function setChildren($children): void
-    {
-        $this->children = $children;
     }
 
     /**
@@ -279,9 +272,10 @@ class Process extends DbObject
     /**
      * @param mixed $icon
      */
-    public function setIcon($icon): void
+    public function setIcon(?Icon $icon): self
     {
         $this->icon = $icon;
+        return $this;
     }
 
     /**
@@ -293,14 +287,6 @@ class Process extends DbObject
     }
 
     /**
-     * @param mixed $institutionProcesses
-     */
-    public function setInstitutionProcesses($institutionProcesses): void
-    {
-        $this->institutionProcesses = $institutionProcesses;
-    }
-
-    /**
      * @return mixed
      */
     public function getStages()
@@ -308,13 +294,6 @@ class Process extends DbObject
         return $this->stages;
     }
 
-    /**
-     * @param mixed $stages
-     */
-    public function setStages($stages): void
-    {
-        $this->stages = $stages;
-    }
     public function addInstitutionProcess(InstitutionProcess $institutionProcess): Process
     {
         $this->institutionProcesses->add($institutionProcess);
@@ -339,6 +318,16 @@ class Process extends DbObject
         $this->children->removeElement($child);
         return $this;
     }
+
+    /**
+     * @return Collection|Process[]
+    */
+    function getValidatedChildren() {
+        return $this->children->filter(function(Process $p){
+            return !$p->isApprovable();
+        });
+    }
+
     public function addValidatedChildren(Process $child): Process
     {
         return $this->addChildren($child);

@@ -43,6 +43,7 @@ abstract class DbObject
 
     public function __construct($id = 0, $createdBy = null, $inserted = null)
     {
+        //parent::__construct($requestStack, $security, $currentUser, $em);
         $this->id = $id;
         $this->createdBy = $createdBy;
         $this->inserted = $inserted ?: new DateTime();

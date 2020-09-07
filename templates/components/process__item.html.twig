@@ -1,0 +1,86 @@
+<li class="element">
+    <div class="process-row flex-center-sb">
+    <div class="element-data element-name" style="font-size: 17px;">
+        {% if entity != 'process' and process.vars.data.process is not null %}
+        <div class="element-data element-process tooltipped" data-position="top" data-tooltip="{{ process.vars.data.process.name }}" data-delay="50" style="font-size: 17px">
+            {{ process.vars.data.process.name|first|capitalize }}
+        </div>
+        {% else %}
+        <div class="element-data element-process tooltipped" data-position="top" data-tooltip="{% trans %}processes.unrelated{% endtrans %}" data-delay="50" style="font-size: 17px">
+            ?
+        </div>
+        {% endif %}
+        
+        <span {% if not process.vars.data.gradable %}class="grey-text"{% endif %}>{{ process.vars.data.name }}</span>
+
+        {% if not process.vars.data.gradable %}
+        <i class="material-icons tooltipped grey-text" style="margin-left: 5px;" data-position="top" data-tooltip="{% trans %}processes.non_gradable{% endtrans %}" data-delay="50">speaker_notes_off</i>
+        {% endif %}
+        </div>
+        <div class="input-field element-input" style="display: none;">
+        {{ form_widget(process.name) }}
+        </div>
+        <div class="element-input" style="display: none;">
+        {{ form_widget(process.gradable) }}
+        {{ form_label(process.gradable) }}
+        </div>
+        {% if not isRoot %}
+        <div class="element-input input-name input-field" style="display: none;">
+            {{ form_widget(process.process) }}
+            {{ form_label(process.process) }}
+            <a class="modal-trigger" href="#requestNewProcess" onclick="onAddProcessClick('-1')"><i class="fas fa-plus"></i>{{ 'processes.request_btn'|trans }}</a>
+        </div>
+
+        <div class="element-data element-master-user" style="font-size: 17px">
+            {% if process.vars.data.masterUser == null %}
+            <em>({% trans %}processes.no_master_user{% endtrans %})</em>
+            {% else %}
+            {{ process.vars.data.masterUser.fullname }}
+            {% endif %}
+        </div>
+        <div class="element-input input-field" style="display: none;">
+            {{ form_widget(process.masterUser) }}
+            {{ form_label(process.masterUser) }}
+        </div>
+        {% endif %}
+        <div class="element-input input-field" style="display: none;">
+        {{ form_widget(process.parent) }}
+        {{ form_label(process.parent) }}
+        </div>
+
+        
+        <div class="">
+        <ul class="flex-center">
+            <li style="margin-left:auto;margin-right:10px">
+            <a class="modify waves-effect waves-light btn-flat tooltipped" data-position="top" data-tooltip="{% trans %}processes.update{% endtrans %}" data-delay="50" onclick="onAddParentClick('{{ currentuser.organization.id }}','{{k}}');onAddProcessClick('{{k}}')">
+                <i class="fa fa-pencil-alt"></i>
+            </a>
+            </li>
+            {% if process.vars.data.gradable %}
+            <li style="margin-right:10px"> 
+                <a class="validate waves-effect waves-light {% if process.vars.data.stages|length > 0 %}btn lime darken-3{% else %}btn-flat lime-text text-darken-3{% endif %} tooltipped" href="{{ url('manageActivityElement',{entity: entity, elmtId: process.vars.data.id}) }}" data-position="top" data-tooltip="{% trans %}processes.followup_settings{% endtrans %}" style="padding:0px 14px;display:flex;justify-content:center;width:75px">
+                <i class="fa fa-users-cog"></i>
+                </a>
+            </li>
+            {% endif %}
+            <li>
+            <a href="#deleteElement" class="waves-effect waves-light accent-4 btn-flat modal-trigger tooltipped" data-eid="{{ process.vars.data.id }}" data-position="top" data-tooltip="{% trans %}processes.delete_btn{% endtrans %}">
+                <i class="fa fa-trash"></i>
+            </a>
+            </li>
+        </ul>
+        </div>
+    </div>
+
+    {% set childrenProcesses = process.validatedChildren %}
+
+    {% if childrenProcesses|length > 0 and order < 5 %}
+        {% set order = order + 1 %}
+        <ul class="processes">
+            {% for process in childrenProcesses %}
+                {% apply escape %}{% include "components/process__item.html.twig" with {entity: entity, process: process, order: order} %} {% endapply %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+</li>
