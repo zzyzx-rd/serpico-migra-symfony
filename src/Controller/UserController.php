@@ -291,11 +291,11 @@ class UserController extends MasterController
         if($orgId == 0){
             $organization = $entityManager->getRepository(Process::class)->findAll()[0]->getOrganization();
             $element = new Process;
-            $formParam = 'process';
+            $entity = 'process';
         } else {
             $organization = $repoO->find($orgId);
             $element = new InstitutionProcess;
-            $formParam = 'iprocess';
+            $entity = 'iprocess';
         }
        
         $currentUser = $this->user;;
@@ -305,7 +305,7 @@ class UserController extends MasterController
         }
 
         
-        $createProcessRequestForm = $this->createForm(AddProcessForm::class, $element, ['standalone' => true, 'organization' => $organization, 'elmt' => $formParam]);
+        $createProcessRequestForm = $this->createForm(AddProcessForm::class, $element, ['standalone' => true, 'organization' => $organization, 'entity' => $entity]);
         $createProcessRequestForm->handleRequest($request);
 
         if ($createProcessRequestForm->isValid()) {
@@ -440,7 +440,7 @@ class UserController extends MasterController
         $repoO = $this->em->getRepository(Organization::class);
         /** @var Organization */
         $organization = $repoO->findOneById($orgId);
-        if($orgId !== 0){
+        if($orgId != 0){
             $institutionProcesses = $organization->getInstitutionProcesses()->filter(static function(InstitutionProcess $p){return $p->getParent() === null;});
         } else {
             $allProcesses = new ArrayCollection($this->em->getRepository(Process::class)->findAll());

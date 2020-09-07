@@ -58,21 +58,21 @@
                     <div class="row no-margin">
                         <div class="col s12 m12">
                             <h5>{% trans %}firm_settings.other.departments.section_title{% endtrans %}</h5>
-                            <a class="waves-effect waves-light btn modify-button" href="{{ url('updateOrganizationElements', {'orgId' : currentuser.organization.id, entity: 'department' }) }}">{% trans %}firm_settings.other.departments.manage_btn{% endtrans %}</a>
+                            <a class="waves-effect waves-light btn modify-button" href="{{ url('updateOrganizationElements', {entity: 'department' }) }}">{% trans %}firm_settings.other.departments.manage_btn{% endtrans %}</a>
                         </div>
                     </div>
 
                     <div class="row no-margin">
                         <div class="col s12 m12">
                             <h5>{% trans %}firm_settings.other.positions.section_title{% endtrans %}</h5>
-                            <a class="waves-effect waves-light btn modify-button" href="{{ url('updateOrganizationElements', {'orgId' : currentuser.organization.id, entity: 'position' }) }}">{% trans %}firm_settings.other.positions.manage_btn{% endtrans %}</a>
+                            <a class="waves-effect waves-light btn modify-button" href="{{ url('updateOrganizationElements', {entity: 'position' }) }}">{% trans %}firm_settings.other.positions.manage_btn{% endtrans %}</a>
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col s12 m12">
                             <h5>{% trans %}firm_settings.other.titles.section_title{% endtrans %}</h5>
-                            <a class="waves-effect waves-light btn modify-button" href="{{ url('updateOrganizationElements', {'orgId' : currentuser.organization.id, entity: 'title' }) }}">{% trans %}firm_settings.other.positions.manage_btn{% endtrans %}</a>
+                            <a class="waves-effect waves-light btn modify-button" href="{{ url('updateOrganizationElements', {entity: 'title' }) }}">{% trans %}firm_settings.other.positions.manage_btn{% endtrans %}</a>
                         </div>
                     </div>
                 </div>

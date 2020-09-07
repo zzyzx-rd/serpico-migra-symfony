@@ -42,7 +42,7 @@ class AddProcessForm extends AbstractType
         ])->add('parent', EntityType::class,
         [
             'label_format' => 'institutions.add_process.%name%',
-            'class' => $options['elmt'] === 'iprocess' ? InstitutionProcess::class : Process::class,
+            'class' => $options['entity'] === 'iprocess' ? InstitutionProcess::class : Process::class,
             'choice_label' => 'name',
             'query_builder' => function (EntityRepository $er) {
                 return $er->createQueryBuilder('p')
@@ -66,9 +66,9 @@ class AddProcessForm extends AbstractType
     {
         $resolver
         ->setDefaults([
-            'elmt' => 'iprocess',
+            'entity' => 'iprocess',
             'data_class' => function (Options $options) {
-                return $options['elmt'] === 'iprocess'
+                return $options['entity'] === 'iprocess'
                        ? InstitutionProcess::class
                        : Process::class;
             },

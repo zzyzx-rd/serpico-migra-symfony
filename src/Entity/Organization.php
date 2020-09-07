@@ -1116,5 +1116,19 @@ class Organization extends DbObject
         return $this->weights->first();
     }
 
+    public function getUsersWithoutJobInfo($entity = 'department'){
+        return $this->getUsers()->filter(
+            fn(User $u) =>  $entity == 'department' ? !$u->getDepartment() : ($entity == 'position' ? !$u->getPosition() : !$u->getTitle())
+        );
+    }
+
+    function getPendingProcesses() {
+        return $this->processes->filter(fn(Process $p) => $p->isApprovable());
+    }
+
+    function getPendingInstitutionProcesses() {
+        return $this->institutionProcesses->filter(fn(InstitutionProcess $p) => $p->isApprovable());
+    }
+
 
 }

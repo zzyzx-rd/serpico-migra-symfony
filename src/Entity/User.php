@@ -1159,11 +1159,11 @@ class User extends DbObject implements  UserInterface, \Serializable
 
     public function is_admin(): bool
     {
-        return $this->role === 1;
+        return $this->role === 1 || $this->role === 4;
     }
     public function is_am(): bool
     {
-        return $this->role === 2;
+        return $this->role !== 3;
     }
 
     public function is_collab(): bool

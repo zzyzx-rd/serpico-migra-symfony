@@ -198,11 +198,11 @@ class SettingsController extends MasterController
         $isRoot = $currentUser->getRole() == 4;
         $organization = $currentUser->getOrganization();
         $process = $isRoot ?  new Process : new InstitutionProcess();
-        $elmtType = $isRoot ? 'process' :'iprocess';
+        $entity = $isRoot ? 'process' :'iprocess';
         
         $manageForm = $this->createForm(ManageProcessForm::class, $organization, ['standalone' => true, 'isRoot' => $isRoot]);
         $manageForm->handleRequest($request);
-        $createForm = $this->createForm(AddProcessForm::class, $process, ['standalone' => true, 'organization' => $organization,'elmt' => $elmtType]);
+        $createForm = $this->createForm(AddProcessForm::class, $process, ['standalone' => true, 'organization' => $organization,'entity' => $entity]);
         $createForm->handleRequest($request);
 
         $validatingProcesses = $isRoot ? $organization->getProcesses()->filter(function(Process $p){return $p->isApprovable();}) :
@@ -211,14 +211,14 @@ class SettingsController extends MasterController
 
         if($validatingProcesses->count() > 0){
             $validatingProcess = $validatingProcesses->first();
-            $validateForm = $this->createForm(AddProcessForm::class, $validatingProcess, ['standalone' => true, 'organization' => $organization,'elmt' => $elmtType]);
+            $validateForm = $this->createForm(AddProcessForm::class, $validatingProcess, ['standalone' => true, 'organization' => $organization, 'entity' => $entity]);
             $validateForm->handleRequest($request);
         } else {
             $validateForm = null;
         }
      
 
-        if ($manageForm->isValid()) {
+        if ($manageForm->isSubmitted() && $manageForm->isValid()) {
             $em->flush();
             return $this->redirectToRoute('firmSettings');
         }
@@ -229,6 +229,7 @@ class SettingsController extends MasterController
                 'form' => $manageForm->createView(),
                 'requestForm' => $createForm->createView(),
                 'validateForm' => $validateForm ? $validateForm->createView() : null,
+                'entity' => $entity,
             ]);
 
 
@@ -243,13 +244,13 @@ class SettingsController extends MasterController
      * @return JsonResponse
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/settings/organization/{orgId}/{entity}/pvalidate/{elmtId}", name="validateProcess")
+     * @Route("/settings/organization/{orgId}/{entity}/validate/{elmtId}", name="validateProcess")
      */
-    public function validateProcessAction(Request $request, $elmtId, $elmtType, $orgId) {
+    public function validateProcessAction(Request $request, $elmtId, $entity, $orgId) {
         $em = $this->em;
         $repoO = $em->getRepository(Organization::class);
         
-        $currentUser = $this->user;;
+        $currentUser = $this->user;
         if (!$currentUser instanceof User) {
             return $this->redirectToRoute('login');
         }
@@ -288,7 +289,7 @@ class SettingsController extends MasterController
                 $element->setName($_POST['name'])
                     ->setParent($repoE->findOneById($_POST['parent']))
                     ->setGradable($_POST['gradable']);
-                if ($elmtType == 'iprocess') {
+                if ($entity == 'iprocess') {
                     $repoU = $em->getRepository(User::class);
                     $selectedProcess = $em->getRepository(Process::class)->find($_POST['process']);
                     $selectedMasterUser = $repoU->find($_POST['masterUser']);

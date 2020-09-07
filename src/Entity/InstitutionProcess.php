@@ -159,7 +159,6 @@ class InstitutionProcess extends DbObject
     public function setApprovable(bool $inp_approvable): self
     {
         $this->approvable = $inp_approvable;
-
         return $this;
     }
 
@@ -218,9 +217,10 @@ class InstitutionProcess extends DbObject
     /**
      * @param mixed $organization
      */
-    public function setOrganization($organization): void
+    public function setOrganization($organization): self
     {
         $this->organization = $organization;
+        return $this;
     }
 
     /**
@@ -234,9 +234,10 @@ class InstitutionProcess extends DbObject
     /**
      * @param mixed $process
      */
-    public function setProcess($process): void
+    public function setProcess($process): self
     {
         $this->process = $process;
+        return $this;
     }
 
     /**
@@ -250,9 +251,10 @@ class InstitutionProcess extends DbObject
     /**
      * @param mixed $masterUser
      */
-    public function setMasterUser($masterUser): void
+    public function setMasterUser(?User $masterUser): self
     {
         $this->masterUser = $masterUser;
+        return $this;
     }
 
     /**
@@ -266,9 +268,10 @@ class InstitutionProcess extends DbObject
     /**
      * @param mixed $parent
      */
-    public function setParent($parent): void
+    public function setParent($parent): self
     {
         $this->parent = $parent;
+        return $this;
     }
 
     /**
@@ -280,27 +283,11 @@ class InstitutionProcess extends DbObject
     }
 
     /**
-     * @param mixed $children
-     */
-    public function setChildren($children): void
-    {
-        $this->children = $children;
-    }
-
-    /**
      * @return mixed
      */
     public function getStages()
     {
         return $this->stages;
-    }
-
-    /**
-     * @param mixed $stages
-     */
-    public function setStages($stages): void
-    {
-        $this->stages = $stages;
     }
 
     public function addChildren(InstitutionProcess $child): InstitutionProcess

@@ -2617,9 +2617,9 @@ class OrganizationController extends MasterController
      * @return mixed
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/settings/organization/{orgId}/{entity}s", name="updateOrganizationElements")
+     * @Route("/settings/organization/elements/{entity}s", name="updateOrganizationElements")
      */
-    public function updateOrganizationElementsAction(Request $request, $entity, $orgId)
+    public function updateOrganizationElementsAction(Request $request, $entity)
     {
         $em    = $this->em;
         $repoO = $em->getRepository(Organization::class);
@@ -2639,9 +2639,8 @@ class OrganizationController extends MasterController
                 break;
         }
         $currentUser = $this->user;
-        $organization = $repoO->findOneBy(["id" => $orgId]);
+        $organization = $currentUser->getOrganization();
         $role                    = $currentUser->getRole();
-        $organization            = $repoO->find($orgId);
         $elements                = $repoE->findBy(['organization' => $currentUser->getOrganization()]);
 
         $hasPageAccess = true;
@@ -2673,17 +2672,8 @@ class OrganizationController extends MasterController
                 'elmtType' => $entity,
                 'elements' => $elements,
                 'form'     => $manageOrganizationElementsForm->createView(),
-                'UsersWithoutOrgElement' => $this->getUsersWithoutOrgElement($entity,$orgId)
+                'UsersWithoutOrgElement' => $organization->getUsersWithoutJobInfo($entity)
             ]);
-    }
-    public function getUsersWithoutOrgElement($elmtType , $orgId){
-        $em    = $this->em;
-
-        if($elmtType == 'department'){
-            return $em->getRepository(User::class)->findBy(['organization' =>$orgId, 'department' => null]);
-        } else {
-            return $em->getRepository(User::class)->findBy(['organization' => $orgId, 'position' => null]);
-        }
     }
 
     /**
@@ -6273,7 +6263,7 @@ class OrganizationController extends MasterController
         $elementInitialName = $element->getName();
         $elementInitialParent = $element->getParent();
         $entity = $type == 'p' ? 'process' : 'iprocess';
-        $validateProcessForm = $this->createForm(AddProcessForm::class, $element, ['standalone' => true, 'organization' => $organization, 'elmt' => $entity]);
+        $validateProcessForm = $this->createForm(AddProcessForm::class, $element, ['standalone' => true, 'organization' => $organization, 'entity' => $entity]);
         $validateProcessForm->handleRequest($request);
         if($validateProcessForm->isValid()){
             $element->setApprovable(false);
