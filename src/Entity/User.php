@@ -132,7 +132,7 @@ class User extends DbObject implements  UserInterface, \Serializable
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="usr_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="usr_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -287,7 +287,6 @@ class User extends DbObject implements  UserInterface, \Serializable
      * @param $validated
      * @param $enabledCreatingUser
      * @param $createdBy
-     * @param $inserted
      * @param $lastConnected
      * @param $deleted
      * @param int $role
@@ -329,7 +328,6 @@ class User extends DbObject implements  UserInterface, \Serializable
         $rememberMeToken = null,
         $superior = null,
         $createdBy = null,
-        $inserted = null,
         $validated = null,
         $lastConnected = null,
         $deleted = null,

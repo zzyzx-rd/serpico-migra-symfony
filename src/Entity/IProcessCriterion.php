@@ -82,7 +82,7 @@ class IProcessCriterion extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="crt_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="crt_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -125,7 +125,6 @@ class IProcessCriterion extends DbObject
      * @param $crt_step
      * @param $crt_comment
      * @param $crt_createdBy
-     * @param $crt_inserted
      * @param $stage
      * @param $institutionProcess
      * @param $participants
@@ -144,7 +143,6 @@ class IProcessCriterion extends DbObject
         $crt_forceComment_sign = null,
         $crt_comment = null,
         $crt_createdBy = null,
-        $crt_inserted= null,
         Stage $stage = null,
         InstitutionProcess $institutionProcess = null,
         Collection $participants = null,

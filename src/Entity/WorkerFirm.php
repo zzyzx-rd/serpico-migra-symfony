@@ -137,7 +137,7 @@ class WorkerFirm extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="wfi_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="wfi_inserted", type="datetime",  options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -206,7 +206,6 @@ class WorkerFirm extends DbObject
      * @param $wfi_nb_active_exp
      * @param $wfi_created
      * @param $wfi_createdBy
-     * @param $wfi_inserted
      * @param $mainSector
      * @param $city
      * @param $state
@@ -234,7 +233,6 @@ class WorkerFirm extends DbObject
         $wfi_nb_active_exp = null,
         $wfi_created = null,
         $wfi_createdBy = null,
-        $wfi_inserted = null,
         $wfi_hq_location = null,
         $wfi_website = null,
         $wfi_creation = null,

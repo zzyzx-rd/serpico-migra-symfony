@@ -30,7 +30,7 @@ class CriterionGroup extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="cgp_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="cgp_inserted", type="datetime", nullable=false , options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 

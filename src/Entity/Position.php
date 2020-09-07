@@ -37,7 +37,7 @@ class Position extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="pos_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="pos_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -84,7 +84,6 @@ class Position extends DbObject
      * @param ?int$id
      * @param $name
      * @param $createdBy
-     * @param $inserted
      * @param $deleted
      * @param $organization
      * @param $department
@@ -98,7 +97,6 @@ class Position extends DbObject
         $organization = null,
         $department = null,
         $createdBy = null,
-        $inserted = null,
         $deleted = null,
         $users=null)
     {

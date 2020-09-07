@@ -41,7 +41,7 @@ class OptionName extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="ona_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="ona_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -52,15 +52,13 @@ class OptionName extends DbObject
      * @param $name
      * @param $description
      * @param $createdBy
-     * @param $inserted
      */
     public function __construct(
         $id = 0,
         $type = null,
         $description = null,
         $name = null,
-        $createdBy = null,
-        $inserted = null)
+        $createdBy = null)
     {
         parent::__construct($id, $createdBy, new DateTime());
 
@@ -107,5 +105,21 @@ class OptionName extends DbObject
     public function __toString()
     {
         return (string) $this->id;
+    }
+
+    /**
+     * @return DateTime
+     */
+    public function getInserted(): DateTime
+    {
+        return $this->inserted;
+    }
+
+    /**
+     * @param DateTime $inserted
+     */
+    public function setInserted(DateTime $inserted): void
+    {
+        $this->inserted = $inserted;
     }
 }

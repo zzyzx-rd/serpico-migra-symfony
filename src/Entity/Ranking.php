@@ -70,7 +70,7 @@ class Ranking extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="rnk_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="rnk_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -121,7 +121,6 @@ class Ranking extends DbObject
      * @param $rnk_value
      * @param $rnk_series_pop
      * @param $rnk_createdBy
-     * @param $rnk_inserted
      * @param $rnk_updated
      * @param $activity
      * @param $stage
@@ -142,7 +141,6 @@ class Ranking extends DbObject
         $rnk_value = null,
         $rnk_series_pop = null,
         $rnk_createdBy = null,
-        $rnk_inserted = null,
         $rnk_updated = null,
         $activity = null,
         $stage = null,

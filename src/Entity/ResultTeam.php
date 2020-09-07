@@ -114,7 +114,7 @@ class ResultTeam extends DbObject
      */
     protected ?int $createdBy;
     /**
-     * @Column(name="rst_inserted", type="datetime")
+     * @Column(name="rst_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      * @var DateTime
      */
     protected DateTime $inserted;
@@ -249,6 +249,22 @@ class ResultTeam extends DbObject
     {
         $this->weightedAbsoluteResult = $weightedAbsoluteResult;
         return $this;
+    }
+
+    /**
+     * @return DateTime
+     */
+    public function getInserted(): DateTime
+    {
+        return $this->inserted;
+    }
+
+    /**
+     * @param DateTime $inserted
+     */
+    public function setInserted(DateTime $inserted): void
+    {
+        $this->inserted = $inserted;
     }
 
     /**

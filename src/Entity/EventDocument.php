@@ -46,7 +46,7 @@ class EventDocument extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="evd_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="evd_inserted", type="datetime", nullable=true, options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -57,7 +57,6 @@ class EventDocument extends DbObject
      * @param $path
      * @param $event
      * @param $createdBy
-     * @param $inserted
      */
     public function __construct(
         $id = 0,

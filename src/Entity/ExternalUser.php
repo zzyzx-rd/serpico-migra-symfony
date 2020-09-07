@@ -62,7 +62,7 @@ class ExternalUser extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="ext_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="ext_inserted", type="datetime", nullable=false, options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -108,7 +108,6 @@ class ExternalUser extends DbObject
      * @param $positionName
      * @param $owner
      * @param $createdBy
-     * @param $inserted
      * @param $lastConnected
      * @param $deleted
      * @param User $user
@@ -125,7 +124,6 @@ class ExternalUser extends DbObject
         $positionName = null,
         $owner = null,
         $createdBy = null,
-        $inserted = null,
         $lastConnected = null,
         $deleted = null,
         User $user = null,

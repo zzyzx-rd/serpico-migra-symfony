@@ -119,10 +119,10 @@ class OrganizationElementType extends AbstractType
 
         if ($options['standalone']) {
             $builder->add('submit', SubmitType::class, [
-                'label_format' => 'create_position.%name%',
-                'attr' => [
-                    'class' => 'btn element-submit',
-                ],
+                    'label_format' => 'create_position.%name%',
+                    'attr' => [
+                        'class' => 'btn element-submit',
+                    ],
             ]);
         }
 

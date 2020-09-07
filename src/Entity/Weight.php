@@ -51,7 +51,7 @@ class Weight extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="wgt_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="wgt_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -84,7 +84,6 @@ class Weight extends DbObject
      * @param int $value
      * @param DateTime $modified
      * @param $createdBy
-     * @param DateTime $inserted
      * @param DateTime $deleted
      * @param $organization
      */
@@ -95,7 +94,6 @@ class Weight extends DbObject
         $value = 100,
         DateTime $modified = null,
         $createdBy = null,
-        DateTime $inserted = null,
         DateTime $deleted = null,
         $organization = null
     )

@@ -642,7 +642,8 @@ class UserController extends MasterController
         $repoU = $this->em->getRepository(User::class);
         $currentUser = $this->user;
         // If not fresh new internal activity, institution is null. If activity request by citizen/external, then is necessarily linked to an (i)process
-        $institutionProcess = $inpId !== 0 ? $repoIP->findOneById($inpId) : null;
+        $institutionProcess = $inpId !== 0 ? $repoIP->findOneById($inpId) : 0;
+        var_dump($institutionProcess);
         $institution = ((int)$_POST['fi'] === 1) ? $currentUser->getOrganization() : $institutionProcess->getOrganization();
         $activity = new Activity;
         $startdate = new DateTime;
@@ -660,231 +661,234 @@ class UserController extends MasterController
 
         // Does IProcess has defined stages ? If it is the case, activity will inheritate from IProcess stages and so on
         // Otherwise, activity will inheritate from Process stages and so on
+        if($institutionProcess != null) {
+            if ($institutionProcess && !$institutionProcess->isApprovable()) {
+                $IProcessStages = $institutionProcess->getStages();
 
-        if($institutionProcess && !$institutionProcess->isApprovable()){
-            $IProcessStages = $institutionProcess->getStages();
-
-            if (count($IProcessStages) !== 0){
-                $baseElement = $institutionProcess;
-            } else if (count($institutionProcess->getProcess()->getStages()) !== 0) {
-                $baseElement = $institutionProcess->getProcess();
-            } else {
-                return new JsonResponse('No possibility to create activity', 500);
+                if (count($IProcessStages) !== 0) {
+                    $baseElement = $institutionProcess;
+                } else if (count($institutionProcess->getProcess()->getStages()) !== 0) {
+                    $baseElement = $institutionProcess->getProcess();
+                } else {
+                    return new JsonResponse('No possibility to create activity', 500);
+                }
             }
-        }
 
-        if($isUnlinkedToAnyProcess || $institutionProcess->isApprovable()){
-            return $this->redirectToRoute("activityInitialisation", ['entity' => 'activity', 'inpId' => $inpId, 'actName' => $actName]);
-            //$activityController = new ActivityController($this->em, $this->security, $this->stack);
-            //return $activityController->addActivityId('activity', $inpId, $actName);
-        }
+            if ($isUnlinkedToAnyProcess || $institutionProcess->isApprovable()) {
+                return $this->redirectToRoute("activityInitialisation", ['entity' => 'activity', 'inpId' => $inpId, 'actName' => $actName]);
+                //$activityController = new ActivityController($this->em, $this->security, $this->stack);
+                //return $activityController->addActivityId('activity', $inpId, $actName);
+            }
 
 // We duplicate activity process/iprocess
-        $activity
-            ->setName($actName !== '' ? $actName : $institutionProcess->getName())
-            ->setOrganization($institution)
-            ->setMasterUserId(
-                $institutionProcess->getMasterUser() ?
-                    $institutionProcess->getMasterUser()->getId() :
-                    $repoU->findOneBy(['firstname' => 'ZZ','lastname' => 'ZZ','orgId' => $institution->getId()])->getId()
-            )
-            ->setCreatedBy($currentUser->getId())
-            ->setStatus($institutionProcess->isApprovable() ? -3 : 1);
+            $activity
+                ->setName($actName !== '' ? $actName : $institutionProcess->getName())
+                ->setOrganization($institution)
+                ->setMasterUserId(
+                    $institutionProcess->getMasterUser() ?
+                        $institutionProcess->getMasterUser()->getId() :
+                        $repoU->findOneBy(['firstname' => 'ZZ', 'lastname' => 'ZZ', 'orgId' => $institution->getId()])->getId()
+                )
+                ->setCreatedBy($currentUser->getId())
+                ->setStatus($institutionProcess->isApprovable() ? -3 : 1);
 
-        if($institutionProcess->isApprovable() & !$fromInternal){
-            $recipients = [];
-            /*** We need the person in charge of approval : it is, by order of importance,
-            1/ The person in charge of the process, or
-            2/ Parent process responsible (up to order 2), or
-            3/ One administrator (the first alive in the DB)
-             ***/
-            $IProcessResponsible = $institutionProcess->getMasterUser();
-            $parentIProcess = $institutionProcess->getParent();
-            $grandParentIProcess = $parentIProcess !== null ? $parentIProcess->getParent() : null;
+            if ($institutionProcess->isApprovable() & !$fromInternal) {
+                $recipients = [];
+                /*** We need the person in charge of approval : it is, by order of importance,
+                 * 1/ The person in charge of the process, or
+                 * 2/ Parent process responsible (up to order 2), or
+                 * 3/ One administrator (the first alive in the DB)
+                 ***/
+                $IProcessResponsible = $institutionProcess->getMasterUser();
+                $parentIProcess = $institutionProcess->getParent();
+                $grandParentIProcess = $parentIProcess !== null ? $parentIProcess->getParent() : null;
 
-            if($IProcessResponsible !== null){
-                $recipients[] = $IProcessResponsible;
-            } else if ($parentIProcess){
-                $parentIProcessResponsible = $parentIProcess->getMasterUser();
-                if($parentIProcessResponsible !== null){
-                    $recipients[] = $parentIProcessResponsible;
-                } else if ($grandParentIProcess){
-                    $grandParentIProcessResponsible = $grandParentIProcess->getMasterUser();
-                    if($grandParentIProcessResponsible !== null){
-                        $recipients[] = $grandParentIProcessResponsible;
+                if ($IProcessResponsible !== null) {
+                    $recipients[] = $IProcessResponsible;
+                } else if ($parentIProcess) {
+                    $parentIProcessResponsible = $parentIProcess->getMasterUser();
+                    if ($parentIProcessResponsible !== null) {
+                        $recipients[] = $parentIProcessResponsible;
+                    } else if ($grandParentIProcess) {
+                        $grandParentIProcessResponsible = $grandParentIProcess->getMasterUser();
+                        if ($grandParentIProcessResponsible !== null) {
+                            $recipients[] = $grandParentIProcessResponsible;
+                        }
                     }
                 }
+
+                if (!$recipients) {
+                    $firstAliveAdministrator = $repoU->findOneBy(['role' => 1, 'deleted' => null, 'orgId' => $institution->getId()]);
+                    $recipients[] = $firstAliveAdministrator;
+                }
+
+                $settings = [];
+                $settings['activity'] = $activity;
+                $settings['requester'] = $currentUser;
+
+                //2 - Send mail to recipients, set them as deciders
+                foreach ($recipients as $recipient) {
+
+                    $decision = new Decision;
+                    $decision
+                        ->setType(1)
+                        ->setRequester($currentUser->getId())
+                        ->setAnonymousRequest(false)
+                        ->setAnonymousDecision(false)
+                        ->setDecider($recipient->getId())
+                        ->setOrganization($institution)
+                        ->setActivity($activity);
+                    $decision->setCreatedBy($currentUser->getId());
+                    $this->em->persist($decision);
+                }
+
+                $this->em->persist($activity);
+
+                $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'request']);
+
             }
 
-            if(!$recipients){
-                $firstAliveAdministrator = $repoU->findOneBy(['role' => 1, 'deleted' => null, 'orgId' => $institution->getId()]);
-                $recipients[] = $firstAliveAdministrator;
-            }
 
-            $settings = [];
-            $settings['activity'] = $activity;
-            $settings['requester'] = $currentUser;
+            (count($IProcessStages) !== 0) ?
+                $activity->setInstitutionProcess($baseElement)->setProcess($baseElement->getProcess()) :
+                $activity->setProcess($baseElement);
 
-            //2 - Send mail to recipients, set them as deciders
-            foreach ($recipients as $recipient) {
+            $pStages = $baseElement->getStages();
+            $accessLinks = [];
 
-                $decision = new Decision;
-                $decision
-                    ->setType(1)
-                    ->setRequester($currentUser->getId())
-                    ->setAnonymousRequest(false)
-                    ->setAnonymousDecision(false)
-                    ->setDecider($recipient->getId())
-                    ->setOrganization($institution)
-                    ->setActivity($activity);
-                $decision->setCreatedBy($currentUser->getId());
-                $this->em->persist($decision);
-            }
+            foreach ($pStages as $pStage) {
+                $stage = new Stage;
 
-            $this->em->persist($activity);
+                if (!$pStage->isDefiniteDates()) {
 
-            $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'request']);
+                    $clonedSD = clone $startdate;
+                    $pStageFreq = $pStage->getDFrequency();
+                    if ($pStageFreq !== 'BD') {
+                        $dateIntervalPrefix = ($pStageFreq === 'm' || $pStageFreq === 'H') ? 'PT' : 'P';
+                        $enddate = $clonedSD->add(new DateInterval($dateIntervalPrefix . $pStage->getDPeriod() . $pStageFreq));
+                    } else {
+                        $enddate = $clonedSD->modify("+{$pStage->getPeriod()}weekdays");
+                    }
+                    $gStartdate = $clonedSD;
+                    $gEnddate = $clonedSD->add(new DateInterval('P15D'));
 
-        }
-
-
-        (count($IProcessStages) !== 0) ?
-            $activity->setInstitutionProcess($baseElement)->setProcess($baseElement->getProcess()) :
-            $activity->setProcess($baseElement);
-
-        $pStages = $baseElement->getStages();
-        $accessLinks = [];
-
-        foreach($pStages as $pStage){
-            $stage = new Stage;
-
-            if(!$pStage->isDefiniteDates()){
-
-                $clonedSD = clone $startdate;
-                $pStageFreq = $pStage->getDFrequency();
-                if($pStageFreq !== 'BD'){
-                    $dateIntervalPrefix = ($pStageFreq === 'm' || $pStageFreq === 'H') ? 'PT' : 'P';
-                    $enddate = $clonedSD->add(new DateInterval($dateIntervalPrefix.$pStage->getDPeriod().$pStageFreq));
                 } else {
-                    $enddate = $clonedSD->modify("+{$pStage->getPeriod()}weekdays");
+                    $startdate = $pStage->getStartdate();
+                    $enddate = $pStage->getEnddate();
+                    $gStartdate = $pStage->getGStartdate();
+                    $gEnddate = $pStage->getGEnddate();
                 }
-                $gStartdate = $clonedSD;
-                $gEnddate = $clonedSD->add(new DateInterval('P15D'));
 
-            } else {
-                $startdate = $pStage->getStartdate();
-                $enddate = $pStage->getEnddate();
-                $gStartdate = $pStage->getGStartdate();
-                $gEnddate = $pStage->getGEnddate();
-            }
+                $accessLink = mt_rand(100000, 999999);
 
-            $accessLink = mt_rand(100000, 999999);
-
-            $stage
-                ->setName($pStage->getName())
-                ->setMasterUserId($pStage->getMasterUserId())
-                ->setVisibility($pStage->getVisibility())
-                ->setAccessLink($accessLink)
-                ->setWeight(1)
-                ->setStartdate($startdate)
-                ->setEnddate($enddate)
-                ->setGstartdate($gStartdate)
-                ->setGenddate($gEnddate)
-                ->setMode(1)
-                ->setCreatedBy($currentUser->getId());
+                $stage
+                    ->setName($pStage->getName())
+                    ->setMasterUserId($pStage->getMasterUserId())
+                    ->setVisibility($pStage->getVisibility())
+                    ->setAccessLink($accessLink)
+                    ->setWeight(1)
+                    ->setStartdate($startdate)
+                    ->setEnddate($enddate)
+                    ->setGstartdate($gStartdate)
+                    ->setGenddate($gEnddate)
+                    ->setMode(1)
+                    ->setCreatedBy($currentUser->getId());
 
 
-            if($pStage->getVisibility() === 2){
-                $accessLinks[] = $accessLink;
-            }
-            $pCriteria = $pStage->getCriteria();
-
-            if(count($pCriteria) !== 0){
-                foreach($pCriteria as $pCriterion){
-                    $criterion = new Criterion;
-
-                    $criterion->setCName($pCriterion->getCName())
-                        ->setType($pCriterion->getType())
-                        ->setWeight($pCriterion->getWeight())
-                        ->setLowerbound($pCriterion->getLowerbound())
-                        ->setUpperbound($pCriterion->getUpperbound())
-                        ->setStep($pCriterion->getStep())
-                        ->setForceCommentCompare($pCriterion->isForceCommentCompare())
-                        ->setForceCommentSign($pCriterion->getForceCommentSign())
-                        ->setForceCommentValue($pCriterion->getForceCommentValue());
-
-                    $stage->addCriterion($criterion);
-
-                    $pParticipations = count($IProcessStages) != 0 ? $pCriterion->getParticipants() : null;
-                    if(count($IProcessStages) != 0 && count($pParticipations) != 0){
-                        foreach($pParticipations as $pParticipation){
-                            $participation = new Participation;
-                            $participation->setLeader($pParticipation->isLeader())
-                                ->setMWeight($pParticipation->getMWeight())
-                                ->setPrecomment($pParticipation->getPrecomment())
-                                ->setTeam($pParticipation->getTeam())
-                                ->setUsrId($pParticipation->getUsrId())
-                                ->setType($pParticipation->getType());
-                            $stage->addParticipant($participation);
-                            $criterion->addParticipant($participation);
-                        }
-
-                    } else {
-                        $synthParticipation = new Participation;
-                        $institutionSynthUser = $repoU->findOneBy(['firstname' => 'ZZ','lastname' => 'ZZ','orgId' => $institution->getId()]);
-
-                        $synthParticipation->setLeader(true)
-                            ->setTeam(null)
-                            ->setUsrId($institutionSynthUser->getId())
-                            ->setType(-1);
-                        $stage->addParticipant($synthParticipation);
-                        $criterion->addParticipant($synthParticipation);
-                    }
-
-                    // If comes from an external request, we create external participation
-                    if(!$fromInternal){
-                        $userParticipation = new Participation;
-                        $userParticipation->setLeader(false)
-                            ->setUsrId($currentUser->getId())
-                            ->setType(0);
-                        $stage->addParticipant($userParticipation);
-                        $criterion->addParticipant($userParticipation);
-                    }
+                if ($pStage->getVisibility() === 2) {
+                    $accessLinks[] = $accessLink;
                 }
-                $stage->addCriterion($criterion);
-            }
-            $activity->addStage($stage);
-            $this->em->persist($activity);
+                $pCriteria = $pStage->getCriteria();
 
-            // Sending participants mails if necessary
-            if($informingMail){
-                if(count($stage->getCriteria()) > 0){
+                if (count($pCriteria) !== 0) {
+                    foreach ($pCriteria as $pCriterion) {
+                        $criterion = new Criterion;
 
-                    // Parameter for subject mail title
-                    if(count($institutionProcess->getStages()) > 1){
-                        $mailSettings['stage'] = $stage;
-                    } else {
-                        $mailSettings['activity'] = $activity;
-                    }
+                        $criterion->setCName($pCriterion->getCName())
+                            ->setType($pCriterion->getType())
+                            ->setWeight($pCriterion->getWeight())
+                            ->setLowerbound($pCriterion->getLowerbound())
+                            ->setUpperbound($pCriterion->getUpperbound())
+                            ->setStep($pCriterion->getStep())
+                            ->setForceCommentCompare($pCriterion->isForceCommentCompare())
+                            ->setForceCommentSign($pCriterion->getForceCommentSign())
+                            ->setForceCommentValue($pCriterion->getForceCommentValue());
 
-                    /** @var Participation[] */
-                    $uniqueParticipations = $stage->getUniqueParticipations();
-                    if(count($uniqueParticipations) > 0){
-                        foreach($uniqueParticipations as $uniqueParticipation){
-                            if(count($pParticipations) !== 0 || (count($pParticipations) === 0 && $uniqueParticipation->getUsrId() != $synthParticipation->getUsrId())){
-                                $recipients[] = $uniqueParticipation->getDirectUser();
-                                $uniqueParticipation->setIsMailed(true);
-                                $this->em->persist($uniqueParticipation);
+                        $stage->addCriterion($criterion);
+
+                        $pParticipations = count($IProcessStages) != 0 ? $pCriterion->getParticipants() : null;
+                        if (count($IProcessStages) != 0 && count($pParticipations) != 0) {
+                            foreach ($pParticipations as $pParticipation) {
+                                $participation = new Participation;
+                                $participation->setLeader($pParticipation->isLeader())
+                                    ->setMWeight($pParticipation->getMWeight())
+                                    ->setPrecomment($pParticipation->getPrecomment())
+                                    ->setTeam($pParticipation->getTeam())
+                                    ->setUsrId($pParticipation->getUsrId())
+                                    ->setType($pParticipation->getType());
+                                $stage->addParticipant($participation);
+                                $criterion->addParticipant($participation);
                             }
+
+                        } else {
+                            $synthParticipation = new Participation;
+                            $institutionSynthUser = $repoU->findOneBy(['firstname' => 'ZZ', 'lastname' => 'ZZ', 'orgId' => $institution->getId()]);
+
+                            $synthParticipation->setLeader(true)
+                                ->setTeam(null)
+                                ->setUsrId($institutionSynthUser->getId())
+                                ->setType(-1);
+                            $stage->addParticipant($synthParticipation);
+                            $criterion->addParticipant($synthParticipation);
                         }
 
-                        $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $mailSettings, 'actionType' => 'activityParticipation']);
+                        // If comes from an external request, we create external participation
+                        if (!$fromInternal) {
+                            $userParticipation = new Participation;
+                            $userParticipation->setLeader(false)
+                                ->setUsrId($currentUser->getId())
+                                ->setType(0);
+                            $stage->addParticipant($userParticipation);
+                            $criterion->addParticipant($userParticipation);
+                        }
+                    }
+                    $stage->addCriterion($criterion);
+                }
+                $activity->addStage($stage);
+                $this->em->persist($activity);
+
+                // Sending participants mails if necessary
+                if ($informingMail) {
+                    if (count($stage->getCriteria()) > 0) {
+
+                        // Parameter for subject mail title
+                        if (count($institutionProcess->getStages()) > 1) {
+                            $mailSettings['stage'] = $stage;
+                        } else {
+                            $mailSettings['activity'] = $activity;
+                        }
+
+                        /** @var Participation[] */
+                        $uniqueParticipations = $stage->getUniqueParticipations();
+                        if (count($uniqueParticipations) > 0) {
+                            foreach ($uniqueParticipations as $uniqueParticipation) {
+                                if (count($pParticipations) !== 0 || (count($pParticipations) === 0 && $uniqueParticipation->getUsrId() != $synthParticipation->getUsrId())) {
+                                    $recipients[] = $uniqueParticipation->getDirectUser();
+                                    $uniqueParticipation->setIsMailed(true);
+                                    $this->em->persist($uniqueParticipation);
+                                }
+                            }
+
+                            $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $mailSettings, 'actionType' => 'activityParticipation']);
+                        }
                     }
                 }
             }
-        }
+
         $this->em->flush();
         return new JsonResponse(['message' => 'success', 'aid' => $activity->getId(), 'ali' => $accessLinks],200);
+        }
+        return new JsonResponse(['message' => 'success', 'aid' => $activity->getId(), 'ali' => mt_rand(100000, 999999)],200);
     }
 
 

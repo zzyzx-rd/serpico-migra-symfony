@@ -36,7 +36,7 @@ abstract class DbObject
     protected ?int $createdBy;
 
     /**
-     * @Column(name="inserted", type="datetime")
+     * @Column(name="inserted", type="datetime" , options={"default": "CURRENT_TIMESTAMP"})
      * @var DateTime
      */
     protected DateTime $inserted;

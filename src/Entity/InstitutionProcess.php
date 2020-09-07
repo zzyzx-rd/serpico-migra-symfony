@@ -50,7 +50,7 @@ class InstitutionProcess extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="inp_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="inp_inserted", type="datetime",  options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -100,7 +100,6 @@ class InstitutionProcess extends DbObject
      * @param $inp_approvable
      * @param $inp_gradable
      * @param $inp_createdBy
-     * @param $inp_inserted
      * @param $inp_deleted
      * @param $organization
      * @param $process
@@ -116,7 +115,6 @@ class InstitutionProcess extends DbObject
         $inp_createdBy = null,
         $inp_approvable = false,
         $inp_gradable = true,
-        $inp_inserted = null,
         $inp_deleted = null,
         Organization $organization = null,
         Process $process = null,
@@ -387,4 +385,6 @@ class InstitutionProcess extends DbObject
     {
         return $u->getRole() == 1 || $u->getRole() == 4 || $this->masterUser == $u;
     }
+
+
 }

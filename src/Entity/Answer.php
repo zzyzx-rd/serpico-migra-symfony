@@ -34,7 +34,7 @@ class Answer extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="asw_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="asw_inserted", type="datetime", nullable=true, options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
     /**
@@ -61,7 +61,6 @@ class Answer extends DbObject
      * @param int|null $createdBy
      * @param $field
      * @param Survey $survey
-     * @param $asw_inserted
      * @param Participation $participation
      */
     public function __construct(
@@ -70,7 +69,6 @@ class Answer extends DbObject
         int $createdBy = null,
         $field = null,
         Survey $survey = null,
-        $asw_inserted = null,
         Participation $participation = null)
     {
         parent::__construct($id, $createdBy, new DateTime());
@@ -86,7 +84,7 @@ class Answer extends DbObject
         return $this;
     }
 
-    public function setInserted(DateTimeInterface $inserted): self
+    public function setInserted(?DateTimeInterface $inserted): self
     {
         $this->inserted = $inserted;
         return $this;

@@ -40,7 +40,7 @@ class Target extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="tgt_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="tgt_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -98,7 +98,6 @@ class Target extends DbObject
      * @param $tgt_sign
      * @param $tgt_value
      * @param $tgt_createdBy
-     * @param $tgt_inserted
      * @param $organization
      * @param $department
      * @param $position
@@ -113,7 +112,6 @@ class Target extends DbObject
         $tgt_sign = null,
         $tgt_value = null,
         $tgt_createdBy = null,
-        $tgt_inserted = null,
         $organization = null,
         $department = null,
         $position = null,

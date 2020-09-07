@@ -86,7 +86,7 @@ class Participation extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="par_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="par_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -164,7 +164,6 @@ class Participation extends DbObject
      * @param float|null $of_penalty
      * @param bool|null $mailed
      * @param int|null $createdBy
-     * @param DateTime|null $inserted
      * @param DateTime|null $confirmed
      * @param DateTime|null $deleted
      * @param ArrayCollection $grades
@@ -190,7 +189,6 @@ class Participation extends DbObject
         float $of_penalty = null,
         bool $mailed = null,
         int $createdBy = null,
-        DateTime $inserted = null,
         DateTime $confirmed = null,
         DateTime $deleted = null,
         ArrayCollection $grades = null,

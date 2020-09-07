@@ -86,7 +86,7 @@ class WorkerIndividual extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="win_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="win_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -116,7 +116,6 @@ class WorkerIndividual extends DbObject
      * @param $win_lk_nbConnections
      * @param $win_lk_contacted
      * @param $win_createdBy
-     * @param $win_inserted
      * @param $experiences
      * @param $mails
      */
@@ -134,7 +133,6 @@ class WorkerIndividual extends DbObject
         $win_createdBy = null,
         $win_created = null,
         $win_lk_nbConnections = null,
-        $win_inserted = null,
         $experiences = null,
         $mails = null)
     {

@@ -39,7 +39,7 @@ class Department extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="dpt_inserted", type="datetime")
+     * @ORM\Column(name="dpt_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -98,7 +98,6 @@ class Department extends DbObject
      * @param $id
      * @param $name
      * @param $createdBy
-     * @param $inserted
      * @param $deleted
      * @param $masterUser
      * @param $positions
@@ -114,7 +113,6 @@ class Department extends DbObject
         $id = 0,
         $name = '',
         $createdBy = null,
-        $inserted = null,
         $deleted = null,
         $masterUser = null,
         $positions = null,

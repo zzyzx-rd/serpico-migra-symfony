@@ -39,7 +39,7 @@ class Survey extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="sur_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="sur_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -84,7 +84,6 @@ class Survey extends DbObject
      * @param ?int$id
      * @param $sur_name
      * @param $sur_createdBy
-     * @param $sur_inserted
      * @param $sur_state
      * @param $stage
      * @param $organization
@@ -97,7 +96,6 @@ class Survey extends DbObject
         $sur_state = null,
         $sur_name = '',
         $sur_createdBy = null,
-        $sur_inserted = null,
         Stage $stage = null,
         Organization $organization = null,
         ArrayCollection $participations = null,

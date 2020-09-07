@@ -184,7 +184,7 @@ class Activity extends DbObject
      */
     protected ?int $createdBy;
     /**
-     * @Column(name="act_inserted", type="datetime", nullable=true)
+     * @Column(name="act_inserted", type="datetime", nullable=false, options={"default": "CURRENT_TIMESTAMP"})
      * @var DateTime
      */
     protected DateTime $inserted;
@@ -313,7 +313,7 @@ class Activity extends DbObject
         DateTime $released = null,
         DateTime $archived = null
     ) {
-        parent::__construct($id, $createdBy, new DateTime);
+        parent::__construct($id, $createdBy, new DateTime());
         $this->magnitude = $magnitude;
         $this->complete = $complete;
         $this->simplified = $simplified;
@@ -769,10 +769,8 @@ class Activity extends DbObject
         $this->res_benefit_eff = $res_benefit_eff;
     }
 
-    /**
-     * @param DateTime $inserted
-     */
-    public function setInserted(DateTime $inserted): void
+
+    public function setInserted(?DateTimeInterface $inserted): void
     {
         $this->inserted = $inserted;
     }

@@ -36,7 +36,7 @@ class WorkerFirmSector extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="wfs_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="wfs_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -56,7 +56,6 @@ class WorkerFirmSector extends DbObject
      * @param ?int$id
      * @param $wfs_name
      * @param $wfs_createdBy
-     * @param $wfs_inserted
      * @param $icon
      * @param $firm
      */
@@ -64,7 +63,6 @@ class WorkerFirmSector extends DbObject
       ?int $id = 0,
         $wfs_name = null,
         $wfs_createdBy = null,
-        $wfs_inserted = null,
         $icon = null,
         $firm = null)
     {

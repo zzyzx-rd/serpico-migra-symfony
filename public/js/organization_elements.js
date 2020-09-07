@@ -41,9 +41,11 @@ $(function(){
         //$('form[name^="add"]').find('input[name*="name"]').val($inputName.val());
         urlToPieces = window.location.pathname.split('/');
         urlToPieces[urlToPieces.length - 1] = urlToPieces[urlToPieces.length - 1].slice(0,-1);
+
         urlToPieces.push('validate',eid);
 
         vurl = urlToPieces.join('/');
+
         $.post(vurl,$form.serialize())
             .done(function(data){
                 $curRow.find('.element-input').hide();

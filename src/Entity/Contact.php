@@ -102,7 +102,7 @@ class Contact extends DbObject
     public $mtime;
 
     /**
-     * @ORM\Column(name="con_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="con_inserted", type="datetime", nullable=false, options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -135,7 +135,6 @@ class Contact extends DbObject
      * @param $con_doc
      * @param $con_mdate
      * @param $con_mtime
-     * @param $con_inserted
      * @param $con_confirmed
      * @param $con_createdBy
      */
@@ -157,7 +156,6 @@ class Contact extends DbObject
         $con_doc = false,
         $con_mdate = null,
         $con_mtime = null,
-        $con_inserted = null,
         $con_confirmed = null,
         $con_createdBy = null)
     {
@@ -373,7 +371,7 @@ class Contact extends DbObject
         return $this;
     }
 
-    public function setInserted(DateTimeInterface $con_inserted): self
+    public function setInserted(?DateTimeInterface $con_inserted): self
     {
         $this->inserted = $con_inserted;
 

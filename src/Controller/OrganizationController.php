@@ -1649,6 +1649,7 @@ class OrganizationController extends MasterController
                 ->setClientOrganization($clientOrganization)
                 ->setCreatedBy($currentUser->getId());
 
+
                 $em->persist($client);
 
             }
@@ -2677,19 +2678,19 @@ class OrganizationController extends MasterController
 
     /**
      * @param Request $request
-     * @param $elmtName
+     * @param $etityelmtName
      * @param $elmtId
      * @param $orgId
      * @return JsonResponse
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/settings/organization/element/validate", name="validateOrganizationElement")
+     * @Route("/settings/organization/{orgId}/{entity}/validate/{elmtId}", name="validateOrganizationElement")
      */
-    public function validateOrganizationElementAction(Request $request)
+    public function validateOrganizationElementAction(Request $request, $entity, $elmtId, $orgId)
     {
         $em    = $this->em;
-        $elmtId = $request->get('id');
-        $entity = $request->get('e');
+
+
         $repoO = $em->getRepository(Organization::class);
         switch ($entity) {
             case 'department':
@@ -2705,8 +2706,12 @@ class OrganizationController extends MasterController
                 $element = new Title;
                 break;
             case 'weight':
-                $repoE   = $em->getRepository(Weight::class);
-                $element = new Weight;
+            $repoE   = $em->getRepository(Weight::class);
+            $element = new Weight;
+            break;
+            case 'processe':
+                $repoE   = $em->getRepository(Process::class);
+                $element = new Process;
                 break;
             default:
                 break;
@@ -2739,12 +2744,13 @@ class OrganizationController extends MasterController
             $organizationElmtForm = $this->createForm(OrganizationElementType::class, $element, ['standalone' => false, 'entity' => $entity, 'organization' => $organization]);
             $organizationElmtForm->handleRequest($request);
 
+        if ($organizationElmtForm->isSubmitted()) {
             if ($organizationElmtForm->isValid()) {
                 $element->setCreatedBy($currentUser->getId());
                 $em->persist($element);
                 $em->flush();
                 $output = ['message' => 'Success!', 'id' => $element->getId()];
-                if($entity != 'weight'){
+                if ($entity != 'weight') {
                     $output['name'] = $element->getName();
                 }
                 return new JsonResponse($output, 200);
@@ -2753,7 +2759,9 @@ class OrganizationController extends MasterController
                 //$errors = $this->buildErrorArray($organizationElmtForm);
                 //return new JsonResponse($errors, 500);
             }
-        //}
+        }else{
+        return new JsonResponse("form no submitted !", 500);
+        }
     }
 
     /**

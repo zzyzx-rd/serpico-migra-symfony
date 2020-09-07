@@ -70,7 +70,7 @@ class RankingTeamHistory extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="rth_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="rth_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 

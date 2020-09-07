@@ -113,7 +113,7 @@ class ResultProject extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="rsp_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="rsp_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -154,7 +154,6 @@ class ResultProject extends DbObject
      * @param null $weightedDistanceRatio
      * @param null $equalDistanceRatio
      * @param $rsp_createdBy
-     * @param $rsp_inserted
      * @param $activity
      * @param $stage
      * @param $criterion
@@ -179,7 +178,6 @@ class ResultProject extends DbObject
         $weightedDistanceRatio = null,
         $equalDistanceRatio = null,
         $rsp_createdBy = null,
-        $rsp_inserted = null,
         $activity = null,
         $stage = null,
         $criterion = null)

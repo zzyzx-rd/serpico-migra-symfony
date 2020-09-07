@@ -43,7 +43,7 @@ class Mail extends DbObject
     public ?int $createdBy;
 
     /**
-     * @ORM\Column(name="mail_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="mail_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
@@ -95,7 +95,6 @@ class Mail extends DbObject
      * @param $persona
      * @param $token
      * @param $read
-     * @param $inserted
      * @param $language
      * @param null $createdBy
      * @param User $user
@@ -111,7 +110,6 @@ class Mail extends DbObject
         $persona = null,
         $token = null,
         $read = null,
-        $inserted = null,
         $language = null,
         $createdBy = null,
         User $user = null,
