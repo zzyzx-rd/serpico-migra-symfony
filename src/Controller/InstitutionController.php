@@ -108,12 +108,11 @@ final class InstitutionController extends MasterController
     {
 
         $em = $this->getEntityManager();
-        $user = $this->user;
+        $currentUser = $this->user;
         $repoA = $em->getRepository(Activity::class);
         $repoP = $em->getRepository(Participation::class);
         $repoDec = $em->getRepository(Decision::class);
-        $role = $user->getRole();
-        $currentUsrId = $user->getId();
+        $role = $currentUser->getRole();
         $repoS = $em->getRepository(Survey::class);
 
         if(isset($_COOKIE['sorting_type'])){
@@ -135,7 +134,7 @@ final class InstitutionController extends MasterController
             $dateType = 's';
         }
 
-        $userArchivingPeriod = $user->getActivitiesArchivingNbDays();
+        $userArchivingPeriod = $currentUser->getActivitiesArchivingNbDays();
 
 
         // Add activities where current user is either is a leader, or at least a participant;
@@ -162,7 +161,7 @@ final class InstitutionController extends MasterController
             }
         }
 
-        $checkingIds = [$currentUsrId];
+        $checkingIds = [$currentUser->getId()];
         $userActivities = new ArrayCollection;
 
         if($existingAccessAndResultsViewOption){
@@ -172,7 +171,7 @@ final class InstitutionController extends MasterController
             if($activitiesAccess == 1){
                 $userActivities = new ArrayCollection($orgActivities);
             } else if ($activitiesAccess == 2){
-                $departmentUsers = $this->user->getDepartment() != null ? $em->getRepository(Department::class)->find($this->user->getDptId())->getUsers() : [];
+                $departmentUsers = $currentUser->getDepartment() != null ? $currentUser->getDepartment()->getUsers() : [];
                 foreach($departmentUsers as $departmentUser){
                     $checkingIds[] = $departmentUser->getId();
                 }
@@ -252,19 +251,19 @@ final class InstitutionController extends MasterController
                 }
             }
             //Get activities where user is participating as external user
-            $externalActivities = $externalActivities = $em->getRepository(User::class)->getExternalActivities($user);
+            $externalActivities = $em->getRepository(User::class)->getExternalActivities($currentUser);
             $userActivities = new ArrayCollection((array)$userActivities->toArray() + $externalActivities->toArray());
 
         }
 
         $addProcessForm = $this->createForm(AddProcessForm::class, null, ['standalone' => true]);
-        $delegateActivityForm = $this->createForm(DelegateActivityForm::class, null, ['standalone' => true, 'currentUser' => $user]) ;
+        $delegateActivityForm = $this->createForm(DelegateActivityForm::class, null, ['standalone' => true, 'currentUser' => $currentUser]) ;
         $delegateActivityForm->handleRequest($request);
-        $requestActivityForm = $this->createForm(RequestActivityForm::class, null, ['standalone' => true, 'em' => $em, 'currentUser' => $user ]) ;
+        $requestActivityForm = $this->createForm(RequestActivityForm::class, null, ['standalone' => true, 'em' => $em, 'currentUser' => $currentUser ]) ;
         $requestActivityForm->handleRequest($request);
-        $validateRequestForm = $this->createForm(DelegateActivityForm::class, null,  ['standalone' => true, 'request' => true, 'currentUser' => $user]);
+        $validateRequestForm = $this->createForm(DelegateActivityForm::class, null,  ['standalone' => true, 'request' => true, 'currentUser' => $currentUser]);
         $validateRequestForm->handleRequest($request);
-        $eventForm = $this->createForm(AddEventForm::class, null, ['standalone' => true, 'currentUser' => $user]);
+        $eventForm = $this->createForm(AddEventForm::class, null, ['standalone' => true, 'currentUser' => $currentUser]);
         $eventForm->handleRequest($request);
 
         // In case they might access results depending on user participation, then we need to feed all stages and feed a collection which will be analysed therefore in hideResultsFromStages function
