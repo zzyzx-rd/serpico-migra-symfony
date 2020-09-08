@@ -306,7 +306,6 @@ class Stage extends DbObject
      * @JoinColumn(name="usr_id", referencedColumnName="usr_id", nullable=true)
      */
     public ?User $masterUser;
-
     /**
      * @var Security
      */
@@ -489,12 +488,18 @@ class Stage extends DbObject
         return $this->outputs;
     }
 
-    /**
-     * @param mixed $outputs
-     */
-    public function setOutputs($outputs): void
+    public function addOutput(Output $output): Stage
     {
-        $this->outputs = $outputs;
+
+        $this->outputs->add($output);
+        $output->setStage($this);
+        return $this;
+
+    }
+    public function removeOutput(Output $output): Stage
+    {
+        $this->outputs->removeElement($output);
+        return $this;
     }
 
     public function setProgress(int $progress): self

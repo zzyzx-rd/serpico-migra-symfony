@@ -44,6 +44,8 @@ class Output extends DbObject
      * @OneToMany(targetEntity="Criterion", mappedBy="output", cascade={"persist", "remove"}, orphanRemoval=true)
      */
     public $criteria;
+
+
     /**
      * @ORM\Column(name="otp_created_by", type="integer", nullable=true)
      */
@@ -53,6 +55,8 @@ class Output extends DbObject
      * @ORM\Column(name="otp_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
+
+
     /**
      * @OneToOne(targetEntity="Survey")
      * @JoinColumn(name="survey_sur_id", referencedColumnName="sur_id",nullable=true)
@@ -69,43 +73,51 @@ class Output extends DbObject
      * @param int $createdBy
      * @param DateTime $startdate
      * @param DateTime $enddate
+     * @param DateTime $inserted
      */
     public function __construct($id = 0, $createdBy = null)
     {
         parent::__construct($id, $createdBy, new DateTime);
     }
 
-    /**
-     * @return DateTime
-     */
-    public function getInserted(): DateTime
-    {
-        return $this->inserted;
-    }
+
+
+
 
     /**
-     * @param DateTime $inserted
+     * @return  ArrayCollection|Criterion[]
      */
-    public function setInserted(DateTime $inserted): void
+    public function getCriteria()
     {
-        $this->inserted = $inserted;
+        return $this->criteria;
     }
 
-    /**
-     * @return int|null
-     */
-    public function getId(): ?int
+    public function addCriterion(Criterion $criterion): Output
     {
-        return $this->id;
-    }
 
-    /**
-     * @param int|null $id
-     */
-    public function setId(?int $id): void
-    {
-        $this->id = $id;
+        $this->criteria->add($criterion);
+        $criterion->setStage($this);
+        return $this;
+
     }
+    public function removeCriterion(Criterion $criterion): Output
+{
+    $this->criteria->removeElement($criterion);
+    return $this;
+}
+
+
+
+
+
+            
+            
+            
+
+
+
+
+
 
     /**
      * @return DateTime
@@ -118,7 +130,7 @@ class Output extends DbObject
     /**
      * @param DateTime $startdate
      */
-    public function setStartdate(DateTime $startdate): void
+    public function setStartdate(DateTime $startdate): self
     {
         $this->startdate = $startdate;
     }
@@ -134,7 +146,7 @@ class Output extends DbObject
     /**
      * @param DateTime $enddate
      */
-    public function setEnddate(DateTime $enddate): void
+    public function setEnddate(DateTime $enddate): self
     {
         $this->enddate = $enddate;
     }
@@ -147,29 +159,26 @@ class Output extends DbObject
         return $this->stage;
     }
 
+
+
+
     /**
-     * @param mixed $stage
+     * @return Survey
      */
-    public function setStage($stage): void
+    public function getSurvey(): Survey
     {
-        $this->stage = $stage;
+        return $this->survey;
     }
 
     /**
-     * @return mixed
+     * @param Survey $survey
      */
-    public function getCriteria()
+    public function setSurvey(Survey $survey): self
     {
-        return $this->criteria;
+        $this->survey = $survey;
     }
 
-    /**
-     * @param mixed $criteria
-     */
-    public function setCriteria($criteria): void
-    {
-        $this->criteria = $criteria;
-    }
+
 
 
 
