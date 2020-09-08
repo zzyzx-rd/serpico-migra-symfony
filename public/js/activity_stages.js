@@ -171,17 +171,13 @@ function updateDatepickers(k, index){
           var gEndCal = $(this).find('.dp-gend');
           var startDateTS = (startCal.val() == "") ? Date.now() : parseDdmmyyyy(startCal.val().replace(regex,function(match){return replaceVars[match];}));
           var endDateTS = (endCal.val() == "") ? startDateTS : parseDdmmyyyy(endCal.val().replace(regex,function(match){return replaceVars[match];}));
-          var gStartDateTS = (gStartCal.val() == "") ? startDateTS : parseDdmmyyyy(gStartCal.val().replace(regex,function(match){return replaceVars[match];}));
-          var gEndDateTS = (gEndCal.val() == "") ? startDateTS : parseDdmmyyyy(gEndCal.val().replace(regex,function(match){return replaceVars[match];}));
-          var startDate = new Date(startDateTS);
+        var startDate = new Date(startDateTS);
           var endDate = new Date(endDateTS);
-          var gStartDate = new Date(gStartDateTS);
-          var gEndDate = new Date(gEndDateTS);
+
 
           startCal.pickadate('picker').set('select',startDate);
           endCal.pickadate('picker').set('select',endDate).set('min',startDate);
-          gStartCal.pickadate('picker').set('select',gStartDate).set('min',startDate);
-          gEndCal.pickadate('picker').set('select',gEndDate).set('min',gStartDate);
+         
       });
 
   } else if(k==1) {

@@ -353,8 +353,8 @@ class Stage extends DbObject
         $finalized = null,
         $lastReopened = null,
         $deleted = null,
-        $gcompleted = null,
-        $security)
+        $gcompleted = null
+        )
     {
         parent::__construct($id, $createdBy, new DateTime);
         $this->complete = $complete;
@@ -399,8 +399,7 @@ class Stage extends DbObject
         $this->rankingTeams = new ArrayCollection;
         $this->historicalRankingTeams = new ArrayCollection;
         $this->outputs = new ArrayCollection;
-        $this->security = $security;
-        $this->currentUser = $this->security->getUser();
+
     }
 
 
@@ -1444,6 +1443,183 @@ class Stage extends DbObject
     {
         $this->events->removeElement($event);
         return $this;
+    }
+    /**
+     * @return ArrayCollection|Participation[]
+     */
+    public function getGraderParticipants()
+    {
+        return $this->getParticipants()->matching(Criteria::create()->where(Criteria::expr()->neq("type", -1)));
+    }/**
+ * @return ArrayCollection|Participation[]
+ */
+    public function getIndivParticipants()
+    {
+        $indivParticipants = new ArrayCollection;
+        $myParticipations = $this->getSelfParticipations();
+        $myTeam = $myParticipations->count() === 0 ? null : $myParticipations->first()->getTeam();
+
+        foreach ($this->getParticipants() as $participant) {
+            $team = $participant->getTeam();
+            if ($team === null || $team == $myTeam) {
+                $indivParticipants->add($participant);
+            }
+        };
+        return count($indivParticipants) > 0 ? $indivParticipants : null;
+    }
+    /**
+     * @return ArrayCollection|Participation[]
+     */
+    public function getIntParticipants(){
+        return $this->getParticipants()->filter(function(Participation $p){
+            return $p->getTeam() === null && $p->getUser()->getOrganization() ==
+                $this->currentUser->getOrganization();
+        });
+    }
+    /**
+     * @return ArrayCollection|Participation[]
+     */
+    public function getGradableParticipants()
+    {
+        return $this->getParticipants()->matching(Criteria::create()->where(Criteria::expr()->neq("type", 0)));
+    }
+
+    /**
+     * @return ArrayCollection|Participation[]
+     */
+    public function getExtParticipants()
+    {
+        return $this->getParticipants()->filter(function(Participation $p){
+            return $p->getTeam() === null && $p->getUser()->getOrganization() != $this->currentUser->getOrganization();
+        });
+    }
+    /**
+     * @return ArrayCollection|Participation[]
+     */
+    public function getTeamParticipants()
+    {
+        $myParticipations = $this->getSelfParticipations();
+        $myTeam = $myParticipations->count() === 0 ? null : $myParticipations->first()->getTeam();
+        return $this->getParticipants()->filter(static function(Participation $p) use ($myTeam){
+            return $p->getTeam() !== null && $p->getTeam() != $myTeam;
+        });
+    }
+    /**
+     * @return ArrayCollection|Participation[]
+     */
+    public function getUserGradableParticipants()
+    {
+        // We get all non-third party user participations, except those of people who are part of a team we don't belong to
+        if ($this->mode == STAGE::GRADED_STAGE) {
+            return null;
+        } else {
+
+            $userGradableParticipants = new ArrayCollection;
+
+            $unorderedGradableParticipants = $this->getIndivParticipants()->filter(function(Participation $p){
+                return $p->getType() != Participation::PARTICIPATION_THIRD_PARTY;
+            });
+
+            foreach($unorderedGradableParticipants as $unorderedGradableParticipant){
+                $userGradableParticipants->add($unorderedGradableParticipant);
+            }
+
+            return $userGradableParticipants;
+        }
+    }
+
+    public function addTeamGradableParticipation(Participation $participant): Stage
+    {
+        $this->participations->add($participant);
+        return $this;
+    }
+
+    public function removeTeamGradableParticipation(Participation $participant): Stage
+    {
+        $this->participations->removeElement($participant);
+        return $this;
+    }
+
+
+
+    public function addGradableParticipant(Participation $participant): Stage
+    {
+        if ($this->participations->exists(function (Participation $u) use ($participant) {
+            return $u->getUser()->getId() === $participant->getUser()->getId();
+        })) {
+            return $this;
+        }
+
+        foreach ($this->criteria as $criterion) {
+            $criterion->addParticipation($participant);
+            $participant->setCriterion($criterion)->setStage($this);
+        }
+        return $this;
+    }
+
+    public function removeGradableParticipant(Participation $participant): Stage
+    {
+        foreach ($this->criteria as $criterion) {
+            $criterion->participants->removeElement($participant);
+        }
+        return $this;
+    }
+
+    /**
+     * Get distinct participants, independant from current user
+     * @return ArrayCollection|Participation[]
+     */
+    public function getIndependantParticipants()
+    {
+        $eligibleParticipations = null;
+        $independantParticipants = new ArrayCollection;
+        $teams = [];
+
+        $eligibleParticipations = count($this->criteria) === 0 ? $this->participations : $this->criteria->first()->getParticipations();
+
+        foreach ($eligibleParticipations as $eligibleParticipation) {
+            $team = $eligibleParticipation->getTeam();
+            if ($team === null) {
+                $independantParticipants->add($eligibleParticipation);
+            } else {
+                if (!in_array($team, $teams)) {
+                    $independantParticipants->add($eligibleParticipation);
+                    $teams[] = $team;
+                }
+            }
+        }
+        return $independantParticipants;
+    }
+    public function getParticipants(): ArrayCollection
+    {
+
+        // Depends on whether current user is part of a team
+        $eligibleParticipations = null;
+        $participants = new ArrayCollection;
+        $teams = [];
+
+        $eligibleParticipations = count($this->criteria) === 0 ? $this->participations : $this->criteria->first()->getParticipations();
+
+        $myParticipations = $this->getSelfParticipations();
+        $myTeam = $myParticipations->count() === 0 ? null : $myParticipations->first()->getTeam();
+
+        foreach ($eligibleParticipations as $eligibleParticipation) {
+            $currentTeam = $eligibleParticipation->getTeam();
+            if ($currentTeam === null || $currentTeam == $myTeam) {
+                $participants->add($eligibleParticipation);
+            } else if (!in_array($currentTeam, $teams, true)) {
+                $participants->add($eligibleParticipation);
+                $teams[] = $currentTeam;
+            }
+        }
+
+        return $participants;
+    }
+    public function getGradingParticipants()
+    {
+        return count($this->getParticipants()->matching(
+            Criteria::create()->where(Criteria::expr()->neq("type", -1))
+        ));
     }
 
 }

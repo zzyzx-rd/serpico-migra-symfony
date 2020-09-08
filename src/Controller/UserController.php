@@ -888,7 +888,7 @@ class UserController extends MasterController
         $this->em->flush();
         return new JsonResponse(['message' => 'success', 'aid' => $activity->getId(), 'ali' => $accessLinks],200);
         }
-        return new JsonResponse(['message' => 'success', 'aid' => $activity->getId(), 'ali' => mt_rand(100000, 999999)],200);
+        return $this->redirectToRoute("activityInitialisation", ['entity' => 'activity', 'inpId' => $inpId, 'actName' => $actName]);
     }
 
 
