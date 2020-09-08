@@ -1019,6 +1019,26 @@ class Organization extends DbObject
         $this->removeProcess($process);
         return $this;
     }
+
+    /**
+     * @return Collection|InstitutionProcess[]
+     */
+    function getParentValidatedInstitutionProcesses() {
+
+        return $this->institutionProcesses->filter(function(InstitutionProcess $p){
+            return $p->getParent() == null && !$p->isApprovable();
+        });
+    }
+
+    function addParentValidatedInstitutionProcess(InstitutionProcess $institutionProcess){
+        $this->addInstitutionProcess($institutionProcess);
+        return $this;
+    }
+
+    function removeParentValidatedInstitutionProcess(InstitutionProcess $institutionProcess){
+        $this->removeInstitutionProcess($institutionProcess);
+        return $this;
+    }
     public function __toString()
     {
         return (string) $this->id;

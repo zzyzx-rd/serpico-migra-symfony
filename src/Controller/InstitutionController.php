@@ -223,7 +223,10 @@ final class InstitutionController extends MasterController
                         $isParticipant = 0;
                         $isMasterUserId = 0;
                         foreach ($orgActivity->getStages() as $orgStage){
-                            foreach ($orgStage->getParticipants() as $orgParticipant){
+
+                            $orgStage->currentUser = $currentUser;
+
+                            foreach ($orgStage->getParticipations() as $orgParticipant){
                                 if (in_array($orgParticipant->getUser()->getId(), $checkingIds)){
                                     $isParticipant = 1;
                                     ($orgParticipant->getStatus() != 5) ? $userActivities->add($orgActivity) : $userArchivedActivities->add($orgActivity);
