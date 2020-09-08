@@ -35,16 +35,17 @@ class Output extends DbObject
      * @ORM\Column(name="otp_enddate", type="datetime", nullable=true)
      */
     public DateTime $enddate;
+
     /**
      * @ManyToOne(targetEntity=Stage::class, inversedBy="outputs")
      * @JoinColumn(name="stage_stg_id", referencedColumnName="stg_id",nullable=false)
      */
     protected $stage;
+
     /**
      * @OneToMany(targetEntity="Criterion", mappedBy="output", cascade={"persist", "remove"}, orphanRemoval=true)
      */
     public $criteria;
-
 
     /**
      * @ORM\Column(name="otp_created_by", type="integer", nullable=true)
@@ -56,7 +57,6 @@ class Output extends DbObject
      */
     public DateTime $inserted;
 
-
     /**
      * @OneToOne(targetEntity="Survey")
      * @JoinColumn(name="survey_sur_id", referencedColumnName="sur_id",nullable=true)
@@ -67,21 +67,22 @@ class Output extends DbObject
     /**
      * Stage constructor.
      * @param ?int$id
-     * @param bool $complete
      * @param null $masterUser
-     * @param string $name
      * @param int $createdBy
      * @param DateTime $startdate
      * @param DateTime $enddate
      * @param DateTime $inserted
      */
-    public function __construct($id = 0, $createdBy = null)
+
+    public function __construct($id = 0,
+                                $createdBy = null
+    )
     {
         parent::__construct($id, $createdBy, new DateTime);
+        $this->criteria= new ArrayCollection;
+        $this->startdate = new DateTime;
+        $this->enddate = new DateTime;
     }
-
-
-
 
 
     /**
@@ -96,7 +97,7 @@ class Output extends DbObject
     {
 
         $this->criteria->add($criterion);
-        $criterion->setStage($this);
+        $criterion->setOutput($this);
         return $this;
 
     }
@@ -105,19 +106,6 @@ class Output extends DbObject
     $this->criteria->removeElement($criterion);
     return $this;
 }
-
-
-
-
-
-            
-            
-            
-
-
-
-
-
 
     /**
      * @return DateTime

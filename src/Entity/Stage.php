@@ -398,6 +398,7 @@ class Stage extends DbObject
         $this->resultTeams = new ArrayCollection;
         $this->rankingTeams = new ArrayCollection;
         $this->historicalRankingTeams = new ArrayCollection;
+        $this->outputs = new ArrayCollection;
         $this->security = $security;
         $this->currentUser = $this->security->getUser();
     }
@@ -490,11 +491,9 @@ class Stage extends DbObject
 
     public function addOutput(Output $output): Stage
     {
-
         $this->outputs->add($output);
         $output->setStage($this);
         return $this;
-
     }
     public function removeOutput(Output $output): Stage
     {
