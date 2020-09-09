@@ -117,15 +117,7 @@ class IProcessStage extends DbObject
      */
     public $enddate;
 
-    /**
-     * @ORM\Column(name="stg_gstartdate", type="datetime", nullable=true)
-     */
-    public $gstartdate;
-
-    /**
-     * @ORM\Column(name="stg_genddate", type="datetime", nullable=true)
-     */
-    public $genddate;
+   
 
     /**
      * @ORM\Column(name="stg_deadline_nbDays", type="integer", nullable=true)
@@ -257,8 +249,6 @@ class IProcessStage extends DbObject
      * @param $stg_definite_dates
      * @param $stg_startdate
      * @param $stg_enddate
-     * @param $stg_gstartdate
-     * @param $stg_genddate
      * @param $stg_deadline_nbDays
      * @param $stg_deadline_mailSent
      * @param $stg_createdBy
@@ -296,8 +286,6 @@ class IProcessStage extends DbObject
         $stg_definite_dates = false,
         $stg_startdate = null,
         $stg_enddate = null,
-        $stg_gstartdate = null,
-        $stg_genddate = null,
         $stg_deadline_nbDays = 3,
         $stg_deadline_mailSent = null,
         $stg_createdBy = null,
@@ -339,8 +327,6 @@ class IProcessStage extends DbObject
         $this->definite_dates = $stg_definite_dates;
         $this->startdate = $stg_startdate;
         $this->enddate = $stg_enddate;
-        $this->gstartdate = $stg_gstartdate;
-        $this->genddate = $stg_genddate;
         $this->deadline_nbDays = $stg_deadline_nbDays;
         $this->deadline_mailSent = $stg_deadline_mailSent;
         $this->createdBy = $stg_createdBy;
@@ -556,29 +542,7 @@ class IProcessStage extends DbObject
         return $this;
     }
 
-    public function getGstartdate(): ?DateTimeInterface
-    {
-        return $this->gstartdate;
-    }
-
-    public function setGstartdate(DateTimeInterface $stg_gstartdate): self
-    {
-        $this->gstartdate = $stg_gstartdate;
-
-        return $this;
-    }
-
-    public function getGenddate(): ?DateTimeInterface
-    {
-        return $this->genddate;
-    }
-
-    public function setGenddate(DateTimeInterface $stg_genddate): self
-    {
-        $this->genddate = $stg_genddate;
-
-        return $this;
-    }
+    
 
     public function isDeadlineNbDays(): ?int
     {

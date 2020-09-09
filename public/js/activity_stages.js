@@ -177,7 +177,7 @@ function updateDatepickers(k, index){
 
           startCal.pickadate('picker').set('select',startDate);
           endCal.pickadate('picker').set('select',endDate).set('min',startDate);
-         
+
       });
 
   } else if(k==1) {
@@ -1518,8 +1518,6 @@ $(document).on('click','.s-validate', function(e) {
   isDefiniteDates = $curRow.find('[name*="definiteDates"]').is(':checked');
   startdate = $curRow.find('[name*="startdate"]').val();
   enddate = $curRow.find('[name*="enddate"]').val();
-  gstartdate = $curRow.find('[name*="gstardate"]').val();
-  genddate = $curRow.find('[name*="genddate"]').val();
   dPeriod = $curRow.find('[name*="dPeriod"]').val();
   dFrequency = $curRow.find('select[name*="dFrequency"] option:selected').val();
   dOrigin = $curRow.find('select[name*="dOrigin"] option:selected').val();
@@ -1536,8 +1534,6 @@ $(document).on('click','.s-validate', function(e) {
   $form.find('[name*="activeWeight"]').val(weightVal);
   $form.find('[name*="name"]').val(inputName);
   $form.find('[name*="definiteDates"]').prop('checked', isDefiniteDates);
-  $form.find('[name*="[gstartdate]"]').val(gstartdate);
-  $form.find('[name*="[genddate]"]').val(genddate);
   $form.find('[name*="[startdate]"]').val(startdate);
   $form.find('[name*="[enddate]"]').val(enddate);
   $form.find('[name*="dPeriod"]').val(dPeriod);
@@ -1593,14 +1589,9 @@ $(document).on('click','.s-validate', function(e) {
       var gEndCal =  $curRow.find('.dp-gend');
       startCal.attr('value',startdateDDMMYYYY);
       endCal.attr('value',enddateDDMMYYYY);
-      gStartCal.attr('value',gstartdateDDMMYYYY);
-      gEndCal.attr('value',genddateDDMMYYYY);
       startdateDDMM = startdateDDMMYYYY.split('/').slice(0,2).join('/');
       enddateDDMM = enddateDDMMYYYY.split('/').slice(0,2).join('/');
-      gstartdateDDMM = gstartdateDDMMYYYY.split('/').slice(0,2).join('/');
-      genddateDDMM = genddateDDMMYYYY.split('/').slice(0,2).join('/');
       stageDatesText = startdateDDMM == enddateDDMM ? startdateDDMM : startdateDDMM + ' - ' + enddateDDMM;
-      gradingDatesText = gstartdateDDMM == genddateDDMM ? gstartdateDDMM : gstartdateDDMM + ' - ' + genddateDDMM;
       $curRow.closest('.stage').find('.stage-dates').contents().last().replaceWith(stageDatesText);
       $curRow.closest('.stage').find('.grading-dates').contents().last().replaceWith(gradingDatesText);
       //const href=$li.attr('href').replace('0', data['sid']);

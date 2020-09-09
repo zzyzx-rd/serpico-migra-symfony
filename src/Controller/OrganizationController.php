@@ -1202,29 +1202,30 @@ class OrganizationController extends MasterController
 
 
                 $impactedCriteria = new ArrayCollection();
-                foreach ($element->getCriteria() as $stageCriterion){
-                    if($stageCriterion != $criterion){$impactedCriteria->add($stageCriterion);}
+                $outputs=$element->getOutputs();
+                foreach ($outputs->getCriteria() as $outputsCriterion){
+                    if($outputsCriterion != $criterion){$impactedCriteria->add($outputsCriterion);}
                 }
                 $sumNewWeights = 0;
 
-                foreach($impactedCriteria as $stageCriterion){
+                foreach($impactedCriteria as $outputsCriterion){
 
-                    if($impactedCriteria->last() != $stageCriterion){
+                    if($impactedCriteria->last() != $outputsCriterion){
                         $newWeight = ($crtId == 0) ?
-                            round((1 - $criterion->getWeight()) * $stageCriterion->getWeight(), 2) :
-                            round((1 - $criterion->getWeight()) / (1 - $criterionBeforeUpgrade->getWeight()) * $stageCriterion->getWeight(), 2);
+                            round((1 - $criterion->getWeight()) * $outputsCriterion->getWeight(), 2) :
+                            round((1 - $criterion->getWeight()) / (1 - $criterionBeforeUpgrade->getWeight()) * $outputsCriterion->getWeight(), 2);
 
-                        $stageCriterion->setWeight($newWeight);
+                        $outputsCriterion->setWeight($newWeight);
                         $sumNewWeights += $newWeight;
                     } else {
-                        $stageCriterion->setWeight(1 - $criterion->getWeight() - $sumNewWeights);
+                        $outputsCriterion->setWeight(1 - $criterion->getWeight() - $sumNewWeights);
                     }
-                    $em->persist($stageCriterion);
+                    $em->persist($outputsCriterion);
                 }
 
                 if($crtId == 0){
-                    $element->addCriterion($criterion);
-                    $em->persist($element);
+                    $outputs->addCriterion($criterion);
+                    $em->persist($outputs);
                 } else {
                     $em->persist($criterion);
                 }

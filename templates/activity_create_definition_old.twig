@@ -430,16 +430,7 @@
               </div>
           </div>
           <div class="row grading-calendar">
-              <div class="input-field col s6 m6">
-                  {{ form_label(form.gstartdate) }}
-                  {{ form_widget(form.gstartdate) }}
-                  {{ form_errors(form.gstartdate) }}
-              </div>
-                <div class="input-field col s6 m6">
-                    {{ form_label(form.genddate) }}
-                    {{ form_widget(form.genddate) }}
-                    {{ form_errors(form.genddate) }}
-                </div>
+            
           </div>
       {% endif %}
       {% if not activity.recurring %}

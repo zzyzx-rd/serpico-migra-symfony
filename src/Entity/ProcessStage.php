@@ -124,15 +124,7 @@ class ProcessStage extends DbObject
      */
     public $enddated;
 
-    /**
-     * @ORM\Column(name="stg_gstartdate", type="datetime", nullable=true)
-     */
-    public $gstartdate;
 
-    /**
-     * @ORM\Column(name="stg_genddate", type="datetime", nullable=true)
-     */
-    public $genddate;
 
     /**
      * @ORM\Column(name="stg_dealine_nbDays", type="integer", nullable=true)
@@ -265,8 +257,6 @@ class ProcessStage extends DbObject
      * @param $stg_forigin
      * @param $stg_startdate
      * @param $stg_enddated
-     * @param $stg_gstartdate
-     * @param $stg_genddate
      * @param $stg_dealine_nbDays
      * @param $stg_deadline_mailSent
      * @param $stg_createdBy
@@ -307,8 +297,6 @@ class ProcessStage extends DbObject
         $stg_forigin = null,
         $stg_startdate = null,
         $stg_enddated = null,
-        $stg_gstartdate = null,
-        $stg_genddate = null,
         $stg_dealine_nbDays = 3,
         $stg_deadline_mailSent = null,
         $stg_createdBy = null,
@@ -346,8 +334,6 @@ class ProcessStage extends DbObject
         $this->forigin = $stg_forigin;
         $this->startdate = $stg_startdate;
         $this->enddated = $stg_enddated;
-        $this->gstartdate = $stg_gstartdate;
-        $this->genddate = $stg_genddate;
         $this->dealineNbDays = $stg_dealine_nbDays;
         $this->stgDeadlineMailSent = $stg_deadline_mailSent;
         $this->isFinalized = $stg_isFinalized;
@@ -573,29 +559,6 @@ class ProcessStage extends DbObject
         return $this;
     }
 
-    public function getGstartdate(): ?DateTimeInterface
-    {
-        return $this->gstartdate;
-    }
-
-    public function setGstartdate(DateTimeInterface $stg_gstartdate): self
-    {
-        $this->gstartdate = $stg_gstartdate;
-
-        return $this;
-    }
-
-    public function getGenddate(): ?DateTimeInterface
-    {
-        return $this->genddate;
-    }
-
-    public function setGenddate(DateTimeInterface $stg_genddate): self
-    {
-        $this->genddate = $stg_genddate;
-
-        return $this;
-    }
 
     public function getDealineNbDays(): ?int
     {
