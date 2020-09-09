@@ -1,6 +1,7 @@
 <?php
 namespace App\Model;
 use App\Entity\Activity;
+use App\Entity\Organization;
 use App\Entity\Participation;
 use App\Entity\Stage;
 use App\Entity\User;
@@ -149,6 +150,21 @@ class UserM extends ModelEntity {
         $pdoStatement->execute();
         return count($pdoStatement->fetchAll());
 
+    }
+
+    public function getExternalActivities(User $user, Organization $organization = null)
+    {
+        $externalActivities = new ArrayCollection;
+        $userParticipations = $this->em->getRepository(Participation::class)->findBy(['user' => $user]);
+        foreach ($userParticipations as $userParticipation) {
+            $activity = $userParticipation->getStage()->getActivity();
+            if ($organization != null && $activity->getOrganization() == $organization || $organization == null && $activity->getOrganization() != $user->getOrganization()) {
+                if (!$externalActivities->contains($activity)) {
+                    $externalActivities->add($activity);
+                }
+            }
+        }
+        return $externalActivities;
     }
 
 
