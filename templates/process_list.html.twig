@@ -61,7 +61,8 @@
         $concernedParentSelect =  (selectId  == -1) ? $('#validateProcess select') : $('select.parent-select').eq(selectId);
         $initVal =  (selectId  == -1) ? $(event.target).data('pid') : $concernedParentSelect.val();
         $('.red-text').remove();
-        const response = await fetch(url);
+        const $params = {selfId: $concernedParentSelect.closest('.element').find('[href="#deleteElement"]').data('eid') }
+        const response = await fetch(url, $params);
         const json = await response.json();
         newOptions = [];
         $.each(json.processes, function(key, process){

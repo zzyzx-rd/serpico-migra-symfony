@@ -438,13 +438,15 @@ class UserController extends MasterController
     public function getAllProcessesFromInstitution(Request $request, $orgId): JsonResponse
     {
         $repoO = $this->em->getRepository(Organization::class);
+        $selfId = $request->get('selfId');
+
         /** @var Organization */
         $organization = $repoO->findOneById($orgId);
         if($orgId != 0){
-            $institutionProcesses = $organization->getInstitutionProcesses()->filter(static function(InstitutionProcess $p){return $p->getParent() === null;});
+            $institutionProcesses = $organization->getInstitutionProcesses()->filter(static fn(InstitutionProcess $p) => $p->getParent() === null && $p->getId() != $selfId);
         } else {
             $allProcesses = new ArrayCollection($this->em->getRepository(Process::class)->findAll());
-            $institutionProcesses = $allProcesses->filter(static function(Process $p){return $p->getParent() === null;});
+            $institutionProcesses = $allProcesses->filter(static fn(Process $p) => $p->getParent() === null && $p->getId() != $selfId);
         }
         $orgIProcesses = [];
         foreach($institutionProcesses as $institutionProcess) {

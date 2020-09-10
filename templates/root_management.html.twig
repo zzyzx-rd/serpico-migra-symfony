@@ -39,7 +39,7 @@
 
 
 {% block content %}
-  {% set manage_procs = path('manageProcesses', { orgId: currentuser.organization.id }) %}
+  {% set manage_procs = path('manageProcesses', { orgId: 0 }) %}
   {% set manage_orgs = path('manageOrganizations') %}
   <section>
     <a class="btn-large waves-effect waves-light teal" href="{{ manage_procs }}">

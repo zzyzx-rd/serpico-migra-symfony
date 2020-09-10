@@ -1426,7 +1426,7 @@ class Activity extends DbObject
         $array = $this->stages->getValues();
         usort($array, function($first, $second) use ($consideredEl) {
             if($consideredEl == 'self'){
-                return (date_diff($first->getGEnddate(),$first->getGStartdate())->format('%r%a') >= date_diff($second->getEnddate(),$second->getStartdate())->format('%r%a')) ? 1 : -1;
+                return (date_diff($first->getEnddate(),$first->getStartdate())->format('%r%a') >= date_diff($second->getEnddate(),$second->getStartdate())->format('%r%a')) ? 1 : -1;
             } else {
                 return (date_diff($first->getGEnddate(),$first->getGStartdate())->format('%r%a') >= date_diff($second->getGEnddate(),$second->getGStartdate())->format('%r%a')) ? 1 : -1;
             }
