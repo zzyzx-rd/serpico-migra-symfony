@@ -182,34 +182,6 @@ class StageType extends AbstractType
                     //new EDGreaterThanSD
                 ]
             ])
-            ->add('gstartdate', DateTimeType::class,
-            [
-                'format' => 'dd/MM/yyyy',
-                'widget' => 'single_text',
-                'label_format' => 'stages.stage.%name%',
-                'html5' => false,
-                'attr' => ['class' => 'dp-gstart'],
-                //'data' => $options['startdate'],
-                'constraints' => [
-                    new Assert\NotBlank([
-                        'message' => 'A recurring activity must have a startdate'
-                    ]),
-                ]
-            ])
-
-            ->add('genddate', DateTimeType::class,
-            [
-                'format' => 'dd/MM/yyyy',
-                'widget' => 'single_text',
-                'label_format' => 'stages.stage.%name%',
-                'html5' => false,
-                'attr' => ['class' => 'dp-gend'],
-                //'data' => $options['enddate'],
-                'constraints' => [
-                    new Assert\NotBlank,
-                    //new EDGreaterThanSD
-                ]
-            ])
             ->add('mode', ChoiceType::class,
                 [
                     'label_format' => 'stages.stage.%name%',

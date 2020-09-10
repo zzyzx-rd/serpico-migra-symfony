@@ -109,6 +109,11 @@ class Criterion extends DbObject
      * @JoinColumn(name="stage_stg_id", referencedColumnName="stg_id",nullable=true)
      */
     protected $stage;
+    /**
+     * @ManyToOne(targetEntity="Output", inversedBy="criteria")
+     * @JoinColumn(name="output_out_id", referencedColumnName="otp_id",nullable=true)
+     */
+    protected $outputs;
 
     /**
      * @ManyToOne(targetEntity="Organization", inversedBy="criteria")
@@ -221,6 +226,7 @@ class Criterion extends DbObject
         $rankingTeams = null,
         $historicalRankings = null,
         $historicalRankingTeams = null,
+        $outputs = null,
         $template = null)
     {
         parent::__construct($id, $createdBy, new DateTime());
@@ -240,6 +246,7 @@ class Criterion extends DbObject
         $this->deleted = $deleted;
         $this->stage = $stage;
         $this->organization = $organization;
+        $this->participations = $participations ?: new ArrayCollection;
         $this->participants = $participations ?: new ArrayCollection;
         $this->cName = $cName;
         $this->target = $target;
@@ -250,6 +257,7 @@ class Criterion extends DbObject
         $this->rankingTeams = $rankingTeams ?: new ArrayCollection;
         $this->historicalRankings = $historicalRankings ?: new ArrayCollection;
         $this->historicalRankingTeams = $historicalRankingTeams ?: new ArrayCollection;
+        $this->outputs = $outputs  ?: new ArrayCollection;
         $this->template = $template;
     }
 
@@ -321,6 +329,16 @@ class Criterion extends DbObject
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getOutputs()
+    {
+        return $this->outputs;
+    }
+
+
 
     public function getForceCommentSign(): ?string
     {
@@ -683,6 +701,12 @@ class Criterion extends DbObject
         }
 
         return 0.7;
+    }
+
+
+    public function setTargetValue($targetValue)
+    {
+        return $this;
     }
 
     public function __toString()

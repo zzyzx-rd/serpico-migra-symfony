@@ -17,6 +17,7 @@ use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\OneToOne;
 use Doctrine\ORM\Mapping\OrderBy;
+use Model\ActivityUser;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -1356,9 +1357,44 @@ class Stage extends DbObject
     {
         return $this->getGraderParticipants()->count() > 0 && $this->getUniqueGradableParticipations()->count() > 0;
     }
+    /**
+     * @return Collection|ActivityUser[]
+     */
+    public function getUniqueGradableParticipations()
+    {
+        return $this->getUniqueParticipations()->matching(Criteria::create()->where(Criteria::expr()->neq("type", 0)));
+    }
 
+    /**
+     * @return Collection|ActivityUser[]
+     */
+    public function getUniqueParticipations()
+    {
 
+        // Depends on whether current user is part of a team
+        $eligibleParticipants = null;
+        $uniqueParticipants = new ArrayCollection;
+        $teams = [];
 
+        $eligibleParticipants = count($this->criteria) == 0 ? $this->participants : $this->criteria->first()->getParticipations();
+
+        $myParticipations = $this->getSelfParticipations();
+        $myTeam = $myParticipations->count() == 0 ? null : $myParticipations->first()->getTeam();
+
+        foreach ($eligibleParticipants as $eligibleParticipant) {
+            $currentTeam = $eligibleParticipant->getTeam();
+            if ($currentTeam == null || $currentTeam == $myTeam) {
+                $uniqueParticipants->add($eligibleParticipant);
+            } else {
+                if (!in_array($currentTeam, $teams)) {
+                    $uniqueParticipants->add($eligibleParticipant);
+                    $teams[] = $currentTeam;
+                }
+            }
+        }
+
+        return $uniqueParticipants;
+    }
 
 
 
@@ -1599,17 +1635,17 @@ class Stage extends DbObject
         $teams = [];
 
         $eligibleParticipations = count($this->criteria) === 0 ? $this->participations : $this->criteria->first()->getParticipations();
-
         $myParticipations = $this->getSelfParticipations();
         $myTeam = $myParticipations->count() === 0 ? null : $myParticipations->first()->getTeam();
-
-        foreach ($eligibleParticipations as $eligibleParticipation) {
-            $currentTeam = $eligibleParticipation->getTeam();
-            if ($currentTeam === null || $currentTeam == $myTeam) {
-                $participants->add($eligibleParticipation);
-            } else if (!in_array($currentTeam, $teams, true)) {
-                $participants->add($eligibleParticipation);
-                $teams[] = $currentTeam;
+        if($eligibleParticipations!=null) {
+            foreach ($eligibleParticipations as $eligibleParticipation) {
+                $currentTeam = $eligibleParticipation->getTeam();
+                if ($currentTeam === null || $currentTeam == $myTeam) {
+                    $participants->add($eligibleParticipation);
+                } else if (!in_array($currentTeam, $teams, true)) {
+                    $participants->add($eligibleParticipation);
+                    $teams[] = $currentTeam;
+                }
             }
         }
 

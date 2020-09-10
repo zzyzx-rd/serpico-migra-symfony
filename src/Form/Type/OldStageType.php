@@ -90,34 +90,6 @@ class OldStageType extends AbstractType
             ]
         ])
 
-        ->add('gstartdate', DateTimeType::class,
-        [
-            'format' => 'dd/MM/yyyy',
-            'widget' => 'single_text',
-            'label_format' => 'stages.stage.%name%',
-            'html5' => false,
-            'attr' => ['class' => 'dp-gstart'],
-            //'data' => $options['gstartdate'],
-            'constraints' => [
-                new Assert\NotBlank,
-                //new GSDGreaterThanSD
-            ]
-        ])
-
-        ->add('genddate', DateTimeType::class,
-        [
-            'format' => 'dd/MM/yyyy',
-            'widget' => 'single_text',
-            'label_format' => 'stages.stage.%name%',
-            'html5' => false,
-            'attr' => ['class' => 'dp-gend'],
-            //'data' => $options['genddate'],
-            'constraints' => [
-                new Assert\NotBlank,
-                //new GEDGreaterThanGSD,
-                //new GEDGreaterThanED
-            ]
-        ])
 
         ->add('weight',PercentType::class,
         [
@@ -151,8 +123,7 @@ class OldStageType extends AbstractType
         //$resolver->addAllowedTypes('standalone', 'bool');
         //$resolver->setRequired('startdate');
         //$resolver->setRequired('enddate');
-        //$resolver->setRequired('gstartdate');
-        //$resolver->setRequired('genddate');
+        
     }
 
     /*

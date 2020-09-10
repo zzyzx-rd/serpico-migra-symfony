@@ -297,7 +297,6 @@ class SearchWorkerForm extends AbstractType
         //$resolver->addAllowedTypes('standalone', 'bool');
         //$resolver->setRequired('startdate');
         //$resolver->setRequired('enddate');
-        //$resolver->setRequired('gstartdate');
     }
 
     /*

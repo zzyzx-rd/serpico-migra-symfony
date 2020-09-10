@@ -60,15 +60,10 @@
 
 
     {% if activity.status == -1 %}
-      {% set hasFeedbackExpired = activityM.hasFeedbackExpired(activity) %}
+
       {% set hasMinParticipants = activityM.hasMinimumParticipationConfig(activity) %}
       {% set hasOutput = activityM.hasMinimumOutputConfig(activity) %}
-      {% if hasFeedbackExpired %}
-        <ul class="has-barred tooltipped" data-tooltip="{{'activities.feedback_has_expired'|trans}}">
-          <i class="material-icons {% if not hasMinParticipants or not hasOutput %}m-right{% endif %}" style="font-size:20px!important">edit</i>
-          <i class="fa fa-minus barred fb-barred"></i>
-        </ul>
-      {% endif %}
+
       {% if not hasMinParticipants %}
         <ul class="has-barred tooltipped" data-tooltip="{{'activities.no_min_participation_config'|trans}}">
           <i class="fa fa-users {% if not hasOutput %}m-right{% endif %}"></i>

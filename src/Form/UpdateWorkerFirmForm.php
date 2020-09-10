@@ -157,7 +157,6 @@ class UpdateWorkerFirmForm extends AbstractType
                 'label_format' => 'worker_firm_data.%name%',
                 'html5' => false,
                 'attr' => ['class' => 'dp-gstart'],
-                //'data' => $options['gstartdate'],
                 'constraints' => [
                     new Assert\NotBlank,
                     //new GSDGreaterThanSD
