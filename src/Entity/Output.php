@@ -93,6 +93,14 @@ class Output extends DbObject
         return $this->criteria;
     }
 
+    /**
+     * @param mixed $stage
+     */
+    public function setStage($stage): void
+    {
+        $this->stage = $stage;
+    }
+
     public function addCriterion(Criterion $criterion): Output
     {
 

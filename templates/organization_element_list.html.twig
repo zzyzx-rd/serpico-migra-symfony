@@ -27,7 +27,8 @@
     <!-- Dropify -->
     <link href="{{ asset('css/dropify.min.css') }}" rel="stylesheet" type="text/css">
     <script>
-        var vurl = "{{ url('validateOrganizationElement',{'orgId': orgId,'entity': elmtType,'elmtId': 0}) }}";
+        alert(orgId);
+        var vurl = "{{ url('validateOrganizationElement',{'orgId': orgid ,'entity': elmtType,'elmtId': 0}) }}";
     </script>
   {% endblock %}
 

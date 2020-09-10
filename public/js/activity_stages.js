@@ -1049,6 +1049,7 @@ $(document).on('click','[href="#deleteStage"]', function () {
 });
 
 $(document).on('click','[href="#deleteCriterion"]', function () {
+    alert()
   $('.remove-criterion').data('cid', $(this).data('cid'));
   $('#deleteCriterion').css('z-index',9999);
 });
@@ -1136,7 +1137,7 @@ $(document).on('click', '.remove-criterion',function(e) {
       })
 
   }
-
+    alert($(this).data('cid'));
   if ($(this).data('cid')) {
 
       urlToPieces = dcurl.split('/');
@@ -1560,8 +1561,6 @@ $(document).on('click','.s-validate', function(e) {
           tmp[i+3] = tmp[i+3].split('=');
           startdateDDMMYYYY = $($("#" + $('.dp-start')[j].id)).pickadate('picker').get('select', 'dd/mm/yyyy');
           enddateDDMMYYYY = $($("#" + $('.dp-end')[j].id)).pickadate('picker').get('select', 'dd/mm/yyyy');
-          gstartdateDDMMYYYY = $($("#" + $('.dp-gstart')[j].id)).pickadate('picker').get('select', 'dd/mm/yyyy');
-          genddateDDMMYYYY = $($("#" + $('.dp-gend')[j].id)).pickadate('picker').get('select', 'dd/mm/yyyy');
           tmp[i][1] = startdateDDMMYYYY;
           tmp[i+1][1] = enddateDDMMYYYY;
           tmp[i+2][1] = gstartdateDDMMYYYY;
@@ -1733,8 +1732,6 @@ $('.stage-add .stage-fresh-new-btn').on('click',function(){
 
   $stgElmt.find('.dp-start').pickadate('picker').set('select',initStartDate);
   $stgElmt.find('.dp-end').pickadate('picker').set('select',initEndDate).set('min',initStartDate);
-  $stgElmt.find('.dp-gstart').pickadate('picker').set('select',initGStartDate).set('min',initStartDate);
-  $stgElmt.find('.dp-gend').pickadate('picker').set('select',initGEndDate).set('min',initGStartDate);
 
   $stgElmt.find('input[name*="period"]').val(15);
   $stgElmt.find('select[name*="frequency"]').val('D');

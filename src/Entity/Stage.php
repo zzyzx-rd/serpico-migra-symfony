@@ -543,27 +543,7 @@ class Stage extends DbObject
         return $this;
     }
 
-    public function getGstartdate(): ?DateTimeInterface
-    {
-        return $this->gstartdate;
-    }
 
-    public function setGstartdate(DateTimeInterface $gstartdate): self
-    {
-        $this->gstartdate = $gstartdate;
-        return $this;
-    }
-
-    public function getGenddate(): ?DateTimeInterface
-    {
-        return $this->genddate;
-    }
-
-    public function setGenddate(DateTimeInterface $genddate): self
-    {
-        $this->genddate = $genddate;
-        return $this;
-    }
 
     public function getInserted(): ?DateTimeInterface
     {
@@ -1625,6 +1605,20 @@ class Stage extends DbObject
             }
         }
         return $independantParticipants;
+    }
+    /**
+     * @return Collection|Stage[]
+     */
+    public function getSortedOutputsPerPeriod(){
+
+        $array = $this->outputs->getValues();
+        usort($array, function($first, $second)  {
+
+                return (date_diff($first->getEnddate(),$first->getStartdate())->format('%r%a') >= date_diff($second->getEnddate(),$second->getStartdate())->format('%r%a')) ? 1 : -1;
+
+        });
+        $orderedStages = new ArrayCollection($array);
+        return $orderedStages;
     }
     public function getParticipants(): ArrayCollection
     {

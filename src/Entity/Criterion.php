@@ -113,7 +113,7 @@ class Criterion extends DbObject
      * @ManyToOne(targetEntity="Output", inversedBy="criteria")
      * @JoinColumn(name="output_out_id", referencedColumnName="otp_id",nullable=true)
      */
-    protected $outputs;
+    protected $output;
 
     /**
      * @ManyToOne(targetEntity="Organization", inversedBy="criteria")
@@ -184,6 +184,7 @@ class Criterion extends DbObject
      * @param $createdBy
      * @param $deleted
      * @param $stage
+     * @param $output
      * @param $organization
      * @param $cName
      * @param $target
@@ -226,7 +227,7 @@ class Criterion extends DbObject
         $rankingTeams = null,
         $historicalRankings = null,
         $historicalRankingTeams = null,
-        $outputs = null,
+        Output $output = null,
         $template = null)
     {
         parent::__construct($id, $createdBy, new DateTime());
@@ -257,7 +258,7 @@ class Criterion extends DbObject
         $this->rankingTeams = $rankingTeams ?: new ArrayCollection;
         $this->historicalRankings = $historicalRankings ?: new ArrayCollection;
         $this->historicalRankingTeams = $historicalRankingTeams ?: new ArrayCollection;
-        $this->outputs = $outputs  ?: new ArrayCollection;
+        $this->output = $output ;
         $this->template = $template;
     }
 
@@ -336,6 +337,15 @@ class Criterion extends DbObject
     public function getOutputs()
     {
         return $this->outputs;
+    }
+
+    /**
+     * @param Output $output
+     */
+    public function setOutput(Output $output): void
+    {
+        $this->output = $output;
+
     }
 
 
@@ -708,6 +718,16 @@ class Criterion extends DbObject
     {
         return $this;
     }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getOutput(): ArrayCollection
+    {
+        return $this->output;
+    }
+
+
 
     public function __toString()
     {

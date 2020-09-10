@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Output;
 use App\Model\ActivityM;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -1167,94 +1168,108 @@ class OrganizationController extends MasterController
 
             $criterionForm = $this->createForm(CriterionType::class, $criterion, ['entity' => $entity, 'standalone' => true, 'currentUser' => $currentUser]);
             $criterionForm->handleRequest($request);
-
-            if (!$criterionForm->isValid()) {
-                $errors = $this->buildErrorArray($criterionForm);
-                return $errors;
-            } else {
-
-                if($entity == 'activity' && ($crtId == 0 || ($criterionBeforeUpgrade->getCName() != $criterion->getCName() || $criterionBeforeUpgrade->getType() != $criterion->getType()))){
-
-                    // Checking if we need to unvalidate participations (we decide to unlock all stage participations and not only the modified one)
-                    $completedStageParticipations = $element->getParticipants()->filter(function(Participation $p){
-                        return $p->getStatus() == 3;
-                    });
-
-                    if($completedStageParticipations->count() > 0){
-
-                        $recipients = [];
-                        $mailRecipientIds = [];
-                        foreach($completedStageParticipations as $completedParticipation){
-                            if(in_array($completedParticipation->getUsrId(),$mailRecipientIds) === false){
-                                $recipients[] = $completedParticipation->getDirectUser();
-                                $mailRecipientIds[] = $completedParticipation->getUsrId();
-                            }
-                            $completedParticipation->setStatus(2);
-                            $em->persist($completedParticipation);
-                        }
-                        $em->flush();
-                        $settings = ['stage' => $element, 'actElmt' => 'criterion'];
-
-                        $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'unvalidateOutputDueToChange']);
-
-                    }
-                }
-
-
-                $impactedCriteria = new ArrayCollection();
-                $outputs=$element->getOutputs();
-                foreach ($outputs->getCriteria() as $outputsCriterion){
-                    if($outputsCriterion != $criterion){$impactedCriteria->add($outputsCriterion);}
-                }
-                $sumNewWeights = 0;
-
-                foreach($impactedCriteria as $outputsCriterion){
-
-                    if($impactedCriteria->last() != $outputsCriterion){
-                        $newWeight = ($crtId == 0) ?
-                            round((1 - $criterion->getWeight()) * $outputsCriterion->getWeight(), 2) :
-                            round((1 - $criterion->getWeight()) / (1 - $criterionBeforeUpgrade->getWeight()) * $outputsCriterion->getWeight(), 2);
-
-                        $outputsCriterion->setWeight($newWeight);
-                        $sumNewWeights += $newWeight;
-                    } else {
-                        $outputsCriterion->setWeight(1 - $criterion->getWeight() - $sumNewWeights);
-                    }
-                    $em->persist($outputsCriterion);
-                }
-
-                if($crtId == 0){
-                    $outputs->addCriterion($criterion);
-                    $em->persist($outputs);
+            if ($criterionForm->isSubmitted()) {
+                if (!$criterionForm->isValid()) {
+                    $errors = $this->buildErrorArray($criterionForm);
+                    return $errors;
                 } else {
-                    $em->persist($criterion);
-                }
-                //$criterion->setStage($element);
-                $em->flush();
 
+                    if ($entity == 'activity' && ($crtId == 0 || ($criterionBeforeUpgrade->getCName() != $criterion->getCName() || $criterionBeforeUpgrade->getType() != $criterion->getType()))) {
 
-                if($crtId == 0){
-                    // In case participants were set before first criterion, we link these participations to this new criterion
-                    if(sizeof($element->getCriteria()) == 1){
-                        $unsetParticipations = $repoP->findBy(['stage' => $element, 'criterion' => null]);
-                        foreach($unsetParticipations as $unsetParticipation){
-                            $criterion->addParticipation($unsetParticipation);
-                        }
-                    } else {
-                        $firstCriterionExistingParticipations = $repoP->findBy(['stage' => $element, 'criterion' => $element->getCriteria()->first()]);
-                        foreach($firstCriterionExistingParticipations as $firstCriterionExistingParticipation){
-                            $newParticipation = clone $firstCriterionExistingParticipation;
-                            $newParticipation->setInserted(new DateTime())
-                                ->setCreatedBy($currentUser->getId());
-                            $criterion->addParticipation($newParticipation);
+                        // Checking if we need to unvalidate participations (we decide to unlock all stage participations and not only the modified one)
+                        $completedStageParticipations = $element->getParticipants()->filter(function (Participation $p) {
+                            return $p->getStatus() == 3;
+                        });
+
+                        if ($completedStageParticipations->count() > 0) {
+
+                            $recipients = [];
+                            $mailRecipientIds = [];
+                            foreach ($completedStageParticipations as $completedParticipation) {
+                                if (in_array($completedParticipation->getUsrId(), $mailRecipientIds) === false) {
+                                    $recipients[] = $completedParticipation->getDirectUser();
+                                    $mailRecipientIds[] = $completedParticipation->getUsrId();
+                                }
+                                $completedParticipation->setStatus(2);
+                                $em->persist($completedParticipation);
+                            }
+                            $em->flush();
+                            $settings = ['stage' => $element, 'actElmt' => 'criterion'];
+
+                            $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'unvalidateOutputDueToChange']);
+
                         }
                     }
-                    $em->persist($criterion);
-                    $em->flush();
-                }
 
-                $responseArray = ['message' => 'Success to add criteria!', 'cid' => $criterion->getId()];
-                return new JsonResponse($responseArray, 200);
+
+                    $impactedCriteria = new ArrayCollection();
+                    $outputs = $element->getOutputs();
+                    foreach ($outputs as $output) {
+                        foreach ($output->getCriteria() as $outputsCriterion) {
+                            if ($outputsCriterion != $criterion) {
+                                $impactedCriteria->add($outputsCriterion);
+                            }
+                        }
+                    }
+                    $sumNewWeights = 0;
+
+                    foreach ($impactedCriteria as $outputsCriterion) {
+
+                        if ($impactedCriteria->last() != $outputsCriterion) {
+                            $newWeight = ($crtId == 0) ?
+                                round((1 - $criterion->getWeight()) * $outputsCriterion->getWeight(), 2) :
+                                round((1 - $criterion->getWeight()) / (1 - $criterionBeforeUpgrade->getWeight()) * $outputsCriterion->getWeight(), 2);
+
+                            $outputsCriterion->setWeight($newWeight);
+                            $sumNewWeights += $newWeight;
+                        } else {
+                            $outputsCriterion->setWeight(1 - $criterion->getWeight() - $sumNewWeights);
+                        }
+                        $em->persist($outputsCriterion);
+                    }
+
+                    if ($crtId == 0) {
+                        if($element->getOutputs()==null){
+                            $output = new Output();
+                            $element->addOutput($output);
+                        }
+                        else{
+                            $output= $element->getOutputs();
+                        }
+
+                        $output->addCriterion($criterion);
+                        $em->persist($output);
+                    } else {
+                        $em->persist($criterion);
+                    }
+                    //$criterion->setStage($element);
+                    var_dump($criterion->getId());
+                    $em->flush();
+
+
+                    if ($crtId == 0) {
+                        // In case participants were set before first criterion, we link these participations to this new criterion
+                        if (sizeof($element->getCriteria()) == 1) {
+                            $unsetParticipations = $repoP->findBy(['stage' => $element, 'criterion' => null]);
+                            foreach ($unsetParticipations as $unsetParticipation) {
+                                $criterion->addParticipation($unsetParticipation);
+                            }
+                        } else {
+                            $firstCriterionExistingParticipations = $repoP->findBy(['stage' => $element, 'criterion' => $element->getCriteria()->first()]);
+                            foreach ($firstCriterionExistingParticipations as $firstCriterionExistingParticipation) {
+                                $newParticipation = clone $firstCriterionExistingParticipation;
+                                $newParticipation->setInserted(new DateTime())
+                                    ->setCreatedBy($currentUser->getId());
+                                $criterion->addParticipation($newParticipation);
+                            }
+                        }
+                        $em->persist($criterion);
+                        $em->flush();
+                    }
+
+                    $responseArray = ['message' => 'Success to add criteria!', 'cid' => $criterion->getId()];
+                    return new JsonResponse($responseArray, 200);
+                }
             }
         }
     }
@@ -2672,6 +2687,7 @@ class OrganizationController extends MasterController
             [
                 'elmtType' => $entity,
                 'elements' => $elements,
+                'orgid' => $organization->getId(),
                 'form'     => $manageOrganizationElementsForm->createView(),
                 'UsersWithoutOrgElement' => $organization->getUsersWithoutJobInfo($entity)
             ]);
@@ -3344,8 +3360,8 @@ class OrganizationController extends MasterController
         }
 
         $criWeight = $criterion->getWeight();
-        $stage = $criterion->getStage();
-        $stage->removeCriterion($criterion);
+        $stage = $criterion->getOutput();
+        $stage->getOutputs()->removeCriterion($criterion);
 
         $sumWeights = 0;
 

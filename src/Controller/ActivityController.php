@@ -106,8 +106,6 @@ class ActivityController extends MasterController
             ->setWeight(1)
             ->setStartdate($activityStartDate)
             ->setEnddate($activityEndDate)
-            ->setGstartdate($activityGStartDate)
-            ->setGenddate($activityGEndDate)
             ->setMode(1)
             ->setProgress(STAGE::PROGRESS_ONGOING)
             ->setCreatedBy($usrId);
@@ -183,8 +181,6 @@ class ActivityController extends MasterController
                 ->setMode(1)
                 ->setStartdate(clone $startDate)
                 ->setEnddate(clone $startDate)
-                ->setGstartdate(clone $startDate)
-                ->setGenddate(clone $startDate)
                 ->setCreatedBy($currentUserId);
 
             /*$criterion = (new Criterion)
@@ -506,6 +502,7 @@ class ActivityController extends MasterController
 
         /** @var Stage|TemplateStage|IProcessStage */
         $stage = $repoS->find($stgId);
+        var_dump($stage->getId());
         /** @var Activity|TemplateActivity|InstitutionProcess */
         $element = $entity != 'iprocess' ? $stage->getActivity() : $stage->getInstitutionProcess();
         $activityOrganization = $element->getOrganization();

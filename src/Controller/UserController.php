@@ -1598,11 +1598,7 @@ class UserController extends MasterController
         //$totalParticipations = new ArrayCollection($totalParticipations);
         $iterator = $totalParticipations->getIterator();
 
-        $iterator->uasort(function ($first, $second) use ($nowDT) {
-            $firstGEnddate = clone $first->getStage()->getGEnddate();
-            $secondGEnddate = clone $second->getStage()->getGEnddate();
-            return ($nowDT->diff($firstGEnddate)->days > $nowDT->diff($secondGEnddate)->days) ? 1 : -1;
-        });
+
 
         $totalParticipations = iterator_to_array($iterator);
 
