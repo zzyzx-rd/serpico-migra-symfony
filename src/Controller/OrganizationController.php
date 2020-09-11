@@ -81,6 +81,7 @@ use App\Entity\User;
 use App\Entity\Weight;
 use App\Entity\WorkerFirm;
 use App\Form\AddOrganizationForm;
+use App\Form\ManageProcessForm;
 use App\Repository\OrganizationRepository;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -98,6 +99,7 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Twig\Environment;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 class OrganizationController extends MasterController
 {
@@ -2723,12 +2725,8 @@ class OrganizationController extends MasterController
                 $element = new Title;
                 break;
             case 'weight':
-            $repoE   = $em->getRepository(Weight::class);
-            $element = new Weight;
-            break;
-            case 'processe':
-                $repoE   = $em->getRepository(Process::class);
-                $element = new Process;
+                $repoE   = $em->getRepository(Weight::class);
+                $element = new Weight;
                 break;
             default:
                 break;
@@ -6262,6 +6260,154 @@ class OrganizationController extends MasterController
         return new JsonResponse(['msg' => 'success'],200);
     }
 
+    // AJAX call to get all institutionProcesses in a sorted json from current firm
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @Route("/organization/json/processes", name="getIProcesses")
+     */
+    public function getAllIProcesses(Request $request): JsonResponse
+    {
+        $selfId = $request->get('selfId');
+
+        return new JsonResponse(['id' => $selfId], 200);
+
+        /** @var Organization */
+        $organization = $this->user->getOrganization();
+        $institutionProcesses = $organization->getInstitutionProcesses()->filter(static fn(InstitutionProcess $p) => $p->getParent() === null && $p->getId() != $selfId);
+        $orgIProcesses = [];
+        foreach($institutionProcesses as $institutionProcess) {
+            $children = $institutionProcess->getChildren();
+            if($institutionProcess->isGradable() || count($children)){
+                $orgIProcess = [];
+                $orgIProcess['key'] = $institutionProcess->getId();
+                $orgIProcess['value'] = $institutionProcess->getName();
+                $orgIProcess['disabled'] = $institutionProcess->isGradable() ? '' : 'disabled';
+                    $IProcessChild = [];
+                    foreach($institutionProcess->getChildren() as $child){
+                        $subchildren = $child->getChildren();
+                        if($child->isGradable() || count($subchildren)){
+                            $IProcessChild['key'] = $child->getId();
+                            $IProcessChild['value'] = $child->getName();
+                            $IProcessChild['disabled'] = $child->isGradable() == true ? '' : 'disabled';
+                            $IProcessSubChild = [];
+                            foreach($child->getChildren() as $subchild){
+                                $subsubchilden = $subchild->getChildren();
+                                if($subchild->isGradable() || count($subsubchilden)){
+                                    $IProcessSubChild['key'] = $subchild->getId();
+                                    $IProcessSubChild['value'] = $subchild->getName();
+                                    $IProcessSubChild['disabled'] = $subchild->isGradable()? '' : 'disabled';
+                                    $IProcessChild['children'][] = $IProcessSubChild;
+                                }
+                            }
+                            $orgIProcess['children'][] = $IProcessChild;
+                        }
+                    }
+                $orgIProcesses[] = $orgIProcess;
+            }
+        }
+        return new JsonResponse(['processes' => $orgIProcesses],200);
+    }
+
+    // AJAX call to get all institutionProcesses in a sorted json from current firm
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @Route("/root/json/processes", name="getProcesses")
+     * @IsGranted("ROLE_ADMIN", statusCode=403, message="You don't have access to that page")
+     */
+    public function getAllProcesses(Request $request): JsonResponse
+    {
+        $repoO = $this->em->getRepository(Organization::class);
+        $data = json_decode(file_get_contents('php://input'), true);
+        $selfId = $data ? $data['selfId'] : null;
+        $allProcesses = new ArrayCollection($this->em->getRepository(Process::class)->findAll());
+        $institutionProcesses = $allProcesses->filter(static fn(Process $p) => $p->getParent() === null && $p->getId() != $selfId);
+        
+        $orgIProcesses = [];
+        foreach($institutionProcesses as $institutionProcess) {
+            $children = $institutionProcess->getChildren();
+            if($institutionProcess->isGradable() || count($children)){
+                $orgIProcess = [];
+                $orgIProcess['key'] = $institutionProcess->getId();
+                $orgIProcess['value'] = $institutionProcess->getName();
+                $orgIProcess['disabled'] = $institutionProcess->isGradable() ? '' : 'disabled';
+                    $IProcessChild = [];
+                    foreach($institutionProcess->getChildren() as $child){
+                        $subchildren = $child->getChildren();
+                        if($child->isGradable() || count($subchildren)){
+                            $IProcessChild['key'] = $child->getId();
+                            $IProcessChild['value'] = $child->getName();
+                            $IProcessChild['disabled'] = $child->isGradable() == true ? '' : 'disabled';
+                            $IProcessSubChild = [];
+                            foreach($child->getChildren() as $subchild){
+                                $subsubchilden = $subchild->getChildren();
+                                if($subchild->isGradable() || count($subsubchilden)){
+                                    $IProcessSubChild['key'] = $subchild->getId();
+                                    $IProcessSubChild['value'] = $subchild->getName();
+                                    $IProcessSubChild['disabled'] = $subchild->isGradable()? '' : 'disabled';
+                                    $IProcessChild['children'][] = $IProcessSubChild;
+                                }
+                            }
+                            $orgIProcess['children'][] = $IProcessChild;
+                        }
+                    }
+                $orgIProcesses[] = $orgIProcess;
+            }
+        }
+        return new JsonResponse(['processes' => $orgIProcesses],200);
+    }
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return mixed
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/organization/processes", name="manageIProcesses")
+     * @IsGranted("ROLE_ADMIN", statusCode=403, message="You don't have access to that page")
+     */
+    public function manageIProcessesAction(Request $request){
+
+        $em = $this->em;
+        $repoP = $em->getRepository(Process::class);
+        $repoO = $em->getRepository(Organization::class);
+        $currentUser = $this->user;
+        $organization = $currentUser->getOrganization();
+        $process = new InstitutionProcess();
+        
+        $manageForm = $this->createForm(ManageProcessForm::class, $organization, ['standalone' => true, 'isRoot' => false]);
+        $manageForm->handleRequest($request);
+        $createForm = $this->createForm(AddProcessForm::class, $process, ['standalone' => true, 'organization' => $organization,'entity' => 'iprocess']);
+        $createForm->handleRequest($request);
+
+        $validatingProcesses = $organization->getInstitutionProcesses()->filter(function(InstitutionProcess $p){return $p->isApprovable();});
+        
+        if($validatingProcesses->count() > 0){
+            $validatingProcess = $validatingProcesses->first();
+            $validateForm = $this->createForm(AddProcessForm::class, $validatingProcess, ['standalone' => true, 'organization' => $organization, 'entity' => 'iprocess']);
+            $validateForm->handleRequest($request);
+        } else {
+            $validateForm = null;
+        }
+
+        if ($manageForm->isSubmitted() && $manageForm->isValid()) {
+            $em->flush();
+            return $this->redirectToRoute('firmSettings');
+        }
+
+        return $this->render('process_list.html.twig',
+            [
+                'isRoot' => false,
+                'form' => $manageForm->createView(),
+                'requestForm' => $createForm->createView(),
+                'validateForm' => $validateForm ? $validateForm->createView() : null,
+                'entity' => 'iprocess',
+            ]);
+    }
+
     /**
      * @param Application $app
      * @param Request $request
@@ -6270,10 +6416,10 @@ class OrganizationController extends MasterController
      * @throws OptimisticLockException
      * @Route("/{entity}/request/validate", name="validateProcessRequest")
      */
-    public function validateProcessRequestAction(Application $app, Request $request){
+    public function validateProcessRequestAction(Request $request){
         $id = $request->get('id');
         $type = $request->get('type');
-        $organization = MasterController::getAuthorizedUser()->getOrganization();
+        $organization = $this->user->getOrganization();
         
         /** @var InstitutionProcess|Process */
         $element = $type == 'p' ? $this->em->getRepository(Process::class)->find($id) : $this->em->getRepository(InstitutionProcess::class)->find($id);

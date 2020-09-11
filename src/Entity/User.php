@@ -255,6 +255,8 @@ class User extends DbObject implements  UserInterface, \Serializable
      */
     public $subordinates;
 
+    private $roles;
+
     
     /**
      * @var UploadedFile
@@ -382,6 +384,7 @@ class User extends DbObject implements  UserInterface, \Serializable
         $this->leadingDepartments = new ArrayCollection();
         $this->subordinates = new ArrayCollection();
         $this->participations = new ArrayCollection();
+        $this->roles = new ArrayCollection();
     }
 
 
@@ -1036,8 +1039,18 @@ class User extends DbObject implements  UserInterface, \Serializable
 
 
     public function getRoles(): array
-    {
-        return ['ROLE_ADMIN'];
+    {   
+
+        switch($this->role){
+            case 4 :
+                return ['ROLE_ROOT'];
+            case 3:
+                return ['ROLE_COLLABORATOR'];
+            case 2:
+                return ['ROLE_ACTIVITY_MANAGER'];
+            case 1:
+                return ['ROLE_ADMIN'];
+        }
     }
 
     public function getSalt()

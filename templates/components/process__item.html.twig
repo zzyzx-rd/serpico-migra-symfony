@@ -1,5 +1,12 @@
+{% if order == 2 %}
+    {% set cssProcessClass = "child" %}
+{% elseif order == 3 %}
+    {% set cssProcessClass = "subchild" %}
+{% else %}
+    {% set cssProcessClass = "" %}
+{% endif %}
 <li class="element">
-    <div class="process-row flex-center-sb">
+    <div class="process-row {{cssProcessClass}} flex-center-sb">
     <div class="element-data element-name" style="font-size: 17px;">
         {% if entity != 'process' and process.vars.data.process is not null %}
         <div class="element-data element-process tooltipped" data-position="top" data-tooltip="{{ process.vars.data.process.name }}" data-delay="50" style="font-size: 17px">
@@ -52,7 +59,7 @@
         <div class="">
         <ul class="flex-center">
             <li style="margin-left:auto;margin-right:10px">
-            <a class="modify waves-effect waves-light btn-flat tooltipped" data-position="top" data-tooltip="{% trans %}processes.update{% endtrans %}" data-delay="50" onclick="onAddParentClick('{{ currentuser.organization.id }}','{{k}}');onAddProcessClick('{{k}}')">
+            <a class="modify waves-effect waves-light btn-flat tooltipped" data-position="top" data-tooltip="{% trans %}processes.update{% endtrans %}" data-delay="50" onclick="onAddParentClick('{{k}}');{% if global.route == "manageIProcess" %}onAddProcessClick('{{k}}'){% endif %}">
                 <i class="fa fa-pencil-alt"></i>
             </a>
             </li>
@@ -78,7 +85,7 @@
         {% set order = order + 1 %}
         <ul class="processes">
             {% for process in childrenProcesses %}
-                {% apply escape %}{% include "components/process__item.html.twig" with {entity: entity, process: process, order: order} %} {% endapply %}
+                {% include "components/process__item.html.twig" with {entity: entity, process: process, order: order} %}
             {% endfor %}
         </ul>
     {% endif %}

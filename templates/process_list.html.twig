@@ -1,6 +1,6 @@
 {% extends "layout.html.twig" %}
 
-{% if not isRoot %}
+{% if global.route == "manageIProcesses" %}
   {% set nbFields = 4 %}
   {% set collectionForm = form.parentValidatedInstitutionProcesses %}
   {% set elmtType = 'iprocess' %}
@@ -9,9 +9,6 @@
   {% set collectionForm = form.parentValidatedProcesses %}
   {% set elmtType = 'process' %}
 {% endif %}
-
-{% set orgId = global.request.get('orgId') %}
-
 
 {% block title %}
   {% trans %}
@@ -25,13 +22,15 @@
     var upaurl = "{{ url('createUserProcessActivity',{inpId : 0}) }}";
     var cpurl = "{{ url('createProcessRequest',{orgId : 0}) }}";
     var dpurl = "{{ url('rejectProcessRequest') }}";
-    var vpurl = "{{ url('validateProcessRequest',{entity: currentuser.role == 4 ? 'process' : 'iprocess'}) }}";
-    var ipurl = "{{ url('getAllProcessesFromInstitution',{orgId : 0}) }}";
+    var vpurl = "{{ global.route =='manageIProcesses' ? url('validateIProcess',{elmtId: 0}) : url('validateProcess',{elmtId: 0}) }}";
+    var vrurl = "{{ global.route =='manageIProcesses' ? url('validateProcessRequest',{entity: global.route == 'manageIProcesses' ? 'iprocess' : 'process'}) }}";
+    var ipurl = "{{ global.route =='manageIProcesses' ? url('getIProcesses') : url('getProcesses') }}";
+    var purl = "{{ url('getProcesses') }}";
     var orgId = "{{ currentuser.organization.id }}";
-    const durl = "{{ url('deleteProcess',{orgId: orgId, entity : currentuser.role == 4 ? 'process' : 'iprocess'}) }}";
+    const durl = "{{ url('deleteProcess',{orgId: " + orgId + ", entity : global.route == 'manageIProcesses' ? 'iprocess' : 'process'}) }}";
 
     async function onAddProcessClick(selectId) {
-        const url = ipurl;
+        const url = purl;
         $concernedProcessSelect = (selectId  == -1) ? $('#requestNewProcess select') :  $('select.family-select').eq(selectId);
         $('.red-text').remove();
         const response = await fetch(url);
@@ -54,14 +53,15 @@
         $concernedProcessSelect.material_select();
     }
 
-    async function onAddParentClick(_institutionId, selectId) {
+    async function onAddParentClick(selectId) {
         const $this = $(this);
-        const url = ipurl.replace(0, _institutionId);
-        institutionId = _institutionId;
-        $concernedParentSelect =  (selectId  == -1) ? $('#validateProcess select') : $('select.parent-select').eq(selectId);
-        $initVal =  (selectId  == -1) ? $(event.target).data('pid') : $concernedParentSelect.val();
+        const url = ipurl;
+
+        $concernedParentSelect = (selectId  == -1) ? $('#validateProcess select') : $('select.parent-select').eq(selectId);
+        $initVal = (selectId  == -1) ? $(event.target).data('pid') : $concernedParentSelect.val();
         $('.red-text').remove();
-        const response = await fetch(url);
+        const $params = {selfId: $concernedParentSelect.closest('.element').find('[href="#deleteElement"]').data('eid') }
+        const response = await fetch(url, {method: 'POST', body: JSON.stringify($params)});
         const json = await response.json();
         newOptions = [];
         $.each(json.processes, function(key, process){
@@ -74,7 +74,7 @@
             })
         })
 
-        newOptions.unshift('<option value>({% trans %}processes.no_parent_heading{% endtrans %})</option>');
+        newOptions.unshift('<option value>({% trans %}processes.no_parent{% endtrans %})</option>');
         
         $concernedParentSelect.empty();
         $concernedParentSelect.html(newOptions.join(''));
@@ -145,8 +145,6 @@
         {% endtrans %}</h4>
     </div>
 
-    {% set k = -1 %}
-
     <ul class="processes" data-prototype="{% apply escape %}{% include 'prototype_process.twig' with { 'item': collectionForm.vars.prototype, 'elmtType': elmtType, 'isRoot': isRoot, 'nbFields': nbFields } %}{% endapply %}" style="margin-top:50px">
 
       {% if currentuser.organization.processes|length > 0 %}
@@ -184,16 +182,18 @@
               {% endif %}
             </a>
 
-            <a class="btn waves-green flex-center modal-trigger validate-btn" href="#validateProcess" style="margin-left: auto;" data-id="{{ pendingProcess.id }}" data-pid="{{ pendingProcess.parent ? pendingProcess.parent.id : 0 }}" data-type="{{pendingProcess.process is defined ? 'i' : 'p'}}" onclick="onAddParentClick('{{currentuser.role == 4 ? 0 : currentuser.orgId}}','-1')">
+            <a class="btn waves-green flex-center modal-trigger validate-btn" href="#validateProcess" style="margin-left: auto;" data-id="{{ pendingProcess.id }}" data-pid="{{ pendingProcess.parent ? pendingProcess.parent.id : 0 }}" data-type="{{pendingProcess.process is defined ? 'i' : 'p'}}" onclick="onAddParentClick('-1')">
               {{'pending_validation'|trans}}
               <i class="fa fa-gavel" style="margin-left: 5px;"></i>
             </a>
           </div>
         </li>
       {% endfor %}
-      
+
+      {% set k = 0 %}
       {% for key, process in collectionForm %}
-        {% include "components/process__item.html.twig" with {entity: entity, process: process, order: 1} %}
+        {% include "components/process__item.html.twig" with {entity: entity, process: process, k: k, order: 1} %}
+        {% set k = k + 1 %}
       {% endfor %}
     </ul>
 

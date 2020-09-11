@@ -427,59 +427,6 @@ class UserController extends MasterController
 
     }
 
-    // AJAX call to get all processes from a given institution
-
-    /**
-     * @param Request $request
-     * @param $orgId
-     * @return JsonResponse
-     * @Route("/institution/processes/{orgId}", name="getAllProcessesFromInstitution")
-     */
-    public function getAllProcessesFromInstitution(Request $request, $orgId): JsonResponse
-    {
-        $repoO = $this->em->getRepository(Organization::class);
-        /** @var Organization */
-        $organization = $repoO->findOneById($orgId);
-        if($orgId != 0){
-            $institutionProcesses = $organization->getInstitutionProcesses()->filter(static function(InstitutionProcess $p){return $p->getParent() === null;});
-        } else {
-            $allProcesses = new ArrayCollection($this->em->getRepository(Process::class)->findAll());
-            $institutionProcesses = $allProcesses->filter(static function(Process $p){return $p->getParent() === null;});
-        }
-        $orgIProcesses = [];
-        foreach($institutionProcesses as $institutionProcess) {
-            $children = $institutionProcess->getChildren();
-            if($institutionProcess->isGradable() || count($children)){
-                $orgIProcess = [];
-                $orgIProcess['key'] = $institutionProcess->getId();
-                $orgIProcess['value'] = $institutionProcess->getName();
-                $orgIProcess['disabled'] = $institutionProcess->isGradable() ? '' : 'disabled';
-                    $IProcessChild = [];
-                    foreach($institutionProcess->getChildren() as $child){
-                        $subchildren = $child->getChildren();
-                        if($child->isGradable() || count($subchildren)){
-                            $IProcessChild['key'] = $child->getId();
-                            $IProcessChild['value'] = $child->getName();
-                            $IProcessChild['disabled'] = $child->isGradable() == true ? '' : 'disabled';
-                            $IProcessSubChild = [];
-                            foreach($child->getChildren() as $subchild){
-                                $subsubchilden = $subchild->getChildren();
-                                if($subchild->isGradable() || count($subsubchilden)){
-                                    $IProcessSubChild['key'] = $subchild->getId();
-                                    $IProcessSubChild['value'] = $subchild->getName();
-                                    $IProcessSubChild['disabled'] = $subchild->isGradable()? '' : 'disabled';
-                                    $IProcessChild['children'][] = $IProcessSubChild;
-                                }
-                            }
-                            $orgIProcess['children'][] = $IProcessChild;
-                        }
-                    }
-                $orgIProcesses[] = $orgIProcess;
-            }
-        }
-        return new JsonResponse(['processes' => $orgIProcesses],200);
-    }
-
     /**
      * @param Request $request
      * @param $entity

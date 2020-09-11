@@ -1419,6 +1419,23 @@ class Activity extends DbObject
     }
 
 
+    /**
+     * @return Collection|Stage[]
+     */
+    public function getSortedStagesPerPeriod($consideredEl = 'self'){
+        
+        $array = $this->stages->getValues();
+        usort($array, function($first, $second) use ($consideredEl) {
+            if($consideredEl == 'self'){
+                return (date_diff($first->getEnddate(),$first->getStartdate())->format('%r%a') >= date_diff($second->getEnddate(),$second->getStartdate())->format('%r%a')) ? 1 : -1;
+            } else {
+                return (date_diff($first->getGEnddate(),$first->getGStartdate())->format('%r%a') >= date_diff($second->getGEnddate(),$second->getGStartdate())->format('%r%a')) ? 1 : -1;
+            }
+        });
+        $orderedStages = new ArrayCollection($array);
+        return $orderedStages;
+    }
+
 
     /**
     * @return ArrayCollection|Event[]

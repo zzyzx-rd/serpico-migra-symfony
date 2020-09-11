@@ -682,7 +682,7 @@ processes:
   update: Update category
   process_request_msg: Request to Serpico administrators a process family that you would need. This family will be reviewed and approved in case he would not exist
   new_family: New family
-  no_parent_category: No category
+  no_parent: No parent
   delete_modal:
     title: category deletion
     content: Are you to delete this category, and not attaching it to another category ? All related categories & activities related will be detached, but will be preserved

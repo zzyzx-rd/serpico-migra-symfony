@@ -103,29 +103,29 @@ class Process extends DbObject
     /**
      * Process constructor.
      * @param ?int$id
-     * @param $pro_name
-     * @param $pro_approvable
-     * @param $pro_gradable
-     * @param $pro_createdBy
-     * @param $pro_deleted
+     * @param $name
+     * @param $approvable
+     * @param $gradable
+     * @param $createdBy
+     * @param $deleted
      * @param $children
      * @param $stages
      */
     public function __construct(
       ?int $id = 0,
-        $pro_name = '',
-        $pro_createdBy = null,
-        $pro_gradable = true,
-        $pro_deleted = null,
-        $pro_approvable = false,
+        $name = '',
+        $createdBy = null,
+        $gradable = true,
+        $deleted = null,
+        $approvable = false,
         $children = null,
         $stages = null)
     {
-        parent::__construct($id, $pro_createdBy, new DateTime());
-        $this->name = $pro_name;
-        $this->approvable = $pro_approvable;
-        $this->gradable = $pro_gradable;
-        $this->deleted = $pro_deleted;
+        parent::__construct($id, $createdBy, new DateTime());
+        $this->name = $name;
+        $this->approvable = $approvable;
+        $this->gradable = $gradable;
+        $this->deleted = $deleted;
         $this->children = $children?:new ArrayCollection();
         $this->stages = $stages?:new ArrayCollection();
         $this->criteria = new ArrayCollection();
@@ -137,10 +137,9 @@ class Process extends DbObject
         return $this->name;
     }
 
-    public function setName(string $pro_name): self
+    public function setName(string $name): self
     {
-        $this->name = $pro_name;
-
+        $this->name = $name;
         return $this;
     }
 
@@ -149,27 +148,26 @@ class Process extends DbObject
         return $this->approvable;
     }
 
-    public function setApprovable(bool $pro_approvable): self
+    public function setApprovable(bool $approvable): self
     {
-        $this->approvable = $pro_approvable;
+        $this->approvable = $approvable;
         return $this;
     }
 
-    public function getGradable(): ?bool
+    public function isGradable(): ?bool
     {
         return $this->gradable;
     }
 
-    public function setGradable(bool $pro_gradable): self
+    public function setGradable(bool $gradable): self
     {
-        $this->gradable = $pro_gradable;
-
+        $this->gradable = $gradable;
         return $this;
     }
 
-    public function setInserted(DateTimeInterface $pro_inserted): self
+    public function setInserted(DateTimeInterface $inserted): self
     {
-        $this->inserted = $pro_inserted;
+        $this->inserted = $inserted;
 
         return $this;
     }
@@ -179,10 +177,9 @@ class Process extends DbObject
         return $this->deleted;
     }
 
-    public function setDeleted(?DateTimeInterface $pro_deleted): self
+    public function setDeleted(?DateTimeInterface $deleted): self
     {
-        $this->deleted = $pro_deleted;
-
+        $this->deleted = $deleted;
         return $this;
     }
 
@@ -198,7 +195,7 @@ class Process extends DbObject
     {
         if (!$this->activities->contains($activity)) {
             $this->activities[] = $activity;
-            $activity->setcess($this);
+            $activity->setProcess($this);
         }
 
         return $this;
@@ -209,8 +206,8 @@ class Process extends DbObject
         if ($this->activities->contains($activity)) {
             $this->activities->removeElement($activity);
             // set the owning side to null (unless already changed)
-            if ($activity->getcess() === $this) {
-                $activity->setcess(null);
+            if ($activity->getProcess() === $this) {
+                $activity->setProcess(null);
             }
         }
 

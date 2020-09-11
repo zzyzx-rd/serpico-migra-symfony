@@ -71,7 +71,7 @@ class InstitutionProcess extends DbObject
     protected ?Process $process;
     /**
      * @ManyToOne(targetEntity="User")
-     * @JoinColumn(name="masterUser_usr_id", referencedColumnName="usr_id", nullable=false)
+     * @JoinColumn(name="masterUser_usr_id", referencedColumnName="usr_id", nullable=true)
      */
     protected $masterUser;
     /**
@@ -170,7 +170,6 @@ class InstitutionProcess extends DbObject
     public function setGradable(bool $inp_gradable): self
     {
         $this->gradable = $inp_gradable;
-
         return $this;
     }
 
