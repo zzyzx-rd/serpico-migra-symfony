@@ -60,6 +60,7 @@ use App\Entity\InstitutionProcess;
 use App\Entity\Mail;
 use Symfony\Component\Form\FormFactory;
 use Symfony\Component\Routing\Annotation\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 class SettingsController extends MasterController
 {
@@ -188,30 +189,29 @@ class SettingsController extends MasterController
      * @return mixed
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/settings/organization/{orgId}/processes", name="manageProcesses")
+     * @Route("/settings/root/processes", name="manageProcesses")
+     * @IsGranted("ROLE_ROOT", statusCode=404, message="Page not found")
      */
     public function manageProcessesAction(Request $request){
         $em = $this->em;
         $repoP = $em->getRepository(Process::class);
         $repoO = $em->getRepository(Organization::class);
-        $currentUser = $this->user;;
-        $isRoot = $currentUser->getRole() == 4;
+        $currentUser = $this->user;
         $organization = $currentUser->getOrganization();
-        $process = $isRoot ?  new Process : new InstitutionProcess();
-        $entity = $isRoot ? 'process' :'iprocess';
+        $process = new Process();
+
         
-        $manageForm = $this->createForm(ManageProcessForm::class, $organization, ['standalone' => true, 'isRoot' => $isRoot]);
+        $manageForm = $this->createForm(ManageProcessForm::class, $organization, ['standalone' => true, 'isRoot' => true]);
         $manageForm->handleRequest($request);
-        $createForm = $this->createForm(AddProcessForm::class, $process, ['standalone' => true, 'organization' => $organization,'entity' => $entity]);
+        $createForm = $this->createForm(AddProcessForm::class, $process, ['standalone' => true, 'organization' => $organization,'entity' => 'process']);
         $createForm->handleRequest($request);
 
-        $validatingProcesses = $isRoot ? $organization->getProcesses()->filter(function(Process $p){return $p->isApprovable();}) :
-            $organization->getInstitutionProcesses()->filter(function(InstitutionProcess $p){return $p->isApprovable();});
-        
+        $allProcesses = new ArrayCollection($repoP->findAll());
+        $validatingProcesses = $allProcesses->filter(function(Process $p){return $p->isApprovable();});
 
         if($validatingProcesses->count() > 0){
             $validatingProcess = $validatingProcesses->first();
-            $validateForm = $this->createForm(AddProcessForm::class, $validatingProcess, ['standalone' => true, 'organization' => $organization, 'entity' => $entity]);
+            $validateForm = $this->createForm(AddProcessForm::class, $validatingProcess, ['standalone' => true, 'organization' => $organization, 'entity' => 'process']);
             $validateForm->handleRequest($request);
         } else {
             $validateForm = null;
@@ -225,14 +225,12 @@ class SettingsController extends MasterController
 
         return $this->render('process_list.html.twig',
             [
-                'isRoot' => $isRoot,
+                'isRoot' => true,
                 'form' => $manageForm->createView(),
                 'requestForm' => $createForm->createView(),
                 'validateForm' => $validateForm ? $validateForm->createView() : null,
-                'entity' => $entity,
+                'entity' => 'process',
             ]);
-
-
     }
 
     /**
@@ -244,64 +242,89 @@ class SettingsController extends MasterController
      * @return JsonResponse
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/settings/organization/{orgId}/{entity}/validate/{elmtId}", name="validateProcess")
+     * @Route("/settings/root/process/validate/{elmtId}", name="validateProcess")
+     * @IsGranted("ROLE_ROOT", statusCode=404, message="Page not found")
      */
-    public function validateProcessAction(Request $request, $elmtId, $entity, $orgId) {
-        $em = $this->em;
-        $repoO = $em->getRepository(Organization::class);
-        
+    public function validateProcessAction(Request $request, $elmtId) {
+        $em = $this->em;        
         $currentUser = $this->user;
         if (!$currentUser instanceof User) {
             return $this->redirectToRoute('login');
         }
-        $currentUserOrganization = $currentUser->getOrganization();
-        $organization = $repoO->find($orgId);
-        $repoE = ($currentUser->getRole() == 4) ? $em->getRepository(Process::class) : $em->getRepository(InstitutionProcess::class);
 
-        $elements = $repoE->findBy(['organization' => $orgId]);
+        $organization = $currentUser->getOrganization();
+        $repoP = $em->getRepository(Process::class);
+        $process = $elmtId == 0 ? new Process : $repoP->find($elmtId);
 
-        $hasPageAccess = true;
-
-        if ($currentUser->getRole() != 4 && ($organization != $currentUserOrganization || $currentUser->getRole() != 1 && $currentUser->getId() != $elmtId)) {
-            $hasPageAccess = false;
+        if ($_POST['name'] == "") {
+            return new JsonResponse(['errorMsg' => 'The process must have a name'], 500);
         }
 
-        if (!$hasPageAccess) {
-            return $this->render('errors/403.html.twig');
+        $process->setOrganization($organization);
+        $doublonProcess = $repoP->findOneByName($_POST['name']);
+
+        if (($doublonProcess == null) || ($doublonProcess == $process)) {
+            $process->setName($_POST['name'])
+                ->setParent($repoP->findOneById($_POST['parent']))
+                ->setGradable($_POST['gradable']);
+
+            $em->persist($process);
+            $em->flush();
+            return new JsonResponse(['message' => 'Success!','eid' => $process->getId()], 200);
         } else {
-
-            if ($_POST['name'] == "") {
-                return new JsonResponse(['errorMsg' => 'The process must have a name'], 500);
-            }
-
-            if ($elmtId != 0) {
-                /** @var InstitutionProcess|Process */
-                $element = $repoE->find($elmtId);
-            } else {
-                /** @var InstitutionProcess|Process */
-                $element = ($currentUser->getRole() == 4) ? new Process : new InstitutionProcess;
-                $element->setOrganization($organization);
-            }
-
-            $doublonElmt = $repoE->findOneBy(['organization' => $organization, 'name' => $_POST['name']]);
-
-            if (($doublonElmt == null) || ($doublonElmt == $element)) {
-                $element->setName($_POST['name'])
-                    ->setParent($repoE->findOneById($_POST['parent']))
-                    ->setGradable($_POST['gradable']);
-                if ($entity == 'iprocess') {
-                    $repoU = $em->getRepository(User::class);
-                    $selectedProcess = $em->getRepository(Process::class)->find($_POST['process']);
-                    $selectedMasterUser = $repoU->find($_POST['masterUser']);
-                    $element->setMasterUser($selectedMasterUser)->setProcess($selectedProcess);
-                }
-                $em->persist($element);
-                $em->flush();
-                return new JsonResponse(['message' => 'Success!','eid' => $element->getId()], 200);
-            } else {
-                return new JsonResponse(['errorMsg' => 'There is already a process having the same name !'], 500);
-            }
+            return new JsonResponse(['errorMsg' => 'There is already a process having the same name !'], 500);
         }
+    }
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $elmtId
+     * @param $elmtType
+     * @param $orgId
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/organization/process/validate/{elmtId}", name="validateIProcess")
+     * @IsGranted("ROLE_ADMIN", statusCode=404, message="Page not found")
+     */
+    public function validateIProcessAction(Request $request, $elmtId) {
+        
+        $em = $this->em;        
+        $currentUser = $this->user;
+        if (!$currentUser instanceof User) {
+            return $this->redirectToRoute('login');
+        }
+        
+        $organization = $currentUser->getOrganization();
+        $repoP = $em->getRepository(InstitutionProcess::class);
+
+        if ($_POST['name'] == "") {
+            return new JsonResponse(['errorMsg' => 'The process must have a name'], 500);
+        }
+
+        $process = $elmtId != 0 ? $repoP->find($elmtId) : new InstitutionProcess;
+        $process->setOrganization($organization);
+        
+        $doublonProcess = $repoP->findOneBy(['organization' => $organization, 'name' => $_POST['name']]);
+
+        if (($doublonProcess == null) || ($doublonProcess == $process)) {
+            $process->setName($_POST['name'])
+                ->setParent($repoP->findOneById($_POST['parent']))
+                ->setGradable($_POST['gradable']);
+          
+            $repoU = $em->getRepository(User::class);
+            $selectedProcess = $em->getRepository(Process::class)->find($_POST['process']);
+            $selectedMasterUser = $repoU->find($_POST['masterUser']);
+            $process->setMasterUser($selectedMasterUser)->setProcess($selectedProcess);
+            
+            $em->persist($process);
+            $em->flush();
+            return new JsonResponse(['message' => 'Success!','eid' => $process->getId()], 200);
+        } else {
+            return new JsonResponse(['errorMsg' => 'There is already a process having the same name !'], 500);
+        }
+        
     }
 
     /**

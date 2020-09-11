@@ -37,3 +37,9 @@ security:
             algorithm: bcrypt
             cost: 12
 #        Symfony\Component\Security\Core\User\UserTempo:
+
+    role_hierarchy:
+        ROLE_COLLABORATOR:
+        ROLE_ACTIVITY_MANAGER: [ROLE_COLLABORATOR]
+        ROLE_ADMIN: [ROLE_COLLABORATOR, ROLE_ACTIVITY_MANAGER]
+        ROLE_ROOT: [ROLE_COLLABORATOR, ROLE_ACTIVITY_MANAGER, ROLE_ADMIN]

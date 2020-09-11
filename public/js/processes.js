@@ -21,8 +21,8 @@ $(function () {
         e.preventDefault();
         $curRow = $(this).closest('.process-row');
         $curRow.find('.red-text').remove();
-        $inputName = $curRow.find('input[name*="name"]').val();
-        name = $inpuName.val();
+        $inputName = $curRow.find('input[name*="name"]');
+        name = $inputName.val();
         gradable = $curRow.find('[name*="gradable"]').is(':checked') ? 1 : 0;
         masterUser = $curRow.find('select[name*="masterUser"]').val();
         parent = $curRow.find('select[name*="[parent]"]').val();
@@ -33,12 +33,10 @@ $(function () {
         //$('form[name^="add"]').find('input[name*="name"]').val($inputName.val());
         const params = {name: name, gradable: gradable, masterUser: masterUser, process: process, parent: parent}
         eid = $(this).closest('.process-row').find('.fa-trash').closest('a').data('eid');
-        urlToPieces = window.location.pathname.split('/');
-        urlToPieces[urlToPieces.length - 1] = urlToPieces[urlToPieces.length - 1].slice(0, -2);
-        urlToPieces.push('validate', eid);
-
-        vurl = urlToPieces.join('/');
-        const $post = $.post(vurl, params);
+        urlToPieces = vpurl.split('/');
+        urlToPieces[urlToPieces.length - 1] = eid;
+        url = urlToPieces.join('/');
+        const $post = $.post(url, params);
         $post.done(data => {
             location.reload();
             return;
@@ -117,7 +115,7 @@ $(function () {
 
         $collectionHolder.append($newFormLi);
         $newFormLi.find('select').material_select();
-        onAddParentClick(orgId, $('select.parent-select').length - 1);
+        onAddParentClick($('select.parent-select').length - 1);
         onAddProcessClick($('select.parent-select').length - 1);
         $('.floating-add').addClass('fixed-action-btn').removeClass('floating-add');
     }
@@ -201,7 +199,7 @@ $(function () {
                 })
         } else {
             data = $('#validateProcess form').serialize() + '&' + $.param(params);
-            $.post(vpurl,data)
+            $.post(vrurl,data)
                 .done(function(data){
                     location.reload();
                 })

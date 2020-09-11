@@ -738,7 +738,7 @@ processes:
   update: Modifier la catégorie
   process_request_msg: Demandez à rajouter une nouvelle famille aux administrateurs de Serpico, qui répondront à votre demande
   new_family: Nouvelle famille
-  no_parent_category: Aucune catégorie
+  no_parent: Pas de parent
   delete_modal:
     title: Suppression de catégorie
     content: Etes-vous sûr de supprimer cette catégorie, sans la rattacher à une autre ? Toutes les catégories et activités liées en seront détachées, mais seront préservées
