@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+
 html {
   --child-nesting: 2rem;
   --nesting-gap: 1.5em;
@@ -6,10 +8,20 @@ html {
   overflow-y: scroll;
   background-color: #fff;
   color: #000;
+  font-family: Poppins;
+  font-weight: 400;
 }
 
 body[style="overflow: hidden;"] {
   height: 100vh;
+}
+
+.dd-bg-color{
+  background-color: #341f56;
+}
+
+.btn,.btn-large{
+  background-color: #55318e!important;
 }
 
 .sm-right{

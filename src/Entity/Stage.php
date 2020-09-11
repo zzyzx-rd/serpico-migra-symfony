@@ -378,8 +378,6 @@ class Stage extends DbObject
         $this->weight = $weight;
         $this->startdate = new DateTime;
         $this->enddate = new DateTime;
-        $this->gstartdate = new DateTime;
-        $this->genddate = new DateTime;
         $this->deadlineNbDays = $deadlineNbDays;
         $this->deadlineMailSent = $deadlineMailSent;
         $this->isFinalized = false;
@@ -1403,34 +1401,31 @@ class Stage extends DbObject
         return $teamParticipants;
     }
 
-    public function getStartdateDay($consideredEl = 'self')
+    public function getStartdateDay()
     {
-        $startDate = $consideredEl == 'self' ? $this->startdate : $this->gstartdate;
-        $year = $startDate->format('Y');
-        $month = $startDate->format('m');
-        $day = $startDate->format('d');
+        $year = $this->startdate->format('Y');
+        $month = $this->startdate->format('m');
+        $day = $this->startdate->format('d');
         return (int) date("z",mktime("12","00","00",(int)$month,(int)$day,(int)$year));
     }
 
-    public function getPeriod($consideredEl = 'self')
+    public function getPeriod()
     {
-        $startDate = $consideredEl == 'self' ? $this->startdate : $this->gstartdate;
-        $endDate = $consideredEl == 'self' ? $this->enddate : $this->genddate;
-        $diff = $startDate->diff($endDate)->format("%a");
+        $diff = $this->startdate->diff($this->enddate)->format("%a");
         return $diff;
     }
 
     /**
      * @return Collection|Stage[]
      */
-    public function getEmbeddedStages($consideredEl = 'self'){
-        $sortedByPeriodStages = $this->activity->getSortedStagesPerPeriod($consideredEl);
+    public function getEmbeddedStages(){
+        $sortedByPeriodStages = $this->activity->getSortedStagesPerPeriod();
         $embeddedStages = new ArrayCollection;
         foreach($sortedByPeriodStages as $key => $sortedByPeriodStage){
             if($key <= $sortedByPeriodStages->indexOf($this)){
                 continue;
             } else {
-                if($this->getStartdateDay() - 3 < $sortedByPeriodStage->getStartdateDay($consideredEl) && $sortedByPeriodStage->getStartdateDay($consideredEl) + $sortedByPeriodStage->getPeriod($consideredEl) < $this->getStartdateDay($consideredEl) + $this->getPeriod($consideredEl) + 3){
+                if($this->getStartdateDay() - 3 < $sortedByPeriodStage->getStartdateDay() && $sortedByPeriodStage->getStartdateDay() + $sortedByPeriodStage->getPeriod() < $this->getStartdateDay() + $this->getPeriod() + 3){
                     $embeddedStages->add($sortedByPeriodStage);
                 } else {
                     break;

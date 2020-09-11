@@ -139,7 +139,7 @@ class MailController extends MasterController {
             $mailTemplate = $twig->load('mails/' . $actionType . '.html.twig');
             $mailingEmailAddress = $recipientUsers ? $recipient->getEmail() : $recipient;
 
-            $email->from(new Address('no-reply@serpicoapp.com','Serpico'))
+            $email->from(new Address('no-reply@dealdrive.lu','Dealdrive'))
                 ->to($mailingEmailAddress)
                 ->subject($mailTemplate->renderBlock('subject', $data));
                 
