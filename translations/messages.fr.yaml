@@ -747,6 +747,7 @@ processes:
 
 
 process_stages:
+  output_add: Ajouter un retour programmé
   save_survey: Vos choix seront sauvegardés, vous devrez les valider par la suite pour qu'ils soient pris en compte.
   submit: Sauvegarder
   approvable: Ce process doit être validé avant que les requérants puissent accéder aux feedbacks / évaluations
@@ -2258,7 +2259,8 @@ survey:
   multiple_choice: Choix multiples
   linear_scale: Échelle linéaire
 
-
+output:
+  add_btn_internal: Ajouer un retour programmé
 criteria:
   hard_group_name: Hard skills
   soft_group_name: Soft skills

@@ -358,8 +358,10 @@ $(document).on(
   'click', '.btn-add-criterion',
   function() {
     const $this = $(this);
-    const $section = $this.closest('section');
-    const $criteriaList = $section.find('ul.criteria-list');
+    const $section = $this.closest('div.modal');
+      console.log($section);
+
+      const $criteriaList = $section.find('.output-criteria');
 
     if ($criteriaList.children('.new').length) {
       return;

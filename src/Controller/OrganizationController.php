@@ -6477,6 +6477,7 @@ class OrganizationController extends MasterController
         }
         $element = $repoE->find($elmtId);
         $element->currentUser = $this->user;
+
         $activityElementForm = $this->createForm(
             ActivityElementForm::class,
             $element,

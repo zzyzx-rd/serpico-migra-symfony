@@ -230,54 +230,83 @@
                   <i class="material-icons right">edit</i> {{'activity_elements.modify_stage_btn'|trans}}
                 </a>
               </div>
+              <section>
 
-              <section class="criteria">
-                
-                <template class="criteria-list--item__proto">
-                  {%
-                    include "components/activity_page__criterion_item.html.twig"
-                    with { s: s, c: "__crtNb__", criterion: stage.criteria.vars.prototype }
-                  %}
-                </template>
-                
-                <header>
-                  <ul class="tabs output-tabs tabs-fixed-width">
-                    <li class="tab criteria-tab">
-                      <a href="#stage-{{s}}-type--criteria">{{ 'activity_elements.criteria'|trans }}</a>
-                    </li>
-                    <li class="tab survey-tab">
-                      <a href="#stage-{{s}}-type--survey">{{ 'activity_elements.survey'|trans }}</a>
-                    </li>
-                  </ul>
-                </header>
-                <div id="stage-{{s}}-type--criteria">
-                  <ul class="criteria-list">
-                    <template class="criteria-list--item__proto">
-{#                      {% include "modals/stage_criterion.html.twig" with { s: '__stgNb__', c: '__crtNb__', criterion: stage.criteria.vars.prototype } %}#}
-                    </template>
+
+                    <a
+                            href="#outputModal" class=" btn-flat  modal-trigger "
+                            data-tooltip="{% trans %}process_stages.output_add{% endtrans %}">
+                      <i class="material-icons left">add</i>
+                      {{ 'output.add_btn_internal'|trans }}
+                    </a>
+
+
+
+
+                <div id="outputModal" class="modal" style="width: 50%;height: 60%">
+                  <div class="modal-title">
+                    <h5>Ajouter un Survey ou des critère </h5>
+                  </div>
+                  <div class="modal-footer" style="text-align: left">
+                    <section class="criteria">
+                      <header>
+                        <ul class="tabs output-tabs tabs-fixed-width">
+                          <li class="tab criteria-tab">
+                            <a href="#stage-{{s}}-type--criteria">{{ 'activity_elements.criteria'|trans }}</a>
+                          </li>
+                          <li class="tab survey-tab">
+                            <a href="#stage-{{s}}-type--survey">{{ 'activity_elements.survey'|trans }}</a>
+                          </li>
+                        </ul>
+                      </header>
+
+                      <div id="stage-{{s}}-type--criteria">
+                        <ul class="criteria-list">
+                    <button class="btn-flat btn-add-criterion">
+                      <i class="material-icons left">add</i>
+                      {{ 'criteria.add_btn_internal'|trans }}
+                    </button>
+                    <div class="output-criteria">
+                      <template class="criteria-list--item__proto">
+                        {%
+                          include "components/activity_page__criterion_item.html.twig"
+                          with { s: s, c: "__crtNb__", criterion: stage.criteria.vars.prototype }
+                        %}
+                      </template>
+
+                      <template class="criteria-list--item__proto">
+                        {#                      {% include "modals/stage_criterion.html.twig" with { s: '__stgNb__', c: '__crtNb__', criterion: stage.criteria.vars.prototype } %}#}
+                      </template>
                     {% for c, criterion in stage.criteria %}
                       {% include "components/activity_page__criterion_item.html.twig" with { s: s, c: c, criterion: criterion } %}
+                    {% endfor %}
+                          <li class="no-items-placeholder">
+                            <p>
+                              {{ 'process_stages.no_criteria'|trans }}
+                            </p>
+                            <p>
+                              {{ 'process_stages.tooltip_no_criteria'|trans }}
+                            </p>
+                          </li>
+                    </div>
+                        </ul>
+
+
+
+                      </div>
+                    </section>
+                    </div>
+
+                </div>
+
+                    {% for o, output in stage.vars.data.outputs %}
+                      {% include "components/activity_page__output_item.html.twig" with { s: s, c: c, criterion: criterion } %}
                     {% endfor %}
                     {#
                       This item only displays when not preceeded with any element,
                       through CSS direct sibling selector.
                     #}
-                    <li class="no-items-placeholder">
-                      <p>
-                        {{ 'process_stages.no_criteria'|trans }}
-                      </p>
-                      <p>
-                        {{ 'process_stages.tooltip_no_criteria'|trans }}
-                      </p>
-                    </li>
-                  </ul>
-                  <footer>
-                    <button class="btn-flat btn-add-criterion">
-                      <i class="material-icons left">add</i>
-                      {{ 'criteria.add_btn_internal'|trans }}
-                    </button>
-                  </footer>
-                </div>
+
                 <div id="stage-{{s}}-type--survey">
                   {% if stage.vars.data.survey|length != null %}
                     <h6>Gérer le sondage</h6>
@@ -351,6 +380,24 @@
                 </template>
                 <header>{{ 'activity_elements.participants'|trans }}</header>
                 <ul class="participants-list">
+                  <div class="action-buttons" style="justify-content: space-between;padding-top:0">
+                    {% if form.vars.data.organization.externalUsers|length > 0 %}
+                      <button type="button" class="btn-flat btn-add-participant-e no-padding">
+                        <i class="material-icons left">add</i>
+                        {{ 'participants.add_btn_partner'|trans }}
+                      </button>
+                    {% endif %}
+                    {% if form.vars.data.organization.teams|length > 0 %}
+                      <button type="button" class="btn-flat btn-add-participant-t no-padding">
+                        <i class="material-icons left">add</i>
+                        {{ 'participants.add_btn_team'|trans }}
+                      </button>
+                    {% endif %}
+                    <button type="button" class="btn-flat btn-add-participant-i no-padding">
+                      <i class="material-icons left">add</i>
+                      {{ 'participants.add_btn_collab'|trans }}
+                    </button>
+                  </div>
                   {% for participant in stage.intParticipants %}
                     {% include "components/activity_page__participant_item.html.twig" with { participant: participant, leadingOption: true, mode: 'i', entity: 'user' } %}
                   {% endfor %}
@@ -361,24 +408,7 @@
                     {% include "components/activity_page__participant_item.html.twig" with { participant: participant, leadingOption: false, mode: 'e', entity: 'user' } %}
                   {% endfor %}
                 </ul>
-                <footer class="action-buttons" style="justify-content: space-between;padding-bottom:0">
-                  {% if form.vars.data.organization.externalUsers|length > 0 %}
-                    <button type="button" class="btn-flat btn-add-participant-e no-padding">
-                      <i class="material-icons left">add</i>
-                      {{ 'participants.add_btn_partner'|trans }}
-                    </button>
-                  {% endif %}
-                  {% if form.vars.data.organization.teams|length > 0 %}
-                    <button type="button" class="btn-flat btn-add-participant-t no-padding">
-                      <i class="material-icons left">add</i>
-                      {{ 'participants.add_btn_team'|trans }}
-                    </button>
-                  {% endif %}
-                  <button type="button" class="btn-flat btn-add-participant-i no-padding">
-                    <i class="material-icons left">add</i>
-                    {{ 'participants.add_btn_collab'|trans }}
-                  </button>
-                </footer>
+
               </section>
             </div>
           </section>

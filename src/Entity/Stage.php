@@ -378,8 +378,6 @@ class Stage extends DbObject
         $this->weight = $weight;
         $this->startdate = new DateTime;
         $this->enddate = new DateTime;
-        $this->gstartdate = new DateTime;
-        $this->genddate = new DateTime;
         $this->deadlineNbDays = $deadlineNbDays;
         $this->deadlineMailSent = $deadlineMailSent;
         $this->isFinalized = false;
@@ -395,6 +393,7 @@ class Stage extends DbObject
         $this->results = new ArrayCollection;
         $this->projectResults = new ArrayCollection;
         $this->rankings = new ArrayCollection;
+        $this->outputs = new ArrayCollection;
         $this->historicalRankings = new ArrayCollection;
         $this->resultTeams = new ArrayCollection;
         $this->rankingTeams = new ArrayCollection;
@@ -1414,9 +1413,9 @@ class Stage extends DbObject
 
     public function getPeriod($consideredEl = 'self')
     {
-        $startDate = $consideredEl == 'self' ? $this->startdate : $this->gstartdate;
-        $endDate = $consideredEl == 'self' ? $this->enddate : $this->genddate;
-        $diff = $startDate->diff($endDate)->format("%a");
+
+
+        $diff = $this->startdate->diff($this->enddate)->format("%a");
         return $diff;
     }
 

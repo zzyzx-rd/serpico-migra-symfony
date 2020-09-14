@@ -691,6 +691,7 @@ processes:
 
 
 process_stages:
+  output_add: Add output
   save_survey: Your choices will be saved, you have to valide them later to be taken in account.
   approvable: This process requires to be validated internally prior to starting feedbacks & evaluation
   no_participants: No participants involved
@@ -2155,7 +2156,8 @@ survey:
   check_case: Checkboxes
   multiple_choice: Multiple choice
   linear_scale: Linear scale
-
+output:
+  add_btn_internal: Add output
 criteria:
   page_title: Activity criteria
   mobile_header_description: Activity criteria
