@@ -83,7 +83,7 @@ $(function () {
     $(e).css({'left': Math.round(10000 * (c / tDays )) / 100 + '%' });
   });
   $('.activity-content-stage').css({
-    'background' : 'repeating-linear-gradient(90deg, #0096882b, #0096886b '+ centralElWidth / 12 +'px, #ffffff '+ centralElWidth / 12 +'px, #ffffff '+ centralElWidth / 6 +'px)'
+    'background' : 'repeating-linear-gradient(90deg, #f3ccff2b, #63009445 '+ centralElWidth / 12 +'px, #ffffff '+ centralElWidth / 12 +'px, #ffffff '+ centralElWidth / 6 +'px)'
   });
 
   $(window).on('resize',function(){
@@ -96,7 +96,7 @@ $(function () {
         $(e).css({'left': Math.round(10000 * (c / tDays )) / 100 + '%' });
       });
       $('.activity-content-stage').css({
-        'background' : 'repeating-linear-gradient(90deg, #0096882b, #0096886b '+ centralElWidth / 12 +'px, #ffffff '+ centralElWidth / 12 +'px, #ffffff '+ centralElWidth / 6 +'px)'
+        'background' : 'repeating-linear-gradient(90deg, #f3ccff2b, #63009445 '+ centralElWidth / 12 +'px, #ffffff '+ centralElWidth / 12 +'px, #ffffff '+ centralElWidth / 6 +'px)'
       });
     //}, 200);
   });
@@ -123,7 +123,7 @@ $(function () {
 
       $(this).css({'margin-left': Math.round(10000 * sPctWidthSD) / 100 + "%",
         'width': Math.round(10000 * sPctWidthP) / 100 + "%",
-        'background' : ssd >= c ? '#5CD08F' : (ssd + sp > c ? 'linear-gradient(to right, transparent, transparent ' + Math.round(10000 * (c - ssd) / sp) / 100 + '%, #16AFB7 '+ Math.round(10000 * (c - ssd) / sp) / 100 +'%), repeating-linear-gradient(61deg, #16AFB7, #16AFB7 0.5rem, transparent 0.5px, transparent 1rem)' : 'gray'),
+        'background' : ssd >= c ? '#5CD08F' : (ssd + sp > c ? 'linear-gradient(to right, transparent, transparent ' + Math.round(10000 * (c - ssd) / sp) / 100 + '%, #7942d0 '+ Math.round(10000 * (c - ssd) / sp) / 100 +'%), repeating-linear-gradient(61deg, #7942d0, #7942d0 0.5rem, transparent 0.5px, transparent 1rem)' : 'gray'),
         'height' : '7px',
         'border-radius' : '0.3rem',  
       });

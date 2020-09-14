@@ -17,10 +17,12 @@
             <i class="material-icons">access_time</i>
             <span>{{ stage.startdate|format_datetime('short', 'none', pattern='dd/MM') }} - {{ stage.enddate|format_datetime('short', 'none', pattern='dd/MM') }}</span>
           </ul>
+          {#
           <ul class="flex-center">
             <i class="material-icons">send</i>
             <span>{{ stage.gstartdate|format_datetime('short', 'none', pattern='dd/MM') }} - {{ stage.genddate|format_datetime('short', 'none', pattern='dd/MM') }}</span>
           </ul>
+          #}
         </ul>
       </li>
     </ul>

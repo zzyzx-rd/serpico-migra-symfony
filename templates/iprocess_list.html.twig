@@ -45,7 +45,7 @@
   <link rel="stylesheet" href="{{ asset('css/iprocess_list.css') }}">
   <link rel="stylesheet" href="{{ asset('css/dropify.min.css') }}">
   <script>
-    var ipurl = "{{ url('getAllProcessesFromInstitution',{orgId : 0}) }}";
+    var ipurl = "{{ url('getIProcesses') }}";
     var gcurl = "{{ url('getElementConfig', {entity:'activity', elmtId : 0}) }}";
     var gsurl = "{{ url('getGradableStages', {actId : 0}) }}";
     var aurl = "{{ url('createUserProcessActivity', { inpId: 0 }) }}";
@@ -1004,13 +1004,13 @@
 {% block content %}
   <main>
 
-    {% if currentuser.role == 1 %}
+    {% if is_granted('ROLE_ADMIN') %}
       <div class="modal-footer action-buttons">
         <div class="button-field">
           {% if global.route == "myActivities" %}
-              <a href="{{ url('processesList') }}" class="btn-large waves-effect waves-light teal lighten-1" style="margin:20px 0px 0px 0px">{% trans %}activities.firm_activities{% endtrans %}</a>
+              <a href="{{ url('processesList') }}" class="btn-large waves-effect waves-light" style="margin:20px 0px 0px 0px">{% trans %}activities.firm_activities{% endtrans %}</a>
           {% else %}
-              <a href="{{ url('myActivities') }}" class="btn-large waves-effect waves-light teal lighten-1" style="margin:20px 0px 0px 0px">{% trans %}activities.my_activities{% endtrans %}</a>
+              <a href="{{ url('myActivities') }}" class="btn-large waves-effect waves-light" style="margin:20px 0px 0px 0px">{% trans %}activities.my_activities{% endtrans %}</a>
           {% endif %}
         </div>
       </div>

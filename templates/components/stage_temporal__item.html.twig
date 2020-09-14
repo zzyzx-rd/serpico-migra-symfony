@@ -9,8 +9,8 @@
 
     <section class="stage-container completed-stages-container"></section>
     
-      {% set startdate = dateType == 's' ? stage.startdate : stage.gstartdate %}
-      {% set enddate = dateType == 's' ? stage.enddate : stage.genddate %}
+      {% set startdate = dateType == 's' ? stage.startdate : stage.startdate %}
+      {% set enddate = dateType == 's' ? stage.enddate : stage.enddate %}
   
       {% set diffDays = startdate.diff(enddate) %}
   

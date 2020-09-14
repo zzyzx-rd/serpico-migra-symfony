@@ -42,12 +42,12 @@
 
   <body>
     <div class="page-container">
-      <nav id="nav" class="black">
+      <nav id="nav" class="dd-bg-color">
         <div class="nav-wrapper">
           <ul>
             {% if is_granted('IS_AUTHENTICATED_REMEMBERED') and global.currentuser is not null %}
               <li class="logo">
-                <a href="/"><img src="{{ asset('lib/img/logo_l.svg') }}"></a>
+                <a href="/"><img src="{{ asset('lib/img/logo_dd_l.png') }}"></a>
               </li>
               <li>
                 <a href="{{ path('help') }}">
@@ -56,7 +56,7 @@
                 </a>
               </li>
               {% if global.currentuser.is_root %}
-                <li class="firm">
+                <li class="orange darken-2">
                   <a href="{{ path('rootManagement') }}">
                     <i class="fa fa-cogs" aria-hidden="true"></i>
                     <span>{% trans %}header.root_mgt{% endtrans %}</span>
@@ -64,7 +64,7 @@
                 </li>
               {% endif %}
               {% if global.currentuser.is_admin %}
-                <li class="firm">
+                <li class="orange darken-2">
                   <a href="{{ path('firmSettings') }}">
                     <i class="fa fa-cog" aria-hidden="true"></i>
                     <span>{% trans %}header.settings{% endtrans %}</span>
@@ -93,7 +93,7 @@
                   </a>
                 </li>
               {% endif %}
-              <li class="firm">
+              <li class="orange darken-2">
                 <a href="{{ path('myActivities') }}">
                   <i class="fa fa-briefcase" aria-hidden="true"></i>
                   <span>
