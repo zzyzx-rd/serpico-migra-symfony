@@ -6,7 +6,7 @@
 
 {% set type = output_model ? output_model.type : '__type__' %}
 <div class="output-item">
-<div class=" row" style="display: flex;align-items: center ;color: #55308e">
+<div class=" flex-center-sb row" style="color: #55308e">
 {% if type == 2 %}
 
     <h7> Formulaire </h7>
@@ -16,7 +16,8 @@
 {% endif %}
 
 <i class="fas fa-clock" style="margin-left: 20%"></i>
-<div >08/10-</div>
+<div >08/10</div>
+<div> - </div>
 <div>10/10</div>
 </div>
     <div id="stage-{{s}}-type--criteria">
