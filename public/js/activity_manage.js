@@ -1,3 +1,78 @@
+
+function initPickates(){
+  switch(lg){
+    case 'fr':
+        $.extend($.fn.pickadate.defaults, {
+            monthsFull: ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'],
+            monthsShort: [ 'Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aou', 'Sep', 'Oct', 'Nov', 'Dec' ],
+            weekdaysFull: [ 'Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi' ],
+            weekdaysShort: [ 'Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam' ],
+            today: 'Aujourd\'hui',
+            clear: 'Effacer',
+            close: 'Fermer',
+            firstDay: 1,
+            //format: 'dd mmmm yyyy',
+        });
+        break;
+    case 'es':
+        $.extend($.fn.pickadate.defaults, {
+            monthsFull: [ 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre' ],
+            monthsShort: [ 'ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic' ],
+            weekdaysFull: [ 'domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado' ],
+            weekdaysShort: [ 'dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb' ],
+            today: 'hoy',
+            clear: 'borrar',
+            close: 'cerrar',
+            firstDay: 1,
+            //format: 'dddd d !de mmmm !de yyyy',
+        });
+        break;
+    case 'pt':
+        $.extend($.fn.pickadate.defaults, {
+            monthsFull: [ 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro' ],
+            monthsShort: [ 'jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez' ],
+            weekdaysFull: [ 'Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado' ],
+            weekdaysShort: [ 'dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab' ],
+            today: 'Hoje',
+            clear: 'Limpar',
+            close: 'Fechar',
+            firstDay: 1,
+            //format: 'd !de mmmm !de yyyy',
+        });
+        break;
+    default:
+        break;
+  
+  }
+  
+  
+  $.extend($.fn.pickadate.defaults, {
+    selectMonths: true,
+    selectYears: 5,
+    yearend: '31/12/2020',
+    closeOnSelect: true,
+    clear: false,
+    //format : 'dd MMMM, yyyy',
+    //formatSubmit: 'yyyy/mm/dd'
+  });
+  
+  $('.dp-start, .dp-end, .dp-gstart, .dp-gend').each(function() {
+    $(this).pickadate();
+  });
+}
+
+initPickates();
+
+var startCal = $('#createActivity').find('.dp-start');
+var endCal = $('#createActivity').find('.dp-end');
+var startDateTS = (startCal.val() == "") ? Date.now() : new Date(startCal.val());
+var endDateTS = (endCal.val() == "") ? startDateTS : new Date(endCal.val());
+var startDate = new Date(startDateTS);
+var endDate = new Date(endDateTS);
+
+startCal.pickadate('picker').set('select',startDate);
+endCal.pickadate('picker').set('select',endDate).set('min',startDate);
+
 function initETIcons() {
   const $stylizableSelects = $('#updateEvent select');
   $stylizableSelects.find('option').each(function (_i, e) {
@@ -391,7 +466,8 @@ $('.process-request').on('click',function(e){
       });
 });
 
-
+$('[href="#createActivity"]').on('click',function(){
+  $('.setup-activity').prepend('<i class="fa fa-cog sm-right"></i>')/*.append('<i class="fa fa-question-circle sm-left"></i>')*/;
 });
 
 $('.stages-holder').on('mouseenter',function(){
@@ -424,40 +500,166 @@ $('.stages-holder').on('mouseenter',function(){
 })
 */
 
-$('[href="#updateEvent"]').on('click',function(){
-  initETIcons();
-  $('.event-element-name').empty().append($(this).closest('.act-info').find('.act-info-name').text());
-  $('.update-event-btn').attr('data-aid',$(this).attr('data-aid'));
-  $('.update-event-btn').attr('data-sid',$(this).attr('data-sid'));
-  $('.update-event-btn').attr('data-ms',$(this).attr('data-ms'));
-  $('.update-event-btn').attr('data-eid',$(this).hasClass('btn-floating') ? 0 : $(this).attr('data-eid'));
-})
+  $('[href="#updateEvent"]').on('click',function(){
+    initETIcons();
+    $('.event-element-name').empty().append($(this).closest('.act-info').find('.act-info-name').text());
+    $('.update-event-btn').attr('data-aid',$(this).attr('data-aid'));
+    $('.update-event-btn').attr('data-sid',$(this).attr('data-sid'));
+    $('.update-event-btn').attr('data-ms',$(this).attr('data-ms'));
+    $('.update-event-btn').attr('data-eid',$(this).hasClass('btn-floating') ? 0 : $(this).attr('data-eid'));
+  })
+
+  $('.insert-document-btn, .insert-comment-btn').on('click',function(e){
+    e.preventDefault();
+    $holder = $(this).hasClass('insert-comment-btn') ? $('ul.comments') : $('ul.documents');
+    $newProto = $($holder.data('prototype'));
+    if($(this).hasClass('insert-document-btn')){
+      $newProto.find('.dropify').dropify();
+    }
+    $holder.append($newProto);
+  })
+
+  $('.update-event-btn').on('click',function(e){
+    e.preventDefault();
+    const $this = $(this);
+    const params = {sid: $this.attr('data-sid'), eid: $this.hasClass('btn-floating') ? 0 : $this.attr('data-eid'), mids: $('#partNotification').is(':checked')};
+    data = $('#updateEvent form').serialize() + '&' + $.param(params);
+    $.post(eurl,data)
+        .done(function(data){
+            location.reload();
+        })
+        .fail(function(data){
+            console.log(data);
+        })
+  })
+
+  $('.btn-participant-add').on('click',function(){
+      const $this = $(this);
+      const prototype = $('.participants-list').data('prototype');
+      var newForm = prototype
+            .replace(/__name__/g, $('.participants-list--item').length);
+      let $newForm = $(newForm);
+      $newForm.find('.validation-buttons').after('<select name="participantSelector" style="margin-top:45px"></select>');
+      $newForm.addClass('edit');
+      $this.before($newForm);
+      $('.participants-list').css('margin-bottom','60px');
+  })
+
+  $(document).on('keyup','input[name*="fullname"]',function(event){
+    var $this = $(this);
+    var $selector = $(this).closest('.participants-list--item').find('[name*="participantSelector"]');
+    $selectorMElmts = $selector.closest('.select-wrapper');
+
+    if($this.val().length >= 3 /*&& event.keyCode != 8*/){
+        //urlToPieces = surl.split('/');
+        //urlToPieces[urlToPieces.length - 1] = $(this).val();
+        //surl = urlToPieces.join('/');
+        const params = {name: $this.val()};
+        $.post(surl,params)
+            .done(function(data){
+
+                if(!data.qParts.length){
+                    $this.removeAttr('value');
+                    $selectorMElmts.hide();
+                    return false;
+                }
+                
+                $selector.closest('.select-wrapper').find('img').remove();
+                $selector.empty();
+                $.each(data.qParts,function(key,el){
+                    let elId = el.e == 'team' ? el.teaId : (el.e == 'partner' ? el.extUsrId : el.usrId);
+                    let elName = el.e == 'partner' ? el.orgName : (el.e == 'team' ? el.teaName : el.username);
+                    let elPic = el.e == 'partner' ? el.logo : (el.e == 'team' ? el.teaPicture : el.usrPicture);
+                    //$option = $(`<option class="flex-center" value=${firm.id}></option>`);
+                    //$option.append(`<img class="firm-option-logo" src="/lib/img/org/${firm.logo ? firm.logo : 'no-picture.png'}">`)
+                    //$option.append(`<span>${firm.name}</span>`);
+                    $selector.append(`<option value="${elId}" data-type="${el.e}" data-fname="${el.wfiId != currentWfiId ? el.orgName : ''}" data-wid="${data.wfiId}" data-oid="${el.orgId ? el.orgId : ""}" data-pic="${elPic ? elPic : ""}" data>${elName}</option`);
+                })
+                //el.val(selector.find(":selected").text());
+                //$selector.prepend(`<option value>(${noFirm})</option>`);
+                //$this.attr("value",$selector.find(":selected").val());
+                $selector.material_select();
+                $selectorMElmts = $selector.closest('.select-wrapper')
+                $selector.prev().find('li').each(function(i,e){
+                    logo = $selector.find('option').eq(i).attr('data-pic');
+                    elType = $selector.find('option').eq(i).attr('data-type');
+                    orgName = $selector.find('option').eq(i).attr('data-fname');
+                    folder = elType == 'partner' ? 'org' : elType;
+                    //$selector.prev().find('li').index($(e)) == 0 ? ($(e).find('span').css('color','black'), $(e).prepend(`<img class="firm-option-logo" src="/lib/img/org/new-firm.png">`)) :
+                    $(e).prepend(`<img class="firm-option-logo" src="/lib/img/${folder}/${logo ? logo : 'no-picture.png'}">`);
+                    $(e).append(`<span class="el-type">${orgName != '' && elType != 'partner' ? orgName : elType}</span>`);
+                    $(e).addClass('flex-center');
+                    //$option.append(`<span>${firm.name}</span>`);
+                    //selector.append($option);
+                });
+                //$selectorMElmts.prepend(`<img class="firm-input-logo" src="/lib/img/org/${data.workerFirms[0].logo ? data.workerFirms[0].logo : 'no-picture.png'}">`);
 
 
+                //$('select[name="firmSelector"]').eq(index).show();
+            })
+            .fail(function(data){
+               console.log(data);
+            })
+    } else {
+        //if($selectorMElmts){
+            $selectorMElmts.hide();
+        //}
+    }
+  });
 
-$('.insert-document-btn, .insert-comment-btn').on('click',function(e){
-  e.preventDefault();
-  $holder = $(this).hasClass('insert-comment-btn') ? $('ul.comments') : $('ul.documents');
-  $newProto = $($holder.data('prototype'));
-  if($(this).hasClass('insert-document-btn')){
-    $newProto.find('.dropify').dropify();
-  }
-  $holder.append($newProto);
-})
+  $(document).on('change','[name*="participantSelector"]',function(){
+      var $this = $(this);
+      var $partElmt = $this.closest('.participants-list--item');
+      var $selectedOpt = $this.find(":selected");
+      //var index = $('.participants-list--item').index($this.closest('.participants-list--item'));
+      if($this.val() != ""){
+          $partElmt.find('.tooltipped').attr('data-tooltip',$selectedOpt.text()).tooltip();
+          
+          if(!$selectedOpt.attr('data-oid')){
+            // ** AJAX CREATE CLIENT IN DB
+          }
 
-$('.update-event-btn').on('click',function(e){
-  e.preventDefault();
-  const $this = $(this);
-  const params = {sid: $this.attr('data-sid'), eid: $this.hasClass('btn-floating') ? 0 : $this.attr('data-eid'), mids: $('#partNotification').is(':checked')};
-  data = $('#updateEvent form').serialize() + '&' + $.param(params);
-  $.post(eurl,data)
+          switch($selectedOpt.attr('data-type')){
+            case 'partner':
+              $partElmt.find('input[name*="externalUser"]').attr('value',$this.val());
+              break;
+            case 'team':
+              $partElmt.find('input[name*="team"]').attr('value',$this.val());
+              break;
+            case 'user':
+              $partElmt.find('input[name*="user"]').attr('value',$this.val());
+              break;
+          }
+
+          $this.val($this.val());
+          $partElmt.removeClass('edit');
+          $partElmt.closest('.participants-list').css('margin-bottom','');
+      } else {
+          $this.val("");
+      }
+      $partElmt.find('.selected-participant-logo').attr('src', $this.prev().find('li').eq($this.find('option').index($this.find('option:selected'))).find('img').attr('src'));
+      
+      if($this.val() != ""){
+          $partElmt.find('.participant-fullname-zone').show();
+          $partElmt.find('.participant-field-zone').hide();
+      } else {
+          $this.parent().hide();
+      }
+  });
+
+  $('.create-activity').on('click',function(e){
+    e.preventDefault();
+    const $this = $(this);
+    $.post(acurl,$this.closest('form').serialize())
       .done(function(data){
-          location.reload();
+        console.log(data)
       })
       .fail(function(data){
-          console.log(data);
+        console.log(data)
       })
-})
+  })
+
+});
 
 
 

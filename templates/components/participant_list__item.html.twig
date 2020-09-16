@@ -1,0 +1,23 @@
+
+<li class="participants-list--item sm-right">
+  {#<div class="row">#}
+    <a class="participant-btn btn no-padding participant-fullname-zone tooltipped" data-position="top" data-tooltip="" style="display:none">
+      <img class="selected-participant-logo" src="{{ asset('lib/img/org/no-picture.png') }}" alt="">
+    </a>
+    <div class="input-field participant-field-zone">
+      <label for="participant-fullname">Insérez le nom du participant : Spuerkess, Didier Mouget...</label>
+      <input class="participant-fullname no-margin" name="participant-fullname" type="text">
+      <div class="flex-center validation-buttons">
+        <div class="btn-flat reduced-margin participant-delete">
+          <i class="material-icons">clear</i>
+        </div>
+        <div class="btn participant-validate">
+          <i class="material-icons">check</i>
+        </div>
+      </div>
+      {{form_widget(participant.user)}}
+      {{form_widget(participant.team)}}
+      {{form_widget(participant.externalUser)}}
+    </div>
+  {#</div>#}
+</li>

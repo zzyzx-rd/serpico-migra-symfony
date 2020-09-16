@@ -520,6 +520,12 @@ header:
   home: Home
   logout: logout
   discover: Découvrir
+  plan:
+    free: Free
+    pro: Pro
+    premium: Premium
+    enterprise: Enterprise
+    upgrade: Upgrade
 
 #footer:
 #  tc: Terms of service
@@ -1804,7 +1810,7 @@ activities:
   activity_period: "Estimated period :"
   grading_period: "Grading period :"
   progress: "Progress :"
-  participants: "Participants :"
+  participants: Participants
   define: Define
   modify: Modify
   grade: Grade
@@ -1841,9 +1847,12 @@ activities:
     available_grading_stages: Plick select stage status state to update it
 
   create:
-    modal_trg_msg: Create activity
     initialize_title: Activity creation
     uninitialize_title: Fresh new activity creation
+    modal_trg_msg: Create activity
+    modal_title: Activity creation
+    linked_to: Linked to
+    no_ip: No category
     self_msg: Do you want to create it yourself ?
     delegate_choice_title_msg: Create activity
     delegate_choice_msg: You can either create and paramater the new activity yourself, or delegate it to an activity leader
@@ -1861,6 +1870,7 @@ activities:
     activityLeader: Activity Leader
     submit: Ok
     next: Next
+    complexify: Detailed configuration
 
   request:
     modal_btn_msg: Request activity creation

@@ -47,7 +47,7 @@ class globalVar {
     public function userPicture(): string
     {
         $userPicture = $this->CurrentUser() ? $this->CurrentUser()->getPicture() : null;
-        return 'lib/img/' . ($userPicture ?: 'no-picture.png');
+        return 'lib/img/user/' . ($userPicture ?: 'no-picture.png');
     }
 
 

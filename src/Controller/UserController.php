@@ -52,6 +52,7 @@ use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 class UserController extends MasterController
 {
@@ -503,8 +504,8 @@ class UserController extends MasterController
             $sData['ddates'] = $stage->isDefiniteDates();
             $sData['startdate'] = $stage->getStartdate();
             $sData['enddate'] = $stage->getEnddate();
-            $sData['gstartdate'] = $stage->getGStartdate();
-            $sData['genddate'] = $stage->getGEnddate();
+            //$sData['gstartdate'] = $stage->getGStartdate();
+            //$sData['genddate'] = $stage->getGEnddate();
             $sData['dorigin'] = $stage->getDOrigin();
             $sData['dperiod'] = $stage->getDPeriod();
             $sData['dfreq'] = $stage->getDFrequency();
@@ -1489,23 +1490,10 @@ class UserController extends MasterController
      * @throws ORMException
      * @throws OptimisticLockException
      * @Route("/home", name="home")
+     * @IsGranted("IS_AUTHENTICATED_REMEMBERED")
      */
     public function homeAction(Request $request)
     {
-//        if (isset($_COOKIE['!auth!'])) {
-//            setcookie('!auth!', null, 1, '/'); // delete cookie immediatly
-////            /** @var TokenStorage */
-////            $tokenObj = $app['security.token_storage'];
-////            $token = $tokenObj->getToken();
-////            if ($token === null) {
-////                throw 'No token';
-////            }
-////            $user = $token->getUser();
-//            // we basically "remember" the user
-////            $user->setRememberMeToken($_COOKIE['REMEMBERME']);
-////            $this->em->persist($user);
-////            $this->em->flush();
-//        }
 
         $user = $this->security->getUser();
         $repoA = $this->em->getRepository(Activity::class);

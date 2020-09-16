@@ -43,8 +43,10 @@ use App\Entity\Survey;
 use App\Entity\Team;
 use App\Entity\Member;
 use App\Entity\User;
+use App\Form\ActivityMinElementForm;
 use App\Form\AddEventForm;
 use App\Repository\UserRepository;
+use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormFactory;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -54,6 +56,51 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class ActivityController extends MasterController
 {
+
+
+    /** Most simple of creating an activity */
+    /**
+     * @param string $entity
+     * @param int $inpId
+     * @param string $actName
+     * @return JsonResponse|RedirectResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/activity/create",name="createActivity")
+     */
+    public function createActivityAction(Request $request)
+    {       
+        $currentUser = $this->user;
+        $organization = $this->org;
+        $em = $this->em;
+        $stage = new Stage;
+        /** @var Form */
+        $createActivityForm = $this->createForm(ActivityMinElementForm::class, $stage, ['organization' => $organization, 'currentUser' => $currentUser]);
+        $createActivityForm->handleRequest($request);
+        if($createActivityForm->isSubmitted() && $createActivityForm->isValid()){
+            
+            $stage
+                ->setOrganization($organization)
+                ->setStatus((int) ($stage->getStartdate() >= new DateTime))
+                ->setMasterUser($currentUser)
+                ->setCreatedBy($currentUser->getId());
+            $activity = new Activity;
+            $activity->addStage($stage)
+                ->setName($stage->getName())
+                ->setStatus($stage->getStatus())
+                ->setOrganization($organization)
+                ->setMasterUser($stage->getMasterUser())
+                ->setCreatedBy($currentUser->getId());
+            $em->persist($activity);
+            $em->flush();
+            return new JsonResponse(['actId' => $activity->getId(), 'stgId' => $stage->getId(), 'startdateDay' => $stage->getStartdate()->format('z')],200);
+
+        } else {
+            $errors = $this->buildErrorArray($createActivityForm);
+            return $errors;
+        }
+    }
+
     // Creating activity V1 : attributing leadership to current user and redirecting to parameters
     /**
      * @param string $entity
