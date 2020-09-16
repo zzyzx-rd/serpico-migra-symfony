@@ -1910,6 +1910,7 @@ activities:
   provide_my_feedbacks: Provide my feedbacks
 
 activity_elements:
+  output: Scheduled Returns
   parameters: Parameters
   expected_output: Expected feedback
   no_defined_output: No defined output

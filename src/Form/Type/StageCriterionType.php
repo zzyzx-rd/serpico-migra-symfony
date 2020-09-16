@@ -35,16 +35,16 @@ class StageCriterionType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('criteria', CollectionType::class,
+        $builder->add('outputs', CollectionType::class,
             [
-                'entry_type' => CriterionType::class,
+                'entry_type' => OutputType::class,
                 'entry_options' => [
                     'currentUser' => $options["currentUser"],
                     'organization' => $options['organization'],
                     'entity' => $options['entity'],
                 ],
                 'prototype' => true,
-                'prototype_name' => '__crtIndex__',
+                'prototype_name' => '__otpIndex__',
                 'by_reference' => false,
                 'allow_delete' => 'true',
                 'allow_add' => 'true',
@@ -54,8 +54,7 @@ class StageCriterionType extends AbstractType
                 ],
                 'label' => false,
                 'error_bubbling' => false,
-            ]
-        )->add('visibility', ChoiceType::class,
+            ])->add('visibility', ChoiceType::class,
         [
             'label' => 'stages.stage.visibility.label_title',
             'constraints' => [

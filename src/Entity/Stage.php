@@ -1412,11 +1412,7 @@ class Stage extends DbObject
 
     public function getPeriod()
     {
-<<<<<<< HEAD
 
-
-=======
->>>>>>> c0eda03adbb29da5a409e2259615c8e343545fa9
         $diff = $this->startdate->diff($this->enddate)->format("%a");
         return $diff;
     }

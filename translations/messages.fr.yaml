@@ -2016,6 +2016,7 @@ activities:
 
 
 activity_elements:
+  output: Retours programmés
   parameters: Paramètres
   expected_output: Retours attendus
   no_defined_output: Pas de retours définis

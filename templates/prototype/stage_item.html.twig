@@ -38,12 +38,12 @@
           <i class="material-icons right">edit</i> Modifier la phase
         </a>
       </div>
-
+{% set outputs = stage.outputs %}
       <section class="criteria">
         <template class="criteria-list--item__proto">
           {%
-            include "components/activity_page__criterion_item.html.twig"
-            with { s: "__stgNb__", c: "__crtNb__", criterion: stage.criteria.vars.prototype }
+            include "components/activity_page__output_item.html.twig"
+            with { s: "__stgNb__", o: "__otpNb__", outputs: outputs.vars.prototype }
           %}
         </template>
         <header>

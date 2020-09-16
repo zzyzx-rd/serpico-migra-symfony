@@ -1,0 +1,33 @@
+{% set output_model = outputs.vars.data %}
+
+
+<div id="outputModal" class="modal" style="width: 65%;height: 70%">
+    <div class="modal-title">
+        <h5>Retour programmmé</h5>
+    </div>
+    <div class="modal-footer" style="text-align: left">
+        <section class="criteria">
+
+            <div style="text-align: left "> <p>Date de début</p>{{ form_widget(outputs.startdate) }}
+            </div>
+            <div style="text-align: right "><p>Date de fin</p>{{ form_widget(outputs.enddate) }}</div>
+
+
+            {{ form_row(outputs.type) }}
+            {{ form_row(outputs.visibility) }}
+
+
+
+            {% set output_model = outputs.vars.data %}
+            {% set checkBeforeValidation = output_model and output_model.stage.hasCompletedOutput == 1 %}
+            <button type="button"
+                    class="o-validate{{checkBeforeValidation ? '-prior-check'}} btn blue darken-2"
+                    data-cid="{{output_model ? output_model.id : 0}}"
+            >
+                <i class="material-icons left">done</i> {{ 'criteria.tooltip.validate'|trans }}
+            </button>
+        </section>
+    </div>
+</div>
+
+

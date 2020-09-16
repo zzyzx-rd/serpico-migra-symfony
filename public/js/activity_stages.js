@@ -357,11 +357,11 @@ $(document).on(
 ).on(
   'click', '.btn-add-criterion',
   function() {
-    const $this = $(this);
-    const $section = $this.closest('div.modal');
-      console.log($section);
 
-      const $criteriaList = $section.find('.output-criteria');
+      const $this = $(this);
+      const $section = $this.closest('.output');
+      console.log($section);
+      const $criteriaList = $section.find('ul.criteria-list');
 
     if ($criteriaList.children('.new').length) {
       return;
@@ -1651,7 +1651,7 @@ $(document).on('click','.c-validate', function(e) {
 
   $.post(url, $form.serialize())
   .done(function(data) {
-      $btn.attr('data-cid',data.cid);
+  /*    $btn.attr('data-cid',data.cid);
       $deleteBtn.attr('data-cid',data.cid);
       $curRow.modal('close');
       if(typeVal == 1){
@@ -1666,7 +1666,7 @@ $(document).on('click','.c-validate', function(e) {
         $crtElmt.find('.comment-value').empty().append((commentSign == 'smaller' ? '<' : '≤') + Math.round(parseFloat(commentValue.replace(",","."))));
       } else {
         $crtElmt.find('.comment-container').hide();
-      }
+      }*/
   })
   .fail(function(data) {
       Object.keys(data.responseJSON).forEach(function(key){
@@ -1676,7 +1676,72 @@ $(document).on('click','.c-validate', function(e) {
 
 
 });
+$(document).on('click','.o-validate', function(e) {
 
+    e.preventDefault();
+    $btn = $(this);
+    $deleteBtn = $btn.closest('.modal').find('[href="#deleteOutput"]');
+    var $crtElmt = $(this).closest('.form-output');
+    //$crtElmt = $(this).closest('.criterion');
+    sid =  $(this).closest('.stage').data('id');
+    oid = $(this).data('oid');
+    //crtVal = $crtElmt.find('select option:selected').val();
+    typeVal = $crtElmt.find('input:checked').val();
+    startdate = $crtElmt.find('.startdate').find('input').val();
+    enddate = $crtElmt.find('.enddate').find('input').val();
+
+    const $this = $(this);
+    const $section = $this.closest('.output');
+    const $outputList = $section.find('ul.output-list');
+    const $output = $section.find('.output-list--item');
+    const nbCriteria = $output.length;
+    const proto = $section.find('template.output-list--item__proto')[0];
+    const protoHtml = proto.innerHTML.trim();
+    const newProtoHtml = protoHtml
+        .replace(/__stgIndex__/g,$('.stage-element').not('.completed-stage-element').length - 1)
+        .replace(/__otpIndex__/g, $outputList.children().length - 2)
+        .replace(/__otpNb__/g, $outputList.children().length - 1)
+        .replace(/__type__/g, typeVal)
+        .replace(/__startdate__/g, startdate)
+        .replace(/__enddate__/g, enddate)
+        //.replace(/__weight__/g, Math.round(100/(nbCriteria + 1)))
+        .replace(/__stgNb__/g, $('.stage').index($section.closest('.stage')));
+
+    let $crtProto = $(newProtoHtml);
+    //$crtElmt.append(newProtoHtml);
+    $crtProto.find('.modal').modal();
+    $crtProto.find('.tooltipped').tooltip();
+
+
+    $outputList.children().last().before($crtProto);
+
+    const $form = $('.o-form form');
+
+    const urlToPieces = vourl.split('/');
+    urlToPieces[urlToPieces.length - 4] = sid;
+    urlToPieces[urlToPieces.length - 1] = 0;
+    const url = urlToPieces.join('/');
+
+
+    $form.find('[name*="type"]').eq(typeVal - 1).prop('checked',true);
+    $form.find('[name*="stardate"]').val(startdate);
+    $form.find('[name*="enddate"]').val(enddate);
+
+
+    $.post(url, $form.serialize())
+        .done(function(data) {
+            $btn.attr('data-cid',data.oid);
+            $deleteBtn.attr('data-cid',data.oid);
+
+        })
+        .fail(function(data) {
+            Object.keys(data.responseJSON).forEach(function(key){
+                $btn.closest('.modal').find(`input[name*="${key}"]`).after(`<strong class="red-text">${data.responseJSON[key]}</strong>`);
+            })
+        });
+
+
+});
 $(document).on('click','.criteria-tab, .survey-tab',function(){
 
   if($(this).hasClass('survey-tab') && $(this).find('a').hasClass('active') && $(this).closest('section').find('.criteria-list .criteria-list--item').length > 0){

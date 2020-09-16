@@ -225,83 +225,83 @@
                   </a>
                 </div>
               {% endif %}
+              {% set output = stage.vars.data.outputs %}
               <div class="stage-actions">
                 <a href="#stage_{{s}}" class="btn-flat modal-trigger">
                   <i class="material-icons right">edit</i> {{'activity_elements.modify_stage_btn'|trans}}
                 </a>
               </div>
-              <section>
+              <section class="output">
 
+                {% set output_model = outputElementForm.vars.data %}
 
-                    <a
-                            href="#outputModal" class=" btn-flat  modal-trigger "
-                            data-tooltip="{% trans %}process_stages.output_add{% endtrans %}">
-                      <i class="material-icons left">add</i>
-                      {{ 'output.add_btn_internal'|trans }}
-                    </a>
-
-
-
-
-                <div id="outputModal" class="modal" style="width: 50%;height: 60%">
+                {% set checkBeforeValidation = output_model and output_model.stage.hasCompletedOutput == 1 %}
+                {%  set outputs_form =  stage.outputs.vars.prototype %}
+                <div id="outputModal" class="modal" style="width: 65%;height: 70%">
                   <div class="modal-title">
-                    <h5>Ajouter un Survey ou des critère </h5>
+                    <h5>Retour programmmé</h5>
                   </div>
                   <div class="modal-footer" style="text-align: left">
-                    <section class="criteria">
-                      <header>
-                        <ul class="tabs output-tabs tabs-fixed-width">
-                          <li class="tab criteria-tab">
-                            <a href="#stage-{{s}}-type--criteria">{{ 'activity_elements.criteria'|trans }}</a>
-                          </li>
-                          <li class="tab survey-tab">
-                            <a href="#stage-{{s}}-type--survey">{{ 'activity_elements.survey'|trans }}</a>
-                          </li>
-                        </ul>
-                      </header>
+                    <section class="form-output">
 
-                      <div id="stage-{{s}}-type--criteria">
-                        <ul class="criteria-list">
+                      <div class="startdate"style="text-align: left "> <p>Date de début</p>{{ form_widget(outputs_form.startdate) }}
+                      </div>
+                        <div class="enddate" style="text-align: right "><p>Date de fin</p>{{ form_widget(outputs_form.enddate) }}</div>
+
+
+                      {{ form_row(outputs_form.type, { attr: { class: "type" }}) }}
+                      {{ form_row(outputs_form.visibility, { attr: { class: "visibility" }}) }}
+
+
+
+
+                      <button type="button"
+                              class="o-validate{{checkBeforeValidation ? '-prior-check'}} btn blue darken-2"
+                              data-cid="{{output_model ? output_model.id : 0}}"
+                      >
+                        <i class="material-icons left">done</i> {{ 'criteria.tooltip.validate'|trans }}
+                      </button>
+                    </section>
+                    </div>
+                </div>
+
+                <header>{{ 'activity_elements.output'|trans }}</header>
+                <a
+                        href="#outputModal" class=" btn-flat btn-add-output modal-trigger "
+                        data-tooltip="{% trans %}process_stages.output_add{% endtrans %}">
+                  <i class="material-icons left">add</i>
+                  {{ 'output.add_btn_internal'|trans }}
+                </a>
+            <div id="stage-{{s}}-type--criteria">
+              <ul class="output-list">
+
+                <template class="output-list--item__proto">
+                  {%
+                    include "components/activity_page__output_item.html.twig"
+                    with { s: s, o: "__otpIndex__", outputs: stage.outputs.vars.prototype }
+                  %}
+                  {% for o, output in stage.vars.data.outputs %}
+                    {% include "components/activity_page__output_item.html.twig" with { s: s, c: c, outputs: stage.outputs.vars.prototype } %}
+                  {% endfor %}
+                </template>
+
+              </ul>
+                  <ul class="criteria-list">
                     <button class="btn-flat btn-add-criterion">
                       <i class="material-icons left">add</i>
                       {{ 'criteria.add_btn_internal'|trans }}
                     </button>
                     <div class="output-criteria">
-                      <template class="criteria-list--item__proto">
-                        {%
-                          include "components/activity_page__criterion_item.html.twig"
-                          with { s: s, c: "__crtNb__", criterion: stage.criteria.vars.prototype }
-                        %}
-                      </template>
 
-                      <template class="criteria-list--item__proto">
-                        {#                      {% include "modals/stage_criterion.html.twig" with { s: '__stgNb__', c: '__crtNb__', criterion: stage.criteria.vars.prototype } %}#}
-                      </template>
-                    {% for c, criterion in stage.criteria %}
-                      {% include "components/activity_page__criterion_item.html.twig" with { s: s, c: c, criterion: criterion } %}
-                    {% endfor %}
-                          <li class="no-items-placeholder">
-                            <p>
-                              {{ 'process_stages.no_criteria'|trans }}
-                            </p>
-                            <p>
-                              {{ 'process_stages.tooltip_no_criteria'|trans }}
-                            </p>
-                          </li>
+
+
+
+
                     </div>
-                        </ul>
-
-
-
-                      </div>
-                    </section>
-                    </div>
-
+                  </ul>
                 </div>
 
-                    {% for o, output in stage.vars.data.outputs %}
-                      {% include "components/activity_page__output_item.html.twig" with { s: s, c: c, criterion: criterion } %}
-                    {% endfor %}
+
                     {#
                       This item only displays when not preceeded with any element,
                       through CSS direct sibling selector.
@@ -497,24 +497,8 @@
                     {% endif %}
                   {% endfor %}
 
-                  {% if not stage.criteria.vars.valid %}
-                    <div>
-                      Critères :
-                      {% for ckey, criterion in stage.criteria %}
-                        {{ form_errors(stage.criteria)}}
-                        {% if not criterion.vars.valid %}
-                          {{ ckey }} - {{ criterion.vars.data.cname.name }}:
-                          {% for child in criterion.children %}
-                            {% if not child.vars.valid %}
-                              <div>
-                                {{ form_label(child) }}
-                                {{ form_errors(child) }}
-                              </div>
-                            {% endif %}
-                          {% endfor %}
-                        {% endif %}
-                      {% endfor %}
-                    </div>
+                  {% if not stage.outputs.vars.valid %}
+
                   {% endif %}
                 </div>
               {% endif %}
@@ -540,7 +524,11 @@
       {{ form_rest(criterionElementForm) }}
       {{ form_end(criterionElementForm) }}
     </div>
-
+  <div class="0-form" style="display: none;">
+    {{ form_start(outputElementForm) }}
+    {{ form_rest(outputElementForm) }}
+    {{ form_end(outputElementForm) }}
+  </div>
     <div id="deleteStage" class="modal">
       <div class="modal-title">
         <h5>{{ 'stages.deleteStage.modal_title'|trans }}</h5>
@@ -729,7 +717,8 @@
     var dcurl = "{{ url('ajaxCriterionDelete',{'entity' : entity, 'criId' : 0}) }}";
     var dsurl = "{{ url('ajaxStageDelete',{'entity' : entity, 'stgId' : 0}) }}";
     var dpsurl = "{{ url('duplicateStage',{'entity' : entity, 'elmtId' : 0}) }}";
-    var vcurl = "{{ url('validateCriterionElement',{'entity' : entity, 'elmtId': elmtId, 'stgId' : 0, 'crtId' : 0}) }}";
+    var vcurl = "{{ url('validateCriterionElement',{'entity' : entity, 'elmtId': elmtId, 'otpId' : 0, 'crtId' : 0}) }}";
+    var vourl = "{{ url('validateOutputElement',{'entity' : entity, 'elmtId': elmtId, 'stgId' : 0, 'otpId' : 0}) }}";
     var vsurl = "{{ url('validateStageElement',{'entity' : entity, 'elmtId': elmtId, 'stgId' : 0}) }}";
     var vnurl = "{{ url('validateElementName',{'entity' : entity, 'elmtId': elmtId}) }}";
 
