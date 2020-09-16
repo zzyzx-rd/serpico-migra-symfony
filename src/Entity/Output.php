@@ -35,7 +35,15 @@ class Output extends DbObject
      * @ORM\Column(name="otp_enddate", type="datetime", nullable=true)
      */
     public DateTime $enddate;
-
+    /**
+     * @ORM\Column(name="otp_type", type="integer", nullable=true)
+     */
+    public $type;
+    /**
+     * @ORM\Column(name="otp_visibility", type="integer", nullable=true)
+     */
+    public $visibility;
+    /**
     /**
      * @ManyToOne(targetEntity=Stage::class, inversedBy="outputs")
      * @JoinColumn(name="stage_stg_id", referencedColumnName="stg_id",nullable=false)
@@ -51,7 +59,10 @@ class Output extends DbObject
      * @ORM\Column(name="otp_created_by", type="integer", nullable=true)
      */
     public ?int $createdBy;
-
+    /**
+     * @ORM\Column(name="otp_name", type="string", length=255, nullable=true)
+     */
+    public string $name;
     /**
      * @ORM\Column(name="otp_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
@@ -72,10 +83,12 @@ class Output extends DbObject
      * @param DateTime $startdate
      * @param DateTime $enddate
      * @param DateTime $inserted
+     * @param String $name
      */
 
     public function __construct($id = 0,
-                                $createdBy = null
+                                $createdBy = null,
+                                $name = null
     )
     {
         parent::__construct($id, $createdBy, new DateTime);

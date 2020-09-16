@@ -821,7 +821,7 @@ class ActivityController extends MasterController
 
                 if(!$consideredParticipation->getisMailed()){
 
-                    $participationUsrId = $consideredParticipation->getUsrId();
+                    $participationUsrId = $consideredParticipation->getUser()->getId();
 
                     if(in_array($participationUsrId,$mailedUsrIds) === false){
                         $mailedUsrIds[] = $participationUsrId;

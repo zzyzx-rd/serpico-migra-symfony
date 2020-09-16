@@ -393,6 +393,7 @@ class Stage extends DbObject
         $this->results = new ArrayCollection;
         $this->projectResults = new ArrayCollection;
         $this->rankings = new ArrayCollection;
+        $this->outputs = new ArrayCollection;
         $this->historicalRankings = new ArrayCollection;
         $this->resultTeams = new ArrayCollection;
         $this->rankingTeams = new ArrayCollection;
@@ -1411,6 +1412,7 @@ class Stage extends DbObject
 
     public function getPeriod()
     {
+
         $diff = $this->startdate->diff($this->enddate)->format("%a");
         return $diff;
     }

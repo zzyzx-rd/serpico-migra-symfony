@@ -34,6 +34,7 @@ use App\Form\Type\AnswerType;
 use App\Form\Type\ClientType;
 use App\Form\Type\ClientUserType;
 use App\Form\Type\CriterionType;
+use App\Form\Type\OutputType;
 use App\Form\Type\ExternalUserType;
 use App\Form\Type\OrganizationElementType;
 use App\Form\Type\StageType;
@@ -1092,11 +1093,15 @@ class OrganizationController extends MasterController
      * @return JsonResponse
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/{entity}/{elmtId}/stage/{stgId}/criterion/validate/{crtId}", name="validateCriterionElement")
+     * @Route("/{entity}/{elmtId}/stage/{otpId}/criterion/validate/{crtId}", name="validateCriterionElement")
      */
-    public function validateElementCriterionAction(Request $request, $entity, $elmtId, $stgId, $crtId)
+    public function validateElementCriterionAction(Request $request, $entity, $otpId, $elmtId, $crtId)
     {
         $em = $this->em;
+
+        $repoT = $em->getRepository(Output::class);
+        $output = $repoT->find($otpId);
+        $stgId = $output->getStage()->getId();
         $repoO = $em->getRepository(Organization::class);
         switch ($entity) {
             case 'iprocess':
@@ -1272,10 +1277,52 @@ class OrganizationController extends MasterController
                     $responseArray = ['message' => 'Success to add criteria!', 'cid' => $criterion->getId()];
                     return new JsonResponse($responseArray, 200);
                 }
-            }
+            }$responseArray = ['message' => 'Success to add criteria!', 'cid' => $criterion->getId()];
+            return new JsonResponse($responseArray, 200);
         }
     }
+    /**
+     * @param Request $request
+     * @param $entity
+     * @param $elmtId
+     * @param $stgId
+     * @param $otpId
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/{entity}/{elmtId}/stage/{stgId}/output/validate/{otpId}", name="validateOutputElement")
+     */
+    public function validateElementOutputAction(Request $request, $entity, $elmtId, $stgId, $otpId)
+    {
+                        $em = $this->em;
+                        $currentUser = $this->getUser();
+                        $repoE = $em->getRepository(Stage::class);
+                        $element = $repoE->find($stgId);
+                        $output = $otpId != 0 ? $repoE->find($otpId) : new Output;
+                        $outputForm = $this->createForm(OutputType::class, $output, ['entity' => $entity, 'standalone' => true, 'currentUser' => $currentUser]);
+                        $outputForm->handleRequest($request);
 
+                        if ($outputForm->isSubmitted()) {
+                            if ($outputForm->isValid()) {
+
+                                $em->persist($output);
+                                $em->flush();
+                                $responseArray = ['message' => 'Success to add output!', 'oid' => $output->getId()];
+                                return new JsonResponse($responseArray, 200);
+
+                            }else{
+                                $errors = $this->buildErrorArray($outputForm);
+                                return $errors;
+
+                            }
+                        }
+
+
+
+
+
+
+    }
     //Adds surveys to current organization
 
     /**
@@ -6477,6 +6524,7 @@ class OrganizationController extends MasterController
         }
         $element = $repoE->find($elmtId);
         $element->currentUser = $this->user;
+
         $activityElementForm = $this->createForm(
             ActivityElementForm::class,
             $element,
@@ -6490,6 +6538,11 @@ class OrganizationController extends MasterController
 
         $criterionElementForm = $this->createForm(
             CriterionType::class,
+            null,
+            ['entity' => $entity, 'standalone' => true, 'currentUser' => $this->user]
+        );
+        $outputElementForm = $this->createForm(
+            OutputType::class,
             null,
             ['entity' => $entity, 'standalone' => true, 'currentUser' => $this->user]
         );
@@ -6605,6 +6658,7 @@ class OrganizationController extends MasterController
                 'form' => $activityElementForm->createView(),
                 'stageElementForm' => $stageElementForm->createView(),
                 'criterionElementForm' => $criterionElementForm->createView(),
+                'outputElementForm' => $outputElementForm->createView(),
             ]
         );
     }

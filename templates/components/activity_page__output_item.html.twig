@@ -1,0 +1,49 @@
+
+{% set output_model = outputs.vars.data %}
+{% set startdate= output_model ? output_model.startdate : "__startdate__" %}
+{% set enddate = output_model ? output_model.enddate : "__enddate__" %}
+
+
+{% set type = output_model ? output_model.type : '__type__' %}
+<div class="output-item">
+<div class=" row" style="display: flex;align-items: center ;color: #55308e">
+{% if type == 2 %}
+
+    <h7> Formulaire </h7>
+{% else %}
+    <h7> Critère d'évaluation</h7>
+
+{% endif %}
+
+<i class="fas fa-clock" style="margin-left: 20%"></i>
+<div >08/10-</div>
+<div>10/10</div>
+</div>
+    <div id="stage-{{s}}-type--criteria">
+        <ul class="criteria-list">
+
+            <button class="btn-flat btn-add-criterion">
+                <i class="material-icons left">add</i>
+                {{ 'criteria.add_btn_internal'|trans }}
+            </button>
+            <div class="output-criteria">
+                <template class="criteria-list--item__proto">
+                    {%
+                        include "components/activity_page__criterion_item.html.twig"
+                        with { s: s, c: "__crtNb__", criterion: outputs.criteria.vars.prototype }
+                    %}
+                </template>
+
+                <template class="criteria-list--item__proto">
+                    {#                      {% include "modals/stage_criterion.html.twig" with { s: '__stgNb__', c: '__crtNb__', criterion: stage.criteria.vars.prototype } %}#}
+                </template>
+                {% for c, criterion in outputs.criteria %}
+                    {% include "components/activity_page__criterion_item.html.twig" with { s: s, c: c, criterion: criterion } %}
+                {% endfor %}
+
+            </div>
+        </ul>
+    </div>
+</div>
+
+
