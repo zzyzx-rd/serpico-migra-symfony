@@ -243,11 +243,11 @@
                   </div>
                   <div class="modal-footer" style="text-align: left">
                     <section class="form-output">
-
+                      <div class="flex-center-sb">
                       <div class="startdate"style="text-align: left "> <p>Date de début</p>{{ form_widget(outputs_form.startdate) }}
                       </div>
                         <div class="enddate" style="text-align: right "><p>Date de fin</p>{{ form_widget(outputs_form.enddate) }}</div>
-
+                      </div>
 
                       {{ form_row(outputs_form.type, { attr: { class: "type" }}) }}
                       {{ form_row(outputs_form.visibility, { attr: { class: "visibility" }}) }}
