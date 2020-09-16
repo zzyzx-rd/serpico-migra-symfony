@@ -20,8 +20,12 @@ body[style="overflow: hidden;"] {
   background-color: #341f56;
 }
 
-.btn,.btn-large{
+.btn,.btn-large,.btn-floating{
   background-color: #55318e!important;
+}
+
+a.material-icons{
+  color: #55318e!important;
 }
 
 .sm-right{
@@ -147,11 +151,17 @@ li + li.no-items-placeholder {
   display: flex;
   align-items: center;
   height: 100%;
+  color:#341f56;
+}
+
+.nav-wrapper > ul > li > a:hover{
+  color:white;
 }
 
 #nav * {
   transition: none;
 }
+
 
 #nav .logo {
   margin-right: auto;
@@ -283,6 +293,7 @@ table.striped td {
 
 .lg-icon .collapsible-body .country {
   line-height: normal;
+  color: white!important;
 }
 
 #serpicoapp .modal .modal-footer {
@@ -569,7 +580,7 @@ header>ul>li:last-child {
 /*** for desktop ***/
 
 nav .collapsible-header, nav .collapsible, nav .collapsible-body, nav .collapsible>li {
-  background: black !important;
+  background: #341f56 !important;
   border: none;
 }
 
@@ -2825,9 +2836,17 @@ h2.header {
   #serpicoNav {
     margin-left: 70px;
   }
-  #nav div ul li a:hover {
-    background-color: white;
-    color: black;
+  #nav div ul li a:hover, .plan a:hover {
+    background-color: #341f56;
+    color: white;
+  }
+
+  .plan, .plan a{
+    font-size: 13px!important;
+  }
+
+  .plan a{
+    color: orange;
   }
   /*
   #nav div ul li {

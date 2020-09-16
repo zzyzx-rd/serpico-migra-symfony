@@ -15,6 +15,10 @@ ul {
   font-size: 2.5em;
 }
 
+.tabs{
+  color: #341f56;
+}
+
 
 #main-tabs-container > .tabs {
   position: sticky;
@@ -74,7 +78,7 @@ li.no-items-placeholder {
 }
 
 #main-tabs-container > section a {
-  color: #26a69a;
+  color: #55318e;
 }
 
 .myself {
@@ -244,7 +248,7 @@ li.no-items-placeholder {
   display: flex;
   width: 14em;
   flex-flow: column;
-  background-color: #009688;
+  background-color: #55318e;
   color: #fff;
   border-radius: 2px;
   padding: 1em;

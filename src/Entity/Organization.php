@@ -177,6 +177,12 @@ class Organization extends DbObject
     protected $logo;
 
     /**
+     * @Column(name="org_plan", type="integer", length=1, nullable=false, options={"default": "3"})
+     * @var string
+     */
+    protected $plan;
+
+    /**
      * @OneToMany(targetEntity="Team", mappedBy="organization",cascade={"persist", "remove"}, orphanRemoval=true)
      */
     public $teams;
@@ -226,6 +232,9 @@ class Organization extends DbObject
      */
     protected $events;
 
+    const PLAN_FREE = 3;
+    const PLAN_PREMIUM = 2;
+    const PLAN_ENTERPRISE = 1;
 
     /**
      * Organization constructor.
@@ -233,6 +242,7 @@ class Organization extends DbObject
      * @param $legalname
      * @param $commname
      * @param $type
+     * @param $plan
      * @param $isClient
      * @param $oth_language
      * @param $weight_type
@@ -267,6 +277,7 @@ class Organization extends DbObject
     public function __construct(
       ?int $id = 0,
         $isClient = null,
+        $plan = 3,
         $legalname = '',
         $commname = '',
         $type = '',
@@ -305,6 +316,7 @@ class Organization extends DbObject
         $this->legalname = $legalname;
         $this->commname = $commname;
         $this->type = $type;
+        $this->plan = $plan;
         $this->isClient = $isClient;
         $this->oth_language = $oth_language;
         $this->weight_type = $weight_type;
@@ -339,9 +351,21 @@ class Organization extends DbObject
 
 
 
+
     public function getOrgId(): ?int
     {
         return $this->id;
+    }
+
+    public function getPlan(): ?int
+    {
+        return $this->plan;
+    }
+
+    public function setPlan(int $plan): self
+    {
+        $this->plan = $plan;
+        return $this;
     }
 
     public function getLegalname(): ?string

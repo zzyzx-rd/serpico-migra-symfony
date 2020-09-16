@@ -177,7 +177,7 @@ class WorkerFirm extends DbObject
     public $mails;
 
     /**
-     * @ORM\OneToOne(targetEntity=Organization::class, mappedBy="worker_firm_wfi", cascade={"persist", "remove"})
+     * @ORM\OneToOne(targetEntity=Organization::class, mappedBy="workerFirm", cascade={"persist", "remove"})
      * @JoinColumn(name="organization_org_id", referencedColumnName="org_id", nullable=true)
      */
     private $organization;

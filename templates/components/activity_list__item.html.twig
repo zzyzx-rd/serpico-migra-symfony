@@ -27,11 +27,11 @@
             {% if k < 2 %}
               {% if currentuser.role == 1 %}
                 <a class="activity-client-name" href="{{ path('createClientUser',{cliId: client.id}) }}">
-                  {{ k != activityClients|length - 1 ? client.commname ~', ' : client.commname }}
+                  {{ k != activityClients|length - 1 ? client.name ~', ' : client.name }}
                 </a>
               {% else %}
                 <span class="activity-client-name">
-                {{ k != activityClients|length - 1 ? client.commname ~' ,' : client.commname }}
+                {{ k != activityClients|length - 1 ? client.name ~' ,' : client.name }}
               </span>
               {% endif %}
             {% endif %}

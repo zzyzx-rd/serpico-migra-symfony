@@ -480,7 +480,7 @@ class SettingsController extends MasterController
         try{
             $entityManager = $this->getEntityManager($app) ;
             $repoO = $entityManager->getRepository(Organization::class);
-            $currentUser = $this->user;;
+            $currentUser = $this->user;
             $organization = $repoO->findOneById($orgId);
             
             $delegateActivityForm = $this->createForm(DelegateActivityForm::class, null,  ['app' => $app, 'standalone' => true]);
@@ -2385,6 +2385,45 @@ class SettingsController extends MasterController
      * @param Request $request
      * @param Application $app
      * @return JsonResponse
+     * @Route("/workers/participants/search", name="dynamicSearchParticipant")
+     */
+    public function dynamicSearchParticipant(Request $request){
+
+        $name = $request->get('name');
+        $em = $this->em;
+        $qb = $em->createQueryBuilder();
+
+        $elements = new ArrayCollection($qb->select('wf.name AS orgName','wf.id AS wfiId','wf.logo','identity(wf.organization) AS orgId', 'u.id AS usrId', 'u.username', 'u.picture AS usrPicture', 'eu.id AS extUsrId', 't.id AS teaId', 't.name AS teaName', 't.picture AS teaPicture')
+        ->from('App\Entity\WorkerFirm', 'wf')
+        ->leftJoin('App\Entity\User', 'u', 'WITH', 'u.organization = wf.organization')
+        ->leftJoin('App\Entity\ExternalUser', 'eu', 'WITH', 'eu.user = u.id')
+        ->leftJoin('App\Entity\Team', 't', 'WITH', 't.organization = wf.organization')
+        ->where('wf.name LIKE :name AND u.username IS NULL')
+        ->orWhere('u.username LIKE :name')
+        ->orWhere('t.name LIKE :name')
+        //->andWhere('wf.active = true AND wf.nbActiveExp > 0 OR wf.organization IS NOT NULL')
+        //->orWhere('wf.id LIKE :name')
+        ->setParameter('name', '%'. $name .'%')
+        //->orderBy('wf.nbActiveExp','DESC')
+        ->getQuery()
+        ->getResult());
+
+        $qParts = [];
+        foreach($elements as $element){
+            $element['e'] = !$element['username'] ? (!$element['teaName'] ? 'partner' : 'team') : 'user';
+            //if(!$element['username']){$element['usrId'] = "";}
+            $qParts[] = $element;
+        }
+
+        //$workerFirms = array_combine($values,$keys);
+        return new JsonResponse(['qParts' => $qParts],200);
+
+    }
+    
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return JsonResponse
      * @Route("/workers/firm/search", name="dynamicSearchParentFirm")
      */
     public function dynamicSearchParentFirm(Request $request){
@@ -2829,7 +2868,7 @@ class SettingsController extends MasterController
      */
     public function validateMassFirm(Request $request, $isSearchByLocation, $wfIdsSeq)
     {
-        $currentUser = $this->user;;
+        $currentUser = $this->user;
         if (!$currentUser instanceof User) {
             return $this->redirectToRoute('login');
         }

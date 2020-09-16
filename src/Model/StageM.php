@@ -22,9 +22,9 @@ class StageM extends ModelEntity
     /**
      * @return ArrayCollection|Participation[]
      */
-    public function getGraderParticipants()
+    public function getGraderParticipants($stage)
     {
-        return $this->getParticipants()->matching(Criteria::create()->where(Criteria::expr()->neq("type", -1)));
+        return $this->getParticipants($stage)->matching(Criteria::create()->where(Criteria::expr()->neq("type", -1)));
     }
     /**
      * @param Stage $stage
@@ -85,9 +85,9 @@ class StageM extends ModelEntity
     /**
      * @return ArrayCollection|Participation[]
      */
-    public function getGradableParticipants()
+    public function getGradableParticipants($stage)
     {
-        return $this->getParticipants()->matching(Criteria::create()->where(Criteria::expr()->neq("type", 0)));
+        return $this->getParticipants($stage)->matching(Criteria::create()->where(Criteria::expr()->neq("type", 0)));
     }
 
     /**
@@ -196,17 +196,18 @@ class StageM extends ModelEntity
         }
         return $independantParticipants;
     }
-    public function getParticipants(): ArrayCollection
+    public function getParticipants($stage): ArrayCollection
     {
 
         // Depends on whether current user is part of a team
         $eligibleParticipations = null;
         $participants = new ArrayCollection;
+
         $teams = [];
 
-        $eligibleParticipations = count($this->criteria) === 0 ? $this->participations : $this->criteria->first()->getParticipations();
+        $eligibleParticipations = count($stage->getCriteria()) === 0 ? $stage->getParticipations() : $stage->getCriteria()->first()->getParticipations();
 
-        $myParticipations = $this->getSelfParticipations();
+        $myParticipations = $stage->getSelfParticipations();
         $myTeam = $myParticipations->count() === 0 ? null : $myParticipations->first()->getTeam();
 
         foreach ($eligibleParticipations as $eligibleParticipation) {
@@ -221,9 +222,9 @@ class StageM extends ModelEntity
 
         return $participants;
     }
-    public function getGradingParticipants()
+    public function getGradingParticipants($stage)
     {
-        return count($this->getParticipants()->matching(
+        return count($stage->getParticipations()->matching(
             Criteria::create()->where(Criteria::expr()->neq("type", -1))
         ));
     }

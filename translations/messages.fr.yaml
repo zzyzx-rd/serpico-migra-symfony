@@ -497,6 +497,13 @@ header:
   home: Accueil
   logout: se déconnecter
   discover: Know more
+  plan:
+    free: Gratuit
+    pro: Pro
+    premium: Premium
+    enterprise: Entreprise
+    upgrade: Mise à niveau
+  
 
 solution:
   hr: RH
@@ -1872,6 +1879,11 @@ activities:
   timeframe_view_type: Vue temporelle
   self_date_type: Dates de déroulement
   output_date_type: Dates de retour
+
+  no_activities:
+    main_msg: Créez des activités
+    secondary_msg: afin d'obtenir une vue dynamique de votre business
+
   o_status:
     cancelled: Annulées
     discarded: Rejetées
@@ -1908,7 +1920,7 @@ activities:
   activity_period: "Période estimée :"
   grading_period: "Période de notation :"
   progress: "Avancement :"
-  participants: "Participants :"
+  participants: Participants
   define: Définir
   modify: Modifier
   grade: Noter
@@ -1950,7 +1962,9 @@ activities:
     initialize_title: Création d'une activité
     uninitialize_title: Création d'une toute nouvelle activité
     modal_trg_msg: Créer une activité
-    delegate_choice_title_msg: Création d'activité
+    modal_title: Création d'activité
+    linked_to: "Rattachée à :"
+    no_ip: Aucune catégorie
     delegate_choice_msg: Vous pouvez soit la créer et la paramétrer vous-même, soit définir un leader qui le fera pour vous
     nodelegate_btn_msg: La créer et configurer moi-meme
     delegate_btn_msg: Déléguer
@@ -1966,6 +1980,8 @@ activities:
     activityLeader: Leader d'activité
     submit: Ok
     next: Suivant
+    complexify: Configuration détaillée
+    add_participant: Ajouter participant
 
   request:
     modal_btn_msg: Demander la création d'une activité
@@ -2802,7 +2818,7 @@ create_client:
   partner:
     add_button: Ajouter partenaire
     prototype_title: Partenaire
-    un'existing_worker_firm: Aucune de celles-ci
+    unexisting_worker_firm: Aucune de celles-ci
 
   individual:
     add_button: Ajouter des membres

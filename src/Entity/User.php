@@ -311,16 +311,16 @@ class User extends DbObject implements  UserInterface, \Serializable
     public function __construct(
       ?int $id = null,
         $int = true,
-        $firstname = '',
-        $lastname = '',
-        $username = '',
-        $nickname = '',
+        $firstname = null,
+        $lastname = null,
+        $username = null,
+        $nickname = null,
         $birthdate = null,
-        $email = '',
-        $password = '',
+        $email = null,
+        $password = null,
         $picture = null,
         $pictureFile = null,
-        $token ='',
+        $token = null,
         $weight_ini = null,
         int $role = null,
         $department = null,
@@ -1041,16 +1041,37 @@ class User extends DbObject implements  UserInterface, \Serializable
     public function getRoles(): array
     {   
 
+        $roles = [];
+
+        switch($this->organization->getPlan()){
+            case 3:
+                $roles[] = 'ROLE_FREE';
+                break;
+            case 2:
+                $roles[] = 'ROLE_PREMIUM';
+                break;
+            case 1:
+                $roles[] = 'ROLE_ENTERPRISE';
+                break;
+        }
+
         switch($this->role){
             case 4 :
-                return ['ROLE_ROOT'];
+                $roles[] = 'ROLE_ROOT';
+                break;
             case 3:
-                return ['ROLE_COLLABORATOR'];
+                $roles[] = 'ROLE_COLLABORATOR';
+                break;
             case 2:
-                return ['ROLE_ACTIVITY_MANAGER'];
+                $roles[] = 'ROLE_ACTIVITY_MANAGER';
+                break;
             case 1:
-                return ['ROLE_ADMIN'];
+                $roles[] = 'ROLE_ADMIN';
+                break;
         }
+
+        return $roles;
+
     }
 
     public function getSalt()
@@ -1204,5 +1225,7 @@ class User extends DbObject implements  UserInterface, \Serializable
         $this->subordinates->removeElement($user);
         return $this;
     }
+
+
 
 }

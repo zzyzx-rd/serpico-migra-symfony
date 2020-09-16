@@ -1699,7 +1699,7 @@ class OrganizationController extends MasterController
                     $externalSynthUser = new ExternalUser;
                     $externalSynthUser->setUser($synthUser)
                         ->setOwner(true)->setFirstname('ZZ')
-                        ->setLastname('ZZ');
+                        ->setLastname($client->getName());
     
                 } else {
                     $synthUser = $em->getRepository(User::class)->findOneBy(['organization' => $clientOrganization, 'firstname' => 'ZZ', 'lastname' => 'ZZ']);
@@ -6796,7 +6796,7 @@ class OrganizationController extends MasterController
         $syntheticUser = new User;
         $syntheticUser
             ->setFirstname('ZZ')
-            ->setLastname('ZZ')
+            ->setLastname($connectedUserOrg->getCommname())
             ->setRole(3);
 
         $organization->addUser($syntheticUser);
@@ -6809,30 +6809,6 @@ class OrganizationController extends MasterController
             return true;
         }
 
-    }
-
-     /**
-     * @Route("/email")
-     */
-    public function sendEmail(MailerInterface $mailer)
-    {
-
-        dd('couocu');
-        $email = (new Email())
-            ->from('no-reply@serpicoapp.com')
-            ->to('gchatelain@serpicoapp.com')
-            //->cc('cc@example.com')
-            //->bcc('bcc@example.com')
-            //->replyTo('fabien@example.com')
-            //->priority(Email::PRIORITY_HIGH)
-            ->subject('Time for Symfony Mailer!')
-            ->text('Sending emails is fun again!')
-            ->html('<p>See Twig integration for better HTML integration!</p>');
-
-        $mailer->send($email);
-        return $this->redirectToRoute('home');
-
-        // ...
     }
 
 }

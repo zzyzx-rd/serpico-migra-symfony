@@ -12,6 +12,8 @@
 
 {% set actNameTruncVal = 22 %}
 
+{% set noActivities = orphanActivities is empty and processesActivities is empty %}
+
 
 
 {% set actStatuses = 
@@ -48,12 +50,15 @@
     var ipurl = "{{ url('getIProcesses') }}";
     var gcurl = "{{ url('getElementConfig', {entity:'activity', elmtId : 0}) }}";
     var gsurl = "{{ url('getGradableStages', {actId : 0}) }}";
+    var surl = "{{path('dynamicSearchParticipant')}}";
     var aurl = "{{ url('createUserProcessActivity', { inpId: 0 }) }}";
     var adurl = "{{ url('activityDelegate') }}";
     var adeleteUrl="{{ url('ajaxActivityDelete', {'actId' : 0}) }}";
     var usurl= "{{ url('updateStageStatus', {stgId : 0}) }}";
     var cpurl = "{{ url('createProcessRequest', {orgId : currentuser.organization.id}) }}";
     var eurl = "{{ url('updateEvent', {eveId : 0}) }}";
+    var acurl = "{{ url('createActivity') }}";
+    var currentWfiId = "{{ currentuser.organization.id }}";
   </script>
   <style>
       .elmts{
@@ -218,17 +223,23 @@
       }
 
       .sorting-type .btn-flat, .sorting-type .btn-flat>i{
-        color : #26a69a;
+        
         font-size: 12px;
       }
       .sorting-type .btn-flat:last-of-type{
         padding-left : 7px;
       }
 
-      .sorting-type-value, .change-status-type{
-        color : #00acc1;
+      .view-type-value, .change-view-type{
+        color: #55318e; 
       }
-
+      .sorting-type-value, .change-status-type{
+        color: purple;
+      }
+      .dates-type-value, .change-dates-type{
+        color: #55318e;
+      }
+  
       #sortingTypeSelector{
         display: none;
       }
@@ -255,11 +266,11 @@
         flex-direction: column;
         align-items: flex-end;
       }
-      .change-view-type, .change-status-type, .change-date-type{
+      .change-view-type, .change-status-type, .change-dates-type{
         display: flex;
         flex-direction: column;
       }
-      .change-view-type>i, .change-status-type>i, .change-date-type>i{
+      .change-view-type>i, .change-status-type>i, .change-dates-type>i{
         line-height: 10px;
       }
 
@@ -528,6 +539,144 @@
         font-size: 1rem;
       }
 
+      .activity-component{
+        list-style:none;
+      }
+
+      .stages-holder ol{
+        padding:0;
+      }
+
+      .stages.stage-element{
+        position:absolute;
+      }
+
+      .no-activity-holder{
+        position:relative;
+      }
+
+      .no-activity-overlay{
+        position: absolute;
+        background-color: #80808078;
+        height: 100%;
+        top: 0;
+        width: 100%;
+        color:white;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index:1
+      }
+
+      .no-activity-msg {
+        background: #55318e;
+        padding: 0.5rem 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .no-activity-msg span:nth-child(2){
+        font-size: 0.8rem;
+      }
+
+      .ip-zone{
+        font-size: 13px!important;
+        text-transform: uppercase;
+      }
+
+      .ip-zone i{
+        font-size:18px;
+      }
+
+      .ip-value, .setup-activity, .participants-title{
+        color: #55318e;
+      }
+
+      .participants-title{
+        text-transform: uppercase;
+      }
+
+      .setup-activity{
+        border: 1px solid #55318e;
+      }
+
+      .participant-field-zone{
+        position:relative;
+      }
+
+      .validation-buttons{
+        position:absolute;
+        right: 0;
+        top: 15%;
+      }
+
+      .validation-buttons > *{
+        padding: 0 1rem;
+        line-height: 28px;
+        height: 28px;
+      }
+
+      [name*="participantSelector"], .participant-field-zone .select-wrapper input, .participant-field-zone .select-wrapper .caret{
+        display:none!important;
+      }
+
+      .participants{
+        margin-bottom: 1rem;
+      }
+
+      .participant-field-zone .dropdown-content{
+        opacity: 1!important;
+        display: block!important;
+        width: 100%
+      }
+
+      .select-dropdown li img{
+        float: left;
+      }
+
+      .el-type{
+        margin-left: auto;
+        text-transform: uppercase;
+        color: #55318e!important;
+      }
+
+      .participants-list{
+        position:relative;
+      }
+
+      .participants-list > li:not(.edit){
+        height:36px;
+      }
+
+      .participants-list--item.edit{
+        position:absolute;
+        width: 100%;
+        bottom: min(-50%,-40px);
+      }
+
+      .participant-btn, .btn-participant-add{
+        border-radius:100%;
+        padding: 0 0.4rem;
+        width: 36px;
+        justify-content:center;
+      }
+
+      .btn-participant-add{
+        display: inline-flex;
+        align-items: center;
+        height:1.8rem;
+      }
+
+      .btn-participant-add > i{
+        font-size: 1rem;
+      }
+
+      .selected-participant-logo{
+        height: 100%;
+        border-radius:100%;
+      }
 
   </style>
 {% endblock %}
@@ -535,6 +684,8 @@
 {% block javascripts %}
   <script>
 
+
+    
     const $processSelect = $('#processSelect');
     const $createActivityModal = $('#createActivity');
     const $requestProcessModal = $('#requestNewProcess');
@@ -836,12 +987,13 @@
                             <span>{% trans %}process_stages.dates_definition.defined_duration.timespan{% endtrans %} :</span>
                             ${stage.ddates ? new Date(stage.startdate.date).toLocaleDateString('{% trans %}long_locale{% endtrans %}',dateOptions) + ' - ' + new Date(stage.enddate.date).toLocaleDateString('{% trans %}long_locale{% endtrans %}',dateOptions) : stage.dperiod + stage.dfreq }
                           </span>
-                          <span class="grading-duration">
-                            <i class="material-icons">send</i>
-                            <span>{% trans %}process_stages.dates_definition.defined_duration.feedback{% endtrans %} :</span>
-                            ${stage.ddates ? new Date(stage.gstartdate.date).toLocaleDateString('{% trans %}long_locale{% endtrans %}',dateOptions) + ' - ' + new Date(stage.genddate.date).toLocaleDateString('{% trans %}long_locale{% endtrans %}',dateOptions) : stage.fperiod + stage.ffreq }
-                          </span>
                       </div>`)
+
+                      //<span class="grading-duration">
+                      //  <i class="material-icons">send</i>
+                      //  <span>{% trans %}process_stages.dates_definition.defined_duration.feedback{% endtrans %} :</span>
+                      //  ${stage.ddates ? new Date(stage.gstartdate.date).toLocaleDateString('{% trans %}long_locale{% endtrans %}',dateOptions) + ' - ' + new Date(stage.genddate.date).toLocaleDateString('{% trans %}long_locale{% endtrans %}',dateOptions) : stage.fperiod + stage.ffreq }
+                      //</span>
 
                     $stgElmt.append($datesElmt);
 
@@ -991,6 +1143,7 @@
   </script>
   <script src="{{ asset('js/activity_manage.js') }}"></script>
   <script src="{{ asset('js/dropify.min.js') }}"></script>
+  <script src="{{ asset('js/calendar_fix.js') }}"></script>
 {% endblock %}
 
 
@@ -1030,7 +1183,7 @@
               {% endif %}
             </div>
 
-            <ul class="change-view-type" data-type="{{viewTypeCookie}}">
+            <ul class="change-view-type change-selector" data-type="{{viewTypeCookie}}">
               <i class="fa fa-caret-up"></i>
               <i class="fa fa-caret-down"></i>
             </ul>
@@ -1049,7 +1202,7 @@
                   <span class="sm-left sm-right">{{ 'activities.progress_sorting_type'|trans }}</span>
                 {% endif %}
               </div>
-              <ul class="change-status-type" data-type="{{sortingTypeCookie}}">
+              <ul class="change-status-type change-selector" data-type="{{sortingTypeCookie}}">
                 <i class="fa fa-caret-up"></i>
                 <i class="fa fa-caret-down"></i>
               </ul>
@@ -1058,13 +1211,13 @@
           {% if viewTypeCookie == 't' %}
           <li class="flex-center">
             <a class="btn-flat no-padding flex-center">
-              <div class="sorting-type-value flex-center">
+              <div class="dates-type-value flex-center">
                   <i class="material-icons" {% if dateTypeCookie != 's' %}style="display:none"{% endif %}>settings_ethernet</i>
                   <span class="sm-left sm-right" {% if dateTypeCookie != 's' %}style="display:none"{% endif %}>{{ 'activities.self_date_type'|trans }}</span>
                   <i class="material-icons" {% if dateTypeCookie == 's' %}style="display:none"{% endif %}>send</i>
                   <span class="sm-left sm-right" {% if dateTypeCookie == 's' %}style="display:none"{% endif %}>{{ 'activities.output_date_type'|trans }}</span>
               </div>
-              <ul class="change-date-type" data-type="{{dateTypeCookie}}">
+              <ul class="change-dates-type change-selector" data-type="{{dateTypeCookie}}">
                 <i class="fa fa-caret-up"></i>
                 <i class="fa fa-caret-down"></i>
               </ul>
@@ -1079,7 +1232,7 @@
 
     <div id="activities-container">
       {% if viewTypeCookie == 'd' %} 
-        <ul class="tabs tabs-fixed-width">
+        <ul class="tabs tabs-fixed-width" {% if noActivities %} style="display:none" {% endif %}>
           {% for s, status in displayedStatuses %}
             
             {% set nbActivities = processesActivities[s]|length + orphanActivities[s]|length %}
@@ -1091,7 +1244,7 @@
           {% endfor %}
         </ul>
       {% else %}
-        <ul class="tabs-t-view flex-center">
+        <ul class="tabs-t-view flex-center" {% if noActivities %} style="display:none" {% endif %}>
 
           {% for s, status in displayedStatuses %}
             {% set outputStatusCookie = global.request.cookies.get('r_s_' ~ sortingTypeCookie ~ '_' ~ status) %}
@@ -1230,6 +1383,9 @@
           {% if orphanActivities is not empty %}
             <li class="process-list--item hierarchized-item">
               <div class="row no-margin flex-center">
+
+
+
                 <div class="col s2 center">
                   <div class="flex-center process-detail">
                     <i class="material-icons">layers</i>
@@ -1311,7 +1467,76 @@
       {% endif %}
     </div>
 
-    {% if orphanActivities is empty and processesActivities is empty %}
+    {% if noActivities %}
+
+      <ul class="demo-activities">
+        
+          <li class="process-list--item hierarchized-item">
+            <div class="row no-margin flex-center no-activity-holder">
+              <div class="no-activity-overlay">
+                <div class="no-activity-msg">
+                  <span>{{'activities.no_activities.main_msg'|trans}}</span>
+                  <span>{{'activities.no_activities.secondary_msg'|trans}}</span>
+                </div>
+              </div>
+              <div class="col s2 center">
+                <div class="flex-center process-detail">
+                  <i class="material-icons">layers</i>
+                  <span class="m-left">{{ 'activities.orphans'|trans }}</span>
+                </div>
+              </div>
+              <div class="col s10 no-padding">
+                <div class="item-body">
+                  <ul class="activity-list">
+                    {% for k in 0..4 %}
+                      <div class="row no-margin flex-center activity-holder">
+                          <div class="col s9 center no-margin no-padding activity-content-stage">
+                              <div class="curDate"></div>
+                              <ul class="stages-holder" style="position:relative">
+                                <ol class="activity-component" data-sd="0" data-p="365" data-id="{{random(1,1000000)}}">
+                                    {% set startdateDay = random(7,320) %}
+                                    {% set period = random(max(0,15 - startdateDay), 350 - startdateDay) %}
+                                    {% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateDay: startdateDay, period: period, embeddedStages: null, visibleEl: true} %}
+                                </ol>
+                              </ul>
+                          </div>
+
+                          <div class="col m2 act-info">
+                              <div class="fixed-action-btn modified-fixed-btn" style="visibility: hidden;">
+                                  <a class="btn-floating">
+                                      <i class="material-icons">create</i>
+                                  </a>
+                  
+                                  <ul class="flex-center act-action-buttons">
+                                      <li>
+                                          <a class="btn-floating act-btn tooltipped modal-trigger" href="#updateEvent" data-tooltip="{{ 'activities.instant_add'|trans }}" data-position="top" data-aid="{{k}}" data-sid="{{ 10+k }}"><i class="material-icons">offline_bolt</i></a>
+                                      </li>
+                                      <li>
+                                          <a class="btn-floating act-btn tooltipped modal-trigger" href="#updateStageProgressStatus" data-position="top" data-html="true" data-tooltip="{{ 'activities.update_status'|trans}}" data-eid="{{ k }}"><i class="material-icons">update</i></a>
+                                      </li>
+                                      <li>
+                                          <a class="btn-floating act-btn tooltipped" href="#" data-position="top" data-html="true" data-tooltip="{{ 'activities.modify'|trans}}"><i class="material-icons">settings</i></a>
+                                      </li>                           
+                                      <li>
+                                          <a class="btn-floating act-btn tooltipped" data-tooltip="{{ 'activities.provide_my_feedbacks'|trans }}" data-position="top" href="#"><i class="fa fa-pen-alt"></i></a>
+                                      </li>
+                                  </ul>    
+                              </div>
+                          </div>
+                      </div>
+
+                    {% endfor %}
+
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </li>
+        
+
+      </ul>
+
+      {#}
       <div class="container">
         <div class="center" style="margin-top: 20px;">
             <i class="fa fa-clipboard fa-3x"></i>
@@ -1325,11 +1550,12 @@
             {% endif %}
         </div>
       </div>
+      #}
     {% endif %}
 
     {% if currentuser.role != 3 %}
       <div id="fixedButton create-act-btn" class="fixed-action-btn">
-          <a class="btn-floating blue darken-2 modal-trigger" href="#createActivity" onclick="onAddProcessClick('{{ currentuser.organization.id }}')" data-oid="{{currentuser.organization.id}}"><i class="material-icons">add</i></a>
+          <a class="btn-floating modal-trigger" href="#createActivity" onclick="onAddProcessClick('{{ currentuser.organization.id }}')" data-oid="{{currentuser.organization.id}}"><i class="material-icons">add</i></a>
           {#}
           <ul>
               <li><a class="btn-floating orange lighten-2 tooltipped modal-trigger" data-position="left" data-delay="50" data-tooltip="{% trans %}tooltip.template.create_from_scratch{% endtrans %}" href="{{ path('activityInitialisation',{'elmt' : 'template'}) }}">
@@ -1350,7 +1576,50 @@
 
   <div id="createActivity" class="modal">
       <div class="modal-content">
-        <h5>{% trans %}activities.create.delegate_choice_title_msg{% endtrans %}</h5>
+        <div class="flex-center-sb">
+          <h5>{{'activities.create.modal_title'|trans}}</h5>
+          <div class="flex-center ip-zone">
+            <span class="sm-right sm-left">{{'activities.create.linked_to'|trans}}</span>
+            <div class="ip-value flex-center">
+              <i class="material-icons">layers</i>
+              <span class="sm-right sm-left">{{'activities.create.no_ip'|trans}}</span>
+            </div>
+            <i class="material-icons">create</i>
+          </div>
+        </div>
+        {{ form_start(newActivityForm) }}
+        <div class="input-field">
+         {{form_label(newActivityForm.name)}}
+         {{form_widget(newActivityForm.name)}}
+        </div>
+
+        <div class="row no-margin">
+            <div class="col s6 m6 input-field">
+              {{ form_label(newActivityForm.startdate) }}
+              {{ form_widget(newActivityForm.startdate) }}
+            </div>
+            <div class="col s6 m6 input-field">
+              {{ form_label(newActivityForm.enddate) }}
+              {{ form_widget(newActivityForm.enddate) }}
+            </div>
+        </div>
+        <div class="participants">
+            <div class="participants-title">
+              <i class="fa fa-users"></i>
+              <span>{{'activities.participants'|trans}}</span>
+             
+            </div>
+
+            <ul class="participants-list flex-center" data-prototype="{% apply escape %}{% include "components/participant_list__item.html.twig" with { participant: newActivityForm.participants.vars.prototype } %}{% endapply %}">
+              {% for participant in newActivityForm.participants.vars.data %}
+                  {{ participant.user }}
+              {% endfor %}  
+                <li class="sm-left btn btn-participant-add flex-center tooltipped" data-tooltip="{{'activities.create.add_participant'|trans}}" data-position="top">
+                  <i class="fa fa-plus"></i>
+                </li>
+            </ul>
+        </div>
+        {#
         <div style="margin-top: 2Opx;">
           <div id="processSelector">
               <div style="margin-bottom: 20px">{% trans %}activities.available_processes{% endtrans %}</div>
@@ -1368,15 +1637,27 @@
                   {% trans %} activities.request_process{% endtrans %}
               </a>
           </div>
-        </div>
-        {#}
-        <p>{% trans %}activities.create.delegate_choice_msg{% endtrans %}</p>
+        </div>      
         #}
-      </div>
-    <div class="modal-footer action-buttons">
+        
+        
+
+    <div class="modal-footer flex-center-sb">
         <div class="button-field">
-          <a class="waves-effect waves-green btn final-step-btn modal-close">{% trans %}activities.create.next{% endtrans %}</a>
+        {{ form_widget(newActivityForm.complexify) }}
         </div>
+        <div class="button-field">
+          {#<a class="waves-effect waves-green btn final-step-btn modal-close">{% trans %}activities.create.submit{% endtrans %}</a>#}
+          {{ form_widget(newActivityForm.submit) }}
+        </div>
+    </div>
+    {{ form_rest(newActivityForm) }}
+    {{ form_end(newActivityForm) }}
+  </div>
+
+  <div id="processSelect" class="modal">
+    <div class="input-field">
+      <select id="processSelect"></select>
     </div>
   </div>
 

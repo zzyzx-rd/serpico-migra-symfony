@@ -6,9 +6,12 @@ use App\Entity\Activity;
 use App\Entity\Participation;
 use App\Entity\Decision;
 use App\Entity\Department;
+use App\Entity\Organization;
 use App\Entity\OrganizationUserOption;
+use App\Entity\Stage;
 use App\Entity\Survey;
 use App\Entity\User;
+use App\Form\ActivityMinElementForm;
 use App\Form\AddEventForm;
 use App\Form\AddProcessForm;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -82,9 +85,10 @@ final class InstitutionController extends MasterController
         $addProcessForm = $this->createForm(AddProcessForm::class, null, ['standalone' => true]);
         $delegateActivityForm = $this->createForm(DelegateActivityForm::class, null, ['standalone' => true, 'currentUser' => $this->user]);
         $eventForm = $this->createForm(AddEventForm::class, null, ['standalone' => true, 'currentUser' => $this->user]);
+        $createForm = $this->createForm(ActivityMinElementForm::class, new Stage, ['currentUser' => $this->user]);
 
         return $this->render(
-            'iprocess_list.html.twig',
+            'activities_dashboard.html.twig',
             [
                 'delegateForm' => $delegateActivityForm->createView(),
                 'displayedStatuses'  => $displayedStatuses,
@@ -95,6 +99,7 @@ final class InstitutionController extends MasterController
                 'viewTypeCookie' => $viewType,
                 'dateTypeCookie' => $dateType,
                 'eventForm' => $eventForm->createView(),
+                'newActivityForm' => $createForm->createView(),
             ]
         );
     }
@@ -164,97 +169,109 @@ final class InstitutionController extends MasterController
         $checkingIds = [$currentUser->getId()];
         $userActivities = new ArrayCollection;
 
-        if($existingAccessAndResultsViewOption){
-            $activitiesAccess = $existingAccessAndResultsViewOption->getOptionIValue();
-            $statusAccess = $existingAccessAndResultsViewOption->getOptionSecondaryIValue();
-            $noParticipationRestriction = $existingAccessAndResultsViewOption->getOptionSValue() == 'none';
-            if($activitiesAccess == 1){
-                $userActivities = new ArrayCollection($orgActivities);
-            } else if ($activitiesAccess == 2){
-                $departmentUsers = $currentUser->getDepartment() != null ? $currentUser->getDepartment()->getUsers() : [];
-                foreach($departmentUsers as $departmentUser){
-                    $checkingIds[] = $departmentUser->getId();
-                }
+        // 1 - Retrieving activities 
+        // Depends on either organization plan (for free organization, no privacy/segregation) and/or user rights/roles
+
+        if($this->org->getPlan() == Organization::PLAN_FREE){
+
+            $userActivities = new ArrayCollection($orgActivities);
+
+        } else {
+
+            if($existingAccessAndResultsViewOption){
+                $activitiesAccess = $existingAccessAndResultsViewOption->getOptionIValue();
+                $statusAccess = $existingAccessAndResultsViewOption->getOptionSecondaryIValue();
+                $noParticipationRestriction = $existingAccessAndResultsViewOption->getOptionSValue() == 'none';
+                /*if($activitiesAccess == 1){
+                    $userActivities = new ArrayCollection($orgActivities);
+                } else if ($activitiesAccess == 2){*/
+                    $departmentUsers = $currentUser->getDepartment() != null ? $currentUser->getDepartment()->getUsers() : [];
+                    foreach($departmentUsers as $departmentUser){
+                        $checkingIds[] = $departmentUser->getId();
+                    }
+                //}
             }
-        }
-
-        $userArchivedActivities = new ArrayCollection;
-
-
-        if($existingAccessAndResultsViewOption == null || $activitiesAccess != 1){
-
-            // 1/ Get requested activities (as currentuser is not a participant, we have to retrieve them with a different query)
-            // passing through Decision table
-
-            if ($role == 3){
-                $pendingDecisions = $repoDec->findBy(['requester' => $checkingIds, 'validated' => null]);
-                foreach($pendingDecisions as $pendingDecision){
-                    $userActivities->add($pendingDecision->getActivity());
+    
+            $userArchivedActivities = new ArrayCollection;
+    
+    
+            if($existingAccessAndResultsViewOption == null || $activitiesAccess != 1){
+    
+                // 1/ Get requested activities (as currentuser is not a participant, we have to retrieve them with a different query)
+                // passing through Decision table
+    
+                if ($role == 3){
+                    $pendingDecisions = $repoDec->findBy(['requester' => $checkingIds, 'validated' => null]);
+                    foreach($pendingDecisions as $pendingDecision){
+                        $userActivities->add($pendingDecision->getActivity());
+                    }
+                } else {
+                    $pendingDecisions = $repoDec->findBy(['decider' => $checkingIds, 'validated' => null]);
+                    foreach($pendingDecisions as $pendingDecision){
+                        $userActivities->add($pendingDecision->getActivity());
+                    }
                 }
-            } else {
-                $pendingDecisions = $repoDec->findBy(['decider' => $checkingIds, 'validated' => null]);
-                foreach($pendingDecisions as $pendingDecision){
-                    $userActivities->add($pendingDecision->getActivity());
-                }
-            }
-
-            // IDs of activities in which at least one *graded* participant is a direct or indirect subordinate
-            $subordinates = $this->user->getSubordinates();
-            /** @var Participation[] */
-            $subordinatesParticipations = $repoP->findBy(['user' => $subordinates->toArray(), 'type' => [ -1, 1 ] ]);
-            $activitiesWithSubordinates_IDs = array_map(function (Participation $p) {
-                return $p->getStage()->getActivity()->getId();
-            }, $subordinatesParticipations);
-
-            foreach($orgActivities as $orgActivity){
-                if (
-                    $orgActivity->getStatus() == -2 && in_array($orgActivity->getMasterUserId(), $checkingIds) ||
-                    in_array($orgActivity->getId(), $activitiesWithSubordinates_IDs)
-                ){
-                    $userActivities->add($orgActivity);
-                }
-
-                // 3/ Get all activities in which current user is participating
-
-                if(!in_array($orgActivity->getId(), $activitiesWithSubordinates_IDs)){
-                    if(!$orgActivity->getArchived()){
-
-                        $isParticipant = 0;
-                        $isMasterUserId = 0;
-                        foreach ($orgActivity->getStages() as $orgStage){
-
-                            $orgStage->currentUser = $currentUser;
-
-                            foreach ($orgStage->getParticipations() as $orgParticipant){
-                                if (in_array($orgParticipant->getUser()->getId(), $checkingIds)){
-                                    $isParticipant = 1;
-                                    ($orgParticipant->getStatus() != 5) ? $userActivities->add($orgActivity) : $userArchivedActivities->add($orgActivity);
+    
+                // IDs of activities in which at least one *graded* participant is a direct or indirect subordinate
+                $subordinates = $this->user->getSubordinates();
+                /** @var Participation[] */
+                $subordinatesParticipations = $repoP->findBy(['user' => $subordinates->toArray(), 'type' => [ -1, 1 ] ]);
+                $activitiesWithSubordinates_IDs = array_map(function (Participation $p) {
+                    return $p->getStage()->getActivity()->getId();
+                }, $subordinatesParticipations);
+    
+                foreach($orgActivities as $orgActivity){
+                    if (
+                        $orgActivity->getStatus() == -2 && in_array($orgActivity->getMasterUserId(), $checkingIds) ||
+                        in_array($orgActivity->getId(), $activitiesWithSubordinates_IDs)
+                    ){
+                        $userActivities->add($orgActivity);
+                    }
+    
+                    // 3/ Get all activities in which current user is participating
+    
+                    if(!in_array($orgActivity->getId(), $activitiesWithSubordinates_IDs)){
+                        if(!$orgActivity->getArchived()){
+    
+                            $isParticipant = 0;
+                            $isMasterUserId = 0;
+                            foreach ($orgActivity->getStages() as $orgStage){
+    
+                                $orgStage->currentUser = $currentUser;
+    
+                                foreach ($orgStage->getParticipations() as $orgParticipant){
+                                    if (in_array($orgParticipant->getUser()->getId(), $checkingIds)){
+                                        $isParticipant = 1;
+                                        ($orgParticipant->getStatus() != 5) ? $userActivities->add($orgActivity) : $userArchivedActivities->add($orgActivity);
+                                        break;
+                                    }
+                                }
+    
+                                if ($isParticipant == 1){
+                                    break;
+                                } elseif(in_array($orgStage->getMasterUser()->getId(), $checkingIds) && (!$orgStage->getOwnerUserId() || in_array($orgStage->getOwnerUserId(), $checkingIds))){
+                                    $isMasterUserId = 1;
                                     break;
                                 }
                             }
-
-                            if ($isParticipant == 1){
-                                break;
-                            } elseif(in_array($orgStage->getMasterUser()->getId(), $checkingIds) && (!$orgStage->getOwnerUserId() || in_array($orgStage->getOwnerUserId(), $checkingIds))){
-                                $isMasterUserId = 1;
-                                break;
+    
+                            if($isMasterUserId == 1 && $isParticipant == 0 && $orgActivity->getStatus() != -2){
+                                $userActivities->add($orgActivity);
                             }
+    
+                        } else {
+                            $userArchivedActivities->add($orgActivity);
                         }
-
-                        if($isMasterUserId == 1 && $isParticipant == 0 && $orgActivity->getStatus() != -2){
-                            $userActivities->add($orgActivity);
-                        }
-
-                    } else {
-                        $userArchivedActivities->add($orgActivity);
                     }
                 }
+                //Get activities where user is participating as external user
+                $externalActivities = $em->getRepository(User::class)->getExternalActivities($currentUser);
+                $userActivities = new ArrayCollection((array)$userActivities->toArray() + $externalActivities->toArray());
+    
             }
-            //Get activities where user is participating as external user
-            $externalActivities = $em->getRepository(User::class)->getExternalActivities($currentUser);
-            $userActivities = new ArrayCollection((array)$userActivities->toArray() + $externalActivities->toArray());
-
         }
+
+
 
         $addProcessForm = $this->createForm(AddProcessForm::class, null, ['standalone' => true]);
         $delegateActivityForm = $this->createForm(DelegateActivityForm::class, null, ['standalone' => true, 'currentUser' => $currentUser]) ;
@@ -265,6 +282,7 @@ final class InstitutionController extends MasterController
         $validateRequestForm->handleRequest($request);
         $eventForm = $this->createForm(AddEventForm::class, null, ['standalone' => true, 'currentUser' => $currentUser]);
         $eventForm->handleRequest($request);
+        $createForm = $this->createForm(ActivityMinElementForm::class, new Stage, ['currentUser' => $this->user]);
 
         // In case they might access results depending on user participation, then we need to feed all stages and feed a collection which will be analysed therefore in hideResultsFromStages function
         if($existingAccessAndResultsViewOption && !$noParticipationRestriction){
@@ -276,7 +294,7 @@ final class InstitutionController extends MasterController
             }
         }
 
-
+        // 2 - Sorting activities per status and process
 
         $statuses = [
             -5 => $sortingType == 'o' ? 'cancelled' : 'stopped',
@@ -394,7 +412,7 @@ final class InstitutionController extends MasterController
         ksort($displayedStatuses);
 
         return $this->render(
-            'iprocess_list.html.twig',
+            'activities_dashboard.html.twig',
             [
                 'displayedStatuses'  => $displayedStatuses,
                 'orphanActivities'  => $orphanActivities,
@@ -407,6 +425,7 @@ final class InstitutionController extends MasterController
                 'viewTypeCookie' => $viewType,
                 'dateTypeCookie' => $dateType,
                 'eventForm' => $eventForm->createView(),
+                'newActivityForm' => $createForm->createView(),
             ]
         );
 
