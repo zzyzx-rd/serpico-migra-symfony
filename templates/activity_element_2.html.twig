@@ -286,19 +286,7 @@
                 </template>
 
               </ul>
-                  <ul class="criteria-list">
-                    <button class="btn-flat btn-add-criterion">
-                      <i class="material-icons left">add</i>
-                      {{ 'criteria.add_btn_internal'|trans }}
-                    </button>
-                    <div class="output-criteria">
 
-
-
-
-
-                    </div>
-                  </ul>
                 </div>
 
 
@@ -355,10 +343,7 @@
                       </div>
                     </div>
                   {% else %}
-                    <h6 class="no-participants">
-                      <span>{{ 'process_stages.no_survey'|trans }}</span>
-                      <i class="fa fa-question-circle tooltipped" data-position="top"></i>
-                    </h6>
+
 
 {#                    <a#}
 {#                      href="{{ url('surveyRequest',{'stgId' : stage.vars.data.id}) }}?redirect={{ url(global.route,global.routeParams)|e('url') }}"#}
@@ -524,7 +509,7 @@
       {{ form_rest(criterionElementForm) }}
       {{ form_end(criterionElementForm) }}
     </div>
-  <div class="0-form" style="display: none;">
+  <div class="o-form" style="display: none;">
     {{ form_start(outputElementForm) }}
     {{ form_rest(outputElementForm) }}
     {{ form_end(outputElementForm) }}

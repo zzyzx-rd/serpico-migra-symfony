@@ -83,10 +83,12 @@ class Output extends DbObject
      * @param DateTime $startdate
      * @param DateTime $enddate
      * @param DateTime $inserted
+     * @param String $name
      */
 
     public function __construct($id = 0,
-                                $createdBy = null
+                                $createdBy = null,
+                                $name = null
     )
     {
         parent::__construct($id, $createdBy, new DateTime);

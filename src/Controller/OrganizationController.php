@@ -1295,31 +1295,28 @@ class OrganizationController extends MasterController
     public function validateElementOutputAction(Request $request, $entity, $elmtId, $stgId, $otpId)
     {
                         $em = $this->em;
-                        $currentUser= $this->getUser();
-                        $output = new Output;
-                        $repoE     = $em->getRepository(Stage::class);
-                        $element     = $repoE->find($stgId);
-                        if ($otpId != 0) {
-                            $output = $repoE->find($otpId);
-                            $outputBeforeUpgrade = clone $output;
-                            }else{
-                            $output = new Output();
-                        }
+                        $currentUser = $this->getUser();
+                        $repoE = $em->getRepository(Stage::class);
+                        $element = $repoE->find($stgId);
+                        $output = $otpId != 0 ? $repoE->find($otpId) : new Output;
                         $outputForm = $this->createForm(OutputType::class, $output, ['entity' => $entity, 'standalone' => true, 'currentUser' => $currentUser]);
-                        $outputForm ->handleRequest($request);
+                        $outputForm->handleRequest($request);
 
-                        if ($outputForm ->isSubmitted()) {
-                            if ($outputForm ->isValid()) {
-
+                        if ($outputForm->isSubmitted()) {
+                            if ($outputForm->isValid()) {
 
                                 $em->persist($output);
-
                                 $em->flush();
+                                $responseArray = ['message' => 'Success to add output!', 'oid' => $output->getId()];
+                                return new JsonResponse($responseArray, 200);
 
-                            }}
+                            }else{
+                                $errors = $this->buildErrorArray($outputForm);
+                                return $errors;
 
-        $responseArray = ['message' => 'Success to add criteria!', 'cid' => $output->getId()];
-        return new JsonResponse($responseArray, 200);
+                            }
+                        }
+
 
 
 

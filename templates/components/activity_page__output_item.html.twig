@@ -5,8 +5,8 @@
 
 
 {% set type = output_model ? output_model.type : '__type__' %}
-
-<div class="output-item row" style="display: flex;align-items: center ;color: #55308e">
+<div class="output-item">
+<div class=" row" style="display: flex;align-items: center ;color: #55308e">
 {% if type == 2 %}
 
     <h7> Formulaire </h7>
@@ -21,6 +21,7 @@
 </div>
     <div id="stage-{{s}}-type--criteria">
         <ul class="criteria-list">
+
             <button class="btn-flat btn-add-criterion">
                 <i class="material-icons left">add</i>
                 {{ 'criteria.add_btn_internal'|trans }}
