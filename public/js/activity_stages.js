@@ -127,33 +127,76 @@ function sliders($btn = null) {
 
 sliders();
 
-function parseDdmmyyyy(str)
-{
-  var parts = str.split('/');
-  return new Date(parts[2], parts[1] - 1, parts[0]);
+function initPickates(){
+  switch(lg){
+    case 'fr':
+        $.extend($.fn.pickadate.defaults, {
+            monthsFull: ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'],
+            monthsShort: [ 'Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aou', 'Sep', 'Oct', 'Nov', 'Dec' ],
+            weekdaysFull: [ 'Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi' ],
+            weekdaysShort: [ 'Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam' ],
+            today: 'Aujourd\'hui',
+            clear: 'Effacer',
+            close: 'Fermer',
+            firstDay: 1,
+            //format: 'dd mmmm yyyy',
+        });
+        break;
+    case 'es':
+        $.extend($.fn.pickadate.defaults, {
+            monthsFull: [ 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre' ],
+            monthsShort: [ 'ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic' ],
+            weekdaysFull: [ 'domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado' ],
+            weekdaysShort: [ 'dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb' ],
+            today: 'hoy',
+            clear: 'borrar',
+            close: 'cerrar',
+            firstDay: 1,
+            //format: 'dddd d !de mmmm !de yyyy',
+        });
+        break;
+    case 'pt':
+        $.extend($.fn.pickadate.defaults, {
+            monthsFull: [ 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro' ],
+            monthsShort: [ 'jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez' ],
+            weekdaysFull: [ 'Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado' ],
+            weekdaysShort: [ 'dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab' ],
+            today: 'Hoje',
+            clear: 'Limpar',
+            close: 'Fechar',
+            firstDay: 1,
+            //format: 'd !de mmmm !de yyyy',
+        });
+        break;
+    default:
+        break;
+  
+  }
+  
+  
+  $.extend($.fn.pickadate.defaults, {
+    selectMonths: true,
+    selectYears: 5,
+    yearend: '31/12/2020',
+    closeOnSelect: true,
+    clear: false,
+    //format : 'dd MMMM, yyyy',
+    //formatSubmit: 'yyyy/mm/dd'
+  });
+  
+  $('.dp-start, .dp-end, .dp-gstart, .dp-gend').each(function() {
+    $(this).pickadate();
+  });
 }
+
+initPickates();
+
 
 // Updates calendar datepickers
 
 function updateDatepickers(k, index){
 
   var nbStages =  $('.stage').length;
-
-  var replaceVars = {
-      "janvier":"January","enero":"January","janeiro":"January",
-      "février":"February","febrero":"February","fevereiro":"February",
-      "mars":"March","marzo":"March","março":"March",
-      "avril":"April","abril":"April","abril":"April",
-      "mai":"May","mayo":"May","maio":"May",
-      "juin":"June","junio":"June","junho":"June",
-      "juillet":"July","julio":"July","julho":"July",
-      "août":"August","agosto":"August","agosto":"August",
-      "septembre":"September","septiembre":"September","setembro":"September",
-      "octobre":"October","octubre":"October","outubro":"October",
-      "novembre":"November","noviembre":"November","novembro":"November",
-      "décembre":"December","diciembre":"December","dezembro":"December",
-  };
-  var regex = /janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre|enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre|janeiro|fevereiro|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro/g ;
 
   //Three possible cases : loading(0), addition of one stage(1), update(2) or removal (-1)
 
@@ -169,12 +212,10 @@ function updateDatepickers(k, index){
           var endCal = $(this).find('.dp-end');
           var gStartCal = $(this).find('.dp-gstart');
           var gEndCal = $(this).find('.dp-gend');
-          var startDateTS = (startCal.val() == "") ? Date.now() : parseDdmmyyyy(startCal.val().replace(regex,function(match){return replaceVars[match];}));
-          var endDateTS = (endCal.val() == "") ? startDateTS : parseDdmmyyyy(endCal.val().replace(regex,function(match){return replaceVars[match];}));
-        var startDate = new Date(startDateTS);
+          var startDateTS = (startCal.val() == "") ? Date.now() : new Date(startCal.val());
+          var endDateTS = (endCal.val() == "") ? startDateTS : new Date(endCal.val());
+          var startDate = new Date(startDateTS);
           var endDate = new Date(endDateTS);
-
-
           startCal.pickadate('picker').set('select',startDate);
           endCal.pickadate('picker').set('select',endDate).set('min',startDate);
 
@@ -211,65 +252,6 @@ function updateDatepickers(k, index){
 
 }
 
-switch(lg){
-
-  case 'fr':
-      $.extend($.fn.pickadate.defaults, {
-          monthsFull: ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'],
-          monthsShort: [ 'Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aou', 'Sep', 'Oct', 'Nov', 'Dec' ],
-          weekdaysFull: [ 'Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi' ],
-          weekdaysShort: [ 'Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam' ],
-          today: 'Aujourd\'hui',
-          clear: 'Effacer',
-          close: 'Fermer',
-          firstDay: 1,
-          //format: 'dd mmmm yyyy',
-      });
-      break;
-  case 'es':
-      $.extend($.fn.pickadate.defaults, {
-          monthsFull: [ 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre' ],
-          monthsShort: [ 'ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic' ],
-          weekdaysFull: [ 'domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado' ],
-          weekdaysShort: [ 'dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb' ],
-          today: 'hoy',
-          clear: 'borrar',
-          close: 'cerrar',
-          firstDay: 1,
-          //format: 'dddd d !de mmmm !de yyyy',
-      });
-      break;
-  case 'pt':
-      $.extend($.fn.pickadate.defaults, {
-          monthsFull: [ 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro' ],
-          monthsShort: [ 'jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez' ],
-          weekdaysFull: [ 'Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado' ],
-          weekdaysShort: [ 'dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab' ],
-          today: 'Hoje',
-          clear: 'Limpar',
-          close: 'Fechar',
-          firstDay: 1,
-          //format: 'd !de mmmm !de yyyy',
-      });
-      break;
-  default:
-      break;
-
-}
-
-$.extend($.fn.pickadate.defaults, {
-  selectMonths: true,
-  selectYears: 5,
-  yearend: '31/12/2020',
-  closeOnSelect: true,
-  clear: false,
-  //format : 'dd MMMM, yyyy',
-  //formatSubmit: 'yyyy/mm/dd'
-});
-
-$('.dp-start, .dp-end, .dp-gstart, .dp-gend').each(function() {
-  $(this).pickadate();
-});
 
 var endDates = $('.dp-end');
 endDates.data('previous', endDates.val());

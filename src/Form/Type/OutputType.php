@@ -77,7 +77,7 @@ class OutputType extends AbstractType
             ]);
             $builder->add('startdate', DateTimeType::class,
                 [
-                    'format' => 'dd/MM/yyyy',
+                    'format' => 'd MMMM, y',
                     'widget' => 'single_text',
                     'label_format' => 'stages.stage.%name%',
                     'html5' => false,
@@ -92,7 +92,7 @@ class OutputType extends AbstractType
 
                 ->add('enddate', DateTimeType::class,
                     [
-                        'format' => 'dd/MM/yyyy',
+                        'format' => 'd MMMM, y',
                         'widget' => 'single_text',
                         'label_format' => 'stages.stage.%name%',
                         'html5' => false,
