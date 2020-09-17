@@ -285,7 +285,7 @@ final class InstitutionController extends MasterController
         $createForm = $this->createForm(ActivityMinElementForm::class, new Stage, ['currentUser' => $this->user]);
 
         // In case they might access results depending on user participation, then we need to feed all stages and feed a collection which will be analysed therefore in hideResultsFromStages function
-        if($existingAccessAndResultsViewOption && !$noParticipationRestriction){
+        if($existingAccessAndResultsViewOption && empty($noParticipationRestriction)){
             $userStages = new ArrayCollection;
             foreach($userActivities as $activity){
                 foreach($activity->getStages() as $stage){

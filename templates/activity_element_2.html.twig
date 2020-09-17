@@ -238,62 +238,71 @@
                 {% set checkBeforeValidation = output_model and output_model.stage.hasCompletedOutput == 1 %}
                 {%  set outputs_form =  stage.outputs.vars.prototype %}
                 <div id="outputModal" class="modal" style="width: 65%;height: 70%">
-                  <div class="modal-title">
-                    <h5>Retour programmmé</h5>
-                  </div>
-                  <div class="modal-footer" style="text-align: left">
+
+
+
+                  <h4 class="modal-content" >
+                    <h5 class="center">Retour programmmé</h5>
                     <section class="form-output">
                       <div class="flex-center-sb">
-                      <div class="startdate"style="text-align: left "> <p>Date de début</p>{{ form_widget(outputs_form.startdate) }}
+                      <div class="startdate"style="text-align: left "> {{ form_row(outputs_form.startdate) }}
                       </div>
-                        <div class="enddate" style="text-align: right "><p>Date de fin</p>{{ form_widget(outputs_form.enddate) }}</div>
+                        <div class="enddate" style="text-align: right ">{{ form_row(outputs_form.enddate) }}</div>
                       </div>
-
+                      <div style="width:0%">
                       {{ form_row(outputs_form.type, { attr: { class: "type" }}) }}
+                      </div>
                       {{ form_row(outputs_form.visibility, { attr: { class: "visibility" }}) }}
 
 
 
 
-                      <button type="button"
-                              class="o-validate{{checkBeforeValidation ? '-prior-check'}} btn blue darken-2"
-                              data-cid="{{output_model ? output_model.id : 0}}"
-                      >
-                        <i class="material-icons left">done</i> {{ 'criteria.tooltip.validate'|trans }}
-                      </button>
+
                     </section>
-                    </div>
+                    <section>
+                    <button type="button"
+                            class="o-validate{{checkBeforeValidation ? '-prior-check'}} btn blue darken-2"
+                            data-oid="{{output_model ? output_model.id : 0}}" style="margin-top:3% "
+                    >
+                      <i class="material-icons left">done</i> {{ 'criteria.tooltip.validate'|trans }}
+                    </button>
+                    </section>
+                    </h4>
                 </div>
+                {#
+             <template class="output-list--item__proto">
+               {% include "modals/stage_output.html.twig" with { s: '__stgIndex__', o: '__opttNb__', outputs:outputs_form } %}
+             </template>#}
+             <header>{{ 'activity_elements.output'|trans }}</header>
+             <a
+                     href="#outputModal" class=" btn-flat btn-add-output modal-trigger "
+                     data-tooltip="{% trans %}process_stages.output_add{% endtrans %}">
+               <i class="material-icons left">add</i>
+               {{ 'output.add_btn_internal'|trans }}
+             </a>
+         <div id="stage-{{s}}-type--output">
+           <ul class="output-list">
 
-                <header>{{ 'activity_elements.output'|trans }}</header>
-                <a
-                        href="#outputModal" class=" btn-flat btn-add-output modal-trigger "
-                        data-tooltip="{% trans %}process_stages.output_add{% endtrans %}">
-                  <i class="material-icons left">add</i>
-                  {{ 'output.add_btn_internal'|trans }}
-                </a>
-            <div id="stage-{{s}}-type--criteria">
-              <ul class="output-list">
+             <template class="output-list--item__proto">
+               {%
+                 include "components/activity_page__output_item.html.twig"
+                 with { s: s, o: "__otpIndex__", outputs: stage.outputs.vars.prototype }
+               %}
 
-                <template class="output-list--item__proto">
-                  {%
-                    include "components/activity_page__output_item.html.twig"
-                    with { s: s, o: "__otpIndex__", outputs: stage.outputs.vars.prototype }
-                  %}
-                  {% for o, output in stage.vars.data.outputs %}
-                    {% include "components/activity_page__output_item.html.twig" with { s: s, c: c, outputs: stage.outputs.vars.prototype } %}
-                  {% endfor %}
-                </template>
+             </template>
+             {% for o, output in stage.outputs %}
 
-              </ul>
+               {% include "components/activity_page__output_item.html.twig" with { s: s, o: o, outputs: output } %}
+             {% endfor %}
+           </ul>
 
-                </div>
+             </div>
 
 
-                    {#
-                      This item only displays when not preceeded with any element,
-                      through CSS direct sibling selector.
-                    #}
+                 {#
+                   This item only displays when not preceeded with any element,
+                   through CSS direct sibling selector.
+                 #}
 
                 <div id="stage-{{s}}-type--survey">
                   {% if stage.vars.data.survey|length != null %}
@@ -461,7 +470,7 @@
         <div class="modal-title">
           <h5>{{ 'activities.modal_error_creation_title'|trans }}</h5>
         </div>
-        <div class="modal-content">
+        <div class="modal-content" style>
           {{ form_errors(form) }}
           {{ form_errors(form.activeModifiableStages) }}
 
@@ -482,9 +491,7 @@
                     {% endif %}
                   {% endfor %}
 
-                  {% if not stage.outputs.vars.valid %}
 
-                  {% endif %}
                 </div>
               {% endif %}
             {% endfor %}
@@ -496,7 +503,7 @@
       </div>
     {% endif %}
 
-    {{ form_end(form) }}
+    {{ form_end(form, {'render_rest': false}) }}
 
     <div class="s-form" style="display: none;">
       {{ form_start(stageElementForm) }}

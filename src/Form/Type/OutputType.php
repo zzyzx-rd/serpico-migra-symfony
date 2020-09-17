@@ -47,14 +47,12 @@ class OutputType extends AbstractType
                     'choices' => ['critère'=>1,
                         'survey'=>2],
                     'expanded' => true,
-                    'required' => false,
-                    'multiple' => true,
+                    'required' => true,
+                    'multiple' => false,
 
                 ]
             );
-        $builder->add('name', TextType::class,
-        [
-        ]);
+
         $builder->add('criteria', CollectionType::class,
             [
                 'entry_type' => CriterionType::class,
@@ -75,34 +73,27 @@ class OutputType extends AbstractType
                 'label' => false,
                 'error_bubbling' => false,
             ]);
-            $builder->add('startdate', DateTimeType::class,
+        $builder->add('startdate', DateTimeType::class,
+            [
+                'format' => 'Y-m-d H:i:s',
+                'widget' => 'single_text',
+                'label_format' => 'stages.stage.%name%',
+                'html5' => false,
+                'attr' => ['class' => 'dp-start'],
+                //'data' => $options['startdate'],
+
+            ])
+
+            ->add('enddate', DateTimeType::class,
                 [
-                    'format' => 'd MMMM, y',
+                    'format' => 'Y-m-d H:i:s',
                     'widget' => 'single_text',
                     'label_format' => 'stages.stage.%name%',
                     'html5' => false,
-                    'attr' => ['class' => 'dp-start'],
-                    //'data' => $options['startdate'],
-                    'constraints' => [
-                        new NotBlank([
-                            'message' => 'A recurring activity must have a startdate'
-                        ]),
-                    ]
-                ])
+                    'attr' => ['class' => 'dp-end'],
+                    //'data' => $options['enddate'],
 
-                ->add('enddate', DateTimeType::class,
-                    [
-                        'format' => 'd MMMM, y',
-                        'widget' => 'single_text',
-                        'label_format' => 'stages.stage.%name%',
-                        'html5' => false,
-                        'attr' => ['class' => 'dp-end'],
-                        //'data' => $options['enddate'],
-                        'constraints' => [
-                            new NotBlank,
-                            //new EDGreaterThanSD
-                        ]
-                    ]);
+                ]);
         $builder->add('visibility', ChoiceType::class,
             [
                 'label' => 'visibilé',

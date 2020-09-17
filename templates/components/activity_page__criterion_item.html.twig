@@ -34,7 +34,7 @@
             {{ form_label(criterion.weight) }}
             <div class="weight-criterion-slider" style="margin-top:10px;"></div>
             <div class="weight-criterion-slider-range-value center" style="font-size:1.2rem;padding-top: 5px"></div>
-            {{ form_widget(criterion.weight, { attr: { hidden: '' } }) }}
+            {{ form_widget(criterion.weight, { attr: { hidden: 'true' } }) }}
             {{ form_errors(criterion.weight) }}
           </div>
         </div>

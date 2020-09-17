@@ -27,12 +27,12 @@ class Output extends DbObject
     public ?int $id;
 
     /**
-     * @ORM\Column(name="otp_startdate", type="datetime", nullable=true)
+     * @ORM\Column(name="otp_startdate", type="datetime",  options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $startdate;
 
     /**
-     * @ORM\Column(name="otp_enddate", type="datetime", nullable=true)
+     * @ORM\Column(name="otp_enddate", type="datetime",  options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $enddate;
     /**
@@ -88,7 +88,8 @@ class Output extends DbObject
 
     public function __construct($id = 0,
                                 $createdBy = null,
-                                $name = null
+                                $name = ""
+
     )
     {
         parent::__construct($id, $createdBy, new DateTime);
@@ -104,6 +105,22 @@ class Output extends DbObject
     public function getCriteria()
     {
         return $this->criteria;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    /**
+     * @param string $name
+     */
+    public function setName(string $name): void
+    {
+        $this->name = $name;
     }
 
     /**
@@ -136,12 +153,11 @@ class Output extends DbObject
         return $this->startdate;
     }
 
-    /**
-     * @param DateTime $startdate
-     */
-    public function setStartdate(DateTime $startdate): self
+
+    public function setStartdate(DateTime $startdate ): self
     {
         $this->startdate = $startdate;
+        return $this;
     }
 
     /**
@@ -157,7 +173,8 @@ class Output extends DbObject
      */
     public function setEnddate(DateTime $enddate): self
     {
-        $this->enddate = $enddate;
+        $this->enddate = new DateTime();
+        return $this;
     }
 
     /**

@@ -337,13 +337,74 @@ $(document).on(
     $participantItem.addClass('edit-mode');
   }
 ).on(
+    'click', '.btn-add-output',
+    function() {
+
+        const $this = $(this);
+        const $section = $this.closest('.output');
+
+        const $outputList = $section.find('.output-criteria');
+
+        if ($criteriaList.children('.new').length) {
+            return;
+        }
+
+        //const $proto =  $section.find('template.criteria-list--item__proto');
+        /** @type {HTMLTemplateElement} */
+        const outputs = $section.find('.output-list--item');
+
+        const nbOutput = outputs.length;
+        const proto = $section.find('template.output-list--item__proto')[0];
+        const $output = $section.closest('.output');
+        const outputList = $output.find('ul.output-list');
+        const protoHtml = proto.innerHTML.trim();
+        const newProtoHtml = protoHtml
+            .replace(/__otpIndex__/g, outputList.children().length - 1)
+
+
+
+        const $crtElmt = $(newProtoHtml);
+        //$crtElmt.append(newProtoHtml);
+        $crtElmt.find('.modal').modal();
+        $crtElmt.find('.tooltipped').tooltip();
+
+        // Setting default values, and putting label upside by adding them "active" class
+        $crtElmt.find('input[name*="lowerbound"]').val(0).prev().addClass("active");
+        $crtElmt.find('input[name*="upperbound"]').val(5).prev().addClass("active");
+        $crtElmt.find('input[name*="step"]').val(0.5).prev().addClass("active");
+
+
+
+        $criteriaList.children().last().before($crtElmt);
+
+
+
+
+
+
+        slider.next().next().hide();
+
+
+        handleCNSelectElems($crtElmt);
+
+        $crtElmt.find('.modal-output').modal({
+            complete: function(){
+
+
+            }
+        });
+        $crtElmt.find('.modal-output').modal('open');
+
+
+    }
+).on(
   'click', '.btn-add-criterion',
   function() {
 
       const $this = $(this);
-      const $section = $this.closest('.output');
-      console.log($section);
-      const $criteriaList = $section.find('ul.criteria-list');
+      const $section = $this.closest('.output-item');
+
+      const $criteriaList = $section.find('.output-criteria');
 
     if ($criteriaList.children('.new').length) {
       return;
@@ -352,21 +413,25 @@ $(document).on(
     //const $proto =  $section.find('template.criteria-list--item__proto');
     /** @type {HTMLTemplateElement} */
     const $criteria = $section.find('.criteria-list--item');
+
     const nbCriteria = $criteria.length;
     const proto = $section.find('template.criteria-list--item__proto')[0];
+    const $output = $section.closest('.output');
+    const $outputList = $output.find('ul.output-list');
     const protoHtml = proto.innerHTML.trim();
     const newProtoHtml = protoHtml
-    .replace(/__stgIndex__/g,$('.stage-element').not('.completed-stage-element').length - 1)
-    .replace(/__crtIndex__/g, $criteriaList.children().length - 2)
-    .replace(/__crtNb__/g, $criteriaList.children().length - 1)
-    .replace(/__lowerbound__/g, 0)
-    .replace(/__upperbound__/g, 5)
-    .replace(/__step__/g, 0.5)
-    //.replace(/__weight__/g, Math.round(100/(nbCriteria + 1)))
-    .replace(/__stgNb__/g, $('.stage').index($section.closest('.stage')));
+        .replace(/__otpIndex__/g, $criteriaList.children().length - 1)
+        .replace(/__crtIndex__/g, $criteriaList.children().length - 1)
+        .replace(/__crtNb__/g, $criteriaList.children().length - 1)
+        .replace(/__lowerbound__/g, 0)
+        .replace(/__upperbound__/g, 5)
+        .replace(/__step__/g, 0.5)
+        //.replace(/__weight__/g, Math.round(100/(nbCriteria + 1)))
+        .replace(/__stgNb__/g, $('.stage').index($section.closest('.stage')));
 
     const $crtElmt = $(newProtoHtml);
     //$crtElmt.append(newProtoHtml);
+
     $crtElmt.find('.modal').modal();
     $crtElmt.find('.tooltipped').tooltip();
 
@@ -375,6 +440,7 @@ $(document).on(
     $crtElmt.find('input[name*="upperbound"]').val(5).prev().addClass("active");
     $crtElmt.find('input[name*="step"]').val(0.5).prev().addClass("active");
     // Select new criterion as being an evaluation one (by default)
+
     $crtElmt.find('[id*="_type"]').eq(1)[0].checked = true;
 
     /*
@@ -400,12 +466,12 @@ $(document).on(
     var weight = $crtElmt.find('.weight');
 
     //Removing '%' text added by PercentType
-    weight[0].removeChild(weight[0].lastChild);
+    //weight[0].removeChild(weight[0].lastChild);
 
     //Get new criteria objects after insertion
     //var relatedCriteria = $crtElmt.closest('.stage').find('.criterion');
     $relatedCriteria = $criteriaList.find('.criteria-list--item');
-
+    console.log($criteriaList);
 
     var creationVal = Math.round(100 / $relatedCriteria.length);
     var sumVal = 0;
@@ -512,7 +578,8 @@ $(document).on(
         }*/
       }
     })
-    $crtElmt.find('.criterion-modal').modal('open');
+
+    $crtElmt.modal('open');
 
 
   }
@@ -1663,14 +1730,19 @@ $(document).on('click','.o-validate', function(e) {
     e.preventDefault();
     $btn = $(this);
     $deleteBtn = $btn.closest('.modal').find('[href="#deleteOutput"]');
-    var $crtElmt = $(this).closest('.form-output');
+    var $crtElmt = $(this).closest('.modal');
+
     //$crtElmt = $(this).closest('.criterion');
     sid =  $(this).closest('.stage').data('id');
     oid = $(this).data('oid');
     //crtVal = $crtElmt.find('select option:selected').val();
     typeVal = $crtElmt.find('input:checked').val();
-    startdate = $crtElmt.find('.startdate').find('input').val();
-    enddate = $crtElmt.find('.enddate').find('input').val();
+    startdate = $crtElmt.find('.dp-start').val();
+    enddate = $crtElmt.find('.dp-end').val();
+    startdate = new Date(startdate);
+
+    enddate = new Date(enddate);
+
 
     const $this = $(this);
     const $section = $this.closest('.output');
@@ -1679,21 +1751,28 @@ $(document).on('click','.o-validate', function(e) {
     const nbCriteria = $output.length;
     const proto = $section.find('template.output-list--item__proto')[0];
     const protoHtml = proto.innerHTML.trim();
+
     const newProtoHtml = protoHtml
         .replace(/__stgIndex__/g,$('.stage-element').not('.completed-stage-element').length - 1)
         .replace(/__otpIndex__/g, $outputList.children().length - 2)
         .replace(/__otpNb__/g, $outputList.children().length - 1)
         .replace(/__type__/g, typeVal)
-        .replace(/__startdate__/g, startdate)
-        .replace(/__enddate__/g, enddate)
+        .replace(/__startdate__/g, startdate.getMonth()+"/"+startdate.getDay() )
+        .replace(/__enddate__/g, enddate.getMonth()+"/"+enddate.getDay() )
         //.replace(/__weight__/g, Math.round(100/(nbCriteria + 1)))
         .replace(/__stgNb__/g, $('.stage').index($section.closest('.stage')));
 
     let $crtProto = $(newProtoHtml);
+    console.log($crtProto);
     //$crtElmt.append(newProtoHtml);
     $crtProto.find('.modal').modal();
     $crtProto.find('.tooltipped').tooltip();
-
+    var date = startdate.getFullYear()+'-'+(startdate.getMonth()+1)+'-'+startdate.getDate();
+    var time = startdate.getHours() + ":" + startdate.getMinutes() + ":" + startdate.getSeconds();
+    startdate = date+' '+time;
+    var date = enddate.getFullYear()+'-'+(enddate.getMonth()+1)+'-'+enddate.getDate();
+    var time = enddate.getHours() + ":" + enddate.getMinutes() + ":" + enddate.getSeconds();
+    enddate = date+' '+time;
 
     $outputList.children().last().before($crtProto);
 
@@ -1706,14 +1785,15 @@ $(document).on('click','.o-validate', function(e) {
 
 
     $form.find('[name*="type"]').eq(typeVal - 1).prop('checked',true);
-    $form.find('[name*="stardate"]').val(startdate);
-    $form.find('[name*="enddate"]').val(enddate);
+    $form.find('[name*="[startdate]"]').val(startdate);
+    $form.find('[name*="[enddate]"]').val(enddate);
 
 
+    console.log(enddate);
     $.post(url, $form.serialize())
         .done(function(data) {
-            $btn.attr('data-cid',data.oid);
-            $deleteBtn.attr('data-cid',data.oid);
+            $btn.attr('data-oid',data.oid);
+            $deleteBtn.attr('data-oid',data.oid);
 
         })
         .fail(function(data) {
@@ -1775,7 +1855,7 @@ $('.stage-add .stage-fresh-new-btn').on('click',function(){
   var initGStartDate = new Date(Date.now());
   var initGEndDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
-  $stgElmt.find('.dp-start, .dp-end, .dp-gstart, .dp-gend').each(function() {
+  $stgElmt.find('.dp-start,.dp-end, .dp-gstart, .dp-gend').each(function() {
       $(this).pickadate();
   });
 

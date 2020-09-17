@@ -1299,6 +1299,7 @@ class OrganizationController extends MasterController
                         $repoE = $em->getRepository(Stage::class);
                         $element = $repoE->find($stgId);
                         $output = $otpId != 0 ? $repoE->find($otpId) : new Output;
+
                         $outputForm = $this->createForm(OutputType::class, $output, ['entity' => $entity, 'standalone' => true, 'currentUser' => $currentUser]);
                         $outputForm->handleRequest($request);
 
@@ -1306,6 +1307,8 @@ class OrganizationController extends MasterController
                             if ($outputForm->isValid()) {
 
                                 $em->persist($output);
+                                $output->setName("");
+                                $output->setStage($element);
                                 $em->flush();
                                 $responseArray = ['message' => 'Success to add output!', 'oid' => $output->getId()];
                                 return new JsonResponse($responseArray, 200);
@@ -1316,6 +1319,7 @@ class OrganizationController extends MasterController
 
                             }
                         }
+
 
 
 

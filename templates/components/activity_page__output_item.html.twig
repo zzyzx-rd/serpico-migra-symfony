@@ -5,41 +5,38 @@
 
 
 {% set type = output_model ? output_model.type : '__type__' %}
-<div class="output-item">
-<div class=" flex-center-sb row" style="color: #55308e">
-{% if type == 2 %}
+<div class="output-item card" style="min-height: 0px;background-color: #e0f7fa">
+<div class=" flex-center-sb row card-content" style="color: #55308e">
 
-    <h7> Formulaire </h7>
-{% else %}
+
+
     <h7> Critère d'évaluation</h7>
 
-{% endif %}
 
 <i class="fas fa-clock" style="margin-left: 20%"></i>
-<div >08/10</div>
+    {% if output_model %}
+
+    {% else %}
+<div >{{startdate}}</div>
 <div> - </div>
-<div>10/10</div>
+<div>{{enddate}}</div>
+    {% endif %}
 </div>
     <div id="stage-{{s}}-type--criteria">
         <ul class="criteria-list">
 
-            <button class="btn-flat btn-add-criterion">
+            <button class="btn-flat btn-add-criterion modal-trigger" id="#modalCritère">
                 <i class="material-icons left">add</i>
                 {{ 'criteria.add_btn_internal'|trans }}
             </button>
             <div class="output-criteria">
-                <template class="criteria-list--item__proto">
-                    {%
-                        include "components/activity_page__criterion_item.html.twig"
-                        with { s: s, c: "__crtNb__", criterion: outputs.criteria.vars.prototype }
-                    %}
-                </template>
+
 
                 <template class="criteria-list--item__proto">
-                    {#                      {% include "modals/stage_criterion.html.twig" with { s: '__stgNb__', c: '__crtNb__', criterion: stage.criteria.vars.prototype } %}#}
+                                       {% include "modals/stage_criterion.html.twig" with { o: o, c: '__crtNb__', criterion: outputs.criteria.vars.prototype } %}
                 </template>
                 {% for c, criterion in outputs.criteria %}
-                    {% include "components/activity_page__criterion_item.html.twig" with { s: s, c: c, criterion: criterion } %}
+                    {% include "components/activity_page__criterion_item.html.twig" with { o: o, c: c, criterion: criterion } %}
                 {% endfor %}
 
             </div>
