@@ -58,7 +58,12 @@
     var cpurl = "{{ url('createProcessRequest', {orgId : currentuser.organization.id}) }}";
     var eurl = "{{ url('updateEvent', {eveId : 0}) }}";
     var acurl = "{{ url('createActivity') }}";
+    var uid = "{{ currentuser.id }}";
+    var un = "{{ currentuser.fullname }}";
     var currentWfiId = "{{ currentuser.organization.id }}";
+    var userPic = "{{ asset(global.userpicture) }}";
+    var myself = "{{ 'myself'|trans|capitalize }}";
+    var pcurl = "{{ url('createParticipant') }}";
   </script>
   <style>
       .elmts{
@@ -602,7 +607,7 @@
         border: 1px solid #55318e;
       }
 
-      .participant-field-zone{
+      .participant-field-zone, .firm-field-zone{
         position:relative;
       }
 
@@ -622,18 +627,33 @@
         display:none!important;
       }
 
+      [name*="firmSelector"], .firm-field-zone .select-wrapper input, .firm-field-zone .select-wrapper .caret{
+        display:none!important;
+      }
+
       .participants{
         margin-bottom: 1rem;
       }
 
-      .participant-field-zone .dropdown-content{
+      .participant-field-zone .dropdown-content, .firm-field-zone .dropdown-content{
         opacity: 1!important;
         display: block!important;
         width: 100%
       }
 
+      .f-prefix{
+        margin-top: auto;
+        margin-bottom: 7px;
+      }
+
       .select-dropdown li img{
         float: left;
+      }
+
+      .select-dropdown li img.s-firm-option-logo{
+        height: 20px;
+        width: 20px;
+        margin: 5px 10px;
       }
 
       .el-type{
@@ -653,7 +673,7 @@
       .participants-list--item.edit{
         position:absolute;
         width: 100%;
-        bottom: min(-50%,-40px);
+        bottom: min(-50%,-60px);
       }
 
       .participant-btn, .btn-participant-add{
@@ -678,6 +698,17 @@
         border-radius:100%;
       }
 
+      .part-feeded{
+        text-indent: 3rem;
+      }
+
+      .no-mail-img-holder{
+      text-align:center
+      }
+
+      .no-mail-img-holder img, .legal-img-holder img  {
+        width: 100%;
+      }
   </style>
 {% endblock %}
 
@@ -1170,7 +1201,7 @@
     {% endif %}
 
     <div class="sorting-type flex-center">
-      <ul class="flex-center view-settings">
+      <ul class="flex-center view-settings no-margin">
         <li class="flex-center">
           <a class="btn-flat no-padding flex-center">
             <div class="view-type-value flex-center">
@@ -1190,7 +1221,10 @@
           </a>
         </li>
 
-        {#{% if viewTypeCookie == "d" %}#}
+          {#
+
+          This is to sort activities per status (output), or progress
+
           <li class="flex-center">
             <a class="btn-flat no-padding flex-center">
               <div class="sorting-type-value flex-center">
@@ -1208,6 +1242,9 @@
               </ul>
             </a>
           </li>
+
+          This is to show either dates per stage duration, or output duration (still relevant ?)
+
           {% if viewTypeCookie == 't' %}
           <li class="flex-center">
             <a class="btn-flat no-padding flex-center">
@@ -1223,10 +1260,12 @@
               </ul>
             </a>
           </li>
+
+           
           
           
-          {% endif %}
-        {#{% endif %}#}
+          {% endif %}#}
+        
       </ul>
     </div>
 
@@ -1262,7 +1301,6 @@
       {% endif %}
 
       {% if viewTypeCookie == 'd' %}
-
         {% for s, status in displayedStatuses %}
           <div id="{{ status }}">
             <ul class="process-list process-list-d">
@@ -1395,18 +1433,30 @@
                 <div class="col s10 no-padding">
                   <div class="item-body">
                     <ul class="activity-list">
-                      {% for s, status in orphanActivities %}
-                        {% set actStatus = null %}
-                        {% set showable = false %}
+
+                    {% if global.route != 'myActivities' %}
+                      {% for s, status in displayedStatuses %}
+                        {#{% set actStatus = null %}#}
+                       {#{% set showable = false %}#}
                         {% for activity in orphanActivities[s] %}
-                          {% if activity.status != actStatus %}
+                          {#{% if activity.status is not null %}#}
                             {% set actStatus = sortingTypeCookie == 'o' ? activity.status : activity.progress %}
                             {% set actStatusName = actStatuses[sortingTypeCookie][actStatus] %}
                             {% set showable = global.request.cookies.get('r_s_' ~ sortingTypeCookie ~ '_' ~ actStatusName) is null %}
-                          {% endif %}
+                          {#{% endif %}#}
                           {% include "components/activity2_list__item.html.twig" with { activity: activity, showable: showable, sortingType: sortingTypeCookie, actStatus: actStatusName } %}
                         {% endfor %}
                       {% endfor %}
+                    {% else %}
+                      {% for activity in orphanActivities %}
+                          {#{% if activity.status is not null %}#}
+                            {% set actStatus = sortingTypeCookie == 'o' ? activity.status : activity.progress %}
+                            {% set actStatusName = actStatuses[sortingTypeCookie][actStatus] %}
+                            {% set showable = global.request.cookies.get('r_s_' ~ sortingTypeCookie ~ '_' ~ actStatusName) is null %}
+                          {#{% endif %}#}
+                          {% include "components/activity2_list__item.html.twig" with { activity: activity, showable: showable, sortingType: sortingTypeCookie, actStatus: actStatusName } %}
+                        {% endfor %}
+                    {% endif %}
                     </ul>
                   </div>
                 </div>
@@ -1575,6 +1625,7 @@
   </main>
 
   <div id="createActivity" class="modal">
+    {{ form_start(newActivityForm) }}
       <div class="modal-content">
         <div class="flex-center-sb">
           <h5>{{'activities.create.modal_title'|trans}}</h5>
@@ -1587,7 +1638,7 @@
             <i class="material-icons">create</i>
           </div>
         </div>
-        {{ form_start(newActivityForm) }}
+        
         <div class="input-field">
          {{form_label(newActivityForm.name)}}
          {{form_widget(newActivityForm.name)}}
@@ -1639,7 +1690,7 @@
           </div>
         </div>      
         #}
-        
+    </div>
         
 
     <div class="modal-footer flex-center-sb">
@@ -1653,6 +1704,97 @@
     </div>
     {{ form_rest(newActivityForm) }}
     {{ form_end(newActivityForm) }}
+  </div>
+
+  <div id="createParticipant" class="modal">
+    <form name="create-participant" method="post">
+    <div class="modal-content">
+        <h5>{{'activities.create_participant_modal.title'|trans ~ ' : '}}<span class="new-part-name"></span></h5>
+        <p>{{'activities.create_participant_modal.msg'|trans ~ ' : '}}</p>
+        <div class="sm-bottom">
+          <input type="checkbox" id="choice-firm" name="choice-firm" class="filled-in">
+          <label for="choice-firm">{{ 'firm'|trans|capitalize }}</label>
+        </div>
+        <div class="sm-bottom">
+          <input type="checkbox" id="choice-indpt" name="choice-inpdt" class="filled-in">
+          <label for="choice-indpt">{{ 'independant'|trans|capitalize }}</label>
+        </div>
+        <div>
+          <input type="checkbox" id="choice-user" name="choice-user" class="filled-in" checked="checked">
+          <label for="choice-user">{{ 'firm_member'|trans|capitalize }}</label>
+          <div class="user-inputs">
+          
+            <div class="row flex-center no-margin">
+              <div class="input-field col m3 user-fn">
+                <label for="firstname">{{ 'firstname'|trans|capitalize }}</label>
+                <input type="text" name="firstname" class="no-margin">
+              </div>
+              <div class="input-field col m3 user-ln">
+                <label for="lastname">{{ 'lastname'|trans|capitalize }}</label>
+                <input type="text" name="lastname" class="no-margin">
+              </div>
+              <div class="col m1 f-prefix">
+                <span>{{ 'from'|trans }}</span>
+              </div>
+              <div class="firm-field-zone input-field col m5">
+                <label for="firm">{{ 'firm'|trans|capitalize ~ ', ' ~ 'organization'|trans|capitalize }}</label>
+                <input type="text" class="firm-name no-margin" name="firm">
+                <select name="firmSelector" style="display:none;"></select>
+                {#<div class="flex-center validation-buttons">
+                  <div class="btn firm-validate">
+                    <i class="material-icons">check</i>
+                  </div>
+                </div>
+                #}
+                <input type="hidden" name="wid">
+                <input type="hidden" name="oid">
+                <input type="hidden" name="cid">
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col s12 m12 input-field">
+                <label for="email">{{ 'email'|trans|capitalize }}</label>
+                <input type="text" name="email">
+              </div>
+            </div>
+          </div>
+
+        </div>
+    </div>
+    <div class="modal-footer">
+        <a class="modal-close waves-effect btn-flat dd-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+        <a class="modal-action waves-effect waves-green btn create-part-button">{{'create'|trans}}</a>
+    </div>
+    </form>
+  </div>
+
+  <div id="interactPart" class="modal">
+    <div class="modal-content">
+      <h5>{{'activities.create_participant_wo_mail_modal.title'|trans}}</h5>
+      <div class="no-mail-img-holder">
+        <img src="{{asset('lib/img/no-mail-2-1.png')}}" alt="no-mail">
+      </div>
+      <p>{{'activities.create_participant_wo_mail_modal.msg'|trans}}</p>
+    </div>
+    <div class="modal-footer">
+        <a class="modal-close waves-effect btn-flat dd-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+        <a class="modal-action modal-close waves-effect waves-green btn create-part-button">{{ 'add_anyway'|trans }}</a>
+    </div>
+  </div>
+
+  <div id="legalPerson" class="modal">
+    <div class="modal-content">
+      <h5>{{'activities.create_participant_legal_person_modal.title'|trans}}</h5>
+      <div class="legal-img-holder">
+        <img src="{{asset('lib/img/legal-person.png')}}" alt="legal-person">
+      </div>
+      <p>{{'activities.create_participant_legal_person_modal.msg'|trans}}</p>
+      <div class="flex-center-fe">
+        <a class="modal-close waves-effect btn-flat dd-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+        <a class="modal-action modal-close waves-effect waves-green btn create-part-button">{{ 'add_anyway'|trans }}</a>
+      </div>
+    </div>
   </div>
 
   <div id="processSelect" class="modal">
@@ -1952,6 +2094,19 @@
     </div>
   </div>
 
+  <div id="deleteParticipant" class="modal">
+    <div class="modal-content">
+        <p>{% trans %}activities.delete_participant_msg{% endtrans %}</p>
+        {#{% else %}
+            <p>{% trans %}activities.delete_activity_msg{% endtrans %}Are you sure you want to delete this activity ?</p>
+        {% endif %}#}
+    </div>
+    <div class="modal-footer">
+        <a class=" modal-action modal-close waves-effect waves-green btn delete-button">{% trans %}user_update.delete_modal.confirm{% endtrans %}</a>
+        <a class=" modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+    </div>
+  </div>
+
   <div id="chooseGradableStage" class="modal">
     <div class="modal-content">
       <h5>{% trans %}activities.select_graded_stage.choice_title_msg{% endtrans %}</h5>
@@ -2008,6 +2163,5 @@
       <a class="modal-close btn">ok</a>
     </div>
   </div>
-
 
 {% endblock content %}

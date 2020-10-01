@@ -47,6 +47,23 @@ setTimeout(function (){
   }
 },200)
 
+$.delete = function(url, data, callback, type){
+ 
+  if ( $.isFunction(data) ){
+    type = type || callback,
+        callback = data,
+        data = {}
+  }
+ 
+  return $.ajax({
+    url: url,
+    type: 'DELETE',
+    success: callback,
+    data: data,
+    contentType: type
+  });
+}
+
 if(location.pathname.split('/').includes('iprocess')){
   $('.stage-container').css('background-color','#ffffd4');
   setTimeout(function(){
@@ -404,7 +421,7 @@ $(document).on(
       const $this = $(this);
       const $section = $this.closest('.output-item');
 
-      const $criteriaList = $section.find('.output-criteria');
+      const $criteriaList = $section.find('.criteria-list');
 
     if ($criteriaList.children('.new').length) {
       return;
@@ -417,7 +434,7 @@ $(document).on(
     const nbCriteria = $criteria.length;
     const proto = $section.find('template.criteria-list--item__proto')[0];
     const $output = $section.closest('.output');
-    const $outputList = $output.find('ul.output-list');
+    //const $criteriaList = $output.find('ul.criteria-list');
     const protoHtml = proto.innerHTML.trim();
     const newProtoHtml = protoHtml
         .replace(/__otpIndex__/g, $criteriaList.children().length - 1)
@@ -430,9 +447,10 @@ $(document).on(
         .replace(/__stgNb__/g, $('.stage').index($section.closest('.stage')));
 
     const $crtElmt = $(newProtoHtml);
-    //$crtElmt.append(newProtoHtml);
+    $criteriaList.append($crtElmt);
 
-    $crtElmt.find('.modal').modal();
+    $crtElmt.modal();
+    $crtElmt.tooltip();
     $crtElmt.find('.tooltipped').tooltip();
 
     // Setting default values, and putting label upside by adding them "active" class
@@ -2042,6 +2060,17 @@ $('.activity-element-update, .activity-element-save').on('click',function(e){
       $(e).click();
     })
   }
+})
+
+$('.remove-activity').on('click',function(e){
+  e.preventDefault();
+  $.delete(daurl,{r: 'json'})
+    .done(function(data){
+      $('.back-btn').click();
+    })
+    .fail(function(data){
+      console.log(data);
+    })
 })
 
 

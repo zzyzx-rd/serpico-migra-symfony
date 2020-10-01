@@ -139,7 +139,7 @@ class Participation extends DbObject
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="participations")
-     * @JoinColumn(name="user_usr_id", referencedColumnName="usr_id", nullable=false)
+     * @JoinColumn(name="user_usr_id", referencedColumnName="usr_id", nullable=true)
      */
     public $user;
 
@@ -148,6 +148,8 @@ class Participation extends DbObject
      * @JoinColumn(name="external_user_ext_usr_id", referencedColumnName="ext_id", nullable=true)
      */
     public $externalUser;
+
+    public $workerFirm;
 
 
     /**
@@ -386,17 +388,12 @@ class Participation extends DbObject
         return $this->grades;
     }
 
-    /**
-     * @return mixed
-     */
     public function getTeam()
     {
         return $this->team;
     }
 
-    /**
-     * @param mixed $team
-     */
+    
     public function setTeam($team): self
     {
         $this->team = $team;
@@ -462,23 +459,23 @@ class Participation extends DbObject
         return $this->answers;
     }
 
-    public function getUser(): ?User
+    public function getUser()
     {
         return $this->user;
     }
 
-    public function setUser(?User $user): self
+    public function setUser($user): self
     {
         $this->user = $user;
         return $this;
     }
 
-    public function getExternalUser(): ?ExternalUser
+    public function getExternalUser()
     {
         return $this->externalUser;
     }
 
-    public function setExternalUser(?ExternalUser $externalUser): self
+    public function setExternalUser($externalUser): self
     {
         $this->externalUser = $externalUser;
         return $this;
@@ -570,4 +567,15 @@ class Participation extends DbObject
         $this->survey = $survey;
         return $this;
     }
+
+    public function getWorkerFirm(){
+        return $this->workerFirm;
+    }
+
+    public function setWorkerFirm(?int $workerFirm): self
+    {
+        return $this;
+    }
+
+
 }

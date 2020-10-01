@@ -69,7 +69,7 @@ class Client extends DbObject
     protected $clientOrganization;
 
     /**
-     * @OneToOne(targetEntity="WorkerFirm")
+     * @ManyToOne(targetEntity="WorkerFirm")
      * @JoinColumn(name="worker_firm_wfi_id", referencedColumnName="wfi_id", nullable=true)
      */
     protected $workerFirm;
@@ -208,7 +208,7 @@ class Client extends DbObject
     /**
      * @param mixed $workerFirm
      */
-    public function setWorkerFirm($workerFirm): self
+    public function setWorkerFirm(WorkerFirm $workerFirm): self
     {
         $this->workerFirm = $workerFirm;
         return $this;
@@ -242,7 +242,7 @@ class Client extends DbObject
     {
         $aliveExtUsers = new ArrayCollection;
         foreach ($this->externalUsers as $externalUser) {
-            if ($externalUser->getDeleted() == null && $externalUser->getLastname() !== 'ZZ') {
+            if ($externalUser->getDeleted() == null && !$externalUser->isSynthetic()) {
                 $aliveExtUsers->add($externalUser);
             }
         };

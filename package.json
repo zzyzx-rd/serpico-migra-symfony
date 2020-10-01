@@ -6,9 +6,12 @@
   "directories": {
     "test": "tests"
   },
-  "dependencies": {},
+  "dependencies": {
+    "dropzone": "^5.7.2",
+    "jquery": "^3.5.1"
+  },
   "devDependencies": {
-    "webpack": "^4.44.1",
+    "webpack": "^4.44.2",
     "webpack-cli": "^3.3.12"
   },
   "scripts": {

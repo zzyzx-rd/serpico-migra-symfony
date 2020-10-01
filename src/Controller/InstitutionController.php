@@ -76,6 +76,9 @@ final class InstitutionController extends MasterController
         $orphanActivities  = $this->activityRepo->getOrgOrphanActivities($this->org);
         $processActivities = $this->activityRepo->getOrgProcessActivities($this->org, $viewType);
 
+        //print_r(sizeof($orphanActivities));
+        //die;
+
         foreach ($statuses as $s => $status) {
             if ($orphanActivities && $orphanActivities[$s] or $processActivities && $processActivities[$s]) {
                 $displayedStatuses[$s] = $status;
@@ -194,8 +197,7 @@ final class InstitutionController extends MasterController
     
             $userArchivedActivities = new ArrayCollection;
     
-    
-            if($existingAccessAndResultsViewOption == null || $activitiesAccess != 1){
+            //if($existingAccessAndResultsViewOption == null || $activitiesAccess != 1){
     
                 // 1/ Get requested activities (as currentuser is not a participant, we have to retrieve them with a different query)
                 // passing through Decision table
@@ -241,6 +243,7 @@ final class InstitutionController extends MasterController
     
                                 foreach ($orgStage->getParticipations() as $orgParticipant){
                                     if (in_array($orgParticipant->getUser()->getId(), $checkingIds)){
+
                                         $isParticipant = 1;
                                         ($orgParticipant->getStatus() != 5) ? $userActivities->add($orgActivity) : $userArchivedActivities->add($orgActivity);
                                         break;
@@ -249,15 +252,19 @@ final class InstitutionController extends MasterController
     
                                 if ($isParticipant == 1){
                                     break;
-                                } elseif(in_array($orgStage->getMasterUser()->getId(), $checkingIds) && (!$orgStage->getOwnerUserId() || in_array($orgStage->getOwnerUserId(), $checkingIds))){
+                                } 
+                                /*
+                                elseif(in_array($orgStage->getMasterUser()->getId(), $checkingIds) && (!$orgStage->getOwnerUserId() || in_array($orgStage->getOwnerUserId(), $checkingIds))){
                                     $isMasterUserId = 1;
                                     break;
                                 }
+                                */
                             }
-    
+                            
+                            /*
                             if($isMasterUserId == 1 && $isParticipant == 0 && $orgActivity->getStatus() != -2){
                                 $userActivities->add($orgActivity);
-                            }
+                            }*/
     
                         } else {
                             $userArchivedActivities->add($orgActivity);
@@ -268,7 +275,7 @@ final class InstitutionController extends MasterController
                 $externalActivities = $em->getRepository(User::class)->getExternalActivities($currentUser);
                 $userActivities = new ArrayCollection((array)$userActivities->toArray() + $externalActivities->toArray());
     
-            }
+            //}
         }
 
 
@@ -410,6 +417,7 @@ final class InstitutionController extends MasterController
         }
 
         ksort($displayedStatuses);
+        //dd($orphanActivities);
 
         return $this->render(
             'activities_dashboard.html.twig',

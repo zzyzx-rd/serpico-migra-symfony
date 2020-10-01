@@ -43,6 +43,7 @@ use App\Entity\Survey;
 use App\Entity\Team;
 use App\Entity\Member;
 use App\Entity\User;
+use App\Entity\WorkerFirm;
 use App\Form\ActivityMinElementForm;
 use App\Form\AddEventForm;
 use App\Repository\UserRepository;
@@ -58,7 +59,7 @@ class ActivityController extends MasterController
 {
 
 
-    /** Most simple of creating an activity */
+    /** Most simple way of creating an activity */
     /**
      * @param string $entity
      * @param int $inpId
@@ -73,32 +74,268 @@ class ActivityController extends MasterController
         $currentUser = $this->user;
         $organization = $this->org;
         $em = $this->em;
+        $clickedBtn = $request->get('btn');
         $stage = new Stage;
         /** @var Form */
         $createActivityForm = $this->createForm(ActivityMinElementForm::class, $stage, ['organization' => $organization, 'currentUser' => $currentUser]);
         $createActivityForm->handleRequest($request);
-        if($createActivityForm->isSubmitted() && $createActivityForm->isValid()){
+
+        //return new JsonResponse(['coucou'],200);
+
+        if($createActivityForm->isSubmitted()){
+
+            $participants = $createActivityForm->get('participants')->getData();
+            $participantData = $createActivityForm->get('participants');
+            //dd($participants);
             
-            $stage
-                ->setOrganization($organization)
-                ->setStatus((int) ($stage->getStartdate() >= new DateTime))
-                ->setMasterUser($currentUser)
+            //return ['coucou'];
+            foreach($participants as $key => $participant){
+                if($participantData[$key]->get('userPart')->getData() != null){
+                    $usrId = $participantData[$key]->get('userPart')->getData();
+                    $user = $em->getRepository(User::class)->find($usrId);
+                    if($user == $currentUser){
+                        $participant->setLeader(true);
+                    }
+                    $participant->setUser($user);
+                } else {
+                    $participant->setUser(null);
+                }
+                if ($participantData[$key]->get('teamPart')->getData() != null){
+                    $teaId = $participantData[$key]->get('teamPart')->getData();
+                    /** @var Team */
+                    $team = $em->getRepository(Team::class)->find($teaId);
+                    foreach($team->getMembers() as $member){
+
+                        $participation = new Participation();
+                        $user = $member->getUser();
+                        $participation->setUser($user)
+                            ->setTeam($team);
+                        if($member->getUser() == $currentUser){
+                            $participation->setLeader(true);
+                        }
+                        $stage->addParticipation($participation);
+                    }
+
+                    $em->persist($stage);
+
+                } else {
+                    $participant->setTeam(null);
+                }
+                if ($participantData[$key]->get('externalUserPart')->getData() != null){
+                    $extId = $participantData[$key]->get('externalUserPart')->getData();
+                    $externalUser = $em->getRepository(ExternalUser::class)->find($extId);
+                    $participant->setExternalUser($externalUser);
+                } else {
+                    $participant->setExternalUser(null);
+                }
+            }
+
+            if($clickedBtn == 'submit'){
+
+                if($createActivityForm->isValid()){
+
+                    $progress = (int) ($stage->getStartdate() < new DateTime('tomorrow'));
+                    
+                    $activity = new Activity;
+                    $stage  
+                        ->setOrganization($organization)
+                        ->setProgress($progress)
+                        ->setMasterUser($currentUser)
+                        ->setCreatedBy($currentUser->getId());
+    
+                    foreach($stage->getParticipants() as $participation){
+                        $participation->setActivity($activity);
+                    }
+                
+                    $activity->addStage($stage)
+                        ->setName($stage->getName())
+                        ->setProgress($progress)
+                        ->setOrganization($organization)
+                        ->setMasterUser($stage->getMasterUser())
+                        ->setCreatedBy($currentUser->getId());
+                    $em->persist($activity);
+                    $em->flush();
+                    return new JsonResponse(['actId' => $activity->getId(), 'stgId' => $stage->getId(), 'startdateDay' => $stage->getStartdate()->format('z')],200);
+                } else {
+            
+                    $errors = $this->buildErrorArray($createActivityForm);
+                    return $errors;
+                }
+
+            } else {
+
+                $activity = new Activity;
+                $progress = $createActivityForm->get('startdate')->isValid() ? (int) ($stage->getStartdate() < new DateTime('tomorrow')) : 0;
+
+                foreach($createActivityForm->get('participants') as $participantForm){
+                    if($participantForm->isValid()){
+                        $participant = $participantForm->getData();
+                        $participant->setActivity($activity);
+                        $stage->addParticipant($participant);
+                    }
+                }
+
+                if($createActivityForm->get('name')->isValid()){
+                    $stage->setName($createActivityForm->get('name')->getData());
+                } else {
+                    $stage->setName("Phase 1");
+                }
+
+                $activityNb = $organization->getActivities()->count() + 1;
+                $activity->setName("Activity $activityNb");
+                $activity->setProgress($progress);
+                $stage->setProgress($progress);
+                $activity->addStage($stage);
+                $em->persist($activity);
+                $em->flush();
+
+                return $this->redirectToRoute('manageActivityElement',['entity' => 'activity', 'elmtId' => $activity->getId()]);
+
+            }
+        }
+    }
+
+    /**
+     * @return JsonResponse|RedirectResponse
+     * @throws ORMException
+     * @Route("/participant/create",name="createParticipant")
+     */
+    public function createParticipant(Request $request){
+        $currentUser = $this->user;
+        $organization = $this->org;
+        $em = $this->em;
+
+        $uname = $request->get('uname');
+        $type = $request->get('type');
+        $firstname = $_POST['firstname'];
+        $lastname = $_POST['lastname'];
+        $firm = $_POST['firm'];
+        $email = $_POST['email'];
+
+
+        $client = empty($_POST['cid']) ? new Client : $em->getRepository(Client::class)->find($_POST['cid']);
+        $entityName = $type == 'u' ? $firm : $uname;
+
+        if(empty($_POST['wid'])){
+
+            $workerFirm = new WorkerFirm;
+            $workerFirm->setCommonName($entityName)
+                ->setName($entityName)
                 ->setCreatedBy($currentUser->getId());
-            $activity = new Activity;
-            $activity->addStage($stage)
-                ->setName($stage->getName())
-                ->setStatus($stage->getStatus())
-                ->setOrganization($organization)
-                ->setMasterUser($stage->getMasterUser())
-                ->setCreatedBy($currentUser->getId());
-            $em->persist($activity);
+            
+            $em->persist($workerFirm);
             $em->flush();
-            return new JsonResponse(['actId' => $activity->getId(), 'stgId' => $stage->getId(), 'startdateDay' => $stage->getStartdate()->format('z')],200);
+        } else {
+            $workerFirm = $em->getRepository(WorkerFirm::class)->find($_POST['wid']);
+        }
+
+        if(empty($_POST['oid'])){
+
+            $clientOrganization = new Organization;
+            $clientOrganization
+                ->setCommname($entityName)
+                ->setType($type != 'u' ? $type : 'F')
+                ->setValidated(new \DateTime)
+                ->setExpired(new \DateTime('2100-01-01 00:00:00'))
+                ->setWeightType('role')
+                ->setWorkerFirm($workerFirm)
+                ->setCreatedBy($currentUser->getId());
+
+            $em->persist($clientOrganization);
+
+            $this->forward('App\Controller\OrganizationController::updateOrgFeatures', ['organization' => $clientOrganization, 'nonExistingOrg' => true, 'createdAsClient' => true]);
+
 
         } else {
-            $errors = $this->buildErrorArray($createActivityForm);
-            return $errors;
+
+            $clientOrganization = $em->getRepository(Organization::class)->find($_POST['oid']);
+            if(empty($_POST['cid'])){
+                $this->forward('App\Controller\OrganizationController::updateOrgFeatures', ['organization' => $clientOrganization, 'nonExistingOrg' => false, 'createdAsClient' => true]);
+            }
+
         }
+
+        $synthUser = $em->getRepository(User::class)->findOneBy(['organization' => $clientOrganization, 'synthetic' => true]);
+        
+        if($clientOrganization != $organization && (empty($_POST['cid']) || empty($_POST['oid']))){
+
+            /** @var ExternalUser */
+            $externalSynthUser = new ExternalUser;
+            $externalSynthUser->setUser($synthUser)
+                ->setOwner(true)->setFirstname($organization->getCommname())
+                ->setSynthetic(true)
+                ->setLastname($type == 'u' ? $firm : $uname);
+
+            $client
+            ->setName($type == 'u' ? $firm : $uname)
+            ->addExternalUser($externalSynthUser)
+            ->setOrganization($organization)
+            ->setClientOrganization($clientOrganization)
+            ->setWorkerFirm($workerFirm)
+            ->setCreatedBy($currentUser->getId());
+
+            $em->persist($client);
+            
+        }
+
+        if($type != 'f'){
+
+            $user = $em->getRepository(User::class)->findOneBy(['organization' => $clientOrganization, 'firstname' => $_POST['firstname'], 'lastname' => $_POST['lastname']]);
+            if(!$user){
+                $user = new User;
+                $user->setFirstname($firstname)
+                    ->setLastname($lastname)
+                    ->setEmail(!empty($email) ? $email : null)
+                    ->setToken(!empty($email) ? md5(rand()) : null)
+                    ->setUsername("$firstname $lastname")
+                    ->setRole(USER::ROLE_AM)
+                    ->setCreatedBy($currentUser->getId());
+                $clientOrganization->addUser($user);
+            }
+
+            if($clientOrganization != $organization){
+                
+                $externalUser = new ExternalUser;
+                $externalUser->setFirstname($firstname)
+                    ->setLastname($lastname)
+                    ->setEmail(!empty($email) ? $email : null)
+                    ->setClient($client)
+                    ->setCreatedBy($currentUser->getId());
+                $user->addExternalUser($externalUser);
+                $em->persist($clientOrganization);
+            } else {
+                $externalUser = null;
+            }
+            
+        } else {
+
+            $user = $synthUser;
+            $externalUser = $externalSynthUser;
+        }
+        
+        $em->flush();
+
+        if(!empty($email)){
+
+            $settings = [];
+            $settings['tokens'][] = $user->getToken();
+            $settings['invitingUser'] = $currentUser;
+            $settings['invitingOrganization'] = $currentUser->getOrganization();
+            $recipients[] = $user;
+            if($externalUser->getEmail() != ""){
+                $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'externalInvitation']);
+            }
+            $externalUser->setClient($client)->setUser($user);
+
+        }
+
+        $picFolder = $type == 'u' || $type == 'i' ? 'user' : ($type == 'f' ? 'org' : 'team');
+        $fn = $type == 'u' ? "$firstname $lastname" : $firm;
+        $tn = $type == 'u' && $clientOrganization != $organization ? "$firstname $lastname ($firm)" : "$firstname $lastname";
+        $outputType = $type == 't' ? 't' : ($externalUser ? 'eu' : 'u');
+
+        return new JsonResponse(['wid' => $workerFirm, 'oid' => $clientOrganization->getId(), 'uid' => $user->getId(), 'euid' => $externalUser ? $externalUser->getId() : '', 'pic' => "lib/img/$picFolder/no-picture.png", 'fn' => $fn, 'tn' => $tn, 'type' => $outputType], 200);
+
     }
 
     // Creating activity V1 : attributing leadership to current user and redirecting to parameters

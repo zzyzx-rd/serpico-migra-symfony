@@ -66,7 +66,7 @@ class Stage extends DbObject
     /**
      * @ORM\Column(name="stg_name", type="string", length=255, nullable=true)
      */
-    public string $name;
+    public ?string $name;
 
     /**
      * @ORM\Column(name="stg_mode", type="integer", nullable=true)
@@ -74,7 +74,7 @@ class Stage extends DbObject
     public int $mode;
 
     /**
-     * @ORM\Column(name="stG_visibility", type="integer", nullable=true)
+     * @ORM\Column(name="stg_visibility", type="integer", nullable=true)
      */
     public int $visibility;
 
@@ -342,7 +342,7 @@ class Stage extends DbObject
         $activity = null,
         $visibility = 3,
         $masterUser = null,
-        $name = '',
+        ?string $name = null,
         $accessLink = null,
         $status = 0,
         $description = null,
@@ -408,10 +408,9 @@ class Stage extends DbObject
         return $this->name;
     }
 
-    public function setName(string $name): self
+    public function setName(?string $name): self
     {
         $this->name = $name;
-
         return $this;
     }
 
@@ -955,7 +954,7 @@ class Stage extends DbObject
             return false;
         }
 
-        $userParticipations = $this->participations->filter(static function(Participation $p) use ($u){return $p->getDirectUser() === $u;});
+        $userParticipations = $this->participations->filter(static function(Participation $p) use ($u){return $p->getUser() === $u;});
         if($userParticipations->count() > 0){
             return $userParticipations->forAll(static function(int $i, Participation $p) {
                 return $p->getStatus() >= 3;
@@ -969,7 +968,8 @@ class Stage extends DbObject
     {
 
         $this->participations->add($participation);
-        $participation->setStage($this);
+        $participation->setStage($this)
+            ->setActivity($this->activity);
         return $this;
     }
 
@@ -996,8 +996,9 @@ class Stage extends DbObject
     {
         $participantUser = $participation->getUser();
         $participantTeam = $participation->getTeam();
+        $participantExtUser = $participation->getExternalUser();
         foreach ($this->participations as $theParticipant) {
-            if ($participantUser == $theParticipant->getUser() || ($participantTeam && $participantTeam == $theParticipant->getTeam())) {
+            if ($participantUser == $theParticipant->getUser() || ($participantTeam && $participantTeam == $theParticipant->getTeam()) || ($participantExtUser && $participantExtUser == $theParticipant->getExternalUser())) {
                 $this->removeParticipation($theParticipant);
             }
         }

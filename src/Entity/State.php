@@ -135,7 +135,6 @@ class State extends DbObject
     public function setInserted(DateTimeInterface $inserted): self
     {
         $this->inserted = $inserted;
-
         return $this;
     }
 
@@ -147,12 +146,10 @@ class State extends DbObject
         return $this->country;
     }
 
-    /**
-     * @param mixed $country
-     */
-    public function setCountry($country): void
+    public function setCountry(Country $country): self
     {
         $this->country = $country;
+        return $this;
     }
 
     /**
@@ -161,14 +158,6 @@ class State extends DbObject
     public function getCities()
     {
         return $this->cities;
-    }
-
-    /**
-     * @param mixed $cities
-     */
-    public function setCities($cities): void
-    {
-        $this->cities = $cities;
     }
 
     /**
@@ -196,6 +185,19 @@ class State extends DbObject
     public function removeFirm(WorkerFirm $firm): State
     {
         $this->firms->removeElement($firm);
+        return $this;
+    }
+
+    public function addCity(City $city): State
+    {
+        $this->cities->add($city);
+        $city->setState($this);
+        return $this;
+    }
+
+    public function removeCity(City $city): State
+    {
+        $this->cities->removeElement($city);
         return $this;
     }
 

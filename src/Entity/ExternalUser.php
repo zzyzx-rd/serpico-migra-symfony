@@ -49,7 +49,12 @@ class ExternalUser extends DbObject
     /**
      * @ORM\Column(name="ext_weight_value", type="float", nullable=true)
      */
-    public $weight_value;
+    public $weightValue;
+
+    /**
+     * @ORM\Column(name="ext_synth", type="boolean", nullable=true)
+     */
+    public $synthetic;
 
     /**
      * @ORM\Column(name="ext_owner", type="boolean", nullable=true)
@@ -104,9 +109,10 @@ class ExternalUser extends DbObject
      * @param string $firstname
      * @param string $lastname
      * @param $email
-     * @param float $weight_value
+     * @param float $weightValue
      * @param $positionName
      * @param $owner
+     * @param $synthetic
      * @param $createdBy
      * @param $lastConnected
      * @param $deleted
@@ -120,9 +126,10 @@ class ExternalUser extends DbObject
         $firstname = '',
         $lastname = '',
         $email = null,
-        $weight_value = 0.0,
+        $weightValue = 0.0,
         $positionName = null,
         $owner = null,
+        $synthetic = false, 
         $createdBy = null,
         $lastConnected = null,
         $deleted = null,
@@ -135,8 +142,9 @@ class ExternalUser extends DbObject
         $this->lastname = $lastname;
         $this->email = $email;
         $this->positionName = $positionName;
-        $this->weight_value = $weight_value;
+        $this->weightValue = $weightValue;
         $this->owner = $owner;
+        $this->synthetic = $synthetic;
         $this->last_connected = $lastConnected;
         $this->deleted = $deleted;
         $this->user = $user;
@@ -194,12 +202,12 @@ class ExternalUser extends DbObject
 
     public function getWeightValue(): ?float
     {
-        return $this->weight_value;
+        return $this->weightValue;
     }
 
-    public function setWeightValue(float $weight_value): self
+    public function setWeightValue(float $weightValue): self
     {
-        $this->weight_value = $weight_value;
+        $this->weightValue = $weightValue;
         return $this;
     }
 
@@ -211,7 +219,17 @@ class ExternalUser extends DbObject
     public function setOwner(bool $owner): self
     {
         $this->owner = $owner;
+        return $this;
+    }
 
+    public function isSynthetic(): ?bool
+    {
+        return $this->synthetic;
+    }
+
+    public function setSynthetic(bool $synthetic): self
+    {
+        $this->synthetic = $synthetic;
         return $this;
     }
 
@@ -246,18 +264,12 @@ class ExternalUser extends DbObject
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getUser()
+    public function getUser(): User
     {
         return $this->user;
     }
 
-    /**
-     * @param mixed $user
-     */
-    public function setUser($user): self
+    public function setUser(User $user): self
     {
         $this->user = $user;
         return $this;
@@ -344,5 +356,10 @@ class ExternalUser extends DbObject
         $prefix = $this->lastname ?? '';
         $suffix = $this->firstname ?? '';
         return $prefix . ' ' . $suffix;
+    }
+
+    public function __toString()
+    {
+        return (string) $this->id;
     }
 }

@@ -119,10 +119,8 @@ class InstitutionProcess extends DbObject
         Organization $organization = null,
         Process $process = null,
         User $masterUser = null,
-        $parent = null,
-        $children = null,
-        $stages = null,
-        $activities = null)
+        $parent = null
+        )
     {
         parent::__construct($id, $inp_createdBy, new DateTime());
         $this->name = $inp_name;

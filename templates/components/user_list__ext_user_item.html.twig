@@ -10,7 +10,7 @@
 {% set weight = user.weight %}#}
 
 {% set user = externalUser.user ?? null %}
-{% set picture_url = user ? asset(global.userPicture(user)) : '/lib/img/no-picture.png' %}
+{% set picture_url = user ? asset(global.userPicture(user)) : '/lib/img/user/no-picture.png' %}
 
 {#}
 {% set hasCompletedActivities = user.nbCompletedActivities > 0 %}

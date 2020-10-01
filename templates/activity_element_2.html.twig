@@ -80,6 +80,9 @@
         {% endif %}
 
       </div>
+
+      <a href="#deleteActivity" class="btn-flat modal-trigger delete-act-btn"><i class="fa fa-trash"></i></a>
+
     </header>
 
     {% if entity == 'iprocess' or entity == 'process' %}
@@ -521,12 +524,24 @@
     {{ form_rest(outputElementForm) }}
     {{ form_end(outputElementForm) }}
   </div>
-    <div id="deleteStage" class="modal">
+    <div id="deleteActivity" class="modal">
       <div class="modal-title">
-        <h5>{{ 'stages.deleteStage.modal_title'|trans }}</h5>
       </div>
       <div class="modal-content">
-        {{ 'stages.deleteStage.modal_content'|trans }}
+        <h5>{{ 'activities.delete_activity_modal.title'|trans }}</h5>
+        <p>{{ 'activities.delete_activity_modal.content'|trans }}</p>
+        
+      </div>
+      <div class="modal-footer">
+        <a class="btn modal-close remove-activity">{{ 'stages.deleteStage.accept'|trans }}</a>
+        <a class="modal-close btn-flat red-text">{{ 'stages.deleteStage.cancel'|trans }}</a>
+      </div>
+    </div>
+
+    <div id="deleteStage" class="modal">
+      <div class="modal-content">
+        <h5>{{ 'stages.deleteStage.modal_title'|trans }}</h5>
+        <p>{{ 'stages.deleteStage.modal_content'|trans }}</p>
       </div>
       <div class="modal-footer">
         <a class="btn modal-close remove-stage">{{ 'stages.deleteStage.accept'|trans }}</a>
@@ -713,6 +728,7 @@
     var vourl = "{{ url('validateOutputElement',{'entity' : entity, 'elmtId': elmtId, 'stgId' : 0, 'otpId' : 0}) }}";
     var vsurl = "{{ url('validateStageElement',{'entity' : entity, 'elmtId': elmtId, 'stgId' : 0}) }}";
     var vnurl = "{{ url('validateElementName',{'entity' : entity, 'elmtId': elmtId}) }}";
+    var daurl = "{{ url('ajaxActivityDelete',{'actId' : elmtId}) }}";
 
   </script>
 {% endblock %}

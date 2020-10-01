@@ -39,7 +39,9 @@ $('#clients').on('click', '.client-logo', ({ target }) => {
   $setClientIconModal.modal('open');
 });
 
-$('#client-icon-upload-btn').on('click', () => clientIconDropzone.processQueue());
+$('#client-icon-upload-btn').on('click', function(){
+  clientIconDropzone.processQueue();
+});
 
 
 

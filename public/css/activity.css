@@ -139,6 +139,11 @@ li + li.no-items-placeholder {
   left: 40px;
 }
 
+.delete-act-btn{
+  position: absolute;
+  right: 40px;
+}
+
 #main-header .activity-name, #main-header > .team-name {
   font-size: 1.8em;
   display: flex;

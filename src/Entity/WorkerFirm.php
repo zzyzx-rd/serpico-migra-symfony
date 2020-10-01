@@ -31,6 +31,17 @@ class WorkerFirm extends DbObject
     public ?int $id;
 
     /**
+     * @ManyToOne(targetEntity="WorkerFirm", inversedBy="children")
+     * @JoinColumn(name="parent_id", referencedColumnName="wfi_id", nullable=true)
+     */
+    public $parent;
+
+    /**
+     * @OneToMany(targetEntity="WorkerFirm", mappedBy="parent", cascade={"persist"}, orphanRemoval=false)
+     */
+    public $children;
+
+    /**
      * @ORM\Column(name="wfi_hq_location", type="string", length=255, nullable=true)
      */
     public $HQLocation;
@@ -177,6 +188,11 @@ class WorkerFirm extends DbObject
     public $mails;
 
     /**
+     * @OneToMany(targetEntity="Client", mappedBy="workerFirm", cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    public $clients;
+
+    /**
      * @ORM\OneToOne(targetEntity=Organization::class, mappedBy="workerFirm", cascade={"persist", "remove"})
      * @JoinColumn(name="organization_org_id", referencedColumnName="org_id", nullable=true)
      */
@@ -185,6 +201,7 @@ class WorkerFirm extends DbObject
     /**
      * WorkerFirm constructor.
      * @param ?int$id
+     * @param $parent
      * @param $wfi_active
      * @param $wfi_hq_city
      * @param $wfi_hq_state
@@ -240,10 +257,11 @@ class WorkerFirm extends DbObject
         $city = null,
         $state = null,
         $country = null,
-        $experiences = null,
-        $mails = null)
+        $parent = null
+        )
     {
         parent::__construct($id, $wfi_createdBy, new DateTime());
+        $this->parent = $parent;
         $this->creationDate = $creationDate;
         $this->HQLocation = $wfi_hq_location;
         $this->HQCity = $wfi_hq_city;
@@ -268,8 +286,10 @@ class WorkerFirm extends DbObject
         $this->city = $city;
         $this->state = $state;
         $this->country = $country;
-        $this->experiences = $experiences?:new ArrayCollection();
-        $this->mails = $mails?:new ArrayCollection();
+        $this->experiences = new ArrayCollection();
+        $this->mails = new ArrayCollection();
+        $this->clients = new ArrayCollection();
+        $this->children = new ArrayCollection();
     }
 
     public function getHQLocation(): ?string
@@ -560,7 +580,7 @@ class WorkerFirm extends DbObject
     /**
      * @return mixed
      */
-    public function getCountry()
+    public function getCountry(): ?Country
     {
         return $this->country;
     }
@@ -657,14 +677,67 @@ class WorkerFirm extends DbObject
     public function setOrganization(?Organization $organization): self
     {
         $this->organization = $organization;
-
+        /*
         // set (or unset) the owning side of the relation if necessary
         $newWorker_firm_wfi = null === $organization ? null : $this;
         if ($organization->getWorkerFirmWfi() !== $newWorker_firm_wfi) {
             $organization->setWorkerFirmWfi($newWorker_firm_wfi);
         }
 
+        */
         return $this;
+    }
+
+    /**
+     * @return ArrayCollection|Client[]
+     */
+    public function getClients(){
+        return $this->clients;
+    }
+
+    public function addClient(Client $client): self
+    {
+        $this->clients->add($client);
+        $client->setWorkerFirm($this);
+        return $this;
+    }
+
+    public function removeClient(Client $client): self
+    {
+        $this->clients->removeElement($client);
+        return $this;
+    }
+
+    public function addChildren(WorkerFirm $child): self
+    {
+        $this->children->add($child);
+        $child->setParent($this);
+        return $this;
+    }
+
+    public function removeChildren(WorkerFirm $child): self
+    {
+        $this->children->removeElement($child);
+        return $this;
+    }
+
+    /**
+     * @return ArrayCollection|WorkerFirm[]
+     */
+    public function getChildren()
+    {
+        return $this->children;
+    }
+
+    public function setParent(?WorkerFirm $parent): self
+    {
+        $this->parent = $parent;
+        return $this;
+    }
+
+    public function getParent(): ?self
+    {
+        return $this->parent;
     }
 
 

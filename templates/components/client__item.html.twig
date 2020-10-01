@@ -38,9 +38,11 @@
                 </span>
                 {#<span class="commname-value">{{ client ? item.vars.data.commname : '' }}</span>#}
             </a>
-            <div class="w-firm input-field client-input" style="display:none">
-                {{ form_label(item.name) }}
-                {{ form_widget(item.name) }}
+            <div class="w-firm client-input" style="display:none">
+                <div class="input-field">
+                    {{ form_label(item.name) }}
+                    {{ form_widget(item.name) }}
+                </div>
                 <select name="firmSelector" style="margin-top:45px"></select>
                 {{ form_widget(item.workerFirm) }}
             </div>
@@ -51,7 +53,7 @@
                 <i class="fa fa-industry m-right"></i>
                 <span class="">{{'type'|trans ~ ' : ' ~ 'create_client.type.firm'|trans}}</span>
             </a>
-            <div class="client-select-type client-input" style="display: none;">
+            <div class="client-select-type input-field client-input" style="display: none;">
                 {{ form_label(item.type) }}
                 {{ form_widget(item.type) }}
             </div>
@@ -71,7 +73,7 @@
         {% endfor %}
     
     </ul>
-        <div class="button-field add-user-zone" style="display:none ; position: absolute">
+        <div class="button-field add-user-zone" style="{% if client is null %}display:none ;{% endif %}position: absolute">
             <a class="btn waves-effect waves-light  insert-individual-btn data-cid="{{ client ? client.id : 0 }}"">
                 <span>Ajouter utilisateur</span>
             </a>

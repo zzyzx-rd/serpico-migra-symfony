@@ -1,0 +1,93 @@
+{% extends "layout.html.twig" %}
+
+
+{% set page = global.request.get('page') %}
+
+{% block data_params %}
+  {{ global.html_data_params({
+    'set-client-icon': url('setWorkerFirmIcon', { wfiId: 0 })
+  }) }}
+{% endblock %}
+
+{% block title %}
+  {{ 'user_list.page_title'|trans }}
+{% endblock %}
+
+{% block css %}
+  <link rel="stylesheet" href="{{ asset('build/user_list.css') }}">
+{% endblock %}
+
+{% set user_icon %}
+  <i class="fa fa-user"></i>
+{% endset %}
+
+{% block content %}
+  <main>
+    <div class="user-search-container">
+      <input type="text" id="user-search" class="browser-default"
+        spellcheck="false" placeholder="Recherche rapide" autocomplete="off">
+      <i class="material-icons">search</i>
+    </div>
+    <section id="main-tabs-container">
+
+      <ul class="flex-center-sa">
+        <li class="flex-center">
+          <span>{{'sort'|trans ~ ' :'}}</span>
+          <div class="input-field">
+            <select name="s-p" id="s-p">
+              <option value="a">{{'worker_firm_list.alphabetical_order'|trans}}</option>
+              <option value="i">{{'worker_firm_list.creation_date_order'|trans}}</option>
+            </select>
+          </div>
+        </li>
+        <li class="flex-center">
+          <span>{{'order'|trans ~ ' :'}}</span>
+          <div class="input-field">
+            <select name="s-o" id="s-o">
+              <option value="a">{{'ascending'|trans}}</option>
+              <option value="d">{{'descending'|trans}}</option>
+            </select>
+          </div>
+        </li>
+        <li>
+          {% if nbWorkerFirms > maxResults %}
+            <a href="{{ path('manageWorkerFirms',{page: page - 1}) }}" class="btn{% if page == 1 %} disabled{% endif %}">{{'previous'|trans}}</a>
+            <a href="{{ path('manageWorkerFirms',{page: page + 1}) }}" class="btn{% if nbWorkerFirms < page * maxResults %} disabled{% endif %}">{{'next'|trans}}</a>
+          {% endif %}
+        </li>
+      </ul>
+
+
+      <section id="clients">
+        <ul class="client-type-list">
+          {% include "components/worker_firm_list__item.html.twig" with { workerFirm: workerFirms, nbWorkerFirms: nbWorkerFirms } %}
+        </ul>
+      </section>
+    </section>
+
+    <div class="fixed-action-btn">
+      <a class="btn-floating btn-large teal" href="{{ path('updateWorkerFirm',{wfiId : 0}) }}">
+        <i class="large material-icons">add</i>
+      </a>
+    </div>
+
+    <a id="scrolltop" href="#serpicoapp" class="btn-floating btn-large blue">
+      <i class="material-icons">arrow_upward</i>
+    </a>
+
+
+    <div id="client-icon-modal" class="modal">
+      <div class="modal-content">
+        <div id="client-icon-dropzone" class="dropzone"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="client-icon-upload-btn" type="button" class="btn">ok</button>
+      </div>
+    </div>
+  </main>
+{% endblock %}
+
+{% block javascripts %}
+  <script>$('select').material_select();</script>
+  <script defer src="{{ asset('build/user_list.js') }}"></script>
+{% endblock %}

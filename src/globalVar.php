@@ -5,6 +5,7 @@ use App\Entity\Client;
 use App\Entity\Organization;
 use App\Entity\Stage;
 use App\Entity\User;
+use App\Entity\WorkerFirm;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
@@ -51,12 +52,21 @@ class globalVar {
     }
 
 
+    public function workerFirmLogo(?WorkerFirm $wf): string
+    {
+        if($wf->getLogo()){
+            return 'lib/img/wf/' . $wf->getLogo();
+        } else {
+            return 'lib/img/org/no-picture.png';
+        }
+    }
+
     public function organizationLogo(?Organization $o): string
     {
         if($o && $o->getLogo()){
             return 'lib/img/org/'. $o->getLogo();
         } else if ($o && $o->getWorkerFirm() && $o->getWorkerFirm()->getLogo()){
-            return 'lib/img/org/' . $o->getWorkerFirm()->getLogo();
+            return 'lib/img/wf/' . $o->getWorkerFirm()->getLogo();
         } else {
             return 'lib/img/org/no-picture.png';
         }
@@ -93,9 +103,12 @@ class globalVar {
     {
         $dataParams = [];
         foreach ($arr as $key => $value) {
-            $dataParams[] = "data-$key=\"$value\"";
+            if(is_string($value)){
+                $dataParams[] = "data-$key=$value";
+            } else {
+                $dataParams[] = "data-$key=\"$value\"";
+            }
         }
-
         return implode(' ', $dataParams);
     }
 

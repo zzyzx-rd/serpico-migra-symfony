@@ -1,4 +1,9 @@
 
+function isEmail(email) {
+  var regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+  return regex.test(email);
+}
+
 function initPickates(){
   switch(lg){
     case 'fr':
@@ -467,7 +472,12 @@ $('.process-request').on('click',function(e){
 });
 
 $('[href="#createActivity"]').on('click',function(){
-  $('.setup-activity').prepend('<i class="fa fa-cog sm-right"></i>')/*.append('<i class="fa fa-question-circle sm-left"></i>')*/;
+  if(!$('.setup-activity').find('.fa-cog').length){
+    $('.setup-activity').prepend('<i class="fa fa-cog sm-right"></i>')/*.append('<i class="fa fa-question-circle sm-left"></i>')*/;
+  }
+  if(!$('.participants-list--item').length){
+    directInsert(myself,un,uid,userPic,'u');
+  }
 });
 
 $('.stages-holder').on('mouseenter',function(){
@@ -535,45 +545,174 @@ $('.stages-holder').on('mouseenter',function(){
 
   $('.btn-participant-add').on('click',function(){
       const $this = $(this);
-      const prototype = $('.participants-list').data('prototype');
-      var newForm = prototype
-            .replace(/__name__/g, $('.participants-list--item').length);
-      let $newForm = $(newForm);
-      $newForm.find('.validation-buttons').after('<select name="participantSelector" style="margin-top:45px"></select>');
-      $newForm.addClass('edit');
-      $this.before($newForm);
-      $('.participants-list').css('margin-bottom','60px');
+      if(!$this.parent().find('.edit').length){
+        const prototype = $('.participants-list').data('prototype');
+        var newForm = prototype
+              .replace(/__name__/g, $('.participants-list--item').length);
+        let $newForm = $(newForm);
+        $newForm.find('.validation-buttons').after('<select name="participantSelector" style="margin-top:45px"></select>');
+        $newForm.addClass('edit');
+        $this.before($newForm);
+        $('.participants-list').css('margin-bottom','60px');
+      }
   })
 
-  $(document).on('keyup','input[name*="fullname"]',function(event){
+
+  /** Function which directly insert participant in the activity - tn for tooltip, fn fullname, secId in case of extUsr  */
+  function directInsert(tn, fn, id, pic = null, type = null, secId = null){
+
+    if($('.participants-list--item.edit').length){
+      $partElmt = $('.participants-list--item.edit');
+    } else {
+      var prototype = $('.participants-list').data('prototype');
+      var newForm = prototype
+        .replace(/__name__/g, $('.participants-list--item').length);
+      $partElmt = $(newForm);
+    } 
+
+    $partElmt.find('.validation-buttons').after('<select name="participantSelector" style="margin-top:45px"></select>');
+    $partBtn = $partElmt.find('.participant-btn');
+    $partFZone = $partElmt.find('.participant-field-zone');
+    $partFZone.find('.participant-fullname').val(fn).addClass('part-feeded');
+    $partFZone.find('.participant-fullname').prev().addClass('active');
+    var $img = $partBtn.find('.selected-participant-logo');
+    $img.attr('src',pic);
+    $partBtn.attr('data-tooltip',tn).tooltip();
+    etype = type ? type : data.type;
+    switch(etype){
+      case 'eu' : 
+        $partFZone.find('input.u').attr('value',id);
+        $partFZone.find('input.eu').attr('value',secId);
+        break;
+      case 'u' :
+        $partFZone.find('input.u').attr('value',id);
+        break;
+      case 't' :
+        $partFZone.find('input.t').attr('value',id);
+        break;
+    }
+    var $inputImg = $img.clone();
+    $inputImg.attr('class','');
+    $inputImg.addClass('input-img');
+    $inputImg.css({
+      'position': 'absolute',
+      'left': '0',
+      'top': '15%',
+      'height': '30px',
+    });
+    $partFZone.append($inputImg);
+    $partBtn.show();
+    $partElmt.removeClass('edit');       
+    $partFZone.hide();
+    $('.btn-participant-add').before($partElmt);
+  }
+
+  $(document).on('keyup','input[name*="firm"]',function(e){
+
     var $this = $(this);
-    var $selector = $(this).closest('.participants-list--item').find('[name*="participantSelector"]');
+    var $selector = $('[name="firmSelector"]');
+    if($selector.find('option:selected').length && $this.val() != $selector.find('option:selected').text()){
+      $inputZone = $this.parent();
+      $inputZone.find('input').not($this).each(function(i,e){
+        $(e).removeAttr('value');
+      })
+      $inputZone.find('.input-f-img').remove();
+      $this.removeClass('part-feeded');
+    }
     $selectorMElmts = $selector.closest('.select-wrapper');
 
-    if($this.val().length >= 3 /*&& event.keyCode != 8*/){
-        //urlToPieces = surl.split('/');
-        //urlToPieces[urlToPieces.length - 1] = $(this).val();
-        //surl = urlToPieces.join('/');
-        const params = {name: $this.val()};
+    if($this.val().length >= 3){
+        
+        const params = {name: $this.val(), type:'firm'};
         $.post(surl,params)
             .done(function(data){
 
                 if(!data.qParts.length){
                     $this.removeAttr('value');
-                    $selectorMElmts.hide();
+                    $selector.empty();
+                    $selector.material_select();
+                    //$selectorMElmts.hide();
                     return false;
                 }
                 
                 $selector.closest('.select-wrapper').find('img').remove();
                 $selector.empty();
                 $.each(data.qParts,function(key,el){
-                    let elId = el.e == 'team' ? el.teaId : (el.e == 'partner' ? el.extUsrId : el.usrId);
-                    let elName = el.e == 'partner' ? el.orgName : (el.e == 'team' ? el.teaName : el.username);
-                    let elPic = el.e == 'partner' ? el.logo : (el.e == 'team' ? el.teaPicture : el.usrPicture);
+                    let elName = el.orgName;
+                    let elPic = el.logo;
+                    $selector.append(`<option value="${el.wfiId}" data-wid="${el.wfiId}" data-oid="${el.orgId ? el.orgId : ''}" data-cid="${el.cliId ? el.cliId : ''}" data-pic="${elPic ? elPic : ""}">${elName}</option`);
+                })
+                $selector.material_select();
+                $selectorMElmts = $selector.closest('.select-wrapper')
+                $selector.prev().find('li').each(function(i,e){
+                    logo = $selector.find('option').eq(i).attr('data-pic');
+                    folder = 'org';
+                    $(e).prepend(`<img class="s-firm-option-logo" src="/lib/img/${folder}/${logo ? logo : 'no-picture.png'}">`);
+                    $(e).addClass('flex-center');
+                });
+              
+            })
+            .fail(function(data){
+               console.log(data);
+            })
+    } else {
+        //if($selectorMElmts){
+            $selectorMElmts.hide();
+        //}
+    }
+
+  });
+
+  $(document).on('keyup','input[name*="fullname"]',function(event){
+    var $this = $(this);
+    var $partElmt = $(this).closest('.participants-list--item');
+    var $selector = $partElmt.find('[name*="participantSelector"]');
+    if($selector.find('option:selected').length && $this.val() != $selector.find('option:selected').text()){
+      $partInputZone = $this.parent();
+      $partInputZone.find('input').not($this).each(function(i,e){
+        $(e).removeAttr('value');
+      })
+      $partInputZone.find('.input-img').remove();
+      $this.removeClass('part-feeded');
+
+    }
+    $selectorMElmts = $selector.closest('.select-wrapper');
+    const p = [];
+    $('.participants-list--item').not($partElmt).each(function(i,e){
+      $(e).find('.participant-field-zone input:not(.select-dropdown)').each(function(i,f){
+        if($(f).attr('value')){
+          p.push({el: $(f).attr('class'), id: $(f).attr('value')});
+        }
+      })
+    })
+
+    if($this.val().length >= 3 /*&& event.keyCode != 8*/){
+        //urlToPieces = surl.split('/');
+        //urlToPieces[urlToPieces.length - 1] = $(this).val();
+        //surl = urlToPieces.join('/');
+        const params = {name: $this.val(), type: 'all', p: p};
+        
+        $.post(surl,params)
+            .done(function(data){
+
+                if(!data.qParts.length){
+                    $this.removeAttr('value');
+                    //$selectorMElmts.hide();
+                    $selector.empty();
+                    $selector.material_select();
+                    return false;
+                }
+                
+                $selector.closest('.select-wrapper').find('img').remove();
+                $selector.empty();
+                $.each(data.qParts,function(key,el){
+                    let elId = el.e == 't' ? el.teaId : (el.e == 'f' ? el.wfiId : (el.e == 'eu' ? el.extUsrId : el.usrId));
+                    let elName = el.e == 'f' ? el.orgName : (el.e == 't' ? el.teaName : el.username);
+                    let elPic = el.e == 'f' || el.e == 'eu' && el.s ? el.logo : (el.e == 't' ? el.teaPicture : el.usrPicture);
                     //$option = $(`<option class="flex-center" value=${firm.id}></option>`);
                     //$option.append(`<img class="firm-option-logo" src="/lib/img/org/${firm.logo ? firm.logo : 'no-picture.png'}">`)
                     //$option.append(`<span>${firm.name}</span>`);
-                    $selector.append(`<option value="${elId}" data-type="${el.e}" data-fname="${el.wfiId != currentWfiId ? el.orgName : ''}" data-wid="${data.wfiId}" data-oid="${el.orgId ? el.orgId : ""}" data-pic="${elPic ? elPic : ""}" data>${elName}</option`);
+                    $selector.append(`<option value="${elId}" data-type="${el.e}" data-s="${el.s ? 1 : 0}" data-fname="${el.wfiId != currentWfiId ? el.orgName : ''}" data-wid="${el.wfiId}" data-oid="${el.orgId ? el.orgId : ""}" data-pic="${elPic ? elPic : ""}" data-uid="${el.usrId}">${elName}</option`);
                 })
                 //el.val(selector.find(":selected").text());
                 //$selector.prepend(`<option value>(${noFirm})</option>`);
@@ -583,11 +722,12 @@ $('.stages-holder').on('mouseenter',function(){
                 $selector.prev().find('li').each(function(i,e){
                     logo = $selector.find('option').eq(i).attr('data-pic');
                     elType = $selector.find('option').eq(i).attr('data-type');
+                    synth = $selector.find('option').eq(i).attr('data-s');
                     orgName = $selector.find('option').eq(i).attr('data-fname');
-                    folder = elType == 'partner' ? 'org' : elType;
+                    folder = elType == 'f' || elType == 'eu' && synth == '1' ? 'org' : (elType == 'u' || elType == 'eu' ? 'user' : 'team');
                     //$selector.prev().find('li').index($(e)) == 0 ? ($(e).find('span').css('color','black'), $(e).prepend(`<img class="firm-option-logo" src="/lib/img/org/new-firm.png">`)) :
                     $(e).prepend(`<img class="firm-option-logo" src="/lib/img/${folder}/${logo ? logo : 'no-picture.png'}">`);
-                    $(e).append(`<span class="el-type">${orgName != '' && elType != 'partner' ? orgName : elType}</span>`);
+                    $(e).append(`<span class="el-type">${elType == 'eu' && synth == 0 ? orgName : (elType == 'eu' && synth == 1 ? 'Client' : (elType == 'f' ? 'New partner' : (elType == 'u' ? 'user' : 'team'))) }</span>`);
                     $(e).addClass('flex-center');
                     //$option.append(`<span>${firm.name}</span>`);
                     //selector.append($option);
@@ -598,7 +738,7 @@ $('.stages-holder').on('mouseenter',function(){
                 //$('select[name="firmSelector"]').eq(index).show();
             })
             .fail(function(data){
-               console.log(data);
+              console.log(data);
             })
     } else {
         //if($selectorMElmts){
@@ -607,56 +747,278 @@ $('.stages-holder').on('mouseenter',function(){
     }
   });
 
+
+  $(document).on('click',function(e){
+    var $this = $(e.target);
+    var $visibleSel = $('.dropdown-content:visible');
+    
+    if($visibleSel.closest('.participant-field-zone').length || $this.hasClass('participant-fullname')){
+      
+      if (!$this.hasClass('participant-fullname') && $visibleSel.length){
+        $visibleSel.attr('style','display:none!important');
+      } else if($this.hasClass('participant-fullname')){
+        $sel = $this.closest('.participants-list--item').find('.participant-field-zone .dropdown-content');
+        if($sel.find('li').length){
+          $sel.removeAttr('style');
+        }
+      }
+    
+    } else if($visibleSel.closest('.firm-field-zone').length || $this.hasClass('firm-name')) {
+
+      if (!$this.hasClass('firm-name') && $visibleSel.length){
+        $visibleSel.attr('style','display:none!important');
+      } else if($this.hasClass('firm-name')){
+        $sel = $('#createParticipant').find('.dropdown-content');
+        if($sel.find('li').length){
+          $sel.removeAttr('style');
+        }
+      }
+
+
+    }
+  })
+
+
+
   $(document).on('change','[name*="participantSelector"]',function(){
       var $this = $(this);
       var $partElmt = $this.closest('.participants-list--item');
       var $selectedOpt = $this.find(":selected");
+
+      if($selectedOpt.attr('data-s') == 1 || $selectedOpt.attr('data-type') == 'f'){
+        $('#legalPerson').modal('open');
+      }
       //var index = $('.participants-list--item').index($this.closest('.participants-list--item'));
       if($this.val() != ""){
           $partElmt.find('.tooltipped').attr('data-tooltip',$selectedOpt.text()).tooltip();
-          
+          $this.prev().attr('style','display:none!important');
+
           if(!$selectedOpt.attr('data-oid')){
             // ** AJAX CREATE CLIENT IN DB
           }
 
           switch($selectedOpt.attr('data-type')){
-            case 'partner':
-              $partElmt.find('input[name*="externalUser"]').attr('value',$this.val());
+            case 'f':
+              $partElmt.find('input[name*="workerFirm"]').attr('value',$this.val());
               break;
-            case 'team':
+            case 'eu':
+              $partElmt.find('input[name*="externalUser"]').attr('value',$this.val());
+              $partElmt.find('input[name*="user"]').attr('value',$selectedOpt.attr('data-uid'));
+              break;
+            case 't':
               $partElmt.find('input[name*="team"]').attr('value',$this.val());
               break;
-            case 'user':
+            case 'u':
               $partElmt.find('input[name*="user"]').attr('value',$this.val());
               break;
           }
 
-          $this.val($this.val());
-          $partElmt.removeClass('edit');
-          $partElmt.closest('.participants-list').css('margin-bottom','');
-      } else {
-          $this.val("");
-      }
-      $partElmt.find('.selected-participant-logo').attr('src', $this.prev().find('li').eq($this.find('option').index($this.find('option:selected'))).find('img').attr('src'));
-      
-      if($this.val() != ""){
-          $partElmt.find('.participant-fullname-zone').show();
-          $partElmt.find('.participant-field-zone').hide();
+          $this.closest('.participant-field-zone').find('input.participant-fullname').val($selectedOpt.text());
+          var img = $this.prev().find('li').eq($this.find('option').index($this.find('option:selected'))).find('img');
+          if(!$partElmt.find('.input-img').length){
+            var inputImg = img.clone();
+            inputImg.attr('class','');
+            inputImg.addClass('input-img');
+            inputImg.css({
+              'position': 'absolute',
+              'left': '0',
+              'top': '15%',
+              'height': '30px',
+            });
+            $partElmt.find('.participant-fullname').addClass('part-feeded');
+            //inputElmt.css({'padding-left':'3rem!important'});
+            $partElmt.find('.participant-field-zone').append(inputImg);
+          }
+          $partElmt.find('.selected-participant-logo').attr('src', img.attr('src'));
+          if($selectedOpt.attr('data-s') != 1 && $selectedOpt.attr('data-type') != 'f'){
+            $partElmt.removeClass('edit');
+            $partElmt.closest('.participants-list').css('margin-bottom','');
+            $partElmt.find('.participant-fullname-zone').show();
+            $partElmt.find('.participant-field-zone').hide();
+          }
+          
       } else {
           $this.parent().hide();
+          $this.val("");
       }
   });
 
-  $('.create-activity').on('click',function(e){
+  $('[name*="firmSelector').on('change',function(){
+      var $this = $(this);
+      var $selectedOpt = $this.find(":selected");
+      const $usrElmts = $this.closest('.user-inputs');
+      $usrElmts.find('input[name="wid"]').val($selectedOpt.attr('data-wid'));
+      $usrElmts.find('input[name="oid"]').val($selectedOpt.attr('data-oid'));
+      $usrElmts.find('input[name="cid"]').val($selectedOpt.attr('data-cid'));
+      $usrElmts.find('.firm-name').val($selectedOpt.text());
+      var img = $this.prev().find('li').eq($this.find('option').index($this.find('option:selected'))).find('img');
+      if(!$usrElmts.find('.input-f-img').length){
+        var inputImg = img.clone();
+        inputImg.attr('class','');
+        inputImg.addClass('input-f-img');
+        inputImg.css({
+          'position': 'absolute',
+          'left': '0.75rem',
+          'top': '15%',
+          'height': '30px',
+        });
+        $usrElmts.find('.firm-name').addClass('part-feeded');
+        //inputElmt.css({'padding-left':'3rem!important'});
+        $usrElmts.find('.firm-field-zone').append(inputImg);
+      }
+  });
+
+  $('.setup-activity, .create-activity').on('click',function(e){
     e.preventDefault();
     const $this = $(this);
-    $.post(acurl,$this.closest('form').serialize())
+    $.each($('.red-text'),function(){
+      $(this).remove();
+    });
+
+    const params = {btn: $this.hasClass('create-activity') ? 'submit' : 'complexify'};
+    var data = $this.closest('form').serialize() + '&' + $.param(params)
+
+    $.post(acurl,data)
       .done(function(data){
-        console.log(data)
+        $('#createActivity').modal('close');
+        location.reload();
       })
       .fail(function(data){
-        console.log(data)
+        $.each(data.responseJSON, function(key, value){
+          $.each($('#createActivity input'),function(){
+            if($(this).attr('name').indexOf(key) != -1){
+                $(this).after('<div class="red-text"><strong>'+value+'</strong></div>');
+                return false;
+                }
+          });
+        })
       })
+  })
+
+  $(document).on('click','.participant-delete',function(e){
+    $(this).closest('.participants-list--item').remove();
+  });
+
+  $(document).on('click','.participant-btn',function(e){
+    const $this = $(this);
+    const $partHolder = $this.closest('.participants-list--item');
+    $partHolder.addClass('edit');
+    $partHolder.parent().css('margin-bottom','60px');
+    $this.hide();
+    $this.next().show();
+    /*
+    const $partHolder = $this.closest('.participants-list--item');
+    $partHolder.find('input').each(function(i,e){
+      if($(e).attr('value')){
+        $('#deleteParticipant')
+          .attr('data-e',$(e).attr('class'))
+          .attr('data-eid',$(e).attr('value'))
+      }
+    })
+    $(this).closest('.participants-list--item').remove();
+    */
+
+  });
+
+  $(document).on('click','.participant-validate',function(){
+    const $this = $(this);
+    const $partElmt = $this.closest('.participants-list--item');
+
+    if($partElmt.find('input.participant-fullname').hasClass('part-feeded')){
+          $partElmt.removeClass('edit');
+          $partElmt.find('.participant-fullname-zone').show();
+          $partElmt.find('.participant-field-zone').hide();
+    } else {
+      var creationModal = $('#createParticipant');
+      var partFN = $partElmt.find('input.participant-fullname').val();
+      creationModal.find('.new-part-name').empty().append(partFN);
+      var partNameToPieces = partFN.split(' ');
+      //if(!$('input[name="firstname"]').val().length){
+        $('input[name="firstname"]').val(partNameToPieces[0]).prev().addClass('active');
+        $('input[name="lastname"]').val(partNameToPieces.slice(1).join(' ')).prev().addClass('active');
+      //}
+      $('#createParticipant').modal('open');
+    }
+    
+  })
+
+  $('#choice-indpt').on('change',function(){
+    $('#choice-user, #choice-firm').prop('checked',!$(this).is(':checked'));
+    if($(this).is(':checked')){
+      $('.firm-field-zone, .f-prefix').hide();
+      $('.user-fn, .user-ln').removeClass('m3').addClass('m6');
+      $('.user-inputs').show();
+    }
+  })
+
+  $('#choice-firm').on('change',function(){
+    $('#choice-user, #choice-indpt').prop('checked',!$(this).is(':checked'));
+    if($(this).is(':checked')){
+      $('.user-inputs').hide();
+    }
+  })
+
+  $('#choice-user').on('change',function(){
+  
+    $('#choice-firm, #choice-indpt').prop('checked',!$(this).is(':checked'));
+    if($(this).is(':checked')){
+      $('.user-fn, .user-ln').removeClass('m6').addClass('m3');
+      $('.f-prefix, .firm-field-zone').show();
+      var partNameToPieces = $(this).closest('.modal').find('.new-part-name').text().split(' ');
+      $('.user-inputs').show();
+      if(!$('input[name="firstname"]').val().length){
+        $('input[name="firstname"]').val(partNameToPieces[0]).prev().addClass('active');
+        $('input[name="lastname"]').val(partNameToPieces.slice(1).join(' ')).prev().addClass('active');
+      }
+    } else {
+      $('.user-inputs').hide();
+    }
+  })
+
+  $('.create-part-button').on('click',function(e){
+
+    const $this = $(this);
+    if($('#createParticipant').is(':visible') || $('#legalPerson').is(':visible') && $('.participant-field-zone:visible').find('input.f').attr('value')){
+      
+      // In case new client
+      if($('.participant-field-zone:visible').find('input.f').attr('value')){
+        $('#createParticipant').find('input[name="wid"]').val($('.participant-field-zone:visible').find('input.f').attr('value'));
+        $('#createParticipant').find('input[name="oid"]').val($('.participant-field-zone:visible [name*="participantSelector"] option:selected').attr('data-oid'));
+        nc = 1;
+      } else {
+        nc = 0;
+      }
+  
+      var $emailInput = $('.user-inputs').find('input[name="email"]');
+
+      if($emailInput.is(':visible') && !isEmail($emailInput.val()) && !$('#interactPart').is(':visible')){
+        $('#interactPart').modal('open');
+        return false;
+      }
+      if($('#choice-firm').is(':checked') && !$('#legalPerson').is(':visible')){
+        $('#legalPerson').modal('open');
+        return false;
+      }
+
+      let type = $('#choice-firm').is(':checked') || nc == 1 ? 'f' : ($('#choice-indpt').is(':checked') ? 'i' : 'u');
+      let uname = $('.new-part-name').text();
+      const params = {type: type, uname: uname};
+      $.post(pcurl,$('#createParticipant form').serialize() + '&' + $.param(params))
+        .done(function(data){
+          directInsert(tn = data.tn, fn = data.fn, id = data.uid, pic = data.pic, secId = data.euid);
+          $('#interactPart, #legalPerson, #createParticipant').modal('close');
+        })
+        .fail(function(data){
+          console.log(data);
+        })
+
+
+
+
+    } else {
+      $('.participant-validate:visible').click();
+    }
+
   })
 
 });

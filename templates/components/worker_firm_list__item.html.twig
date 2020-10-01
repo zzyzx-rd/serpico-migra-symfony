@@ -1,0 +1,19 @@
+<li class="client-type-list--item client-firms hierarchized-item">
+  <header>{{ 'user_list.firms'|trans ~ ' (' ~ nbWorkerFirms ~ ')' }} </header>
+  <div class="item-body">
+    <ul class="firms-list">
+      {% for workerFirm in workerFirms %}
+          {% set logo_url = asset(global.workerFirmLogo(workerFirm)) %}
+          <li class="firms-list--item hierarchized-item" data-id="{{ workerFirm.id }}">
+            <header class="flex-center">
+              <img src="{{ logo_url }}" alt="" class="client-logo">
+              <span class="firm-name">{{ workerFirm.name }}</span>
+              <div class="user-actions">
+                <a class="material-icons" href="{{ url('updateWorkerFirm', { wfiId: workerFirm.id }) }}" tooltip="{{ 'user_list.modify'|trans }}">settings</a>
+              </div>
+            </header>
+          </li>
+      {% endfor %}
+    </ul>
+  </div>
+</li>

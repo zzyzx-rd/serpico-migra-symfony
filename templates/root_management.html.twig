@@ -41,14 +41,19 @@
 {% block content %}
   {% set manage_procs = path('manageProcesses') %}
   {% set manage_orgs = path('manageOrganizations') %}
+  {% set manage_wfs = path('manageWorkerFirms',{page: 1}) %}
   <section>
     <a class="btn-large waves-effect waves-light teal" href="{{ manage_procs }}">
       <i class="fa fa-bookmark"></i>
       {% trans %}root_management.manage_processes{% endtrans %}
     </a>
-    <a class="btn-large waves-effect waves-light teal" href="{{ manage_orgs }}">
+    <a class="btn-large waves-effect waves-light teal" href="{{ manage_wfs }}">
       <i class="fa fa-hotel"></i>
       <span>{% trans %}root_management.manage_organizations{% endtrans %}</span>
+    </a>
+    <a class="btn-large waves-effect waves-light teal" href="{{ manage_orgs }}">
+      <i class="fa fa-handshake orange-text"></i>
+      <span class="orange-text">{% trans %}root_management.our_clients{% endtrans %}</span>
     </a>
   </section>
 {% endblock %}

@@ -1699,18 +1699,19 @@ class OrganizationController extends MasterController
                         ->setWorkerFirm($workerFirm);
                     $em->persist($clientOrganization);
     
-                    $synthUser = $this->createFirmMinConfig($clientOrganization,true);
-                    $externalSynthUser = new ExternalUser;
-                    $externalSynthUser->setUser($synthUser)
-                        ->setOwner(true)->setFirstname('ZZ')
-                        ->setLastname($client->getName());
+                    $this->updateOrgFeatures($clientOrganization, $nonExistingOrg = true, $createdAsClient = true);
+                    
     
                 } else {
-                    $synthUser = $em->getRepository(User::class)->findOneBy(['organization' => $clientOrganization, 'firstname' => 'ZZ', 'lastname' => 'ZZ']);
+                    $synthUser = $em->getRepository(User::class)->findOneBy(['organization' => $clientOrganization, 'synthetic' => true]);
                 }
 
                 /** @var ExternalUser */
-
+                $externalSynthUser = new ExternalUser;
+                $externalSynthUser->setUser($synthUser)
+                    ->setOwner(true)->setFirstname($organization->getCommname())
+                    ->setSynthetic(true)
+                    ->setLastname($client->getName());
 
                 $client
                 ->addExternalUser($externalSynthUser)
@@ -3210,7 +3211,7 @@ class OrganizationController extends MasterController
 
         $users           = new ArrayCollection($repoU->findBy(['organization' => $organization, 'deleted' => null], ['department' => 'ASC', 'position' => 'ASC']));
         $usersWithDpt    = $users->matching(Criteria::create()->where(Criteria::expr()->neq('department', null)));
-        $usersWithoutDpt = $users->matching(Criteria::create()->where(Criteria::expr()->eq('department', null))->andWhere(Criteria::expr()->neq('lastname', 'ZZ')));
+        $usersWithoutDpt = $users->matching(Criteria::create()->where(Criteria::expr()->eq('department', null))->andWhere(Criteria::expr()->eq('synthetic', false)));
 
         $viewableUsersWithoutDpt = [];
         $viewableUsersWithoutDpt = $usersWithoutDpt;
@@ -3435,10 +3436,13 @@ class OrganizationController extends MasterController
      * @param Request $request
      * @param $actId
      * @return RedirectResponse
-     * @Route("/ajax/activity/delete/{actId}", name="ajaxActivityDelete")
+     * @Route("/activities/delete/{actId}", name="ajaxActivityDelete")
      */
     public function deleteActivityAction(Request $request, $actId): RedirectResponse
     {
+        
+        $returnType = $request->get('r');
+        
         $activity = $this->em->getRepository(Activity::class)->find($actId);
         $activityM = new ActivityM($this->em, $this->stack, $this->security);
         if ($activityM->isDeletable($activity)) {
@@ -3454,7 +3458,12 @@ class OrganizationController extends MasterController
             } catch (ORMException $e) {
             }
         }
-        return $this->redirectToRoute("myActivities");
+
+        if($returnType == 'json'){
+            return true;
+        } else {
+            return $this->redirectToRoute("myActivities");
+        }
     }
 
     /**
@@ -6669,150 +6678,155 @@ class OrganizationController extends MasterController
 
     // Second parameters is there to create Ext users, who are users of the connected user organization,
     // in order to enable inverse participation in activities
-    public function createFirmMinConfig(Organization $organization, $mirrorExtUsers = false){
-        $em = $this->em;
-
-        if($mirrorExtUsers){
-            $connectedUser = $this->user;
-            $connectedUserOrg = $connectedUser->getOrganization();
-            // Setting new client relationship
-            $client = new Client;
-            $client->setClientOrganization($connectedUserOrg)
-                ->setWorkerFirm($connectedUserOrg->getWorkerFirm())
-                ->setType($connectedUserOrg->getType())
-                ->setName($connectedUserOrg->getCommname())
-                ->setCreatedBy($connectedUser->getId());
-            
-                
-            /** @var Collection|User[] */
-            $orgUsers = $connectedUser->getOrganization()->getUsers();
-            foreach($orgUsers as $orgUser){
-                $externalUser = new ExternalUser;
-                $externalUser->setUser($orgUser)
-                    ->setWeightValue(100)
-                    ->setEmail($orgUser->getEmail())
-                    ->setPositionName($orgUser->getPosition() ? $orgUser->getPosition()->getName() : null)
-                    ->setFirstname($orgUser->getFirstname())
-                    ->setLastname($orgUser->getLastname());
-                $client->addExternalUser($externalUser);
-            }
-
-            $em->persist($client);
-            $organization->addClient($client);
-        }
-
-        $repoON = $em->getRepository(OptionName::class);
-
-        // Settling default organization weight
-        $defaultOrgWeight = new Weight();
-        $defaultOrgWeight->setOrganization($organization)
-            ->setValue(100);
-        $organization->addWeight($defaultOrgWeight);
-
-        // Settling default options
-        /** @var OptionName[] */
-        $options = $repoON->findAll();
-        foreach ($options as $option) {
-
-            $optionValid = (new OrganizationUserOption)
-            ->setOName($option);
-
-            // We set nb of days for reminding emails, very important otherwise if unset, if people create activities, can make system bug.
-            //  => Whenever someone logs in, this person triggers reminder mails to every person in every organization, organization thus should have this parameter date set.
-            if($option->getName() == 'mailDeadlineNbDays'){
-                $optionValid->setOptionFValue(2);
-            }
-            //$em->persist($optionValid);
-
-            // At least 3 options should exist for a new firm for activity & access results
-            if($option->getName() == 'activitiesAccessAndResultsView'){
-
-                // Visibility and access options has many options :
-                // * Scope (opt_bool_value in DB, optionTrue property) : defines whether user sees his own results (0), or all participant results (1)
-                // * Activities access (opt_int_value, optionIValue property) : defines whether user can access all organisation acts (1), his department activities (2) or his own activities (3)
-                // * Status access (opt_int_value_2, optionSecondaryIValue property) : defines whether user can access computed results (2), or released results (3)
-                // * Detail (opt_float_value, optionFValue property) : defines whether user accesses averaged/consolidated results (0), or detailed results (1)
-                // * Results Participation Condition (opt_string_value, optionSValue property) : defines whether user accesses activity results without condition ('none'), if he is activity owner ('owner'), or if he is participating ('participant')
-
-                $optionAdmin = $optionValid;
-                $optionAdmin->setRole(1)->setOptionTrue(true)->setOptionIValue(1)->setOptionSecondaryIValue(2)->setOptionFValue(1)->setOptionSValue('none');
-                $organization->addOption($optionAdmin);
-
-                $optionAM = (new OrganizationUserOption)
-                    ->setOName($option)
-                    ->setRole(2)
-                    ->setOptionTrue(true)
-                    ->setOptionIValue(2)
-                    ->setOptionSecondaryIValue(2)
-                    ->setOptionFValue(0)
-                    ->setOptionSValue('owner');
-                $organization->addOption($optionAM);
-
-                $optionC = (new OrganizationUserOption)
-                    ->setOName($option)
-                    ->setRole(3)
-                    ->setOptionTrue(false)
-                    ->setOptionIValue(3)
-                    ->setOptionSecondaryIValue(3)
-                    ->setOptionFValue(0)
-                    ->setOptionSValue('participant');
-                $organization->addOption($optionC);
-                //$em->persist($optionC);
-            } else {
-                $organization->addOption($optionValid);
-            }
-        }
-
-        //$em->persist($organization);
-
-        // Settling default criterion names
-        $repoCN = $em->getRepository(CriterionName::class);
-        $criterionGroups = [
-            1 => new CriterionGroup('Hard skills'),
-            2 => new CriterionGroup('Soft skills')
-        ];
-        foreach ($criterionGroups as $cg) {
-            $organization->addCriterionGroup($cg);
-            //$cg->setOrganization($organization);
-            //$em->persist($cg);
-        }
-
-        /**
-         * @var CriterionName[]
-         */
-        $defaultCriteria = $repoCN->findBy(['organization' => null]);
-        foreach ($defaultCriteria as $defaultCriterion) {
-            $criterion = clone $defaultCriterion;
-            // 1: hard skill
-            // 2: soft skill
-            $type = $criterion->getType();
-            $cg = $criterionGroups[$type];
-            $criterion
-                //->setOrganization($organization)
-                ->setCriterionGroup($cg);
-
-            $cg->addCriterion($criterion);
-            $organization->addCriterionName($criterion);
-            //$em->persist($criterion);
-        }
-
-        //Synthetic User Creation (for external, in case no consituted team has been created to grade a physical person for an activity)
-        $syntheticUser = new User;
-        $syntheticUser
-            ->setFirstname('ZZ')
-            ->setLastname($connectedUserOrg->getCommname())
-            ->setRole(3);
-
-        $organization->addUser($syntheticUser);
+    public function updateOrgFeatures(Organization $organization, $nonExistingOrg = true, $createdAsClient = false)
+    {
         
-        $em->persist($organization);
-        //$em->flush();
-        if($mirrorExtUsers){
-            return $syntheticUser;
-        } else {
-            return true;
-        }
 
+            $em = $this->em;
+    
+            if($createdAsClient){
+
+                $connectedUser = $this->user;
+                $connectedUserOrg = $connectedUser->getOrganization();
+                // Setting new client relationship
+                $client = new Client;
+                $client->setClientOrganization($connectedUserOrg)
+                    ->setWorkerFirm($connectedUserOrg->getWorkerFirm())
+                    ->setType($connectedUserOrg->getType())
+                    ->setName($connectedUserOrg->getCommname())
+                    ->setCreatedBy($connectedUser->getId());
+                
+                    
+                /** @var Collection|User[] */
+                $orgUsers = $connectedUser->getOrganization()->getUsers();
+                foreach($orgUsers as $orgUser){
+                    $externalUser = new ExternalUser;
+                    $externalUser->setUser($orgUser)
+                        ->setWeightValue(100)
+                        ->setEmail($orgUser->getEmail())
+                        ->setPositionName($orgUser->getPosition() ? $orgUser->getPosition()->getName() : null)
+                        ->setFirstname($orgUser->getFirstname())
+                        ->setLastname($orgUser->getLastname());
+                    $client->addExternalUser($externalUser);
+                }
+    
+                $em->persist($client);
+                $organization->addClient($client);
+            }
+
+            if($nonExistingOrg){
+                
+                $repoON = $em->getRepository(OptionName::class);
+        
+                // Settling default organization weight
+                $defaultOrgWeight = new Weight();
+                $defaultOrgWeight->setOrganization($organization)
+                    ->setValue(100);
+                $organization->addWeight($defaultOrgWeight);
+        
+                // Settling default options
+                /** @var OptionName[] */
+                $options = $repoON->findAll();
+                foreach ($options as $option) {
+        
+                    $optionValid = (new OrganizationUserOption)
+                    ->setOName($option);
+        
+                    // We set nb of days for reminding emails, very important otherwise if unset, if people create activities, can make system bug.
+                    //  => Whenever someone logs in, this person triggers reminder mails to every person in every organization, organization thus should have this parameter date set.
+                    if($option->getName() == 'mailDeadlineNbDays'){
+                        $optionValid->setOptionFValue(2);
+                    }
+                    //$em->persist($optionValid);
+        
+                    // At least 3 options should exist for a new firm for activity & access results
+                    if($option->getName() == 'activitiesAccessAndResultsView'){
+        
+                        // Visibility and access options has many options :
+                        // * Scope (opt_bool_value in DB, optionTrue property) : defines whether user sees his own results (0), or all participant results (1)
+                        // * Activities access (opt_int_value, optionIValue property) : defines whether user can access all organisation acts (1), his department activities (2) or his own activities (3)
+                        // * Status access (opt_int_value_2, optionSecondaryIValue property) : defines whether user can access computed results (2), or released results (3)
+                        // * Detail (opt_float_value, optionFValue property) : defines whether user accesses averaged/consolidated results (0), or detailed results (1)
+                        // * Results Participation Condition (opt_string_value, optionSValue property) : defines whether user accesses activity results without condition ('none'), if he is activity owner ('owner'), or if he is participating ('participant')
+        
+                        $optionAdmin = $optionValid;
+                        $optionAdmin->setRole(1)->setOptionTrue(true)->setOptionIValue(1)->setOptionSecondaryIValue(2)->setOptionFValue(1)->setOptionSValue('none');
+                        $organization->addOption($optionAdmin);
+        
+                        $optionAM = (new OrganizationUserOption)
+                            ->setOName($option)
+                            ->setRole(2)
+                            ->setOptionTrue(true)
+                            ->setOptionIValue(2)
+                            ->setOptionSecondaryIValue(2)
+                            ->setOptionFValue(0)
+                            ->setOptionSValue('owner');
+                        $organization->addOption($optionAM);
+        
+                        $optionC = (new OrganizationUserOption)
+                            ->setOName($option)
+                            ->setRole(3)
+                            ->setOptionTrue(false)
+                            ->setOptionIValue(3)
+                            ->setOptionSecondaryIValue(3)
+                            ->setOptionFValue(0)
+                            ->setOptionSValue('participant');
+                        $organization->addOption($optionC);
+                        //$em->persist($optionC);
+                    } else {
+                        $organization->addOption($optionValid);
+                    }
+                }
+    
+                //$em->persist($organization);
+        
+                // Settling default criterion names
+                $repoCN = $em->getRepository(CriterionName::class);
+                $criterionGroups = [
+                    1 => new CriterionGroup('Hard skills'),
+                    2 => new CriterionGroup('Soft skills')
+                ];
+                foreach ($criterionGroups as $cg) {
+                    $organization->addCriterionGroup($cg);
+                    //$cg->setOrganization($organization);
+                    //$em->persist($cg);
+                }
+        
+                /**
+                 * @var CriterionName[]
+                 */
+                $defaultCriteria = $repoCN->findBy(['organization' => null]);
+                foreach ($defaultCriteria as $defaultCriterion) {
+                    $criterion = clone $defaultCriterion;
+                    // 1: hard skill
+                    // 2: soft skill
+                    $type = $criterion->getType();
+                    $cg = $criterionGroups[$type];
+                    $criterion
+                        //->setOrganization($organization)
+                        ->setCriterionGroup($cg);
+        
+                    $cg->addCriterion($criterion);
+                    $organization->addCriterionName($criterion);
+                    //$em->persist($criterion);
+                }
+    
+                //Synthetic User Creation (for external, in case no consituted team has been created to grade a physical person for an activity)
+                $syntheticUser = new User;
+                $syntheticUser
+                    ->setFirstname('ZZ')
+                    ->setSynthetic(true)
+                    ->setLastname($connectedUserOrg->getCommname())
+                    ->setRole(3);
+        
+                $organization->addUser($syntheticUser);
+                $em->persist($syntheticUser);
+                $em->persist($organization);
+                $em->flush();
+
+            }
+
+            return new Response('success',200);
     }
 
 }
