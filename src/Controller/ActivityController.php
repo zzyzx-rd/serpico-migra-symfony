@@ -140,6 +140,7 @@ class ActivityController extends MasterController
                     $stage  
                         ->setOrganization($organization)
                         ->setProgress($progress)
+                        ->setStatus($progres)
                         ->setMasterUser($currentUser)
                         ->setCreatedBy($currentUser->getId());
     
@@ -150,6 +151,7 @@ class ActivityController extends MasterController
                     $activity->addStage($stage)
                         ->setName($stage->getName())
                         ->setProgress($progress)
+                        ->setStatus($progress)
                         ->setOrganization($organization)
                         ->setMasterUser($stage->getMasterUser())
                         ->setCreatedBy($currentUser->getId());
