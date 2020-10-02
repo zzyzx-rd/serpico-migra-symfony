@@ -1796,6 +1796,10 @@ activities:
   timeframe_view_type: Timeframe view
   self_date_type: Duration dates
   output_date_type: Feedback dates
+  no_activities:
+    main_msg: Add activities
+    secondary_msg: to get a dynamic view of your business
+
   o_status:
     cancelled: Cancelled
     discarded: Discarded

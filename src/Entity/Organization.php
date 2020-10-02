@@ -530,7 +530,7 @@ class Organization extends DbObject
     {
         if (!$this->activities->contains($activity)) {
             $this->activities[] = $activity;
-            $activity->setanization($this);
+            $activity->setOrganization($this);
         }
 
         return $this;

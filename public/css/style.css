@@ -16,6 +16,10 @@ body[style="overflow: hidden;"] {
   height: 100vh;
 }
 
+.dd-text{
+  color: #55318e;
+}
+
 .dd-bg-color{
   background-color: #341f56;
 }

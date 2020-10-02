@@ -1903,7 +1903,7 @@ activities:
 
   no_activities:
     main_msg: Créez des activités
-    secondary_msg: afin d'obtenir une vue dynamique de votre business
+    secondary_msg: "afin d'obtenir une vue dynamique de votre business"
 
   o_status:
     cancelled: Annulées

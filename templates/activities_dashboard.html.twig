@@ -709,13 +709,33 @@
       .no-mail-img-holder img, .legal-img-holder img  {
         width: 100%;
       }
+
+      .virtual-activities-holder{
+        position:relative;
+      }
+
+      .no-activity-overlay{
+        position:absolute;
+        left:0;
+        height:100%;
+        width: 100%;
+        z-index: 1;
+      }
+
   </style>
 {% endblock %}
 
 {% block javascripts %}
   <script>
 
-
+    var noActOverlay = $(`
+      <div class="no-activity-overlay">
+        <div class="no-activity-msg">
+          <span>{{'activities.no_activities.main_msg'|trans}}</span>
+          <span>{{'activities.no_activities.secondary_msg'|trans}}</span>
+        </div>
+      </div>
+    `);
     
     const $processSelect = $('#processSelect');
     const $createActivityModal = $('#createActivity');
@@ -1186,21 +1206,22 @@
 {% endmacro %}
 
 {% block content %}
+
+  {% set organization = currentuser.organization %}
+  {% set displayProcesses = organization.plan != 3 and organization.institutionProcesses|length > 0 %}
+
   <main>
 
-    {% if is_granted('ROLE_ADMIN') %}
-      <div class="modal-footer action-buttons">
-        <div class="button-field">
-          {% if global.route == "myActivities" %}
-              <a href="{{ url('processesList') }}" class="btn-large waves-effect waves-light" style="margin:20px 0px 0px 0px">{% trans %}activities.firm_activities{% endtrans %}</a>
-          {% else %}
-              <a href="{{ url('myActivities') }}" class="btn-large waves-effect waves-light" style="margin:20px 0px 0px 0px">{% trans %}activities.my_activities{% endtrans %}</a>
-          {% endif %}
-        </div>
-      </div>
-    {% endif %}
+    <div class="sorting-type dashboard-btns flex-center">
 
-    <div class="sorting-type flex-center">
+      {% if is_granted('ROLE_ADMIN') %}    
+        {% if global.route == "myActivities" %}
+            <a href="{{ url('processesList') }}" class="btn-flat dd-text waves-effect waves-light">{% trans %}activities.firm_activities{% endtrans %}</a>
+        {% else %}
+            <a href="{{ url('myActivities') }}" class="btn-flat dd-text waves-effect waves-light">{% trans %}activities.my_activities{% endtrans %}</a>
+        {% endif %}
+      {% endif %}
+
       <ul class="flex-center view-settings no-margin">
         <li class="flex-center">
           <a class="btn-flat no-padding flex-center">
@@ -1283,7 +1304,7 @@
           {% endfor %}
         </ul>
       {% else %}
-        <ul class="tabs-t-view flex-center" {% if noActivities %} style="display:none" {% endif %}>
+        <ul class="tabs-t-view flex-center no-margin" {% if noActivities %} style="display:none" {% endif %}>
 
           {% for s, status in displayedStatuses %}
             {% set outputStatusCookie = global.request.cookies.get('r_s_' ~ sortingTypeCookie ~ '_' ~ status) %}
@@ -1350,8 +1371,11 @@
             <i class="arr right"></i>
           </div>
           <div class="row no-padding no-margin">
-            <div class="col s2"></div>
-            <div class="col s10 no-padding">
+            {% if displayProcesses %}
+              <div class="col s2"></div>
+            {% endif %}
+
+            <div class="col s{{ displayProcesses ? 10 : 12}} no-padding">
               <div class="row no-padding no-margin">
                 <div class="col s9 no-padding">
                   <div class="row no-padding no-margin months-ref">
@@ -1378,7 +1402,7 @@
           </div>
         </div>
 
-        {#}
+        {#
         {% for s, status in displayedStatuses %}
           <div id="{{ status }}">
             <ul class="process-list process-list-t no-margin">
@@ -1417,7 +1441,7 @@
         #}
 
         
-        <ul class="process-list process-list-t no-margin">
+        <ul class="process-list process-list-t no-margin" data-prototype="{% apply escape %}{% include "components/activity2_list__item.html.twig" %}{% endapply %}">
           {% if orphanActivities is not empty %}
             <li class="process-list--item hierarchized-item">
               <div class="row no-margin flex-center">
@@ -1517,6 +1541,8 @@
       {% endif %}
     </div>
 
+    {#
+
     {% if noActivities %}
 
       <ul class="demo-activities">
@@ -1585,8 +1611,11 @@
         
 
       </ul>
+      #}
 
-      {#}
+
+
+      {#
       <div class="container">
         <div class="center" style="margin-top: 20px;">
             <i class="fa fa-clipboard fa-3x"></i>
@@ -1600,13 +1629,13 @@
             {% endif %}
         </div>
       </div>
-      #}
-    {% endif %}
+     
+    {% endif %} #}
 
     {% if currentuser.role != 3 %}
       <div id="fixedButton create-act-btn" class="fixed-action-btn">
-          <a class="btn-floating modal-trigger" href="#createActivity" onclick="onAddProcessClick('{{ currentuser.organization.id }}')" data-oid="{{currentuser.organization.id}}"><i class="material-icons">add</i></a>
-          {#}
+          <a class="btn-floating btn-large modal-trigger" href="#createActivity" onclick="onAddProcessClick('{{ currentuser.organization.id }}')" data-oid="{{currentuser.organization.id}}"><i class="material-icons">add</i></a>
+          {#
           <ul>
               <li><a class="btn-floating orange lighten-2 tooltipped modal-trigger" data-position="left" data-delay="50" data-tooltip="{% trans %}tooltip.template.create_from_scratch{% endtrans %}" href="{{ path('activityInitialisation',{'elmt' : 'template'}) }}">
                   <div style="position: relative;display:inline-block">

@@ -4,6 +4,33 @@ function isEmail(email) {
   return regex.test(email);
 }
 
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function getDay(){
+  var MyDate = new Date;
+  var PremierJour = Date.UTC(MyDate.getFullYear(), 0, 0);
+  var Aujourdhui  = Date.UTC(MyDate.getFullYear(), MyDate.getMonth(), MyDate.getDate());
+  return Math.floor((Aujourdhui - PremierJour) / (1000 * 60 * 60 * 24));
+}
+
+function dateFromDay(year, day){
+  var date = new Date(year, 0); // initialize a date in `year-01-01`
+  return new Date(date.setDate(day)); // add the number of days
+}
+
+function ndDayPerYears(annee) {
+
+  if(annee % 4 == 0 && annee % 100 == 0 && annee % 400 == 0 ){
+      return 366;
+  } else {
+    return 365;
+  }
+}
+
 function initPickates(){
   switch(lg){
     case 'fr':
@@ -68,12 +95,18 @@ function initPickates(){
 
 initPickates();
 
+var now = new Date();
+var annee = now.getFullYear();
+var c = getDay();
+var tDays = ndDayPerYears(annee);
+var annee = now.getFullYear();
 var startCal = $('#createActivity').find('.dp-start');
 var endCal = $('#createActivity').find('.dp-end');
 var startDateTS = (startCal.val() == "") ? Date.now() : new Date(startCal.val());
 var endDateTS = (endCal.val() == "") ? startDateTS : new Date(endCal.val());
 var startDate = new Date(startDateTS);
 var endDate = new Date(endDateTS);
+
 
 startCal.pickadate('picker').set('select',startDate);
 endCal.pickadate('picker').set('select',endDate).set('min',startDate);
@@ -138,33 +171,89 @@ $(function () {
       setCookie(key, keyValue, '-1');
   }
 
-  
+
 
   $('a:has(.fa-plus)').on('click', function () {
     $('.process-name').empty().append($(this).closest('ul').find('header').text())
     $('.start-btn,.launch-btn,.modify-btn').removeData().data('pid', $(this).data('pid'));
   });
 
-  var now = new Date();
-  var annee   = now.getFullYear();
   $('.dmin').append(annee +'<div class="line"></div>');
   $('.dmax').append(annee + 1 + '<div class="line"></div>');
-  var centralElWidth = $('.activity-content-stage:visible').eq(0).width();
-  var now = new Date();
-  var annee = now.getFullYear();
-  var c = getDay();
-  var tDays = ndDayPerYears(annee);
-  var dateChevron = $('.chevron');
-  var actCurDate = $('.curDate');
 
-  var echelle = centralElWidth / tDays;
-  dateChevron.css({'left': 'calc('+Math.round(10000 * (c / tDays )) / 100 + '% - 10px)' });
-  actCurDate.each(function(i,e){
-    $(e).css({'left': Math.round(10000 * (c / tDays )) / 100 + '%' });
-  });
-  $('.activity-content-stage').css({
-    'background' : 'repeating-linear-gradient(90deg, #f3ccff2b, #63009445 '+ centralElWidth / 12 +'px, #ffffff '+ centralElWidth / 12 +'px, #ffffff '+ centralElWidth / 6 +'px)'
-  });
+  /**
+   * Display activities in a proper way
+   * @param {HTMLInputElement} $activities
+   * @param bool setEvents
+   */
+  function displayTemporalActivities($activities, $setEvents){
+
+    var centralElWidth = $('.activity-content-stage:visible').eq(0).width();
+    var actCurDate = $activities.find('.curDate');
+    var echelle = centralElWidth / tDays;
+    
+    actCurDate.each(function(i,e){
+      $(e).css('left', Math.round(10000 * c / tDays) / 100 + '%');
+    });
+  
+  
+  
+    $activities.find('.activity-content-stage').css({
+      'background' : 'repeating-linear-gradient(90deg, #f3ccff2b, #63009445 '+ centralElWidth / 12 +'px, #ffffff '+ centralElWidth / 12 +'px, #ffffff '+ centralElWidth / 6 +'px)'
+    });
+
+    $activities.find('.activity-component').each(function (){
+      var $this = $(this);
+      var sd = $this.data("sd");
+      var p =  $this.data("p");
+      var id = $this.data("id");
+      pxWidthP = (p + 1) * echelle;
+      pxWidthSD = sd * echelle;
+      pctWidthSD = getPercentage(pxWidthSD, centralElWidth);
+      pctWidthP = getPercentage(pxWidthP, centralElWidth);
+  
+      $this.css({'margin-left': pctWidthSD + "%" });
+      $this.css({'width': pctWidthP + "%" });
+  
+      $this.find('.stage-element').each(function(){
+        var ssd = $(this).data("sd");
+        var sp =  $(this).data("p");
+        
+        sPctWidthSD = (ssd - sd) / p;
+        sPctWidthP = Math.max(3,(sp + 1)) / (p + 1);
+  
+        $(this).css({'margin-left': Math.round(10000 * sPctWidthSD) / 100 + "%",
+          'width': Math.round(10000 * sPctWidthP) / 100 + "%",
+          'background' : ssd >= c ? '#5CD08F' : (ssd + sp > c ? 'linear-gradient(to right, transparent, transparent ' + Math.round(10000 * (c - ssd) / sp) / 100 + '%, #7942d0 '+ Math.round(10000 * (c - ssd) / sp) / 100 +'%), repeating-linear-gradient(61deg, #7942d0, #7942d0 0.5rem, transparent 0.5px, transparent 1rem)' : 'gray'),
+          'height' : '7px',
+          'border-radius' : '0.3rem',  
+        });
+      });
+    });
+
+    if($setEvents){
+
+      $activities.find('.event').each(function(){
+        var od = $(this).data("od");
+        var sp =  $(this).data("p");
+        
+        sPctWidthSD = (od - sd) / p;
+        sPctWidthP = Math.max(3,(sp + 1)) / (p + 1);
+  
+        $(this).css({'margin-left': Math.round(10000 * sPctWidthSD) / 100 + "%",
+          'width': Math.round(10000 * sPctWidthP) / 100 + "%",
+          'height' : '15px',
+          'border-radius' : '0.3rem',  
+        });
+      });
+    
+    }
+  
+  }
+
+  $('.chevron').css({'left': 'calc('+Math.round(10000 * (c / tDays )) / 100 + '% - 10px)' });
+
+  displayTemporalActivities($('.activity-holder'),true);
 
   $(window).on('resize',function(){
     //setTimeout(function(){
@@ -181,58 +270,27 @@ $(function () {
     //}, 200);
   });
 
-  $.each($('.activity-component'), function (){
-    var $this = $(this);
-    var sd = $this.data("sd");
-    var p =  $this.data("p");
-    var id = $this.data("id");
-    pxWidthP = (p + 1) * echelle;
-    pxWidthSD = sd * echelle;
-    pctWidthSD = getPercentage(pxWidthSD, centralElWidth);
-    pctWidthP = getPercentage(pxWidthP, centralElWidth);
-
-    $this.css({'margin-left': pctWidthSD + "%" });
-    $this.css({'width': pctWidthP + "%" });
-
-    $this.find('.stage-element').each(function(){
-      var ssd = $(this).data("sd");
-      var sp =  $(this).data("p");
-      
-      sPctWidthSD = (ssd - sd) / p;
-      sPctWidthP = Math.max(3,(sp + 1)) / (p + 1);
-
-      $(this).css({'margin-left': Math.round(10000 * sPctWidthSD) / 100 + "%",
-        'width': Math.round(10000 * sPctWidthP) / 100 + "%",
-        'background' : ssd >= c ? '#5CD08F' : (ssd + sp > c ? 'linear-gradient(to right, transparent, transparent ' + Math.round(10000 * (c - ssd) / sp) / 100 + '%, #7942d0 '+ Math.round(10000 * (c - ssd) / sp) / 100 +'%), repeating-linear-gradient(61deg, #7942d0, #7942d0 0.5rem, transparent 0.5px, transparent 1rem)' : 'gray'),
-        'height' : '7px',
-        'border-radius' : '0.3rem',  
-      });
-    });
-
-    $this.find('.event').each(function(){
-      var od = $(this).data("od");
-      var sp =  $(this).data("p");
-      
-      sPctWidthSD = (od - sd) / p;
-      sPctWidthP = Math.max(3,(sp + 1)) / (p + 1);
-
-      $(this).css({'margin-left': Math.round(10000 * sPctWidthSD) / 100 + "%",
-        'width': Math.round(10000 * sPctWidthP) / 100 + "%",
-        'height' : '15px',
-        'border-radius' : '0.3rem',  
-      });
-    });
-  });
-
-  $('.stage-item-button').on('mouseenter',function(){
+  /*
+  $(document).on('mouseenter','.stage-item-button',function(){
       var $this = $(this);
       $this.parent().css('z-index',999);
   }).on('mouseleave',function(){
       var $this = $(this);
       $this.parent().css('z-index',1);
-  })
-  
-  
+  });
+  */
+
+  $(document).on('mouseenter',function(e){
+    var $this = $(e.target) ;
+    if($this.hasClass('no-activity-overlay') || $this.hasClass('dummy-activity')){
+      $('.no-activity-overlay').css('visibility','hidden');
+    }
+
+    
+  });
+  /*.on('mouseleave',function(){
+    $('.no-activity-overlay').css('visibility','');
+  });*/
 
   initETIcons();
 
@@ -307,31 +365,31 @@ $(function () {
     urlToPieces = $('#chooseGradableStage .btn').attr('href').split('/');
     urlToPieces[urlToPieces.length - 2] = $(this).val();
     $('#chooseGradableStage .btn').attr('href', urlToPieces.join('/'));
-  })
-
-
-  /*$('[href="#createActivity"]').on('click', function () {
-    $('#processSelect').empty();
-    oid = $(this).data('oid');
-    urlToPieces = ipurl.split('/');
-    urlToPieces[urlToPieces.length - 1] = oid;
-    url = urlToPieces.join('/');
-    $.post(url)
-      .done(function (data) {
-        $.each($('.red-text'), function () {
-          $(this).remove();
-        });
-        $('#processSelect').append($('<option>' + '(Non liée à un process)' + '</option>'));
-        $.each(data.processes, function (key, process) {
-          $('#processSelect').append($('<option value="' + process.key + '">' + process.value + '</option>'));
-        })
-        console.log(data);
-      })
-      .fail(function (data) {
-        console.log(data);
-      });
   });
-  */
+
+
+    /*$('[href="#createActivity"]').on('click', function () {
+      $('#processSelect').empty();
+      oid = $(this).data('oid');
+      urlToPieces = ipurl.split('/');
+      urlToPieces[urlToPieces.length - 1] = oid;
+      url = urlToPieces.join('/');
+      $.post(url)
+        .done(function (data) {
+          $.each($('.red-text'), function () {
+            $(this).remove();
+          });
+          $('#processSelect').append($('<option>' + '(Non liée à un process)' + '</option>'));
+          $.each(data.processes, function (key, process) {
+            $('#processSelect').append($('<option value="' + process.key + '">' + process.value + '</option>'));
+          })
+          console.log(data);
+        })
+        .fail(function (data) {
+          console.log(data);
+        });
+    });
+    */
 
   $('.status-selector:not(.showable) .stage-item-button').css('background-color','transparent');
 
@@ -352,7 +410,7 @@ $(function () {
     getCookie('date_type') == 's' ? 
       (eraseCookie('date_type'), setCookie('date_type','o',365), $('.stage-element.o-dates:not(.embedded)').show(), $('.stage-element.s-dates').hide()) : 
       (eraseCookie('date_type'), setCookie('date_type','s',365), $('.stage-element.o-dates').hide(), $('.stage-element.s-dates:not(.embedded)').show());
-  })
+  });
 
   $('.tabs-t-view .stage-item-button').on('click',function(){
     var $this = $(this);
@@ -376,7 +434,7 @@ $(function () {
 
     $this.find('i').hide();
 
-  })
+  });
 
   $('.process-list-t .activity-list').each(function(i,e){
     if(!$(e).find('> .row:visible').length){
@@ -403,7 +461,7 @@ $(function () {
 
   $(document).on('click','[href="#deleteActivity"]',function(e){
     $('.delete-button').data('eid',$(this).attr('data-eid'));
-  })
+  });
 
   // Modal button to delete activity
   $('.delete-button').on('click',function(e){
@@ -431,84 +489,61 @@ $(function () {
   if($('.status-current').length){
       $('.status-current>a').click();
   }
-  function ndDayPerYears(annee) {
 
-    if(annee % 4 == 0 && annee % 100 == 0 && annee % 400 == 0 ){
-        return 366;
-    } else {
-      return 365;
-    }
+  function getPercentage(min,max){
+    var result = min / max;
+    return result * 100;
   }
-  function getDay()
-{
-	var MyDate = new Date;
-	var PremierJour = Date.UTC(MyDate.getFullYear(), 0, 0);
-	var Aujourdhui  = Date.UTC(MyDate.getFullYear(), MyDate.getMonth(), MyDate.getDate());
-	return Math.floor((Aujourdhui - PremierJour) / (1000 * 60 * 60 * 24));
-}
-function getPercentage(min,max){
-  var result = min / max;
-  return result * 100;
-}
 
-$('[href="#requestNewProcess"]').on('click',function(){
-  $('#requestNewProcess select').material_select();
-})
+  $('[href="#requestNewProcess"]').on('click',function(){
+    $('#requestNewProcess select').material_select();
+  })
 
-$('.process-request').on('click',function(e){
-  e.preventDefault();
-  headingName = $('#requestNewProcess form input').val();
-  $.post(cpurl,$('#requestNewProcess form').serialize())
-      .done(function(data){
-          $('#addUserProcessActivitySuccess').modal('open');
-          $('#processSelect').append(`<option value="${data.id}">${headingName}</option>`);
-          $('#processSelect').val(data.id);
-          $('#processSelect').material_select();
-          console.log(data);
-      })
-      .fail(function(data){
-          console.log(data)
-      });
-});
-
-$('[href="#createActivity"]').on('click',function(){
-  if(!$('.setup-activity').find('.fa-cog').length){
-    $('.setup-activity').prepend('<i class="fa fa-cog sm-right"></i>')/*.append('<i class="fa fa-question-circle sm-left"></i>')*/;
-  }
-  if(!$('.participants-list--item').length){
-    directInsert(myself,un,uid,userPic,'u');
-  }
-});
-
-$('.stages-holder').on('mouseenter',function(){
-    
-    $(this).closest('.activity-holder').find('.act-info .fixed-action-btn').css('visibility','');
-    //$(this).closest('.activity-holder').find('.stages-holder').off('mouseenter');
-}).on('mouseleave',function(){
-  var $this = $(this);
-    /*
-    if(!$this.closest('.activity-holder').find('.act-info .fixed-action-btn').is(':hover')){
-      $this.closest('.activity-holder').find('.act-info .fixed-action-btn').css('visibility','hidden');
-    }*/
-    
-    var interval = setInterval(function(){
-      if(!$this.closest('.activity-holder').find('.act-info .fixed-action-btn').is(':hover')) {
-        $this.closest('.activity-holder').find('.act-info .fixed-action-btn').css('visibility','hidden');
-        clearInterval(interval);
-      }
-    },50);
-})
-
-/*$('.fixed-action-btn').on('mouseenter',function(){
-  $(this).closest('.activity-holder').find('.stages-holder').off('mouseenter');
-}).on('mouseleave',function(){
-  $(this).closest('.activity-holder').find('.stages-holder').on('mouseenter',function(){
-      $(this).closest('.activity-holder').find('.act-info .fixed-action-btn').show();
-  }).on('mouseleave',function(){
-      $(this).closest('.activity-holder').find('.act-info .fixed-action-btn').hide();
+  $('.process-request').on('click',function(e){
+    e.preventDefault();
+    headingName = $('#requestNewProcess form input').val();
+    $.post(cpurl,$('#requestNewProcess form').serialize())
+        .done(function(data){
+            $('#addUserProcessActivitySuccess').modal('open');
+            $('#processSelect').append(`<option value="${data.id}">${headingName}</option>`);
+            $('#processSelect').val(data.id);
+            $('#processSelect').material_select();
+            console.log(data);
+        })
+        .fail(function(data){
+            console.log(data)
+        });
   });
-})
-*/
+
+  $('[href="#createActivity"]').on('click',function(){
+    if(!$('.setup-activity').find('.fa-cog').length){
+      $('.setup-activity').prepend('<i class="fa fa-cog sm-right"></i>')/*.append('<i class="fa fa-question-circle sm-left"></i>')*/;
+    }
+    if(!$('.participants-list--item').length){
+      directInsert(myself,un,uid,userPic,'u');
+    }
+  });
+
+  $('.stages-holder').on('mouseenter',function(){
+      
+      $(this).closest('.activity-holder').find('.act-info .fixed-action-btn').css('visibility','');
+      //$(this).closest('.activity-holder').find('.stages-holder').off('mouseenter');
+  }).on('mouseleave',function(){
+    var $this = $(this);
+      /*
+      if(!$this.closest('.activity-holder').find('.act-info .fixed-action-btn').is(':hover')){
+        $this.closest('.activity-holder').find('.act-info .fixed-action-btn').css('visibility','hidden');
+      }*/
+      
+      var interval = setInterval(function(){
+        if(!$this.closest('.activity-holder').find('.act-info .fixed-action-btn').is(':hover')) {
+          $this.closest('.activity-holder').find('.act-info .fixed-action-btn').css('visibility','hidden');
+          clearInterval(interval);
+        }
+      },50);
+  });
+
+
 
   $('[href="#updateEvent"]').on('click',function(){
     initETIcons();
@@ -653,7 +688,7 @@ $('.stages-holder').on('mouseenter',function(){
               
             })
             .fail(function(data){
-               console.log(data);
+                console.log(data);
             })
     } else {
         //if($selectorMElmts){
@@ -959,7 +994,7 @@ $('.stages-holder').on('mouseenter',function(){
   })
 
   $('#choice-user').on('change',function(){
-  
+
     $('#choice-firm, #choice-indpt').prop('checked',!$(this).is(':checked'));
     if($(this).is(':checked')){
       $('.user-fn, .user-ln').removeClass('m6').addClass('m3');
@@ -988,7 +1023,7 @@ $('.stages-holder').on('mouseenter',function(){
       } else {
         nc = 0;
       }
-  
+
       var $emailInput = $('.user-inputs').find('input[name="email"]');
 
       if($emailInput.is(':visible') && !isEmail($emailInput.val()) && !$('#interactPart').is(':visible')){
@@ -1021,6 +1056,46 @@ $('.stages-holder').on('mouseenter',function(){
 
   })
 
+  if(getCookie('view_type') == 't'){
+    $actHeight = $('.stages-holder:visible').eq(0).height();
+    $mainHeaderElmtsHeight = $('.sorting-type').height() + $('.timescale').height() + $('.tabs-t-view').height();
+    $mainHeight = Math.min(1000, $('main').height());
+    $actList = $();
+    totalPotentialAct = Math.floor(($mainHeight - $mainHeaderElmtsHeight) / $actHeight);
+    nbVisibleAct = $('.stages-holder:visible').length;
+    if (nbVisibleAct < totalPotentialAct){
+        for(k = nbVisibleAct; k < totalPotentialAct; k++){
+          actProto = $('.process-list-t').data('prototype');
+          var sdDay = getRandomInt(7,320);
+          var period = getRandomInt(Math.max(0,15 - sdDay), 350 - sdDay);
+          var sdate = new Date(annee, 0, sdDay).getDate();
+          var edate = new Date(annee, 0 , sdDay + period).getDate();
+
+          $actProto = $(actProto);
+          $actProto.find('.stage-element').attr('data-sd',sdDay);
+          $actProto.find('.stage-element').attr('data-p',period);
+          $actProto.find('.s-day').empty().append(sdate);
+          $actProto.find('.e-day').empty().append(edate);
+
+          $actList = $actList.add($actProto);
+        }
+
+        displayTemporalActivities($actList,false);
+
+        var $actHolder = $('<div class="virtual-activities-holder"></div>');
+
+        $actList.each(function(i,e){
+          $actHolder.append($(e));
+        })
+
+        $actHolder.append(noActOverlay);
+
+        $('.activity-list:visible').last().append($actHolder);
+
+        
+        
+      }
+  };
 });
 
 

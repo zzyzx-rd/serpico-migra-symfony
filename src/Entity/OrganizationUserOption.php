@@ -103,7 +103,7 @@ class OrganizationUserOption extends DbObject
     protected $user;
 
     /**
-     * @Column(name="org_role", nullable=true)
+     * @Column(name="org_role", type="integer", nullable=true)
      */
     public $role;
 
