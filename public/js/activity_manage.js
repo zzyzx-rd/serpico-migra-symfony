@@ -178,8 +178,16 @@ $(function () {
     $('.start-btn,.launch-btn,.modify-btn').removeData().data('pid', $(this).data('pid'));
   });
 
-  $('.dmin').append(annee +'<div class="line"></div>');
-  $('.dmax').append(annee + 1 + '<div class="line"></div>');
+  if($('.no-processes').length){
+
+    $('.dmin').append('<span class="starting-mark">' + annee + '</span>' + '<div class="line-no-processes"></div>');
+    $('.dmax').append('<span class="ending-mark">' + (annee + 1) + '</span>' + '<div class="line-no-processes"></div>');
+    
+  } else {
+
+    $('.dmin').append(annee + '<div class="line"></div>');
+    $('.dmax').append(annee + 1 + '<div class="line"></div>');
+  }
 
   /**
    * Display activities in a proper way
@@ -188,7 +196,7 @@ $(function () {
    */
   function displayTemporalActivities($activities, $setEvents){
 
-    var centralElWidth = $('.activity-content-stage:visible').eq(0).width();
+    var centralElWidth = $('.activity-content-stage:visible').length ? $('.activity-content-stage:visible').eq(0).width() : $('.dummy-activities-container').width() * 0.75;
     var actCurDate = $activities.find('.curDate');
     var echelle = centralElWidth / tDays;
     
@@ -234,11 +242,13 @@ $(function () {
     if($setEvents){
 
       $activities.find('.event').each(function(){
-        var od = $(this).data("od");
-        var sp =  $(this).data("p");
+        var sd = $(this).closest('.activity-component').data("sd");
+        var p = $(this).closest('.activity-component').data("p");
+        var ed = $(this).data("od");
+        var ep =  $(this).data("p") ? $(this).data("p") : 0;
         
-        sPctWidthSD = (od - sd) / p;
-        sPctWidthP = Math.max(3,(sp + 1)) / (p + 1);
+        sPctWidthSD = (ed - sd) / p;
+        sPctWidthP = Math.max(3,(ep + 1)) / (p + 1);
   
         $(this).css({'margin-left': Math.round(10000 * sPctWidthSD) / 100 + "%",
           'width': Math.round(10000 * sPctWidthP) / 100 + "%",
@@ -280,13 +290,16 @@ $(function () {
   });
   */
 
-  $(document).on('mouseenter',function(e){
-    var $this = $(e.target) ;
-    if($this.hasClass('no-activity-overlay') || $this.hasClass('dummy-activity')){
+  $(document).on('mouseover',function(e){
+    var $this = $(e.target);
+    if($this.closest('.virtual-activities-holder').length){
       $('.no-activity-overlay').css('visibility','hidden');
     }
-
-    
+  }).on('mouseout',function(e){
+    var $this = $(e.target);
+    if(!$this.closest('.virtual-activities-holder').length){
+      $('.no-activity-overlay').css('visibility','');
+    }
   });
   /*.on('mouseleave',function(){
     $('.no-activity-overlay').css('visibility','');
@@ -524,23 +537,17 @@ $(function () {
     }
   });
 
-  $('.stages-holder').on('mouseenter',function(){
+  $('.activity-holder').on('mouseover',function(){
       
-      $(this).closest('.activity-holder').find('.act-info .fixed-action-btn').css('visibility','');
+      $(this).find('.act-info .fixed-action-btn').css('visibility','');
       //$(this).closest('.activity-holder').find('.stages-holder').off('mouseenter');
-  }).on('mouseleave',function(){
-    var $this = $(this);
-      /*
-      if(!$this.closest('.activity-holder').find('.act-info .fixed-action-btn').is(':hover')){
-        $this.closest('.activity-holder').find('.act-info .fixed-action-btn').css('visibility','hidden');
-      }*/
-      
-      var interval = setInterval(function(){
-        if(!$this.closest('.activity-holder').find('.act-info .fixed-action-btn').is(':hover')) {
-          $this.closest('.activity-holder').find('.act-info .fixed-action-btn').css('visibility','hidden');
-          clearInterval(interval);
-        }
-      },50);
+  }).on('mouseout',function(e){
+
+    var $relatedTarget = $(e.relatedTarget);
+    if($relatedTarget != $(this)){
+      $(this).find('.act-info .fixed-action-btn').css('visibility','hidden');
+    }
+   
   });
 
 
@@ -1057,7 +1064,7 @@ $(function () {
   })
 
   if(getCookie('view_type') == 't'){
-    $actHeight = $('.stages-holder:visible').eq(0).height();
+    $actHeight = !$('.stages-holder:visible').length ? 75 : $('.stages-holder:visible').eq(0).height();
     $mainHeaderElmtsHeight = $('.sorting-type').height() + $('.timescale').height() + $('.tabs-t-view').height();
     $mainHeight = Math.min(1000, $('main').height());
     $actList = $();
@@ -1081,7 +1088,19 @@ $(function () {
         }
 
         displayTemporalActivities($actList,false);
-
+        const dummyParams = {wa:1, td: totalPotentialAct - nbVisibleAct + 1};
+        $.post(dcurl,dummyParams)
+          .done(function(data){
+            $actList.each(function(i,e){
+              $(e).find('.act-info-name').append(data.dummyElmts[i].actName);
+              $(e).find('.activity-client-name').attr('data-tooltip',data.dummyElmts[i].name).tooltip();
+              $(e).find('.client-logo').attr('src',data.dummyElmts[i].logo);
+            })
+          })
+          .fail(function(data){
+            console.log(data);
+          })
+        
         var $actHolder = $('<div class="virtual-activities-holder"></div>');
 
         $actList.each(function(i,e){
@@ -1090,7 +1109,9 @@ $(function () {
 
         $actHolder.append(noActOverlay);
 
-        $('.activity-list:visible').last().append($actHolder);
+        $appenedElmt = $('.activity-list:visible').length ? $('.activity-list:visible').last() : $('.dummy-activities-container');
+
+        $appenedElmt.append($actHolder);
 
         
         

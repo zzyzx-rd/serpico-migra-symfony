@@ -1797,8 +1797,8 @@ activities:
   self_date_type: Duration dates
   output_date_type: Feedback dates
   no_activities:
-    main_msg: Add activities
-    secondary_msg: to get a dynamic view of your business
+    main_msg: Add client followup
+    secondary_msg: to have a dynamic overview of your business
 
   o_status:
     cancelled: Cancelled
@@ -1952,7 +1952,7 @@ activities:
   no_registered_activities_msg: Enroll into a existing process to follow and update on its evolution !
   hide_group: Hide these activities
   display_group: Show these activities
-  instant_add: Instant add
+  instant_add: Instant feedback
   update_status: Update progress status
   provide_my_feedbacks: Provide my feedbacks
   delete_activity_modal:
@@ -2017,7 +2017,10 @@ activity_elements:
       provide_onset_date: Provide an onset date
       exp_res_date: Expected resolution date
       provide_exp_res_date: Provide an expected resolution date
-
+    tooltip:
+      shared_documents: Shared documents
+      comments: Comments
+      no_given_comments: No given comments
 
 create_parameters:
   page_title: Activity parameters

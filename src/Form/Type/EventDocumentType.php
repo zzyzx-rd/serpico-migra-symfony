@@ -21,7 +21,7 @@ class EventDocumentType extends AbstractType
             'required' => false,
             'attr' => [
                 'class' => 'dropify',
-                'data-allowed-file-extensions' => 'csv',
+                //'data-allowed-file-extensions' => 'csv',
                 'data-max-file-size' => '1M',
                 'data-height' => '60'
             ],

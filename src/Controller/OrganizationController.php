@@ -6829,4 +6829,75 @@ class OrganizationController extends MasterController
             return new Response('success',200);
     }
 
+
+    /**
+     * @param Request $request
+     * @param $entity
+     * @param $elmtId
+     * @return string|RedirectResponse|Response
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/dummies/clients", name="getDummyClients")
+     */
+
+    public function getDummyClientsAndActNames(Request $request){
+
+        $em = $this->em;
+        $withActNames = $request->get('wa');
+        $totalDummies = $request->get('td');
+
+        $qb = $em->createQueryBuilder();
+        $allWFIds = $qb->select('wf.id AS wfIds')
+            ->from('App\Entity\WorkerFirm','wf')
+            ->orderBy('wf.logo')
+            //->where('order.logo IS NOT NULL')
+            ->getQuery()
+            ->getResult();
+
+        
+        if($withActNames){
+            if($request->getLocale() == 'en'){
+                $actNames = ['Marketing project', 'VP Recruitment', 'Contract Negotiation', 'Delivery', 'Proof of Concept', 'Deal Agreement', 'Trade Fair exhibition', 'Call for Tender'];
+            } else if($request->getLocale() == 'fr') {
+                $actNames = ['Projet marketing', 'Recrutement VP', 'Nego contractuelle', 'Réalisation prestation', 'Test client', 'Projet de collaboration', 'Salon - Expo', 'Appel d\'offres'];
+            }
+        }
+        
+        $randomIds = [];
+        $randomWFArrayKeys = [];
+        $randomActNameArrayKeys = [];
+
+        for($i=0; $i<$totalDummies; $i++){
+            
+            $randomWFArrayKey = random_int(0,sizeof($allWFIds) - 1);
+            while(array_search($randomWFArrayKey,$randomWFArrayKeys) !== false){
+                $randomWFArrayKey = random_int(0,sizeof($allWFIds) - 1);
+            }
+            $randomWFArrayKeys[] = $randomWFArrayKey;
+            $randomIds[] = $allWFIds[$randomWFArrayKey]['wfIds'];
+
+            $randomActNameArrayKey = random_int(0,sizeof($actNames) - 1);
+            while(array_search($randomActNameArrayKey,$randomActNameArrayKeys) !== false){
+                $randomActNameArrayKey = random_int(0,sizeof($actNames) - 1);
+            }
+            $randomActNameArrayKeys[] = $randomActNameArrayKey;
+
+        }
+        
+        $dummyElmts = [];
+
+        /** @var WorkerFirm[] */
+        $dummyClients = $em->getRepository(WorkerFirm::class)->findById($randomIds);
+
+        foreach($dummyClients as $key => $dummyClient){
+            $output['name'] = $dummyClient->getName();
+            $output['logo'] = $dummyClient->getLogo() ? "lib/img/wf/".$dummyClient->getLogo() : "lib/img/org/no-picture.png";
+            $output['actName'] = $actNames[$randomActNameArrayKeys[$key]];
+            $dummyElmts[] = $output; 
+        }
+
+        return new JsonResponse(['dummyElmts' => $dummyElmts], 200);
+
+    }
+
 }

@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Activity;
+use App\Entity\Client;
 use App\Entity\Participation;
 use App\Entity\Decision;
 use App\Entity\Department;
@@ -11,6 +12,7 @@ use App\Entity\OrganizationUserOption;
 use App\Entity\Stage;
 use App\Entity\Survey;
 use App\Entity\User;
+use App\Entity\WorkerFirm;
 use App\Form\ActivityMinElementForm;
 use App\Form\AddEventForm;
 use App\Form\AddProcessForm;
@@ -418,6 +420,7 @@ final class InstitutionController extends MasterController
 
         ksort($displayedStatuses);
         //dd($orphanActivities);
+        
 
         return $this->render(
             'activities_dashboard.html.twig',

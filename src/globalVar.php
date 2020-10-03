@@ -72,8 +72,12 @@ class globalVar {
         }
     }
     
-    public function clientLogo(Client $c): string
+    public function clientLogo(?Client $c): string
     {
+        if(!$c){
+            return 'lib/img/org/no-picture.png';
+        }
+
         if($c->getLogo()){
             return 'lib/img/org/' . $c->getLogo();
         }

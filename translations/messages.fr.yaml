@@ -1902,8 +1902,8 @@ activities:
   output_date_type: Dates de retour
 
   no_activities:
-    main_msg: Créez des activités
-    secondary_msg: "afin d'obtenir une vue dynamique de votre business"
+    main_msg: Rajouter vos suivis clients
+    secondary_msg: et obtenez une vue dynamique de votre business
 
   o_status:
     cancelled: Annulées
@@ -2058,7 +2058,7 @@ activities:
   no_registered_activities_msg: Inscrivez-vous à une démarche existante afin de suivre et renseigner son évolution !
   hide_group: Masquer ces activités
   display_group: Afficher ces activités
-  instant_add: Ajout spontané
+  instant_add: Retour spontané
   update_status: Mettre à jour l'avancement
   provide_my_feedbacks: Donner mes feedbacks
   delete_activity_modal:
@@ -2124,7 +2124,10 @@ activity_elements:
       provide_onset_date: Indiquer une date de survenance
       exp_res_date: Date de résolution espérée
       provide_exp_res_date: Indiquer une date de résolution espérée
-
+    tooltip:
+      shared_documents: Documents partagés
+      comments: Commentaires
+      no_given_comments: Pas de commentaires donnés
 
 
 create_parameters:

@@ -14,8 +14,6 @@
 
 {% set noActivities = orphanActivities is empty and processesActivities is empty %}
 
-
-
 {% set actStatuses = 
   { 'o' : {
         '-5' : 'cancelled',
@@ -64,6 +62,7 @@
     var userPic = "{{ asset(global.userpicture) }}";
     var myself = "{{ 'myself'|trans|capitalize }}";
     var pcurl = "{{ url('createParticipant') }}";
+    var dcurl = "{{ url('getDummyClients') }}";
   </script>
   <style>
       .elmts{
@@ -224,7 +223,6 @@
 
       .sorting-type{
         padding: 0 3em;
-        justify-content: flex-end;
       }
 
       .sorting-type .btn-flat, .sorting-type .btn-flat>i{
@@ -469,12 +467,13 @@
       .act-info > .fixed-action-btn{
         position: absolute;
         right: calc(100% + 0.7rem);
+        top:17%;
       }
       
       .modified-fixed-btn ul{
         text-align: right;
         margin-right: 2.5rem;
-        top: 50%;
+        top: 37%;
         -webkit-transform: translateY(-50%);
         transform: translateY(-50%);
         height: 3rem;
@@ -720,6 +719,15 @@
         height:100%;
         width: 100%;
         z-index: 1;
+      }
+
+      .no-processes{
+        width: 96%;
+        margin: auto;
+      }
+
+      .switch-org-self-btn{
+        margin-right:auto;
       }
 
   </style>
@@ -1212,13 +1220,13 @@
 
   <main>
 
-    <div class="sorting-type dashboard-btns flex-center">
+    <div class="sorting-type dashboard-btns flex-center-fe">
 
       {% if is_granted('ROLE_ADMIN') %}    
         {% if global.route == "myActivities" %}
-            <a href="{{ url('processesList') }}" class="btn-flat dd-text waves-effect waves-light">{% trans %}activities.firm_activities{% endtrans %}</a>
+            <a href="{{ url('processesList') }}" class="btn-flat dd-text switch-org-self-btn waves-effect waves-light">{% trans %}activities.firm_activities{% endtrans %}</a>
         {% else %}
-            <a href="{{ url('myActivities') }}" class="btn-flat dd-text waves-effect waves-light">{% trans %}activities.my_activities{% endtrans %}</a>
+            <a href="{{ url('myActivities') }}" class="btn-flat dd-text switch-org-self-btn waves-effect waves-light">{% trans %}activities.my_activities{% endtrans %}</a>
         {% endif %}
       {% endif %}
 
@@ -1358,11 +1366,18 @@
 
       {% else %}
         <div class="timescale">
-          <div class="row no-margin date">
-            <div class="col s4 dmin center no-padding"></div>
-            <div class="col s3 center no-padding"></div>
-            <div class="col s5 dmax center no-padding">
-            </div>
+          <div class="row {{ displayProcesses ? 'no-margin' : 'no-processes'}} date">
+            {% if displayProcesses %}
+            
+              <div class="col s4 dmin center no-padding"></div>
+              <div class="col s3 center no-padding"></div>
+              <div class="col s5 dmax center no-padding"></div>
+            
+            {% else %}
+              <div class="col s9 dmin no-padding"></div>
+              <div class="col s3 dmax no-padding"></div>
+
+            {% endif %}
           </div>
           <div class="row no-margin">
             <div class="arrow">
@@ -1370,11 +1385,11 @@
             </div>
             <i class="arr right"></i>
           </div>
-          <div class="row no-padding no-margin">
-            {% if displayProcesses %}
-              <div class="col s2"></div>
-            {% endif %}
+          <div class="row no-padding {{ displayProcesses ? 'no-margin' : 'no-processes'}}">
 
+
+            {% if displayProcesses %}<div class="col s2"></div>{% endif %}
+            
             <div class="col s{{ displayProcesses ? 10 : 12}} no-padding">
               <div class="row no-padding no-margin">
                 <div class="col s9 no-padding">
@@ -1444,17 +1459,19 @@
         <ul class="process-list process-list-t no-margin" data-prototype="{% apply escape %}{% include "components/activity2_list__item.html.twig" %}{% endapply %}">
           {% if orphanActivities is not empty %}
             <li class="process-list--item hierarchized-item">
-              <div class="row no-margin flex-center">
+              <div class="row flex-center {{ displayProcesses ? 'no-margin' : 'no-processes' }}">
 
 
-
-                <div class="col s2 center">
-                  <div class="flex-center process-detail">
-                    <i class="material-icons">layers</i>
-                    <span class="m-left">{{ 'activities.orphans'|trans }}</span>
+                {% if displayProcesses %}
+                  <div class="col s2 center">
+                    <div class="flex-center process-detail">
+                      <i class="material-icons">layers</i>
+                      <span class="m-left">{{ 'activities.orphans'|trans }}</span>
+                    </div>
                   </div>
-                </div>
-                <div class="col s10 no-padding">
+                {% endif %}
+
+                <div class="col s{{ displayProcesses ? 10 : 12 }} no-padding">
                   <div class="item-body">
                     <ul class="activity-list">
 
@@ -1524,6 +1541,16 @@
               </div>
             </li>
           {% endfor %}
+
+          {% if noActivities %}
+
+            <li class="process-list--item hierarchized-item">
+              <div class="row no-padding flex-center no-processes">
+                <div class="col s12 no-padding dummy-activities-container"></div>
+              </div>
+            </li>
+
+          {% endif %}
 
         </ul>
 

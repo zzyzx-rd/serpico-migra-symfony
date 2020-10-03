@@ -22,7 +22,7 @@
                 
                 {% for e, event in stage.events %}
 
-                    <div class="event tooltipped" data-od="{{ event.onsetdateDay }}" data-p="{{ event.period }}">
+                    <div class="event tooltipped" data-od="{{ event.onsetdateDay }}" data-p="{{ event.period }}" data-html="true" data-tooltip="{% apply escape %}{% include "components/event__item.html.twig" with { event: event } %}{% endapply %}">
                       <i class="fa fa-map-marker event-marker">
                         <i class="fa fa-{{event.eventType.icon.name}} event-type"></i>
                       </i>
@@ -79,7 +79,7 @@
 
               <ol class="activity-component" data-sd="0" data-p="365" data-id="{{random(1,1000000)}}">
                   {% set startdateDay = random(7,320) %}
-                  {% set period = random(max(0, startdateDay - 15), 350 - startdateDay) %}
+                  {% set period = random(3, 350 - startdateDay) %}
                   {% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateDay: startdateDay, period: period, embeddedStages: null, visibleEl: true} %}
               </ol>
 
@@ -91,11 +91,13 @@
 
   <div class="col s3 act-info">
 
-    {% if activity is defined %}
     
-      <div class="{{sortingType ~ '-' ~ actStatus}}" style="display: inline-block;">
+    
+      <div class="{{activity is defined ? sortingType ~ '-' ~ actStatus}}" style="display: inline-block;">
         <div class="stage-item-button"></div>
       </div>
+    
+    {% if activity is defined %}
     
     
       <div class="fixed-action-btn modified-fixed-btn" style="visibility: hidden;">
@@ -133,8 +135,10 @@
         </ul>
       
       </div>
+    
+    {% endif %}
 
-      {% set actName = activity.name %}
+      {% set actName = activity is defined ? activity.name : '' %}
       {% set isTooLong = actName|length > actNameTruncVal %}
       {% if isTooLong %}
           <span class="act-info-name tooltipped" data-tooltip="{{actName}}">{{actName|slice(0,actNameTruncVal) ~ '...' }}</span>
@@ -142,46 +146,58 @@
           <span class="act-info-name">{{ actName }}</span>
       {% endif %}
 
-      {% set activityClients =  activity.independantUniqueParticipatingClients %}
-      {% if activityClients|length != 0 %}
+      {% if activity is defined %}
+      
+      
+        {% set activityClients =  activity.independantUniqueParticipatingClients %}
+        {% if activityClients|length != 0 %}
 
 
-        <div class="activity-clients flex-center">
-          {% if activity.organization != currentuser.organization %}
-            <small> - {{ 'from'|trans }}</small>
-            <span class="activity-client-name">{{ activity.organization.commname }}</span>
-            {% set activityClients = activityClients|filter((v,k) => v.clientOrganization != currentuser.organization) %}
-          {% endif %}
-          {% if activityClients|length != 0 %}
+          <div class="activity-clients flex-center">
+            {% if activity.organization != currentuser.organization %}
+              <small> - {{ 'from'|trans }}</small>
+              <span class="activity-client-name">{{ activity.organization.commname }}</span>
+              {% set activityClients = activityClients|filter((v,k) => v.clientOrganization != currentuser.organization) %}
+            {% endif %}
+            {% if activityClients|length != 0 %}
 
-              <small class="sm-right">{{ ' - ' ~ 'with'|trans }}</small>
+                <small class="sm-right">{{ ' - ' ~ 'with'|trans }}</small>
 
-              {% set k = 0 %}
-              {% for client in activityClients %}
-                {% if k < 2 %}
+                {% set k = 0 %}
+                {% for client in activityClients %}
+                  {% if k < 2 %}
 
-                    <a class="badge-container activity-client-name tooltipped" data-tooltip="{{client.name}}">
-                      <img class="client-logo" src="{{ asset(global.clientLogo(client)) }}" alt="">
-                    </a>
+                      <a class="badge-container activity-client-name tooltipped" data-tooltip="{{client.name}}">
+                        <img class="client-logo" src="{{ asset(global.clientLogo(client)) }}" alt="">
+                      </a>
 
-                  {% set k = k + 1 %}
+                    {% set k = k + 1 %}
+                  {% endif %}
+                {% endfor %}
+
+                {% if activityClients|length - k > 0 %}
+                      {{'and '|trans }}
+                      <span class="activity-client-name tooltipped" data-position="top" data-html="true" data-tooltip="
+                      {% for c, client in activityClients %}
+                          {% if c >= k %}
+                            {{ activityClients[c].commname }} <br>
+                          {% endif %}
+                      {% endfor %}
+                      "
+                      >{{ (activityClients|length - k) ~ ' other'|trans ~ (activityClients|length - k > 1 ? 's' : '')}}</span>
                 {% endif %}
-              {% endfor %}
-
-              {% if activityClients|length - k > 0 %}
-                    {{'and '|trans }}
-                    <span class="activity-client-name tooltipped" data-position="top" data-html="true" data-tooltip="
-                    {% for c, client in activityClients %}
-                        {% if c >= k %}
-                          {{ activityClients[c].commname }} <br>
-                        {% endif %}
-                    {% endfor %}
-                    "
-                    >{{ (activityClients|length - k) ~ ' other'|trans ~ (activityClients|length - k > 1 ? 's' : '')}}</span>
-              {% endif %}
-          {% endif %}
-        </div>
+            {% endif %}
+          </div>
+        {% endif %}
+      
+      {% else %}
+        <div class="activity-clients flex-center">
+          <small class="sm-right">{{ ' - ' ~ 'with'|trans }}</small>
+          <a class="badge-container activity-client-name tooltipped" data-tooltip="">
+            <img class="client-logo" src="{{ asset(global.clientLogo(null)) }}" alt="">
+          </a>
       {% endif %}
-    {% endif %}
+
+    
   </div>
 </div>

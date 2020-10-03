@@ -1,6 +1,6 @@
 {% include "components/stage_element__item.html.twig" with { stage: stage, hasTopBorder: false } %}
 
-{% if embeddedStages  %}
+{% if embeddedStages %}
   {% for embeddedStage in embeddedStages %}
     {% include "components/stage_element__item.html.twig" with { stage: embeddedStage, hasTopBorder: true } %}
   {% endfor %}
