@@ -153,7 +153,7 @@ class WorkerFirm extends DbObject
     public DateTime $inserted;
 
     /**
-     * @OneToOne(targetEntity="WorkerFirmSector", inversedBy="firm")
+     * @ManyToOne(targetEntity="WorkerFirmSector", inversedBy="firms")
      * @JoinColumn(name="worker_firm_sector_wfs_id", referencedColumnName="wfs_id",nullable=true)
      */
     public $mainSector;

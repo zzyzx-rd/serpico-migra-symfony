@@ -69,7 +69,7 @@ class Client extends DbObject
     protected $clientOrganization;
 
     /**
-     * @ManyToOne(targetEntity="WorkerFirm")
+     * @ManyToOne(targetEntity="WorkerFirm", inversedBy="clients")
      * @JoinColumn(name="worker_firm_wfi_id", referencedColumnName="wfi_id", nullable=true)
      */
     protected $workerFirm;
