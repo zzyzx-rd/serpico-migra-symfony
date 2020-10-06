@@ -24,7 +24,7 @@
                   </div>
                   #}
                   <ul class="user-list">
-                    {% for externalUser in firm.externalUsers %}
+                    {% for externalUser in firm.aliveExternalUsers %}
                       {% include "components/user_list__ext_user_item.html.twig" with { externalUser: externalUser, stats: false, roles: false, settings: false } %}
                     {% endfor %}
                   </ul>

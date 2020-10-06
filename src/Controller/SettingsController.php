@@ -187,6 +187,63 @@ class SettingsController extends MasterController
      * @param Request $request
      * @param Application $app
      * @return mixed
+     * @Route("/settings/root/workerFirms/{page}", name="manageWorkerFirms")
+     */
+    public function manageWorkerFirmsAction(Request $request, int $page){
+        $em = $this->em;
+        $qb = $em->createQueryBuilder();
+        $qb2 = $em->createQueryBuilder();
+
+        if(isset($_COOKIE['wf_s_p'])){
+            $sortingProp = $_COOKIE['wf_s_p'];
+        } else {
+            setcookie('wf_s_p', 'a');
+            $sortingProp = 'a';
+        }
+
+        if(isset($_COOKIE['wf_s_o'])){
+            $sortingOrder = $_COOKIE['wf_s_o'];
+        } else {
+            setcookie('wf_s_o', 'a');
+            $sortingOrder = 'a';
+        }
+
+        $maxResults = 20;
+        switch($sortingProp){
+            case 'a' :
+                $prop = 'name'; break;
+            case 'i' :
+                $prop = 'inserted';
+        }
+        $sortingOrder = $_COOKIE['wf_s_o'] == 'a' ? 'ASC' : 'DESC';
+        
+        $nbWorkerFirms = current($qb->select('count(wf)')
+        ->from('App\Entity\WorkerFirm','wf')
+        ->getQuery()
+        ->getResult()[0]);
+
+        $workerFirms = $qb2->select('wf')
+                ->from('App\Entity\WorkerFirm','wf')
+                ->orderBy('wf.' . $prop, $sortingOrder)
+                ->setFirstResult(($page - 1) * $maxResults)
+                ->setMaxResults($maxResults)
+                ->getQuery()
+                ->getResult();
+
+        return $this->render('worker_firm_list.html.twig',
+            [
+                'workerFirms' => $workerFirms,
+                'nbWorkerFirms' => $nbWorkerFirms,
+                'maxResults' => $maxResults,
+            ]) ;
+
+    }
+
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return mixed
      * @throws ORMException
      * @throws OptimisticLockException
      * @Route("/settings/root/processes", name="manageProcesses")
@@ -741,7 +798,7 @@ class SettingsController extends MasterController
                     ->setExpired(new \DateTime('2100-01-01 00:00:00'))
                     ->setWorkerFirm($workerFirm);
 
-                $this->forward('App\Controller\OrganizationController::createFirmMinConfig', ['organization' => $organization, 'mirrorExtUsers' => false]);
+                $this->forward('App\Controller\OrganizationController::updateOrgFeatures', ['organization' => $organization, 'nonExistingOrg' => true, 'createdAsClient' => false]);
                 
                 /** @var string */
                 $positionName = $organizationForm->get('position')->getData();
@@ -2308,9 +2365,9 @@ class SettingsController extends MasterController
      * @return RedirectResponse
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/workers/firms/update/{wfId}", name="updateWorkerFirm")
+     * @Route("/workers/firms/update/{wfiId}", name="updateWorkerFirm")
      */
-    public function updateWorkerFirm(Request $request, $wfId)
+    public function updateWorkerFirm(Request $request, $wfiId)
     {
         $currentUser = $this->user;
         if (!$currentUser instanceof User) {
@@ -2319,26 +2376,28 @@ class SettingsController extends MasterController
         $em = $this->em;
         $repoWF = $em->getRepository(WorkerFirm::class);
 
-        $workerFirm = $repoWF->findOneById($wfId);
+        $workerFirm = $repoWF->findOneById($wfiId);
         if($workerFirm == null){
             $workerFirm = new WorkerFirm;
         }
         
-        $updateWorkerFirmForm = $this->createForm(UpdateWorkerFirmForm::class, $workerFirm, ['standalone' => true, 'app' => $app, 'workerFirm' => $workerFirm]);
+        $updateWorkerFirmForm = $this->createForm(UpdateWorkerFirmForm::class, $workerFirm, ['standalone' => true]);
         $updateWorkerFirmForm->handleRequest($request);
 
-        if($updateWorkerFirmForm->isValid()){
+        if($updateWorkerFirmForm->isSubmitted() && $updateWorkerFirmForm->isValid()){
 
             $repoWFS = $em->getRepository(WorkerFirmSector::class);
             $repoCO = $em->getRepository(Country::class);
             $repoCI = $em->getRepository(City::class);
             $repoS = $em->getRepository(State::class);
-            $country = null;
+            /** @var Country */
+            $country = $workerFirm->getCountry();
             $state = null;
             $city = null;
 
-            $repoWFS = $em->getRepository(WorkerFirmSector::class);
-            $country = $repoCO->findOneByAbbr($updateWorkerFirmForm->get('HQCountry')->getData());
+            if($country != null){
+                $workerFirm->setHQCountry($country->getAbbr());
+            }
 
             if($updateWorkerFirmForm->get('HQState')->getData() != null){
                 $state = $repoS->findOneByName($updateWorkerFirmForm->get('HQState')->getData());
@@ -2358,19 +2417,18 @@ class SettingsController extends MasterController
             }
 
             $workerFirm
-                ->setMainSector($repoWFS->findOneById($updateWorkerFirmForm->get('mainSector')->getData()))
                 ->setCountry($country)
                 ->setState($state)
                 ->setCity($city);
 
-            if($wfId == 0){
+            if($wfiId == 0){
                 $workerFirm->setCreated(1)->setName($updateWorkerFirmForm->get('commonName')->getData());
             }
 
             $em->persist($workerFirm);
             $em->flush();
 
-            return $this->redirectToRoute('displayWorkerFirm',['wfId' => $workerFirm->getId()]);
+            return $this->redirectToRoute('manageWorkerFirms');
         }
 
         return $this->render('worker_firm_data.html.twig',
@@ -2392,25 +2450,128 @@ class SettingsController extends MasterController
         $name = $request->get('name');
         $em = $this->em;
         $qb = $em->createQueryBuilder();
+        $type = $request->get('type');
+        $user = $this->user;
+        $organization = $user->getOrganization();
+        $clients = $organization->getClients();
+        $clientIds = '';
+        foreach ($clients as $client) {
+            $clientIds .= "'". $client->getId() . "', ";
+        }
+        $clientIds = substr($clientIds,0,-2);
+    
 
-        $elements = new ArrayCollection($qb->select('wf.name AS orgName','wf.id AS wfiId','wf.logo','identity(wf.organization) AS orgId', 'u.id AS usrId', 'u.username', 'u.picture AS usrPicture', 'eu.id AS extUsrId', 't.id AS teaId', 't.name AS teaName', 't.picture AS teaPicture')
-        ->from('App\Entity\WorkerFirm', 'wf')
-        ->leftJoin('App\Entity\User', 'u', 'WITH', 'u.organization = wf.organization')
-        ->leftJoin('App\Entity\ExternalUser', 'eu', 'WITH', 'eu.user = u.id')
-        ->leftJoin('App\Entity\Team', 't', 'WITH', 't.organization = wf.organization')
-        ->where('wf.name LIKE :name AND u.username IS NULL')
-        ->orWhere('u.username LIKE :name')
-        ->orWhere('t.name LIKE :name')
-        //->andWhere('wf.active = true AND wf.nbActiveExp > 0 OR wf.organization IS NOT NULL')
-        //->orWhere('wf.id LIKE :name')
-        ->setParameter('name', '%'. $name .'%')
-        //->orderBy('wf.nbActiveExp','DESC')
-        ->getQuery()
-        ->getResult());
+        $participants = $request->get('p') ?: [];
+        $partUsers = [0];
+        $partTeams = [0];
+        $partFirms = [0];
+        $partExtUsers = [0];
+
+        foreach ($participants as $participant) {
+            switch($participant['el']){
+                case 'u':
+                    $partUsers[] = $participant['id'];
+                    break;
+                case 't':
+                    $partTeams[] = $participant['id'];
+                    break;
+                case 'f':
+                    $partFirms[] = $participant['id'];
+                    break;
+                case 'eu':
+                    $partExtUsers[] = $participant['id'];
+                    break;
+            }
+        }
+
+        //return new JsonResponse($partExtUsers,200);
+
+
+        if($type == 'all'){
+            //$elements = new ArrayCollection($qb->select('wf.name AS orgName','wf.id AS wfiId','wf.logo','identity(wf.organization) AS orgId', 'u.id AS usrId', 'u.username', 'u.picture AS usrPicture', 'eu.id AS extUsrId', 't.id AS teaId', 't.name AS teaName', 't.picture AS teaPicture')
+            $elementsUsrTeams = $qb->select('u.id AS usrId', 'u.username', 'u.picture AS usrPicture'/*, 'eu.id AS extUsrId'*/, 't.id AS teaId', 't.name AS teaName', 't.picture AS teaPicture')
+            ->from('App\Entity\User', 'u')
+            ->leftJoin('App\Entity\Team', 't', 'WITH', 't.organization = u.organization')
+            ->where('u.organization = :oid')    
+            ->andWhere('u.username LIKE :name AND u.id NOT IN (:partUsers)')
+            ->orWhere('t.name LIKE :name AND t.id NOT IN (:partTeams)')
+            ->setParameter('name', '%'. $name .'%')
+            ->setParameter('partUsers', $partUsers)
+            ->setParameter('partTeams', $partTeams)
+            ->setParameter('oid', $organization)
+            ->getQuery()
+            ->getResult();
+
+            $qb2 = $em->createQueryBuilder();
+            $elementsExtUsers = $qb2->select('wf.name AS orgName', 'wf.id AS wfiId','wf.logo', 'o.id AS orgId', 'CONCAT(eu.firstname,\' \', eu.lastname) AS username', 'eu.lastname AS l', 'eu.synthetic AS s', 'eu.id AS extUsrId, u.picture AS usrPicture, u.id AS usrId')
+                ->from('App\Entity\ExternalUser', 'eu')
+                ->innerJoin('App\Entity\User', 'u', 'WITH', 'u.id = eu.user')
+                ->innerJoin('App\Entity\Client', 'c', 'WITH', 'c.id = eu.client')
+                ->innerJoin('App\Entity\Organization', 'o', 'WITH', 'o.id = c.clientOrganization')
+                ->innerJoin('App\Entity\WorkerFirm', 'wf', 'WITH', 'wf.id = o.workerFirm')
+                ->where('CONCAT(eu.firstname,\' \', eu.lastname) LIKE :name AND eu.synthetic = FALSE OR eu.lastname LIKE :name AND eu.synthetic = TRUE')
+                ->andWhere('eu.id NOT IN (:partExtUsers)')
+                ->andWhere('eu.client IN (:clients)')
+                ->setParameter('partExtUsers',$partExtUsers)
+                ->setParameter('name', '%'. $name .'%')
+                ->setParameter('clients', $clients)
+                ->getQuery()
+                ->getResult();
+            
+            $arrangedExtUsers = [];
+            foreach($elementsExtUsers as $elementsExtUser){
+                $arrangedExtUser = $elementsExtUser;
+                if($elementsExtUser['s']){
+                    $arrangedExtUser['username'] = $elementsExtUser['l'];
+                }
+                $arrangedExtUser['l'] = "";
+                $arrangedExtUsers[] = $arrangedExtUser;
+            }
+
+
+
+            $qb3 = $em->createQueryBuilder();
+            $elementsFirms = $qb3->select('wf.name AS orgName','wf.id AS wfiId','wf.logo', 'o.id AS orgId', 'c.id AS cliId')
+            ->from('App\Entity\WorkerFirm', 'wf')
+            // Join is made to prevent selection of clients
+            ->leftJoin('App\Entity\Organization', 'o', 'WITH', 'o.workerFirm = wf.id')
+            ->leftJoin('App\Entity\Client', 'c', 'WITH', 'c.clientOrganization = o.id')
+            ->where('wf.name LIKE :name')
+            ->andWhere('wf.id NOT IN (:partFirms)')
+            // Line below prevents selection of firm which is already client (existing as synth ext user), and user self firm mirrored as client for its clients
+            ->andWhere('c.organization IS NULL OR (c.organization != :oid AND c.clientOrganization != :oid)')
+            ->setParameter('name', '%'. $name .'%')
+            ->setParameter('oid',$organization)
+            ->setParameter('partFirms',$partFirms)
+            ->getQuery()
+            ->getResult();
+
+            $elements = new ArrayCollection(array_merge($elementsUsrTeams,$arrangedExtUsers,$elementsFirms));
+
+
+        } else {
+
+        $elements = new ArrayCollection($qb->select('wf.name AS orgName','wf.id AS wfiId','wf.logo','o.id AS orgId, c.id AS cliId')
+            ->from('App\Entity\WorkerFirm', 'wf')
+            ->leftJoin('App\Entity\Organization', 'o', 'WITH', 'o.workerFirm = wf.id')
+            ->leftJoin('App\Entity\Client', 'c', 'WITH', 'c.clientOrganization = o.id')
+            ->where('wf.name LIKE :name')
+            ->setParameter('name', '%'. $name .'%')
+            ->getQuery()
+            ->getResult());
+        }
 
         $qParts = [];
         foreach($elements as $element){
-            $element['e'] = !$element['username'] ? (!$element['teaName'] ? 'partner' : 'team') : 'user';
+            if(isset($element['extUsrId'])){
+                $element['e'] = 'eu';
+            } else if(isset($element['usrId'])){
+                $element['e'] = 'u';
+            } else if(isset($element['teaId'])){
+                $element['e'] = 't';
+            } else {
+                $element['e'] = 'f';
+            }
             //if(!$element['username']){$element['usrId'] = "";}
             $qParts[] = $element;
         }

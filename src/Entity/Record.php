@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\RecordRepository;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Id;
@@ -13,8 +14,14 @@ use Doctrine\ORM\Mapping\Id;
 class Record
 {
     /**
-     * @Id
-     * @Column(name="rec_entity", type="string", nullable=true)
+     * @ORM\Id()
+     * @ORM\GeneratedValue()
+     * @Column(name="rec_id", type="integer", nullable=false)
+     * @var int
+     */
+    public ?int $id;
+    /**
+     * @Column(name="rec_entity", type="string", length=255, nullable=true)
      * @var string
      */
     public $entity;
@@ -38,12 +45,12 @@ class Record
      * @ORM\Column(name="rec_new", type="string", length=255, nullable=true)
      */
     public $new;
+
     /**
      * @Column(name="rec_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      * @var DateTime
      */
     protected DateTime $inserted;
-    /**
 
     /**
      * @return string

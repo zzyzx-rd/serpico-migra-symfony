@@ -113,7 +113,7 @@ margin-bottom: 0;
   margin-top: 2%;
 }
 .arrow{
-  width: 95%;
+  width: 96%;
   text-align: center;
   margin: auto;
   height: 5px;
@@ -153,6 +153,16 @@ ol.stages > .stage-element {
   margin-left: auto;
   margin-right: auto;
 }
+
+.line-no-processes{
+  background-color: black;
+  width: 4px;
+  height: 25px;
+}
+
+/*.ending-mark{
+  margin-left: -1.5rem;
+}*/
 
 .activity-content-stage{
   position: relative;

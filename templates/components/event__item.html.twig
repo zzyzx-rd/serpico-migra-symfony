@@ -1,0 +1,65 @@
+<div style="width:350px;">
+  <ul class="flex-center t-stage-info">
+    <li>
+      {% set eventIcon = event.eventType.icon %}
+      <i class="{{ eventIcon.type == 'fa' ? 'fa fa-' ~ eventIcon.name : 'material-icons' }}">{{ eventIcon.type == 'm' ? eventIcon.name }}</i>
+      <span>{{event.eventType.eName.name}}</span>
+    </li>
+    <li class="t-stage-dates">
+      <ul class="flex-center">
+        <ul class="flex-center m-right">
+          <i class="fa fa-calendar"></i>
+          <span>{{ event.onsetDate|format_datetime('short', 'none', pattern='dd/MM') }}</span>
+          {% if event.expResDate %}
+            <i class="fa fa-calendar-check"></i>
+            <span>{{ event.expResDate|format_datetime('short', 'none', pattern='dd/MM') }}</span>
+          {% endif %}
+        </ul>
+        {#
+        <ul class="flex-center">
+          <i class="material-icons">send</i>
+          <span>{{ stage.gstartdate|format_datetime('short', 'none', pattern='dd/MM') }} - {{ stage.genddate|format_datetime('short', 'none', pattern='dd/MM') }}</span>
+        </ul>
+        #}
+      </ul>
+    </li>
+  </ul>
+
+  {% if event.documents|length %}
+    <div class="event-documents"  style="text-align: left;">
+        <i class="fa fa-file-alt"></i>
+        <span>{{ event.documents|length ~ ' ' ~ 'activity_elements.events.tooltip.shared_documents'|trans }}</span>
+    </div>
+  {% endif %}
+    {#{% for document in event.documents %}
+        <div class="flex-center-sb">
+          <div>
+            <i class="fa fa-file-alt"></i>
+            <span>{{ document.title }}</span>
+          </div>
+          <div>
+            <i class="material-icons">access_time</i>
+            <span>{{ document.inserted|format_datetime('short', 'none', pattern='dd/MM') }}</span>
+          </div>
+        </div>
+    {% endfor %}
+    #}
+ 
+  <div class="event-comments" style="text-align: left">
+    <div>
+     
+    </div>
+    {% if event.comments|length %}
+      <i class="fa fa-comment"></i>
+      <span>{{'activity_elements.events.tooltip.comments'|trans}}</span>
+      {% for comment in event.comments %}
+        <div>
+          <span>{{ comment.value }}</span>
+        </div> 
+      {% endfor %}
+    {% else %}
+      <span>{{'activity_elements.events.tooltip.no_given_comments'|trans}}</span>
+    {% endif %}
+  </div>
+
+</div>

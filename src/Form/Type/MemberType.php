@@ -70,14 +70,14 @@ class MemberType extends AbstractType
                     'label_format' => 'participants.%name%',
                     'class' => User::class,
                     'choice_label' => function (User $u) {
-                        if ($u->getLastname() == 'ZZ') {
+                        if ($u->isSynthetic()) {
                             return $u->getOrganization()->getCommname();
                         } else {
                             return $u->getInvertedFullName();
                         }
                     },
                     'choice_attr' => function(User $u) {
-                        return $u->getLastname() == 'ZZ' ? ['class' => 'synth'] : [];
+                        return $u->isSynthetic() ? ['class' => 'synth'] : [];
                     },
                     'query_builder' => function (EntityRepository $er) use ($organization, $currentUser) {
                         $orgId = $organization ? $organization->getId() : $currentUser->getOrganization()->getId();

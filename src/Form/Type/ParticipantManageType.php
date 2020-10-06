@@ -61,14 +61,14 @@ class ParticipantManageType extends AbstractType
                         'label_format' => 'participants.%name%',
                         'class' => User::class,
                         'choice_label' => static function (User $u) {
-                            if ($u->getLastname() === 'ZZ') {
+                            if ($u->isSynthetic()) {
                                 return $u->getOrganization()->getCommname();
                             }
 
                             return $u->getInvertedFullName();
                         },
                         'choice_attr' => static function(User $u) {
-                            return $u->getLastname() === 'ZZ' ? ['class' => 'synth'] : [];
+                            return $u->isSynthetic() ? ['class' => 'synth'] : [];
                         },
                         'query_builder' => static function (EntityRepository $er) use ($organization, $currentUser) {
                             $organization = $organization ?: $currentUser->getOrganization();

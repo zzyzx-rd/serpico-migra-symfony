@@ -466,7 +466,9 @@ class PersonController extends MasterController
                 $settings['invitingUser'] = $currentUser;
                 $settings['invitingOrganization'] = $currentUser->getOrganization();
                 $recipients[] = $user;
-                $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'externalInvitation']);
+                if($externalUser->getEmail() != ""){
+                    $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'externalInvitation']);
+                }
                 $externalUser->setClient($client)->setUser($user);
             }
             $em->persist($externalUser);

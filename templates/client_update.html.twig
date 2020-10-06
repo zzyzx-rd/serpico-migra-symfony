@@ -139,7 +139,7 @@
       }
 
       .client-btn {
-        background-color: aliceblue;
+        background-color: #55318e4a!important;
         color: black;
         margin: 1.4em auto;
         display: inline-block;
@@ -170,6 +170,23 @@
 
       .user-position, .user-weight{
         display: inline-block;
+      }
+
+      .user-ext-email{
+        position:relative;
+      }
+
+      .client-user-barred{
+        left:5%;
+        bottom:12%;
+      }
+
+      .client-input{
+        min-width:250px;
+      }
+
+      .client-input .select-dropdown{
+        width: 100%;
       }
 
     </style>
@@ -283,9 +300,10 @@
 {% endblock %}
 
 {% block javascripts %}
-  <script src="{{ asset('js/calendar_fix.js') }}"></script>
-  <script src="{{ asset('js/dropify.min.js') }}"></script>
-  <script src="{{ asset('js/client_user_create.js') }}"></script>
+<script>$('select').material_select();</script>
+<script src="{{ asset('js/calendar_fix.js') }}"></script>
+<script src="{{ asset('js/dropify.min.js') }}"></script>
+<script src="{{ asset('js/client_user_create.js') }}"></script>
 
 
 {% endblock %}

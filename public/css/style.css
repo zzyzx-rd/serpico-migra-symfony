@@ -16,6 +16,10 @@ body[style="overflow: hidden;"] {
   height: 100vh;
 }
 
+.dd-text{
+  color: #55318e;
+}
+
 .dd-bg-color{
   background-color: #341f56;
 }
@@ -36,6 +40,10 @@ a.material-icons{
   margin-left: 5px;
 }
 
+.sm-bottom{
+  margin-bottom: 5px;
+}
+
 .m-right{
   margin-right: 10px;
 }
@@ -43,6 +51,11 @@ a.material-icons{
 .m-left{
   margin-left: 10px;
 }
+
+.m-bottom{
+  margin-bottom: 10px;
+}
+
 
 .modal .gradetype {
   display: flex;
@@ -83,6 +96,9 @@ li + li.no-items-placeholder {
   left: -10%;
 }
 
+.dd-text{
+  color: #55318e;
+}
 
 .mat-icon {
   font-family: "Material Icons";
@@ -433,6 +449,12 @@ td a {
   display: flex;
   align-items: center;
   justify-content: space-around;
+}
+
+.flex-center-fe {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 /***header***/

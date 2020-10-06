@@ -2,17 +2,34 @@ weight: Poids
 long_locale: fr-FR
 and: et
 Ok: OK
+myself: moi-même
 with: avec
 or: ou
 from: de
 other: autre
 all: Tous
 back: Retour
+previous: Précédent
 next: Suivant
 delete: Supprimer
 save: Sauvegarder
 create: Créer
+create_anyway: créer quand même
+add_anyway: ajouter quand même
 update: Mettre à jour
+firm: entreprise
+organization: organisation
+partner: Partenaire
+independant: indépendant
+user: utilisateur
+firm_member : Membre d'une entreprise / institution
+firstname: prénom
+lastname: nom
+email: email
+ascending: croissant
+descending: décroissant
+sort: Tri
+order: Ordre
 pending_validation: En attente de validation
 show_less: Afficher moins
 show_more: Afficher __count__ de plus
@@ -710,6 +727,7 @@ settings:
 root_management:
   manage_processes: Gestion des processus
   manage_organizations: Gestion des entreprises & institutions
+  our_clients: Nos clients
 
 processes:
   backToMyActivity: Retour
@@ -1559,6 +1577,9 @@ worker_search:
     confirm: Oui
     decline: Annuler
 
+worker_firm_list:
+  alphabetical_order: ordre alphabétique
+  creation_date_order: date de création
 
 worker_firm_data:
   commonName: Nom de l'entreprise
@@ -1881,8 +1902,8 @@ activities:
   output_date_type: Dates de retour
 
   no_activities:
-    main_msg: Créez des activités
-    secondary_msg: afin d'obtenir une vue dynamique de votre business
+    main_msg: Rajouter vos suivis clients
+    secondary_msg: et obtenez une vue dynamique de votre business
 
   o_status:
     cancelled: Annulées
@@ -1939,6 +1960,7 @@ activities:
   delete_activity_btn: Supprimer
   delete_stage_msg: Etes-vous sûr de vouloir supprimer cette phase d'activité ? Toutes les données éventuellement saisies par les participants seront effacées
   delete_activity_msg: Etes-vous sûr de vouloir supprimer cette activité ? Toutes les données éventuellement saisies par les participants seront effacées
+  delete_participant_msg: Etes-vous sûr de vouloir supprimer ce participant de l'activité ?
   delete_recurring_msg: Cette activité fait partie d'une série d'activités récurrentes. Voulez-vous supprimer toutes ces activités ou simplement celle-ci ? Les données liées aux participants seront effacées
   delete_rec_all_confirm: Supprimer la série
   delete_rec_single_confirm: Supprimer cette activité
@@ -1957,6 +1979,16 @@ activities:
   request_process: Rajouter une catégorie
   create_from_template:
     modal_title: "Créer une activité depuis un modèle :"
+  create_participant_modal:
+    title: Nouveau participant
+    msg: Ce participant est un(e)
+    from_firm: de l'entreprise
+  create_participant_wo_mail_modal:
+    title: Participant sans email
+    msg: Ce participant ne pourra pas faire de retours sur vos activités communes si vous ne vous renseignez pas son adresse email - vous pouvez toujours la renseigner ensuite
+  create_participant_legal_person_modal:
+    title: Nouveau participant personne morale
+    msg: En sélectionnant ce participant représentant une entreprise ou institution, vous ne lui donnez pas accès à l'activité. Seuls des membres de cette entreprise/institution peuvent y accéder 
 
   create:
     initialize_title: Création d'une activité
@@ -2026,9 +2058,12 @@ activities:
   no_registered_activities_msg: Inscrivez-vous à une démarche existante afin de suivre et renseigner son évolution !
   hide_group: Masquer ces activités
   display_group: Afficher ces activités
-  instant_add: Ajout spontané
+  instant_add: Retour spontané
   update_status: Mettre à jour l'avancement
   provide_my_feedbacks: Donner mes feedbacks
+  delete_activity_modal:
+    title: Suppression de l'activité
+    content: Etes-vous sûr de vouloir supprimer cette activité ? Toutes ses données associées (phases, retours et participants) seront supprimées
 
 
 activity_elements:
@@ -2089,7 +2124,10 @@ activity_elements:
       provide_onset_date: Indiquer une date de survenance
       exp_res_date: Date de résolution espérée
       provide_exp_res_date: Indiquer une date de résolution espérée
-
+    tooltip:
+      shared_documents: Documents partagés
+      comments: Commentaires
+      no_given_comments: Pas de commentaires donnés
 
 
 create_parameters:
@@ -2762,6 +2800,7 @@ create_user:
   provide_position: Préciser poste
   provide_title: Préciser titre
   provide_email: Renseigner email
+  no_provided_email: Pas d'email renseigné
   undefined_department: Département indéfini
   undefined_position: Poste indéfini
 

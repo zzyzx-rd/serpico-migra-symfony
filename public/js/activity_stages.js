@@ -47,6 +47,23 @@ setTimeout(function (){
   }
 },200)
 
+$.delete = function(url, data, callback, type){
+ 
+  if ( $.isFunction(data) ){
+    type = type || callback,
+        callback = data,
+        data = {}
+  }
+ 
+  return $.ajax({
+    url: url,
+    type: 'DELETE',
+    success: callback,
+    data: data,
+    contentType: type
+  });
+}
+
 if(location.pathname.split('/').includes('iprocess')){
   $('.stage-container').css('background-color','#ffffd4');
   setTimeout(function(){
@@ -404,7 +421,7 @@ $(document).on(
       const $this = $(this);
       const $section = $this.closest('.output-item');
 
-      const $criteriaList = $section.find('.output-criteria');
+      const $criteriaList = $section.find('.criteria-list');
 
     if ($criteriaList.children('.new').length) {
       return;
@@ -2058,6 +2075,17 @@ $('.activity-element-update, .activity-element-save').on('click',function(e){
       $(e).click();
     })
   }
+})
+
+$('.remove-activity').on('click',function(e){
+  e.preventDefault();
+  $.delete(daurl,{r: 'json'})
+    .done(function(data){
+      $('.back-btn').click();
+    })
+    .fail(function(data){
+      console.log(data);
+    })
 })
 
 

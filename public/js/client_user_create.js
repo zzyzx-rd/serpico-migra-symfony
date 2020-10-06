@@ -115,13 +115,12 @@ $(function(){
                         $selector.append(`<option value="${firm.id}">${firm.name}</option`);
                     })
                     //el.val(selector.find(":selected").text());
-                    $selector.prepend(`<option value>(${noFirm})</option>`);
                     //$this.attr("value",$selector.find(":selected").val());
                     $selector.material_select();
                     $selectorMElmts = $selector.closest('.select-wrapper')
                     $selector.prev().find('li').each(function(i,e){
-                        $selector.prev().find('li').index($(e)) == 0 ? ($(e).find('span').css('color','black'), $(e).prepend(`<img class="firm-option-logo" src="/lib/img/org/new-firm.png">`)) :
-                        $(e).prepend(`<img class="firm-option-logo" src="/lib/img/org/${data.workerFirms[i-1].logo ? data.workerFirms[i-1].logo : 'no-picture.png'}">`);
+                        
+                        $(e).prepend(`<img class="firm-option-logo" src="/lib/img/org/${data.workerFirms[i].logo ? data.workerFirms[i].logo : 'no-picture.png'}">`);
                         //$option.append(`<span>${firm.name}</span>`);
                         //selector.append($option);
                     });

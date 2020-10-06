@@ -82,14 +82,14 @@ class ActivityM extends ModelEntity {
     {
         $role = $u->getRole();
 
-        if (
+        /*if (
             $activity->status !== Activity::STATUS_ONGOING &&
             $activity->status !== Activity::STATUS_FUTURE &&
             $activity->status !== Activity::STATUS_INCOMPLETE &&
             $activity->status !== Activity::STATUS_AWAITING_CREATION
         ) {
             return false;
-        }
+        }*/
         if ($role === 4) {
             return true;
         }

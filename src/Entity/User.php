@@ -52,6 +52,11 @@ class User extends DbObject implements  UserInterface, \Serializable
     public $internal;
 
     /**
+     * @ORM\Column(name="usr_synth", type="boolean", nullable=true)
+     */
+    public $synthetic;
+
+    /**
      * @ORM\Column(name="usr_firstname", type="string", length=255, nullable=true)
      */
     public $firstname;
@@ -310,7 +315,8 @@ class User extends DbObject implements  UserInterface, \Serializable
      */
     public function __construct(
       ?int $id = null,
-        $int = true,
+        $internal = true,
+        $synthetic = false,
         $firstname = null,
         $lastname = null,
         $username = null,
@@ -348,7 +354,8 @@ class User extends DbObject implements  UserInterface, \Serializable
     {
         parent::__construct($id, $createdBy, new DateTime());
         $this->pictureFile = $pictureFile;
-        $this->internal = $int;
+        $this->internal = $internal;
+        $this->synthetic = $synthetic;
         $this->firstname = $firstname;
         $this->lastname = $lastname;
         $this->username = $username;
@@ -393,9 +400,21 @@ class User extends DbObject implements  UserInterface, \Serializable
         return $this->internal;
     }
 
-    public function setInt(bool $int): self
+    public function setInternal(bool $internal): self
     {
-        $this->internal = $int;
+        $this->internal = $internal;
+
+        return $this;
+    }
+
+    public function isSynthetic(): ?bool
+    {
+        return $this->synthetic;
+    }
+
+    public function setSynthetic(bool $synthetic): self
+    {
+        $this->synthetic = $synthetic;
 
         return $this;
     }
@@ -979,7 +998,7 @@ class User extends DbObject implements  UserInterface, \Serializable
     }
     public function __toString()
     {
-        return  strval($this->id);
+        return (string) $this->id;
     }
     public function addMail(Mail $mail): User
     {

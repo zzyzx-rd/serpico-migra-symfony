@@ -10,163 +10,206 @@
     <ul class="stages-holder">
       
         {#{% if activity.pastStages|length > 0 %}#}
+{% if activity is defined %}
 
-        {#{% set simultClass = activity.nbSimultaneousStages('p') > 2 ? "too-many-simult" : (activity.nbSimultaneousStages('p') == 2 ? "simult" : "") %}#}
+  {% set approvable = activity.status == -3 and activity.decisions is not empty and activity.decisions|first.deciderUser == currentuser %}
+  {% set visible = showable is defined ? showable : true %}
 
-          <ol class="stages activity-component" data-sd="{{ activity.startdateDay }}" data-p="{{ activity.period }}" data-id="{{random(1,1000000)}}">
-            
-            {% set checkingIndex = -1 %}
+{% endif %}
 
-            {% for stage in activity.stages %}
+  <div class="row no-margin flex-center {{activity is defined ? actStatus : 'dummy-activity'}} activity-holder" {% if activity is defined and not visible %}style="display:none"{% endif %}>
+    <div class="col s9 center no-padding activity-content-stage" style="background-color: #feffe9;">
+      
+      <div class="curDate"></div>
+
+      <ul class="stages-holder">
+
+          {% if activity is defined %}
+          
+            <ol class="stages activity-component" data-sd="{{ activity.startdateDay }}" data-p="{{ activity.period }}" data-id="{{random(1,1000000)}}">
               
-              {% for e, event in stage.events %}
+              {% set checkingIndex = -1 %}
 
-                  <div class="event tooltipped" data-od="{{ event.onsetdateDay }}" data-p="{{ event.period }}">
-                    <i class="fa fa-map-marker event-marker">
-                      <i class="fa fa-{{event.eventType.icon.name}} event-type"></i>
-                    </i>
-                  </div>
+              {% for stage in activity.stages %}
+                
+                {% for e, event in stage.events %}
 
+                    <div class="event tooltipped" data-od="{{ event.onsetdateDay }}" data-p="{{ event.period }}" data-html="true" data-tooltip="{% apply escape %}{% include "components/event__item.html.twig" with { event: event } %}{% endapply %}">
+                      <i class="fa fa-map-marker event-marker">
+                        <i class="fa fa-{{event.eventType.icon.name}} event-type"></i>
+                      </i>
+                    </div>
+
+                {% endfor %}
               {% endfor %}
-            {% endfor %}
 
-            {% for s, stage in activity.sortedStagesPerPeriod %}
+              {% for s, stage in activity.sortedStagesPerPeriod %}
 
- 
-              {% set embeddedStages = null %}
+  
+                {% set embeddedStages = null %}
 
-              {% if s > checkingIndex %}
-                {% set isEmbedded = false %}
-                {% set embeddedStages = stage.embeddedStages %}
-                {% if embeddedStages is not empty %}
-                  {% set checkingIndex = s + embeddedStages|length %}
+                {% if s > checkingIndex %}
+                  {% set isEmbedded = false %}
+                  {% set embeddedStages = stage.embeddedStages %}
+                  {% if embeddedStages is not empty %}
+                    {% set checkingIndex = s + embeddedStages|length %}
+                  {% endif %}
+                  {% set visibleEl = dateTypeCookie == 's' %}
+                {% else %}
+                  {% set isEmbedded = true %}
+                  {% set visibleEl = false %}
                 {% endif %}
-                {% set visibleEl = dateTypeCookie == 's' %}
-              {% else %}
-                {% set isEmbedded = true %}
-                {% set visibleEl = false %}
-              {% endif %}
 
-              {% include "components/stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: isEmbedded, startdateDay: stage.startdateDay, period: stage.period, embeddedStages: embeddedStages, visibleEl: visibleEl } %}
-            
-            {% endfor %}
-            
-            {% set checkingIndex = -1 %}
-
-            {% for s, stage in activity.sortedStagesPerPeriod('output') %}
+                {% include "components/stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: isEmbedded, startdateDay: stage.startdateDay, period: stage.period, embeddedStages: embeddedStages, visibleEl: visibleEl } %}
               
-              {% set embeddedStages = null %}
-            
-              {% if s > checkingIndex %}
-                {% set isEmbedded = false %}
-                {% set embeddedStages = stage.embeddedStages('output') %}
-                {% if embeddedStages is not empty %}  
-                  {% set checkingIndex = s + embeddedStages|length %}
+              {% endfor %}
+              
+              {% set checkingIndex = -1 %}
+
+              {% for s, stage in activity.sortedStagesPerPeriod('output') %}
+                
+                {% set embeddedStages = null %}
+              
+                {% if s > checkingIndex %}
+                  {% set isEmbedded = false %}
+                  {% set embeddedStages = stage.embeddedStages('output') %}
+                  {% if embeddedStages is not empty %}  
+                    {% set checkingIndex = s + embeddedStages|length %}
+                  {% endif %}
+                  {% set visibleEl = dateTypeCookie == 'o' %}
+                {% else %}
+                  {% set isEmbedded = true %}
+                  {% set visibleEl = false %}
                 {% endif %}
-                {% set visibleEl = dateTypeCookie == 'o' %}
-              {% else %}
-                {% set isEmbedded = true %}
-                {% set visibleEl = false %}
-              {% endif %}
 
-              {% include "components/stage_temporal__item.html.twig" with { dateType: 'o', isEmbedded: isEmbedded, startdateDay: stage.startdateDay('output'), period: stage.period('output'), embeddedStages: embeddedStages, visibleEl: visibleEl } %}
-            
-            {% endfor %}
-          </ol>
+                {% include "components/stage_temporal__item.html.twig" with { dateType: 'o', isEmbedded: isEmbedded, startdateDay: stage.startdateDay('output'), period: stage.period('output'), embeddedStages: embeddedStages, visibleEl: visibleEl } %}
+              
+              {% endfor %}
+            </ol>
+          
+          {% else %}
 
-    </ul>
+              <ol class="activity-component" data-sd="0" data-p="365" data-id="{{random(1,1000000)}}">
+                  {% set startdateDay = random(7,320) %}
+                  {% set period = random(3, 350 - startdateDay) %}
+                  {% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateDay: startdateDay, period: period, embeddedStages: null, visibleEl: true} %}
+              </ol>
+
+          {% endif %}
+
+
+      </ul>
   </div>
 
   <div class="col s3 act-info">
 
-    <div class="{{sortingType ~ '-' ~ actStatus}}" style="display: inline-block;">
-      <div class="stage-item-button"></div>
-    </div>
     
     
-    <div class="fixed-action-btn modified-fixed-btn" style="visibility: hidden;">
-              
-      <a class="btn-floating">
-          <i class="material-icons">create</i>
-      </a>
+      <div class="{{activity is defined ? sortingType ~ '-' ~ actStatus}}" style="display: inline-block;">
+        <div class="stage-item-button"></div>
+      </div>
+    
+    {% if activity is defined %}
+    
+    
+      <div class="fixed-action-btn modified-fixed-btn" style="visibility: hidden;">
+                
+        <a class="btn-floating">
+            <i class="material-icons">create</i>
+        </a>
+        
+        <ul class="flex-center">
+            <li>
+              <a class="btn-floating act-btn tooltipped modal-trigger" href="#updateEvent" data-tooltip="{{ 'activities.instant_add'|trans }}" data-position="top" data-aid="{{ activity.id }}" data-sid="{{ activity.activeStages|length > 1 ? 0 : activity.activeStages.first.id }}"><i class="material-icons">offline_bolt</i></a>
+            </li>
+          {% if activityM.userCanEdit(activity,currentuser) %}  
+            <li>
+              <a class="btn-floating act-btn tooltipped modal-trigger" href="#updateStageProgressStatus" data-position="top" data-html="true" data-tooltip="{{ 'activities.update_status'|trans}}" data-eid="{{ activity.id }}"><i class="material-icons">update</i></a>
+            </li>
+            <li>
+              <a class="btn-floating act-btn tooltipped" href={{ url("manageActivityElement",{entity:"activity", elmtId: activity.id }) }} data-position="top" data-html="true" data-tooltip="{{ 'activities.modify'|trans}}"><i class="material-icons">settings</i></a>
+            </li>
+          {% endif %}
+          {% if activityM.userCanGiveOutput(activity,currentuser) %}
+            <li>
+              {% if activity.userActiveGradableStages(currentuser).first.survey is not null %}
+                <a class="btn-floating act-btn tooltipped" data-tooltip="{{ 'activities.provide_my_feedbacks'|trans }}" data-position="top" href="{{ path('answerSurvey', { stgId: activity.userActiveGradableStages(currentuser).first.id }) }}"><i class="fa fa-pen-alt"></i></a>
+              {% else %}
+                <a class="btn-floating act-btn tooltipped" data-tooltip="{{ 'activities.provide_my_feedbacks'|trans }}" data-position="top" href="{{ path('newStageGrade', { stgId: activity.userActiveGradableStages(currentuser).first.id }) }}"><i class="fa fa-pen-alt"></i></a>
+              {% endif %}
+            </li>
+          {% endif %}
+          {% if activityM.userCanViewResults(activity,currentuser) %}
+            <li>
+              <a class="btn-floating act-btn tooltipped" data-tooltip="{{ 'result'|trans }}" data-position="top" href="{{ path('activityResults', { actId: activity.id }) }}"><i class="material-icons">show_chart</i></a>
+            </li>
+          {% endif %}
+        </ul>
       
-      <ul class="flex-center">
-          <li>
-            <a class="btn-floating act-btn tooltipped modal-trigger" href="#updateEvent" data-tooltip="{{ 'activities.instant_add'|trans }}" data-position="top" data-aid="{{ activity.id }}" data-sid="{{ activity.activeStages|length > 1 ? 0 : activity.activeStages.first.id }}"><i class="material-icons">offline_bolt</i></a>
-          </li>
-        {% if activityM.userCanEdit(activity,currentuser) %}  
-          <li>
-            <a class="btn-floating act-btn tooltipped modal-trigger" href="#updateStageProgressStatus" data-position="top" data-html="true" data-tooltip="{{ 'activities.update_status'|trans}}" data-eid="{{ activity.id }}"><i class="material-icons">update</i></a>
-          </li>
-          <li>
-            <a class="btn-floating act-btn tooltipped" href={{ url("manageActivityElement",{entity:"activity", elmtId: activity.id }) }} data-position="top" data-html="true" data-tooltip="{{ 'activities.modify'|trans}}"><i class="material-icons">settings</i></a>
-          </li>
-        {% endif %}
-        {% if activityM.userCanGiveOutput(activity,currentuser) %}
-          <li>
-            {% if activity.userActiveGradableStages(currentuser).first.survey is not null %}
-              <a class="btn-floating act-btn tooltipped" data-tooltip="{{ 'activities.provide_my_feedbacks'|trans }}" data-position="top" href="{{ path('answerSurvey', { stgId: activity.userActiveGradableStages(currentuser).first.id }) }}"><i class="fa fa-pen-alt"></i></a>
-            {% else %}
-              <a class="btn-floating act-btn tooltipped" data-tooltip="{{ 'activities.provide_my_feedbacks'|trans }}" data-position="top" href="{{ path('newStageGrade', { stgId: activity.userActiveGradableStages(currentuser).first.id }) }}"><i class="fa fa-pen-alt"></i></a>
-            {% endif %}
-          </li>
-        {% endif %}
-        {% if activityM.userCanViewResults(activity,currentuser) %}
-          <li>
-            <a class="btn-floating act-btn tooltipped" data-tooltip="{{ 'result'|trans }}" data-position="top" href="{{ path('activityResults', { actId: activity.id }) }}"><i class="material-icons">show_chart</i></a>
-          </li>
-        {% endif %}
-      </ul>
+      </div>
     
-    </div>
-
-    {% set actName = activity.name %}
-    {% set isTooLong = actName|length > actNameTruncVal %}
-    {% if isTooLong %}
-        <span class="act-info-name tooltipped" data-tooltip="{{actName}}">{{actName|slice(0,actNameTruncVal) ~ '...' }}</span>
-    {% else %}
-        <span class="act-info-name">{{ actName }}</span>
     {% endif %}
 
-    {% set activityClients =  activity.independantUniqueParticipatingClients %}
-    {% if activityClients|length != 0 %}
+      {% set actName = activity is defined ? activity.name : '' %}
+      {% set isTooLong = actName|length > actNameTruncVal %}
+      {% if isTooLong %}
+          <span class="act-info-name tooltipped" data-tooltip="{{actName}}">{{actName|slice(0,actNameTruncVal) ~ '...' }}</span>
+      {% else %}
+          <span class="act-info-name">{{ actName }}</span>
+      {% endif %}
 
-
-      <div class="activity-clients flex-center">
-        {% if activity.organization != currentuser.organization %}
-          <small> - {{ 'from'|trans }}</small>
-          <span class="activity-client-name">{{ activity.organization.commname }}</span>
-          {% set activityClients = activityClients|filter((v,k) => v.clientOrganization != currentuser.organization) %}
-        {% endif %}
+      {% if activity is defined %}
+      
+      
+        {% set activityClients =  activity.independantUniqueParticipatingClients %}
         {% if activityClients|length != 0 %}
 
-            <small class="sm-right">{{ ' - ' ~ 'with'|trans }}</small>
 
-            {% set k = 0 %}
-            {% for client in activityClients %}
-              {% if k < 2 %}
-
-                  <a class="badge-container activity-client-name tooltipped" data-tooltip="{{client.name}}">
-                    <img class="client-logo" src="{{ asset(global.clientLogo(client)) }}" alt="">
-                  </a>
-
-                {% set k = k + 1 %}
-              {% endif %}
-            {% endfor %}
-
-            {% if activityClients|length - k > 0 %}
-                  {{'and '|trans }}
-                  <span class="activity-client-name tooltipped" data-position="top" data-html="true" data-tooltip="
-                  {% for c, client in activityClients %}
-                      {% if c >= k %}
-                        {{ activityClients[c].commname }} <br>
-                      {% endif %}
-                  {% endfor %}
-                  "
-                  >{{ (activityClients|length - k) ~ ' other'|trans ~ (activityClients|length - k > 1 ? 's' : '')}}</span>
+          <div class="activity-clients flex-center">
+            {% if activity.organization != currentuser.organization %}
+              <small> - {{ 'from'|trans }}</small>
+              <span class="activity-client-name">{{ activity.organization.commname }}</span>
+              {% set activityClients = activityClients|filter((v,k) => v.clientOrganization != currentuser.organization) %}
             {% endif %}
+            {% if activityClients|length != 0 %}
+
+                <small class="sm-right">{{ ' - ' ~ 'with'|trans }}</small>
+
+                {% set k = 0 %}
+                {% for client in activityClients %}
+                  {% if k < 2 %}
+
+                      <a class="badge-container activity-client-name tooltipped" data-tooltip="{{client.name}}">
+                        <img class="client-logo" src="{{ asset(global.clientLogo(client)) }}" alt="">
+                      </a>
+
+                    {% set k = k + 1 %}
+                  {% endif %}
+                {% endfor %}
+
+                {% if activityClients|length - k > 0 %}
+                      {{'and '|trans }}
+                      <span class="activity-client-name tooltipped" data-position="top" data-html="true" data-tooltip="
+                      {% for c, client in activityClients %}
+                          {% if c >= k %}
+                            {{ activityClients[c].commname }} <br>
+                          {% endif %}
+                      {% endfor %}
+                      "
+                      >{{ (activityClients|length - k) ~ ' other'|trans ~ (activityClients|length - k > 1 ? 's' : '')}}</span>
+                {% endif %}
+            {% endif %}
+          </div>
         {% endif %}
-      </div>
-    {% endif %}
+      
+      {% else %}
+        <div class="activity-clients flex-center">
+          <small class="sm-right">{{ ' - ' ~ 'with'|trans }}</small>
+          <a class="badge-container activity-client-name tooltipped" data-tooltip="">
+            <img class="client-logo" src="{{ asset(global.clientLogo(null)) }}" alt="">
+          </a>
+      {% endif %}
+
+    
   </div>
 </div>

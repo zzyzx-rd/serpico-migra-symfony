@@ -35,9 +35,19 @@ class ParticipantMinType extends AbstractType
 
             $form = $event->getForm();
         
-            $form->add('user', HiddenType::class,[])
-            ->add('externalUser', HiddenType::class,[])
-            ->add('team', HiddenType::class,[]);
+            $form->add('userPart', HiddenType::class,[
+                'property_path' => 'user',
+                'attr' => ['class' => 'u']
+            ])
+            ->add('externalUserPart', HiddenType::class,[
+                'property_path' => 'externalUser',
+                'attr' => ['class' => 'eu']
+            ])
+            ->add('teamPart', HiddenType::class,[
+                'property_path' => 'team',
+                'attr' => ['class' => 't']
+            ])
+            ->add('workerFirm', HiddenType::class,['attr' => ['class' => 'f']]);
         });
 
         if ($options['standalone']) {
@@ -53,6 +63,7 @@ class ParticipantMinType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefault('entity', 'activity');
+        
         $resolver->setDefault('data_class', function (Options $options) {
             if ($options['entity'] === 'iprocess') {
                 return IProcessParticipation::class;
@@ -61,6 +72,7 @@ class ParticipantMinType extends AbstractType
             }
             return Participation::class;
         });
+        
         $resolver->setRequired('currentUser');
         $resolver->setDefault('organization', null);
         $resolver->setDefault('query', null);

@@ -55,7 +55,7 @@ class Activity extends DbObject
     /**
      * @ORM\Column(name="act_name", type="string", length=255, nullable=true)
      */
-    public string $name;
+    public ?string $name;
 
     /**
      * @ORM\Column(name="act_visibility", type="string", length=255, nullable=true)
@@ -154,10 +154,9 @@ class Activity extends DbObject
     public $events;
 
     /**
-     * @Column(name="act_progress", type="float", nullable=false)
-     * @var float
+     * @Column(name="act_progress", type="integer", nullable=false)
      */
-    protected float $progress;
+    protected ?int $progress;
     /**
      * @Column(name="act_isRewarding", type="boolean", nullable=true)
      * @var bool
@@ -271,7 +270,7 @@ class Activity extends DbObject
      * @param int $nbParticipants
      * @param string $objectives
      * @param int|null $status
-     * @param float $progress
+     * @param int $progress
      * @param bool $isRewarding
      * @param float $distrAmount
      * @param int $res_inertia
@@ -290,7 +289,7 @@ class Activity extends DbObject
         int $magnitude = 1,
         bool $complete = false,
         bool $simplified = true,
-        string $name = '',
+        ?string $name = null,
         string $visibility = 'public',
         DateTime $startdate = null,
         DateTime $enddate = null,
@@ -299,7 +298,7 @@ class Activity extends DbObject
         int $nbParticipants = 0,
         string $objectives = '',
         int $status = null,
-        float $progress = 0.0,
+        int $progress = null,
         bool $isRewarding = false,
         float $distrAmount = 0.0,
         int $res_inertia = 0,
@@ -339,7 +338,7 @@ class Activity extends DbObject
         $this->saved = $saved;
         $this->released = $released;
         $this->archived = $archived;
-        $this->participants = new ArrayCollection;
+        $this->participations = new ArrayCollection;
         $this->stages = new ArrayCollection;
         $this->decisions = new ArrayCollection;
         $this->projectResults = new ArrayCollection;
@@ -407,7 +406,7 @@ class Activity extends DbObject
         return $this->name;
     }
 
-    public function setName(string $name): self
+    public function setName(?string $name): self
     {
         $this->name = $name;
 
@@ -465,7 +464,17 @@ class Activity extends DbObject
     public function setStatus(int $status): self
     {
         $this->status = $status;
+        return $this;
+    }
 
+    public function getProgress(): ?int
+    {
+        return $this->progress;
+    }
+
+    public function setProgress(int $progress): self
+    {
+        $this->progress = $progress;
         return $this;
     }
 
@@ -506,19 +515,11 @@ class Activity extends DbObject
     }
 
     /**
-     * @return mixed
+     * @return Stage[]|ArrayCollection
      */
     public function getStages()
     {
         return $this->stages;
-    }
-
-    /**
-     * @param mixed $stages
-     */
-    public function setStages($stages): void
-    {
-        $this->stages = $stages;
     }
 
     /**
@@ -686,23 +687,7 @@ class Activity extends DbObject
      */
     public function getParticipations()
     {
-        return $this->participants;
-    }
-
-    /**
-     * @return float
-     */
-    public function getProgress(): float
-    {
-        return $this->progress;
-    }
-
-    /**
-     * @param float $progress
-     */
-    public function setProgress(float $progress): void
-    {
-        $this->progress = $progress;
+        return $this->participations;
     }
 
     /**
@@ -1004,6 +989,7 @@ class Activity extends DbObject
     {
         // We retrieve all stages where current user can grade
         return $this->getActiveStages()->filter(static function(Stage $s) use ($u){
+            $s->currentUser = $u;
             $participations = $s->getIntParticipants();
             return $participations && $participations->exists(static function(int $i, Participation $p) use ($s, $u){
                     return ($p->getUser() == $u) && ($s->getGradableParticipants()->count() > 0);
@@ -1159,7 +1145,7 @@ class Activity extends DbObject
 
     public function hasParticipant(User $u)
     {
-        return $this->participants->exists(
+        return $this->participations->exists(
             static function (int $i, Participation $p) use ($u) { return $p->getUser() == $u; }
         );
     }
@@ -1293,7 +1279,7 @@ class Activity extends DbObject
         $department = $u->getDepartment();
         $departmentUsers = $department ? $department->getUsers() : [];
 
-        foreach ($this->participants as $p) {
+        foreach ($this->participations as $p) {
             if ($p->getType() != self::STATUS_FUTURE) {
                 if (in_array($p->getDirectUser(), $subordinates)) {
                     return true;
@@ -1314,7 +1300,7 @@ class Activity extends DbObject
             return $canSeeResults;
         }
 
-        return $canSeeResults && $this->participants->exists(
+        return $canSeeResults && $this->participations->exists(
                 static function (int $i, Participation $p) use ($u) { return $p->getUser() == $u && $p->isLeader(); }
             );
     }
@@ -1352,6 +1338,19 @@ class Activity extends DbObject
     public function removeStage(Stage $stage): Activity
     {
         $this->stages->removeElement($stage);
+        return $this;
+    }
+
+    public function addParticipation(Participation $participation): self
+    {
+        $this->participations->add($participation);
+        $participation->setActivity($this);
+        return $this;
+    }
+
+    public function removeParticipation(Participation $participation): Activity
+    {
+        $this->participations->removeElement($participation);
         return $this;
     }
 
@@ -1454,6 +1453,34 @@ class Activity extends DbObject
     public function removeEvent(Event $event): Activity
     {
         $this->events->removeElement($event);
+        return $this;
+    }
+
+    public function addParticipant(Participation $participation): Activity
+    {
+        foreach($this->stages as $stage){
+            if (count($stage->getCriteria()) !== 0) {
+                foreach ($stage->criteria as $criterion) {
+                    $criterion->addParticipation($participation);
+                    $participation->setCriterion($criterion)->setStage($stage)->setActivity($this);
+                }
+            } else {            
+                $stage->addParticipation($participation);
+            }
+        }
+        return $this;
+    }
+
+    public function removeParticipant(Participation $participation): Activity
+    {
+        $participantUser = $participation->getUser();
+        $participantTeam = $participation->getTeam();
+        $participantExtUser = $participation->getExternalUser();
+        foreach ($this->participations as $theParticipant) {
+            if ($participantUser == $theParticipant->getUser() || ($participantTeam && $participantTeam == $theParticipant->getTeam()) || ($participantExtUser && $participantExtUser == $theParticipant->getExternalUser())) {
+                $this->removeParticipation($theParticipant);
+            }
+        }
         return $this;
     }
 

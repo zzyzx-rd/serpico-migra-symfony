@@ -109,10 +109,10 @@ class MailController extends MasterController {
             $em->persist($mail);
             $em->flush();
             
-            $email->embedFromPath('lib/img/logo_serpico_mail.png','logo_img');
+            $email->embedFromPath('lib/img/logo_dd_p_l.png','logo_img');
 
             $data['logo_width_px'] = 80;
-            $data['company_name'] = 'Serpico';
+            $data['company_name'] = 'Dealdrive';
             $data['address'] = '38, route d\'Esch';
             $data['zipcode_city'] = 'L-1470 Luxembourg';
             $data['phone'] = '+352 28 79 97 18';

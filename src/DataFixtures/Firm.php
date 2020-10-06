@@ -273,6 +273,12 @@ class Firm extends Fixture
             ->setRole(3)
             ->setPassword($this->encoder->encodePassword($gdbdg, "Serpico2019"));
 
+        $synth = new User();
+        $synth//->setUsername("ZZ - ".$serpico->getCommname())
+            ->setFirstname('ZZ')
+            ->setLastname($serpico->getCommname())
+            ->setSynthetic(true);
+
         $departement = new Department();
         $departement->setMasterUser($masterUser)
             ->setName("Development");

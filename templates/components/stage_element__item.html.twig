@@ -70,8 +70,9 @@
           {% for participant in participants %}
             <li class="t-participant flex-center user-info">
               {% set user = participant.user %}
-              <img class="user-picture sm-right" src="{{asset(global.userpicture(user))}}" alt="" width="17px" height="17px">
-              <span>{{ user.fullname }}</span>
+              {% set extUser = participant.externalUser %}
+              <img class="user-picture sm-right" src="{{extUser is not null and extUser.synthetic ? asset(global.organizationLogo(extUser.client.clientOrganization)): asset(global.userpicture(user))}}" alt="" width="17px" height="17px">
+              <span>{{ extUser is not null and extUser.synthetic ? extUser.lastname : user.fullname }}</span>
             </li>
           {% endfor %}
 
