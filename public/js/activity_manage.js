@@ -99,7 +99,11 @@ $(document).ready(function(){
     console.log($('.value-scale').material_select());
     console.log($('.scale').material_select());
 });
-
+function setCookie(key, value, expiry) {
+    var expires = new Date();
+    expires.setTime(expires.getTime() + (expiry * 24 * 60 * 60 * 1000));
+    document.cookie = key + '=' + value + ';expires=' + expires.toUTCString();
+}
 moment().format();
 var now = new Date();
 var annee   = now.getFullYear();
@@ -113,12 +117,14 @@ var endDate = new Date(endDateTS);
 var time = getCookie("time");
 var valueTime = getCookie("valueTime");
 
-       if(time== "undefined" ){
+       if(time== "undefined" || time== "" ){
 
-           time = "years"
+           time = "years";
+           setCookie('time',time,365);
            valueTime = annee;
+           setCookie('valueTime',valueTime,365);
        }
-
+console.log(time);
     if ( time == "years"){
         $('.scale option[value=years]').attr('selected','selected');
 
@@ -137,6 +143,7 @@ var valueTime = getCookie("valueTime");
 
             }
         }
+        console.log(valueTime);
         $('.value-scale option[value='+valueTime+']').attr('selected','selected');
     }
 
@@ -246,7 +253,7 @@ $(function () {
 
   var echelle = centralElWidth / tDays;
 
-
+/*
   if($('.no-processes').length){
 
     $('.dmin').append('<span class="starting-mark">' + annee + '</span>' + '<div class="line-no-processes"></div>');
@@ -257,7 +264,7 @@ $(function () {
     $('.dmin').append(annee + '<div class="line"></div>');
     $('.dmax').append(annee + 1 + '<div class="line"></div>');
   }
-
+*/
   /**
    * Display activities in a proper way
    * @param {HTMLInputElement} $activities
@@ -367,7 +374,7 @@ function dateUpdate() {
         $('.suiv').text((parseInt(valueTime) + 1));
         var tDays = ndDayPerYears((parseInt(valueTime)));
     } else {
-
+        console.log(valueTime);
         valueTime = valueTime.replace("q-", " ");
 
 
