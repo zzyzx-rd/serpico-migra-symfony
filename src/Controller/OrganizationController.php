@@ -1100,8 +1100,8 @@ class OrganizationController extends MasterController
         $em = $this->em;
 
         $repoT = $em->getRepository(Output::class);
-        $output = $repoT->find($otpId);
-        $stgId = $output->getStage()->getId();
+        $outputElement = $repoT->find($otpId);
+        $stgId = $outputElement->getStage()->getId();
         $repoO = $em->getRepository(Organization::class);
         switch ($entity) {
             case 'iprocess':
@@ -1237,20 +1237,18 @@ class OrganizationController extends MasterController
 
                     if ($crtId == 0) {
                         if($element->getOutputs()==null){
-                            $output = new Output();
+                            $outputElement = new Output();
                             $element->addOutput($output);
                         }
-                        else{
-                            $output= $element->getOutputs();
-                        }
 
-                        $output->addCriterion($criterion);
+
+                        $outputElement->addCriterion($criterion);
                         $em->persist($output);
                     } else {
                         $em->persist($criterion);
                     }
                     //$criterion->setStage($element);
-                    var_dump($criterion->getId());
+
                     $em->flush();
 
 
@@ -1307,7 +1305,6 @@ class OrganizationController extends MasterController
                             if ($outputForm->isValid()) {
 
                                 $em->persist($output);
-                                $output->setName("");
                                 $output->setStage($element);
                                 $em->flush();
                                 $responseArray = ['message' => 'Success to add output!', 'oid' => $output->getId()];
@@ -3405,30 +3402,30 @@ class OrganizationController extends MasterController
 
         if (!$criterion) {
             $message = sprintf('Criterion %d not found', $criId);
-            return $app->json(['status' => 'error', 'message' => $message], 404);
+            return new JsonResponse(['status' => 'error', 'message' => $message], 404);
         }
 
         $criWeight = $criterion->getWeight();
-        $stage = $criterion->getOutput();
-        $stage->getOutputs()->removeCriterion($criterion);
+        $output = $criterion->getOutput();
+        $output->removeCriterion($criterion);
 
         $sumWeights = 0;
 
-        foreach($stage->getCriteria() as $stageCriterion) {
+        foreach($output->getCriteria() as $outputCriterion) {
 
-            $newWeight = ($stageCriterion != $stage->getCriteria()->last()) ?
-                round($stageCriterion->getWeight() / (1 - $criWeight), 2) :
+            $newWeight = ($outputCriterion != $output->getCriteria()->last()) ?
+                round($outputCriterion->getWeight() / (1 - $criWeight), 2) :
                 1 - $sumWeights;
 
-            $stageCriterion->setWeight($newWeight);
+            $outputCriterion->setWeight($newWeight);
             $sumWeights += $newWeight;
 
         }
 
-        $em->persist($stage);
+        $em->persist($output);
         $em->flush();
 
-        return $app->json(['status' => 'done']);
+        return new JsonResponse(['status' => 'done'], 200);
     }
 
     /**

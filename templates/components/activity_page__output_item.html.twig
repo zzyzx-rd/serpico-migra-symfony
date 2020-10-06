@@ -5,7 +5,7 @@
 
 
 {% set type = output_model ? output_model.type : '__type__' %}
-<div class="output-item card" style="min-height: 0px;background-color: #e0f7fa">
+<div class="output-item card" data-oid="{{output_model ? output_model.id : 0}}" style="min-height: 0px;background-color: #e0f7fa">
 <div class=" flex-center-sb row card-content" style="color: #55308e">
 
 
@@ -16,6 +16,10 @@
 <i class="fas fa-clock" style="margin-left: 20%"></i>
     {% if output_model %}
 
+        {{ startdate|format_datetime('short', 'none', locale='fr') }} -
+        {{ enddate|format_datetime('short', 'none', locale='fr')}}
+
+
     {% else %}
 <div >{{startdate}}</div>
 <div> - </div>
@@ -25,21 +29,23 @@
     <div id="stage-{{s}}-type--criteria">
         <ul class="criteria-list">
 
-            <button class="btn-flat btn-add-criterion modal-trigger" id="#modalCritère">
-                <i class="material-icons left">add</i>
-                {{ 'criteria.add_btn_internal'|trans }}
-            </button>
-            <div class="output-criteria">
+
+            <div class="output-criteria" style="padding: 24px;">
 
 
-                <template class="criteria-list--item__proto">
-                                       {% include "modals/stage_criterion.html.twig" with { o: o, c: '__crtNb__', criterion: outputs.criteria.vars.prototype } %}
+                <template class="criteria-modal--item__proto">
+                                       {% include "components/activity_page__criterion_item.html.twig" with { o: o, c: '__crtNb__', criterion: outputs.criteria.vars.prototype } %}
                 </template>
+
                 {% for c, criterion in outputs.criteria %}
                     {% include "components/activity_page__criterion_item.html.twig" with { o: o, c: c, criterion: criterion } %}
                 {% endfor %}
 
             </div>
+            <button class="btn-flat btn-add-criterion modal-trigger" id="#modalCritère">
+                <i class="material-icons left">add</i>
+                {{ 'criteria.add_btn_internal'|trans }}
+            </button>
         </ul>
     </div>
 </div>

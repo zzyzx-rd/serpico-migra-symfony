@@ -947,7 +947,7 @@ class Activity extends DbObject
         $year=$startDate->format('Y');
         $month=$startDate->format('m');
         $day=$startDate->format('d');
-        return (int) date("z",mktime("12","00","00",(int)$month,(int)$day,(int)$year));
+        return $startDate->format('U');
     }
     public function getPeriod(): void
     {
@@ -964,8 +964,9 @@ class Activity extends DbObject
             }
         }
 
-        $diff = $startDate->diff($enddate)->format("%a");
-        echo $diff;
+        $sD = $startDate->format("U");
+        $sE = $enddate->format("U");
+        echo $sE - $sD;
 
 
     }

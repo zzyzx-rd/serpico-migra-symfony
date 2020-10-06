@@ -1,6 +1,8 @@
+{% block javascripts %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.0/moment.min.js" integrity="sha512-Izh34nqeeR7/nwthfeE0SI3c8uhFSnqxV0sI9TvTcXiFJkMd6fB644O64BRq2P/LA/+7eRvCw4GmLsXksyTHBg==" crossorigin="anonymous"></script>
+{% endblock %}
 {% set approvable = activity.status == -3 and activity.decisions is not empty and activity.decisions|first.deciderUser == currentuser %}
 {% set visible = showable is defined ? showable : true %}
-
 <div class="row no-margin flex-center {{actStatus}} activity-holder" {% if not visible %}style="display:none"{% endif %}>
   <div class="col s9 center no-padding activity-content-stage" style="background-color: #feffe9;">
     

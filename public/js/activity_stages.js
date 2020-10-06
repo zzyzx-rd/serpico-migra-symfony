@@ -415,9 +415,10 @@ $(document).on(
     const $criteria = $section.find('.criteria-list--item');
 
     const nbCriteria = $criteria.length;
-    const proto = $section.find('template.criteria-list--item__proto')[0];
+    const proto = $section.find('template.criteria-modal--item__proto')[0];
     const $output = $section.closest('.output');
     const $outputList = $output.find('ul.output-list');
+    console.log(proto);
     const protoHtml = proto.innerHTML.trim();
     const newProtoHtml = protoHtml
         .replace(/__otpIndex__/g, $criteriaList.children().length - 1)
@@ -430,10 +431,10 @@ $(document).on(
         .replace(/__stgNb__/g, $('.stage').index($section.closest('.stage')));
 
     const $crtElmt = $(newProtoHtml);
-    //$crtElmt.append(newProtoHtml);
-
-    $crtElmt.find('.modal').modal();
-    $crtElmt.find('.tooltipped').tooltip();
+    $criteriaList.append($crtElmt);
+      $('.modal').modal();
+      $criteriaList.find('.modal').modal();
+      $criteriaList.find('.tooltipped').tooltip();
 
     // Setting default values, and putting label upside by adding them "active" class
     $crtElmt.find('input[name*="lowerbound"]').val(0).prev().addClass("active");
@@ -513,6 +514,7 @@ $(document).on(
         let btnV = $crtElmt.find('.c-validate');
         var slider = $crtElmt.find('.weight-criterion-slider');
         if(!btnV.hasClass('clicked')){
+
             if($crtElmt.hasClass('new')){
 
               $crtElmt.remove();
@@ -530,7 +532,7 @@ $(document).on(
               $crtElmt.find('.lowerbound').val(prevLB);
               $crtElmt.find('.c-weighting').empty().append(`(${prevWeight} %)`);
               $crtElmt.find('select[name*="cName"]').val($crtElmt.find('select[name*="cName"] option[selected="selected"]').val());
-
+              console.log($crtElmt.find('select[name*="cName"]'));
             }
         } else {
             btnV.removeClass('clicked');
@@ -579,7 +581,7 @@ $(document).on(
       }
     })
 
-    $crtElmt.modal('open');
+    $crtElmt.find('.modal').modal('open');
 
 
   }
@@ -938,9 +940,12 @@ function handleCNSelectElems (target) {
       potentialDuplicate = inUse.reduce((acc, v, i, arr) => arr.indexOf(v) !== i && acc.indexOf(v) === -1 ? acc.concat(v) : acc, [])
       if(potentialDuplicate.length){
         $targetPartSelect.find(`option[value="${potentialDuplicate[0]}"]`).prop('disabled',true);
+        console.log(`option[value="${potentialDuplicate[0]}"]`);
         $targetPartSelect.find('option').each(function(i,e){
           if(!inUse.includes($(e).val())){
             $targetPartSelect.val($(e).val());
+            console.log($(e).val());
+
             return false;
           }
         })
@@ -1100,7 +1105,7 @@ $(document).on('click','[href="#deleteStage"]', function () {
 });
 
 $(document).on('click','[href="#deleteCriterion"]', function () {
-    alert()
+
   $('.remove-criterion').data('cid', $(this).data('cid'));
   $('#deleteCriterion').css('z-index',9999);
 });
@@ -1188,7 +1193,7 @@ $(document).on('click', '.remove-criterion',function(e) {
       })
 
   }
-    alert($(this).data('cid'));
+
   if ($(this).data('cid')) {
 
       urlToPieces = dcurl.split('/');
@@ -1320,7 +1325,7 @@ $('.stage-modal').modal({
 
 $('.criterion-modal').modal({
   complete: function(){
-
+      alert('yes');
     let modC = $(this)[0].$el;
     let $crtElmt = modC.closest('.criteria-list--item');
     let btnV = $crtElmt.find('.c-validate');
@@ -1352,6 +1357,8 @@ $('.criterion-modal').modal({
         $crtElmt.find('input[name*="type"]:checked').attr('checked',"checked");
         $crtElmt.find('.cname').text($crtElmt.find('select[name*="cName"] option:selected').text().split(' ').slice(1).join(' '));
         $crtElmt.find('.cname').attr('data-icon',$crtElmt.find('select[name*="cName"] option:selected').attr('data-icon'));
+        console.log($crtElmt.find('select[name*="cName"] option:selected').text().split(' ').slice(1).join(' '));
+        console.log($crtElmt.find('select[name*="cName"] option:selected').attr('data-icon'));
         $crtElmt.find('.c-weighting').empty().append(`(${newValue} %)`);
 
 
@@ -1614,8 +1621,6 @@ $(document).on('click','.s-validate', function(e) {
           enddateDDMMYYYY = $($("#" + $('.dp-end')[j].id)).pickadate('picker').get('select', 'dd/mm/yyyy');
           tmp[i][1] = startdateDDMMYYYY;
           tmp[i+1][1] = enddateDDMMYYYY;
-          tmp[i+2][1] = gstartdateDDMMYYYY;
-          tmp[i+3][1] = genddateDDMMYYYY;
           tmp[i] = tmp[i].join('=');
           tmp[i+1] = tmp[i+1].join('=');
           tmp[i+2] = tmp[i+2].join('=');
@@ -1668,8 +1673,10 @@ $(document).on('click','.c-validate', function(e) {
   $crtElmt = $curRow.closest('.criteria-list--item');
   //$crtElmt = $(this).closest('.criterion');
   $curRow.find('.red-text').remove();
-  sid = $btn.hasClass('unvalidate-btn') ? $btn.data('sid') : $(this).closest('.stage').data('id');
-  cid = $(this).data('cid');
+  oid = $(this).closest(".output-item").data('oid');
+  console.log($btn.attr('data-cid'));
+  cid = $btn.attr('data-cid');
+
   crtVal = $curRow.find('select[name*="cName"] option:selected').val();
   typeVal = $curRow.find('[name*="type"]:checked').val();
   isRequiredComment = $curRow.find('[name*="forceCommentCompare"]:checked').val();
@@ -1678,16 +1685,17 @@ $(document).on('click','.c-validate', function(e) {
   lowerbound = $curRow.find('[name*="lowerbound"]').val();
   upperbound = $curRow.find('[name*="upperbound"]').val();
   step = $curRow.find('[name*="step"]').val();
-  weight = +$curRow.find('.weight input').val();
+  weight = $curRow.find('.weight input').val();
+  console.log(weight);
 
 
   const $form = $('.c-form form');
 
   const urlToPieces = vcurl.split('/');
-  urlToPieces[urlToPieces.length - 4] = sid;
+  urlToPieces[urlToPieces.length - 4] = oid;
   urlToPieces[urlToPieces.length - 1] = cid;
   const url = urlToPieces.join('/');
-
+    alert(cid);
   $form.find('[name*="cName"]').val(crtVal);
   $form.find('[name*="type"]').eq(typeVal - 1).prop('checked',true);
   $form.find('[name*="forceCommentCompare"]').prop('checked', isRequiredComment);
@@ -1698,11 +1706,17 @@ $(document).on('click','.c-validate', function(e) {
   $form.find('[name*="step"]').val(step);
   $form.find('[name*="weight"]').val(weight);
 
+
   $.post(url, $form.serialize())
   .done(function(data) {
-  /*    $btn.attr('data-cid',data.cid);
+      console.log($btn);
+      $btn.attr('data-cid',data.cid);
+
+      $crtElmt .attr('data-cid',data.cid);
       $deleteBtn.attr('data-cid',data.cid);
+      handleCNSelectElems($crtElmt);
       $curRow.modal('close');
+      console.log($curRow);
       if(typeVal == 1){
         $crtElmt.find('.bounds').show().empty().append(`[${ Math.round(parseFloat(lowerbound.replace(",",".")))}-${ Math.round(parseFloat(upperbound.replace(",","."))) }]`);
         $crtElmt.find('.stepping').show().empty().append(Math.round(parseFloat(step.replace(",",".")) * 100) / 100);
@@ -1715,7 +1729,7 @@ $(document).on('click','.c-validate', function(e) {
         $crtElmt.find('.comment-value').empty().append((commentSign == 'smaller' ? '<' : '≤') + Math.round(parseFloat(commentValue.replace(",","."))));
       } else {
         $crtElmt.find('.comment-container').hide();
-      }*/
+      }
   })
   .fail(function(data) {
       Object.keys(data.responseJSON).forEach(function(key){
@@ -1757,8 +1771,8 @@ $(document).on('click','.o-validate', function(e) {
         .replace(/__otpIndex__/g, $outputList.children().length - 2)
         .replace(/__otpNb__/g, $outputList.children().length - 1)
         .replace(/__type__/g, typeVal)
-        .replace(/__startdate__/g, startdate.getMonth()+"/"+startdate.getDay() )
-        .replace(/__enddate__/g, enddate.getMonth()+"/"+enddate.getDay() )
+        .replace(/__startdate__/g, startdate.getFullYear()+'-'+(startdate.getMonth()+1)+'-'+startdate.getDate() )
+        .replace(/__enddate__/g, enddate.getFullYear()+'-'+(enddate.getMonth()+1)+'-'+enddate.getDate() )
         //.replace(/__weight__/g, Math.round(100/(nbCriteria + 1)))
         .replace(/__stgNb__/g, $('.stage').index($section.closest('.stage')));
 
@@ -1768,6 +1782,7 @@ $(document).on('click','.o-validate', function(e) {
     $crtProto.find('.modal').modal();
     $crtProto.find('.tooltipped').tooltip();
     var date = startdate.getFullYear()+'-'+(startdate.getMonth()+1)+'-'+startdate.getDate();
+    console.log(date);
     var time = startdate.getHours() + ":" + startdate.getMinutes() + ":" + startdate.getSeconds();
     startdate = date+' '+time;
     var date = enddate.getFullYear()+'-'+(enddate.getMonth()+1)+'-'+enddate.getDate();
@@ -1780,7 +1795,7 @@ $(document).on('click','.o-validate', function(e) {
 
     const urlToPieces = vourl.split('/');
     urlToPieces[urlToPieces.length - 4] = sid;
-    urlToPieces[urlToPieces.length - 1] = 0;
+    urlToPieces[urlToPieces.length - 1] = oid;
     const url = urlToPieces.join('/');
 
 
@@ -1792,8 +1807,9 @@ $(document).on('click','.o-validate', function(e) {
     console.log(enddate);
     $.post(url, $form.serialize())
         .done(function(data) {
-            $btn.attr('data-oid',data.oid);
+            $crtProto.attr('data-oid',data.oid);
             $deleteBtn.attr('data-oid',data.oid);
+            $btn.closest('.modal').modal('close');
 
         })
         .fail(function(data) {

@@ -1404,17 +1404,16 @@ class Stage extends DbObject
 
     public function getStartdateDay()
     {
-        $year = $this->startdate->format('Y');
-        $month = $this->startdate->format('m');
-        $day = $this->startdate->format('d');
-        return (int) date("z",mktime("12","00","00",(int)$month,(int)$day,(int)$year));
+        return $this->startdate->format('U');
+
     }
 
     public function getPeriod()
     {
 
-        $diff = $this->startdate->diff($this->enddate)->format("%a");
-        return $diff;
+        $sD = $this->startdate->format("U");
+        $sE = $this->enddate->format("U");
+        return $sE - $sD;
     }
 
     /**

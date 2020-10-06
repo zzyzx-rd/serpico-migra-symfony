@@ -1,4 +1,4 @@
-<li class="stage-element {{dateType ~ '-dates' ~ (isEmbedded ? ' embedded' : '')}} tooltipped" data-sd="{{ startdateDay }}" data-p="{{ period }}" data-tooltip='{% include "components/stage_holder__item.html.twig" with { stage: stage, embeddedStages: embeddedStages } %}' data-position="top" data-html="true" {% if not visibleEl %}style="display:none"{% endif %}>
+  <li class="stage-element {{dateType ~ '-dates' ~ (isEmbedded ? ' embedded' : '')}} tooltipped" data-sd="{{ startdateDay }}" data-p="{{ period }}" data-tooltip='{% include "components/stage_holder__item.html.twig" with { stage: stage, embeddedStages: embeddedStages } %}' data-position="top" data-html="true" {% if not visibleEl %}style="display:none"{% endif %}>
 
         {#{% if dateType == 's' %}#}
         
@@ -15,16 +15,16 @@
       {% set diffDays = startdate.diff(enddate) %}
   
       {% if diffDays.days > 4 %}
-        <span class="s-day s-dates">{{startdate|format_datetime('short', 'none', pattern='dd')|number_format}}</span>
-        <span class="e-day s-dates">{{enddate|format_datetime('short', 'none', pattern='dd')|number_format}}</span>
+          <span class="s-day s-dates" >{{startdate|format_datetime('short', 'none', pattern='dd')|number_format}}</span>
+          <span class="e-day s-dates" >{{enddate|format_datetime('short', 'none', pattern='dd')|number_format}}</span>
       {% else %}
       {% if diffDays.days == 0 %}
-            <span class="e-day s-dates single-date">
-              {{enddate|format_datetime('short', 'none', pattern='dd')|number_format}}
+            <span class="e-day s-dates single-date" >
+              {{enddate|format_datetime('short', 'none', pattern='dd')|number_format}}/{{enddate|format_datetime('short', 'none', pattern='M')|number_format}}
             </span>
           {% else %}
             <span class="e-day s-dates single-date m-days">
-              {{ startdate|format_datetime('short', 'none', pattern='dd')|number_format ~ ' - ' ~ enddate|format_datetime('short', 'none', pattern='dd')|number_format}}
+              {{ startdate|format_datetime('short', 'none', pattern='dd')|number_format ~ ' - ' ~ enddate|format_datetime('short', 'none', pattern='dd')|number_format}}/{{startdate|format_datetime('short', 'none', pattern='M')|number_format}}
             </span>
           {% endif %}
       {% endif %}
