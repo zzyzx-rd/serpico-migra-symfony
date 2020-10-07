@@ -966,6 +966,10 @@ class SettingsController extends MasterController
 
         $followerMail = $_POST['follower'];
         $this->forward('App\Controller\MailController::sendMail', ['recipients' => [$followerMail], 'settings' => ['recipientUsers' => false], 'actionType' => 'launchingFollowupConfirmation']);
+        $em = $this->em;
+        $ddAdmins = $em->getRepository(User::class)->findByRole(4);
+
+        $this->forward('App\Controller\MailController::sendMail', ['recipients' => $ddAdmins, 'settings' => ['follower' => $followerMail], 'actionType' => 'launchingFollowupSubscription']);
         return new JsonResponse(['msg' => 'success'],200);
     }
 

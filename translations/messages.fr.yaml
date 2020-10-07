@@ -1265,6 +1265,12 @@ mails:
   launchingFollowupConfirmation:
     subject: Merci de suivre notre lancement !
     message: "Toute l'équipe de Dealdrive vous remercie d'assister au lancement de la plateforme. Vous serez mis au courant lors du lancement et en plus de l'offre gratuite, bénéficierez de fonctionnalités payantes sans frais pendant 2 mois"
+  
+  launchingFollowupSubscription:
+    subject: Un utilisateur suit votre lancement !
+    intro_begin: "L'utilisateur"
+    intro_end: vous suit.
+    message: "Dernier petit coup de rein de votre côté et il saura très content de savoir le produit sorti !"
     
   subscriptionConfirmation:
     subject: Bienvenue sur Serpico, la solution de suivi client collaborative

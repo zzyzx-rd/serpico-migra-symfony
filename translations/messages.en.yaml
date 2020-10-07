@@ -1167,6 +1167,12 @@ mails:
     subject: "Thank you for following Dealdrive's launching !"
     message: "All our team want to thank you assisting to our product launch. Aside from our free plan, you will benefit from paying functionities during the next 2 months"
 
+  launchingFollowupSubscription:
+    subject: A user is following your launching !
+    intro_begin: The user
+    intro_end: is following you.
+    message: "Last effort from your side and this user will be delighted to see that Dealdrive is live !"
+
   subscriptionConfirmation:
     subject: Bienvenue sur Serpico, la solution de suivi client collaborative
     message1: Vous avez rejoint lunivers de Serpico, la plateforme collaborative qui relie votre équipe à vos partenaires 💪 !
