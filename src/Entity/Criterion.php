@@ -331,13 +331,7 @@ class Criterion extends DbObject
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getOutputs()
-    {
-        return $this->outputs;
-    }
+
 
     /**
      * @param Output $output
@@ -720,9 +714,9 @@ class Criterion extends DbObject
     }
 
     /**
-     * @return ArrayCollection
+     * @return mixed
      */
-    public function getOutput(): ArrayCollection
+    public function getOutput()
     {
         return $this->output;
     }

@@ -94,23 +94,79 @@ function initPickates(){
 }
 
 initPickates();
+$(document).ready(function(){
 
+    console.log($('.value-scale').material_select());
+    console.log($('.scale').material_select());
+});
+function setCookie(key, value, expiry) {
+    var expires = new Date();
+    expires.setTime(expires.getTime() + (expiry * 24 * 60 * 60 * 1000));
+    document.cookie = key + '=' + value + ';expires=' + expires.toUTCString();
+}
+moment().format();
 var now = new Date();
-var annee = now.getFullYear();
-var c = getDay();
-var tDays = ndDayPerYears(annee);
-var annee = now.getFullYear();
+var annee   = now.getFullYear();
+var anneeSuiv = annee + 1
 var startCal = $('#createActivity').find('.dp-start');
 var endCal = $('#createActivity').find('.dp-end');
 var startDateTS = (startCal.val() == "") ? Date.now() : new Date(startCal.val());
 var endDateTS = (endCal.val() == "") ? startDateTS : new Date(endCal.val());
 var startDate = new Date(startDateTS);
 var endDate = new Date(endDateTS);
+var time = getCookie("time");
+var valueTime = getCookie("valueTime");
+
+       if(time== "undefined" || time== "" ){
+
+           time = "years";
+           setCookie('time',time,365);
+           valueTime = annee;
+           setCookie('valueTime',valueTime,365);
+       }
+console.log(time);
+    if ( time == "years"){
+        $('.scale option[value=years]').attr('selected','selected');
+
+        $('.value-scale')
+            .append('<option value="'+annee+'">'+annee+'</option>')
+            .append('<option value="'+anneeSuiv+'">'+anneeSuiv+'</option>');
+        $('.value-scale option[value='+valueTime+']').attr('selected','selected');
+
+    } else {
+        $('.scale option[value=trimester]').attr('selected','selected');
+        for (var u=0; u<2;u++) {
+            var Y = annee +u;
+            for (var i = 1; i < 5; i++) {
+                $('.value-scale')
+                    .append('<option value="q-' + i + '-' + Y + '">q-' + i + '-' + Y + '</option>')
+
+            }
+        }
+        console.log(valueTime);
+        $('.value-scale option[value='+valueTime+']').attr('selected','selected');
+    }
+
 
 
 startCal.pickadate('picker').set('select',startDate);
 endCal.pickadate('picker').set('select',endDate).set('min',startDate);
-
+function getCookie(cname) {
+    var name = cname + "=";
+    var decodedCookie = decodeURIComponent(document.cookie);
+    var ca = decodedCookie.split(';');
+    for(var i = 0; i <ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            c.substring(name.length, c.length);
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+}
 function initETIcons() {
   const $stylizableSelects = $('#updateEvent select');
   $stylizableSelects.find('option').each(function (_i, e) {
@@ -178,6 +234,26 @@ $(function () {
     $('.start-btn,.launch-btn,.modify-btn').removeData().data('pid', $(this).data('pid'));
   });
 
+    var now = new Date();
+    var annee   = now.getFullYear();
+    if ( time == "years"){
+        annee = parseInt(valueTime) ;
+
+    }
+    anneeSuiv=(annee + 1);
+  $('.dmin').append('<span>'+annee+'</span> <div class="line"></div>');
+  $('.dmax').append('<span>'+anneeSuiv+'</span><div class="line"></div>');
+  var centralElWidth = $('.activity-content-stage:visible').eq(0).width();
+  var now = new Date();
+  var annee = now.getFullYear();
+  var c = getDay();
+  var tDays = ndDayPerYears(annee);
+  var dateChevron = $('.chevron');
+
+
+  var echelle = centralElWidth / tDays;
+
+/*
   if($('.no-processes').length){
 
     $('.dmin').append('<span class="starting-mark">' + annee + '</span>' + '<div class="line-no-processes"></div>');
@@ -188,7 +264,7 @@ $(function () {
     $('.dmin').append(annee + '<div class="line"></div>');
     $('.dmax').append(annee + 1 + '<div class="line"></div>');
   }
-
+*/
   /**
    * Display activities in a proper way
    * @param {HTMLInputElement} $activities
@@ -280,15 +356,500 @@ $(function () {
     //}, 200);
   });
 
-  /*
-  $(document).on('mouseenter','.stage-item-button',function(){
+  dateUpdate();
+function dateUpdate() {
+    var time = getCookie("time");
+    var valueTime = getCookie("valueTime");
+    var month = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
+    $('#activities-container').find('.months-ref').children().remove()
+    if (time == "years") {
+        for (var i = 0; i < 12; i++) {
+            $('#activities-container').find('.months-ref').append('<div class="col s1">' + month[i] + '</div>');
+        }
+        date3 = new Date(valueTime, 0, 1);
+        date4 = new Date((parseInt(valueTime) + 1), 0, 1);
+        $('.dmax').append('<span class="suiv" style="position: absolute;top: -20%;margin-left:5%"></span>');
+        $('.dmin').append('<span class="prec" style="position: absolute;top: -20%;margin-left:5%"></span>');
+        $('.prec').text((parseInt(valueTime) - 1));
+        $('.suiv').text((parseInt(valueTime) + 1));
+        var tDays = ndDayPerYears((parseInt(valueTime)));
+    } else {
+        console.log(valueTime);
+        valueTime = valueTime.replace("q-", " ");
+
+
+        var dateTri = dateTrimester(parseInt(valueTime.substring(3, 7)), (parseInt(valueTime[1])));
+        var date3 = dateTri[0];
+        var date4 = dateTri[1];
+        qT = (parseInt(valueTime[1]) == 1) ? 4 : parseInt(valueTime[1]) - 1;
+        qTSuiv = (parseInt(valueTime[1]) + 1 == 5) ? 1 : parseInt(valueTime[1]) + 1;
+        var tDays = dayDiff(date3, date4);
+        $('.dmin span').remove();
+        $('.dmax span').remove();
+        $('.dmax').prepend('<span class="suiv" style="position: absolute;top: -20%;right: 20%;"></span>');
+        $('.dmin').append('<span class="prec" style="position: absolute;top: -20%;left: 20%;"></span>');
+        var nextYear = (parseInt(valueTime.substring(3, 7)) + 1);
+        var oldYear = (parseInt(valueTime.substring(3, 7)) - 1);
+        if (qT == 4) {
+            $('.prec').text(' q-' + (qT) + '-' + oldYear);
+        } else {
+
+            $('.prec').text(' q-' + (qT) + '-' + parseInt(valueTime.substring(3, 7)));
+
+        }
+        if (qTSuiv == 1) {
+            $('.suiv').text(' q-' + (qTSuiv) + '-' + nextYear);
+        } else {
+            $('.suiv').text(' q-' + (qTSuiv) + '-' + parseInt(valueTime.substring(3, 7)));
+        }
+
+        $('.dmin').prepend('<span>' + (date3.getDate()) + '/' + (date3.getMonth() + 1) + '</span>');
+        $('.dmax').prepend('<span>' + (date4.getDate()) + '/' + (date4.getMonth() + 1) + '</span>');
+
+
+        width = 100 / 13;
+        week = moment(date3).week();
+        week = (week == 2) ? 1 : week;
+        for (var m = week; m < week + 13; m++) {
+            test = $('#activities-container').find('.months-ref');
+
+            $(test).append('<div class="col " style="width:' + (100 / 13) + '% ">s' + (m) + '</div>');
+        }
+
+    }
+
+
+    div = $('.months-ref div.col').length;
+    if (time == "years") {
+        $('.activity-content-stage').css({
+            'background': 'repeating-linear-gradient(90deg, #f3ccff2b, #63009445 ' + centralElWidth / 12 + 'px, #ffffff ' + centralElWidth / 12 + 'px, #ffffff ' + centralElWidth / 6 + 'px)'
+        });
+    } else {
+
+
+        $('.activity-content-stage').css({
+            'background': 'repeating-linear-gradient(90deg, #f3ccff2b, #63009445 ' + (((centralElWidth) / div)) + 'px, #ffffff ' + (((centralElWidth) / div)) + 'px, #ffffff ' + ((centralElWidth) / (div / 2)) + 'px)'
+        });
+
+    }
+    var c = getDay();
+    var now = new Date();
+
+    var dateChevron = $('.chevron');
+    var actCurDate = $('.curDate');
+
+    var echelle = centralElWidth / tDays;
+    if (date4 > now && now > date3) {
+        dateChevron.show();
+        dateChevron.css({'left': 'calc(' + Math.round(10000 * (c / tDays)) / 100 + '% - 10px)'});
+        actCurDate.each(function (i, e) {
+            $(e).css({'left': Math.round(10000 * (c / tDays)) / 100 + '%'});
+            $(e).show();
+        });
+    } else {
+        dateChevron.hide();
+        actCurDate.each(function (i, e) {
+            $(e).hide();
+        });
+    }
+
+
+    $.each($('.activity-component'), function () {
+        var $this = $(this);
+        $(this).closest('.activity-holder').show();
+        var sd = parseInt($this.data("sd"));
+        var p = parseInt($this.data("p"));
+        var noStage = false;
+
+        var id = $this.data("id");
+        var date1 = new Date(sd * 1000);
+        var date2 = new Date((sd + p) * 1000);
+        var time = getCookie("time");
+        var valueTime = getCookie("valueTime");
+
+
+        var pos = posScale(month, time, date1, date2, date3, date4);
+
+
+        sd = dayof(date3, date1);
+        sd = (sd < 0) ? -sd : sd;
+        sdD = dayofyear(date1);
+
+        if (time == "years") {
+            p = ndDayPerYears(parseInt(valueTime));
+
+        } else {
+            p = dayof(date3, date4);
+
+        }
+        p = (dayof(date3, date1) > p) ? p : dayof(date3, date4);
+
+        // p1 = parseInt(dayDiff(date2,date4));
+        // p2 = parseInt(dayDiff(date2,date1));
+
+        // p = (p2 < p1) ? p1 : p2;
+        //   console.log(p1,p2,p);
+        console.log(sd, sdD, p, $(this), pos);
+        if (pos == "in") {
+
+            pxWidthP = (p + 1) * echelle;
+            pxWidthSD = sd * echelle;
+            pctWidthSD = getPercentage(pxWidthSD, centralElWidth);
+            pctWidthP = getPercentage(pxWidthP, centralElWidth);
+            $this.css({'margin-left': pctWidthSD + "%"});
+            $this.css({'width': pctWidthP + "%"});
+
+            $this.find('.stage-element').each(function () {
+                var ssd = $(this).data("sd");
+                var sp = $(this).data("p");
+                datest = new Date(parseInt(ssd) * 1000);
+                dateen = new Date((parseInt(ssd) + sp) * 1000);
+                ssd = dayof(date3, datest);
+                sp = dayDiff(datest, dateen);
+
+                $(this).find('.s-day').text(datest.getDate());
+                $(this).find('.e-day').text(dateen.getDate());
+                sPctWidthSD = (ssd - sd) / p;
+                sPctWidthP = Math.max(3, (parseInt(sp) + 1)) / (p + 1);
+                console.log(ssd + sp > c);
+                $(this).css({
+                    'margin-left': Math.round(10000 * sPctWidthSD) / 100 + "%",
+                    'width': Math.round(10000 * sPctWidthP) / 100 + "%",
+                    'background': ssd >= c ? '#5CD08F' : (parseInt(ssd) + parseInt(sp) > c ? 'linear-gradient(to right, transparent, transparent ' + Math.round(10000 * (c - ssd) / sp) / 100 + '%, #7942d0 ' + Math.round(10000 * (c - ssd) / sp) / 100 + '%), repeating-linear-gradient(61deg, #7942d0, #7942d0 0.5rem, transparent 0.5px, transparent 1rem)' : 'gray'),
+                    'height': '7px',
+                    'border-radius': '0.3rem',
+                    'display': "block",
+                });
+            });
+
+            $this.find('.event').each(function () {
+
+                var od = $(this).data("od");
+                var sp = $(this).data("p");
+
+                sPctWidthSD = (od - sd) / p;
+                sPctWidthP = Math.max(3, (sp + 1)) / (p + 1);
+
+                $(this).css({
+                    'margin-left': Math.round(10000 * sPctWidthSD) / 100 + "%",
+                    'width': Math.round(10000 * sPctWidthP) / 100 + "%",
+                    'height': '15px',
+                    'border-radius': '0.3rem',
+                });
+            });
+        } else if (pos.includes("ext")) {
+
+            if (pos.includes("end")) {
+
+                var dayext = dayDiff(date3, date2);
+
+                pxWidthP = dayext * echelle;
+
+
+                pctWidthP = getPercentage(pxWidthP, centralElWidth);
+                $this.css({'margin-left': 0 + "%"});
+                $this.css({'width': pctWidthP + "%"});
+                $this.parent().css({'overflow': "hidden"});
+
+
+                $this.find('.stage-element').each(function () {
+                    console.log($(this));
+                    var ssd = $(this).data("sd");
+                    var sp = $(this).data("p");
+
+                    datest = new Date(parseInt(ssd) * 1000);
+                    dateen = new Date((parseInt(ssd) + parseInt(sp)) * 1000);
+                    /*if (!(datest > date3 && datest < date4) ) {
+                        ssd = dayofyear(datest);
+                        sd=ssd;
+                    }*/
+                    if ((datest > date3 && datest < date4) || (dateen > date3 && dateen < date4)) {
+                        noStage = true;
+                        ssdOf = dayof(date3, datest);
+                        ssd = dayofyear(datest);
+                        sp = dayDiff(date3, dateen);
+                        console.log(date3, dateen);
+                        $(this).find('.s-day').text(datest.getDate() + '/' + (datest.getMonth() + 1));
+                        $(this).find('.e-day').text(datest.getDate());
+
+
+                        sPctWidthSD = (ssdOf - sd) / (p);
+                        console.log(ssdOf, c)
+                        sPctWidthP = Math.max(3, (parseInt(sp) + 1)) / ((p) + 1);
+                        console.log(sPctWidthSD, sPctWidthP);
+                        $(this).css({
+                            'display': "block",
+                            'margin-left': sPctWidthSD < 0 ? 0 + '%' : Math.round(10000 * sPctWidthSD) / 100 + "%",
+                            'width': dateen > date4 ? '100%' : Math.round(10000 * sPctWidthP) / 100 + "%",
+                            'background': ssd >= c ? '#5CD08F' : (parseInt(ssd) + parseInt(sp) > c ? 'linear-gradient(to right, transparent, transparent ' + Math.max(1, Math.round(10000 * (c - ssdOf) / sp) / 100) + '%, #7942d0 ' + Math.round(10000 * (c - ssdOf) / sp) / 100 + '%), repeating-linear-gradient(61deg, #7942d0, #7942d0 0.5rem, transparent 0.5px, transparent 1rem)' : 'gray'),
+                            'border-radius': '0.3rem',
+                            'display': "block",
+                        });
+                    } else {
+                        $(this).css({
+                            'display': "none",
+
+                        });
+                    }
+                });
+
+                $this.find('.event').each(function () {
+                    var od = $(this).data("od");
+                    var sp = $(this).data("p");
+
+                    sPctWidthSD = (od - sd) / p;
+                    sPctWidthP = Math.max(3, (sp + 1)) / (p + 1);
+
+                    $(this).css({
+                        'margin-left': Math.round(10000 * sPctWidthSD) / 100 + "%",
+                        'width': Math.round(10000 * sPctWidthP) / 100 + "%",
+                        'height': '15px',
+                        'border-radius': '0.3rem',
+                    });
+                });
+            } else {
+                var dayext = dayDiff(date1, date4);
+                pxWidthP = dayext * echelle;
+                pxWidthSD = sd * echelle;
+                pctWidthSD = getPercentage(pxWidthSD, centralElWidth);
+                pctWidthP = getPercentage(pxWidthP, centralElWidth);
+
+                $this.css({'margin-left': pctWidthSD + "%"});
+                $this.css({'width': 100 + "%"});
+                $this.parent().css({'overflow': "hidden"});
+
+                $this.find('.stage-element').each(function () {
+
+                    var ssd = $(this).data("sd");
+                    var sp = $(this).data("p");
+                    datest = new Date(parseInt(ssd) * 1000);
+                    dateen = new Date((parseInt(ssd) + sp) * 1000);
+
+                    ssdOf = dayof(date3, datest);
+                    ssd = dayofyear(datest);
+                    sp = dayDiff(datest, dateen);
+                    if (ssdOf > tDays) {
+                        $(this).css({
+                            'display': "none",
+                        });
+                    } else {
+                        noStage = true;
+                        $(this).css({
+                            'display': "block",
+                        });
+                    }
+                    sPctWidthSD = (ssdOf - sd) / p;
+                    sPctWidthP = Math.max(3, (parseInt(sp) + 1)) / ((p) + 1);
+                    $(this).find('.s-day').text(dateen.getDate());
+                    $(this).find('.e-day').text(dateen.getDate() + '/' + (dateen.getMonth() + 1));
+                    console.log(parseInt(ssd) + parseInt(sp), parseInt(ssdOf), parseInt(ssd), parseInt(sp), c, $(this));
+                    $(this).css({
+                        'margin-left': Math.round(10000 * sPctWidthSD) / 100 + "%",
+                        'width': Math.min(Math.round(10000 * sPctWidthP) / 100, 100) + "%",
+                        'background': ssd >= c ? '#5CD08F' : (parseInt(ssd) + parseInt(sp) > c ? 'linear-gradient(to right, transparent, transparent ' + Math.max(1, Math.round(10000 * (c - ssdOf) / sp) / 100) + '%, #7942d0 ' + Math.round(10000 * (c - ssdOf) / sp) / 100 + '%), repeating-linear-gradient(61deg, #7942d0, #7942d0 0.5rem, transparent 0.5px, transparent 1rem)' : 'gray'),
+                        'height': '7px',
+                        'border-radius': '0.3rem',
+                    });
+
+                });
+                //$(this).fid(.append('<i class="fas fa-arrow-right" style=" top: 20%"  ></i>');
+                $this.find('.event').each(function () {
+                    var od = $(this).data("od");
+                    var sp = $(this).data("p");
+
+                    sPctWidthSD = (od - sd) / p;
+                    pxWidthP = dayext * echelle;
+
+                    $(this).css({
+                        'margin-left': Math.round(10000 * sPctWidthSD) / 100 + "%",
+                        'width': Math.round(10000 * sPctWidthP) / 100 + "%",
+                        'height': '15px',
+                        'border-radius': '0.3rem',
+                    });
+                });
+            }
+        } else if (pos == "int") {
+
+            pxWidthP = (p + 1) * echelle;
+            pxWidthSD = sd * echelle;
+            pctWidthSD = getPercentage(pxWidthSD, centralElWidth);
+            pctWidthP = getPercentage(pxWidthP, centralElWidth);
+            $this.css({'margin-left': (pctWidthSD) < 0 ? pctWidthSD + "%" : "0%"});
+            $this.css({'width': Math.min(pctWidthP, 100) + "%"});
+            $this.parent().css({'overflow': "hidden"});
+
+            $this.find('.stage-element').each(function () {
+                var ssd = $(this).data("sd");
+                var sp = $(this).data("p");
+                datest = new Date(parseInt(ssd) * 1000);
+                dateen = new Date((parseInt(ssd) + parseInt(sp)) * 1000);
+                if (dateen > date3) {
+                    noStage = true;
+                    ssdOf = dayof(date3, datest);
+                    ssd = dayofyear(datest);
+                    sp = dayDiff(datest, dateen);
+                    console.log(dateen, date3)
+
+
+                    //ssd = (ssd < 0) ? (-ssd) : (ssd);
+                    console.log(Math.round(10000 * (c - ssd) / sp) / 100);
+                    sPctWidthSD = (ssdOf - sd) / (p);
+                    sPctWidthP = Math.max(3, (parseInt(sp) + 1)) / ((p) + 1);
+                    $(this).find('.s-day').text(datest.getDate() + '/' + (datest.getMonth() + 1));
+                    $(this).find('.e-day').text(dateen.getDate() + '/' + (dateen.getMonth() + 1));
+
+                    $(this).css({
+                        'margin-left': (ssdOf) >= 0 ? Math.round(10000 * sPctWidthSD) / 100 + "%" : 0 + '%',
+                        'width': Math.min(Math.round(10000 * sPctWidthP) / 100, 100) + "%",
+                        'background': (ssd) >= c ? '#5CD08F' : (ssd + sp > c ? 'linear-gradient(to right, transparent, transparent ' + Math.round(10000 * (c - ssdOf) / sp) / 100 + '%, #7942d0 ' + Math.round(10000 * (c - ssdOf) / sp) / 100 + '%), repeating-linear-gradient(61deg, #7942d0, #7942d0 0.5rem, transparent 0.5px, transparent 1rem)' : 'gray'),
+                        'height': '7px',
+                        'border-radius': '0.3rem',
+                        'display': "block",
+                    });
+                } else {
+                    $(this).css({
+                        'display': "none",
+
+                    });
+                }
+            });
+
+            $this.find('.event').each(function () {
+                var od = $(this).data("od");
+                var sp = $(this).data("p");
+
+                sPctWidthSD = (od - sd) / p;
+                sPctWidthP = Math.max(3, (sp + 1)) / (p + 1);
+
+                $(this).css({
+                    'margin-left': Math.round(10000 * sPctWidthSD) / 100 + "%",
+                    'width': Math.round(10000 * sPctWidthP) / 100 + "%",
+                    'height': '15px',
+                    'border-radius': '0.3rem',
+                });
+            });
+        } else {
+            $(this).closest('.activity-holder').hide();
+            $this.find('.e-day').each(function () {
+                $(this).css('margin-right', '90%');
+            })
+            $this.css({'margin-left': 0 + "%"});
+            $this.css({'width': 0 + "%"});
+
+            $this.find('.stage-element').each(function () {
+
+
+                $(this).css({});
+            });
+
+            $this.find('.event').each(function () {
+
+
+                $(this).css({});
+            });
+
+
+        }
+
+        if (!noStage) {
+            $this.hide();
+        }
+    })
+};
+
+    function getNbJoursMois(mois, annee) {
+        var lgMois = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        if ((annee%4 == 0 && annee%100 != 0) || annee%400 == 0) lgMois[1] += 1;
+        return lgMois[mois]; // 0 < mois <11
+    }
+
+    function dateTrimester(year,qT){
+        var tbl = [];
+        for(var i=0;i<2;i++){
+            day= moment(year, "YYYY").quarter(qT+i).toDate();
+
+
+
+
+             if(day.getDay()!=1) {
+                 if (i != 1) {
+                     d = (day.getDay() == 0) ? 1 : (8-day.getDay()%7);
+                     day.setDate(day.getDate()+d);
+
+
+                 } else {
+
+                     d = (day.getDay() == 0) ? 0 : (7-day.getDay()%7);
+                     day.setDate(day.getDate()+d);
+
+
+                 }
+
+             } else if (i == 1) {
+                 if(day.getDay()==1) {
+                     m = (day.getMonth() == 12) ? 1 : day.getMonth()+1;
+                     day.setMonth(m);
+                     day.setDate(getNbJoursMois(12 , year-1));
+                     day.setFullYear(year-1);
+                 }
+
+
+             } else {
+
+             }
+
+            tbl.push(day);
+
+        }
+        return tbl;
+
+
+    }
+
+    function posScale(month,time,date1,date2,date3,date4) {
+            var pos= " ";
+            console.log(date1,date2,date3,date4);
+            if (date1 < date3) {
+
+                if (date2 < date3) {
+
+                    pos = " ";
+                }
+                else if(date2 > date4){
+
+                    pos = "int";
+                }
+                else {
+                    pos = " ext ";
+
+                    var dayext = dayDiff(date3,date2);
+                    pos += " end "
+                }
+
+            } else if (date1 < date4) {
+                if (date2 < date4) {
+                    pos = "in";
+
+                }else{
+                    var dayext = dayDiff(date1,date4);
+                    pos = "ext";
+                }
+            } else{
+                pos = " ";
+
+            }
+        console.log(pos);
+
+        return pos;
+    };
+  $('.stage-item-button').on('mouseenter',function(){
       var $this = $(this);
       $this.parent().css('z-index',999);
   }).on('mouseleave',function(){
       var $this = $(this);
       $this.parent().css('z-index',1);
   });
-  */
+  
 
   $(document).on('mouseover',function(e){
     var $this = $(e.target);
@@ -305,9 +866,102 @@ $(function () {
     $('.no-activity-overlay').css('visibility','');
   });*/
 
+    function dayofyear(d) {   // d is a Date object
+        var yn = d.getFullYear();
+        var mn = d.getMonth();
+        var dn = d.getDate();
+        var d1 = new Date(yn,0,1,12,0,0); // noon on Jan. 1
+        var d2 = new Date(yn,mn,dn,12,0,0); // noon on input date
+        var ddiff = Math.round((d2-d1)/864e5);
+        return ddiff+1;
+    }
+    function dayof(d,d2) {   // d is a Date object
+        var yn = d.getFullYear();
+        var mn = d.getMonth();
+        var dn = d.getDate();
+        var yn2 = d2.getFullYear();
+        var mn2 = d2.getMonth();
+        var dn2 = d2.getDate();
+        var d1 = new Date(yn,mn,dn,12,0,0); // noon on Jan. 1
+        var d2 = new Date(yn2,mn2,dn2,12,0,0); // no
+        var ddiff = Math.round((d2-d1)/864e5);
+        return ddiff+1;
+    }
+    function dayDiff(d1, d2)
+    {
+        d1 = d1.getTime() / 86400000;
+        d2 = d2.getTime() / 86400000;
+        console.log("testttt",d1, d2,Number(d2 - d1).toFixed(0))
+        return new Number(d2 - d1).toFixed(0);
+    }
+    function dateDiff(date1, date2){
+        var diff = {}                           // Initialisation du retour
+        var tmp = date2 - date1;
+
+        tmp = Math.floor(tmp/1000);             // Nombre de secondes entre les 2 dates
+        diff.sec = tmp % 60;                    // Extraction du nombre de secondes
+
+        tmp = Math.floor((tmp-diff.sec)/60);    // Nombre de minutes (partie entière)
+        diff.min = tmp % 60;                    // Extraction du nombre de minutes
+
+        tmp = Math.floor((tmp-diff.min)/60);    // Nombre d'heures (entières)
+        diff.hour = tmp % 24;                   // Extraction du nombre d'heures
+
+        tmp = Math.floor((tmp-diff.hour)/24);   // Nombre de jours restants
+        diff.day = tmp;
+
+        return diff;
+    }
   initETIcons();
 
+    $('.moveP').on('click', function (e) {
+        var valueTime = getCookie('valueTime');
+        var time = getCookie('time');
+        if($(this).hasClass('fa-caret-left')){
 
+
+            if (time == "years") {
+                valueTime= parseInt(valueTime)-1;
+            } else {
+                //parseInt(valueTime.substring(3,7)),(parseInt(valueTime[1])
+                if(parseInt(valueTime[2])==1){
+                    time=parseInt(valueTime.substring(4,8))-1;
+                    valueTime='q-'+4+'-'+time;
+                    console.log(valueTime);
+                }else{
+                    valueTime='q-'+(parseInt(valueTime[2])-1)+'-'+valueTime.substring(4,8);
+                    console.log(valueTime);
+                }
+
+            }
+
+
+            }
+        else{
+            if (time == "years") {
+                valueTime= parseInt(valueTime)+1;
+            } else {
+                //parseInt(valueTime.substring(3,7)),(parseInt(valueTime[1])
+                if(parseInt(valueTime[2])==4){
+                    time=parseInt(valueTime.substring(4,8))+1;
+                    valueTime='q-'+1+'-'+time;
+                    console.log(valueTime);
+
+                }else{
+                    console.log(valueTime.substring(4,8));
+                    valueTime='q-'+(parseInt(valueTime[2])+1)+'-'+valueTime.substring(4,8);
+
+                }
+
+            }
+        }
+        console.log(valueTime);
+        setCookie('valueTime',valueTime,365);
+        valueTimeChange(valueTime);
+        console.log(document.cookie)
+
+        dateUpdate();
+    });
   $('.start-btn,.launch-btn,.modify-btn').on('click', function (e) {
     e.preventDefault();
     $.each($('.red-text'), function () {
@@ -378,25 +1032,127 @@ $(function () {
     urlToPieces = $('#chooseGradableStage .btn').attr('href').split('/');
     urlToPieces[urlToPieces.length - 2] = $(this).val();
     $('#chooseGradableStage .btn').attr('href', urlToPieces.join('/'));
-  });
+  })
+    $('.scale').on('change', function () {
+        var time = $(this).children("option:selected").val();
+        if(time !== undefined) {
+            eraseCookie('time');
+            setCookie('time',time,365);
+            console.log(time);
+            $.each( $('.select-value-scale ').find('.dropdown-content li'), function () {
+
+                console.log($(this).remove());
+
+            });
+            $.each( $('.value-scale ').find('option'), function () {
+
+                console.log($(this).remove());
+
+            });
+
+            if ( time == "years"){
 
 
-    /*$('[href="#createActivity"]').on('click', function () {
-      $('#processSelect').empty();
-      oid = $(this).data('oid');
-      urlToPieces = ipurl.split('/');
-      urlToPieces[urlToPieces.length - 1] = oid;
-      url = urlToPieces.join('/');
-      $.post(url)
-        .done(function (data) {
-          $.each($('.red-text'), function () {
-            $(this).remove();
-          });
-          $('#processSelect').append($('<option>' + '(Non liée à un process)' + '</option>'));
-          $.each(data.processes, function (key, process) {
-            $('#processSelect').append($('<option value="' + process.key + '">' + process.value + '</option>'));
-          })
-          console.log(data);
+
+                $('.value-scale select')
+                    .append('<option value="'+annee+'">'+annee+'</option>')
+                    .append('<option value="'+anneeSuiv+'">'+anneeSuiv+'</option>');
+                $('.select-value-scale ').find('.dropdown-content')
+                    .append('<li class=""><span>'+annee+'</li>')
+                    .append('<li class=""> <span>'+anneeSuiv+'</span></li>');
+                $('.value-scale ').find('input.select-dropdown ').attr('value',annee);
+                console.log($('.value-scale ').find('input.select-dropdown '));
+                eraseCookie('valueTime');
+                setCookie('valueTime',annee,365);
+                $('.dmin span').remove();
+                $('.dmax span').remove();
+                $('.dmin').prepend('<span>'+parseInt(annee) +'</span>');
+                $('.dmax').prepend('<span>'+(parseInt(annee) + 1) +'</span>');
+                $('.value-scale option[value="'+annee+'"]').attr('selected','selected');
+            } else {
+
+                for (var i= 1; i<5;i++){
+                    $('.value-scale select')
+                        .append('<option value="q-'+i+'-'+annee+'">q-'+i+'-'+annee+'</option>')
+                        .append('<option value="q-'+i+'-'+anneeSuiv+'">q-'+i+'-'+anneeSuiv+'</option>');
+                    $('.select-value-scale ').find('.dropdown-content')
+                        .append('<li class=""><span>q-'+i+'-'+annee+'</li>')
+                        .append('<li class=""> <span>q-'+i+'-'+anneeSuiv+'</span></li>');
+                }
+                $('.value-scale ').find('input.select-dropdown ').attr('value','q-'+1+'-'+annee);
+                eraseCookie('valueTime');
+                setCookie('valueTime','q-'+1+'-'+annee ,365);
+
+                $('.value-scale option[value="q-'+1+'-'+annee+'"]').attr('selected','selected');
+            }
+            console.log(document.cookie)
+            $(this).material_select();
+            dateUpdate();
+        }
+
+    })
+function valueTimeChange(valueTime) {
+    if (valueTime !== undefined) {
+        eraseCookie('valueTime');
+        setCookie('valueTime', valueTime, 365);
+
+
+        $('.value-scale ').find('input.select-dropdown ').attr('value', valueTime);
+        if (time == "years") {
+            $('.dmin span').remove();
+            $('.dmax span').remove();
+            $('.dmin').prepend('<span>' + parseInt(valueTime) + '</span>');
+            $('.dmax').prepend('<span>' + (parseInt(valueTime) + 1) + '</span>');
+        } else {
+
+        }
+    }
+}
+    $('.value-scale').on('change', function () {
+        var valueTime = $(this).children("option:selected").val();
+        valueTimeChange(valueTime);
+            console.log(document.cookie)
+            $(this).material_select();
+            dateUpdate();
+
+
+    })
+    function eraseCookie(name) {
+        createCookie(name,"",-1);
+    }
+    function createCookie(name,value,days) {
+        if (days) {
+            var date = new Date();
+            date.setTime(date.getTime()+(days*24*60*60*1000));
+            var expires = "; expires="+date.toGMTString();
+        }
+        else var expires = "";
+        document.cookie = name+"="+value+expires+"; path=/";
+    }
+    function readCookie(name) {
+        var nameEQ = name + "=";
+        var ca = document.cookie.split(';');
+        for(var i=0;i < ca.length;i++) {
+            var c = ca[i];
+            while (c.charAt(0)==' ') c = c.substring(1,c.length);
+            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+        }
+        return null;
+    }
+  /*$('[href="#createActivity"]').on('click', function () {
+    $('#processSelect').empty();
+    oid = $(this).data('oid');
+    urlToPieces = ipurl.split('/');
+    urlToPieces[urlToPieces.length - 1] = oid;
+    url = urlToPieces.join('/');
+    $.post(url)
+      .done(function (data) {
+        $.each($('.red-text'), function () {
+          $(this).remove();
+        });
+        $('#processSelect').append($('<option>' + '(Non liée à un process)' + '</option>'));
+        $.each(data.processes, function (key, process) {
+          $('#processSelect').append($('<option value="' + process.key + '">' + process.value + '</option>'));
         })
         .fail(function (data) {
           console.log(data);

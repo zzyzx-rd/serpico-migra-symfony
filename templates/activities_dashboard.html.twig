@@ -1200,7 +1200,8 @@
       }
     });
   </script>
-  <script src="{{ asset('js/activity_manage.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.0/moment.min.js" integrity="sha512-Izh34nqeeR7/nwthfeE0SI3c8uhFSnqxV0sI9TvTcXiFJkMd6fB644O64BRq2P/LA/+7eRvCw4GmLsXksyTHBg==" crossorigin="anonymous"></script>
+    <script src="{{ asset('js/activity_manage.js') }}"></script>
   <script src="{{ asset('js/dropify.min.js') }}"></script>
   <script src="{{ asset('js/calendar_fix.js') }}"></script>
 {% endblock %}
@@ -1297,7 +1298,25 @@
         
       </ul>
     </div>
+      <div style="padding: 0 3em;
+    justify-content: flex-end;">
+      <div class="input-field select-scale col s12" style=" width:30%">
+          <select class="scale">
+              <option value="years">Année</option>
+              <option value="trimester">Trimestre</option>
+          </select>
+          <label>Echelle de temps</label>
+      </div>
+      </div>
+      <div style="padding: 0 3em;
+    justify-content: flex-end;">
+      <div class="input-field col s12 select-value-scale" style="width: 30% ; display :none">
+          <select class="value-scale" >
 
+          </select>
+          <label>Valeur</label>
+      </div>
+      </div>
     <div id="activities-container">
       {% if viewTypeCookie == 'd' %} 
         <ul class="tabs tabs-fixed-width" {% if noActivities %} style="display:none" {% endif %}>
@@ -1366,18 +1385,15 @@
 
       {% else %}
         <div class="timescale">
-          <div class="row {{ displayProcesses ? 'no-margin' : 'no-processes'}} date">
-            {% if displayProcesses %}
-            
-              <div class="col s4 dmin center no-padding"></div>
-              <div class="col s3 center no-padding"></div>
-              <div class="col s5 dmax center no-padding"></div>
-            
-            {% else %}
-              <div class="col s9 dmin no-padding"></div>
-              <div class="col s3 dmax no-padding"></div>
-
-            {% endif %}
+          <div class="row no-margin date">
+              <div class="col s3 center"></div>
+              <div class="col s6 center no-padding"></div>
+              <div class="col s3  center" >
+              </div>
+            <div class="col s4 dmin center no-padding"><i class="fa fa-caret-left moveP " style="position: absolute;top: -20%" ></i></div>
+            <div class="col s3 center no-padding"></div>
+            <div class="col s5 dmax center no-padding"><i class="fa fa-caret-right moveP " style="position: absolute;top: -20%"></i>
+            </div>
           </div>
           <div class="row no-margin">
             <div class="arrow">
@@ -1458,6 +1474,7 @@
         
         <ul class="process-list process-list-t no-margin" data-prototype="{% apply escape %}{% include "components/activity2_list__item.html.twig" %}{% endapply %}">
           {% if orphanActivities is not empty %}
+
             <li class="process-list--item hierarchized-item">
               <div class="row flex-center {{ displayProcesses ? 'no-margin' : 'no-processes' }}">
 
@@ -1599,6 +1616,7 @@
                                 <ol class="activity-component" data-sd="0" data-p="365" data-id="{{random(1,1000000)}}">
                                     {% set startdateDay = random(7,320) %}
                                     {% set period = random(max(0,15 - startdateDay), 350 - startdateDay) %}
+
                                     {% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateDay: startdateDay, period: period, embeddedStages: null, visibleEl: true} %}
                                 </ol>
                               </ul>

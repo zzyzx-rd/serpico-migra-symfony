@@ -22,7 +22,7 @@
 
   {#{% include "modals/stage_criterion.html.twig" with { s: s, c: c, criterion: criterion } %}#}
 
-  <div id="criterion_{{s}}_{{c}}" class="modal criterion-modal" data-cweight="{{criterion_model ? criterion_model.weight : 0}}">
+  <div id="criterion_{{o}}_{{c}}" class="modal criterion-modal" data-cweight="{{criterion_model ? criterion_model.weight : 0}}">
     <div class="modal-content">
       <div class="row first-data-row">
         <div class="col s5 criterion-label">
@@ -30,7 +30,7 @@
             <h4>{% trans %}criteria.criterion.title{% endtrans %} {{ criterion.vars.data is not empty ? c + 1 : c }}</h4>
         </div>
         <div class="col s4">
-          <div class="input-field weight" {% if criterion_model and criterion_model.stage.criteria|length == 1 %}style="display:none"{% endif %}>
+          <div class="input-field weight" {% if criterion_model and criterion_model.output.criteria|length == 1 %}style="display:none"{% endif %}>
             {{ form_label(criterion.weight) }}
             <div class="weight-criterion-slider" style="margin-top:10px;"></div>
             <div class="weight-criterion-slider-range-value center" style="font-size:1.2rem;padding-top: 5px"></div>
@@ -94,9 +94,9 @@
       </div>
     </div>
     <div class="modal-footer">
-      {% set checkBeforeValidation = criterion_model and criterion.vars.data.stage.hasCompletedOutput == 1 %}
+
       <button type="button"
-        class="c-validate{{checkBeforeValidation ? '-prior-check'}} btn blue darken-2" 
+        class="c-validate btn blue darken-2"
         data-cid="{{criterion_model ? criterion.vars.data.id : 0}}"
       >
         <i class="material-icons left">done</i> {{ 'criteria.tooltip.validate'|trans }}
@@ -104,7 +104,6 @@
     </div>
   </div>
 
-  {% include "modals/stage_criterion_target.html.twig" with { s: s, c: c, criterion: criterion } %}
 
   <div class="cname cn-icon" data-icon="{{ icon }}" data-icon-type="{{ icon ? icon.type }}" data-uc="{{icon ? icon.unicode }}">
     {% if cname %}
@@ -124,5 +123,5 @@
   <div class="stepping">
     {{ step }}
   </div>
-  <a class="btn-flat btn-edit-criterion modal-trigger material-icons" href="#criterion_{{s}}_{{c}}">edit</a>
+  <a class="btn-flat btn-edit-criterion modal-trigger material-icons" href="#criterion_{{o}}_{{c}}">edit</a>
 </li>

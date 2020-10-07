@@ -59,10 +59,7 @@ class Output extends DbObject
      * @ORM\Column(name="otp_created_by", type="integer", nullable=true)
      */
     public ?int $createdBy;
-    /**
-     * @ORM\Column(name="otp_name", type="string", length=255, nullable=true)
-     */
-    public string $name;
+
     /**
      * @ORM\Column(name="otp_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
@@ -87,8 +84,8 @@ class Output extends DbObject
      */
 
     public function __construct($id = 0,
-                                $createdBy = null,
-                                $name = ""
+                                $createdBy = null
+
 
     )
     {
@@ -107,21 +104,6 @@ class Output extends DbObject
         return $this->criteria;
     }
 
-    /**
-     * @return string
-     */
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-    /**
-     * @param string $name
-     */
-    public function setName(string $name): void
-    {
-        $this->name = $name;
-    }
 
     /**
      * @param mixed $stage
