@@ -62,7 +62,7 @@ class Icon extends DbObject
     public $eventTypes;
 
     /**
-     * @OneToMany(targetEntity="WorkerFirmSector", mappedBy="icon", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="WorkerFirmSector", mappedBy="icon")
      * @var Collection<WorkerFirmSector>
      */
     public $workerFirmSectors;

@@ -140,7 +140,7 @@ class ActivityController extends MasterController
                     $stage  
                         ->setOrganization($organization)
                         ->setProgress($progress)
-                        ->setStatus($progres)
+                        ->setStatus($progress)
                         ->setMasterUser($currentUser)
                         ->setCreatedBy($currentUser->getId());
     
@@ -157,7 +157,7 @@ class ActivityController extends MasterController
                         ->setCreatedBy($currentUser->getId());
                     $em->persist($activity);
                     $em->flush();
-                    return new JsonResponse(['actId' => $activity->getId(), 'stgId' => $stage->getId(), 'startdateDay' => $stage->getStartdate()->format('z')],200);
+                    return new JsonResponse(['actId' => $activity->getId(), 'stgId' => $stage->getId(), 'startdateDay' => $stage->getStartdate()->format('z'), ],200);
                 } else {
             
                     $errors = $this->buildErrorArray($createActivityForm);

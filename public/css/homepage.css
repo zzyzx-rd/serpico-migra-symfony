@@ -38,7 +38,7 @@
 
 .activity-holder{
   height: 100%;
-  background: repeating-linear-gradient(90deg, rgba(0, 150, 136, 0.17), rgba(0, 150, 136, 0.42) 14.28%, rgb(255, 255, 255) 14.28%, rgb(255, 255, 255) 28.56%);
+  background: repeating-linear-gradient(90deg, #f3ccff2b, #63009445 14.28%, rgb(255, 255, 255) 14.28%, rgb(255, 255, 255) 28.56%);
   position: relative;
 }
 

@@ -39,6 +39,12 @@ back_to_home: Return to homepage
 please_wait: Wait a few moments, ongoing process
 curr_language: en
 result: Results
+powered_by: Powered by
+days: days
+hours: hours
+minutes: minutes
+seconds: seconds
+
 help:
   page_title: Serpico, for a meaningful and collaborative performance
   mobile_header_title: Help
@@ -452,17 +458,26 @@ footer:
 #    empower_workforce: Engage your workforce
 #
 
+countdown:
+  motto: "The #1 solution to follow your business easily"
+  coming_live_soon: Coming live soon
+  cta_msg: Be the first notified & get a 2-month full version trial
+  your_email: Your email
+  keep_in_touch: "Let'z keep in touch"
+  thank_you_followup_modal: "Thank you for following our take-off ! You will be notified personally by our team when Dealdrive is launched; see you soon for building together a revolutionary client experience !"
+
 landing:
-  page_name: The collaborative evaluation solution
-  serpico_alt_motto: Collaborative metrics
+  page_name: The CRM which connects clients
+  motto: The first CRM where Relationship matters
+  
   main_message:
     title: An innovative solution for participative management
     additional_elmt: A collaborative and digital platform that measures performance at all levels in the company
     discover_solution: Discover it
   section_1:
-    title: The features offered by Serpico
-    paragraph_1: "Serpico adapts to any type of company whether big or small and independently of its activity sector. The solution is customizable and adapts to any need ranging from the simple digitalization of the evaluation process, to fine-tuning and group-level strategy. It allows:"
-    item_1: "- To evaluate <b>humans</b> but also <b>projects</b> in every department"
+    title: The features offered by Dealdrive
+    paragraph_1: "Dealdrive adapts to any type of company whether big or small and independently of its activity sector. The solution is customizable and adapts to any need ranging from the simple digitalization of the evaluation process, to fine-tuning and group-level strategy. It allows:"
+    item_1: "- To followup <b>clients</b> but also <b>projects</b> in every department"
     item_2: "- <b>Feedbacks</b> and/or <b>grading</b> targeting either <b>projects</b> and/or their <b>participants</b>"
     item_3: "- Results analysis by <b>activity</b> and by <b>collaborator</b>"
     item_4: "- To include client <b>satisfaction</b> and the possibility <b>to communicate</b> those results to your clients"
@@ -514,11 +529,11 @@ language:
 header:
   register:
     public_evaluations: Public evaluations
-    start: Get Started
+    start: Sign up
     description: One step away from boosting your client relationship !
   product: Our solution
   about: About us
-  login: Connexion
+  login: Login
   firmSettings: Settings
   firms: Firms
   root_mgt: Root Management
@@ -1147,6 +1162,10 @@ mails:
     message2: "vous y a convié afin de pouvoir donner votre retour lors dune de ses prochaines activités. Cliquez dès à présent sur ce lien afin dy définir votre mot de passe et remplir votre profil :"
     button_text: Accédez à Serpico
     message3: Créez à votre tour vos activités et invitez vos partenaires à vous rejoindre afin de leur faire des retours, et optimiser votre relation avec eux ! Si vous avez des questions, nhésitez pas à en référer à votre responsable ou en nous contactant via contact@serpicoapp.com, nous tâcherons dy répondre dans les meilleurs délais. Nous vous souhaitons tout cas une agréable expérience sur notre plateforme de suivi collaboratif !
+
+  launchingFollowupConfirmation:
+    subject: "Thank you for following Dealdrive's launching !"
+    message: "All our team want to thank you assisting to our product launch. Aside from our free plan, you will benefit from paying functionities during the next 2 months"
 
   subscriptionConfirmation:
     subject: Bienvenue sur Serpico, la solution de suivi client collaborative

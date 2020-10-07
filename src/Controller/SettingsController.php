@@ -957,6 +957,19 @@ class SettingsController extends MasterController
     }
 
     /**
+     * @return mixed
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/launching/mail/send", name="sendLaunchingMail")
+     */
+    public function sendLaunchingMail(){
+
+        $followerMail = $_POST['follower'];
+        $this->forward('App\Controller\MailController::sendMail', ['recipients' => [$followerMail], 'settings' => ['recipientUsers' => false], 'actionType' => 'launchingFollowupConfirmation']);
+        return new JsonResponse(['msg' => 'success'],200);
+    }
+
+    /**
      * @param Request $request
      * @param Application $app
      * @param $orgId

@@ -1117,6 +1117,23 @@ $(function () {
         
       }
   };
+
+  $('.remove-activity').on('click',function(e){
+    e.preventDefault();
+    var id = $(this).data('id');
+    $.delete(daurl,{r: 'json',id: $(this).data('id')})
+      .done(function(data){
+        $(`[href="#deleteActivity"][data-aid="${id}"]`).closest('.activity-holder').remove();
+      })
+      .fail(function(data){
+        console.log(data);
+      })
+  });
+
+  $('[href="#deleteActivity"]').on('click',function(e){
+    $('.remove-activity').data('id',$(this).attr('data-aid'));
+  })
+
 });
 
 

@@ -19,7 +19,7 @@ security:
             form_login:
                 login_path: login
                 check_path: login
-                default_target_path: myActivities
+                default_target_path: processesList
                 always_use_default_target_path: true
 
             # activate different ways to authenticate

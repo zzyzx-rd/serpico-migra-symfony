@@ -40,6 +40,12 @@ back_to_home: Retour a l'accueil
 please_wait: Traitement en cours
 users_list.no_teams_msg: Aucune équipe
 result: Résultats
+powered_by: Une marque de
+days: jours
+hours: heures
+minutes: minutes
+seconds: secondes
+
 help:
   page_title: Serpico, pour une performance collaborative et porteuse de sens
   mobile_header_title: Aide
@@ -428,17 +434,25 @@ layout:
 #    secure_business: Accélerez le business
 #    target_pilot: Pilotage des objectifs
 #    empower_workforce: Engagement des salariés
+countdown:
+  motto: "La solution n°1 de suivi client"
+  coming_live_soon: "Elle est sur le point d'arriver"
+  cta_msg: Inscrivez-vous & bénécifiez de 2 mois d'essai
+  your_email: Votre email
+  keep_in_touch: Je participe au lancement !
+  thank_you_followup_modal: "Merci de nous suivre dès le début, vous serez prévenu personnellement par notre équipe lors du lancement. A très vite pour construire ensemble révolution de l'expérience client !" 
+
 landing:
-  page_name: La solution d'évaluation collaborative
-  serpico_alt_motto: Collaborative metrics
+  page_name: Le CRM qui donne la priorité à vos clients
+  motto: Le CRM qui donne la priorité à vos clients
   main_message:
     title: Une solution innovante tournée vers le management participatif
     additional_elmt: Une plateforme digitale et collaborative qui mesure la performance à tous les niveaux de l'entreprise
     discover_solution: Découvrez là
   section_1:
-    title: Les fonctionnalités offertes par Serpico
-    paragraph_1: "Serpico est pertinent pour chaque type d'entreprise quelque soit le secteur d'activité et le nombre d'employé. La solution est entièrement personnalisable et s'adapte à chaque exigence, depuis le besoin de digitalisation du processus d'évaluation jusqu'au pilotage stratégie de l'ensemble des projets au niveau du groupe. Il permet:"
-    item_1: "- D'évaluer l'<strong>humain</strong> mais également les <strong>projets</strong> de chaque service"
+    title: Les fonctionnalités offertes par Dealdrive
+    paragraph_1: "Dealdrive est pertinent pour chaque type d'entreprise quelque soit le secteur d'activité et le nombre d'employé. La solution est entièrement personnalisable et s'adapte à chaque exigence, depuis le besoin de digitalisation du processus d'évaluation jusqu'au pilotage stratégie de l'ensemble des projets au niveau du groupe. Il permet:"
+    item_1: "- De suivre ses <strong>clients</strong> mais également les <strong>projets</strong> de chaque service"
     item_2: "- Des retours par <strong>feedback</strong> et/ou <strong>notation</strong>, avec pour cible le <strong>projet</strong> et/ou ses <strong>participants</strong>"
     item_3: "- L'analyse des résultats par <strong>activité</strong>, et par <strong>collaborateur</strong>"
     item_4: "- D'inclure la <strong>satisfaction</strong> des clients de l'entreprise et la <strong>communication</strong> éventuelle des résultats aux clients"
@@ -491,7 +505,7 @@ language:
 header:
   register:
     public_evaluations: Evaluations publiques
-    start: Démarrer
+    start: S'inscrire
     description: Plus qu'un pas avant de booster votre relation client !
   product: La solution
   about: A propos
@@ -1248,6 +1262,10 @@ mails:
     button_text: Accédez à Serpico
     message3: Créez à votre tour vos activités et invitez vos partenaires à vous rejoindre afin de leur faire des retours, et optimiser votre relation avec eux ! Si vous avez des questions, N'hésitez pas à en référer à votre responsable ou en nous contactant via contact@serpicoapp.com, nous tâcherons d'y répondre dans les meilleurs délais. Nous vous souhaitons tout cas une agréable expérience sur notre plateforme de suivi collaboratif !
 
+  launchingFollowupConfirmation:
+    subject: Merci de suivre notre lancement !
+    message: "Toute l'équipe de Dealdrive vous remercie d'assister au lancement de la plateforme. Vous serez mis au courant lors du lancement et en plus de l'offre gratuite, bénéficierez de fonctionnalités payantes sans frais pendant 2 mois"
+    
   subscriptionConfirmation:
     subject: Bienvenue sur Serpico, la solution de suivi client collaborative
     message1: Vous avez rejoint lunivers de Serpico, la plateforme collaborative qui relie votre équipe à vos partenaires 💪 !

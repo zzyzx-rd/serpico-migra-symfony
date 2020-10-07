@@ -8,6 +8,9 @@
             <header class="flex-center">
               <img src="{{ logo_url }}" alt="" class="client-logo">
               <span class="firm-name">{{ workerFirm.name }}</span>
+              {% if workerFirm.country %}
+                <span class="flag m-left {{workerFirm.country.abbr|lower}}"></span>
+              {% endif %}
               <div class="user-actions">
                 <a class="material-icons" href="{{ url('updateWorkerFirm', { wfiId: workerFirm.id }) }}" tooltip="{{ 'user_list.modify'|trans }}">settings</a>
               </div>

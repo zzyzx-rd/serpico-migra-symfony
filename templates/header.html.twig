@@ -2,17 +2,25 @@
 {% set serpicoappSignup = path('userCreateOrganization') %}
 {% set atHome = current_path == '/' %}
 {% set locale = app.request.getLocale() in ['fr','en'] ? app.request.getLocale() : en %}
+
+{% set difference = date('10/11/2020 15:00:00').diff(date('now')) %}
+{% set isLaunched = difference.invert == 0 %}
+
 <body>
-<header id="header" {% if atHome %}class="home"{% endif %} style="z-index: 1;">
+<header id="header" class="{{ not isLaunched ? 'tbl' : (atHome ? 'home' : '') }}" style="z-index: 1;">
   <nav id="nav">
     <div class="nav-wrapper">
       <a href="/" class="brand-logo">
-        <img src="{{ asset('lib/img/logo_dd_p_l.png') }}" alt="Dealdrive">
+        <img src="{{ not isLaunched ? asset('lib/img/logo_dd_l.png') : asset('lib/img/logo_dd_l.png') }}" alt="Dealdrive">
       </a>
-      <a href="#" data-activates="mobile-menu" class="button-collapse">
-        <i class="material-icons">menu</i>
-      </a>
+      {% if isLaunched %}
+        <a href="#" data-activates="mobile-menu" class="button-collapse">
+          <i class="material-icons">menu</i>
+        </a>
+      {% endif %}
       <ul class="right hide-on-med-and-down flex-center">
+        {% if isLaunched %}
+
         <li>
           <a class="product" href="{{ path('solution') }}">
             {% trans %}header.product{% endtrans %}
@@ -22,16 +30,18 @@
           <a href="{{ path('about') }}">{% trans %}header.about{% endtrans %}</a>
         </li>
         <li>
-          <a class="modal-trigger" href="{{ path('home') }}">
+          <a class="modal-trigger" href="{{ is_granted('IS_AUTHENTICATED_REMEMBERED') ? path('processesList') : path('login') }}">
             {% trans %}header.login{% endtrans %}
           </a>
         </li>
         
         <li>
-          <a class="btn cyan darken-4 waves-effect waves-light privileged" href="{{ serpicoappSignup }}">
+          <a class="btn waves-effect waves-light login-btn" href="{{ serpicoappSignup }}">
             {% trans %}header.register.start{% endtrans %}
           </a>
         </li>
+
+        {% endif %}
         
         <li>
           <ul class="collapsible flags" data-collapsible="accordion">
@@ -105,7 +115,7 @@
         </li>
         {#
         <li>
-          <a class="btn waves-effect waves-light privileged" href="{{ serpicoappSignup }}">
+          <a class="btn waves-effect waves-light login-btn" href="{{ serpicoappSignup }}">
             {% trans %}header.register.public_evaluations{% endtrans %}
           </a>
         </li>

@@ -34,6 +34,7 @@
         });
         var rurl = "#";
         var curl = "#";
+        var sdurl = "{{ path('sendLaunchingMail') }}";
     </script>
 {% endblock %}
 
@@ -42,36 +43,263 @@
     Login
 {% endblock %}
 
+  {% set difference = date('10/11/2020 15:00:00').diff(date('now')) %}
+  {% set isLaunched = difference.invert == 0 %}
+
 {% block content %}
-    {#
-    <ul id="hero" class="banner">
-        <li class="banner-background">
-            <div class="video-container">
-                <div class="video-filter"></div>
-                <div class="video-file">
-                    <video class="video-file" poster="" autoplay loop muted>
-                        <source src="" type="video/webm">
-                        <source src="{{ asset('lib/img/Serpico_Pitch_video.mp4') }}" type="video/mp4">
-                    </video>
+    <div class="page-container">
+
+      
+
+        {% if isLaunched %}
+
+            <section class="row with-dashboard">
+                <div class="col m5">
+                    <h3 class="motto">{{'landing.motto'|trans}}</h3>
+                </div>
+                {% set startCalDate = date("first day of " ~ date('now - 3 months')|format_datetime('short','none', pattern="MMMM", locale="en") ~ " " ~ date('now - 3 months')|format_datetime('short','none',pattern='Y')) %}
+                {% set endCalDate = date("last day of " ~ date('now + 3 months')|format_datetime('short','none', pattern="MMMM", locale="en") ~ " " ~ date('now + 3 months')|format_datetime('short','none',pattern='Y')) %}
+                {% set currentDateDays = date('now').diff(startCalDate).days %}
+                {% set lengthCalDays = endCalDate.diff(startCalDate).days %}
+
+                <div class="col m7 calendar-element" data-c="{{ currentDateDays }}" data-l="{{ lengthCalDays }}">
+                    <div class="row calendar-holder no-margin">
+                        <div class="col no-padding m10 activity-holder">
+                            <div class="curDate"></div>
+                            {% set monthMinus3 = date('now')|date_modify("-3 months")|format_datetime('short','none',pattern='MMMMM') %}
+                            {% set monthMinus2 = date('now')|date_modify("-2 months")|format_datetime('short','none',pattern='MMMMM') %}
+                            {% set monthMinus1 = date('now')|date_modify("-1 months")|format_datetime('short','none',pattern='MMMMM') %}
+                            {% set monthMinus0 = date('now')|date_modify("+0 months")|format_datetime('short','none',pattern='MMMMM') %}
+                            {% set monthPlus1 = date('now')|date_modify("+1 months")|format_datetime('short','none',pattern='MMMMM') %}
+                            {% set monthPlus2 = date('now')|date_modify("+2 months")|format_datetime('short','none',pattern='MMMMM') %}
+                            {% set monthPlus3 = date('now')|date_modify("+3 months")|format_datetime('short','none',pattern='MMMMM') %}
+                            <ul class="months-holder">
+                                <li>{{monthMinus3}}</li>
+                                <li>{{monthMinus2}}</li>
+                                <li>{{monthMinus1}}</li>
+                                <li>{{monthMinus0}}</li>
+                                <li>{{monthPlus1}}</li>
+                                <li>{{monthPlus2}}</li>
+                                <li>{{monthPlus3}}</li>
+                            </ul>
+                            {% for k in 0..2 %}
+                                <ul class="stages-holder no-margin" style="position:relative">
+                                    <ol class="activity-component">
+                                        {% set startdateDay = random(7,160) %}
+                                        {% set period = random(max(0,15 - startdateDay), 190 - startdateDay) %}
+                                        {% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateDay: startdateDay, period: period, embeddedStages: null, visibleEl: true} %}
+                                    </ol>
+                                </ul>
+                            {% endfor %}
+                        </div>
+
+                        <div class="col m2 act-info">
+
+                            {% for k in 0..2 %}
+
+                            <div class="fixed-action-btn modified-fixed-btn" style="visibility: hidden;">
+                    
+                                <a class="btn-floating">
+                                    <i class="material-icons">create</i>
+                                </a>
+                
+                                <ul class="flex-center act-action-buttons">
+                                    <li>
+                                        <a class="btn-floating act-btn tooltipped modal-trigger" href="#updateEvent" data-tooltip="{{ 'activities.instant_add'|trans }}" data-position="top" data-aid="{{k}}" data-sid="{{ 10+k }}"><i class="material-icons">offline_bolt</i></a>
+                                    </li>
+                                    <li>
+                                        <a class="btn-floating act-btn tooltipped modal-trigger" href="#updateStageProgressStatus" data-position="top" data-html="true" data-tooltip="{{ 'activities.update_status'|trans}}" data-eid="{{ k }}"><i class="material-icons">update</i></a>
+                                    </li>
+                                    <li>
+                                        <a class="btn-floating act-btn tooltipped" href="#" data-position="top" data-html="true" data-tooltip="{{ 'activities.modify'|trans}}"><i class="material-icons">settings</i></a>
+                                    </li>                           
+                                    <li>
+                                        <a class="btn-floating act-btn tooltipped" data-tooltip="{{ 'activities.provide_my_feedbacks'|trans }}" data-position="top" href="#"><i class="fa fa-pen-alt"></i></a>
+                                    </li>
+                                    {#}
+                                    {% if true %}
+                                    <li>
+                                        <a class="btn-floating act-btn tooltipped" data-tooltip="{{ 'result'|trans }}" data-position="top" href="{{ path('activityResults', { actId: k }) }}"><i class="material-icons">show_chart</i></a>
+                                    </li>
+                                    {% endif %}
+                                    #}
+                                </ul>    
+                            </div>
+
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+        
+            </section>
+
+            <section class="" style="font-size:17px">
+                <div class="row valign-wrapper" style="width:90%;flex-wrap:wrap-reverse;margin:50px auto">
+                    <div class="col m6 s12">
+                        <h4>{% trans %}landing.section_1.title{% endtrans %}</h4>
+                        <p>{% trans %}landing.section_1.paragraph_1{% endtrans %}</p>
+                        <ul style="min-height:200px;display:flex;justify-content:space-between;flex-direction:column;margin-left: 50px">
+                            <li>{% trans %}landing.section_1.item_1{% endtrans %}</li>
+                            <li>{% trans %}landing.section_1.item_2{% endtrans %}</li>
+                            <li>{% trans %}landing.section_1.item_3{% endtrans %}</li>
+                            <li>{% trans %}landing.section_1.item_4{% endtrans %}</li>
+                        </ul>
+                    </div>
+                    <div class="col m6 s12">
+                        <div style="width:80%;margin:auto">
+                            <img src="{{ asset('lib/img/performance-cocreation.png') }}" alt="Circle with all firm actors" style="width:100%">
+                        </div>
+                    </div>
+                </div>
+                <div class="row valign-wrapper landing-section-steps">
+                    <div class="col m6 s12">
+                        <div>
+                            <ul class="landing-section-steps-elements">
+                                <li><span>{% trans %}landing.section_2.step_1{% endtrans %}</span></li>
+                                <li><span>{% trans %}landing.section_2.step_2{% endtrans %}</span></li>
+                                <li><span>{% trans %}landing.section_2.step_3{% endtrans %}</span></li>
+                                <li><span>{% trans %}landing.section_2.step_4{% endtrans %}</span></li>
+                                <li><span>{% trans %}landing.section_2.step_5{% endtrans %}</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col m6 s12">
+                        <h4>{% trans %}landing.section_2.title{% endtrans %}</h4>
+                        <p>{% trans %}landing.section_2.paragraph_1{% endtrans %}</p>
+                        <p>{% trans %}landing.section_2.paragraph_2{% endtrans %}</p>
+                    </div>
+                </div>
+                <div class="row valign-wrapper" style="width:90%;flex-wrap:wrap-reverse;margin:50px auto;">
+                    <div class="col m6 s12">
+                        <h4>{% trans %}landing.section_3.title{% endtrans %}</h4>
+                        <p>{% trans %}landing.section_3.paragraph_1{% endtrans %}</p>
+                        <p>{% trans %}landing.section_3.paragraph_2{% endtrans %}</p>
+                        <p>{% trans %}landing.section_3.paragraph_3{% endtrans %}</p>
+                    </div>
+                    <div class="col m6 s12">
+                        <div style="width:50%;margin:auto">
+                            <img src="{{ asset('lib/img/secure-web-hosting.png') }}" alt="Secure web hosting" style="width:100%">
+                        </div>
+                    </div>
+                </div>
+
+
+                <div style="background: #16afb747;display:none;">
+
+                    <div class="row valign-wrapper video-platform-row" style="min-height: 400px;width: 85%;margin-bottom:0px;">
+
+                        <div class="col s12 m6">
+                            <div>
+                                <video id="video-steps" poster="lib/img/SerpicoSteps.gif" autoplay loop muted style="width: 95%"></video>
+                            </div>
+                        </div>
+
+
+                        <div class="col s12 m6">
+                            <h4> {% trans %}landing.section_4.title{% endtrans %}</h4>
+                            <p>{% trans %}landing.section_4.paragraph_1{% endtrans %}</p>
+                            <p>{% trans %}landing.section_4.paragraph_2{% endtrans %}</p>
+                            <ul id="video-platform-buttons" style="display:flex;justify-content:space-around">
+                                <a class="btn btn-flat brochure-btn waves-effect waves-light" style="margin: 0px 10px; border: 1px solid orange" name="" target="_blank" href="https://app.serpicoapp.com/lib/pdf/onboarding_brochure.pdf">{% trans %}landing.section_4.prospectus_button{% endtrans %}</a>
+                                <a class="btn waves-effect waves-light" href="https://app.serpicoapp.com/fr/organizations/new" style="margin: 0px 5px;" name="" value="home">
+                                    <ul class="flex-center">
+                                        <li style="padding:0">{% trans %}header.register.public_evaluations{% endtrans %}</li>
+                                        <li style="margin-left:5px;padding:0"></li>
+                                    </ul>
+                                </a>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        
+        {% else %}
+            <main>
+                <div class="countdown-page">
+                
+                    {#<div class="row no-margin white-text ">#}
+                    <ul class="flex-center">
+                        <div class="s-title"></div>
+                        <li class="macbook-with-dd">
+                            <img src="{{asset('lib/img/macbook_with_DD_in_browser.png')}}" alt="">
+                        </li>
+                        <li class="white-text cta-dd">
+                            <div class="m-title">
+                                <h3 class="white-text" style="font-weight:700;">{{'countdown.motto'|trans}}</h3>
+                            </div>
+                            
+                            <div class="countdown-elmts">
+                                <div>{{ 'countdown.coming_live_soon'|trans ~ ' 🐣' }}</div>
+                                <h5 id="countdown">
+                                    <ul class="flex-center" style="justify-content:space-between; width:100%">
+                                        <li class="ct-elmt">
+                                            <ul>
+                                                <li id="ct-d"></li>
+                                                <li>{{'days'|trans}}</li>
+                                            </ul>
+                                        </li>
+                                        <li class="ct-elmt">
+                                            <ul>
+                                                <li id="ct-h"></li>
+                                                <li>{{'hours'|trans}}</li>
+                                            </ul>
+                                        </li>
+                                        <li class="ct-elmt">
+                                            <ul>
+                                                <li id="ct-m"></li>
+                                                <li>{{'minutes'|trans}}</li>
+                                            </ul>
+                                        </li>
+                                        <li class="ct-elmt">
+                                            <ul>
+                                                <li id="ct-s"></li>
+                                                <li>{{'seconds'|trans}}</li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </h5>
+                            </div>
+
+                            {{'countdown.cta_msg'|trans ~' 😍'}}
+                            <form action="" method="post">
+                                <div class="row input-field">
+                                    <label for="follower">{{'countdown.your_email'|trans}}</label>
+                                    <input type="text" class="no-margin" name="follower">
+                                </div>
+                                <a class="btn waves-effect waves-light orange get-notified-launch-btn">{{'countdown.keep_in_touch'|trans}}</a>
+                            </form>
+                        </li>
+                       
+                    
+                    </ul>
+
+                   
+                    {#</div>#}
+                </div>
+            </main>
+
+            <div id="subscribed" class="modal">
+                <div class="modal-content">
+                    <p>{{ 'countdown.thank_you_followup_modal'|trans ~ ' 🚀'}}</p>
+                    <div class="flex-center" style="justify-content:flex-end;">
+                        <div class="button-field">
+                            <a class="waves-effect waves-green btn modal-close">Ok</a>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </li>
-        <li class="vps" style="z-index:1;">
-            <div class="banner-title">
-                <h4 class="main-msg">{% trans %}landing.main_message.title{% endtrans %}</h4>
-                <p>{% trans %}landing.main_message.additional_elmt{% endtrans %}</p>
-                <a class="btn waves-effect waves-light modal-trigger" href="#videoPresentation" value="solution">
-                    <ul class="flex-center">
-                        <li style="margin-right: 5px"></li>
-                        <li>{% trans %}landing.main_message.discover_solution{% endtrans %}</li>
-                    </ul>
-                </a>
-            </div>
-        </li>
-    </ul>
-    <div class="parallax">
+
+        {% endif %}
+
+        
+    
     </div>
-    #}
+
+    
+
+
+
+    {#
     <ul id="hero" class="banner">
         <div class="first-section-container row flex-center">
             <div class="col m5">
@@ -136,13 +364,6 @@
                                 <li>
                                     <a class="btn-floating act-btn tooltipped" data-tooltip="{{ 'activities.provide_my_feedbacks'|trans }}" data-position="top" href="#"><i class="fa fa-pen-alt"></i></a>
                                 </li>
-                                {#}
-                                {% if true %}
-                                <li>
-                                    <a class="btn-floating act-btn tooltipped" data-tooltip="{{ 'result'|trans }}" data-position="top" href="{{ path('activityResults', { actId: k }) }}"><i class="material-icons">show_chart</i></a>
-                                </li>
-                                {% endif %}
-                                #}
                             </ul>    
                         </div>
 
@@ -152,85 +373,8 @@
             </div>
         </div>
     </ul>
-    <div class="" style="font-size:17px">
-        <div class="row valign-wrapper" style="width:90%;flex-wrap:wrap-reverse;margin:50px auto">
-            <div class="col m6 s12">
-                <h4>{% trans %}landing.section_1.title{% endtrans %}</h4>
-                <p>{% trans %}landing.section_1.paragraph_1{% endtrans %}</p>
-                <ul style="min-height:200px;display:flex;justify-content:space-between;flex-direction:column;margin-left: 50px">
-                    <li>{% trans %}landing.section_1.item_1{% endtrans %}</li>
-                    <li>{% trans %}landing.section_1.item_2{% endtrans %}</li>
-                    <li>{% trans %}landing.section_1.item_3{% endtrans %}</li>
-                    <li>{% trans %}landing.section_1.item_4{% endtrans %}</li>
-                </ul>
-            </div>
-            <div class="col m6 s12">
-                <div style="width:80%;margin:auto">
-                    <img src="{{ asset('lib/img/performance-cocreation.png') }}" alt="Circle with all firm actors" style="width:100%">
-                </div>
-            </div>
-        </div>
-        <div class="row valign-wrapper landing-section-steps">
-            <div class="col m6 s12">
-                <div>
-                    <ul class="landing-section-steps-elements">
-                        <li><span>{% trans %}landing.section_2.step_1{% endtrans %}</span></li>
-                        <li><span>{% trans %}landing.section_2.step_2{% endtrans %}</span></li>
-                        <li><span>{% trans %}landing.section_2.step_3{% endtrans %}</span></li>
-                        <li><span>{% trans %}landing.section_2.step_4{% endtrans %}</span></li>
-                        <li><span>{% trans %}landing.section_2.step_5{% endtrans %}</span></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="col m6 s12">
-                <h4>{% trans %}landing.section_2.title{% endtrans %}</h4>
-                <p>{% trans %}landing.section_2.paragraph_1{% endtrans %}</p>
-                <p>{% trans %}landing.section_2.paragraph_2{% endtrans %}</p>
-            </div>
-        </div>
-        <div class="row valign-wrapper" style="width:90%;flex-wrap:wrap-reverse;margin:50px auto;">
-            <div class="col m6 s12">
-                <h4>{% trans %}landing.section_3.title{% endtrans %}</h4>
-                <p>{% trans %}landing.section_3.paragraph_1{% endtrans %}</p>
-                <p>{% trans %}landing.section_3.paragraph_2{% endtrans %}</p>
-                <p>{% trans %}landing.section_3.paragraph_3{% endtrans %}</p>
-            </div>
-            <div class="col m6 s12">
-                <div style="width:50%;margin:auto">
-                    <img src="{{ asset('lib/img/secure-web-hosting.png') }}" alt="Secure web hosting" style="width:100%">
-                </div>
-            </div>
-        </div>
-
-
-        <div style="background: #16afb747;display:none;">
-
-            <div class="row valign-wrapper video-platform-row" style="min-height: 400px;width: 85%;margin-bottom:0px;">
-
-                <div class="col s12 m6">
-                    <div>
-                        <video id="video-steps" poster="lib/img/SerpicoSteps.gif" autoplay loop muted style="width: 95%"></video>
-                    </div>
-                </div>
-
-
-                <div class="col s12 m6">
-                    <h4> {% trans %}landing.section_4.title{% endtrans %}</h4>
-                    <p>{% trans %}landing.section_4.paragraph_1{% endtrans %}</p>
-                    <p>{% trans %}landing.section_4.paragraph_2{% endtrans %}</p>
-                    <ul id="video-platform-buttons" style="display:flex;justify-content:space-around">
-                        <a class="btn btn-flat brochure-btn waves-effect waves-light" style="margin: 0px 10px; border: 1px solid orange" name="" target="_blank" href="https://app.serpicoapp.com/lib/pdf/onboarding_brochure.pdf">{% trans %}landing.section_4.prospectus_button{% endtrans %}</a>
-                        <a class="btn waves-effect waves-light" href="https://app.serpicoapp.com/fr/organizations/new" style="margin: 0px 5px;" name="" value="home">
-                            <ul class="flex-center">
-                                <li style="padding:0">{% trans %}header.register.public_evaluations{% endtrans %}</li>
-                                <li style="margin-left:5px;padding:0"></li>
-                            </ul>
-                        </a>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
+    #}
+    
     <!-- Modal Structures -->
     <div id="videoPresentation" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">

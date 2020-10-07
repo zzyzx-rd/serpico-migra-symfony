@@ -107,6 +107,9 @@
         </a>
         
         <ul class="flex-center">
+             <li>
+              <a class="btn-floating act-btn tooltipped modal-trigger" href="#deleteActivity" data-tooltip="{{ 'activities.delete_activity_modal.title'|trans }}" data-position="top" data-aid="{{ activity.id }}"><i class="fa fa-trash"></i></a>
+            </li>
             <li>
               <a class="btn-floating act-btn tooltipped modal-trigger" href="#updateEvent" data-tooltip="{{ 'activities.instant_add'|trans }}" data-position="top" data-aid="{{ activity.id }}" data-sid="{{ activity.activeStages|length > 1 ? 0 : activity.activeStages.first.id }}"><i class="material-icons">offline_bolt</i></a>
             </li>

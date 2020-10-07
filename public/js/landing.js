@@ -298,7 +298,7 @@ $(function() {
     
             $(this).css({'margin-left': Math.round(10000 * sPctWidthSD) / 100 + "%",
             'width': Math.round(10000 * sPctWidthP) / 100 + "%",
-            'background' : ssd >= c ? '#5CD08F' : (ssd + p > c ? 'linear-gradient(to right, transparent, transparent ' + Math.round(10000 * (c - ssd) / p) / 100 + '%, #16AFB7 '+ Math.round(10000 * (c - ssd) / p) / 100 +'%), repeating-linear-gradient(61deg, #16AFB7, #16AFB7 0.5rem, transparent 0.5px, transparent 1rem)' : 'gray'),
+            'background' : ssd >= c ? '#5CD08F' : (ssd + p > c ? 'linear-gradient(to right, transparent, transparent ' + Math.round(10000 * (c - ssd) / p) / 100 + '%, #7942d0 '+ Math.round(10000 * (c - ssd) / p) / 100 +'%), repeating-linear-gradient(61deg, #7942d0, #7942d0 0.5rem, transparent 0.5px, transparent 1rem)' : 'gray'),
             'height' : '7px',
             'border-radius' : '0.3rem',  
             });
@@ -336,5 +336,84 @@ $(function() {
     $('.act-info .fixed-action-btn').each(function(i,e){
         const $fixedBtns = $('.act-info .fixed-action-btn');
         $(e).css('top', Math.round(100 * ($fixedBtns.index($(this)) / $fixedBtns.length)) + '%');
+    });
+
+    function CountDownTimer(dt, d, h, m, s)
+    {
+        var end = new Date(dt);
+
+        var _second = 1000;
+        var _minute = _second * 60;
+        var _hour = _minute * 60;
+        var _day = _hour * 24;
+        var timer;
+
+        function showRemaining() {
+            var now = new Date();
+            var distance = end - now;
+            if (distance < 0) {
+
+                clearInterval(timer);
+                document.getElementById(id).innerHTML = 'EXPIRED!';
+
+                return;
+            }
+            var days = Math.floor(distance / _day);
+            var hours = Math.floor((distance % _day) / _hour);
+            var minutes = Math.floor((distance % _hour) / _minute);
+            var seconds = Math.floor((distance % _minute) / _second);
+
+
+
+            document.getElementById(d).innerHTML = "";
+            document.getElementById(h).innerHTML = "";
+            document.getElementById(m).innerHTML = "";
+            document.getElementById(s).innerHTML = "";
+
+            document.getElementById(d).innerHTML = days;
+            document.getElementById(h).innerHTML += hours;
+            document.getElementById(m).innerHTML += minutes;
+            document.getElementById(s).innerHTML += seconds;
+        }
+
+        timer = setInterval(showRemaining, 1000);
+    }
+
+    function isEmail(email) {
+        var regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+        return regex.test(email);
+      }
+
+    $('.get-notified-launch-btn').on('click',function(){
+        var $this = $(this);
+        $('.error-email').remove();
+        if(isEmail($('[name="follower"]').val())){
+            $.post(sdurl,$this.closest('form').serialize())
+                .done(function(data){
+                    $('#subscribed').modal('open');
+                    $('[name="follower"]').empty();
+                })
+                .fail(function(data){
+                    console.log(data);
+                })
+        } else {
+            $('[name="follower"]').after('<div class="orange-text error-email">The email address is not correct, please type again</div>')
+        }
     })
+
+    CountDownTimer('10/11/2020 17:00:00','ct-d','ct-h','ct-m','ct-s');
+
+    if($('main').width() < 950){
+        $('.m-title > *').css('text-align','center').appendTo('.s-title');
+        $('.countdown-page > ul').css('flex-direction','column');
+        $('.macbook-with-dd img').css({
+            'margin-left' : 0,
+            'width' : '100%',
+        });
+        $('.cta-dd').css({
+            'max-width' : '100%',
+            'margin' : '0 5vw',
+            'text-align': 'center',
+        });
+    }
 });

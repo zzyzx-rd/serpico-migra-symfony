@@ -96,11 +96,11 @@ td a {
 
 @media screen and (max-width: 950px)
 {
-  header {
+  /*header {
     height: 60px;
     width: 90%;
     margin: auto;
-  }
+  }*/
 
   /*header li:first-child {
     padding-left: 10px;
@@ -462,7 +462,7 @@ nav .collapsible-body {
 
 #linkFooter {
   width: 100%;
-  background-color: #26a69a;
+  background-color: #55318e;
 }
 
 div.col.s12.m2.linkedin {
@@ -715,6 +715,49 @@ div.col.s12.m2.linkedin {
   width: 90%;
 }
 /****************************************************LANDING PAGE****************************************************/
+
+.macbook-with-dd{
+  max-width: 750px;
+}
+
+.macbook-with-dd img{
+  --mac-width:1000px;
+  --cta-width: 450px;
+  width:1000px;
+  margin-left: min(-230px,calc(100vw - var(--mac-width) - var(--cta-width)));
+}
+
+.m-title{
+  font-weight:700;
+}
+
+.cta-dd{
+  max-width: 30%;
+  margin:auto;
+}
+.countdown-elmts{
+  margin: 40px 0px;
+}
+
+.countdown-page{
+  background: #55318e !important;
+  display: flex;
+  flex-flow: column;
+  flex-grow: 1;
+}
+
+.ct-elmt{
+  text-align: center;
+}
+
+.ct-elmt > ul > li:first-of-type{
+  color: #ffab40;
+  font-size: 30px;
+}
+
+.ct-elmt > ul > li:last-of-type{  
+  font-size: 17px;
+}
 
 .banner {
   position: relative;
@@ -1077,8 +1120,8 @@ nav ul a {
   padding: 0px 15px;
 }
 
-.privileged {
-  background-color: #15a6ae;
+.login-btn, .get-notified-launch-btn {
+  background-color: #FF9300!important;
 }
 
 header > ul {
@@ -1137,11 +1180,11 @@ header > ul {
 }
 
 #header.home {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  background:linear-gradient(to right, white, white 18%, #1cb4bd 50%)
+  background:linear-gradient(to right, white, white 18%, #55318e 50%)
+}
+
+#header.tbl {
+  background-color: #55318e!important;
 }
 
 #nav {
@@ -1151,7 +1194,7 @@ header > ul {
   line-height: var(--height);
 }
 
-.home #nav {
+.home #nav, .tbl #nav {
   background-color: transparent;
   box-shadow: none;
 }
@@ -1375,6 +1418,14 @@ section h2 {
   background-repeat: no-repeat;
   background-position: center;
 
+}
+
+.with-dashboard{
+  margin-top:2rem;
+}
+
+.btn, .btn-floating{
+  background-color: #55318e!important;
 }
 
 #secureBusiness::after {
@@ -1731,10 +1782,6 @@ section h2 {
   .position-name {
     font-size: 1rem;
   }
-}
-
-.modal {
-  min-height: 250px;
 }
 
 .dismiss-modal {

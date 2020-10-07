@@ -51,7 +51,6 @@
     var surl = "{{path('dynamicSearchParticipant')}}";
     var aurl = "{{ url('createUserProcessActivity', { inpId: 0 }) }}";
     var adurl = "{{ url('activityDelegate') }}";
-    var adeleteUrl="{{ url('ajaxActivityDelete', {'actId' : 0}) }}";
     var usurl= "{{ url('updateStageStatus', {stgId : 0}) }}";
     var cpurl = "{{ url('createProcessRequest', {orgId : currentuser.organization.id}) }}";
     var eurl = "{{ url('updateEvent', {eveId : 0}) }}";
@@ -63,6 +62,7 @@
     var myself = "{{ 'myself'|trans|capitalize }}";
     var pcurl = "{{ url('createParticipant') }}";
     var dcurl = "{{ url('getDummyClients') }}";
+    var daurl = "{{ url('activityDelete') }}";
   </script>
   <style>
       .elmts{
@@ -2145,7 +2145,7 @@
         {% endif %}#}
     </div>
     <div class="modal-footer">
-        <a class=" modal-action modal-close waves-effect waves-green btn delete-button">{% trans %}user_update.delete_modal.confirm{% endtrans %}</a>
+        <a class=" modal-action modal-close waves-effect waves-green btn remove-activity">{% trans %}user_update.delete_modal.confirm{% endtrans %}</a>
         <a class=" modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
     </div>
   </div>
