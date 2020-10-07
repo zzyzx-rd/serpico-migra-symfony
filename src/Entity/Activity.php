@@ -134,11 +134,11 @@ class Activity extends DbObject
      */
     public $rankingTeams;
     /**
-     * @OneToMany(targetEntity="RankingHistory", mappedBy="activity",cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="RankingHistory", mappedBy="activity", cascade={"persist", "remove"}, orphanRemoval=true)
      */
     public $historicalRankings;
     /**
-     * @OneToMany(targetEntity="RankingTeamHistory", mappedBy="activity",cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="RankingTeamHistory", mappedBy="activity", cascade={"persist", "remove"}, orphanRemoval=true)
      */
     public $historicalRankingTeams;
 
