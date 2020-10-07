@@ -137,11 +137,13 @@
               {% endif %}
             </li>
           {% endif %}
+          {#
           {% if activityM.userCanViewResults(activity,currentuser) %}
             <li>
               <a class="btn-floating act-btn tooltipped" data-tooltip="{{ 'result'|trans }}" data-position="top" href="{{ path('activityResults', { actId: activity.id }) }}"><i class="material-icons">show_chart</i></a>
             </li>
           {% endif %}
+          #}
         </ul>
       
       </div>
