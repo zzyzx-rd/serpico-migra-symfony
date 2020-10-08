@@ -4,13 +4,52 @@
 {% set selectedCity = global.request.cookies.get('wf_cit') %}
 
 <li class="client-type-list--item client-firms hierarchized-item">
-  <header>{{ 'firms'|trans ~ 
-    (selectedCountry ? ' - ' : '') ~
-    (selectedCountry ? workerFirms[0].country.name : '') ~ 
-    (selectedState ? ', ' ~ workerFirms[0].state.name : '') ~ 
-    (selectedCity ? ', ' ~ workerFirms[0].city.name : '') ~ 
-    ' (' ~ workerFirms|length ~ ')' 
-  }} </header>
+  <header>
+    <ul class="flex-center-sb">
+      <li class="black-text">
+          {{ 'firms'|trans ~ 
+          (selectedCountry ? ' - ' : '') ~
+          (selectedCountry ? workerFirms[0].country.name : '') ~ 
+          (selectedState ? ', ' ~ workerFirms[0].state.name : '') ~ 
+          (selectedCity ? ', ' ~ workerFirms[0].city.name : '') ~ 
+          ' (' ~ nbWorkerFirms ~ ')' 
+        }} 
+      </li>
+
+      {% if nbWorkerFirms > maxResults %}
+        <li>
+
+            {% set startingPage = 1 %}
+            {% set endingPage = nbWorkerFirms // global.request.cookies.get('wf_nb') %}
+            {% set currentPage = global.request.cookies.get('wf_cp') %}
+            
+            {% if currentPage > 1 %}
+              <a class="btn white-text first-page"> {{ startingPage }} </a>
+            {% endif %}
+
+            {% if currentPage - 1 > startingPage %}
+              <a class="btn white-text prev-page"> < </a>
+            {% endif %}
+
+            <a class="btn-flat curr-page">{{ currentPage }}</a>
+
+            {% if currentPage < endingPage - 1 %}
+              <a class="btn white-text next-page"> > </a>
+            {% endif %}
+
+            {% if currentPage < endingPage %}
+              <a class="btn white-text last-page">{{ endingPage }}</a>
+            {% endif %}
+
+        </li>
+      {% endif %}
+    </ul>
+  
+  
+  
+        
+  
+  </header>
   <div class="item-body">
     <ul class="firms-list">
       {% for workerFirm in workerFirms %}
