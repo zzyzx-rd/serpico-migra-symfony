@@ -42,6 +42,9 @@ use App\Entity\WorkerIndividual;
 use App\Entity\Country;
 use App\Entity\State;
 use App\Entity\City;
+use Stripe\Stripe;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -61,14 +64,18 @@ use App\Entity\Mail;
 use Symfony\Component\Form\FormFactory;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Component\Validator\Constraints\NotBlank;
+
 
 class SettingsController extends MasterController
 {
+
+
     public static function getClientLangague(){
         $langs = explode(',', $_SERVER['HTTP_ACCEPT_LANGUAGE']);
         return substr($langs[0], 0, 2);
     }
-
+ 
     /**
      * @param Request $request
      * @param Application $app
@@ -154,7 +161,172 @@ class SettingsController extends MasterController
         return $this->render('root_management.html.twig');
 
     }
+   /**
+     * @param Request $request
+     * @param Application $app
+     * @return mixed
+     * @Route("/price", name="priceManagement")
+     */
+    public function PriceManagementAction(Request $request){
+        $form = $this->get( 'form.factory' )
+            ->createNamedBuilder('payment-form')
+            ->add('token', HiddenType::class, [
+                'constraints' => [new NotBlank()],
+            ])
+            ->add('soumettre',SubmitType::class)
+            ->getForm();
 
+        if ($request->isMethod('POST')) {
+            $form->handleRequest($request);
+
+            if ($form->isValid()) {
+                try {
+                    $this->get('app.client.stripe')->createPremiumCharge($this->getUser(), $form->get('token')->getData());
+                    $redirect = $this->get('session')->get('premium_redirect');
+                } catch (\Stripe\Error\Base $e) {
+                    $this->addFlash('warning', sprintf('Unable to take payment, %s', $e instanceof \Stripe\Error\Card ? lcfirst($e->getMessage()) : 'please try again.'));
+                    $redirect = $this->generateUrl('premium_payment');
+                } finally {
+                    var_dump($this->get('session')->get('premium_redirect'));
+                    return $this->redirect($redirect);
+                }
+            }
+        }
+
+        return $this->render( 'price_management.html.twig' , [
+            'form' => $form->createView(),
+            'stripe_public_key' => 'pk_test_51HZHYgHmuPtR98gq78pZ4Orw0HliC7zhtkmv6FHQp2eVakz9X8IvYtYNwUuAt09tTXKeLZupQFlODr2tsLvTsH6o00PRmtxy8X'
+
+        ]);
+
+
+
+    }
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return mixed
+     * @Route("/stripe-webhook", name="stripWebook")
+     */
+    public function stripWebookManagementAction(Request $request){
+
+        $logger = $this->get('logger');
+        $event = $request->getParsedBody();
+        $stripe = $this->stripe;
+
+        // Parse the message body (and check the signature if possible)
+        $webhookSecret = getenv('STRIPE_WEBHOOK_SECRET');
+        if ($webhookSecret) {
+            try {
+                $event = $stripe->webhooks->constructEvent(
+                    $request->getBody(),
+                    $request->getHeaderLine('stripe-signature'),
+                    $webhookSecret
+                );
+
+            } catch (Exception $e) {
+                return new JsonResponse(['error' => $e->getMessage()  ], 403);
+            }
+        } else {
+            $event = $request->getParsedBody();
+        }
+        $type = $event['type'];
+        $object = $event['data']['object'];
+
+        // Handle the event
+        // Review important events for Billing webhooks
+        // https://stripe.com/docs/billing/webhooks
+        // Remove comment to see the various objects sent for this sample
+        switch ($type) {
+            case 'invoice.paid':
+                // The status of the invoice will show up as paid. Store the status in your
+                // database to reference when a user accesses your service to avoid hitting rate
+                // limits.
+                $logger->info('🔔  Webhook received! ' . $object);
+                break;
+            case 'invoice.payment_failed':
+                // If the payment fails or the customer does not have a valid payment method,
+                // an invoice.payment_failed event is sent, the subscription becomes past_due.
+                // Use this webhook to notify your user that their payment has
+                // failed and to retrieve new card details.
+                $logger->info('🔔  Webhook received! ' . $object);
+                break;
+            case 'customer.subscription.deleted':
+                // handle subscription cancelled automatically based
+                // upon your subscription settings. Or if the user
+                // cancels it.
+                $logger->info('🔔  Webhook received! ' . $object);
+                break;
+            // ... handle other event types
+            default:
+                // Unhandled event type
+        }
+
+        return new JsonResponse(['status' => 'success' ], 200);
+
+
+    }
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return mixed
+     * @Route("/create-customer", name="stripWebook")
+     */
+    public function createCustomerManagementAction(Request $request){
+
+       $body = json_decode($request->request->get('data'));
+
+        $stripe = $this->stripe;
+
+        $customer = $stripe->customers->create([
+            'email' => $body->email
+        ]);
+
+
+        return new JsonResponse(['customer' => $customer ], 200);
+    }
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return mixed
+     * @Route("/create-subscription", name="createSubscription")
+     */
+    public function createSubscriptionManagementAction(Request $request){
+        $body = json_decode($request->getBody());
+        $stripe = $this->stripe;
+
+        try {
+            $payment_method = $stripe->paymentMethods->retrieve(
+                $body->paymentMethodId
+            );
+            $payment_method->attach([
+                'customer' => $body->customerId,
+            ]);
+        } catch (Exception $e) {
+
+        }
+
+
+        // Set the default payment method on the customer
+        $stripe->customers->update($body->customerId, [
+            'invoice_settings' => [
+                'default_payment_method' => $body->paymentMethodId
+            ]
+        ]);
+
+        // Create the subscription
+        $subscription = $stripe->subscriptions->create([
+            'customer' => $body->customerId,
+            'items' => [
+                [
+                    'price' => 'price_HGd7M3DV3IMXkC',
+                ],
+            ],
+            'expand' => ['latest_invoice.payment_intent'],
+        ]);
+
+        return new JsonResponse($subscription, 200);
+    }
     /**
      * @param Request $request
      * @param Application $app

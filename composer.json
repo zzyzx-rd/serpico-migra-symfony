@@ -1,6 +1,8 @@
 {
     "type": "project",
     "license": "proprietary",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "require": {
         "php": "^7.4",
         "ext-ctype": "*",
@@ -41,6 +43,7 @@
         "symfony/yaml": "5.1.*",
         "twig/extra-bundle": "^2.12|^3.0",
         "twig/intl-extra": "^3.0",
+        "stripe/stripe-php" : "v7.57.0",
         "twig/twig": "^2.12|^3.0"
     },
     "require-dev": {
