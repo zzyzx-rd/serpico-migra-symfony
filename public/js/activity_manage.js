@@ -458,7 +458,7 @@ function dateUpdate() {
             pctWidthP = getPercentage(pxWidthP, centralElWidth);
             $this.css({'margin-left': pctWidthSD + "%"});
             $this.css({'width': pctWidthP + "%"});
-
+            $this.css({'display': "none"});
             $this.find('.stage-element').each(function () {
                 var ssd = $(this).data("sd");
                 var sp = $(this).data("p");
