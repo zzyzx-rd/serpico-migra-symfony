@@ -26,8 +26,8 @@ firm_member : Membre d'une entreprise / institution
 firstname: prénom
 lastname: nom
 email: email
-ascending: croissant
-descending: décroissant
+ascending: ASC
+descending: DESC
 sort: Tri
 order: Ordre
 pending_validation: En attente de validation
@@ -45,6 +45,9 @@ days: jours
 hours: heures
 minutes: minutes
 seconds: secondes
+country: pays
+state: région
+city: ville
 
 help:
   page_title: Serpico, pour une performance collaborative et porteuse de sens
@@ -1602,7 +1605,7 @@ worker_search:
     decline: Annuler
 
 worker_firm_list:
-  alphabetical_order: ordre alphabétique
+  alphabetical_order: A-Z
   creation_date_order: date de création
 
 worker_firm_data:

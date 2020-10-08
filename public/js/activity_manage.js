@@ -99,11 +99,7 @@ $(document).ready(function(){
     console.log($('.value-scale').material_select());
     console.log($('.scale').material_select());
 });
-function setCookie(key, value, expiry) {
-    var expires = new Date();
-    expires.setTime(expires.getTime() + (expiry * 24 * 60 * 60 * 1000));
-    document.cookie = key + '=' + value + ';expires=' + expires.toUTCString();
-}
+
 moment().format();
 var now = new Date();
 var annee   = now.getFullYear();
@@ -151,22 +147,7 @@ console.log(time);
 
 startCal.pickadate('picker').set('select',startDate);
 endCal.pickadate('picker').set('select',endDate).set('min',startDate);
-function getCookie(cname) {
-    var name = cname + "=";
-    var decodedCookie = decodeURIComponent(document.cookie);
-    var ca = decodedCookie.split(';');
-    for(var i = 0; i <ca.length; i++) {
-        var c = ca[i];
-        while (c.charAt(0) == ' ') {
-            c = c.substring(1);
-        }
-        if (c.indexOf(name) == 0) {
-            c.substring(name.length, c.length);
-            return c.substring(name.length, c.length);
-        }
-    }
-    return "";
-}
+
 function initETIcons() {
   const $stylizableSelects = $('#updateEvent select');
   $stylizableSelects.find('option').each(function (_i, e) {
@@ -210,24 +191,6 @@ function initETIcons() {
 }
 
 $(function () {
-
-  function setCookie(key, value, expiry) {
-    var expires = new Date();
-    expires.setTime(expires.getTime() + (expiry * 24 * 60 * 60 * 1000));
-    document.cookie = key + '=' + value + ';expires=' + expires.toUTCString();
-  }
-
-  function getCookie(key) {
-      var keyValue = document.cookie.match('(^|;) ?' + key + '=([^;]*)(;|$)');
-      return keyValue ? keyValue[2] : null;
-  }
-
-  function eraseCookie(key) {
-      var keyValue = getCookie(key);
-      setCookie(key, keyValue, '-1');
-  }
-
-
 
   $('a:has(.fa-plus)').on('click', function () {
     $('.process-name').empty().append($(this).closest('ul').find('header').text())

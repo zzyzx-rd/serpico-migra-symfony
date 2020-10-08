@@ -26,8 +26,8 @@ firm_member : Firm / Institution member
 firstname: firstname
 lastname: lastname
 email: email
-ascending: ascending
-descending: descending
+ascending: ASC
+descending: DESC
 sort: Sort
 order: Order
 pending_validation: Pending validation
@@ -44,6 +44,9 @@ days: days
 hours: hours
 minutes: minutes
 seconds: seconds
+country: country
+state: state
+city: city
 
 help:
   page_title: Serpico, for a meaningful and collaborative performance
@@ -1476,7 +1479,7 @@ worker_search:
     decline: Cancel
 
 worker_firm_list:
-  alphabetical_order: alphabetical order
+  alphabetical_order: A-Z
   creation_date_order: creation date
 
 worker_firm_data:

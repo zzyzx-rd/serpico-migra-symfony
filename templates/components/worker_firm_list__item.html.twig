@@ -1,5 +1,16 @@
+
+{% set selectedCountry = global.request.cookies.get('wf_c') %}
+{% set selectedState = global.request.cookies.get('wf_s') %}
+{% set selectedCity = global.request.cookies.get('wf_cit') %}
+
 <li class="client-type-list--item client-firms hierarchized-item">
-  <header>{{ 'user_list.firms'|trans ~ ' (' ~ nbWorkerFirms ~ ')' }} </header>
+  <header>{{ 'firms'|trans ~ 
+    (selectedCountry ? ' - ' : '') ~
+    (selectedCountry ? workerFirms[0].country.name : '') ~ 
+    (selectedState ? ', ' ~ workerFirms[0].state.name : '') ~ 
+    (selectedCity ? ', ' ~ workerFirms[0].city.name : '') ~ 
+    ' (' ~ workerFirms|length ~ ')' 
+  }} </header>
   <div class="item-body">
     <ul class="firms-list">
       {% for workerFirm in workerFirms %}
@@ -8,8 +19,8 @@
             <header class="flex-center">
               <img src="{{ logo_url }}" alt="" class="client-logo">
               <span class="firm-name">{{ workerFirm.name }}</span>
-              {% if workerFirm.country %}
-                <span class="flag m-left {{workerFirm.country.abbr|lower}}"></span>
+              {% if not selectedCountry and workerFirm.country %}
+                <span class="flag m-left {{ workerFirm.country.abbr|lower }}"></span>
               {% endif %}
               <div class="user-actions">
                 <a class="material-icons" href="{{ url('updateWorkerFirm', { wfiId: workerFirm.id }) }}" tooltip="{{ 'user_list.modify'|trans }}">settings</a>
