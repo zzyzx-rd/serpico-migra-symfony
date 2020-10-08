@@ -3432,13 +3432,14 @@ class OrganizationController extends MasterController
     /**
      * @param Request $request
      * @param $actId
-     * @return RedirectResponse
-     * @Route("/activities/delete/{actId}", name="ajaxActivityDelete")
+     * @return Response|RedirectResponse
+     * @Route("/activities/delete", name="activityDelete")
      */
-    public function deleteActivityAction(Request $request, $actId): RedirectResponse
+    public function deleteActivityAction(Request $request)
     {
         
         $returnType = $request->get('r');
+        $actId = $request->get('id');
         
         $activity = $this->em->getRepository(Activity::class)->find($actId);
         $activityM = new ActivityM($this->em, $this->stack, $this->security);
@@ -3457,7 +3458,7 @@ class OrganizationController extends MasterController
         }
 
         if($returnType == 'json'){
-            return true;
+            return new JsonResponse(['msg' => 'success'],200);
         } else {
             return $this->redirectToRoute("myActivities");
         }
@@ -6846,6 +6847,8 @@ class OrganizationController extends MasterController
         $qb = $em->createQueryBuilder();
         $allWFIds = $qb->select('wf.id AS wfIds')
             ->from('App\Entity\WorkerFirm','wf')
+            ->innerJoin('App\Entity\Organization','o','WITH','o.id = wf.organization')
+            ->where("o.type != 'I' AND o.type != 'i'")
             ->orderBy('wf.logo')
             //->where('order.logo IS NOT NULL')
             ->getQuery()
@@ -6888,7 +6891,7 @@ class OrganizationController extends MasterController
 
         foreach($dummyClients as $key => $dummyClient){
             $output['name'] = $dummyClient->getName();
-            $output['logo'] = $dummyClient->getLogo() ? "lib/img/wf/".$dummyClient->getLogo() : "lib/img/org/no-picture.png";
+            $output['logo'] = $dummyClient->getLogo() ? "/lib/img/wf/".$dummyClient->getLogo() : "/lib/img/org/no-picture.png";
             $output['actName'] = $actNames[$randomActNameArrayKeys[$key]];
             $dummyElmts[] = $output; 
         }

@@ -43,7 +43,7 @@ class WorkerFirmSector extends DbObject
 
     /**
      * @ManyToOne(targetEntity="Icon", inversedBy="workerFirmSectors")
-     * @JoinColumn(name="icon_ico_id", referencedColumnName="ico_id",nullable=true)
+     * @JoinColumn(name="icon_ico_id", referencedColumnName="ico_id", nullable=true)
      */
     protected $icon;
 
@@ -96,20 +96,16 @@ class WorkerFirmSector extends DbObject
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getIcon()
+    
+    public function getIcon(): ?Icon
     {
         return $this->icon;
     }
 
-    /**
-     * @param mixed $icon
-     */
-    public function setIcon($icon): void
+    public function setIcon(?Icon $icon): self
     {
         $this->icon = $icon;
+        return $this;
     }
 
     /**

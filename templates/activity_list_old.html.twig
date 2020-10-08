@@ -7,7 +7,7 @@
 {% block css %}
     <script type="text/javascript">
         var deleteUrl = "{{ url('ajaxStageDelete',{'stgId' : 0}) }}";
-        var adeleteUrl = "{{ url('ajaxActivityDelete',{'actId' : 0}) }}";
+        var adeleteUrl = "{{ url('activityDelete',{'actId' : 0}) }}";
         var rdeleteUrl = "{{ url('ajaxRecurringDelete',{'rctId' : 0}) }}";
         var archiveUrl = "{{ url('ajaxActivityArchive',{'actId' : 0}) }}";
         var delegateUrl = "{{ url('activityDelegate') }}";

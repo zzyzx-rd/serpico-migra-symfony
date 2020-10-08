@@ -128,9 +128,9 @@
               {#{% if global.routeParams|length == 1 and path(global.route) in freeAccessRoutes %}#}
                 <li class="logo">
                   <a href="{{ path('home_welcome') }}">
-                    <img src="{{ asset('lib/img/logo_s.png') }}">
+                    <img src="{{ asset('lib/img/DD_logo_squared_t.png') }}">
                   </a>
-                  {% trans %}landing.serpico_alt_motto{% endtrans %}
+                  {% trans %}landing.page_name{% endtrans %}
                 </li>
               {#{% endif %}#}
               {% if global.route == "about" %}
@@ -213,7 +213,7 @@
     <script src="{{ asset('build/runtime.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.js"></script>
-    <script src="{{ asset('js/header.js') }}"></script>
+    <script src="{{ asset('js/base.js') }}"></script>
     {% block javascripts %}{% endblock %}
   </body>
 </html>

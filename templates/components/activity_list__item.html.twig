@@ -106,12 +106,14 @@
     {% endif %}
 
     {# if finalized or published #}
+    {#
     {% if activity.userCanViewResults(global.currentuser) %}
       <a class="material-icons tooltipped" data-tooltip={{ "result"|trans}} data-position="bottom" href="{{ path('activityResults', { actId: activity.id  }) }}">show_chart</a>
     {% endif %}
+    #}  
 
     {% if activityM.userCanEdit(activity, global.currentuser) %}
-      <a class="material-icons tooltipped modal-trigger" data-tooltip={{ "activities.modify" |trans}} href="#activityInfo" data-eid="{{activity.id}}" data-position="bottom">settings</a>
+      <a class="material-icons tooltipped modal-trigger" data-tooltip={{ "activities.modify"|trans }} href="#activityInfo" data-eid="{{activity.id}}" data-position="bottom">settings</a>
     {% else %}
       {% if activity.userCanAccessInfo(global.currentuser) %}
         <a class="material-icons tooltipped modal-trigger" href="#activityInfo" data-eid="{{activity.id}}" data-tooltip="{% trans %}activity_elements.access_activity_details{% endtrans %}" data-position="bottom">info_outline</a>

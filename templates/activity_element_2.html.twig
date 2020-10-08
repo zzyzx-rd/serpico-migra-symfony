@@ -728,7 +728,7 @@
     var vourl = "{{ url('validateOutputElement',{'entity' : entity, 'elmtId': elmtId, 'stgId' : 0, 'otpId' : 0}) }}";
     var vsurl = "{{ url('validateStageElement',{'entity' : entity, 'elmtId': elmtId, 'stgId' : 0}) }}";
     var vnurl = "{{ url('validateElementName',{'entity' : entity, 'elmtId': elmtId}) }}";
-    var daurl = "{{ url('ajaxActivityDelete',{'actId' : elmtId}) }}";
+    var daurl = "{{ url('activityDelete',{'actId' : elmtId}) }}";
 
   </script>
 {% endblock %}

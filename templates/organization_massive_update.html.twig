@@ -11,7 +11,7 @@
       <script>
           var dourl = "{{ url('deleteOrganization',{'orgId' : organization.id}) }}";
           var duurl = "{{ url('rootAjaxUserDelete',{'orgId' : organization.id, 'usrId' : 0}) }}";
-          var daurl = "{{ url('ajaxActivityDelete',{'actId' : 0}) }}";
+          var daurl = "{{ url('activityDelete',{'actId' : 0}) }}";
           var ourl = "{{ url('manageOrganizations') }}";
       </script>
   {% endblock %}
