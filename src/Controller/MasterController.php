@@ -35,6 +35,8 @@ use App\Entity\Team;
 use App\Entity\User;
 use App\Repository\ParticipationRepository;
 use App\Repository\UserRepository;
+
+use Stripe\Stripe;
 use Swift_Image;
 use Swift_Mailer;
 use Swift_Message;
@@ -99,6 +101,10 @@ abstract class MasterController extends AbstractController
      */
     protected $user;
     /**
+     * @var Stripe
+     */
+    protected $stripe;
+    /**
      * MasterController constructor.
      * @param EntityManagerInterface $em
      * @param Security $security
@@ -106,6 +112,7 @@ abstract class MasterController extends AbstractController
      */
     public function __construct(EntityManagerInterface $em, Security $security, RequestStack $stack, UserPasswordEncoderInterface $encoder, Environment $twig)
     {
+        Stripe::setApiKey('pk_test_51HZHYgHmuPtR98gq78pZ4Orw0HliC7zhtkmv6FHQp2eVakz9X8IvYtYNwUuAt09tTXKeLZupQFlODr2tsLvTsH6o00PRmtxy8X');
         $this->em = $em;
         $this->security = $security;
         $this->stack = $stack;
@@ -122,6 +129,7 @@ abstract class MasterController extends AbstractController
         $this->activityRepo = $this->em->getRepository(Activity::class);
         $this->em = $em;
         $this->security = $security;
+
         // Twig constants
 //        $loader = new FilesystemLoader('../templates');
 //        $twig = new Environment($loader);

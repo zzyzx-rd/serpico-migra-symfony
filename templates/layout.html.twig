@@ -52,7 +52,7 @@
               <li class="plan">
                 <div class="c-flex-center">
                   <span> {{currentuser.organization.plan == 1 ? 'header.plan.enterprise'|trans|upper : (currentuser.organization.plan == 2 ? 'header.plan.premium'|trans|upper : 'header.plan.free'|trans|upper) }} </span>
-                  <a href="#">{{ 'header.plan.upgrade'|trans }}</a>
+                  <a href="{{ path('priceManagement') }}">{{ 'header.plan.upgrade'|trans }}</a>
                 </div>
               </li>
               <li>

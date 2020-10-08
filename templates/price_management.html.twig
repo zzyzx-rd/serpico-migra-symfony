@@ -1,0 +1,290 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+    {% trans %}organizations.page_title{% endtrans %}
+{% endblock %}
+
+{% block pagename %}
+    {% trans %}organizations.mobile_header_title{% endtrans %}
+{% endblock %}
+
+{% block username %}
+    {{ currentuser.firstname }}
+    {{ currentuser.lastname }}
+{% endblock %}
+
+{% block css %}
+    <style>
+        section {
+            align-items: center;
+        }
+
+        section > .btn-large {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 1em;
+            line-height: inherit;
+        }
+
+        section > .btn-large i {
+            font-size: 1.2em;
+            padding-bottom: .1em;
+            padding-right: .3em;
+        }
+    </style>
+{% endblock css %}
+
+
+{% block content %}
+
+<div>
+    <form id="subscription-form">
+        <div id="card-element" class="MyCardElement">
+            <!-- Elements will create input elements here -->
+        </div>
+
+        <!-- We'll put the error messages in this element -->
+        <div id="card-errors" role="alert"></div>
+        <button type="submit">Subscribe</button>
+    </form>
+    <div class="center"> Plans and pricing </div>
+    <table>
+    <tr class="row" style="width: 100%">
+        <td class="col s3"> </td>
+            <td class="col s2 card-panel no-padding center" style="border: 1px solid #DFE1E5;">
+                <div style="border-bottom: 1px solid #DFE1E5;">
+                    <i class="fas fa-dollar-sign  " style="width:30%;"></i>
+                    <p>Free</p>
+                </div>
+                <h1>0&euro; </h1>
+                <p> ............................ ...... ... .....</p>
+                <button class="btn waves-effect waves-light "> Getting started</button>
+            </td>
+        <td class="col s2 card-panel no-padding center" style="border: 1px solid #DFE1E5;"><div style="border-bottom: 1px solid #DFE1E5;"> Standard </div>
+            <h1>7&euro; </h1>
+            <p> ............................ ...... ... .....</p>
+            <button class="btn waves-effect waves-light "> Getting started</button>
+        </td>
+        <td class="col s2 card-panel no-padding center" style="border: 1px solid #DFE1E5;"><div style="border-bottom: 1px solid #DFE1E5;"> Prenium </div>
+            <h1>14&euro; </h1>
+            <p> ............................ ...... ... .....</p>
+            <button class="btn waves-effect waves-light "> Getting started</button>
+        </td>
+        <td class="col s3" > </td>
+        <form id="signup-form">
+            <div>
+                <input id="email" type="text" placeholder="Email address" required />
+            </div>
+            ​
+            <button id="email-submit" type="submit">
+                <span id="button-text">Sign up</span>
+            </button>
+        </form>
+
+
+
+
+    </tr>
+    </table>
+
+
+
+    {{ form_start(form, {attr: {id: form.vars.id}}) }}
+    <div class="form-group">
+        <label for="card-element">
+            Credit or Debit Card
+        </label>
+        <div id="card-element" class="form-control"></div>
+        <div id="card-errors" class="help-block" role="alert"></div>
+    </div>
+    {{ form_widget(form.token) }}
+    {{ form_end(form) }}
+
+
+
+</div>
+
+{% endblock %}
+{% block javascripts %}
+    <script src="https://js.stripe.com/v3/"></script>
+    <script type="text/javascript">
+
+
+        var form = document.getElementById('{{ form.vars.id }}');
+        var errors = document.getElementById('card-errors');
+
+        var stripe = Stripe('{{ stripe_public_key }}');
+        var elements = stripe.elements();
+        var card = elements.create('card');
+        card.on('change', showCardError);
+        function createCustomer() {
+            let billingEmail = document.querySelector('#email').value;
+            return fetch('/create-customer', {
+                method: 'post',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: billingEmail,
+                }),
+            })
+                .then((response) => {
+                    return response.json();
+                })
+                .then((result) => {
+                    // result.customer.id is used to map back to the customer object
+                    // result.setupIntent.client_secret is used to create the payment method
+                    return result;
+                });
+        }
+        let signupForm = document.getElementById('signup-form');
+        signupForm.addEventListener('submit', function (evt) {
+          evt.preventDefault();
+          // Create Stripe customer
+          createCustomer().then((result) => {
+              customer = result.customer;
+          });
+      });
+        function showCardError(event) {
+            let displayError = document.getElementById('card-errors');
+            if (event.error) {
+                displayError.textContent = event.error.message;
+            } else {
+                displayError.textContent = '';
+            }
+        }
+        card.mount('#card-element');
+        card.addEventListener('change', function(event) {
+            if (event.error) {
+                errors.textContent = event.error.message;
+                form.classList.add('has-error');
+            } else {
+                errors.textContent = '';
+                form.classList.remove('has-error');
+            }
+        });
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            stripe.createToken(card).then(function(result) {
+                if (result.error) {
+                    errors.textContent = result.error.message;
+                    form.classList.add('has-error');
+                } else {
+                    document.getElementById('{{ form.children.token.vars.id }}').setAttribute('value', result.token.id);
+                    form.submit();
+                }
+            });
+        });
+        var form = document.getElementById('subscription-form');
+form.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+// If a previous payment was attempted, get the latest invoice
+    const latestInvoicePaymentIntentStatus = localStorage.getItem(
+        'latestInvoicePaymentIntentStatus'
+    );
+    if (latestInvoicePaymentIntentStatus === 'requires_payment_method') {
+      const invoiceId = localStorage.getItem('latestInvoiceId');
+      const isPaymentRetry = true;
+      // create new payment method & retry payment on invoice with new payment method
+      createPaymentMethod({
+          card,
+          isPaymentRetry,
+          invoiceId,
+      });
+  } else {
+      // create new payment method & create subscription
+      createPaymentMethod({ card });
+  }
+});
+function createPaymentMethod({ card, isPaymentRetry, invoiceId }) {
+    // Set up payment method for recurring usage
+    console.log($('#name'));
+    let billingName = document.querySelector('#name').value;
+  stripe.createPaymentMethod({
+          type: 'card',
+          card: card,
+          billing_details: {
+              name: billingName,
+          },
+      })
+      .then((result) => {
+          if (result.error) {
+              displayError(result);
+          } else {
+              if (isPaymentRetry) {
+                  // Update the payment method and retry invoice payment
+                  retryInvoiceWithNewPaymentMethod({
+                      customerId: customerId,
+                      paymentMethodId: result.paymentMethod.id,
+                      invoiceId: invoiceId,
+                      priceId: priceId,
+                  });
+              } else {
+                  // Create the subscription
+                  createSubscription({
+                      customerId: customerId,
+                      paymentMethodId: result.paymentMethod.id,
+                      priceId: priceId,
+                  });
+              }
+          }
+      });
+}
+        function createSubscription({ customerId, paymentMethodId, priceId }) {
+            return (
+                fetch('/create-subscription', {
+                    method: 'post',
+                    headers: {
+                        'Content-type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        customerId: customerId,
+                        paymentMethodId: paymentMethodId,
+                        priceId: priceId,
+                    }),
+                })
+                    .then((response) => {
+                        return response.json();
+                    })
+                    // If the card is declined, display an error to the user.
+                    .then((result) => {
+                        if (result.error) {
+                            // The card had an error when trying to attach it to a customer.
+                            throw result;
+                        }
+                        return result;
+                    })
+                    // Normalize the result to contain the object returned by Stripe.
+                    // Add the additional details we need.
+                    .then((result) => {
+                        return {
+                            paymentMethodId: paymentMethodId,
+                            priceId: priceId,
+                            subscription: result,
+                        };
+                    })
+                    // Some payment methods require a customer to be on session
+                    // to complete the payment process. Check the status of the
+                    // payment intent to handle these actions.
+                    .then(handlePaymentThatRequiresCustomerAction)
+                    // If attaching this card to a Customer object succeeds,
+                    // but attempts to charge the customer fail, you
+                    // get a requires_payment_method error.
+                    .then(handleRequiresPaymentMethod)
+                    // No more actions required. Provision your service for the user.
+                    .then(onSubscriptionComplete)
+                    .catch((error) => {
+                        // An error has happened. Display the failure to the user here.
+                        // We utilize the HTML element we created.
+                        showCardError(error);
+                    })
+            );
+        }
+
+    </script>
+{% endblock %}
