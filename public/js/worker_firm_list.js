@@ -29,6 +29,27 @@ $(function(){
         var $this = $(this);
         eraseCookie('wf_nb');
         setCookie('wf_nb',$this.val(),365);
+        eraseCookie('wf_cp');
+        setCookie('wf_cp',1,365);
+        location.reload();
+    });
+
+    $('.prev-page, .next-page').on('click',function(){
+        var $this = $(this);
+        eraseCookie('wf_cp');
+        setCookie('wf_cp',$this.hasClass('prev-page') ? parseInt($('.curr-page').text()) - 1 : parseInt($('.curr-page').text()) + 1, 365);
+        location.reload();
+    });
+
+    $('.first-page').on('click',function(){
+        eraseCookie('wf_cp');
+        setCookie('wf_cp',1,365);
+        location.reload();
+    });
+
+    $('.last-page').on('click',function(){
+        eraseCookie('wf_cp');
+        setCookie('wf_cp',parseInt($('.last-page').text()),365);
         location.reload();
     });
 

@@ -6,3 +6,4 @@ vendor/
 .DS_Store
 migrations/
 node_modules/
+public/lib/img/

@@ -403,9 +403,8 @@ class SettingsController extends MasterController
         $sortingOrder = $_COOKIE['wf_s_o'] == 'a' ? 'ASC' : 'DESC';
         
         $countryIds = [];
-        $nbWorkerFirms = 0;
 
-        $countryQueryResults = $qb->select('count(wf) as nbPerCountry, identity(wf.country) AS couId')
+        $countryQueryResults = $qb->select('identity(wf.country) AS couId')
         ->from('App\Entity\WorkerFirm','wf')
         ->groupBy('wf.country')
         ->getQuery()
@@ -413,7 +412,6 @@ class SettingsController extends MasterController
 
         foreach($countryQueryResults as $countryQueryResult){
             $countryIds[] = $countryQueryResult['couId'];
-            $nbWorkerFirms += $countryQueryResult['nbPerCountry'];
         }
 
         $countries = $em->getRepository(Country::class)->findById($countryIds);
@@ -448,6 +446,9 @@ class SettingsController extends MasterController
                 $qb2->andWhere('wf.city IS NULL');
             }
         }
+
+        $nbWorkerFirms = $qb2->getQuery()->getResult();
+        $nbWorkerFirms = sizeof($nbWorkerFirms);
 
         $workerFirms = $qb2->setFirstResult(($page - 1) * $maxResults)
             ->setMaxResults((int) $maxResults);

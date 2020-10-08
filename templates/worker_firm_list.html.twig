@@ -86,12 +86,6 @@
             <label for="citySelector">{{ 'city'|trans|capitalize }}</label>
           </div>
         </li>
-        <li>
-          {% if nbWorkerFirms > maxResults %}
-            <a href="{{ path('manageWorkerFirms') }}" class="btn{% if page == 1 %} disabled{% endif %}">{{'previous'|trans}}</a>
-            <a href="{{ path('manageWorkerFirms') }}" class="btn{% if nbWorkerFirms < page * maxResults %} disabled{% endif %}">{{'next'|trans}}</a>
-          {% endif %}
-        </li>
       </ul>
 
 
