@@ -31,28 +31,65 @@
     <section id="main-tabs-container">
 
       <ul class="flex-center-sa">
-        <li class="flex-center">
-          <span>{{'sort'|trans ~ ' :'}}</span>
+        <li>
+        
           <div class="input-field">
-            <select name="s-p" id="s-p">
-              <option value="a">{{'worker_firm_list.alphabetical_order'|trans}}</option>
-              <option value="i">{{'worker_firm_list.creation_date_order'|trans}}</option>
+            <select name="nbResultsSelector" id="">
+              <option value="20" {{ global.request.cookies.get('wf_nb') == 20 ? "selected" }}>20</option>
+              <option value="50" {{ global.request.cookies.get('wf_nb') == 50 ? "selected" }}>50</option>
+              <option value="100" {{ global.request.cookies.get('wf_nb') == 100 ? "selected" }}>100</option>
             </select>
+            <label for="nbResultsSelector">Results per page :</label>
           </div>
         </li>
         <li class="flex-center">
-          <span>{{'order'|trans ~ ' :'}}</span>
           <div class="input-field">
-            <select name="s-o" id="s-o">
+            <select name="sortingProp" id="sortingProp">
+              <option value="a">{{'worker_firm_list.alphabetical_order'|trans}}</option>
+              <option value="i">{{'worker_firm_list.creation_date_order'|trans}}</option>
+            </select>
+            <label for="sortingProp">{{ 'sort'|trans }}</label>
+          </div>
+        </li>
+        <li class="flex-center">
+          <div class="input-field">
+            <select name="sortingOrder" id="sortingOrder">
               <option value="a">{{'ascending'|trans}}</option>
               <option value="d">{{'descending'|trans}}</option>
             </select>
+            <label for="sortingOrder">{{ 'order'|trans }}</label>
+          </div>
+        </li>
+        <li>
+          <div class="input-field">
+            <select name="countrySelector" id="">
+                <option value="">(All)</option>
+                <option value="0">(No country)</option>
+              {% for country in countries %}
+                <option value="{{ country.id }}" {{ global.request.cookies.get('wf_c') == country.id ? "selected" }}>{{ country.name }}</option>
+              {% endfor %}
+            </select>
+            <label for="countrySelector">{{ 'country'|trans|capitalize }}</label>
+          </div>
+        </li>
+        <li>
+          <div class="input-field">
+            <select name="stateSelector" id="">
+            </select>
+            <label for="stateSelector">{{ 'state'|trans|capitalize }}</label>
+          </div>
+        </li>
+        <li>
+          <div class="input-field">
+            <select name="citySelector" id="">
+            </select>
+            <label for="citySelector">{{ 'city'|trans|capitalize }}</label>
           </div>
         </li>
         <li>
           {% if nbWorkerFirms > maxResults %}
-            <a href="{{ path('manageWorkerFirms',{page: page - 1}) }}" class="btn{% if page == 1 %} disabled{% endif %}">{{'previous'|trans}}</a>
-            <a href="{{ path('manageWorkerFirms',{page: page + 1}) }}" class="btn{% if nbWorkerFirms < page * maxResults %} disabled{% endif %}">{{'next'|trans}}</a>
+            <a href="{{ path('manageWorkerFirms') }}" class="btn{% if page == 1 %} disabled{% endif %}">{{'previous'|trans}}</a>
+            <a href="{{ path('manageWorkerFirms') }}" class="btn{% if nbWorkerFirms < page * maxResults %} disabled{% endif %}">{{'next'|trans}}</a>
           {% endif %}
         </li>
       </ul>
@@ -89,5 +126,6 @@
 
 {% block javascripts %}
   <script>$('select').material_select();</script>
-  <script defer src="{{ asset('build/user_list.js') }}"></script>
+  <script defer src="{{ asset('js/worker_firm_list.js') }}"></script>
+  <script src="{{ asset('build/user_list.js') }}"></script>
 {% endblock %}

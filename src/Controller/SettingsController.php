@@ -359,9 +359,9 @@ class SettingsController extends MasterController
      * @param Request $request
      * @param Application $app
      * @return mixed
-     * @Route("/settings/root/workerFirms/{page}", name="manageWorkerFirms")
+     * @Route("/settings/root/workerFirms", name="manageWorkerFirms")
      */
-    public function manageWorkerFirmsAction(Request $request, int $page){
+    public function manageWorkerFirmsAction(Request $request){
         $em = $this->em;
         $qb = $em->createQueryBuilder();
         $qb2 = $em->createQueryBuilder();
@@ -380,7 +380,20 @@ class SettingsController extends MasterController
             $sortingOrder = 'a';
         }
 
-        $maxResults = 20;
+        if(isset($_COOKIE['wf_nb'])){
+            $maxResults = $_COOKIE['wf_nb'];
+        } else {
+            setcookie('wf_nb', 20);
+            $maxResults = 20;
+        }
+
+        if(isset($_COOKIE['wf_cp'])){
+            $page = $_COOKIE['wf_cp'];
+        } else {
+            setcookie('wf_cp', 1);
+            $page = 1;
+        }
+
         switch($sortingProp){
             case 'a' :
                 $prop = 'name'; break;
@@ -389,24 +402,64 @@ class SettingsController extends MasterController
         }
         $sortingOrder = $_COOKIE['wf_s_o'] == 'a' ? 'ASC' : 'DESC';
         
-        $nbWorkerFirms = current($qb->select('count(wf)')
-        ->from('App\Entity\WorkerFirm','wf')
-        ->getQuery()
-        ->getResult()[0]);
+        $countryIds = [];
+        $nbWorkerFirms = 0;
 
-        $workerFirms = $qb2->select('wf')
-                ->from('App\Entity\WorkerFirm','wf')
-                ->orderBy('wf.' . $prop, $sortingOrder)
-                ->setFirstResult(($page - 1) * $maxResults)
-                ->setMaxResults($maxResults)
-                ->getQuery()
-                ->getResult();
+        $countryQueryResults = $qb->select('count(wf) as nbPerCountry, identity(wf.country) AS couId')
+        ->from('App\Entity\WorkerFirm','wf')
+        ->groupBy('wf.country')
+        ->getQuery()
+        ->getResult();
+
+        foreach($countryQueryResults as $countryQueryResult){
+            $countryIds[] = $countryQueryResult['couId'];
+            $nbWorkerFirms += $countryQueryResult['nbPerCountry'];
+        }
+
+        $countries = $em->getRepository(Country::class)->findById($countryIds);
+        
+        $qb2->select('wf')
+            ->from('App\Entity\WorkerFirm','wf')
+            ->orderBy('wf.' . $prop, $sortingOrder);
+
+        if(isset($_COOKIE['wf_c'])){
+            if($_COOKIE['wf_c'] != 0){
+                $qb2->where('wf.country = :couId')
+                    ->setParameter('couId', $_COOKIE['wf_c']);
+            } else {
+                $qb2->where('wf.country IS NULL');
+            }
+        }
+
+        if(isset($_COOKIE['wf_s'])){
+            if($_COOKIE['wf_s'] != 0){
+                $qb2->andWhere('wf.state = :staId')
+                    ->setParameter('staId', $_COOKIE['wf_s']);
+            } else {
+                $qb2->andWhere('wf.state IS NULL');
+            }
+        }
+
+        if(isset($_COOKIE['wf_cit'])){
+            if($_COOKIE['wf_cit'] != 0){
+                $qb2->andWhere('wf.city = :citId')
+                    ->setParameter('citId', $_COOKIE['wf_cit']);
+            } else {
+                $qb2->andWhere('wf.city IS NULL');
+            }
+        }
+
+        $workerFirms = $qb2->setFirstResult(($page - 1) * $maxResults)
+            ->setMaxResults((int) $maxResults);
+
+        $workerFirms = $qb2->getQuery()->getResult();
 
         return $this->render('worker_firm_list.html.twig',
             [
                 'workerFirms' => $workerFirms,
                 'nbWorkerFirms' => $nbWorkerFirms,
                 'maxResults' => $maxResults,
+                'countries' => $countries,
             ]) ;
 
     }
