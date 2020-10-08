@@ -64,6 +64,7 @@
           <div class="input-field">
             <select name="countrySelector" id="">
                 <option value="">(All)</option>
+                <option value="0">(No country)</option>
               {% for country in countries %}
                 <option value="{{ country.id }}" {{ global.request.cookies.get('wf_c') == country.id ? "selected" }}>{{ country.name }}</option>
               {% endfor %}

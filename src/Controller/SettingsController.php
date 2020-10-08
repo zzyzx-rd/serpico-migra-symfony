@@ -402,25 +402,51 @@ class SettingsController extends MasterController
         }
         $sortingOrder = $_COOKIE['wf_s_o'] == 'a' ? 'ASC' : 'DESC';
         
-        $query = $qb->select('count(wf), identity(wf.country)')
+        $countryIds = [];
+        $nbWorkerFirms = 0;
+
+        $countryQueryResults = $qb->select('count(wf) as nbPerCountry, identity(wf.country) AS couId')
         ->from('App\Entity\WorkerFirm','wf')
         ->groupBy('wf.country')
         ->getQuery()
         ->getResult();
 
-
-        $nbWorkerFirms = current($query[0]);
-        $countryIds = $query[1];
+        foreach($countryQueryResults as $countryQueryResult){
+            $countryIds[] = $countryQueryResult['couId'];
+            $nbWorkerFirms += $countryQueryResult['nbPerCountry'];
+        }
 
         $countries = $em->getRepository(Country::class)->findById($countryIds);
-
+        
         $qb2->select('wf')
             ->from('App\Entity\WorkerFirm','wf')
             ->orderBy('wf.' . $prop, $sortingOrder);
 
         if(isset($_COOKIE['wf_c'])){
-            $qb2->where('wf.country = :couId')
-                ->setParameter('couId', $_COOKIE['wf_c']);
+            if($_COOKIE['wf_c'] != 0){
+                $qb2->where('wf.country = :couId')
+                    ->setParameter('couId', $_COOKIE['wf_c']);
+            } else {
+                $qb2->where('wf.country IS NULL');
+            }
+        }
+
+        if(isset($_COOKIE['wf_s'])){
+            if($_COOKIE['wf_s'] != 0){
+                $qb2->andWhere('wf.state = :staId')
+                    ->setParameter('staId', $_COOKIE['wf_s']);
+            } else {
+                $qb2->andWhere('wf.state IS NULL');
+            }
+        }
+
+        if(isset($_COOKIE['wf_cit'])){
+            if($_COOKIE['wf_cit'] != 0){
+                $qb2->andWhere('wf.city = :citId')
+                    ->setParameter('citId', $_COOKIE['wf_cit']);
+            } else {
+                $qb2->andWhere('wf.city IS NULL');
+            }
         }
 
         $workerFirms = $qb2->setFirstResult(($page - 1) * $maxResults)
