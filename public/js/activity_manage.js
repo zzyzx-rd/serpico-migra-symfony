@@ -112,7 +112,6 @@ var startDate = new Date(startDateTS);
 var endDate = new Date(endDateTS);
 var time = getCookie("time");
 var valueTime = getCookie("valueTime");
-alert(time);
        if(time== "undefined" || time== "" || time == null ){
 
            time = "years";
@@ -120,7 +119,6 @@ alert(time);
            valueTime = annee;
            setCookie('valueTime',valueTime,365);
        }
-console.log(time);
     if ( time == "years"){
         $('.scale option[value=years]').attr('selected','selected');
 
@@ -139,7 +137,6 @@ console.log(time);
 
             }
         }
-        console.log(valueTime);
         $('.value-scale option[value='+valueTime+']').attr('selected','selected');
     }
 
@@ -251,7 +248,6 @@ $(function () {
 
     $activities.find('.activity-component').each(function (){
       var $this = $(this);
-      console.log($activities);
       var sd = $this.data("sd");
       var p =  $this.data("p");
       var id = $this.data("id");
@@ -326,7 +322,6 @@ function dateUpdate() {
     var time = getCookie("time");
     var valueTime = getCookie("valueTime");
     var month = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
-    alert('test');
     $('#activities-container').find('.months-ref').children().remove()
     if (time == "years") {
         for (var i = 0; i < 12; i++) {
@@ -340,7 +335,6 @@ function dateUpdate() {
         $('.suiv').text((parseInt(valueTime) + 1));
         var tDays = ndDayPerYears((parseInt(valueTime)));
     } else {
-        console.log(valueTime);
         valueTime = valueTime.replace("q-", " ");
 
 
@@ -455,7 +449,6 @@ function dateUpdate() {
 
         // p = (p2 < p1) ? p1 : p2;
         //   console.log(p1,p2,p);
-        console.log( pos);
 
         if (pos == "in") {
 
@@ -478,7 +471,6 @@ function dateUpdate() {
                 $(this).find('.e-day').text(dateen.getDate());
                 sPctWidthSD = (ssd - sd) / p;
                 sPctWidthP = Math.max(3, (parseInt(sp) + 1)) / (p + 1);
-                console.log(ssd + sp > c);
                 $(this).css({
                     'margin-left': Math.round(10000 * sPctWidthSD) / 100 + "%",
                     'width': Math.round(10000 * sPctWidthP) / 100 + "%",
@@ -520,7 +512,6 @@ function dateUpdate() {
 
 
                 $this.find('.stage-element').each(function () {
-                    console.log($(this));
                     var ssd = $(this).data("sd");
                     var sp = $(this).data("p");
 
@@ -535,15 +526,12 @@ function dateUpdate() {
                         ssdOf = dayof(date3, datest);
                         ssd = dayofyear(datest);
                         sp = dayDiff(date3, dateen);
-                        console.log(date3, dateen);
                         $(this).find('.s-day').text(datest.getDate() + '/' + (datest.getMonth() + 1));
                         $(this).find('.e-day').text(datest.getDate());
 
 
                         sPctWidthSD = (ssdOf - sd) / (p);
-                        console.log(ssdOf, c)
                         sPctWidthP = Math.max(3, (parseInt(sp) + 1)) / ((p) + 1);
-                        console.log(sPctWidthSD, sPctWidthP);
                         $(this).css({
                             'display': "block",
                             'margin-left': sPctWidthSD < 0 ? 0 + '%' : Math.round(10000 * sPctWidthSD) / 100 + "%",
@@ -616,7 +604,6 @@ function dateUpdate() {
                     }
                     sPctWidthSD = (ssdOf - sd) / p;
                     sPctWidthP = Math.max(3, (parseInt(sp) + 1)) / ((p) + 1);
-                    console.log(parseInt(ssd) + parseInt(sp), parseInt(ssdOf), parseInt(ssd), parseInt(sp), c, $(this));
                     $(this).css({
                         'margin-left': Math.round(10000 * sPctWidthSD) / 100 + "%",
                         'width': Math.min(Math.round(10000 * sPctWidthP) / 100, 100) + "%",
@@ -662,11 +649,9 @@ function dateUpdate() {
                     ssdOf = dayof(date3, datest);
                     ssd = dayofyear(datest);
                     sp = dayDiff(datest, dateen);
-                    console.log(dateen, date3)
 
 
                     //ssd = (ssd < 0) ? (-ssd) : (ssd);
-                    console.log(Math.round(10000 * (c - ssd) / sp) / 100);
                     sPctWidthSD = (ssdOf - sd) / (p);
                     sPctWidthP = Math.max(3, (parseInt(sp) + 1)) / ((p) + 1);
                     $(this).find('.s-day').text(datest.getDate() + '/' + (datest.getMonth() + 1));
@@ -783,7 +768,6 @@ function dateUpdate() {
 
     function posScale(month,time,date1,date2,date3,date4) {
             var pos= " ";
-            console.log(date1,date2,date3,date4);
             if (date1 < date3) {
 
                 if (date2 < date3) {
@@ -813,7 +797,6 @@ function dateUpdate() {
                 pos = " ";
 
             }
-        console.log(pos);
 
         return pos;
     };
@@ -866,7 +849,6 @@ function dateUpdate() {
     {
         d1 = d1.getTime() / 86400000;
         d2 = d2.getTime() / 86400000;
-        console.log("testttt",d1, d2,Number(d2 - d1).toFixed(0))
         return new Number(d2 - d1).toFixed(0);
     }
     function dateDiff(date1, date2){
@@ -902,10 +884,8 @@ function dateUpdate() {
                 if(parseInt(valueTime[2])==1){
                     time=parseInt(valueTime.substring(4,8))-1;
                     valueTime='q-'+4+'-'+time;
-                    console.log(valueTime);
                 }else{
                     valueTime='q-'+(parseInt(valueTime[2])-1)+'-'+valueTime.substring(4,8);
-                    console.log(valueTime);
                 }
 
             }
@@ -920,20 +900,16 @@ function dateUpdate() {
                 if(parseInt(valueTime[2])==4){
                     time=parseInt(valueTime.substring(4,8))+1;
                     valueTime='q-'+1+'-'+time;
-                    console.log(valueTime);
 
                 }else{
-                    console.log(valueTime.substring(4,8));
                     valueTime='q-'+(parseInt(valueTime[2])+1)+'-'+valueTime.substring(4,8);
 
                 }
 
             }
         }
-        console.log(valueTime);
         setCookie('valueTime',valueTime,365);
         valueTimeChange(valueTime);
-        console.log(document.cookie)
 
         dateUpdate();
     });
@@ -977,7 +953,6 @@ function dateUpdate() {
         $(data.responseJSON).each((i,e) => errorHtmlMsg +='<strong>'+Object.values(e)[0]+'</strong>')
         $('#errorModal').find('.error-msg').append($(errorHtmlMsg));
         $('#errorModal').modal('open');
-        console.log(data);
       });
   });
 
@@ -1013,15 +988,14 @@ function dateUpdate() {
         if(time !== undefined) {
             eraseCookie('time');
             setCookie('time',time,365);
-            console.log(time);
             $.each( $('.select-value-scale ').find('.dropdown-content li'), function () {
 
-                console.log($(this).remove());
+                $(this).remove();
 
             });
             $.each( $('.value-scale ').find('option'), function () {
 
-                console.log($(this).remove());
+                $(this).remove();
 
             });
 
@@ -1036,7 +1010,6 @@ function dateUpdate() {
                     .append('<li class=""><span>'+annee+'</li>')
                     .append('<li class=""> <span>'+anneeSuiv+'</span></li>');
                 $('.value-scale ').find('input.select-dropdown ').attr('value',annee);
-                console.log($('.value-scale ').find('input.select-dropdown '));
                 eraseCookie('valueTime');
                 setCookie('valueTime',annee,365);
                 $('.dmin span').remove();
@@ -1060,7 +1033,6 @@ function dateUpdate() {
 
                 $('.value-scale option[value="q-'+1+'-'+annee+'"]').attr('selected','selected');
             }
-            console.log(document.cookie)
             $(this).material_select();
             dateUpdate();
         }
@@ -1086,7 +1058,6 @@ function valueTimeChange(valueTime) {
     $('.value-scale').on('change', function () {
         var valueTime = $(this).children("option:selected").val();
         valueTimeChange(valueTime);
-            console.log(document.cookie)
             $(this).material_select();
             dateUpdate();
 
@@ -1799,7 +1770,6 @@ function valueTimeChange(valueTime) {
     $mainHeaderElmtsHeight = $('.sorting-type').height() + $('.timescale').height() + $('.tabs-t-view').height();
     $mainHeight = Math.min(1000, $('main').height());
     $actList = $();
-    console.log($actList);
     totalPotentialAct = Math.floor(($mainHeight - $mainHeaderElmtsHeight) / $actHeight);
     nbVisibleAct = $('.stages-holder:visible').length;
     if (nbVisibleAct < totalPotentialAct){
@@ -1815,7 +1785,6 @@ function valueTimeChange(valueTime) {
           $actProto.find('.stage-element').attr('data-p',period);
           $actProto.find('.s-day').empty().append(sdate);
           $actProto.find('.e-day').empty().append(edate);
-            console.log($actProto);
           $actList = $actList.add($actProto);
         }
 
@@ -1838,13 +1807,12 @@ function valueTimeChange(valueTime) {
 
         $actList.each(function(i,e){
           $actHolder.append($(e));
-            console.log($(e));
+
         })
 
         $actHolder.append(noActOverlay);
 
         $appenedElmt = $('.activity-list:visible').length ? $('.activity-list:visible').last() : $('.dummy-activities-container');
-        console.log($actHolder.find('.activity-component'));
        $appenedElmt.append($actHolder);
 
         
