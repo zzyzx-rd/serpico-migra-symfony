@@ -116,8 +116,8 @@ var startDate = new Date(startDateTS);
 var endDate = new Date(endDateTS);
 var time = getCookie("time");
 var valueTime = getCookie("valueTime");
-
-       if(time== "undefined" || time== "" ){
+alert(time);
+       if(time== "undefined" || time== "" || time == null ){
 
            time = "years";
            setCookie('time',time,365);
@@ -288,6 +288,7 @@ $(function () {
 
     $activities.find('.activity-component').each(function (){
       var $this = $(this);
+      console.log($activities);
       var sd = $this.data("sd");
       var p =  $this.data("p");
       var id = $this.data("id");
@@ -357,10 +358,12 @@ $(function () {
   });
 
   dateUpdate();
+
 function dateUpdate() {
     var time = getCookie("time");
     var valueTime = getCookie("valueTime");
     var month = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
+    alert('test');
     $('#activities-container').find('.months-ref').children().remove()
     if (time == "years") {
         for (var i = 0; i < 12; i++) {
@@ -489,7 +492,8 @@ function dateUpdate() {
 
         // p = (p2 < p1) ? p1 : p2;
         //   console.log(p1,p2,p);
-        console.log(sd, sdD, p, $(this), pos);
+        console.log( pos);
+
         if (pos == "in") {
 
             pxWidthP = (p + 1) * echelle;
@@ -628,6 +632,15 @@ function dateUpdate() {
                     ssdOf = dayof(date3, datest);
                     ssd = dayofyear(datest);
                     sp = dayDiff(datest, dateen);
+                    if(dateen<date4){
+                        $(this).find('.s-day').text(datest.getDate());
+                        $(this).find('.e-day').text(dateen.getDate() );
+
+                    } else {
+                        $(this).find('.s-day').text(datest.getDate());
+                        $(this).find('.e-day').text(dateen.getDate() + '/' + (dateen.getMonth() + 1));
+
+                    }
                     if (ssdOf > tDays) {
                         $(this).css({
                             'display': "none",
@@ -640,8 +653,6 @@ function dateUpdate() {
                     }
                     sPctWidthSD = (ssdOf - sd) / p;
                     sPctWidthP = Math.max(3, (parseInt(sp) + 1)) / ((p) + 1);
-                    $(this).find('.s-day').text(dateen.getDate());
-                    $(this).find('.e-day').text(dateen.getDate() + '/' + (dateen.getMonth() + 1));
                     console.log(parseInt(ssd) + parseInt(sp), parseInt(ssdOf), parseInt(ssd), parseInt(sp), c, $(this));
                     $(this).css({
                         'margin-left': Math.round(10000 * sPctWidthSD) / 100 + "%",
@@ -754,7 +765,8 @@ function dateUpdate() {
         if (!noStage) {
             $this.hide();
         }
-    })
+    });
+
 };
 
     function getNbJoursMois(mois, annee) {
@@ -1824,6 +1836,7 @@ function valueTimeChange(valueTime) {
     $mainHeaderElmtsHeight = $('.sorting-type').height() + $('.timescale').height() + $('.tabs-t-view').height();
     $mainHeight = Math.min(1000, $('main').height());
     $actList = $();
+    console.log($actList);
     totalPotentialAct = Math.floor(($mainHeight - $mainHeaderElmtsHeight) / $actHeight);
     nbVisibleAct = $('.stages-holder:visible').length;
     if (nbVisibleAct < totalPotentialAct){
@@ -1839,7 +1852,7 @@ function valueTimeChange(valueTime) {
           $actProto.find('.stage-element').attr('data-p',period);
           $actProto.find('.s-day').empty().append(sdate);
           $actProto.find('.e-day').empty().append(edate);
-
+            console.log($actProto);
           $actList = $actList.add($actProto);
         }
 
@@ -1847,6 +1860,7 @@ function valueTimeChange(valueTime) {
         const dummyParams = {wa:1, td: totalPotentialAct - nbVisibleAct + 1};
         $.post(dcurl,dummyParams)
           .done(function(data){
+
             $actList.each(function(i,e){
               $(e).find('.act-info-name').append(data.dummyElmts[i].actName);
               $(e).find('.activity-client-name').attr('data-tooltip',data.dummyElmts[i].name).tooltip();
@@ -1861,13 +1875,14 @@ function valueTimeChange(valueTime) {
 
         $actList.each(function(i,e){
           $actHolder.append($(e));
+            console.log($(e));
         })
 
         $actHolder.append(noActOverlay);
 
         $appenedElmt = $('.activity-list:visible').length ? $('.activity-list:visible').last() : $('.dummy-activities-container');
-
-        $appenedElmt.append($actHolder);
+        console.log($actHolder.find('.activity-component'));
+       $appenedElmt.append($actHolder);
 
         
         
