@@ -451,7 +451,7 @@ function dateUpdate() {
         //   console.log(p1,p2,p);
 
         if (pos == "in") {
-
+            noStage = true;
             pxWidthP = (p + 1) * echelle;
             pxWidthSD = sd * echelle;
             pctWidthSD = getPercentage(pxWidthSD, centralElWidth);
