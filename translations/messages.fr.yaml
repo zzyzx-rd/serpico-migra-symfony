@@ -48,6 +48,11 @@ seconds: secondes
 country: pays
 state: région
 city: ville
+scale: Echelle
+year_short: A
+trimester_short: T
+year: Année
+trimester: Trimestre
 
 help:
   page_title: Serpico, pour une performance collaborative et porteuse de sens

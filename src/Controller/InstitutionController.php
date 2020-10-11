@@ -58,6 +58,12 @@ final class InstitutionController extends MasterController
             setcookie('date_type', 's');
             $dateType = 's';
         }
+        if(isset($_COOKIE['ts'])){
+            $timescale = $_COOKIE['ts'];
+        } else {
+            setcookie('ts', 'y');
+            $timescale = 's';
+        }
 
 
         $statuses = [
@@ -103,6 +109,7 @@ final class InstitutionController extends MasterController
                 'sortingTypeCookie' => $sortingType,
                 'viewTypeCookie' => $viewType,
                 'dateTypeCookie' => $dateType,
+                'timescaleCookie' => $timescale,
                 'eventForm' => $eventForm->createView(),
                 'newActivityForm' => $createForm->createView(),
             ]
@@ -111,6 +118,12 @@ final class InstitutionController extends MasterController
 
     /**
      * @param Request $request
+     * Cookies :
+     * ts defines chosen timescale
+     * ci defines current interval
+     * view_type defines either temporal view, or by status view
+     * date_type defines we see either duration for the stage itself (s) or eventual outputs (o)
+     * 
      * @Route("/myactivities", name="myActivities")
      * @return Response
      */
@@ -142,6 +155,21 @@ final class InstitutionController extends MasterController
         } else {
             setcookie('date_type', 's');
             $dateType = 's';
+        }
+        if(isset($_COOKIE['ts'])){
+            $timescale = $_COOKIE['ts'];
+        } else {
+            setcookie('ts', 'y');
+            $timescale = 'y';
+        }
+        if(isset($_COOKIE['ci'])){
+            $currentInterval = $_COOKIE['ci'];
+        } else {
+            if($timescale == 'y'){
+
+            }
+            setcookie('ci', 'y');
+            $currentInterval = 's';
         }
 
         $userArchivingPeriod = $currentUser->getActivitiesArchivingNbDays();
@@ -435,6 +463,7 @@ final class InstitutionController extends MasterController
                 'sortingTypeCookie' => $sortingType,
                 'viewTypeCookie' => $viewType,
                 'dateTypeCookie' => $dateType,
+                'timescaleCookie' => $timescale,
                 'eventForm' => $eventForm->createView(),
                 'newActivityForm' => $createForm->createView(),
             ]

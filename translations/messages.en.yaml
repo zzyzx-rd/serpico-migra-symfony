@@ -47,6 +47,11 @@ seconds: seconds
 country: country
 state: state
 city: city
+scale: Scale
+year_short: Y
+trimester_short: T
+year: Year
+trimester: Quarter
 
 help:
   page_title: Serpico, for a meaningful and collaborative performance

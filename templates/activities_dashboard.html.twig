@@ -233,7 +233,7 @@
         padding-left : 7px;
       }
 
-      .view-type-value, .change-view-type{
+      .view-type-value, .change-view-type, .change-timescale-type{
         color: #55318e; 
       }
       .sorting-type-value, .change-status-type{
@@ -265,15 +265,11 @@
       #viewTypeSelector{
         display: none;
       }
-      .view-settings{
-        flex-direction: column;
-        align-items: flex-end;
-      }
-      .change-view-type, .change-status-type, .change-dates-type{
+      .change-view-type, .change-status-type, .change-dates-type, .change-timescale-type{
         display: flex;
         flex-direction: column;
       }
-      .change-view-type>i, .change-status-type>i, .change-dates-type>i{
+      .change-view-type>i, .change-status-type>i, .change-dates-type>i, .change-timescale-type>i{
         line-height: 10px;
       }
 
@@ -585,7 +581,7 @@
         font-size: 0.8rem;
       }
 
-      .ip-zone{
+      .ip-zonpe{
         font-size: 13px!important;
         text-transform: uppercase;
       }
@@ -730,10 +726,35 @@
         margin-right:auto;
       }
 
+      .prev-int-btn{
+        position:absolute;
+        left:6%;
+        cursor:pointer;
+        top:9%;
+        font-size:15px;
+      }
+
+      .next-int-btn{
+        position:absolute;
+        right:6%;
+        cursor:pointer;
+        top:9%;
+        font-size:15px;
+      }
+
+      .dmin,.dmax{
+        position:relative;
+      }
+
+      .ts-value{
+        font-weight: 700;
+      }
+
   </style>
 {% endblock %}
 
 {% block javascripts %}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.0/moment.min.js" integrity="sha512-Izh34nqeeR7/nwthfeE0SI3c8uhFSnqxV0sI9TvTcXiFJkMd6fB644O64BRq2P/LA/+7eRvCw4GmLsXksyTHBg==" crossorigin="anonymous"></script>
   <script>
 
     var noActOverlay = $(`
@@ -780,15 +801,6 @@
     }
 
     $('#initializedActivity').find('select[name*="activityLeader"]').material_select();
-
-    $('.change-view-type').on('click',function(){
-        document.cookie = `view_type=${$(this).data('type') == "d" ? "t" : "d"}`;
-        window.location = window.location;
-    })
-    $('.change-status-type').on('click',function(){
-        document.cookie = `sorting_type=${$(this).data('type') == "o" ? "p" : "o"}`;
-        window.location = window.location;
-    })
 
     $('.sorting-type .fas').on('click',function(){
       $(this).hide();
@@ -1231,73 +1243,95 @@
         {% endif %}
       {% endif %}
 
-      <ul class="flex-center view-settings no-margin">
-        <li class="flex-center">
-          <a class="btn-flat no-padding flex-center">
-            <div class="view-type-value flex-center">
-              {% if viewTypeCookie == 'd' %}
-                <i class="material-icons">fiber_smart_record</i>
-                <span class="sm-left sm-right">{{ 'activities.status_view_type'|trans }}</span>
-              {% else %}
-                <i class="material-icons">linear_scale</i>
-                <span class="sm-left sm-right">{{ 'activities.timeframe_view_type'|trans }}</span>
-              {% endif %}
-            </div>
-
-            <ul class="change-view-type change-selector" data-type="{{viewTypeCookie}}">
-              <i class="fa fa-caret-up"></i>
-              <i class="fa fa-caret-down"></i>
-            </ul>
-          </a>
-        </li>
-
-          {#
-
-          This is to sort activities per status (output), or progress
-
+      <ul class="no-margin">
+      
+        <ul class="flex-center-fe view-settings no-margin">
           <li class="flex-center">
             <a class="btn-flat no-padding flex-center">
-              <div class="sorting-type-value flex-center">
-                {% if sortingTypeCookie == 'o' %}
-                  <i class="material-icons">rate_review</i>
-                  <span class="sm-left sm-right">{{ 'activities.output_sorting_type'|trans }}</span>
+              <div class="view-type-value flex-center">
+                {% if viewTypeCookie == 'd' %}
+                  <i class="material-icons">fiber_smart_record</i>
+                  <span class="sm-left sm-right">{{ 'activities.status_view_type'|trans }}</span>
                 {% else %}
-                  <i class="material-icons">event_available</i>
-                  <span class="sm-left sm-right">{{ 'activities.progress_sorting_type'|trans }}</span>
+                  <i class="material-icons">linear_scale</i>
+                  <span class="sm-left sm-right">{{ 'activities.timeframe_view_type'|trans }}</span>
                 {% endif %}
               </div>
-              <ul class="change-status-type change-selector" data-type="{{sortingTypeCookie}}">
+
+              <ul class="change-view-type change-selector" data-type="{{viewTypeCookie}}">
                 <i class="fa fa-caret-up"></i>
                 <i class="fa fa-caret-down"></i>
               </ul>
             </a>
           </li>
 
-          This is to show either dates per stage duration, or output duration (still relevant ?)
+              {#
 
-          {% if viewTypeCookie == 't' %}
+              This is to sort activities per status (output), or progress
+
+              <li class="flex-center">
+                <a class="btn-flat no-padding flex-center">
+                  <div class="sorting-type-value flex-center">
+                    {% if sortingTypeCookie == 'o' %}
+                      <i class="material-icons">rate_review</i>
+                      <span class="sm-left sm-right">{{ 'activities.output_sorting_type'|trans }}</span>
+                    {% else %}
+                      <i class="material-icons">event_available</i>
+                      <span class="sm-left sm-right">{{ 'activities.progress_sorting_type'|trans }}</span>
+                    {% endif %}
+                  </div>
+                  <ul class="change-status-type change-selector" data-type="{{sortingTypeCookie}}">
+                    <i class="fa fa-caret-up"></i>
+                    <i class="fa fa-caret-down"></i>
+                  </ul>
+                </a>
+              </li>
+
+              This is to show either dates per stage duration, or output duration (still relevant ?)
+
+              {% if viewTypeCookie == 't' %}
+              <li class="flex-center">
+                <a class="btn-flat no-padding flex-center">
+                  <div class="dates-type-value flex-center">
+                      <i class="material-icons" {% if dateTypeCookie != 's' %}style="display:none"{% endif %}>settings_ethernet</i>
+                      <span class="sm-left sm-right" {% if dateTypeCookie != 's' %}style="display:none"{% endif %}>{{ 'activities.self_date_type'|trans }}</span>
+                      <i class="material-icons" {% if dateTypeCookie == 's' %}style="display:none"{% endif %}>send</i>
+                      <span class="sm-left sm-right" {% if dateTypeCookie == 's' %}style="display:none"{% endif %}>{{ 'activities.output_date_type'|trans }}</span>
+                  </div>
+                  <ul class="change-dates-type change-selector" data-type="{{dateTypeCookie}}">
+                    <i class="fa fa-caret-up"></i>
+                    <i class="fa fa-caret-down"></i>
+                  </ul>
+                </a>
+              </li>
+
+              
+              
+              
+              {% endif %}#}
+            
+        </ul>
+        <ul class="flex-center-fe scale-settings">
           <li class="flex-center">
             <a class="btn-flat no-padding flex-center">
-              <div class="dates-type-value flex-center">
-                  <i class="material-icons" {% if dateTypeCookie != 's' %}style="display:none"{% endif %}>settings_ethernet</i>
-                  <span class="sm-left sm-right" {% if dateTypeCookie != 's' %}style="display:none"{% endif %}>{{ 'activities.self_date_type'|trans }}</span>
-                  <i class="material-icons" {% if dateTypeCookie == 's' %}style="display:none"{% endif %}>send</i>
-                  <span class="sm-left sm-right" {% if dateTypeCookie == 's' %}style="display:none"{% endif %}>{{ 'activities.output_date_type'|trans }}</span>
+              <div class="view-type-value flex-center">
+                <i class="material-icons">fiber_smart_record</i>
+                <span class="sm-left">{{ 'scale'|trans ~ ' :'}}</span>
+                <span class="ts-value sm-left sm-right">{{timescaleCookie == 'y' ? 'year'|trans : 'trimester'|trans }}</span>
               </div>
-              <ul class="change-dates-type change-selector" data-type="{{dateTypeCookie}}">
+
+              <ul class="change-timescale-type change-selector" data-type="{{ timescaleCookie }}">
                 <i class="fa fa-caret-up"></i>
                 <i class="fa fa-caret-down"></i>
               </ul>
             </a>
           </li>
-
-           
-          
-          
-          {% endif %}#}
-        
+        </ul>
       </ul>
+
+
     </div>
+      {#
       <div style="padding: 0 3em;
     justify-content: flex-end;">
       <div class="input-field select-scale col s12" style=" width:30%">
@@ -1317,6 +1351,7 @@
           <label>Valeur</label>
       </div>
       </div>
+      #}
     <div id="activities-container">
       {% if viewTypeCookie == 'd' %} 
         <ul class="tabs tabs-fixed-width" {% if noActivities %} style="display:none" {% endif %}>
@@ -1384,21 +1419,36 @@
         {% endfor %}
 
       {% else %}
-        <div class=" row timescale">
-            <div class="col s9 no-padding">
-          <div class="row no-margin date">
-            <div class="col s4 dmin center no-padding"><i class="fa fa-caret-left moveP " style="position: absolute;top: -20%" ></i></div>
-            <div class="col s3 center no-padding"></div>
-            <div class="col s5 dmax center no-padding"><i class="fa fa-caret-right moveP " style="position: absolute;top: -20%"></i>
-            </div>
-          </div>
-          <div class="row no-margin">
-            <div class="arrow">
-              <div class="col s3"> </div>
-            </div>
-            <i class="arr right"></i>
-          </div>
-            </div>
+
+        <div class="timescale">
+
+            {#<div class="col s9 no-padding">#}
+              <div class="row no-margin date">
+                <div class="col s4 dmin center no-padding">
+                  <div class="prev-int-btn dd-text">
+                    <i class="fa fa-caret-left moveP"></i>
+                    <span class="prev-interval-val"></span>
+                  </div>
+                  <span class="start-int-value"></span>
+                  <div class="line"></div>
+                </div>
+                <div class="col s3 center curr-int-value no-padding"></div>
+                <div class="col s5 dmax center no-padding">
+                  <div class="next-int-btn dd-text">
+                    <span class="next-interval-val"></span>
+                    <i class="fa fa-caret-right moveP"></i>
+                  </div>
+                  <span class="end-int-value"></span>
+                  <div class="line"></div>
+                </div>
+              </div>
+              <div class="row no-margin">
+                <div class="arrow">
+                  <div class="col s3"> </div>
+                </div>
+                <i class="arr right"></i>
+              </div>
+            {#</div>#}
           <div class="row no-padding {{ displayProcesses ? 'no-margin' : 'no-processes'}}">
 
 
