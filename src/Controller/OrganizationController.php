@@ -6910,10 +6910,8 @@ class OrganizationController extends MasterController
         $qb = $em->createQueryBuilder();
         $allWFIds = $qb->select('wf.id AS wfIds')
             ->from('App\Entity\WorkerFirm','wf')
-            ->innerJoin('App\Entity\Organization','o','WITH','o.id = wf.organization')
-            ->where("o.type != 'I' AND o.type != 'i'")
-            ->andWhere('wf.logo IS NOT NULL')
-            //->orderBy('wf.logo')
+            ->where('wf.logo IS NOT NULL')
+            ->setMaxResults(500)
             ->getQuery()
             ->getResult();
 
