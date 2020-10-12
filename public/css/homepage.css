@@ -14,6 +14,13 @@
   margin-left: auto;
   width:400px;
   height: 200px;
+  position:relative;
+}
+
+.arrow-hand-elmt{
+  position:absolute;
+  width: 20%;
+  left: -10%;
 }
 
 .stages-holder{
@@ -30,6 +37,22 @@
 
 .motto{
   font-weight: 700;
+}
+
+.motto-elmt{
+  margin-left: 5vw;
+}
+
+.section-detailed-func{
+  min-height:200px;
+  display:flex;
+  justify-content:space-between;
+  flex-direction:column;
+  margin-left: 50px
+}
+
+.section-detailed-func > li:not(:last-of-type){
+  margin-bottom:5px;
 }
 
 .calendar-element .row{
@@ -99,14 +122,17 @@
   right: -1.5rem;
 }
 
-.act-info{
+.act-elmt-info{
   position: relative;
   height: 100%;
+  width: 100%;
 }
 
-.act-info > .fixed-action-btn{
+.act-elmt-info > .fixed-action-btn{
   position: absolute;
   right: calc(100% + 0.7rem); 
+  top:0%;
+  height:100%;
 }
 
 .modified-fixed-btn .act-action-buttons{
@@ -142,7 +168,7 @@
   top: 0;
   bottom: 0;
   left: calc(var(--size) / 2);
-  box-shadow: 0 0 0 4px #58ce8c;
+  box-shadow: 0 0 0 4px #55318e;
 }
 
 .landing-section-steps-elements li {
@@ -158,7 +184,7 @@
   height: var(--size);
   width: var(--size);
   margin-right: var(--size);
-  border: 7px solid #2ba9b3;
+  border: 7px solid #ffab40;
   border-radius: 9999px;
   background-color: #fff;
 }

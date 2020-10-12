@@ -437,6 +437,7 @@ td a {
 .flex-center {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .flex-center-sb {
@@ -1125,6 +1126,14 @@ div.col.s12.m2.linkedin {
 }
 
 @media screen and (max-width: 600px) {
+
+  .logo{
+    background-image: url('../lib/img/logo_dd_l.png');
+    background-repeat: no-repeat;
+    background-size: contain;
+    margin-left: auto;
+  }
+
   .banner-title {
     margin: auto 5vw 50px 5vw;
     font-size: 17px;
@@ -1518,12 +1527,6 @@ header>ul {
 }
 
 /*** FORM LOGIN ***/
-
-#formLogin {
-  margin-left: 15%;
-  margin-top: 15%;
-  margin: 0 auto;
-}
 
 #formLogin input {
   background-color: white;

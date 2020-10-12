@@ -2286,4 +2286,27 @@
     </div>
   </div>
 
+  {#{% if currentuser.lastConnected is null %}#}
+    <div id="firstConnectionModal" class="modal">
+      
+      <div class="modal-content">
+
+          <h5>Just a few info...</h5>
+          <p>You are almost done 🥳 ! Please provide your organization to link it to your account</p>
+          <div class="input-field">
+            <input type="text" name="firm">
+            <select name="firmSelector" id=""></select>
+          </div>
+          <div class="action-buttons">
+            <div class="button-field">
+          <a class="btn waves-light waves-effect">Ok</a>
+            </div>
+          </div>
+        
+        
+      </div>
+    </div>
+
+  {#{% endif %}#}
+
 {% endblock content %}

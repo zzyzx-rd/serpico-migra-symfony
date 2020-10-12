@@ -23,9 +23,9 @@ partner: partner
 independant : independant
 user: user
 firm_member : Firm / Institution member
-firstname: firstname
-lastname: lastname
-email: email
+firstname: First name
+lastname: Last name
+email: Email
 ascending: ASC
 descending: DESC
 sort: Sort
@@ -475,34 +475,34 @@ countdown:
   thank_you_followup_modal: "Thank you for following our take-off ! You will be notified personally by our team when Dealdrive is launched; see you soon for building together a revolutionary client experience !"
 
 landing:
-  page_name: The CRM which connects clients
-  motto: The first CRM where Relationship matters
-  
-  main_message:
-    title: An innovative solution for participative management
-    additional_elmt: A collaborative and digital platform that measures performance at all levels in the company
-    discover_solution: Discover it
+  page_name: In line with your clients
+  motto: The CRM which puts you in line with your clients
+  play_with_dummies: And ease your life in the meantime
   section_1:
-    title: The features offered by Dealdrive
-    paragraph_1: "Dealdrive adapts to any type of company whether big or small and independently of its activity sector. The solution is customizable and adapts to any need ranging from the simple digitalization of the evaluation process, to fine-tuning and group-level strategy. It allows:"
-    item_1: "- To followup <b>clients</b> but also <b>projects</b> in every department"
-    item_2: "- <b>Feedbacks</b> and/or <b>grading</b> targeting either <b>projects</b> and/or their <b>participants</b>"
-    item_3: "- Results analysis by <b>activity</b> and by <b>collaborator</b>"
-    item_4: "- To include client <b>satisfaction</b> and the possibility <b>to communicate</b> those results to your clients"
+    title: Reduce business uncertainties by onboarding your partners
+    paragraph_1: "The pandemic crisis pushed many firms to adopt internal followup solutions (team building and communication). But there is still <span class=\"strong\">way</span> to do, especially in <span class=\"strong\">client experience and followup</span> that we want to remodel"
+    item_1: "- By decreasing mails, and shifting towards a <span class=\"strong\">visual and intuitive</span> follow-up with your clients"
+    item_2: "- You should be able to give any time, impactul feedbacks to your client (modifications, suggestions, deliverables)"
+    item_3: "- Everything keeps being stored in one <span class=\"strong\"> shared dashboard, preventing misunderstandings and unncessary waitings</span>, stemming business and fueling concerns on business continuity"
+    #item_4: "- To include client <b>satisfaction</b> and the possibility <b>to communicate</b> those results to your clients"
   section_2:
-    title: "An application in phase with its clients"
-    paragraph_1: "Knowing the importance of ergonomy (user experience) we have worked to create the <b>best experience</b> possible for our users, to <b>simplify</b> and to make performance evaluation <b>easy and fun</b> for the teams. Handling the solution Serpico is <b>intuitive</b> and can be <b>personnalized</b>"
-    paragraph_2: "The deployment of Serpico is made <b>at your side</b> through formations for the collaborators it is easy for them to adhere. </br></br>We work on a <b>simplified process</b> to integrate Serpico in your company thanks to a dedicated follow-up team"
-    step_1: "<b>Training</b> inside teams"
-    step_2: "<b>Definition</b> of skills/criteria"
-    step_3: "<b>Integration</b> of projects"
-    step_4: "<b>Analysis & diffusion</b> of results per project"
-    step_5: "<b>Result analysis</b> throughout time"
+    title: "An intuitive and straightforward client-experience"
+    paragraph_1: "You want to make a feedback to your business partners ? You simply need to :"
+    #paragraph_2: "The deployment of Serpico is made <b>at your side</b> through formations for the collaborators it is easy for them to adhere. </br></br>We work on a <b>simplified process</b> to integrate Serpico in your company thanks to a dedicated follow-up team"
+    item_1: "- Access the business activity you share  <span class=\"strong\">together</strong>"
+    item_2: "- You pick up the type of return you want to make, while potentially inserting <span class=\"strong\">documents</span> or <span class=\"strong\">comments</span>"
+    item_3: "- Your partner sees your feedback in his <span class=\"strong\">dashboard</span>"
+    
+    step_1: "Onboard your <span class=\"strong\">business activities</span>"
+    step_2: "Add your participating <span class=\"strong\">clients</span>"
+    step_3: "You give them <span class=\"strong\">updates</span>"
+    step_4: "Meanwhile they can give you <span class=\"strong\">feedbacks</span>"
+    #step_5: "<b>Result analysis</b> throughout time"
   section_3:
-    title: "Securised data and potentially integrable in your own existing systems"
-    paragraph_1: "Evaluation data can be very sensitive, not only for the external environment but also for the employees. We take the greatest care to <b>limit access to the results</b> in such manner that each user can only access some results, defined by their role."
-    paragraph_2: "Serpico is <b>compliant and secured</b>. If the client wishes that their data are to be stored on their own servers an install on site can be done."
-    paragraph_3: "We guarantee a secured treatment of the data you share by following rules in accordance to the GDPR directives."
+    title: "Protected and soon certified data"
+    paragraph_1: "Client data are always sensitive, due to their confidentiality and importance"
+    paragraph_2: "DealDrive has built an internal firewall, and keeps all eyes on segregating information between your partners"
+    paragraph_3: "More precisely, we are storing your data on <span class=\"strong\">our european cloud servers which comply with GDPR standards</span>, and we've been adopting a <span class=\"strong\">continous deployment & integration</span> approach (CDCI) to offer you the best service. In order to become a trustworthy actor, we are looking to be certified by a third-party actor within the next months"
   section_4:
     title: A collaborative and flexible approach
     paragraph_1: Serpico extends actual methods of performance measurement
@@ -540,6 +540,7 @@ header:
     start: Sign up
     description: One step away from boosting your client relationship !
   product: Our solution
+  pricing: Pricing
   about: About us
   login: Login
   firmSettings: Settings
@@ -1378,6 +1379,11 @@ mails:
     parameterKey: Clé
     parameterValue: Value
     parameter: Paramètre
+
+  userSignupInfo:
+    subject: Subscription of
+    message1: For your info, user
+    message2: has join DealDrive !
 
   validateOrgSubscription:
     subject: Validation du compte

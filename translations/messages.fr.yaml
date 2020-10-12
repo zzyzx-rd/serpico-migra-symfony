@@ -23,9 +23,9 @@ partner: Partenaire
 independant: indépendant
 user: utilisateur
 firm_member : Membre d'une entreprise / institution
-firstname: prénom
-lastname: nom
-email: email
+firstname: Prénom
+lastname: Nom
+email: Email
 ascending: ASC
 descending: DESC
 sort: Tri
@@ -36,7 +36,7 @@ show_more: Afficher __count__ de plus
 show_all: Tout afficher
 curr_language: fr
 page_under_work: Page en construction
-back_to_home: Retour a l'accueil
+back_to_home: Retour à l'accueil
 please_wait: Traitement en cours
 users_list.no_teams_msg: Aucune équipe
 result: Résultats
@@ -451,33 +451,34 @@ countdown:
   thank_you_followup_modal: "Merci de nous suivre dès le début, vous serez prévenu personnellement par notre équipe lors du lancement. A très vite pour construire ensemble révolution de l'expérience client !" 
 
 landing:
-  page_name: Le CRM qui donne la priorité à vos clients
-  motto: Le CRM qui donne la priorité à vos clients
-  main_message:
-    title: Une solution innovante tournée vers le management participatif
-    additional_elmt: Une plateforme digitale et collaborative qui mesure la performance à tous les niveaux de l'entreprise
-    discover_solution: Découvrez là
+  page_name: En phase avec vos clients
+  motto: Le CRM qui vous met en phase avec vos clients
+  play_with_dummies: Et vous rend la vie plus simple par la même occasion
   section_1:
-    title: Les fonctionnalités offertes par Dealdrive
-    paragraph_1: "Dealdrive est pertinent pour chaque type d'entreprise quelque soit le secteur d'activité et le nombre d'employé. La solution est entièrement personnalisable et s'adapte à chaque exigence, depuis le besoin de digitalisation du processus d'évaluation jusqu'au pilotage stratégie de l'ensemble des projets au niveau du groupe. Il permet:"
-    item_1: "- De suivre ses <strong>clients</strong> mais également les <strong>projets</strong> de chaque service"
-    item_2: "- Des retours par <strong>feedback</strong> et/ou <strong>notation</strong>, avec pour cible le <strong>projet</strong> et/ou ses <strong>participants</strong>"
-    item_3: "- L'analyse des résultats par <strong>activité</strong>, et par <strong>collaborateur</strong>"
-    item_4: "- D'inclure la <strong>satisfaction</strong> des clients de l'entreprise et la <strong>communication</strong> éventuelle des résultats aux clients"
+    title: "Réduisez les incertitudes coté business en incluant vos partenaires"
+   # paragraph_1: "Dealdrive est pertinent pour chaque type d'entreprise quelque soit le secteur d'activité et le nombre d'employé. La solution est entièrement personnalisable et s'adapte à chaque exigence, depuis le besoin de digitalisation du processus d'évaluation jusqu'au pilotage stratégie de l'ensemble des projets au niveau du groupe. Il permet:"
+    paragraph_1: "La crise sanitaire a permis aux entreprises de s'outiller pour le suivi interne (lien équipe et communication). Il reste encore <span class=\"strong\">beaucoup</span> à faire, notamment la <span class=\"strong\">relation et l'expérience client</span> que nous souhaitons transformer en profondeur."
+    item_1: "- En réduisant le suivi par mail et en privilégiant une approche <span class=\"strong\">visuelle</span> et spontanée de l'ensemble de la relation"
+    item_2: "- L'insertion à tout moment d'<span class=\"strong\">événements structurant</span> le cycle de vie business (corrections, suggestions, livrables)"
+    item_3: "- Tout est consigné sur un <span class=\"strong\">tableau partagé, évitant les incompréhensions et les attentes inutiles</span>, génératrices d'un climat d'affaires plus crispé sur la continuité des opérations"
+    #item_4: "- Un reporting normalisé qui privilégié une approche unifée clients de l'entreprise et la <strong>communication</strong> éventuelle des résultats aux clients"
   section_2:
-    title: "Une application en phase avec ses clients"
-    paragraph_1: "Conscient de l'importance de l'ergonomie (user experience), nous avons travaillé à proposer la <strong>meilleure expérience</strong> pour nos utilisateurs, afin de <strong>simplifier</strong> et rendre <strong>ludique</strong> l'évaluation de performance par les équipes. La personnalisation et la prise en main de la solution Serpico est très <strong>intuitive</strong>."
-    paragraph_2: "Le déploiement de Serpico s'effectue <strong>à vos cotés</strong>, via des formations dispensées à l'ensemble des équipes afin d'emporter l'adhésion de la direction et des salariés.</br></br>Nous oeuvrons à un <strong>processus facilité</strong> pour l'intégration de Serpico dans le quotidien de votre entreprise via une équipe de suivi dédiée. "
-    step_1: "<strong>Formation</strong> au sein des équipes"
-    step_2: "<strong>Définition</strong> des skills/critères"
-    step_3: "<strong>Intégration</strong> des projets"
-    step_4: "<strong>Analyse & diffusion</strong> des résultats par projet"
-    step_5: "<strong>Analyse des résultats</strong> au cours du temps"
+    title: "Une expérience client intuitive et qui va à l'essentiel"
+    paragraph_1: "Vous voulez faire un retour à vos partenaires commerciaux ? Rien de plus simple :"
+    item_1: "- Vous accédez à l'activité business que vous partagez <span class=\"strong\">en commun</strong>"
+    item_2: "- Vous choisissez le retour que vous souhaitez lui faire, insérant <span class=\"strong\">documents</span> ou <span class=\"strong\">commentaires</span>"
+    item_3: "- Il est notifié automatiquement et voit votre retour dans son <span class=\"strong\">tableau partagé</span>"
+    #paragraph_2: "Le déploiement de Serpico s'effectue <strong>à vos cotés</strong>, via des formations dispensées à l'ensemble des équipes afin d'emporter l'adhésion de la direction et des salariés.</br></br>Nous oeuvrons à un <strong>processus facilité</strong> pour l'intégration de Serpico dans le quotidien de votre entreprise via une équipe de suivi dédiée. "
+    step_1: "Onboarding de vos <span class=\"strong\">activités commerciales</span>"
+    step_2: "Insertion de vos <span class=\"strong\">partenaires</span> y participant"
+    step_3: "Vous les informez de l'<span class=\"strong\">évolution business</span>"
+    step_4: "Ils vous font des <span class=\"strong\">retours</span> par la même occasion"
+    #step_5: "<span class=\"strong\">Analyse des résultats</span> au cours du temps"
   section_3:
-    title: "Des données sécurisées et intégrables dans vos systèmes existants"
-    paragraph_1: "Les données d'évaluation peuvent être sensibles, non seulement pour l'environnement extérieur, mais également pour les salariés. Nous accordons le plus grand soin à <strong>compartimenter l'accès aux résultats</strong>, de sorte que chaque utilisateur accède aux résultats liés à son rôle."
-    paragraph_2: "Serpico est <strong>compliant et sécurisé</strong>. Si votre entreprise souhaite que ses données ne soient pas stockées sur nos serveurs, une installation sur site peut être effectuée."
-    paragraph_3: "Nous garantissons un <strong>traitement sécurisé</strong> de l'ensemble de vos données via l'application des techniques de <strong>sécurité</strong> et de chiffrement en conformité avec la législation récente incluant les éxigences de la directive <strong>RGPD</strong>. "
+    title: "Des données protégées, et bientôt certifiées"
+    paragraph_1: "Les clients font toujours l'objet d'une attention particulière, du fait de <span class=\"strong\">l'importance</span> des informations traitées."
+    paragraph_2: "DealDrive s'inscrit dans un principe de cloisenemment des données vous assurant sécurité et étanchéité des informations entre vos différents partenaires."
+    paragraph_3: "Plus précisément, nous stockons vos données sur <span class=\"strong\">nos serveurs cloud européen respectant la protection des données</span> et nous insérons dans une démarche d'<span class=\"strong\">intégration continue (CICD)</span>, afin de vous garantir le meilleur service. Soucieux d'obtenir votre confiance, Dealdrive s'inscrit dans une démarche de certification par un acteur externe dans les prochains mois."
   section_4:
     title: Une approche collaborative et flexible
     paragraph_1: Serpico représente une extension des outils actuels de suivi de performance
@@ -516,6 +517,7 @@ header:
     start: S'inscrire
     description: Plus qu'un pas avant de booster votre relation client !
   product: La solution
+  pricing: Tarifs
   about: A propos
   login: Connexion
   firmSettings: "Entreprise :"
@@ -1281,8 +1283,8 @@ mails:
     message: "Dernier petit coup de rein de votre côté et il saura très content de savoir le produit sorti !"
     
   subscriptionConfirmation:
-    subject: Bienvenue sur Serpico, la solution de suivi client collaborative
-    message1: Vous avez rejoint lunivers de Serpico, la plateforme collaborative qui relie votre équipe à vos partenaires 💪 !
+    subject: Bienvenue sur DealDrive, la solution de votre suivi clients
+    message1: , la plateforme collaborative qui relie votre équipe à vos partenaires 💪 !
     message2: "Cliquez dès à présent sur ce lien afin d'y définir votre mot de passe et remplir votre profil :"
     button_text: Accédez à Serpico
     message3: Votre compte a été créé en tant qu'administrateur de votre entreprise. Vous pourrez ajouter des utilisateurs et rajoutez des projets et process en cours de réalisation avec vos partenaires, afin d'optimiser le suivi et d'assurer le meilleur service envers eux. <br><br> Si vous avez des questions, n'hésitez pas à en référer à votre responsable ou sinon par mail en nous contactant via l'adresse contact@serpicoapp.com, nous tâcherons d'y répondre dans les meilleurs délais. Nous vous souhaitons une agréable expérience sur notre plateforme de suivi collaboratif !
@@ -1504,6 +1506,11 @@ mails:
     parameterKey: Clé
     parameterValue: Value
     parameter: Paramètre
+
+  userSignupInfo:
+    subject: Inscription de
+    message1: Pour votre information, l'utilisateur
+    message2: a rejoint Dealdrive !
 
   validateOrgSubscription:
     subject: Validation du compte

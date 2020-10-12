@@ -187,7 +187,7 @@ class UserController extends MasterController
     }
 
     /**
-     * @Route("/accounts/signup", name="signup")
+     * @Route("/accounts/signup", name="insticoSignup")
      * @param Request $request
      * @param Application $app
      * @return string

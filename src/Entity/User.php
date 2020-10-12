@@ -958,7 +958,7 @@ class User extends DbObject implements  UserInterface, \Serializable
         return $this;
     }
 
-    public function getOrganization(): Organization
+    public function getOrganization(): ?Organization
     {
         return $this->organization;
     }

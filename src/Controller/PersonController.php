@@ -28,9 +28,15 @@ class PersonController extends MasterController
      */
     public function home(): Response
     {
+        
+        $workerFirmsArrayRespContent = $this->forward('App\Controller\OrganizationController::getDummyClientsAndActNames')->getContent();
+        $workerFirmsActDummies = json_decode($workerFirmsArrayRespContent,true)['dummyElmts'];
 
         return $this->render('landing.html.twig',
-            ['controller_name' => 'SecurityController']);
+            [
+                'controller_name' => 'SecurityController',
+                'workerFirmActDummies' => $workerFirmsActDummies,
+            ]);
     }
 
     /**

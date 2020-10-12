@@ -82,6 +82,7 @@ use App\Entity\User;
 use App\Entity\Weight;
 use App\Entity\WorkerFirm;
 use App\Form\AddOrganizationForm;
+use App\Form\AddSignupUserForm;
 use App\Form\ManageProcessForm;
 use App\Repository\OrganizationRepository;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -6081,6 +6082,67 @@ class OrganizationController extends MasterController
      * @return mixed
      * @throws ORMException
      * @throws OptimisticLockException
+     * @Route("/signup", name="signup")
+     */
+    public function signupAction(Request $request)
+    {
+
+        $em = $this->em;
+        /** @var User */
+        $user = new User;
+        $signupForm = $this->createForm(AddSignupUserForm::class, $user);
+        $signupForm->handleRequest($request);
+
+        if ($signupForm->isSubmitted()) {
+
+            if ($signupForm->isValid()) {
+
+                $token = md5(rand());
+                $user->setToken($token)
+                    ->setUsername($user->getFirstname() . ' '. $user->getLastname());
+                $em->persist($user);
+                $em->flush();
+
+                //Sending mail to DealDrive root users 
+                //$serpicoOrg = $repoO->findOneByCommname('Serpico');
+                $repoU = $em->getRepository(User::class);
+                $recipients = $repoU->findBy(['role' => 4]);
+
+                $settings['fullname']   = $user->getFullName();
+                $settings['email']      = $user->getEmail();
+
+                $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'userSignupInfo']);
+
+                //Sending mail acknowledgment receipt to the requester
+                $recipients          = [];
+                $recipients[]        = $user;
+                $settings            = [];
+                $settings['token'] = $user->getToken();
+
+                $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'subscriptionConfirmation']);
+
+                return $this->redirectToRoute('home');
+            }
+
+        }
+
+        return $this->render('organization_add.html.twig',
+            [
+                'form'        => $signupForm->createView(),
+                'noFooter'    => true,
+                'request'     => $request,
+                'addFromUser' => true,
+            ]);
+
+    }
+
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return mixed
+     * @throws ORMException
+     * @throws OptimisticLockException
      * @Route("/organizations/new", name="userCreateOrganization")
      */
     public function addUserOrganizationAction(Request $request)
@@ -6841,16 +6903,17 @@ class OrganizationController extends MasterController
     public function getDummyClientsAndActNames(Request $request){
 
         $em = $this->em;
-        $withActNames = $request->get('wa');
-        $totalDummies = $request->get('td');
+        
+        $withActNames = $request->get('wa') ?: true;
+        $totalDummies = $request->get('td') ?: 3;
 
         $qb = $em->createQueryBuilder();
         $allWFIds = $qb->select('wf.id AS wfIds')
             ->from('App\Entity\WorkerFirm','wf')
             ->innerJoin('App\Entity\Organization','o','WITH','o.id = wf.organization')
             ->where("o.type != 'I' AND o.type != 'i'")
-            ->orderBy('wf.logo')
-            //->where('order.logo IS NOT NULL')
+            ->andWhere('wf.logo IS NOT NULL')
+            //->orderBy('wf.logo')
             ->getQuery()
             ->getResult();
 

@@ -173,6 +173,8 @@
                     <span class="page-title">
                         {{ toValidate is defined ? 'create_organization.validate_title'|trans : 'header.register.description'|trans }}
                     </span>
+
+                    {% if currentuser and currentuser.role == 4 %}
                     <div class="organization-commname">
                         
                         {% if organization and organization.commname is not null %}
@@ -200,6 +202,9 @@
                             <input type="hidden" name="wfiId">
                         </div>
                     </div>
+                    {% endif %}
+
+
                     {#
                     <div class="input-field w-firm">
                         {{ form_row(form.commname) }}

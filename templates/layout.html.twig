@@ -141,6 +141,7 @@
                   </a>
                 </li>
               {% endif %}
+              {#
               <li>
                 {% if global.route == "solution" %}
                   <a href="{{ path('home_welcome') }}">
@@ -156,8 +157,9 @@
                   <a href="{{ path('about') }}">{% trans %}header.about{% endtrans %}</a>
                 </li>
               {% endif %}
+              #}
               <li>
-                <a class="modal-trigger" href="#login">{% trans %}header.login{% endtrans %}</a>
+                <a class="modal-trigger" href="{{ path('home_welcome') }}">{{ 'back_to_home'|trans }}</a>
               </li>
             {% endif %}
             <li class="lg-icon">
