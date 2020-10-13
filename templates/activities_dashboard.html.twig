@@ -52,17 +52,19 @@
     var aurl = "{{ url('createUserProcessActivity', { inpId: 0 }) }}";
     var adurl = "{{ url('activityDelegate') }}";
     var usurl= "{{ url('updateStageStatus', {stgId : 0}) }}";
-    var cpurl = "{{ url('createProcessRequest', {orgId : currentuser.organization.id}) }}";
+    var cpurl = "{{ currentuser.organization ? url('createProcessRequest', {orgId : currentuser.organization.id}): '' }}";
+    var fc = parseInt("{{ firstConnection }}");
     var eurl = "{{ url('updateEvent', {eveId : 0}) }}";
     var acurl = "{{ url('createActivity') }}";
+    var currentWfiId = "{{ currentuser.organization ? currentuser.organization.id : '' }}";
     var uid = "{{ currentuser.id }}";
     var un = "{{ currentuser.fullname }}";
-    var currentWfiId = "{{ currentuser.organization.id }}";
     var userPic = "{{ asset(global.userpicture) }}";
     var myself = "{{ 'myself'|trans|capitalize }}";
     var pcurl = "{{ url('createParticipant') }}";
     var dcurl = "{{ url('getDummyClients') }}";
     var daurl = "{{ url('activityDelete') }}";
+    var suourl = "{{ url('setUserOrganization') }}";
   </script>
   <style>
       .elmts{
@@ -746,7 +748,7 @@
         position:relative;
       }
 
-      .ts-value{
+      .ts-value, #beforeStarting h6{
         font-weight: 700;
       }
 
@@ -1229,7 +1231,7 @@
 {% block content %}
 
   {% set organization = currentuser.organization %}
-  {% set displayProcesses = organization.plan != 3 and organization.institutionProcesses|length > 0 %}
+  {% set displayProcesses = organization and organization.plan != 3 and organization.institutionProcesses|length > 0 %}
 
   <main>
 
@@ -1423,24 +1425,45 @@
         <div class="timescale">
 
             {#<div class="col s9 no-padding">#}
-              <div class="row no-margin date">
-                <div class="col s4 dmin center no-padding">
-                  <div class="prev-int-btn dd-text">
-                    <i class="fa fa-caret-left moveP"></i>
-                    <span class="prev-interval-val"></span>
+              <div class="row date {{ displayProcesses ? 'no-margin' : 'no-processes' }}">
+
+                {% if displayProcesses %}
+                  <div class="col s4 dmin center no-padding">
+                    <div class="prev-int-btn dd-text">
+                      <i class="fa fa-caret-left moveP"></i>
+                      <span class="prev-interval-val"></span>
+                    </div>
+                    <span class="start-int-value"></span>
+                    <div class="line"></div>
                   </div>
-                  <span class="start-int-value"></span>
-                  <div class="line"></div>
-                </div>
-                <div class="col s3 center curr-int-value no-padding"></div>
-                <div class="col s5 dmax center no-padding">
-                  <div class="next-int-btn dd-text">
-                    <span class="next-interval-val"></span>
-                    <i class="fa fa-caret-right moveP"></i>
+                  <div class="col s3 center curr-int-value no-padding"></div>
+                  <div class="col s5 dmax center no-padding">
+                    <div class="next-int-btn dd-text">
+                      <span class="next-interval-val"></span>
+                      <i class="fa fa-caret-right moveP"></i>
+                    </div>
+                    <span class="end-int-value"></span>
+                    <div class="line"></div>
                   </div>
-                  <span class="end-int-value"></span>
-                  <div class="line"></div>
-                </div>
+                {% else %}
+                  <div class="col s9 dmin no-padding">
+                    <div class="prev-int-btn dd-text">
+                      <i class="fa fa-caret-left moveP"></i>
+                      <span class="prev-interval-val"></span>
+                    </div>
+                    <span class="start-int-value"></span>
+                    <div class="line-no-processes"></div>
+                  </div>
+                  {#<div class="col center curr-int-value no-padding"></div>#}
+                  <div class="col s3 dmax no-padding">
+                    <div class="next-int-btn dd-text">
+                      <span class="next-interval-val"></span>
+                      <i class="fa fa-caret-right moveP"></i>
+                    </div>
+                    <span class="end-int-value"></span>
+                    <div class="line-no-processes"></div>
+                  </div>
+                {% endif %}
               </div>
               <div class="row no-margin">
                 <div class="arrow">
@@ -1725,7 +1748,7 @@
      
     {% endif %} #}
 
-    {% if currentuser.role != 3 %}
+    {% if organization and currentuser.role != 3 %}
       <div id="fixedButton create-act-btn" class="fixed-action-btn">
           <a class="btn-floating btn-large modal-trigger" href="#createActivity" onclick="onAddProcessClick('{{ currentuser.organization.id }}')" data-oid="{{currentuser.organization.id}}"><i class="material-icons">add</i></a>
           {#
@@ -1746,567 +1769,592 @@
 
   </main>
 
-  <div id="createActivity" class="modal">
-    {{ form_start(newActivityForm) }}
-      <div class="modal-content">
-        <div class="flex-center-sb">
-          <h5>{{'activities.create.modal_title'|trans}}</h5>
-          <div class="flex-center ip-zone">
-            <span class="sm-right sm-left">{{'activities.create.linked_to'|trans}}</span>
-            <div class="ip-value flex-center">
-              <i class="material-icons">layers</i>
-              <span class="sm-right sm-left">{{'activities.create.no_ip'|trans}}</span>
-            </div>
-            <i class="material-icons">create</i>
-          </div>
-        </div>
-        
-        <div class="input-field">
-         {{form_label(newActivityForm.name)}}
-         {{form_widget(newActivityForm.name)}}
-        </div>
-
-        <div class="row no-margin">
-            <div class="col s6 m6 input-field">
-              {{ form_label(newActivityForm.startdate) }}
-              {{ form_widget(newActivityForm.startdate) }}
-            </div>
-            <div class="col s6 m6 input-field">
-              {{ form_label(newActivityForm.enddate) }}
-              {{ form_widget(newActivityForm.enddate) }}
-            </div>
-        </div>
-        <div class="participants">
-            <div class="participants-title">
-              <i class="fa fa-users"></i>
-              <span>{{'activities.participants'|trans}}</span>
-             
-            </div>
-
-            <ul class="participants-list flex-center" data-prototype="{% apply escape %}{% include "components/participant_list__item.html.twig" with { participant: newActivityForm.participants.vars.prototype } %}{% endapply %}">
-              {% for participant in newActivityForm.participants.vars.data %}
-                  {{ participant.user }}
-              {% endfor %}  
-                <li class="sm-left btn btn-participant-add flex-center tooltipped" data-tooltip="{{'activities.create.add_participant'|trans}}" data-position="top">
-                  <i class="fa fa-plus"></i>
-                </li>
-            </ul>
-        </div>
-        {#
-        <div style="margin-top: 2Opx;">
-          <div id="processSelector">
-              <div style="margin-bottom: 20px">{% trans %}activities.available_processes{% endtrans %}</div>
-              <div class="input-field">
-                <select id="processSelect"></select>
-              </div>
-          </div>
-          <div>
-              {% if currentuser.role != 1 %}
-                <a class="modal-trigger" href="#requestNewProcess" onclick="onAddProcessClick('{{currentuser.organization.id}}')">
-              {% else %}
-                <a href="{{url('manageProcesses',{orgId: currentuser.organization.id})}}">
-              {% endif %}
-                  <i class="fas fa-plus modal-close"></i>
-                  {% trans %} activities.request_process{% endtrans %}
-              </a>
-          </div>
-        </div>      
-        #}
-    </div>
-        
-
-    <div class="modal-footer flex-center-sb">
-        <div class="button-field">
-        {{ form_widget(newActivityForm.complexify) }}
-        </div>
-        <div class="button-field">
-          {#<a class="waves-effect waves-green btn final-step-btn modal-close">{% trans %}activities.create.submit{% endtrans %}</a>#}
-          {{ form_widget(newActivityForm.submit) }}
-        </div>
-    </div>
-    {{ form_rest(newActivityForm) }}
-    {{ form_end(newActivityForm) }}
-  </div>
-
-  <div id="createParticipant" class="modal">
-    <form name="create-participant" method="post">
-    <div class="modal-content">
-        <h5>{{'activities.create_participant_modal.title'|trans ~ ' : '}}<span class="new-part-name"></span></h5>
-        <p>{{'activities.create_participant_modal.msg'|trans ~ ' : '}}</p>
-        <div class="sm-bottom">
-          <input type="checkbox" id="choice-firm" name="choice-firm" class="filled-in">
-          <label for="choice-firm">{{ 'firm'|trans|capitalize }}</label>
-        </div>
-        <div class="sm-bottom">
-          <input type="checkbox" id="choice-indpt" name="choice-inpdt" class="filled-in">
-          <label for="choice-indpt">{{ 'independant'|trans|capitalize }}</label>
-        </div>
-        <div>
-          <input type="checkbox" id="choice-user" name="choice-user" class="filled-in" checked="checked">
-          <label for="choice-user">{{ 'firm_member'|trans|capitalize }}</label>
-          <div class="user-inputs">
-          
-            <div class="row flex-center no-margin">
-              <div class="input-field col m3 user-fn">
-                <label for="firstname">{{ 'firstname'|trans|capitalize }}</label>
-                <input type="text" name="firstname" class="no-margin">
-              </div>
-              <div class="input-field col m3 user-ln">
-                <label for="lastname">{{ 'lastname'|trans|capitalize }}</label>
-                <input type="text" name="lastname" class="no-margin">
-              </div>
-              <div class="col m1 f-prefix">
-                <span>{{ 'from'|trans }}</span>
-              </div>
-              <div class="firm-field-zone input-field col m5">
-                <label for="firm">{{ 'firm'|trans|capitalize ~ ', ' ~ 'organization'|trans|capitalize }}</label>
-                <input type="text" class="firm-name no-margin" name="firm">
-                <select name="firmSelector" style="display:none;"></select>
-                {#<div class="flex-center validation-buttons">
-                  <div class="btn firm-validate">
-                    <i class="material-icons">check</i>
-                  </div>
+  {% if organization is not null %}
+  
+  
+  
+      <div id="createActivity" class="modal">
+        {{ form_start(newActivityForm) }}
+          <div class="modal-content">
+            <div class="flex-center-sb">
+              <h5>{{'activities.create.modal_title'|trans}}</h5>
+              <div class="flex-center ip-zone">
+                <span class="sm-right sm-left">{{'activities.create.linked_to'|trans}}</span>
+                <div class="ip-value flex-center">
+                  <i class="material-icons">layers</i>
+                  <span class="sm-right sm-left">{{'activities.create.no_ip'|trans}}</span>
                 </div>
-                #}
-                <input type="hidden" name="wid">
-                <input type="hidden" name="oid">
-                <input type="hidden" name="cid">
+                <i class="material-icons">create</i>
               </div>
             </div>
-
-            <div class="row">
-              <div class="col s12 m12 input-field">
-                <label for="email">{{ 'email'|trans|capitalize }}</label>
-                <input type="text" name="email">
-              </div>
-            </div>
-          </div>
-
-        </div>
-    </div>
-    <div class="modal-footer">
-        <a class="modal-close waves-effect btn-flat dd-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
-        <a class="modal-action waves-effect waves-green btn create-part-button">{{'create'|trans}}</a>
-    </div>
-    </form>
-  </div>
-
-  <div id="interactPart" class="modal">
-    <div class="modal-content">
-      <h5>{{'activities.create_participant_wo_mail_modal.title'|trans}}</h5>
-      <div class="no-mail-img-holder">
-        <img src="{{asset('lib/img/no-mail-2-1.png')}}" alt="no-mail">
-      </div>
-      <p>{{'activities.create_participant_wo_mail_modal.msg'|trans}}</p>
-    </div>
-    <div class="modal-footer">
-        <a class="modal-close waves-effect btn-flat dd-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
-        <a class="modal-action modal-close waves-effect waves-green btn create-part-button">{{ 'add_anyway'|trans }}</a>
-    </div>
-  </div>
-
-  <div id="legalPerson" class="modal">
-    <div class="modal-content">
-      <h5>{{'activities.create_participant_legal_person_modal.title'|trans}}</h5>
-      <div class="legal-img-holder">
-        <img src="{{asset('lib/img/legal-person.png')}}" alt="legal-person">
-      </div>
-      <p>{{'activities.create_participant_legal_person_modal.msg'|trans}}</p>
-      <div class="flex-center-fe">
-        <a class="modal-close waves-effect btn-flat dd-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
-        <a class="modal-action modal-close waves-effect waves-green btn create-part-button">{{ 'add_anyway'|trans }}</a>
-      </div>
-    </div>
-  </div>
-
-  <div id="processSelect" class="modal">
-    <div class="input-field">
-      <select id="processSelect"></select>
-    </div>
-  </div>
-
-  <div id="initializedActivity" class="modal">
-
-    <div class="modal-content">
-      <div class="flex-center">
-        <a href="#createActivity" class="btn waves-effect waves-green modal-trigger modal-close">{{ 'grades.back'|trans }}</a>
-        <h5 class="initialize-modal-title">{{ 'activities.create.initialize_title'|trans }}</h5>
-      </div>
-
-      <div class="elmts"></div>
-
-      {#<p>{{ 'activities.request.initialize_modify_content'|trans }}</p>#}
-      {#
-      <input type="checkbox" class="filled-in" id="warn_participants" name="warn_participants" checked>
-      <label for="warn_participants">{{ 'activities.request.informing_mail'|trans }}</label>
-      #}
-      <input type="checkbox" class="filled-in" id="delegate" name="delegate-checkbox">
-      <label for="delegate">{{ 'activities.create.delegate_btn_msg'|trans }}</label>
-
-      <div class="delegate" style="display: none;">
-        {{ form_start(delegateForm) }}
-            {#<p>{% trans %}activities.create.delegate_content_msg{% endtrans %}</p>#}
-            <div class="input-field del-act-name" style="display: none;">
-              {{ form_row(delegateForm.activityName) }}
-            </div>
+            
             <div class="input-field">
-              {{ form_widget(delegateForm.activityLeader) }}
-              {{ form_label(delegateForm.activityLeader) }}
+            {{form_label(newActivityForm.name)}}
+            {{form_widget(newActivityForm.name)}}
             </div>
 
-            {{ form_row(delegateForm.activityDescription) }}
-
-
-            <div class="action-buttons">
-                <div class="button-field">
-                    {{ form_row(delegateForm.submit,{attr: {style: "margin-top:15px;"}}) }}
+            <div class="row no-margin">
+                <div class="col s6 m6 input-field">
+                  {{ form_label(newActivityForm.startdate) }}
+                  {{ form_widget(newActivityForm.startdate) }}
+                </div>
+                <div class="col s6 m6 input-field">
+                  {{ form_label(newActivityForm.enddate) }}
+                  {{ form_widget(newActivityForm.enddate) }}
                 </div>
             </div>
-        {{ form_rest(delegateForm) }}
-        {{ form_end(delegateForm) }}
-      </div>
+            <div class="participants">
+                <div class="participants-title">
+                  <i class="fa fa-users"></i>
+                  <span>{{'activities.participants'|trans}}</span>
+                
+                </div>
 
-    </div>
-    <div class="modal-footer action-buttons">
-      {#}
-      <div class="button-field">
-        <button type="button" class="modal-action launch-btn btn">{{ 'activities.request.launch_btn_msg'|trans }}</button>
-      </div>
-      #}
-      <div class="button-field">
-        <button type="button" class="modal-action modify-btn button btn">{{ 'create_organization.create'|trans }}</button>
-      </div>
-      {#}
-      <div class="button-field">
-        <a class="waves-effect waves-green btn modal-trigger" href="#delegateActivity">{% trans %}activities.create.delegate_btn_msg{% endtrans %}</a>
-      </div>
-      #}
-    </div>
-  </div>
-
-  <div id="uninitializedActivity" class="modal">
-    <div class="modal-content">
-      <h5>{{ 'activities.create.uninitialize_title'|trans }}</h5>
-      <p>{{ 'activities.create.delegate_choice_msg'|trans }}</p>
-      <div class="input-field">
-        <label for="activity_name">{{ 'activities.request.name_label'|trans }}</label>
-        <input type="text" id="activity_name" name="activity_name" required="required">
-      </div>
-
-    </div>
-    <div class="modal-footer action-buttons">
-      <div class="button-field">
-        <button type="button" class="modal-action start-btn btn">{{ 'activities.create.nodelegate_btn_msg'|trans }}</button>
-      </div>
-      {#<div class="button-field">
-        <button type="button" class="modal-action modal-close submit-button red btn">{{ 'activities.request.cancel_btn_msg'|trans }}</button>
-      </div>
-      #}
-      <div class="button-field">
-        <a class="waves-effect waves-green btn modal-trigger" href="#delegateActivity">{% trans %}activities.create.delegate_btn_msg{% endtrans %}</a>
-      </div>
-    </div>
-  </div>
-
-  <div id="activityInfo" class="modal" data-eid="0">
-    <div class="modal-content">
-      <h5>{{ 'activities.details'|trans }}</h5>
-      <div class="elmts">
-
-      </div>
-    </div>
-    <div class="modal-footer action-buttons">
-      {#<div class="button-field">
-        <button type="button" class="modal-close btn">Ok</button>
-      </div>
-      #}
-    </div>
-  </div>
-
-  <div id="activity-validate" class="modal">
-    <div class="modal-content">
-      <h5>{{ 'activities.request.initialize_title'|trans }}
-        -
-        <span class="process-name"></span>
-      </h5>
-      <p>{{ 'activities.request.ask_for_add'|trans }}</p>
-    </div>
-    <div class="modal-footer action-buttons">
-      <div class="button-field">
-        <button type="button" class="modal-action start-btn btn">{{ 'activities.request.confirm_btn_msg'|trans }}</button>
-      </div>
-      <div class="button-field">
-        <button type="button" class="modal-action modal-close submit-button red btn">{{ 'activities.request.cancel_btn_msg'|trans }}</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="errorModal" class="modal">
-    <div class="modal-content">
-      <h5>{{ 'activities.modal_error_creation_title'|trans }}</h5>
-      <p class="error-msg"></p>
-    </div>
-    <div class="modal-footer">
-      <div class="action-buttons">
-        <div class="button-field">
-          <button type="button" class="modal-action modal-close waves-effect btn">Ok</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="delegateSuccess" class="modal">
-    <div class="modal-content">
-        <p>{% trans %}activities.create.delegate_success_msg{% endtrans %}</p>
-    </div>
-    <div class="modal-footer">
-        <div class="button-field">
-            <a class="modal-close submit-button waves-effect waves-green btn-large">{% trans %}activities.create.delegate_success_close_btn_msg{% endtrans %}</a>
-        </div>
-    </div>
-  </div>
-
-  <div id="chooseGradableStage" class="modal">
-      <div class="modal-content">
-        <h5>{% trans %}activities.select_graded_stage.choice_title_msg{% endtrans %}</h5>
-        <div style="margin-top: 2Opx;">
-          <div id="stageSelector">
-              <div style="margin-bottom: 20px">{% trans %}activities.select_graded_stage.available_grading_stages{% endtrans %}</div>
-              <select id="stageSelect" style="display: block!important; font-family: Roboto, FontAwesome; width: 65%"></select>
-          </div>
-        </div>
-      </div>
-    <div class="modal-footer action-buttons">
-        <div class="button-field">
-          <a class="waves-effect waves-green btn" href="{{ path('newStageGrade', { stgId: 0 }) }}">{% trans %}activities.grade{% endtrans %}</a>
-        </div>
-    </div>
-  </div>
-
-  <div id="requestNewProcess" class="modal">
-    <div class="modal-content">
-      {{ form_start(addProcessForm, {attr: {autocomplete: "off"}}) }}
-          <h5>{{'institutions.add_modal_process.modal_add_title'|trans}}</h5>
-          <p>{{'institutions.add_modal_process.link_to_process'|trans}}</p>
-          <div>
-              {{ form_row(addProcessForm.name) }}
-          </div>
-          <div class="input-field">
-            {{ form_widget(addProcessForm.parent) }}
-            {{ form_label(addProcessForm.parent) }}
-          </div>
-
-      </div>
-
-      <div class="modal-footer action-buttons">
-          <div class="button-field">
-              {{ form_row(addProcessForm.submit) }}
-          </div>
-      </div>
-      {{ form_rest(addProcessForm)}}
-      {{ form_end(addProcessForm)}}
-  </div>
-
-  <div id="updateEvent" class="modal">
-    <div class="modal-content">
-      {{ form_start(eventForm, {attr: {autocomplete: "off"}}) }}
-          <header class="flex-center-sb">
-            <h5 style="display:inline-block">
-            <span class="event-element-name"></span>
-            <span>{{' : ' ~ 'activity_elements.events.add_event.modal_new_title'|trans}}</span>
-            </h5>
-            {{ form_row(eventForm.submit)|replace({'[link]' : '<i class="fa fa-check"></i>'})|raw }}
-          </header>
-          <p>{{'activity_elements.events.add_event.modal_msg'|trans}}</p>
-          <div>
-              {{ form_row(eventForm.eventType) }}
-          </div>
-          <div class="row no-margin">
-            <a class="event-notifications-header flex-center">
-              <i class="fa fa-paper-plane sm-right"></i>
-              <span>{{'activity_elements.events.add_event.notify_participants'|trans}}</span>
-            </a>
-            <div class="event-notifications-content" style="display:none">
-              <input id="partNotification" type="checkbox" class="filled-in">
-              <label for="partNotification">
-                {{'activity_elements.events.add_event.notify_all_participants'|trans}}
-              </label>
-            </div>          
-          </div>
-
-          <div class="row no-margin">
-            <a class="event-dates-header flex-center">
-              <i class="fa fa-calendar-alt sm-right"></i>
-              <span>{{'activity_elements.events.add_event.manage_dates'|trans}}</span>
-            </a>
-            <div class="event-dates-content" style="display:none">
-              <div class="col m12 s12 onset-date-elmt">
-                  <div class="element-data">
-                    <i class="fa fa-clock"></i>
-                    <span>{{'activity_elements.events.add_event.onset_date'|trans }}</span>
-                  </div>
-                  <div class="element-input" style="display:none">
-                    {{ form_label(eventForm.onsetDate) }}
-                    {{ form_widget(eventForm.onsetDate) }}
-                  </div>
-              </div>
-              <div class="col m12 s12 exp-res-date-elmt">
-                  <div class="element-data">
-                    <i class="fa fa-clock"></i>
-                    <span>{{'activity_elements.events.add_event.exp_res_date'|trans }}</span>
-                  </div>
-                  <div class="element-input" style="display:none">
-                    {{ form_label(eventForm.expResDate) }}
-                    {{ form_widget(eventForm.expResDate) }}
-                  </div>
-              </div>
+                <ul class="participants-list flex-center" data-prototype="{% apply escape %}{% include "components/participant_list__item.html.twig" with { participant: newActivityForm.participants.vars.prototype } %}{% endapply %}">
+                  {% for participant in newActivityForm.participants.vars.data %}
+                      {{ participant.user }}
+                  {% endfor %}  
+                    <li class="sm-left btn btn-participant-add flex-center tooltipped" data-tooltip="{{'activities.create.add_participant'|trans}}" data-position="top">
+                      <i class="fa fa-plus"></i>
+                    </li>
+                </ul>
             </div>
-          </div>
-
-          <div class="event-action-buttons flex-center-sa">
-            
-              <a class="btn waves-effect waves-light insert-comment-btn">
-                <i class="fa fa-comment-medical sm-right"></i>
-                <span>{{ 'activity_elements.events.add_event.insert_comment'|trans }}</span>
-              </a>
-            
-            
-              <a class="btn waves-effect waves-light insert-document-btn">
-                <i class="fa fa-file-medical sm-right"></i>
-                <span>{{ 'activity_elements.events.add_event.insert_document'|trans }}</span>
-              </a>
-            
-          </div>
-          {#<ul class="comments" data-prototype="{% apply escape %}{% include 'components/client__item.html.twig' with { item: form.comments.vars.prototype } %}{% endapply %}">#}
-          <ul class="comments" data-prototype="{{ form_widget(eventForm.comments.vars.prototype)|e('html') }}">
-          {% for comment in eventForm.comments.vars.data %}
-          {% endfor %}
-          </ul>
-
-          {#<ul class="documents" data-prototype="{% apply escape %}{% include 'components/client__item.html.twig' with { item: form.comments.vars.prototype } %}{% endapply %}">#}
-          <ul class="documents" data-prototype="{{ form_widget(eventForm.documents.vars.prototype)|e('html') }}">
-          {% for document in eventForm.documents.vars.data %}
-          {% endfor %}
-          </ul>
-
-          {#}
-          <div class="action-buttons">
-              <div class="button-field">
-                  {{ form_row(eventForm.submit) }}
+            {#
+            <div style="margin-top: 2Opx;">
+              <div id="processSelector">
+                  <div style="margin-bottom: 20px">{% trans %}activities.available_processes{% endtrans %}</div>
+                  <div class="input-field">
+                    <select id="processSelect"></select>
+                  </div>
               </div>
+              <div>
+                  {% if currentuser.role != 1 %}
+                    <a class="modal-trigger" href="#requestNewProcess" onclick="onAddProcessClick('{{currentuser.organization.id}}')">
+                  {% else %}
+                    <a href="{{url('manageProcesses',{orgId: currentuser.organization.id})}}">
+                  {% endif %}
+                      <i class="fas fa-plus modal-close"></i>
+                      {% trans %} activities.request_process{% endtrans %}
+                  </a>
+              </div>
+            </div>      
+            #}
+        </div>
+            
+
+        <div class="modal-footer flex-center-sb">
+            <div class="button-field">
+            {{ form_widget(newActivityForm.complexify) }}
+            </div>
+            <div class="button-field">
+              {#<a class="waves-effect waves-green btn final-step-btn modal-close">{% trans %}activities.create.submit{% endtrans %}</a>#}
+              {{ form_widget(newActivityForm.submit) }}
+            </div>
+        </div>
+        {{ form_rest(newActivityForm) }}
+        {{ form_end(newActivityForm) }}
+      </div>
+
+      <div id="createParticipant" class="modal">
+        <form name="create-participant" method="post">
+        <div class="modal-content">
+            <h5>{{'activities.create_participant_modal.title'|trans ~ ' : '}}<span class="new-part-name"></span></h5>
+            <p>{{'activities.create_participant_modal.msg'|trans ~ ' : '}}</p>
+            <div class="sm-bottom">
+              <input type="checkbox" id="choice-firm" name="choice-firm" class="filled-in">
+              <label for="choice-firm">{{ 'firm'|trans|capitalize }}</label>
+            </div>
+            <div class="sm-bottom">
+              <input type="checkbox" id="choice-indpt" name="choice-inpdt" class="filled-in">
+              <label for="choice-indpt">{{ 'independant'|trans|capitalize }}</label>
+            </div>
+            <div>
+              <input type="checkbox" id="choice-user" name="choice-user" class="filled-in" checked="checked">
+              <label for="choice-user">{{ 'firm_member'|trans|capitalize }}</label>
+              <div class="user-inputs">
+              
+                <div class="row flex-center no-margin">
+                  <div class="input-field col m3 user-fn">
+                    <label for="firstname">{{ 'firstname'|trans|capitalize }}</label>
+                    <input type="text" name="firstname" class="no-margin">
+                  </div>
+                  <div class="input-field col m3 user-ln">
+                    <label for="lastname">{{ 'lastname'|trans|capitalize }}</label>
+                    <input type="text" name="lastname" class="no-margin">
+                  </div>
+                  <div class="col m1 f-prefix">
+                    <span>{{ 'from'|trans }}</span>
+                  </div>
+                  <div class="firm-field-zone input-field col m5">
+                    <label for="firm">{{ 'firm'|trans|capitalize ~ ', ' ~ 'organization'|trans|capitalize }}</label>
+                    <input type="text" class="firm-name no-margin" name="firm">
+                    <select name="firmSelector" style="display:none;"></select>
+                    {#<div class="flex-center validation-buttons">
+                      <div class="btn firm-validate">
+                        <i class="material-icons">check</i>
+                      </div>
+                    </div>
+                    #}
+                    <input type="hidden" name="wid">
+                    <input type="hidden" name="oid">
+                    <input type="hidden" name="cid">
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col s12 m12 input-field">
+                    <label for="email">{{ 'email'|trans|capitalize }}</label>
+                    <input type="text" name="email">
+                  </div>
+                </div>
+              </div>
+
+            </div>
+        </div>
+        <div class="modal-footer">
+            <a class="modal-close waves-effect btn-flat dd-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+            <a class="modal-action waves-effect waves-green btn create-part-button">{{'create'|trans}}</a>
+        </div>
+        </form>
+      </div>
+
+      <div id="interactPart" class="modal">
+        <div class="modal-content">
+          <h5>{{'activities.create_participant_wo_mail_modal.title'|trans}}</h5>
+          <div class="no-mail-img-holder">
+            <img src="{{asset('lib/img/no-mail-2-1.png')}}" alt="no-mail">
+          </div>
+          <p>{{'activities.create_participant_wo_mail_modal.msg'|trans}}</p>
+        </div>
+        <div class="modal-footer">
+            <a class="modal-close waves-effect btn-flat dd-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+            <a class="modal-action modal-close waves-effect waves-green btn create-part-button">{{ 'add_anyway'|trans }}</a>
+        </div>
+      </div>
+
+      <div id="legalPerson" class="modal">
+        <div class="modal-content">
+          <h5>{{'activities.create_participant_legal_person_modal.title'|trans}}</h5>
+          <div class="legal-img-holder">
+            <img src="{{asset('lib/img/legal-person.png')}}" alt="legal-person">
+          </div>
+          <p>{{'activities.create_participant_legal_person_modal.msg'|trans}}</p>
+          <div class="flex-center-fe">
+            <a class="modal-close waves-effect btn-flat dd-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+            <a class="modal-action modal-close waves-effect waves-green btn create-part-button">{{ 'add_anyway'|trans }}</a>
+          </div>
+        </div>
+      </div>
+
+      <div id="processSelect" class="modal">
+        <div class="input-field">
+          <select id="processSelect"></select>
+        </div>
+      </div>
+
+      <div id="initializedActivity" class="modal">
+
+        <div class="modal-content">
+          <div class="flex-center">
+            <a href="#createActivity" class="btn waves-effect waves-green modal-trigger modal-close">{{ 'grades.back'|trans }}</a>
+            <h5 class="initialize-modal-title">{{ 'activities.create.initialize_title'|trans }}</h5>
+          </div>
+
+          <div class="elmts"></div>
+
+          {#<p>{{ 'activities.request.initialize_modify_content'|trans }}</p>#}
+          {#
+          <input type="checkbox" class="filled-in" id="warn_participants" name="warn_participants" checked>
+          <label for="warn_participants">{{ 'activities.request.informing_mail'|trans }}</label>
+          #}
+          <input type="checkbox" class="filled-in" id="delegate" name="delegate-checkbox">
+          <label for="delegate">{{ 'activities.create.delegate_btn_msg'|trans }}</label>
+          <div class="delegate" style="display: none;">
+            {{ form_start(delegateForm) }}
+                {#<p>{% trans %}activities.create.delegate_content_msg{% endtrans %}</p>#}
+                <div class="input-field del-act-name" style="display: none;">
+                  {{ form_row(delegateForm.activityName) }}
+                </div>
+                <div class="input-field">
+                  {{ form_widget(delegateForm.activityLeader) }}
+                  {{ form_label(delegateForm.activityLeader) }}
+                </div>
+
+                {{ form_row(delegateForm.activityDescription) }}
+
+
+                <div class="action-buttons">
+                    <div class="button-field">
+                        {{ form_row(delegateForm.submit,{attr: {style: "margin-top:15px;"}}) }}
+                    </div>
+                </div>
+            {{ form_rest(delegateForm) }}
+            {{ form_end(delegateForm) }}
+          </div>
+
+        </div>
+        <div class="modal-footer action-buttons">
+          {#}
+          <div class="button-field">
+            <button type="button" class="modal-action launch-btn btn">{{ 'activities.request.launch_btn_msg'|trans }}</button>
           </div>
           #}
-
-      </div>
-
-      {{ form_rest(eventForm)}}
-      {{ form_end(eventForm)}}
-  </div>
-
-  <div id="deleteActivity" class="modal">
-    <div class="modal-content">
-        <p>{% trans %}activities.delete_activity_msg{% endtrans %}</p>
-        {#{% else %}
-            <p>{% trans %}activities.delete_activity_msg{% endtrans %}Are you sure you want to delete this activity ?</p>
-        {% endif %}#}
-    </div>
-    <div class="modal-footer">
-        <a class=" modal-action modal-close waves-effect waves-green btn remove-activity">{% trans %}user_update.delete_modal.confirm{% endtrans %}</a>
-        <a class=" modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
-    </div>
-  </div>
-
-  <div id="deleteParticipant" class="modal">
-    <div class="modal-content">
-        <p>{% trans %}activities.delete_participant_msg{% endtrans %}</p>
-        {#{% else %}
-            <p>{% trans %}activities.delete_activity_msg{% endtrans %}Are you sure you want to delete this activity ?</p>
-        {% endif %}#}
-    </div>
-    <div class="modal-footer">
-        <a class=" modal-action modal-close waves-effect waves-green btn delete-button">{% trans %}user_update.delete_modal.confirm{% endtrans %}</a>
-        <a class=" modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
-    </div>
-  </div>
-
-  <div id="chooseGradableStage" class="modal">
-    <div class="modal-content">
-      <h5>{% trans %}activities.select_graded_stage.choice_title_msg{% endtrans %}</h5>
-      <div style="margin-top: 2Opx;">
-        <div id="stageSelector">
-          <div style="margin-bottom: 20px">{% trans %}activities.select_graded_stage.available_grading_stages{% endtrans %}</div>
-          <select id="stageSelect" style="display: block!important; font-family: Roboto, FontAwesome; width: 65%"></select>
-        </div>
-      </div>
-    </div>
-    <div class="modal-footer action-buttons">
-      <div class="button-field">
-        <a class="waves-effect waves-green btn" href="{{ path('newStageGrade', { stgId: 0 }) }}">{% trans %}activities.grade{% endtrans %}</a>
-      </div>
-    </div>
-  </div>
-
-  <div id="updateStageProgressStatus" class="modal">
-    <div class="modal-content">
-      <h5>{% trans %}activities.select_stage_status.choice_title_msg{% endtrans %}</h5>
-      <div style="margin-top: 2Opx;">
-        <div id="statusSelector">
-          <div style="margin-bottom: 20px">{% trans %}activities.select_stage_status.available_grading_stages{% endtrans %}</div>
-          <select id="progressStatusSelect">
-          </select>
-        </div>
-      </div>
-    </div>
-    <div class="modal-footer action-buttons">
-      <div class="button-field">
-        <a class="waves-effect waves-green update-status-btn btn">{% trans %}activity_elements.update{% endtrans %}</a>
-      </div>
-    </div>
-  </div>
-
-  <div id="sendDataModal" class="modal">
-    <div class="modal-title">
-      <h5>Finaliser les réponses</h5>
-    </div>
-    <div class="modal-content">
-      <p>Vous êtes sur le point d'envoyer vos réponses, vous ne pourrez plus les modifier après avoir confirmé.</p>
-    </div>
-    <div class="modal-footer">
-      <a value="Confirmer" class="btn waves-effect waves-light modal-close remove-criterion " >Confirmer</a>
-      <a class="waves-effect waves-light modal-close btn-flat red-text">Annuler</a>
-    </div>
-  </div>
-
-  <div id="addUserProcessActivitySuccess" class="modal">
-    <div class="modal-content">
-      {{ 'institutions.add_user_process_activity_success_msg'|trans }}
-    </div>
-    <div class="modal-footer">
-      <a class="modal-close btn">ok</a>
-    </div>
-  </div>
-
-  {#{% if currentuser.lastConnected is null %}#}
-    <div id="firstConnectionModal" class="modal">
-      
-      <div class="modal-content">
-
-          <h5>Just a few info...</h5>
-          <p>You are almost done 🥳 ! Please provide your organization to link it to your account</p>
-          <div class="input-field">
-            <input type="text" name="firm">
-            <select name="firmSelector" id=""></select>
+          <div class="button-field">
+            <button type="button" class="modal-action modify-btn button btn">{{ 'create_organization.create'|trans }}</button>
           </div>
+          {#}
+          <div class="button-field">
+            <a class="waves-effect waves-green btn modal-trigger" href="#delegateActivity">{% trans %}activities.create.delegate_btn_msg{% endtrans %}</a>
+          </div>
+          #}
+        </div>
+      </div>
+      
+
+      <div id="uninitializedActivity" class="modal">
+        <div class="modal-content">
+          <h5>{{ 'activities.create.uninitialize_title'|trans }}</h5>
+          <p>{{ 'activities.create.delegate_choice_msg'|trans }}</p>
+          <div class="input-field">
+            <label for="activity_name">{{ 'activities.request.name_label'|trans }}</label>
+            <input type="text" id="activity_name" name="activity_name" required="required">
+          </div>
+
+        </div>
+        <div class="modal-footer action-buttons">
+          <div class="button-field">
+            <button type="button" class="modal-action start-btn btn">{{ 'activities.create.nodelegate_btn_msg'|trans }}</button>
+          </div>
+          {#<div class="button-field">
+            <button type="button" class="modal-action modal-close submit-button red btn">{{ 'activities.request.cancel_btn_msg'|trans }}</button>
+          </div>
+          #}
+          <div class="button-field">
+            <a class="waves-effect waves-green btn modal-trigger" href="#delegateActivity">{% trans %}activities.create.delegate_btn_msg{% endtrans %}</a>
+          </div>
+        </div>
+      </div>
+
+      <div id="activityInfo" class="modal" data-eid="0">
+        <div class="modal-content">
+          <h5>{{ 'activities.details'|trans }}</h5>
+          <div class="elmts">
+
+          </div>
+        </div>
+        <div class="modal-footer action-buttons">
+          {#<div class="button-field">
+            <button type="button" class="modal-close btn">Ok</button>
+          </div>
+          #}
+        </div>
+      </div>
+
+      <div id="activity-validate" class="modal">
+        <div class="modal-content">
+          <h5>{{ 'activities.request.initialize_title'|trans }}
+            -
+            <span class="process-name"></span>
+          </h5>
+          <p>{{ 'activities.request.ask_for_add'|trans }}</p>
+        </div>
+        <div class="modal-footer action-buttons">
+          <div class="button-field">
+            <button type="button" class="modal-action start-btn btn">{{ 'activities.request.confirm_btn_msg'|trans }}</button>
+          </div>
+          <div class="button-field">
+            <button type="button" class="modal-action modal-close submit-button red btn">{{ 'activities.request.cancel_btn_msg'|trans }}</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="errorModal" class="modal">
+        <div class="modal-content">
+          <h5>{{ 'activities.modal_error_creation_title'|trans }}</h5>
+          <p class="error-msg"></p>
+        </div>
+        <div class="modal-footer">
           <div class="action-buttons">
             <div class="button-field">
-          <a class="btn waves-light waves-effect">Ok</a>
+              <button type="button" class="modal-action modal-close waves-effect btn">Ok</button>
             </div>
           </div>
-        
-        
+        </div>
+      </div>
+
+      <div id="delegateSuccess" class="modal">
+        <div class="modal-content">
+            <p>{% trans %}activities.create.delegate_success_msg{% endtrans %}</p>
+        </div>
+        <div class="modal-footer">
+            <div class="button-field">
+                <a class="modal-close submit-button waves-effect waves-green btn-large">{% trans %}activities.create.delegate_success_close_btn_msg{% endtrans %}</a>
+            </div>
+        </div>
+      </div>
+
+      <div id="chooseGradableStage" class="modal">
+          <div class="modal-content">
+            <h5>{% trans %}activities.select_graded_stage.choice_title_msg{% endtrans %}</h5>
+            <div style="margin-top: 2Opx;">
+              <div id="stageSelector">
+                  <div style="margin-bottom: 20px">{% trans %}activities.select_graded_stage.available_grading_stages{% endtrans %}</div>
+                  <select id="stageSelect" style="display: block!important; font-family: Roboto, FontAwesome; width: 65%"></select>
+              </div>
+            </div>
+          </div>
+        <div class="modal-footer action-buttons">
+            <div class="button-field">
+              <a class="waves-effect waves-green btn" href="{{ path('newStageGrade', { stgId: 0 }) }}">{% trans %}activities.grade{% endtrans %}</a>
+            </div>
+        </div>
+      </div>
+
+      <div id="requestNewProcess" class="modal">
+        <div class="modal-content">
+          {{ form_start(addProcessForm, {attr: {autocomplete: "off"}}) }}
+              <h5>{{'institutions.add_modal_process.modal_add_title'|trans}}</h5>
+              <p>{{'institutions.add_modal_process.link_to_process'|trans}}</p>
+              <div>
+                  {{ form_row(addProcessForm.name) }}
+              </div>
+              <div class="input-field">
+                {{ form_widget(addProcessForm.parent) }}
+                {{ form_label(addProcessForm.parent) }}
+              </div>
+
+          </div>
+
+          <div class="modal-footer action-buttons">
+              <div class="button-field">
+                  {{ form_row(addProcessForm.submit) }}
+              </div>
+          </div>
+          {{ form_rest(addProcessForm)}}
+          {{ form_end(addProcessForm)}}
+      </div>
+
+      <div id="updateEvent" class="modal">
+        <div class="modal-content">
+          {{ form_start(eventForm, {attr: {autocomplete: "off"}}) }}
+              <header class="flex-center-sb">
+                <h5 style="display:inline-block">
+                <span class="event-element-name"></span>
+                <span>{{' : ' ~ 'activity_elements.events.add_event.modal_new_title'|trans}}</span>
+                </h5>
+                {{ form_row(eventForm.submit)|replace({'[link]' : '<i class="fa fa-check"></i>'})|raw }}
+              </header>
+              <p>{{'activity_elements.events.add_event.modal_msg'|trans}}</p>
+              <div>
+                  {{ form_row(eventForm.eventType) }}
+              </div>
+              <div class="row no-margin">
+                <a class="event-notifications-header flex-center">
+                  <i class="fa fa-paper-plane sm-right"></i>
+                  <span>{{'activity_elements.events.add_event.notify_participants'|trans}}</span>
+                </a>
+                <div class="event-notifications-content" style="display:none">
+                  <input id="partNotification" type="checkbox" class="filled-in">
+                  <label for="partNotification">
+                    {{'activity_elements.events.add_event.notify_all_participants'|trans}}
+                  </label>
+                </div>          
+              </div>
+
+              <div class="row no-margin">
+                <a class="event-dates-header flex-center">
+                  <i class="fa fa-calendar-alt sm-right"></i>
+                  <span>{{'activity_elements.events.add_event.manage_dates'|trans}}</span>
+                </a>
+                <div class="event-dates-content" style="display:none">
+                  <div class="col m12 s12 onset-date-elmt">
+                      <div class="element-data">
+                        <i class="fa fa-clock"></i>
+                        <span>{{'activity_elements.events.add_event.onset_date'|trans }}</span>
+                      </div>
+                      <div class="element-input" style="display:none">
+                        {{ form_label(eventForm.onsetDate) }}
+                        {{ form_widget(eventForm.onsetDate) }}
+                      </div>
+                  </div>
+                  <div class="col m12 s12 exp-res-date-elmt">
+                      <div class="element-data">
+                        <i class="fa fa-clock"></i>
+                        <span>{{'activity_elements.events.add_event.exp_res_date'|trans }}</span>
+                      </div>
+                      <div class="element-input" style="display:none">
+                        {{ form_label(eventForm.expResDate) }}
+                        {{ form_widget(eventForm.expResDate) }}
+                      </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="event-action-buttons flex-center-sa">
+                
+                  <a class="btn waves-effect waves-light insert-comment-btn">
+                    <i class="fa fa-comment-medical sm-right"></i>
+                    <span>{{ 'activity_elements.events.add_event.insert_comment'|trans }}</span>
+                  </a>
+                
+                
+                  <a class="btn waves-effect waves-light insert-document-btn">
+                    <i class="fa fa-file-medical sm-right"></i>
+                    <span>{{ 'activity_elements.events.add_event.insert_document'|trans }}</span>
+                  </a>
+                
+              </div>
+              {#<ul class="comments" data-prototype="{% apply escape %}{% include 'components/client__item.html.twig' with { item: form.comments.vars.prototype } %}{% endapply %}">#}
+              <ul class="comments" data-prototype="{{ form_widget(eventForm.comments.vars.prototype)|e('html') }}">
+              {% for comment in eventForm.comments.vars.data %}
+              {% endfor %}
+              </ul>
+
+              {#<ul class="documents" data-prototype="{% apply escape %}{% include 'components/client__item.html.twig' with { item: form.comments.vars.prototype } %}{% endapply %}">#}
+              <ul class="documents" data-prototype="{{ form_widget(eventForm.documents.vars.prototype)|e('html') }}">
+              {% for document in eventForm.documents.vars.data %}
+              {% endfor %}
+              </ul>
+
+              {#}
+              <div class="action-buttons">
+                  <div class="button-field">
+                      {{ form_row(eventForm.submit) }}
+                  </div>
+              </div>
+              #}
+
+          </div>
+
+          {{ form_rest(eventForm)}}
+          {{ form_end(eventForm)}}
+      </div>
+
+      <div id="deleteActivity" class="modal">
+        <div class="modal-content">
+            <p>{% trans %}activities.delete_activity_msg{% endtrans %}</p>
+            {#{% else %}
+                <p>{% trans %}activities.delete_activity_msg{% endtrans %}Are you sure you want to delete this activity ?</p>
+            {% endif %}#}
+        </div>
+        <div class="modal-footer">
+            <a class=" modal-action modal-close waves-effect waves-green btn remove-activity">{% trans %}user_update.delete_modal.confirm{% endtrans %}</a>
+            <a class=" modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+        </div>
+      </div>
+
+      <div id="deleteParticipant" class="modal">
+        <div class="modal-content">
+            <p>{% trans %}activities.delete_participant_msg{% endtrans %}</p>
+            {#{% else %}
+                <p>{% trans %}activities.delete_activity_msg{% endtrans %}Are you sure you want to delete this activity ?</p>
+            {% endif %}#}
+        </div>
+        <div class="modal-footer">
+            <a class=" modal-action modal-close waves-effect waves-green btn delete-button">{% trans %}user_update.delete_modal.confirm{% endtrans %}</a>
+            <a class=" modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+        </div>
+      </div>
+
+      <div id="chooseGradableStage" class="modal">
+        <div class="modal-content">
+          <h5>{% trans %}activities.select_graded_stage.choice_title_msg{% endtrans %}</h5>
+          <div style="margin-top: 2Opx;">
+            <div id="stageSelector">
+              <div style="margin-bottom: 20px">{% trans %}activities.select_graded_stage.available_grading_stages{% endtrans %}</div>
+              <select id="stageSelect" style="display: block!important; font-family: Roboto, FontAwesome; width: 65%"></select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer action-buttons">
+          <div class="button-field">
+            <a class="waves-effect waves-green btn" href="{{ path('newStageGrade', { stgId: 0 }) }}">{% trans %}activities.grade{% endtrans %}</a>
+          </div>
+        </div>
+      </div>
+
+      <div id="updateStageProgressStatus" class="modal">
+        <div class="modal-content">
+          <h5>{% trans %}activities.select_stage_status.choice_title_msg{% endtrans %}</h5>
+          <div style="margin-top: 2Opx;">
+            <div id="statusSelector">
+              <div style="margin-bottom: 20px">{% trans %}activities.select_stage_status.available_grading_stages{% endtrans %}</div>
+              <select id="progressStatusSelect">
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer action-buttons">
+          <div class="button-field">
+            <a class="waves-effect waves-green update-status-btn btn">{% trans %}activity_elements.update{% endtrans %}</a>
+          </div>
+        </div>
+      </div>
+
+      <div id="sendDataModal" class="modal">
+        <div class="modal-title">
+          <h5>Finaliser les réponses</h5>
+        </div>
+        <div class="modal-content">
+          <p>Vous êtes sur le point d'envoyer vos réponses, vous ne pourrez plus les modifier après avoir confirmé.</p>
+        </div>
+        <div class="modal-footer">
+          <a value="Confirmer" class="btn waves-effect waves-light modal-close remove-criterion " >Confirmer</a>
+          <a class="waves-effect waves-light modal-close btn-flat red-text">Annuler</a>
+        </div>
+      </div>
+
+      <div id="addUserProcessActivitySuccess" class="modal">
+        <div class="modal-content">
+          {{ 'institutions.add_user_process_activity_success_msg'|trans }}
+        </div>
+        <div class="modal-footer">
+          <a class="modal-close btn">ok</a>
+        </div>
+      </div>
+
+  {% else %}
+
+    <div id="firstConnectionModal" class="modal">
+      
+      <div class="modal-content user-inputs">
+          <form class="user-inputs">
+            <h5>{{ 'activities.first_connection_modal.title'|trans }}</h5>
+            <p>{{ 'activities.first_connection_modal.msg'|trans }}</p>
+            <div class="input-field firm-field-zone">
+              <input class="firm-name" type="text" name="firm">
+              <select name="firmSelector" id=""></select>
+              <input type="hidden" name="wid">
+            </div>
+            <div class="action-buttons">
+
+              <div class="button-field">
+            <a class="btn waves-light waves-effect set-usr-org-btn">Ok</a>
+              </div>
+            </div>
+          </form>
       </div>
     </div>
 
-  {#{% endif %}#}
-
+  {% endif %}
+    <div id="beforeStarting" class="modal">
+      <div class="modal-content user-inputs">
+        <h5>{{ 'activities.before_starting_modal.title'|trans|raw }}</h5>
+          <p>{{ 'activities.before_starting_modal.msg_intro'|trans|raw }}</p>
+        <h6>{{ 'activities.before_starting_modal.creation_mode.title'|trans|raw }}</h6>
+          <p>
+            {{ 'activities.before_starting_modal.creation_mode.msg'|trans|raw }} 
+            {{ 'activities.before_starting_modal.creation_mode.msg_2'|trans|raw }}
+            <img class="client-logo tooltipped" src="" alt="">
+          </p>
+          <p>{{ 'activities.before_starting_modal.creation_mode.msg_3'|trans|raw }}</p>
+        <h6>{{ 'activities.before_starting_modal.premium_info.title'|trans|raw }}</h6>
+          <p>{{ 'activities.before_starting_modal.premium_info.msg'|trans|raw }}</p>
+        <div class="action-buttons">
+          <div class="button-field">
+            <a class="btn waves-light waves-effect letz-start-btn">{{ 'ok_got_it'|trans }}</a>
+          </div>
+        </div>
+      </div>
+    </div>
 {% endblock content %}

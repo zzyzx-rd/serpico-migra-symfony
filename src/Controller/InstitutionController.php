@@ -162,14 +162,14 @@ final class InstitutionController extends MasterController
             setcookie('ts', 'y');
             $timescale = 'y';
         }
-        if(isset($_COOKIE['ci'])){
-            $currentInterval = $_COOKIE['ci'];
-        } else {
+        if(!isset($_COOKIE['ci'])) {
             if($timescale == 'y'){
-
+                setcookie('ci', date("Y"));
+            } else {
+                $currentQt = ceil(date("n") / 3);
+                $currentYear = date("Y");
+                setcookie('ci', "q-$currentQt-$currentYear");
             }
-            setcookie('ci', 'y');
-            $currentInterval = 's';
         }
 
         $userArchivingPeriod = $currentUser->getActivitiesArchivingNbDays();
@@ -184,19 +184,24 @@ final class InstitutionController extends MasterController
 
         $existingAccessAndResultsViewOption = null;
         $statusAccess = null;
-        $accessAndResultsViewOptions = $this->org->getOptions()->filter(function(OrganizationUserOption $option) {return $option->getOName()->getName() == 'activitiesAccessAndResultsView' && ($option->getRole() == $this->user->getRole() || $option->getUser() == $this->user);});
 
-        // We always chose the most selective access option (NB : we could in the future, create options decidated to position, departments... so below option selection should be rewritten)
-        if(count($accessAndResultsViewOptions) > 0){
-            if(count($accessAndResultsViewOptions) == 2){
-                foreach($accessAndResultsViewOptions as $accessAndResultsViewOption){
-                    if($accessAndResultsViewOption->getUser() != null){
-                        $existingAccessAndResultsViewOption = $accessAndResultsViewOption;
+        if($this->org){
+
+            $accessAndResultsViewOptions = $this->org->getOptions()->filter(function(OrganizationUserOption $option) {return $option->getOName()->getName() == 'activitiesAccessAndResultsView' && ($option->getRole() == $this->user->getRole() || $option->getUser() == $this->user);});
+    
+            // We always chose the most selective access option (NB : we could in the future, create options decidated to position, departments... so below option selection should be rewritten)
+            if(count($accessAndResultsViewOptions) > 0){
+                if(count($accessAndResultsViewOptions) == 2){
+                    foreach($accessAndResultsViewOptions as $accessAndResultsViewOption){
+                        if($accessAndResultsViewOption->getUser() != null){
+                            $existingAccessAndResultsViewOption = $accessAndResultsViewOption;
+                        }
                     }
+                } else {
+                    $existingAccessAndResultsViewOption = $accessAndResultsViewOptions->first();
                 }
-            } else {
-                $existingAccessAndResultsViewOption = $accessAndResultsViewOptions->first();
             }
+        
         }
 
         $checkingIds = [$currentUser->getId()];
@@ -205,7 +210,7 @@ final class InstitutionController extends MasterController
         // 1 - Retrieving activities 
         // Depends on either organization plan (for free organization, no privacy/segregation) and/or user rights/roles
 
-        if($this->org->getPlan() == Organization::PLAN_FREE){
+        if($this->org && $this->org->getPlan() == Organization::PLAN_FREE){
 
             $userActivities = new ArrayCollection($orgActivities);
 
@@ -309,17 +314,18 @@ final class InstitutionController extends MasterController
         }
 
 
-
-        $addProcessForm = $this->createForm(AddProcessForm::class, null, ['standalone' => true]);
-        $delegateActivityForm = $this->createForm(DelegateActivityForm::class, null, ['standalone' => true, 'currentUser' => $currentUser]) ;
-        $delegateActivityForm->handleRequest($request);
-        $requestActivityForm = $this->createForm(RequestActivityForm::class, null, ['standalone' => true, 'em' => $em, 'currentUser' => $currentUser ]) ;
-        $requestActivityForm->handleRequest($request);
-        $validateRequestForm = $this->createForm(DelegateActivityForm::class, null,  ['standalone' => true, 'request' => true, 'currentUser' => $currentUser]);
-        $validateRequestForm->handleRequest($request);
-        $eventForm = $this->createForm(AddEventForm::class, null, ['standalone' => true, 'currentUser' => $currentUser]);
-        $eventForm->handleRequest($request);
-        $createForm = $this->createForm(ActivityMinElementForm::class, new Stage, ['currentUser' => $this->user]);
+        if($this->org){
+            $addProcessForm = $this->createForm(AddProcessForm::class, null, ['standalone' => true]);
+            $delegateActivityForm = $this->createForm(DelegateActivityForm::class, null, ['standalone' => true, 'currentUser' => $currentUser]) ;
+            $delegateActivityForm->handleRequest($request);
+            $requestActivityForm = $this->createForm(RequestActivityForm::class, null, ['standalone' => true, 'em' => $em, 'currentUser' => $currentUser ]) ;
+            $requestActivityForm->handleRequest($request);
+            $validateRequestForm = $this->createForm(DelegateActivityForm::class, null,  ['standalone' => true, 'request' => true, 'currentUser' => $currentUser]);
+            $validateRequestForm->handleRequest($request);
+            $eventForm = $this->createForm(AddEventForm::class, null, ['standalone' => true, 'currentUser' => $currentUser]);
+            $eventForm->handleRequest($request);
+            $createForm = $this->createForm(ActivityMinElementForm::class, new Stage, ['currentUser' => $this->user]);
+        }
 
         // In case they might access results depending on user participation, then we need to feed all stages and feed a collection which will be analysed therefore in hideResultsFromStages function
         if($existingAccessAndResultsViewOption && empty($noParticipationRestriction)){
@@ -448,24 +454,32 @@ final class InstitutionController extends MasterController
 
         ksort($displayedStatuses);
         //dd($orphanActivities);
-        
+
+        $firstConnection = $currentUser->getLastConnected() == null;
+        if($firstConnection){
+            $currentUser->setLastConnected(new \DateTime);
+            $em->persist($currentUser);
+            $em->flush();
+        }
+ 
 
         return $this->render(
             'activities_dashboard.html.twig',
             [
                 'displayedStatuses'  => $displayedStatuses,
                 'orphanActivities'  => $orphanActivities,
-                'processesActivities' => $structuredProcessesActivities,
-                'addProcessForm' => $addProcessForm->createView(),
-                'delegateForm' => $delegateActivityForm->createView(),
-                'validateRequestForm' => $validateRequestForm->createView(),
-                'requestForm' => $requestActivityForm->createView(),
+                'processesActivities' => $this->org ? $structuredProcessesActivities : null,
+                'addProcessForm' => $this->org ? $addProcessForm->createView() : null,
+                'delegateForm' => $this->org ? $delegateActivityForm->createView() : null,
+                'validateRequestForm' => $this->org ? $validateRequestForm->createView() : null,
+                'requestForm' => $this->org ? $requestActivityForm->createView() : null,
                 'sortingTypeCookie' => $sortingType,
                 'viewTypeCookie' => $viewType,
                 'dateTypeCookie' => $dateType,
                 'timescaleCookie' => $timescale,
-                'eventForm' => $eventForm->createView(),
-                'newActivityForm' => $createForm->createView(),
+                'eventForm' => $this->org ? $eventForm->createView() : null,
+                'newActivityForm' => $this->org ? $createForm->createView() : null,
+                'firstConnection' => (int) $firstConnection,
             ]
         );
 

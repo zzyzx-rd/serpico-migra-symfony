@@ -31,6 +31,10 @@ function ndDayPerYears(annee) {
   }
 }
 
+$('#firstConnectionModal, #beforeStarting').modal({
+  dismissible: false,
+})
+
 function initPickates(){
   switch(lg){
     case 'fr':
@@ -103,41 +107,42 @@ $(document).ready(function(){
 moment().format();
 var now = new Date();
 var annee   = now.getFullYear();
-var anneeSuiv = annee + 1
-var startCal = $('#createActivity').find('.dp-start');
-var endCal = $('#createActivity').find('.dp-end');
-var startDateTS = (startCal.val() == "") ? Date.now() : new Date(startCal.val());
-var endDateTS = (endCal.val() == "") ? startDateTS : new Date(endCal.val());
-var startDate = new Date(startDateTS);
-var endDate = new Date(endDateTS);
-var ts = getCookie("ts");
-var ci = getCookie("ci");
-       
-  if (ts == "y"){
-      $('.scale option[value=years]').attr('selected','selected');
+var anneeSuiv = annee + 1;
 
-      $('.value-scale')
-          .append('<option value="'+annee+'">'+annee+'</option>')
-          .append('<option value="'+anneeSuiv+'">'+anneeSuiv+'</option>');
-      $('.value-scale option[value='+ci+']').attr('selected','selected');
+if($('[class*="dp-"]').length){
 
-  } else {
-      $('.scale option[value=trimester]').attr('selected','selected');
-      for (var u=0; u<2;u++) {
-          var Y = annee + u;
-          for (var i = 1; i < 5; i++) {
-              $('.value-scale')
-                  .append('<option value="q-' + i + '-' + Y + '">q-' + i + '-' + Y + '</option>')
-
-          }
-      }
-      $('.value-scale option[value='+ci+']').attr('selected','selected');
-  }
-
-
-
-startCal.pickadate('picker').set('select',startDate);
-endCal.pickadate('picker').set('select',endDate).set('min',startDate);
+  var startCal = $('#createActivity').find('.dp-start');
+  var endCal = $('#createActivity').find('.dp-end');
+  var startDateTS = (startCal.val() == "") ? Date.now() : new Date(startCal.val());
+  var endDateTS = (endCal.val() == "") ? startDateTS : new Date(endCal.val());
+  var startDate = new Date(startDateTS);
+  var endDate = new Date(endDateTS);
+  var ts = getCookie("ts");
+  var ci = getCookie("ci");
+         
+    if (ts == "y"){
+        $('.scale option[value=years]').attr('selected','selected');
+  
+        $('.value-scale')
+            .append('<option value="'+annee+'">'+annee+'</option>')
+            .append('<option value="'+anneeSuiv+'">'+anneeSuiv+'</option>');
+        $('.value-scale option[value='+ci+']').attr('selected','selected');
+  
+    } else {
+        $('.scale option[value=trimester]').attr('selected','selected');
+        for (var u=0; u<2;u++) {
+            var Y = annee + u;
+            for (var i = 1; i < 5; i++) {
+                $('.value-scale')
+                    .append('<option value="q-' + i + '-' + Y + '">q-' + i + '-' + Y + '</option>')
+  
+            }
+        }
+        $('.value-scale option[value='+ci+']').attr('selected','selected');
+    }
+  startCal.pickadate('picker').set('select',startDate);
+  endCal.pickadate('picker').set('select',endDate).set('min',startDate);
+}
 
 function initETIcons() {
   const $stylizableSelects = $('#updateEvent select');
@@ -347,6 +352,11 @@ $(function () {
     //}, 200);
   });
 
+  if(!$('.activity-component').length){
+    feedDashboardScreen();
+  }
+
+
   dateUpdate();
 
 function dateUpdate() {
@@ -393,14 +403,16 @@ function dateUpdate() {
         wDate = moment(si);
         ct = wDate.quarter();
         $timescale = $('#activities-container').find('.months-ref');
+        offset = moment.duration(moment(dateTrimester(cy,1)[0]).diff(moment(`${wDate.year()}-01-01`))).days() < 4 && moment(moment(dateTrimester(cy,1)[0])).week() == 2 ? -1 : 0;
         while (wDate.quarter() == ct){
           week = wDate.week();
+          
           if(week == 1){
-            if (moment.duration(moment(`${wDate.year()}-12-31`).diff(moment(wDate))).days() >= 3){
+            if (moment.duration(moment(`${ct == 4 ? cy : cy - 1}-12-31`).diff(moment(wDate))).days() >= 3){
               week = 53;
             }
           }
-          $timescale.append('<div><sub>s</sub>' + week + '</div>');
+          $timescale.append('<div><sub>s</sub>' + (week + offset == 0 ? 52 : week + offset) + '</div>');
           wDate = wDate.add(1,'w');
         }
     }
@@ -756,19 +768,13 @@ function dateUpdate() {
             })*/
             $this.css({'margin-left': 0 + "%"});
             $this.css({'width': 0 + "%"});
-
             $this.find('.stage-element').each(function () {
-
-
                 $(this).css({});
             });
 
             $this.find('.event').each(function () {
-
-
                 $(this).css({});
             });
-
 
         }
 
@@ -791,42 +797,29 @@ function dateUpdate() {
         for(var i=0;i<2;i++){
             day= moment(year, "YYYY").quarter(qT+i).toDate();
 
-
-
-
              if(day.getDay()!=1) {
                  if (i != 1) {
-                     d = (day.getDay() == 0) ? 1 : (8-day.getDay()%7);
+                     d = (day.getDay() == 0) ? 1 : (8 - day.getDay() % 7);
                      day.setDate(day.getDate()+d);
-
-
                  } else {
-
-                     d = (day.getDay() == 0) ? 0 : (7-day.getDay()%7);
+                     d = (day.getDay() == 0) ? 0 : (7 - day.getDay() % 7);
                      day.setDate(day.getDate()+d);
-
-
                  }
 
              } else if (i == 1) {
                  if(day.getDay()==1) {
-                     m = (day.getMonth() == 12) ? 1 : day.getMonth()+1;
+                     m = (day.getMonth() == 12) ? 1 : day.getMonth() + 1;
                      day.setMonth(m);
                      day.setDate(getNbJoursMois(12 , year-1));
                      day.setFullYear(year-1);
                  }
 
-
              } else {
 
              }
-
             tbl.push(day);
-
         }
         return tbl;
-
-
     }
 
     function posScale(month,time,sa,ea,si,ei) {
@@ -1684,8 +1677,10 @@ function dateUpdate() {
       var $selectedOpt = $this.find(":selected");
       const $usrElmts = $this.closest('.user-inputs');
       $usrElmts.find('input[name="wid"]').val($selectedOpt.attr('data-wid'));
-      $usrElmts.find('input[name="oid"]').val($selectedOpt.attr('data-oid'));
-      $usrElmts.find('input[name="cid"]').val($selectedOpt.attr('data-cid'));
+      if(!$this.closest('#firstConnectionModal').length){
+        $usrElmts.find('input[name="oid"]').val($selectedOpt.attr('data-oid'));
+        $usrElmts.find('input[name="cid"]').val($selectedOpt.attr('data-cid'));
+      }
       $usrElmts.find('.firm-name').val($selectedOpt.text());
       var img = $this.prev().find('li').eq($this.find('option').index($this.find('option:selected'))).find('img');
       if(!$usrElmts.find('.input-f-img').length){
@@ -1876,16 +1871,17 @@ function dateUpdate() {
           $actProto = $(actProto);
   
           //if(!nbVisibleAct){
-  
-          var sdDay = getRandomInt(7,320);
-          var period = getRandomInt(Math.max(0,15 - sdDay), 350 - sdDay);
-          var sdate = new Date(annee, 0, sdDay).getDate();
-          var edate = new Date(annee, 0 , sdDay + period).getDate();
-  
-          $actProto.find('.stage-element').attr('data-sd',sdDay);
-          $actProto.find('.stage-element').attr('data-p',period);
-          $actProto.find('.s-day').empty().append(sdate);
-          $actProto.find('.e-day').empty().append(edate);
+          var sdOffDays = getRandomInt(7,320);
+          //var ssd = moment(moment().year()+'-01-01').add(sdOffDays,'d');
+          var periodDays = getRandomInt(Math.max(0,15 - sdOffDays), 350 - sdOffDays);
+          //var sed = ssd.add(periodDays,'d');
+          //var p = moment.duration(moment(sed).diff(moment(ssd)));
+          var sdate = new Date(annee, 0, sdOffDays);
+          var edate = new Date(annee, 0 , sdOffDays + periodDays);
+          $actProto.find('.stage-element').attr('data-sd',sdate.getTime() / 1000);
+          $actProto.find('.stage-element').attr('data-p', (edate.getTime() - sdate.getTime()) / 1000);
+          $actProto.find('.s-day').empty().append(sdate.getDate());
+          $actProto.find('.e-day').empty().append(edate.getDate());
           //} 
   
           $actList = $actList.add($actProto);
@@ -1893,19 +1889,18 @@ function dateUpdate() {
         }
         
         displayTemporalActivities($actList, nbSubInt, nbAct > 0, false);
-  
         if(nbAct){
           $actList.each(function(i,e){
             $(e).find('.stage-element').remove();
             $(e).find('.act-info').empty();
           });
         } else {
-          
+          const $toBeFeededActs = $actList;
           const dummyParams = {wa:1, td: totalPotentialAct - nbVisibleAct + 1};
           $.post(dcurl,dummyParams)
             .done(function(data){
   
-              $actList.each(function(i,e){
+              $toBeFeededActs.each(function(i,e){
                   $(e).find('.act-info-name').append(data.dummyElmts[i].actName);
                   $(e).find('.activity-client-name').attr('data-tooltip',data.dummyElmts[i].name).tooltip();
                   $(e).find('.client-logo').attr('src',data.dummyElmts[i].logo);
@@ -1950,6 +1945,41 @@ function dateUpdate() {
 
   $('[href="#deleteActivity"]').on('click',function(e){
     $('.remove-activity').data('id',$(this).attr('data-aid'));
+  })
+
+  $('.set-usr-org-btn').on('click',function(e){
+      e.preventDefault();
+      var $this = $(this);
+      $.post(suourl, $this.closest('form').serialize())
+        .done(function(data){
+          $('#firstConnectionModal').modal('close');
+          $('#beforeStarting img').attr({
+            'src' : $('.client-logo').eq(1).attr('src'),
+            'data-tooltip': $('.client-logo').eq(1).parent().attr('data-tooltip')
+          }).tooltip();
+          $('#beforeStarting').modal('open');
+
+        })
+        .fail(function(data){
+          console.log(data);
+        });
+  });
+
+  if(currentWfiId && fc){
+    setTimeout(function(){
+        $('#beforeStarting img').attr({
+          'src' : $('.client-logo').eq(1).attr('src'),
+          'data-tooltip': $('.client-logo').eq(1).parent().attr('data-tooltip')
+        }).tooltip();
+        $('#beforeStarting').modal('open');
+    },300);
+  }
+
+  $('.letz-start-btn').on('click',function(e){
+    e.preventDefault();
+    if(!currentWfiId){
+      location.reload();
+    }
   })
 
 });

@@ -12,7 +12,7 @@
     <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
     <title>
       {% block title '' %}
-      - Serpico Public
+      - DealDrive
     </title>
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('lib/img/favicon/favicon.ico') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('lib/img/favicon/favicon-32x32.png') }}">
@@ -34,7 +34,7 @@
     </script>
   </head>
 
-  {% if global.currentuser != null %}
+  {% if global.currentuser != null and currentuser.organization is not null %}
     {% set orgName = global.currentuser.organization.commname %}
   {% else %}
     {% set orgName = '' %}
@@ -51,16 +51,18 @@
               </li>
               <li class="plan">
                 <div class="c-flex-center">
-                  <span> {{currentuser.organization.plan == 1 ? 'header.plan.enterprise'|trans|upper : (currentuser.organization.plan == 2 ? 'header.plan.premium'|trans|upper : 'header.plan.free'|trans|upper) }} </span>
+                  <span> {{ not currentuser.organization or currentuser.organization.plan == 1 ? 'header.plan.enterprise'|trans|upper : (currentuser.organization.plan == 2 ? 'header.plan.premium'|trans|upper : 'header.plan.free'|trans|upper) }} </span>
                   <a href="{{ path('priceManagement') }}">{{ 'header.plan.upgrade'|trans }}</a>
                 </div>
               </li>
+              {#
               <li>
                 <a href="{{ path('help') }}">
                   <i class="fa fa-question-circle" aria-hidden="true"></i>
                   <span>{% trans %}header.help{% endtrans %}</span>
                 </a>
               </li>
+              #}
               {% if global.currentuser.is_root %}
                 <li class="">
                   <a href="{{ path('rootManagement') }}">
@@ -111,13 +113,13 @@
                   </span>
                 </a>
               </li>
+              {#
               <li>
                 <a href="{{ path('home') }}">
                   <img class="user-profile-picture" src="{{ asset(global.userpicture) }}">
-                  {# username is only defined for user being citizen (public), otherwise fullname #}
-                  {#{{ global.currentuser.fullname != "" ? global.currentuser.fullname : global.currentuser.username }}#}
                 </a>
               </li>
+              #}
               <li class="logout">
                 <a href="{{ path('logout') }}">
                   <i class="fas fa-sign-out-alt" aria-hidden="true"></i>

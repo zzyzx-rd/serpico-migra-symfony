@@ -33,7 +33,10 @@ signup:
   email: "Please provide a valid email adress in this field (example : some@thing.com)."
 
 create_user:
-  email: Oops... this email already exists, user may already have an account !
+  email: It seems you already have an account ! Don't hesitate to reset your password if needed to access it again
+
+create_users:
+  email: It seems this user already has an account in your organization ! Update it if necessary
 
 worker_search:
   ub_greater_than_lb: Max nb of employees should be superior to min nb of employees

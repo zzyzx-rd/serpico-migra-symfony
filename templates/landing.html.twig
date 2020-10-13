@@ -21,17 +21,6 @@
 
 
     <script>
-        $(function () {
-            $(".video").click(function () {
-                var theModal = $(this).data("target"),
-                    videoSRC = $(this).attr("data-video"),
-                    videoSRCauto = videoSRC + "?modestbranding=1&rel=0&controls=0&showinfo=0&html5=1&autoplay=1";
-                $(theModal + ' iframe').attr('src', videoSRCauto);
-                $(theModal + ' button.close').click(function () {
-                    $(theModal + ' iframe').attr('src', videoSRC);
-                });
-            });
-        });
         var rurl = "#";
         var curl = "#";
         var sdurl = "{{ path('sendLaunchingMail') }}";
@@ -48,8 +37,6 @@
 
 {% block content %}
     <div class="page-container">
-
-      
 
         {% if isLaunched %}
 
@@ -197,34 +184,6 @@
                     </div>
                 </div>
 
-
-                <div style="background: #16afb747;display:none;">
-
-                    <div class="row valign-wrapper video-platform-row" style="min-height: 400px;width: 85%;margin-bottom:0px;">
-
-                        <div class="col s12 m6">
-                            <div>
-                                <video id="video-steps" poster="lib/img/SerpicoSteps.gif" autoplay loop muted style="width: 95%"></video>
-                            </div>
-                        </div>
-
-
-                        <div class="col s12 m6">
-                            <h4> {% trans %}landing.section_4.title{% endtrans %}</h4>
-                            <p>{% trans %}landing.section_4.paragraph_1{% endtrans %}</p>
-                            <p>{% trans %}landing.section_4.paragraph_2{% endtrans %}</p>
-                            <ul id="video-platform-buttons" style="display:flex;justify-content:space-around">
-                                <a class="btn btn-flat brochure-btn waves-effect waves-light" style="margin: 0px 10px; border: 1px solid orange" name="" target="_blank" href="https://app.serpicoapp.com/lib/pdf/onboarding_brochure.pdf">{% trans %}landing.section_4.prospectus_button{% endtrans %}</a>
-                                <a class="btn waves-effect waves-light" href="https://app.serpicoapp.com/fr/organizations/new" style="margin: 0px 5px;" name="" value="home">
-                                    <ul class="flex-center">
-                                        <li style="padding:0">{% trans %}header.register.public_evaluations{% endtrans %}</li>
-                                        <li style="margin-left:5px;padding:0"></li>
-                                    </ul>
-                                </a>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
             </section>
         
         {% else %}
@@ -309,86 +268,22 @@
     
     </div>
 
-    
+    {% if global.request.cookies.get('signup') is not null %}#}
 
-
-
-    {#
-    <ul id="hero" class="banner">
-        <div class="first-section-container row flex-center">
-            <div class="col m5">
-                <h3 class="motto">Drive your customer relations to the highest standard</h3> 
-            </div>
-            {% set startCalDate = date("first day of " ~ date('now - 3 months')|format_datetime('short','none', pattern="MMMM", locale="en") ~ " " ~ date('now - 3 months')|format_datetime('short','none',pattern='Y')) %}
-            {% set endCalDate = date("last day of " ~ date('now + 3 months')|format_datetime('short','none', pattern="MMMM", locale="en") ~ " " ~ date('now + 3 months')|format_datetime('short','none',pattern='Y')) %}
-            {% set currentDateDays = date('now').diff(startCalDate).days %}
-            {% set lengthCalDays = endCalDate.diff(startCalDate).days %}
-
-            <div class="col m7 calendar-element" data-c="{{ currentDateDays }}" data-l="{{ lengthCalDays }}">
-                <div class="row calendar-holder no-margin">
-                    <div class="col no-padding m10 activity-holder">
-                        <div class="curDate"></div>
-                        {% set monthMinus3 = date('now')|date_modify("-3 months")|format_datetime('short','none',pattern='MMMMM') %}
-                        {% set monthMinus2 = date('now')|date_modify("-2 months")|format_datetime('short','none',pattern='MMMMM') %}
-                        {% set monthMinus1 = date('now')|date_modify("-1 months")|format_datetime('short','none',pattern='MMMMM') %}
-                        {% set monthMinus0 = date('now')|date_modify("+0 months")|format_datetime('short','none',pattern='MMMMM') %}
-                        {% set monthPlus1 = date('now')|date_modify("+1 months")|format_datetime('short','none',pattern='MMMMM') %}
-                        {% set monthPlus2 = date('now')|date_modify("+2 months")|format_datetime('short','none',pattern='MMMMM') %}
-                        {% set monthPlus3 = date('now')|date_modify("+3 months")|format_datetime('short','none',pattern='MMMMM') %}
-                        <ul class="months-holder">
-                            <li>{{monthMinus3}}</li>
-                            <li>{{monthMinus2}}</li>
-                            <li>{{monthMinus1}}</li>
-                            <li>{{monthMinus0}}</li>
-                            <li>{{monthPlus1}}</li>
-                            <li>{{monthPlus2}}</li>
-                            <li>{{monthPlus3}}</li>
-                        </ul>
-                        {% for k in 0..2 %}
-                            <ul class="stages-holder" style="position:relative">
-                                <ol class="activity-component">
-                                    {% set startdateDay = random(7,160) %}
-                                    {% set period = random(max(0,15 - startdateDay), 190 - startdateDay) %}
-                                    {% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateDay: startdateDay, period: period, embeddedStages: null, visibleEl: true} %}
-                                </ol>
-                            </ul>
-                        {% endfor %}
-                    </div>
-
-                    <div class="col m2 act-info">
-
-                        {% for k in 0..2 %}
-
-                        <div class="fixed-action-btn modified-fixed-btn" style="visibility: hidden;">
-                
-                            <a class="btn-floating">
-                                <i class="material-icons">create</i>
-                            </a>
-            
-                            <ul class="flex-center act-action-buttons">
-                                <li>
-                                    <a class="btn-floating act-btn tooltipped modal-trigger" href="#updateEvent" data-tooltip="{{ 'activities.instant_add'|trans }}" data-position="top" data-aid="{{k}}" data-sid="{{ 10+k }}"><i class="material-icons">offline_bolt</i></a>
-                                </li>
-                                <li>
-                                    <a class="btn-floating act-btn tooltipped modal-trigger" href="#updateStageProgressStatus" data-position="top" data-html="true" data-tooltip="{{ 'activities.update_status'|trans}}" data-eid="{{ k }}"><i class="material-icons">update</i></a>
-                                </li>
-                                <li>
-                                    <a class="btn-floating act-btn tooltipped" href="#" data-position="top" data-html="true" data-tooltip="{{ 'activities.modify'|trans}}"><i class="material-icons">settings</i></a>
-                                </li>                           
-                                <li>
-                                    <a class="btn-floating act-btn tooltipped" data-tooltip="{{ 'activities.provide_my_feedbacks'|trans }}" data-position="top" href="#"><i class="fa fa-pen-alt"></i></a>
-                                </li>
-                            </ul>    
-                        </div>
-
-                        {% endfor %}
+        <div id="sendMailPwdDef" class="modal">
+            <div class="modal-content">
+                <p>{{ 'landing.send_mail_pwd_modal.msg'|trans ~ ' 😊'}}</p>
+                <div class="flex-center" style="justify-content:flex-end;">
+                    <div class="button-field">
+                        <a class="waves-effect waves-green btn modal-close">Ok</a>
                     </div>
                 </div>
             </div>
         </div>
-    </ul>
-    #}
+
+    {% endif %}
     
+    {#}
     <!-- Modal Structures -->
     <div id="videoPresentation" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -398,11 +293,11 @@
                         <span aria-hidden="true"><i class="fa fa-times"></i></span>
                     </a>
                     <iframe width="100%" height="653" src="https://www.youtube.com/embed/WHkPobLf_wY" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                    {#<iframe id="presVideo" width="100%" height="400" src="" frameborder="0" allowfullscreen></iframe>#}
                 </div>
             </div>
         </div>
     </div>
+    #}
 {% endblock %}
 {% block javascripts %}
     <script src="{{ asset('js/home.js') }}"></script>

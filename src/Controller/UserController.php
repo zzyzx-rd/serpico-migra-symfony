@@ -165,11 +165,9 @@ class UserController extends MasterController
             $encoder = $app['security.encoder_factory']->getEncoder($user);
             $password = $encoder->encodePassword($user->getPassword(), 'azerty');
             $user->setPassword($password);
-
-            $user->setToken('');
             $entityManager->persist($user);
             $entityManager->flush();
-            return $this->redirectToRoute('home');
+            return $this->redirectToRoute('home_welcome');
         }
 
         if (!$user) {
@@ -179,6 +177,7 @@ class UserController extends MasterController
             return $this->render('password_definition.html.twig',
                 [
                     'firstname' => $user->getFirstName(),
+                    'hasOrg' => $user->getOrganization() != null,
                     'form' => $pwdForm->createView(),
                     'token' => $token,
                     'request' => $request,
@@ -347,32 +346,27 @@ class UserController extends MasterController
      */
     public function createPwdActionAJAX(Request $request, $token)
     {
-        //try{
         $entityManager = $this->em;
         $repoU = $entityManager->getRepository(User::class);
         $user = $repoU->findOneByToken($token);
-            
-            $pwdForm = $this->createForm(PasswordDefinitionForm::class, $user, ['standalone' => true]);
-            $pwdForm->handleRequest($request);
+        $pwdForm = $this->createForm(PasswordDefinitionForm::class, $user, ['standalone' => true]);
+        $pwdForm->handleRequest($request);
 
-            if ($pwdForm->isValid()) 
-            {
-                $password = $this->encoder->encodePassword($user, $user->getPassword());
-                $user->setPassword($password);
-                $user->setToken('');
-                $entityManager->persist($user);
-                $entityManager->flush();
-                return new JsonResponse(['message' => 'Success!'], 200);
-                /*return $this->redirectToRoute('login')*/
-            } else {
-                $errors = $this->buildErrorArray($pwdForm);
-                return $errors;
+        if ($pwdForm->isValid()) 
+        {
+            $password = $this->encoder->encodePassword($user, $user->getPassword());
+            $user->setPassword($password);
+            if($user->getOrganization()){
+                $user->setToken(null);
             }
-        /*} catch(\Exception $e){
-            print_r($e->getMessage());
-            die;
-        }*/
-
+            $entityManager->persist($user);
+            $entityManager->flush();
+            return new JsonResponse(['message' => 'Success!', 'hasOrg' => $user->getOrganization() ? true : false], 200);
+            /*return $this->redirectToRoute('login')*/
+        } else {
+            $errors = $this->buildErrorArray($pwdForm);
+            return $errors;
+        }
     }
 
     /**

@@ -409,6 +409,13 @@ $(function() {
     if($(document).width() < 601){
         $('#header .brand-logo img').attr('src','/lib/img/logo_dd_l.png');
     }
+
+    var sg = getCookie("signup");
+    if (sg){
+        $('#sendMailPwdDef').modal('open');
+        eraseCookie('signup');
+    }
+
     /*
     if($('main').width() < 950){
         $('.m-title > *').css('text-align','center').appendTo('.s-title');

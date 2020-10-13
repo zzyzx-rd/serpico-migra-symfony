@@ -200,6 +200,59 @@ class ActivityController extends MasterController
     /**
      * @return JsonResponse|RedirectResponse
      * @throws ORMException
+     * @Route("/user/organization/set",name="setUserOrganization")
+     */
+    public function setOrganization(Request $request){
+        $wfiId = $_POST['wid'];
+        $em = $this->em;
+        $firmName = $_POST['firm'];
+        $token = $request->get('tk');
+        $currentUser = $em->getRepository(User::class)->findOneByToken($token);
+        $currentUser->setToken(null);
+        $em->persist($currentUser);
+        if(!$wfiId){
+            $workerFirm = new WorkerFirm;
+            $workerFirm->setCommonName($firmName)
+                ->setName($firmName)
+                ->setCreatedBy($currentUser->getId());
+            $em->persist($workerFirm);
+            $em->flush();
+        } else {
+            $workerFirm = $em->getRepository(WorkerFirm::class)->find($wfiId);
+        }
+
+        $organization = $workerFirm->getOrganization();
+
+        if($organization){
+            $organization->addUser($currentUser);
+            $em->persist($organization);
+        } else {
+            $organization = new Organization;
+            $organization
+                ->setCommname($firmName)
+                ->setType('F')
+                ->setValidated(new \DateTime)
+                ->setExpired(new \DateTime('2100-01-01 00:00:00'))
+                ->setWeightType('role')
+                ->setWorkerFirm($workerFirm)
+                ->setPlan(ORGANIZATION::PLAN_PREMIUM)
+                ->setCreatedBy($currentUser->getId());
+
+            $em->persist($organization);
+            $workerFirm->setOrganization($organization);
+            $em->persist($workerFirm);
+            $this->forward('App\Controller\OrganizationController::updateOrgFeatures', ['organization' => $organization, 'nonExistingOrg' => true, 'createdAsClient' => false]);
+        }
+
+        $organization->addUser($currentUser);
+        $em->persist($organization);
+        $em->flush();
+        return new JsonResponse(['msg' => 'success'], 200);
+    }
+
+    /**
+     * @return JsonResponse|RedirectResponse
+     * @throws ORMException
      * @Route("/participant/create",name="createParticipant")
      */
     public function createParticipant(Request $request){

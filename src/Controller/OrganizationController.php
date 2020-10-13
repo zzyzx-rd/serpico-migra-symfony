@@ -6099,7 +6099,8 @@ class OrganizationController extends MasterController
 
                 $token = md5(rand());
                 $user->setToken($token)
-                    ->setUsername($user->getFirstname() . ' '. $user->getLastname());
+                    ->setUsername($user->getFirstname() . ' '. $user->getLastname())
+                    ->setRole(1);
                 $em->persist($user);
                 $em->flush();
 
@@ -6121,7 +6122,8 @@ class OrganizationController extends MasterController
 
                 $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'subscriptionConfirmation']);
 
-                return $this->redirectToRoute('home');
+                setcookie('signup', 'y');
+                return $this->redirectToRoute('home_welcome');
             }
 
         }
@@ -6914,6 +6916,8 @@ class OrganizationController extends MasterController
             ->setMaxResults(500)
             ->getQuery()
             ->getResult();
+
+        //return new JsonResponse(['clientIds' => $allWFIds],200);
 
         
         if($withActNames){

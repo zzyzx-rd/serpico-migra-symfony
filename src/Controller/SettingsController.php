@@ -2693,14 +2693,18 @@ class SettingsController extends MasterController
         $em = $this->em;
         $qb = $em->createQueryBuilder();
         $type = $request->get('type');
+
+        
         $user = $this->user;
-        $organization = $user->getOrganization();
-        $clients = $organization->getClients();
+        $organization = $user ? $this->org : null;
+        $clients = $organization ? $organization->getClients() : new ArrayCollection();
+        
+        /*
         $clientIds = '';
         foreach ($clients as $client) {
             $clientIds .= "'". $client->getId() . "', ";
         }
-        $clientIds = substr($clientIds,0,-2);
+        $clientIds = substr($clientIds,0,-2);*/
     
 
         $participants = $request->get('p') ?: [];
@@ -2793,14 +2797,14 @@ class SettingsController extends MasterController
 
         } else {
 
-        $elements = new ArrayCollection($qb->select('wf.name AS orgName','wf.id AS wfiId','wf.logo','o.id AS orgId, c.id AS cliId')
-            ->from('App\Entity\WorkerFirm', 'wf')
-            ->leftJoin('App\Entity\Organization', 'o', 'WITH', 'o.workerFirm = wf.id')
-            ->leftJoin('App\Entity\Client', 'c', 'WITH', 'c.clientOrganization = o.id')
-            ->where('wf.name LIKE :name')
-            ->setParameter('name', '%'. $name .'%')
-            ->getQuery()
-            ->getResult());
+            $elements = new ArrayCollection($qb->select('wf.name AS orgName','wf.id AS wfiId','wf.logo','o.id AS orgId, c.id AS cliId')
+                ->from('App\Entity\WorkerFirm', 'wf')
+                ->leftJoin('App\Entity\Organization', 'o', 'WITH', 'o.workerFirm = wf.id')
+                ->leftJoin('App\Entity\Client', 'c', 'WITH', 'c.clientOrganization = o.id')
+                ->where('wf.name LIKE :name')
+                ->setParameter('name', '%'. $name .'%')
+                ->getQuery()
+                ->getResult());
         }
 
         $qParts = [];

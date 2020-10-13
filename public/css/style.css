@@ -16,6 +16,10 @@ body[style="overflow: hidden;"] {
   height: 100vh;
 }
 
+.strong{
+  font-weight: 700;
+}
+
 .dd-text{
   color: #55318e;
 }

@@ -1061,17 +1061,18 @@ class User extends DbObject implements  UserInterface, \Serializable
     {   
 
         $roles = [];
-
-        switch($this->organization->getPlan()){
-            case 3:
-                $roles[] = 'ROLE_FREE';
-                break;
-            case 2:
-                $roles[] = 'ROLE_PREMIUM';
-                break;
-            case 1:
-                $roles[] = 'ROLE_ENTERPRISE';
-                break;
+        if($this->organization){
+            switch($this->organization->getPlan()){
+                case 3:
+                    $roles[] = 'ROLE_FREE';
+                    break;
+                case 2:
+                    $roles[] = 'ROLE_PREMIUM';
+                    break;
+                case 1:
+                    $roles[] = 'ROLE_ENTERPRISE';
+                    break;
+            }
         }
 
         switch($this->role){

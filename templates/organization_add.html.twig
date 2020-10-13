@@ -220,7 +220,8 @@
                         </div>
                     </div>
                     <div class="input-field">
-                        {{ form_row(form.email) }}
+                        {{ form_widget(form.email) }}
+                        {{ form_errors(form.email) }}
                     </div>
                     
                     {% if currentuser and currentuser.role == 4 %}
@@ -352,6 +353,7 @@
     
     </main>
 
+{#
 {% if not form.vars.valid %}
 	<div id="errors" class="modal open">
 		<div class="modal-title">
@@ -365,6 +367,7 @@
 		</div>
 	</div>
 {% endif %}
+#}
 
 {% if orgId is defined %}
 <div id="deleteOrganization" class="modal">

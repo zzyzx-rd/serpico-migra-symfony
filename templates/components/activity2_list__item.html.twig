@@ -101,10 +101,11 @@
           
           {% else %}
 
-              <ol class="activity-component" data-sd="0" data-p="365" data-id="{{random(1,1000000)}}">
+              <ol class="activity-component" data-sd="{{ date("first day of january").timestamp }}" data-p="{{ 360 * 24 * 60 * 60 }}">
+                  {# these below values are not important as they are replaced in front #}
                   {% set startdateDay = random(7,320) %}
                   {% set period = random(3, 350 - startdateDay) %}
-                  {% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateDay: startdateDay, period: period, embeddedStages: null, visibleEl: true} %}
+                  {% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateDay: startdateDay, period: random(3,200), embeddedStages: null, visibleEl: true} %}
               </ol>
 
           {% endif %}

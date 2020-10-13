@@ -47,7 +47,7 @@ class AddSignupUserForm extends AbstractType
                         'entity' => 'user',
                         'element' => $builder->getData(),
                         'property' => 'email',
-                        'message' => 'create_users.doublon_email_user'
+                        'message' => 'create_user.email'
                     ]),
                 ],
                 'required' => false,
