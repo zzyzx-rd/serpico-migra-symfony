@@ -28,6 +28,7 @@ use App\Entity\DbObject;
 use App\Entity\Decision;
 use App\Entity\Department;
 use App\Entity\Event;
+use App\Entity\EventDocument;
 use App\Entity\ExternalUser;
 use App\Entity\GeneratedImage;
 use App\Entity\Grade;
@@ -54,6 +55,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Service\FileUploader;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class ActivityController extends MasterController
 {
@@ -137,6 +140,7 @@ class ActivityController extends MasterController
                     $progress = (int) ($stage->getStartdate() < new DateTime('tomorrow'));
                     
                     $activity = new Activity;
+
                     $stage  
                         ->setOrganization($organization)
                         ->setProgress($progress)
@@ -147,17 +151,35 @@ class ActivityController extends MasterController
                     foreach($stage->getParticipants() as $participation){
                         $participation->setActivity($activity);
                     }
-                
+
+                    $toBeMailedParticipants = $stage->getUniqueParticipations()->filter(fn(Participation $p) => $p->getUser() && !$p->getUser()->isSynthetic());
+                    
+                    foreach($toBeMailedParticipants as $toBeMailedParticipant){
+                        $recipients[] = $toBeMailedParticipant->getUser();
+                    }
+
                     $activity->addStage($stage)
-                        ->setName($stage->getName())
-                        ->setProgress($progress)
-                        ->setStatus($progress)
-                        ->setOrganization($organization)
-                        ->setMasterUser($stage->getMasterUser())
-                        ->setCreatedBy($currentUser->getId());
+                    ->setName($stage->getName())
+                    ->setProgress($progress)
+                    ->setStatus($progress)
+                    ->setOrganization($organization)
+                    ->setMasterUser($stage->getMasterUser())
+                    ->setCreatedBy($currentUser->getId());
                     $em->persist($activity);
                     $em->flush();
-                    return new JsonResponse(['actId' => $activity->getId(), 'stgId' => $stage->getId(), 'startdateDay' => $stage->getStartdate()->format('z'), ],200);
+                    $response = $this->forward('App\Controller\MailController::sendMail', [
+                        'recipients' => $recipients, 
+                        'settings' => [
+                            'activity' => $activity->getStages()->count() > 1 ? null : $activity, 
+                            'stage' => $activity->getStages()->count() > 1 ? $stage : null
+                        ], 
+                        'actionType' => 'activityParticipation']
+                    );
+                    if($response->getStatusCode() == 500){
+                        return new JsonResponse(['msg' => $response->getContent()], 500);
+                    } else {
+                        return new JsonResponse(['actId' => $activity->getId(), 'stgId' => $stage->getId(), 'startdateU' => $stage->getStartdate()->format('U'), 'period' => $stage->getEnddate()->format('U') - $stage->getStartdate()->format('U')], 200);
+                    }
                 } else {
             
                     $errors = $this->buildErrorArray($createActivityForm);
@@ -221,7 +243,7 @@ class ActivityController extends MasterController
             $workerFirm = $em->getRepository(WorkerFirm::class)->find($wfiId);
         }
 
-        $organization = $workerFirm->getOrganization();
+        $organization = $workerFirm->getOrganizations()->filter(fn(Organization $o) => $o->getCommname() == $firmName)->first();
 
         if($organization){
             $organization->addUser($currentUser);
@@ -239,13 +261,13 @@ class ActivityController extends MasterController
                 ->setCreatedBy($currentUser->getId());
 
             $em->persist($organization);
-            $workerFirm->setOrganization($organization);
             $em->persist($workerFirm);
             $this->forward('App\Controller\OrganizationController::updateOrgFeatures', ['organization' => $organization, 'nonExistingOrg' => true, 'createdAsClient' => false]);
         }
-
+        
         $organization->addUser($currentUser);
-        $em->persist($organization);
+        $workerFirm->addOrganization($organization);
+        $em->persist($workerFirm);
         $em->flush();
         return new JsonResponse(['msg' => 'success'], 200);
     }
@@ -293,13 +315,13 @@ class ActivityController extends MasterController
                 ->setValidated(new \DateTime)
                 ->setExpired(new \DateTime('2100-01-01 00:00:00'))
                 ->setWeightType('role')
+                ->setPlan(ORGANIZATION::PLAN_PREMIUM)
                 ->setWorkerFirm($workerFirm)
                 ->setCreatedBy($currentUser->getId());
 
             $em->persist($clientOrganization);
 
             $this->forward('App\Controller\OrganizationController::updateOrgFeatures', ['organization' => $clientOrganization, 'nonExistingOrg' => true, 'createdAsClient' => true]);
-
 
         } else {
 
@@ -378,7 +400,10 @@ class ActivityController extends MasterController
             $settings['invitingOrganization'] = $currentUser->getOrganization();
             $recipients[] = $user;
             if($externalUser->getEmail() != ""){
-                $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'externalInvitation']);
+                $response = $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'externalInvitation']);
+                if($response->getStatusCode() == 500){
+                    return new JsonResponse(['msg' => $response->getContent()], 500);
+                }
             }
             $externalUser->setClient($client)->setUser($user);
 
@@ -756,14 +781,15 @@ class ActivityController extends MasterController
      */
     public function updateEvent(
         Request $request,
-        int $eveId
+        int $eveId,
+        FileUploader $fileUploader
     ) {
         /** @var int */
         $stgId = $request->get('sid');
         /** @var int */
         $actId = $request->get('aid');
         /** @var int */
-        $mids = $request->get('mids');
+        $notification = $request->get('mids');
 
         $em = $this->em;
         /** @var Event */
@@ -774,11 +800,51 @@ class ActivityController extends MasterController
         $eventForm = $this->createForm(AddEventForm::class, $event, ['currentUser' => $currentUser, 'standalone' => true]);
         $eventForm->handleRequest($request);
         if($eventForm->isSubmitted() && $eventForm->isValid()){
+
             $now = new DateTime;
             if(!$event->getOnsetDate()){!$eventInitOnsetDate ? $event->setOnsetDate($now) : $event->setOnsetDate(null);}
             $event->setStage($stage);
+
+            $documentsForm = $eventForm->get('documents');
+            
+            foreach($documentsForm as $documentForm){
+                /** @var UploadedFile */
+                $documentFile = $documentForm->get('file')->getData();
+
+                /** @var EventDocument */
+                $document = $documentForm->getData();
+                $documentFileInfo = $fileUploader->upload($documentFile);
+                $document->setPath($documentFileInfo['name'])
+                    ->setType($documentFileInfo['extension'])
+                    ->setSize($documentFileInfo['size'])
+                    ->setMime($documentFileInfo['mime']);
+                $em->persist($document);
+            }
+
+            $comments = $event->getComments();
+            foreach($comments as $comment){
+                $comment->setAuthor($currentUser);
+            }
+
+            $em->persist($event);
+
+            if($notification){
+                $recipients = $event->getStage()->getUniqueParticipations()->map(fn(Participation $p) => [$p->getUser()])->getValues()[0];
+                $settings['event'] = $event;
+                $response = $this->forward('App\Controller\MailController::sendMail', [
+                    'recipients' => $recipients, 
+                    'settings' => [
+                        'event' => $event,
+                        'update' => $eveId != 0
+                    ], 
+                    'actionType' => 'eventNotification'
+                ]);
+                if($response->getStatusCode() == 500){ return $response; };
+            }
+
             $em->persist($event);
             $em->flush();
+
         } else {
             $errors = $this->buildErrorArray($eventForm);
             return $errors;

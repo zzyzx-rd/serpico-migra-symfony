@@ -62,6 +62,7 @@
                 <span class="flag m-left {{ workerFirm.country.abbr|lower }}"></span>
               {% endif %}
               <div class="user-actions">
+                <a class="material-icons modal-trigger" href="#deleteWorkerFirm" data-id="{{ workerFirm.id }}" tooltip="{{ 'user_list.delete'|trans }}">delete</a>
                 <a class="material-icons" href="{{ url('updateWorkerFirm', { wfiId: workerFirm.id }) }}" tooltip="{{ 'user_list.modify'|trans }}">settings</a>
               </div>
             </header>

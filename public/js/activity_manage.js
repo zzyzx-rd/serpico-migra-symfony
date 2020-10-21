@@ -35,6 +35,12 @@ $('#firstConnectionModal, #beforeStarting').modal({
   dismissible: false,
 })
 
+$('.event').tooltip({
+  complete: function(){
+    $(this).closest('.stage-element').tooltip('close');
+  }
+})
+
 function initPickates(){
   switch(lg){
     case 'fr':
@@ -109,6 +115,32 @@ var now = new Date();
 var annee   = now.getFullYear();
 var anneeSuiv = annee + 1;
 
+
+function dTrans($elmts, $entity, $prop){
+  var tElmts = [];
+    
+  $elmts.each(function(i,e){
+    var tElmt = {};
+    tElmt.e = $entity;
+    tElmt.id = e.value;
+    tElmt.p = $prop;
+    tElmts.push(tElmt);
+  
+  })
+  
+  const params = {elmts: tElmts};
+
+  $.post(dturl, params)
+    .done(function(data){
+      var lElmts = data.lElmts;
+      $elmts.each(function(i,e){
+          $(e).empty().append(lElmts[i]);
+      })
+    })
+}
+
+//dTrans($('#eventGSelector').find('option'),'EventGroupName','name');
+
 if($('[class*="dp-"]').length){
 
   var startCal = $('#createActivity').find('.dp-start');
@@ -144,46 +176,90 @@ if($('[class*="dp-"]').length){
   endCal.pickadate('picker').set('select',endDate).set('min',startDate);
 }
 
-function initETIcons() {
-  const $stylizableSelects = $('#updateEvent select');
-  $stylizableSelects.find('option').each(function (_i, e) {
-    e.innerHTML = e.innerHTML.trim()
-  });
-  $stylizableSelects.material_select();
 
-  const regExp = /~(.+)~/;
+$('#eventGSelector').on('change',function(){
+  updateEvents();
+})
 
-  $('#updateEvent .select-dropdown').each(function (_i, e) {
-    const $this = $(e);
-    const match = $this.val().match(regExp);
-    let icon = String.fromCodePoint && match && match[1] ? String.fromCodePoint('0x' + match[1]) : '';
 
-    if ($this.is('input')) {
-      if (!match) return;
-      $this.val($this.val().replace(regExp, icon));
-    } else {
-      $this.find('li > span').each(function (_i, e) {
-        e.innerHTML = e.innerHTML.trim().replace(
-          regExp,
-          `<span class="et-icon" data-icon="${icon}"></span>`
-        );
+
+function updateEvents($evgId = null, $evtId = null) {
+  $evgSelect = $('#eventGSelector');
+  $evtSelect = $('[id*="eventType"]');
+  if($evgId){
+    $evgSelect.val($evgId);
+  }
+  const $stylizableSelects = $evgSelect.add($evtSelect);
+
+  $.post(geurl,{id: $evgSelect.val()})
+    .done(function(eventTypes){ 
+      $evtSelect.empty();
+      $.each(eventTypes, function(i,e){
+        $evtSelect.append(`<option value="${e.id}">${e.name}</option>`);
+      })
+
+      if($evtId){
+        $evtSelect.val($evtId);
+      }
+
+      $stylizableSelects.material_select(); 
+
+      $('.select-evg').find('.select-dropdown').each(function(_i, e){
+        const $this = $(this);
+        if ($this.is('input')) {
+            $this.closest('.input-field').find('.evg-input-circle').remove();
+            $(this).css('text-indent', '1.5rem');
+            $this.parent().prepend(`<div class="evg-circle evg-input-circle no-margin evg-b-${$('#eventGSelector option:selected').attr('data-evgid')}" style=""></div>`);
+        } else {
+          $this.find('li > span').each(function (i, f) {
+            $(f).parent().addClass('flex-center').prepend($(`<div class="evg-circle sm-left evg-b-${$('#eventGSelector option').eq(i).attr('data-evgid')}"></div>`));
+          });
+        }
+      })
+
+      const regExp = /~(.+)~/;
+
+      $('.select-with-fa .select-dropdown').each(function (_i, e) {
+        const $this = $(e);
+        const match = $this.val().match(regExp);
+        let icon = String.fromCodePoint && match && match[1] ? String.fromCodePoint('0x' + match[1]) : '';
+
+        if ($this.is('input')) {
+          if (!match) return;
+          $this.val($this.val().replace(regExp, icon));
+        } else {
+          $this.find('li > span').each(function (_i, e) {
+
+            const $this = $(e);
+            const match = $this.text().match(regExp);
+            let icon = String.fromCodePoint && match && match[1] ? String.fromCodePoint('0x' + match[1]) : '';
+
+            e.innerHTML = e.innerHTML.trim().replace(
+              regExp,
+              `<span class="et-icon" data-icon="${icon}"></span>`
+            );
+          });
+        }
+        $this.find('li').each(function(i,f){
+          const $opt = $(f);
+          $opt.addClass('flex-center');
+          $opt.find('img').css({
+            height : 'auto',
+            width : '20px',
+            margin : '0',
+            float : 'none',
+            color : '#26a69a',
+          });
+        });
+      
+        $this.addClass('stylized');
+
       });
-    }
-    $this.find('li').each(function(i,f){
-      const $opt = $(f);
-      $opt.addClass('flex-center');
-      $opt.find('img').css({
-        height : 'auto',
-        width : '20px',
-        margin : '0',
-        float : 'none',
-        color : '#26a69a',
-      });
-    });
-   
-    $this.addClass('stylized');
+      //dTrans($evtSelect.find('option'),'EventName','name');
+    })
+  
 
-    });
+  
 }
 
 $(function () {
@@ -324,7 +400,7 @@ $(function () {
           sPctWidthP = Math.max(3,(ep + 1)) / (p + 1);
     
           $(this).css({'margin-left': Math.round(10000 * sPctWidthSD) / 100 + "%",
-            'width': Math.round(10000 * sPctWidthP) / 100 + "%",
+            'width': Math.max(1,Math.round(10000 * sPctWidthP) / 100) + "%",
             'height' : '15px',
             'border-radius' : '0.3rem',  
           });
@@ -447,13 +523,13 @@ function dateUpdate() {
         var $this = $(this);
         $this.show();
         $(this).closest('.activity-holder').show();
-        var sd = parseInt($this.data("sd"));
+        var sdU = parseInt($this.data("sd"));
         var p = parseInt($this.data("p"));
         var noStage = false;
 
         var id = $this.data("id");
-        var sa = new Date(sd * 1000);
-        var ea = new Date((sd + p) * 1000);
+        var sa = new Date(sdU * 1000);
+        var ea = new Date((sdU + p) * 1000);
         var ts = getCookie("ts");
         var ci = getCookie("ci");
 
@@ -519,11 +595,11 @@ function dateUpdate() {
 
             $this.find('.event').each(function () {
 
-                var od = $(this).data("od");
+                var odU = $(this).data("od");
                 var sp = $(this).data("p");
 
-                sPctWidthSD = (od - sd) / pd;
-                sPctWidthP = Math.max(3, (sp + 1)) / (pd + 1);
+                sPctWidthSD = (odU - sdU) / p;
+                sPctWidthP = Math.max(3, (sp + 1)) / (p + 1);
 
                 $(this).css({
                     'margin-left': Math.round(10000 * sPctWidthSD) / 100 + "%",
@@ -585,13 +661,12 @@ function dateUpdate() {
                         });
                     }
                 });
-
                 $this.find('.event').each(function () {
-                    var od = $(this).data("od");
+                    var odU = $(this).data("od");
                     var sp = $(this).data("p");
 
-                    sPctWidthSD = (od - sd) / pd;
-                    sPctWidthP = Math.max(3, (sp + 1)) / (pd + 1);
+                    sPctWidthSD = (odU - sdU) / p;
+                    sPctWidthP = Math.max(3, (sp + 1)) / (p + 1);
 
                     $(this).css({
                         'margin-left': Math.round(10000 * sPctWidthSD) / 100 + "%",
@@ -600,6 +675,7 @@ function dateUpdate() {
                         'border-radius': '0.3rem',
                     });
                 });
+
             } else {
                 var dayext = dayDiff(sa, ei);
                 pxWidthP = dayext * echelle;
@@ -656,10 +732,10 @@ function dateUpdate() {
                 });
                 //$(this).fid(.append('<i class="fas fa-arrow-right" style=" top: 20%"  ></i>');
                 $this.find('.event').each(function () {
-                    var od = $(this).data("od");
+                    var odU = $(this).data("od");
                     var sp = $(this).data("p");
 
-                    sPctWidthSD = (od - sd) / pd;
+                    sPctWidthSD = (odU - sdU) / p;
                     pxWidthP = dayext * echelle;
 
                     $(this).css({
@@ -748,8 +824,8 @@ function dateUpdate() {
                 var od = $(this).data("od");
                 var sp = $(this).data("p");
 
-                sPctWidthSD = (od - sd) / pd;
-                sPctWidthP = Math.max(3, (sp + 1)) / (pd + 1);
+                sPctWidthSD = (odU - sdU) / p;
+                sPctWidthP = Math.max(3, (sp + 1)) / (p + 1);
 
                 $(this).css({
                     'margin-left': Math.round(10000 * sPctWidthSD) / 100 + "%",
@@ -925,7 +1001,7 @@ function dateUpdate() {
 
         return diff;
     }
-  initETIcons();
+  updateEvents();
 
     $('.prev-int-btn, .next-int-btn').on('click', function (e) {
         var ci = getCookie('ci');
@@ -1120,6 +1196,55 @@ function dateUpdate() {
 
 
   })
+
+  /** Function which directly insert participant in the activity - tn for tooltip, fn fullname, secId in case of extUsr  */
+  function directInsert(tn, fn, id, pic = null, type = null, secId = null){
+
+    if($('.participants-list--item.edit').length){
+      $partElmt = $('.participants-list--item.edit');
+    } else {
+      var prototype = $('.participants-list').data('prototype');
+      var newForm = prototype
+        .replace(/__name__/g, $('.participants-list--item').length);
+      $partElmt = $(newForm);
+    } 
+
+    $partElmt.find('.validation-buttons').after('<select name="participantSelector" style="margin-top:45px"></select>');
+    $partBtn = $partElmt.find('.participant-btn');
+    $partFZone = $partElmt.find('.participant-field-zone');
+    $partFZone.find('.participant-fullname').val(fn).addClass('part-feeded');
+    $partFZone.find('.participant-fullname').prev().addClass('active');
+    var $img = $partBtn.find('.selected-participant-logo');
+    $img.attr('src',pic);
+    $partBtn.attr('data-tooltip',tn).tooltip();
+    etype = type ? type : data.type;
+    switch(etype){
+      case 'eu' : 
+        $partFZone.find('input.u').attr('value',id);
+        $partFZone.find('input.eu').attr('value',secId);
+        break;
+      case 'u' :
+        $partFZone.find('input.u').attr('value',id);
+        break;
+      case 't' :
+        $partFZone.find('input.t').attr('value',id);
+        break;
+    }
+    var $inputImg = $img.clone();
+    $inputImg.attr('class','');
+    $inputImg.addClass('input-img');
+    $inputImg.css({
+      'position': 'absolute',
+      'left': '0',
+      'top': '15%',
+      'height': '30px',
+    });
+    $partFZone.append($inputImg);
+    $partBtn.show();
+    $partElmt.removeClass('edit');       
+    $partFZone.hide();
+    $('.btn-participant-add').before($partElmt);
+  }
 
   function eraseCookie(name) {
       createCookie(name,"",-1);
@@ -1337,39 +1462,337 @@ function dateUpdate() {
    
   });
 
+  $(document).on('click','.stage-element',function(){
+    if($(this).hasClass('s-multiple-events')){
+      $(this).removeClass('s-selectable');
+    }
+    var $stage = $(this);
+    var id = $stage.attr('data-id');
+    $.post(sdurl,{id: id})
+      .done(function(data){
+        console.log(data);
+        const options = { month: 'numeric', day: 'numeric' };
+        $modal = $('#createActivity');
+        $modal.find('.modal-title > h5').empty().append(data.name);
+        $modal.find('input[name*="name"]').closest('.input-field').hide();
+        $modal.find('.act-dates').empty().append(`<i class="fa fa-calendar"></i><span class="sm-left s-date">${new Date(data.sdate.date).toLocaleDateString(lg+'-'+lg.toUpperCase(),options)}</span><span class="sm-right sm-left">-</span><span class="e-date">${new Date(data.edate.date).toLocaleDateString(lg+'-'+lg.toUpperCase(),options)}</span>`);
+        $modal.find('.dp-start').pickadate('picker').set('select',new Date(data.sdate.date));
+        $modal.find('.dp-end').pickadate('picker').set('select',new Date(data.edate.date));
+        $modal.find('.dp-start').closest('.row').hide();
+        $modal.find('.events').show();
+        $partHolder = $modal.find('ul.participants-list');
+        $partHolder.empty();
+        $(data.participants).each(function(i,p){
+          $partElmt = $($partHolder.data('prototype'));
+          $partElmt.find('.selected-participant-logo').attr('src', p.picture);
+          $partElmt.find('.participant-btn').show().attr('data-tooltip',p.fullname);
+          $partElmt.find('.participant-field-zone').hide();
+          $partElmt.find('.tooltipped').tooltip();
+          $partHolder.append($partElmt);
+        })
+        $evtHolder = $modal.find('ul.events-list');
+        $evtHolder.empty();
+        $(data.events).each(function(i,e){
+          $evtElmt = $($evtHolder.data('prototype'));
+          $evtElmt.find('.evg-circle').addClass(`evg-b-${e.evgId}`);
+          if(e.nbcoms > 0){
+            $evtElmt.find('.e-comments').show().find('.nb-coms').append(e.nbcoms);
+          }
+          if(e.nbdocs > 0){
+            $evtElmt.find('.e-documents').show().find('.nb-docs').append(e.nbdocs);
+          }
+          $evtElmt.find('.evg-name').append(e.evg);
+          $evtElmt.find('.evt-name').append(e.evt);
+          $evtElmt.find('.fa-external-link-alt').attr('data-id',e.id);
+          $evtElmt.find('.tooltipped').tooltip();
+          $evtHolder.append($evtElmt);
+        })
+        $modal.modal('open');
+        
+      })
+      .fail(function(data){
+        console.log(data);
+      })
 
+  });
+
+  $(document).on('click','.fa-external-link-alt',function(){
+    var $this = $(this);
+    if($this.closest('.modal').is('#createActivity')){
+      $(`.event[data-id="${$this.data('id')}"]`).addClass('e-selectable').click();
+      $('#multipleEvent').modal('close');
+      $this.closest('.modal').modal('close');
+    } else if($this.closest('.modal').is('#updateEvent')){
+      $(`.stage-element[data-id="${$this.data('id')}"]`).click();
+      $('#updateEvent').modal('close');
+    }
+  })
+
+
+
+  $('.e-multiple-events').on('click',function(){
+
+      $('#eventSelector').empty();
+      const $this = $(this);
+      const $evtHolder = $(this).parent();
+      ids = [];
+      $visibleEventTT = $($evtHolder.find('.event:visible').attr('data-tooltip'));
+      $visibleEventTT.find('.t-event-info').each(function(i,e){
+        evt = {};
+        evt.name = $(e).find('.evg').text() + ' - ' + $(e).find('.evt').text();
+        evt.id = $evtHolder.find('.event').eq(i).attr('data-id');
+        ids.push(evt);
+      })
+      $(ids).each(function(i,evt){
+        $('#eventSelector').append(`<option value="${evt.id}">${evt.name}</option>`);
+      })
+
+      $('#eventSelector').material_select();
+      $('#multipleEvent').modal('open');
+  })
 
   $('[href="#updateEvent"]').on('click',function(){
-    initETIcons();
-    $('.event-element-name').empty().append($(this).closest('.act-info').find('.act-info-name').text());
+
+    $modal.find('.btn-e-update, .e-create').show();
+    $modal.find('.btn-e-modify').hide();
+    $modal.find('.ev-info').remove();
+    $modal.find('.e-documents, .e-comments').empty();
+    $modal.find('.documents-number').empty().append(`${$modal.find('.documents-number').data('nodoc')}`);
+    $modal.find('.comments-number').empty().append(`${$modal.find('.comments-number').data('nodoc')}`);
+
+    updateEvents();
+    //$('.event-element-name').empty().append($(this).closest('.act-info').find('.act-info-name').text());
     $('.update-event-btn').attr('data-aid',$(this).attr('data-aid'));
     $('.update-event-btn').attr('data-sid',$(this).attr('data-sid'));
     $('.update-event-btn').attr('data-ms',$(this).attr('data-ms'));
     $('.update-event-btn').attr('data-eid',$(this).hasClass('btn-floating') ? 0 : $(this).attr('data-eid'));
   })
 
-  $('.insert-document-btn, .insert-comment-btn').on('click',function(e){
+  $('.add-e-document, .add-e-comment').on('click',function(e){
     e.preventDefault();
-    $holder = $(this).hasClass('insert-comment-btn') ? $('ul.comments') : $('ul.documents');
-    $newProto = $($holder.data('prototype'));
-    if($(this).hasClass('insert-document-btn')){
-      $newProto.find('.dropify').dropify();
+    $holder = $(this).hasClass('add-e-comment') ? $('ul.e-comments') : $('ul.e-documents');
+    proto = $holder.data('prototype-creation');
+    proto = proto.replace(/__name__/g, $holder.children().length);
+    $newProto = $(proto);
+    if($(this).hasClass('add-e-document')){
+      $newProto.find('.dropify').dropify({
+        messages: {
+          'default' : msgDocInsert,
+          'replace' : msgDocReplace,
+          'remove' : msgDocRemove,
+          'error': msgDocError,
+        }
+      });
+      $newProto.find('.dropify-message').addClass('flex-center');
+      $newProto.find('.dropify-infos-message').addClass('no-margin');
     }
     $holder.append($newProto);
   })
 
+  $(document).on('click','.e-doc-remove',function(){
+    $(this).closest('.e-document').remove();
+  });
+
   $('.update-event-btn').on('click',function(e){
     e.preventDefault();
     const $this = $(this);
-    const params = {sid: $this.attr('data-sid'), eid: $this.hasClass('btn-floating') ? 0 : $this.attr('data-eid'), mids: $('#partNotification').is(':checked')};
-    data = $('#updateEvent form').serialize() + '&' + $.param(params);
-    $.post(eurl,data)
+    //const params = {sid: $this.attr('data-sid'), eid: $this.hasClass('btn-floating') ? 0 : $this.attr('data-eid'), mids: true};
+    //data = $('#updateEvent form').serialize() + '&' + $.param(params);
+
+    formData = new FormData($('#updateEvent form')[0]);
+    formData.append('sid',$this.attr('data-sid'));
+    formData.append('eid',$this.hasClass('btn-floating') ? 0 : $this.attr('data-eid'));
+    formData.append('mids',true);
+
+    $.ajax({
+      type: "POST",
+      data: formData,
+      url: eurl,
+      processData: false,
+      contentType: false,
+      success: function(data){
+        location.reload();
+      }
+    })
+
+      /*$.post(eurl,data)
         .done(function(data){
-            location.reload();
+            //location.reload();
         })
         .fail(function(data){
             console.log(data);
         })
+        */
+  })
+
+  $(document).on('click','.e-selectable',function(){
+    
+    if($(this).hasClass('e-multiple-events')){
+      $(this).removeClass('e-selectable');
+    }
+
+    var $event = $(this);
+    var id = $(this).attr('data-id');
+    
+    $.post(edurl,{id: id})
+      .done(function(data){
+        $("#eventGSelector").val(data.group);
+        $modal = $("#updateEvent");
+        $modal.find('.btn-e-update, .e-create').hide();
+        $modal.find('.btn-e-modify').show();
+        if(data.documents){
+          $modal.find('.documents-number').empty().append(data.documents.length);
+        } else {
+          $modal.find('.documents-number').empty().append(`(${$modal.find('.documents-number').data('nodoc')})`);
+        }
+        $docHolder = $modal.find('.e-documents');
+        $docHolder.empty();
+        $(data.documents).each(function(i,d){
+
+            $docElmt = $($docHolder.data('prototype-display'));
+            $docElmt.find('.e-doc-ext').append(d.type);
+            $docElmt.find('.e-doc-title').append(d.title);
+            $docElmt.find('.e-doc-size').append(`${Math.round(d.size/1000)} Ko`);
+            $docElmt.find('.file-download').attr({
+              'data-path' : d.path,
+              'data-mime' : d.mime,
+              'data-title' : d.title
+            });
+            $docElmt.find('.tooltipped').tooltip();
+            $docHolder.append($docElmt);
+        });
+        $docHolder.find('.btn-e-update').hide();
+
+        if(data.comments){
+          $modal.find('.comments-number').empty().append(data.comments.length);
+        } else {
+          $modal.find('.comments-number').empty().append(`(${$modal.find('.documents-number').data('nodoc')})`);
+        }
+        $comHolder = $modal.find('.e-comments');
+        $comHolder.empty();
+        $(data.comments).each(function(i,c){
+            $comElmt = $($comHolder.data('prototype-display'));
+            $comElmt.attr('data-id',c.id);
+            $comElmt.find('.e-com-author').append(c.author);
+            $comElmt.find('.e-com-content').append(c.content);           
+            $comElmt.find('.e-com-inserted').append(new Date(c.inserted.date).toLocaleDateString("fr-FR",{ weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' }));  
+            if(c.self){
+              $modifyElmt = $(`<span class="e-com-modify tooltipped" data-tooltip="${msgComModify}" data-position="top"><i class="fa fa-pen"><i></span>`)
+              $modifyElmt.tooltip();
+              $comElmt.find('.e-com-right-elmts').append($modifyElmt);
+            }         
+            $comHolder.append($comElmt);
+        });
+
+        $modal.find('.ev-info').remove();
+        updateEvents(data.group, data.type);
+        setTimeout(function(){
+          var $evtSelector = $('[id*="eventType"]');
+          //$('[id*="eventType"]').val(data.type);
+          var $evgCircle = $("#updateEvent .evg-input-circle").clone();
+          $evgCircle.css('position','');
+          $evgCircle.removeClass('evg-input-circle').removeClass('evg-b-1').addClass(`evg-b-${$('#eventGSelector option:selected').attr('data-evgid')}`);
+          $modal.find('.event-element-name').empty().append(data.sname);
+          $modal.find('.fa-external-link-alt').attr({
+            'data-id' :data.sid,
+            'data-tooltip' : evtAccStgMsg,   
+          }).tooltip();
+
+          var $headerEVG = $('<div class="ev-info flex-center"></div>');
+          $headerEVG
+            .append($evgCircle)
+            .append(`<span class="sm-left">${$("#eventGSelector option:selected").text()}</span>`)
+            .append('<span class="sm-left sm-right">:</span>')
+            .append(`<span>${$('[id*="eventType"] option:selected').text().split('~').slice(-1)[0].trim()}</span>`)
+            //.append(`<div class="btn-flat btn-e-update modal-trigger" href="#deleteEvent" data-id="${id}" style="display:none;"><i class="fa fa-trash"></i><div>`)
+            .append(`<div class="btn-flat btn-e-update" style="display:none;"><i class="fa fa-cog"></i><div>`);
+            $modal.find('header>h5').prepend($headerEVG);
+            $modal.find('.event-selection').hide();
+          $("#updateEvent").modal('open');
+
+        },200);
+          
+      })
+      .fail(function(data){
+        console.log(data);
+      })  
+  })
+
+  $('.event-select-btn').on('click',function(){
+    const selectedVal = $('#eventSelector').val();
+    if($(`.event[data-id="${selectedVal}"]`).hasClass('e-multiple-events')){
+      $(this).addClass('e-selectable');
+    }
+    $(`.event[data-id="${parseInt(($('#eventSelector').val()))}"]`).click();
+  })
+
+  $(document).on('click','.e-com-modify',function(){
+    const $comment = $(this).closest('.e-existing-comment');
+    const $content = $comment.find('.e-com-content').text().trim();
+    $proto = $($(this).closest('.e-comments').data('prototype-creation'));
+    $proto.find('textarea').text($content);
+    $proto.attr('data-id',$comment.data('id')).addClass('flex-center');
+    $proto.append('<div class="c-flex-center c-action-buttons"><i class="fa fa-times dd-text btn-flat modal-trigger" href="#deleteComment"></i><i class="fa fa-check dd-text btn-flat e-com-delete"></i></div>');
+    $proto.children().first().css('width','90%');
+    $comment.after($proto);
+    $comment.hide();
+  });
+
+  $(document).on('click','[href="#deleteComment"]',function(){
+    $('.e-com-delete').attr('data-id',$(this).closest('.e-comment').data('id'));
+  });
+
+  $('.e-com-delete').on('click',function(){
+   
+    urlToPieces = dcomurl.split('/');
+    id = $(this).attr('data-id');
+    urlToPieces[urlToPieces.length - 1] = id;
+    url = urlToPieces.join('/');
+    $.delete(url,null)
+      .done(function(){
+        $(`.e-existing-comment[data-id="${id}"], .e-comment[data-id="${id}"]`).remove();
+      })
+    
+  });
+
+  /*$(document).on('click','[href="#deleteDocument"]',function(){
+    $('e-com-delete').attr('data-id',$(this).closest('.e-existing-comment').data('id'));
+  });
+  */
+
+  $(document).on('click','.btn-flat.file-download',function(){
+    var $this = $(this);
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", `../../lib/evt/${$this.attr('data-path')}`);
+    xhr.responseType = "blob";
+    xhr.onreadystatechange = function(){
+      if(xhr.readyState === 4 && xhr.status === 200) {
+        saveFile(xhr.response,$this.attr('data-title'));
+      }
+    }
+    xhr.send();
+  })
+
+  $(document).on('click','[href="#deleteEvent"]',function(){
+    $('.remove-event').attr('data-id',$(this).attr('data-id'));
+  })
+
+  $('.remove-event').on('click',function(){
+    urlToPieces = deurl.split('/');
+    id = $(this).attr('data-id');
+    urlToPieces[urlToPieces.length - 1] = id;
+    url = urlToPieces.join('/');
+    $.delete(url,null)
+      .done(function(){
+        $(`.event[data-id="${id}"]`).remove();
+        $('#updateEvent').modal('close');
+      })
+  });
+
+  $(document).on('click','.participant-delete, .btn-participant-validate',function(){
+    var $this = $(this);
+    $this.closest('.modal').find('.modal-footer .red-text').remove();
+    $('.red-text').remove();
   })
 
   $('.btn-participant-add').on('click',function(){
@@ -1384,57 +1807,7 @@ function dateUpdate() {
         $this.before($newForm);
         $('.participants-list').css('margin-bottom','60px');
       }
-  })
-
-
-  /** Function which directly insert participant in the activity - tn for tooltip, fn fullname, secId in case of extUsr  */
-  function directInsert(tn, fn, id, pic = null, type = null, secId = null){
-
-    if($('.participants-list--item.edit').length){
-      $partElmt = $('.participants-list--item.edit');
-    } else {
-      var prototype = $('.participants-list').data('prototype');
-      var newForm = prototype
-        .replace(/__name__/g, $('.participants-list--item').length);
-      $partElmt = $(newForm);
-    } 
-
-    $partElmt.find('.validation-buttons').after('<select name="participantSelector" style="margin-top:45px"></select>');
-    $partBtn = $partElmt.find('.participant-btn');
-    $partFZone = $partElmt.find('.participant-field-zone');
-    $partFZone.find('.participant-fullname').val(fn).addClass('part-feeded');
-    $partFZone.find('.participant-fullname').prev().addClass('active');
-    var $img = $partBtn.find('.selected-participant-logo');
-    $img.attr('src',pic);
-    $partBtn.attr('data-tooltip',tn).tooltip();
-    etype = type ? type : data.type;
-    switch(etype){
-      case 'eu' : 
-        $partFZone.find('input.u').attr('value',id);
-        $partFZone.find('input.eu').attr('value',secId);
-        break;
-      case 'u' :
-        $partFZone.find('input.u').attr('value',id);
-        break;
-      case 't' :
-        $partFZone.find('input.t').attr('value',id);
-        break;
-    }
-    var $inputImg = $img.clone();
-    $inputImg.attr('class','');
-    $inputImg.addClass('input-img');
-    $inputImg.css({
-      'position': 'absolute',
-      'left': '0',
-      'top': '15%',
-      'height': '30px',
-    });
-    $partFZone.append($inputImg);
-    $partBtn.show();
-    $partElmt.removeClass('edit');       
-    $partFZone.hide();
-    $('.btn-participant-add').before($partElmt);
-  }
+  })^
 
   $(document).on('keyup','input[name*="firm"]',function(e){
 
@@ -1576,6 +1949,12 @@ function dateUpdate() {
     }
   });
 
+  $('.btn-e-modify:not(.modal-close').on('click',function(){
+    var $modal = $(this).closest('.modal');
+    $modal.find('.btn-e-modify').hide();
+    $modal.find('.btn-e-update').show();
+  })
+
 
   $(document).on('click',function(e){
     var $this = $(e.target);
@@ -1706,13 +2085,18 @@ function dateUpdate() {
       $(this).remove();
     });
 
+    if($('.participants-list--item.edit').length){
+      $this.parent().prepend('<span class="red-text sm-right part-error">Please validate (or remove) above participant before validating</span>');
+      return false;
+    }
+
     const params = {btn: $this.hasClass('create-activity') ? 'submit' : 'complexify'};
     var data = $this.closest('form').serialize() + '&' + $.param(params)
 
     $.post(acurl,data)
       .done(function(data){
         $('#createActivity').modal('close');
-        location.reload();
+        //location.reload();
       })
       .fail(function(data){
         $.each(data.responseJSON, function(key, value){

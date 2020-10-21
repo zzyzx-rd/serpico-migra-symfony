@@ -65,6 +65,21 @@
     var dcurl = "{{ url('getDummyClients') }}";
     var daurl = "{{ url('activityDelete') }}";
     var suourl = "{{ url('setUserOrganization') }}";
+    var dturl = "{{ url('getDynamicTranslations') }}";
+    var geurl = "{{ url('getEventTypesFromEventGroup') }}";
+    var notConfirmingPartError = "{{ 'getEventTypesFromEventGroup'|trans }}";
+    var edurl = "{{ url('getEventData') }}";
+    var sdurl = "{{ url('getStageData') }}";
+    var deurl = "{{ url('deleteEvent',{eveId: 0}) }}";
+    var dcomurl = "{{ url('deleteComment', {id: 0}) }}";
+    var ddocurl = "{{ url('deleteDocument', {id: 0}) }}";
+    var msgDocInsert = "{{ 'activity_elements.events.documents.dropify_insert_msg'|trans }}";
+    var msgDocReplace = "{{ 'remove'|trans }}";
+    var msgDocRemove = "{{ 'replace'|trans }}";
+    var msgDocError = "{{ 'activity_elements.events.documents.dropify_error_msg'|trans }}";
+    var msgComModify = "{{ 'activity_elements.events.'|trans|capitalize }}";
+    var evtAccStgMsg = "{{ 'activity_elements.events.access_stage_btn'|trans }}";
+    var evtAccActMsg = "{{ 'activity_elements.events.access_activity_btn'|trans }}";
   </script>
   <style>
       .elmts{
@@ -151,7 +166,7 @@
         margin-right: 5px;
       }
 
-      .stage-dates{
+      .stage-dates, .c-action-buttons > i{
         padding: 0 1rem;
       }
 
@@ -522,25 +537,6 @@
         margin-top: 20px
       }
 
-      .event-notifications-header, .event-dates-header{
-        color: #00acc1;
-        cursor: pointer;
-      }
-
-      .event .event-marker{
-        position:relative;
-        color: #16afb7;
-        font-size:1.6rem;
-      }
-
-      .event .event-type{
-        position:absolute;
-        color:white;
-        left:22%;
-        top:13%;
-        font-size: 1rem;
-      }
-
       .activity-component{
         list-style:none;
       }
@@ -592,11 +588,11 @@
         font-size:18px;
       }
 
-      .ip-value, .setup-activity, .participants-title{
+      .ip-value, .setup-activity, .participants-title, .events-title{
         color: #55318e;
       }
 
-      .participants-title{
+      .participants-title, .events-title{
         text-transform: uppercase;
       }
 
@@ -750,6 +746,249 @@
 
       .ts-value, #beforeStarting h6{
         font-weight: 700;
+      }
+
+      #legalPerson{
+        width:33%;
+        min-width:300px;
+      }
+
+      .dashboard-btns{
+        align-items: flex-start;
+        font-size: 12px;
+      }
+
+      .curr-int-within-cal{
+        font-size:20px;
+        color:black;
+        position:absolute;
+        top:0%;
+        left:50%;
+      }
+
+      .prev-int-within-cal{
+        right:5rem;
+        
+      }
+
+      .next-int-within-cal{
+        left:-5rem;
+        right:'';
+      }
+
+      #createActivity .modal-footer{
+        padding: 24px;
+      }
+
+      .part-error{
+        font-size: 15px;
+      }
+
+      .et-icon::before {
+        content: attr(data-icon);
+        font-family: "Font Awesome 5 Free", "Font Awesome 5 Brands";
+        font-weight: 900;
+        margin-right: .25em;
+      }
+
+      .et-icon[data-icon-type="m"]::before {
+        font-family: "Material Icons";
+        font-weight: normal;
+      }
+      .et-icon[data-icon-type="fa"]::before, .et-icon[data-icon-type="fab"]::before{
+        font-family: "Font Awesome 5 Free";
+      }
+
+      .evg-b-1{
+        background-color: purple;
+      }
+      .evg-b-2{
+        background-color: blue;
+      }
+      .evg-b-3{
+        background-color: red; 
+      }
+      .evg-b-4{
+        background-color: green;
+      }
+      .evg-b-5{
+        background-color: orange;
+      }
+      .evg-b-6{
+        background-color: brown;
+      }
+
+
+      .evg-1{
+        color: purple;
+      }
+      .evg-2{
+        color: blue;
+      }
+      .evg-3{
+        color: red; 
+      }
+      .evg-4{
+        color: green;
+      }
+      .evg-5{
+        color: orange;
+      }
+      .evg-6{
+        color: brown;
+      }
+
+      .evg-circle{
+        height: 15px;
+        width: 15px;
+        border-radius:100%;
+        display: inline-block;
+      }
+
+      .evg-input-circle{
+        position: absolute;
+        top:30%;
+      }
+
+      .event .event-marker{
+        position:relative;
+        color: #16afb7;
+        font-size:2.1rem;
+      }
+
+      .event-logo-container > .unique-event{
+        position:absolute;
+        left:19%;
+        top:16%;
+        font-size: 36%;
+      }
+
+       .event-logo-container > :not(.unique-event){
+        position:absolute;
+        left:26%;
+        top:5%;
+        font-family: 'Poppins';
+        font-size: 46%;
+      }
+
+      :not(.multiple-events) .event-logo-container{
+        border-radius: 100%;
+        background-color: white;
+        position: absolute;
+        height: 1.1rem;
+        width: 1.1rem;
+        top: 12%;
+        left: 15%;
+      }
+
+      #updateEvent form > div {
+        min-height: 36px;
+      }
+
+      .e-doc-logo{
+        font-size:150%;
+        position:relative;
+        color: #55318e;
+      }
+
+      .e-doc-ext{
+        text-transform: uppercase;
+        font-family: 'Poppins';
+        position: absolute;
+        color: orange;
+        font-size: 8px;
+        left: 5%;
+        bottom: 14%;
+      }
+
+      .e-doc-size{
+        font-size:12px;
+      }
+
+      .e-existing-comment {
+        background: #55318e;
+        width: 90%;
+        padding: 15px 10px 10px 10px;
+        border-radius: 7px;
+        color: white;
+        position: relative;
+      }
+
+      .e-com-author, .e-com-inserted{
+        font-size:10px;
+      }
+ 
+      .e-com-author{
+        padding-left:1rem;
+      }
+
+
+      .e-document{
+        position:relative;
+        padding-left:2rem;
+      }
+
+      .e-document::before {
+        content: "";
+        position: absolute;
+        top: -1rem;
+        bottom: 1rem;
+        left: 0.5rem;
+        right: calc(100% - 2rem);
+        border-left: thin solid;
+        border-bottom: thin solid;
+        opacity: .2
+      }
+
+      .doc-action-buttons{
+        display: inline-block;
+        margin-left: auto;
+      }
+
+      .doc-action-buttons > .btn-flat {
+        padding: 0 1rem!important;
+      }
+
+      .dropify-wrapper{
+        min-height: 60px;
+      }
+
+      .dropify-message :not(.file-icon){
+        font-family: 'Poppins';
+        max-width: 85%;
+      }
+
+      .dropify-message .file-icon{
+        min-width: 15%;
+      }
+
+      .dropify-message p{
+        text-align: center;
+      }
+
+      #updateEvent .btn-flat{
+        height: 25px;
+        line-height: 25px;
+      }
+
+      .dropify-wrapper .dropify-message span.file-icon{
+        font-size: 29px;
+      }
+
+      .evg-text-shadow{
+        text-shadow: 2px 0 0 #fff, -2px 0 0 #fff, 0 2px 0 #fff, 0 -2px 0 #fff, 1px 1px #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff;
+      }
+
+      .e-com-info{
+        position: absolute;
+        right: 1%;
+        top: 0%;
+        font-size: 13px;
+        width:100%
+      }
+
+      .e-com-modify, .e-com-right-elmts, .fa-external-link-alt{
+         cursor:pointer;
       }
 
   </style>
@@ -1235,15 +1474,27 @@
 
   <main>
 
-    <div class="sorting-type dashboard-btns flex-center-fe">
+    <div class="sorting-type dashboard-btns flex-center-sb">
 
-      {% if is_granted('ROLE_ADMIN') %}    
-        {% if global.route == "myActivities" %}
-            <a href="{{ url('processesList') }}" class="btn-flat dd-text switch-org-self-btn waves-effect waves-light">{% trans %}activities.firm_activities{% endtrans %}</a>
-        {% else %}
-            <a href="{{ url('myActivities') }}" class="btn-flat dd-text switch-org-self-btn waves-effect waves-light">{% trans %}activities.my_activities{% endtrans %}</a>
+      {#{% if is_granted('ROLE_ADMIN') %}#}   
+      <ul class="no-margin">
+        <li>
+          <a class="btn-flat flex-center my-firm dd-text">
+            <span>{{ 'my_firm'|trans ~ ' :' }}</span>
+            <img class="client-logo sm-left sm-right" src="{{ asset(global.organizationLogo(currentuser.organization)) }}">
+            <span>{{ currentuser.organization.commname }}</span>
+          </a>
+        </li>
+        {% if is_granted('ROLE_ENTREPRISE') %}
+          <li>
+          {% if global.route == "myActivities" %}
+              <a href="{{ url('processesList') }}" class="btn-flat dd-text switch-org-self-btn waves-effect waves-light">{% trans %}activities.firm_activities{% endtrans %}</a>
+          {% else %}
+              <a href="{{ url('myActivities') }}" class="btn-flat dd-text switch-org-self-btn waves-effect waves-light">{% trans %}activities.my_activities{% endtrans %}</a>
+          {% endif %}
+          </li>    
         {% endif %}
-      {% endif %}
+      </ul>
 
       <ul class="no-margin">
       
@@ -1447,16 +1698,17 @@
                   </div>
                 {% else %}
                   <div class="col s9 dmin no-padding">
-                    <div class="prev-int-btn dd-text">
+                    <div class="prev-int-btn prev-int-within-cal dd-text">
                       <i class="fa fa-caret-left moveP"></i>
                       <span class="prev-interval-val"></span>
                     </div>
                     <span class="start-int-value"></span>
                     <div class="line-no-processes"></div>
+                    <span class="curr-int-value curr-int-within-cal"></span>
                   </div>
                   {#<div class="col center curr-int-value no-padding"></div>#}
                   <div class="col s3 dmax no-padding">
-                    <div class="next-int-btn dd-text">
+                    <div class="next-int-btn next-int-within-cal dd-text">
                       <span class="next-interval-val"></span>
                       <i class="fa fa-caret-right moveP"></i>
                     </div>
@@ -1543,7 +1795,7 @@
         #}
 
         
-        <ul class="process-list process-list-t no-margin" data-prototype="{% apply escape %}{% include "components/activity2_list__item.html.twig" %}{% endapply %}">
+        <ul class="process-list process-list-t no-margin" data-prototype="{% apply escape %}{% include "components/activity2_list__item.html.twig" with {em: em} %}{% endapply %}">
           {% if orphanActivities is not empty %}
 
             <li class="process-list--item hierarchized-item">
@@ -1573,7 +1825,7 @@
                             {% set actStatusName = actStatuses[sortingTypeCookie][actStatus] %}
                             {% set showable = global.request.cookies.get('r_s_' ~ sortingTypeCookie ~ '_' ~ actStatusName) is null %}
                           {#{% endif %}#}
-                          {% include "components/activity2_list__item.html.twig" with { activity: activity, showable: showable, sortingType: sortingTypeCookie, actStatus: actStatusName } %}
+                          {% include "components/activity2_list__item.html.twig" with { activity: activity, showable: showable, sortingType: sortingTypeCookie, actStatus: actStatusName, em:em } %}
                         {% endfor %}
                       {% endfor %}
                     {% else %}
@@ -1583,7 +1835,7 @@
                             {% set actStatusName = actStatuses[sortingTypeCookie][actStatus] %}
                             {% set showable = global.request.cookies.get('r_s_' ~ sortingTypeCookie ~ '_' ~ actStatusName) is null %}
                           {#{% endif %}#}
-                          {% include "components/activity2_list__item.html.twig" with { activity: activity, showable: showable, sortingType: sortingTypeCookie, actStatus: actStatusName } %}
+                          {% include "components/activity2_list__item.html.twig" with { activity: activity, showable: showable, sortingType: sortingTypeCookie, actStatus: actStatusName, em:em } %}
                         {% endfor %}
                     {% endif %}
                     </ul>
@@ -1619,7 +1871,7 @@
 
                         {% for activity in processStatusActivities %}
 
-                          {% include "components/activity2_list__item.html.twig" with { activity: activity, showable: showable, sortingType: sortingTypeCookie, dateType: dateTypeCookie, actStatus: actStatusName } %}
+                          {% include "components/activity2_list__item.html.twig" with { activity: activity, showable: showable, sortingType: sortingTypeCookie, dateType: dateTypeCookie, actStatus: actStatusName, em:em } %}
                           
                         {% endfor %}
                       {% endfor %}
@@ -1685,10 +1937,10 @@
                               <div class="curDate"></div>
                               <ul class="stages-holder" style="position:relative">
                                 <ol class="activity-component" data-sd="0" data-p="365" data-id="{{random(1,1000000)}}">
-                                    {% set startdateDay = random(7,320) %}
-                                    {% set period = random(max(0,15 - startdateDay), 350 - startdateDay) %}
+                                    {% set startdateU = random(7,320) %}
+                                    {% set period = random(max(0,15 - startdateU), 350 - startdateU) %}
 
-                                    {% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateDay: startdateDay, period: period, embeddedStages: null, visibleEl: true} %}
+                                    {% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateU: startdateU, period: period, embeddedStages: null, visibleEl: true} %}
                                 </ol>
                               </ul>
                           </div>
@@ -1776,16 +2028,19 @@
       <div id="createActivity" class="modal">
         {{ form_start(newActivityForm) }}
           <div class="modal-content">
-            <div class="flex-center-sb">
+            <div class="flex-center-sb modal-title">
               <h5>{{'activities.create.modal_title'|trans}}</h5>
-              <div class="flex-center ip-zone">
-                <span class="sm-right sm-left">{{'activities.create.linked_to'|trans}}</span>
-                <div class="ip-value flex-center">
-                  <i class="material-icons">layers</i>
-                  <span class="sm-right sm-left">{{'activities.create.no_ip'|trans}}</span>
+              {% if is_granted('ROLE_ENTREPRISE') %}
+                <div class="flex-center ip-zone">
+                  <span class="sm-right sm-left">{{'activities.create.linked_to'|trans}}</span>
+                  <div class="ip-value flex-center">
+                    <i class="material-icons">layers</i>
+                    <span class="sm-right sm-left">{{'activities.create.no_ip'|trans}}</span>
+                  </div>
+                  <i class="material-icons">create</i>
                 </div>
-                <i class="material-icons">create</i>
-              </div>
+              {% endif %}
+              <div class="act-dates"></div>
             </div>
             
             <div class="input-field">
@@ -1805,7 +2060,7 @@
             </div>
             <div class="participants">
                 <div class="participants-title">
-                  <i class="fa fa-users"></i>
+                  <i class="fa fa-users m-right"></i>
                   <span>{{'activities.participants'|trans}}</span>
                 
                 </div>
@@ -1818,6 +2073,15 @@
                       <i class="fa fa-plus"></i>
                     </li>
                 </ul>
+            </div>
+
+            <div class="events" style="display:none">
+                <div class="events-title flex-center">
+                  <i class="material-icons m-right">offline_bolt</i>
+                  <span>{{'activities.events'|trans}}</span>
+                
+                </div>
+                <ul class="events-list" data-prototype="{% apply escape %}{% include "components/event_list__item.html.twig" %}{% endapply %}"></ul>
             </div>
             {#
             <div style="margin-top: 2Opx;">
@@ -1842,10 +2106,12 @@
         </div>
             
 
-        <div class="modal-footer flex-center-sb">
+        <div class="modal-footer flex-center-fe">
+            {#
             <div class="button-field">
             {{ form_widget(newActivityForm.complexify) }}
             </div>
+            #}
             <div class="button-field">
               {#<a class="waves-effect waves-green btn final-step-btn modal-close">{% trans %}activities.create.submit{% endtrans %}</a>#}
               {{ form_widget(newActivityForm.submit) }}
@@ -1936,12 +2202,12 @@
         <div class="modal-content">
           <h5>{{'activities.create_participant_legal_person_modal.title'|trans}}</h5>
           <div class="legal-img-holder">
-            <img src="{{asset('lib/img/legal-person.png')}}" alt="legal-person">
+            <img src="{{asset('lib/img/legal-person-l.png')}}" alt="legal-person">
           </div>
           <p>{{'activities.create_participant_legal_person_modal.msg'|trans}}</p>
           <div class="flex-center-fe">
             <a class="modal-close waves-effect btn-flat dd-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
-            <a class="modal-action modal-close waves-effect waves-green btn create-part-button">{{ 'add_anyway'|trans }}</a>
+            <a class="modal-action modal-close waves-effect waves-green btn create-part-button">{{ 'add'|trans }}</a>
           </div>
         </div>
       </div>
@@ -2137,35 +2403,77 @@
       <div id="updateEvent" class="modal">
         <div class="modal-content">
           {{ form_start(eventForm, {attr: {autocomplete: "off"}}) }}
+
               <header class="flex-center-sb">
                 <h5 style="display:inline-block">
-                <span class="event-element-name"></span>
-                <span>{{' : ' ~ 'activity_elements.events.add_event.modal_new_title'|trans}}</span>
+                  <span class="e-create">{{'activity_elements.events.add_event.modal_new_title'|trans}}</span>
                 </h5>
-                {{ form_row(eventForm.submit)|replace({'[link]' : '<i class="fa fa-check"></i>'})|raw }}
+                <div>
+                <div class="flex-center">
+                  <span class="event-element-name"></span>
+                  <i class="m-left dd-text fa fa-external-link-alt tooltipped" data-tooltip=""></i>
+                </div>
+                </div>
               </header>
-              <p>{{'activity_elements.events.add_event.modal_msg'|trans}}</p>
-              <div>
-                  {{ form_row(eventForm.eventType) }}
+              <div class="event-selection">
+                <p>{{'activity_elements.events.add_event.modal_msg'|trans}}</p>
+                <div class="row">
+                    <div class="col s12 m4 input-field">
+                        <select name="eventGSelector" id="eventGSelector" class="select-evg">
+                          {% for eventGroup in eventGroups %}
+                              <option data-evgid="{{ eventGroup['evnId'] }}" value="{{ eventGroup['id'] }}">{{ eventGroup['name'] }}</option>
+                          {% endfor %}
+                        </select>
+                        <label for="eventGSelector">Catégorie</label>
+
+                    </div>
+                    <div class="col s12 m8 input-field">
+                    
+                      {{ form_widget(eventForm.eventType) }}
+                      {{ form_label(eventForm.eventType) }}
+                    </div>
+
+                </div>
               </div>
-              <div class="row no-margin">
-                <a class="event-notifications-header flex-center">
-                  <i class="fa fa-paper-plane sm-right"></i>
-                  <span>{{'activity_elements.events.add_event.notify_participants'|trans}}</span>
-                </a>
+              {#
+              <div class="no-margin flex-center-sb">
+                <div class="event-notifications-header flex-center">
+                  <i class="dd-text fa fa-paper-plane sm-right"></i>
+                  <span class="dd-text">{{ 'notifications'|trans|capitalize }}</span><span class="sm-left sm-right">:</span><span class="notif-choice">{{'all'|trans ~ ' ' ~ 'participants_trans'|trans }} </span>
+                </div>
+
+                <div class="btn-flat btn-e-update">
+                  <i class="fa fa-cog"></i>
+                </div>
+                
                 <div class="event-notifications-content" style="display:none">
                   <input id="partNotification" type="checkbox" class="filled-in">
                   <label for="partNotification">
                     {{'activity_elements.events.add_event.notify_all_participants'|trans}}
                   </label>
-                </div>          
+                </div>
+                         
               </div>
+              #}
 
-              <div class="row no-margin">
+              <div class="no-margin flex-center-sb">
+                <div>
+                  <i class="fa fa-clock"></i>
+                  {% set occurenceDate = eventForm.vars.data is null ? date('now')|format_datetime('short', 'none', pattern='dd/MM') : eventForm.vars.data.onsetDate|format_datetime('short', 'none', pattern='dd/MM') %}
+                  <span class="dd-text">{{ 'activity_elements.events.add_event.onset_date'|trans|capitalize }}</span><span class="sm-left sm-right">:</span><span class="date-choice">{{ occurenceDate }} </span>  
+                  {% if not eventForm.vars.data is null and eventForm.vars.data.expResDate is null %}
+                    {% set resolutionDate = eventForm.vars.data.onsetDate|format_datetime('short', 'none', pattern='dd/MM') %}
+                    <span class="dd-text">{{ 'activity_elements.events.add_event.resolution_date'|trans|capitalize }}</span><span class="sm-left sm-right">:</span><span class="date-choice">{{ resolutionDate }} </span> 
+                  {% endif %}
+                </div>
+              
+
+                {#
                 <a class="event-dates-header flex-center">
                   <i class="fa fa-calendar-alt sm-right"></i>
                   <span>{{'activity_elements.events.add_event.manage_dates'|trans}}</span>
                 </a>
+                #}
                 <div class="event-dates-content" style="display:none">
                   <div class="col m12 s12 onset-date-elmt">
                       <div class="element-data">
@@ -2190,6 +2498,57 @@
                 </div>
               </div>
 
+              <div class="no-margin">
+                <div class="flex-center-sb">
+                  <div>
+                    <i class="fa fa-file"></i>
+                    <span class="dd-text">{{ 'activity_elements.events.documents.title'|trans|capitalize }}</span><span class="sm-left sm-right">:</span><span class="documents-number" data-nodoc="{{ 'none_m'|trans }}">{{ '(' ~ 'none_m'|trans ~ ')' }} </span>
+                  </div>
+
+                  <div class="btn-flat btn-e-update add-e-document">
+                    <i class="fa fa-plus"></i>
+                  </div>  
+                </div>              
+                <div class="event-documents-content">
+                  <ul class="e-documents" data-prototype-creation="{% apply escape %}{% include "components/event_document_creation_list__item.html.twig" with {item: eventForm.documents.vars.prototype} %}{% endapply %}" data-prototype-display="{% apply escape %}{% include "components/event_document_existing_list__item.html.twig" %}{% endapply %}">
+                  </ul>
+                </div>
+              </div>
+
+              <div class="no-margin flex-center-sb">
+                <div>
+                  <i class="fa fa-comments"></i>
+                  <span class="dd-text">{{ 'activity_elements.events.comments.title'|trans|capitalize }}</span><span class="sm-left sm-right">:</span><span class="comments-number" data-nodoc="{{ 'none_m'|trans }}">{{ '(' ~ 'none_m'|trans ~ ')' }} </span>  
+                </div>
+                <div> 
+                  <div class="btn-flat btn-e-update add-e-comment">
+                    <i class="fa fa-plus"></i>
+                  </div>
+                  {#
+                  <div class="btn-flat">
+                    <i class="fa fa-cog"></i>
+                  </div>
+                  #}
+                </div>
+              </div>
+              
+              <div class="event-comments-content">
+                <ul class="e-comments" data-prototype-creation="{% apply escape %}{% include "components/event_comment_creation_list__item.html.twig" with {item: eventForm.comments.vars.prototype} %}{% endapply %}" data-prototype-display="{% apply escape %}{% include "components/event_comment_existing_list__item.html.twig" %}{% endapply %}">
+                </ul>
+              </div>
+  
+              <div class="flex-center-fe m-top">
+                <div class="btn-flat btn-e-modify modify-update dd-text flex-center" style="display:none">
+                  <i class="fa fa-cog sm-right"></i>
+                  <span>{{ 'update'|trans ~ ' / ' ~ 'modify'|trans }}</span>
+                </div>
+                <div class="btn btn-e-modify waves-effect waves-light modal-close" style="display:none">
+                  Ok
+                </div>
+                {{ form_row(eventForm.submit)|replace({'[link]' : '<i class="fa fa-check"></i>'})|raw }}
+              </div>
+
+              {#
               <div class="event-action-buttons flex-center-sa">
                 
                   <a class="btn waves-effect waves-light insert-comment-btn">
@@ -2202,29 +2561,20 @@
                     <i class="fa fa-file-medical sm-right"></i>
                     <span>{{ 'activity_elements.events.add_event.insert_document'|trans }}</span>
                   </a>
-                
               </div>
-              {#<ul class="comments" data-prototype="{% apply escape %}{% include 'components/client__item.html.twig' with { item: form.comments.vars.prototype } %}{% endapply %}">#}
-              <ul class="comments" data-prototype="{{ form_widget(eventForm.comments.vars.prototype)|e('html') }}">
+
+              <ul class="e-comments" data-prototype="{{ form_widget(eventForm.comments.vars.prototype)|e('html') }}">
               {% for comment in eventForm.comments.vars.data %}
               {% endfor %}
               </ul>
 
-              {#<ul class="documents" data-prototype="{% apply escape %}{% include 'components/client__item.html.twig' with { item: form.comments.vars.prototype } %}{% endapply %}">#}
               <ul class="documents" data-prototype="{{ form_widget(eventForm.documents.vars.prototype)|e('html') }}">
               {% for document in eventForm.documents.vars.data %}
               {% endfor %}
               </ul>
-
-              {#}
-              <div class="action-buttons">
-                  <div class="button-field">
-                      {{ form_row(eventForm.submit) }}
-                  </div>
-              </div>
               #}
 
-          </div>
+            </div>
 
           {{ form_rest(eventForm)}}
           {{ form_end(eventForm)}}
@@ -2233,9 +2583,6 @@
       <div id="deleteActivity" class="modal">
         <div class="modal-content">
             <p>{% trans %}activities.delete_activity_msg{% endtrans %}</p>
-            {#{% else %}
-                <p>{% trans %}activities.delete_activity_msg{% endtrans %}Are you sure you want to delete this activity ?</p>
-            {% endif %}#}
         </div>
         <div class="modal-footer">
             <a class=" modal-action modal-close waves-effect waves-green btn remove-activity">{% trans %}user_update.delete_modal.confirm{% endtrans %}</a>
@@ -2243,6 +2590,33 @@
         </div>
       </div>
 
+      <div id="deleteEvent" class="modal">
+        <div class="modal-content">
+            <p>{% trans %}activities.delete_event_msg{% endtrans %}</p>
+        </div>
+        <div class="modal-footer">
+            <a class=" modal-action modal-close waves-effect waves-green btn remove-event">{% trans %}user_update.delete_modal.confirm{% endtrans %}</a>
+            <a class=" modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+        </div>
+      </div>
+      <div id="deleteDocument" class="modal">
+        <div class="modal-content">
+            <p>{{ 'activity_elements.events.documents.document.delete_msg'|trans }}</p>
+        </div>
+        <div class="modal-footer">
+            <a class="modal-action modal-close waves-effect waves-green btn e-doc-delete">{% trans %}user_update.delete_modal.confirm{% endtrans %}</a>
+            <a class="modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+        </div>
+      </div>
+      <div id="deleteComment" class="modal">
+        <div class="modal-content">
+            <p>{{ 'activity_elements.events.comments.comment.delete_msg'|trans }}</p>
+        </div>
+        <div class="modal-footer">
+            <a class="modal-action modal-close waves-effect waves-green btn e-com-delete">{% trans %}user_update.delete_modal.confirm{% endtrans %}</a>
+            <a class="modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+        </div>
+      </div>
       <div id="deleteParticipant" class="modal">
         <div class="modal-content">
             <p>{% trans %}activities.delete_participant_msg{% endtrans %}</p>
@@ -2313,6 +2687,24 @@
         </div>
       </div>
 
+      <div id="multipleEvent" class="modal">
+        <div class="modal-content">
+          {{ 'activity_elements.events.multiple_events_modal.title'|trans }}
+          <div class="input-field">
+            <select name="eventSelector" id="eventSelector"></select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a class="btn modal-close event-select-btn">ok</a>
+        </div>
+      </div>
+
+      <div id="updateDocument" clas="modal">
+        <i class="btn-flat fa fa-times btn-e-update tooltipped" data-tooltip="Delete file" style="display:none"></i>
+        <i class="btn-flat fa fa-cloud-upload-alt file-upload btn-e-update tooltipped" data-tooltip="Update file" style="display:none"></i>
+        <i class="btn-flat fa fa-cloud-download-alt file-download tooltipped" data-tooltip="Download file" data-path="" data-mime="" data-title=""></i>
+      </div>
+
   {% else %}
 
     <div id="firstConnectionModal" class="modal">
@@ -2346,13 +2738,15 @@
             {{ 'activities.before_starting_modal.creation_mode.msg'|trans|raw }} 
             {{ 'activities.before_starting_modal.creation_mode.msg_2'|trans|raw }}
             <img class="client-logo tooltipped" src="" alt="">
+            {{'. ' ~ 'activities.before_starting_modal.creation_mode.msg_3'|trans|raw }}
           </p>
-          <p>{{ 'activities.before_starting_modal.creation_mode.msg_3'|trans|raw }}</p>
+        <h6>{{ 'activities.before_starting_modal.event_sharing.title'|trans|raw }}</h6>
+          <p>{{ 'activities.before_starting_modal.event_sharing.msg'|trans|raw }}</p>
         <h6>{{ 'activities.before_starting_modal.premium_info.title'|trans|raw }}</h6>
           <p>{{ 'activities.before_starting_modal.premium_info.msg'|trans|raw }}</p>
         <div class="action-buttons">
           <div class="button-field">
-            <a class="btn waves-light waves-effect letz-start-btn">{{ 'ok_got_it'|trans }}</a>
+            <a class="btn waves-light waves-effect letz-start-btn modal-close">{{ 'ok_got_it'|trans }}</a>
           </div>
         </div>
       </div>

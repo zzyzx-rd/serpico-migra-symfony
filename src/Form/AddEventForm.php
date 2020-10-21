@@ -42,7 +42,9 @@ class AddEventForm extends AbstractType
                 return $iconObj ? 
                     [
                         'class' => ($iconObj->getType() !== 'm') ? $et->getIcon()->getType() . ' fa-'.$et->getIcon()->getName() : $et->getIcon()->getName(),
-                        'data-icon' => ($iconObj->getType() !== 'm') ? $iconObj : '',
+                        //'data-icon' => ($iconObj->getType() !== 'm') ? $iconObj : '',
+                        //'data-egn' => $et->getEventGroup()->getEventGroupName()->getId(),
+                        //'data-en' => $et->getEName()->getId(),
                     ]
                     : [];
             },       
@@ -71,6 +73,9 @@ class AddEventForm extends AbstractType
         [
             'label' => false,
             'entry_type' => EventDocumentType::class,
+            'entry_options' => [
+                'currentUser' => $options['currentUser']
+            ],
             'prototype' => true,
             'by_reference' => false,
             'allow_delete' => true,
@@ -101,7 +106,7 @@ class AddEventForm extends AbstractType
                 'label' => '[link]',
                 'attr' =>
                     [
-                        'class' => 'waves-effect waves-light btn blue darken-4 update-event-btn',
+                        'class' => 'waves-effect waves-light btn btn-e-update update-event-btn',
                     ]
             ]);
         }

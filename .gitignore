@@ -7,3 +7,4 @@ vendor/
 migrations/
 node_modules/
 public/lib/img/
+public/lib/evt/

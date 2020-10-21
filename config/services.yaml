@@ -6,6 +6,7 @@
 parameters:
     stripe_public_key: pk_test_51HZHYgHmuPtR98gq78pZ4Orw0HliC7zhtkmv6FHQp2eVakz9X8IvYtYNwUuAt09tTXKeLZupQFlODr2tsLvTsH6o00PRmtxy8X
     stripe_secret_key: sk_test_51HZHYgHmuPtR98gqv3rds5W4VXvscTazOlR2lSbIN0xLH2vTrRan4RhhNKhaBzBpyxBxTjO27z5WJwVJEfowFwm500MTz3e2ob
+    event_document_directory: '../public/lib/evt'
 services:
     app.client.stripe:
         class: App\Client\StripeClient
@@ -33,6 +34,10 @@ services:
         tags: ['controller.service_arguments']
         calls:
             - [setContainer, ["@service_container"]]
+
+    App\Service\FileUploader:
+        arguments:
+            $targetDirectory: '%event_document_directory%'
 #    twig.extension.intl:
 #        class: Twig\Extensions\IntlExtension
 #        tags:

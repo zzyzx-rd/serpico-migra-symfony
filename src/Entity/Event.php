@@ -17,7 +17,7 @@ use Doctrine\ORM\Mapping\OrderBy;
 
 /**
  * @ApiResource()
- * @ORM\Entity(repositoryClass=EventRepository::class)
+ * @ORM\Entity()
  */
 class Event extends DbObject
 {
@@ -127,7 +127,7 @@ class Event extends DbObject
         $id = 0,
         $priority = null,
         $type = 1,
-        $name = '',
+        $name = null,
         $createdBy = null,
         $onsetDate = null,
         $resDate = null,
@@ -354,13 +354,9 @@ class Event extends DbObject
         return (string) $this->id;
     }
 
-    public function getOnsetdateDay()
+    public function getOnsetdateU()
     {
-        $onsetDate = $this->onsetDate;
-        $year = $onsetDate->format('Y');
-        $month = $onsetDate->format('m');
-        $day = $onsetDate->format('d');
-        return (int) date("z",mktime("12","00","00",(int)$month,(int)$day,(int)$year));
+        return $this->onsetDate->format('U');
     }
 
     public function getPeriod()
@@ -368,8 +364,100 @@ class Event extends DbObject
         $expResDate = $this->expResDate;
         if(!$expResDate){return null;}
         $onsetDate = $this->onsetDate;
-        $diff = $expResDate->diff($onsetDate)->format("%a");
+        $diff = $expResDate->diff($onsetDate)->format("%s");
         return $diff;
+    }
+
+    /**
+     * 
+     * Function which return number of events, self excluded, which are lying within current event period +- threshold % of considered interval period 
+     * @return Collection|Event[]
+     */
+    public function getEmbeddedEvents($period = 'y', $thresholdIntPct = 3){
+
+        // Period interval in seconds
+        switch($period){
+            case 'y' :
+                $intCurrYear = intval($_COOKIE['ci']);
+                $intNextYear = $intCurrYear + 1;
+                $sd = new DateTime("first day of january $intCurrYear");
+                $ed = new DateTime("first day of january $intNextYear");
+                break;
+            case 't' :
+                $cookieElmts = explode('/',$_COOKIE['ci']);
+                $intYear = intval(end($cookieElmts));
+                $intQuarter = intval(prev($cookieElmts));
+                $quarterMonths = ['january', 'april', 'july', 'october'];
+                $quarterStartingMonth = $quarterMonths[$intQuarter - 1];
+                $quarterEndingMonth = $quarterMonths[$intQuarter % 4];
+                $quarterEndingYear = $intQuarter == 4 ? $intYear + 1 : $intYear;
+                $sd = new DateTime("first day of $quarterStartingMonth $intYear");
+                $ed = new DateTime("first day of $quarterEndingMonth $quarterEndingYear");
+                break;
+            case 'w' :
+                $cookieElmts = explode('/',$_COOKIE['ci']);
+                $intYear = intval(end($cookieElmts));
+                $intCurrWeekOffset = intval(prev($cookieElmts)) - 1;
+                $intNextWeekOffset = $intCurrWeekOffset + 1;
+                $sd = new DateTime("+$intCurrWeekOffset weeks january $intYear");
+                $ed = new DateTime("+$intNextWeekOffset weeks january $intYear");
+                break;
+        }
+
+        $period = $ed->getTimestamp() - $sd->getTimestamp();
+        $sortedByPeriodEvents = $this->stage->getSortedEventsPerPeriod();
+        $embeddedStages = new ArrayCollection;
+        foreach($sortedByPeriodEvents as $key => $sortedByPeriodEvent){
+            if($key <= $sortedByPeriodEvents->indexOf($this)){
+                continue;
+            } else {
+                if($this->getOnsetdateU() - round($thresholdIntPct * 0.01 * $period)  < $sortedByPeriodEvent->getOnsetdateU() && $sortedByPeriodEvent->getOnsetdateU() + $sortedByPeriodEvent->getPeriod() < $this->getOnsetdateU() + $this->getPeriod() + round($thresholdIntPct * 0.01 * $period)){
+                    $embeddedStages->add($sortedByPeriodEvent);
+                } else {
+                    break;
+                }
+            }
+        }
+        return $embeddedStages;
+    }
+
+    function nicetime($date)
+    {
+        if(empty($date)) {
+            return "No date provided";
+        }
+    
+        $periods         = array("second", "minute", "hour", "day", "week", "month", "year", "decade");
+        $lengths         = array("60","60","24","7","4.35","12","10");
+        $now             = time();
+        $unix_date       = strtotime($date);
+    
+        // check validity of date
+        if(empty($unix_date)) {   
+            return "Bad date";
+        }
+
+        // is it future date or past date
+        if($now > $unix_date) {   
+            $difference     = $now - $unix_date;
+            $tense         = "ago";
+        
+        } else {
+            $difference     = $unix_date - $now;
+            $tense         = "from now";
+        }
+    
+        for($j = 0; $difference >= $lengths[$j] && $j < count($lengths)-1; $j++) {
+            $difference /= $lengths[$j];
+        }
+    
+        $difference = round($difference);
+    
+        if($difference != 1) {
+            $periods[$j].= "s";
+        }
+    
+        return "$difference $periods[$j] {$tense}";
     }
 
 }

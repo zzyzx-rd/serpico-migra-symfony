@@ -767,6 +767,14 @@ div.col.s12.m2.linkedin {
   font-size: 17px;
 }
 
+.dummy-data-disclaimer{
+  position: absolute;
+  bottom: -1rem;
+  right: 0%;
+  font-size:8px;
+  font-style: italic;
+}
+
 .banner {
   position: relative;
   z-index: 0;

@@ -7,6 +7,7 @@ use App\Entity\Client;
 use App\Entity\Participation;
 use App\Entity\Decision;
 use App\Entity\Department;
+use App\Entity\EventGroup;
 use App\Entity\Organization;
 use App\Entity\OrganizationUserOption;
 use App\Entity\Stage;
@@ -38,7 +39,7 @@ final class InstitutionController extends MasterController
     /**
      * @Route("/settings/institution/processes", name="processesList")
      */
-    public function processesListAction(): Response
+    public function processesListAction(Request $request): Response
     {
         if(isset($_COOKIE['sorting_type'])){
             $sortingType = $_COOKIE['sorting_type'];
@@ -83,6 +84,21 @@ final class InstitutionController extends MasterController
 
         $orphanActivities  = $this->activityRepo->getOrgOrphanActivities($this->org);
         $processActivities = $this->activityRepo->getOrgProcessActivities($this->org, $viewType);
+        $em = $this->em;
+        $locale = strtoupper($request->getLocale());
+        $org = $this->org;
+        $eventGroups = $this->org->getEventGroups()->map(
+            function(EventGroup $eg) use ($em,$locale,$org){
+                $eg->em = $em;
+                $eg->locale = $locale;
+                $eg->org = $org;
+                return [
+                    'id' => $eg->getId(),
+                    'name' => $eg->getDTrans(),
+                    'evnId' => $eg->getEventGroupName()->getId(),
+                ];
+            }
+        )->getValues();
 
         //print_r(sizeof($orphanActivities));
         //die;
@@ -112,6 +128,9 @@ final class InstitutionController extends MasterController
                 'timescaleCookie' => $timescale,
                 'eventForm' => $eventForm->createView(),
                 'newActivityForm' => $createForm->createView(),
+                'firstConnection' => true,
+                'em' => $em,
+                'eventGroups' => $eventGroups,
             ]
         );
     }
@@ -307,7 +326,9 @@ final class InstitutionController extends MasterController
                     }
                 }
                 //Get activities where user is participating as external user
-                $externalActivities = $em->getRepository(User::class)->getExternalActivities($currentUser);
+                $externalActivities = $currentUser->getExternalActivities();
+                //dd($externalActivities);
+                
                 $userActivities = new ArrayCollection((array)$userActivities->toArray() + $externalActivities->toArray());
     
             //}
@@ -461,6 +482,22 @@ final class InstitutionController extends MasterController
             $em->persist($currentUser);
             $em->flush();
         }
+
+        $locale = strtoupper($request->getLocale());
+        $org = $this->org;
+
+        $eventGroups = $this->org->getEventGroups()->map(
+            function(EventGroup $eg) use ($em,$locale,$org){
+                $eg->em = $em;
+                $eg->locale = $locale;
+                $eg->org = $org;
+                return [
+                    'id' => $eg->getId(),
+                    'name' => $eg->getDTrans(),
+                    'evnId' => $eg->getEventGroupName()->getId(),
+                ];
+            }
+        )->getValues();
  
 
         return $this->render(
@@ -480,6 +517,8 @@ final class InstitutionController extends MasterController
                 'eventForm' => $this->org ? $eventForm->createView() : null,
                 'newActivityForm' => $this->org ? $createForm->createView() : null,
                 'firstConnection' => (int) $firstConnection,
+                'eventGroups' => $eventGroups,
+                'em' => $em,
             ]
         );
 

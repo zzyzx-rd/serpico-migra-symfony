@@ -9,15 +9,29 @@
         </style>
     </head>
 
+
     {% block subject %}
+        {% set stageEl = stage is defined and stage is not null ? stage : activity.stages.first %}
+        {% set formattedSD = stageEl.startdate|format_datetime('short', 'none', pattern='dd/MM') %}
+        {% set formattedED = stageEl.enddate|format_datetime('short', 'none', pattern='dd/MM') %}
+        {% set moreThanADay = stageEl.enddate.diff(stageEl.startdate).days > 0 %}
         {% if stage is defined and stage is not null %}
-            {% trans %}mails.activityParticipation.stage_subject_message_1{% endtrans %} "{{ stage.name|raw }}" {% trans %}mails.activityParticipation.stage_subject_message_2{% endtrans %} "{{ stage.activity.name|raw }}" {% if teamParticipation is defined %} {% trans %}mails.activityParticipation.subject_team_suffix{% endtrans %} {% endif %}
+            {{ 'mails.activityParticipation.stage_subject_message_1'|trans ~ stage.name|raw ~ 'mails.activityParticipation.stage_subject_message_2'|trans ~ stage.activity.name|raw ~ 
+            (teamParticipation is defined ? 'mails.activityParticipation.subject_team_suffix'|trans : '') ~
+            '(' ~ (moreThanADay ? 'from_date'|trans ~ ' ' ~ formattedSD ~ 'to_date'|trans ~ ' ' ~ formattedED : formattedSD) ~ ')'
+            }}
         {% else %}
-            {% trans %}mails.activityParticipation.activity_subject{% endtrans %} "{{ activity.name|raw }}" {% if teamParticipation is defined %} {% trans %}mails.activityParticipation.subject_team_suffix{% endtrans %} {% endif %}
+            {{ 'mails.activityParticipation.activity_subject'|trans ~ activity.name|raw ~ (teamParticipation is defined ? 'mails.activityParticipation.subject_team_suffix' : '') ~
+            '(' ~ (moreThanADay ? 'from_date'|trans ~ ' ' ~ formattedSD ~ 'to_date'|trans ~ ' ' ~ formattedED : formattedSD) ~ ')'
+            }}
         {% endif %}
     {% endblock %}
 
     {% block body %}
+        {% set stageEl = stage is defined and stage is not null ? stage : activity.stages.first %}
+        {% set formattedSD = stageEl.startdate|format_datetime('short', 'none', pattern='dd/MM') %}
+        {% set formattedED = stageEl.enddate|format_datetime('short', 'none', pattern='dd/MM') %}
+        {% set moreThanADay = stageEl.enddate.diff(stageEl.startdate).days > 0 %}
     <body bgcolor="white">
         <table width="100%" bgcolor="white" border="0" cellpadding="0" cellspacing="0">
             <tr>
@@ -26,24 +40,20 @@
                         <td>
                             <p>{% trans %}mails.hello{% endtrans %} {{ recipient.firstname }},</p>
                             {% if activity is defined and activity is not null %}
-                                <p>{% trans %}mails.activityParticipation.message_act_begin{% endtrans %} "{{ activity.name|raw }}" {% trans %}mails.activityParticipation.message_end{% endtrans %}</p>
+                                <p>{% trans %}mails.activityParticipation.message_act_begin{% endtrans %} "{{ activity.name|raw }}" {{ 'mails.activityParticipation.message_end'|trans ~ ' (' ~ 'initial_dates'|trans ~ ' : ' ~ (moreThanADay ? formattedSD ~ ' - ' ~ formattedED : formattedSD) ~ ' )' }}</p>
                             {% else %}
-                                <p>{% trans %}mails.activityParticipation.message_stg_begin{% endtrans %} "{{ stage.name|raw }}" {% trans %}mails.activityParticipation.message_stg_mid{% endtrans %} "{{ stage.activity.name|raw }}" {% trans %}mails.activityParticipation.message_end{% endtrans %}</p>
+                                <p>{% trans %}mails.activityParticipation.message_stg_begin{% endtrans %} "{{ stage.name|raw }}" {% trans %}mails.activityParticipation.message_stg_mid{% endtrans %} "{{ stage.activity.name|raw }}" {{ 'mails.activityParticipation.message_end'|trans ~ ' (' ~ 'initial_dates'|trans ~ ' : ' ~ formattedSD ~ ' - ' ~ formattedED ~ ' )' }}</p>
                             {% endif %}
                             <p style="text-align: center"><a href="{{ url('trackMLinkClick',{'trkToken' : trkToken}) }}" target="_blank"><button style="background-color: #26a69a; height: 40px; line-height: 40px; text-decoration: none; color: #fff; text-align: center; border: none;">{% trans %}mails.activityParticipation.button_text{% endtrans %}</button></a></p>
-                            <p>{% if teamParticipation is defined %}
-                                {% trans %}mails.activityParticipation.message3_teamParticipant{% endtrans %}
-                                    {% else %}
+                            <p>
                                 {% trans %}mails.activityParticipation.message3_participant{% endtrans %}
-                                {% endif %} 
-                                ({% if activity is defined and activity is not null %}{{ activity.activeStages.first.gstartdate|localizeddate('long', 'none') }}{% else %}{{ stage.gstartdate|localizeddate('long', 'none') }}{% endif %}) 
-                                {% trans %}mails.activityParticipation.message4{% endtrans %}</p>
+                            </p>
                             <p>{% trans %}mails.see_you_soon{% endtrans %}</p><br>
                         </td>
                         </tr>
                         <tr>
                             <td>
-                               {% if company_name == 'Serpico' %}<p>{% trans %}mails.signature_team{% endtrans %}{#{% else %}{% trans %}mails.signature_team_for_client{% endtrans %}#}</p>{% endif %}
+                               {% if company_name == 'Serpico' %}<p>{% trans %}mails.signature_team{% endtrans %}</p>{% endif %}
                                 {% if company_name == 'Serpico' %}<a href="{{ company_website }}" style="width: 60px">{% endif %}<img src="cid:logo_img" alt="logo {{ company_name }}" style="width: {{ logo_width_px }}px">{% if company_name == 'Serpico' %}</a>{% endif %}
                                 <p><strong>{% if company_name == 'Serpico' %}{% trans %}mails.serpico_motto{% endtrans %}{% else %}{{ company_name }}{% endif %}</strong><br>{{ address }} | {{ zipcode_city }}</p>
                                 {% if company_name == 'Serpico' %}<p>{{ phone }}</p>{% endif %}

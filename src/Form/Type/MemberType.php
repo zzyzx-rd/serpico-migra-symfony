@@ -54,7 +54,7 @@ class MemberType extends AbstractType
                         return $er->createQueryBuilder('u')
                             ->where("u.organization = $theOrganization")
                             ->andWhere("u.deleted is NULL")
-                            ->andWhere("u.lastname != 'ZZ'")
+                            ->andWhere("u.synth is NULL")
                             ->orderBy('u.lastname', 'asc');
 
                     },

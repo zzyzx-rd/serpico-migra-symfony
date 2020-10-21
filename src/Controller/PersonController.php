@@ -24,22 +24,6 @@ use Symfony\Component\Routing\Annotation\Route;
 class PersonController extends MasterController
 {
     /**
-     * @Route("/", name="home_welcome")
-     */
-    public function home(): Response
-    {
-        
-        $workerFirmsArrayRespContent = $this->forward('App\Controller\OrganizationController::getDummyClientsAndActNames')->getContent();
-        $workerFirmsActDummies = json_decode($workerFirmsArrayRespContent,true)['dummyElmts'];
-
-        return $this->render('landing.html.twig',
-            [
-                'controller_name' => 'SecurityController',
-                'workerFirmActDummies' => $workerFirmsActDummies,
-            ]);
-    }
-
-    /**
      * @param Request $request
      * @Route("/settings/{entity}/{elmtId}/overview", name="elementOverview")
      */

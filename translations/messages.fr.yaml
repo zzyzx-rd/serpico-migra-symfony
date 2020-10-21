@@ -12,11 +12,16 @@ back: Retour
 previous: Précédent
 next: Suivant
 delete: Supprimer
+remove: Supprimer
+replace: Remplacer
 save: Sauvegarder
 create: Créer
+creation: Création
 create_anyway: créer quand même
+add: ajouter
 add_anyway: ajouter quand même
 update: Mettre à jour
+update_noun: Mise à jour
 firm: entreprise
 organization: organisation
 partner: Partenaire
@@ -41,10 +46,11 @@ please_wait: Traitement en cours
 users_list.no_teams_msg: Aucune équipe
 result: Résultats
 powered_by: Une marque de
-days: jours
-hours: heures
-minutes: minutes
-seconds: secondes
+month: mois
+day: jour
+hour: heure
+minute: minute
+second: seconde
 country: pays
 state: région
 city: ville
@@ -54,6 +60,22 @@ trimester_short: T
 year: Année
 trimester: Trimestre
 ok_got_it: C'est noté !
+trial: Essai
+my_firm: Mon entreprise
+from_date: du
+to_date: au
+initial_dates: dates initiales
+notifications: notifications
+participants_trans: participants
+manage: Gérer
+of: de
+none_m: aucun
+none_f: aucune
+modify: modifier
+unlimited: illimité
+up_to: jusqu'à
+comment: commentaire
+document: document
 
 help:
   page_title: DealDrive, pour une performance collaborative et porteuse de sens
@@ -452,19 +474,20 @@ countdown:
   thank_you_followup_modal: "Merci de nous suivre dès le début, vous serez prévenu personnellement par notre équipe lors du lancement. A très vite pour construire ensemble révolution de l'expérience client !" 
 
 landing:
-  page_name: En phase avec vos clients
-  motto: Le CRM qui vous met en phase avec vos clients
-  play_with_dummies: Et vous rend la vie plus simple par la même occasion
+  page_name: Votre assistant de suivi des opérations
+  motto: Votre assistant de suivi des opérations
+  motto_promise: Projetez vos opérations sur un tableau... et remplacez vos tableurs et mails !
+  dummy_data_disclaimer: Données à titre d'exemple
   section_1:
-    title: "Réduisez les incertitudes coté business en incluant vos partenaires"
+    title: "Une nouvelle manière d'aborder les interactions business, plus intuitive"
    # paragraph_1: "Dealdrive est pertinent pour chaque type d'entreprise quelque soit le secteur d'activité et le nombre d'employé. La solution est entièrement personnalisable et s'adapte à chaque exigence, depuis le besoin de digitalisation du processus d'évaluation jusqu'au pilotage stratégie de l'ensemble des projets au niveau du groupe. Il permet:"
-    paragraph_1: "La crise sanitaire a permis aux entreprises de s'outiller pour le suivi interne (lien équipe et communication). Il reste encore <span class=\"strong\">beaucoup</span> à faire, notamment la <span class=\"strong\">relation et l'expérience client</span> que nous souhaitons transformer en profondeur."
+    paragraph_1: "Nous souhaitons transformer en profondeur la <span class=\"strong\">relation et l'expérience client</span>"
     item_1: "- En réduisant le suivi par mail et en privilégiant une approche <span class=\"strong\">visuelle</span> et spontanée de l'ensemble de la relation"
     item_2: "- L'insertion à tout moment d'<span class=\"strong\">événements structurant</span> le cycle de vie business (corrections, suggestions, livrables)"
     item_3: "- Tout est consigné sur un <span class=\"strong\">tableau partagé, évitant les incompréhensions et les attentes inutiles</span>, génératrices d'un climat d'affaires plus crispé sur la continuité des opérations"
     #item_4: "- Un reporting normalisé qui privilégié une approche unifée clients de l'entreprise et la <strong>communication</strong> éventuelle des résultats aux clients"
   section_2:
-    title: "Une expérience client intuitive et qui va à l'essentiel"
+    title: "Une expérience client qui va à l'essentiel"
     paragraph_1: "Vous voulez faire un retour à vos partenaires commerciaux ? Rien de plus simple :"
     item_1: "- Vous accédez à l'activité business que vous partagez <span class=\"strong\">en commun</strong>"
     item_2: "- Vous choisissez le retour que vous souhaitez lui faire, insérant <span class=\"strong\">documents</span> ou <span class=\"strong\">commentaires</span>"
@@ -548,6 +571,37 @@ header:
     enterprise: Entreprise
     upgrade: Mise à niveau
   
+pricing:
+  page_title: Tarifs
+  header_title: "Gérez vos <span class=\"dd-text\">opérations</span> à <span class=\"dd-orange-text\">moindre frais</span>"
+  from: À partir de
+  user: user
+  free_column_title: "Idéal pour <br><span class=\"strong\">petites entreprises</span><br>& <span class=\"strong\">équipes</span>"
+  pricing_table:
+    plan_title: Formule
+    plan_free: Gratuit
+    plan_premium: Premium
+    plan_enterprise: Entreprise
+    functionality_1: Gestion des opérations
+    functionality_2: Ajout de clients
+    functionality_3: Informations échangées
+    functionality_4: Ajout d'événements et updates
+    functionality_5: Visibilité des données
+    functionality_6: Paramétrage entreprise
+    functionality_7: Données analytiques de suivi
+  features: Fonctionnalités
+  note_a: Les updates de vos collègues et partenaires sont immédiatement visibles sur votre dashboard, vous recevez une notification par mail au plus tard le lendemain de l'update
+  note_b: Les updates de vos collègues et partenaires sont immédiatement visibles sur votre dashboard, et vous en êtes immédiatement notifiés par mail
+  note_c: Vous et vos collègues voyez le même tableau des opérations
+  note_d: Les tableaux peuvent offrir plusieurs vues, de la vue utilisateur sur ses opérations propres, jusqu'à celle du départment et enfin de l'entreprise
+  note_e: Vous pouvez configurer des updates plus poussés, et voir l'évolution de la performance des opérations dans la durée
+  subscriptions: Abonnements
+  note_1: "Le prix mensuel par utilisateur est pour le Plan Premium, 7€ du 1er au 100ème, 6€ du 101ème au 250ème utilisateur, et 5€ au délà. Pour le tarif Entreprise, 14€ du 1er au 100ème, 10€ du 101ème au 250ème utilisateur, et 7€ au delà. <a class=\"dd-text\" href=\"/#\">Conditions tarifaires</a> applicables"
+  note_2: Limité à 10 collaborateurs
+  note_3: A venir prochainement
+  trial_21_days_cta: 21 jours premium gratuits
+  start_now: Démarrez dès maintenant
+
 
 solution:
   hr: RH
@@ -1271,10 +1325,10 @@ mails:
   externalInvitation:
     subject_begin: Invitation de
     subject_end: Bienvenue sur DealDrive, la solution de suivi relation client collaborative
-    message1: Bienvenue sur DealDrive, qui porte haut et fort les valeurs déchange pour augmenter la satisfaction entre partenaires !
-    message2: "vous y a convié afin de pouvoir donner votre retour lors d'une de ses prochaines activités. Cliquez dès à présent sur ce lien afin d'y définir votre mot de passe et remplir votre profil :"
+    message1: vous invite à optimiser votre suivi en faisant des updates immédiats sur les activités qui vous lient. Prenez aussi le temps d'insérer aussi votre dealflow et faites le lien avec vos partenaires via votre tableau interactif
+    message2: Cliquez dès à présent sur ce lien afin d'y définir votre mot de passe et remplir votre profil
     button_text: Accédez à DealDrive
-    message3: Créez à votre tour vos activités et invitez vos partenaires à vous rejoindre afin de leur faire des retours, et optimiser votre relation avec eux ! Si vous avez des questions, N'hésitez pas à en référer à votre responsable ou en nous contactant via contact@serpicoapp.com, nous tâcherons d'y répondre dans les meilleurs délais. Nous vous souhaitons tout cas une agréable expérience sur notre plateforme de suivi collaboratif !
+    message3: "DealDrive sera toujours gratuit. Vous bénéficiez toutefois d'un compte Premium pendant 21 jours, qui vous permet d'informer immédiatement vos partenaires de tout update. N'hésitez pas à nous faire remonter toute remarque ou bug via l'adresse contact@dealdrive.app, nous ne nous lasserons jamais de simplifier l'expérience client"
 
   launchingFollowupConfirmation:
     subject: Merci de suivre notre lancement !
@@ -1288,10 +1342,10 @@ mails:
     
   subscriptionConfirmation:
     subject: Bienvenue sur DealDrive, la solution de votre suivi clients
-    message1: , la plateforme collaborative qui relie votre équipe à vos partenaires 💪 !
-    message2: "Cliquez dès à présent sur ce lien afin d'y définir votre mot de passe et remplir votre profil :"
+    message1: Optimisez votre suivi en insérant votre dealflow avec vos partenaires, et faites-leur à tout moment part d'updates via votre tableau interactif
+    message2: Cliquez dès à présent sur ce lien afin d'y définir votre mot de passe et remplir votre profil
     button_text: Accédez à DealDrive
-    message3: Votre compte a été créé en tant qu'administrateur de votre entreprise. Vous pourrez ajouter des utilisateurs et rajoutez des projets et process en cours de réalisation avec vos partenaires, afin d'optimiser le suivi et d'assurer le meilleur service envers eux. <br><br> Si vous avez des questions, n'hésitez pas à en référer à votre responsable ou sinon par mail en nous contactant via l'adresse contact@serpicoapp.com, nous tâcherons d'y répondre dans les meilleurs délais. Nous vous souhaitons une agréable expérience sur notre plateforme de suivi collaboratif !
+    message3: DealDrive sera toujours gratuit. Vous bénéficiez toutefois d'un compte Premium pendant 21 jours, qui vous permet d'informer immédiatement vos partenaires de tout update <i class=\"material-icons dd-text\">offline_bolt</i>. N'hésitez pas à nous faire remonter toute remarque ou bug via l'adresse contact@dealdrive.app, nous continuerons inlassablement de simplifier l'expérience client
 
   subscriptionAcknowledgmentReceipt:
     subject: Demande de création de compte
@@ -1387,24 +1441,30 @@ mails:
     activity_subject: Participation à l'activité
     stage_subject_message_1: Participation à la phase
     stage_subject_message_2: de l'activité
-    subject_team_suffix: (en tant que groupe)
+    subject_team_suffix: (en tant qu'équipe)
     message_act_begin: Vous venez d'être ajouté à l'activité
     message_stg_begin: Vous venez d'être ajouté à la phase
     message_stg_mid: de l'activité
-    message_end: "par un membre de votre organisation. Retrouvez cette activité depuis votre espace personnel :"
-    button_text: Accéder à mes activités
-    message3_participant: En tant que participant, vous prendrez part à l'évaluation une fois la période de notation démarrée
-    message3_teamParticipant: En tant que participant faisant partie d'une équipe, vous prendrez part à l'évaluation une fois la période de notation démarrée. Sachez que vous noterez chaque personne de votre équipe individuellement, alors que les participants extérieurs à l'équipe vous noteront en tant quéquipe
-    message4: . Bonne activité et évaluation !
+    message_end: par un membre de votre organisation. Retrouvez cette activité sur votre dashboard personnel
+    button_text: Accéder à mon dashboard
+    message3_participant: Vous pouvez dès à présent effectuer des updates (commentaires, suggestions, documents) afin d'optimiser votre relation client !
+    #message3_teamParticipant: En tant que participant faisant partie d'une équipe, vous prendrez part à l'évaluation une fois la période de notation démarrée. Sachez que vous noterez chaque personne de votre équipe individuellement, alors que les participants extérieurs à l'équipe vous noteront en tant quéquipe
+    #message4: . Bonne activité et évaluation !
+
+  eventNotification:
+    msg_creation: Cet événement a été créé par l'un des participants
+    msg_update: Cet événement a été modifié par l'un des participants
+    msg_2: Accédez à votre dashboard pour prendre connaissance de cet événement
+    button_text: Accéder à mon dashboard
 
   activityAssignation:
     activity_subject: Vous avez été désigné owner de l'activité
     stage_subject_message_1: Vous avez été désigné owner de la phase
-    stage_subject_message_2: de l'activité
+    stage_subject_message_2: "de l'activité"
     message_act_begin: Vous venez d'être désigné owner de l'activité
     message_stg_begin: Vous venez d'être désigné owner de la phase
     message_stg_mid: de l'activité
-    message_end: "par un membre de votre organisation. Retrouvez cette activité depuis votre espace personnel :"
+    message_end: par un membre de votre organisation. Retrouvez cette activité depuis votre espace personnel
     button_text: Accédez à mes activités
     message3_participant: En tant que leader, vous pouvez accéder à la configuration de celle-ci, notamment rajouter les participants et indiquer les dates de déroulé et la période de notation
     message4: . Bonne activité et évaluation !
@@ -1623,6 +1683,7 @@ worker_search:
 worker_firm_list:
   alphabetical_order: A-Z
   creation_date_order: date de création
+  size_order: taille
 
 worker_firm_data:
   commonName: Nom de l'entreprise
@@ -1924,15 +1985,18 @@ activities:
     msg: "On y est presque ! Il ne manque plus qu'à renseigner votre entreprise afin de la lier à votre compte"
   before_starting_modal:
     title: Avant de commencer...
-    msg_intro: "Ce que vous voyez en fond, fictivement, sont un aperçu de ce à quoi pourrait ressembler votre dashboard avec des activités renseignées - pour en rajouter, cliquez sur le bouton <i class=\"fa fa-plus-circle dd-text sm-left sm-right\"></i> en bas"
+    msg_intro: "Ce que vous voyez en fond est un aperçu de ce à quoi ressemblera votre dashboard avec des activités - cliquez sur le bouton <i class=\"fa fa-plus-circle dd-text sm-left sm-right\"></i> en bas pour en rajouter"
     creation_mode: 
-      title: "En mode privé <i class=\"fa fa-user-secret dd-text sm-left sm-right\"></i> ou partagé"
-      msg: "Tout l'intérêt de DealDrive réside dans l'<span class=\"strong\">interactivité avec vos partenaires</span>, mais rien ne vous empêche de créer vos activités en mode <span style=\"font-style:italic;\">privé</span>, sans que ceux-ci soient notifiés."
-      msg_2 : "Il suffit pour cela de créer de sélectionner votre partenaire en tant que <span class=\"strong\">personne morale</span>."
-      msg_3: Vous pourrez toujours ajouter de véritables participants par la suite et interagir avec eux
+      title: "En mode partagé ou privé <i class=\"fa fa-user-secret dd-text sm-left sm-right\"></i>"
+      msg: "DealDrive permet l'interactivité avec vos partenaires, mais rien ne vous empêche de créer vos activités <span class=\"strong\">en mode <span style=\"font-style:italic;\">privé</span></span> - ils ne seront pas notifiés."
+      msg_2 : "Sélectionnez pour cela votre partenaire en tant que <span class=\"strong\">personne morale</span>"
+      msg_3: Vous pourrez toujours ajouter des participants ensuite
+    event_sharing:
+      title: Communiquez votre avancement avec vos partenaires
+      msg: "En cliquant sur le bouton d'ajout de retour <i class=\"material-icons dd-text\">offline_bolt</i></a> vous leur transmettez suggestions, documents... tout ce qui rythme votre relation business"
     premium_info:
       title: Un compte Premium pendant 21 jours... au moins 🥳
-      msg: "Qui vous permet de <span class=\"strong\">transmettre instanément</span> vos retours à vos partenaires. Au-delà, votre compte passera en mode Gratuit à moins que vous ne l'upgradiez pour continuer à bénéficier des fonctionnalités live avec vos partenaires"
+      msg: "Qui vous permet de <span class=\"strong\">transmettre instanément</span> vos retours à vos partenaires. Au-delà, votre compte passera en mode Gratuit et vous pourrez l'upgrader pour continuer à bénéficier des fonctionnalités live avec vos partenaires"
       
   with: avec
   modal_error_creation_title: Avant de continuer...
@@ -2000,6 +2064,7 @@ activities:
   grading_period: "Période de notation :"
   progress: "Avancement :"
   participants: Participants
+  events: Updates
   define: Définir
   modify: Modifier
   grade: Noter
@@ -2018,6 +2083,7 @@ activities:
   delete_activity_btn: Supprimer
   delete_stage_msg: Etes-vous sûr de vouloir supprimer cette phase d'activité ? Toutes les données éventuellement saisies par les participants seront effacées
   delete_activity_msg: Etes-vous sûr de vouloir supprimer cette activité ? Toutes les données éventuellement saisies par les participants seront effacées
+  delete_event_msg: Etes-vous sûr de vouloir supprimer cet update ? Toutes les données liées (documents et commentaires) seront supprimées
   delete_participant_msg: Etes-vous sûr de vouloir supprimer ce participant de l'activité ?
   delete_recurring_msg: Cette activité fait partie d'une série d'activités récurrentes. Voulez-vous supprimer toutes ces activités ou simplement celle-ci ? Les données liées aux participants seront effacées
   delete_rec_all_confirm: Supprimer la série
@@ -2046,7 +2112,7 @@ activities:
     msg: Ce participant ne pourra pas faire de retours sur vos activités communes si vous ne vous renseignez pas son adresse email - vous pouvez toujours la renseigner ensuite
   create_participant_legal_person_modal:
     title: Nouveau participant personne morale
-    msg: En sélectionnant ce participant représentant une entreprise ou institution, vous ne lui donnez pas accès à l'activité. Seuls des membres de cette entreprise/institution peuvent y accéder 
+    msg: L'entreprise n'aura pas accès à cette activité. Rajoutez par la suite des participants afin de les notifier de l'avancement que vous avez avec eux
 
   create:
     initialize_title: Création d'une activité
@@ -2116,9 +2182,10 @@ activities:
   no_registered_activities_msg: Inscrivez-vous à une démarche existante afin de suivre et renseigner son évolution !
   hide_group: Masquer ces activités
   display_group: Afficher ces activités
-  instant_add: Retour spontané
+  instant_add: Faire un update
   update_status: Mettre à jour l'avancement
   provide_my_feedbacks: Donner mes feedbacks
+  delete_activity: Supprimer l'activité
   delete_activity_modal:
     title: Suppression de l'activité
     content: Etes-vous sûr de vouloir supprimer cette activité ? Toutes ses données associées (phases, retours et participants) seront supprimées
@@ -2168,17 +2235,22 @@ activity_elements:
   go_back_processes: Retour aux processes
   modify_stage_btn: Modifier la phase
   events:
+    access_event_btn: Accéder à l'update
+    access_stage_btn: Accéder à la phase
+    access_activity_btn: Accéder à l'activité
     add_event:
-      modal_new_title: Ajout d'événement
-      modal_update_title: Mise à jour de l'événement
+      modal_new_title: Créer un update
+      modal_update_title: Enrichir l'update
       modal_msg: Que souhaitez-vous renseigner ?
       insert_document: Partager un document
       insert_comment: Commentaire/Description
-      eventType: Type d'événement
-      manage_dates: Gestion des dates
+      eventType: Type d'update
+      manage_dates^: Gestion des dates
       notify_participants: Notification des participants
       notify_all_articipants: Notifier tous les participants
-      onset_date: Date de survenance
+      onset_date: Survenance
+      resolution_date: Fin
+      dates_mgt: Gestion des dates
       provide_onset_date: Indiquer une date de survenance
       exp_res_date: Date de résolution espérée
       provide_exp_res_date: Indiquer une date de résolution espérée
@@ -2186,6 +2258,19 @@ activity_elements:
       shared_documents: Documents partagés
       comments: Commentaires
       no_given_comments: Pas de commentaires donnés
+    multiple_events_modal:
+      title: Quel update voulez-vous voir en détail/modifier ?
+    documents: 
+      title: Documents liés
+      dropify_insert_msg: Glissez-déposez un document ou cliquez pour l'insérer (max 5 MB)
+      dropify_error_msg: Il y a un problème avec votre fichier (taille ou format)
+      document:
+        title: Nom du document
+        delete_msg: Etes-vous sûr de vouloir supprimer ce document pour l'ensemble des participants concernés ? 
+    comments:
+      title: Commentaires
+      comment:
+        delete_msg: Etes-vous sûr de vouloir supprimer votre commentaire ? 
 
 
 create_parameters:

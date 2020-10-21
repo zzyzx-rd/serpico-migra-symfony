@@ -27,7 +27,7 @@
           </tr>
           <tr>
             <td>
-              {% if company_name == 'Serpico' %}<p>{% trans %}mails.signature_team{% endtrans %}{#{% else %}{% trans %}mails.signature_team_for_client{% endtrans %}#}</p>{% endif %}
+              {% if company_name == 'Serpico' %}<p>{% trans %}mails.signature_team{% endtrans %}</p>{% endif %}
               {% if company_name == 'Serpico' %}<a href="{{ company_website }}" style="width: 60px">{% endif %}<img src="cid:logo_img" alt="logo {{ company_name }}" style="width: {{ logo_width_px }}px">{% if company_name == 'Serpico' %}</a>{% endif %}
               <p><strong>{% if company_name == 'Serpico' %}{% trans %}mails.serpico_motto{% endtrans %}{% else %}{{ company_name }}{% endif %}</strong><br>{{ address }} | {{ zipcode_city }}</p>
               {% if company_name == 'Serpico' %}<p>{{ phone }}</p>{% endif %}

@@ -272,7 +272,7 @@
             $('.delete-btn').on('click',function(){
                 urlToPieces = durl.split('/');
                 const oid = $(this).attr('data-id');
-                urlToPieces[urlToPieces.length-2] =  $(this).attr('data-id');
+                urlToPieces[urlToPieces.length-2] = oid;
                 durl = urlToPieces.join('/');
                 $.post(durl,null)
                     .done(function(data){

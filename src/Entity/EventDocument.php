@@ -3,12 +3,13 @@
 namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
-use App\Repository\OptionNameRepository;
+use App\Repository\EventDocumentRepository;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\OneToMany;
 
 /**
  * @ApiResource()
@@ -29,9 +30,29 @@ class EventDocument extends DbObject
     public $title;
 
     /**
+     * @ORM\Column(name="evd_type", type="string", length=255, nullable=true)
+     */
+    public $type;
+
+    /**
+     * @ORM\Column(name="evd_mime", type="string", length=255, nullable=true)
+     */
+    public $mime;
+
+    /**
      * @ORM\Column(name="evd_path", type="string", length=255, nullable=true)
      */
     public $path;
+
+    /**
+     * @ORM\Column(name="evd_size", type="integer", length=10, nullable=true)
+     */
+    public ?int $size;
+
+    /**
+     * @OneToMany(targetEntity="DocumentAuthor", mappedBy="document", cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    protected $documentAuthors;
 
     /**
      * @ManyToOne(targetEntity="Event", inversedBy="documents")
@@ -55,6 +76,7 @@ class EventDocument extends DbObject
      * @param $id
      * @param $title
      * @param $path
+     * @param $size
      * @param $event
      * @param $createdBy
      */
@@ -62,13 +84,21 @@ class EventDocument extends DbObject
         $id = 0,
         $title = null,
         $path = null,
+        $size = null,
+        $type = null,
+        $mime = null,
         Event $event = null,
+        User $author = null,
         $createdBy = null)
     {
         parent::__construct($id, $createdBy, new DateTime());
         $this->title = $title;
         $this->path = $path;
+        $this->size = $size;
+        $this->type = $type;
+        $this->mime = $mime;
         $this->event = $event;
+        $this->author = $author;
     }
 
 
@@ -83,6 +113,28 @@ class EventDocument extends DbObject
         return $this;
     }
 
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    public function setType(string $type): self
+    {
+        $this->type = $type;
+        return $this;
+    }
+
+    public function getMime(): ?string
+    {
+        return $this->mime;
+    }
+
+    public function setMime(string $mime): self
+    {
+        $this->mime = $mime;
+        return $this;
+    }
+
     public function getPath(): ?string
     {
         return $this->path;
@@ -94,6 +146,17 @@ class EventDocument extends DbObject
         return $this;
     }
 
+    public function getSize(): ?int
+    {
+        return $this->size;
+    }
+
+    public function setSize(int $size): self
+    {
+        $this->size = $size;
+        return $this;
+    }
+
     public function getEvent(): ?Event
     {
         return $this->event;
@@ -102,6 +165,27 @@ class EventDocument extends DbObject
     public function setEvent(Event $event): self
     {
         $this->event = $event;
+        return $this;
+    }
+
+
+    /**
+     * @return ArrayCollection|DocumentAuthor[]
+     */
+    public function getDocumentAuthors()
+    {
+        return $this->documentAuthors;
+    }
+
+    public function addDocumentAuthor(DocumentAuthor $documentAuthor): self
+    {
+        $this->documentAuthors->add($documentAuthor);
+        return $this;
+    }
+
+    public function removeDocumentAuthor(DocumentAuthor $documentAuthor): self
+    {
+        $this->documentAuthors->removeElement($documentAuthor);
         return $this;
     }
 

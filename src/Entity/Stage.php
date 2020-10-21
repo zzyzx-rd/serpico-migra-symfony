@@ -252,7 +252,7 @@ class Stage extends DbObject
     public $participations;
 
     /**
-     * @OneToMany(targetEntity="Event", mappedBy="stage",cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="Event", mappedBy="stage", cascade={"persist", "remove"},  orphanRemoval=true)
      */
     public $events;
 
@@ -300,6 +300,11 @@ class Stage extends DbObject
      * @OneToMany(targetEntity="RankingTeamHistory", mappedBy="stage",cascade={"persist", "remove"}, orphanRemoval=true)
      */
     public $historicalRankingTeams;
+
+    /**
+     * @OneToMany(targetEntity="Mail", mappedBy="stage",cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    public $mails;
 
 
     /**
@@ -398,8 +403,7 @@ class Stage extends DbObject
         $this->resultTeams = new ArrayCollection;
         $this->rankingTeams = new ArrayCollection;
         $this->historicalRankingTeams = new ArrayCollection;
-        $this->outputs = new ArrayCollection;
-
+        $this->mails = new ArrayCollection;
     }
 
 
@@ -1356,7 +1360,7 @@ class Stage extends DbObject
         $uniqueParticipants = new ArrayCollection;
         $teams = [];
 
-        $eligibleParticipants = count($this->criteria) == 0 ? $this->participants : $this->criteria->first()->getParticipations();
+        $eligibleParticipants = count($this->criteria) == 0 ? $this->participations : $this->criteria->first()->getParticipations();
 
         $myParticipations = $this->getSelfParticipations();
         $myTeam = $myParticipations->count() == 0 ? null : $myParticipations->first()->getTeam();
@@ -1403,7 +1407,7 @@ class Stage extends DbObject
         return $teamParticipants;
     }
 
-    public function getStartdateDay()
+    public function getStartdateU()
     {
         return $this->startdate->format('U');
 
@@ -1411,23 +1415,55 @@ class Stage extends DbObject
 
     public function getPeriod()
     {
-
         $sD = $this->startdate->format("U");
         $sE = $this->enddate->format("U");
         return $sE - $sD;
     }
 
     /**
+     * 
+     * Function which return number of stages, self excluded, which are lying within current stage period +- threshold % of considered interval period 
      * @return Collection|Stage[]
      */
-    public function getEmbeddedStages(){
+    public function getEmbeddedStages($period = 'y', $thresholdIntPct = 3){
+
+        // Period interval in seconds
+        switch($period){
+            case 'y' :
+                $intCurrYear = intval($_COOKIE['ci']);
+                $intNextYear = $intCurrYear + 1;
+                $sd = new DateTime("first day of january $intCurrYear");
+                $ed = new DateTime("first day of january $intNextYear");
+                break;
+            case 't' :
+                $cookieElmts = explode('/',$_COOKIE['ci']);
+                $intYear = intval(end($cookieElmts));
+                $intQuarter = intval(prev($cookieElmts));
+                $quarterMonths = ['january', 'april', 'july', 'october'];
+                $quarterStartingMonth = $quarterMonths[$intQuarter - 1];
+                $quarterEndingMonth = $quarterMonths[$intQuarter % 4];
+                $quarterEndingYear = $intQuarter == 4 ? $intYear + 1 : $intYear;
+                $sd = new DateTime("first day of $quarterStartingMonth $intYear");
+                $ed = new DateTime("first day of $quarterEndingMonth $quarterEndingYear");
+                break;
+            case 'w' :
+                $cookieElmts = explode('/',$_COOKIE['ci']);
+                $intYear = intval(end($cookieElmts));
+                $intCurrWeekOffset = intval(prev($cookieElmts)) - 1;
+                $intNextWeekOffset = $intCurrWeekOffset + 1;
+                $sd = new DateTime("+$intCurrWeekOffset weeks january $intYear");
+                $ed = new DateTime("+$intNextWeekOffset weeks january $intYear");
+                break;
+        }
+
+        $period = $ed->getTimestamp() - $sd->getTimestamp();
         $sortedByPeriodStages = $this->activity->getSortedStagesPerPeriod();
         $embeddedStages = new ArrayCollection;
         foreach($sortedByPeriodStages as $key => $sortedByPeriodStage){
             if($key <= $sortedByPeriodStages->indexOf($this)){
                 continue;
             } else {
-                if($this->getStartdateDay() - 3 < $sortedByPeriodStage->getStartdateDay() && $sortedByPeriodStage->getStartdateDay() + $sortedByPeriodStage->getPeriod() < $this->getStartdateDay() + $this->getPeriod() + 3){
+                if($this->getStartdateU() - round($thresholdIntPct * 0.01 * $period)  < $sortedByPeriodStage->getStartdateU() && $sortedByPeriodStage->getStartdateU() + $sortedByPeriodStage->getPeriod() < $this->getStartdateU() + $this->getPeriod() + round($thresholdIntPct * 0.01 * $period)){
                     $embeddedStages->add($sortedByPeriodStage);
                 } else {
                     break;
@@ -1435,6 +1471,22 @@ class Stage extends DbObject
             }
         }
         return $embeddedStages;
+    }
+
+    /**
+     * @return Collection|Event[]
+     */
+    public function getSortedEventsPerPeriod(){
+                    
+        /** @var Event[] */
+        $array = $this->events->getValues();
+        usort($array, function($first, $second) {
+            $firstExpResDate = $first->getExpResDate() ?: $first->getOnsetDate(); 
+            $secondExpResDate = $second->getExpResDate() ?: $second->getOnsetDate(); 
+            return ($firstExpResDate->getTimestamp() - $first->getOnsetDate()->getTimestamp() >= $secondExpResDate->getTimestamp() - $second->getOnsetdate()->getTimestamp()) ? 1 : -1;
+        });
+        $orderedEvents = new ArrayCollection($array);
+        return $orderedEvents;
     }
 
      /**
@@ -1647,6 +1699,27 @@ class Stage extends DbObject
         return count($this->getParticipants()->matching(
             Criteria::create()->where(Criteria::expr()->neq("type", -1))
         ));
+    }
+
+    /**
+    * @return ArrayCollection|Mail[]
+    */
+    public function getMails()
+    {
+        return $this->mails;
+    }
+
+    public function addMail(Mail $mail): Stage
+    {
+        $this->mails->add($mail);
+        $mail->setStage($this);
+        return $this;
+    }
+
+    public function removeMail(Mail $mail): Stage
+    {
+        $this->mails->removeElement($mail);
+        return $this;
     }
 
 }

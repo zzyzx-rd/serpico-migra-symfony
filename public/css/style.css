@@ -3,6 +3,7 @@
 html {
   --child-nesting: 2rem;
   --nesting-gap: 1.5em;
+  --nav-height: 75px;
 
   height: 100vh;
   overflow-y: scroll;
@@ -48,6 +49,10 @@ a.material-icons{
   margin-bottom: 5px;
 }
 
+.sm-top{
+  margin-top: 5px;
+}
+
 .m-right{
   margin-right: 10px;
 }
@@ -58,6 +63,10 @@ a.material-icons{
 
 .m-bottom{
   margin-bottom: 10px;
+}
+
+.m-top{
+  margin-top: 10px;
 }
 
 
@@ -102,6 +111,10 @@ li + li.no-items-placeholder {
 
 .dd-text{
   color: #55318e;
+}
+
+.dd-orange-text{
+  color: #FF9300;
 }
 
 .mat-icon {
@@ -161,13 +174,15 @@ li + li.no-items-placeholder {
   padding-left: var(--child-nesting);
 }
 
-
-
+#nav{
+  height: var(--nav-height);
+  line-height: var(--nav-height);
+}
 
 
 .nav-wrapper > ul,
 .nav-wrapper > ul > li,
-.nav-wrapper > ul > li > a {
+.nav-wrapper > ul > li > a:not(.login-btn) {
   display: flex;
   align-items: center;
   height: 100%;
@@ -399,6 +414,10 @@ td a {
   margin: 0!important;
 }
 
+.no-wrap {
+  flex-wrap: nowrap!important;
+}
+
 @media print {
   .keep-together {
     page-break-inside: avoid;
@@ -436,6 +455,12 @@ td a {
   display: flex;
   align-items: center;
   flex-direction: column;
+}
+
+.flex-end {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
 }
 
 .flex-center {
@@ -1170,6 +1195,11 @@ div.col.s12.m2.linkedin {
 }
 
 @media screen and (min-width: 601px) {
+  
+  .white-login-zone{
+    width:200px;
+  }
+  
   .banner-title {
     width: 60%;
     margin-right: auto;
@@ -1393,8 +1423,9 @@ nav ul a {
 }
 
 .login-btn {
-  background-color: #15a6ae;
-}
+  background-color: #FF9300!important;
+};
+
 
 nav ul a.btn {
   margin: 0px 20px 0px 0px !important;

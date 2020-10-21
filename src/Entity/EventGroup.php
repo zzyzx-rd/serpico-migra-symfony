@@ -7,6 +7,7 @@ use App\Repository\EventGroupRepository;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -60,6 +61,19 @@ class EventGroup extends DbObject
      * @ORM\Column(name="evg_inserted", type="datetime", nullable=false, options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
+
+    /**
+     * @ORM\Column(name="evg_enabled", type="boolean", nullable=false, options={"default": true})
+     */
+    public bool $enabled;
+    /**
+     * @ManyToOne(targetEntity="EventGroupName", inversedBy="eventGroups")
+     * @JoinColumn(name="event_group_name_egn_id", referencedColumnName="egn_id",nullable=true)
+     */
+    public $eventGroupName;
+
+    public ?EntityManager $em;
+    public ?string $locale;
     
     /**
      * EventGroup constructor.
@@ -75,6 +89,7 @@ class EventGroup extends DbObject
         Organization $organization = null,
         Department $department = null,
         $createdBy = null,
+        $enabled = true,
         $id = null,
         ArrayCollection $eventTypes = null)
     {
@@ -82,6 +97,7 @@ class EventGroup extends DbObject
         $this->name = $name;
         $this->organization = $organization;
         $this->department = $department;
+        $this->enabled = $enabled;
         $this->eventTypes = $eventTypes ?: new ArrayCollection;
     }
 
@@ -166,7 +182,6 @@ class EventGroup extends DbObject
         $events = $this->eventTypes->map(static function(EventName $e) {
             return [
                 'id' => $e->getId(),
-                'type' => $e->getType(),
                 'name' => $e->getName()
             ];
         })->toArray();
@@ -184,7 +199,59 @@ class EventGroup extends DbObject
 
     public function __toString()
     {
-        return (string) $this->name;
+        return (string) $this->id;
+    }
+
+    public function setEnabled(bool $enabled): self
+    {
+        $this->enabled = $enabled;
+        return $this;
+    }
+
+    public function isEnabled(): bool
+    {
+        return $this->enabled;
+    }
+
+    /**
+     * @return EventGroupName
+     */
+    public function getEventGroupName(): EventGroupName
+    {
+        return $this->eventGroupName;
+    }
+
+    public function setEventGroupName(EventGroupName $eventGroupName)
+    {
+        $this->eventGroupName = $eventGroupName;
+        return $this;
+    }
+
+    public function getDTrans(){
+        $translatables =  $this->em->getRepository(DynamicTranslation::class)->findBy(['entity' => 'EventGroupName', 'entityId' => $this->getEventGroupName()->getId(), 'entityProp' => 'name', 'organization' => [null, $this->org]], ['organization' => 'ASC']);
+        if(!$translatables){
+            return $this->getEventGroupName()->getName();
+        } else {
+            /** @var DynamicTranslation */
+            $translatable = sizeof($translatables) > 1 ? $translatables[1] : $translatables[0];                
+            $translatable->locale = $this->locale;
+            return $translatable->getDynTrans();
+        }
+    }
+
+    public function setLocale($locale){
+        $this->locale = $locale;
+        return $this;
+    }
+
+    public function setEm($em){
+        $this->em = $em;
+        return $this;
+    }
+
+    public function setOrg($org){
+        $this->org = $org;
+        return $this;
     }
     
 }

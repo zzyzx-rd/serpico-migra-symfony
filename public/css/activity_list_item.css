@@ -1,6 +1,6 @@
 
 
-ol.stages {
+ol.stages, .select-dropdown > li {
   --strike-width: .2em;
   --button-size: 2em;
   --bgcolor: #e0f7fa;
@@ -412,6 +412,6 @@ section li.no-items-placeholder {
 
 .event{
   position: absolute;
-  top: -1.6rem;
+  top: -2.1rem;
   left:-0.3rem;
 }

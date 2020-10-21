@@ -16,21 +16,25 @@
 
           {% if activity is defined %}
           
-            <ol class="stages activity-component" data-sd="{{ activity.startdateDay }}" data-p="{{ activity.period }}" data-id="{{random(1,1000000)}}">
+            <ol class="stages activity-component" data-sd="{{ activity.startdateU }}" data-p="{{ activity.period }}" data-id="{{random(1,1000000)}}">
               
               {% set checkingStageIndex = -1 %}
 
+              {#}
               {% for stage in activity.stages %}
                 {% for e, event in stage.events %}
 
-                    <div class="event tooltipped" data-od="{{ event.onsetdateDay }}" data-p="{{ event.period }}" data-html="true" data-tooltip="{% apply escape %}{% include "components/event__item.html.twig" with { event: event } %}{% endapply %}">
+                    <div class="event tooltipped" data-id="{{ event.id }}" data-od="{{ event.onsetdateU }}" data-p="{{ event.period }}" data-html="true" data-tooltip="{% apply escape %}{% include "components/event__item.html.twig" with { event: event, em: em } %}{% endapply %}">
                       <i class="fa fa-map-marker event-marker">
-                        <i class="fa fa-{{event.eventType.icon.name}} event-type"></i>
+                        <div class="event-logo-container">
+                          <i class="fa fa-{{event.eventType.icon.name}} evg-{{ event.eventType.eventGroup.eventGroupName.id }} event-type"></i>
+                        </div>
                       </i>
                     </div>
 
                 {% endfor %}
               {% endfor %}
+              #}
 
               {% for s, stage in activity.sortedStagesPerPeriod %}
 
@@ -39,7 +43,7 @@
 
                 {% if s > checkingStageIndex %}
                   {% set isEmbedded = false %}
-                  {% set embeddedStages = stage.embeddedStages %}
+                  {% set embeddedStages = stage.embeddedStages(timescaleCookie,3) %}
                   {% if embeddedStages is not empty %}
                     {% set checkingStageIndex = s + embeddedStages|length %}
                   {% endif %}
@@ -49,28 +53,31 @@
                   {% set visibleEl = false %}
                 {% endif %}
 
-                {% include "components/stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: isEmbedded, startdateDay: stage.startdateDay, period: stage.period, embeddedStages: embeddedStages, visibleEl: visibleEl } %}
+                {% include "components/stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: isEmbedded, startdateU: stage.startdateU, period: stage.period, embeddedStages: embeddedStages, visibleEl: visibleEl } %}
                 
                 {% set checkingEventIndex = -1 %}
-                {% for e, event in stage.events %}
 
-                  {% set embeddedEvents = null %}
-              
-                  {% if s > checkingEventIndex %}
-                    {% set isEmbedded = false %}
-                    {% set embeddedStages = stage.embeddedStages('output') %}
-                    {% if embeddedEvents is not empty %}  
-                      {% set checkingEventIndex = s + embeddedEvents|length %}
-                    {% endif %}
-                    {% set visibleEl = dateTypeCookie == 'o' %}
-                  {% else %}
-                    {% set isEmbedded = true %}
-                    {% set visibleEl = false %}
-                  {% endif %}
+                    {% for e, event in stage.sortedEventsPerPeriod %}
 
-                  {% include "components/stage_temporal__item.html.twig" with { dateType: 'o', isEmbedded: isEmbedded, startdateDay: stage.startdateDay, period: stage.period, embeddedStages: embeddedStages, visibleEl: visibleEl } %}
-                {% endfor %}
-              
+                              {% set embeddedEvents = null %}
+                        
+                              {% if e > checkingEventIndex %}
+                                {% set isEmbedded = false %}
+                                {% set embeddedEvents = event.embeddedEvents(timescaleCookie, 3) %}
+                                {% if embeddedEvents is not empty %}  
+                                  {% set checkingEventIndex = e + embeddedEvents|length %}
+                                {% endif %}
+                                {% set visibleEl = true %}
+                              {% else %}
+                                {% set isEmbedded = true %}
+                                {% set visibleEl = false %}
+                              {% endif %}
+
+                              {% include "components/event_temporal__item.html.twig" with { isEmbedded: isEmbedded, onsetdateU: event.onsetDateU, period: event.period, embeddedEvents: embeddedEvents, visibleEl: visibleEl } %}
+                        
+
+                    {% endfor %}    
+
               {% endfor %}
 
               
@@ -93,7 +100,7 @@
                   {% set visibleEl = false %}
                 {% endif %}
 
-                {% include "components/stage_temporal__item.html.twig" with { dateType: 'o', isEmbedded: isEmbedded, startdateDay: stage.startdateDay('output'), period: stage.period('output'), embeddedStages: embeddedStages, visibleEl: visibleEl } %}
+                {% include "components/stage_temporal__item.html.twig" with { dateType: 'o', isEmbedded: isEmbedded, startdateU: stage.startdateU('output'), period: stage.period('output'), embeddedStages: embeddedStages, visibleEl: visibleEl } %}
               
               {% endfor %}
               #}
@@ -103,9 +110,9 @@
 
               <ol class="activity-component" data-sd="{{ date("first day of january").timestamp }}" data-p="{{ 360 * 24 * 60 * 60 }}">
                   {# these below values are not important as they are replaced in front #}
-                  {% set startdateDay = random(7,320) %}
-                  {% set period = random(3, 350 - startdateDay) %}
-                  {% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateDay: startdateDay, period: random(3,200), embeddedStages: null, visibleEl: true} %}
+                  {% set startdateU = random(7,320) %}
+                  {% set period = random(3, 350 - startdateU) %}
+                  {% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateU: startdateU, period: random(3,200), embeddedStages: null, visibleEl: true} %}
               </ol>
 
           {% endif %}
@@ -131,21 +138,25 @@
             <i class="material-icons">create</i>
         </a>
         
-        <ul class="flex-center">
-             <li>
-              <a class="btn-floating act-btn tooltipped modal-trigger" href="#deleteActivity" data-tooltip="{{ 'activities.delete_activity_modal.title'|trans }}" data-position="top" data-aid="{{ activity.id }}"><i class="fa fa-trash"></i></a>
-            </li>
+        <ul class="flex-center no-wrap">
             <li>
-              <a class="btn-floating act-btn tooltipped modal-trigger" href="#updateEvent" data-tooltip="{{ 'activities.instant_add'|trans }}" data-position="top" data-aid="{{ activity.id }}" ><i class="material-icons">offline_bolt</i></a>
+              <a class="btn-floating act-btn tooltipped modal-trigger" href="#deleteActivity" data-tooltip="{{ 'activities.delete_activity'|trans }}" data-position="top" data-aid="{{ activity.id }}"><i class="fa fa-trash"></i></a>
             </li>
           {% if activityM.userCanEdit(activity,currentuser) %}  
             <li>
               <a class="btn-floating act-btn tooltipped modal-trigger" href="#updateStageProgressStatus" data-position="top" data-html="true" data-tooltip="{{ 'activities.update_status'|trans}}" data-eid="{{ activity.id }}"><i class="material-icons">update</i></a>
             </li>
+            {#
             <li>
               <a class="btn-floating act-btn tooltipped" href={{ url("manageActivityElement",{entity:"activity", elmtId: activity.id }) }} data-position="top" data-html="true" data-tooltip="{{ 'activities.modify'|trans}}"><i class="material-icons">settings</i></a>
             </li>
+            #}
           {% endif %}
+            <li>
+              <a class="btn-floating act-btn tooltipped modal-trigger" href="#updateEvent" data-tooltip="{{ 'activities.instant_add'|trans }}" data-position="top" data-aid="{{ activity.id }}" data-sid="{{ activity.stages|length == 1 ? activity.stages.first.id }}"><i class="material-icons">offline_bolt</i></a>
+            </li>
+
+          {#
           {% if activityM.userCanGiveOutput(activity,currentuser) %}
             <li>
               {% if activity.userActiveGradableStages(currentuser).first.survey is not null %}
@@ -155,6 +166,8 @@
               {% endif %}
             </li>
           {% endif %}
+          #}
+
           {#
           {% if activityM.userCanViewResults(activity,currentuser) %}
             <li>
@@ -185,8 +198,10 @@
 
           <div class="activity-clients flex-center">
             {% if activity.organization != currentuser.organization %}
-              <small> - {{ 'from'|trans }}</small>
-              <span class="activity-client-name">{{ activity.organization.commname }}</span>
+              <small> - {{ 'with'|trans }}</small>
+              <a class="badge-container activity-client-name tooltipped" data-tooltip="{{activity.organization.commname}}">
+                <img class="client-logo sm-left" src="{{ asset(global.organizationLogo(activity.organization)) }}" alt="">
+              </a>
               {% set activityClients = activityClients|filter((v,k) => v.clientOrganization != currentuser.organization) %}
             {% endif %}
             {% if activityClients|length != 0 %}

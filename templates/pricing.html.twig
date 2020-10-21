@@ -1,0 +1,366 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+Signup
+{% endblock %}
+
+{% block pagename %}
+Signup
+{% endblock %}
+
+{% block css %}
+
+  <style>
+      .old-times:before {
+          content: "";
+          background-image: url(/lib/img/place_paris.png);
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          opacity: 0.25;
+          background-repeat: no-repeat;
+          background-size: cover;
+          z-index: -1;
+      }
+
+      .old-times {
+          position: relative;
+      }
+
+      .content {
+        text-align: center;
+        margin-bottom: auto;
+        margin-top: auto;
+      }
+
+      #signup {
+        width: 40%;
+        margin:50px auto;
+      }
+
+
+      #signup input {
+          background-color: #ffffffbd;
+      }
+
+      #signup label{
+          color: black;
+      }
+
+      table{
+        width: 80%;
+        margin-left:auto;
+        margin-right: auto;
+      }
+
+      .row:not(.footer-row){
+        width: 80%;
+        display: flex;
+        flex-wrap:nowrap;
+      }
+
+      .row:not(.footer-row):first-of-type i {
+        font-size: 35px;
+      }
+
+      .free-plan-icon{
+        color: green;
+      }
+
+      .premium-plan-icon{
+        color: darkblue;
+      }
+
+      .enterprise-plan-icon{
+        color: darkgoldenrod;
+      }
+
+      .row:not(.footer-row) > * {
+        width: 25%;
+        text-align: center;
+      }
+
+      .table-title, tbody > tr:last-of-type > td:first-of-type, section > h4{
+        font-weight:700;
+      }
+
+      tr:not(:last-of-type) {
+        border-bottom: 1px solid #55318e;
+      }
+
+      table.highlight > tbody > tr:hover{
+        background-color: #fdf7ff!important;
+      }
+
+      tr > td:first-of-type, th:first-of-type{
+        text-align:left!important;
+        width: 25%;
+      }
+
+      tr > td:nth-of-type(2), th:nth-of-type(2){
+        width: 25%;
+      }
+
+      tr > td:nth-of-type(3), th:nth-of-type(3){
+        width: 25%;
+      }
+
+      .price-value{
+        font-weight: 700;
+        font-size:50px;
+      }
+
+      .price-ccy{
+        font-weight: 700;
+        font-size:20px;
+      }
+
+      .enterprise-ccy{
+        margin-left:-5px;
+      }
+
+      .price-line{
+        line-height:1.1;
+      }
+
+      .free-price-value{
+        font-weight: 700;
+        font-size:70px;
+      }
+    
+      .pricing-notes{
+        width:80%;
+        margin:auto;
+      }
+
+      .pricing-table-section{
+        margin: 50px 0;
+      }
+
+      #linkFooter {
+        width: 100%;
+        background-color: #55318e;
+        margin-top:20px;
+        font-size:15px;
+      }
+
+      
+
+  </style>
+
+{% endblock %}
+
+{% block content %}
+    <main>
+      <section>
+        <h4 class="center">{{'pricing.header_title'|trans|raw}}</h4>
+      </section>
+      <section class="pricing-table-section">
+        <div class="row flex-center-fe">
+          <div></div>
+          <div>
+            <div class="c-flex-center">
+                <i class="fa fa-seedling free-plan-icon"></i>
+            </div>
+          </div>
+          <div>
+            <div class="c-flex-center">
+              <i class="fa fa-dove premium-plan-icon"></i>
+            </div>
+          </div>
+          <div>
+            <div class="c-flex-center">
+              <i class="fa fa-building enterprise-plan-icon"></i>
+            </div>
+          </div>
+        </div>
+        <div class="row flex-center-fe" style="margin-bottom:0">
+          <div></div>
+          <div>
+            <div class="c-flex-center">
+              <div>{{'pricing.free_column_title'|trans|raw}}</div>
+              {#<div class="price-line"><span class="price-value">5</span><span class="price-ccy">€</span></div>
+              <div><span>{{ '/' ~ 'month'|trans }}</span><span>{{ '/' ~ 'pricing.user'|trans }}</span><sup class="dd-text">1</sup></div>#}
+            </div>
+          </div>
+          <div>
+            <div class="c-flex-center">
+              <div>{{'pricing.from'|trans}}</div>
+              <div class="price-line"><span class="price-value">5</span><span class="price-ccy">€</span></div>
+              <div><span>{{ '/' ~ 'month'|trans }}</span><span>{{ '/' ~ 'pricing.user'|trans }}</span><sup class="dd-text">1</sup></div>
+            </div>
+          </div>
+          <div>
+            <div class="c-flex-center">
+              <div>{{'pricing.from'|trans}}</div>
+              <div class="price-line"><span class="price-value">7</span><span class="price-ccy enterprise-ccy">€</span></div>
+              <div><span>{{ '/' ~ 'month'|trans }}</span><span>{{ '/' ~ 'pricing.user'|trans }}</span><sup class="dd-text">1</sup></div>
+            </div>
+          </div>
+        </div>
+        <table class="highlight centered">
+          <thead>
+            <tr>
+              <th>{{'pricing.pricing_table.plan_title'|trans}}</th>
+              <th class="table-title dd-text">{{'pricing.pricing_table.plan_free'|trans|upper}}<sup class="dd-text">2</sup></th>
+              <th class="table-title dd-text">{{'pricing.pricing_table.plan_premium'|trans|upper}}</th>
+              <th class="table-title dd-text">{{'pricing.pricing_table.plan_enterprise'|trans|upper}}<sup class="dd-text">3</sup></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{{'pricing.pricing_table.functionality_1'|trans}}</td>
+              <td><i class="fa fa-check dd-text"></i></td>
+              <td><i class="fa fa-check dd-text"></i></td>
+              <td><i class="fa fa-check dd-text"></i></td>
+            </tr>
+            <tr>
+              <td>{{'pricing.pricing_table.functionality_2'|trans}}</td>
+              <td><i class="fa fa-check dd-text"></i></td>
+              <td><i class="fa fa-check dd-text"></i></td>
+              <td><i class="fa fa-check dd-text"></i></td>
+            </tr>
+            <tr>
+              <td>{{'pricing.pricing_table.functionality_3'|trans}}</td>
+              <td><span class="dd-text tooltipped" data-tooltip="{{'comments'|trans|capitalize}}"><i class="fa fa-comments"></i></span></td>
+              <td><span class="dd-text tooltipped" data-tooltip="{{'comments'|trans|capitalize}}"><i class="fa fa-comments"></i></span><span class="sm-left sm-right">+</span><span class="dd-text tooltipped" data-tooltip="{{'documents'|trans|capitalize}}"><i class="fa fa-layer-group"></i></span></td>
+              <td><span class="dd-text tooltipped" data-tooltip="{{'comments'|trans|capitalize}}"><i class="fa fa-comments"></i></span><span class="sm-left sm-right">+</span><span class="dd-text tooltipped" data-tooltip="{{'documents'|trans|capitalize}}"><i class="fa fa-layer-group"></i></span></td>
+            </tr>
+            <tr>
+              <td>{{'pricing.pricing_table.functionality_4'|trans}}</td>
+              <td><sup class="dd-text">a</sup></td>
+              <td><sup class="dd-text">b</sup></td>
+              <td><sup class="dd-text">b</sup></td>
+            </tr>
+            <tr>
+              <td>{{'pricing.pricing_table.functionality_5'|trans}}</td>
+              <td><sup class="dd-text">c</sup></td>
+              <td><sup class="dd-text">d</sup></td>
+              <td><sup class="dd-text">d</sup></td>
+            </tr>
+            <tr>
+              <td>{{'pricing.pricing_table.functionality_6'|trans}}</td>
+              <td></td>
+              <td><i class="fa fa-check dd-text"></i></td>
+              <td><i class="fa fa-check dd-text"></i></td>
+            </tr>
+            <tr>
+              <td>{{'pricing.pricing_table.functionality_7'|trans}}<sup class="dd-text">e</sup></td>
+              <td></td>
+              <td></td>
+              <td><i class="fa fa-check dd-text"></i></td>
+            </tr>
+            <tr>
+              <td>{{'pricing.start_now'|trans}}</td>
+              <td></td>
+              <td><a class="btn waves-effect waves-light" href="{{ path('signup')}}">{{ 'pricing.trial_21_days_cta'|trans }}</a></td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+      <div class="pricing-notes">
+        <h6 class="dd-text">{{'pricing.features'|trans}}</h6>
+        <p class="no-margin">
+          <sup class="dd-text">a</sup>
+          <span>{{ 'pricing.note_a'|trans }}</span>
+        </p>
+        <p class="no-margin">
+          <sup class="dd-text">b</sup>
+          <span>{{'pricing.note_b'|trans}}</span>
+        </p>
+        <p class="no-margin">
+          <sup class="dd-text">c</sup>
+          <span>{{'pricing.note_c'|trans}}</span>
+        </p>
+        <p class="no-margin">
+          <sup class="dd-text">d</sup>
+          <span>{{'pricing.note_d'|trans}}</span>
+        </p>
+        <p class="no-margin">
+          <sup class="dd-text">e</sup>
+          <span>{{'pricing.note_e'|trans}}</span>
+        </p>
+        <h6 class="dd-text">{{ 'pricing.subscriptions'|trans }}</h6>
+        <p class="no-margin">
+          <sup class="dd-text">1</sup>
+          <span>{{'pricing.note_1'|trans|raw}}</span>
+        </p>
+        <p class="no-margin">
+          <sup class="dd-text">2</sup>
+          <span>{{'pricing.note_2'|trans}}</span>
+        </p>
+        <p class="no-margin">
+          <sup class="dd-text">3</sup>
+          <span>{{'pricing.note_3'|trans}}</span>
+        </p>
+      </div>
+    </main>
+
+     <footer>
+        <div id="linkFooter">
+            <div style="width:85%;margin:auto;">
+                <div class="row footer-row align" style="margin-bottom:0">
+                    <div class="col s12 m3 no-margin">
+                        <ul class="flex-center " style="justify-content: space-around;flex-direction:column">
+                            <li>
+                                <img src="{{ asset('lib/img/logo_dd_l.png') }}" alt="" style="width:140px">
+                            </li>
+
+                            {#<p class="grey-text text-lighten-4">ZZYZX Road</p>#}
+                            <li class="grey-text text-lighten-4">38, route d'Esch</li>
+                            <li class="grey-text text-lighten-4">L-1470 Luxembourg</li>
+                            
+                        </ul>
+                    </div>
+                    <div class="col s12 m6">
+                        <ul class="align" style="justify-content: space-around;">
+                            <li class="linkedin">
+                                <a href="https://www.linkedin.com/company/dealdrive-connect-to-clients-crm/" target="_blank">
+                                    <img src="{{ asset('lib/img/linkedin-icon-white.png') }}">
+                                </a>
+                            </li>
+                            {#
+                            <li>
+                                <a href="https://www.youtube.com/channel/UCMVASckl068rgTEsHC4dKsw" target="_blank">
+                                    <img src="{{ asset('lib/img/youtube-white.png') }}">
+                                </a>
+                            </li>
+                            #}
+                            <li>
+                                <a href="http://www.made-in-luxembourg.lu/" target="_blank">
+                                    <img src="{{ asset('lib/img/made_in_white.png') }}" style="width:67px">
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col s12 m3 white-text">
+                        <ul style="display:flex; justify-content: space-around;flex-direction:column; align-items: flex-end;">
+                            <li style="margin-bottom:5px">
+                                <span>{{ 'powered_by'|trans }}</span>
+                                <i class="fa fa-road"></i>
+                                <span>ZZYZX Rd</span>
+                                {#}
+                                <script type="text/javascript">
+                                    document.write(new Date().getFullYear());
+                                </script>
+                                #}
+                            </li>
+                            {#<li class="grey-text text-lighten-4"><a href="mailto:contact@dealdrive.lu" style="color:white;">contact@dealdrive.lu</a></li>#}
+                            {#
+                            <li style="text-align:right">
+                                <a href="{{ path('terms_conditions') }}" class="white-text">{% trans %}footer.tc{% endtrans %}</a>
+                            </li>
+                            #}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </footer>
+
+{% endblock %}
+
+{% block javascripts %}
+  <script src="{{ asset('js/signup.js') }}"></script>
+{% endblock %}

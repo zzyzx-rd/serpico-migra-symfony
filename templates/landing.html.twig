@@ -44,7 +44,7 @@
                 <div class="col m5 s12">
                     
                     <h3 class="motto motto-elmt">{{'landing.motto'|trans}}</h3>
-                    <h5 class="motto-elmt">{{ 'landing.play_with_dummies'|trans }}</h5>
+                    <h5 class="motto-elmt">{{ 'landing.motto_promise'|trans }}</h5>
                 </div>
                 {% set startCalDate = date("first day of " ~ date('now - 3 months')|format_datetime('short','none', pattern="MMMM", locale="en") ~ " " ~ date('now - 3 months')|format_datetime('short','none',pattern='Y')) %}
                 {% set endCalDate = date("last day of " ~ date('now + 3 months')|format_datetime('short','none', pattern="MMMM", locale="en") ~ " " ~ date('now + 3 months')|format_datetime('short','none',pattern='Y')) %}
@@ -74,12 +74,13 @@
                             {% for k in 0..2 %}
                                 <ul class="stages-holder no-margin" style="position:relative">
                                     <ol class="activity-component">
-                                        {% set startdateDay = random(7,160) %}
-                                        {% set period = random(max(0,15 - startdateDay), 190 - startdateDay) %}
-                                        {% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateDay: startdateDay, period: period, embeddedStages: null, visibleEl: true} %}
+                                        {% set startdateU = random(7,160) %}
+                                        {% set period = random(max(0,15 - startdateU), 190 - startdateU) %}
+                                        {% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateU: startdateU, period: period, embeddedStages: null, visibleEl: true} %}
                                     </ol>
                                 </ul>
                             {% endfor %}
+                            <span class="dd-text dummy-data-disclaimer">{{'landing.dummy_data_disclaimer'|trans}}</span>
                         </div>
 
                         <div class="col m3 s4 act-infos">

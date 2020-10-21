@@ -4,9 +4,12 @@ namespace App\Controller;
 
 use App\Entity\Mail;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
+use Symfony\Component\HttpFoundation\Response;
 
 class MailController extends MasterController {
 
@@ -156,10 +159,16 @@ class MailController extends MasterController {
                 $email->attachFromPath('lib/Data/Serpico_Presentation_EN.pdf','Presentation');
             }
 
-            $mailer->send($email);
+            try{
+                $mailer->send($email);
+            } catch (TransportExceptionInterface $e) {
+                // some error prevented the email sending; display an
+                // error message or try to resend the message
+                return new JsonResponse(['file' => $e->getFile(), 'line' => $e->getLine(), 'msg' => $e->getMessage()], 500);
+            }
         }
 
-        return true;
+        return new JsonResponse('success', 200);
 
         /*
         } catch(\Exception $e) {

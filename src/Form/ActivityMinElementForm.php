@@ -86,7 +86,7 @@ class ActivityMinElementForm extends AbstractType
                 ]
             )
 
-            
+            /*
             ->add('complexify', SubmitType::class,
                 [
                     'label_format' => 'activities.create.%name%',
@@ -95,6 +95,7 @@ class ActivityMinElementForm extends AbstractType
                     ],
                 ]
             )
+            */
 
             ->add('submit', SubmitType::class,
                 [

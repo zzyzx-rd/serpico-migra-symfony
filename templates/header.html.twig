@@ -21,15 +21,15 @@
         {% if isLaunched %}
 
         <li>
-          <a class="product" href="{#{{ path('solution') }}#}{{ path('home_welcome') }}">
+          <a class="product" href="{#{{ path('solution') }}#}{{ path('pricing') }}">
             {% trans %}header.pricing{% endtrans %}
           </a>
         </li>
-        {#
         <li>
-          <a href="{{ path('about') }}">{% trans %}header.about{% endtrans %}</a>
+          <a class="product" href="{{ path('home_welcome') }}">
+            {% trans %}header.product{% endtrans %}
+          </a>
         </li>
-        #}
         <li>
           <a class="modal-trigger" href="{{ is_granted('IS_AUTHENTICATED_REMEMBERED') ? path('processesList') : path('login') }}">
             {% trans %}header.login{% endtrans %}
@@ -100,7 +100,7 @@
       
       <ul class="side-nav" id="mobile-menu">
         <li>
-          <a class="product" href="{#{{ path('solution') }}#}{{ path('home_welcome') }}">
+          <a class="product" href="{#{{ path('solution') }}#}{{ path('pricing') }}">
             {% trans %}header.pricing{% endtrans %}
           </a>
         </li>

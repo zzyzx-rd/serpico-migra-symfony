@@ -398,7 +398,9 @@ class SettingsController extends MasterController
             case 'a' :
                 $prop = 'name'; break;
             case 'i' :
-                $prop = 'inserted';
+                $prop = 'inserted';break;
+            case 's' :
+                $prop = 'nbLkEmployees';break;
         }
         $sortingOrder = $_COOKIE['wf_s_o'] == 'a' ? 'ASC' : 'DESC';
         
@@ -954,6 +956,27 @@ class SettingsController extends MasterController
         return $this->redirectToRoute('manageOrganizations');
     }
 
+    // Delete worker firm (limited to root master)
+
+    /**
+     * @param Application $app
+     * @param $orgId
+     * @return mixed
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/root/workerFirm/delete", name="deleteWorkerFirm")
+     */
+    public function deleteWorkerFirmAction(Request $request) {
+        $em = $this->em;
+        $wfiId = $request->get('id');
+        $repoWF = $em->getRepository(WorkerFirm::class);
+        /** @var WorkerFirm */
+        $workerFirm = $repoWF->find($wfiId);
+        $em->remove($workerFirm);
+        $em->flush();
+        return $this->redirectToRoute('manageWorkerFirms');
+    }
+
 
     //Adds organization (limited to root master)
 
@@ -969,7 +992,6 @@ class SettingsController extends MasterController
     {
         $em = $this->em;
         /** @var FormFactory */
-        
         $organizationForm = $this->createForm(AddOrganizationForm::class, null, ['standalone' => true, 'orgId' => 0, 'em' => $em, 'isFromClient' => false]);
         $organizationForm->handleRequest($request);
         $errorMessage = '';
@@ -2755,7 +2777,7 @@ class SettingsController extends MasterController
                 ->innerJoin('App\Entity\Client', 'c', 'WITH', 'c.id = eu.client')
                 ->innerJoin('App\Entity\Organization', 'o', 'WITH', 'o.id = c.clientOrganization')
                 ->innerJoin('App\Entity\WorkerFirm', 'wf', 'WITH', 'wf.id = o.workerFirm')
-                ->where('CONCAT(eu.firstname,\' \', eu.lastname) LIKE :name AND eu.synthetic = FALSE OR eu.lastname LIKE :name AND eu.synthetic = TRUE')
+                ->where('CONCAT(eu.firstname,\' \', eu.lastname) LIKE :name AND eu.synthetic IS NULL OR eu.lastname LIKE :name AND eu.synthetic = TRUE')
                 ->andWhere('eu.id NOT IN (:partExtUsers)')
                 ->andWhere('eu.client IN (:clients)')
                 ->setParameter('partExtUsers',$partExtUsers)
@@ -3137,29 +3159,6 @@ class SettingsController extends MasterController
         $repoWI = $em->getRepository(WorkerIndividual::class);
         $workerIndividual = $repoWI->findOneById($wiId);
         $em->remove($workerIndividual);
-        $em->flush();
-        return new JsonResponse(['message' => "Success"],200);
-    }
-
-    /**
-     * @param Request $request
-     * @param Application $app
-     * @param $wfId
-     * @return JsonResponse
-     * @throws ORMException
-     * @throws OptimisticLockException
-     * @Route("/workers/firm/delete/{wfId}", name="deleteWorkerFirm")
-     */
-    public function deleteWorkerFirm(Request $request, $wfId){
-
-        $connectedUser = MasterController::getAuthorizedUser($app);
-        if($connectedUser->getRole() != 4){
-            return $this->render('errors/403.html.twig');
-        }
-        $em = $this->em;
-        $repoWF = $em->getRepository(WorkerFirm::class);
-        $workerFirm = $repoWF->findOneById($wfId);
-        $em->remove($workerFirm);
         $em->flush();
         return new JsonResponse(['message' => "Success"],200);
     }

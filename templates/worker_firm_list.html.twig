@@ -45,8 +45,9 @@
         <li class="flex-center">
           <div class="input-field">
             <select name="sortingProp" id="sortingProp">
-              <option value="a">{{'worker_firm_list.alphabetical_order'|trans}}</option>
-              <option value="i">{{'worker_firm_list.creation_date_order'|trans}}</option>
+              <option value="a" {{ global.request.cookies.get('wf_s_p') == 'a' ? "selected" }}>{{'worker_firm_list.alphabetical_order'|trans}}</option>
+              <option value="i" {{ global.request.cookies.get('wf_s_p') == 'i' ? "selected" }}>{{'worker_firm_list.creation_date_order'|trans}}</option>
+              <option value="s" {{ global.request.cookies.get('wf_s_p') == 's' ? "selected" }}>{{'worker_firm_list.size_order'|trans}}</option>
             </select>
             <label for="sortingProp">{{ 'sort'|trans }}</label>
           </div>
@@ -54,8 +55,8 @@
         <li class="flex-center">
           <div class="input-field">
             <select name="sortingOrder" id="sortingOrder">
-              <option value="a">{{'ascending'|trans}}</option>
-              <option value="d">{{'descending'|trans}}</option>
+              <option value="a" {{ global.request.cookies.get('wf_s_o') == 'a' ? "selected" }}>{{'ascending'|trans}}</option>
+              <option value="d" {{ global.request.cookies.get('wf_s_o') == 'd' ? "selected" }}>{{'descending'|trans}}</option>
             </select>
             <label for="sortingOrder">{{ 'order'|trans }}</label>
           </div>
@@ -115,11 +116,23 @@
         <button id="client-icon-upload-btn" type="button" class="btn">ok</button>
       </div>
     </div>
+
+    <div id="deleteWorkerFirm" class="modal">
+        <div class="modal-content">
+            <h4>{% trans %}create_organization.delete_modal.title{% endtrans %}</h4>
+            <p>{% trans %}create_organization.delete_modal.content{% endtrans %}</p>
+        </div>
+        <div class="modal-footer">
+            <a class="modal-action modal-close waves-effect waves-green btn-large delete-btn">{% trans %}create_organization.delete_modal.confirm{% endtrans %}</a>
+            <a class="modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}create_organization.delete_modal.cancel{% endtrans %}</a>
+        </div>
+    </div>
+
   </main>
 {% endblock %}
 
 {% block javascripts %}
-  <script>$('select').material_select();</script>
+  <script>$('select').material_select();var durl="{{ url('deleteWorkerFirm',{wfiId: 0}) }}";</script>
   <script defer src="{{ asset('js/worker_firm_list.js') }}"></script>
   <script src="{{ asset('build/user_list.js') }}"></script>
 {% endblock %}

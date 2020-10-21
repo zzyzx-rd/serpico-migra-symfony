@@ -15,7 +15,7 @@ class EventCommentType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
 
-        $builder->add('value', TextareaType::class,
+        $builder->add('content', TextareaType::class,
             [
                 'label' => 'Add comment',
                 'required' => true,

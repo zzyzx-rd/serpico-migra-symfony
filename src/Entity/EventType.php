@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\EventTypeRepository;
 use DateTime;
 use DateTimeInterface;
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -37,11 +38,16 @@ class EventType extends DbObject
     public DateTime $inserted;
 
     /**
+     * @ORM\Column(name="evt_enabled", type="boolean", nullable=false, options={"default": true})
+     */
+    public bool $enabled;
+
+    /**
      * @ManyToOne(targetEntity="Icon", inversedBy="eventTypes")
      * @JoinColumn(name="icon_ico_id", referencedColumnName="ico_id",nullable=true)
      * @var Icon
      */
-    protected $icon;
+    protected ?Icon $icon;
 
     /**
      * @ManyToOne(targetEntity="Organization", inversedBy="eventTypes")
@@ -64,12 +70,17 @@ class EventType extends DbObject
      */
     protected $eName;
 
+    public ?Organization $org;
+    public ?EntityManager $em;
+    public ?string $locale;
+
     /**
      * EventType constructor.
      * @param $id
      * @param $type
      * @param $unit
      * @param $createdBy
+     * @param $enabled
      * @param Icon $icon
      * @param Organization $organization
      * @param EventGroup $eventGroup
@@ -78,6 +89,7 @@ class EventType extends DbObject
     public function __construct(
         $id = null,
         $type = null,
+        $enabled = true,
         $createdBy = null,
         Icon $icon = null,
         Organization $organization = null,
@@ -87,6 +99,7 @@ class EventType extends DbObject
         parent::__construct($id, $createdBy, new DateTime);
         $this->type = $type;
         $this->eName = $eName;
+        $this->enabled = $enabled;
         $this->icon = $icon;
         $this->organization = $organization;
         $this->eventGroup = $eventGroup;
@@ -115,9 +128,9 @@ class EventType extends DbObject
     }
 
     /**
-     * @return Icon
+     * @return Icon|null
      */
-    public function getIcon(): Icon
+    public function getIcon(): ?Icon
     {
         return $this->icon;
     }
@@ -153,6 +166,7 @@ class EventType extends DbObject
      */
     public function getEventGroup(): EventGroup
     {
+
         return $this->eventGroup;
     }
 
@@ -169,6 +183,44 @@ class EventType extends DbObject
     public function setInserted(DateTimeInterface $inserted): self
     {
         $this->inserted = $inserted;
+        return $this;
+    }
+
+    public function setEnabled(bool $enabled): self
+    {
+        $this->enabled = $enabled;
+        return $this;
+    }
+
+    public function isEnabled(): bool
+    {
+        return $this->enabled;
+    }
+
+    public function getDTrans(){
+        $translatables =  $this->em->getRepository(DynamicTranslation::class)->findBy(['entity' => 'EventName', 'entityId' => $this->getEName()->getId(), 'entityProp' => 'name', 'organization' => [null, $this->org]], ['organization' => 'ASC']);
+        if(!$translatables){
+            return $this->getEName()->getName();
+        } else {
+            /** @var DynamicTranslation */
+            $translatable = sizeof($translatables) > 1 ? $translatables[1] : $translatables[0];                
+            $translatable->locale = $this->locale;
+            return $translatable->getDynTrans();
+        }
+    }
+
+    public function setLocale($locale){
+        $this->locale = $locale;
+        return $this;
+    }
+
+    public function setEm($em){
+        $this->em = $em;
+        return $this;
+    }
+
+    public function setOrg($org){
+        $this->org = $org;
         return $this;
     }
 }

@@ -49,6 +49,15 @@ use App\Entity\CriterionGroup;
 use App\Entity\CriterionName;
 use App\Entity\Decision;
 use App\Entity\Department;
+use App\Entity\DocumentAuthor;
+use App\Entity\DynamicTranslation;
+use App\Entity\Event;
+use App\Entity\EventComment;
+use App\Entity\EventDocument;
+use App\Entity\EventGroup;
+use App\Entity\EventGroupName;
+use App\Entity\EventName;
+use App\Entity\EventType;
 use App\Entity\ExternalUser;
 use App\Entity\GeneratedImage;
 use App\Entity\Grade;
@@ -85,6 +94,7 @@ use App\Form\AddOrganizationForm;
 use App\Form\AddSignupUserForm;
 use App\Form\ManageProcessForm;
 use App\Repository\OrganizationRepository;
+use DateTimeZone;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Annotation\Route;
@@ -6743,7 +6753,6 @@ class OrganizationController extends MasterController
     public function updateOrgFeatures(Organization $organization, $nonExistingOrg = true, $createdAsClient = false)
     {
         
-
             $em = $this->em;
     
             if($createdAsClient){
@@ -6872,13 +6881,33 @@ class OrganizationController extends MasterController
                     $organization->addCriterionName($criterion);
                     //$em->persist($criterion);
                 }
-    
+
+                // Setting up Events
+                /** @var EventGroupName[] */
+                $eventGroupNames = $em->getRepository(EventGroupName::class)->findAll();
+
+                foreach ($eventGroupNames as $egn) {
+                    $eventGroup = new EventGroup;
+                    $eventGroup->setEventGroupName($egn);
+                    
+                    /** @var EventName[] */
+                    $eventNames = $egn->getEventNames();
+                    foreach($eventNames as $en){
+                        $eventType = new EventType;
+                        $eventType->setEName($en)
+                            ->setIcon($en->getIcon());
+                        $eventGroup->addEventType($eventType);
+                        $organization->addEventType($eventType);
+                    }
+                    $organization->addEventGroup($eventGroup);
+                }
+
                 //Synthetic User Creation (for external, in case no consituted team has been created to grade a physical person for an activity)
                 $syntheticUser = new User;
                 $syntheticUser
                     ->setFirstname('ZZ')
                     ->setSynthetic(true)
-                    ->setLastname($connectedUserOrg->getCommname())
+                    ->setLastname($organization->getCommname())
                     ->setRole(3);
         
                 $organization->addUser($syntheticUser);
@@ -6891,6 +6920,253 @@ class OrganizationController extends MasterController
             return new Response('success',200);
     }
 
+
+    /**
+     * @param Request $request
+     * @param $entity
+     * @param $elmtId
+     * @return string|RedirectResponse|Response
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/dynamic/translations", name="getDynamicTranslations")
+     */
+
+    /**
+     * @param Request $request
+     * @param $entity
+     * @param $elmtId
+     * @return string|RedirectResponse|Response
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/organization/events/event-names", name="getEventTypesFromEventGroup")
+     */
+    public function getEventTypesFromEventGroup(Request $request){
+        $evgId = $request->get('id');
+        $em = $this->em;
+        $locale = strtoupper($request->getLocale());
+        $org = $this->org;
+        $eventGroup = $em->getRepository(EventGroup::class)->find($evgId);
+        //$eventGroup = 
+        $eventTypes = $eventGroup->getEventTypes()->map(
+            function(EventType $et) use ($em,$locale,$org){
+                $et->em = $em;
+                $et->locale = $locale;
+                $et->org = $org;
+                return [
+                    'id' => $et->getId(),
+                    'name' => ($et->getIcon() ? '~' . $et->getIcon()->getUnicode() .'~ ' : '') . $et->getDTrans(),
+                ];
+            }
+        )->getValues();
+        
+        //dd($eventTypes);
+        return new JsonResponse($eventTypes, 200);
+    }
+
+    /**
+     * Delete event
+     * @Route("/organization/event/delete/{eveId}", name="deleteEvent")
+     */
+    public function deleteEvent(int $eveId){
+        $em = $this->em;
+        /** @var Event */
+        $event = $em->getRepository(Event::class)->find($eveId);
+        if(!$event){
+            return new JsonResponse(['msg' => 'error'], 500);
+        }
+        $stage = $event->getStage();
+        $stage->removeEvent($event);
+        $em->persist($stage);
+        $em->flush();
+        return new JsonResponse(['msg' => 'success'], 200);
+    }
+    /**
+     * Delete event document
+     * @Route("/organization/event/document/delete/{id}", name="deleteDocument")
+     */
+    public function deleteDocument(int $id){
+        $em = $this->em;
+        /** @var EventDocument */
+        $eventDocument = $em->getRepository(EventDocument::class)->find($id);
+        if(!$eventDocument){
+            return new JsonResponse(['msg' => 'error'], 500);
+        }
+        $event = $eventDocument->getEvent();
+        $event->removeDocument($eventDocument);
+        $em->persist($event);
+        $em->flush();
+        return new JsonResponse(['msg' => 'success'], 200);
+    }
+    /**
+     * Delete event comment
+     * @Route("/organization/event/comment/delete/{id}", name="deleteComment")
+     */
+    public function deleteComment(int $id){
+        $em = $this->em;
+        /** @var EventComment */
+        $eventComment = $em->getRepository(EventComment::class)->find($id);
+        if(!$eventComment){
+            return new JsonResponse(['msg' => 'error'], 500);
+        }
+        $event = $eventComment->getEvent();
+        $event->removeComment($eventComment);
+        $em->persist($event);
+        $em->flush();
+        return new JsonResponse(['msg' => 'success'], 200);
+    }
+
+    /**
+     * Gets current data of related stage
+     * @Route("/organization/stage/data", name="getStageData")
+     */
+    public function retrieveStageData(Request $request){
+        $stgId = $request->get('id');
+        $em = $this->em;
+        $locale = strtoupper($request->getLocale());
+        $currentUser = $this->user;
+        $org = $this->org;
+        /** @var Stage */
+        $stage = $em->getRepository(Stage::class)->find($stgId);
+
+        $data['aname'] = $stage->getActivity()->getId();
+        $data['aname'] = $stage->getActivity()->getName();
+        $data['name'] = $stage->getName();
+        $data['progress'] = $stage->getProgress();
+        $data['sdate'] = $stage->getStartdate();
+        $data['edate'] = $stage->getEnddate();
+
+        foreach($stage->getEvents() as $event){
+            $evtData = [];
+            $evtData['id'] = $event->getId();
+            /** @var EventGroup */
+            $eventGroup = $event->getEventType()->getEventGroup();
+            /** @var EventType */
+            $eventType = $event->getEventType();
+            $eventType->setLocale($locale)->setEm($em)->setOrg($org);
+            $eventGroup->setLocale($locale)->setEm($em)->setOrg($org);
+            $evtData['evgId'] = $eventGroup->getEventGroupName()->getId();
+            $evtData['evg'] = $eventGroup->getDTrans();
+            $evtData['evt'] = $eventType->getDTrans();
+            $evtData['odate'] = $event->getOnsetDate();
+            $evtData['rdate'] = $event->getExpResDate();
+            $evtData['nbdocs'] = $event->getDocuments()->count();
+            $evtData['nbcoms'] = $event->getComments()->count();
+            $data['events'][] = $evtData;
+        }
+
+        foreach($stage->getUniqueParticipations() as $participant){
+            $user = $participant->getUser();
+            $partData = [];
+            $partData['uid'] = $participant->getId();
+            $partData['fullname'] = $user->getFullname();
+            $externalUser = $participant->getExternalUser();
+            if($externalUser){
+                $partData['eid'] = $externalUser->getId();
+                $clientName = $externalUser->getClient()->getName();
+                $partData['fullname'] .= " ($clientName)";
+            }
+            $partData['synth'] = $user->isSynthetic();
+            $partData['picture'] = $user->isSynthetic() ? 'lib/img/org/no-picture.png' : ($user->getPicture() ?: 'lib/img/user/no-picture.png');
+           
+            $data['participants'][] = $partData;
+        }
+        
+        return new JsonResponse($data, 200);
+    }
+
+    /**
+     * Gets current data of related event
+     * @Route("/organization/event/data", name="getEventData")
+     */
+    public function retrieveEventData(Request $request){
+        $eveId = $request->get('id');
+        $em = $this->em;
+        $currentUser = $this->user;
+        /** @var Event */
+        $event = $em->getRepository(Event::class)->find($eveId);
+        $data['sid'] = $event->getStage()->getId();
+        $data['sname'] = $event->getStage()->getName();
+        $data['type'] = $event->getEventType()->getId();
+        $data['group'] = $event->getEventType()->getEventGroup()->getId();
+        $data['odate'] = $event->getOnsetDate();
+        $data['expResDate'] = $event->getExpResDate();
+        foreach($event->getDocuments() as $document){
+            $docData = [];
+            $commData['id'] = $document->getId();
+            $docData['title'] = $document->getTitle();
+            $docData['path'] = $document->getPath();
+            $docData['type'] = $document->getType();
+            $docData['mime'] = $document->getMime();
+            $docData['size'] = $document->getSize();
+            $documents['authors'] = $document->getDocumentAuthors()->count() > 0 ? $document->getDocumentAuthors()->map(fn(DocumentAuthor $da) => ['mainAuthor' => $da->isLeader(), 'fullname' => $da->getAuthor()->getFullName()])->getValues()[0] : '';
+            $docData['inserted'] = $document->getInserted();
+            $data['documents'][] = $docData;
+        }
+
+        foreach($event->getComments() as $comment){
+            $commData = [];
+            $commData['id'] = $comment->getId();
+            $commData['self'] = $comment->getAuthor() == $currentUser;
+            $commData['author'] = $comment->getAuthor()->getFullName();
+            $commData['content'] = $comment->getContent();
+            $commData['inserted'] = $comment->getInserted()->setTimezone(new DateTimeZone('Europe/Paris'));
+            foreach($comment->getChildren() as $subComment){
+                $subCommentData = [];
+                $commData['id'] = $comment->getId();
+                $commData['self'] = $comment->getAuthor() == $currentUser;
+                $subCommentData['author'] = $subComment->getAuthor()->getFullName();
+                $subCommentData['content'] = $subComment->getContent();
+                $subCommentData['inserted'] = $subComment->getInserted()->setTimezone(new DateTimeZone('Europe/Paris'));
+                $commData['relatedComments'][] = $commData;
+            }
+            $data['comments'][] = $commData;
+        }
+        
+        return new JsonResponse($data, 200);
+    }
+
+
+     /**
+     * @param Request $request
+     * @param $entity
+     * @param $elmtId
+     * @return string|RedirectResponse|Response
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/dynamic/translations", name="getDynamicTranslations")
+     */
+
+    public function getDynamicTranslations(Request $request){
+
+        $em = $this->em;
+        
+        $repoET = $em->getRepository(EventType::class);
+        $repoT = $em->getRepository(DynamicTranslation::class);
+        $locale = strtoupper($request->getLocale());  
+        $translatableElmts = $request->get('elmts');
+        $lElmts = [];
+        
+        foreach($translatableElmts as $translatableElmt){
+            if($translatableElmt['e'] == 'EventGroupName'){
+                $motherEntityId = $em->getRepository(EventGroup::class)->find($translatableElmt['id'])->getEventGroupName()->getId();
+            } else {
+                $motherEntityId = $em->getRepository(EventType::class)->find($translatableElmt['id'])->getEName()->getId();
+            }
+            
+            $translatables = $repoT->findBy(['entity' => $translatableElmt['e'], 'entityId' => $motherEntityId, 'entityProp' => $translatableElmt['p'], 'organization' =>[null, $this->org]], ['organization' => 'ASC']);
+            if(!$translatables){
+                $lElmts[] = "";
+            } else {
+                /** @var DynamicTranslation */
+                $translatable = sizeof($translatables) > 1 ? $translatables[1] : $translatables[0];                
+                $translatable->locale = $locale;
+                $lElmts[] = $translatable->getDynTrans();
+            }
+        }
+        
+        return new JsonResponse(['lElmts' => $lElmts], 200);
+
+    }
 
     /**
      * @param Request $request

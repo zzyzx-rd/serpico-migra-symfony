@@ -1,11 +1,4 @@
-  <li class="stage-element {{dateType ~ '-dates' ~ (isEmbedded ? ' embedded' : '')}} tooltipped" data-sd="{{ startdateDay }}" data-p="{{ period }}" data-tooltip="{% apply escape %}{% include "components/stage_holder__item.html.twig" with { stage: stage, embeddedStages: embeddedStages } %}{% endapply %}" data-position="top" data-html="true" {% if not visibleEl %}style="display:none"{% endif %}>
-
-        {#{% if dateType == 's' %}#}
-        
-          
-        
-        {#{% endif %}#}
-        
+  <li class="stage-element {{dateType ~ '-dates' ~ (embeddedStages is not empty ? ' s-multiple-events' : ' s-selectable') ~ (isEmbedded ? ' embedded' : '')}} tooltipped" data-name="{{stage.name}}" data-id="{{stage.id}}" data-sd="{{ startdateU }}" data-p="{{ period }}" data-tooltip="{% apply escape %}{% include "components/stage_holder__item.html.twig" with { stage: stage, embeddedStages: embeddedStages } %}{% endapply %}" data-position="top" data-html="true" {% if not visibleEl %}style="display:none"{% endif %}>
 
     <section class="stage-container completed-stages-container"></section>
     
@@ -31,6 +24,6 @@
       
       {% if embeddedStages is not empty %}
         <span class="multiple-stages s-multiple-stages"> {{ embeddedStages|length + 1 }} </span>
-      {% endif %}    
-  
+      {% endif %}
+
 </li>

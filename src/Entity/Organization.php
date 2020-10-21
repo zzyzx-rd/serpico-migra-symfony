@@ -160,7 +160,7 @@ class Organization extends DbObject
      */
     public $usersCSV;
     /**
-     * @ORM\OneToOne(targetEntity=WorkerFirm::class, inversedBy="organization", cascade={"persist"})
+     * @ORM\ManyToOne(targetEntity=WorkerFirm::class, inversedBy="organizations")
      * @JoinColumn(name="worker_firm_wfi_id", referencedColumnName="wfi_id", nullable=true)
      */
     private $workerFirm;
@@ -183,7 +183,7 @@ class Organization extends DbObject
     protected $plan;
 
     /**
-     * @OneToMany(targetEntity="Team", mappedBy="organization",cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="Team", mappedBy="organization",cascade={"persist", "remove"})
      */
     public $teams;
     /**
@@ -191,7 +191,7 @@ class Organization extends DbObject
      */
     public $mails;
     /**
-     * @OneToMany(targetEntity="Target", mappedBy="organization",cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="Target", mappedBy="organization",cascade={"persist", "remove"})
      */
     public $targets;
     /**
@@ -199,7 +199,7 @@ class Organization extends DbObject
      */
     public $options;
     /**
-     * @OneToMany(targetEntity="Process", mappedBy="organization", cascade={"persist","remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="Process", mappedBy="organization", cascade={"persist","remove"})
      */
     public $processes;
     /**
@@ -223,14 +223,18 @@ class Organization extends DbObject
     protected $eventGroups;
 
     /**
-     * @OneToMany(targetEntity="EventType", mappedBy="organization", cascade={"persist","remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="EventType", mappedBy="organization", cascade={"persist","remove"})
      */
     protected $eventTypes;
 
     /**
-     * @OneToMany(targetEntity="Event", mappedBy="organization", cascade={"persist","remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="Event", mappedBy="organization", cascade={"persist","remove"})
      */
     protected $events;
+    /**
+     * @OneToMany(targetEntity="DynamicTranslation", mappedBy="organization", cascade={"persist","remove"})
+     */
+    protected $dTranslations;
 
     const PLAN_FREE = 3;
     const PLAN_PREMIUM = 2;
@@ -309,8 +313,8 @@ class Organization extends DbObject
         $options = null,
         $processes = null,
         $institutionProcesses = null,
-        array $criterionGroups = null,
-        $workerFirm = null)
+        array $criterionGroups = null
+        )
     {
         parent::__construct($id, $createdBy, new DateTime());
         $this->legalname = $legalname;
@@ -346,7 +350,10 @@ class Organization extends DbObject
         $this->institutionProcesses = $institutionProcesses?: new ArrayCollection();
         $this->criterionGroups = $criterionGroups?: new ArrayCollection();
         $this->users = $users?: new ArrayCollection();
-        $this->workerFirm = $workerFirm;
+        $this->eventGroups = new ArrayCollection();
+        $this->eventTypes = new ArrayCollection();
+        $this->translations = new ArrayCollection();
+
     }
 
 
@@ -376,7 +383,6 @@ class Organization extends DbObject
     public function setLegalname(string $legalname): self
     {
         $this->legalname = $legalname;
-
         return $this;
     }
 
@@ -1088,9 +1094,7 @@ class Organization extends DbObject
      */
     public function getUsers()
     {
-        return $this->users->filter(function(User $u){
-            return $u->getLastname() != 'ZZ';
-        });
+        return $this->users;
     }
 
     public function addUser(User $user): Organization
@@ -1172,6 +1176,69 @@ class Organization extends DbObject
 
     function getPendingInstitutionProcesses() {
         return $this->institutionProcesses->filter(fn(InstitutionProcess $p) => $p->isApprovable());
+    }
+
+    /**
+    * @return ArrayCollection|EventGroup[]
+    */
+    public function getEventGroups()
+    {
+        return $this->eventGroups;
+    }
+
+    public function addEventGroup(EventGroup $eventGroup): self
+    {
+        $this->eventGroups->add($eventGroup);
+        $eventGroup->setOrganization($this);
+        return $this;
+    }
+
+    public function removeEventGroup(EventGroup $eventGroup): self
+    {
+        $this->eventGroups->removeElement($eventGroup);
+        return $this;
+    }
+
+    /**
+    * @return ArrayCollection|EventType[]
+    */
+    public function getEventTypes()
+    {
+        return $this->eventTypes;
+    }
+
+    public function addEventType(EventType $eventType): self
+    {
+        $this->eventTypes->add($eventType);
+        $eventType->setOrganization($this);
+        return $this;
+    }
+
+    public function removeEventType(EventType $eventType): self
+    {
+        $this->eventTypes->removeElement($eventType);
+        return $this;
+    }
+    
+    /**
+    * @return ArrayCollection|DynamicTranslation[]
+    */
+    public function getDTranslations()
+    {
+        return $this->dTranslations;
+    }
+
+    public function addDTranslation(DynamicTranslation $dTranslation): self
+    {
+        $this->dTranslations->add($dTranslation);
+        $dTranslation->setOrganization($this);
+        return $this;
+    }
+
+    public function removeDTranslation(DynamicTranslation $dTranslation): self
+    {
+        $this->dTranslations->removeElement($dTranslation);
+        return $this;
     }
 
 

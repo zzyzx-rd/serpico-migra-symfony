@@ -16,6 +16,22 @@ $(function(){
         }
         location.reload();
     });
+    $('[name="sortingProp"]').on('change',function(){
+        var $this = $(this);
+        eraseCookie('wf_s_p');
+        if($this.val()){
+            setCookie('wf_s_p',$this.val(),365);
+        }
+        location.reload();
+    });
+    $('[name="sortingOrder"]').on('change',function(){
+        var $this = $(this);
+        eraseCookie('wf_s_o');
+        if($this.val()){
+            setCookie('wf_s_o',$this.val(),365);
+        }
+        location.reload();
+    });
     $('[name="citySelector"]').on('change',function(){
         var $this = $(this);
         eraseCookie('wf_cit');
@@ -53,7 +69,17 @@ $(function(){
         location.reload();
     });
 
+    $('[href="#deleteWorkerFirm"]').on('click',function(){
+        $('.delete-btn').attr('data-id',$(this).attr('data-id'));
+    });
 
+    $('.delete-btn').on('click',function(e){
+        e.preventDefault();
+        $.post(durl,{id: $(this).attr('data-id')})
+            .done(function(data){
+                $(`[href="#deleteWorkerFirm"][data-id=${wid}]`).closest('.firms-list--item').remove();
+            })
+    })
 
 
    
