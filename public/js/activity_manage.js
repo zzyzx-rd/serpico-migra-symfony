@@ -1447,6 +1447,7 @@ function dateUpdate() {
     if(!$('.participants-list--item').length){
       directInsert(myself,un,uid,userPic,'u');
     }
+    $('#addParticipant').removeAttr('id');
   });
 
   $('.activity-holder').on('mouseover',function(){
@@ -1462,6 +1463,12 @@ function dateUpdate() {
    
   });
 
+  $(document).on('mouseenter','.participant-btn',function(){
+    $(this).find('.p-delete-overlay').show();
+  }).on('mouseleave','.participant-btn',function(){
+    $(this).find('.p-delete-overlay').hide();
+  }),
+
   $(document).on('click','.stage-element',function(){
     if($(this).hasClass('s-multiple-events')){
       $(this).removeClass('s-selectable');
@@ -1473,27 +1480,40 @@ function dateUpdate() {
         console.log(data);
         const options = { month: 'numeric', day: 'numeric' };
         $modal = $('#createActivity');
-        $modal.find('.modal-title > h5').empty().append(data.name);
+        $modal.attr({'data-id':id, 'data-sid':data.aid});
+        $modal.find('.btn-s-update').hide();
+        $modal.find('.btn-s-modify').show();
+        $modal.find('.s-name').empty().append(data.name);
         $modal.find('input[name*="name"]').closest('.input-field').hide();
-        $modal.find('.act-dates').empty().append(`<i class="fa fa-calendar"></i><span class="sm-left s-date">${new Date(data.sdate.date).toLocaleDateString(lg+'-'+lg.toUpperCase(),options)}</span><span class="sm-right sm-left">-</span><span class="e-date">${new Date(data.edate.date).toLocaleDateString(lg+'-'+lg.toUpperCase(),options)}</span>`);
+        $modal.find('.s-dates').empty().append(`<i class="fa fa-calendar"></i><span class="sm-left s-date">${new Date(data.sdate.date).toLocaleDateString(lg+'-'+lg.toUpperCase(),options)}</span><span class="sm-right sm-left">-</span><span class="e-date">${new Date(data.edate.date).toLocaleDateString(lg+'-'+lg.toUpperCase(),options)}</span><div class="s-modify-dates m-left"><i class="btn-s-update btn-s-dates fa fa-pen dd-orange-text" style="display:none"></i></div>`);
         $modal.find('.dp-start').pickadate('picker').set('select',new Date(data.sdate.date));
         $modal.find('.dp-end').pickadate('picker').set('select',new Date(data.edate.date));
         $modal.find('.dp-start').closest('.row').hide();
+        $modal.find('.s-dates-row').append('<div class="btn dates-validate"><i class="material-icons">check</i></div>');
+        $modal.find('.s-dates-row').addClass('flex-center-sb').find('.col').removeClass('s6 m6');
         $modal.find('.events').show();
         $partHolder = $modal.find('ul.participants-list');
-        $partHolder.empty();
+        $partHolder.find('.participants-list--item').remove();
+        $partHolder.find('.btn-participant-add').attr('id','addParticipant');
+        $modal.find('.nb-participants').empty().append(`(${data.participants ? data.participants.length : 0})`);
         $(data.participants).each(function(i,p){
           $partElmt = $($partHolder.data('prototype'));
+          $partElmt.find('.participant-field-zone').remove();
+          $partElmt.find('');
           $partElmt.find('.selected-participant-logo').attr('src', p.picture);
-          $partElmt.find('.participant-btn').show().attr('data-tooltip',p.fullname);
-          $partElmt.find('.participant-field-zone').hide();
+          $partElmt.find('.participant-btn').attr({
+            'data-tooltip' : p.fullname + (p.synth ? ' (' + synthSuffix + ')' : ''),
+            'data-pid' : p.id,
+          }).addClass('existing deletable modal-trigger').attr('href','#deleteParticipant').append('<div class="p-delete-overlay flex-center" style="display:none;"><i class="fa fa-trash"></i></div>').show();
           $partElmt.find('.tooltipped').tooltip();
-          $partHolder.append($partElmt);
+          $partHolder.prepend($partElmt);
         })
         $evtHolder = $modal.find('ul.events-list');
         $evtHolder.empty();
+        $modal.find('.nb-events').empty().append(`(${data.events ? data.events.length : 0})`);
         $(data.events).each(function(i,e){
           $evtElmt = $($evtHolder.data('prototype'));
+          $evtElmt.find('.e-odate').empty().append(e.odate);
           $evtElmt.find('.evg-circle').addClass(`evg-b-${e.evgId}`);
           if(e.nbcoms > 0){
             $evtElmt.find('.e-comments').show().find('.nb-coms').append(e.nbcoms);
@@ -1514,6 +1534,31 @@ function dateUpdate() {
         console.log(data);
       })
 
+  });
+
+  $(document).on('click','.btn-s-dates', function(){
+    $('.s-dates').hide();
+    $('.s-dates-row').show();
+  })
+
+  $(document).on('click','.dates-validate',function(){
+    const $this = $(this);
+    const $modal = $this.closest('.modal');
+    const $outputOptions = { month: 'numeric', day: 'numeric'};
+    const $sentOptions = { month: 'numeric', day: 'numeric', year: 'numeric'};
+    const loc = `${lg}-${lg.toUpperCase()}`;
+    const sdStr = $modal.find('.dp-start').val().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const edStr = $modal.find('.dp-end').val().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    const sd = new Date(sdStr).toLocaleString('en-EN',$sentOptions);
+    const ed = new Date(edStr).toLocaleString('en-EN',$sentOptions);
+    const $params = {id: $modal.attr('data-id'), sd: sd, ed: ed}  
+    $.post(usdurl,$params)
+      .done(function(data){
+        $('.s-dates-row').hide();
+        $('.s-date').empty().append(new Date(sdStr).toLocaleString(loc,$outputOptions));
+        $('.e-date').empty().append(new Date(edStr).toLocaleString(loc,$outputOptions));
+        $('.s-dates').show();
+      })
   });
 
   $(document).on('click','.fa-external-link-alt',function(){
@@ -1553,6 +1598,7 @@ function dateUpdate() {
 
   $('[href="#updateEvent"]').on('click',function(){
 
+    $modal = $('#updateEvent');
     $modal.find('.btn-e-update, .e-create').show();
     $modal.find('.btn-e-modify').hide();
     $modal.find('.ev-info').remove();
@@ -1598,7 +1644,7 @@ function dateUpdate() {
     const $this = $(this);
     //const params = {sid: $this.attr('data-sid'), eid: $this.hasClass('btn-floating') ? 0 : $this.attr('data-eid'), mids: true};
     //data = $('#updateEvent form').serialize() + '&' + $.param(params);
-
+    
     formData = new FormData($('#updateEvent form')[0]);
     formData.append('sid',$this.attr('data-sid'));
     formData.append('eid',$this.hasClass('btn-floating') ? 0 : $this.attr('data-eid'));
@@ -1649,16 +1695,18 @@ function dateUpdate() {
         $docHolder.empty();
         $(data.documents).each(function(i,d){
 
-            $docElmt = $($docHolder.data('prototype-display'));
+            $docElmt = $($docHolder.data('prototype-existing'));
             $docElmt.find('.e-doc-ext').append(d.type);
             $docElmt.find('.e-doc-title').append(d.title);
             $docElmt.find('.e-doc-size').append(`${Math.round(d.size/1000)} Ko`);
-            $docElmt.find('.file-download').attr({
+            $docElmt.find('.fa-file-download').attr({
               'data-path' : d.path,
               'data-mime' : d.mime,
               'data-title' : d.title
             });
+            $docElmt.attr('data-id',d.id);
             $docElmt.find('.tooltipped').tooltip();
+            $docElmt.find('.collapsible').collapsible();
             $docHolder.append($docElmt);
         });
         $docHolder.find('.btn-e-update').hide();
@@ -1671,7 +1719,7 @@ function dateUpdate() {
         $comHolder = $modal.find('.e-comments');
         $comHolder.empty();
         $(data.comments).each(function(i,c){
-            $comElmt = $($comHolder.data('prototype-display'));
+            $comElmt = $($comHolder.data('prototype-existing'));
             $comElmt.attr('data-id',c.id);
             $comElmt.find('.e-com-author').append(c.author);
             $comElmt.find('.e-com-content').append(c.content);           
@@ -1694,8 +1742,8 @@ function dateUpdate() {
           $evgCircle.removeClass('evg-input-circle').removeClass('evg-b-1').addClass(`evg-b-${$('#eventGSelector option:selected').attr('data-evgid')}`);
           $modal.find('.event-element-name').empty().append(data.sname);
           $modal.find('.fa-external-link-alt').attr({
-            'data-id' :data.sid,
-            'data-tooltip' : evtAccStgMsg,   
+            'data-id' : data.sid,
+            'data-tooltip' : data.ms ? evtAccStgMsg : evtAccActMsg,   
           }).tooltip();
 
           var $headerEVG = $('<div class="ev-info flex-center"></div>');
@@ -1708,7 +1756,7 @@ function dateUpdate() {
             .append(`<div class="btn-flat btn-e-update" style="display:none;"><i class="fa fa-cog"></i><div>`);
             $modal.find('header>h5').prepend($headerEVG);
             $modal.find('.event-selection').hide();
-          $("#updateEvent").modal('open');
+          $("#updateEvent").attr('data-id',id).modal('open');
 
         },200);
           
@@ -1721,9 +1769,136 @@ function dateUpdate() {
   $('.event-select-btn').on('click',function(){
     const selectedVal = $('#eventSelector').val();
     if($(`.event[data-id="${selectedVal}"]`).hasClass('e-multiple-events')){
-      $(this).addClass('e-selectable');
+      $(`.event[data-id="${selectedVal}"]`).addClass('e-selectable');
     }
     $(`.event[data-id="${parseInt(($('#eventSelector').val()))}"]`).click();
+  })
+
+  $(document).on('click', '.e-doc-update', function(){
+    $(this).parent().find('.doc-actions').show();
+    $(this).hide();
+  })
+
+  $(document).on('mouseover','.e-document',function(){
+      if(!$('.doc-name-validate:visible').length){
+        $(this).find('.doc-actions').show();
+      }
+  }).on('mouseleave','.e-document',function(){
+    $(this).find('.doc-actions').hide();
+  })
+
+  $(document).on('click','.doc-name-validate',function(){
+      const $this = $(this);
+      const $docElmt = $this.closest('.e-document');
+      const title = $this.parent().find('input').val();
+      const $params = {id: $docElmt.data('id'), title: title}
+      $.post(udturl,$params)
+        .done(function(data){
+          $docElmt.find('.doc-input-zone').remove();
+          $docElmt.find('.e-doc-title').empty().append(title).show();
+          $docElmt.find('.e-doc-size').show();
+        })
+  });
+
+  $(document).on('click','.doc-upload-validate',function(){
+      const $this = $(this);
+      const $docElmt = $this.closest('.e-document');
+      const $docHolder = $docElmt.closest('.e-documents');
+      const $evtElmt = $docElmt.closest('.modal');
+      if($this.closest('.col').find('.e-doc-remove').length){
+        $hiddenDocElmt = $($docHolder.data('prototype-existing'));
+        $hiddenDocElmt.hide();
+        $docElmt.before($hiddenDocElmt);
+        isExisting = false;
+      } else {
+        $hiddenDocElmt = $docElmt.prev();
+        isExisting = true;
+      }
+      const $docFile = $docElmt.find('.dropify');
+      var form = new FormData();
+      form.append("file",$docFile[0].files[0]);
+      if(!isExisting){
+        form.append("eid",$evtElmt.data('id'));
+        form.append("title",$docElmt.find('input[type="text"]').val());
+      } else {
+        form.append("id", $hiddenDocElmt.attr('data-id'));
+      }
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST",udcurl);
+      xhr.onload = function (oEvent) {
+        if (xhr.status === 200) {
+            d = JSON.parse(xhr.response);
+            $docElmt.remove();
+            console.log('upload success',xhr.responseText);
+            $hiddenDocElmt.find('.e-doc-ext').empty().append(d.type);
+            $hiddenDocElmt.find('.fa-file-download').attr({
+              'data-path' : d.path,
+              'data-mime' : d.mime,
+              'data-title' : d.title,
+            });
+            if(!isExisting){
+              $hiddenDocElmt.find('.e-doc-title').append($docElmt.find('input[type="text"]').val());
+              $evtElmt.find('.documents-number').empty().append($evtElmt.find('.e-document').length);
+            }
+            $hiddenDocElmt.find('.e-doc-size').empty().append(`${Math.round(d.size/1000)} Ko`);
+            $hiddenDocElmt.attr('data-id',d.id).show();
+        } else {
+            console.log("Error " + xhr.status + " occurred when trying to upload your file.<br \/>");
+        }
+      };
+      xhr.send(form);
+  });
+
+  $(document).on('click','.e-doc-upload',function(){
+      const $docElmt = $(this).closest('.e-document');
+      const docTitle = $docElmt.find('.e-doc-title').text();
+      const $docHolder = $docElmt.closest('.e-documents');
+      $proto = $($docHolder.data('prototype-creation'));
+      $proto.addClass('updating');
+      $proto.find('.dropify').dropify();
+      $proto.find('.input-field').empty().append(`<span>${docTitle}</span>`);
+      $proto.find('.col:last-of-type').empty().append('<div class="btn doc-upload-validate btn-reduced-padding"><i class="material-icons">check</i></div>')
+      $proto.find('.dropify-message p').css('margin','auto');
+      $docElmt.after($proto);
+      $docElmt.hide();
+  });
+
+  $(document).on('mouseover','.s-dates, ul.participants-list, .events-title, .s-title-zone',function(){
+    if(!$(this).closest('.modal').find('input:visible').length){
+      $(this).find('.btn-s-update').show();
+    }
+  }).on('mouseleave','.s-dates, ul.participants-list, .events-title, .s-title-zone',function(){  
+    if(!$(this).find('input').length){
+      $(this).find('.btn-s-update').hide();
+    }
+  })
+
+  $(document).on('click','.s-name-update',function(){
+    const $this = $(this);
+    if(!$this.find('input').length){
+      const $modal = $this.closest('.modal');
+      const $sName = $modal.find('.s-name');
+      $sName.hide();
+      $this.find('.fa-pen').hide();
+      $this.prepend(`<div class="s-name-input-zone"><input type="text" class="s-name-input-name" value="${$sName.text()}"><div class="btn btn-reduced-padding s-name-validate"><i class="material-icons">check</i></div><div>`);
+    } 
+  })
+
+  $(document).on('click','.s-name-validate',function(){
+    const $this = $(this);
+    const $modal = $this.closest('.modal');
+    const name = $this.parent().find('input').val();
+    const $params = {id: $modal.data('id'), name: name}
+    $.post(usnurl,$params)
+      .done(function(data){
+        if(data.actNameChg){
+          $(`.stage-element[data-id=${$modal.data('id')}]`).closest('.activity-holder').find('.act-info').find('.act-info-name').empty().append(name);
+        }
+        $modal.find('.s-name-input-zone').remove();
+        $modal.find('.s-name-update > i').show();
+        $modal.find('.s-name-update').hide();
+        $modal.find('.s-name').empty().append(name).show();
+      })
   })
 
   $(document).on('click','.e-com-modify',function(){
@@ -1745,7 +1920,7 @@ function dateUpdate() {
   $('.e-com-delete').on('click',function(){
    
     urlToPieces = dcomurl.split('/');
-    id = $(this).attr('data-id');
+    id = $(this).data('id');
     urlToPieces[urlToPieces.length - 1] = id;
     url = urlToPieces.join('/');
     $.delete(url,null)
@@ -1755,15 +1930,29 @@ function dateUpdate() {
     
   });
 
-  /*$(document).on('click','[href="#deleteDocument"]',function(){
-    $('e-com-delete').attr('data-id',$(this).closest('.e-existing-comment').data('id'));
+  $(document).on('click','[href="#deleteDocument"]',function(){
+    $('.e-doc-delete').attr('data-id', $(this).closest('.e-document').data('id'));
   });
-  */
 
-  $(document).on('click','.btn-flat.file-download',function(){
+  $('.e-doc-delete').on('click',function(){
+   
+    urlToPieces = ddocurl.split('/');
+    id = $(this).attr('data-id');
+    urlToPieces[urlToPieces.length - 1] = id;
+    url = urlToPieces.join('/');
+    $.delete(url,null)
+      .done(function(){
+        $(`.e-document[data-id="${id}"]`).remove();
+        var nbDocs = parseInt($('.documents-number').text());
+        $('.documents-number').empty().append(nbDocs ? `(${$('.documents-number').data('nodoc')})` : nbDocs - 1); 
+      })
+    
+  });
+
+  $(document).on('click','.fa-file-download',function(){
     var $this = $(this);
     var xhr = new XMLHttpRequest();
-    xhr.open("GET", `../../lib/evt/${$this.attr('data-path')}`);
+    xhr.open("GET", `../../lib/evt/${$this.attr('data-path')}`,true);
     xhr.responseType = "blob";
     xhr.onreadystatechange = function(){
       if(xhr.readyState === 4 && xhr.status === 200) {
@@ -1771,6 +1960,15 @@ function dateUpdate() {
       }
     }
     xhr.send();
+  })
+
+  $(document).on('click', '.e-document .fa-pen',function(){
+    const $doc = $(this).closest('.e-document');
+    $doc.find('.e-doc-size').hide();
+    $docTitle = $doc.find('.e-doc-title');
+    $docTitle.after(`<div class="doc-input-zone"><input type="text" class="doc-input-name" value="${$docTitle.text()}"><div class="btn btn-reduced-padding doc-name-validate"><i class="material-icons">check</i></div><div>`);
+    $docTitle.hide();
+
   })
 
   $(document).on('click','[href="#deleteEvent"]',function(){
@@ -1955,6 +2153,17 @@ function dateUpdate() {
     $modal.find('.btn-e-update').show();
   })
 
+  /*
+  $('.btn-s-modify:not(.modal-close').on('click',function(){
+    var $modal = $(this).closest('.modal');
+    $modal.find('.participant-btn').each(function(i,e){
+      $(e).addClass('deletable modal-trigger').attr('href','#deleteParticipant').append('<div class="p-delete-overlay flex-center" style="display:none;"><i class="fa fa-trash"></i></div>');
+    });
+    $modal.find('.btn-s-modify').hide();
+    $modal.find('.btn-s-update').show();
+  })
+  */
+
 
   $(document).on('click',function(e){
     var $this = $(e.target);
@@ -2038,7 +2247,7 @@ function dateUpdate() {
             $partElmt.find('.participant-field-zone').append(inputImg);
           }
           $partElmt.find('.selected-participant-logo').attr('src', img.attr('src'));
-          if($selectedOpt.attr('data-s') != 1 && $selectedOpt.attr('data-type') != 'f'){
+          if($selectedOpt.attr('data-s') != 1 && $selectedOpt.attr('data-type') != 'f' && !$('.participant-btn.existing').length){
             $partElmt.removeClass('edit');
             $partElmt.closest('.participants-list').css('margin-bottom','');
             $partElmt.find('.participant-fullname-zone').show();
@@ -2111,10 +2320,32 @@ function dateUpdate() {
   })
 
   $(document).on('click','.participant-delete',function(e){
-    $(this).closest('.participants-list--item').remove();
+    var $this = $(this);
+    pid = $this.data('pid');
+    if(!pid){
+      $(this).closest('.participants-list--item').remove();
+    } else {
+      urlToPieces = dpurl.split('/');
+      urlToPieces[urlToPieces.length - 4] = $this.data('id');
+      urlToPieces[urlToPieces.length - 1] = pid;
+      url = urlToPieces.join('/');
+      $.delete(url,null)
+        .done(function(){
+          $('#deleteParticipant').modal('close');
+          $(`.participant-btn[data-pid=${pid}]`).closest('.participants-list--item').remove();
+          $('.nb-participants').empty().append(`(${$('.participants-list--item').length})`);
+        })
+
+    }
   });
 
-  $(document).on('click','.participant-btn',function(e){
+  $(document).on('click','.participant-btn.existing',function(){
+    var $this = $(this);
+    var $modal = $(this).closest('.modal');
+    $('.participant-delete').attr({'data-id':$modal.data('id'),'data-pid':$this.data('pid')});
+  })
+
+  $(document).on('click','.participant-btn:not(.existing)',function(e){
     const $this = $(this);
     const $partHolder = $this.closest('.participants-list--item');
     $partHolder.addClass('edit');
@@ -2138,22 +2369,68 @@ function dateUpdate() {
   $(document).on('click','.participant-validate',function(){
     const $this = $(this);
     const $partElmt = $this.closest('.participants-list--item');
+    if(!$('.participant-btn.existing').length){
 
-    if($partElmt.find('input.participant-fullname').hasClass('part-feeded')){
-          $partElmt.removeClass('edit');
-          $partElmt.find('.participant-fullname-zone').show();
-          $partElmt.find('.participant-field-zone').hide();
+
+      if($partElmt.find('input.participant-fullname').hasClass('part-feeded')){
+        $partElmt.removeClass('edit');
+        $partElmt.find('.participant-fullname-zone').show();
+        $partElmt.find('.participant-field-zone').hide();
+      } else {
+        var creationModal = $('#createParticipant');
+        var partFN = $partElmt.find('input.participant-fullname').val();
+        creationModal.find('.new-part-name').empty().append(partFN);
+        var partNameToPieces = partFN.split(' ');
+        //if(!$('input[name="firstname"]').val().length){
+          $('input[name="firstname"]').val(partNameToPieces[0]).prev().addClass('active');
+          $('input[name="lastname"]').val(partNameToPieces.slice(1).join(' ')).prev().addClass('active');
+        //}
+        $('#createParticipant').modal('open');
+      }
+
     } else {
-      var creationModal = $('#createParticipant');
-      var partFN = $partElmt.find('input.participant-fullname').val();
-      creationModal.find('.new-part-name').empty().append(partFN);
-      var partNameToPieces = partFN.split(' ');
-      //if(!$('input[name="firstname"]').val().length){
-        $('input[name="firstname"]').val(partNameToPieces[0]).prev().addClass('active');
-        $('input[name="lastname"]').val(partNameToPieces.slice(1).join(' ')).prev().addClass('active');
-      //}
-      $('#createParticipant').modal('open');
+
+
+
+      const $partInputs = $this.closest('.participant-field-zone').find('input');
+      const $modal = $this.closest('.modal');
+      $params = {};
+      $partInputs.each(function(i,e){
+        value = $(e).attr('value');
+        c = $(e).attr('class')
+        if(value){
+          $params[c] = value;
+        }
+
+      })
+      
+      if (!c.length){
+        var creationModal = $('#createParticipant');
+        var partFN = $partElmt.find('input.participant-fullname').val();
+        creationModal.find('.new-part-name').empty().append(partFN);
+        var partNameToPieces = partFN.split(' ');
+        //if(!$('input[name="firstname"]').val().length){
+          $('input[name="firstname"]').val(partNameToPieces[0]).prev().addClass('active');
+          $('input[name="lastname"]').val(partNameToPieces.slice(1).join(' ')).prev().addClass('active');
+          //}
+          $('#createParticipant').modal('open');
+      } else {
+          
+        $params.id = $modal.attr('data-id');
+        $.post(apurl,$params)
+          .done(function(data){
+            $partElmt.removeClass('edit');
+            $partElmt.find('.participant-fullname-zone').show();
+            $partElmt.find('.participant-field-zone').hide(); 
+          })
+      
+      }
+
+      console.log($params);
+      
+
     }
+    
     
   })
 

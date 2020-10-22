@@ -27,6 +27,7 @@ organization: entity
 partner: partner
 independant : independant
 user: user
+legal_person: legal person
 firm_member : Firm / Institution member
 firstname: First name
 lastname: Last name
@@ -75,6 +76,8 @@ unlimited: unlimited
 up_to: up to
 comment: comment
 document: document
+download: download
+rename: rename
 
 help:
   page_title: DealDrive, for a meaningful and collaborative performance
@@ -2111,6 +2114,7 @@ activity_elements:
   unvalidating_output_msg: One or more participants have already finalized their output. Due to this modification, they will be notified that they need to finalize their output again; do you want to continue ?
   duplicate_element_name_msg: You need to change the name, as there is already an existing element having this name
   no_remaining_participant_msg: You need to create more participants of this category in your user base, as you already selected all of them !
+  synth_user_suffix : legal person
   duplicate_participant:
     with_team_begin: You cannot add user
     with_team_end: for this stage, as it is already a member of a participating team
@@ -2134,6 +2138,7 @@ activity_elements:
     access_stage_btn: Access related stage
     access_activity_btn: Access related activity
     add_event:
+      btn_msg: Add update
       modal_new_title: Udpate creation
       modal_update_title: Refining update
       modal_msg: What do you want to point out ?
@@ -2161,6 +2166,7 @@ activity_elements:
     document:
       title: File name
       delete_msg: Do you really want to delete that documents for all participants ?
+      upload_new_version: Upload new version
   comments:
     title: Comments
     comment:

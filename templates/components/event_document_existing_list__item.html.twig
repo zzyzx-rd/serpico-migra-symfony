@@ -4,6 +4,20 @@
     </i>
     <span class="m-left e-doc-title"></span>
     <span class="dd-text sm-left e-doc-size"></span>
-    <i class="modal-trigger sm-left dd-text fa fa-cog btn-e-update" href="#updateDocument"></i>
+    </i>
+    <ul class="doc-actions flex-center" style="display:none">
+      <li class="flex-center">
+        <i class="dd-orange-text fa fa-file-download m-right tooltipped" data-tooltip="{{'download'|trans|capitalize}}"></i>
+      </li>
+      <li class="flex-center">
+        <i class="dd-orange-text fa fa-pen m-right tooltipped" data-tooltip="{{'rename'|trans|capitalize}}"></i>
+      </li>
+      <li class="flex-center">
+        <i class="dd-orange-text fa fa-arrow-alt-circle-up e-doc-upload m-right tooltipped" data-tooltip="{{'activity_elements.events.documents.document.upload_new_version'|trans|capitalize}}"></i>
+      </li>
+      <li class="flex-center">
+        <i class="dd-orange-text fa fa-times tooltipped modal-trigger" href="#deleteDocument" data-tooltip="{{'delete'|trans|capitalize}}"></i>
+      </li>
+    </ul>
     </div>
   </div>

@@ -112,6 +112,8 @@ use Symfony\Component\Mime\Email;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Twig\Environment;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use App\Service\FileUploader;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class OrganizationController extends MasterController
 {
@@ -6991,8 +6993,10 @@ class OrganizationController extends MasterController
         if(!$eventDocument){
             return new JsonResponse(['msg' => 'error'], 500);
         }
+        $path = $eventDocument->getPath();
         $event = $eventDocument->getEvent();
         $event->removeDocument($eventDocument);
+        unlink(dirname(dirname(__DIR__)) . "/public/lib/evt/$path");
         $em->persist($event);
         $em->flush();
         return new JsonResponse(['msg' => 'success'], 200);
@@ -7017,6 +7021,136 @@ class OrganizationController extends MasterController
 
     /**
      * Gets current data of related stage
+     * @Route("/organization/document/content/update", name="updateDocumentContent")
+     */
+    public function updateDocumentContent(Request $request, FileUploader $fileUploader){
+
+        $docId = $request->get('id');
+        $evtId = $request->get('eid');
+        $docTitle = $request->get('title');
+        $documentFile = $request->files->get('file');
+        $em = $this->em;
+        $documentFileInfo = $fileUploader->upload($documentFile);
+        $type = $documentFileInfo['extension'];
+        $size = $documentFileInfo['size'];
+        $path = $documentFileInfo['name'];
+        $mime = $documentFileInfo['mime'];
+        /** @var EventDocument */
+        $document = $docId ? $em->getRepository(EventDocument::class)->find($docId) : new EventDocument;
+        $document
+            ->setType($type)
+            ->setSize($size)
+            ->setPath($path)
+            ->setMime($mime);
+            $em->persist($document);
+        if(!$docId){
+            $document->setTitle($docTitle);
+            /** @var Event */
+            $event = $em->getRepository(Event::class)->find($evtId);
+            $event->addDocument($document);
+            $em->persist($event);
+        }
+        $em->flush();
+        return new JsonResponse(['type' => $type, 'size' => $size, 'mime' => $mime, 'path' => $path, 'title' => $docTitle, 'id' => $document->getId()], 200);
+    }
+
+    /**
+     * Gets current data of related stage
+     * @Route("/organization/document/title/update", name="updateDocumentTitle")
+     */
+    public function updateDocumentTitle(Request $request){
+        $docId = $request->get('id');
+        $docTitle = $request->get('title');
+        $em = $this->em;
+        /** @var EventDocument */
+        $document = $em->getRepository(EventDocument::class)->find($docId);
+        $document->setTitle($docTitle);
+        $em->persist($document);
+        $em->flush();
+        return new JsonResponse(['msg' => 'success'], 200);
+    }
+
+    /**
+     * Gets current data of related stage
+     * @Route("/organization/stage/name/update", name="updateStageName")
+     */
+    public function updateStageName(Request $request){
+        $stgId = $request->get('id');
+        $stgName = $request->get('name');
+        $em = $this->em;
+        /** @var Stage */
+        $stage = $em->getRepository(Stage::class)->find($stgId);
+        $activity = $stage->getActivity();
+        $actNameChg = false;
+        if($activity->getStages()->count() == 1){
+            $actNameChg = true;
+            $activity->setName($stgName);
+            $em->persist($activity);
+        }
+        $stage->setName($stgName);
+        $em->persist($stage);
+        $em->flush();
+        return new JsonResponse(['msg' => 'success', 'actNameChg' => $actNameChg], 200);
+    }
+    
+    /**
+     * Gets current data of related stage
+     * @Route("/organization/stage/dates/update", name="updateStageDates")
+     */
+    public function updateStageDates(Request $request){
+        $stgId = $request->get('id');
+        $startdateStr = $request->get('sd');
+        $enddateStr = $request->get('ed');
+        $startdate = new DateTime($startdateStr);
+        $enddate = new DateTime($enddateStr);
+        $em = $this->em;
+        /** @var Stage */
+        $stage = $em->getRepository(Stage::class)->find($stgId);
+        $stage->setStartdate($startdate)
+            ->setEnddate($enddate);
+        $em->persist($stage);
+        $em->flush();
+        return new JsonResponse(['msg' => 'success'], 200);
+    }
+
+    /**
+     * Gets current data of related stage
+     * @Route("/organization/stage/participants/add", name="addParticipantStage")
+     */
+    public function addParticipantStage(Request $request){
+        $stgId = $request->get('id');
+        $usrId = $request->get('u');
+        $extUsrId = $request->get('eu');
+        $teaId = $request->get('t');
+        $em = $this->em;
+        /** @var Stage */
+        $stage = $em->getRepository(Stage::class)->find($stgId);
+        $user = $usrId ? $em->getRepository(User::class)->find($usrId) : null;
+        $externalUser = $extUsrId ? $em->getRepository(ExternalUser::class)->find($extUsrId) : null;
+        $team = $teaId ? $em->getRepository(Team::class)->find($teaId) : null;
+        $participant = new Participation;
+        $participant->setUser($user)
+            ->setExternalUser($externalUser)
+            ->setTeam($team);
+        $stage->addParticipation($participant);
+        $em->persist($stage);
+        $em->flush();
+        $recipients = $team ? $team->getMembers()->map(fn(Member $m) => [$m->getUser()])->getValues()[0] : [$user];
+        $activity = $stage->getActivity();
+        $response = $this->forward('App\Controller\MailController::sendMail', [
+            'recipients' => $recipients, 
+            'settings' => [
+                'activity' => $activity->getStages()->count() > 1 ? null : $activity, 
+                'stage' => $activity->getStages()->count() > 1 ? $stage : null
+            ], 
+            'actionType' => 'activityParticipation']
+        );
+        if($response->getStatusCode() == 500){ return $response; };
+        return new JsonResponse(['msg' => 'success'], 200);
+    }
+
+    /**
+     * Gets current data of related stage
      * @Route("/organization/stage/data", name="getStageData")
      */
     public function retrieveStageData(Request $request){
@@ -7027,9 +7161,9 @@ class OrganizationController extends MasterController
         $org = $this->org;
         /** @var Stage */
         $stage = $em->getRepository(Stage::class)->find($stgId);
-
-        $data['aname'] = $stage->getActivity()->getId();
-        $data['aname'] = $stage->getActivity()->getName();
+        $activity = $stage->getActivity();
+        $data['ms'] =  $activity->getStages()->count() > 1;
+        $data['aname'] = $activity->getName();
         $data['name'] = $stage->getName();
         $data['progress'] = $stage->getProgress();
         $data['sdate'] = $stage->getStartdate();
@@ -7047,8 +7181,8 @@ class OrganizationController extends MasterController
             $evtData['evgId'] = $eventGroup->getEventGroupName()->getId();
             $evtData['evg'] = $eventGroup->getDTrans();
             $evtData['evt'] = $eventType->getDTrans();
-            $evtData['odate'] = $event->getOnsetDate();
-            $evtData['rdate'] = $event->getExpResDate();
+            $evtData['odate'] = $event->getOnsetDate()->diff(new DateTime)->d > 5 ? $event->getOnsetDate() : $event->nicetime($event->getOnsetDate()->format('Y-m-d'));
+            $evtData['rdate'] = $event->getExpResDate() == null ? null : ($event->getExpResDate()->diff(new DateTime)->d > 5 ? $event->getExpResDate() : $event->nicetime($event->getExpResDate()->format('Y-m-d')));
             $evtData['nbdocs'] = $event->getDocuments()->count();
             $evtData['nbcoms'] = $event->getComments()->count();
             $data['events'][] = $evtData;
@@ -7057,17 +7191,20 @@ class OrganizationController extends MasterController
         foreach($stage->getUniqueParticipations() as $participant){
             $user = $participant->getUser();
             $partData = [];
-            $partData['uid'] = $participant->getId();
+            $partData['id'] = $participant->getId();
             $partData['fullname'] = $user->getFullname();
             $externalUser = $participant->getExternalUser();
+            $isSynthetic = $user->isSynthetic();
             if($externalUser){
-                $partData['eid'] = $externalUser->getId();
                 $clientName = $externalUser->getClient()->getName();
-                $partData['fullname'] .= " ($clientName)";
+                if(!$isSynthetic){
+                    $partData['fullname'] .= " ($clientName)";
+                } else {
+                    $partData['fullname'] = $clientName;
+                }
             }
-            $partData['synth'] = $user->isSynthetic();
-            $partData['picture'] = $user->isSynthetic() ? 'lib/img/org/no-picture.png' : ($user->getPicture() ?: 'lib/img/user/no-picture.png');
-           
+            $partData['synth'] = $isSynthetic;
+            $partData['picture'] = $isSynthetic ? '/lib/img/org/no-picture.png' : ($user->getPicture() ?: '/lib/img/user/no-picture.png');
             $data['participants'][] = $partData;
         }
         
@@ -7092,13 +7229,13 @@ class OrganizationController extends MasterController
         $data['expResDate'] = $event->getExpResDate();
         foreach($event->getDocuments() as $document){
             $docData = [];
-            $commData['id'] = $document->getId();
+            $docData['id'] = $document->getId();
             $docData['title'] = $document->getTitle();
             $docData['path'] = $document->getPath();
             $docData['type'] = $document->getType();
             $docData['mime'] = $document->getMime();
             $docData['size'] = $document->getSize();
-            $documents['authors'] = $document->getDocumentAuthors()->count() > 0 ? $document->getDocumentAuthors()->map(fn(DocumentAuthor $da) => ['mainAuthor' => $da->isLeader(), 'fullname' => $da->getAuthor()->getFullName()])->getValues()[0] : '';
+            $docData['authors'] = $document->getDocumentAuthors()->count() > 0 ? $document->getDocumentAuthors()->map(fn(DocumentAuthor $da) => ['mainAuthor' => $da->isLeader(), 'fullname' => $da->getAuthor()->getFullName()])->getValues()[0] : '';
             $docData['inserted'] = $document->getInserted();
             $data['documents'][] = $docData;
         }

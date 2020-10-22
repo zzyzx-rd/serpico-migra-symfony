@@ -27,6 +27,7 @@ organization: organisation
 partner: Partenaire
 independant: indépendant
 user: utilisateur
+legal_person: personne morale
 firm_member : Membre d'une entreprise / institution
 firstname: Prénom
 lastname: Nom
@@ -76,6 +77,8 @@ unlimited: illimité
 up_to: jusqu'à
 comment: commentaire
 document: document
+download: télécharger
+rename: renommer
 
 help:
   page_title: DealDrive, pour une performance collaborative et porteuse de sens
@@ -2216,6 +2219,7 @@ activity_elements:
   unvalidating_output_msg: Un ou plusieurs participants ont déjà validé leur retour. La modification que vous souhaitez réaliser fera qu'ils devront à nouveau finaliser leur retour; voulez-vous continuer ?
   duplicate_element_name_msg: Vous devez changer ce nom car un élément existant possède déjà un nom similaire
   no_remaining_participant_msg: Vous devez créer plus de participants de ce type dans votre base d'utilisateurs, car vous les avez déjà tous sélectionnés !
+  synth_user_suffix : personne morale
   duplicate_participant:
     with_team_begin: Vous ne pouvez pas rajouter l'utilisateur
     with_team_end: pour cette phase, car il est déjà présent dans l'équipe participante
@@ -2239,6 +2243,7 @@ activity_elements:
     access_stage_btn: Accéder à la phase
     access_activity_btn: Accéder à l'activité
     add_event:
+      btn_msg: Ajouter un update
       modal_new_title: Créer un update
       modal_update_title: Enrichir l'update
       modal_msg: Que souhaitez-vous renseigner ?
@@ -2267,6 +2272,7 @@ activity_elements:
       document:
         title: Nom du document
         delete_msg: Etes-vous sûr de vouloir supprimer ce document pour l'ensemble des participants concernés ? 
+        upload_new_version: Téléverser une nouvelle version
     comments:
       title: Commentaires
       comment:
