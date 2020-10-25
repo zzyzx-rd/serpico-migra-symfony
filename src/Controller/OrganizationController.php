@@ -304,6 +304,7 @@ class OrganizationController extends MasterController
     {
 
         global $app;
+        $currentUser = $this->user;
         $activityForm = $this->createForm(
             ActivityElementForm::class, $element, ['entity' => $entity]
         );
@@ -6676,7 +6677,12 @@ class OrganizationController extends MasterController
                             $this->em->persist($participant);
                         }
 
-//                        self::sendMail($app, $recipients, 'activityParticipation', $mailSettings);
+
+                        $response = $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $mailSettings, 'actionType' => 'activityParticipation']);
+                        if($response->getStatusCode() == 500){
+                            return new JsonResponse(['msg' => $response->getContent()], 500);
+                        }               
+
                         $this->em->flush();
                     }
 
@@ -6783,8 +6789,8 @@ class OrganizationController extends MasterController
                     $client->addExternalUser($externalUser);
                 }
     
-                $em->persist($client);
                 $organization->addClient($client);
+                $em->persist($organization);
             }
 
             if($nonExistingOrg){
@@ -6916,22 +6922,10 @@ class OrganizationController extends MasterController
                 $em->persist($syntheticUser);
                 $em->persist($organization);
                 $em->flush();
-
             }
 
             return new Response('success',200);
     }
-
-
-    /**
-     * @param Request $request
-     * @param $entity
-     * @param $elmtId
-     * @return string|RedirectResponse|Response
-     * @throws ORMException
-     * @throws OptimisticLockException
-     * @Route("/settings/dynamic/translations", name="getDynamicTranslations")
-     */
 
     /**
      * @param Request $request
@@ -7042,16 +7036,57 @@ class OrganizationController extends MasterController
             ->setSize($size)
             ->setPath($path)
             ->setMime($mime);
-            $em->persist($document);
         if(!$docId){
             $document->setTitle($docTitle);
             /** @var Event */
             $event = $em->getRepository(Event::class)->find($evtId);
             $event->addDocument($document);
             $em->persist($event);
+        } else {
+            $document->setModified(new DateTime);
+            $em->persist($document);
         }
         $em->flush();
         return new JsonResponse(['type' => $type, 'size' => $size, 'mime' => $mime, 'path' => $path, 'title' => $docTitle, 'id' => $document->getId()], 200);
+    }
+
+    /**
+     * Gets current data of related stage
+     * @Route("/organization/comment/content/update", name="updateCommentContent")
+     */
+    public function updateCommentContent(Request $request){
+        $locale = $request->getLocale();
+        $comId = $request->get('id');
+        $evtId = $request->get('eid');
+        $parentId = $request->get('cid');
+        $comContent = $request->get('content');
+        $em = $this->em;
+        /** @var EventComment */
+        $comment = $comId ? $em->getRepository(EventComment::class)->find($comId) : new EventComment;
+        $isCurrentlyModified = $comment->getContent() && $comContent != $comment->getContent();
+        if(!$comId){
+            
+            $comment->setContent($comContent)
+                ->setAuthor($this->user);
+            if($parentId){
+                $parent = $em->getRepository(EventComment::class)->find($parentId);
+                $comment->setParent($parent);
+            }
+            
+            /** @var Event */
+            $event = $em->getRepository(Event::class)->find($evtId);
+            $event->addComment($comment);
+            $em->persist($event);
+            $em->flush();
+        } else {
+            if($isCurrentlyModified){
+                $comment->setContent($comContent)
+                    ->setModified(new DateTime);
+                $em->persist($comment);
+                $em->flush();
+            }
+        }
+        return new JsonResponse(['msg' => 'success', 'author' => $this->user, 'modified' => $comment->getModified() != null, 'updated' => $comment->getModified() ? $this->nicetime($comment->getModified(),$locale): $this->nicetime($comment->getInserted(),$locale), 'id' => $comment->getId()], 200);
     }
 
     /**
@@ -7135,18 +7170,22 @@ class OrganizationController extends MasterController
         $stage->addParticipation($participant);
         $em->persist($stage);
         $em->flush();
-        $recipients = $team ? $team->getMembers()->map(fn(Member $m) => [$m->getUser()])->getValues()[0] : [$user];
-        $activity = $stage->getActivity();
-        $response = $this->forward('App\Controller\MailController::sendMail', [
-            'recipients' => $recipients, 
-            'settings' => [
-                'activity' => $activity->getStages()->count() > 1 ? null : $activity, 
-                'stage' => $activity->getStages()->count() > 1 ? $stage : null
-            ], 
-            'actionType' => 'activityParticipation']
-        );
+
+        // Adding oneself does not trigger any email sending
+        if($user != $this->user){
+            $recipients = $team ? $team->getMembers()->map(fn(Member $m) => [$m->getUser()])->getValues()[0] : [$user];
+            $activity = $stage->getActivity();
+            $response = $this->forward('App\Controller\MailController::sendMail', [
+                'recipients' => $recipients, 
+                'settings' => [
+                    'activity' => $activity->getStages()->count() > 1 ? null : $activity, 
+                    'stage' => $activity->getStages()->count() > 1 ? $stage : null,
+                ], 
+                'actionType' => 'activityParticipation']
+            );
+        }
         if($response->getStatusCode() == 500){ return $response; };
-        return new JsonResponse(['msg' => 'success'], 200);
+        return new JsonResponse(['msg' => 'success','pid' => $participant->getId()], 200);
     }
 
     /**
@@ -7216,6 +7255,7 @@ class OrganizationController extends MasterController
      * @Route("/organization/event/data", name="getEventData")
      */
     public function retrieveEventData(Request $request){
+        $locale = $request->getLocale();
         $eveId = $request->get('id');
         $em = $this->em;
         $currentUser = $this->user;
@@ -7227,6 +7267,7 @@ class OrganizationController extends MasterController
         $data['group'] = $event->getEventType()->getEventGroup()->getId();
         $data['odate'] = $event->getOnsetDate();
         $data['expResDate'] = $event->getExpResDate();
+        $tz = new DateTimeZone('Europe/Paris');
         foreach($event->getDocuments() as $document){
             $docData = [];
             $docData['id'] = $document->getId();
@@ -7236,27 +7277,31 @@ class OrganizationController extends MasterController
             $docData['mime'] = $document->getMime();
             $docData['size'] = $document->getSize();
             $docData['authors'] = $document->getDocumentAuthors()->count() > 0 ? $document->getDocumentAuthors()->map(fn(DocumentAuthor $da) => ['mainAuthor' => $da->isLeader(), 'fullname' => $da->getAuthor()->getFullName()])->getValues()[0] : '';
-            $docData['inserted'] = $document->getInserted();
+            $docData['inserted'] = $document->getInserted()->setTimezone($tz);
+            $docData['modified'] = $document->getModified() ? $document->getModified()->setTimezone($tz) : "";
             $data['documents'][] = $docData;
         }
 
         foreach($event->getComments() as $comment){
-            $commData = [];
-            $commData['id'] = $comment->getId();
-            $commData['self'] = $comment->getAuthor() == $currentUser;
-            $commData['author'] = $comment->getAuthor()->getFullName();
-            $commData['content'] = $comment->getContent();
-            $commData['inserted'] = $comment->getInserted()->setTimezone(new DateTimeZone('Europe/Paris'));
+            $comData = [];
+            $comData['id'] = $comment->getId();
+            $comData['self'] = $comment->getAuthor() == $currentUser;
+            $comData['author'] = $comment->getAuthor()->getFullName();
+            $comData['content'] = $comment->getContent();
+            $comData['inserted'] = $this->nicetime($comment->getInserted()->setTimezone($tz), $locale);
+            $comData['modified'] = $comment->getModified() ? $this->nicetime($comment->getModified()->setTimezone($tz), $locale) : "";
+
             foreach($comment->getChildren() as $subComment){
-                $subCommentData = [];
-                $commData['id'] = $comment->getId();
-                $commData['self'] = $comment->getAuthor() == $currentUser;
-                $subCommentData['author'] = $subComment->getAuthor()->getFullName();
-                $subCommentData['content'] = $subComment->getContent();
-                $subCommentData['inserted'] = $subComment->getInserted()->setTimezone(new DateTimeZone('Europe/Paris'));
-                $commData['relatedComments'][] = $commData;
+                $subComData = [];
+                $subComData['id'] = $comment->getId();
+                $subComData['self'] = $comment->getAuthor() == $currentUser;
+                $subComData['author'] = $subComment->getAuthor()->getFullName();
+                $subComData['content'] = $subComment->getContent();
+                $subComData['inserted'] = $this->nicetime($subComment->getInserted()->setTimezone($tz), $locale);
+                $subComData['modified'] = $subComment->getModified() ? $this->nicetime($subComment->getModified()->setTimezone($tz), $locale) : "";
+                $commData['relatedComments'][] = $subComData;
             }
-            $data['comments'][] = $commData;
+            $data['comments'][] = $comData;
         }
         
         return new JsonResponse($data, 200);
@@ -7376,6 +7421,82 @@ class OrganizationController extends MasterController
 
         return new JsonResponse(['dummyElmts' => $dummyElmts], 200);
 
+    }
+
+    function nicetime(DateTime $date, string $locale)
+    {
+        if(empty($date)) {
+            return "No date provided";
+        }
+        
+        switch($locale){
+            case 'en' :
+                $periods = array("second", "minute", "hour", "day", "week", "month", "year", "decade");
+                break;
+            case 'fr' :
+                $periods = array("seconde", "minute", "heure", "jour", "semaine", "mois", "année", "décennie");
+                break;
+            case 'es' :
+                $periods = array("secundo", "minuto", "hora", "dia", "semana", "mes", "año", "decena");
+                break;
+        }
+
+        $lengths         = array("60","60","24","7","4.35","12","10");
+        $now             = time();
+        $unix_date       = $date->getTimestamp();
+    
+        // check validity of date
+        if(empty($unix_date)) {   
+            return "Bad date";
+        }
+
+        // is it future date or past date
+        if($now > $unix_date) {   
+            $difference = $now - $unix_date;
+            switch($locale){
+                case 'fr' :
+                    $tense = "il y a ";
+                    break;
+                case 'en' :
+                    $tense = "ago";
+                    break;
+                case 'es' :
+                    $tense = "hace";
+                    break;
+            }
+        
+        } else {
+            $difference = $unix_date - $now;
+            switch($locale){
+                case 'fr' :
+                    $tense = "dans";
+                    break;
+                case 'en' :
+                    $tense = "from now";
+                    break;
+                case 'es' :
+                    $tense = "en";
+                    break;
+            }
+        }
+    
+        for($j = 0; $difference >= $lengths[$j] && $j < count($lengths)-1; $j++) {
+            $difference /= $lengths[$j];
+        }
+    
+        $difference = round($difference);
+    
+        if($difference != 1) {
+            $periods[$j].= "s";
+        }
+        switch($locale){
+            case 'en' :
+                return "$difference $periods[$j] {$tense}";
+            case 'fr' :
+            case 'es' :
+                return "{$tense} $difference $periods[$j]";
+        }
+        
     }
 
 }

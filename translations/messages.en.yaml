@@ -46,7 +46,12 @@ please_wait: Wait a few moments, ongoing process
 curr_language: en
 result: Results
 powered_by: Powered by
+year: year
+year_short: Y
+trimester: quarter
+trimester_short: T
 month: month
+week: week
 day: day
 hour: hour
 minute: minute
@@ -55,10 +60,6 @@ country: country
 state: state
 city: city
 scale: Scale
-year_short: Y
-trimester_short: T
-year: Year
-trimester: Quarter
 ok_got_it: Got it !
 trial: Trial
 my_firm: My firm
@@ -72,12 +73,14 @@ of: of
 none_m: none
 none_f: none
 modify: modify
+modified: modified
 unlimited: unlimited
 up_to: up to
 comment: comment
 document: document
 download: download
 rename: rename
+
 
 help:
   page_title: DealDrive, for a meaningful and collaborative performance
@@ -1334,7 +1337,7 @@ mails:
     message_act_begin: You have been added to the activity
     message_stg_begin: You have been added to the stage
     message_stg_mid: of activity
-    message_end: par un membre de votre organisation. Access to this activity through your personal dashboard
+    message_end: Access to this activity through your personal dashboard
     button_text: Access to my dashboard
     message3_participant: You can already provide updates (comments, suggestions, documents) to optimize your business dealflow !
     #message3_teamParticipant: En tant que participant faisant partie dune équipe, vous prendrez part à lévaluation une fois la période de notation démarrée. Sachez que vous noterez chaque personne de votre équipe individuellement, alors que les participants extérieurs à léquipe vous noteront en tant quéquipe
@@ -1998,7 +2001,7 @@ activities:
     from_firm: from firm
   create_participant_wo_mail_modal:
     title: Participant without email
-    msg: This participant will not be able to give any feedback if you don't provide his/her email address - you can still add it later
+    msg: This participant will not be able to give any feedback without email address - you can still add it later
   create_participant_legal_person_modal:
     title: New legal person participant
     msg: Adding this participant representing a firm or institution does not provide him any access to the activity. Only firm/institution members are granted access
@@ -2094,7 +2097,10 @@ activity_elements:
   parameters: Parameters
   expected_output: Expected feedback
   no_defined_output: No defined output
-  stages: Stages
+  stages: 
+    multiple_stages_modal:
+      add_event_title: To which stage do you want to attach thsis event ?
+      title: Which stage do you want to look at/modify ?
   criteria: Criteria
   participants: Participants
   iprocess: Process
@@ -2159,18 +2165,20 @@ activity_elements:
       no_given_comments: No given comments
     multiple_events_modal:
       title: Which update do you want to look at/modify ?
-  documents: 
-    section_title: Related documents
-    dropify_insert_msg: Drap & drop or click to insert a document (max 5 MB)
-    dropify_error_msg: There is a problem with your file (size or format)
-    document:
-      title: File name
-      delete_msg: Do you really want to delete that documents for all participants ?
-      upload_new_version: Upload new version
-  comments:
-    title: Comments
-    comment:
-      delete_msg: Do you really want to delete your comment ?
+    documents: 
+      title: Related documents
+      add_document: Add document
+      dropify_insert_msg: Drap & drop or click to insert a document (max 5 MB)
+      dropify_error_msg: There is a problem with your file (size or format)
+      document:
+        title: File name
+        delete_msg: Do you really want to delete that documents for all participants ?
+        upload_new_version: Upload new version
+    comments:
+      title: Comments
+      add_comment: Add comment
+      comment:
+        delete_msg: Do you really want to delete your comment ?
 
 create_parameters:
   page_title: Activity parameters

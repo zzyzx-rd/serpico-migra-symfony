@@ -39,11 +39,18 @@
                     <table class="content" align="left" cellpadding="0" cellspacing="0" border="0">
                         <td>
                             <p>{% trans %}mails.hello{% endtrans %} {{ recipient.firstname }},</p>
-                            {% if activity is defined and activity is not null %}
-                                <p>{% trans %}mails.activityParticipation.message_act_begin{% endtrans %} "{{ activity.name|raw }}" {{ 'mails.activityParticipation.message_end'|trans ~ ' (' ~ 'initial_dates'|trans ~ ' : ' ~ (moreThanADay ? formattedSD ~ ' - ' ~ formattedED : formattedSD) ~ ' )' }}</p>
-                            {% else %}
-                                <p>{% trans %}mails.activityParticipation.message_stg_begin{% endtrans %} "{{ stage.name|raw }}" {% trans %}mails.activityParticipation.message_stg_mid{% endtrans %} "{{ stage.activity.name|raw }}" {{ 'mails.activityParticipation.message_end'|trans ~ ' (' ~ 'initial_dates'|trans ~ ' : ' ~ formattedSD ~ ' - ' ~ formattedED ~ ' )' }}</p>
-                            {% endif %}
+                        
+                            <p>
+                                {{'mails.activityParticipation.message_act_begin'|trans ~ ' "' ~ 
+                                        (activity is defined and activity is not null ? activity.name|raw : stage.name|raw) ~ 
+                                    '" ' ~ 'by'|trans ~ ' ' ~ currentuser.fullname ~ 
+                                        (currentuser.organization.id != recipient.organization.id ? 'from'|trans ~ currentuser.organization.commname : '') ~ 
+                                    ' (' ~ 'initial_dates'|trans ~ ' : ' ~ 
+                                        (moreThanADay ? formattedSD ~ ' - ' ~ formattedED : formattedSD) ~  
+                                '). ' ~ 'mails.activityParticipation.message_end'|trans ~ ':'
+                                }}
+                            </p>
+                          
                             <p style="text-align: center"><a href="{{ url('trackMLinkClick',{'trkToken' : trkToken}) }}" target="_blank"><button style="background-color: #26a69a; height: 40px; line-height: 40px; text-decoration: none; color: #fff; text-align: center; border: none;">{% trans %}mails.activityParticipation.button_text{% endtrans %}</button></a></p>
                             <p>
                                 {% trans %}mails.activityParticipation.message3_participant{% endtrans %}

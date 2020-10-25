@@ -231,7 +231,8 @@ final class InstitutionController extends MasterController
 
         if($this->org && $this->org->getPlan() == Organization::PLAN_FREE){
 
-            $userActivities = new ArrayCollection($orgActivities);
+            $externalOrgActivities = $this->org->getExternalActivities();
+            $userActivities = new ArrayCollection($orgActivities + (array)$externalOrgActivities->toArray());
 
         } else {
 
@@ -333,7 +334,6 @@ final class InstitutionController extends MasterController
     
             //}
         }
-
 
         if($this->org){
             $addProcessForm = $this->createForm(AddProcessForm::class, null, ['standalone' => true]);

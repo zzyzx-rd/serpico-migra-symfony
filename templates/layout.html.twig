@@ -30,7 +30,7 @@
     {% block css %}{##}{% endblock %}
 
     <script>
-      window.lg = '{% trans %}curr_language   {% endtrans %}';
+      window.lg = '{{ global.request.locale }}';
     </script>
   </head>
 

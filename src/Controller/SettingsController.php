@@ -2719,7 +2719,9 @@ class SettingsController extends MasterController
         
         $user = $this->user;
         $organization = $user ? $this->org : null;
+        $orgId = $organization->getId();
         $clients = $organization ? $organization->getClients() : new ArrayCollection();
+        $repoP = $em->getRepository(Participation::class);
         
         /*
         $clientIds = '';
@@ -2736,20 +2738,36 @@ class SettingsController extends MasterController
         $partExtUsers = [0];
 
         foreach ($participants as $participant) {
-            switch($participant['el']){
-                case 'u':
-                    $partUsers[] = $participant['id'];
-                    break;
-                case 't':
-                    $partTeams[] = $participant['id'];
-                    break;
-                case 'f':
-                    $partFirms[] = $participant['id'];
-                    break;
-                case 'eu':
-                    $partExtUsers[] = $participant['id'];
-                    break;
+            if(isset($participant['el'])){
+                switch($participant['el']){
+                    case 'u':
+                        $partUsers[] = $participant['id'];
+                        break;
+                    case 't':
+                        $partTeams[] = $participant['id'];
+                        break;
+                    case 'f':
+                        $partFirms[] = $participant['id'];
+                        break;
+                    case 'eu':
+                        $partExtUsers[] = $participant['id'];
+                        break;
+                }
+            } else {
+                $participant = $repoP->find($participant['id']);
+                $externalUser = $participant->getExternalUser();
+                if($participant->getTeam()){
+                    $partTeams[] = $participant->getTeam()->getId();
+                } else if ($externalUser) {
+                    $partExtUsers[] = $externalUser->getId();
+                    if($externalUser->isSynthetic()){
+                        $partFirms[] = $externalUser->getClient()->getWorkerFirm()->getId();
+                    }
+                } else {
+                    $partUsers[] = $participant->getUser()->getId();
+                }
             }
+
         }
 
         //return new JsonResponse($partExtUsers,200);
@@ -2809,7 +2827,7 @@ class SettingsController extends MasterController
             // Line below prevents selection of firm which is already client (existing as synth ext user), and user self firm mirrored as client for its clients
             ->andWhere('c.organization IS NULL OR (c.organization != :oid AND c.clientOrganization != :oid)')
             ->setParameter('name', '%'. $name .'%')
-            ->setParameter('oid',$organization)
+            ->setParameter('oid', $organization)
             ->setParameter('partFirms',$partFirms)
             ->getQuery()
             ->getResult();
@@ -2819,15 +2837,30 @@ class SettingsController extends MasterController
 
         } else {
 
-            $elements = new ArrayCollection($qb->select('wf.name AS orgName','wf.id AS wfiId','wf.logo','o.id AS orgId, c.id AS cliId')
-                ->from('App\Entity\WorkerFirm', 'wf')
-                ->leftJoin('App\Entity\Organization', 'o', 'WITH', 'o.workerFirm = wf.id')
-                ->leftJoin('App\Entity\Client', 'c', 'WITH', 'c.clientOrganization = o.id')
-                ->where('wf.name LIKE :name')
-                ->setParameter('name', '%'. $name .'%')
-                ->getQuery()
-                ->getResult());
+            $elements = new ArrayCollection(
+                $qb->select('wf.name AS orgName','wf.id AS wfiId','wf.logo','o.id AS orgId', 'c.id AS cliId', 'IDENTITY(c.organization) AS cOrg')
+                    ->from('App\Entity\WorkerFirm', 'wf')
+                    ->leftJoin('App\Entity\Organization', 'o', 'WITH', 'o.workerFirm = wf.id')
+                    ->leftJoin('App\Entity\Client', 'c', 'WITH', 'c.clientOrganization = o.id')
+                    ->where('wf.name LIKE :name')
+                //->andWhere('c.organization = :org')
+                    ->setParameter('name', '%'. $name .'%')
+                //->setParameter('org', $organization)
+                    ->getQuery()
+                    ->getResult()
+                );
+
+            $elements = $elements->map(fn($e) => [
+                'orgName' => $e['orgName'],
+                'wfiId' => $e['wfiId'],
+                'logo' => $e['logo'],
+                'orgId' => $e['orgId'],
+                'cliId' => $e['cOrg'] == $orgId ? $e['cliId'] : ""
+            ]);
+            
         }
+
+
 
         $qParts = [];
         foreach($elements as $element){

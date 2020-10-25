@@ -40,14 +40,18 @@ pending_validation: En attente de validation
 show_less: Afficher moins
 show_more: Afficher __count__ de plus
 show_all: Tout afficher
-curr_language: fr
 page_under_work: Page en construction
 back_to_home: Retour à l'accueil
 please_wait: Traitement en cours
 users_list.no_teams_msg: Aucune équipe
 result: Résultats
 powered_by: Une marque de
+year: année
+year_short: A
+trimester: trimestre
+trimester_short: T
 month: mois
+week: semaine
 day: jour
 hour: heure
 minute: minute
@@ -56,10 +60,6 @@ country: pays
 state: région
 city: ville
 scale: Echelle
-year_short: A
-trimester_short: T
-year: Année
-trimester: Trimestre
 ok_got_it: C'est noté !
 trial: Essai
 my_firm: Mon entreprise
@@ -73,6 +73,7 @@ of: de
 none_m: aucun
 none_f: aucune
 modify: modifier
+modified: modifié
 unlimited: illimité
 up_to: jusqu'à
 comment: commentaire
@@ -1448,7 +1449,7 @@ mails:
     message_act_begin: Vous venez d'être ajouté à l'activité
     message_stg_begin: Vous venez d'être ajouté à la phase
     message_stg_mid: de l'activité
-    message_end: par un membre de votre organisation. Retrouvez cette activité sur votre dashboard personnel
+    message_end: Retrouvez cette activité sur votre dashboard personnel
     button_text: Accéder à mon dashboard
     message3_participant: Vous pouvez dès à présent effectuer des updates (commentaires, suggestions, documents) afin d'optimiser votre relation client !
     #message3_teamParticipant: En tant que participant faisant partie d'une équipe, vous prendrez part à l'évaluation une fois la période de notation démarrée. Sachez que vous noterez chaque personne de votre équipe individuellement, alors que les participants extérieurs à l'équipe vous noteront en tant quéquipe
@@ -2112,7 +2113,7 @@ activities:
     from_firm: de l'entreprise
   create_participant_wo_mail_modal:
     title: Participant sans email
-    msg: Ce participant ne pourra pas faire de retours sur vos activités communes si vous ne vous renseignez pas son adresse email - vous pouvez toujours la renseigner ensuite
+    msg: Ce participant ne pourra pas faire de retours sur vos activités communes sans adresse email - vous pouvez toujours la renseigner ensuite
   create_participant_legal_person_modal:
     title: Nouveau participant personne morale
     msg: L'entreprise n'aura pas accès à cette activité. Rajoutez par la suite des participants afin de les notifier de l'avancement que vous avez avec eux
@@ -2199,7 +2200,10 @@ activity_elements:
   parameters: Paramètres
   expected_output: Retours attendus
   no_defined_output: Pas de retours définis
-  stages: Phases
+  stages: 
+    multiple_stages_modal:
+      add_event_title: A quelle phase voulez-vous rattacher cet update ?
+      title: Quelle phase voulez-vous voir en détail/modifier ?
   criteria: Critères
   participants: Participants
   iprocess: Process
@@ -2267,6 +2271,7 @@ activity_elements:
       title: Quel update voulez-vous voir en détail/modifier ?
     documents: 
       title: Documents liés
+      add_document: Ajouter un document
       dropify_insert_msg: Glissez-déposez un document ou cliquez pour l'insérer (max 5 MB)
       dropify_error_msg: Il y a un problème avec votre fichier (taille ou format)
       document:
@@ -2275,6 +2280,7 @@ activity_elements:
         upload_new_version: Téléverser une nouvelle version
     comments:
       title: Commentaires
+      add_comment: Ajouter un commentaire
       comment:
         delete_msg: Etes-vous sûr de vouloir supprimer votre commentaire ? 
 

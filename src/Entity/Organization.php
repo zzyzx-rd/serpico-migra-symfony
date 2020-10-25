@@ -1241,5 +1241,31 @@ class Organization extends DbObject
         return $this;
     }
 
+    public function getExternalActivities(){
+        $allExternalParticipations = [];
+        foreach($this->users as $user){
+            $externalUsers = $user->getExternalUsers();
+            foreach($externalUsers as $externalUser){
+                $extUserParticipations = $externalUser->getParticipations();
+                foreach($extUserParticipations as $extUserParticipation){
+                    $allExternalParticipations[] = $extUserParticipation;
+                }
+            }
+        }
+
+        $allExternalParticipations = new ArrayCollection($allExternalParticipations);
+        $existingActivities = new ArrayCollection;
+        return $allExternalParticipations->filter(function(Participation $p) use ($existingActivities){
+            $activity = $p->getStage()->getActivity();
+            if(!$existingActivities->contains($activity)){
+                $existingActivities->add($activity);
+                return true;
+            } else {
+                return false;
+            }
+        })->map(fn(Participation $p) => $p->getStage()->getActivity());
+
+    }
+
 
 }

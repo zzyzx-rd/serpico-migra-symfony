@@ -644,7 +644,7 @@ class User extends DbObject implements  UserInterface, \Serializable
     /**
      * @return int
      */
-    public function getRole(): int
+    public function getRole(): ?int
     {
         return $this->role;
     }

@@ -1436,7 +1436,7 @@ class Stage extends DbObject
                 $ed = new DateTime("first day of january $intNextYear");
                 break;
             case 't' :
-                $cookieElmts = explode('/',$_COOKIE['ci']);
+                $cookieElmts = explode('-',$_COOKIE['ci']);
                 $intYear = intval(end($cookieElmts));
                 $intQuarter = intval(prev($cookieElmts));
                 $quarterMonths = ['january', 'april', 'july', 'october'];
@@ -1447,7 +1447,7 @@ class Stage extends DbObject
                 $ed = new DateTime("first day of $quarterEndingMonth $quarterEndingYear");
                 break;
             case 'w' :
-                $cookieElmts = explode('/',$_COOKIE['ci']);
+                $cookieElmts = explode('-',$_COOKIE['ci']);
                 $intYear = intval(end($cookieElmts));
                 $intCurrWeekOffset = intval(prev($cookieElmts)) - 1;
                 $intNextWeekOffset = $intCurrWeekOffset + 1;

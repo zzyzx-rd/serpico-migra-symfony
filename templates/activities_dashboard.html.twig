@@ -78,6 +78,7 @@
     var udturl = "{{ url('updateDocumentTitle') }}";
     var udcurl = "{{ url('updateDocumentContent') }}";
     var usnurl = "{{ url('updateStageName') }}";
+    var uccurl = "{{ url('updateCommentContent') }}";
     var apurl = "{{ url('addParticipantStage') }}";
     var msgDocInsert = "{{ 'activity_elements.events.documents.dropify_insert_msg'|trans }}";
     var msgDocReplace = "{{ 'remove'|trans }}";
@@ -87,6 +88,8 @@
     var evtAccStgMsg = "{{ 'activity_elements.events.access_stage_btn'|trans|raw }}";
     var evtAccActMsg = "{{ 'activity_elements.events.access_activity_btn'|trans|raw }}";
     var synthSuffix = "{{ 'activity_elements.synth_user_suffix'|trans }}";
+    var lkEvtToStgMsg = "{{ 'activity_elements.stages.multiple_stages_modal.add_event_title'|trans }}";
+    var modifiedMsg = "{{ 'modified'|trans }}";
   </script>
   <style>
       .elmts{
@@ -776,7 +779,7 @@
         font-weight: 700;
       }
 
-      #legalPerson{
+      #legalPerson, #interactPart{
         width:33%;
         min-width:300px;
       }
@@ -933,16 +936,16 @@
         font-size:12px;
       }
 
-      .e-existing-comment {
-        background: #55318e;
+      .e-comment.existing {
         width: 90%;
         padding: 15px 10px 10px 10px;
         border-radius: 7px;
         color: white;
         position: relative;
+        margin-top:22px;
       }
 
-      .e-com-author, .e-com-inserted{
+      .e-com-author, .e-com-updated{
         font-size:10px;
       }
  
@@ -994,7 +997,7 @@
         text-align: center;
       }
 
-      #updateEvent .btn-flat, .doc-name-validate, .doc-upload-validate, .s-name-validate{
+      #updateEvent .btn-flat, .doc-name-validate, .doc-upload-validate, .s-name-validate, .com-validate{
         height: 25px;
         line-height: 25px;
       }
@@ -1015,7 +1018,7 @@
         width:100%
       }
 
-      .e-com-modify, .e-com-right-elmts, .fa-external-link-alt, .s-modify-dates > i, .e-doc-update, .doc-actions > li, .btn-s-update{
+      .e-com-modify, .e-com-right-elmts, .fa-external-link-alt, .s-modify-dates > i, .e-doc-update, .doc-actions > li, .btn-s-update, .e-com-reply, .stage-element, .event-marker{
          cursor:pointer;
       }
 
@@ -1074,6 +1077,61 @@
       #addParticipant {
         background-color: #FF9300!important;
       }
+
+      .btn-add-event{
+        font-size:20px;
+      }
+
+      .e-dates-header, .e-documents-header, .e-comments-header{
+        height:25px;
+      }
+
+      .e-com-remove, .e-com-delete, [href="#deleteComment"]{
+        padding: 0 1rem!important;
+      }
+
+      .e-comment > .row {
+        width: 100%;
+      }
+
+      .com-reply-zone{
+        position: absolute;
+        bottom: -1.5rem;
+        right: 0rem;
+        font-size: 13px;
+        width: 100%;
+        height: 1.5rem;
+      }
+
+      .int-precision{
+        font-size:13px;
+      }
+
+      .e-comment:not(.self):not(.edit){
+        background: grey;
+      }
+      .e-comment.self{
+        margin-left:auto;
+        background: #55318e;
+      }
+
+      .timescale-change-btn + .select-wrapper{
+        width:100px;
+        margin-left:5px;
+      }
+
+      .timescale-change-btn + .select-wrapper .select-dropdown{
+        margin:0!important;
+      }
+
+      .timescale-change-btn + .select-wrapper input{
+        height:2rem;
+        line-height:2rem;
+      }
+      /*
+      .e-comment:not(.being-replied){
+        margin-bottom: 1.7rem;
+      }*/
 
   </style>
 {% endblock %}
@@ -1650,17 +1708,26 @@
         </ul>
         <ul class="flex-center-fe scale-settings">
           <li class="flex-center">
-            <a class="btn-flat no-padding flex-center">
               <div class="view-type-value flex-center">
                 <i class="material-icons">fiber_smart_record</i>
-                <span class="sm-left">{{ 'scale'|trans ~ ' :'}}</span>
-                <span class="ts-value sm-left sm-right">{{timescaleCookie == 'y' ? 'year'|trans : 'trimester'|trans }}</span>
+                <span class="sm-left">{{ 'scale'|trans|upper ~ ' :'}}</span>
+                <div class="timescale-zone">
+                  <a class="btn-flat no-padding timescale-change-btn flex-center">
+                    <span class="ts-value dd-text sm-left sm-right">{{timescaleCookie == 'y' ? 'year'|trans : (timescaleCookie == 't' ? 'trimester'|trans : 'week'|trans) }}</span>
+                    <ul class="change-timescale-type change-selector" data-type="{{ timescaleCookie }}">
+                      <i class="fa fa-caret-up"></i>
+                      <i class="fa fa-caret-down"></i>
+                    </ul>
+                  </a>
+                  <select name="timescaleSelector" id="timescaleSelector">
+                    <option value="y" {{timescaleCookie == 'y' ? 'selected'}}>{{'year'|trans|capitalize}}</option>
+                    <option value="t" {{timescaleCookie == 't' ? 'selected'}}>{{'trimester'|trans|capitalize}}</option>
+                    <option value="w" {{timescaleCookie == 'w' ? 'selected'}}>{{'week'|trans|capitalize}}</option>
+                  </select>
+                
+                </div>
               </div>
 
-              <ul class="change-timescale-type change-selector" data-type="{{ timescaleCookie }}">
-                <i class="fa fa-caret-up"></i>
-                <i class="fa fa-caret-down"></i>
-              </ul>
             </a>
           </li>
         </ul>
@@ -2557,7 +2624,7 @@
               </div>
               #}
 
-              <div class="no-margin flex-center-sb">
+              <div class="no-margin flex-center-sb e-dates-header">
                 <div>
                   <i class="fa fa-clock"></i>
                   {% set occurenceDate = eventForm.vars.data is null ? date('now')|format_datetime('short', 'none', pattern='dd/MM') : eventForm.vars.data.onsetDate|format_datetime('short', 'none', pattern='dd/MM') %}
@@ -2600,13 +2667,13 @@
               </div>
 
               <div class="no-margin">
-                <div class="flex-center-sb">
+                <div class="e-documents-header flex-center-sb">
                   <div>
                     <i class="fa fa-file"></i>
-                    <span class="dd-text">{{ 'activity_elements.events.documents.title'|trans|capitalize }}</span><span class="sm-left sm-right">:</span><span class="documents-number" data-nodoc="{{ 'none_m'|trans }}">{{ '(' ~ 'none_m'|trans ~ ')' }} </span>
+                    <span class="dd-text">{{ 'activity_elements.events.documents.title'|trans|capitalize }}</span><span class="sm-left sm-right">:</span><span class="documents-number" data-none="{{ 'none_m'|trans }}">{{ '(' ~ 'none_m'|trans ~ ')' }} </span>
                   </div>
 
-                  <div class="btn-flat btn-e-update add-e-document">
+                  <div class="btn-flat dd-orange-text btn-e-update add-e-document tooltipped" data-tooltip="{{ 'activity_elements.events.documents.add_document'|trans }}">
                     <i class="fa fa-plus"></i>
                   </div>  
                 </div>              
@@ -2616,13 +2683,13 @@
                 </div>
               </div>
 
-              <div class="no-margin flex-center-sb">
+              <div class="no-margin flex-center-sb e-comments-header">
                 <div>
                   <i class="fa fa-comments"></i>
-                  <span class="dd-text">{{ 'activity_elements.events.comments.title'|trans|capitalize }}</span><span class="sm-left sm-right">:</span><span class="comments-number" data-nodoc="{{ 'none_m'|trans }}">{{ '(' ~ 'none_m'|trans ~ ')' }} </span>  
+                  <span class="dd-text">{{ 'activity_elements.events.comments.title'|trans|capitalize }}</span><span class="sm-left sm-right">:</span><span class="comments-number" data-none="{{ 'none_m'|trans }}">{{ '(' ~ 'none_m'|trans ~ ')' }} </span>  
                 </div>
                 <div> 
-                  <div class="btn-flat btn-e-update add-e-comment">
+                  <div class="btn-flat dd-orange-text btn-e-update add-e-comment tooltipped" data-tooltip="{{ 'activity_elements.events.comments.add_comment'|trans }}">
                     <i class="fa fa-plus"></i>
                   </div>
                   {#
@@ -2638,10 +2705,9 @@
                 </ul>
               </div>
   
-              <div class="flex-center-fe m-top">
-                <div class="btn-flat btn-e-modify modify-update dd-text flex-center" style="display:none">
-                  <i class="fa fa-cog sm-right"></i>
-                  <span>{{ 'update'|trans ~ ' / ' ~ 'modify'|trans }}</span>
+              <div class="flex-center-fe">
+                <div class="btn-flat btn-e-modify dd-text modal-trigger" href="#deleteEvent" style="display:none">
+                  <span>{{ 'delete'|trans }}</span>
                 </div>
                 <div class="btn btn-e-modify waves-effect waves-light modal-close" style="display:none">
                   Ok
@@ -2797,6 +2863,20 @@
         </div>
         <div class="modal-footer">
           <a class="btn modal-close event-select-btn">ok</a>
+        </div>
+      </div>
+      
+      <div id="multipleStage" class="modal">
+        <div class="modal-content">
+          <div class="modal-s-title">
+            {{ 'activity_elements.stages.multiple_stages_modal.title'|trans }}
+          </div>
+          <div class="input-field">
+            <select name="stageSelector" id="stageSelector"></select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a class="btn modal-close stage-select-btn">ok</a>
         </div>
       </div>
 

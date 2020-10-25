@@ -10,12 +10,12 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function getDay(){
+/*function getDay(){
   var MyDate = new Date;
   var PremierJour = Date.UTC(MyDate.getFullYear(), 0, 0);
   var Aujourdhui  = Date.UTC(MyDate.getFullYear(), MyDate.getMonth(), MyDate.getDate());
   return Math.floor((Aujourdhui - PremierJour) / (1000 * 60 * 60 * 24));
-}
+}*/
 
 function dateFromDay(year, day){
   var date = new Date(year, 0); // initialize a date in `year-01-01`
@@ -151,6 +151,8 @@ if($('[class*="dp-"]').length){
   var endDate = new Date(endDateTS);
   var ts = getCookie("ts");
   var ci = getCookie("ci");
+  y = parseInt(ci.split('-').slice(-1)[0]);
+  cInt = parseInt(ci.split('-')[1]); 
          
     if (ts == "y"){
         $('.scale option[value=years]').attr('selected','selected');
@@ -276,36 +278,40 @@ $(function () {
     }
     anneeSuiv=(annee + 1);
   $('.curr-int-value').append(annee);
-  if(getCookie("ts") == 'y'){
+  if(ts == 'y'){
     $('.start-int-value').empty().append('1/1');
     $('.end-int-value').empty().append('31/12');
   }
   var centralElWidth = $('.activity-content-stage:visible').eq(0).width();
   var now = new Date();
   var annee = now.getFullYear();
+  var c = now;
   
-  if(getCookie('ts') == 't'){
+  if(ts == 't' || ts == 'w'){
     ci = getCookie("ci");
     cy = parseInt(ci.split('-').slice(-1)[0]);
-    ct = parseInt(ci.split('-')[1]);  
-    var dateTri = dateTrimester(cy, ct);
+    nbInt = parseInt(ci.split('-')[1]);  
+    var dateTri = datesInterval(ts, cy, nbInt);
     var si = dateTri[0];
     var ei = dateTri[1];
     var tDays = parseInt(dayDiff(si, ei));
-    var c = moment.duration(moment().diff(moment(si),'days')).milliseconds();
-    //if(c > tDays || c < 0) {c = -1;}
-
-    wDate = moment(si);
-    ct = wDate.quarter();
-    var nbSubInt = 0;
-    while (wDate.quarter() == ct){
-      wDate = wDate.add(1,'w');
-      nbSubInt++;
+    
+    if(ts == 't'){
+      
+      wDate = moment(si);
+      ct = wDate.quarter();
+      var nbSubInt = 0;
+      while (wDate.quarter() == ct){
+        wDate = wDate.add(1,'w');
+        nbSubInt++;
+      }
+    
+    } else {
+      var nbSubInt = 7;
     }
 
   } else {
     var tDays = ndDayPerYears(annee);
-    var c = getDay();
     var nbSubInt = 12;
   }
 
@@ -442,6 +448,9 @@ function dateUpdate() {
     $('.e-day').css('padding-right','');
     var ts = getCookie("ts");
     var ci = getCookie("ci");
+    var c = new Date();
+    y = parseInt(ci.split('-').slice(-1)[0]);
+    cInt = parseInt(ci.split('-')[1]); 
     var month = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
     $('#activities-container').find('.months-ref').children().not('.chevron').remove()
     if (ts == "y") {
@@ -454,42 +463,56 @@ function dateUpdate() {
         $('.prev-interval-val').empty().append((parseInt(ci) - 1));
         $('.next-interval-val').empty().append((parseInt(ci) + 1));
         var tDays = ndDayPerYears((parseInt(ci)));
-        var c = getDay();
+        //var c = getDay();
 
-    } else if (ts == "t") {
-        $('.months-ref').removeClass('row').addClass('flex-center-sa');
-        cy = parseInt(ci.split('-').slice(-1)[0]);
-        ct = parseInt(ci.split('-')[1]);  
-        var dateTri = dateTrimester(cy, ct);
-        var si = dateTri[0];
-        var ei = dateTri[1];
-        pt = (ct - 1) % 4; 
-        nt = (ct + 1) % 4; 
+    } else {
+        $('.months-ref').removeClass('row').addClass('flex-center-sa'); 
+        var datesInt = datesInterval(ts, cy, cInt);
+        var si = datesInt[0];
+        var ei = datesInt[1];
+        pInt = ts == 't' ? (cInt - 1) % 4 : (cInt - 1) % 52; 
+        nInt = ts == 't' ? (cInt + 1) % 4 : (cInt + 1) % 52; 
         var ny = cy + 1;
         var py = cy - 1;
-        var tDays = parseInt(dayDiff(si, ei));
-        var c = moment.duration(moment().diff(moment(si),'days')).milliseconds();
-        $('.prev-interval-val').empty().append(`Q${pt == 0 ? 4 : pt} ${pt == 0 ? py : ''}`);
-        $('.next-interval-val').empty().append(`Q${nt == 0 ? 4 : nt} ${nt == 1 ? ny : ''}`);
-        $('.curr-int-value').empty().append(`Q${ct} ${cy}`);
+        var tDays = parseInt(dayDiff(si, ei)) + 1;
+        //var c = moment.duration(moment().diff(moment(si),'days')).milliseconds();
+        if(ts == 't'){
+          $('.prev-interval-val').empty().append(`${lg == 'fr' ? 'T' : 'Q'}${pInt == 0 ? 4 : pInt} ${pInt == 0 ? py : ''}`);
+          $('.next-interval-val').empty().append(`${lg == 'fr' ? 'T' : 'Q'}${nInt == 0 ? 4 : nInt} ${nInt == 1 ? ny : ''}`);
+          $('.curr-int-value').empty().append(`${lg == 'fr' ? 'T' : 'Q'}${cInt} <span class="int-precision">${cy}</span>`);
+        } else {
+          $('.prev-interval-val').empty().append(`${lg == 'fr' ? 'S' : 'W'}${pInt == 0 ? 52 : pInt} ${pInt == 0 ? py : ''}`);
+          $('.next-interval-val').empty().append(`${lg == 'fr' ? 'S' : 'W'}${nInt == 0 ? 52 : nInt} ${nInt == 1 ? ny : ''}`);
+          $('.curr-int-value').empty().append(`${lg == 'fr' ? 'S' : 'W'}${cInt} <span class="int-precision">${cy}</span>`);
+        }
         $('.start-int-value').empty().append(`${si.getDate()}/${si.getMonth() + 1}`);
         $('.end-int-value').empty().append(`${ei.getDate()}/${ei.getMonth() + 1}`);
         //width = 100 / 13;
         //week = moment(si).week();
         wDate = moment(si);
-        ct = wDate.quarter();
         $timescale = $('#activities-container').find('.months-ref');
-        offset = moment.duration(moment(dateTrimester(cy,1)[0]).diff(moment(`${wDate.year()}-01-01`))).days() < 4 && moment(moment(dateTrimester(cy,1)[0])).week() == 2 ? -1 : 0;
-        while (wDate.quarter() == ct){
-          week = wDate.week();
-          
-          if(week == 1){
-            if (moment.duration(moment(`${ct == 4 ? cy : cy - 1}-12-31`).diff(moment(wDate))).days() >= 3){
-              week = 53;
+        if(ts == 't'){
+          ct = wDate.quarter();
+          offset = moment.duration(moment(datesInterval(ts,cy,1)[0]).diff(moment(`${wDate.year()}-01-01`))).days() < 4 && moment(moment(datesInterval(ts,cy,1)[0])).week() == 2 ? -1 : 0;
+          while (wDate.quarter() == ct){
+            week = wDate.week();
+            
+            if(week == 1){
+              if (moment.duration(moment(`${ct == 4 ? cy : cy - 1}-12-31`).diff(moment(wDate))).days() >= 3){
+                week = 53;
+              }
             }
+            $timescale.append('<div><sub>s</sub>' + (week + offset == 0 ? 52 : week + offset) + '</div>');
+            wDate = wDate.add(1,'w');
           }
-          $timescale.append('<div><sub>s</sub>' + (week + offset == 0 ? 52 : week + offset) + '</div>');
-          wDate = wDate.add(1,'w');
+        } else if(ts == 'w'){
+          weekdays_short = [];
+          weekdays_short['en'] = ['M','T','W','T','F','S','S'];
+          weekdays_short['fr'] = ['L','M','M','J','V','S','D'];
+          for(i=0;i<7;i++){
+            $timescale.append(`<div><sub>${weekdays_short[lg][i]}</sub>${i != 0 ? wDate.add(1,'d').date() : wDate.date()}</div>`)
+          }
+
         }
     }
 
@@ -504,12 +527,12 @@ function dateUpdate() {
     var dateChevron = $('.chevron');
     var actCurDate = $('.curDate');
 
-    var echelle = centralElWidth / tDays;
+    var echelle = centralElWidth / (ei - si);
     if (ei > now && now > si) {
         dateChevron.show();
-        dateChevron.css({'left': 'calc(' + Math.round(10000 * (c / tDays)) / 100 + '% - 10px)'});
+        dateChevron.css({'left': 'calc(' + Math.round(10000 * (c - si) / (ei - si)) / 100 + '% - 10px)'});
         actCurDate.each(function (i, e) {
-            $(e).css({'left': Math.round(10000 * (c / tDays)) / 100 + '%'});
+            $(e).css({'left': Math.round(10000 * (c - si) / (ei - si)) / 100 + '%'});
             $(e).show();
         });
     } else {
@@ -525,339 +548,79 @@ function dateUpdate() {
         $(this).closest('.activity-holder').show();
         var sdU = parseInt($this.data("sd"));
         var p = parseInt($this.data("p"));
-        var noStage = false;
 
         var id = $this.data("id");
         var sa = new Date(sdU * 1000);
         var ea = new Date((sdU + p) * 1000);
-        var ts = getCookie("ts");
-        var ci = getCookie("ci");
+        csd = Math.max(si,sa);
+        ced = Math.min(ei,ea);
+        actOff = (Math.min(ei,csd) - si) / (ei - si);
+        actW = (ced - csd) / (ei - si);
+        $this.css({'margin-left': Math.round(10000 * actOff) / 100 + "%"});
+        $this.css({'width': Math.round(10000 * actW) / 100  + "%"});
+        $this.parent().css({'overflow': "hidden"});
 
+        $this.find('.stage-element').each(function () {
 
-        
-        // Defines whether element lies inside (in), outside (''), ends('end') extends ('ext') (starting and extending in only 'ext')
+            var sdVal = $(this).data("sd");
+            var spVal = $(this).data("p");
+            ssd = new Date(sdVal * 1000);
+            sed = new Date((sdVal + spVal)  * 1000);
 
-        var pos = posScale(month, ts, sa, ea, si, ei);
-
-
-        sd = dayof(si, sa);
-        //sd = (sd < 0) ? -sd : sd;
-        sdD = dayofyear(sa);
-
-        /*
-        if (ts == "y") {
-            pd = ndDayPerYears(parseInt(ci));
-
-        } else {
-            pd = dayof(si, ei);
-        }
-        */
-
-        pd = dayof(sa,ea);
-
-        intd = parseInt(dayof(si, ei));
-        //pd = (dayof(si, sa) > pd) ? pd : dayof(si, ei);
-
-        // p1 = parseInt(dayDiff(ea,ei));
-        // p2 = parseInt(dayDiff(ea,sa));
-
-        // p = (p2 < p1) ? p1 : p2;
-        //   console.log(p1,p2,p);
-
-        if (pos == "in") {
-            pxWidthP = (pd + 1) * echelle;
-            pxWidthSD = sd * echelle;
-            pctWidthSD = getPercentage(pxWidthSD, centralElWidth);
-            pctWidthP = getPercentage(pxWidthP, centralElWidth);
-            $this.css({'margin-left': pctWidthSD + "%"});
-            $this.css({'width': pctWidthP + "%"});
-            $this.css({'display': "block"});
-            $this.find('.stage-element').each(function () {
-                var ssd = $(this).data("sd");
-                var sp = $(this).data("p");
-                datest = new Date(parseInt(ssd) * 1000);
-                dateen = new Date((parseInt(ssd) + sp) * 1000);
-                ssd = dayof(si, datest);
-                sp = dayDiff(datest, dateen);
-
-                $(this).find('.s-day').text(getCookie('ts') == 'y' ? datest.getDate() : datest.getDate() + '/' + (datest.getMonth() + 1));
-                $(this).find('.e-day').text(getCookie('ts') == 'y' ? dateen.getDate() : dateen.getDate() + '/' + (dateen.getMonth() + 1));
-                sPctWidthSD = (ssd - sd) / pd;
-                sPctWidthP = Math.max(3, (parseInt(sp) + 1)) / (pd + 1);
-                $(this).css({
-                    'margin-left': Math.round(10000 * sPctWidthSD) / 100 + "%",
-                    'width': Math.round(10000 * sPctWidthP) / 100 + "%",
-                    'background': ssd >= c ? '#5CD08F' : (parseInt(ssd) + parseInt(sp) > c ? 'linear-gradient(to right, transparent, transparent ' + Math.round(10000 * (c - ssd) / sp) / 100 + '%, #7942d0 ' + Math.round(10000 * (c - ssd) / sp) / 100 + '%), repeating-linear-gradient(61deg, #7942d0, #7942d0 0.5rem, transparent 0.5px, transparent 1rem)' : 'gray'),
-                    'height': '7px',
-                    'border-radius': '0.3rem',
-                });
-            });
-
-            $this.find('.event').each(function () {
-
-                var odU = $(this).data("od");
-                var sp = $(this).data("p");
-
-                sPctWidthSD = (odU - sdU) / p;
-                sPctWidthP = Math.max(3, (sp + 1)) / (p + 1);
-
-                $(this).css({
-                    'margin-left': Math.round(10000 * sPctWidthSD) / 100 + "%",
-                    'width': Math.round(10000 * sPctWidthP) / 100 + "%",
-                    'height': '15px',
-                    'border-radius': '0.3rem',
-                });
-            });
-        } else if (pos.includes("ext")) {
-
-            if (pos.includes("end")) {
-
-                var dayext = dayDiff(si, ea);
-
-                pxWidthP = dayext * echelle;
-
-
-                pctWidthP = getPercentage(pxWidthP, centralElWidth);
-                $this.css({'margin-left': 0 + "%"});
-                $this.css({'width': pctWidthP + "%"});
-                //$this.css({'width': 100 + "%"});
-                $this.parent().css({'overflow': "hidden"});
-
-
-                $this.find('.stage-element').each(function () {
-                    var ssd = $(this).data("sd");
-                    var sp = $(this).data("p");
-
-                    datest = new Date(parseInt(ssd) * 1000);
-                    dateen = new Date((parseInt(ssd) + parseInt(sp)) * 1000);
-                    /*if (!(datest > si && datest < ei) ) {
-                        ssd = dayofyear(datest);
-                        sd=ssd;
-                    }*/
-                    if ((datest > si && datest < ei) || (dateen > si && dateen < ei)) {
-                        
-                        ssdOf = Math.max(0, moment.duration(moment(datest).diff(moment(si),'days')).milliseconds());
-                        cOf = Math.max(0, moment.duration(moment().diff(moment(si),'days')).milliseconds());
-
-                        ssd = dayofyear(datest);
-                        sp = dayDiff(si, dateen);
-                        $(this).find('.s-day').text(datest.getDate() + '/' + (datest.getMonth() + 1));
-                        $(this).find('.e-day').text(getCookie('ts') == 'y' ? dateen.getDate() : dateen.getDate() + '/' + (dateen.getMonth() + 1));
-
-                        
-
-                        sPctWidthSD = ssdOf / dayext;
-                        sPctWidthP = sp / dayext;
-                        $(this).css({ 
-                            'margin-left': Math.round(10000 * sPctWidthSD) / 100 + "%",
-                            'width': Math.round(10000 * sPctWidthP) / 100 + "%",
-                            'background': ssdOf >= cOf ? '#5CD08F' : (parseInt(ssdOf) + parseInt(sp) > cOf ? 'linear-gradient(to right, transparent, transparent ' + Math.max(1, Math.round(10000 * (c - ssdOf) / sp) / 100) + '%, #7942d0 ' + Math.round(10000 * (c - ssdOf) / sp) / 100 + '%), repeating-linear-gradient(61deg, #7942d0, #7942d0 0.5rem, transparent 0.5px, transparent 1rem)' : 'gray'),
-                            'border-radius': '0.3rem',
-                            'display' : 'block'
-                        });
-                    } else {
-                        $(this).css({
-                            'display': "none",
-                        });
-                    }
-                });
-                $this.find('.event').each(function () {
-                    var odU = $(this).data("od");
-                    var sp = $(this).data("p");
-
-                    sPctWidthSD = (odU - sdU) / p;
-                    sPctWidthP = Math.max(3, (sp + 1)) / (p + 1);
-
-                    $(this).css({
-                        'margin-left': Math.round(10000 * sPctWidthSD) / 100 + "%",
-                        'width': Math.round(10000 * sPctWidthP) / 100 + "%",
-                        'height': '15px',
-                        'border-radius': '0.3rem',
-                    });
-                });
+            if(ssd < ei){
+                $(this).find('.s-day').text(getCookie('ts') == 'y' ? ssd.getDate() : ssd.getDate() + '/' + (ssd.getMonth() + 1));
+                $(this).find('.e-day').text(getCookie('ts') == 'y' ? sed.getDate() : sed.getDate() + '/' + (sed.getMonth() + 1));
 
             } else {
-                var dayext = dayDiff(sa, ei);
-                pxWidthP = dayext * echelle;
-                pxWidthSD = sd * echelle;
-                pctWidthSD = getPercentage(pxWidthSD, centralElWidth);
-                pctWidthP = getPercentage(pxWidthP, centralElWidth);
+                $(this).find('.s-day').text(getCookie('ts') == 'y' ? ssd.getDate() : ssd.getDate() + '/' + (ssd.getMonth() + 1));
+                $(this).find('.e-day').text(sed.getDate() + '/' + (sed.getMonth() + 1));
 
-                $this.css({'margin-left': pctWidthSD + "%"});
-                //$this.css({'margin-left': 0 + "%"});
-                $this.css({'width': 100 + "%"});
-                $this.parent().css({'overflow': "hidden"});
-
-                $this.find('.stage-element').each(function () {
-
-                    var ssd = $(this).data("sd");
-                    var sp = $(this).data("p");
-                    datest = new Date(parseInt(ssd) * 1000);
-                    dateen = new Date((parseInt(ssd) + sp) * 1000);
-
-                    //ssdOf = dayof(si, datest);
-                    ssdOf = Math.max(0, moment.duration(moment(datest).diff(moment(si),'days')).milliseconds());
-                    cOf = Math.max(0, moment.duration(moment().diff(moment(si),'days')).milliseconds());
-
-                    ssd = dayofyear(datest);
-                    sp = dayDiff(datest, dateen);
-                    if(dateen<ei){
-                        $(this).find('.s-day').text(getCookie('ts') == 'y' ? datest.getDate() : datest.getDate() + '/' + (datest.getMonth() + 1));
-                        $(this).find('.e-day').text(getCookie('ts') == 'y' ? dateen.getDate() : dateen.getDate() + '/' + (dateen.getMonth() + 1));
-
-                    } else {
-                        $(this).find('.s-day').text(getCookie('ts') == 'y' ? datest.getDate() : datest.getDate() + '/' + (datest.getMonth() + 1));
-                        $(this).find('.e-day').text(dateen.getDate() + '/' + (dateen.getMonth() + 1));
-
-                    }
-                    if (ssdOf > tDays) {
-                        $(this).css({
-                            'display': "none",
-                        });
-                    } else {
-                        $(this).css({
-                            'display': "block",
-                        });
-                    }
-                    sPctWidthSD = (ssdOf - sd) / pd;
-                    sPctWidthP = Math.max(3, (parseInt(sp) + 1)) / (pd + 1);
-                    $(this).css({
-                        'margin-left': Math.round(10000 * sPctWidthSD) / 100 + "%",
-                        'width': Math.min(Math.round(10000 * sPctWidthP) / 100, 100) + "%",
-                        'background': ssdOf >= cOf ? '#5CD08F' : (parseInt(ssdOf) + parseInt(sp) > cOf ? 'linear-gradient(to right, transparent, transparent ' + Math.max(1, Math.round(10000 * (c - ssdOf) / sp) / 100) + '%, #7942d0 ' + Math.round(10000 * (c - ssdOf) / sp) / 100 + '%), repeating-linear-gradient(61deg, #7942d0, #7942d0 0.5rem, transparent 0.5px, transparent 1rem)' : 'gray'),
-                        'height': '7px',
-                        'border-radius': '0.3rem',
-                    });
-
+            }
+            if (ssd > ei) {
+                $(this).css({
+                    'display': "none",
                 });
-                //$(this).fid(.append('<i class="fas fa-arrow-right" style=" top: 20%"  ></i>');
-                $this.find('.event').each(function () {
-                    var odU = $(this).data("od");
-                    var sp = $(this).data("p");
-
-                    sPctWidthSD = (odU - sdU) / p;
-                    pxWidthP = dayext * echelle;
-
-                    $(this).css({
-                        'margin-left': Math.round(10000 * sPctWidthSD) / 100 + "%",
-                        'width': Math.round(10000 * sPctWidthP) / 100 + "%",
-                        'height': '15px',
-                        'border-radius': '0.3rem',
-                    });
+            } else {
+                $(this).css({
+                    'display': "block",
                 });
             }
-        } else if (pos == "int") {
+            sOff = (Math.min(ea,Math.max(sa,ssd)) - sa) / (ea - sa);
+            sW = (Math.min(sed,ea) - Math.max(sa,ssd)) / (ea - sa);
 
-            pxWidthP = (pd + 1) * echelle;
-            pxWidthSD = sd * echelle;
-            pctWidthSD = getPercentage(pxWidthSD, centralElWidth);
-            pctWidthP = getPercentage(pxWidthP, centralElWidth);
-            $this.css({'margin-left': (pctWidthSD) < 0 ? pctWidthSD + "%" : "0%"});
-            $this.css({'width': /*Math.min(*/pctWidthP/*, 100)*/ + "%"});
-            $this.parent().css({'overflow': "hidden"});
+            ssd > ei || sed < si ? $(this).css('display',"none") : $(this).css('display',"block");
 
-            $this.find('.stage-element').each(function () {
-
-                var ssd = $(this).data("sd");
-                var sp = $(this).data("p");
-                datest = new Date(parseInt(ssd) * 1000);
-                dateen = new Date((parseInt(ssd) + parseInt(sp)) * 1000);
-                if (dateen > si) {
-
-                    ssdOfd = dayof(si, datest);
-                    sedOfd = dayof(dateen, ei);
-                    cOfd = Math.max(0, moment.duration(moment().diff(moment(si),'days')).milliseconds());
-                    ssd = dayofyear(datest);
-                    
-                    spd = parseInt(dayDiff(datest, dateen));
-
-                    
-                    //ssd = (ssd < 0) ? (-ssd) : (ssd);
-                    sPctWidthSD = (ssdOfd - sd) / pd;
-                    sPctWidthP = Math.max(3, spd + 1) / (pd + 1);
-
-                    $(this).css({
-                      'margin-left': /*ssdOf >= 0 ?*/ Math.round(10000 * sPctWidthSD) / 100 + "%" /*: 0 + '%'*/,
-                      'width': Math.min(Math.round(10000 * sPctWidthP) / 100, 100) + "%",
-                      'background': ssdOfd >= cOfd ? '#5CD08F' : (ssdOfd + spd > cOfd ? 'linear-gradient(to right, transparent, transparent ' + Math.round(10000 * (cOfd - ssdOfd) / spd) / 100 + '%, #7942d0 ' + Math.round(10000 * (cOfd - ssdOfd) / spd) / 100 + '%), repeating-linear-gradient(61deg, #7942d0, #7942d0 0.5rem, transparent 0.5px, transparent 1rem)' : 'gray'),
-                      'height': '7px',
-                      'border-radius': '0.3rem',
-                      'display' : 'block'
-
-                    });
-
-                    $(this).find('.s-day').css('padding-left','').text(datest.getDate() + '/' + (datest.getMonth() + 1));
-                    $(this).find('.e-day').css('padding-right','').text(dateen.getDate() + '/' + (dateen.getMonth() + 1));
-                    
-                    if(ssdOfd < 0){
-                      $(this).find('.s-day').prepend('<i class="fa fa-caret-left sm-right"></i>');
-                    }
-                    if(sedOfd < 0){
-                      $(this).find('.e-day').append('<i class="fa fa-caret-right sm-left"></i>');
-                    }
-
-                    limLeft = $('.stages-holder').offset().left;
-                    limRight = $('.act-info').offset().left;
-                    //stagesPos = $('.act-info').offset();
-                    sDayPos = $(this).find('.s-day').offset().left;
-                    eDayPos = $(this).find('.e-day').offset().left;
-                    
-                    off = 0;
-                    while(sDayPos + off < limLeft){
-                      off += 10;
-                    }
-                    $(this).find('.s-day').css('padding-left',off);
-                    off = 0;
-                    while(eDayPos - off > limRight){
-                      off += 10;
-                    }
-                    $(this).find('.e-day').css('padding-right',off + 45);
-
-                } else {
-                    $(this).css({
-                        'display': 'none',
-                    });
-                }
+            $(this).css({
+                'margin-left': Math.round(10000 * sOff) / 100 + "%",
+                'width': Math.round(10000 * sW) / 100 + "%",
+                'background': ssd >= c ? '#5CD08F' : (sed > c ? 'linear-gradient(to right, transparent, transparent ' + Math.max(1, Math.round(10000 * (c - csd) / (ced - csd)) / 100) + '%, #7942d0 ' + Math.round(10000 * (c - csd) / (ced - csd)) / 100 + '%), repeating-linear-gradient(61deg, #7942d0, #7942d0 0.5rem, transparent 0.5px, transparent 1rem)' : 'gray'),
+                'height': '7px',
+                'border-radius': '0.3rem',
             });
 
-            $this.find('.event').each(function () {
-                var od = $(this).data("od");
-                var sp = $(this).data("p");
+        });
 
-                sPctWidthSD = (odU - sdU) / p;
-                sPctWidthP = Math.max(3, (sp + 1)) / (p + 1);
+        $this.find('.event').each(function () {
+            var odU = $(this).data("od");
+            var ep = $(this).data("p") ? $(this).data("p") : 0;
 
-                $(this).css({
-                    'margin-left': Math.round(10000 * sPctWidthSD) / 100 + "%",
-                    'width': Math.round(10000 * sPctWidthP) / 100 + "%",
-                    'height': '15px',
-                    'border-radius': '0.3rem',
-                });
+            od = new Date(odU * 1000);
+            erd = new Date((odU + ep)  * 1000);
+            eOff = (Math.min(ced,Math.max(csd,od)) - csd) / (ced - csd);
+            eW = (Math.min(erd,ced) - Math.max(csd,od)) / (ced - csd);
+
+            od > ei || erd < si ? $(this).css('visibility',"hidden") : $(this).css('visibility','');
+
+            $(this).css({
+                'margin-left': Math.round(10000 * eOff) / 100 + "%",
+                'width': Math.round(10000 * eW) / 100 + "%",
+                'height': '15px',
+                'border-radius': '0.3rem',
             });
-        } else {
-
-            noStage = true;
-            $(this).closest('.activity-holder').hide();
-            /*
-            $this.find('.e-day').each(function () {
-                $(this).css('margin-right', '90%');
-            })*/
-            $this.css({'margin-left': 0 + "%"});
-            $this.css({'width': 0 + "%"});
-            $this.find('.stage-element').each(function () {
-                $(this).css({});
-            });
-
-            $this.find('.event').each(function () {
-                $(this).css({});
-            });
-
-        }
-
-        if (noStage) {
-            $this.hide();
-        }
-    });
+        });
+    })
+       
+    //});
 
     feedDashboardScreen();
 };
@@ -868,34 +631,50 @@ function dateUpdate() {
         return lgMois[mois]; // 0 < mois <11
     }
 
-    function dateTrimester(year,qT){
-        var tbl = [];
-        for(var i=0;i<2;i++){
-            day= moment(year, "YYYY").quarter(qT+i).toDate();
+    function datesInterval(period,year,intNb){
+        //switch(period){
+            //case 't' :
+              var dates = [];
 
-             if(day.getDay()!=1) {
-                 if (i != 1) {
-                     d = (day.getDay() == 0) ? 1 : (8 - day.getDay() % 7);
-                     day.setDate(day.getDate()+d);
-                 } else {
-                     d = (day.getDay() == 0) ? 0 : (7 - day.getDay() % 7);
-                     day.setDate(day.getDate()+d);
-                 }
+              //Retrieving start and end interval dates
+              for(var i=0;i<2;i++){
 
-             } else if (i == 1) {
-                 if(day.getDay()==1) {
-                     m = (day.getMonth() == 12) ? 1 : day.getMonth() + 1;
-                     day.setMonth(m);
-                     day.setDate(getNbJoursMois(12 , year-1));
-                     day.setFullYear(year-1);
-                 }
+                  date = period == 't' ? moment(year, "YYYY").quarter(intNb+i).toDate() : moment(year, "YYYY").week(intNb+i).toDate();
+                  // If different to monday
+                  
+                  if(date.getDay() != 1) {
+                      // First day starts on monday
+                      /*
+                      if (i == 0) {
+                          d = (date.getDay() == 0) ? 1 : (8 - date.getDay() % 7);
+                          date.setDate(date.getDate()+d);
+                      } else {
+                          // and finishes on sunday
+                          d = (date.getDay() == 0) ? 0 : (8 - date.getDay() % 7);
+                          date.setDate(date.getDate()+d);
+                      }
+                      */
 
-             } else {
+                      d = date.getDay() < 4 ? 1 - date.getDay() : date.getDay(); 
+                      date.setDate(date.getDate()+d);
 
-             }
-            tbl.push(day);
-        }
-        return tbl;
+                  } else if (i == 1) {
+                      if(date.getDay() == 1) {
+                          m = (date.getMonth() == 12) ? 1 : date.getMonth() + 1;
+                          date.setMonth(m);
+                          date.setDate(getNbJoursMois(12 , year-1));
+                          date.setFullYear(year-1);
+                      }
+
+                  } else {
+
+                  }
+                  dates.push(date);
+              }
+
+        //}
+        
+        return dates;
     }
 
     function posScale(month,time,sa,ea,si,ei) {
@@ -956,90 +735,40 @@ function dateUpdate() {
     $('.no-activity-overlay').css('visibility','');
   });*/
 
-    function dayofyear(d) {   // d is a Date object
-        var yn = d.getFullYear();
-        var mn = d.getMonth();
-        var dn = d.getDate();
-        var d1 = new Date(yn,0,1,12,0,0); // noon on Jan. 1
-        var d2 = new Date(yn,mn,dn,12,0,0); // noon on input date
-        var ddiff = Math.round((d2-d1)/864e5);
-        return ddiff+1;
-    }
-    function dayof(d,d2) {   // d is a Date object
-        var yn = d.getFullYear();
-        var mn = d.getMonth();
-        var dn = d.getDate();
-        var yn2 = d2.getFullYear();
-        var mn2 = d2.getMonth();
-        var dn2 = d2.getDate();
-        var d1 = new Date(yn,mn,dn,12,0,0); // noon on Jan. 1
-        var d2 = new Date(yn2,mn2,dn2,12,0,0); // no
-        var ddiff = Math.round((d2-d1)/864e5);
-        return ddiff+1;
-    }
     function dayDiff(d1, d2)
     {
         d1 = d1.getTime() / 86400000;
         d2 = d2.getTime() / 86400000;
         return new Number(d2 - d1).toFixed(0);
     }
-    function dateDiff(sa, ea){
-        var diff = {}                           // Initialisation du retour
-        var tmp = ea - sa;
 
-        tmp = Math.floor(tmp/1000);             // Nombre de secondes entre les 2 dates
-        diff.sec = tmp % 60;                    // Extraction du nombre de secondes
-
-        tmp = Math.floor((tmp-diff.sec)/60);    // Nombre de minutes (partie entière)
-        diff.min = tmp % 60;                    // Extraction du nombre de minutes
-
-        tmp = Math.floor((tmp-diff.min)/60);    // Nombre d'heures (entières)
-        diff.hour = tmp % 24;                   // Extraction du nombre d'heures
-
-        tmp = Math.floor((tmp-diff.hour)/24);   // Nombre de jours restants
-        diff.day = tmp;
-
-        return diff;
-    }
   updateEvents();
 
     $('.prev-int-btn, .next-int-btn').on('click', function (e) {
-        var ci = getCookie('ci');
-        var ts = getCookie('ts');
-        if($(this).hasClass('prev-int-btn')){
-
-
+        
+      if($(this).hasClass('prev-int-btn')){
             if (ts == "y") {
-                ci = parseInt(ci)-1;
+                ci--;
             } else {
-                //parseInt(ci.substring(3,7)),(parseInt(ci[1])
-                if(parseInt(ci[2])==1){
-                    ts = parseInt(ci.substring(4,8))-1;
-                    ci = 'q-'+4+'-'+ts;
+                if(cInt == 1){
+                    ci = ts == 't' ? `q-4-${y-1}` : `w-52-${y-1}`;
                 } else {
-                    ci = 'q-'+(parseInt(ci[2])-1)+'-'+ci.substring(4,8);
+                    ci = `${ts == 't' ? 'q' : 'w'}-${cInt - 1}-${y}`;
                 }
-
             }
-
-
-            }
-        else {
+      } else {
             if (ts == "y") {
-                ci = parseInt(ci)+1;
+                ci++;
             } else {
-                //parseInt(ci.substring(3,7)),(parseInt(ci[1])
-                if(parseInt(ci[2])==4){
-                    ts = parseInt(ci.substring(4,8))+1;
-                    ci = 'q-'+1+'-'+ts;
+                if(ts == 't' && cInt == 4 || ts == 'tw' && cInt == 52){
+                    ci = `${ts == 't' ? 'q' : 'w'}-1-${y+1}`;
                 } else {
-                    ci='q-'+(parseInt(ci[2])+1)+'-'+ci.substring(4,8);
+                    ci =`${ts == 't' ? 'q' : 'w'}-${cInt + 1}-${y}`;
                 }
 
             }
         }
-        setCookie('ci',ci,365);
-        intervalChange(ci);
+        setCookie('ci', ci, 365);
         dateUpdate();
     });
 
@@ -1171,22 +900,7 @@ function dateUpdate() {
 
   })
   */
-  function intervalChange(ci) {
-      if (ci !== undefined) {
-          eraseCookie('ci');
-          setCookie('ci', ci, 365);
 
-
-          $('.value-scale').find('input.select-dropdown').attr('value', ci);
-          if (ci == "y") {
-              $('.curr-int-value').empty().append(parseInt(ci));
-              $('.prev-interval-val').empty().append(parseInt(ci) - 1);
-              $('.next-interval-val').empty().append(parseInt(ci) + 1);
-          } else {
-
-          }
-      }
-  }
 
   $('.value-scale').on('change', function () {
       var ci = $(this).children("option:selected").val();
@@ -1310,7 +1024,7 @@ function dateUpdate() {
     window.location = window.location;
   })
   */
-
+  /*
   $('.change-timescale-type > *').on('click',function(){
     ts = getCookie('ts');
     ci = getCookie('ci');
@@ -1321,6 +1035,7 @@ function dateUpdate() {
     setCookie('ci',new_ci,365);
     location.reload();
   });
+  */
 
   /*
   $('.change-date-type').on('click',function(){
@@ -1481,6 +1196,7 @@ function dateUpdate() {
         const options = { month: 'numeric', day: 'numeric' };
         $modal = $('#createActivity');
         $modal.attr({'data-id':id, 'data-sid':data.aid});
+        if(data.ms){$modal.addClass('a-multiple-stages');}
         $modal.find('.btn-s-update').hide();
         $modal.find('.btn-s-modify').show();
         $modal.find('.s-name').empty().append(data.name);
@@ -1571,7 +1287,7 @@ function dateUpdate() {
       $(`.stage-element[data-id="${$this.data('id')}"]`).click();
       $('#updateEvent').modal('close');
     }
-  })
+  });
 
 
 
@@ -1603,8 +1319,8 @@ function dateUpdate() {
     $modal.find('.btn-e-modify').hide();
     $modal.find('.ev-info').remove();
     $modal.find('.e-documents, .e-comments').empty();
-    $modal.find('.documents-number').empty().append(`${$modal.find('.documents-number').data('nodoc')}`);
-    $modal.find('.comments-number').empty().append(`${$modal.find('.comments-number').data('nodoc')}`);
+    $modal.find('.documents-number').empty().append(`${$modal.find('.documents-number').data('none')}`);
+    $modal.find('.comments-number').empty().append(`${$modal.find('.comments-number').data('none')}`);
 
     updateEvents();
     //$('.event-element-name').empty().append($(this).closest('.act-info').find('.act-info-name').text());
@@ -1635,8 +1351,26 @@ function dateUpdate() {
     $holder.append($newProto);
   })
 
+  $(document).on('click','.e-com-reply',function(){
+    const $this = $(this);
+    $holder = $('ul.e-comments');
+    proto = $holder.data('prototype-creation');
+    proto = proto.replace(/__name__/g, $holder.children().length);
+    $newProto = $(proto);
+    $this.closest('.com-reply-zone').hide();
+    $this.closest('.e-comment').addClass('being-replied').after($newProto);
+  })
+
   $(document).on('click','.e-doc-remove',function(){
     $(this).closest('.e-document').remove();
+  });
+
+  $(document).on('click','.e-com-remove',function(){
+    const $comElmt = $(this).closest('.e-comment');
+    if($comElmt.prev().hasClass('being-replied')){
+      $comElmt.prev().find('.com-reply-zone').show();
+    }
+    $comElmt.remove();
   });
 
   $('.update-event-btn').on('click',function(e){
@@ -1689,7 +1423,7 @@ function dateUpdate() {
         if(data.documents){
           $modal.find('.documents-number').empty().append(data.documents.length);
         } else {
-          $modal.find('.documents-number').empty().append(`(${$modal.find('.documents-number').data('nodoc')})`);
+          $modal.find('.documents-number').empty().append(`(${$modal.find('.documents-number').data('none')})`);
         }
         $docHolder = $modal.find('.e-documents');
         $docHolder.empty();
@@ -1714,7 +1448,7 @@ function dateUpdate() {
         if(data.comments){
           $modal.find('.comments-number').empty().append(data.comments.length);
         } else {
-          $modal.find('.comments-number').empty().append(`(${$modal.find('.documents-number').data('nodoc')})`);
+          $modal.find('.comments-number').empty().append(`(${$modal.find('.documents-number').data('none')})`);
         }
         $comHolder = $modal.find('.e-comments');
         $comHolder.empty();
@@ -1722,13 +1456,16 @@ function dateUpdate() {
             $comElmt = $($comHolder.data('prototype-existing'));
             $comElmt.attr('data-id',c.id);
             $comElmt.find('.e-com-author').append(c.author);
-            $comElmt.find('.e-com-content').append(c.content);           
-            $comElmt.find('.e-com-inserted').append(new Date(c.inserted.date).toLocaleDateString("fr-FR",{ weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' }));  
+            $comElmt.find('.e-com-content').append(c.content);
+            var updateDT =  c.modified ? c.modified : c.inserted;         
+            $comElmt.find('.e-com-updated').append(`${updateDT} ${c.modified ? ' ('+modifiedMsg+')' : ''}`);  
             if(c.self){
               $modifyElmt = $(`<span class="e-com-modify tooltipped" data-tooltip="${msgComModify}" data-position="top"><i class="fa fa-pen"><i></span>`)
               $modifyElmt.tooltip();
-              $comElmt.find('.e-com-right-elmts').append($modifyElmt);
-            }         
+              $comElmt.addClass('self').find('.e-com-right-elmts').append($modifyElmt);
+            } else {
+              $comElmt.append(`<div class="com-reply-zone flex-center-fe"><div class="dd-orange-text e-com-reply btn-e-update"><i class="fa fa-reply m-right"></i><span>Reply</span></div></div>`);
+            }      
             $comHolder.append($comElmt);
         });
 
@@ -1780,12 +1517,48 @@ function dateUpdate() {
   })
 
   $(document).on('mouseover','.e-document',function(){
-      if(!$('.doc-name-validate:visible').length){
+      var $modal = $(this).closest('.modal');
+      if(!$modal.find('.doc-name-validate:visible, input:visible, textarea:visible').length){
         $(this).find('.doc-actions').show();
       }
   }).on('mouseleave','.e-document',function(){
     $(this).find('.doc-actions').hide();
   })
+  
+  $(document).on('click','.com-validate',function(){
+      const $this = $(this);
+      const $comElmt = $this.closest('.e-comment');
+      const $comHolder = $this.closest('.e-comments');
+      const $evtElmt = $comElmt.closest('.modal');
+      const comExists = $comElmt.prev().hasClass('existing');
+      if(comExists){
+        $existingComElmt = $comElmt.prev();
+      } else {
+        $existingComElmt = $($comHolder.data('prototype-existing'));
+        $modifyElmt = $(`<span class="e-com-modify tooltipped" data-tooltip="${msgComModify}" data-position="top"><i class="fa fa-pen"><i></span>`)
+        $modifyElmt.tooltip();
+        $existingComElmt.find('.e-com-right-elmts').append($modifyElmt);
+        $comElmt.before($existingComElmt);
+      }
+      const content = $this.closest('.e-comment').find('textarea').val();
+
+      $params = {id: $comElmt.data('id'), eid: $evtElmt.data('id'), content: content};
+      if($comElmt.data('pid')){$params['pid'] = $comElmt.data('pid');}
+      if(!$comElmt.data('id') && $comElmt.prev().hasClass('being-replied')){$params['cid'] = $comElmt.prev().data('id');}
+      $.post(uccurl,$params)
+        .done(function(data){
+          $comElmt.remove();
+          if(!comExists){
+            $existingComElmt.attr('data-id',data.id).find('.e-com-author').append(data.author);
+          } 
+          if(!comExists || data.modified){
+            $existingComElmt.find('.e-com-updated').empty().append(`${new Date(data.updated.date).toLocaleDateString("fr-FR",{ weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' })} ${data.modified ? ' ('+modifiedMsg+')' : ''}`);
+            $existingComElmt.find('.e-com-content').empty().append(content);
+          }
+          $existingComElmt.closest('.com-reply-zone').show();
+          $existingComElmt.show();
+        })
+  });
 
   $(document).on('click','.doc-name-validate',function(){
       const $this = $(this);
@@ -1873,6 +1646,15 @@ function dateUpdate() {
     }
   })
 
+  $(document).on('mouseover','.e-dates-header, .e-documents-header, .e-comments-header, .e-comment',function(){
+    var $modal = $(this).closest('.modal');
+    if(!$modal.find('input:visible,textarea:visible').length){
+      $(this).find('.btn-e-update').show();
+    }
+  }).on('mouseleave','.e-dates-header, .e-documents-header, .e-comments-header, .e-comment',function(){  
+    $(this).find('.btn-e-update').hide();
+  })
+
   $(document).on('click','.s-name-update',function(){
     const $this = $(this);
     if(!$this.find('input').length){
@@ -1902,13 +1684,14 @@ function dateUpdate() {
   })
 
   $(document).on('click','.e-com-modify',function(){
-    const $comment = $(this).closest('.e-existing-comment');
+    const $comment = $(this).closest('.existing');
     const $content = $comment.find('.e-com-content').text().trim();
     $proto = $($(this).closest('.e-comments').data('prototype-creation'));
     $proto.find('textarea').text($content);
     $proto.attr('data-id',$comment.data('id')).addClass('flex-center');
-    $proto.append('<div class="c-flex-center c-action-buttons"><i class="fa fa-times dd-text btn-flat modal-trigger" href="#deleteComment"></i><i class="fa fa-check dd-text btn-flat e-com-delete"></i></div>');
-    $proto.children().first().css('width','90%');
+    $proto.find('.e-com-remove').removeClass('e-com-remove').addClass('modal-trigger').attr('href','#deleteComment');
+    //$proto.append('<div class="c-flex-center c-action-buttons"><i class="fa fa-times dd-text btn-flat modal-trigger" href="#deleteComment"></i><i class="fa fa-check dd-text btn-flat e-com-delete"></i></div>');
+    //$proto.children().first().css('width','90%');
     $comment.after($proto);
     $comment.hide();
   });
@@ -1917,15 +1700,17 @@ function dateUpdate() {
     $('.e-com-delete').attr('data-id',$(this).closest('.e-comment').data('id'));
   });
 
-  $('.e-com-delete').on('click',function(){
+  $(document).on('click','.e-com-delete',function(){
    
     urlToPieces = dcomurl.split('/');
-    id = $(this).data('id');
+    id = $(this).attr('data-id');
     urlToPieces[urlToPieces.length - 1] = id;
     url = urlToPieces.join('/');
     $.delete(url,null)
       .done(function(){
-        $(`.e-existing-comment[data-id="${id}"], .e-comment[data-id="${id}"]`).remove();
+        $(`.e-comment.existing[data-id="${id}"], .e-comment[data-id="${id}"]`).remove();
+        var nbComs = parseInt($('.comments-number').text());
+        $('.comments-number').empty().append(nbComs ? `(${$('.comments-number').data('none')})` : nbComs - 1); 
       })
     
   });
@@ -1934,7 +1719,7 @@ function dateUpdate() {
     $('.e-doc-delete').attr('data-id', $(this).closest('.e-document').data('id'));
   });
 
-  $('.e-doc-delete').on('click',function(){
+  $(document).on('click','.e-doc-delete',function(){
    
     urlToPieces = ddocurl.split('/');
     id = $(this).attr('data-id');
@@ -1944,7 +1729,7 @@ function dateUpdate() {
       .done(function(){
         $(`.e-document[data-id="${id}"]`).remove();
         var nbDocs = parseInt($('.documents-number').text());
-        $('.documents-number').empty().append(nbDocs ? `(${$('.documents-number').data('nodoc')})` : nbDocs - 1); 
+        $('.documents-number').empty().append(nbDocs ? `(${$('.documents-number').data('none')})` : nbDocs - 1); 
       })
     
   });
@@ -1972,7 +1757,7 @@ function dateUpdate() {
   })
 
   $(document).on('click','[href="#deleteEvent"]',function(){
-    $('.remove-event').attr('data-id',$(this).attr('data-id'));
+    $('.remove-event').attr('data-id',$(this).closest('.modal').attr('data-id'));
   })
 
   $('.remove-event').on('click',function(){
@@ -2005,7 +1790,16 @@ function dateUpdate() {
         $this.before($newForm);
         $('.participants-list').css('margin-bottom','60px');
       }
-  })^
+  })
+
+  $('.btn-add-event').on('click',function(){
+    var $modal = $(this).closest('.modal');
+    if ($(this).closest('.modal').hasClass('a-multiple-stages')){
+      $('#multipleStage').modal('open');
+    }
+    $(`[href="#updateEvent"][data-sid="${$modal.data('id')}"]`).find('i').click();
+    $modal.modal('close');
+  })
 
   $(document).on('keyup','input[name*="firm"]',function(e){
 
@@ -2066,6 +1860,7 @@ function dateUpdate() {
   $(document).on('keyup','input[name*="fullname"]',function(event){
     var $this = $(this);
     var $partElmt = $(this).closest('.participants-list--item');
+    var $partHolder = $(this).closest('.participants-list');
     var $selector = $partElmt.find('[name*="participantSelector"]');
     if($selector.find('option:selected').length && $this.val() != $selector.find('option:selected').text()){
       $partInputZone = $this.parent();
@@ -2079,11 +1874,17 @@ function dateUpdate() {
     $selectorMElmts = $selector.closest('.select-wrapper');
     const p = [];
     $('.participants-list--item').not($partElmt).each(function(i,e){
-      $(e).find('.participant-field-zone input:not(.select-dropdown)').each(function(i,f){
-        if($(f).attr('value')){
-          p.push({el: $(f).attr('class'), id: $(f).attr('value')});
-        }
-      })
+      if(!$partHolder.find('.existing').length){
+        $(e).find('.participant-field-zone input:not(.select-dropdown)').each(function(i,f){
+          if($(f).attr('value')){
+            p.push({el: $(f).attr('class'), id: $(f).attr('value')});
+          }
+        });
+      } else {
+        $(e).find('.participant-btn').each(function(i,f){
+          p.push({id: $(f).data('pid')});
+        });
+      }
     })
 
     if($this.val().length >= 3 /*&& event.keyCode != 8*/){
@@ -2147,12 +1948,6 @@ function dateUpdate() {
     }
   });
 
-  $('.btn-e-modify:not(.modal-close').on('click',function(){
-    var $modal = $(this).closest('.modal');
-    $modal.find('.btn-e-modify').hide();
-    $modal.find('.btn-e-update').show();
-  })
-
   /*
   $('.btn-s-modify:not(.modal-close').on('click',function(){
     var $modal = $(this).closest('.modal');
@@ -2207,7 +2002,7 @@ function dateUpdate() {
       }
       //var index = $('.participants-list--item').index($this.closest('.participants-list--item'));
       if($this.val() != ""){
-          $partElmt.find('.tooltipped').attr('data-tooltip',$selectedOpt.text()).tooltip();
+          $partElmt.find('.tooltipped').attr('data-tooltip',`${$selectedOpt.text()} ${$selectedOpt.data('fname').length > 0 ? ' (' + $selectedOpt.data('fname') + ')' : ''}`).tooltip();
           $this.prev().attr('style','display:none!important');
 
           if(!$selectedOpt.attr('data-oid')){
@@ -2390,8 +2185,6 @@ function dateUpdate() {
 
     } else {
 
-
-
       const $partInputs = $this.closest('.participant-field-zone').find('input');
       const $modal = $this.closest('.modal');
       $params = {};
@@ -2401,10 +2194,9 @@ function dateUpdate() {
         if(value){
           $params[c] = value;
         }
-
       })
       
-      if (!c.length){
+      if (isEmpty($params)){
         var creationModal = $('#createParticipant');
         var partFN = $partElmt.find('input.participant-fullname').val();
         creationModal.find('.new-part-name').empty().append(partFN);
@@ -2414,24 +2206,21 @@ function dateUpdate() {
           $('input[name="lastname"]').val(partNameToPieces.slice(1).join(' ')).prev().addClass('active');
           //}
           $('#createParticipant').modal('open');
+
       } else {
           
         $params.id = $modal.attr('data-id');
         $.post(apurl,$params)
           .done(function(data){
             $partElmt.removeClass('edit');
-            $partElmt.find('.participant-fullname-zone').show();
+            $partElmt.find('.participant-btn').addClass('existing deletable modal-trigger').attr({
+              'href' : '#deleteParticipant',
+              'data-pid' : data.pid
+            }).append('<div class="p-delete-overlay flex-center" style="display:none;"><i class="fa fa-trash"></i></div>').show();
             $partElmt.find('.participant-field-zone').hide(); 
-          })
-      
+          })    
       }
-
-      console.log($params);
-      
-
     }
-    
-    
   })
 
   $('#choice-indpt').on('change',function(){
@@ -2642,6 +2431,21 @@ function dateUpdate() {
       location.reload();
     }
   })
+
+  $('.timescale-change-btn').on('click',function(){
+      $('#timescaleSelector').material_select();
+      $(this).hide();
+  });
+
+  $('#timescaleSelector').on('change',function(){
+      const val = $(this).val();
+      const now = new Date();
+      eraseCookie('ts');
+      eraseCookie('ci');
+      setCookie('ci',`${val == 'y' ? now.getFullYear() : (val == 't' ? 'q-' + moment().quarter() + '-' + now.getFullYear() : 'w-'+ moment().week() + '-' + now.getFullYear() )}`,365);
+      setCookie('ts',$(this).val(),365);
+      location.reload();
+  });
 
 });
 

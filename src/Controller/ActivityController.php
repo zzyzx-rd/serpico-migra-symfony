@@ -171,7 +171,7 @@ class ActivityController extends MasterController
                         'recipients' => $recipients, 
                         'settings' => [
                             'activity' => $activity->getStages()->count() > 1 ? null : $activity, 
-                            'stage' => $activity->getStages()->count() > 1 ? $stage : null
+                            'stage' => $activity->getStages()->count() > 1 ? $stage : null,
                         ], 
                         'actionType' => 'activityParticipation']
                     );
@@ -402,7 +402,7 @@ class ActivityController extends MasterController
             if($externalUser->getEmail() != ""){
                 $response = $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'externalInvitation']);
                 if($response->getStatusCode() == 500){
-                    return new JsonResponse(['msg' => $response->getContent()], 500);
+                    return $response->getContent();
                 }
             }
             $externalUser->setClient($client)->setUser($user);

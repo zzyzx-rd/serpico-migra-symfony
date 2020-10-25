@@ -139,9 +139,11 @@
         </a>
         
         <ul class="flex-center no-wrap">
+          {% if activity.organization == currentuser.organization %}
             <li>
               <a class="btn-floating act-btn tooltipped modal-trigger" href="#deleteActivity" data-tooltip="{{ 'activities.delete_activity'|trans }}" data-position="top" data-aid="{{ activity.id }}"><i class="fa fa-trash"></i></a>
             </li>
+          {% endif %}
           {% if activityM.userCanEdit(activity,currentuser) %}  
             <li>
               <a class="btn-floating act-btn tooltipped modal-trigger" href="#updateStageProgressStatus" data-position="top" data-html="true" data-tooltip="{{ 'activities.update_status'|trans}}" data-eid="{{ activity.id }}"><i class="material-icons">update</i></a>

@@ -6,6 +6,7 @@ use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\EventDocumentRepository;
 use DateTime;
 use DateTimeInterface;
+use DateTimeZone;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -67,9 +68,16 @@ class EventDocument extends DbObject
     public ?int $createdBy;
 
     /**
+     * @ORM\Column(name="evd_modified", type="datetime", nullable=true)
+     */
+    public $modified;
+
+    /**
      * @ORM\Column(name="evd_inserted", type="datetime", nullable=true, options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
+
+    public ?DateTimeZone $tz;
 
     /**
      * OptionName constructor.
@@ -89,7 +97,8 @@ class EventDocument extends DbObject
         $mime = null,
         Event $event = null,
         User $author = null,
-        $createdBy = null)
+        $createdBy = null,
+        DateTime $modified = null)
     {
         parent::__construct($id, $createdBy, new DateTime());
         $this->title = $title;
@@ -99,6 +108,7 @@ class EventDocument extends DbObject
         $this->mime = $mime;
         $this->event = $event;
         $this->author = $author;
+        $this->modified = $modified;
     }
 
 
@@ -194,6 +204,18 @@ class EventDocument extends DbObject
         $this->inserted = $inserted;
         return $this;
     }
+
+    public function getModified($niceFormat = null): ?DateTimeInterface
+    {
+        return $this->modified;    
+    }
+
+    public function setModified(?DateTimeInterface $modified): self
+    {
+        $this->modified = $modified;
+        return $this;
+    } 
+
 
     public function __toString()
     {

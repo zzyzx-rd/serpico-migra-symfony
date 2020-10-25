@@ -61,6 +61,11 @@ class EventComment extends DbObject
     public $children;
 
     /**
+     * @ORM\Column(name="evc_modified", type="datetime", nullable=true)
+     */
+    public $modified;
+
+    /**
      * @ORM\Column(name="evc_inserted", type="datetime", nullable=false, options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
@@ -78,7 +83,8 @@ class EventComment extends DbObject
         $type = null,
         $description = null,
         $content = null,
-        $createdBy = null
+        $createdBy = null,
+        DateTime $modified = null
         )
     {
         parent::__construct($id, $createdBy, new DateTime());
@@ -86,6 +92,7 @@ class EventComment extends DbObject
         $this->content = $content;
         $this->description = $description;
         $this->children = new ArrayCollection;
+        $this->modified = $modified;
     }
 
 
@@ -136,6 +143,17 @@ class EventComment extends DbObject
     public function setInserted(?DateTimeInterface $inserted): self
     {
         $this->inserted = $inserted;
+        return $this;
+    }
+
+    public function getModified(): ?DateTimeInterface
+    {
+        return $this->modified;
+    }
+
+    public function setModified(?DateTimeInterface $modified): self
+    {
+        $this->modified = $modified;
         return $this;
     }
 
