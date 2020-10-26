@@ -1276,8 +1276,6 @@ function dateUpdate() {
     }
   });
 
-
-
   $('.e-multiple-events').on('click',function(){
 
       $('#eventSelector').empty();
@@ -2087,7 +2085,7 @@ function dateUpdate() {
     $.post(acurl,data)
       .done(function(data){
         $('#createActivity').modal('close');
-        //location.reload();
+        location.reload();
       })
       .fail(function(data){
         $.each(data.responseJSON, function(key, value){
