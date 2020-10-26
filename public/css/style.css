@@ -362,14 +362,14 @@ table.striped td {
   font-weight: 501;
 }
 
+
+
 body {
   display: flex;
   flex-flow: column;
   min-height: 100vh;
   margin: 0;
   padding: 0;
-  font-size: 16px;
-  min-width: 993px;
 }
 
 main {
@@ -1208,18 +1208,24 @@ div.col.s12.m2.linkedin {
     transform: rotate(10deg);
   }
 
+  /*
   body{
     font-size: 22px;
   }
 
   h5{
     font-size: 26px;
-  }
+  }*/
 
 }
 
 @media screen and (min-width: 601px) {
   
+  body{
+    font-size: 16px;
+    min-width: 993px;
+  }
+
   .white-login-zone{
     width:200px;
   }

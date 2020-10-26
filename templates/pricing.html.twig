@@ -59,7 +59,7 @@ Signup
         flex-wrap:nowrap;
       }
 
-      .row:not(.footer-row):first-of-type i {
+      th i {
         font-size: 35px;
       }
 
@@ -92,16 +92,16 @@ Signup
         background-color: #fdf7ff!important;
       }
 
-      tr > td:first-of-type, th:first-of-type{
+      tr > td:first-of-type,{
         text-align:left!important;
         width: 25%;
       }
 
-      tr > td:nth-of-type(2), th:nth-of-type(2){
+      tr > td:nth-of-type(2){
         width: 25%;
       }
 
-      tr > td:nth-of-type(3), th:nth-of-type(3){
+      tr > td:nth-of-type(3){
         width: 25%;
       }
 
@@ -144,7 +144,22 @@ Signup
         font-size:15px;
       }
 
-      
+      .table-headers{
+        min-height: 175px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        margin: auto;
+      }
+
+      @media screen and (max-width: 601px){
+        .pricing-table-section{
+          overflow-x: scroll;
+        }
+      }
+
+            
 
   </style>
 
@@ -156,55 +171,46 @@ Signup
         <h4 class="center">{{'pricing.header_title'|trans|raw}}</h4>
       </section>
       <section class="pricing-table-section">
-        <div class="row flex-center-fe">
-          <div></div>
-          <div>
-            <div class="c-flex-center">
-                <i class="fa fa-seedling free-plan-icon"></i>
-            </div>
-          </div>
-          <div>
-            <div class="c-flex-center">
-              <i class="fa fa-dove premium-plan-icon"></i>
-            </div>
-          </div>
-          <div>
-            <div class="c-flex-center">
-              <i class="fa fa-building enterprise-plan-icon"></i>
-            </div>
-          </div>
-        </div>
-        <div class="row flex-center-fe" style="margin-bottom:0">
-          <div></div>
-          <div>
-            <div class="c-flex-center">
-              <div>{{'pricing.free_column_title'|trans|raw}}</div>
-              {#<div class="price-line"><span class="price-value">5</span><span class="price-ccy">€</span></div>
-              <div><span>{{ '/' ~ 'month'|trans }}</span><span>{{ '/' ~ 'pricing.user'|trans }}</span><sup class="dd-text">1</sup></div>#}
-            </div>
-          </div>
-          <div>
-            <div class="c-flex-center">
-              <div>{{'pricing.from'|trans}}</div>
-              <div class="price-line"><span class="price-value">5</span><span class="price-ccy">€</span></div>
-              <div><span>{{ '/' ~ 'month'|trans }}</span><span>{{ '/' ~ 'pricing.user'|trans }}</span><sup class="dd-text">1</sup></div>
-            </div>
-          </div>
-          <div>
-            <div class="c-flex-center">
-              <div>{{'pricing.from'|trans}}</div>
-              <div class="price-line"><span class="price-value">7</span><span class="price-ccy enterprise-ccy">€</span></div>
-              <div><span>{{ '/' ~ 'month'|trans }}</span><span>{{ '/' ~ 'pricing.user'|trans }}</span><sup class="dd-text">1</sup></div>
-            </div>
-          </div>
-        </div>
+  
         <table class="highlight centered">
           <thead>
             <tr>
               <th>{{'pricing.pricing_table.plan_title'|trans}}</th>
-              <th class="table-title dd-text">{{'pricing.pricing_table.plan_free'|trans|upper}}<sup class="dd-text">2</sup></th>
-              <th class="table-title dd-text">{{'pricing.pricing_table.plan_premium'|trans|upper}}</th>
-              <th class="table-title dd-text">{{'pricing.pricing_table.plan_enterprise'|trans|upper}}<sup class="dd-text">3</sup></th>
+              <th> 
+                  <div class="table-headers">
+                    <i class="fa fa-seedling free-plan-icon"></i>
+                    <div class="c-flex-center">
+                      <div>{{'pricing.free_column_title'|trans|raw}}</div>
+                    </div>
+                    <span class="table-title dd-text">{{'pricing.pricing_table.plan_free'|trans|upper}}<sup class="dd-text">2</sup></span>
+                  
+                  </div>
+               
+              </th>
+              <th>
+                <div class="table-headers">
+                
+                  <i class="fa fa-dove premium-plan-icon"></i>
+                  <div class="c-flex-center">
+                    <div>{{'pricing.from'|trans}}</div>
+                    <div class="price-line"><span class="price-value">5</span><span class="price-ccy">€</span></div>
+                    <div><span>{{ '/' ~ 'month'|trans }}</span><span>{{ '/' ~ 'pricing.user'|trans }}</span><sup class="dd-text">1</sup></div>
+                  </div>
+                  <span class="table-title dd-text">{{'pricing.pricing_table.plan_premium'|trans|upper}}</span>
+                </div>
+              </th>
+              <th>
+                <div class="table-headers">
+                
+                  <i class="fa fa-building enterprise-plan-icon"></i>
+                  <div class="c-flex-center">
+                    <div>{{'pricing.from'|trans}}</div>
+                    <div class="price-line"><span class="price-value">7</span><span class="price-ccy enterprise-ccy">€</span></div>
+                    <div><span>{{ '/' ~ 'month'|trans }}</span><span>{{ '/' ~ 'pricing.user'|trans }}</span><sup class="dd-text">1</sup></div>
+                  </div>
+                  <span class="table-title dd-text">{{'pricing.pricing_table.plan_enterprise'|trans|upper}}<sup class="dd-text">3</sup></span>
+                </div>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -223,8 +229,8 @@ Signup
             <tr>
               <td>{{'pricing.pricing_table.functionality_3'|trans}}</td>
               <td><span class="dd-text tooltipped" data-tooltip="{{'comments'|trans|capitalize}}"><i class="fa fa-comments"></i></span></td>
-              <td><span class="dd-text tooltipped" data-tooltip="{{'comments'|trans|capitalize}}"><i class="fa fa-comments"></i></span><span class="sm-left sm-right">+</span><span class="dd-text tooltipped" data-tooltip="{{'documents'|trans|capitalize}}"><i class="fa fa-layer-group"></i></span></td>
-              <td><span class="dd-text tooltipped" data-tooltip="{{'comments'|trans|capitalize}}"><i class="fa fa-comments"></i></span><span class="sm-left sm-right">+</span><span class="dd-text tooltipped" data-tooltip="{{'documents'|trans|capitalize}}"><i class="fa fa-layer-group"></i></span></td>
+              <td><span class="dd-text tooltipped" data-tooltip="{{'comments'|trans|capitalize}}"><i class="fa fa-comments"></i></span><span class="sm-left sm-right">+</span><span class="dd-text tooltipped" data-tooltip="{{'documents'|trans|capitalize}}"><i class="fa fa-file"></i></span></td>
+              <td><span class="dd-text tooltipped" data-tooltip="{{'comments'|trans|capitalize}}"><i class="fa fa-comments"></i></span><span class="sm-left sm-right">+</span><span class="dd-text tooltipped" data-tooltip="{{'documents'|trans|capitalize}}"><i class="fa fa-file"></i></span></td>
             </tr>
             <tr>
               <td>{{'pricing.pricing_table.functionality_4'|trans}}</td>
