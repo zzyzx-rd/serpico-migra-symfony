@@ -538,7 +538,7 @@ landing:
     success_msg: Message envoyé ! Consultez votre messagerie afin de vous connecter à nouveau
 
 language:
-  selection: Language
+  selection: Langage
   choose: Choix de la langue
 
 header:

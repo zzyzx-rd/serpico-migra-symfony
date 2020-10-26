@@ -49,10 +49,6 @@ td a {
   padding-bottom: 0px !important;
 }
 
-#languageModal {
-  background-color: #26a69a;
-}
-
 .no-margin {
   margin: 0 !important;
 }
@@ -851,6 +847,20 @@ div.col.s12.m2.linkedin {
     margin-top:40px;
   }
 
+  #languageModal ul {
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  #languageModal ul li {
+    padding: 0.5rem 0;
+  }
+
+  #languageModal ul a {
+      min-width: 200px;
+  }
+
   .logo{
     background-image: url('../lib/img/logo_dd_l.png');
     background-repeat: no-repeat;
@@ -1494,6 +1504,10 @@ section h2 {
 
 .login-btn, .get-notified-launch-btn {
   background-color: #FF9300!important;
+}
+
+.login-btn{
+  display: inline-block!important;
 }
 
 .client-logo {

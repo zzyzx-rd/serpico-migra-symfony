@@ -99,30 +99,31 @@
       
       
       <ul class="side-nav" id="mobile-menu">
+
+        <li>
+          <a class="product" href="{{ path('home_welcome') }}">
+            {% trans %}header.product{% endtrans %}
+          </a>
+        </li>
+
         <li>
           <a class="product" href="{#{{ path('solution') }}#}{{ path('pricing') }}">
             {% trans %}header.pricing{% endtrans %}
           </a>
         </li>
-        {#
+        
         <li>
-          <a href="{{ path('about') }}">
-            {% trans %}header.about{% endtrans %}
-          </a>
-        </li>
-        #}
-        <li>
-          <a class="modal-trigger" href="{{ path('signup') }}">
+          <a href="{{ is_granted('IS_AUTHENTICATED_REMEMBERED') ? path('processesList') : path('login') }}">
             {% trans %}header.login{% endtrans %}
           </a>
         </li>
-        {#
+        
         <li>
-          <a class="btn waves-effect waves-light login-btn" href="{{ serpicoappSignup }}">
-            {% trans %}header.register.public_evaluations{% endtrans %}
+          <a class="btn waves-effect waves-light login-btn" href="{{ path('signup') }}">
+            {% trans %}header.register.start{% endtrans %}
           </a>
         </li>
-        #}
+
         <li>
           <a class="waves-effect waves-light modal-trigger btn-small" id="language" href='#languageModal'>
             {% trans %}language.selection{% endtrans %}
