@@ -9,7 +9,7 @@
         </style>
     </head>
     {% block subject %}
-        {% trans %}mails.userSignupInfo.subject{% endtrans %} "{{ userFN|raw }}"
+        {% trans %}mails.userSignupInfo.subject{% endtrans %} "{{ fullname|raw }}"
     {% endblock %}
 
     {% block body %}
