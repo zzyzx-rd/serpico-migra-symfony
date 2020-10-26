@@ -39,11 +39,11 @@
                 </tr>
                 <tr>
                     <td>
-                        {% if company_name == 'Serpico' %}<p>{% trans %}mails.signature_team{% endtrans %}</p>{% endif %}
-                        {% if company_name == 'Serpico' %}<a href="{{ company_website }}" style="width: 60px">{% endif %}<img src="cid:logo_img" alt="logo {{ company_name }}" style="width: {{ logo_width_px }}px">{% if company_name == 'Serpico' %}</a>{% endif %}
-                        <p class="margin:0;"><strong>{{ company_name }}</strong><br>{{ address }} | {{ zipcode_city }}</p>
+                        <p>{% trans %}mails.signature_team{% endtrans %}</p>
+                        <a href="{{ company_website }}" style="width: 110px"><img src="cid:logo_img" alt="logo {{ company_name }}" style="width: {{ logo_width_px }}px"></a>
+                        <p style="margin:0;"><strong>{{ 'mails.dealdrive_motto'|trans }}</strong></strong><br>{{ address }} | {{ zipcode_city }}</p>
                         {% if company_name == 'Serpico' %}<p>{{ phone }}</p>{% endif %}
-                        {% if company_name == 'Serpico' %}<img src="{{ incubator_logo }}" alt="logo Lux Future Lab" style="width: 80px">{% endif %}
+                        
                     </td>
                 </tr>
             </table>

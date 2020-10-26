@@ -120,12 +120,12 @@ class MailController extends MasterController {
             
             $email->embedFromPath('lib/img/logo_dd_p_l.png','logo_img');
 
-            $data['logo_width_px'] = 80;
+            $data['logo_width_px'] = 110;
             $data['company_name'] = 'Dealdrive';
             $data['address'] = '38, route d\'Esch';
             $data['zipcode_city'] = 'L-1470 Luxembourg';
             $data['phone'] = '+352 28 79 97 18';
-            $data['company_website'] = 'https://www.serpicoapp.com';
+            $data['company_website'] = 'https://www.dealdrive.app';
             $data['recipient'] = $recipient;
             $data['mailId'] = isset($mail) ? $mail->getId() : 0;
             $data['incubator_logo'] = null;
