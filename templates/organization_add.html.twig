@@ -125,8 +125,6 @@
             <span class="page-title">{#{{ toValidate is defined ? 'create_organization.validate_title'|trans : 'header.register.description'|trans }}#}</span>
         </header>
 
-        {% set organization = form.vars.data %}
-
         {{ form_start(form) }}
         {#
         {{ form_label(form.legalName) }}
@@ -174,9 +172,9 @@
                         {{ toValidate is defined ? 'create_organization.validate_title'|trans : 'header.register.description'|trans }}
                     </span>
 
-                    {% if currentuser and currentuser.role == 4 %}
+                    {% if currentuser and currentuser.role == 4 and global.route != 'signup' %}
                     <div class="organization-commname">
-                        
+                        {% set organization = form.vars.data %}
                         {% if organization and organization.commname is not null %}
                             {% set commonName = organization.commname %}
                             {% set isTooLong = commonName|length > truncVal %}
@@ -224,7 +222,7 @@
                         {{ form_errors(form.email) }}
                     </div>
                     
-                    {% if currentuser and currentuser.role == 4 %}
+                    {% if currentuser and currentuser.role == 4 and global.route != 'signup' %}
                         <div class="row no-margin">
                             <div class="col s12 m6">
                                 <div class="organization-department">
