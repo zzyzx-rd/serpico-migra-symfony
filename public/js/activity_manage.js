@@ -643,17 +643,6 @@ function dateUpdate() {
                   // If different to monday
                   
                   if(date.getDay() != 1) {
-                      // First day starts on monday
-                      /*
-                      if (i == 0) {
-                          d = (date.getDay() == 0) ? 1 : (8 - date.getDay() % 7);
-                          date.setDate(date.getDate()+d);
-                      } else {
-                          // and finishes on sunday
-                          d = (date.getDay() == 0) ? 0 : (8 - date.getDay() % 7);
-                          date.setDate(date.getDate()+d);
-                      }
-                      */
 
                       d = date.getDay() < 4 ? 1 - date.getDay() : date.getDay(); 
                       date.setDate(date.getDate()+d);
@@ -665,10 +654,8 @@ function dateUpdate() {
                           date.setDate(getNbJoursMois(12 , year-1));
                           date.setFullYear(year-1);
                       }
-
-                  } else {
-
                   }
+
                   dates.push(date);
               }
 
