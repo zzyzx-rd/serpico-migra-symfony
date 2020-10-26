@@ -1096,7 +1096,7 @@ mails:
   madam: Mrs
   serpico_HQ_city: Luxembourg
   dealdrive_motto: Your operation follow-up assistant
-  signature_team: The DealDrive team
+  signature_team: The DealDrive Team
   signature_team_for_client: Léquipe de DealDrive, la solution dévaluation collaborative de
   hello: Dear
   see_you_soon: See you soon,
@@ -1233,10 +1233,10 @@ mails:
   externalInvitation:
     subject_begin: Invitation from
     subject_end: Welcome to DealDrive, the solution which connects your clients to you
-    message1: invites you to ease your follow-up by providing interactive updates on your shard business. Take a moment to onboard your dealflow and your partners as well through your interactive dashboard
+    message1: invites you to ease your follow-up by providing interactive updates on your shared business. Take a moment to onboard your dealflow and your partners as well through your interactive dashboard
     message2: "Click into this link to define your password and access your dashboard"
     button_text: Access DealDrive
-    message3: "DealDrive will always be free. However you benefit from a 21-day Premium account, which enables you to inform immediately your prospects through updates. May you have any remark, suggestion or see any bug fix, feel free to write to our team through contact@dealdrive.app, as we will endlessly continue to ease client experience !"
+    message3: "DealDrive will always be free. Take note you benefit from a 21-day Premium account, which enables you to inform immediately your prospects through updates and documents. May you have any remark, suggestion or see any bug fix, feel free to write to our team through contact@dealdrive.app, we are continuously trying to ease client experience !"
 
   launchingFollowupConfirmation:
     subject: "Thank you for following Dealdrive's launching !"
@@ -1272,9 +1272,9 @@ mails:
     message: "Vous recevez cet email car votre adresse email a été modifiée par un administrateur. Vous serez amené à saisir un nouveau mot de passe afin de vous connecter via le lien suivant :"
 
   passwordModify:
-    subject: Modification de votre mot de passe
-    message_1: "Vous recevez cet email car vous avez demandé à changer de mot de passe.  Cliquez sur ce lien afin de le modifier :"
-    button_text: Modifier mot de passe
+    subject: Password modification
+    message_1: "You asked to change your password; click on this link to proceed :"
+    button_text: Modify password
 
   teamCreation:
     subject: Vous venez dêtre rajouté à léquipe
