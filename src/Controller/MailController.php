@@ -148,7 +148,7 @@ class MailController extends MasterController {
             $email->from('Dealdrive <no-reply@dealdrive.app>')
                 ->to($mailingEmailAddress)
                 ->subject($mailTemplate->renderBlock('subject', $data))
-                ->setBody($mailTemplate->renderBlock('body', $data));
+                ->html($mailTemplate->renderBlock('body', $data));
                 
             if (isset($data['addPresFR']) and $data['addPresFR'] == 1) {
                 $email->attachFromPath('lib/Data/Serpico_Presentation_FR.pdf','Presentation');
