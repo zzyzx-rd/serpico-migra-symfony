@@ -1332,7 +1332,7 @@ mails:
     message1: vous invite à optimiser votre suivi en faisant des updates immédiats sur les activités qui vous lient. Prenez aussi le temps d'insérer aussi votre dealflow et faites le lien avec vos partenaires via votre tableau interactif
     message2: Cliquez dès à présent sur ce lien afin d'y définir votre mot de passe et remplir votre profil
     button_text: Accédez à DealDrive
-    message3: "DealDrive sera toujours gratuit. Vous bénéficiez toutefois d'un compte Premium pendant 21 jours, qui vous permet d'informer immédiatement vos partenaires de tout update. N'hésitez pas à nous faire remonter toute remarque ou bug via l'adresse contact@dealdrive.app, nous ne nous lasserons jamais de simplifier l'expérience client"
+    message3: "DealDrive sera toujours gratuit. Sachez que vous bénéficiez d'un compte Premium pendant 21 jours, qui vous permet d'informer immédiatement vos partenaires de vos update business (partage de documents, avancement...) avec lui. N'hésitez pas à nous faire remonter toute remarque ou bug via l'adresse contact@dealdrive.app, nous cherchons quotidiennement à simplifier l'expérience client"
 
   launchingFollowupConfirmation:
     subject: Merci de suivre notre lancement !
