@@ -181,12 +181,12 @@ class User extends DbObject implements  UserInterface, \Serializable
     protected $superior;
 
     /**
-     * @OneToMany(targetEntity="Mail", mappedBy="user",cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="Mail", mappedBy="user", cascade={"persist", "remove"}, orphanRemoval=true)
      */
     public $mails;
 
     /**
-     * @OneToMany(targetEntity="Target", mappedBy="user",cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="Target", mappedBy="user", cascade={"persist", "remove"}, orphanRemoval=true)
      */
     public $targets;
 

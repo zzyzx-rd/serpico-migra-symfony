@@ -1575,11 +1575,11 @@ worker_firm_data:
   url: LinkedIn url
   size: Firm size
   mailPrefix: Email prefix
-  mailSuffix: Email suffix
+  suffix: Email suffix
   creationDate: Creation date
   HQCity: City - HQ
   HQState: State/Department - HQ
-  HQCountry: Country - HQ
+  country: Country - HQ
   page_title: Firm data
   mobile_header_title: Worker/Firm research
   fullName: Lastname / Firstname

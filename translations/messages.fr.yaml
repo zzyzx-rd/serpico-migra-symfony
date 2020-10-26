@@ -1697,11 +1697,11 @@ worker_firm_data:
   url: LinkedIn url
   size: Taille de l'entreprise
   mailPrefix: Préfixe de l'adresse mail
-  mailSuffix: Suffixe de l'adresse mail
+  suffix: Suffixe de l'adresse mail
   creationDate: Date de création
   HQCity: Ville - Siège social
   HQState: Etat/Département - Siège social
-  HQCountry: Pays - Siège social
+  country: Pays - Siège social
   page_title: Données de l'entreprise
   mobile_header_title: Worker/Firm research
   fullName: Lastname / Firstname

@@ -31,7 +31,7 @@
           </a>
         </li>
         <li>
-          <a class="modal-trigger" href="{{ is_granted('IS_AUTHENTICATED_REMEMBERED') ? path('processesList') : path('login') }}">
+          <a href="{{ is_granted('IS_AUTHENTICATED_REMEMBERED') ? path('processesList') : path('login') }}">
             {% trans %}header.login{% endtrans %}
           </a>
         </li>

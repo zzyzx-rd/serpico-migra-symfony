@@ -22,7 +22,7 @@
                 <td>
                     <p>{% trans %}mails.hello{% endtrans %} {{ recipient.firstname }},</p>
                     <p>{{ requester.firstname }}  {{ requester.lastname }} {% trans %}mails.request.message1{% endtrans %} "{{ activity.name|raw }}"</p>
-                    <p style="text-align: center"><a href="{{ url('trackMLinkClick',{'trkToken' : trkToken}) }}" target="_blank"><button style="background-color: #26a69a; height: 40px; line-height: 40px; text-decoration: none; color: #fff; text-align: center; border: none;">{% trans %}mails.request.button_text{% endtrans %}</button></a></p>
+                    <p style="text-align: center"><a href="{{ url('trackMLinkClick',{'trkToken' : trkToken}) }}" target="_blank"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;">{% trans %}mails.request.button_text{% endtrans %}</button></a></p>
                     <p>{% trans %}mails.request.message2{% endtrans %}</p><br>
                     {#<p>{% trans %}mails.see_you_soon{% endtrans %}</p>#}
                 </td>
@@ -31,7 +31,7 @@
                     <td>
                         {% if company_name == 'Serpico' %}<p>{% trans %}mails.signature_team{% endtrans %}</p>{% endif %}
                         {% if company_name == 'Serpico' %}<a href="{{ company_website }}" style="width: 60px">{% endif %}<img src="cid:logo_img" alt="logo {{ company_name }}" style="width: {{ logo_width_px }}px">{% if company_name == 'Serpico' %}</a>{% endif %}
-                        <p><strong>{% if company_name == 'Serpico' %}{% trans %}mails.serpico_motto{% endtrans %}{% else %}{{ company_name }}{% endif %}</strong><br>{{ address }} | {{ zipcode_city }}</p>
+                        <p class="margin:0;"><strong>{{ company_name }}</strong><br>{{ address }} | {{ zipcode_city }}</p>
                         {% if company_name == 'Serpico' %}<p>{{ phone }}</p>{% endif %}
                         {% if company_name == 'Serpico' %}<img src="{{ incubator_logo }}" alt="logo Lux Future Lab" style="width: 80px">{% endif %}
                     </td>
