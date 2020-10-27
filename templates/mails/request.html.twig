@@ -22,7 +22,7 @@
                 <td>
                     <p>{% trans %}mails.hello{% endtrans %} {{ recipient.firstname }},</p>
                     <p>{{ requester.firstname }}  {{ requester.lastname }} {% trans %}mails.request.message1{% endtrans %} "{{ activity.name|raw }}"</p>
-                    <p style="text-align: center"><a href="{{ url('trackMLinkClick',{'trkToken' : trkToken}) }}" target="_blank"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;">{% trans %}mails.request.button_text{% endtrans %}</button></a></p>
+                    <p style="text-align: center"><a href="{{ url('trackMLinkClick',{'trkToken' : trkToken}) }}" target="_blank"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;font-weight:600;text-transform:uppercase;">{% trans %}mails.request.button_text{% endtrans %}</button></a></p>
                     <p>{% trans %}mails.request.message2{% endtrans %}</p><br>
                     {#<p>{% trans %}mails.see_you_soon{% endtrans %}</p>#}
                 </td>

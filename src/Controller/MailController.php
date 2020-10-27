@@ -143,12 +143,13 @@ class MailController extends MasterController {
             }
 
             $mailTemplate = $twig->load('mails/' . $actionType . '.html.twig');
+            $email->htmlTemplate('mails/'. $actionType . '.html.twig')
+            ->context($data);
             $mailingEmailAddress = $recipientUsers ? $recipient->getEmail() : $recipient;
 
             $email->from('Dealdrive <no-reply@dealdrive.app>')
                 ->to($mailingEmailAddress)
-                ->subject($mailTemplate->renderBlock('subject', $data))
-                ->html($mailTemplate->renderBlock('body', $data));
+                ->subject($mailTemplate->renderBlock('subject', $data));
                 
             if (isset($data['addPresFR']) and $data['addPresFR'] == 1) {
                 $email->attachFromPath('lib/Data/Serpico_Presentation_FR.pdf','Presentation');

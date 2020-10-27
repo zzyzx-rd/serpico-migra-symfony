@@ -43,10 +43,10 @@
 
                                 {% if activity is defined %}
                                     <p>{% trans %}mails.resultsReleased.message_1_participant_activity{% endtrans %} "{{ activity.name|raw }}" {% trans %}mails.resultsReleased.message_2_participant{% endtrans %}</p>
-                                    <p style="text-align: center"><a href="{{ url('trackMLinkClick',{'trkToken' : trkToken}) }}" target="_blank"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;">{% trans %}mails.resultsReleased.button_text{% endtrans %}</button></a></p>
+                                    <p style="text-align: center"><a href="{{ url('trackMLinkClick',{'trkToken' : trkToken}) }}" target="_blank"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;font-weight:600;text-transform:uppercase;">{% trans %}mails.resultsReleased.button_text{% endtrans %}</button></a></p>
                                 {% else %}
                                     <p>{% trans %}mails.resultsReleased.message_1a_participant_stage{% endtrans %} "{{ stage.name|raw }}" {% trans %}mails.resultsReleased.message_1b_participant_stage{% endtrans %} "{{ stage.activity.name|raw }}" {% trans %}mails.resultsReleased.message_2_participant{% endtrans %}</p>
-                                    <p style="text-align: center"><a href="{{ url('trackMLinkClick',{'trkToken' : trkToken}) }}" target="_blank"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;">{% trans %}mails.resultsReleased.button_text{% endtrans %}</button></a></p>
+                                    <p style="text-align: center"><a href="{{ url('trackMLinkClick',{'trkToken' : trkToken}) }}" target="_blank"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;font-weight:600;text-transform:uppercase;">{% trans %}mails.resultsReleased.button_text{% endtrans %}</button></a></p>
                                 {% endif %}
                                 <p>{% trans %}mails.resultsReleased.message_3{% endtrans %}</p>
 
@@ -62,14 +62,14 @@
 
                                 {% if activity is defined %}
                                     <p>{% trans %}mails.resultsReleased.message_1_releaser_activity{% endtrans %} "{{ activity.name|raw }}" {% trans %}mails.resultsReleased.message_2_administrator{% endtrans %}</p>
-                                    <p style="text-align: center"><a href="{{ url('trackMLinkClick',{'trkToken' : trkToken}) }}" target="_blank"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;">{% trans %}mails.resultsReleased.button_text{% endtrans %}</button></a></p>
+                                    <p style="text-align: center"><a href="{{ url('trackMLinkClick',{'trkToken' : trkToken}) }}" target="_blank"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;font-weight:600;text-transform:uppercase;">{% trans %}mails.resultsReleased.button_text{% endtrans %}</button></a></p>
                                 {% else %}
                                     <p>{% trans %}mails.resultsReleased.message_1a_releaser_stage{% endtrans %} "{{ stage.name|raw }}" {% trans %}mails.resultsReleased.message_1b_releaser_stage{% endtrans %} "{{ stage.activity.name|raw }}" {% trans %}mails.resultsReleased.message_2_administrator{% endtrans %}</p>
-                                    <p style="text-align: center"><a href="{{ url('trackMLinkClick',{'trkToken' : trkToken}) }}" target="_blank"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;">{% trans %}mails.resultsReleased.button_text{% endtrans %}</button></a></p>
+                                    <p style="text-align: center"><a href="{{ url('trackMLinkClick',{'trkToken' : trkToken}) }}" target="_blank"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;font-weight:600;text-transform:uppercase;">{% trans %}mails.resultsReleased.button_text{% endtrans %}</button></a></p>
                                 {% endif %}
 
                             {% endif %}
-                            <p>{% trans %}mails.see_you_soon{% endtrans %}</p><br>
+                            <p>{% trans %}mails.see_you_soon{% endtrans %}</p>
                         </td>
                         </tr>
                         <tr>

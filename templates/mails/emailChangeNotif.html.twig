@@ -21,8 +21,8 @@
                         <td>
                             <p>{% trans %}mails.hello{% endtrans %} {{ recipient.firstname }},</p>
                             <p>{% trans %}mails.emailChangeNotif.message{% endtrans %}</p>
-                            <p style="text-align: center"><a href="{{ url('definePassword', {'token' : token }) }}" target="_blank"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;">{% trans %}mails.registration.button_text{% endtrans %}</button></a></p>
-                            <p>{% trans %}mails.see_you_soon{% endtrans %}</p><br>
+                            <p style="text-align: center"><a href="{{ url('definePassword', {'token' : token }) }}" target="_blank"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;font-weight:600;text-transform:uppercase;">{% trans %}mails.registration.button_text{% endtrans %}</button></a></p>
+                            <p>{% trans %}mails.see_you_soon{% endtrans %}</p>
                         </td>
                         </tr>
                         <tr>

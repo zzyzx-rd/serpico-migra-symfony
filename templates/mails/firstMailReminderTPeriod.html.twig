@@ -43,9 +43,9 @@
                         </tr>
                         <tr>
                             <td>
-                                <p style="text-align: center"><a href="{{ url('login') }}" target="_blank"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;">{% trans %}mails.firstMailReminderTPeriod.button_text{% endtrans %}</button></a></p>
+                                <p style="text-align: center"><a href="{{ url('login') }}" target="_blank"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;font-weight:600;text-transform:uppercase;">{% trans %}mails.firstMailReminderTPeriod.button_text{% endtrans %}</button></a></p>
                                 <p>{% trans %}mails.firstMailReminderTPeriod.message2{% endtrans %} <strong>{{ expiringDate|localizeddate('long', 'none') }}</strong></p>
-                                <p>{% trans %}mails.see_you_soon{% endtrans %}</p><br>
+                                <p>{% trans %}mails.see_you_soon{% endtrans %}</p>
                             </td>
                         </tr>
                         <tr>

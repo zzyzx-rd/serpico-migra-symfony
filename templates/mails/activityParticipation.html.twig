@@ -2,30 +2,29 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <title>Un Email Responsive</title>
+        <title>
+        {% block subject %}
+            {% set stageEl = stage is defined and stage is not null ? stage : activity.stages.first %}
+            {% set formattedSD = stageEl.startdate|format_datetime('short', 'none', pattern='dd/MM') %}
+            {% set formattedED = stageEl.enddate|format_datetime('short', 'none', pattern='dd/MM') %}
+            {% set moreThanADay = stageEl.enddate.diff(stageEl.startdate).days > 0 %}
+            {% if stage is defined and stage is not null %}
+                {{ 'mails.activityParticipation.stage_subject_message_1'|trans ~ stage.name|raw ~ 'mails.activityParticipation.stage_subject_message_2'|trans ~ stage.activity.name|raw ~ 
+                (teamParticipation is defined ? 'mails.activityParticipation.subject_team_suffix'|trans : '') ~
+                '(' ~ (moreThanADay ? 'from_date'|trans ~ ' ' ~ formattedSD ~ 'to_date'|trans ~ ' ' ~ formattedED : formattedSD) ~ ')'
+                }}
+            {% else %}
+                {{ 'mails.activityParticipation.activity_subject'|trans ~ activity.name|raw ~ (teamParticipation is defined ? 'mails.activityParticipation.subject_team_suffix' : '') ~
+                '(' ~ (moreThanADay ? 'from_date'|trans ~ ' ' ~ formattedSD ~ 'to_date'|trans ~ ' ' ~ formattedED : formattedSD) ~ ')'
+                }}
+            {% endif %}
+        {% endblock %}
+        </title>
         <style type="text/css">
             body {margin: 0; padding: 0; min-width: 100%!important;}
             .content {width: 100%; max-width: 800px;}
         </style>
     </head>
-
-
-    {% block subject %}
-        {% set stageEl = stage is defined and stage is not null ? stage : activity.stages.first %}
-        {% set formattedSD = stageEl.startdate|format_datetime('short', 'none', pattern='dd/MM') %}
-        {% set formattedED = stageEl.enddate|format_datetime('short', 'none', pattern='dd/MM') %}
-        {% set moreThanADay = stageEl.enddate.diff(stageEl.startdate).days > 0 %}
-        {% if stage is defined and stage is not null %}
-            {{ 'mails.activityParticipation.stage_subject_message_1'|trans ~ stage.name|raw ~ 'mails.activityParticipation.stage_subject_message_2'|trans ~ stage.activity.name|raw ~ 
-            (teamParticipation is defined ? 'mails.activityParticipation.subject_team_suffix'|trans : '') ~
-            '(' ~ (moreThanADay ? 'from_date'|trans ~ ' ' ~ formattedSD ~ 'to_date'|trans ~ ' ' ~ formattedED : formattedSD) ~ ')'
-            }}
-        {% else %}
-            {{ 'mails.activityParticipation.activity_subject'|trans ~ activity.name|raw ~ (teamParticipation is defined ? 'mails.activityParticipation.subject_team_suffix' : '') ~
-            '(' ~ (moreThanADay ? 'from_date'|trans ~ ' ' ~ formattedSD ~ 'to_date'|trans ~ ' ' ~ formattedED : formattedSD) ~ ')'
-            }}
-        {% endif %}
-    {% endblock %}
 
     {% block body %}
         {% set stageEl = stage is defined and stage is not null ? stage : activity.stages.first %}
@@ -51,11 +50,11 @@
                                 }}
                             </p>
                           
-                            <p style="text-align: center"><a href="{{ url('trackMLinkClick',{'trkToken' : trkToken}) }}" target="_blank"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;">{% trans %}mails.activityParticipation.button_text{% endtrans %}</button></a></p>
+                            <p style="text-align: center"><a href="{{ url('trackMLinkClick',{'trkToken' : trkToken}) }}" target="_blank"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;font-weight:600;text-transform:uppercase;">{% trans %}mails.activityParticipation.button_text{% endtrans %}</button></a></p>
                             <p>
                                 {% trans %}mails.activityParticipation.message3_participant{% endtrans %}
                             </p>
-                            <p>{% trans %}mails.see_you_soon{% endtrans %}</p><br>
+                            <p>{% trans %}mails.see_you_soon{% endtrans %}</p>
                         </td>
                         </tr>
                         <tr>

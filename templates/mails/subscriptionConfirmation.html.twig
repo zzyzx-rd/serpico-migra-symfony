@@ -2,15 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Un Email Responsive</title>
+    <title>{% block subject %}{% trans %}mails.subscriptionConfirmation.subject{% endtrans %}{% endblock %}</title>
     <style type="text/css">
         body {margin: 0; padding: 0; min-width: 100%!important;}
         .content {width: 100%; max-width: 800px;}
     </style>
 </head>
-{% block subject %}
-    {% trans %}mails.subscriptionConfirmation.subject{% endtrans %}
-{% endblock %}
 
 {% block body %}
 <body bgcolor="white">
@@ -22,9 +19,9 @@
                     <p>{% trans %}mails.hello{% endtrans %} {{ recipient.firstname }},</p>
                     <p>{% trans %}mails.subscriptionConfirmation.message1{% endtrans %}</p>
                     <p>{% trans %}mails.subscriptionConfirmation.message2{% endtrans %}</p>
-                    <p style="text-align: center"><a href="{{ url('definePassword', {'token' : token }) }}"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;">{% trans %}mails.subscriptionConfirmation.button_text{% endtrans %}</button></a></p>
+                    <p style="text-align: center"><a href="{{ url('definePassword', {'token' : token }) }}"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;font-weight:600;text-transform:uppercase;">{% trans %}mails.subscriptionConfirmation.button_text{% endtrans %}</button></a></p>
                     <p>{% trans %}mails.subscriptionConfirmation.message3{% endtrans %}</p>
-                    <p>{% trans %}mails.see_you_soon{% endtrans %}</p><br>
+                    <p>{% trans %}mails.see_you_soon{% endtrans %}</p>
                 </td>
                 </tr>
                 <tr>

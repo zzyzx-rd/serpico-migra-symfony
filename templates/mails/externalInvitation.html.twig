@@ -2,15 +2,18 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <title>Un Email Responsive</title>
+        <title>
+            {% block subject %}
+                {{'mails.externalInvitation.subject_begin'|trans ~ invitingOrganization.commname|raw ~ ' - ' ~ 'mails.externalInvitation.subject_end'|trans}}
+            {% endblock %}
+        </title>
         <style type="text/css">
             body {margin: 0; padding: 0; min-width: 100%!important;}
             .content {width: 100%; max-width: 800px;}
         </style>
     </head>
-    {% block subject %}
-        {% trans %}mails.externalInvitation.subject_begin{% endtrans %} {{ invitingOrganization.commname|raw }} - {% trans %}mails.externalInvitation.subject_end{% endtrans %}
-    {% endblock %}
+    
+        
 
     {% block body %}
     <body bgcolor="white">
@@ -21,9 +24,9 @@
                         <td>
                             <p>{% trans %}mails.hello{% endtrans %} {{ recipient.firstname }},</p>
                             <p>{{ invitingOrganization.commname|raw ~ ' '}} {{ 'mails.externalInvitation.message1'|trans ~ '. ' ~ 'mails.externalInvitation.message2'|trans }}</p>
-                            <p style="text-align: center"><a href="{{ url('definePassword', {'token' : token }) }}" target="_blank"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;">{% trans %}mails.externalInvitation.button_text{% endtrans %}</button></a></p>
+                            <p style="text-align: center"><a href="{{ url('definePassword', {'token' : token }) }}" target="_blank"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;font-weight:600;text-transform:uppercase;">{% trans %}mails.externalInvitation.button_text{% endtrans %}</button></a></p>
                             <p>{% trans %}mails.externalInvitation.message3{% endtrans %}</p>
-                            <p>{% trans %}mails.see_you_soon{% endtrans %}</p><br>
+                            <p>{% trans %}mails.see_you_soon{% endtrans %}</p>
                         </td>
                         </tr>
                         <tr>

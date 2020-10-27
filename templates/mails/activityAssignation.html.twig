@@ -30,11 +30,11 @@
                             {% else %}
                                 <p>{% trans %}mails.activityAssignation.message_stg_begin{% endtrans %} "{{ stage.name|raw }}" {% trans %}mails.activityAssignation.message_stg_mid{% endtrans %} "{{ stage.activity.name|raw }}" {% trans %}mails.activityAssignation.message_end{% endtrans %}</p>
                             {% endif %}
-                            <p style="text-align: center"><a href="{{ url('trackMLinkClick',{'trkToken' : trkToken}) }}" target="_blank"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;">{% trans %}mails.activityAssignation.button_text{% endtrans %}</button></a></p>
+                            <p style="text-align: center"><a href="{{ url('trackMLinkClick',{'trkToken' : trkToken}) }}" target="_blank"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;font-weight:600;text-transform:uppercase;">{% trans %}mails.activityAssignation.button_text{% endtrans %}</button></a></p>
                             <p>
                                 {% trans %}mails.activityAssignation.message3_participant{% endtrans %}
                                 {% trans %}mails.activityAssignation.message4{% endtrans %}</p>
-                            <p>{% trans %}mails.see_you_soon{% endtrans %}</p><br>
+                            <p>{% trans %}mails.see_you_soon{% endtrans %}</p>
                         </td>
                         </tr>
                         <tr>

@@ -32,14 +32,14 @@
                             {% endif %}
                             <p style="text-align: center">
                                 {% if activity is defined and activity is not null %}
-                                    <a href="{{ url('trackMLinkClick',{'trkToken' : trkToken}) }}" target="_blank"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;">{% trans %}mails.unvalidatedGradesStageJoiner.button_text{% endtrans %}</button></a></p>
+                                    <a href="{{ url('trackMLinkClick',{'trkToken' : trkToken}) }}" target="_blank"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;font-weight:600;text-transform:uppercase;">{% trans %}mails.unvalidatedGradesStageJoiner.button_text{% endtrans %}</button></a></p>
                                 {% else %}
-                                    <a href="{{ url('trackMLinkClick',{'trkToken' : trkToken}) }}" target="_blank"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;">{% trans %}mails.unvalidatedGradesStageJoiner.button_text{% endtrans %}</button></a></p>
+                                    <a href="{{ url('trackMLinkClick',{'trkToken' : trkToken}) }}" target="_blank"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;font-weight:600;text-transform:uppercase;">{% trans %}mails.unvalidatedGradesStageJoiner.button_text{% endtrans %}</button></a></p>
                                 {% endif %}
                             <p>
                                 {% trans %}mails.unvalidatedGradesStageJoiner.message3{% endtrans %}
                                 ({% if activity is defined and activity is not null %}{{ activity.stages.first.gstartdate|localizeddate('long', 'none')}} - {{activity.activeStages.first.gstartdate|localizeddate('long', 'none') }}{% else %}{{ stage.gstartdate|localizeddate('long', 'none') }} - {{ stage.genddate|localizeddate('long', 'none') }}{% endif %}) 
-                            <p>{% trans %}mails.see_you_soon{% endtrans %}</p><br>
+                            <p>{% trans %}mails.see_you_soon{% endtrans %}</p>
                         </td>
                         </tr>
                         <tr>
