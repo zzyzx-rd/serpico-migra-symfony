@@ -136,7 +136,7 @@ class MailController extends MasterController {
 
             if ($actionType == 'activityParticipation') {
 
-            } else if ($actionType == 'registration' /*&& !$data['firstCreatedOrgUser']*/ || $actionType == 'externalInvitation') {
+            } else if (isset($settings['tokens']) && ($actionType == 'registration' || $actionType == 'externalInvitation')) {
                 $data['token'] = $settings['tokens'][$key];
             } else if ($actionType == 'updateProgressStatus'){
                 $data['stage'] = $settings['stages'][$key];

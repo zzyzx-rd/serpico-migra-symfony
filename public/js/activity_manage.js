@@ -899,7 +899,7 @@ function dateUpdate() {
   })
 
   /** Function which directly insert participant in the activity - tn for tooltip, fn fullname, secId in case of extUsr  */
-  function directInsert(tn, fn, id, pic = null, type = null, secId = null){
+  function directInsert(type, id, tn, fn, pic = null, secId = null){
 
     if($('.participants-list--item.edit').length){
       $partElmt = $('.participants-list--item.edit');
@@ -918,8 +918,7 @@ function dateUpdate() {
     var $img = $partBtn.find('.selected-participant-logo');
     $img.attr('src',pic);
     $partBtn.attr('data-tooltip',tn).tooltip();
-    etype = type ? type : data.type;
-    switch(etype){
+    switch(type){
       case 'eu' : 
         $partFZone.find('input.u').attr('value',id);
         $partFZone.find('input.eu').attr('value',secId);
@@ -1147,7 +1146,7 @@ function dateUpdate() {
       $('.setup-activity').prepend('<i class="fa fa-cog sm-right"></i>')/*.append('<i class="fa fa-question-circle sm-left"></i>')*/;
     }
     if(!$('.participants-list--item').length){
-      directInsert(myself,un,uid,userPic,'u');
+      directInsert('u', uid, myself, un, userPic);
     }
     $('#addParticipant').removeAttr('id');
   });
@@ -1297,22 +1296,27 @@ function dateUpdate() {
       $('#multipleEvent').modal('open');
   })
 
-  $('[href="#updateEvent"]').on('click',function(){
-
-    $modal = $('#updateEvent');
-    $modal.find('.btn-e-update, .e-create').show();
-    $modal.find('.btn-e-modify').hide();
-    $modal.find('.ev-info').remove();
-    $modal.find('.e-documents, .e-comments').empty();
-    $modal.find('.documents-number').empty().append(`${$modal.find('.documents-number').data('none')}`);
-    $modal.find('.comments-number').empty().append(`${$modal.find('.comments-number').data('none')}`);
-
-    updateEvents();
-    //$('.event-element-name').empty().append($(this).closest('.act-info').find('.act-info-name').text());
-    $('.update-event-btn').attr('data-aid',$(this).attr('data-aid'));
-    $('.update-event-btn').attr('data-sid',$(this).attr('data-sid'));
-    $('.update-event-btn').attr('data-ms',$(this).attr('data-ms'));
-    $('.update-event-btn').attr('data-eid',$(this).hasClass('btn-floating') ? 0 : $(this).attr('data-eid'));
+  $('[href="#updateEvent"]').on('click',function(e){
+    if($(e.target).hasClass('add-direct-evt') || $(e.target).parent().hasClass('add-direct-evt')){
+      $modal = $('#updateEvent');
+      $modal.find('.btn-e-update, .e-create').show();
+      $modal.find('.btn-e-modify').hide();
+      $modal.find('.ev-info').remove();
+      $modal.find('.e-documents, .e-comments').empty();
+      $modal.find('.documents-number').empty().append(`${$modal.find('.documents-number').data('none')}`);
+      $modal.find('.comments-number').empty().append(`${$modal.find('.comments-number').data('none')}`);
+      $modal.find('.event-element-name').empty().append($(`.stage-element[data-id="${$(this).attr('data-sid')}"]`).data('name'));
+      $modal.find('.fa-external-link-alt').attr({
+        'data-id' : $(this).attr('data-sid'),
+        'data-tooltip' : $(this).attr('data-sid') ? evtAccStgMsg : evtAccActMsg,   
+      }).tooltip();
+      updateEvents();
+      //$('.event-element-name').empty().append($(this).closest('.act-info').find('.act-info-name').text());
+      $('.update-event-btn').attr('data-aid',$(this).attr('data-aid'));
+      $('.update-event-btn').attr('data-sid',$(this).attr('data-sid'));
+      $('.update-event-btn').attr('data-ms',$(this).attr('data-ms'));
+      $('.update-event-btn').attr('data-eid',$(this).hasClass('btn-floating') ? 0 : $(this).attr('data-eid'));
+    }
   })
 
   $('.add-e-document, .add-e-comment').on('click',function(e){
@@ -2266,12 +2270,25 @@ function dateUpdate() {
         return false;
       }
 
-      let type = $('#choice-firm').is(':checked') || nc == 1 ? 'f' : ($('#choice-indpt').is(':checked') ? 'i' : 'u');
+      let type =  $('#choice-firm').is(':checked') || nc == 1 ? 'f' : ($('#choice-indpt').is(':checked') ? 'i' : 'u');
       let uname = $('.new-part-name').text();
-      const params = {type: type, uname: uname};
+      params = {type: type, uname: uname};
+      sid = $('#createActivity').attr('data-id');
+      if(sid){
+        params['sid'] = sid;
+      }
+      
       $.post(pcurl,$('#createParticipant form').serialize() + '&' + $.param(params))
         .done(function(data){
-          directInsert(tn = data.tn, fn = data.fn, id = data.uid, pic = data.pic, secId = data.euid);
+          
+          directInsert(type = data.type, id = data.uid, tn = data.tn, fn = data.fn, pic = data.pic, secId = data.euid);
+          if(data.pid){
+            const $partElmt = $('.participants-list--item').last();
+            $partElmt.find('.participant-btn').addClass('existing deletable modal-trigger').attr({
+              'href' : '#deleteParticipant',
+              'data-pid' : data.pid
+            }).append('<div class="p-delete-overlay flex-center" style="display:none;"><i class="fa fa-trash"></i></div>').show();
+          }
           $('#interactPart, #legalPerson, #createParticipant').modal('close');
         })
         .fail(function(data){

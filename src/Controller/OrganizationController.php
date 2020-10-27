@@ -6781,11 +6781,12 @@ class OrganizationController extends MasterController
                 foreach($orgUsers as $orgUser){
                     $externalUser = new ExternalUser;
                     $externalUser->setUser($orgUser)
-                        ->setWeightValue(100)
+                        ->setWeightValue(!$orgUser->isSynthetic() ? 100 : null)
                         ->setEmail($orgUser->getEmail())
                         ->setPositionName($orgUser->getPosition() ? $orgUser->getPosition()->getName() : null)
-                        ->setFirstname($orgUser->getFirstname())
-                        ->setLastname($orgUser->getLastname());
+                        ->setFirstname(!$orgUser->isSynthetic() ? $orgUser->getFirstname() : $organization->getCommname())
+                        ->setLastname($orgUser->getLastname())
+                        ->setCreatedBy($connectedUser->getId());
                     $client->addExternalUser($externalUser);
                 }
     
@@ -6921,9 +6922,9 @@ class OrganizationController extends MasterController
                 $organization->addUser($syntheticUser);
                 $em->persist($syntheticUser);
                 $em->persist($organization);
-                $em->flush();
             }
-
+            
+            $em->flush();
             return new Response('success',200);
     }
 

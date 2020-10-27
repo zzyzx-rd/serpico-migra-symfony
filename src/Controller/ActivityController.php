@@ -78,6 +78,7 @@ class ActivityController extends MasterController
         $organization = $this->org;
         $em = $this->em;
         $clickedBtn = $request->get('btn');
+
         $stage = new Stage;
         /** @var Form */
         $createActivityForm = $this->createForm(ActivityMinElementForm::class, $stage, ['organization' => $organization, 'currentUser' => $currentUser]);
@@ -281,14 +282,15 @@ class ActivityController extends MasterController
         $currentUser = $this->user;
         $organization = $this->org;
         $em = $this->em;
-
         $uname = $request->get('uname');
         $type = $request->get('type');
+        $stgId = $request->get('sid');
         $firstname = $_POST['firstname'];
         $lastname = $_POST['lastname'];
         $firm = $_POST['firm'];
         $email = $_POST['email'];
 
+        $newUser = false;
 
         $client = empty($_POST['cid']) ? new Client : $em->getRepository(Client::class)->find($_POST['cid']);
         $entityName = $type == 'u' ? $firm : $uname;
@@ -356,9 +358,13 @@ class ActivityController extends MasterController
         }
 
         if($type != 'f'){
-
-            $user = $em->getRepository(User::class)->findOneBy(['organization' => $clientOrganization, 'firstname' => $_POST['firstname'], 'lastname' => $_POST['lastname']]);
+            if(!empty($email)){
+                $user = $em->getRepository(User::class)->findOneBy(['organization' => $clientOrganization, 'email' => $_POST['email']]);
+            } else {
+                $user = $em->getRepository(User::class)->findOneBy(['organization' => $clientOrganization, 'firstname' => $_POST['firstname'], 'lastname' => $_POST['lastname']]);
+            }
             if(!$user){
+                $newUser = true;
                 $user = new User;
                 $user->setFirstname($firstname)
                     ->setLastname($lastname)
@@ -376,6 +382,7 @@ class ActivityController extends MasterController
                 $externalUser->setFirstname($firstname)
                     ->setLastname($lastname)
                     ->setEmail(!empty($email) ? $email : null)
+                    ->setWeightValue(100)
                     ->setClient($client)
                     ->setCreatedBy($currentUser->getId());
                 $user->addExternalUser($externalUser);
@@ -389,13 +396,26 @@ class ActivityController extends MasterController
             $user = $synthUser;
             $externalUser = $externalSynthUser;
         }
+
+        if($stgId){
+            $stage = $em->getRepository(Stage::class)->find($stgId);
+            $participation = new Participation;
+            $participation//->setTeam()
+                ->setExternalUser($externalUser)
+                ->setUser($user);
+            $stage->addParticipation($participation);
+            $em->persist($stage);
+        } else {
+            $participation = null;
+        }
         
         $em->flush();
-
         if(!empty($email)){
 
             $settings = [];
-            $settings['tokens'][] = $user->getToken();
+            if($newUser){
+                $settings['tokens'][] = $user->getToken();
+            }
             $settings['invitingUser'] = $currentUser;
             $settings['invitingOrganization'] = $currentUser->getOrganization();
             $recipients[] = $user;
@@ -406,7 +426,6 @@ class ActivityController extends MasterController
                 }
             }
             $externalUser->setClient($client)->setUser($user);
-
         }
 
         $picFolder = $type == 'u' || $type == 'i' ? 'user' : ($type == 'f' ? 'org' : 'team');
@@ -414,7 +433,12 @@ class ActivityController extends MasterController
         $tn = $type == 'u' && $clientOrganization != $organization ? "$firstname $lastname ($firm)" : "$firstname $lastname";
         $outputType = $type == 't' ? 't' : ($externalUser ? 'eu' : 'u');
 
-        return new JsonResponse(['wid' => $workerFirm, 'oid' => $clientOrganization->getId(), 'uid' => $user->getId(), 'euid' => $externalUser ? $externalUser->getId() : '', 'pic' => "lib/img/$picFolder/no-picture.png", 'fn' => $fn, 'tn' => $tn, 'type' => $outputType], 200);
+        $responseArray = ['wid' => $workerFirm, 'oid' => $clientOrganization->getId(), 'uid' => $user->getId(), 'euid' => $externalUser ? $externalUser->getId() : '', 'pic' => "lib/img/$picFolder/no-picture.png", 'fn' => $fn, 'tn' => $tn, 'type' => $outputType];
+        if($participation){
+            $responseArray['pid'] = $participation->getId();
+        }
+
+        return new JsonResponse($responseArray, 200);
 
     }
 

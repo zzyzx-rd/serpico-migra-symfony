@@ -1231,11 +1231,13 @@ mails:
     message3: Vous pourrez prendre part aux activités avec vos partenaires, afin de recueillir leurs avis et les satisfaire au mieux ! Si vous avez des questions, nhésitez pas à en référer à votre responsable ou en nous contactant via contact@serpicoapp.com, nous tâcherons dy répondre dans les meilleurs délais. Nous vous souhaitons tout cas une agréable expérience sur notre plateforme de suivi collaboratif !
 
   externalInvitation:
-    subject_begin: Invitation from
-    subject_end: Welcome to DealDrive, the solution which connects your clients to you
+    next_user_subject_begin: Invitation from
+    next_user_subject_end: Welcome to DealDrive, the solution which connects your clients to you
+    existing_user_subject: invites you to give updates in your shared business relation
     message1: invites you to ease your follow-up by providing interactive updates on your shared business. Take a moment to onboard your dealflow and your partners as well through your interactive dashboard
     message2: "Click into this link to define your password and access your dashboard"
-    button_text: Access DealDrive
+    new_user_button_text: Access DealDrive
+    existing_user_button_text: Access my dahshboard
     message3: "DealDrive will always be free. Take note you benefit from a 21-day Premium account, which enables you to inform immediately your prospects through updates and documents. May you have any remark, suggestion or see any bug fix, feel free to write to our team through contact@dealdrive.app, we are continuously trying to ease client experience !"
 
   launchingFollowupConfirmation:

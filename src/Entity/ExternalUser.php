@@ -49,7 +49,7 @@ class ExternalUser extends DbObject
     /**
      * @ORM\Column(name="ext_weight_value", type="float", nullable=true)
      */
-    public $weightValue;
+    public ?float $weightValue;
 
     /**
      * @ORM\Column(name="ext_synth", type="boolean", nullable=true)
@@ -126,7 +126,7 @@ class ExternalUser extends DbObject
         $firstname = '',
         $lastname = '',
         $email = null,
-        $weightValue = 0.0,
+        $weightValue = null,
         $positionName = null,
         $owner = null,
         $synthetic = null, 
@@ -203,7 +203,7 @@ class ExternalUser extends DbObject
         return $this->weightValue;
     }
 
-    public function setWeightValue(float $weightValue): self
+    public function setWeightValue(?float $weightValue): self
     {
         $this->weightValue = $weightValue;
         return $this;

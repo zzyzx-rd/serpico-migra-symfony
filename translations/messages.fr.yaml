@@ -1327,10 +1327,13 @@ mails:
     message3: Vous pourrez prendre part aux activités avec vos partenaires, afin de recueillir leurs avis et les satisfaire au mieux ! Si vous avez des questions, n'hésitez pas à en référer à votre responsable ou en nous contactant via contact@serpicoapp.com, nous tâcherons d'y répondre dans les meilleurs délais. Nous vous souhaitons tout cas une agréable expérience sur notre plateforme de suivi collaboratif !
 
   externalInvitation:
-    subject_begin: Invitation de
-    subject_end: Bienvenue sur DealDrive, la solution de suivi relation client collaborative
+    new_user_subject_begin: Invitation de
+    new_user_subject_end: Bienvenue sur DealDrive, la solution de suivi relation client collaborative
+    existing_user_subject: vous invite à faire des retours sur la relation business que vous avez en commun
     message1: vous invite à optimiser votre suivi en faisant des updates immédiats sur les activités qui vous lient. Prenez aussi le temps d'insérer aussi votre dealflow et faites le lien avec vos partenaires via votre tableau interactif
     message2: Cliquez dès à présent sur ce lien afin d'y définir votre mot de passe et remplir votre profil
+    new_user_button_text: Accédez à DealDrive
+    existing_user_button_text: Accédez à mon dahshboard
     button_text: Accédez à DealDrive
     message3: "DealDrive sera toujours gratuit. Sachez que vous bénéficiez d'un compte Premium pendant 21 jours, qui vous permet d'informer immédiatement vos partenaires de vos update business (partage de documents, avancement...) avec lui. N'hésitez pas à nous faire remonter toute remarque ou bug via l'adresse contact@dealdrive.app, nous cherchons quotidiennement à simplifier l'expérience client"
 

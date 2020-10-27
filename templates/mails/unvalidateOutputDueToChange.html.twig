@@ -63,7 +63,7 @@
             <tr>
               <td>
                 {% if company_name == 'Serpico' %}<p>{{ 'mails.signature_team'|trans }}</p>{% endif %}
-                <a href="{{ company_website }}" style="width: 110px"><img src="cid:logo_img" alt="logo {{ company_name }}" style="width: {{ logo_width_px }}px"></a>
+                <img src="cid:logo_img" alt="logo {{ company_name }}" style="width: {{ logo_width_px }}px">
                 <p><strong>{% if company_name == 'Serpico' %}{{ 'mails.serpico_motto'|trans }}{% else %}{{ company_name }}{% endif %}</strong><br>{{ address }} | {{ zipcode_city }}</p>
                 {% if company_name == 'Serpico' %}<p>{{ phone }}</p>{% endif %}
                 

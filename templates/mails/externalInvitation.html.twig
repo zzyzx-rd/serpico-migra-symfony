@@ -4,7 +4,11 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <title>
             {% block subject %}
-                {{'mails.externalInvitation.subject_begin'|trans ~ invitingOrganization.commname|raw ~ ' - ' ~ 'mails.externalInvitation.subject_end'|trans}}
+                {% if token is defined %}
+                    {{'mails.externalInvitation.new_user_subject_begin'|trans ~ invitingOrganization.commname|raw ~ ' - ' ~ 'mails.externalInvitation.new_user_subject_end'|trans}}
+                {% else %}
+                    {{ invitingUser.fullname|raw ~ ' ' ~ 'from'|trans ~ ' ' ~ invitingOrganization.commname|raw  ~ ' ' ~ 'mails.externalInvitation.existing_user_subject'|trans }}
+                {% endif %}
             {% endblock %}
         </title>
         <style type="text/css">
@@ -12,8 +16,6 @@
             .content {width: 100%; max-width: 800px;}
         </style>
     </head>
-    
-        
 
     {% block body %}
     <body bgcolor="white">
@@ -23,19 +25,22 @@
                     <table class="content" align="left" cellpadding="0" cellspacing="0" border="0">
                         <td>
                             <p>{% trans %}mails.hello{% endtrans %} {{ recipient.firstname }},</p>
-                            <p>{{ invitingOrganization.commname|raw ~ ' '}} {{ 'mails.externalInvitation.message1'|trans ~ '. ' ~ 'mails.externalInvitation.message2'|trans }}</p>
-                            <p style="text-align: center"><a href="{{ url('definePassword', {'token' : token }) }}" target="_blank"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;font-weight:600;text-transform:uppercase;">{% trans %}mails.externalInvitation.button_text{% endtrans %}</button></a></p>
-                            <p>{% trans %}mails.externalInvitation.message3{% endtrans %}</p>
+                            <p>{{ invitingOrganization.commname|raw ~ ' ' ~ 'mails.externalInvitation.message1'|trans  ~ (token is defined ? '. ' ~ 'mails.externalInvitation.message2'|trans ~ ':' : ':') }}</p>
+                            <p style="text-align: center">
+                                <a href="{{ token is defined ? url('definePassword', {'token' : token }) : url('myActivities') }}" target="_blank"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;font-weight:600;text-transform:uppercase;">{{ token is defined ? 'mails.externalInvitation.new_user_button_text'|trans : 'mails.externalInvitation.existing_user_button_text'|trans }}</button></a>    
+                            </p>
+                            {% if token is defined %}
+                                <p>{% trans %}mails.externalInvitation.message3{% endtrans %}</p>
+                            {% endif %}
                             <p>{% trans %}mails.see_you_soon{% endtrans %}</p>
                         </td>
                         </tr>
                         <tr>
                             <td>
                                 <p>{% trans %}mails.signature_team{% endtrans %}</p>
-                                <a href="{{ company_website }}" style="width: 110px"><img src="cid:logo_img" alt="logo {{ company_name }}" style="width: {{ logo_width_px }}px"></a>
-                                <p style="margin:0;"><strong>{{ 'mails.dealdrive_motto'|trans }}</strong></strong><br>{{ address }} | {{ zipcode_city }}</p>
+                                <img src="cid:logo_img" alt="logo {{ company_name }}" style="width: {{ logo_width_px }}px">
+                                <p style="margin:0;"><strong>{{ 'mails.dealdrive_motto'|trans }}</strong><br>{{ address }} | {{ zipcode_city }}</p>
                                 {% if company_name == 'Serpico' %}<p>{{ phone }}</p>{% endif %}
-                                
                             </td>
                         </tr>
                     </table>

@@ -55,8 +55,8 @@
                         <tr>
                             <td>
                                 <p>{% trans %}mails.signature_team{% endtrans %}</p>
-                                <a href="{{ company_website }}" style="width: 110px"><img src="cid:logo_img" alt="logo {{ company_name }}" style="width: {{ logo_width_px }}px"></a>
-                                <p style="margin:0;"><strong>{{ 'mails.dealdrive_motto'|trans }}</strong></strong><br>{{ address }} | {{ zipcode_city }}</p>
+                                <img src="cid:logo_img" alt="logo {{ company_name }}" style="width: {{ logo_width_px }}px">
+                                <p style="margin:0;"><strong>{{ 'mails.dealdrive_motto'|trans }}</strong><br>{{ address }} | {{ zipcode_city }}</p>
                                 {% if company_name == 'Serpico' %}<p>{{ phone }}</p>{% endif %}
                                 
                             </td>

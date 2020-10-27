@@ -166,8 +166,8 @@ final class InstitutionController extends MasterController
         if(isset($_COOKIE['view_type'])){
             $viewType = $_COOKIE['view_type'];
         } else {
-            setcookie('view_type', 'd');
-            $viewType = 'd';
+            setcookie('view_type', 't');
+            $viewType = 't';
         }
         if(isset($_COOKIE['date_type'])){
             $dateType = $_COOKIE['date_type'];
