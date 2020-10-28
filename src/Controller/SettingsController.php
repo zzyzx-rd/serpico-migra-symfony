@@ -42,7 +42,7 @@ use App\Entity\WorkerIndividual;
 use App\Entity\Country;
 use App\Entity\State;
 use App\Entity\City;
-use Stripe\Stripe;
+use Stripe;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormError;
@@ -65,6 +65,7 @@ use Symfony\Component\Form\FormFactory;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Validator\Constraints\NotBlank;
+
 
 
 class SettingsController extends MasterController
@@ -163,40 +164,74 @@ class SettingsController extends MasterController
     }
    /**
      * @param Request $request
-     * @param Application $app
      * @return mixed
      * @Route("/price", name="priceManagement")
      */
     public function PriceManagementAction(Request $request){
-        $form = $this->get( 'form.factory' )
-            ->createNamedBuilder('payment-form')
-            ->add('token', HiddenType::class, [
-                'constraints' => [new NotBlank()],
-            ])
-            ->add('soumettre',SubmitType::class)
-            ->getForm();
-
-        if ($request->isMethod('POST')) {
-            $form->handleRequest($request);
-
-            if ($form->isValid()) {
-                try {
-                    $this->get('app.client.stripe')->createPremiumCharge($this->getUser(), $form->get('token')->getData());
-                    $redirect = $this->get('session')->get('premium_redirect');
-                } catch (\Stripe\Error\Base $e) {
-                    $this->addFlash('warning', sprintf('Unable to take payment, %s', $e instanceof \Stripe\Error\Card ? lcfirst($e->getMessage()) : 'please try again.'));
-                    $redirect = $this->generateUrl('premium_payment');
-                } finally {
-                    var_dump($this->get('session')->get('premium_redirect'));
-                    return $this->redirect($redirect);
-                }
-            }
+        $em = $this->em;
+        $currentUser = $this->user;
+        $priceStandard = [5,6,7];
+        $pricePrenium = [7,10,14];
+        if (!$currentUser instanceof User) {
+            return $this->redirectToRoute('login');
         }
+        $this->org->setCustomerId($this->org->getCustomerId());
+        $em->flush();
+        $organization = $this->org;
+        $customer = $this->stripe->customers->retrieve(
+            $this->org->getCustomerId(),
+        );
 
+
+
+        //dd($customer->metadata->quantity);
+        if($customer->metadata->sub_id == null){
+            $val = 1;
+            $start = " ";
+        } else {
+            $sub = $this->stripe->subscriptions->retrieve(
+                $customer->metadata->sub_id,
+                );
+
+            $start = date('m/d/Y', $sub->current_period_start);
+
+            $val = $customer->metadata->quantity;
+        }
+        $pm = ($customer->invoice_settings->default_payment_method != null) ? true : false;
+        if($pm) {
+            $payment_method = $this->stripe->paymentMethods->retrieve(
+                $customer->invoice_settings->default_payment_method
+            );
+
+            $month = $payment_method->card->exp_month;
+            if($month < 10){
+                $montheend = "0". (string)$month;
+            }
+            else {
+                $montheend = $month;
+            }
+            $dateend = (string) $payment_method->card->exp_year;
+            $dateend = $montheend . "/" . $dateend[2] . $dateend[3];
+            $last4 = $payment_method->card->last4;
+            $name = $payment_method->billing_details->name;
+            $brand = $payment_method->card->brand;
+        } else {
+            $dateend = "";
+            $last4 = "";
+            $name = "";
+            $brand = "";
+        }
         return $this->render( 'price_management.html.twig' , [
-            'form' => $form->createView(),
-            'stripe_public_key' => 'pk_test_51HZHYgHmuPtR98gq78pZ4Orw0HliC7zhtkmv6FHQp2eVakz9X8IvYtYNwUuAt09tTXKeLZupQFlODr2tsLvTsH6o00PRmtxy8X'
 
+            'stripe_public_key' => 'pk_test_51HZHYgHmuPtR98gq78pZ4Orw0HliC7zhtkmv6FHQp2eVakz9X8IvYtYNwUuAt09tTXKeLZupQFlODr2tsLvTsH6o00PRmtxy8X',
+            'currentPlan' => $organization->getPlan(),
+            'val' => $val,
+            'custcard' => $pm,
+            'dateend'  => $dateend,
+            'last4'  => $last4,
+            'name' => $name,
+            'brand' => $brand,
+            'start' => $start
         ]);
 
 
@@ -273,61 +308,285 @@ class SettingsController extends MasterController
      * @Route("/create-customer", name="stripWebook")
      */
     public function createCustomerManagementAction(Request $request){
+        Stripe\Stripe::setApiKey('sk_test_51HZHYgHmuPtR98gqv3rds5W4VXvscTazOlR2lSbIN0xLH2vTrRan4RhhNKhaBzBpyxBxTjO27z5WJwVJEfowFwm500MTz3e2ob');
 
-       $body = json_decode($request->request->get('data'));
-
+        $body =  json_decode(file_get_contents('php://input'), true);
         $stripe = $this->stripe;
 
-        $customer = $stripe->customers->create([
-            'email' => $body->email
+        $customer = \Stripe\Customer::create([
+            'email' => $body['email'],
         ]);
 
 
         return new JsonResponse(['customer' => $customer ], 200);
     }
+
     /**
      * @param Request $request
      * @param Application $app
      * @return mixed
-     * @Route("/create-subscription", name="createSubscription")
+     * @Route("/create-checkout-session", name="createSession")
+     * @throws Stripe\Exception\ApiErrorException
      */
-    public function createSubscriptionManagementAction(Request $request){
-        $body = json_decode($request->getBody());
+    public function createSessionManagementAction(Request $request){
+        Stripe\Stripe::setApiKey('sk_test_51HZHYgHmuPtR98gqv3rds5W4VXvscTazOlR2lSbIN0xLH2vTrRan4RhhNKhaBzBpyxBxTjO27z5WJwVJEfowFwm500MTz3e2ob');
+
+        $session = \Stripe\Checkout\Session::create([
+            'payment_method_types' => ['card'],
+            'line_items' => [[
+                'price' => 'price_1HZI0THmuPtR98gq67btxwid',
+                'quantity' => 1 ,
+            ]],
+            'mode' => 'subscription',
+            'success_url' => 'https://example.com/success',
+            'cancel_url' => 'https://example.com/cancel'
+        ]);
+
+        return new JsonResponse([ 'id' => $session->id ], 200);
+    }
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return mixed
+     * @Route("/create-freesubscription", name="createFreeSubscription")
+     */
+    public function createFreeSubscriptionManagementAction(Request $request){
+
+        $em = $this->em;
+        $currentUser = $this->user;
+        Stripe\Stripe::setApiKey('sk_test_51HZHYgHmuPtR98gqv3rds5W4VXvscTazOlR2lSbIN0xLH2vTrRan4RhhNKhaBzBpyxBxTjO27z5WJwVJEfowFwm500MTz3e2ob');
+        $body =  json_decode(file_get_contents('php://input'), true);
         $stripe = $this->stripe;
 
-        try {
-            $payment_method = $stripe->paymentMethods->retrieve(
-                $body->paymentMethodId
-            );
-            $payment_method->attach([
-                'customer' => $body->customerId,
-            ]);
-        } catch (Exception $e) {
+
+        $priceId = $body['priceId'];
+        $customer = $this->org->getCustomerId();
+
+        $payment_method = Stripe\PaymentMethod::create([
+            'type' => 'card',
+            'card' => [
+                'number' => '4242424242424242',
+                'exp_month' => 10,
+                'exp_year' => 2021,
+                'cvc' => '314',
+            ],
+        ]);
+
+        $payment_method->attach([
+            'customer' => $customer,
+        ]);
+
+
+
+
+
+
+
+
+        // Set the default payment method on the customer
+        try { Stripe\Customer::update($body['customerId'], [
+            'invoice_settings' => [
+                'default_payment_method' => $payment_method->id
+            ]
+        ]);
+        }
+        catch (Exception $e) {
 
         }
 
 
-        // Set the default payment method on the customer
-        $stripe->customers->update($body->customerId, [
-            'invoice_settings' => [
-                'default_payment_method' => $body->paymentMethodId
-            ]
-        ]);
 
-        // Create the subscription
-        $subscription = $stripe->subscriptions->create([
-            'customer' => $body->customerId,
+        $subscription = Stripe\Subscription::create([
+            'customer' => $customer,
             'items' => [
                 [
-                    'price' => 'price_HGd7M3DV3IMXkC',
+                    'price' => $priceId,
+                    'quantity' => $body['quantiy'],
                 ],
             ],
             'expand' => ['latest_invoice.payment_intent'],
         ]);
 
-        return new JsonResponse($subscription, 200);
+        $p = Stripe\Product::retrieve(
+            $subscription->items->data['0']->price->product
+        );
+
+        $p = $p->name;
+        $org = $this->org;
+        if ( $p == "abonnement standard" ) {
+            $org->setPlan(2);
+
+        } else {
+            $org->setPlan(1);
+
+        }
+        $cust = Stripe\Customer::update(
+            $customer,
+            ['metadata' => ['sub_id' => $subscription->id,
+                'quantity' => $body['quantity']]]
+        );
+        dd($cust);
+        $org->setCustomerId($customer);
+
+        $em->flush();
+
+
+
+        return new JsonResponse($p, 200);
     }
+
     /**
+     * @param Request $request
+     * @param Application $app
+     * @return mixed
+     * @Route("/create-subscription", name="createSubscription")
+     * @throws Stripe\Exception\ApiErrorException
+     */
+    public function createSubscriptionManagementAction(Request $request){
+
+        $em = $this->em;
+        $currentUser = $this->user;
+        Stripe\Stripe::setApiKey('sk_test_51HZHYgHmuPtR98gqv3rds5W4VXvscTazOlR2lSbIN0xLH2vTrRan4RhhNKhaBzBpyxBxTjO27z5WJwVJEfowFwm500MTz3e2ob');
+        $body =  json_decode(file_get_contents('php://input'), true);
+        $stripe = $this->stripe;
+        $priceIdStandard = ['price_1HZI3OHmuPtR98gq5OOPo6TX','price_1HZI3OHmuPtR98gqQ7DRFCEV','price_1HZHxfHmuPtR98gqhiyljbWj'];
+        $priceIdPrenium = ['price_1HZI0THmuPtR98gq67btxwid','price_1HZI0THmuPtR98gqGKyedIG3','price_1HZI0THmuPtR98gqJNEUSfTq'];
+        $priceStandard = ["5","6","7"];
+        $pricePrenium = ["7","10","14"];
+        if($body['product'] == "prenium"){
+            $mainPriceId = $priceIdPrenium ;
+            $mainPrice = $pricePrenium ;
+            $mainProd = 'prod_I9bCKiT9lhzxBW';
+
+        } else {
+            $mainPriceId = $priceIdStandard ;
+            $mainPrice = $priceStandard ;
+            $mainProd = 'prod_I9b9NedY9kjwWr';
+
+        }
+
+        /*
+        for($i =0 ; $i < sizeof($mainPrice);$i++){
+            if($mainPrice[$i] == $body['priceId']) {
+                $priceId = $mainPriceId[$i];
+               
+            }
+
+        }*/
+        $customer = $this->org->getCustomerId();
+        $cust = Stripe\Customer::retrieve($customer);
+        $paymentm = ($body['paymentMethodId'] == " ") ? $cust->invoice_settings->default_payment_method : $body['paymentMethodId'];
+
+        $priceResponse = $stripe->prices->create([
+            'unit_amount' => $body['priceId']*100,
+            'currency' => 'eur',
+            'recurring' => ['interval' => $body['period']],
+            'product' =>  $mainProd,
+        ]);
+        $priceId = $priceResponse->id;
+
+
+        $payment_method = $this->stripe->paymentMethods->retrieve(
+            $paymentm
+        );
+
+        $payment_method->attach([
+            'customer' => $customer,
+        ]);
+
+
+
+
+
+
+
+
+        // Set the default payment method on the customer
+
+            $pm = $cust->metadata->payment_method;
+            $pm = ($pm == null)  ? array() : $cust->metadata->payment_method;
+
+          //  $payList = array_push($pm,$paymentm);
+
+
+            $cust = Stripe\Customer::update($customer, [
+            'invoice_settings' => [
+                'default_payment_method' => $paymentm
+            ],
+
+        ]);
+     if( $cust->metadata->sub_id != null) {
+         $cancel = $this->stripe->subscriptions->cancel(
+             $cust->metadata->sub_id,
+
+             );
+     }
+
+
+
+        $subscription = $this->stripe->subscriptions->create([
+            'customer' => $customer,
+            'items' => [
+                [
+                    'price' => $priceId,
+
+                ],
+            ],
+            'expand' => ['latest_invoice.payment_intent'],
+        ]);
+
+        $p = $this->stripe->products->retrieve(
+            $subscription->items->data['0']->price->product
+        );
+
+        $p = $p->name;
+        $org = $this->org;
+        if ( $p == "abonnement standard" ) {
+            $org->setPlan(2);
+
+        } else {
+            $org->setPlan(1);
+
+        }
+        $cust = $this->stripe->customers->update(
+            $customer,
+            ['metadata' => ['sub_id' => $subscription->id,'quantity' => $body['quantity']]]
+        );
+
+        $org->setCustomerId($customer);
+
+        $em->flush();
+
+
+
+        return new JsonResponse($p, 200);
+    }
+
+    /**
+     * @param Request $request
+     * @return mixed
+     * @Route("/cancel-subscription", name="cancelSubscription")
+     * @throws Stripe\Exception\ApiErrorException
+     */
+    public function cancelSubscriptionManagementAction(Request $request){
+        $organization = $this->org;
+        $custId = $organization->getCustomerId();
+        $cust = Stripe\Customer::retrieve(
+            $custId
+        );
+        $id = $cust->metadata->sub_id;
+
+        $sub = $this->stripe->subscriptions->cancel(
+            $id,
+
+        );
+        $em = $this->em;
+        $organization->setPlan(3);
+        $em->flush();
+        return new JsonResponse($cust->metadata->sub_id, 200);
+    }
+
+        /**
      * @param Request $request
      * @param Application $app
      * @return mixed
