@@ -4,6 +4,9 @@
 namespace App\Controller;
 
 
+use App\Entity\Organization;
+use DateTime;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,12 +24,31 @@ class SecurityController extends MasterController
     {
         $lastUserName = $authenticationUtils->getLastUsername();
         $error = $authenticationUtils->getLastAuthenticationError();
+        $this->checkUpAccount();
         return $this->render('login.html.twig', [
             'error' => $error,
             'lastUserName' => $lastUserName,
         ]);
     }
 
+    public function checkUpAccount(): void
+    {
+        $em = $this->em ;
+
+
+        $account = new ArrayCollection($em->getRepository(Organization::class)->findAll());
+
+        $account->filter(function(Organization $o){
+            $now = new DateTime();
+            return ($o->getInserted()->diff($now)->format('%d') > 21);
+        });
+
+        for($i=0;$i<sizeof($account);$i++){
+           
+            if($account[$i]->getCustomerId()==null && $account[$i]->getPlan() == 1){
+            $account[$i]->setPlan(3);
+        }}
+    }
     //Logs current user
 //    public function loginAction(Request $request)
 //    {

@@ -36,6 +36,7 @@ use App\Entity\User;
 use App\Repository\ParticipationRepository;
 use App\Repository\UserRepository;
 
+
 use Stripe\Stripe;
 use Swift_Image;
 use Swift_Mailer;
@@ -109,16 +110,21 @@ abstract class MasterController extends AbstractController
      * @param EntityManagerInterface $em
      * @param Security $security
      * @param RequestStack $stack
+     * @param Stripe $stripe
      */
     public function __construct(EntityManagerInterface $em, Security $security, RequestStack $stack, UserPasswordEncoderInterface $encoder, Environment $twig)
     {
-        Stripe::setApiKey('pk_test_51HZHYgHmuPtR98gq78pZ4Orw0HliC7zhtkmv6FHQp2eVakz9X8IvYtYNwUuAt09tTXKeLZupQFlODr2tsLvTsH6o00PRmtxy8X');
+        Stripe::setApiKey('sk_test_51HZHYgHmuPtR98gqv3rds5W4VXvscTazOlR2lSbIN0xLH2vTrRan4RhhNKhaBzBpyxBxTjO27z5WJwVJEfowFwm500MTz3e2ob');
         $this->em = $em;
         $this->security = $security;
         $this->stack = $stack;
         $this->user = $security->getUser();
         $this->encoder = $encoder;
         $this->twig = $twig;
+        $stripe = new Stripe;
+        $this->stripe = $stripe = new \Stripe\StripeClient(
+            'sk_test_51HZHYgHmuPtR98gqv3rds5W4VXvscTazOlR2lSbIN0xLH2vTrRan4RhhNKhaBzBpyxBxTjO27z5WJwVJEfowFwm500MTz3e2ob'
+        );;
 //        if ($this->user === null) {
 //            dd('erreur de user');
 //            $this->redirectToRoute('login');

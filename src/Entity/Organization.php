@@ -16,6 +16,7 @@ use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\OneToOne;
 use Doctrine\ORM\Mapping\OrderBy;
 use Symfony\Component\Validator\Constraints as Assert;
+use Stripe;
 
 /**
  * @ApiResource()
@@ -181,7 +182,11 @@ class Organization extends DbObject
      * @var string
      */
     protected $plan;
-
+    /**
+     * @Column(name="org_cus_id", type="string", nullable=true)
+     * @var string
+     */
+    protected $customerId;
     /**
      * @OneToMany(targetEntity="Team", mappedBy="organization",cascade={"persist", "remove"}, orphanRemoval=true)
      */
@@ -270,6 +275,7 @@ class Organization extends DbObject
      * @param $targets
      * @param $options
      * @param $processes
+     * @param $customerId
      * @param InstitutionProcess[]|ArrayCollection $institutionProcesses
      * @param CriterionGroup[] $criterionGroups
      * @param $workerFirm
@@ -308,6 +314,7 @@ class Organization extends DbObject
         $targets = null,
         $options = null,
         $processes = null,
+        $customerId = null,
         $institutionProcesses = null,
         array $criterionGroups = null,
         $workerFirm = null)
@@ -347,6 +354,32 @@ class Organization extends DbObject
         $this->criterionGroups = $criterionGroups?: new ArrayCollection();
         $this->users = $users?: new ArrayCollection();
         $this->workerFirm = $workerFirm;
+        $this->customerId = $customerId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCustomerId(): string
+    {
+
+        if($this->customerId == null){
+            $mail = ($this->masterUser == null) ? "" :$this->masterUser->getEmail();
+            $cust = Stripe\Customer::create([
+                'email' => $mail,
+            ]);
+            $this->customerId = $cust->id;
+            return $cust->id;
+        }
+        return $this->customerId;
+    }
+
+    /**
+     * @param string $customerId
+     */
+    public function setCustomerId(string $customerId): void
+    {
+        $this->customerId = $customerId;
     }
 
 
@@ -438,6 +471,14 @@ class Organization extends DbObject
         $this->weight_type = $weight_type;
 
         return $this;
+    }
+
+    /**
+     * @return DateTime
+     */
+    public function getInserted(): DateTime
+    {
+        return $this->inserted;
     }
 
     public function setInserted(DateTimeInterface $inserted): self
