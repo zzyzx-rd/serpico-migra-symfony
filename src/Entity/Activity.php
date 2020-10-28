@@ -472,11 +472,22 @@ class Activity extends DbObject
         return $this;
     }
 
-    public function getProgress(): ?int
+    /*public function getProgress(): ?int
     {
         return $this->progress;
+    }*/
+
+    public function getProgress(){
+        $minValue = 99;
+        foreach($this->stages as $key => $stage){
+            if($stage->getProgress() < $minValue){
+                $minValue = $stage->getProgress();
+            }
+        }
+        return $minValue;
     }
 
+    
     public function setProgress(int $progress): self
     {
         $this->progress = $progress;

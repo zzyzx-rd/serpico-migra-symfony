@@ -467,43 +467,62 @@ function dateUpdate() {
 
     } else {
         $('.months-ref').removeClass('row').addClass('flex-center-sa'); 
-        var datesInt = datesInterval(ts, cy, cInt);
+        var datesInt = datesInterval(ts, y, cInt);
         var si = datesInt[0];
         var ei = datesInt[1];
-        pInt = ts == 't' ? (cInt - 1) % 4 : (cInt - 1) % 52; 
-        nInt = ts == 't' ? (cInt + 1) % 4 : (cInt + 1) % 52; 
-        var ny = cy + 1;
-        var py = cy - 1;
+        var cDivider = ts == 't' ? 5 : (ts == 'w' && moment(`${y+1}-01-01`).day() > 3 ? 54 : 53);
+        var pDivider = ts == 't' ? 5 : (ts == 'w' && moment(`${y}-01-01`).day() > 3 ? 54 : 53);
+
+        pInt = (pDivider + cInt - 1) % pDivider;
+        if(pInt == 0){
+          pInt = pDivider - 1;
+          py = y - 1;
+        } else {
+          py = '';
+        }
+
+        nInt = Math.max(1,(cDivider + cInt + 1) % cDivider);
+        ny = nInt == 1 ? y + 1 : '';
+
+        prefix = (ts == 't') ? (lg == 'fr' ? 'T' : 'Q') : (lg == 'fr' ? 'S' : 'W');
+
         var tDays = parseInt(dayDiff(si, ei)) + 1;
         //var c = moment.duration(moment().diff(moment(si),'days')).milliseconds();
-        if(ts == 't'){
-          $('.prev-interval-val').empty().append(`${lg == 'fr' ? 'T' : 'Q'}${pInt == 0 ? 4 : pInt} ${pInt == 0 ? py : ''}`);
-          $('.next-interval-val').empty().append(`${lg == 'fr' ? 'T' : 'Q'}${nInt == 0 ? 4 : nInt} ${nInt == 1 ? ny : ''}`);
-          $('.curr-int-value').empty().append(`${lg == 'fr' ? 'T' : 'Q'}${cInt} <span class="int-precision">${cy}</span>`);
-        } else {
+        /*if(ts == 't'){*/
+          $('.prev-interval-val').empty().append(`${prefix}${pInt} ${py}`);
+          $('.next-interval-val').empty().append(`${prefix}${nInt} ${ny}`);
+          $('.curr-int-value').empty().append(`${prefix}${cInt} <span class="int-precision">${y}</span>`);
+        /*} else {
           $('.prev-interval-val').empty().append(`${lg == 'fr' ? 'S' : 'W'}${pInt == 0 ? 52 : pInt} ${pInt == 0 ? py : ''}`);
           $('.next-interval-val').empty().append(`${lg == 'fr' ? 'S' : 'W'}${nInt == 0 ? 52 : nInt} ${nInt == 1 ? ny : ''}`);
           $('.curr-int-value').empty().append(`${lg == 'fr' ? 'S' : 'W'}${cInt} <span class="int-precision">${cy}</span>`);
-        }
+        }*/
         $('.start-int-value').empty().append(`${si.getDate()}/${si.getMonth() + 1}`);
         $('.end-int-value').empty().append(`${ei.getDate()}/${ei.getMonth() + 1}`);
         //width = 100 / 13;
         //week = moment(si).week();
         wDate = moment(si);
         $timescale = $('#activities-container').find('.months-ref');
+        currDiffWDaysUSEU = moment.duration(moment(datesInterval(ts,y,1)[0]).diff(moment(`${y}-01-01`))).days();
+        nextDiffWDaysUSEU = moment.duration(moment(datesInterval(ts,y+1,1)[0]).diff(moment(`${y+1}-01-01`))).days();
+        
         if(ts == 't'){
-          ct = wDate.quarter();
-          offset = moment.duration(moment(datesInterval(ts,cy,1)[0]).diff(moment(`${wDate.year()}-01-01`))).days() < 4 && moment(moment(datesInterval(ts,cy,1)[0])).week() == 2 ? -1 : 0;
-          while (wDate.quarter() == ct){
-            week = wDate.week();
+          nct = new Date(wDate);
+          nct = moment(nct).add(Math.max(-currDiffWDaysUSEU,0),'d');
+          ct = nct.quarter(); // Just to be sure to be in according quarter 
+          offset = /* currDiffWDaysUSEU < 3 &&*/ moment(moment(datesInterval(ts,y,1)[0])).week() == 2 ? -1 : 0;
+
+          while (nct.quarter() == ct){
+            week = wDate.week();  
             
             if(week == 1){
-              if (moment.duration(moment(`${ct == 4 ? cy : cy - 1}-12-31`).diff(moment(wDate))).days() >= 3){
+              if (nextDiffWDaysUSEU >= 3 && ct == 4){
                 week = 53;
               }
             }
             $timescale.append('<div><sub>s</sub>' + (week + offset == 0 ? 52 : week + offset) + '</div>');
-            wDate = wDate.add(1,'w');
+            wDate = wDate.add(1,'w')/*.add(Math.max(-currDiffWDaysUSEU,0),'d')*/;
+            nct = nct.add(1,'w')/*.add(Math.max(-currDiffWDaysUSEU,0),'d')*/;
           }
         } else if(ts == 'w'){
           weekdays_short = [];
@@ -618,7 +637,23 @@ function dateUpdate() {
                 'border-radius': '0.3rem',
             });
         });
+
+        if(!$this.find('.stage-element:visible').length){
+          $this.closest('.activity-holder').find('.act-info').css('visibility','hidden');  
+        } else {
+          $this.closest('.activity-holder').find('.act-info').css('visibility','');
+        }
     })
+
+    if(!$('.stage-element:visible').length){
+      if(!$('.no-int-act-overlay').length){
+        proto = $('.process-list').data('prototype-no-int-act');
+        $('.process-list').append($(proto));
+      }
+    } else { 
+       $('.no-int-act-overlay').remove();
+    }
+
        
     //});
 
@@ -639,24 +674,24 @@ function dateUpdate() {
               //Retrieving start and end interval dates
               for(var i=0;i<2;i++){
 
-                  date = period == 't' ? moment(year, "YYYY").quarter(intNb+i).toDate() : moment(year, "YYYY").week(intNb+i).toDate();
+                  thisDate = period == 't' ? moment(year, "YYYY").quarter(intNb+i).toDate() : moment(year, "YYYY").week(intNb+i).toDate();
                   // If different to monday
                   
-                  if(date.getDay() != 1) {
+                  if(thisDate.getDay() != 1) {
 
-                      d = date.getDay() < 4 ? 1 - date.getDay() : date.getDay(); 
-                      date.setDate(date.getDate()+d);
+                      d = thisDate.getDay() < 4 ? 1 - thisDate.getDay() : 8 - thisDate.getDay(); 
+                      thisDate.setDate(thisDate.getDate()+d);
 
                   } else if (i == 1) {
-                      if(date.getDay() == 1) {
-                          m = (date.getMonth() == 12) ? 1 : date.getMonth() + 1;
-                          date.setMonth(m);
-                          date.setDate(getNbJoursMois(12 , year-1));
-                          date.setFullYear(year-1);
+                      if(thisDate.getDay() == 1) {
+                          m = (thisDate.getMonth() == 12) ? 1 : thisDate.getMonth() + 1;
+                          thisDate.setMonth(m);
+                          thisDate.setDate(getNbJoursMois(12 , year-1));
+                          thisDate.setFullYear(year-1);
                       }
                   }
 
-                  dates.push(date);
+                  dates.push(thisDate);
               }
 
         //}
@@ -737,22 +772,35 @@ function dateUpdate() {
             if (ts == "y") {
                 ci--;
             } else {
-                if(cInt == 1){
-                    ci = ts == 't' ? `q-4-${y-1}` : `w-52-${y-1}`;
-                } else {
-                    ci = `${ts == 't' ? 'q' : 'w'}-${cInt - 1}-${y}`;
-                }
+               if(ts == 't' || ts == 'w'){
+                 prevValue = $('.prev-interval-val').text().trim();
+                 if(prevValue.split(' ').length > 1){
+                   yVal = y - 1;
+                   prevValue = prevValue.split(' ')[0];
+                 } else {
+                   yVal = y;
+                 }
+                 tsVal = ts == 't' ? 'q' : ts;
+                 intVal = prevValue.slice(1);
+                 ci = `${tsVal}-${intVal}-${yVal}`;
+               }
             }
       } else {
             if (ts == "y") {
                 ci++;
             } else {
-                if(ts == 't' && cInt == 4 || ts == 'tw' && cInt == 52){
-                    ci = `${ts == 't' ? 'q' : 'w'}-1-${y+1}`;
+              if(ts == 't' || ts == 'w'){
+                nextValue = $('.next-interval-val').text().trim();
+                if(nextValue.split(' ').length > 1){
+                  yVal = y + 1;
+                  nextValue = nextValue.split(' ')[0];
                 } else {
-                    ci =`${ts == 't' ? 'q' : 'w'}-${cInt + 1}-${y}`;
+                  yVal = y;
                 }
-
+                tsVal = ts == 't' ? 'q' : ts;
+                intVal = nextValue.slice(1);
+                ci = `${ts}-${intVal}-${yVal}`;
+              }
             }
         }
         setCookie('ci', ci, 365);

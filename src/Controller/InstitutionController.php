@@ -474,7 +474,6 @@ final class InstitutionController extends MasterController
         }
 
         ksort($displayedStatuses);
-        //dd($orphanActivities);
 
         $firstConnection = $currentUser->getLastConnected() == null;
         if($firstConnection){

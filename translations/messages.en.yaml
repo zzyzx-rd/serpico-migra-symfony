@@ -2088,6 +2088,7 @@ activities:
   display_group: Show these activities
   instant_add: Give an update
   update_status: Update progress status
+  reopen_activity: Reopen activity
   provide_my_feedbacks: Provide my feedbacks
   delete_activity: Delete activity
   delete_activity_modal:
@@ -2099,6 +2100,10 @@ activity_elements:
   parameters: Parameters
   expected_output: Expected feedback
   no_defined_output: No defined output
+  no_int_act:
+    main_msg: No activity in this timeframe
+    closer_activity_ahead: Closer activity ahead
+    closer_activity_passed: Closer activity passed
   stages: 
     multiple_stages_modal:
       add_event_title: To which stage do you want to attach thsis event ?

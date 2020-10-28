@@ -2191,6 +2191,7 @@ activities:
   display_group: Afficher ces activités
   instant_add: Faire un update
   update_status: Mettre à jour l'avancement
+  reopen_activity: Rouvrir l'activité
   provide_my_feedbacks: Donner mes feedbacks
   delete_activity: Supprimer l'activité
   delete_activity_modal:
@@ -2203,6 +2204,10 @@ activity_elements:
   parameters: Paramètres
   expected_output: Retours attendus
   no_defined_output: Pas de retours définis
+  no_int_act:
+    main_msg: Aucune activité dans l'intervalle de temps
+    closer_activity_ahead: Plus proche activité à venir
+    closer_activity_passed: Plus proche activité passée
   stages: 
     multiple_stages_modal:
       add_event_title: A quelle phase voulez-vous rattacher cet update ?

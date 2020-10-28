@@ -1128,6 +1128,27 @@
         height:2rem;
         line-height:2rem;
       }
+
+      .process-list{
+        position: relative;
+      }
+
+      .no-int-act-overlay{
+        position: absolute;
+        background-color: grey;
+        top:0;
+        opacity:0.2;
+        height:100%;
+        width: 100%;
+        z-index: 1;
+      }
+
+      .no-int-act-title-zone{
+        margin-left: auto;
+        margin-right: auto;
+        text-align:center;
+        max-width:50%;
+      }
       /*
       .e-comment:not(.being-replied){
         margin-bottom: 1.7rem;
@@ -1242,7 +1263,7 @@
 
     $(document).on('click','[href="#updateStageProgressStatus"]',function(e) {
 
-        $('.update-status-btn').data('sid',$(this).data('sid'));
+        $('.update-status-btn').attr('data-sid',$(this).data('sid'));
         $select = $('#progressStatusSelect');
         const status = $(this).data('progress');
         const r = $(this).data('r');
@@ -1639,8 +1660,9 @@
       </ul>
 
       <ul class="no-margin">
-      
+        
         <ul class="flex-center-fe view-settings no-margin">
+          {#
           <li class="flex-center">
             <a class="btn-flat no-padding flex-center">
               <div class="view-type-value flex-center">
@@ -1659,6 +1681,8 @@
               </ul>
             </a>
           </li>
+          #}
+
 
               {#
 
@@ -1946,7 +1970,7 @@
         #}
 
         
-        <ul class="process-list process-list-t no-margin" data-prototype="{% apply escape %}{% include "components/activity2_list__item.html.twig" with {em: em} %}{% endapply %}">
+        <ul class="process-list process-list-t no-margin" data-prototype="{% apply escape %}{% include "components/activity2_list__item.html.twig" with {em: em} %}{% endapply %}" data-prototype-no-int-act="{% apply escape %}{% include "components/activity_no_int_act_overlay.html.twig" %}{% endapply %}">
           {% if orphanActivities is not empty %}
 
             <li class="process-list--item hierarchized-item">
