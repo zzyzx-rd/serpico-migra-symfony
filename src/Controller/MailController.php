@@ -4,9 +4,12 @@ namespace App\Controller;
 
 use App\Entity\Mail;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
+use Symfony\Component\HttpFoundation\Response;
 
 class MailController extends MasterController {
 
@@ -117,12 +120,12 @@ class MailController extends MasterController {
             
             $email->embedFromPath('lib/img/logo_dd_p_l.png','logo_img');
 
-            $data['logo_width_px'] = 80;
+            $data['logo_width_px'] = 110;
             $data['company_name'] = 'Dealdrive';
             $data['address'] = '38, route d\'Esch';
             $data['zipcode_city'] = 'L-1470 Luxembourg';
             $data['phone'] = '+352 28 79 97 18';
-            $data['company_website'] = 'https://www.serpicoapp.com';
+            $data['company_website'] = 'https://www.dealdrive.app';
             $data['recipient'] = $recipient;
             $data['mailId'] = isset($mail) ? $mail->getId() : 0;
             $data['incubator_logo'] = null;
@@ -133,19 +136,18 @@ class MailController extends MasterController {
 
             if ($actionType == 'activityParticipation') {
 
-            } else if ($actionType == 'registration' /*&& !$data['firstCreatedOrgUser']*/ || $actionType == 'externalInvitation') {
+            } else if (isset($settings['tokens']) && ($actionType == 'registration' || $actionType == 'externalInvitation')) {
                 $data['token'] = $settings['tokens'][$key];
             } else if ($actionType == 'updateProgressStatus'){
                 $data['stage'] = $settings['stages'][$key];
             }
 
+            $mailTemplate = $twig->load('mails/' . $actionType . '.html.twig');
             $email->htmlTemplate('mails/'. $actionType . '.html.twig')
             ->context($data);
-
-            $mailTemplate = $twig->load('mails/' . $actionType . '.html.twig');
             $mailingEmailAddress = $recipientUsers ? $recipient->getEmail() : $recipient;
 
-            $email->from(new Address('no-reply@dealdrive.lu','Dealdrive'))
+            $email->from('Dealdrive <no-reply@dealdrive.app>')
                 ->to($mailingEmailAddress)
                 ->subject($mailTemplate->renderBlock('subject', $data));
                 
@@ -156,10 +158,16 @@ class MailController extends MasterController {
                 $email->attachFromPath('lib/Data/Serpico_Presentation_EN.pdf','Presentation');
             }
 
-            $mailer->send($email);
+            try{
+                $mailer->send($email);
+            } catch (TransportExceptionInterface $e) {
+                // some error prevented the email sending; display an
+                // error message or try to resend the message
+                return new JsonResponse(['file' => $e->getFile(), 'line' => $e->getLine(), 'msg' => $e->getMessage()], 500);
+            }
         }
 
-        return true;
+        return new JsonResponse('success', 200);
 
         /*
         } catch(\Exception $e) {

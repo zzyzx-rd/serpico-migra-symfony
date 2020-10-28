@@ -193,10 +193,9 @@ class WorkerFirm extends DbObject
     public $clients;
 
     /**
-     * @ORM\OneToOne(targetEntity=Organization::class, mappedBy="workerFirm", cascade={"persist", "remove"})
-     * @JoinColumn(name="organization_org_id", referencedColumnName="org_id", nullable=true)
+     * @ORM\OneToMany(targetEntity="Organization", mappedBy="workerFirm", cascade={"persist","remove"})
      */
-    private $organization;
+    protected $organizations;
 
     /**
      * WorkerFirm constructor.
@@ -290,6 +289,7 @@ class WorkerFirm extends DbObject
         $this->mails = new ArrayCollection();
         $this->clients = new ArrayCollection();
         $this->children = new ArrayCollection();
+        $this->organizations = new ArrayCollection();
     }
 
     public function getHQLocation(): ?string
@@ -669,22 +669,24 @@ class WorkerFirm extends DbObject
         return (string) $this->id;
     }
 
-    public function getOrganization(): ?Organization
+    /**
+     * @return ArrayCollection|Organization[]
+     */
+    public function getOrganizations()
     {
-        return $this->organization;
+        return $this->organizations;
     }
 
-    public function setOrganization(?Organization $organization): self
+    public function addOrganization(Organization $organization): WorkerFirm
     {
-        $this->organization = $organization;
-        /*
-        // set (or unset) the owning side of the relation if necessary
-        $newWorker_firm_wfi = null === $organization ? null : $this;
-        if ($organization->getWorkerFirmWfi() !== $newWorker_firm_wfi) {
-            $organization->setWorkerFirmWfi($newWorker_firm_wfi);
-        }
+        $this->organizations->add($organization);
+        $organization->setWorkerFirm($this);
+        return $this;
+    }
 
-        */
+    public function removeOrganization(Organization $organization): WorkerFirm
+    {
+        $this->organizations->removeElement($organization);
         return $this;
     }
 

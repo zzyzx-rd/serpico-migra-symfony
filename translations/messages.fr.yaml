@@ -12,20 +12,26 @@ back: Retour
 previous: Précédent
 next: Suivant
 delete: Supprimer
+remove: Supprimer
+replace: Remplacer
 save: Sauvegarder
 create: Créer
+creation: Création
 create_anyway: créer quand même
+add: ajouter
 add_anyway: ajouter quand même
 update: Mettre à jour
+update_noun: Mise à jour
 firm: entreprise
 organization: organisation
 partner: Partenaire
 independant: indépendant
 user: utilisateur
+legal_person: personne morale
 firm_member : Membre d'une entreprise / institution
-firstname: prénom
-lastname: nom
-email: email
+firstname: Prénom
+lastname: Nom
+email: Email
 ascending: ASC
 descending: DESC
 sort: Tri
@@ -34,31 +40,57 @@ pending_validation: En attente de validation
 show_less: Afficher moins
 show_more: Afficher __count__ de plus
 show_all: Tout afficher
-curr_language: fr
 page_under_work: Page en construction
-back_to_home: Retour a l'accueil
+back_to_home: Retour à l'accueil
 please_wait: Traitement en cours
 users_list.no_teams_msg: Aucune équipe
 result: Résultats
 powered_by: Une marque de
-days: jours
-hours: heures
-minutes: minutes
-seconds: secondes
+year: année
+year_short: A
+trimester: trimestre
+trimester_short: T
+month: mois
+week: semaine
+day: jour
+hour: heure
+minute: minute
+second: seconde
 country: pays
 state: région
 city: ville
+scale: Echelle
+ok_got_it: C'est noté !
+trial: Essai
+my_firm: Mon entreprise
+from_date: du
+to_date: au
+initial_dates: dates initiales
+notifications: notifications
+participants_trans: participants
+manage: Gérer
+of: de
+none_m: aucun
+none_f: aucune
+modify: modifier
+modified: modifié
+unlimited: illimité
+up_to: jusqu'à
+comment: commentaire
+document: document
+download: télécharger
+rename: renommer
 
 help:
-  page_title: Serpico, pour une performance collaborative et porteuse de sens
+  page_title: DealDrive, pour une performance collaborative et porteuse de sens
   mobile_header_title: Aide
   vp:
     title: Nos valeurs et engagements
-    intro: Serpico est une solution qui permet à chacun de s'emparer continûment, et rigoureusement du principe d'évaluation. Il devient moteur, dans le but de tirer soi-même et l'entreprise vers le haut.
+    intro: DealDrive est une solution qui permet à chacun de s'emparer continûment, et rigoureusement du principe d'évaluation. Il devient moteur, dans le but de tirer soi-même et l'entreprise vers le haut.
     project_approach:
       title: Une approche continue, où chaque élément de travail (activité) contribue à la performance en entreprise
       first_paragraph: "La rigueur commence par la définition de ce qui est mesuré. Il n'y a priori aucune raison de délaisser des éléments de travail réalisés par chacun, et encore moins d'ignorer ceux qui y ont contribué. Chaque collaborateur peut ainsi dès qu'il le juge utile, insérer un élément de travail dans lequel il renseigne les participants afin par la suite de donner des feedbacks. Les bienfaits sont multiples : outre le fait de se sentir impliqué car acteur, cela objective la perception de l'évaluation. Elle est basée sur des tâches concrètes, et se démarque de jugements personnels sans véritable fondement."
-      second_paragraph: "Chez Serpico, nous n'oublions pas que c'est toutefois vous, en tant que personne, qui portez le jugement et qu'il vous appartient en propre. Nous vous garantissons :"
+      second_paragraph: "Chez DealDrive, nous n'oublions pas que c'est toutefois vous, en tant que personne, qui portez le jugement et qu'il vous appartient en propre. Nous vous garantissons :"
       no_ai_guarantee:
         title: Aucune analyse de vos retours faite par des robots, AI ou tout autre chose de ce genre
         first_paragraph: Il est de la compétence des personnes en charge des activités de faire la revue des résultats. Ce n'est pas en provoquant des jugements péremptoires ni en créeant des formes d'auto-censure que l'entreprise s'en trouvera améliorée !
@@ -134,12 +166,12 @@ help:
       first_paragraph: "Allez sur la section <span style=color: #2196F3>Collaborateurs</span> (en haut du menu, ou sur votre page d'accueil) <br>Puis cliquez sur le bouton <span style=color: #2196F3>Ajouter</span> en bas à droite pour créer un nouveau collaborateur :"
       second_paragraph: 'Vous pouvez créer autant de collaborateur que vous souhaitez en cliquant sur le bouton vert \ Ajouter un utilisateur \. Pour chaque utilisateur, insérez ses qualifications et son adresse email. <br><br> Vous devez obligatoirement choisir un département, un poste et lui affecter un poids hiérarchique pour finaliser l''inscription. Dans le cas où un de ces champs n''existerait pas, un clic sur la ligne bleue sous chaque champ vous permettra de créer un nouveau département/poste/poids.<br>'
       tip: Le poids hiérarchique permet de tenir compte des rapports hiérarchiques au sein de l'organisation. Par example, si un utilisateur A avec un poids de 70, est évalué dans une activité incluant deux participants, et que l'utilisateur B possède un poids de 100, alors l'utilisateur A aura un poids égale à 70/170 = 41 %
-      warning: Assurez-vous d'entrer correctement l'adresse mail d'un nouvel utilisateur, en cas derreur il ne recevra pas le lien de connection vers Serpico
+      warning: Assurez-vous d'entrer correctement l'adresse mail d'un nouvel utilisateur, en cas derreur il ne recevra pas le lien de connection vers DealDrive
 
     roles:
-      title: Les différents rôles dans Serpico
+      title: Les différents rôles dans DealDrive
       first_paragraph: "Les utilisateurs peuvent avoir l'un des rôles suivants :"
-      administrator: "<span style=color: #2196F3>Administrateur</span> : généralement un responsable de ressources humaines, ou un directeur, cet utilisateur peut ajouter des collaborateurs dans Serpico, créer et gérer des activités, gérer les paramètres de son organisation et donner un accès aux résultats complets (résultats individuels et/ou feedbacks, ainsi que les résultats globaux)"
+      administrator: "<span style=color: #2196F3>Administrateur</span> : généralement un responsable de ressources humaines, ou un directeur, cet utilisateur peut ajouter des collaborateurs dans DealDrive, créer et gérer des activités, gérer les paramètres de son organisation et donner un accès aux résultats complets (résultats individuels et/ou feedbacks, ainsi que les résultats globaux)"
       activity_manager: "<span style=color: #2196F3>Manager d'activité</span> : généralement un manager déquipe, cet utilisateur peut ajouter des collaborateurs et gérer des activités, et donner un accès à une partie de résultats (feedbacks anonymes et résultats globaux individuels)"
       collaborator: "<span style=color: #2196F3>Collaborateur</span> : tous les autres membres de l'organisation, ils peuvent être ajoutés dans une activité ou demandé la création d'une activité. Ils ont accès à leurs feedbacks individuels anonymisés, leurs résultats globaux et à la note moyenne de l'activité"
       second_paragraph: "Ces rôles peuvent être changés à tout moement (voir la section <span style=color: #2196F3>Collaborateur</span>) <br><br> Les utilisateurs peuvent être distingués comme étant internes ou externes à l'organisation (par défaut, ils sont considérés comme internes). <br><br> Une fois terminé, cliquez sur le bouton \ Créer un utilisateur \ pour valider la création"
@@ -262,7 +294,7 @@ help:
 #    tip_position: Dans la mesure ou vous pourrez créer des activités et utilisateurs, nous aimerions connaitre votre poste actuel
 #    email_error: Merci de renseigner une adresse mail correcte
 #    email_label: Votre adresse mail
-#    label_newsletter: Tenez-moi informé du lancement de Serpico et des actualités via une newsletter
+#    label_newsletter: Tenez-moi informé du lancement de DealDrive et des actualités via une newsletter
 #    label_doc: Envoyez-moi de la documentation
 #    submit: OK
 #    success_msg: Votre inscription a bien été prise en compte ! Vous serez rapidement tenu au courant par notre équipe ;)
@@ -279,7 +311,7 @@ layout:
     modal_title: Démarrez lexpérience dès à présent
     modal_checkbox_label: Créer le compte moi-même
     modal_email_label: Adresse email
-    modal_message: Vous pourrez créer gratuitement (jusque 5 utilisateurs) vos propres activités, afin de permettre à chaque membre de votre organisation de devenir acteur de son évaluation. Avec Serpico, s'évaluer n'a jamais été aussi simple... et précis !
+    modal_message: Vous pourrez créer gratuitement (jusque 5 utilisateurs) vos propres activités, afin de permettre à chaque membre de votre organisation de devenir acteur de son évaluation. Avec DealDrive, s'évaluer n'a jamais été aussi simple... et précis !
     validate: c'est parti !
 
 
@@ -316,7 +348,7 @@ layout:
 #    discover_solution: En savoir plus
 #
 #  section_1:
-#    title: Les fonctionnalités offertes par Serpico
+#    title: Les fonctionnalités offertes par DealDrive
 #    paragraph_1: "Notre outil s'adapte à tout type d'entreprise, allant de la simple digitalisation du processus d'évaluation, au pilotage fin et stratégie niveau groupe. Il permet:"
 #    item_1: Des retours par <b>feedback</b> et/ou <b>notation</b>, avec pour cible le <b>projet</b> et/ou ses <b>participants</b>
 #    item_2: "D'évaluer dans toutes les configurations : <b>actif, tiers ou passif</b>"
@@ -337,7 +369,7 @@ layout:
 #  section_3:
 #    title: Des données sécurisées et intégrables dans vos systèmes existants
 #    paragraph_1: Les données d'évaluation peuvent être sensibles, non seulement pour l'environnement extérieur, mais aussi pour les salariés. Nous accordons le plus grand soin à compartimenter l'accès aux résultats, de sorte que chaque utilisateur accède aux résultats liés à son rôle.
-#    paragraph_2: Serpico se doit d'être compliant et sécurisé. Si le client ne souhaite pas que ses données soient stockées sur nos serveurs, une installation sur site peut être effectuée à se demande.<br><br> Nous documentons le traitement des données, notamment ce qu'il en est fait et où celles-ci sont stockées selon la directive RGPD. Les données sont anonymisées dès lors qu'un salarié quitte l'entreprise
+#    paragraph_2: DealDrive se doit d'être compliant et sécurisé. Si le client ne souhaite pas que ses données soient stockées sur nos serveurs, une installation sur site peut être effectuée à se demande.<br><br> Nous documentons le traitement des données, notamment ce qu'il en est fait et où celles-ci sont stockées selon la directive RGPD. Les données sont anonymisées dès lors qu'un salarié quitte l'entreprise
 #
 
 #  bullet_point_1:
@@ -361,7 +393,7 @@ layout:
 #    title_2: Donnez un véritable pouvoir à vos salariés
 #    description_2: Le fait de devoir noter chaque collègue participant à une activité (projet) rend le collaborateur plus responsable, et focalisé sur ses objectifs celui-ci étant assuré de la confidentialité des notes qu'il attribue
 #    title_3: Rendez l'évaluation légère et ludique
-#    description_3: "Le temps où le collaborateur devait donner son feedback au manager entre quatre murs est révolu : Serpico rend l'évaluation décomplexée en proposant une solution accessible depuis son téléphone"
+#    description_3: "Le temps où le collaborateur devait donner son feedback au manager entre quatre murs est révolu : DealDrive rend l'évaluation décomplexée en proposant une solution accessible depuis son téléphone"
 #
 #  services_section:
 #    video_yt_uuid: IGdvZMzEaoo
@@ -369,9 +401,9 @@ layout:
 #  team_section:
 #    title: L'équipe
 #    position_gc: Fondateur
-#    quote_gc: "Ayant travaillé dans de nombreux départements d'entreprise, j'ai remarqué que le processus d'évaluation était rarement réalisé par projets, et manquait parfois de pertinence d'autant qu'ils ne mesurent souvent pas lavis des autres membres du projet. c'est ce qui ma amené à réfléchir à un modèle collaboratif de partage de valeur, et ensuite à le décliner comme service avec Serpico : je suis convaincu que cela débouchera sur une situation où tout le monde ressortira gagnant !"
+#    quote_gc: "Ayant travaillé dans de nombreux départements d'entreprise, j'ai remarqué que le processus d'évaluation était rarement réalisé par projets, et manquait parfois de pertinence d'autant qu'ils ne mesurent souvent pas lavis des autres membres du projet. c'est ce qui ma amené à réfléchir à un modèle collaboratif de partage de valeur, et ensuite à le décliner comme service avec DealDrive : je suis convaincu que cela débouchera sur une situation où tout le monde ressortira gagnant !"
 #    position_am: Co-designer
-#    quote_am: j'ai travaillé de concert avec Guillaume sur la réalisation de la première version de la plateforme, qui a été testée avec succès auprès délèves dans un environnement dapprentissage. /*c'est un outil que j'ai ensuite promu dans mon entreprise, et tous les collègues ont rapidement adopté Serpico pour sa facilité dutilisation et sa pertinence même à l'échelle d’une petite entreprise*/
+#    quote_am: j'ai travaillé de concert avec Guillaume sur la réalisation de la première version de la plateforme, qui a été testée avec succès auprès délèves dans un environnement dapprentissage. /*c'est un outil que j'ai ensuite promu dans mon entreprise, et tous les collègues ont rapidement adopté DealDrive pour sa facilité dutilisation et sa pertinence même à l'échelle d’une petite entreprise*/
 #
 #  partners_section:
 #    title: Nos références
@@ -383,7 +415,7 @@ layout:
 #  page_name: La solution
 #  mobile_header_title: La solution
 #  global_title: Une solution à valeur ajoutée pour l'ensemble des acteurs
-#  first_explaining_paragraph: Retrouvez les différentes manières dutiliser Serpico ci-dessous (glissez sur les icones pour savoir à qui cela bénéficie) :
+#  first_explaining_paragraph: Retrouvez les différentes manières dutiliser DealDrive ci-dessous (glissez sur les icones pour savoir à qui cela bénéficie) :
 #  clevel: Codir
 #  manager: Manager
 #  pm: Managers
@@ -427,7 +459,7 @@ layout:
 #  target_pilot:
 #    title: Permettez à vos objectifs d'être efficacement pilotés
 #    p_1:
-#      content_beginning: Vos équipes sont certainement dotées d'objectifs chaque année. Serpico agit comme un outil de suivi régulier d'atteinte des objectifs clients et interne. Sappuyant sur les méthodes de méthodologie de projet type Agile, il permet en plus de réaliser des feedbacks en insérant des points davancement, ce qui vous permet de suivre au mieux la feuille de route (roadmap) fixée en début dexercice
+#      content_beginning: Vos équipes sont certainement dotées d'objectifs chaque année. DealDrive agit comme un outil de suivi régulier d'atteinte des objectifs clients et interne. Sappuyant sur les méthodes de méthodologie de projet type Agile, il permet en plus de réaliser des feedbacks en insérant des points davancement, ce qui vous permet de suivre au mieux la feuille de route (roadmap) fixée en début dexercice
 #      content_middle: Cette approche permet aux managers et directeurs de prendre des décisions et dapprécier la situation plus rapidement et efficacement, et ce à nimporte quel moment de lannée sans besoin de consolider ou faire un bilan. Notre plateforme permet une vue par collaborateur ou par équipe en 1 clic
 #
 #
@@ -446,42 +478,44 @@ countdown:
   thank_you_followup_modal: "Merci de nous suivre dès le début, vous serez prévenu personnellement par notre équipe lors du lancement. A très vite pour construire ensemble révolution de l'expérience client !" 
 
 landing:
-  page_name: Le CRM qui donne la priorité à vos clients
-  motto: Le CRM qui donne la priorité à vos clients
-  main_message:
-    title: Une solution innovante tournée vers le management participatif
-    additional_elmt: Une plateforme digitale et collaborative qui mesure la performance à tous les niveaux de l'entreprise
-    discover_solution: Découvrez là
+  page_name: Votre assistant de suivi des opérations
+  motto: Votre assistant de suivi des opérations
+  motto_promise: Projetez vos opérations sur un tableau... et remplacez vos tableurs et mails !
+  dummy_data_disclaimer: Données à titre d'exemple
   section_1:
-    title: Les fonctionnalités offertes par Dealdrive
-    paragraph_1: "Dealdrive est pertinent pour chaque type d'entreprise quelque soit le secteur d'activité et le nombre d'employé. La solution est entièrement personnalisable et s'adapte à chaque exigence, depuis le besoin de digitalisation du processus d'évaluation jusqu'au pilotage stratégie de l'ensemble des projets au niveau du groupe. Il permet:"
-    item_1: "- De suivre ses <strong>clients</strong> mais également les <strong>projets</strong> de chaque service"
-    item_2: "- Des retours par <strong>feedback</strong> et/ou <strong>notation</strong>, avec pour cible le <strong>projet</strong> et/ou ses <strong>participants</strong>"
-    item_3: "- L'analyse des résultats par <strong>activité</strong>, et par <strong>collaborateur</strong>"
-    item_4: "- D'inclure la <strong>satisfaction</strong> des clients de l'entreprise et la <strong>communication</strong> éventuelle des résultats aux clients"
+    title: "Une nouvelle manière d'aborder les interactions business, plus intuitive"
+   # paragraph_1: "Dealdrive est pertinent pour chaque type d'entreprise quelque soit le secteur d'activité et le nombre d'employé. La solution est entièrement personnalisable et s'adapte à chaque exigence, depuis le besoin de digitalisation du processus d'évaluation jusqu'au pilotage stratégie de l'ensemble des projets au niveau du groupe. Il permet:"
+    paragraph_1: "Nous souhaitons transformer en profondeur la <span class=\"strong\">relation et l'expérience client</span>"
+    item_1: "- En réduisant le suivi par mail et en privilégiant une approche <span class=\"strong\">visuelle</span> et spontanée de l'ensemble de la relation"
+    item_2: "- L'insertion à tout moment d'<span class=\"strong\">événements structurant</span> le cycle de vie business (corrections, suggestions, livrables)"
+    item_3: "- Tout est consigné sur un <span class=\"strong\">tableau partagé, évitant les incompréhensions et les attentes inutiles</span>, génératrices d'un climat d'affaires plus crispé sur la continuité des opérations"
+    #item_4: "- Un reporting normalisé qui privilégié une approche unifée clients de l'entreprise et la <strong>communication</strong> éventuelle des résultats aux clients"
   section_2:
-    title: "Une application en phase avec ses clients"
-    paragraph_1: "Conscient de l'importance de l'ergonomie (user experience), nous avons travaillé à proposer la <strong>meilleure expérience</strong> pour nos utilisateurs, afin de <strong>simplifier</strong> et rendre <strong>ludique</strong> l'évaluation de performance par les équipes. La personnalisation et la prise en main de la solution Serpico est très <strong>intuitive</strong>."
-    paragraph_2: "Le déploiement de Serpico s'effectue <strong>à vos cotés</strong>, via des formations dispensées à l'ensemble des équipes afin d'emporter l'adhésion de la direction et des salariés.</br></br>Nous oeuvrons à un <strong>processus facilité</strong> pour l'intégration de Serpico dans le quotidien de votre entreprise via une équipe de suivi dédiée. "
-    step_1: "<strong>Formation</strong> au sein des équipes"
-    step_2: "<strong>Définition</strong> des skills/critères"
-    step_3: "<strong>Intégration</strong> des projets"
-    step_4: "<strong>Analyse & diffusion</strong> des résultats par projet"
-    step_5: "<strong>Analyse des résultats</strong> au cours du temps"
+    title: "Une expérience client qui va à l'essentiel"
+    paragraph_1: "Vous voulez faire un retour à vos partenaires commerciaux ? Rien de plus simple :"
+    item_1: "- Vous accédez à l'activité business que vous partagez <span class=\"strong\">en commun</strong>"
+    item_2: "- Vous choisissez le retour que vous souhaitez lui faire, insérant <span class=\"strong\">documents</span> ou <span class=\"strong\">commentaires</span>"
+    item_3: "- Il est notifié automatiquement et voit votre retour dans son <span class=\"strong\">tableau partagé</span>"
+    #paragraph_2: "Le déploiement de DealDrive s'effectue <strong>à vos cotés</strong>, via des formations dispensées à l'ensemble des équipes afin d'emporter l'adhésion de la direction et des salariés.</br></br>Nous oeuvrons à un <strong>processus facilité</strong> pour l'intégration de DealDrive dans le quotidien de votre entreprise via une équipe de suivi dédiée. "
+    step_1: "Onboarding de vos <span class=\"strong\">activités commerciales</span>"
+    step_2: "Insertion de vos <span class=\"strong\">partenaires</span> y participant"
+    step_3: "Vous les informez de l'<span class=\"strong\">évolution business</span>"
+    step_4: "Ils vous font des <span class=\"strong\">retours</span> par la même occasion"
+    #step_5: "<span class=\"strong\">Analyse des résultats</span> au cours du temps"
   section_3:
-    title: "Des données sécurisées et intégrables dans vos systèmes existants"
-    paragraph_1: "Les données d'évaluation peuvent être sensibles, non seulement pour l'environnement extérieur, mais également pour les salariés. Nous accordons le plus grand soin à <strong>compartimenter l'accès aux résultats</strong>, de sorte que chaque utilisateur accède aux résultats liés à son rôle."
-    paragraph_2: "Serpico est <strong>compliant et sécurisé</strong>. Si votre entreprise souhaite que ses données ne soient pas stockées sur nos serveurs, une installation sur site peut être effectuée."
-    paragraph_3: "Nous garantissons un <strong>traitement sécurisé</strong> de l'ensemble de vos données via l'application des techniques de <strong>sécurité</strong> et de chiffrement en conformité avec la législation récente incluant les éxigences de la directive <strong>RGPD</strong>. "
+    title: "Des données protégées, et bientôt certifiées"
+    paragraph_1: "Les clients font toujours l'objet d'une attention particulière, du fait de <span class=\"strong\">l'importance</span> des informations traitées."
+    paragraph_2: "DealDrive s'inscrit dans un principe de cloisenemment des données vous assurant sécurité et étanchéité des informations entre vos différents partenaires."
+    paragraph_3: "Plus précisément, nous stockons vos données sur <span class=\"strong\">nos serveurs cloud européen respectant la protection des données</span> et nous insérons dans une démarche d'<span class=\"strong\">intégration continue (CICD)</span>, afin de vous garantir le meilleur service. Soucieux d'obtenir votre confiance, Dealdrive s'inscrit dans une démarche de certification par un acteur externe dans les prochains mois."
   section_4:
     title: Une approche collaborative et flexible
-    paragraph_1: Serpico représente une extension des outils actuels de suivi de performance
+    paragraph_1: DealDrive représente une extension des outils actuels de suivi de performance
     paragraph_2: Les rôles et influences de chacun peuvent être paramétrés selon leur expérience et leur fonction.
     prospectus_button: Voir la brochure
   team_section:
     title: "L'équipe"
     position_gc: "Fondateur et CEO"
-    quote_gc: "Ayant travaillé dans de nombreux départements d'entreprise, j'ai remarqué que le processus d'évaluation était rarement réalisé par projets, et manquait parfois de pertinence d'autant qu'ils ne mesurent souvent pas l'avis des autres membres du projet. C'est ce qui m'a amené à réfléchir à un modèle collaboratif de partage de valeur, et ensuite à le décliner comme service avec Serpico : je suis convaincu que cela débouchera sur une situation où tout le monde ressortira gagnant !"
+    quote_gc: "Ayant travaillé dans de nombreux départements d'entreprise, j'ai remarqué que le processus d'évaluation était rarement réalisé par projets, et manquait parfois de pertinence d'autant qu'ils ne mesurent souvent pas l'avis des autres membres du projet. C'est ce qui m'a amené à réfléchir à un modèle collaboratif de partage de valeur, et ensuite à le décliner comme service avec DealDrive : je suis convaincu que cela débouchera sur une situation où tout le monde ressortira gagnant !"
     position_am: "Co-designer"
     quote_am: "J'ai travaillé de concert avec Guillaume sur la réalisation de la première version de la plateforme, qui a été testée avec succès auprès d'élèves dans un environnement d'apprentissage."
   contact_section:
@@ -493,6 +527,8 @@ landing:
     no_account_question: Vous n'avez pas de compte ?
     subscribe: Inscrivez-vous
   keep_me_logged_in: Gardez-moi connecté(e)
+  send_mail_pwd_modal:
+    msg: Un mail vient de vous être envoyé contenant un lien pour définir votre mot de passe. Heureux de vous savoir parmi nous !
 
   retrieve_pwd:
     link_msg: Mot de passe oublié ?
@@ -502,7 +538,7 @@ landing:
     success_msg: Message envoyé ! Consultez votre messagerie afin de vous connecter à nouveau
 
 language:
-  selection: Language
+  selection: Langage
   choose: Choix de la langue
 
 header:
@@ -511,6 +547,7 @@ header:
     start: S'inscrire
     description: Plus qu'un pas avant de booster votre relation client !
   product: La solution
+  pricing: Tarifs
   about: A propos
   login: Connexion
   firmSettings: "Entreprise :"
@@ -538,6 +575,37 @@ header:
     enterprise: Entreprise
     upgrade: Mise à niveau
   
+pricing:
+  page_title: Tarifs
+  header_title: "Gérez vos <span class=\"dd-text\">opérations</span> à <span class=\"dd-orange-text\">moindre frais</span>"
+  from: À partir de
+  user: user
+  free_column_title: "Idéal pour <br><span class=\"strong\">petites entreprises</span><br>& <span class=\"strong\">équipes</span>"
+  pricing_table:
+    plan_title: Formule
+    plan_free: Gratuit
+    plan_premium: Premium
+    plan_enterprise: Entreprise
+    functionality_1: Gestion des opérations
+    functionality_2: Ajout de clients
+    functionality_3: Informations échangées
+    functionality_4: Ajout d'événements et updates
+    functionality_5: Visibilité des données
+    functionality_6: Paramétrage entreprise
+    functionality_7: Données analytiques de suivi
+  features: Fonctionnalités
+  note_a: Les updates de vos collègues et partenaires sont immédiatement visibles sur votre dashboard, vous recevez une notification par mail au plus tard le lendemain de l'update
+  note_b: Les updates de vos collègues et partenaires sont immédiatement visibles sur votre dashboard, et vous en êtes immédiatement notifiés par mail
+  note_c: Vous et vos collègues voyez le même tableau des opérations
+  note_d: Les tableaux peuvent offrir plusieurs vues, de la vue utilisateur sur ses opérations propres, jusqu'à celle du départment et enfin de l'entreprise
+  note_e: Vous pouvez configurer des updates plus poussés, et voir l'évolution de la performance des opérations dans la durée
+  subscriptions: Abonnements
+  note_1: "Le prix mensuel par utilisateur est pour le Plan Premium, 7€ du 1er au 100ème, 6€ du 101ème au 250ème utilisateur, et 5€ au délà. Pour le tarif Entreprise, 14€ du 1er au 100ème, 10€ du 101ème au 250ème utilisateur, et 7€ au delà. <a class=\"dd-text\" href=\"/#\">Conditions tarifaires</a> applicables"
+  note_2: Limité à 10 collaborateurs
+  note_3: A venir prochainement
+  trial_21_days_cta: 21 jours premium gratuits
+  start_now: Démarrez dès maintenant
+
 
 solution:
   hr: RH
@@ -552,37 +620,37 @@ use_cases:
   first_explaining_paragraph: "Retrouvez ci-dessous les nombreux cas d'application :"
   clevel:
     title_1: "Fixez des objectifs stratégiques et suivez leur atteinte"
-    paragraph_1: "Là où aujourd'hui existent encore des suivis et retours non consignés - dans des documents Word, Excel éparpillés - notre solution Serpico <strong>digitalise</strong> et <strong>centralise</strong> les données. Utilisé comme seul point d'entrée du suivi en entreprise il permettra un état des lieux exhaustif de l'avancement des projets stratégiques."
+    paragraph_1: "Là où aujourd'hui existent encore des suivis et retours non consignés - dans des documents Word, Excel éparpillés - notre solution DealDrive <strong>digitalise</strong> et <strong>centralise</strong> les données. Utilisé comme seul point d'entrée du suivi en entreprise il permettra un état des lieux exhaustif de l'avancement des projets stratégiques."
     paragraph_2: "Ce suivi minutieux et en <strong>temps réel</strong> des indicateurs de performance (KPIs) à atteindre, permettra de mesurer <strong>instantanément</strong> la réussite ou non de ces objectifs afin de réagir au plus tôt et de modifier la trajectoire si besoin."
     paragraph_3: "Il permettra également de comprendre les <strong>axes d'amélioration</strong> et les <strong>points clés de réussite</strong> en intégrant les avis/notations de toutes les parties prenantes."
     title_2: "Démocratisez et unifiez la notion de performance au sein de votre entreprise"
-    paragraph_4: "Serpico permet avec sa méthodologie inspirée de la méthode Agile (tâches segmentées en phases, avec contrôle et retours sur le travail rendu) d'appliquer, à l'ensemble des services de l'entreprise, une seule et même <strong>méthode de suivi</strong> d'activité et de performance afin d'<strong>unifier</strong> les évaluations. <br><br>Les salariés sont évalués par critère (définis en amont de chaque projet), au sein d'activités qui s'implémentent au fil de l'année et des nouvelles missions."
+    paragraph_4: "DealDrive permet avec sa méthodologie inspirée de la méthode Agile (tâches segmentées en phases, avec contrôle et retours sur le travail rendu) d'appliquer, à l'ensemble des services de l'entreprise, une seule et même <strong>méthode de suivi</strong> d'activité et de performance afin d'<strong>unifier</strong> les évaluations. <br><br>Les salariés sont évalués par critère (définis en amont de chaque projet), au sein d'activités qui s'implémentent au fil de l'année et des nouvelles missions."
     title_3: "L'intégration du client dans la performance, facteur de différenciation dans le futur"
-    paragraph_5: "Dans un univers toujours plus concurrentiel, où le client est toujours plus exigeant, Serpico offre le moyen que ce dernier puisse participer à l'évaluation de la performance de la prestation réalisée.<br><br>Donnez ainsi la parole à vos clients et tirez partis des feedbacks sur votre travail. Montrez ainsi votre <strong>transparence</strong> et votre <strong>fiabilité</strong>. Faites entrer un regard extérieur sur votre activité et <strong>valorisez-la</strong> auprès des prospects."
-    paragraph_6: "Cette fonctionnalité <strong>unique</strong> de Serpico, sera à coup sûr, un facteur qui vous <strong>démarquera</strong> des autres concurrents réticents à s'ouvrir à l'instrospection."
+    paragraph_5: "Dans un univers toujours plus concurrentiel, où le client est toujours plus exigeant, DealDrive offre le moyen que ce dernier puisse participer à l'évaluation de la performance de la prestation réalisée.<br><br>Donnez ainsi la parole à vos clients et tirez partis des feedbacks sur votre travail. Montrez ainsi votre <strong>transparence</strong> et votre <strong>fiabilité</strong>. Faites entrer un regard extérieur sur votre activité et <strong>valorisez-la</strong> auprès des prospects."
+    paragraph_6: "Cette fonctionnalité <strong>unique</strong> de DealDrive, sera à coup sûr, un facteur qui vous <strong>démarquera</strong> des autres concurrents réticents à s'ouvrir à l'instrospection."
 
   manager:
     title_1: "Fixez les KPIs de vos équipes et objectivez les évaluations"
-    paragraph_1: "Afin d'obtenir une évaluation <strong>plus juste</strong> et qui reflète la <strong>réalité du terrain</strong> Serpico révolutionne l'évaluation des collaborateurs en permettant d'intégrer les retours des collègues et responsables qui ont suivi un même projet."
-    paragraph_2: "Serpico <strong>dépassionne</strong> ce moment de l'évaluation, en:"
+    paragraph_1: "Afin d'obtenir une évaluation <strong>plus juste</strong> et qui reflète la <strong>réalité du terrain</strong> DealDrive révolutionne l'évaluation des collaborateurs en permettant d'intégrer les retours des collègues et responsables qui ont suivi un même projet."
+    paragraph_2: "DealDrive <strong>dépassionne</strong> ce moment de l'évaluation, en:"
     bullet_point_1: "Fixant des critères de performances (soft et/ou hard skills), qui permettront de situer la performance du salarié et son <strong>évolution</strong> en fonction de son ancienneté."
     bullet_point_2: "Permettant une évaluation <strong>collaborative</strong> via la sollicitation des collègues ayant participé au projet ainsi qu'un auto-positionnement du collaborateur évalué."
     title_2: "Suivez les projets de vos équipes en temps réel et gagnez du temps"
-    paragraph_3: "Serpico offre une <strong>nouvelle vision</strong> du suivi du travail des collaborateurs."
+    paragraph_3: "DealDrive offre une <strong>nouvelle vision</strong> du suivi du travail des collaborateurs."
     paragraph_4: "<strong>Simplifiez</strong> et <strong>digitalisez</strong> votre rôle de manager. L'application permet de diminuer drastiquement les feedbacks oraux et de s'assurer en temps réel de l'avancement des projets confiés à vos équipes."
-    paragraph_5: "Grâce à Serpico, c'est aux collaborateurs de fournir des indications quotidiennes/hebdomadaires de son avancement selon des critères que <strong>vous aurez fixés</strong>. Vous vous dégagerez ainsi du temps pour d'autres actions managériales orienté business, par exemple."
+    paragraph_5: "Grâce à DealDrive, c'est aux collaborateurs de fournir des indications quotidiennes/hebdomadaires de son avancement selon des critères que <strong>vous aurez fixés</strong>. Vous vous dégagerez ainsi du temps pour d'autres actions managériales orienté business, par exemple."
     title_3: "Confortez votre business model et la satisfaction client"
-    paragraph_6: "Serpico, par son approche collaborative, permet également d'obtenir une vision holistique du travail de vos équipes en permettant à chacun de noter son travail ainsi que d'intégrer le <strong>retour de vos clients</strong>."
+    paragraph_6: "DealDrive, par son approche collaborative, permet également d'obtenir une vision holistique du travail de vos équipes en permettant à chacun de noter son travail ainsi que d'intégrer le <strong>retour de vos clients</strong>."
     paragraph_7: "Cette approche participe grandement à la <strong>responsabilisation</strong> et l'<strong>implication</strong> de l'ensemble des membres ayant participé au projet. Il <strong>légitime</strong> votre travail, par vos pairs et vos clients."
   hr:
     title_1: "(Re)mettez un pied au sein de chaque équipe en accédant aux feedbacks de chaque projet"
     paragraph_1: "Grâce à votre <strong>vue d'ensemble</strong>, accédez aux retours et feedbacks de chaque activité et <strong>observez</strong> la performance, les points de consensus ou de friction au sein des équipes et des projets."
-    paragraph_2: "Serpico permet d'<strong>accompagner</strong> la mutation des ressources humaines et de regagner le coeur des fonctions métier et de direction. En effet, cela permet de vous <strong>implanter</strong> - au moins de manière virtuelle - au sein des équipes, de pouvoir <strong>analyser la donnée</strong>, l'<strong>interpréter</strong> et émettre des <strong>recommandations</strong> à la direction et aux managers."
+    paragraph_2: "DealDrive permet d'<strong>accompagner</strong> la mutation des ressources humaines et de regagner le coeur des fonctions métier et de direction. En effet, cela permet de vous <strong>implanter</strong> - au moins de manière virtuelle - au sein des équipes, de pouvoir <strong>analyser la donnée</strong>, l'<strong>interpréter</strong> et émettre des <strong>recommandations</strong> à la direction et aux managers."
     title_2: "Améliorez l'intégration (onboarding) des nouveaux collaborateurs dans l'entreprise"
     paragraph_3: "Le processus de recrutement peut être <strong>long</strong> et <strong>incertain</strong> pour trouver le candidat idéal. Une embauche ratée coûte extrêmement cher en temps (jusqu'à une centaine d'heures) et en argent (de 2000 à 15000 euros) aux entreprises, selon les profils."
-    paragraph_4: "Une fois le candidat sélectionné, Serpico <strong>accompagne</strong> l'entreprise mais également le nouveau salarié lors de son <strong>intégration</strong>. Via l'application il devient plus rapidement <strong>opérationnel</strong> notamment par le fait qu'il est co-responsable de son suivi et voit rapidement s'il est en ligne avec les objectifs. <br><br>Les points de rencontre entre l'entreprise, le manager et le collaborateur sont ainsi <strong>multipliés</strong> par rapport à un recrutement classique."
+    paragraph_4: "Une fois le candidat sélectionné, DealDrive <strong>accompagne</strong> l'entreprise mais également le nouveau salarié lors de son <strong>intégration</strong>. Via l'application il devient plus rapidement <strong>opérationnel</strong> notamment par le fait qu'il est co-responsable de son suivi et voit rapidement s'il est en ligne avec les objectifs. <br><br>Les points de rencontre entre l'entreprise, le manager et le collaborateur sont ainsi <strong>multipliés</strong> par rapport à un recrutement classique."
     title_3: "Suivez la progression par objectifs (OKR) des salariés et déclenchez des actions de formation ajustées"
-    paragraph_5: "Le suivi individuel mais également <strong>collectif</strong> des collaborateurs via les objectifs que vous aurez fixés en accord avec la <strong>stratégie de développement</strong> de l'entreprise permettra des recommandations de formation adaptées aux besoins réels de chaque salarié.<br><br>Serpico permet de fixer des objectifs <strong>collectifs</strong> à l'ensemble des salariés, et <strong>spécifiques</strong> par rapport à certains postes."
+    paragraph_5: "Le suivi individuel mais également <strong>collectif</strong> des collaborateurs via les objectifs que vous aurez fixés en accord avec la <strong>stratégie de développement</strong> de l'entreprise permettra des recommandations de formation adaptées aux besoins réels de chaque salarié.<br><br>DealDrive permet de fixer des objectifs <strong>collectifs</strong> à l'ensemble des salariés, et <strong>spécifiques</strong> par rapport à certains postes."
 
 terms_conditions:
   page_name: "Conditions générales d'utilisation"
@@ -597,12 +665,12 @@ terms_conditions:
     title: "1 – Définitions"
     subtitle_1: "ExternalUser"
     subcontent_1: "Désigne toute personne physique ou morale, souscriptrice directe du Service,"
-    subtitle_2: "Serpico"
+    subtitle_2: "DealDrive"
     subcontent_2: "Désigne la marque déposée par ZZYZX Road SARL-S, et le nom commercial sous lesquels sont opérés le Service,"
     subtitle_3: "Service"
-    subcontent_3: "Désigne de manière générale l’ensemble des prestations proposées en ligne par Serpico,"
+    subcontent_3: "Désigne de manière générale l’ensemble des prestations proposées en ligne par DealDrive,"
     subtitle_4: "Utilisateur"
-    subcontent_4: "Désigne toute personne physique, ayant préalablement été invitée par un ExternalUser et/ou l'un de ses représentants et bénéficiant de tout ou partie du Service de Serpico."
+    subcontent_4: "Désigne toute personne physique, ayant préalablement été invitée par un ExternalUser et/ou l'un de ses représentants et bénéficiant de tout ou partie du Service de DealDrive."
   article_2:
     title: "2 – Champ d'application"
     content: "Les conditions générales présentes s’appliquent à l’ensemble des prestations proposées en ligne par le site."
@@ -611,41 +679,41 @@ terms_conditions:
     subtitle_1: "3.1 - Accès au site"
     subcontent_1: "Par l’accès au site, et de ce seul fait, l’utilisateur accepte les présentes conditions générales d’utilisation ainsi que la licence d’utilisation décrite ci-après."
     subtitle_2: "3.2 - Accès au service"
-    subcontent_2: "L’accès au service est possible 7 jours sur 7, et 24 heures sur 24 sauf en cas de force majeure ou d’évènements hors du contrôle et sous réserve des éventuelles interventions de maintenance nécessaires au bon fonctionnement du service ou du matériel. La responsabilité de Serpico ne saurait en aucun cas être engagée en cas d’impossibilité d’accès au site et/ou d’utilisation de ses services. La présente licence d’utilisation confère à l’utilisateur un droit d’accès personnel, réservé à un usage exclusif et non collectif."
+    subcontent_2: "L’accès au service est possible 7 jours sur 7, et 24 heures sur 24 sauf en cas de force majeure ou d’évènements hors du contrôle et sous réserve des éventuelles interventions de maintenance nécessaires au bon fonctionnement du service ou du matériel. La responsabilité de DealDrive ne saurait en aucun cas être engagée en cas d’impossibilité d’accès au site et/ou d’utilisation de ses services. La présente licence d’utilisation confère à l’utilisateur un droit d’accès personnel, réservé à un usage exclusif et non collectif."
   article_4:
     title: "4 - Propriété intellectuelle"
-    content: "Conformément aux dispositions en matière de Propriété Intellectuelle, les différents éléments du site ainsi que son contenu, tels que, entre autres, textes, images, logos, commentaires, bases de données restent la propriété de Serpico ou de leurs auteurs et/ou titulaires respectifs et ce pour la durée légale de protection et pour le monde entier. La licence d’utilisation conférée à l’Utilisateur comprend uniquement le droit de reproduire le contenu du site dont les œuvres consultées pour stockage aux fins de représentation sur écran monoposte et les copies ou reproductions strictement réservées à l’usage privé de l’utilisateur et non destinées à une utilisation collective ou commerciale. En dehors de cette licence d’utilisation, toute reproduction, même partielle, toute représentation, diffusion, vente ou exploitation sous quelque forme que ce soit, électronique ou non, est strictement interdite sans le consentement préalable de Serpico et constitue un acte de contrefaçon engageant la responsabilité civile et pénale de l’auteur de la contrefaçon."
+    content: "Conformément aux dispositions en matière de Propriété Intellectuelle, les différents éléments du site ainsi que son contenu, tels que, entre autres, textes, images, logos, commentaires, bases de données restent la propriété de DealDrive ou de leurs auteurs et/ou titulaires respectifs et ce pour la durée légale de protection et pour le monde entier. La licence d’utilisation conférée à l’Utilisateur comprend uniquement le droit de reproduire le contenu du site dont les œuvres consultées pour stockage aux fins de représentation sur écran monoposte et les copies ou reproductions strictement réservées à l’usage privé de l’utilisateur et non destinées à une utilisation collective ou commerciale. En dehors de cette licence d’utilisation, toute reproduction, même partielle, toute représentation, diffusion, vente ou exploitation sous quelque forme que ce soit, électronique ou non, est strictement interdite sans le consentement préalable de DealDrive et constitue un acte de contrefaçon engageant la responsabilité civile et pénale de l’auteur de la contrefaçon."
     subtitle_1: "4.1 - Charte graphique"
-    subcontent_1: "La charte graphique du site et les éléments qui la composent sont la propriété de Serpico."
+    subcontent_1: "La charte graphique du site et les éléments qui la composent sont la propriété de DealDrive."
     subtitle_2: "4.2 - Bases de données"
-    subcontent_2: "Les bases de données indexant les différents contenus du site sont la propriété de Serpico. La consultation et l’utilisation de ces bases de données n’entraînent en aucune façon la transmission de droits de propriété sur les bases de données à l’utilisateur. Il est rappelé, conformément à l’article 67 de la loi du 18 avril 2001 sur les droits d’auteur, les droits voisins et les bases de données que sont interdites « l’extraction ou la réutilisation de la totalité ou d’une partie substantielle, évaluée de façon qualitative ou quantitative, du contenu d’une base de données [sans l’accord du producteur] », ainsi que « l’extraction ou la réutilisation répétées et systématiques de parties non substantielles du contenu d’une base de données, qui seraient contraires à l’exploitation normale de cette base de données ou qui causeraient un préjudice injustifié aux intérêts légitimes du producteur de la base »."
+    subcontent_2: "Les bases de données indexant les différents contenus du site sont la propriété de DealDrive. La consultation et l’utilisation de ces bases de données n’entraînent en aucune façon la transmission de droits de propriété sur les bases de données à l’utilisateur. Il est rappelé, conformément à l’article 67 de la loi du 18 avril 2001 sur les droits d’auteur, les droits voisins et les bases de données que sont interdites « l’extraction ou la réutilisation de la totalité ou d’une partie substantielle, évaluée de façon qualitative ou quantitative, du contenu d’une base de données [sans l’accord du producteur] », ainsi que « l’extraction ou la réutilisation répétées et systématiques de parties non substantielles du contenu d’une base de données, qui seraient contraires à l’exploitation normale de cette base de données ou qui causeraient un préjudice injustifié aux intérêts légitimes du producteur de la base »."
     subtitle_3: "4.3 - Textes"
     subcontent_3: "Les textes présents sur le site sont la propriété de leurs auteurs respectifs."
     subtitle_4: "4.4 - Liens hypertexte"
-    subcontent_4: "Serpico autorise la mise en place d’un lien hypertexte pointant vers son contenu, sous réserve de ne pas utiliser la technique du lien profond ou du lien encadré (« deep linking » ou « inline linking »), c’est-à-dire que les pages du site ne doivent pas être imbriquées à l’intérieur des pages d’un autre site, mais accessible par l’ouverture d’une fenêtre, et de mentionner la source qui pointera grâce à un lien hypertexte directement sur le contenu visé. Les informations utilisées ne doivent l’être qu’à des fins personnelles, associatives ou professionnelles, toute utilisation à des fins commerciales ou publicitaires est exclue. Cette autorisation ne s’applique pas aux sites internet diffusant des informations à caractère polémique, pornographique, xénophobe ou pouvant, dans une plus large mesure porter atteinte à la sensibilité du plus grand nombre."
+    subcontent_4: "DealDrive autorise la mise en place d’un lien hypertexte pointant vers son contenu, sous réserve de ne pas utiliser la technique du lien profond ou du lien encadré (« deep linking » ou « inline linking »), c’est-à-dire que les pages du site ne doivent pas être imbriquées à l’intérieur des pages d’un autre site, mais accessible par l’ouverture d’une fenêtre, et de mentionner la source qui pointera grâce à un lien hypertexte directement sur le contenu visé. Les informations utilisées ne doivent l’être qu’à des fins personnelles, associatives ou professionnelles, toute utilisation à des fins commerciales ou publicitaires est exclue. Cette autorisation ne s’applique pas aux sites internet diffusant des informations à caractère polémique, pornographique, xénophobe ou pouvant, dans une plus large mesure porter atteinte à la sensibilité du plus grand nombre."
   article_5:
     title: "5 - Protection des données, respect du ExternalUser et de l’Utilisateur"
     subtitle_1: "5.1 – Cadre général"
     subcontent_1: "L’adhésion aux présentes conditions vaut consentement de l’Utilisateur au traitement des données personnelles le concernant décrit au présent alinéa, certaines de ces données revêtant un caractère essentiel pour le bon fonctionnement du Service, puisqu’elles permettent l’établissement de rapports et résultats globaux bénéficiant aux autres Utilisateurs."
     subcontent_2: "L’Utilisateur concerné par ces traitements dispose d’un droit d’accès, de rectification et de suppressions des données à caractère personnel le concernant, ainsi que celui de demander à ce que soient rectifiées, mises à jour ou supprimées les données inexactes, incomplètes ou périmées et de s’opposer, sous réserve de justifier d’un motif légitime, à ce que des données personnelles le concernant fassent l’objet d’un traitement ; il pourra le demander par écrit ou l’adresse contact@serpicoapp.com."
-    subcontent_3: "Conformément au Règlement (UE) N°611/2013, Serpico s’engage à avertir la Commission Nationale pour la Protection des Données du Grand-Duché du Luxembourg d’une violation de sécurité et de la confidentialité de données à caractère personnel dans un délai de 24 heures suivant son constat. "
-    subcontent_4: "Serpico s’engage aussi à informer les Clients desdits incidents, dès lors qu’ils sont susceptibles d’affecter défavorablement leurs données ou le niveau de la protection de vie privée de ses Utilisateurs."
+    subcontent_3: "Conformément au Règlement (UE) N°611/2013, DealDrive s’engage à avertir la Commission Nationale pour la Protection des Données du Grand-Duché du Luxembourg d’une violation de sécurité et de la confidentialité de données à caractère personnel dans un délai de 24 heures suivant son constat. "
+    subcontent_4: "DealDrive s’engage aussi à informer les Clients desdits incidents, dès lors qu’ils sont susceptibles d’affecter défavorablement leurs données ou le niveau de la protection de vie privée de ses Utilisateurs."
     subcontent_5: "Des données électroniques peuvent également être collectées et/ou déposées sur le système informatique de l’Utilisateur à des fins de gestion de sa connexion et de sa navigation sur le Site Internet. L’Utilisateur peut refuser l’utilisation de ces fichiers (aussi appelés « cookies ») via la configuration de son navigateur internet, et cette action n’entravera pas la navigation de l’Utilisateur sur le Site Internet."
-    subcontent_6: "Le ExternalUser et l'Utilisateur reconnaissent et acceptent que Serpico ne pourra en aucun cas être tenu responsable d’une violation de la sécurité entraînant accidentellement ou de manière illicite la destruction, la perte, l’altération, la divulgation ou l’accès non autorisé de données à caractère personnel transmises, stockées ou traitées en relation avec le Site Internet."
+    subcontent_6: "Le ExternalUser et l'Utilisateur reconnaissent et acceptent que DealDrive ne pourra en aucun cas être tenu responsable d’une violation de la sécurité entraînant accidentellement ou de manière illicite la destruction, la perte, l’altération, la divulgation ou l’accès non autorisé de données à caractère personnel transmises, stockées ou traitées en relation avec le Site Internet."
     subtitle_2: "5.2 – Suppression d'un compte Utilisateur"
     subcontent_8: "Les données de l’Utilisateur sont conservées aussi longtemps que son Compte est actif. Elles le seront encore quinze (15) jours à compter de la fermeture du compte Utilisateur."
-    subcontent_9: "Pendant ce délai, l’Utilisateur pourra demander au ExternalUser s’il peut conserver ces données à titre personnel. Le ExternalUser se réserve le droit d’accepter une telle demande, ainsi que la manière dont ces données lui seront reversées. De son côté, Serpico ne saurait être responsable du contenu de ces données reversées à l’Utilisateur, notamment si ces dernières ressortent tronquées, incomplètes et/ou anonymisées."
+    subcontent_9: "Pendant ce délai, l’Utilisateur pourra demander au ExternalUser s’il peut conserver ces données à titre personnel. Le ExternalUser se réserve le droit d’accepter une telle demande, ainsi que la manière dont ces données lui seront reversées. De son côté, DealDrive ne saurait être responsable du contenu de ces données reversées à l’Utilisateur, notamment si ces dernières ressortent tronquées, incomplètes et/ou anonymisées."
     subcontent_10: "Passé ce délai et sans action de l’Utilisateur, les données sont anonymisées et pourront servir à un traitement statistique tel que défini par la loi du 1er août 2018 relative à la protection des données."
   article_6:
-    title: "6 – Responsabilité de Serpico"
-    content: "Serpico s’efforce de publier et éditer des informations correctes et fiables. Toutefois, des inexactitudes techniques ou typographiques ne sauraient être exclues. Serpico se réserve le droit de modifier ou corriger le contenu du site à tout moment. L’utilisation des informations disponibles sur le site se fait sous l’entière responsabilité de l’utilisateur. Serpico ne pourra en aucun cas être tenu responsable de tout dommage de quelque nature que ce soit résultant de l’utilisation ou interprétation des informations disponibles sur le site."
+    title: "6 – Responsabilité de DealDrive"
+    content: "DealDrive s’efforce de publier et éditer des informations correctes et fiables. Toutefois, des inexactitudes techniques ou typographiques ne sauraient être exclues. DealDrive se réserve le droit de modifier ou corriger le contenu du site à tout moment. L’utilisation des informations disponibles sur le site se fait sous l’entière responsabilité de l’utilisateur. DealDrive ne pourra en aucun cas être tenu responsable de tout dommage de quelque nature que ce soit résultant de l’utilisation ou interprétation des informations disponibles sur le site."
   article_7:
     title: "7 - Droit applicable"
-    content: "Le site ainsi que ces conditions générales d’utilisation sont soumis au droit luxembourgeois. Toute contestation qui en résulte est soumise à la compétence des juridictions luxembourgeoises. En cas de litige, l’utilisateur s’adressera en priorité à Serpico pour trouver une solution amiable."
+    content: "Le site ainsi que ces conditions générales d’utilisation sont soumis au droit luxembourgeois. Toute contestation qui en résulte est soumise à la compétence des juridictions luxembourgeoises. En cas de litige, l’utilisateur s’adressera en priorité à DealDrive pour trouver une solution amiable."
   article_8:
     title: "8 - Modifications et mises à jour"
-    content: "Serpico se réserve le droit de procéder à des modifications des présentes conditions générales d’utilisation et s’engage à publier en ligne la nouvelle version dès qu’elle est applicable."
-  updated_date: "Date de la dernière mise à jour : 22/12/2018"
+    content: "DealDrive se réserve le droit de procéder à des modifications des présentes conditions générales d’utilisation et s’engage à publier en ligne la nouvelle version dès qu’elle est applicable."
+  updated_date: "Date de la dernière mise à jour : 26/10/2020"
 
 #################@
 about:
@@ -664,7 +732,7 @@ about:
 #
 #  clevel:
 #    title_1: Fixez des objectifs stratégiques et suivez leur atteinte
-#    paragraph_1: Là où aujourdhui existe encore des suivis et retours non consignés - dans des documents Word, Excel éparpillés - notre solution Serpico digitalise et centralise les données. Utilisé comme seul point dentrée du suivi en entreprise il permettra un état des lieux exhaustif de lavancement des projets stratégiques.
+#    paragraph_1: Là où aujourdhui existe encore des suivis et retours non consignés - dans des documents Word, Excel éparpillés - notre solution DealDrive digitalise et centralise les données. Utilisé comme seul point dentrée du suivi en entreprise il permettra un état des lieux exhaustif de lavancement des projets stratégiques.
 #    paragraph_2: Ce suivi minutieux et en temps réel des indicateurs de performance (KPIs) à atteindre, permettra de mesurer instantanément la réussite ou non de ces objectifs afin de réagir au plus tôt et de modifier la trajectoire si besoin.
 #    paragraph_3: Il permettra également de comprendre les axes damélioration et les points clés de réussite en intégrant les avis/notations de toutes les parties prenantes.
 #    tab_columns:
@@ -690,7 +758,7 @@ about:
 #        cost: Externe, coûteux (de 1k à 3k€/pers)
 #
 #      serpico:
-#        title: Serpico
+#        title: DealDrive
 #        target: Individu
 #        add_target: équipe et projets
 #        audience: Tous collaborateurs
@@ -700,38 +768,38 @@ about:
 #
 #
 #    title_2: Démocratisez et unifiez la notion de performance au sein de votre entreprise
-#    paragraph_4: Serpico permet avec sa méthodologie inspirée de la méthode Agile (tâches segmentées en phases, avec contrôle et retours sur le travail rendu) dappliquer, à l'ensemble des services de l'entreprise, une seule et même méthode de suivi d'activité et de performance afin dunifier les évaluations.
+#    paragraph_4: DealDrive permet avec sa méthodologie inspirée de la méthode Agile (tâches segmentées en phases, avec contrôle et retours sur le travail rendu) dappliquer, à l'ensemble des services de l'entreprise, une seule et même méthode de suivi d'activité et de performance afin dunifier les évaluations.
 #      <br><br>Les salariés sont évalués par critère (définis en amont de chaque projet), au sein d'activités qui simplémentent au fil de lannée et des nouvelles missions. 
 #
 #
 #    title_3: Lintégration du client dans la performance, facteur de différenciation dans le futur
-#    paragraph_5: Dans un univers toujours plus concurrentiel, où le client est toujours plus exigeant, Serpico offre le moyen que ce dernier puisse participer à l'évaluation de la performance de la prestation réalisée.
+#    paragraph_5: Dans un univers toujours plus concurrentiel, où le client est toujours plus exigeant, DealDrive offre le moyen que ce dernier puisse participer à l'évaluation de la performance de la prestation réalisée.
 #      <br><br>Donnez ainsi la parole à vos clients et tirez parti des feedbacks sur votre travail. Montrez ainsi votre transparence et votre fiabilité. Faites entrer un regard extérieur sur votre activité et valorisez-la auprès des prospects.
 #    paragraph_6: Cette fonctionnalité <strong>unique</strong> de SERPICO, sera à coup sûr, un facteur qui vous démarquera des autres concurrents réticents à souvrir à linstrospection.
 #
 #  manager:
 #    title_1: Fixez les KPIs de vos équipes et objectivez les évaluations
-#    paragraph_1: Afin dobtenir une évaluation plus juste et qui reflète la réalité du terrain Serpico révolutionne l'évaluation des collaborateurs en permettant dintégrer les retours des collègues et responsables qui ont suivi un même projet.
-#    paragraph_2: Serpico <b>dépassionne</b> ce moment de l'évaluation, en :
+#    paragraph_1: Afin dobtenir une évaluation plus juste et qui reflète la réalité du terrain DealDrive révolutionne l'évaluation des collaborateurs en permettant dintégrer les retours des collègues et responsables qui ont suivi un même projet.
+#    paragraph_2: DealDrive <b>dépassionne</b> ce moment de l'évaluation, en :
 #    bullet_point_1: Fixant des critères de performances (soft et/ou hard skills), qui permettront de situer la performance du salarié et son évolution en fonction de son ancienneté.
 #    bullet_point_2: Permettant une évaluation collaborative via la sollicitation des collègues ayant participé au projet ainsi qu'un auto-positionnement du collaborateur évalué.
 #    title_2: Suivez les projets de vos équipes en temps réel et gagnez du temps
-#    paragraph_3: Serpico offre une nouvelle vision du suivi du travail des collaborateurs.
+#    paragraph_3: DealDrive offre une nouvelle vision du suivi du travail des collaborateurs.
 #    paragraph_4: Simplifiez et digitalisez votre rôle de manager. l'application permet de diminuer drastiquement les feedbacks oraux et de sassurer en temps réel de lavancement des projets confiés à vos équipes.
-#    paragraph_5: Grâce à Serpico, c'est aux collaborateurs de fournir des indications quotidiennes/hebdomadaires de son avancement selon des critères que vous aurez fixés. Vous vous dégagerez ainsi du temps pour d'autres actions managériales orienté business, par exemple.
+#    paragraph_5: Grâce à DealDrive, c'est aux collaborateurs de fournir des indications quotidiennes/hebdomadaires de son avancement selon des critères que vous aurez fixés. Vous vous dégagerez ainsi du temps pour d'autres actions managériales orienté business, par exemple.
 #    title_3: Confortez votre business model et la satisfaction client
-#    paragraph_6: Serpico, par son approche collaborative, permet également dobtenir une vision holistique du travail de vos équipes en permettant à chacun de noter son travail ainsi que dintégrer le retour de vos clients.
+#    paragraph_6: DealDrive, par son approche collaborative, permet également dobtenir une vision holistique du travail de vos équipes en permettant à chacun de noter son travail ainsi que dintégrer le retour de vos clients.
 #    paragraph_7: Cette approche participe grandement à la responsabilisation et limplication de l'ensemble des membres ayant participé au projet. Il légitime votre travail, par vos pairs et vos clients.
 #
 #  hr:
 #    title_1: (Re)mettez un pied au sein de chaque équipe en accédant aux feedbacks de chaque projet
 #    paragraph_1: Grâce à votre vue d'ensemble, accédez aux retours et feedbacks de chaque activité et observez la performance, les points de consensus ou de friction au sein des équipes et des projets.
-#    paragraph_2: Serpico permet daccompagner la mutation des ressources humaines et de regagner le coeur des fonctions métier et de direction. En effet, cela permet de vous implanter - au moins de manière virtuelle - au sein des équipes, de pouvoir analyser la donnée, linterpréter et émettre des recommandations à la direction et aux managers.
+#    paragraph_2: DealDrive permet daccompagner la mutation des ressources humaines et de regagner le coeur des fonctions métier et de direction. En effet, cela permet de vous implanter - au moins de manière virtuelle - au sein des équipes, de pouvoir analyser la donnée, linterpréter et émettre des recommandations à la direction et aux managers.
 #    title_2: Améliorez lintégration (onboarding) des nouveaux collaborateurs dans l'entreprise
 #    paragraph_3: Le processus de recrutement peut être long pour trouver le candidat idéal et incertain. Une embauche ratée coûte extrêmement cher en temps (jusqu'à une centaine dheures*) et en argent (de 2000 à 15000 euros) aux entreprises, selon les profils.
-#    paragraph_4: Une fois le candidat sélectionné, Serpico accompagne l'entreprise mais également le nouveau salarié lors de son intégration. Via l'application il devient plus rapidement opérationnel notamment par le fait qu'il est co-responsable de son suivi et voit rapidement sil est en ligne avec les objectifs. <br><br>Les points de rencontre entre l'entreprise, le manager et le collaborateur sont ainsi multipliés par rapport à un recrutement classique. 
+#    paragraph_4: Une fois le candidat sélectionné, DealDrive accompagne l'entreprise mais également le nouveau salarié lors de son intégration. Via l'application il devient plus rapidement opérationnel notamment par le fait qu'il est co-responsable de son suivi et voit rapidement sil est en ligne avec les objectifs. <br><br>Les points de rencontre entre l'entreprise, le manager et le collaborateur sont ainsi multipliés par rapport à un recrutement classique. 
 #    title_3: Suivez la progression par objectifs (OKR) des salariés et déclenchez des actions de formation ajustées
-#    paragraph_5: Le suivi individuel mais également collectif des collaborateurs via les objectifs que vous aurez fixés en accord avec la stratégie de développement de l'entreprise permettra des recommandations de formation adaptées aux besoin réel de chaque salarié.<br><br>Serpico permet de fixer des objectifs collectifs à l'ensemble des salariés, et spécifiques par rapport à certains postes. 
+#    paragraph_5: Le suivi individuel mais également collectif des collaborateurs via les objectifs que vous aurez fixés en accord avec la stratégie de développement de l'entreprise permettra des recommandations de formation adaptées aux besoin réel de chaque salarié.<br><br>DealDrive permet de fixer des objectifs collectifs à l'ensemble des salariés, et spécifiques par rapport à certains postes. 
 
 
 contact:
@@ -778,7 +846,7 @@ processes:
   modify_prior_launching_act: Configurer le process avant de lancer l\'activité
   request_btn: Je ne trouve pas la famille souhaitée
   update: Modifier la catégorie
-  process_request_msg: Demandez à rajouter une nouvelle famille aux administrateurs de Serpico, qui répondront à votre demande
+  process_request_msg: Demandez à rajouter une nouvelle famille aux administrateurs de DealDrive, qui répondront à votre demande
   new_family: Nouvelle famille
   no_parent: Pas de parent
   delete_modal:
@@ -842,7 +910,7 @@ institutions:
     submit: OK
 
   add_user_process_activity_success_msg: La catégorie a bien été ajoutée. Elle fera l'objet d'une validation en interne mais vous pouvez dès à présent créer une activité liée à celle-ci !
-  add_family_process_activity_success_msg: La famille de catégorie a bien été ajoutée. Elle sera validée par les administrateurs de Serpico mais vous pouvez dès à présenter configurer et créer des activités basées sur cette famille de catégorie !
+  add_family_process_activity_success_msg: La famille de catégorie a bien été ajoutée. Elle sera validée par les administrateurs de DealDrive mais vous pouvez dès à présenter configurer et créer des activités basées sur cette famille de catégorie !
   add_modal_process:
     modal_add_title: Ajout de catégorie
     link_to_process: Saisissez le nom de cette catégorie et liez-la à une famille de catégories
@@ -977,7 +1045,8 @@ template_manage:
   create_btn: Créer un template
 
 password_definition:
-  welcome_msg: Bienvenue sur Serpico
+  title: Définition du mot de passe
+  welcome_msg: Bienvenue sur DealDrive
   description: Inscrivez-vous pour pouvoir évaluer les institutions publiques dans votre quotidien
   username: Nom complet
   nickname: Nom d'utilisateur
@@ -1010,37 +1079,37 @@ home:
 
 welcome_mail:
   intro: Bonjour
-  message1: Merci de vous être inscrit à Serpico, qui porte haut et fort l'évaluation collaborative !
-  button_text: Accédez à Serpico
+  message1: Merci de vous être inscrit à DealDrive, qui porte haut et fort l'évaluation collaborative !
+  button_text: Accédez à DealDrive
   message2: Nous vous tiendrons informés du lancement de l'application et reprendrons contact avec vous à ce moment-là !
   outro: A très bientôt,
-  team: L'équipe Serpico
+  team: L'équipe DealDrive
 
 create_activity_mail:
   intro: Bonjour
   message1: Vous venez de créer l'activité
   message2: dans votre organisation.
-  button_text: Accédez à Serpico
-  message3: En tant que Manager d'activité, vous pouvez en modifier les paramètres en cours de vie, prendre part à la notation, puis enfin visualiser les résultats tant individuels que collectifs. Nous vous souhaitons un agréable usage de Serpico pour votre activité
+  button_text: Accédez à DealDrive
+  message3: En tant que Manager d'activité, vous pouvez en modifier les paramètres en cours de vie, prendre part à la notation, puis enfin visualiser les résultats tant individuels que collectifs. Nous vous souhaitons un agréable usage de DealDrive pour votre activité
   outro: A très bientôt,
-  team: l'équipe de Serpico
+  team: l'équipe de DealDrive
 
 signup_mail:
   intro: Bonjour
-  message1: Merci de vous être inscrit à Serpico, qui porte haut et fort l'évaluation collaborative !
-  button_text: Accédez à Serpico
+  message1: Merci de vous être inscrit à DealDrive, qui porte haut et fort l'évaluation collaborative !
+  button_text: Accédez à DealDrive
   message2: Nous vous tiendrons informés du lancement de l'application et reprendrons contact avec vous à ce moment-là !
   outro: A très bientôt,
-  team: L'équipe Serpico
+  team: L'équipe DealDrive
 
 contact_mail:
   intro: Bonjour
   message1: Merci de nous avoir écrit !
   message2: "Voici votre message :"
   message3: Nous tâcherons de vous répondre au plus vite !
-  button_text: Accédez à Serpico
+  button_text: Accédez à DealDrive
   outro: A très bientôt,
-  team: L'équipe Serpico
+  team: L'équipe DealDrive
 
 targets:
   page_title: Fixation d'objectifs
@@ -1110,15 +1179,15 @@ mails:
   serpico_HQ_zipcode: L-2449
   serpico_HQ_city: Luxembourg
   serpico_HQ_phone: +352 42 42 38 77
-  serpico_motto: Collaborative metrics
-  signature_team: L'équipe Serpico
-  signature_team_for_client: L'équipe de Serpico, la solution d'évaluation collaborative de
+  dealdrive_motto: Suivi des opérations
+  signature_team: L'équipe de DealDrive
+  signature_team_for_client: L'équipe de DealDrive, la solution d'évaluation collaborative de
   hello: Bonjour
   sir: M.
   madam: Mme
   see_you_soon: A très vite,
   signup:
-    subject: Bienvenue dans Serpico, la plateforme d'évaluation collaborative
+    subject: Bienvenue dans DealDrive, la plateforme d'évaluation collaborative
     button_text: Accéder aux notations
     message_2: Nous vous souhaitons une agréable évaluation. Nous afficherons les résultats sur notre page publique à chaque fois qu'une activité prendra fin
 
@@ -1141,8 +1210,8 @@ mails:
 
   prospecting_1:
     ceo:
-      subject: Serpico - suivi collaboratif de performance en interne et avec vos clients
-      pres_sentence: Avez-vous déjà entendu parler de Serpico, la solution accélératrice de business qui renforce les liens avec vos clients ? Avec elle,
+      subject: DealDrive - suivi collaboratif de performance en interne et avec vos clients
+      pres_sentence: Avez-vous déjà entendu parler de DealDrive, la solution accélératrice de business qui renforce les liens avec vos clients ? Avec elle,
       bp_1:
         title: Accédez instantanément à limplémentation de votre stratégie
         arg_1: En 1 clic, accédez à tous vos projets stratégiques, en plus de ceux ajoutés par vos managers
@@ -1156,17 +1225,17 @@ mails:
 
       bp_3:
         title: Uniformisez la manière daborder les projets au sein de votre firme
-        arg_1: Même à petite échelle, chaque manager peut avoir sa manière dorganiser ses projets et tâches ponctuelles ou récurrentes au sein de son unité. Serpico permet à chaque manager dappliquer une même approche, ce qui améliore le suivi et réduit drastiquement les risques de dépassement de délai et/ou de budget
+        arg_1: Même à petite échelle, chaque manager peut avoir sa manière dorganiser ses projets et tâches ponctuelles ou récurrentes au sein de son unité. DealDrive permet à chaque manager dappliquer une même approche, ce qui améliore le suivi et réduit drastiquement les risques de dépassement de délai et/ou de budget
         arg_2: "Gagnez en comparabilité, et tirez le meilleur de vos équipes en rendant votre entreprise Agile : activité découpée en phases, et en critères d'évaluation"
 
       finale: Nous espérons vous accompagner dans vos collaborations futures; bloquez un rendez-vous sur notre site (lien ci-dessus) et nous viendrons à vous ! Bien cordialement,
 
     pm:
-      subject: Serpico - suivi collaboratif de projets
-      pres_sentence: Avez-vous déjà entendu de parler de Serpico, la solution agile qui simplifie votre pilotage de projet ?
+      subject: DealDrive - suivi collaboratif de projets
+      pres_sentence: Avez-vous déjà entendu de parler de DealDrive, la solution agile qui simplifie votre pilotage de projet ?
       bp_1:
         title: Laissez vos salariés évaluer les projets entre eux et libérez-vous du temps
-        arg_1: Serpico est une startup permettant à l'ensemble des salariés D'évaluer les indicateurs de performance d'un projet. Etablir un bilan peut être chronophage, sans parler du manque de suivi dans le temps qui caractérise de nombreuses entreprises. Economisez 2 jours de travail par an (calcul basé sur une équipe de 5 personnes)
+        arg_1: DealDrive est une startup permettant à l'ensemble des salariés D'évaluer les indicateurs de performance d'un projet. Etablir un bilan peut être chronophage, sans parler du manque de suivi dans le temps qui caractérise de nombreuses entreprises. Economisez 2 jours de travail par an (calcul basé sur une équipe de 5 personnes)
 
       bp_2:
         title: Fini larbitraire lors des entretiens de performance
@@ -1179,11 +1248,11 @@ mails:
       finale: Nous espérons vous accompagner dans vos collaborations futures; bloquez un rendez-vous sur notre site (lien ci-dessus) et nous viendrons à vous ! Bien cordialement,
 
     mnpm:
-      subject: Serpico - suivi collaboratif de performance déquipe
-      pres_sentence: Avez-vous déjà entendu de parler de Serpico, la solution qui tire l'ensemble de votre équipe vers le haut ?
+      subject: DealDrive - suivi collaboratif de performance déquipe
+      pres_sentence: Avez-vous déjà entendu de parler de DealDrive, la solution qui tire l'ensemble de votre équipe vers le haut ?
       bp_1:
         title: Enfin un outil digital ergonomique qui vous libère du temps pour évaluer la performance de vos salariés
-        arg_1: Serpico est une startup permettant à l'ensemble des salariés de savoir où ils en sont d'un point de vue compétences et performance. Etablir un bilan est très chronophage, sans parler du manque de suivi dans le temps qui caractérise de nombreuses entreprises. Economisez 2 jours de travail par an (calcul basé sur une équipe de 5 personnes)
+        arg_1: DealDrive est une startup permettant à l'ensemble des salariés de savoir où ils en sont d'un point de vue compétences et performance. Etablir un bilan est très chronophage, sans parler du manque de suivi dans le temps qui caractérise de nombreuses entreprises. Economisez 2 jours de travail par an (calcul basé sur une équipe de 5 personnes)
 
       bp_2:
         title: Fini larbitraire lors des entretiens de performance
@@ -1196,40 +1265,40 @@ mails:
       finale: Nous espérons vous accompagner dans vos collaborations futures; bloquez un rendez-vous sur notre site (lien ci-dessus) et nous viendrons à vous ! Bien cordialement,
 
     hr:
-      subject: Serpico - suivi collaboratif de compétence et accélérateur de marque employeur
-      pres_sentence: Avez-vous déjà entendu de parler de Serpico, la solution qui permet l'évaluation de compétences des salariés sur leurs activités du quotidien ?
+      subject: DealDrive - suivi collaboratif de compétence et accélérateur de marque employeur
+      pres_sentence: Avez-vous déjà entendu de parler de DealDrive, la solution qui permet l'évaluation de compétences des salariés sur leurs activités du quotidien ?
       bp_1:
         title: Faites de la collaboration un véhicule déterminant de la marque employeur pour vos salariés
         arg_1: Prendre le temps de demander aux équipes, mais aussi à vos clients de participer aux retours est un formidable outil de communication pour votre entreprise, dépassant de loin les solutions de type \greatwashing\ pour votre entreprise. c'est une source principale dattractivité et de rétention de vos talents daujourdhui et de demain !
 
       bp_2:
         title: Pas de surveys hebdomadaires peu qualificatifs, place à ce qui y est réellement entrepris par les équipes
-        arg_1: La tendance est à la donnée de masse au détriment de la qualité. Serpico redonne du sens au suivi de performance et de bien-être en recentrant lapproche sur les tâches du quotidien, principale matrice de compréhension pour un salarié
+        arg_1: La tendance est à la donnée de masse au détriment de la qualité. DealDrive redonne du sens au suivi de performance et de bien-être en recentrant lapproche sur les tâches du quotidien, principale matrice de compréhension pour un salarié
 
       bp_3:
         title: Une solution idéale d'assessment pour vos salariés
-        arg_1: Que ce soit vos managers qui doivent procéder à la tâche rébarbative d'évaluation de leur équipe, ou du salarié qui doit bénéficier du retour sans forcément prendre part à la construction de la performance, Serpico permet une approche transversale du processus d'évaluation
+        arg_1: Que ce soit vos managers qui doivent procéder à la tâche rébarbative d'évaluation de leur équipe, ou du salarié qui doit bénéficier du retour sans forcément prendre part à la construction de la performance, DealDrive permet une approche transversale du processus d'évaluation
 
       finale: Nous espérons vous accompagner dans vos collaborations futures; bloquez un rendez-vous sur notre site et nous viendrons à vous ! Bien cordialement,
 
     worker:
-      subject: Serpico - faites-vous entendre et soyez pleinement acteur de votre évaluation
-      pres_sentence: Avez-vous déjà entendu parler de Serpico, la solution qui vous permet d'évaluer vos compétences en plus de vos managers ?
+      subject: DealDrive - faites-vous entendre et soyez pleinement acteur de votre évaluation
+      pres_sentence: Avez-vous déjà entendu parler de DealDrive, la solution qui vous permet d'évaluer vos compétences en plus de vos managers ?
       bp_1:
         title: Navons-vous jamais eu à défendre votre bilan ?
-        arg_1: Justifiez vos demandes davancement de manière imparable. Serpico, c'est lassurance d'un retour objectif partagé par la communauté
+        arg_1: Justifiez vos demandes davancement de manière imparable. DealDrive, c'est lassurance d'un retour objectif partagé par la communauté
 
       bp_2:
         title: Soyez acteurs de votre évaluation
-        arg_1: Savez-vous combien d'entreprises prennent réellement en compte lavis des salariés avant détablir leur évaluation ? 8%. Il est vraiment temps davoir plus de transversalité dans lassessment, tout en ne remettant pas tout en cause, c'est ce que permet la solution collaborative de Serpico.
+        arg_1: Savez-vous combien d'entreprises prennent réellement en compte lavis des salariés avant détablir leur évaluation ? 8%. Il est vraiment temps davoir plus de transversalité dans lassessment, tout en ne remettant pas tout en cause, c'est ce que permet la solution collaborative de DealDrive.
 
       bp_3:
         title: Identifiez vos points forts/faibles, et confrontez-les à votre perception
-        arg_1: Lécart entre notre point de vue et celui des autres peut parfois être important. La meilleure manière d'en prendre conscience est de confronter sa vision à celle des autres, et danalyser les résultats. Serpico permet d'accéder en 1 clic à votre performance, dès la réalisation d'une tâche seule ou en commun.
+        arg_1: Lécart entre notre point de vue et celui des autres peut parfois être important. La meilleure manière d'en prendre conscience est de confronter sa vision à celle des autres, et danalyser les résultats. DealDrive permet d'accéder en 1 clic à votre performance, dès la réalisation d'une tâche seule ou en commun.
 
       finale: Parlez-en à vos collègues, il est temps de sauter le pas ! Bien à vous,
 
-    button_text: Accéder à Serpico
+    button_text: Accéder à DealDrive
 
   meetingProposition:
     subject: Demande de prise de rendez-vous
@@ -1239,31 +1308,34 @@ mails:
     message4: Prenez vite contact avec lui
 
   meetingValidation:
-    subject: Serpico - Votre demande de prise de rendez-vous le
+    subject: DealDrive - Votre demande de prise de rendez-vous le
     message1: Merci davoir demandé à nous rencontrer le
     message2: Voici les informations que vous avez saisies
     message3: "Ainsi que le message que vous nous avez laissé :"
     message4: Si vous avez besoin de prendre contact avec nous/modifier une information n'hésitez pas à nous contacter sur contact@serpicoapp.com !
 
   registration:
-    subject: Bienvenue sur Serpico, la solution de suivi client collaborative
+    subject: Bienvenue sur DealDrive, la solution de suivi client collaborative
     rootCreation:
-      message: "Bienvenue dans Serpico, la plateforme de suivi collaborative avec vos partenaires ! Votre compte a été créé en tant que %role% dans votre entreprise. Cliquez dès à présent sur ce lien afin d'y définir votre mot de passe et remplir votre profil :"
+      message: "Bienvenue dans DealDrive, la plateforme de suivi collaborative avec vos partenaires ! Votre compte a été créé en tant que %role% dans votre entreprise. Cliquez dès à présent sur ce lien afin d'y définir votre mot de passe et remplir votre profil :"
 
     additionalCreatedOrgUsers:
-      message1: Bienvenue sur Serpico, la plateforme de suivi collaborative avec vos partenaires ! Un responsable de votre organisation,
+      message1: Bienvenue sur DealDrive, la plateforme de suivi collaborative avec vos partenaires ! Un responsable de votre organisation,
       message2:  "vous y a convié. Cliquez dès à présent sur ce lien afin d'y définir votre mot de passe et remplir votre profil :"
 
-    button_text: Accédez à Serpico
+    button_text: Accédez à DealDrive
     message3: Vous pourrez prendre part aux activités avec vos partenaires, afin de recueillir leurs avis et les satisfaire au mieux ! Si vous avez des questions, n'hésitez pas à en référer à votre responsable ou en nous contactant via contact@serpicoapp.com, nous tâcherons d'y répondre dans les meilleurs délais. Nous vous souhaitons tout cas une agréable expérience sur notre plateforme de suivi collaboratif !
 
   externalInvitation:
-    subject_begin: Invitation de
-    subject_end: Bienvenue sur Serpico, la solution de suivi relation client collaborative
-    message1: Bienvenue sur Serpico, qui porte haut et fort les valeurs déchange pour augmenter la satisfaction entre partenaires !
-    message2: "vous y a convié afin de pouvoir donner votre retour lors d'une de ses prochaines activités. Cliquez dès à présent sur ce lien afin d'y définir votre mot de passe et remplir votre profil :"
-    button_text: Accédez à Serpico
-    message3: Créez à votre tour vos activités et invitez vos partenaires à vous rejoindre afin de leur faire des retours, et optimiser votre relation avec eux ! Si vous avez des questions, N'hésitez pas à en référer à votre responsable ou en nous contactant via contact@serpicoapp.com, nous tâcherons d'y répondre dans les meilleurs délais. Nous vous souhaitons tout cas une agréable expérience sur notre plateforme de suivi collaboratif !
+    new_user_subject_begin: Invitation de
+    new_user_subject_end: Bienvenue sur DealDrive, la solution de suivi relation client collaborative
+    existing_user_subject: vous invite à faire des retours sur la relation business que vous avez en commun
+    message1: vous invite à optimiser votre suivi en faisant des updates immédiats sur les activités qui vous lient. Prenez aussi le temps d'insérer aussi votre dealflow et faites le lien avec vos partenaires via votre tableau interactif
+    message2: Cliquez dès à présent sur ce lien afin d'y définir votre mot de passe et remplir votre profil
+    new_user_button_text: Accédez à DealDrive
+    existing_user_button_text: Accédez à mon dahshboard
+    button_text: Accédez à DealDrive
+    message3: "DealDrive sera toujours gratuit. Sachez que vous bénéficiez d'un compte Premium pendant 21 jours, qui vous permet d'informer immédiatement vos partenaires de vos update business (partage de documents, avancement...) avec lui. N'hésitez pas à nous faire remonter toute remarque ou bug via l'adresse contact@dealdrive.app, nous cherchons quotidiennement à simplifier l'expérience client"
 
   launchingFollowupConfirmation:
     subject: Merci de suivre notre lancement !
@@ -1276,11 +1348,11 @@ mails:
     message: "Dernier petit coup de rein de votre côté et il saura très content de savoir le produit sorti !"
     
   subscriptionConfirmation:
-    subject: Bienvenue sur Serpico, la solution de suivi client collaborative
-    message1: Vous avez rejoint lunivers de Serpico, la plateforme collaborative qui relie votre équipe à vos partenaires 💪 !
-    message2: "Cliquez dès à présent sur ce lien afin d'y définir votre mot de passe et remplir votre profil :"
-    button_text: Accédez à Serpico
-    message3: Votre compte a été créé en tant qu'administrateur de votre entreprise. Vous pourrez ajouter des utilisateurs et rajoutez des projets et process en cours de réalisation avec vos partenaires, afin d'optimiser le suivi et d'assurer le meilleur service envers eux. <br><br> Si vous avez des questions, n'hésitez pas à en référer à votre responsable ou sinon par mail en nous contactant via l'adresse contact@serpicoapp.com, nous tâcherons d'y répondre dans les meilleurs délais. Nous vous souhaitons une agréable expérience sur notre plateforme de suivi collaboratif !
+    subject: Bienvenue sur DealDrive, la solution de votre suivi clients
+    message1: Optimisez votre suivi en insérant votre dealflow avec vos partenaires, et faites-leur à tout moment part d'updates via votre tableau interactif
+    message2: Cliquez dès à présent sur ce lien afin d'y définir votre mot de passe et remplir votre profil
+    button_text: Accédez à DealDrive
+    message3: DealDrive sera toujours gratuit. Vous bénéficiez toutefois d'un compte Premium pendant 21 jours, qui vous permet d'informer immédiatement vos partenaires de tout update. N'hésitez pas à nous faire remonter toute remarque ou bug via l'adresse contact@dealdrive.app, nous continuerons inlassablement à simplifier l'expérience client
 
   subscriptionAcknowledgmentReceipt:
     subject: Demande de création de compte
@@ -1289,9 +1361,9 @@ mails:
   firstMailReminderTPeriod:
     subject_admin: Profitez de la période dessai pour créez vos projets et permettre à vos salariés de s'évaluer en commun
     subject_non_admin: Demandez aux managers de pouvoir évaluer votre performance ainsi que celles de vos collègues
-    message1_admin: Votre entreprise bénéficie d'un accès sans engagement à Serpico, c'est l'occasion d'enfin suivre les objectifs de vos salariés beaucoup plus facilement et leur permettre d'être des contributeurs actifs de leur évaluation
-    message1_non_admin: Serpico est l'outil qui vous permet d'accéder à votre performance instantanée, et où vous avez votre mot à dire sur votre appréciation ainsi que sur les personnes avec qui vous travaillez
-    button_text: Accédez à Serpico
+    message1_admin: Votre entreprise bénéficie d'un accès sans engagement à DealDrive, c'est l'occasion d'enfin suivre les objectifs de vos salariés beaucoup plus facilement et leur permettre d'être des contributeurs actifs de leur évaluation
+    message1_non_admin: DealDrive est l'outil qui vous permet d'accéder à votre performance instantanée, et où vous avez votre mot à dire sur votre appréciation ainsi que sur les personnes avec qui vous travaillez
+    button_text: Accédez à DealDrive
     message2: Profitez de votre test avant le
 
   emailChangeNotif:
@@ -1376,24 +1448,30 @@ mails:
     activity_subject: Participation à l'activité
     stage_subject_message_1: Participation à la phase
     stage_subject_message_2: de l'activité
-    subject_team_suffix: (en tant que groupe)
+    subject_team_suffix: (en tant qu'équipe)
     message_act_begin: Vous venez d'être ajouté à l'activité
     message_stg_begin: Vous venez d'être ajouté à la phase
     message_stg_mid: de l'activité
-    message_end: "par un membre de votre organisation. Retrouvez cette activité depuis votre espace personnel :"
-    button_text: Accéder à mes activités
-    message3_participant: En tant que participant, vous prendrez part à l'évaluation une fois la période de notation démarrée
-    message3_teamParticipant: En tant que participant faisant partie d'une équipe, vous prendrez part à l'évaluation une fois la période de notation démarrée. Sachez que vous noterez chaque personne de votre équipe individuellement, alors que les participants extérieurs à l'équipe vous noteront en tant quéquipe
-    message4: . Bonne activité et évaluation !
+    message_end: Retrouvez cette activité sur votre dashboard personnel
+    button_text: Accéder à mon dashboard
+    message3_participant: Vous pouvez dès à présent effectuer des updates (commentaires, suggestions, documents) afin d'optimiser votre relation client !
+    #message3_teamParticipant: En tant que participant faisant partie d'une équipe, vous prendrez part à l'évaluation une fois la période de notation démarrée. Sachez que vous noterez chaque personne de votre équipe individuellement, alors que les participants extérieurs à l'équipe vous noteront en tant quéquipe
+    #message4: . Bonne activité et évaluation !
+
+  eventNotification:
+    msg_creation: Cet événement a été créé par l'un des participants
+    msg_update: Cet événement a été modifié par l'un des participants
+    msg_2: Accédez à votre dashboard pour prendre connaissance de cet événement
+    button_text: Accéder à mon dashboard
 
   activityAssignation:
     activity_subject: Vous avez été désigné owner de l'activité
     stage_subject_message_1: Vous avez été désigné owner de la phase
-    stage_subject_message_2: de l'activité
+    stage_subject_message_2: "de l'activité"
     message_act_begin: Vous venez d'être désigné owner de l'activité
     message_stg_begin: Vous venez d'être désigné owner de la phase
     message_stg_mid: de l'activité
-    message_end: "par un membre de votre organisation. Retrouvez cette activité depuis votre espace personnel :"
+    message_end: par un membre de votre organisation. Retrouvez cette activité depuis votre espace personnel
     button_text: Accédez à mes activités
     message3_participant: En tant que leader, vous pouvez accéder à la configuration de celle-ci, notamment rajouter les participants et indiquer les dates de déroulé et la période de notation
     message4: . Bonne activité et évaluation !
@@ -1500,6 +1578,11 @@ mails:
     parameterValue: Value
     parameter: Paramètre
 
+  userSignupInfo:
+    subject: Inscription de
+    message1: Pour votre information, l'utilisateur
+    message2: a rejoint Dealdrive !
+
   validateOrgSubscription:
     subject: Validation du compte
     message1: l'entreprise
@@ -1509,7 +1592,7 @@ mails:
     message5: Cliquez sur le lien suivant afin de valider son compte
     button_text: Valider le compte
     message6: Merci pour votre rapidité !
-    message7: L'équipe de Serpico à elle-même
+    message7: L'équipe de DealDrive à elle-même
 
 
 #terms_conditions:
@@ -1525,12 +1608,12 @@ mails:
 #    title: 1 – Définitions
 #    subtitle_1: ExternalUser
 #    subcontent_1: Désigne toute personne physique ou morale, souscriptrice directe du Service,
-#    subtitle_2: Serpico
+#    subtitle_2: DealDrive
 #    subcontent_2: Désigne la marque déposée par ZZYZX Road SARL-S, et le nom commercial sous lesquels sont opérés le Service,
 #    subtitle_3: Service
-#    subcontent_3: Désigne de manière générale l’ensemble des prestations proposées en ligne par Serpico,
+#    subcontent_3: Désigne de manière générale l’ensemble des prestations proposées en ligne par DealDrive,
 #    subtitle_4: Utilisateur
-#    subcontent_4: Désigne toute personne physique, ayant préalablement été invitée par un ExternalUser et/ou l'un de ses représentants et bénéficiant de tout ou partie du Service de Serpico.
+#    subcontent_4: Désigne toute personne physique, ayant préalablement été invitée par un ExternalUser et/ou l'un de ses représentants et bénéficiant de tout ou partie du Service de DealDrive.
 #
 #  article_2:
 #    title: 2 – Champ dapplication
@@ -1541,45 +1624,45 @@ mails:
 #    subtitle_1: 3.1 - Accès au site
 #    subcontent_1: Par l’accès au site, et de ce seul fait, l’utilisateur accepte les présentes conditions générales d’utilisation ainsi que la licence d’utilisation décrite ci-après.
 #    subtitle_2: 3.2 - Accès au service
-#    subcontent_2: L’accès au service est possible 7 jours sur 7, et 24 heures sur 24 sauf en cas de force majeure ou d’évènements hors du contrôle et sous réserve des éventuelles interventions de maintenance nécessaires au bon fonctionnement du service ou du matériel. La responsabilité de Serpico ne saurait en aucun cas être engagée en cas d’impossibilité d’accès au site et/ou d’utilisation de ses services. La présente licence d’utilisation confère à l’utilisateur un droit d’accès personnel, réservé à un usage exclusif et non collectif.
+#    subcontent_2: L’accès au service est possible 7 jours sur 7, et 24 heures sur 24 sauf en cas de force majeure ou d’évènements hors du contrôle et sous réserve des éventuelles interventions de maintenance nécessaires au bon fonctionnement du service ou du matériel. La responsabilité de DealDrive ne saurait en aucun cas être engagée en cas d’impossibilité d’accès au site et/ou d’utilisation de ses services. La présente licence d’utilisation confère à l’utilisateur un droit d’accès personnel, réservé à un usage exclusif et non collectif.
 #
 #  article_4:
 #    title: 4 - Propriété intellectuelle
-#    content: Conformément aux dispositions en matière de Propriété Intellectuelle, les différents éléments du site ainsi que son contenu, tels que, entre autres, textes, images, logos, commentaires, bases de données restent la propriété de Serpico ou de leurs auteurs et/ou titulaires respectifs et ce pour la durée légale de protection et pour le monde entier. La licence d’utilisation conférée à l’Utilisateur comprend uniquement le droit de reproduire le contenu du site dont les œuvres consultées pour stockage aux fins de représentation sur écran monoposte et les copies ou reproductions strictement réservées à l’usage privé de l’utilisateur et non destinées à une utilisation collective ou commerciale. En dehors de cette licence d’utilisation, toute reproduction, même partielle, toute représentation, diffusion, vente ou exploitation sous quelque forme que ce soit, électronique ou non, est strictement interdite sans le consentement préalable de Serpico et constitue un acte de contrefaçon engageant la responsabilité civile et pénale de l’auteur de la contrefaçon.
+#    content: Conformément aux dispositions en matière de Propriété Intellectuelle, les différents éléments du site ainsi que son contenu, tels que, entre autres, textes, images, logos, commentaires, bases de données restent la propriété de DealDrive ou de leurs auteurs et/ou titulaires respectifs et ce pour la durée légale de protection et pour le monde entier. La licence d’utilisation conférée à l’Utilisateur comprend uniquement le droit de reproduire le contenu du site dont les œuvres consultées pour stockage aux fins de représentation sur écran monoposte et les copies ou reproductions strictement réservées à l’usage privé de l’utilisateur et non destinées à une utilisation collective ou commerciale. En dehors de cette licence d’utilisation, toute reproduction, même partielle, toute représentation, diffusion, vente ou exploitation sous quelque forme que ce soit, électronique ou non, est strictement interdite sans le consentement préalable de DealDrive et constitue un acte de contrefaçon engageant la responsabilité civile et pénale de l’auteur de la contrefaçon.
 #    subtitle_1: 4.1 - Charte graphique
-#    subcontent_1: La charte graphique du site et les éléments qui la composent sont la propriété de Serpico.
+#    subcontent_1: La charte graphique du site et les éléments qui la composent sont la propriété de DealDrive.
 #    subtitle_2: 4.2 - Bases de données
-#    subcontent_2: Les bases de données indexant les différents contenus du site sont la propriété de Serpico. La consultation et l’utilisation de ces bases de données n’entraînent en aucune façon la transmission de droits de propriété sur les bases de données à l’utilisateur. Il est rappelé, conformément à l’article 67 de la loi du 18 avril 2001 sur les droits d’auteur, les droits voisins et les bases de données que sont interdites « l’extraction ou la réutilisation de la totalité ou d’une partie substantielle, évaluée de façon qualitative ou quantitative, du contenu d’une base de données sans l’accord du producteur », ainsi que « l’extraction ou la réutilisation répétées et systématiques de parties non substantielles du contenu d’une base de données, qui seraient contraires à l’exploitation normale de cette base de données ou qui causeraient un préjudice injustifié aux intérêts légitimes du producteur de la base ».
+#    subcontent_2: Les bases de données indexant les différents contenus du site sont la propriété de DealDrive. La consultation et l’utilisation de ces bases de données n’entraînent en aucune façon la transmission de droits de propriété sur les bases de données à l’utilisateur. Il est rappelé, conformément à l’article 67 de la loi du 18 avril 2001 sur les droits d’auteur, les droits voisins et les bases de données que sont interdites « l’extraction ou la réutilisation de la totalité ou d’une partie substantielle, évaluée de façon qualitative ou quantitative, du contenu d’une base de données sans l’accord du producteur », ainsi que « l’extraction ou la réutilisation répétées et systématiques de parties non substantielles du contenu d’une base de données, qui seraient contraires à l’exploitation normale de cette base de données ou qui causeraient un préjudice injustifié aux intérêts légitimes du producteur de la base ».
 #    subtitle_3: 4.3 - Textes
 #    subcontent_3: Les textes présents sur le site sont la propriété de leurs auteurs respectifs.
 #    subtitle_4: 4.4 - Liens hypertexte
-#    subcontent_4: Serpico autorise la mise en place d’un lien hypertexte pointant vers son contenu, sous réserve de ne pas utiliser la technique du lien profond ou du lien encadré (« deep linking » ou « inline linking »), c’est-à-dire que les pages du site ne doivent pas être imbriquées à l’intérieur des pages d’un autre site, mais accessible par l’ouverture d’une fenêtre, et de mentionner la source qui pointera grâce à un lien hypertexte directement sur le contenu visé. Les informations utilisées ne doivent l’être qu’à des fins personnelles, associatives ou professionnelles, toute utilisation à des fins commerciales ou publicitaires est exclue. Cette autorisation ne s’applique pas aux sites internet diffusant des informations à caractère polémique, pornographique, xénophobe ou pouvant, dans une plus large mesure porter atteinte à la sensibilité du plus grand nombre.
+#    subcontent_4: DealDrive autorise la mise en place d’un lien hypertexte pointant vers son contenu, sous réserve de ne pas utiliser la technique du lien profond ou du lien encadré (« deep linking » ou « inline linking »), c’est-à-dire que les pages du site ne doivent pas être imbriquées à l’intérieur des pages d’un autre site, mais accessible par l’ouverture d’une fenêtre, et de mentionner la source qui pointera grâce à un lien hypertexte directement sur le contenu visé. Les informations utilisées ne doivent l’être qu’à des fins personnelles, associatives ou professionnelles, toute utilisation à des fins commerciales ou publicitaires est exclue. Cette autorisation ne s’applique pas aux sites internet diffusant des informations à caractère polémique, pornographique, xénophobe ou pouvant, dans une plus large mesure porter atteinte à la sensibilité du plus grand nombre.
 #
 #  article_5:
 #    title: 5 - Protection des données, respect du ExternalUser et de l’Utilisateur
 #    subtitle_1: 5.1 – Cadre général
 #    subcontent_1: L’adhésion aux présentes conditions vaut consentement de l’Utilisateur au traitement des données personnelles le concernant décrit au présent alinéa, certaines de ces données revêtant un caractère essentiel pour le bon fonctionnement du Service, puisqu’elles permettent l’établissement de rapports et résultats globaux bénéficiant aux autres Utilisateurs.
 #    subcontent_2: L’Utilisateur concerné par ces traitements dispose d’un droit d’accès, de rectification et de suppressions des données à caractère personnel le concernant, ainsi que celui de demander à ce que soient rectifiées, mises à jour ou supprimées les données inexactes, incomplètes ou périmées et de s’opposer, sous réserve de justifier d’un motif légitime, à ce que des données personnelles le concernant fassent l’objet d’un traitement ; il pourra le demander par écrit ou l’adresse contact@serpicoapp.com.
-#    subcontent_3: Conformément au Règlement (UE) N°611/2013, Serpico s’engage à avertir la Commission Nationale pour la Protection des Données du Grand-Duché du Luxembourg d’une violation de sécurité et de la confidentialité de données à caractère personnel dans un délai de 24 heures suivant son constat.
-#    subcontent_4: Serpico s’engage aussi à informer les Clients desdits incidents, dès lors qu’ils sont susceptibles d’affecter défavorablement leurs données ou le niveau de la protection de vie privée de ses Utilisateurs.
+#    subcontent_3: Conformément au Règlement (UE) N°611/2013, DealDrive s’engage à avertir la Commission Nationale pour la Protection des Données du Grand-Duché du Luxembourg d’une violation de sécurité et de la confidentialité de données à caractère personnel dans un délai de 24 heures suivant son constat.
+#    subcontent_4: DealDrive s’engage aussi à informer les Clients desdits incidents, dès lors qu’ils sont susceptibles d’affecter défavorablement leurs données ou le niveau de la protection de vie privée de ses Utilisateurs.
 #    subcontent_5: Des données électroniques peuvent également être collectées et/ou déposées sur le système informatique de l’Utilisateur à des fins de gestion de sa connexion et de sa navigation sur le Site Internet. L’Utilisateur peut refuser l’utilisation de ces fichiers (aussi appelés « cookies ») via la configuration de son navigateur internet, et cette action n’entravera pas la navigation de l’Utilisateur sur le Site Internet.
-#    subcontent_6: Le ExternalUser et l'utilisateur reconnaissent et acceptent que Serpico ne pourra en aucun cas être tenu responsable d’une violation de la sécurité entraînant accidentellement ou de manière illicite la destruction, la perte, l’altération, la divulgation ou l’accès non autorisé de données à caractère personnel transmises, stockées ou traitées en relation avec le Site Internet.
+#    subcontent_6: Le ExternalUser et l'utilisateur reconnaissent et acceptent que DealDrive ne pourra en aucun cas être tenu responsable d’une violation de la sécurité entraînant accidentellement ou de manière illicite la destruction, la perte, l’altération, la divulgation ou l’accès non autorisé de données à caractère personnel transmises, stockées ou traitées en relation avec le Site Internet.
 #    subtitle_2: 5.2 – Suppression d'un compte Utilisateur
 #    subcontent_8: Les données de l’Utilisateur sont conservées aussi longtemps que son Compte est actif. Elles le seront encore quinze (15) jours à compter de la fermeture du compte Utilisateur.
-#    subcontent_9: Pendant ce délai, l’Utilisateur pourra demander au ExternalUser s’il peut conserver ces données à titre personnel. Le ExternalUser se réserve le droit d’accepter une telle demande, ainsi que la manière dont ces données lui seront reversées. De son côté, Serpico ne saurait être responsable du contenu de ces données reversées à l’Utilisateur, notamment si ces dernières ressortent tronquées, incomplètes et/ou anonymisées.
+#    subcontent_9: Pendant ce délai, l’Utilisateur pourra demander au ExternalUser s’il peut conserver ces données à titre personnel. Le ExternalUser se réserve le droit d’accepter une telle demande, ainsi que la manière dont ces données lui seront reversées. De son côté, DealDrive ne saurait être responsable du contenu de ces données reversées à l’Utilisateur, notamment si ces dernières ressortent tronquées, incomplètes et/ou anonymisées.
 #    subcontent_10: Passé ce délai et sans action de l’Utilisateur, les données sont anonymisées et pourront servir à un traitement statistique tel que défini par la loi du 1er août 2018 relative à la protection des données.
 #
 #  article_6:
-#    title: 6 – Responsabilité de Serpico
-#    content: Serpico s’efforce de publier et éditer des informations correctes et fiables. Toutefois, des inexactitudes techniques ou typographiques ne sauraient être exclues. Serpico se réserve le droit de modifier ou corriger le contenu du site à tout moment. L’utilisation des informations disponibles sur le site se fait sous l’entière responsabilité de l’utilisateur. Serpico ne pourra en aucun cas être tenu responsable de tout dommage de quelque nature que ce soit résultant de l’utilisation ou interprétation des informations disponibles sur le site.
+#    title: 6 – Responsabilité de DealDrive
+#    content: DealDrive s’efforce de publier et éditer des informations correctes et fiables. Toutefois, des inexactitudes techniques ou typographiques ne sauraient être exclues. DealDrive se réserve le droit de modifier ou corriger le contenu du site à tout moment. L’utilisation des informations disponibles sur le site se fait sous l’entière responsabilité de l’utilisateur. DealDrive ne pourra en aucun cas être tenu responsable de tout dommage de quelque nature que ce soit résultant de l’utilisation ou interprétation des informations disponibles sur le site.
 #
 #  article_7:
 #    title: 7 - Droit applicable
-#    content: Le site ainsi que ces conditions générales d’utilisation sont soumis au droit luxembourgeois. Toute contestation qui en résulte est soumise à la compétence des juridictions luxembourgeoises. En cas de litige, l’utilisateur s’adressera en priorité à Serpico pour trouver une solution amiable.
+#    content: Le site ainsi que ces conditions générales d’utilisation sont soumis au droit luxembourgeois. Toute contestation qui en résulte est soumise à la compétence des juridictions luxembourgeoises. En cas de litige, l’utilisateur s’adressera en priorité à DealDrive pour trouver une solution amiable.
 #
 #  article_8:
 #    title: 8 - Modifications et mises à jour
-#    content: Serpico se réserve le droit de procéder à des modifications des présentes conditions générales d’utilisation et s’engage à publier en ligne la nouvelle version dès qu’elle est applicable.
+#    content: DealDrive se réserve le droit de procéder à des modifications des présentes conditions générales d’utilisation et s’engage à publier en ligne la nouvelle version dès qu’elle est applicable.
 #
 #  updated_date: Date de la dernière mise à jour : 22/12/2018
 
@@ -1607,6 +1690,7 @@ worker_search:
 worker_firm_list:
   alphabetical_order: A-Z
   creation_date_order: date de création
+  size_order: taille
 
 worker_firm_data:
   commonName: Nom de l'entreprise
@@ -1616,11 +1700,11 @@ worker_firm_data:
   url: LinkedIn url
   size: Taille de l'entreprise
   mailPrefix: Préfixe de l'adresse mail
-  mailSuffix: Suffixe de l'adresse mail
+  suffix: Suffixe de l'adresse mail
   creationDate: Date de création
   HQCity: Ville - Siège social
   HQState: Etat/Département - Siège social
-  HQCountry: Pays - Siège social
+  country: Pays - Siège social
   page_title: Données de l'entreprise
   mobile_header_title: Worker/Firm research
   fullName: Lastname / Firstname
@@ -1662,14 +1746,14 @@ worker_firm_elements:
   deactivated_user: Mail désactivé
 
 prospecting_mail_subject:
-  1_FR: Serpico - suivi collaboratif de performance avec les clients
-  1_EN: Serpico - quality monitoring solution hands in hands with your clients
-  2_FR: Serpico - suivi collaboratif de projets
-  2_EN: Serpico - collaborative project performance metrics
-  3_FR: Serpico - suivi collaboratif de performance déquipe
-  3_EN: Serpico - collaborative team performance metrics
-  4_FR: Serpico - suivi collaboratif de compétence et accélérateur de marque employeur
-  4_EN: Serpico - collaborative solution for competencies metrics which boosts your employer brand
+  1_FR: DealDrive - suivi collaboratif de performance avec les clients
+  1_EN: DealDrive - quality monitoring solution hands in hands with your clients
+  2_FR: DealDrive - suivi collaboratif de projets
+  2_EN: DealDrive - collaborative project performance metrics
+  3_FR: DealDrive - suivi collaboratif de performance déquipe
+  3_EN: DealDrive - collaborative team performance metrics
+  4_FR: DealDrive - suivi collaboratif de compétence et accélérateur de marque employeur
+  4_EN: DealDrive - collaborative solution for competencies metrics which boosts your employer brand
 
 check_mails:
   page_title: Suivi des mails
@@ -1855,9 +1939,9 @@ profile:
     computed: Terminées
 
   finalizeUserCreation:
-    modal_title: Bienvenue sur Serpico ! Prenez juste le temps de valider les informations ci-dessous
+    modal_title: Bienvenue sur DealDrive ! Prenez juste le temps de valider les informations ci-dessous
     validate_btn: Ok
-    modal_success_msg: Vos informations ont été mises à jour, nous vous souhaitons une agréable expérience d'évaluation avec Serpico !
+    modal_success_msg: Vos informations ont été mises à jour, nous vous souhaitons une agréable expérience d'évaluation avec DealDrive !
 
   first_connection:
     add_first_admin:
@@ -1903,6 +1987,24 @@ organizations:
 
 
 activities:
+  first_connection_modal:
+    title: Juste quelques infos...
+    msg: "On y est presque ! Il ne manque plus qu'à renseigner votre entreprise afin de la lier à votre compte"
+  before_starting_modal:
+    title: Avant de commencer...
+    msg_intro: "Ce que vous voyez en fond est un aperçu de ce à quoi ressemblera votre dashboard avec des activités - cliquez sur le bouton <i class=\"fa fa-plus-circle dd-text sm-left sm-right\"></i> en bas pour en rajouter"
+    creation_mode: 
+      title: "En mode partagé ou privé <i class=\"fa fa-user-secret dd-text sm-left sm-right\"></i>"
+      msg: "DealDrive permet l'interactivité avec vos partenaires, mais rien ne vous empêche de créer vos activités <span class=\"strong\">en mode <span style=\"font-style:italic;\">privé</span></span> - ils ne seront pas notifiés."
+      msg_2 : "Sélectionnez pour cela votre partenaire en tant que <span class=\"strong\">personne morale</span>"
+      msg_3: Vous pourrez toujours ajouter des participants ensuite
+    event_sharing:
+      title: Communiquez votre avancement avec vos partenaires
+      msg: "En cliquant sur le bouton d'ajout de retour <i class=\"material-icons dd-text\">offline_bolt</i></a> vous leur transmettez suggestions, documents... tout ce qui rythme votre relation business"
+    premium_info:
+      title: Un compte Premium pendant 21 jours... au moins 🥳
+      msg: "Qui vous permet de <span class=\"strong\">transmettre instanément</span> vos retours à vos partenaires. Au-delà, votre compte passera en mode Gratuit et vous pourrez l'upgrader pour continuer à bénéficier des fonctionnalités live avec vos partenaires"
+      
   with: avec
   modal_error_creation_title: Avant de continuer...
   do_you_want_continue: Voulez vous continuer ?
@@ -1969,6 +2071,7 @@ activities:
   grading_period: "Période de notation :"
   progress: "Avancement :"
   participants: Participants
+  events: Updates
   define: Définir
   modify: Modifier
   grade: Noter
@@ -1987,6 +2090,7 @@ activities:
   delete_activity_btn: Supprimer
   delete_stage_msg: Etes-vous sûr de vouloir supprimer cette phase d'activité ? Toutes les données éventuellement saisies par les participants seront effacées
   delete_activity_msg: Etes-vous sûr de vouloir supprimer cette activité ? Toutes les données éventuellement saisies par les participants seront effacées
+  delete_event_msg: Etes-vous sûr de vouloir supprimer cet update ? Toutes les données liées (documents et commentaires) seront supprimées
   delete_participant_msg: Etes-vous sûr de vouloir supprimer ce participant de l'activité ?
   delete_recurring_msg: Cette activité fait partie d'une série d'activités récurrentes. Voulez-vous supprimer toutes ces activités ou simplement celle-ci ? Les données liées aux participants seront effacées
   delete_rec_all_confirm: Supprimer la série
@@ -2012,10 +2116,10 @@ activities:
     from_firm: de l'entreprise
   create_participant_wo_mail_modal:
     title: Participant sans email
-    msg: Ce participant ne pourra pas faire de retours sur vos activités communes si vous ne vous renseignez pas son adresse email - vous pouvez toujours la renseigner ensuite
+    msg: Ce participant ne pourra pas faire de retours sur vos activités communes sans adresse email - vous pouvez toujours la renseigner ensuite
   create_participant_legal_person_modal:
     title: Nouveau participant personne morale
-    msg: En sélectionnant ce participant représentant une entreprise ou institution, vous ne lui donnez pas accès à l'activité. Seuls des membres de cette entreprise/institution peuvent y accéder 
+    msg: L'entreprise n'aura pas accès à cette activité. Rajoutez par la suite des participants afin de les notifier de l'avancement que vous avez avec eux
 
   create:
     initialize_title: Création d'une activité
@@ -2085,9 +2189,10 @@ activities:
   no_registered_activities_msg: Inscrivez-vous à une démarche existante afin de suivre et renseigner son évolution !
   hide_group: Masquer ces activités
   display_group: Afficher ces activités
-  instant_add: Retour spontané
+  instant_add: Faire un update
   update_status: Mettre à jour l'avancement
   provide_my_feedbacks: Donner mes feedbacks
+  delete_activity: Supprimer l'activité
   delete_activity_modal:
     title: Suppression de l'activité
     content: Etes-vous sûr de vouloir supprimer cette activité ? Toutes ses données associées (phases, retours et participants) seront supprimées
@@ -2098,7 +2203,10 @@ activity_elements:
   parameters: Paramètres
   expected_output: Retours attendus
   no_defined_output: Pas de retours définis
-  stages: Phases
+  stages: 
+    multiple_stages_modal:
+      add_event_title: A quelle phase voulez-vous rattacher cet update ?
+      title: Quelle phase voulez-vous voir en détail/modifier ?
   criteria: Critères
   participants: Participants
   iprocess: Process
@@ -2118,6 +2226,7 @@ activity_elements:
   unvalidating_output_msg: Un ou plusieurs participants ont déjà validé leur retour. La modification que vous souhaitez réaliser fera qu'ils devront à nouveau finaliser leur retour; voulez-vous continuer ?
   duplicate_element_name_msg: Vous devez changer ce nom car un élément existant possède déjà un nom similaire
   no_remaining_participant_msg: Vous devez créer plus de participants de ce type dans votre base d'utilisateurs, car vous les avez déjà tous sélectionnés !
+  synth_user_suffix : personne morale
   duplicate_participant:
     with_team_begin: Vous ne pouvez pas rajouter l'utilisateur
     with_team_end: pour cette phase, car il est déjà présent dans l'équipe participante
@@ -2137,17 +2246,23 @@ activity_elements:
   go_back_processes: Retour aux processes
   modify_stage_btn: Modifier la phase
   events:
+    access_event_btn: Accéder à l'update
+    access_stage_btn: Accéder à la phase
+    access_activity_btn: Accéder à l'activité
     add_event:
-      modal_new_title: Ajout d'événement
-      modal_update_title: Mise à jour de l'événement
+      btn_msg: Ajouter un update
+      modal_new_title: Créer un update
+      modal_update_title: Enrichir l'update
       modal_msg: Que souhaitez-vous renseigner ?
       insert_document: Partager un document
       insert_comment: Commentaire/Description
-      eventType: Type d'événement
-      manage_dates: Gestion des dates
+      eventType: Type d'update
+      manage_dates^: Gestion des dates
       notify_participants: Notification des participants
       notify_all_articipants: Notifier tous les participants
-      onset_date: Date de survenance
+      onset_date: Survenance
+      resolution_date: Fin
+      dates_mgt: Gestion des dates
       provide_onset_date: Indiquer une date de survenance
       exp_res_date: Date de résolution espérée
       provide_exp_res_date: Indiquer une date de résolution espérée
@@ -2155,6 +2270,22 @@ activity_elements:
       shared_documents: Documents partagés
       comments: Commentaires
       no_given_comments: Pas de commentaires donnés
+    multiple_events_modal:
+      title: Quel update voulez-vous voir en détail/modifier ?
+    documents: 
+      title: Documents liés
+      add_document: Ajouter un document
+      dropify_insert_msg: Glissez-déposez un document ou cliquez pour l'insérer (max 5 MB)
+      dropify_error_msg: Il y a un problème avec votre fichier (taille ou format)
+      document:
+        title: Nom du document
+        delete_msg: Etes-vous sûr de vouloir supprimer ce document pour l'ensemble des participants concernés ? 
+        upload_new_version: Téléverser une nouvelle version
+    comments:
+      title: Commentaires
+      add_comment: Ajouter un commentaire
+      comment:
+        delete_msg: Etes-vous sûr de vouloir supprimer votre commentaire ? 
 
 
 create_parameters:

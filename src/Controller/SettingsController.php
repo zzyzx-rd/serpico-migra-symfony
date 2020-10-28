@@ -657,7 +657,9 @@ class SettingsController extends MasterController
             case 'a' :
                 $prop = 'name'; break;
             case 'i' :
-                $prop = 'inserted';
+                $prop = 'inserted';break;
+            case 's' :
+                $prop = 'nbLkEmployees';break;
         }
         $sortingOrder = $_COOKIE['wf_s_o'] == 'a' ? 'ASC' : 'DESC';
         
@@ -1213,6 +1215,27 @@ class SettingsController extends MasterController
         return $this->redirectToRoute('manageOrganizations');
     }
 
+    // Delete worker firm (limited to root master)
+
+    /**
+     * @param Application $app
+     * @param $orgId
+     * @return mixed
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/root/workerFirm/delete", name="deleteWorkerFirm")
+     */
+    public function deleteWorkerFirmAction(Request $request) {
+        $em = $this->em;
+        $wfiId = $request->get('id');
+        $repoWF = $em->getRepository(WorkerFirm::class);
+        /** @var WorkerFirm */
+        $workerFirm = $repoWF->find($wfiId);
+        $em->remove($workerFirm);
+        $em->flush();
+        return $this->redirectToRoute('manageWorkerFirms');
+    }
+
 
     //Adds organization (limited to root master)
 
@@ -1228,7 +1251,6 @@ class SettingsController extends MasterController
     {
         $em = $this->em;
         /** @var FormFactory */
-        
         $organizationForm = $this->createForm(AddOrganizationForm::class, null, ['standalone' => true, 'orgId' => 0, 'em' => $em, 'isFromClient' => false]);
         $organizationForm->handleRequest($request);
         $errorMessage = '';
@@ -2952,14 +2974,20 @@ class SettingsController extends MasterController
         $em = $this->em;
         $qb = $em->createQueryBuilder();
         $type = $request->get('type');
+
+        
         $user = $this->user;
-        $organization = $user->getOrganization();
-        $clients = $organization->getClients();
+        $organization = $user ? $this->org : null;
+        $orgId = $organization->getId();
+        $clients = $organization ? $organization->getClients() : new ArrayCollection();
+        $repoP = $em->getRepository(Participation::class);
+        
+        /*
         $clientIds = '';
         foreach ($clients as $client) {
             $clientIds .= "'". $client->getId() . "', ";
         }
-        $clientIds = substr($clientIds,0,-2);
+        $clientIds = substr($clientIds,0,-2);*/
     
 
         $participants = $request->get('p') ?: [];
@@ -2969,20 +2997,36 @@ class SettingsController extends MasterController
         $partExtUsers = [0];
 
         foreach ($participants as $participant) {
-            switch($participant['el']){
-                case 'u':
-                    $partUsers[] = $participant['id'];
-                    break;
-                case 't':
-                    $partTeams[] = $participant['id'];
-                    break;
-                case 'f':
-                    $partFirms[] = $participant['id'];
-                    break;
-                case 'eu':
-                    $partExtUsers[] = $participant['id'];
-                    break;
+            if(isset($participant['el'])){
+                switch($participant['el']){
+                    case 'u':
+                        $partUsers[] = $participant['id'];
+                        break;
+                    case 't':
+                        $partTeams[] = $participant['id'];
+                        break;
+                    case 'f':
+                        $partFirms[] = $participant['id'];
+                        break;
+                    case 'eu':
+                        $partExtUsers[] = $participant['id'];
+                        break;
+                }
+            } else {
+                $participant = $repoP->find($participant['id']);
+                $externalUser = $participant->getExternalUser();
+                if($participant->getTeam()){
+                    $partTeams[] = $participant->getTeam()->getId();
+                } else if ($externalUser) {
+                    $partExtUsers[] = $externalUser->getId();
+                    if($externalUser->isSynthetic()){
+                        $partFirms[] = $externalUser->getClient()->getWorkerFirm()->getId();
+                    }
+                } else {
+                    $partUsers[] = $participant->getUser()->getId();
+                }
             }
+
         }
 
         //return new JsonResponse($partExtUsers,200);
@@ -3010,7 +3054,7 @@ class SettingsController extends MasterController
                 ->innerJoin('App\Entity\Client', 'c', 'WITH', 'c.id = eu.client')
                 ->innerJoin('App\Entity\Organization', 'o', 'WITH', 'o.id = c.clientOrganization')
                 ->innerJoin('App\Entity\WorkerFirm', 'wf', 'WITH', 'wf.id = o.workerFirm')
-                ->where('CONCAT(eu.firstname,\' \', eu.lastname) LIKE :name AND eu.synthetic = FALSE OR eu.lastname LIKE :name AND eu.synthetic = TRUE')
+                ->where('CONCAT(eu.firstname,\' \', eu.lastname) LIKE :name AND eu.synthetic IS NULL OR eu.lastname LIKE :name AND eu.synthetic = TRUE')
                 ->andWhere('eu.id NOT IN (:partExtUsers)')
                 ->andWhere('eu.client IN (:clients)')
                 ->setParameter('partExtUsers',$partExtUsers)
@@ -3042,7 +3086,7 @@ class SettingsController extends MasterController
             // Line below prevents selection of firm which is already client (existing as synth ext user), and user self firm mirrored as client for its clients
             ->andWhere('c.organization IS NULL OR (c.organization != :oid AND c.clientOrganization != :oid)')
             ->setParameter('name', '%'. $name .'%')
-            ->setParameter('oid',$organization)
+            ->setParameter('oid', $organization)
             ->setParameter('partFirms',$partFirms)
             ->getQuery()
             ->getResult();
@@ -3052,15 +3096,30 @@ class SettingsController extends MasterController
 
         } else {
 
-        $elements = new ArrayCollection($qb->select('wf.name AS orgName','wf.id AS wfiId','wf.logo','o.id AS orgId, c.id AS cliId')
-            ->from('App\Entity\WorkerFirm', 'wf')
-            ->leftJoin('App\Entity\Organization', 'o', 'WITH', 'o.workerFirm = wf.id')
-            ->leftJoin('App\Entity\Client', 'c', 'WITH', 'c.clientOrganization = o.id')
-            ->where('wf.name LIKE :name')
-            ->setParameter('name', '%'. $name .'%')
-            ->getQuery()
-            ->getResult());
+            $elements = new ArrayCollection(
+                $qb->select('wf.name AS orgName','wf.id AS wfiId','wf.logo','o.id AS orgId', 'c.id AS cliId', 'IDENTITY(c.organization) AS cOrg')
+                    ->from('App\Entity\WorkerFirm', 'wf')
+                    ->leftJoin('App\Entity\Organization', 'o', 'WITH', 'o.workerFirm = wf.id')
+                    ->leftJoin('App\Entity\Client', 'c', 'WITH', 'c.clientOrganization = o.id')
+                    ->where('wf.name LIKE :name')
+                //->andWhere('c.organization = :org')
+                    ->setParameter('name', '%'. $name .'%')
+                //->setParameter('org', $organization)
+                    ->getQuery()
+                    ->getResult()
+                );
+
+            $elements = $elements->map(fn($e) => [
+                'orgName' => $e['orgName'],
+                'wfiId' => $e['wfiId'],
+                'logo' => $e['logo'],
+                'orgId' => $e['orgId'],
+                'cliId' => $e['cOrg'] == $orgId ? $e['cliId'] : ""
+            ]);
+            
         }
+
+
 
         $qParts = [];
         foreach($elements as $element){
@@ -3392,29 +3451,6 @@ class SettingsController extends MasterController
         $repoWI = $em->getRepository(WorkerIndividual::class);
         $workerIndividual = $repoWI->findOneById($wiId);
         $em->remove($workerIndividual);
-        $em->flush();
-        return new JsonResponse(['message' => "Success"],200);
-    }
-
-    /**
-     * @param Request $request
-     * @param Application $app
-     * @param $wfId
-     * @return JsonResponse
-     * @throws ORMException
-     * @throws OptimisticLockException
-     * @Route("/workers/firm/delete/{wfId}", name="deleteWorkerFirm")
-     */
-    public function deleteWorkerFirm(Request $request, $wfId){
-
-        $connectedUser = MasterController::getAuthorizedUser($app);
-        if($connectedUser->getRole() != 4){
-            return $this->render('errors/403.html.twig');
-        }
-        $em = $this->em;
-        $repoWF = $em->getRepository(WorkerFirm::class);
-        $workerFirm = $repoWF->findOneById($wfId);
-        $em->remove($workerFirm);
         $em->flush();
         return new JsonResponse(['message' => "Success"],200);
     }

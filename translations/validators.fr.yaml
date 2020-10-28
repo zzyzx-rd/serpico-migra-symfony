@@ -33,7 +33,7 @@ signup:
   email: "Votre adresse email doit être valide (exemple : toto@tutu.com)"
 
 create_user: 
-  email: Oops... cet email existe déjà, l'utilisateur a certainement déjà un compte !
+  email: Il semble que vous ayez déjà un compte ! Vous pouvez générer un nouveau mot passe afin d'y accéder si besoin !
 
 worker_search: 
   ub_greater_than_lb: Le nombre maximal d'employés doit être supérieur au nombre minimal

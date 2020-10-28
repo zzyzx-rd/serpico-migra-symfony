@@ -25,11 +25,6 @@ class EventName extends DbObject
     public ?int $id;
 
     /**
-     * @ORM\Column(name="evn_type", type="integer", nullable=true)
-     */
-    public $type;
-
-    /**
      * @ORM\Column(name="evn_name", type="string", length=255, nullable=true)
      */
     public $name;
@@ -50,6 +45,19 @@ class EventName extends DbObject
     public DateTime $inserted;
 
     /**
+     * @ManyToOne(targetEntity="EventGroupName", inversedBy="eventNames")
+     * @JoinColumn(name="event_group_name_egn_id", referencedColumnName="egn_id",nullable=true)
+     */
+    public $eventGroupName;
+
+    /**
+     * @ManyToOne(targetEntity="Icon", inversedBy="eventNames")
+     * @JoinColumn(name="icon_ico_id", referencedColumnName="ico_id",nullable=true)
+     * @var Icon
+     */
+    protected ?Icon $icon;
+
+    /**
      * @OneToMany(targetEntity="EventType", mappedBy="eName", cascade={"persist", "remove"}, orphanRemoval=true)
      */
     public $eventTypes;
@@ -65,28 +73,13 @@ class EventName extends DbObject
      */
     public function __construct(
         $id = 0,
-        $type = null,
         $description = null,
         $name = null,
         $createdBy = null)
     {
         parent::__construct($id, $createdBy, new DateTime());
-        $this->type = $type;
         $this->name = $name;
         $this->description = $description;
-    }
-
-
-    public function getType(): ?int
-    {
-        return $this->type;
-    }
-
-    public function setType(int $type): self
-    {
-        $this->type = $type;
-
-        return $this;
     }
 
     public function getName(): ?string
@@ -136,6 +129,37 @@ class EventName extends DbObject
     public function removeEventType(EventType $eventType): EventName
     {
         $this->eventTypes->removeElement($eventType);
+        return $this;
+    }
+
+    /**
+     * @return EventGroupName
+     */
+    public function getEventGroupName(): EventGroupName
+    {
+        return $this->eventGroupName;
+    }
+
+    public function setEventGroupName(EventGroupName $eventGroupName)
+    {
+        $this->eventGroupName = $eventGroupName;
+        return $this;
+    }
+
+    /**
+     * @return Icon|null
+     */
+    public function getIcon(): ?Icon
+    {
+        return $this->icon;
+    }
+
+    /**
+     * @param Icon $icon
+     */
+    public function setIcon(Icon $icon): self
+    {
+        $this->icon = $icon;    
         return $this;
     }
 

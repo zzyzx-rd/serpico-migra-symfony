@@ -6,6 +6,7 @@ use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\IconRepository;
 use DateTime;
 use DateTimeInterface;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\OneToMany;
@@ -50,13 +51,19 @@ class Icon extends DbObject
     public DateTime $inserted;
 
     /**
-     * @OneToMany(targetEntity="CriterionName", mappedBy="icon", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="CriterionName", mappedBy="icon", cascade={"persist", "remove"})
      * @var ArrayCollection
      */
     public $criterionNames;
 
     /**
-     * @OneToMany(targetEntity="EventType", mappedBy="icon", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="EventName", mappedBy="icon", cascade={"persist", "remove"})
+     * @var ArrayCollection
+     */
+    public $eventNames;
+
+    /**
+     * @OneToMany(targetEntity="EventType", mappedBy="icon", cascade={"persist", "remove"})
      * @var ArrayCollection
      */
     public $eventTypes;
@@ -92,6 +99,9 @@ class Icon extends DbObject
         $this->unicode = $ico_unicode;
         $this->criterionNames = $criterionNames;
         $this->workerFirmSectors = $workerFirmSectors;
+        $this->eventNames = new ArrayCollection;
+        $this->eventTypes = new ArrayCollection;
+
     }
 
 
@@ -161,6 +171,27 @@ class Icon extends DbObject
     public function removeEventType(EventType $eventType): Icon
     {
         $this->eventTypes->removeElement($eventType);
+        return $this;
+    }
+
+    /**
+     * @return ArrayCollection|EventName[]
+     */
+    public function getEventNames()
+    {
+        return $this->eventNames;
+    }
+
+    public function addEventName(EventName $eventName): Icon
+    {
+        $eventName->setIcon($this);
+        $this->eventNames->add($eventName);
+        return $this;
+    }
+
+    public function removeEventName(EventName $eventName): Icon
+    {
+        $this->eventNames->removeElement($eventName);
         return $this;
     }
     

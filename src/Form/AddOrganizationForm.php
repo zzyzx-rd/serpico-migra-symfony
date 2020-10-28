@@ -27,25 +27,27 @@ class AddOrganizationForm extends AbstractType
         $isFromClient = isset($options['isFromClient']);
 
         $em = $options['em'];
-        $repoO = $em->getRepository(Organization::class);
         $repoU = $em->getRepository(User::class);
         $repoP = $em->getRepository(Position::class);
-
+        $repoO = $em->getRepository(Organization::class);
         /** @var Organization|null */
         $organization = $repoO->find($orgId);
+        
+        if(!$options['isFromClient']){
 
-        $builder->add('commname', TextType::class,
-            [
-                'label_format' => $options['isFromClient'] ? 'create_organization.your_firm' : 'create_organization.%name%',
-                'constraints' => [
-                    new Assert\NotBlank
-                ],
-                'data' => $organization ? $organization->getCommname() : null,
-                'attr' => [
-                    'disabled' => $toValidate
+            $builder->add('commname', TextType::class,
+                [
+                    'label_format' => $options['isFromClient'] ? 'create_organization.your_firm' : 'create_organization.%name%',
+                    'constraints' => [
+                        new Assert\NotBlank
+                    ],
+                    'data' => $organization ? $organization->getCommname() : null,
+                    'attr' => [
+                        'disabled' => $toValidate
+                    ]
                 ]
-            ]
-        );
+            );
+        }
 
         // If organization is being created, we let root define the new master user; otherwise, has to be part of the organization
         if (!$organization || ($organization && $toValidate)) {

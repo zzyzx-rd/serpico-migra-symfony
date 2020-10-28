@@ -318,16 +318,16 @@ $(function() {
         },50);
     })*/
 
-    $('.stages-holder').on('mouseenter',function(){
+    $('.stages-holder').on('mouseover',function(){
         var holderIndex = $('.stages-holder').index($(this));
-        const $fixedBtn = $('.act-info').find('.fixed-action-btn').eq(holderIndex);
+        const $fixedBtn = $('.act-elmt-info').find('.fixed-action-btn').eq(holderIndex);
         $fixedBtn.css('visibility','');
 
-    }).on('mouseleave',function(){
+    }).on('mouseout',function(){
         var holderIndex = $('.stages-holder').index($(this));
         var interval = setInterval(function(){
-          if(!$('.act-info').find('.fixed-action-btn').eq(holderIndex).is(':hover')) {
-            $('.act-info').find('.fixed-action-btn').eq(holderIndex).css('visibility','hidden');
+          if(!$('.act-elmt-info').find('.fixed-action-btn').eq(holderIndex).is(':hover')) {
+            $('.act-elmt-info').find('.fixed-action-btn').eq(holderIndex).css('visibility','hidden');
             clearInterval(interval);
           }
         },50);
@@ -338,6 +338,7 @@ $(function() {
         $(e).css('top', Math.round(100 * ($fixedBtns.index($(this)) / $fixedBtns.length)) + '%');
     });
 
+    
     function CountDownTimer(dt, d, h, m, s)
     {
         var end = new Date(dt);
@@ -370,7 +371,8 @@ $(function() {
             document.getElementById(m).innerHTML = "";
             document.getElementById(s).innerHTML = "";
 
-            document.getElementById(d).innerHTML = days;
+            document
+            .getElementById(d).innerHTML = days;
             document.getElementById(h).innerHTML += hours;
             document.getElementById(m).innerHTML += minutes;
             document.getElementById(s).innerHTML += seconds;
@@ -378,11 +380,12 @@ $(function() {
 
         timer = setInterval(showRemaining, 1000);
     }
+    
 
     function isEmail(email) {
         var regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
         return regex.test(email);
-      }
+    }
 
     $('.get-notified-launch-btn').on('click',function(){
         var $this = $(this);
@@ -401,8 +404,19 @@ $(function() {
         }
     })
 
-    CountDownTimer('10/11/2020 17:00:00','ct-d','ct-h','ct-m','ct-s');
+   //CountDownTimer('10/11/2020 17:00:00','ct-d','ct-h','ct-m','ct-s');
 
+    if($(document).width() < 601){
+        $('#header .brand-logo img').attr('src','/lib/img/logo_dd_l.png');
+    }
+
+    var sg = getCookie("signup");
+    if (sg){
+        $('#sendMailPwdDef').modal('open');
+        eraseCookie('signup');
+    }
+
+    /*
     if($('main').width() < 950){
         $('.m-title > *').css('text-align','center').appendTo('.s-title');
         $('.countdown-page > ul').css('flex-direction','column');
@@ -415,5 +429,5 @@ $(function() {
             'margin' : '0 5vw',
             'text-align': 'center',
         });
-    }
+    }*/
 });

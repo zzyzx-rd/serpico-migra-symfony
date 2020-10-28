@@ -3,8 +3,9 @@
 <html>
 <head>
     <title>
+        Dealdrive -
         {% block title '' %}
-        - Dealdrive</title>
+    </title>
     <meta name="google-site-verification" content="aGUecHqyNfDi5JeZ8kCBvwTqJYGsirNidG2Gz5xhBQw"/>
     <link rel='shortcut icon' type='image/x-icon' href="lib/img/favicon/favicon.ico"/>
     <link rel="apple-touch-icon" sizes="180x180" href="lib/img/favicon/apple-touch-icon.ico">
@@ -36,7 +37,8 @@
         ga('create', 'UA-116384660-1', 'auto');
         ga('send', 'pageview');
     </script>
-    {% block css %}{% endblock %}
+    {% block css %}
+    {% endblock %}
 
 
 </head>
@@ -54,11 +56,24 @@
 </div>
 
 <div id="languageModal" class="modal">
-    <h5 style="color:white;">{{ "language.choose"|trans }}</h5>
-    <ul>
-        <li><a class="btn" href="{{ path('change_locale', {'locale': 'en'}) }}" style="margin-top:15px; width:70%;margin-left:15%"><img style="height: 30px;" src="{{ asset('lib/img/FlagEngland.png') }}" alt="english"> English</a></li>
-        <li><a class="btn" href="{{ path('change_locale', {'locale': 'fr'}) }}" style="margin-top:10px; width:70%;margin-left:15%"><img style="height: 30px;" src="{{ asset('lib/img/FlagFrance.png') }}" alt="français"> Français</a></li>
-    </ul>
+    <div class="modal-content">
+        <h5>{{ "language.choose"|trans }}</h5>
+        <ul>
+            <li>
+                <a class="btn" href="{{ path('change_locale', {'locale': 'en'}) }}">
+                    <img style="height:50%;" src="{{ asset('lib/img/FlagEngland.png') }}" alt="english">
+                    <span>English</span>
+                </a>
+            </li>
+            <li>
+                <a class="btn" href="{{ path('change_locale', {'locale': 'fr'}) }}">
+                    <img style="height:50%;" src="{{ asset('lib/img/FlagFrance.png') }}" alt="français">
+                    <span>Français</span>    
+                </a>
+            </li>
+        </ul>
+
+    </div>
 </div>
 {% block footer %}
     <footer>
@@ -66,7 +81,7 @@
 
             <div id="linkFooter">
                 <div style="width:85%;margin:auto;">
-                    <div class="row align" style="margin-bottom:0">
+                    <div class="footer-row row align" style="margin-bottom:0">
                         <div class="col s12 m3 no-margin">
                             <ul class="flex-center " style="justify-content: space-around;flex-direction:column">
                                 <li>

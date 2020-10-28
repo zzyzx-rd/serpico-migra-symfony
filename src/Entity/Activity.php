@@ -141,6 +141,10 @@ class Activity extends DbObject
      * @OneToMany(targetEntity="RankingTeamHistory", mappedBy="activity", cascade={"persist", "remove"}, orphanRemoval=true)
      */
     public $historicalRankingTeams;
+    /**
+     * @OneToMany(targetEntity="Mail", mappedBy="activity",cascade={"persist", "remove"})
+     */
+    public $mails;
 
     /**
      * @OneToMany(targetEntity="Participation", mappedBy="activity", cascade={"persist", "remove"}, orphanRemoval=true)
@@ -348,6 +352,7 @@ class Activity extends DbObject
         $this->resultTeams = new ArrayCollection;
         $this->rankingTeams = new ArrayCollection;
         $this->historicalRankingTeams = new ArrayCollection;
+        $this->mails = new ArrayCollection;
         $this->createdBy = $createdBy;
         $this->act_gEndDate = new DateTime('1990-01-01');
         //TODO Set la date et autres dans les controlleurs
@@ -921,7 +926,7 @@ class Activity extends DbObject
 
         return $this;
     }
-    public function getStartdateDay(): int
+    public function getStartdateU(): int
     {
         $startDate = new DateTime('2099-01-01');
         foreach ($this->stages as $stage) {
@@ -929,9 +934,6 @@ class Activity extends DbObject
                 $startDate = $stage->getStartDate();
             }
         }
-        $year=$startDate->format('Y');
-        $month=$startDate->format('m');
-        $day=$startDate->format('d');
         return $startDate->format('U');
     }
     public function getPeriod(): void
@@ -952,8 +954,6 @@ class Activity extends DbObject
         $sD = $startDate->format("U");
         $sE = $enddate->format("U");
         echo $sE - $sD;
-
-
     }
 
     public function getEnddate()
@@ -1426,9 +1426,7 @@ class Activity extends DbObject
         
         $array = $this->stages->getValues();
         usort($array, function($first, $second)  {
-
-                return (date_diff($first->getEnddate(),$first->getStartdate())->format('%r%a') >= date_diff($second->getEnddate(),$second->getStartdate())->format('%r%a')) ? 1 : -1;
-
+            return ($first->getEnddate()->getTimestamp() - $first->getStartdate()->getTimestamp() >= $second->getEnddate()->getTimestamp() - $second->getStartdate()->getTimestamp()) ? 1 : -1;
         });
         $orderedStages = new ArrayCollection($array);
         return $orderedStages;
@@ -1481,6 +1479,27 @@ class Activity extends DbObject
                 $this->removeParticipation($theParticipant);
             }
         }
+        return $this;
+    }
+
+    /**
+    * @return ArrayCollection|Mail[]
+    */
+    public function getMails()
+    {
+        return $this->mails;
+    }
+
+    public function addMail(Mail $mail): Stage
+    {
+        $this->mails->add($mail);
+        $mail->setStage($this);
+        return $this;
+    }
+
+    public function removeMail(Mail $mail): Stage
+    {
+        $this->mails->removeElement($mail);
         return $this;
     }
 

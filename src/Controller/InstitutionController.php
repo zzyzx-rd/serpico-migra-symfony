@@ -7,6 +7,7 @@ use App\Entity\Client;
 use App\Entity\Participation;
 use App\Entity\Decision;
 use App\Entity\Department;
+use App\Entity\EventGroup;
 use App\Entity\Organization;
 use App\Entity\OrganizationUserOption;
 use App\Entity\Stage;
@@ -38,7 +39,7 @@ final class InstitutionController extends MasterController
     /**
      * @Route("/settings/institution/processes", name="processesList")
      */
-    public function processesListAction(): Response
+    public function processesListAction(Request $request): Response
     {
         if(isset($_COOKIE['sorting_type'])){
             $sortingType = $_COOKIE['sorting_type'];
@@ -57,6 +58,12 @@ final class InstitutionController extends MasterController
         } else {
             setcookie('date_type', 's');
             $dateType = 's';
+        }
+        if(isset($_COOKIE['ts'])){
+            $timescale = $_COOKIE['ts'];
+        } else {
+            setcookie('ts', 'y');
+            $timescale = 's';
         }
 
 
@@ -77,6 +84,21 @@ final class InstitutionController extends MasterController
 
         $orphanActivities  = $this->activityRepo->getOrgOrphanActivities($this->org);
         $processActivities = $this->activityRepo->getOrgProcessActivities($this->org, $viewType);
+        $em = $this->em;
+        $locale = strtoupper($request->getLocale());
+        $org = $this->org;
+        $eventGroups = $this->org->getEventGroups()->map(
+            function(EventGroup $eg) use ($em,$locale,$org){
+                $eg->em = $em;
+                $eg->locale = $locale;
+                $eg->org = $org;
+                return [
+                    'id' => $eg->getId(),
+                    'name' => $eg->getDTrans(),
+                    'evnId' => $eg->getEventGroupName()->getId(),
+                ];
+            }
+        )->getValues();
 
         //print_r(sizeof($orphanActivities));
         //die;
@@ -103,14 +125,24 @@ final class InstitutionController extends MasterController
                 'sortingTypeCookie' => $sortingType,
                 'viewTypeCookie' => $viewType,
                 'dateTypeCookie' => $dateType,
+                'timescaleCookie' => $timescale,
                 'eventForm' => $eventForm->createView(),
                 'newActivityForm' => $createForm->createView(),
+                'firstConnection' => true,
+                'em' => $em,
+                'eventGroups' => $eventGroups,
             ]
         );
     }
 
     /**
      * @param Request $request
+     * Cookies :
+     * ts defines chosen timescale
+     * ci defines current interval
+     * view_type defines either temporal view, or by status view
+     * date_type defines we see either duration for the stage itself (s) or eventual outputs (o)
+     * 
      * @Route("/myactivities", name="myActivities")
      * @return Response
      */
@@ -134,14 +166,29 @@ final class InstitutionController extends MasterController
         if(isset($_COOKIE['view_type'])){
             $viewType = $_COOKIE['view_type'];
         } else {
-            setcookie('view_type', 'd');
-            $viewType = 'd';
+            setcookie('view_type', 't');
+            $viewType = 't';
         }
         if(isset($_COOKIE['date_type'])){
             $dateType = $_COOKIE['date_type'];
         } else {
             setcookie('date_type', 's');
             $dateType = 's';
+        }
+        if(isset($_COOKIE['ts'])){
+            $timescale = $_COOKIE['ts'];
+        } else {
+            setcookie('ts', 'y');
+            $timescale = 'y';
+        }
+        if(!isset($_COOKIE['ci'])) {
+            if($timescale == 'y'){
+                setcookie('ci', date("Y"));
+            } else {
+                $currentQt = ceil(date("n") / 3);
+                $currentYear = date("Y");
+                setcookie('ci', "q-$currentQt-$currentYear");
+            }
         }
 
         $userArchivingPeriod = $currentUser->getActivitiesArchivingNbDays();
@@ -156,19 +203,24 @@ final class InstitutionController extends MasterController
 
         $existingAccessAndResultsViewOption = null;
         $statusAccess = null;
-        $accessAndResultsViewOptions = $this->org->getOptions()->filter(function(OrganizationUserOption $option) {return $option->getOName()->getName() == 'activitiesAccessAndResultsView' && ($option->getRole() == $this->user->getRole() || $option->getUser() == $this->user);});
 
-        // We always chose the most selective access option (NB : we could in the future, create options decidated to position, departments... so below option selection should be rewritten)
-        if(count($accessAndResultsViewOptions) > 0){
-            if(count($accessAndResultsViewOptions) == 2){
-                foreach($accessAndResultsViewOptions as $accessAndResultsViewOption){
-                    if($accessAndResultsViewOption->getUser() != null){
-                        $existingAccessAndResultsViewOption = $accessAndResultsViewOption;
+        if($this->org){
+
+            $accessAndResultsViewOptions = $this->org->getOptions()->filter(function(OrganizationUserOption $option) {return $option->getOName()->getName() == 'activitiesAccessAndResultsView' && ($option->getRole() == $this->user->getRole() || $option->getUser() == $this->user);});
+    
+            // We always chose the most selective access option (NB : we could in the future, create options decidated to position, departments... so below option selection should be rewritten)
+            if(count($accessAndResultsViewOptions) > 0){
+                if(count($accessAndResultsViewOptions) == 2){
+                    foreach($accessAndResultsViewOptions as $accessAndResultsViewOption){
+                        if($accessAndResultsViewOption->getUser() != null){
+                            $existingAccessAndResultsViewOption = $accessAndResultsViewOption;
+                        }
                     }
+                } else {
+                    $existingAccessAndResultsViewOption = $accessAndResultsViewOptions->first();
                 }
-            } else {
-                $existingAccessAndResultsViewOption = $accessAndResultsViewOptions->first();
             }
+        
         }
 
         $checkingIds = [$currentUser->getId()];
@@ -177,9 +229,10 @@ final class InstitutionController extends MasterController
         // 1 - Retrieving activities 
         // Depends on either organization plan (for free organization, no privacy/segregation) and/or user rights/roles
 
-        if($this->org->getPlan() == Organization::PLAN_FREE){
+        if($this->org && $this->org->getPlan() == Organization::PLAN_FREE){
 
-            $userActivities = new ArrayCollection($orgActivities);
+            $externalOrgActivities = $this->org->getExternalActivities();
+            $userActivities = new ArrayCollection($orgActivities + (array)$externalOrgActivities->toArray());
 
         } else {
 
@@ -274,24 +327,26 @@ final class InstitutionController extends MasterController
                     }
                 }
                 //Get activities where user is participating as external user
-                $externalActivities = $em->getRepository(User::class)->getExternalActivities($currentUser);
+                $externalActivities = $currentUser->getExternalActivities();
+                //dd($externalActivities);
+                
                 $userActivities = new ArrayCollection((array)$userActivities->toArray() + $externalActivities->toArray());
     
             //}
         }
 
-
-
-        $addProcessForm = $this->createForm(AddProcessForm::class, null, ['standalone' => true]);
-        $delegateActivityForm = $this->createForm(DelegateActivityForm::class, null, ['standalone' => true, 'currentUser' => $currentUser]) ;
-        $delegateActivityForm->handleRequest($request);
-        $requestActivityForm = $this->createForm(RequestActivityForm::class, null, ['standalone' => true, 'em' => $em, 'currentUser' => $currentUser ]) ;
-        $requestActivityForm->handleRequest($request);
-        $validateRequestForm = $this->createForm(DelegateActivityForm::class, null,  ['standalone' => true, 'request' => true, 'currentUser' => $currentUser]);
-        $validateRequestForm->handleRequest($request);
-        $eventForm = $this->createForm(AddEventForm::class, null, ['standalone' => true, 'currentUser' => $currentUser]);
-        $eventForm->handleRequest($request);
-        $createForm = $this->createForm(ActivityMinElementForm::class, new Stage, ['currentUser' => $this->user]);
+        if($this->org){
+            $addProcessForm = $this->createForm(AddProcessForm::class, null, ['standalone' => true]);
+            $delegateActivityForm = $this->createForm(DelegateActivityForm::class, null, ['standalone' => true, 'currentUser' => $currentUser]) ;
+            $delegateActivityForm->handleRequest($request);
+            $requestActivityForm = $this->createForm(RequestActivityForm::class, null, ['standalone' => true, 'em' => $em, 'currentUser' => $currentUser ]) ;
+            $requestActivityForm->handleRequest($request);
+            $validateRequestForm = $this->createForm(DelegateActivityForm::class, null,  ['standalone' => true, 'request' => true, 'currentUser' => $currentUser]);
+            $validateRequestForm->handleRequest($request);
+            $eventForm = $this->createForm(AddEventForm::class, null, ['standalone' => true, 'currentUser' => $currentUser]);
+            $eventForm->handleRequest($request);
+            $createForm = $this->createForm(ActivityMinElementForm::class, new Stage, ['currentUser' => $this->user]);
+        }
 
         // In case they might access results depending on user participation, then we need to feed all stages and feed a collection which will be analysed therefore in hideResultsFromStages function
         if($existingAccessAndResultsViewOption && empty($noParticipationRestriction)){
@@ -420,23 +475,50 @@ final class InstitutionController extends MasterController
 
         ksort($displayedStatuses);
         //dd($orphanActivities);
-        
+
+        $firstConnection = $currentUser->getLastConnected() == null;
+        if($firstConnection){
+            $currentUser->setLastConnected(new \DateTime);
+            $em->persist($currentUser);
+            $em->flush();
+        }
+
+        $locale = strtoupper($request->getLocale());
+        $org = $this->org;
+
+        $eventGroups = $this->org->getEventGroups()->map(
+            function(EventGroup $eg) use ($em,$locale,$org){
+                $eg->em = $em;
+                $eg->locale = $locale;
+                $eg->org = $org;
+                return [
+                    'id' => $eg->getId(),
+                    'name' => $eg->getDTrans(),
+                    'evnId' => $eg->getEventGroupName()->getId(),
+                ];
+            }
+        )->getValues();
+ 
 
         return $this->render(
             'activities_dashboard.html.twig',
             [
                 'displayedStatuses'  => $displayedStatuses,
                 'orphanActivities'  => $orphanActivities,
-                'processesActivities' => $structuredProcessesActivities,
-                'addProcessForm' => $addProcessForm->createView(),
-                'delegateForm' => $delegateActivityForm->createView(),
-                'validateRequestForm' => $validateRequestForm->createView(),
-                'requestForm' => $requestActivityForm->createView(),
+                'processesActivities' => $this->org ? $structuredProcessesActivities : null,
+                'addProcessForm' => $this->org ? $addProcessForm->createView() : null,
+                'delegateForm' => $this->org ? $delegateActivityForm->createView() : null,
+                'validateRequestForm' => $this->org ? $validateRequestForm->createView() : null,
+                'requestForm' => $this->org ? $requestActivityForm->createView() : null,
                 'sortingTypeCookie' => $sortingType,
                 'viewTypeCookie' => $viewType,
                 'dateTypeCookie' => $dateType,
-                'eventForm' => $eventForm->createView(),
-                'newActivityForm' => $createForm->createView(),
+                'timescaleCookie' => $timescale,
+                'eventForm' => $this->org ? $eventForm->createView() : null,
+                'newActivityForm' => $this->org ? $createForm->createView() : null,
+                'firstConnection' => (int) $firstConnection,
+                'eventGroups' => $eventGroups,
+                'em' => $em,
             ]
         );
 

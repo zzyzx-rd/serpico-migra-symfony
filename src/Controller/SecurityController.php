@@ -76,10 +76,5 @@ class SecurityController extends MasterController
 //            ]
 //        );
 //    }
-    /**
-     * @Route("/signup", name="signup")
-     */
-    public function signup(){
-        //TOdO
-    }
+
 }

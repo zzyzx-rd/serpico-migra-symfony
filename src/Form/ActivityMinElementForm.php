@@ -86,7 +86,7 @@ class ActivityMinElementForm extends AbstractType
                 ]
             )
 
-            
+            /*
             ->add('complexify', SubmitType::class,
                 [
                     'label_format' => 'activities.create.%name%',
@@ -95,12 +95,13 @@ class ActivityMinElementForm extends AbstractType
                     ],
                 ]
             )
+            */
 
             ->add('submit', SubmitType::class,
                 [
                     'label_format' => 'activities.create.%name%',
                     'attr' => [
-                        'class' => 'btn waves-effect waves-light create-activity',
+                        'class' => 'btn waves-effect waves-light btn-s-update create-activity',
                     ],
                 ]
             );

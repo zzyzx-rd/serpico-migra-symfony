@@ -1,0 +1,7 @@
+{% include "components/event_element__item.html.twig" with { event: event, em: em, hasTopBorder: false } %}
+
+{% if embeddedEvents %}
+  {% for embeddedEvent in embeddedEvents %}
+    {% include "components/event_element__item.html.twig" with { event: embeddedEvent, em: em, hasTopBorder: true } %}
+  {% endfor %}
+{% endif %}

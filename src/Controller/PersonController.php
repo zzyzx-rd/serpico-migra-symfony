@@ -24,16 +24,6 @@ use Symfony\Component\Routing\Annotation\Route;
 class PersonController extends MasterController
 {
     /**
-     * @Route("/", name="home_welcome")
-     */
-    public function home(): Response
-    {
-
-        return $this->render('landing.html.twig',
-            ['controller_name' => 'SecurityController']);
-    }
-
-    /**
      * @param Request $request
      * @Route("/settings/{entity}/{elmtId}/overview", name="elementOverview")
      */

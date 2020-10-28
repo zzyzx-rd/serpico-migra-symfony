@@ -125,8 +125,6 @@
             <span class="page-title">{#{{ toValidate is defined ? 'create_organization.validate_title'|trans : 'header.register.description'|trans }}#}</span>
         </header>
 
-        {% set organization = form.vars.data %}
-
         {{ form_start(form) }}
         {#
         {{ form_label(form.legalName) }}
@@ -173,8 +171,10 @@
                     <span class="page-title">
                         {{ toValidate is defined ? 'create_organization.validate_title'|trans : 'header.register.description'|trans }}
                     </span>
+
+                    {% if currentuser and currentuser.role == 4 and global.route != 'signup' %}
                     <div class="organization-commname">
-                        
+                        {% set organization = form.vars.data %}
                         {% if organization and organization.commname is not null %}
                             {% set commonName = organization.commname %}
                             {% set isTooLong = commonName|length > truncVal %}
@@ -200,6 +200,9 @@
                             <input type="hidden" name="wfiId">
                         </div>
                     </div>
+                    {% endif %}
+
+
                     {#
                     <div class="input-field w-firm">
                         {{ form_row(form.commname) }}
@@ -218,7 +221,7 @@
                         {{ form_row(form.email) }}
                     </div>
                     
-                    {% if currentuser and currentuser.role == 4 %}
+                    {% if currentuser and currentuser.role == 4 and global.route != 'signup' %}
                         <div class="row no-margin">
                             <div class="col s12 m6">
                                 <div class="organization-department">
@@ -347,6 +350,7 @@
     
     </main>
 
+{#
 {% if not form.vars.valid %}
 	<div id="errors" class="modal open">
 		<div class="modal-title">
@@ -360,6 +364,7 @@
 		</div>
 	</div>
 {% endif %}
+#}
 
 {% if orgId is defined %}
 <div id="deleteOrganization" class="modal">

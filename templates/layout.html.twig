@@ -11,8 +11,8 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
     <title>
+      DealDrive -
       {% block title '' %}
-      - Serpico Public
     </title>
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('lib/img/favicon/favicon.ico') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('lib/img/favicon/favicon-32x32.png') }}">
@@ -30,11 +30,11 @@
     {% block css %}{##}{% endblock %}
 
     <script>
-      window.lg = '{% trans %}curr_language   {% endtrans %}';
+      window.lg = '{{ global.request.locale }}';
     </script>
   </head>
 
-  {% if global.currentuser != null %}
+  {% if global.currentuser != null and currentuser.organization is not null %}
     {% set orgName = global.currentuser.organization.commname %}
   {% else %}
     {% set orgName = '' %}
@@ -51,16 +51,18 @@
               </li>
               <li class="plan">
                 <div class="c-flex-center">
-                  <span> {{currentuser.organization.plan == 1 ? 'header.plan.enterprise'|trans|upper : (currentuser.organization.plan == 2 ? 'header.plan.premium'|trans|upper : 'header.plan.free'|trans|upper) }} </span>
-                  <a href="{{ path('priceManagement') }}">{{ 'header.plan.upgrade'|trans }}</a>
+                  <span> {{ currentuser.organization.plan == 1 ? 'header.plan.enterprise'|trans|upper : (currentuser.organization.plan == 2 ? 'header.plan.premium'|trans|upper : 'header.plan.free'|trans|upper) }} {{ date('now').diff(currentuser.organization.inserted).days < 21 ? '(' ~ 'trial'|trans|upper ~ ')' }} </span>
+                  <a class="dd-orange-text" href="{{ path('priceManagement') }}">{{ 'header.plan.upgrade'|trans }}</a>
                 </div>
               </li>
+              {#
               <li>
                 <a href="{{ path('help') }}">
                   <i class="fa fa-question-circle" aria-hidden="true"></i>
                   <span>{% trans %}header.help{% endtrans %}</span>
                 </a>
               </li>
+              #}
               {% if global.currentuser.is_root %}
                 <li class="">
                   <a href="{{ path('rootManagement') }}">
@@ -94,7 +96,7 @@
                 <li>
                   <a href="{{ path(global.currentuser.is_admin ? 'manageUsers' : 'seeColleaguesTeams') }}">
                     <i class="fa fa-users" aria-hidden="true"></i>
-                    {% set str = 'header.' ~ (global.currentuser.is_admin ? 'users' : 'community') %}
+                    {% set str = 'header.users' %}
                     {{ str|trans }}
                   </a>
                 </li>
@@ -111,13 +113,13 @@
                   </span>
                 </a>
               </li>
+              
               <li>
-                <a href="{{ path('home') }}">
-                  <img class="user-profile-picture" src="{{ asset(global.userpicture) }}">
-                  {# username is only defined for user being citizen (public), otherwise fullname #}
-                  {#{{ global.currentuser.fullname != "" ? global.currentuser.fullname : global.currentuser.username }}#}
+                <a href="{#{{ path('home') }}#}#">
+                  <img class="user-profile-picture tooltipped" src="{{ asset(global.userpicture) }}" data-tooltip="{{ currentuser.fullname }}" data-position="down">
                 </a>
               </li>
+              
               <li class="logout">
                 <a href="{{ path('logout') }}">
                   <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
@@ -133,32 +135,35 @@
                   {% trans %}landing.page_name{% endtrans %}
                 </li>
               {#{% endif %}#}
-              {% if global.route == "about" %}
+
+                
                 <li>
-                  <a href="{{ path('home_welcome') }}">
-                    <i class="fa fa-home"></i>
-                    {% trans %}header.home{% endtrans %}
+                  <a class="product {{ global.route == 'pricing' ? 'strong'}}" href="{#{{ path('solution') }}#}{{ path('pricing') }}">
+                    {% trans %}header.pricing{% endtrans %}
                   </a>
                 </li>
-              {% endif %}
-              <li>
-                {% if global.route == "solution" %}
-                  <a href="{{ path('home_welcome') }}">
-                    <i class="fa fa-home"></i>
-                    {% trans %}header.home{% endtrans %}
-                  </a>
-                {% else %}
-                  <a class="product" href="{{ path('solution') }}">{% trans %}header.product{% endtrans %}</a>
-                {% endif %}
-              </li>
-              {% if global.route != "about" %}
+
                 <li>
-                  <a href="{{ path('about') }}">{% trans %}header.about{% endtrans %}</a>
+                  <a class="product" href="{{ path('home_welcome') }}">
+                    {% trans %}header.product{% endtrans %}
+                  </a>
                 </li>
-              {% endif %}
-              <li>
-                <a class="modal-trigger" href="#login">{% trans %}header.login{% endtrans %}</a>
-              </li>
+                  {% if '/' ~ global.route != path('login') and '/' ~ global.route != path('signup') and not is_granted('IS_AUTHENTICATED_REMEMBERED') %}
+
+                    <li>
+                        <a class="modal-trigger" href="{{ is_granted('IS_AUTHENTICATED_REMEMBERED') ? path('processesList') : path('login') }}">
+                          {% trans %}header.login{% endtrans %}
+                        </a>
+                      </li>
+
+                      <li>
+                        <a class="btn waves-effect waves-light login-btn" href="{{ path('signup') }}">
+                          {% trans %}header.register.start{% endtrans %}
+                        </a>
+                      </li>
+                  
+                  {% endif %}
+              
             {% endif %}
             <li class="lg-icon">
               <div class="collapsible" data-collapsible="accordion">

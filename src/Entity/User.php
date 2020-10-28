@@ -9,6 +9,7 @@ use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\Column;
@@ -163,9 +164,14 @@ class User extends DbObject implements  UserInterface, \Serializable
     public $externalUsers;
 
     /**
-     * @OneToMany(targetEntity="EventComment", mappedBy="user",cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="EventComment", mappedBy="author",cascade={"persist", "remove"}, orphanRemoval=true)
      */
     public $eventComments;
+    
+    /**
+     * @OneToMany(targetEntity="DocumentAuthor", mappedBy="author", cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    public $documentContributions;
 
     /** 
      * @ManyToOne(targetEntity="User", inversedBy="subordinates")
@@ -175,12 +181,12 @@ class User extends DbObject implements  UserInterface, \Serializable
     protected $superior;
 
     /**
-     * @OneToMany(targetEntity="Mail", mappedBy="user",cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="Mail", mappedBy="user", cascade={"persist", "remove"}, orphanRemoval=true)
      */
     public $mails;
 
     /**
-     * @OneToMany(targetEntity="Target", mappedBy="user",cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="Target", mappedBy="user", cascade={"persist", "remove"}, orphanRemoval=true)
      */
     public $targets;
 
@@ -262,7 +268,7 @@ class User extends DbObject implements  UserInterface, \Serializable
 
     private $roles;
 
-    
+
     /**
      * @var UploadedFile
      */
@@ -316,7 +322,7 @@ class User extends DbObject implements  UserInterface, \Serializable
     public function __construct(
       ?int $id = null,
         $internal = true,
-        $synthetic = false,
+        $synthetic = null,
         $firstname = null,
         $lastname = null,
         $username = null,
@@ -415,7 +421,6 @@ class User extends DbObject implements  UserInterface, \Serializable
     public function setSynthetic(bool $synthetic): self
     {
         $this->synthetic = $synthetic;
-
         return $this;
     }
 
@@ -639,7 +644,7 @@ class User extends DbObject implements  UserInterface, \Serializable
     /**
      * @return int
      */
-    public function getRole(): int
+    public function getRole(): ?int
     {
         return $this->role;
     }
@@ -777,13 +782,34 @@ class User extends DbObject implements  UserInterface, \Serializable
     public function addEventComment(EventComment $eventComment): self
     {
         $this->eventComments->add($eventComment);
-        $eventComment->setUser($this);
+        $eventComment->setAuthor($this);
         return $this;
     }
 
     public function removeEventComment(EventComment $eventComment): self
     {
         $this->eventComments->removeElement($eventComment);
+        return $this;
+    }
+
+    /**
+     * @return ArrayCollection|EventDocument[]
+     */
+    public function getEventDocuments()
+    {
+        return $this->eventDocuments;
+    }
+
+    public function addEventDocument(EventDocument $eventDocument): self
+    {
+        $this->eventDocuments->add($eventDocument);
+        $eventDocument->setAuthor($this);
+        return $this;
+    }
+
+    public function removeEventDocument(EventDocument $eventDocument): self
+    {
+        $this->eventDocuments->removeElement($eventDocument);
         return $this;
     }
 
@@ -958,7 +984,7 @@ class User extends DbObject implements  UserInterface, \Serializable
         return $this;
     }
 
-    public function getOrganization(): Organization
+    public function getOrganization(): ?Organization
     {
         return $this->organization;
     }
@@ -1061,17 +1087,18 @@ class User extends DbObject implements  UserInterface, \Serializable
     {   
 
         $roles = [];
-
-        switch($this->organization->getPlan()){
-            case 3:
-                $roles[] = 'ROLE_FREE';
-                break;
-            case 2:
-                $roles[] = 'ROLE_PREMIUM';
-                break;
-            case 1:
-                $roles[] = 'ROLE_ENTERPRISE';
-                break;
+        if($this->organization){
+            switch($this->organization->getPlan()){
+                case 3:
+                    $roles[] = 'ROLE_FREE';
+                    break;
+                case 2:
+                    $roles[] = 'ROLE_PREMIUM';
+                    break;
+                case 1:
+                    $roles[] = 'ROLE_ENTERPRISE';
+                    break;
+            }
         }
 
         switch($this->role){
@@ -1243,6 +1270,20 @@ class User extends DbObject implements  UserInterface, \Serializable
     {
         $this->subordinates->removeElement($user);
         return $this;
+    }
+
+    public function getExternalActivities()
+    {
+        $externalParticipations = $this->participations->filter(fn(Participation $p) => $p->getStage()->getActivity()->getOrganization() != $this->organization);
+        $externalActivities = [];
+        foreach($externalParticipations as $externalParticipation){
+            $externalActivity = $externalParticipation->getStage()->getActivity();
+            if (in_array($externalActivity,$externalActivities) === false){
+                $externalActivities[] = $externalActivity;
+            }
+        }
+        $externalActivities = new ArrayCollection($externalActivities);
+        return $externalActivities;
     }
 
 

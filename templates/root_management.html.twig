@@ -41,7 +41,7 @@
 {% block content %}
   {% set manage_procs = path('manageProcesses') %}
   {% set manage_orgs = path('manageOrganizations') %}
-  {% set manage_wfs = path('manageWorkerFirms',{page: 1}) %}
+  {% set manage_wfs = path('manageWorkerFirms') %}
   <section>
     <a class="btn-large waves-effect waves-light teal" href="{{ manage_procs }}">
       <i class="fa fa-bookmark"></i>

@@ -242,11 +242,19 @@ class Client extends DbObject
     {
         $aliveExtUsers = new ArrayCollection;
         foreach ($this->externalUsers as $externalUser) {
-            if ($externalUser->getDeleted() == null && !$externalUser->isSynthetic()) {
+            if ($externalUser->getDeleted() == null) {
                 $aliveExtUsers->add($externalUser);
             }
         };
         return $aliveExtUsers;
+    }
+
+    /**
+     * @return ArrayCollection|ExternalUser[]
+     */
+    public function getAliveExternalUsersWithoutSync(): ArrayCollection
+    {
+        return $this->getExternalUsers()->filter(fn(ExternalUser $eu) => !$eu->getDeleted() && !$eu->isSynthetic());
     }
 
     public function addAliveExternalUser(ExternalUser $externalUser): Client

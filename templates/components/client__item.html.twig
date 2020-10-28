@@ -2,28 +2,30 @@
 
     <div class="client {% if item.parent is not null %}collection-item{% endif %}">
     <div class="client-data-zone" {% if not client %}style="display:none"{% endif %}>
-        <ul class="flex-center">
-        <li style="margin-right: 20px;position:relative">
-            <img class="client-logo-zone" src="{{ client ? asset(global.clientlogo(client)) : asset('lib/img/org/no-picture.png') }}">
-        </li>
-        <li style="width: 100%;">
-            <ul class="flex-center-sb">
-            <h5 style="display: inline-block;" class="client-name">
-                {% if client and client.name is not empty %}
-                {{ client.name }}
-                {% endif %}
-            </h5>
-            {#<a href="#deleteClient" class="waves-effect waves-light accent-4 btn-flat modal-trigger" style="margin-left: auto;"><i class="fa fa-times"></i></a>#}
-            <div>
-                <a class="modify-client-btn btn-flat"><i class="fa fa-pencil-alt"></i></a>
-            </div>
-            </ul>
-            {#
-            <div>
-            Adresse générique : <span class="client-email"> {{ client.vars.data.email }} </span>
-            </div>
-            #}
-        </li>
+        <ul class="flex-center" style="width:100%">
+            <li style="margin-right: 20px;position:relative">
+                <img class="client-logo-zone" src="{{ client ? asset(global.clientlogo(client)) : asset('lib/img/org/no-picture.png') }}">
+            </li>
+            <li>
+
+                <h5 style="display: inline-block;" class="client-name">
+                    {% if client and client.name is not empty %}
+                    {{ client.name }}
+                    {% endif %}
+                </h5>
+                {#<a href="#deleteClient" class="waves-effect waves-light accent-4 btn-flat modal-trigger" style="margin-left: auto;"><i class="fa fa-times"></i></a>#}
+            
+                {#
+                <div>
+                Adresse générique : <span class="client-email"> {{ client.vars.data.email }} </span>
+                </div>
+                #}
+            </li>
+            <li>
+                <div>
+                    <a class="modify-client-btn btn-flat"><i class="fa fa-pencil-alt"></i></a>
+                </div>
+            </li>
         </ul>   
     </div>
 
@@ -64,12 +66,12 @@
         {{ form_widget(item.id) }}
         </ul> 
     </div>
-    <ul class="individuals collection no-padding" data-prototype="{% apply escape %}{% include 'components/client_external_user__item.html.twig' with { item: item.aliveExternalUsers.vars.prototype, client: item } %}{% endapply %}"
-    {% if not client or client.aliveExternalUsers|length == 0 %}style="display:none"{% endif %}
+    <ul class="individuals collection no-padding" data-prototype="{% apply escape %}{% include 'components/client_external_user__item.html.twig' with { item: item.aliveExternalUsersWithoutSync.vars.prototype, client: item } %}{% endapply %}"
+    {% if not client or client.aliveExternalUsersWithoutSync|length == 0 %}style="display:none"{% endif %}
     >
         
-        {% for ikey, individual in item.aliveExternalUsers %}
-        {% include "components/client_external_user__item.html.twig" with { item: individual, client: item } %}
+        {% for ikey, individual in item.aliveExternalUsersWithoutSync %}
+            {% include "components/client_external_user__item.html.twig" with { item: individual, client: item } %}
         {% endfor %}
     
     </ul>

@@ -3,12 +3,14 @@
 namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
-use App\Repository\OptionNameRepository;
+use App\Repository\EventCommentRepository;
 use DateTime;
 use DateTimeInterface;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\OneToMany;
 
 /**
  * @ApiResource()
@@ -24,16 +26,16 @@ class EventComment extends DbObject
     public ?int $id;
 
     /**
-     * @ORM\Column(name="evc_type", type="string", nullable=true)
+     * @ORM\Column(name="evc_content", type="string", nullable=true)
      */
-    public $value;
+    public $content;
 
     /**
      * @ManyToOne(targetEntity="User", inversedBy="eventComments")
-     * @JoinColumn(name="user_usr_id", referencedColumnName="usr_id", nullable=true)
+     * @JoinColumn(name="evc_author", referencedColumnName="usr_id", nullable=true)
      * @var User
      */
-    protected $user;
+    protected $author;
 
     /**
      * @ManyToOne(targetEntity="Event", inversedBy="comments")
@@ -46,6 +48,22 @@ class EventComment extends DbObject
      * @ORM\Column(name="evc_created_by", type="integer", nullable=true)
      */
     public ?int $createdBy;
+
+    /**
+     * @ManyToOne(targetEntity="EventComment", inversedBy="children")
+     * @JoinColumn(name="parent_id", referencedColumnName="evc_id", nullable=true)
+     */
+    public $parent;
+
+    /**
+     * @OneToMany(targetEntity="EventComment", mappedBy="parent", cascade={"persist", "remove"})
+     */
+    public $children;
+
+    /**
+     * @ORM\Column(name="evc_modified", type="datetime", nullable=true)
+     */
+    public $modified;
 
     /**
      * @ORM\Column(name="evc_inserted", type="datetime", nullable=false, options={"default": "CURRENT_TIMESTAMP"})
@@ -64,16 +82,17 @@ class EventComment extends DbObject
         $id = 0,
         $type = null,
         $description = null,
-        $name = null,
-        $user = null,
-        $createdBy = null
+        $content = null,
+        $createdBy = null,
+        DateTime $modified = null
         )
     {
         parent::__construct($id, $createdBy, new DateTime());
         $this->type = $type;
-        $this->name = $name;
-        $this->user = $user;
+        $this->content = $content;
         $this->description = $description;
+        $this->children = new ArrayCollection;
+        $this->modified = $modified;
     }
 
 
@@ -88,25 +107,25 @@ class EventComment extends DbObject
         return $this;
     }
 
-    public function getName(): ?string
+    public function getContent(): ?string
     {
-        return $this->name;
+        return $this->content;
     }
 
-    public function setName(string $name): self
+    public function setContent(string $content): self
     {
-        $this->name = $name;
+        $this->content = $content;
         return $this;
     }
 
-    public function getUser(): ?User
+    public function getAuthor(): ?User
     {
-        return $this->user;
+        return $this->author;
     }
 
-    public function setUser(User $user): self
+    public function setAuthor(User $author): self
     {
-        $this->user = $user;
+        $this->author = $author;
         return $this;
     }
 
@@ -127,8 +146,51 @@ class EventComment extends DbObject
         return $this;
     }
 
+    public function getModified(): ?DateTimeInterface
+    {
+        return $this->modified;
+    }
+
+    public function setModified(?DateTimeInterface $modified): self
+    {
+        $this->modified = $modified;
+        return $this;
+    }
+
     public function __toString()
     {
         return (string) $this->id;
+    }
+
+    public function addChildren(EventComment $child): self
+    {
+        $this->children->add($child);
+        $child->setParent($this);
+        return $this;
+    }
+
+    public function removeChildren(EventComment $child): self
+    {
+        $this->children->removeElement($child);
+        return $this;
+    }
+
+    /**
+     * @return ArrayCollection|EventComment[]
+     */
+    public function getChildren()
+    {
+        return $this->children;
+    }
+
+    public function setParent(?EventComment $parent): self
+    {
+        $this->parent = $parent;
+        return $this;
+    }
+
+    public function getParent(): ?self
+    {
+        return $this->parent;
     }
 }

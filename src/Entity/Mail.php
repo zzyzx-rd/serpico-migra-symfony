@@ -78,12 +78,12 @@ class Mail extends DbObject
      */
     protected $workerFirm;
     /**
-     * @ManyToOne(targetEntity="Activity")
+     * @ManyToOne(targetEntity="Activity", inversedBy="mails")
      * @JoinColumn(name="activity_act_id", referencedColumnName="act_id", nullable=true)
      */
     protected $activity;
     /**
-     * @ManyToOne(targetEntity="Stage")
+     * @ManyToOne(targetEntity="Stage", inversedBy="mails")
      * @JoinColumn(name="stage_stg_id", referencedColumnName="stg_id", nullable=true)
      */
     protected $stage;

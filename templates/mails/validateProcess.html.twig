@@ -32,18 +32,18 @@
                             <p>{{'validateProcess.message_changed_primary_parent'|trans}} ({{'validateProcess.message_previous_choice'|trans}} "{{initialProcessParent.name}}")
                         {% endif %}
                     {% endif %}
-                    <p style="text-align: center"><a href="{{ url('trackMLinkClick',{'trkToken' : trkToken}) }}" target="_blank"><button style="background-color: #26a69a; height: 40px; line-height: 40px; text-decoration: none; color: #fff; text-align: center; border: none;">{% trans %}mails.validateProcess.button_text{% endtrans %}</button></a></p>
+                    <p style="text-align: center"><a href="{{ url('trackMLinkClick',{'trkToken' : trkToken}) }}" target="_blank"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;font-weight:600;text-transform:uppercase;">{% trans %}mails.validateProcess.button_text{% endtrans %}</button></a></p>
                     <p>{% trans %}mails.validateProcess.message2{% endtrans %}</p><br>
                     {#<p>{% trans %}mails.see_you_soon{% endtrans %}</p>#}
                 </td>
                 </tr>
                 <tr>
                     <td>
-                        {% if company_name == 'Serpico' %}<p>{% trans %}mails.signature_team{% endtrans %}{#{% else %}{% trans %}mails.signature_team_for_client{% endtrans %}#}</p>{% endif %}
-                        {% if company_name == 'Serpico' %}<a href="{{ company_website }}" style="width: 60px">{% endif %}<img src="cid:logo_img" alt="logo {{ company_name }}" style="width: {{ logo_width_px }}px">{% if company_name == 'Serpico' %}</a>{% endif %}
-                        <p><strong>{% if company_name == 'Serpico' %}{% trans %}mails.serpico_motto{% endtrans %}{% else %}{{ company_name }}{% endif %}</strong><br>{{ address }} | {{ zipcode_city }}</p>
+                        <p>{% trans %}mails.signature_team{% endtrans %}</p>
+                        <img src="cid:logo_img" alt="logo {{ company_name }}" style="width: {{ logo_width_px }}px">
+                        <p style="margin:0;"><strong>{{ 'mails.dealdrive_motto'|trans }}</strong><br>{{ address }} | {{ zipcode_city }}</p>
                         {% if company_name == 'Serpico' %}<p>{{ phone }}</p>{% endif %}
-                        {% if company_name == 'Serpico' %}<img src="{{ incubator_logo }}" alt="logo Lux Future Lab" style="width: 80px">{% endif %}
+                        
                     </td>
                 </tr>
             </table>

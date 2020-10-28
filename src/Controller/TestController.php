@@ -35,7 +35,7 @@ class TestController extends MasterController
         ]);
     }
     /**
-     * @Route("/terms", name="terms_conditions")
+     * @Route("/terms-and-conditions", name="terms_conditions")
      */
     public function terms_index()
     {

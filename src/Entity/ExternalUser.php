@@ -49,7 +49,7 @@ class ExternalUser extends DbObject
     /**
      * @ORM\Column(name="ext_weight_value", type="float", nullable=true)
      */
-    public $weightValue;
+    public ?float $weightValue;
 
     /**
      * @ORM\Column(name="ext_synth", type="boolean", nullable=true)
@@ -126,10 +126,10 @@ class ExternalUser extends DbObject
         $firstname = '',
         $lastname = '',
         $email = null,
-        $weightValue = 0.0,
+        $weightValue = null,
         $positionName = null,
         $owner = null,
-        $synthetic = false, 
+        $synthetic = null, 
         $createdBy = null,
         $lastConnected = null,
         $deleted = null,
@@ -145,7 +145,7 @@ class ExternalUser extends DbObject
         $this->weightValue = $weightValue;
         $this->owner = $owner;
         $this->synthetic = $synthetic;
-        $this->last_connected = $lastConnected;
+        $this->lastConnected = $lastConnected;
         $this->deleted = $deleted;
         $this->user = $user;
         $this->client = $client;
@@ -162,7 +162,6 @@ class ExternalUser extends DbObject
     public function setFirstname(string $firstname): self
     {
         $this->firstname = $firstname;
-
         return $this;
     }
 
@@ -174,7 +173,6 @@ class ExternalUser extends DbObject
     public function setLastname(string $lastname): self
     {
         $this->lastname = $lastname;
-
         return $this;
     }
 
@@ -205,7 +203,7 @@ class ExternalUser extends DbObject
         return $this->weightValue;
     }
 
-    public function setWeightValue(float $weightValue): self
+    public function setWeightValue(?float $weightValue): self
     {
         $this->weightValue = $weightValue;
         return $this;
@@ -236,19 +234,17 @@ class ExternalUser extends DbObject
     public function setInserted(DateTimeInterface $inserted): self
     {
         $this->inserted = $inserted;
-
         return $this;
     }
 
     public function getLastConnected(): ?DateTimeInterface
     {
-        return $this->last_connected;
+        return $this->lastConnected;
     }
 
     public function setLastConnected(?DateTimeInterface $lastConnected): self
     {
-        $this->last_connected = $lastConnected;
-
+        $this->lastConnected = $lastConnected;
         return $this;
     }
 
@@ -260,7 +256,6 @@ class ExternalUser extends DbObject
     public function setDeleted(?DateTimeInterface $deleted): self
     {
         $this->deleted = $deleted;
-
         return $this;
     }
 

@@ -1,15 +1,27 @@
+{% set eventType = event.eventType %}
+{% set eventGroup = eventType.eventGroup %}
+
+{% do eventType.setLocale(global.request.locale|upper) %}
+{% do eventType.setEm(em) %}
+{% do eventType.setOrg(currentuser.organization) %}
+{% do eventGroup.setLocale(global.request.locale|upper) %}
+{% do eventGroup.setEm(em) %}
+{% do eventGroup.setOrg(currentuser.organization) %}
+
 <div style="width:350px;">
-  <ul class="flex-center t-stage-info">
+  <ul class="flex-center t-event-info">
     <li>
-      {% set eventIcon = event.eventType.icon %}
+      {% set eventIcon = eventType.icon %}
+      <span class="evg evg-{{eventGroup.eventGroupName.id}} evg-text-shadow">{{ eventGroup.dTrans }}</span>
+      <span class="sm-left sm-right">:</span>
       <i class="{{ eventIcon.type == 'fa' ? 'fa fa-' ~ eventIcon.name : 'material-icons' }}">{{ eventIcon.type == 'm' ? eventIcon.name }}</i>
-      <span>{{event.eventType.eName.name}}</span>
+      <span class="evt">{{ eventType.dTrans }}</span>
     </li>
     <li class="t-stage-dates">
       <ul class="flex-center">
         <ul class="flex-center m-right">
-          <i class="fa fa-calendar"></i>
-          <span>{{ event.onsetDate|format_datetime('short', 'none', pattern='dd/MM') }}</span>
+          <i class="fa fa-calendar sm-right"></i>
+          <span>{{ event.nicetime(event.onsetDate|date("m/d/Y")) }}</span>
           {% if event.expResDate %}
             <i class="fa fa-calendar-check"></i>
             <span>{{ event.expResDate|format_datetime('short', 'none', pattern='dd/MM') }}</span>
@@ -31,19 +43,6 @@
         <span>{{ event.documents|length ~ ' ' ~ 'activity_elements.events.tooltip.shared_documents'|trans }}</span>
     </div>
   {% endif %}
-    {#{% for document in event.documents %}
-        <div class="flex-center-sb">
-          <div>
-            <i class="fa fa-file-alt"></i>
-            <span>{{ document.title }}</span>
-          </div>
-          <div>
-            <i class="material-icons">access_time</i>
-            <span>{{ document.inserted|format_datetime('short', 'none', pattern='dd/MM') }}</span>
-          </div>
-        </div>
-    {% endfor %}
-    #}
  
   <div class="event-comments" style="text-align: left">
     <div>
@@ -51,12 +50,7 @@
     </div>
     {% if event.comments|length %}
       <i class="fa fa-comment"></i>
-      <span>{{'activity_elements.events.tooltip.comments'|trans}}</span>
-      {% for comment in event.comments %}
-        <div>
-          <span>{{ comment.value }}</span>
-        </div> 
-      {% endfor %}
+      <span>{{ event.comments|length ~ ' ' ~ 'activity_elements.events.tooltip.comments'|trans}}</span>
     {% else %}
       <span>{{'activity_elements.events.tooltip.no_given_comments'|trans}}</span>
     {% endif %}
