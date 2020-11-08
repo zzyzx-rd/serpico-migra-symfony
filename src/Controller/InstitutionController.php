@@ -7,6 +7,8 @@ use App\Entity\Client;
 use App\Entity\Participation;
 use App\Entity\Decision;
 use App\Entity\Department;
+use App\Entity\ElementUpdate;
+use App\Entity\EventComment;
 use App\Entity\EventGroup;
 use App\Entity\Organization;
 use App\Entity\OrganizationUserOption;
@@ -24,10 +26,14 @@ use Doctrine\ORM\EntityManagerInterface;
 use App\Form\DelegateActivityForm;
 use App\Form\RequestActivityForm;
 use App\Repository\ActivityRepository;
+use DateTime;
+use DateTimeZone;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Security;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class InstitutionController extends MasterController
 {
@@ -148,9 +154,12 @@ final class InstitutionController extends MasterController
      */
     public function myActivitiesListAction(Request $request): Response
     {
-
-        $em = $this->getEntityManager();
         $currentUser = $this->user;
+        if(!$currentUser){
+            return $this->redirectToRoute('login');
+        }
+        
+        $em = $this->getEntityManager();
         $repoA = $em->getRepository(Activity::class);
         $repoP = $em->getRepository(Participation::class);
         $repoDec = $em->getRepository(Decision::class);
@@ -233,7 +242,6 @@ final class InstitutionController extends MasterController
 
             $externalOrgActivities = $this->org->getExternalActivities();
             $userActivities = new ArrayCollection($orgActivities + (array)$externalOrgActivities->toArray());
-
         } else {
 
             if($existingAccessAndResultsViewOption){
@@ -326,12 +334,19 @@ final class InstitutionController extends MasterController
                         }
                     }
                 }
+
                 //Get activities where user is participating as external user
                 $externalActivities = $currentUser->getExternalActivities();
-                //dd($externalActivities);
-                
-                $userActivities = new ArrayCollection((array)$userActivities->toArray() + $externalActivities->toArray());
-    
+                //  $userActivities = new ArrayCollection(  $userActivities->toArray() + $externalActivities);
+                $copiedUserActivities = clone $userActivities;
+                $userActivities = new ArrayCollection();
+                foreach($copiedUserActivities as $copiedUserActivity){
+                    $userActivities->add($copiedUserActivity);
+                }
+                foreach($externalActivities as $externalActivity){
+                    $userActivities->add($externalActivity);
+                }
+                //$mergedActivities = new ArrayCollection([$userActivities->getValues() + $externalActivities->getValues()]);
             //}
         }
 
@@ -497,7 +512,6 @@ final class InstitutionController extends MasterController
                 ];
             }
         )->getValues();
- 
 
         return $this->render(
             'activities_dashboard.html.twig',
@@ -521,6 +535,283 @@ final class InstitutionController extends MasterController
             ]
         );
 
+        
+    }
+
+    // Recurring function which loads new updates, and checks whether there should dynamic changes to dashboards
+
+    /**
+    * @Route("/updates/retrieve", name="retrieveUpdates")
+    * @return Response
+    */
+    public function retrieveUpdates(Request $request, TranslatorInterface $translator){
+        
+        //$maxRetrieved = 7;
+        $currentUser = $this->user;
+        if(!$currentUser){
+            return new JsonResponse(['error' => 'User not connected', 500]);
+        }
+
+        $newUIds = $request->get('newUIds') ?: [] ;
+        $existingUIds = $request->get('existingUIds') ?: [];
+        $modifyDashboard = $request->get('md');
+       
+        $updates = $currentUser->getUpdates()->filter(fn(ElementUpdate $u) => $u->getUser() == $currentUser)->matching(Criteria::create()->orderBy(['inserted' => Criteria::DESC, 'stage' => Criteria::ASC]));
+        //$unseenUpdates = $updates->filter(fn(ElementUpdate $u) => $u->getViewed() == null);
+        
+        if($updates->count() == sizeof($newUIds) + sizeof($existingUIds)){
+            $dataUpdates['ntu'] = true;
+            
+        } else {
+            
+            if($updates->count() == 0){
+                $dataUpdates['noUpdatesMsg'] = $translator->trans('updates.no_update_yet');
+            }
+
+            // We need to update on 3 cases : new update (necessarily unseen by currentuser), or cancellation of an action by anotyher user, causing update deletion which was present before
+
+            $tz = new DateTimeZone('Europe/Paris');
+            $locale = $request->getLocale();
+            $repoU = $this->em->getRepository(User::class);
+            $dataUpdates['notifs'] = [];
+            $dataUpdates['stages'] = [];
+            $dataUpdates['rUIds'] = [];
+            $updateIds = $updates->map(fn(ElementUpdate $u) => $u->getId())->getValues();
+            foreach($newUIds as $newId){
+                if (!in_array($newId,$updateIds)){
+                    $dataUpdates['rUIds'][] = $newId;
+                }
+            }
+            foreach($existingUIds as $existingId){
+                if (!in_array($existingId,$updateIds)){
+                    $dataUpdates['rUIds'][] = $existingId;
+                }
+            }
+            
+            if($modifyDashboard){
+
+                $stageIds = array_merge(
+                    $currentUser->getExternalStages()->map(fn(Stage $s) => $s->getId())->getValues(), 
+                    $currentUser->getInternalStages()->map(fn(Stage $s) => $s->getId())->getValues()
+                );
+
+                $aIds = $request->get('aIds') ?: [];
+                $sIds = $request->get('sIds') ?: [];
+                $eIds = $request->get('eIds') ?: [];
+                $progressStatuses = [
+                    -5 => 'stopped',
+                    -4 => 'postponed',
+                    -3 => 'suspended',
+                    -2 => 'reopened',
+                    -1 => 'unstarted',
+                    0  => 'upcoming',
+                    1  => 'ongoing',
+                    2  => 'completed',
+                    3  => 'finalized',
+                ];
+               
+                foreach($sIds as $sId){
+                    if (!in_array($sId,$stageIds)){
+                        $dataUpdates['rSIds'][] = $sId;
+                    }
+                }
+            }
+
+            $newUpdates = $updates->filter(fn(ElementUpdate $u) => $u->getViewed() == null);
+            
+            foreach ($newUpdates as $newUpdate){
+
+                if(!in_array($newUpdate, array_merge($newUIds,$existingUIds))){
+
+                    if($newUpdate->getActivity()){
+                        // Different case : first, updates related to activities.
+                        // Then can be on : act/stg creation, participation, event and related documents/comments, criterion, output
+                        $comment = $newUpdate->getEventComment();
+                        $document = $newUpdate->getEventDocument();
+                        $event = $newUpdate->getEvent();
+                        $participation = $newUpdate->getParticipation();
+                        $stage = $newUpdate->getStage();
+                        $activity = $newUpdate->getActivity();
+    
+                        $transParameters = [];
+                        $transParameters['actElmtMsg'] = $activity->getStages()->count() > 1 ? 
+                            $translator->trans('the_phase') . ' ' . $stage->getName() . ' ' . $translator->trans('of') . ' ' . $translator->trans('the_activity') . ' ' . $activity->getName() :
+                            $translator->trans('the_activity') . ' '. $activity->getName();
+    
+                        if($document != null || $comment != null){
+                            $creator = $repoU->find($document ? $document->getCreatedBy() : $comment->getCreatedBy());
+                            $transParameters['updateType'] = $document ? 
+                                ($document->getParent() ? 
+                                    $translator->trans('updates.comment_update_type.withParent') : 
+                                    $translator->trans('updates.comment_update_type.withoutParent')
+                                ) : 
+                                ($newUpdate->getType() == ElementUpdate::CREATION ?
+                                    $translator->trans('updates.comment_update_type.withParent') : 
+                                    $translator->trans('updates.comment_update_type.withoutParent')
+                                );
+                            
+                            $transParameters['update_type'] = $document ? 'event_document' : 'event_comment';
+                            
+                        } else if ($event != null && $event->getUpdates()->filter(fn(ElementUpdate $u) => $u->getEventComment() || $u->getEventDocument())->count() == 0) {
+                            $creator = $repoU->find($event->getCreatedBy());
+                            $dataUpdate['update_type'] = 'event_creation';
+                            $transParameters['group'] = strtolower($event->getEventGroup()->getEventGroupName()->getName());
+                            $transParameters['type'] = strtolower($event->getEventType()->getEventName()->getName());
+                        } else if ($participation != null) {
+                            $creator = $repoU->find($participation->getCreatedBy());
+                            $dataUpdate['type'] = 'p';
+                        } else {
+                            $creator = $repoU->find($stage->getCreatedBy());
+                            $dataUpdate['type'] = 's';
+                            $transParameters['update_type'] = 'act_elmt_creation';
+                        }
+                        
+                        $dataUpdate['id'] = $newUpdate->getId();
+                        $dataUpdate['picture'] = $creator->getPicture() ?: 'no-picture.png';
+                        $dataUpdate['inserted'] = $this->nicetime($newUpdate->getInserted()->setTimezone($tz), $locale);
+                        $transParameters['author'] = $creator->getOrganization() != $currentUser->getOrganization() ? $creator->getFullName(). ' ('.$creator->getOrganization()->getCommname().')' : $creator->getFullName();
+                        $transParameters['updateLevel'] = $newUpdate->getType() == ElementUpdate::CREATION ? $translator->trans('updates.common_level.creation') : (ElementUpdate::CHANGE ? $translator->trans('updates.common_level.update') : $translator->trans('updates.common_level.delete'));
+                        $dataUpdate['msg'] = $translator->trans('updates.update_msg', $transParameters);
+                        $dataUpdate['viewed'] = $newUpdate->getViewed() != null;
+                        
+                    }
+    
+                    $dataUpdates['notifs'][] = $dataUpdate;
+                    //$nbRetrieved++;
+                }
+
+                // Checking existing/removed activities/stg
+                if($modifyDashboard){
+                    
+                    $stage = $newUpdate->getStage();
+                    if($stage && !in_array($stage->getId(), $sIds)){
+                        $stageData = [];
+                        $activity = $stage->getActivity();
+                        $stageData['aid'] = $activity->getId();
+                        if(!in_array($activity->getId(), $aIds)){
+                            $stageData['asd'] = $activity->getStartdateU();
+                            $stageData['ap'] = $activity->getPeriod();
+                            $stageData['an'] = $activity->getName();
+                            $stageData['apr'] = $progressStatuses[$activity->getProgress()];
+                        }
+                        $stageData['sd'] = $stage->getStartdateU();
+                        $stageData['p'] = $stage->getPeriod();
+                        $stageData['n'] = $stage->getName();
+                        $stageData['id'] = $stage->getId();
+                        $stageData['pr'] = $progressStatuses[$stage->getProgress()];
+                        $dataUpdates['stages'][] = $stageData;
+                    }
+                }
+
+            }
+
+            $dataUpdates['nbNew'] = sizeof($dataUpdates['notifs']) - sizeof($dataUpdates['rUIds']);
+
+        }   
+        
+        //dd($dataUpdates);
+
+        return new JsonResponse($dataUpdates, 200);
+
+    }
+
+    /**
+    * @Route("/updates/view", name="viewUpdates")
+    * @return Response
+    */
+    public function hasBeenViewedUpdates(Request $request){
+        $em = $this->em;
+        $currentUser = $this->user;
+        $updates = $currentUser->getUpdates()->filter(fn(ElementUpdate $u) => $u->getViewed() == null && $u->getUser() == $currentUser);
+        
+        foreach($updates as $update){
+            $update->setViewed(new DateTime);
+            $currentUser->addUpdate($update);
+        }
+
+        $em->persist($currentUser);
+        $em->flush();
+        return new JsonResponse(['msg' => 'success'], 200);
+    }
+
+    function nicetime(DateTime $date, string $locale)
+    {
+        if(empty($date)) {
+            return "No date provided";
+        }
+        
+        switch($locale){
+            case 'en' :
+                $periods = array("second", "minute", "hour", "day", "week", "month", "year", "decade");
+                $nowMsg = "Now";
+                break;
+            case 'fr' :
+                $periods = array("seconde", "minute", "heure", "jour", "semaine", "mois", "année", "décennie");
+                $nowMsg = "A l'instant";
+                break;
+            case 'es' :
+                $periods = array("secundo", "minuto", "hora", "dia", "semana", "mes", "año", "decena");
+                $nowMsg = "Ahora";
+                break;
+        }
+
+        $lengths         = array("60","60","24","7","4.35","12","10");
+        $now             = time();
+        $unix_date       = $date->getTimestamp();
+    
+        // check validity of date
+        if(empty($unix_date)) {   
+            return "Bad date";
+        }
+
+        // is it future date or past date
+        if($now > $unix_date) {   
+            $difference = $now - $unix_date;
+            switch($locale){
+                case 'fr' :
+                    $tense = "il y a ";
+                    break;
+                case 'en' :
+                    $tense = "ago";
+                    break;
+                case 'es' :
+                    $tense = "hace";
+                    break;
+            }
+        
+        } else {
+            $difference = $unix_date - $now;
+            switch($locale){
+                case 'fr' :
+                    $tense = "dans";
+                    break;
+                case 'en' :
+                    $tense = "from now";
+                    break;
+                case 'es' :
+                    $tense = "en";
+                    break;
+            }
+        }
+    
+        for($j = 0; $difference >= $lengths[$j] && $j < count($lengths)-1; $j++) {
+            $difference /= $lengths[$j];
+        }
+    
+        $difference = round($difference);
+    
+        if($difference != 1) {
+            $periods[$j].= "s";
+        }
+
+        switch($locale){
+            case 'en' :
+                return $j == 0 ? $nowMsg : "$difference $periods[$j] {$tense}";
+            case 'fr' :
+            case 'es' :
+                return $j == 0 ? $nowMsg : "{$tense} $difference $periods[$j]";
+        }
+        
     }
 
 }

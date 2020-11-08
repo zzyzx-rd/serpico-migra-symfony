@@ -41,7 +41,7 @@ class PasswordDefinitionForm extends AbstractType {
                         new Assert\NotBlank,
                         new Assert\Regex([
                                 'value' => '/^(?=.*\d+)(?=.*[A-Z]+)(.{8,})$/',
-                                'message' => 'password_definition.password',
+                                'message' => 'password.definition_rule',
                         ])
                     ]
                 ]

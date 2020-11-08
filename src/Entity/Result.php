@@ -149,6 +149,11 @@ class Result extends DbObject
      */
     private $externalUser;
 
+    /**
+     * @ORM\OneToMany(targetEntity="ElementUpdate", mappedBy="result", cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    private $updates;
+
 
     /**
      * Result constructor.
@@ -544,6 +549,27 @@ class Result extends DbObject
     public function setExternalUser(?ExternalUser $externalUser): self
     {
         $this->externalUser = $externalUser;
+        return $this;
+    }
+
+    /**
+    * @return ArrayCollection|ElementUpdate[]
+    */
+    public function getUpdates()
+    {
+        return $this->updates;
+    }
+
+    public function addUpdate(ElementUpdate $update): self
+    {
+        $this->updates->add($update);
+        $update->setResult($this);
+        return $this;
+    }
+
+    public function removeUpdate(ElementUpdate $update): self
+    {
+        $this->updates->removeElement($update);
         return $this;
     }
 }

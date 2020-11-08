@@ -51,6 +51,7 @@ use App\Entity\Decision;
 use App\Entity\Department;
 use App\Entity\DocumentAuthor;
 use App\Entity\DynamicTranslation;
+use App\Entity\ElementUpdate;
 use App\Entity\Event;
 use App\Entity\EventComment;
 use App\Entity\EventDocument;
@@ -87,6 +88,7 @@ use App\Entity\TemplateActivity;
 use App\Entity\TemplateCriterion;
 use App\Entity\TemplateStage;
 use App\Entity\Title;
+use App\Entity\Update;
 use App\Entity\User;
 use App\Entity\Weight;
 use App\Entity\WorkerFirm;
@@ -113,6 +115,7 @@ use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Twig\Environment;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use App\Service\FileUploader;
+use App\Service\NotificationManager;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class OrganizationController extends MasterController
@@ -3456,8 +3459,8 @@ class OrganizationController extends MasterController
         $actId = $request->get('id');
         
         $activity = $this->em->getRepository(Activity::class)->find($actId);
-        $activityM = new ActivityM($this->em, $this->stack, $this->security);
-        if ($activityM->isDeletable($activity)) {
+        //$activityM = new ActivityM($this->em, $this->stack, $this->security);
+        if ($this->isDeletable($activity)) {
             $organization = $activity->getOrganization();
             $organization->removeActivity($activity);
             try {
@@ -5815,7 +5818,7 @@ class OrganizationController extends MasterController
         $repoU       = $em->getRepository(User::class);
         $repoO       = $em->getRepository(Organization::class);
         $repoT       = $em->getRepository(Team::class);
-        $repoP      = $em->getRepository(Participation::class);
+        $repoP       = $em->getRepository(Participation::class);
         $currentUser = $this->user;
         if (!$currentUser instanceof User) {
             return $this->redirectToRoute('login');
@@ -6950,6 +6953,7 @@ class OrganizationController extends MasterController
                 $et->locale = $locale;
                 $et->org = $org;
                 return [
+                    'evnId' => $et->getEName()->getId(),
                     'id' => $et->getId(),
                     'name' => ($et->getIcon() ? '~' . $et->getIcon()->getUnicode() .'~ ' : '') . $et->getDTrans(),
                 ];
@@ -7018,10 +7022,16 @@ class OrganizationController extends MasterController
      * Gets current data of related stage
      * @Route("/organization/document/content/update", name="updateDocumentContent")
      */
-    public function updateDocumentContent(Request $request, FileUploader $fileUploader){
+    public function updateDocumentContent(Request $request, FileUploader $fileUploader, NotificationManager $notificationManager){
 
         $docId = $request->get('id');
         $evtId = $request->get('eid');
+        $stgId = $request->get('sid');
+        $evtTypeId = $request->get('evtid');
+        $oDateStr = $request->get('oDateStr');
+        $expResDateStr = $request->get('expResDateStr');
+        if($oDateStr != ""){$oDate = new DateTime($oDateStr);}
+        if($expResDateStr != ""){$expResDate = new DateTime($expResDateStr);}
         $docTitle = $request->get('title');
         $documentFile = $request->files->get('file');
         $em = $this->em;
@@ -7030,37 +7040,103 @@ class OrganizationController extends MasterController
         $size = $documentFileInfo['size'];
         $path = $documentFileInfo['name'];
         $mime = $documentFileInfo['mime'];
+
+        if(!$evtId){
+             /** @var Stage */
+             $stage = $em->getRepository(Stage::class)->find($stgId);
+             $eventType = $em->getRepository(EventType::class)->find($evtTypeId);
+             $event = new Event;
+             $event->setEventType($eventType)
+                ->setOnsetDate($oDate)
+                ->setExpResDate($expResDate)
+                ->setCreatedBy($this->user->getId());
+             $stage->addEvent($event);
+        } else {
+            /** @var Event */
+            $event = $em->getRepository(Event::class)->find($evtId);
+            $stage = $event->getStage();
+        }
+
         /** @var EventDocument */
         $document = $docId ? $em->getRepository(EventDocument::class)->find($docId) : new EventDocument;
         $document
             ->setType($type)
             ->setSize($size)
             ->setPath($path)
-            ->setMime($mime);
+            ->setMime($mime)
+            ->setCreatedBy($this->user->getId());
         if(!$docId){
-            $document->setTitle($docTitle);
-            /** @var Event */
-            $event = $em->getRepository(Event::class)->find($evtId);
+            $document
+                ->setTitle($docTitle)
+                ->setOrganization($this->org)
+                ->setCreatedBy($this->user->getId());
+            $documentAuthor = new DocumentAuthor();
+            $documentAuthor->setAuthor($this->user);
+            $document->addDocumentAuthor($documentAuthor);
             $event->addDocument($document);
             $em->persist($event);
         } else {
             $document->setModified(new DateTime);
             $em->persist($document);
         }
+
+        $status = $docId ? ElementUpdate::CHANGE : ElementUpdate::CREATION;
+        $property = $docId ? ElementUpdate::EVENT_DOC_CONTENT : null;
+
+        $notificationManager->registerUpdates($document,$status,$property);
+        /*foreach($event->getStage()->getParticipants() as $participation){
+            $update = new Update;
+            $update->setType($docId ? ElementUpdate::CHANGE : ElementUpdate::CREATION)
+                ->setEventDocument($document)
+                ->setUser($participation->getUser())
+                ->setStage($stage)
+                ->setActivity($stage->getActivity());
+            $event->addUpdate($update);
+        }*/
+
+        if(!$evtId){
+            $em->persist($stage);
+        }
+
         $em->flush();
-        return new JsonResponse(['type' => $type, 'size' => $size, 'mime' => $mime, 'path' => $path, 'title' => $docTitle, 'id' => $document->getId()], 200);
+
+        /*
+        $recipients = $event->getStage()->getParticipants()->filter(fn(Participation $p) => $p->getUser() != $this->user)->map(fn(Participation $p) => $p->getUser())->getValues();
+        $response = $this->forward('App\Controller\MailController::sendMail', [
+            'recipients' => $recipients, 
+            'settings' => [
+                'event' => $event, 
+                'commentUpdate' => false,
+                'documentUpdate' => true,
+            ],
+            'actionType' => 'eventUpdate'
+        ]);
+        if($response->getStatusCode() == 500){ return $response; };
+        */
+
+        $outputData = ['type' => $type, 'size' => $size, 'mime' => $mime, 'path' => $path, 'title' => $docTitle, 'id' => $document->getId()];
+        if(!$evtId){
+            $outputData['eid'] = $event->getId();
+        }
+        return new JsonResponse($outputData, 200);
     }
 
     /**
      * Gets current data of related stage
      * @Route("/organization/comment/content/update", name="updateCommentContent")
      */
-    public function updateCommentContent(Request $request){
+    public function updateCommentContent(Request $request, NotificationManager $notificationManager){
         $locale = $request->getLocale();
         $comId = $request->get('id');
         $evtId = $request->get('eid');
         $parentId = $request->get('cid');
         $comContent = $request->get('content');
+        $stgId = $request->get('sid');
+        $evtTypeId = $request->get('evtid');
+        $oDateStr = $request->get('oDateStr');
+        $expResDateStr = $request->get('expResDateStr');
+        if($oDateStr != ""){$oDate = new DateTime($oDateStr);}
+        if($expResDateStr != ""){$expResDate = new DateTime($expResDateStr);}
         $em = $this->em;
         /** @var EventComment */
         $comment = $comId ? $em->getRepository(EventComment::class)->find($comId) : new EventComment;
@@ -7068,17 +7144,46 @@ class OrganizationController extends MasterController
         if(!$comId){
             
             $comment->setContent($comContent)
-                ->setAuthor($this->user);
+                ->setAuthor($this->user)
+                ->setOrganization($this->org)
+                ->setCreatedBy($this->user->getId());
             if($parentId){
                 $parent = $em->getRepository(EventComment::class)->find($parentId);
                 $comment->setParent($parent);
             }
+
+            if(!$evtId){
+                /** @var Stage */
+                $stage = $em->getRepository(Stage::class)->find($stgId);
+                $eventType = $em->getRepository(EventType::class)->find($evtTypeId);
+                $event = new Event;
+                $event->setEventType($eventType)
+                   ->setOnsetDate($oDate)
+                   ->setExpResDate($expResDate)
+                   ->setCreatedBy($this->user->getId());
+                $stage->addEvent($event);
+           } else {
+                /** @var Event */
+                $event = $em->getRepository(Event::class)->find($evtId);
+                $stage = $event->getStage();
+           }
             
-            /** @var Event */
-            $event = $em->getRepository(Event::class)->find($evtId);
+            $recipients = $event->getStage()->getUniqueParticipations()->filter(fn(Participation $p) => $p->getUser() != $this->user)->map(fn(Participation $p) => $p->getUser())->getValues();
             $event->addComment($comment);
             $em->persist($event);
             $em->flush();
+
+            /*$response = $this->forward('App\Controller\MailController::sendMail', [
+                'recipients' => $recipients, 
+                'settings' => [
+                    'event' => $event, 
+                    'commentUpdate' => true,
+                    'documentUpdate' => false
+                ],
+                'actionType' => 'eventUpdate'
+            ]);
+            if($response->getStatusCode() == 500){ return $response; };*/
+
         } else {
             if($isCurrentlyModified){
                 $comment->setContent($comContent)
@@ -7087,7 +7192,26 @@ class OrganizationController extends MasterController
                 $em->flush();
             }
         }
-        return new JsonResponse(['msg' => 'success', 'author' => $this->user, 'modified' => $comment->getModified() != null, 'updated' => $comment->getModified() ? $this->nicetime($comment->getModified(),$locale): $this->nicetime($comment->getInserted(),$locale), 'id' => $comment->getId()], 200);
+
+        if(!$comId){
+            $notificationManager->registerUpdates($comment, ElementUpdate::CREATION, 'content');
+        }
+        /*
+        foreach($event->getStage()->getParticipants() as $participation){
+            $update = new Update;
+            $update->setType($comId ? ElementUpdate::CHANGE : ElementUpdate::CREATION)
+                ->setEventComment($comment)
+                ->setUser($participation->getUser())
+                ->setStage($stage)
+                ->setActivity($stage->getActivity());
+            $event->addUpdate($update);
+        }*/
+
+        $outputResponse = ['msg' => 'success', 'author' => $this->user->getFullName(), 'modified' => $comment->getModified() != null, 'inserted' => $this->nicetime($comment->getInserted(),$locale), 'id' => $comment->getId()];
+        if(!$evtId){
+            $outputResponse['eid'] = $event->getId();
+        }
+        return new JsonResponse($outputResponse, 200);
     }
 
     /**
@@ -7225,6 +7349,7 @@ class OrganizationController extends MasterController
             $evtData['rdate'] = $event->getExpResDate() == null ? null : ($event->getExpResDate()->diff(new DateTime)->d > 5 ? $event->getExpResDate() : $event->nicetime($event->getExpResDate()->format('Y-m-d')));
             $evtData['nbdocs'] = $event->getDocuments()->count();
             $evtData['nbcoms'] = $event->getComments()->count();
+            $evtData['oid'] = $event->getOrganization()->getId();
             $data['events'][] = $evtData;
         }
 
@@ -7265,7 +7390,7 @@ class OrganizationController extends MasterController
         $data['sid'] = $event->getStage()->getId();
         $data['sname'] = $event->getStage()->getName();
         $data['type'] = $event->getEventType()->getId();
-        $data['group'] = $event->getEventType()->getEventGroup()->getId();
+        $data['group'] = $event->getEventType()->getEventGroup()->getEventGroupName()->getId();
         $data['odate'] = $event->getOnsetDate();
         $data['expResDate'] = $event->getExpResDate();
         $tz = new DateTimeZone('Europe/Paris');
@@ -7277,30 +7402,33 @@ class OrganizationController extends MasterController
             $docData['type'] = $document->getType();
             $docData['mime'] = $document->getMime();
             $docData['size'] = $document->getSize();
-            $docData['authors'] = $document->getDocumentAuthors()->count() > 0 ? $document->getDocumentAuthors()->map(fn(DocumentAuthor $da) => ['mainAuthor' => $da->isLeader(), 'fullname' => $da->getAuthor()->getFullName()])->getValues()[0] : '';
+            $docData['authors'] = $document->getDocumentAuthors()->count() > 0 ? $document->getDocumentAuthors()->map(fn(DocumentAuthor $da) => ['mainAuthor' => $da->isLeader(), 'fullname' => $da->getAuthor()->getFullName(), 'id' => $da->getAuthor()->getId()])->getValues()[0] : '';
             $docData['inserted'] = $document->getInserted()->setTimezone($tz);
+            $docData['oid'] = $document->getOrganization()->getId();
             $docData['modified'] = $document->getModified() ? $document->getModified()->setTimezone($tz) : "";
             $data['documents'][] = $docData;
         }
 
-        foreach($event->getComments() as $comment){
+        foreach($event->getParentComments() as $comment){
             $comData = [];
             $comData['id'] = $comment->getId();
             $comData['self'] = $comment->getAuthor() == $currentUser;
             $comData['author'] = $comment->getAuthor()->getFullName();
             $comData['content'] = $comment->getContent();
             $comData['inserted'] = $this->nicetime($comment->getInserted()->setTimezone($tz), $locale);
-            $comData['modified'] = $comment->getModified() ? $this->nicetime($comment->getModified()->setTimezone($tz), $locale) : "";
+            $comData['modified'] = $comment->getModified() != null;
+            $comData['oid'] = $comment->getOrganization()->getId();
 
-            foreach($comment->getChildren() as $subComment){
-                $subComData = [];
-                $subComData['id'] = $comment->getId();
-                $subComData['self'] = $comment->getAuthor() == $currentUser;
-                $subComData['author'] = $subComment->getAuthor()->getFullName();
-                $subComData['content'] = $subComment->getContent();
-                $subComData['inserted'] = $this->nicetime($subComment->getInserted()->setTimezone($tz), $locale);
-                $subComData['modified'] = $subComment->getModified() ? $this->nicetime($subComment->getModified()->setTimezone($tz), $locale) : "";
-                $commData['relatedComments'][] = $subComData;
+            foreach($comment->getReplies() as $reply){
+                $replyData = [];
+                $replyData['id'] = $reply->getId();
+                $replyData['self'] = $reply->getAuthor() == $currentUser;
+                $replyData['author'] = $reply->getAuthor()->getFullName();
+                $replyData['content'] = $reply->getContent();
+                $replyData['inserted'] = $this->nicetime($reply->getInserted()->setTimezone($tz), $locale);
+                $replyData['modified'] = $reply->getModified() != null;
+                $replyData['oid'] = $reply->getOrganization()->getId();
+                $commData['replies'][] = $replyData;
             }
             $data['comments'][] = $comData;
         }
@@ -7433,12 +7561,15 @@ class OrganizationController extends MasterController
         switch($locale){
             case 'en' :
                 $periods = array("second", "minute", "hour", "day", "week", "month", "year", "decade");
+                $nowMsg = "Now";
                 break;
             case 'fr' :
                 $periods = array("seconde", "minute", "heure", "jour", "semaine", "mois", "année", "décennie");
+                $nowMsg = "A l'instant";
                 break;
             case 'es' :
                 $periods = array("secundo", "minuto", "hora", "dia", "semana", "mes", "año", "decena");
+                $nowMsg = "Ahora";
                 break;
         }
 
@@ -7490,14 +7621,52 @@ class OrganizationController extends MasterController
         if($difference != 1) {
             $periods[$j].= "s";
         }
+
         switch($locale){
             case 'en' :
-                return "$difference $periods[$j] {$tense}";
+                return $j == 0 ? $nowMsg : "$difference $periods[$j] {$tense}";
             case 'fr' :
             case 'es' :
-                return "{$tense} $difference $periods[$j]";
+                return $j == 0 ? $nowMsg : "{$tense} $difference $periods[$j]";
         }
         
+    }
+
+    function isDeletable(Activity $activity): ?bool
+    {
+        $currentUser = $this->user;
+        $role = $currentUser->getRole();
+
+        if ($role === 4) {
+            return true;
+        }
+
+        if ($role === 3) {
+            return false;
+        }
+
+        if ($activity->status >= 2) {
+            return false;
+        }
+        if ($role === 1) {
+            return true;
+        }
+
+        if (!$activity->isFinalized() && $activity->getMasterUser() == $currentUser) {
+            return true;
+        }
+        // Only case left : activity manager being leader of all stages
+        $k = 0;
+        foreach ($activity->stages as $stage) {
+            foreach ($stage->getParticipants() as $participant) {
+                if ($participant->getUser() == $currentUser && $participant->isLeader()) {
+                    $k++;
+                    break;
+                }
+            }
+        }
+        if ($k === $this->stages->count()) {return true;}
+        return false;
     }
 
 }

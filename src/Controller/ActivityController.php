@@ -27,6 +27,7 @@ use App\Entity\CriterionName;
 use App\Entity\DbObject;
 use App\Entity\Decision;
 use App\Entity\Department;
+use App\Entity\ElementUpdate;
 use App\Entity\Event;
 use App\Entity\EventDocument;
 use App\Entity\ExternalUser;
@@ -56,6 +57,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Service\FileUploader;
+use App\Service\NotificationManager;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class ActivityController extends MasterController
@@ -72,7 +74,7 @@ class ActivityController extends MasterController
      * @throws OptimisticLockException
      * @Route("/activity/create",name="createActivity")
      */
-    public function createActivityAction(Request $request)
+    public function createActivityAction(Request $request, NotificationManager $notificationManager)
     {       
         $currentUser = $this->user;
         $organization = $this->org;
@@ -150,7 +152,8 @@ class ActivityController extends MasterController
                         ->setCreatedBy($currentUser->getId());
     
                     foreach($stage->getParticipants() as $participation){
-                        $participation->setActivity($activity);
+                        $participation->setActivity($activity)
+                            ->setCreatedBy($currentUser->getId());
                     }
 
                     $toBeMailedParticipants = $stage->getUniqueParticipations()->filter(fn(Participation $p) => $p->getUser() && !$p->getUser()->isSynthetic());
@@ -168,6 +171,10 @@ class ActivityController extends MasterController
                     ->setCreatedBy($currentUser->getId());
                     $em->persist($activity);
                     $em->flush();
+
+                    $notificationManager->registerUpdates($activity, ElementUpdate::CREATION, 'content');
+
+                    /*
                     $response = $this->forward('App\Controller\MailController::sendMail', [
                         'recipients' => $recipients, 
                         'settings' => [
@@ -179,8 +186,9 @@ class ActivityController extends MasterController
                     if($response->getStatusCode() == 500){
                         return new JsonResponse(['msg' => $response->getContent()], 500);
                     } else {
-                        return new JsonResponse(['actId' => $activity->getId(), 'stgId' => $stage->getId(), 'startdateU' => $stage->getStartdate()->format('U'), 'period' => $stage->getEnddate()->format('U') - $stage->getStartdate()->format('U')], 200);
-                    }
+                    }*/
+                    
+                    return new JsonResponse(['actId' => $activity->getId(), 'stgId' => $stage->getId(), 'startdateU' => $stage->getStartdate()->format('U'), 'period' => $stage->getEnddate()->format('U') - $stage->getStartdate()->format('U')], 200);
                 } else {
             
                     $errors = $this->buildErrorArray($createActivityForm);
@@ -827,7 +835,8 @@ class ActivityController extends MasterController
 
             $now = new DateTime;
             if(!$event->getOnsetDate()){!$eventInitOnsetDate ? $event->setOnsetDate($now) : $event->setOnsetDate(null);}
-            $event->setStage($stage);
+            $event->setStage($stage)
+                ->setOrganization($this->org);
 
             $documentsForm = $eventForm->get('documents');
             
@@ -850,10 +859,10 @@ class ActivityController extends MasterController
                 $comment->setAuthor($currentUser);
             }
 
-            $em->persist($event);
+            $event->setOrganization($this->org);
 
             if($notification){
-                $recipients = $event->getStage()->getUniqueParticipations()->map(fn(Participation $p) => [$p->getUser()])->getValues()[0];
+                $recipients = $event->getStage()->getUniqueParticipations()->filter(fn(Participation $p) => $p->getUser() != $this->user)->map(fn(Participation $p) => $p->getUser())->getValues();
                 $settings['event'] = $event;
                 $response = $this->forward('App\Controller\MailController::sendMail', [
                     'recipients' => $recipients, 

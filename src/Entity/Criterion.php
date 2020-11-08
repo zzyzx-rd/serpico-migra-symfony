@@ -164,6 +164,10 @@ class Criterion extends DbObject
      * @OneToMany(targetEntity="RankingTeamHistory", mappedBy="criterion",cascade={"persist", "remove"}, orphanRemoval=true)
      */
     public $historicalRankingTeams;
+    /**
+     * @OneToMany(targetEntity="ElementUpdate", mappedBy="criterion", cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    public $updates;
 
 
     /**
@@ -258,7 +262,8 @@ class Criterion extends DbObject
         $this->rankingTeams = $rankingTeams ?: new ArrayCollection;
         $this->historicalRankings = $historicalRankings ?: new ArrayCollection;
         $this->historicalRankingTeams = $historicalRankingTeams ?: new ArrayCollection;
-        $this->output = $output ;
+        $this->updates = new ArrayCollection;
+        $this->output = $output;
         $this->template = $template;
     }
 
@@ -719,6 +724,27 @@ class Criterion extends DbObject
     public function getOutput()
     {
         return $this->output;
+    }
+
+    /**
+    * @return ArrayCollection|ElementUpdate[]
+    */
+    public function getUpdates()
+    {
+        return $this->updates;
+    }
+
+    public function addUpdate(ElementUpdate $update): Criterion
+    {
+        $this->updates->add($update);
+        $update->setCriterion($this);
+        return $this;
+    }
+
+    public function removeUpdate(ElementUpdate $update): Criterion
+    {
+        $this->updates->removeElement($update);
+        return $this;
     }
 
 

@@ -45,20 +45,32 @@ class EventComment extends DbObject
     protected $event;
 
     /**
+     * @ManyToOne(targetEntity="Organization", inversedBy="comments")
+     * @JoinColumn(name="organization_org_id", referencedColumnName="org_id", nullable=true)
+     * @var Organization
+     */
+    protected $organization;
+
+    /**
      * @ORM\Column(name="evc_created_by", type="integer", nullable=true)
      */
     public ?int $createdBy;
 
     /**
-     * @ManyToOne(targetEntity="EventComment", inversedBy="children")
+     * @ManyToOne(targetEntity="EventComment", inversedBy="replies")
      * @JoinColumn(name="parent_id", referencedColumnName="evc_id", nullable=true)
      */
     public $parent;
 
     /**
-     * @OneToMany(targetEntity="EventComment", mappedBy="parent", cascade={"persist", "remove"})
+     * @OneToMany(targetEntity="EventComment", mappedBy="parent", cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    public $children;
+    public $replies;
+
+    /**
+     * @OneToMany(targetEntity="ElementUpdate", mappedBy="eventComment", cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    public $updates;
 
     /**
      * @ORM\Column(name="evc_modified", type="datetime", nullable=true)
@@ -84,6 +96,8 @@ class EventComment extends DbObject
         $description = null,
         $content = null,
         $createdBy = null,
+        Event $event = null,
+        Organization $organization = null,
         DateTime $modified = null
         )
     {
@@ -91,8 +105,11 @@ class EventComment extends DbObject
         $this->type = $type;
         $this->content = $content;
         $this->description = $description;
-        $this->children = new ArrayCollection;
         $this->modified = $modified;
+        $this->event = $event;
+        $this->organization = $organization;
+        $this->replies = new ArrayCollection;
+        $this->updates = new ArrayCollection;
     }
 
 
@@ -140,6 +157,17 @@ class EventComment extends DbObject
         return $this;
     }
 
+    public function getOrganization(): ?Organization
+    {
+        return $this->organization;
+    }
+
+    public function setOrganization(Organization $organization): self
+    {
+        $this->organization = $organization;
+        return $this;
+    }
+
     public function setInserted(?DateTimeInterface $inserted): self
     {
         $this->inserted = $inserted;
@@ -162,25 +190,25 @@ class EventComment extends DbObject
         return (string) $this->id;
     }
 
-    public function addChildren(EventComment $child): self
+    public function addReply(EventComment $reply): self
     {
-        $this->children->add($child);
-        $child->setParent($this);
+        $this->replies->add($reply);
+        $reply->setParent($this);
         return $this;
     }
 
-    public function removeChildren(EventComment $child): self
+    public function removeReply(EventComment $reply): self
     {
-        $this->children->removeElement($child);
+        $this->replies->removeElement($reply);
         return $this;
     }
 
     /**
      * @return ArrayCollection|EventComment[]
      */
-    public function getChildren()
+    public function getReplies()
     {
-        return $this->children;
+        return $this->replies;
     }
 
     public function setParent(?EventComment $parent): self
@@ -192,5 +220,26 @@ class EventComment extends DbObject
     public function getParent(): ?self
     {
         return $this->parent;
+    }
+
+    /**
+    * @return ArrayCollection|ElementUpdate[]
+    */
+    public function getUpdates()
+    {
+        return $this->updates;
+    }
+
+    public function addUpdate(ElementUpdate $update): self
+    {
+        $this->updates->add($update);
+        $update->setEventComment($this);
+        return $this;
+    }
+
+    public function removeUpdate(ElementUpdate $update): self
+    {
+        $this->updates->removeElement($update);
+        return $this;
     }
 }

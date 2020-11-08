@@ -45,6 +45,8 @@
   <link rel="stylesheet" href="{{ asset('css/iprocess_list.css') }}">
   <link rel="stylesheet" href="{{ asset('css/dropify.min.css') }}">
   <script>
+    var oid = "{{ currentuser.organization.id }}";
+    var uid = "{{ currentuser.id }}";
     var ipurl = "{{ url('getIProcesses') }}";
     var gcurl = "{{ url('getElementConfig', {entity:'activity', elmtId : 0}) }}";
     var gsurl = "{{ url('getGradableStages', {actId : 0}) }}";
@@ -56,7 +58,7 @@
     var fc = parseInt("{{ firstConnection }}");
     var eurl = "{{ url('updateEvent', {eveId : 0}) }}";
     var acurl = "{{ url('createActivity') }}";
-    var currentWfiId = "{{ currentuser.organization ? currentuser.organization.id : '' }}";
+    var currentWfiId = "{{ currentuser.organization.workerFirm.id }}";
     var uid = "{{ currentuser.id }}";
     var un = "{{ currentuser.fullname }}";
     var userPic = "{{ asset(global.userpicture) }}";
@@ -157,10 +159,6 @@
         color: white;
       }
 
-      .stage{
-        position: relative;
-      }
-
       .stage-duration{
         width: 50%;
       }
@@ -202,7 +200,6 @@
       .elmts>.activity{
         padding-top: 0.5em;
         margin: 1em 0em;
-        position: relative;
       }
 
       .activity-name{
@@ -321,10 +318,6 @@
         z-index: 0;
       }
 
-      ol.stages{
-        position: relative;
-      }
-
       ol.stages.past-period{
         z-index: 1;
       }
@@ -347,15 +340,11 @@
         justify-content: center;
       }
 
-      .months-ref{
-        position: relative;
-      }
-
       .months-ref .col{
         text-align: center;
       }
 
-      .past-period,.ongoing-period {
+      .activity-component, .past-period, .ongoing-period, .months-ref, .act-info, .stage, .elmts>.activity {
         position: relative;
       }
 
@@ -481,10 +470,6 @@
         top: 0;
         background-color: white;
         z-index: 2;
-      }
-
-      .act-info{
-        position: relative;
       }
 
       .act-info > .fixed-action-btn{
@@ -883,8 +868,15 @@
 
       .event .event-marker{
         position:relative;
-        color: #16afb7;
         font-size:2.1rem;
+      }
+
+      .event.self-last-update .event-marker{
+        color: #55318e;
+      }
+
+      .event:not(.self-last-update) .event-marker{
+        color: #ff9300;
       }
 
       .event-logo-container > .unique-event{
@@ -991,10 +983,15 @@
 
       .dropify-message .file-icon{
         min-width: 15%;
+        display:none;
+      }
+
+      .dropify-message{
+        justify-content:center;
       }
 
       .dropify-message p{
-        text-align: center;
+        text-align:center;
       }
 
       #updateEvent .btn-flat, .doc-name-validate, .doc-upload-validate, .s-name-validate, .com-validate{
@@ -1149,10 +1146,7 @@
         text-align:center;
         max-width:50%;
       }
-      /*
-      .e-comment:not(.being-replied){
-        margin-bottom: 1.7rem;
-      }*/
+      
 
   </style>
 {% endblock %}

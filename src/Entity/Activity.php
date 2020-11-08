@@ -142,9 +142,13 @@ class Activity extends DbObject
      */
     public $historicalRankingTeams;
     /**
-     * @OneToMany(targetEntity="Mail", mappedBy="activity",cascade={"persist", "remove"})
+     * @OneToMany(targetEntity="Mail", mappedBy="activity",cascade={"persist", "remove"}, orphanRemoval=true)
      */
     public $mails;
+    /**
+     * @OneToMany(targetEntity="ElementUpdate", mappedBy="activity",cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    public $updates;
 
     /**
      * @OneToMany(targetEntity="Participation", mappedBy="activity", cascade={"persist", "remove"}, orphanRemoval=true)
@@ -353,6 +357,7 @@ class Activity extends DbObject
         $this->rankingTeams = new ArrayCollection;
         $this->historicalRankingTeams = new ArrayCollection;
         $this->mails = new ArrayCollection;
+        $this->updates = new ArrayCollection;
         $this->createdBy = $createdBy;
         $this->act_gEndDate = new DateTime('1990-01-01');
         //TODO Set la date et autres dans les controlleurs
@@ -947,7 +952,7 @@ class Activity extends DbObject
         }
         return $startDate->format('U');
     }
-    public function getPeriod(): void
+    public function getPeriod()
     {
 
         $startDate = new DateTime('2099-01-01');
@@ -964,7 +969,7 @@ class Activity extends DbObject
 
         $sD = $startDate->format("U");
         $sE = $enddate->format("U");
-        echo $sE - $sD;
+        return $sE - $sD;
     }
 
     public function getEnddate()
@@ -1501,16 +1506,37 @@ class Activity extends DbObject
         return $this->mails;
     }
 
-    public function addMail(Mail $mail): Stage
+    public function addMail(Mail $mail): Activity
     {
         $this->mails->add($mail);
-        $mail->setStage($this);
+        $mail->setActivity($this);
         return $this;
     }
 
-    public function removeMail(Mail $mail): Stage
+    public function removeMail(Mail $mail): Activity
     {
         $this->mails->removeElement($mail);
+        return $this;
+    }
+
+    /**
+    * @return ArrayCollection|ElementUpdate[]
+    */
+    public function getUpdates()
+    {
+        return $this->updates;
+    }
+
+    public function addUpdate(ElementUpdate $update): Activity
+    {
+        $this->updates->add($update);
+        $update->setActivity($this);
+        return $this;
+    }
+
+    public function removeUpdate(ElementUpdate $update): Activity
+    {
+        $this->updates->removeElement($update);
         return $this;
     }
 

@@ -92,6 +92,10 @@ class InstitutionProcess extends DbObject
      * @OrderBy({"status" = "ASC", "name" = "ASC"})
      */
     public $activities;
+    /**
+     * @OneToMany(targetEntity="ElementUpdate", mappedBy="institutionProcess", cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    public $updates;
 
     /**
      * InstitutionProcess constructor.
@@ -134,6 +138,7 @@ class InstitutionProcess extends DbObject
         $this->children = new ArrayCollection();
         $this->stages = new ArrayCollection();
         $this->activities = new ArrayCollection();
+        $this->updates = new ArrayCollection();
     }
 
 
@@ -381,6 +386,27 @@ class InstitutionProcess extends DbObject
     public function userCanEdit(User $u): bool
     {
         return $u->getRole() == 1 || $u->getRole() == 4 || $this->masterUser == $u;
+    }
+
+    /**
+    * @return ArrayCollection|ElementUpdate[]
+    */
+    public function getUpdates()
+    {
+        return $this->updates;
+    }
+
+    public function addUpdate(ElementUpdate $update): self
+    {
+        $this->updates->add($update);
+        $update->setInstitutionProcess($this);
+        return $this;
+    }
+
+    public function removeUpdate(ElementUpdate $update): self
+    {
+        $this->updates->removeElement($update);
+        return $this;
     }
 
 

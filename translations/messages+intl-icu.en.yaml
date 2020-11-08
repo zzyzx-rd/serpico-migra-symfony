@@ -80,7 +80,91 @@ comment: comment
 document: document
 download: download
 rename: rename
+new: new
+for: for
+has: has
+have: have
+the_activity: the activity
+the_stage: the stage
+updates:
 
+  no_update_yet: You have not received any notification yet
+
+  common_level:
+    creation: created
+    update: updated
+    delete: deleted
+
+  comment_update_type:
+    withParent: replied to a comment of
+    withoutParent: commented
+
+  document_update_level:
+    creation: created the document
+    update: uploaded a new version of document
+
+  update_msg: >-
+    {update_type, select,
+      act_elmt_creation {{author} has {updateLevel} {actElmtMsg}}
+      event_creation {
+        {group, select,
+          deliverable {
+            {type, select, 
+              report                {{author} has {updateLevel} a report for {actElmtMsg}}
+              presentation          {{author} has {updateLevel} a presentation {actElmtMsg}}
+              contract              {{author} has {updateLevel} a contract for {actElmtMsg}}
+              spreadsheet           {{author} has {updateLevel} a spreadsheet called for {actElmtMsg}}
+              chart                 {{author} has {updateLevel} a chart for {actElmtMsg}}
+              dataset               {{author} has {updateLevel} a dataset for {actElmtMsg}}
+              audio                 {{author} has {updateLevel} an audio file for {actElmtMsg}}
+              video                 {{author} has {updateLevel} a video file for {actElmtMsg}}
+              visual_document       {{author} has {updateLevel} a visual document for {actElmtMsg}}
+              article               {{author} has {updateLevel} an article for {actElmtMsg}}
+              social_media_post     {{author} has {updateLevel} an article for {actElmtMsg}}
+              minutes               {{author} has {updateLevel} an article for {actElmtMsg}}
+              application           {{author} has {updateLevel} an application for {actElmtMsg}}
+              estimate              {{author} has {updateLevel} an estimate for {actElmtMsg}}
+              physical_delivery     {{author} has {updateLevel} a physical delivery for {actElmtMsg}}
+            }
+          }
+          suggestion {
+            {type, select, 
+              rescheduling          {{author} suggests you to reschedule {actElmtMsg}}
+              enhancement           {{author} suggests you an enhancement for {actElmtMsg}}
+              additional_service    {{author} suggests that you bring an additional service for {actElmtMsg}}
+            }
+          }
+          incident { 
+            {type, select,
+              delivery                {{author} has reported an incident on a delivery for {actElmtMsg}}
+              missing_payment         {{author} has reported an incident on a payment for {actElmtMsg}}
+              belated                 {{author} has reported an unexpected delay for {actElmtMsg}}
+            }
+          }
+          cashflow {
+            {type, select, 
+              partial_payment         {{author} made a partial payment for {actElmtMsg}}
+              full_payment            {{author} made a full payment for {actElmtMsg}}
+              payment                 {{author} made a payment for {actElmtMsg}}
+              partial_reimbursement   {{author} made a partial reimbursement for {actElmtMsg}}
+              full_reimbursement      {{author} made a full reimbursement for {actElmtMsg}}
+              reimbursement           {{author} made a reimbursement for {actElmtMsg}}
+            }
+          }
+          information {
+            {type, select, 
+              feedback                {{author} has given you some feedback for {actElmtMsg}}
+              additional_delay        {{author} informs you of some possible delay for {actElmtMsg}}
+              changes                 {{author} informs you of some changes for {actElmtMsg}}
+              info_needed             {{author} informs you he may need additional info for {actElmtMsg}}
+            }
+          }
+        }    
+      }
+      event_document {{author} has {updateLevel} the document {docName} for {actElmtMsg}}
+      event_comment {{author} has {updateLevel} a comment for {actElmtMsg}}
+      other {Problem here}
+    }
 
 help:
   page_title: DealDrive, for a meaningful and collaborative performance
@@ -1350,7 +1434,19 @@ mails:
     msg_update: This event has been updated by one of the participants
     msg_2: Access your dashboard to look at the update
     button_text: Access to my dashboard
-
+  
+  eventUpdate:
+    subject: You have received
+    activity_msg : the activity
+    stage_msg : the stage
+    message: Access to the new content by browsing into your dashboard
+    button_text: Access to my dashboard
+  
+  stageProgressUpdate:
+    subject_begin: Status for
+    subject_mid: has been updated to 
+    message: You can change the status through your dashboard
+    button_text: Access to my dashboard
 
   activityAssignation:
     activity_subject: Vous avez été désigné leader de lactivité

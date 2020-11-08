@@ -7,6 +7,7 @@ use App\Repository\EventDocumentRepository;
 use DateTime;
 use DateTimeInterface;
 use DateTimeZone;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -56,11 +57,23 @@ class EventDocument extends DbObject
     protected $documentAuthors;
 
     /**
+     * @OneToMany(targetEntity="ElementUpdate", mappedBy="eventDocument", cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    public $updates;
+
+    /**
      * @ManyToOne(targetEntity="Event", inversedBy="documents")
      * @JoinColumn(name="event_eve_id", referencedColumnName="eve_id", nullable=true)
      * @var Event
      */
     protected $event;
+
+    /**
+     * @ManyToOne(targetEntity="Organization", inversedBy="documents")
+     * @JoinColumn(name="organization_org_id", referencedColumnName="org_id", nullable=true)
+     * @var Organization
+     */
+    protected $organization;
 
     /**
      * @ORM\Column(name="evd_created_by", type="integer", nullable=true)
@@ -96,6 +109,7 @@ class EventDocument extends DbObject
         $type = null,
         $mime = null,
         Event $event = null,
+        Organization $organization = null,
         User $author = null,
         $createdBy = null,
         DateTime $modified = null)
@@ -107,8 +121,10 @@ class EventDocument extends DbObject
         $this->type = $type;
         $this->mime = $mime;
         $this->event = $event;
+        $this->organization = $organization;
         $this->author = $author;
         $this->modified = $modified;
+        $this->updates = new ArrayCollection;
     }
 
 
@@ -178,6 +194,17 @@ class EventDocument extends DbObject
         return $this;
     }
 
+    public function getOrganization(): ?Organization
+    {
+        return $this->organization;
+    }
+
+    public function setOrganization(Organization $organization): self
+    {
+        $this->organization = $organization;
+        return $this;
+    }
+
 
     /**
      * @return ArrayCollection|DocumentAuthor[]
@@ -220,5 +247,26 @@ class EventDocument extends DbObject
     public function __toString()
     {
         return (string) $this->id;
+    }
+
+    /**
+    * @return ArrayCollection|ElementUpdate[]
+    */
+    public function getUpdates()
+    {
+        return $this->updates;
+    }
+
+    public function addUpdate(ElementUpdate $update): EventDocument
+    {
+        $this->updates->add($update);
+        $update->setEventDocument($this);
+        return $this;
+    }
+
+    public function removeUpdate(ElementUpdate $update): EventDocument
+    {
+        $this->updates->removeElement($update);
+        return $this;
     }
 }

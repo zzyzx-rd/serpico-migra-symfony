@@ -3,6 +3,7 @@
 {% if currentuser != null %}
   {% set is_admin = currentuser.role == 4 or currentuser.role == 1 %}
   {% set is_root = currentuser.role == 4 %}
+{% set updates = global.updates %}
 {% endif %}
 
 
@@ -31,6 +32,8 @@
 
     <script>
       window.lg = '{{ global.request.locale }}';
+      var ruurl ="{{ url('retrieveUpdates') }}";
+      var vuurl ="{{ url('viewUpdates') }}";
     </script>
   </head>
 
@@ -114,10 +117,22 @@
                 </a>
               </li>
               
-              <li>
-                <a href="{#{{ path('home') }}#}#">
+              <li class="notif-zone">
+                <a href="{#{{ path('home') }}#}#" class="user-notif-link">
                   <img class="user-profile-picture tooltipped" src="{{ asset(global.userpicture) }}" data-tooltip="{{ currentuser.fullname }}" data-position="down">
+                  {% if updates|length > 0 and updates.nbNew > 0 %}
+                    <span class="nb-updates-new" data-nb-visited="{{ updates|length - updates.nbNew|number_format }}">{{ updates.nbNew }}</span>
+                  {% endif %}
                 </a>
+                <ul class="notif-list flex-center" style="display: none;" data-prototype="{% apply escape %}{% include "components/update_element__item.html.twig" %}{% endapply %}">
+                  {% if updates|length > 0 %}
+                    {% for update in updates.notifs %}
+                      {% include "components/update_element__item.html.twig" with { element: update, seen: update.viewed } %}
+                    {% endfor %}
+                  {% else %}
+                    <li class="no-update-msg">{{'updates.no_update_yet'|trans}}</li>
+                  {% endif %}
+                </ul>
               </li>
               
               <li class="logout">

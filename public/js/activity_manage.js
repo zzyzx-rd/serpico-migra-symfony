@@ -104,16 +104,10 @@ function initPickates(){
 }
 
 initPickates();
-$(document).ready(function(){
-
-    console.log($('.value-scale').material_select());
-    console.log($('.scale').material_select());
-});
-
-moment().format();
 var now = new Date();
 var annee   = now.getFullYear();
 var anneeSuiv = annee + 1;
+const $sentDatesOptions = { month: 'numeric', day: 'numeric', year: 'numeric'};
 
 
 function dTrans($elmts, $entity, $prop){
@@ -185,19 +179,24 @@ $('#eventGSelector').on('change',function(){
 
 
 
-function updateEvents($evgId = null, $evtId = null) {
+function updateEvents($evgnId = null, $evtId = null) {
   $evgSelect = $('#eventGSelector');
   $evtSelect = $('[id*="eventType"]');
-  if($evgId){
-    $evgSelect.val($evgId);
+  $evgId = null;
+  if($evgnId){
+    $consideredOption = $evgSelect.find(`option[data-evgid="${$evgnId}"]`);
+    $consideredOption.prop('selected',true);
+    $evgId = $consideredOption.val();
+  } else {
+    $evgId = $evgSelect.val() ? $evgSelect.val() : $evgSelect.find('option').eq(0).val();
   }
   const $stylizableSelects = $evgSelect.add($evtSelect);
 
-  $.post(geurl,{id: $evgSelect.val()})
+  $.post(geurl,{id: $evgId})
     .done(function(eventTypes){ 
       $evtSelect.empty();
       $.each(eventTypes, function(i,e){
-        $evtSelect.append(`<option value="${e.id}">${e.name}</option>`);
+        $evtSelect.append(`<option data-evnid="${e.evnId}" value="${e.id}">${e.name}</option>`);
       })
 
       if($evtId){
@@ -441,133 +440,157 @@ $(function () {
 
   dateUpdate();
 
-function dateUpdate() {
-
-
-    $('.s-day').css('padding-left','');
-    $('.e-day').css('padding-right','');
+function dateUpdate(updateTimeScale = true, actSet = null) {
+    
     var ts = getCookie("ts");
     var ci = getCookie("ci");
-    var c = new Date();
     y = parseInt(ci.split('-').slice(-1)[0]);
     cInt = parseInt(ci.split('-')[1]); 
-    var month = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
-    $('#activities-container').find('.months-ref').children().not('.chevron').remove()
+    var c = new Date();
     if (ts == "y") {
-        for (var i = 0; i < 12; i++) {
-            $('#activities-container').find('.months-ref').append('<div class="col s1">' + month[i] + '</div>');
-        }
-        si = new Date(ci, 0, 1);
-        ei = new Date((parseInt(ci) + 1), 0, 1);
-        $('.curr-int-value').empty().append(parseInt(ci));
-        $('.prev-interval-val').empty().append((parseInt(ci) - 1));
-        $('.next-interval-val').empty().append((parseInt(ci) + 1));
-        var tDays = ndDayPerYears((parseInt(ci)));
-        //var c = getDay();
-
+      si = new Date(ci, 0, 1);
+      ei = new Date((parseInt(ci) + 1), 0, 1);
     } else {
-        $('.months-ref').removeClass('row').addClass('flex-center-sa'); 
-        var datesInt = datesInterval(ts, y, cInt);
-        var si = datesInt[0];
-        var ei = datesInt[1];
-        var cDivider = ts == 't' ? 5 : (ts == 'w' && moment(`${y+1}-01-01`).day() > 3 ? 54 : 53);
-        var pDivider = ts == 't' ? 5 : (ts == 'w' && moment(`${y}-01-01`).day() > 3 ? 54 : 53);
+      var datesInt = datesInterval(ts, y, cInt);
+      var si = datesInt[0];
+      var ei = datesInt[1];
+    }
 
-        pInt = (pDivider + cInt - 1) % pDivider;
-        if(pInt == 0){
-          pInt = pDivider - 1;
-          py = y - 1;
-        } else {
-          py = '';
-        }
+    if(updateTimeScale){
 
-        nInt = Math.max(1,(cDivider + cInt + 1) % cDivider);
-        ny = nInt == 1 ? y + 1 : '';
+      $('.s-day').css('padding-left','');
+      $('.e-day').css('padding-right','');
+      var month = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
+      $('#activities-container').find('.months-ref').children().not('.chevron').remove();
 
-        prefix = (ts == 't') ? (lg == 'fr' ? 'T' : 'Q') : (lg == 'fr' ? 'S' : 'W');
-
-        var tDays = parseInt(dayDiff(si, ei)) + 1;
-        //var c = moment.duration(moment().diff(moment(si),'days')).milliseconds();
-        /*if(ts == 't'){*/
-          $('.prev-interval-val').empty().append(`${prefix}${pInt} ${py}`);
-          $('.next-interval-val').empty().append(`${prefix}${nInt} ${ny}`);
-          $('.curr-int-value').empty().append(`${prefix}${cInt} <span class="int-precision">${y}</span>`);
-        /*} else {
-          $('.prev-interval-val').empty().append(`${lg == 'fr' ? 'S' : 'W'}${pInt == 0 ? 52 : pInt} ${pInt == 0 ? py : ''}`);
-          $('.next-interval-val').empty().append(`${lg == 'fr' ? 'S' : 'W'}${nInt == 0 ? 52 : nInt} ${nInt == 1 ? ny : ''}`);
-          $('.curr-int-value').empty().append(`${lg == 'fr' ? 'S' : 'W'}${cInt} <span class="int-precision">${cy}</span>`);
-        }*/
-        $('.start-int-value').empty().append(`${si.getDate()}/${si.getMonth() + 1}`);
-        $('.end-int-value').empty().append(`${ei.getDate()}/${ei.getMonth() + 1}`);
-        //width = 100 / 13;
-        //week = moment(si).week();
-        wDate = moment(si);
-        $timescale = $('#activities-container').find('.months-ref');
-        currDiffWDaysUSEU = moment.duration(moment(datesInterval(ts,y,1)[0]).diff(moment(`${y}-01-01`))).days();
-        nextDiffWDaysUSEU = moment.duration(moment(datesInterval(ts,y+1,1)[0]).diff(moment(`${y+1}-01-01`))).days();
-        
-        if(ts == 't'){
-          nct = new Date(wDate);
-          nct = moment(nct).add(Math.max(-currDiffWDaysUSEU,0),'d');
-          ct = nct.quarter(); // Just to be sure to be in according quarter 
-          offset = /* currDiffWDaysUSEU < 3 &&*/ moment(moment(datesInterval(ts,y,1)[0])).week() == 2 ? -1 : 0;
-
-          while (nct.quarter() == ct){
-            week = wDate.week();  
-            
-            if(week == 1){
-              if (nextDiffWDaysUSEU >= 3 && ct == 4){
-                week = 53;
+      if (ts == "y") {
+          for (var i = 0; i < 12; i++) {
+              $('#activities-container').find('.months-ref').append('<div class="col s1">' + month[i] + '</div>');
+          }
+          $('.curr-int-value').empty().append(parseInt(ci));
+          $('.prev-interval-val').empty().append((parseInt(ci) - 1));
+          $('.next-interval-val').empty().append((parseInt(ci) + 1));  
+      } else {
+          $('.months-ref').removeClass('row').addClass('flex-center-sa'); 
+          var cDivider = ts == 't' ? 5 : (ts == 'w' && moment(`${y+1}-01-01`).day() > 3 ? 54 : 53);
+          var pDivider = ts == 't' ? 5 : (ts == 'w' && moment(`${y}-01-01`).day() > 3 ? 54 : 53);
+          pInt = (pDivider + cInt - 1) % pDivider;
+          if(pInt == 0){
+            pInt = pDivider - 1;
+            py = y - 1;
+          } else {
+            py = '';
+          }
+  
+          nInt = Math.max(1,(cDivider + cInt + 1) % cDivider);
+          ny = nInt == 1 ? y + 1 : '';
+  
+          prefix = (ts == 't') ? (lg == 'fr' ? 'T' : 'Q') : (lg == 'fr' ? 'S' : 'W');
+  
+          var tDays = parseInt(dayDiff(si, ei)) + 1;
+          //var c = moment.duration(moment().diff(moment(si),'days')).milliseconds();
+          /*if(ts == 't'){*/
+            $('.prev-interval-val').empty().append(`${prefix}${pInt} ${py}`);
+            $('.next-interval-val').empty().append(`${prefix}${nInt} ${ny}`);
+            $('.curr-int-value').empty().append(`${prefix}${cInt} <span class="int-precision">${y}</span>`);
+          /*} else {
+            $('.prev-interval-val').empty().append(`${lg == 'fr' ? 'S' : 'W'}${pInt == 0 ? 52 : pInt} ${pInt == 0 ? py : ''}`);
+            $('.next-interval-val').empty().append(`${lg == 'fr' ? 'S' : 'W'}${nInt == 0 ? 52 : nInt} ${nInt == 1 ? ny : ''}`);
+            $('.curr-int-value').empty().append(`${lg == 'fr' ? 'S' : 'W'}${cInt} <span class="int-precision">${cy}</span>`);
+          }*/
+          $('.start-int-value').empty().append(`${si.getDate()}/${si.getMonth() + 1}`);
+          $('.end-int-value').empty().append(`${ei.getDate()}/${ei.getMonth() + 1}`);
+          //width = 100 / 13;
+          //week = moment(si).week();
+          wDate = moment(si);
+          $timescale = $('#activities-container').find('.months-ref');
+          currDiffWDaysUSEU = moment.duration(moment(datesInterval(ts,y,1)[0]).diff(moment(`${y}-01-01`))).days();
+          nextDiffWDaysUSEU = moment.duration(moment(datesInterval(ts,y+1,1)[0]).diff(moment(`${y+1}-01-01`))).days();
+          
+          if(ts == 't'){
+            nct = new Date(wDate);
+            nct = moment(nct).add(Math.max(-currDiffWDaysUSEU,0),'d');
+            ct = nct.quarter(); // Just to be sure to be in according quarter 
+            offset = /* currDiffWDaysUSEU < 3 &&*/ moment(moment(datesInterval(ts,y,1)[0])).week() == 2 ? -1 : 0;
+  
+            while (nct.quarter() == ct){
+              week = wDate.week();  
+              
+              if(week == 1){
+                if (nextDiffWDaysUSEU >= 3 && ct == 4){
+                  week = 53;
+                }
               }
+              $timescale.append('<div><sub>s</sub>' + (week + offset == 0 ? 52 : week + offset) + '</div>');
+              wDate = wDate.add(1,'w')/*.add(Math.max(-currDiffWDaysUSEU,0),'d')*/;
+              nct = nct.add(1,'w')/*.add(Math.max(-currDiffWDaysUSEU,0),'d')*/;
             }
-            $timescale.append('<div><sub>s</sub>' + (week + offset == 0 ? 52 : week + offset) + '</div>');
-            wDate = wDate.add(1,'w')/*.add(Math.max(-currDiffWDaysUSEU,0),'d')*/;
-            nct = nct.add(1,'w')/*.add(Math.max(-currDiffWDaysUSEU,0),'d')*/;
+          } else if(ts == 'w'){
+            weekdays_short = [];
+            weekdays_short['en'] = ['M','T','W','T','F','S','S'];
+            weekdays_short['fr'] = ['L','M','M','J','V','S','D'];
+            for(i=0;i<7;i++){
+              $timescale.append(`<div><sub>${weekdays_short[lg][i]}</sub>${i != 0 ? wDate.add(1,'d').date() : wDate.date()}</div>`)
+            }
+  
           }
-        } else if(ts == 'w'){
-          weekdays_short = [];
-          weekdays_short['en'] = ['M','T','W','T','F','S','S'];
-          weekdays_short['fr'] = ['L','M','M','J','V','S','D'];
-          for(i=0;i<7;i++){
-            $timescale.append(`<div><sub>${weekdays_short[lg][i]}</sub>${i != 0 ? wDate.add(1,'d').date() : wDate.date()}</div>`)
-          }
-
-        }
+      }
+  
+      div = $('.months-ref').children().length - 1;
+  
+      $('.activity-content-stage').css({
+          'background': 'repeating-linear-gradient(90deg, #f3ccff2b, #63009445 ' + (((centralElWidth) / div)) + 'px, #ffffff ' + (((centralElWidth) / div)) + 'px, #ffffff ' + ((centralElWidth) / (div / 2)) + 'px)'
+      });
+  
+      var now = new Date();
+  
+      var dateChevron = $('.chevron');
+      var actCurDate = $('.curDate');
+  
+      var echelle = centralElWidth / (ei - si);
+      if (ei > now && now > si) {
+          dateChevron.show();
+          dateChevron.css({'left': 'calc(' + Math.round(10000 * (c - si) / (ei - si)) / 100 + '% - 10px)'});
+          actCurDate.each(function (i, e) {
+              $(e).css({'left': Math.round(10000 * (c - si) / (ei - si)) / 100 + '%'});
+              $(e).show();
+          });
+      } else {
+          dateChevron.hide();
+          actCurDate.each(function (i, e) {
+              $(e).hide();
+          });
+      }
+    
     }
 
-    div = $('.months-ref').children().length - 1;
-
-    $('.activity-content-stage').css({
-        'background': 'repeating-linear-gradient(90deg, #f3ccff2b, #63009445 ' + (((centralElWidth) / div)) + 'px, #ffffff ' + (((centralElWidth) / div)) + 'px, #ffffff ' + ((centralElWidth) / (div / 2)) + 'px)'
-    });
-
-    var now = new Date();
-
-    var dateChevron = $('.chevron');
-    var actCurDate = $('.curDate');
-
-    var echelle = centralElWidth / (ei - si);
-    if (ei > now && now > si) {
-        dateChevron.show();
-        dateChevron.css({'left': 'calc(' + Math.round(10000 * (c - si) / (ei - si)) / 100 + '% - 10px)'});
-        actCurDate.each(function (i, e) {
-            $(e).css({'left': Math.round(10000 * (c - si) / (ei - si)) / 100 + '%'});
-            $(e).show();
-        });
+    if(actSet == null){
+      $actElmts = $(document).find('.activity-component');
     } else {
-        dateChevron.hide();
-        actCurDate.each(function (i, e) {
-            $(e).hide();
-        });
+      $actHolders = $('');
+      $.each(actSet, function(i,e){
+        $actHolders = $actHolders.add($(document).find(`.activity-holder[data-id="${e}"]`));
+      })
+      $actElmts = $actHolders.find('.activity-component');
     }
 
-    $.each($('.activity-component'), function () {
+    $.each($actElmts, function () {
         var $this = $(this);
         $this.show();
+
+        if($this.closest('.activity-holder').hasClass('tbd')){
+          nbSubInt = $('.months-ref').children().length - 1;
+          var $actContentStage = $(this).closest('.activity-content-stage');
+          $actContentStage.css({
+            'background' : 'repeating-linear-gradient(90deg, #f3ccff2b, #63009445 '+ centralElWidth / nbSubInt +'px, #ffffff '+ centralElWidth / nbSubInt +'px, #ffffff '+ centralElWidth / (nbSubInt/2) +'px)'
+          });
+          actCurDate = $actContentStage.find('.curDate');
+          (ei > now && now > si) ? actCurDate.css({'left': Math.round(10000 * (c - si) / (ei - si)) / 100 + '%'}).show() : actCurDate.hide(); 
+        }
+
         $(this).closest('.activity-holder').show();
         var sdU = parseInt($this.data("sd"));
         var p = parseInt($this.data("p"));
-
         var id = $this.data("id");
         var sa = new Date(sdU * 1000);
         var ea = new Date((sdU + p) * 1000);
@@ -643,6 +666,8 @@ function dateUpdate() {
         } else {
           $this.closest('.activity-holder').find('.act-info').css('visibility','');
         }
+
+        $this.closest('.activity-holder').removeClass('tbd');
     })
 
     if(!$('.stage-element:visible').length){
@@ -1295,12 +1320,11 @@ function dateUpdate() {
     const $this = $(this);
     const $modal = $this.closest('.modal');
     const $outputOptions = { month: 'numeric', day: 'numeric'};
-    const $sentOptions = { month: 'numeric', day: 'numeric', year: 'numeric'};
     const loc = `${lg}-${lg.toUpperCase()}`;
     const sdStr = $modal.find('.dp-start').val().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     const edStr = $modal.find('.dp-end').val().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    const sd = new Date(sdStr).toLocaleString('en-EN',$sentOptions);
-    const ed = new Date(edStr).toLocaleString('en-EN',$sentOptions);
+    const sd = new Date(sdStr).toLocaleString('en-EN',$sentDatesOptions);
+    const ed = new Date(edStr).toLocaleString('en-EN',$sentDatesOptions);
     const $params = {id: $modal.attr('data-id'), sd: sd, ed: ed}  
     $.post(usdurl,$params)
       .done(function(data){
@@ -1467,6 +1491,9 @@ function dateUpdate() {
         $(data.documents).each(function(i,d){
 
             $docElmt = $($docHolder.data('prototype-existing'));
+            if(d.oid != oid){
+              $docElmt.find('.e-doc-rename-zone, .e-doc-upload-zone, .e-doc-delete-zone').remove();
+            }
             $docElmt.find('.e-doc-ext').append(d.type);
             $docElmt.find('.e-doc-title').append(d.title);
             $docElmt.find('.e-doc-size').append(`${Math.round(d.size/1000)} Ko`);
@@ -1493,9 +1520,8 @@ function dateUpdate() {
             $comElmt = $($comHolder.data('prototype-existing'));
             $comElmt.attr('data-id',c.id);
             $comElmt.find('.e-com-author').append(c.author);
-            $comElmt.find('.e-com-content').append(c.content);
-            var updateDT =  c.modified ? c.modified : c.inserted;         
-            $comElmt.find('.e-com-updated').append(`${updateDT} ${c.modified ? ' ('+modifiedMsg+')' : ''}`);  
+            $comElmt.find('.e-com-content').append(c.content);      
+            $comElmt.find('.e-com-updated').append(`${c.inserted} ${c.modified ? ' ('+modifiedMsg+')' : ''}`);  
             if(c.self){
               $modifyElmt = $(`<span class="e-com-modify tooltipped" data-tooltip="${msgComModify}" data-position="top"><i class="fa fa-pen"><i></span>`)
               $modifyElmt.tooltip();
@@ -1503,7 +1529,27 @@ function dateUpdate() {
             } else {
               $comElmt.append(`<div class="com-reply-zone flex-center-fe"><div class="dd-orange-text e-com-reply btn-e-update"><i class="fa fa-reply m-right"></i><span>Reply</span></div></div>`);
             }      
+            if(c.replies){
+              $repliesHolder = $('<ul class="replies"></ul>'); 
+              $(c.replies).each(function(i,r){
+                $reply = $($comHolder.data('prototype-existing'));
+                $reply.attr('data-id',r.id);
+                $reply.find('.e-com-author').append(r.author);
+                $reply.find('.e-com-content').append(r.content);      
+                $reply.find('.e-com-updated').append(`${r.inserted} ${r.modified ? ' ('+modifiedMsg+')' : ''}`);  
+                if(r.self){
+                  $modifyElmt = $(`<span class="e-com-modify tooltipped" data-tooltip="${msgComModify}" data-position="top"><i class="fa fa-pen"><i></span>`)
+                  $modifyElmt.tooltip();
+                  $reply.addClass('self').find('.e-com-right-elmts').append($modifyElmt);
+                } else {
+                  $reply.append(`<div class="com-reply-zone flex-center-fe"><div class="dd-orange-text e-com-reply btn-e-update"><i class="fa fa-reply m-right"></i><span>Reply</span></div></div>`);
+                }
+                $repliesHolder.append($reply);
+              })
+              $comElmt.before($repliesHolder);
+            }
             $comHolder.append($comElmt);
+
         });
 
         $modal.find('.ev-info').remove();
@@ -1567,30 +1613,46 @@ function dateUpdate() {
       const $comElmt = $this.closest('.e-comment');
       const $comHolder = $this.closest('.e-comments');
       const $evtElmt = $comElmt.closest('.modal');
+      $relatedDashEvt = $evtElmt.data('id') ? $(`.event[data-id="${$evtElmt.data('id')}"]`) : null;  
       const comExists = $comElmt.prev().hasClass('existing');
-      if(comExists){
+      const isEvtExisting = $evtElmt.attr('data-id') != null;
+      const isReply = $comElmt.prev().hasClass('being-replied');
+      if(comExists && !isReply){
         $existingComElmt = $comElmt.prev();
       } else {
         $existingComElmt = $($comHolder.data('prototype-existing'));
         $modifyElmt = $(`<span class="e-com-modify tooltipped" data-tooltip="${msgComModify}" data-position="top"><i class="fa fa-pen"><i></span>`)
         $modifyElmt.tooltip();
+        $existingComElmt.addClass('self');
         $existingComElmt.find('.e-com-right-elmts').append($modifyElmt);
         $comElmt.before($existingComElmt);
       }
-      const content = $this.closest('.e-comment').find('textarea').val();
+      const content = $comElmt.find('textarea').val();
 
       $params = {id: $comElmt.data('id'), eid: $evtElmt.data('id'), content: content};
       if($comElmt.data('pid')){$params['pid'] = $comElmt.data('pid');}
       if(!$comElmt.data('id') && $comElmt.prev().hasClass('being-replied')){$params['cid'] = $comElmt.prev().data('id');}
+      if(!isEvtExisting){
+        $params['sid'] = $evtElmt.find('.fa-external-link-alt').data('id');
+        $params['evtid'] = $evtElmt.find('[name*="eventType"]').val();
+        const sdStr = $modal.find('.dp-start').val() ? $modal.find('.dp-start').val().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : "";
+        const edStr = $modal.find('.dp-end').val() ? $modal.find('.dp-end').val().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : sdStr;
+        $params['oDateStr'] = (sdStr != "" ? new Date(sdStr) : new Date()).toLocaleString('en-EN',$sentDatesOptions);
+        $params['expResDateStr'] = (edStr != "" ? new Date(edStr) : new Date()).toLocaleString('en-EN', $sentDatesOptions); 
+      }
       $.post(uccurl,$params)
-        .done(function(data){
+        .done(function(c){
+          if($relatedDashEvt){
+            $relatedDashEvt.addClass('self');
+          }
           $comElmt.remove();
-          if(!comExists){
-            $existingComElmt.attr('data-id',data.id).find('.e-com-author').append(data.author);
+          if(!comExists || isReply){
+            $existingComElmt.attr('data-id',c.id).find('.e-com-author').append(c.author);
+            $evtElmt.find('.comments-number').empty().append($comHolder.find('.e-comment').length);
           } 
-          if(!comExists || data.modified){
-            $existingComElmt.find('.e-com-updated').empty().append(`${new Date(data.updated.date).toLocaleDateString("fr-FR",{ weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' })} ${data.modified ? ' ('+modifiedMsg+')' : ''}`);
-            $existingComElmt.find('.e-com-content').empty().append(content);
+          if(!comExists || isReply || c.modified){
+            $existingComElmt.find('.e-com-updated').empty().append(`${c.inserted} ${c.modified ? ' ('+modifiedMsg+')' : ''}`);
+            $existingComElmt.find('.e-com-content').empty().append(content);  
           }
           $existingComElmt.closest('.com-reply-zone').show();
           $existingComElmt.show();
@@ -1624,11 +1686,24 @@ function dateUpdate() {
         $hiddenDocElmt = $docElmt.prev();
         isExisting = true;
       }
+      const isEvtExisting = $evtElmt.attr('data-id') != null;
       const $docFile = $docElmt.find('.dropify');
       var form = new FormData();
       form.append("file",$docFile[0].files[0]);
+      
+      if(!isEvtExisting){
+        form.append("sid",$evtElmt.find('.fa-external-link-alt').data('id'));
+        form.append("evtid",$evtElmt.find('[name*="eventType"]').val());
+        const sdStr = $modal.find('.dp-start').val() ? $modal.find('.dp-start').val().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : "";
+        const edStr = $modal.find('.dp-end').val() ? $modal.find('.dp-end').val().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : sdStr;
+        form.append("oDateStr",(sdStr != "" ? new Date(sdStr) : new Date()).toLocaleString('en-EN',$sentDatesOptions));
+        form.append("expResDateStr",(edStr != "" ? new Date(edStr) : new Date()).toLocaleString('en-EN', $sentDatesOptions));
+      }
+
       if(!isExisting){
-        form.append("eid",$evtElmt.data('id'));
+        if(isEvtExisting){
+          form.append("eid",$evtElmt.data('id'));
+        }
         form.append("title",$docElmt.find('input[type="text"]').val());
       } else {
         form.append("id", $hiddenDocElmt.attr('data-id'));
@@ -1649,6 +1724,9 @@ function dateUpdate() {
             if(!isExisting){
               $hiddenDocElmt.find('.e-doc-title').append($docElmt.find('input[type="text"]').val());
               $evtElmt.find('.documents-number').empty().append($evtElmt.find('.e-document').length);
+            }
+            if(!isEvtExisting){
+              $evtElmt.attr('data-id',data.eid);
             }
             $hiddenDocElmt.find('.e-doc-size').empty().append(`${Math.round(d.size/1000)} Ko`);
             $hiddenDocElmt.attr('data-id',d.id).show();
@@ -1685,7 +1763,7 @@ function dateUpdate() {
 
   $(document).on('mouseover','.e-dates-header, .e-documents-header, .e-comments-header, .e-comment',function(){
     var $modal = $(this).closest('.modal');
-    if(!$modal.find('input:visible,textarea:visible').length){
+    if(!$modal.attr('data-id') || $modal.attr('data-id') && !$modal.find('input:visible,textarea:visible').length){
       $(this).find('.btn-e-update').show();
     }
   }).on('mouseleave','.e-dates-header, .e-documents-header, .e-comments-header, .e-comment',function(){  
@@ -1999,8 +2077,7 @@ function dateUpdate() {
 
   $(document).on('click',function(e){
     var $this = $(e.target);
-    var $visibleSel = $('.dropdown-content:visible');
-    
+    var $visibleSel = $('.dropdown-content:visible');    
     if($visibleSel.closest('.participant-field-zone').length || $this.hasClass('participant-fullname')){
       
       if (!$this.hasClass('participant-fullname') && $visibleSel.length){
@@ -2022,9 +2099,8 @@ function dateUpdate() {
           $sel.removeAttr('style');
         }
       }
-
-
     }
+
   })
 
 
@@ -2496,6 +2572,21 @@ function dateUpdate() {
       setCookie('ts',$(this).val(),365);
       location.reload();
   });
+
+  setTimeout(function(){
+    setInterval(function(){
+        var $actTBD = $(document).find('.tbd');
+        if(!$actTBD.length){
+          return false;
+        } else {
+          var actIds = [];
+          $actTBD.each(function(i,e){
+            actIds.push($(e).data('id'));
+          })
+          dateUpdate(false,actIds);
+        }
+    },15000);
+  },1500)
 
 });
 
