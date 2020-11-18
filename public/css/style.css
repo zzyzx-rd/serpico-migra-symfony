@@ -101,7 +101,7 @@ li + li.no-items-placeholder {
   display: none;
 }
 
-.has-barred{
+.has-barred, .user-notif-link{
   position: relative;
 }
 
@@ -3080,4 +3080,60 @@ h2.header {
 
 .user-name.synth{
   font-style: italic;
+}
+
+.nb-updates-new{
+  position:absolute;
+  right: 20%;
+  top: 20%;
+  width: 1rem;
+  height: 1rem;
+  background: orange;
+  text-align: center;
+  border-radius: 3px;
+  line-height: 17px;
+  font-weight: 700;
+}
+
+.notif-list{
+  position: absolute;
+  bottom: calc((4rem + 12px)*(-1));
+  background-color: white;
+  border: 1px solid black;
+  flex-direction: column;
+  width: 350px;
+  right: 140px;
+  display:none;
+  border-radius: 2px;
+}
+
+.notif-list > li{
+  padding:10px;
+}
+
+.notif-list > li:not(.seen){
+  background-color: #8000800d;
+}
+
+.notif-user{
+  display:inline-block;
+}
+
+.notif-user-picture img{
+  height: 15px;
+  width:15px;
+  border-radius: 50%;
+}
+
+.notif-user-name, .notif-act-elmt{
+  font-weight: 600;
+}
+
+.comment-new ul, .notif-action{
+  display: inline-block;
+}
+
+.notif-time{
+  float: right;
+  font-size: 12px;
 }

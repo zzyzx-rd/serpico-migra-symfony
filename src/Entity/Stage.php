@@ -43,9 +43,9 @@ class Stage extends DbObject
     public const PROGRESS_COMPLETED = 2;
     public const PROGRESS_FINALIZED = 3;
 
-    public const VISIBILITY_public = 0;
+    public const VISIBILITY_PUBLIC = 0;
     public const VISIBILITY_UNLISTED = 1;
-    public const VISIBILITY_PUBLIC = 2;
+    public const VISIBILITY_PRIVATE = 2;
 
     public const GRADED_STAGE = 0;
     public const GRADED_PARTICIPANTS = 1;
@@ -305,6 +305,11 @@ class Stage extends DbObject
      * @OneToMany(targetEntity="Mail", mappedBy="stage",cascade={"persist", "remove"}, orphanRemoval=true)
      */
     public $mails;
+
+    /**
+     * @OneToMany(targetEntity="ElementUpdate", mappedBy="stage",cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    public $updates;
 
 
     /**
@@ -568,6 +573,23 @@ class Stage extends DbObject
     {
         $this->reopened = $reopened;
 
+        return $this;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getLastReopened()
+    {
+        return $this->lastRe;
+    }
+
+    /**
+     * @param \DateTime $lastReopened
+     */
+    public function setLastReopened($lastReopened)
+    {
+        $this->lastReopened = $lastReopened;
         return $this;
     }
 
@@ -1680,7 +1702,7 @@ class Stage extends DbObject
         $eligibleParticipations = count($this->criteria) === 0 ? $this->participations : $this->criteria->first()->getParticipations();
         $myParticipations = $this->getSelfParticipations();
         $myTeam = $myParticipations->count() === 0 ? null : $myParticipations->first()->getTeam();
-        if($eligibleParticipations!=null) {
+        if($eligibleParticipations != null) {
             foreach ($eligibleParticipations as $eligibleParticipation) {
                 $currentTeam = $eligibleParticipation->getTeam();
                 if ($currentTeam === null || $currentTeam == $myTeam) {
@@ -1719,6 +1741,27 @@ class Stage extends DbObject
     public function removeMail(Mail $mail): Stage
     {
         $this->mails->removeElement($mail);
+        return $this;
+    }
+
+    /**
+    * @return ArrayCollection|ElementUpdate[]
+    */
+    public function getUpdates()
+    {
+        return $this->updates;
+    }
+
+    public function addUpdate(ElementUpdate $update): Stage
+    {
+        $this->updates->add($update);
+        $update->setStage($this);
+        return $this;
+    }
+
+    public function removeUpdate(ElementUpdate $update): Stage
+    {
+        $this->updates->removeElement($update);
         return $this;
     }
 

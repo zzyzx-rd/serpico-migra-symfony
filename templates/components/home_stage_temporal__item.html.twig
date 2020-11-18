@@ -15,11 +15,11 @@
       {% else %}
       {% if diffDays.days == 0 %}
             <span class="e-day s-dates single-date">
-              {{enddate|format_datetime('short', 'none', pattern='dd')|number_format}}
+              {{ enddate|format_datetime('short', 'none', pattern='dd')|number_format }}
             </span>
           {% else %}
             <span class="e-day s-dates single-date m-days">
-              {{ startdate|format_datetime('short', 'none', pattern='dd')|number_format ~ ' - ' ~ enddate|format_datetime('short', 'none', pattern='dd')|number_format}}
+              {{ startdate|format_datetime('short', 'none', pattern='dd')|number_format ~ ' - ' ~ enddate|format_datetime('short', 'none', pattern='dd')|number_format }}
             </span>
           {% endif %}
       {% endif %}

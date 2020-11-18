@@ -7,7 +7,7 @@
 
 {% endif %}
 
-  <div class="row no-margin flex-center {{activity is defined ? actStatus : 'dummy-activity'}} activity-holder" {% if activity is defined and not visible %}style="display:none"{% endif %}>
+  <div class="row no-margin flex-center {{activity is defined ? actStatus : 'dummy-activity'}} activity-holder" data-id="{{activity is defined ? activity.id}}" {% if activity is defined and not visible %}style="display:none"{% endif %}>
     <div class="col s9 center no-padding activity-content-stage" style="background-color: #feffe9;">
       
       <div class="curDate"></div>
@@ -16,7 +16,7 @@
 
           {% if activity is defined %}
           
-            <ol class="stages activity-component" data-sd="{{ activity.startdateU }}" data-p="{{ activity.period }}" data-id="{{random(1,1000000)}}">
+            <ol class="stages activity-component" data-sd="{{ activity.startdateU }}" data-p="{{ activity.period }}">
               
               {% set checkingStageIndex = -1 %}
 
@@ -59,21 +59,24 @@
 
                     {% for e, event in stage.sortedEventsPerPeriod %}
 
-                              {% set embeddedEvents = null %}
-                        
-                              {% if e > checkingEventIndex %}
-                                {% set isEmbedded = false %}
-                                {% set embeddedEvents = event.embeddedEvents(timescaleCookie, 3) %}
-                                {% if embeddedEvents is not empty %}  
-                                  {% set checkingEventIndex = e + embeddedEvents|length %}
-                                {% endif %}
-                                {% set visibleEl = true %}
-                              {% else %}
-                                {% set isEmbedded = true %}
-                                {% set visibleEl = false %}
-                              {% endif %}
+                        {% set embeddedEvents = null %}
+                      
+                        {% do event.setEm(em) %}
+                        {% do event.setCurrentUser(currentuser) %}
+                  
+                        {% if e > checkingEventIndex %}
+                          {% set isEmbedded = false %}
+                          {% set embeddedEvents = event.embeddedEvents(timescaleCookie, 3) %}
+                          {% if embeddedEvents is not empty %}  
+                            {% set checkingEventIndex = e + embeddedEvents|length %}
+                          {% endif %}
+                          {% set visibleEl = true %}
+                        {% else %}
+                          {% set isEmbedded = true %}
+                          {% set visibleEl = false %}
+                        {% endif %}
 
-                              {% include "components/event_temporal__item.html.twig" with { isEmbedded: isEmbedded, onsetdateU: event.onsetDateU, period: event.period, embeddedEvents: embeddedEvents, visibleEl: visibleEl } %}
+                        {% include "components/event_temporal__item.html.twig" with { isEmbedded: isEmbedded, lastUpdateSelf: event.lastUpdateSelf, onsetdateU: event.onsetDateU, period: event.period, embeddedEvents: embeddedEvents, visibleEl: visibleEl } %}
                         
 
                     {% endfor %}    
@@ -146,7 +149,7 @@
           {% endif %}
           {% if activityM.userCanEdit(activity,currentuser) %}  
             <li>
-              <a class="btn-floating act-btn tooltipped modal-trigger" href="#updateStageProgressStatus" data-position="top" data-html="true" data-tooltip="{{ 'activities.update_status'|trans}}" data-eid="{{ activity.id }}"><i class="material-icons">update</i></a>
+              <a class="btn-floating act-btn tooltipped modal-trigger" href="#updateStageProgressStatus" data-position="top" data-html="true" data-tooltip="{{ activity.progress != 2 ? 'activities.update_status'|trans : 'activities.reopen_activity'|trans }}" data-eid="{{ activity.id }}" data-sid="{{ activity.stages.first.id }}" data-progress="{{ activity.progress }}" data-r="{{ activity.stages.first.reopened }}"><i class="material-icons">update</i></a>
             </li>
             {#
             <li>
@@ -154,9 +157,14 @@
             </li>
             #}
           {% endif %}
+
+          {% if activity.progress < 2 %}
+          
             <li>
               <a class="btn-floating act-btn tooltipped modal-trigger add-direct-evt" href="#updateEvent" data-tooltip="{{ 'activities.instant_add'|trans }}" data-position="top" data-aid="{{ activity.id }}" data-sid="{{ activity.stages|length == 1 ? activity.stages.first.id }}"><i class="material-icons">offline_bolt</i></a>
             </li>
+          
+          {% endif %} 
 
           {#
           {% if activityM.userCanGiveOutput(activity,currentuser) %}

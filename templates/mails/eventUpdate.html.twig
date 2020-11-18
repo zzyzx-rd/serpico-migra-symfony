@@ -1,0 +1,50 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>
+            {% block subject %}
+                {{ 'mails.eventUpdate.subject'|trans ~ ' 1 ' ~ 'new'|trans ~ ' ' ~
+                    (commentUpdate ? 'comment'|trans : 'document'|trans) ~ ' ' ~ 'for'|trans ~ ' ' ~
+                    (event.stage.activity.stages|length > 1 ? 
+                        'mails.eventUpdate.stage_msg'|trans ~ ' ' ~ event.stage.name|raw ~ ' ' ~ 'of'|trans ~ ' ' ~ 'mails.eventUpdate.activity_msg'|trans ~ ' ' ~ event.stage.activity.name|raw :
+                        'mails.eventUpdate.activity_msg'|trans ~ ' ' ~ event.stage.activity.name|raw
+                    )
+                }}
+            {% endblock %}
+        </title>
+        <style type="text/css">
+            body {margin: 0; padding: 0; min-width: 100%!important;}
+            .content {width: 100%; max-width: 800px;}
+        </style>
+    </head>
+    
+
+    {% block body %}
+    <body bgcolor="white">
+        <table width="100%" bgcolor="white" border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td>
+                    <table class="content" align="left" cellpadding="0" cellspacing="0" border="0">
+                        <td>
+                            <p>{% trans %}mails.hello{% endtrans %} {{ recipient.firstname }},</p>
+                            <p>{{ 'mails.eventUpdate.message'|trans ~ ':' }}</p>
+                            <p style="text-align: center"><a href="{{ url('myActivities') }}" target="_blank"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;font-weight:600;text-transform:uppercase;">{% trans %}mails.eventUpdate.button_text{% endtrans %}</button></a></p>
+                            <p>{% trans %}mails.see_you_soon{% endtrans %}</p>
+                        </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <p>{% trans %}mails.signature_team{% endtrans %}</p>
+                                <img src="cid:logo_img" alt="logo {{ company_name }}" style="width: {{ logo_width_px }}px">
+                                <p style="margin:0;"><strong>{{ 'mails.dealdrive_motto'|trans }}</strong><br>{{ address }} | {{ zipcode_city }}</p>
+                                {% if company_name == 'Serpico' %}<p>{{ phone }}</p>{% endif %}
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
+    {% endblock %}
+</html>

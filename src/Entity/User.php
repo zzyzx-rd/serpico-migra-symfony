@@ -266,6 +266,11 @@ class User extends DbObject implements  UserInterface, \Serializable
      */
     public $subordinates;
 
+    /**
+     * @OneToMany(targetEntity="ElementUpdate", mappedBy="user", cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    public $updates;
+
     private $roles;
 
 
@@ -398,6 +403,7 @@ class User extends DbObject implements  UserInterface, \Serializable
         $this->subordinates = new ArrayCollection();
         $this->participations = new ArrayCollection();
         $this->roles = new ArrayCollection();
+        $this->updates = new ArrayCollection();
     }
 
 
@@ -1274,16 +1280,47 @@ class User extends DbObject implements  UserInterface, \Serializable
 
     public function getExternalActivities()
     {
-        $externalParticipations = $this->participations->filter(fn(Participation $p) => $p->getStage()->getActivity()->getOrganization() != $this->organization);
-        $externalActivities = [];
-        foreach($externalParticipations as $externalParticipation){
-            $externalActivity = $externalParticipation->getStage()->getActivity();
-            if (in_array($externalActivity,$externalActivities) === false){
-                $externalActivities[] = $externalActivity;
-            }
-        }
-        $externalActivities = new ArrayCollection($externalActivities);
-        return $externalActivities;
+        return new ArrayCollection(array_unique($this->participations->filter(fn(Participation $p) => $p->getStage()->getActivity()->getOrganization() != $this->organization)
+            ->map(fn(Participation $p) => $p->getStage()->getActivity())->getValues()));       
+    }
+
+    public function getExternalStages()
+    {
+        return new ArrayCollection(array_unique($this->participations->filter(fn(Participation $p) => $p->getStage()->getOrganization() != $this->organization)
+            ->map(fn(Participation $p) => $p->getStage())->getValues()));       
+    }
+
+    public function getInternalActivities()
+    {
+        return new ArrayCollection(array_unique($this->participations->filter(fn(Participation $p) => $p->getStage()->getActivity()->getOrganization() == $this->organization)
+            ->map(fn(Participation $p) => $p->getStage()->getActivity())->getValues()));       
+    }
+
+    public function getInternalStages()
+    {
+        return new ArrayCollection(array_unique($this->participations->filter(fn(Participation $p) => $p->getStage()->getOrganization() == $this->organization)
+            ->map(fn(Participation $p) => $p->getStage())->getValues()));       
+    }
+
+    /**
+    * @return ArrayCollection|ElementUpdate[]
+    */
+    public function getUpdates()
+    {
+        return $this->updates;
+    }
+
+    public function addUpdate(ElementUpdate $update): User
+    {
+        $this->updates->add($update);
+        $update->setUser($this);
+        return $this;
+    }
+
+    public function removeUpdate(ElementUpdate $update): User
+    {
+        $this->updates->removeElement($update);
+        return $this;
     }
 
 

@@ -248,6 +248,14 @@ class Organization extends DbObject
      */
     protected $events;
     /**
+     * @OneToMany(targetEntity="EventDocument", mappedBy="organization", cascade={"persist","remove"})
+     */
+    protected $documents;
+    /**
+     * @OneToMany(targetEntity="EventComment", mappedBy="organization", cascade={"persist","remove"})
+     */
+    protected $comments;
+    /**
      * @OneToMany(targetEntity="DynamicTranslation", mappedBy="organization", cascade={"persist","remove"})
      */
     protected $dTranslations;
@@ -377,6 +385,8 @@ class Organization extends DbObject
         $this->eventTypes = new ArrayCollection();
         $this->translations = new ArrayCollection();
         $this->paymentMethods = new ArrayCollection();
+        $this->comments = new ArrayCollection();
+        $this->documents = new ArrayCollection();
     }
 
     /**
@@ -1339,6 +1349,69 @@ class Organization extends DbObject
     public function removeDTranslation(DynamicTranslation $dTranslation): self
     {
         $this->dTranslations->removeElement($dTranslation);
+        return $this;
+    }
+
+    /**
+    * @return ArrayCollection|EventDocument[]
+    */
+    public function getDocuments()
+    {
+        return $this->documents;
+    }
+
+    public function addDocument(EventDocument $document): self
+    {
+        $this->documents->add($document);
+        $document->setOrganization($this);
+        return $this;
+    }
+
+    public function removeEventDocument(EventDocument $document): self
+    {
+        $this->documents->removeElement($document);
+        return $this;
+    }
+    
+    /**
+    * @return ArrayCollection|EventComment[]
+    */
+    public function getComments()
+    {
+        return $this->comments;
+    }
+
+    public function addComment(EventComment $comment): self
+    {
+        $this->comments->add($comment);
+        $comment->setOrganization($this);
+        return $this;
+    }
+
+    public function removeEventComment(EventComment $comment): self
+    {
+        $this->comments->removeElement($comment);
+        return $this;
+    }
+
+    /**
+    * @return ArrayCollection|Event[]
+    */
+    public function getEvents()
+    {
+        return $this->events;
+    }
+
+    public function addEvent(Event $event): self
+    {
+        $this->events->add($event);
+        $event->setOrganization($this);
+        return $this;
+    }
+
+    public function removeEvent(Event $event): self
+    {
+        $this->events->removeElement($event);
         return $this;
     }
 

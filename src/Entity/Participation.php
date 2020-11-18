@@ -138,6 +138,11 @@ class Participation extends DbObject
     protected $answers;
 
     /**
+     * @OneToMany(targetEntity="ElementUpdate", mappedBy="participation", cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    public $updates;
+
+    /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="participations")
      * @JoinColumn(name="user_usr_id", referencedColumnName="usr_id", nullable=true)
      */
@@ -223,9 +228,10 @@ class Participation extends DbObject
         $this->criterion = $criterion;
         $this->survey = $survey;
         $this->answers = $answers;
-        $this->user = $user;
+        $this->user = $user;    
         $this->externalUser = $externalUser;
         $this->id = $id;
+        $this->updates = new ArrayCollection();
     }
 
 
@@ -574,6 +580,27 @@ class Participation extends DbObject
 
     public function setWorkerFirm(?int $workerFirm): self
     {
+        return $this;
+    }
+
+    /**
+    * @return ArrayCollection|ElementUpdate[]
+    */
+    public function getUpdates()
+    {
+        return $this->updates;
+    }
+
+    public function addUpdate(ElementUpdate $update): Participation
+    {
+        $this->updates->add($update);
+        $update->setParticipation($this);
+        return $this;
+    }
+
+    public function removeUpdate(ElementUpdate $update): Participation
+    {
+        $this->updates->removeElement($update);
         return $this;
     }
 

@@ -94,6 +94,11 @@ class Department extends DbObject
     public $users;
 
     /**
+     * @OneToMany(targetEntity="ElementUpdate", mappedBy="department",cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    public $updates;
+
+    /**
      * Department constructor.
      * @param $id
      * @param $name
@@ -135,6 +140,7 @@ class Department extends DbObject
         $this->eventGroups = $eventGroups?:new ArrayCollection();
         $this->targets = $targets?:new ArrayCollection();
         $this->users = $users?:new ArrayCollection();
+        $this->updates = new ArrayCollection();
     }
 
 
@@ -338,6 +344,27 @@ class Department extends DbObject
     public function removeUser(User $user): Department
     {
         $this->users->removeElement($user);
+        return $this;
+    }
+
+    /**
+    * @return ArrayCollection|ElementUpdate[]
+    */
+    public function getUpdates()
+    {
+        return $this->updates;
+    }
+
+    public function addUpdate(ElementUpdate $update): self
+    {
+        $this->updates->add($update);
+        $update->setDepartment($this);
+        return $this;
+    }
+
+    public function removeUpdate(ElementUpdate $update): self
+    {
+        $this->updates->removeElement($update);
         return $this;
     }
 

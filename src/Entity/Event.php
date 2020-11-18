@@ -8,6 +8,7 @@ use DateTime;
 use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -68,13 +69,20 @@ class Event extends DbObject
 
     /**
      * @OneToMany(targetEntity="EventDocument", mappedBy="event", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OrderBy({"inserted" = "DESC"})
      */
     public $documents;
 
     /**
      * @OneToMany(targetEntity="EventComment", mappedBy="event", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OrderBy({"inserted" = "ASC"})
      */
     public $comments;
+
+    /**
+     * @OneToMany(targetEntity="ElementUpdate", mappedBy="event", cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    public $updates;
 
     /**
      * @ManyToOne(targetEntity="EventType")
@@ -106,6 +114,9 @@ class Event extends DbObject
      * @ORM\Column(name="eve_deleted", type="datetime", nullable=true)
      */
     public $deleted;
+
+    public Organization $org;
+    public User $currentUser;
 
     /**
      * Criterion constructor.
@@ -282,14 +293,22 @@ class Event extends DbObject
         return $this->comments;
     }
 
-    public function addComment(EventComment $comment): Event
+    /**
+     * @return ArrayCollection|EventComment[]
+     */
+    public function getParentComments()
+    {
+        return $this->comments->filter(fn(EventComment $c) => !$c->getParent());
+    }
+
+    public function addComment(EventComment $comment): self
     {
         $this->comments->add($comment);
         $comment->setEvent($this);
         return $this;
     }
 
-    public function removeComment(EventComment $comment): Event
+    public function removeComment(EventComment $comment): self
     {
         $this->comments->removeElement($comment);
         return $this;
@@ -458,6 +477,60 @@ class Event extends DbObject
         }
     
         return "$difference $periods[$j] {$tense}";
+    }
+
+    public function setEm(EntityManager $em){
+        $this->em = $em;
+        return $this;
+    }
+
+    public function setCurrentUser(User $currentUser){
+        $this->currentUser = $currentUser;
+        return $this;
+    }
+
+    public function isLastUpdateSelf(){
+        
+        if($this->documents->count() == 0 && $this->comments->count() == 0){
+            $lastUpdatedElmt = $this;
+        } else {
+            // We consider the last event update
+            $lastUpdatedDoc = $this->documents->count() > 0 ? $this->documents->first() : null;
+            $lastUpdatedCom = $this->comments->count() > 0 ? $this->comments->last() : null;
+            $lastUpdatedDocDate = $lastUpdatedDoc ? ($lastUpdatedDoc->getModified() ?:  $lastUpdatedDoc->getInserted()) : null;
+            $lastUpdatedComDate = $lastUpdatedCom ? ($lastUpdatedCom->getModified() ?:  $lastUpdatedCom->getInserted()) : null;
+            $lastUpdatedElmt = $lastUpdatedComDate > $lastUpdatedDocDate ? $lastUpdatedCom : $lastUpdatedDoc;
+            
+        }
+
+        // If multi-organization event, we look whether current org is initatiator, otherwise if initiator is current logged user
+        $organization = $this->currentUser->getOrganization();
+        if($this->stage->getParticipants()->map(fn(Participation $p) => $p->getUser())->exists(fn($i, User $u) => $u->getOrganization() !== $organization)){
+            return $this->em->getRepository(User::class)->find($lastUpdatedElmt->getCreatedBy())->getOrganization() == $organization;
+        } else {
+            return $lastUpdatedElmt->createdBy == $this->currentUser->getId();
+        }
+    }
+
+    /**
+    * @return ArrayCollection|ElementUpdate[]
+    */
+    public function getUpdates()
+    {
+        return $this->updates;
+    }
+
+    public function addUpdate(ElementUpdate $update): Event
+    {
+        $this->updates->add($update);
+        $update->setEvent($this);
+        return $this;
+    }
+
+    public function removeUpdate(ElementUpdate $update): Event
+    {
+        $this->updates->removeElement($update);
+        return $this;
     }
 
 }

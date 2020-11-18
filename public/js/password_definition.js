@@ -13,13 +13,12 @@ $(function() {
         }
     });
 
-    $('.fa-eye').on('click', function() {
-        var pwdElmt = $(this).closest('.password').find('input');
-
-        if (pwdElmt.attr('type') == 'password')
-            pwdElmt.attr('type', 'text');
-        else
-            pwdElmt.attr('type', 'password');
+    $('.fa-eye').on('mousedown', function() {  
+        $pwdElmt = $(this).closest('.password').find('input');
+        $pwdElmt.attr('type') == 'password' ? $pwdElmt.attr('type', 'text') : '';
+    }).on('mouseup',function(){
+        $pwdElmt = $(this).closest('.password').find('input');
+        $pwdElmt.attr('type') == 'text' ? $pwdElmt.attr('type', 'password') : '';
     })
 
     $('input').on('cut copy paste selectstart drag drop', e => e.preventDefault());

@@ -43,7 +43,7 @@ class Output extends DbObject
      * @ORM\Column(name="otp_visibility", type="integer", nullable=true)
      */
     public $visibility;
-    /**
+
     /**
      * @ManyToOne(targetEntity=Stage::class, inversedBy="outputs")
      * @JoinColumn(name="stage_stg_id", referencedColumnName="stg_id",nullable=false)
@@ -73,6 +73,11 @@ class Output extends DbObject
     protected ?Survey $survey;
 
     /**
+     * @OneToMany(targetEntity="ElementUpdate", mappedBy="output", cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    public $updates;
+
+    /**
      * Stage constructor.
      * @param ?int$id
      * @param null $masterUser
@@ -86,11 +91,11 @@ class Output extends DbObject
     public function __construct($id = 0,
                                 $createdBy = null
 
-
     )
     {
         parent::__construct($id, $createdBy, new DateTime);
-        $this->criteria= new ArrayCollection;
+        $this->criteria = new ArrayCollection;
+        $this->updates = new ArrayCollection;
         $this->startdate = new DateTime;
         $this->enddate = new DateTime;
     }
@@ -122,10 +127,10 @@ class Output extends DbObject
 
     }
     public function removeCriterion(Criterion $criterion): Output
-{
-    $this->criteria->removeElement($criterion);
-    return $this;
-}
+    {
+        $this->criteria->removeElement($criterion);
+        return $this;
+    }
 
     /**
      * @return DateTime
@@ -167,9 +172,6 @@ class Output extends DbObject
         return $this->stage;
     }
 
-
-
-
     /**
      * @return Survey
      */
@@ -186,9 +188,26 @@ class Output extends DbObject
         $this->survey = $survey;
     }
 
+     /**
+    * @return ArrayCollection|ElementUpdate[]
+    */
+    public function getUpdates()
+    {
+        return $this->updates;
+    }
 
+    public function addUpdate(ElementUpdate $update): self
+    {
+        $this->updates->add($update);
+        $update->setOutput($this);
+        return $this;
+    }
 
-
+    public function removeUpdate(ElementUpdate $update): self
+    {
+        $this->updates->removeElement($update);
+        return $this;
+    }
 
 }
 

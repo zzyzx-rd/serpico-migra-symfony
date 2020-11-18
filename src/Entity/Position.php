@@ -80,6 +80,11 @@ class Position extends DbObject
     private $users;
 
     /**
+     * @OneToMany(targetEntity="ElementUpdate", mappedBy="position",cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    public $updates;
+
+    /**
      * Position constructor.
      * @param ?int$id
      * @param $name
@@ -269,6 +274,27 @@ class Position extends DbObject
     public function removeOption(OrganizationUserOption $option): Position
     {
         $this->options->removeElement($option);
+        return $this;
+    }
+
+     /**
+    * @return ArrayCollection|ElementUpdate[]
+    */
+    public function getUpdates()
+    {
+        return $this->updates;
+    }
+
+    public function addUpdate(ElementUpdate $update): self
+    {
+        $this->updates->add($update);
+        $update->setPosition($this);
+        return $this;
+    }
+
+    public function removeUpdate(ElementUpdate $update): self
+    {
+        $this->updates->removeElement($update);
         return $this;
     }
 

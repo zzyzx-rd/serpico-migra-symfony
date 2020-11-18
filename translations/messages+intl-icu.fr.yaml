@@ -80,6 +80,98 @@ comment: commentaire
 document: document
 download: télécharger
 rename: renommer
+new: nouveau
+for: pour
+has: a
+have: ont
+the_activity: l'activité
+the_stage: la phase
+updates:
+
+  no_update_yet: Vous n'avez pas encore reçu de notification
+
+  common_level:
+    creation: créé
+    update: modifié
+    delete: supprimé
+
+  comment_update_type:
+      withParent: a répondu à un commentaire de
+      withoutParent: a commenté
+
+  document_update_level:
+    creation: a crée le document
+    update: a crée une nouvelle version du document
+
+  update_msg: >-
+    {update_type, select,
+      act_elmt_creation {{author} a {updateLevel} {actElmtMsg}}
+      event_creation {
+        {group, select,
+          deliverable {
+            {type, select, 
+              report                {{author} a {updateLevel} un rapport pour {actElmtMsg}}
+              presentation          {{author} a {updateLevel} une présentation pour {actElmtMsg}}
+              contract              {{author} a {updateLevel} un contrat pour {actElmtMsg}}
+              spreadsheet           {{author} a {updateLevel} une feuille de calcul pour {actElmtMsg}}
+              chart                 {{author} a {updateLevel} un graphique pour {actElmtMsg}}
+              dataset               {{author} a {updateLevel} un jeu de données pour {actElmtMsg}}
+              audio                 {{author} a {updateLevel} un fichier audio pour {actElmtMsg}}
+              video                 {{author} a {updateLevel} un fichier vidéo {actElmtMsg}}
+              visual_document       {{author} a {updateLevel} un document visuel {actElmtMsg}}
+              article               {{author} a {updateLevel} un article pour {actElmtMsg}}
+              social_media_post     {{author} a {updateLevel} un post pour {actElmtMsg}}
+              minutes               {{author} a {updateLevel} un compte-rendu pour {actElmtMsg}}
+              application           {{author} a {updateLevel} une candidature pour {actElmtMsg}}
+              estimate              {{author} a {updateLevel} un devis pour {actElmtMsg}}
+              physical_delivery     {{author} a {updateLevel} une livraison physique pour {actElmtMsg}}
+              other                   {Fallback problem}
+            }
+          }
+          suggestion {
+            {type, select, 
+              rescheduling          {{author} vous suggère un nouveau créneau pour {actElmtMsg}}
+              enhancement           {{author} vous suggère une amélioration pour {actElmtMsg}}
+              additional_service    {{author} vous suggère d'apporter un service supplémentaire pour {actElmtMsg}}
+              other                   {Fallback problem}
+            }
+          }
+          incident { 
+            {type, select,
+              delivery                {{author} a reporté un incident de livraison pour {actElmtMsg}}
+              missing_payment         {{author} a reporté un incident de paiement pour {actElmtMsg}}
+              belated                 {{author} a reporté un délai inattendu pour {actElmtMsg}}
+              other                   {Fallback problem}
+            }
+          }
+          cashflow {
+            {type, select, 
+              partial_payment         {{author} a procédé à un paiement partiel pour {actElmtMsg}}
+              full_payment            {{author} a procédé au paiement intégral pour {actElmtMsg}}
+              paiement                {{author} a procédé au paiement pour {actElmtMsg}}
+              partial_reimbursement   {{author} a procédé au remboursement partiel pour {actElmtMsg}}
+              full_reimbursement      {{author} a procédé au remboursement intégral {actElmtMsg}}
+              reimbursement           {{author} a procédé au remboursement pour {actElmtMsg}}
+              other                   {Fallback problem}
+            }
+          }
+          information {
+            {type, select, 
+              feedback                {{author} vous a donné un feedback pour {actElmtMsg}}
+              additional_delay        {{author} vous informe de délai éventuels pour {actElmtMsg}}
+              changes                 {{author} vous informe de changements pour {actElmtMsg}}
+              info_needed             {{author} vous informe qu'il aurait besoin d'informations supplémentaires pour {actElmtMsg}}
+              other                   {Fallback problem}
+            }
+          }
+          other {Fallback problem}
+        }    
+      }
+      event_document  {{author} a {updateLevel} le document {docName} pour {actElmtMsg}}
+      event_comment   {{author} a {updateLevel} un commentaire pour {actElmtMsg}}
+      other {Fallback problem}
+    }
+
 
 help:
   page_title: DealDrive, pour une performance collaborative et porteuse de sens
@@ -1459,9 +1551,22 @@ mails:
     #message4: . Bonne activité et évaluation !
 
   eventNotification:
-    msg_creation: Cet événement a été créé par l'un des participants
+    msg_creation: Cet évé^nement a été créé par l'un des participants
     msg_update: Cet événement a été modifié par l'un des participants
     msg_2: Accédez à votre dashboard pour prendre connaissance de cet événement
+    button_text: Accéder à mon dashboard
+
+  eventUpdate:
+    subject: Vous avez reçu
+    activity_msg : l'activité
+    stage_msg : la phase
+    message: Accédez à ce contenu partagé en vous rendant sur votre dashboard personnel
+    button_text: Accéder à mon dashboard
+  
+  stageProgressUpdate:
+    subject_begin: Le statut pour
+    subject_mid: est passé à
+    message: Vous pouvez aussi modifier ce statut via votre dashboard
     button_text: Accéder à mon dashboard
 
   activityAssignation:
@@ -2191,6 +2296,7 @@ activities:
   display_group: Afficher ces activités
   instant_add: Faire un update
   update_status: Mettre à jour l'avancement
+  reopen_activity: Rouvrir l'activité
   provide_my_feedbacks: Donner mes feedbacks
   delete_activity: Supprimer l'activité
   delete_activity_modal:
@@ -2203,6 +2309,10 @@ activity_elements:
   parameters: Paramètres
   expected_output: Retours attendus
   no_defined_output: Pas de retours définis
+  no_int_act:
+    main_msg: Aucune activité dans l'intervalle de temps
+    closer_activity_ahead: Plus proche activité à venir
+    closer_activity_passed: Plus proche activité passée
   stages: 
     multiple_stages_modal:
       add_event_title: A quelle phase voulez-vous rattacher cet update ?
