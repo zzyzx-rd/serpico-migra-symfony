@@ -61,6 +61,7 @@ use App\Entity\CriterionGroup;
 use App\Entity\CriterionName;
 use App\Entity\InstitutionProcess;
 use App\Entity\Mail;
+use DateTime;
 use Symfony\Component\Form\FormFactory;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -165,16 +166,26 @@ class SettingsController extends MasterController
    /**
      * @param Request $request
      * @return mixed
-     * @Route("/price", name="priceManagement")
+     * @Route("/organization/plan/manage", name="priceManagement")
      */
     public function PriceManagementAction(Request $request){
         $em = $this->em;
         $currentUser = $this->user;
-        $priceStandard = [5,6,7];
-        $pricePrenium = [7,10,14];
         if (!$currentUser instanceof User) {
             return $this->redirectToRoute('login');
         }
+        $priceStandard = [5,6,7];
+        $pricePrenium = [7,10,14];
+        $org = $this->org;
+        
+        /*if(!$org->getCustomerId()){
+            $mail = $org->getMasterUser() ? $org->getMasterUser()->getEmail() : "";
+            $cust = Stripe\Customer::create([
+                'email' => $mail,
+            ]);
+            $org->setCustomerId($cust->id);
+        }*/
+
         $this->org->setCustomerId($this->org->getCustomerId());
         $em->flush();
         $organization = $this->org;
@@ -1295,14 +1306,15 @@ class SettingsController extends MasterController
                     $em->flush();    
                 }
 
+                $now = new DateTime();
+
                 $organization
-                    ->setValidated(new \DateTime)
                     ->setCommname($workerFirm->getName())
                     ->setLegalname($workerFirm->getName())
                     ->setIsClient(true)
                     ->setType($orgType)
                     ->setWeightType('role')
-                    ->setExpired(new \DateTime('2100-01-01 00:00:00'))
+                    ->setExpired($now->add(new DateInterval('P21D')))
                     ->setWorkerFirm($workerFirm);
 
                 $this->forward('App\Controller\OrganizationController::updateOrgFeatures', ['organization' => $organization, 'nonExistingOrg' => true, 'createdAsClient' => false]);

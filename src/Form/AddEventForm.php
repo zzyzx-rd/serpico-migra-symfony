@@ -84,7 +84,7 @@ class AddEventForm extends AbstractType
 
         ->add('onsetDate', DateTimeType::class,
         [
-            'format' => 'dd/MM/yyyy',
+            'format' => 'd MMMM, y',
             'widget' => 'single_text',
             'label_format' => 'activity_elements.events.add_event.%name%',
             'html5' => false,
@@ -93,11 +93,11 @@ class AddEventForm extends AbstractType
         ])
         ->add('expResDate', DateTimeType::class,
         [
-            'format' => 'dd/MM/yyyy',
+            'format' => 'd MMMM, y',
             'widget' => 'single_text',
             'label_format' => 'activity_elements.events.add_event.%name%',
             'html5' => false,
-            'attr' => ['class' => 'dp-start'],
+            'attr' => ['class' => 'dp-end'],
         ]);
 
 

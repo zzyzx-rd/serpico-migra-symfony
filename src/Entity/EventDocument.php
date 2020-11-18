@@ -124,6 +124,7 @@ class EventDocument extends DbObject
         $this->organization = $organization;
         $this->author = $author;
         $this->modified = $modified;
+        $this->documentAuthors = new ArrayCollection;
         $this->updates = new ArrayCollection;
     }
 

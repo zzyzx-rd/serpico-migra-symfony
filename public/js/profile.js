@@ -7,6 +7,10 @@ $(function() {
         }
     });
 
+    $("input[type=file]").on("click", function(e){
+        e.stopPropagation();
+    })
+
   $('.modal').modal();
 
   if($('#tutoModal')) {
@@ -119,6 +123,8 @@ $(function() {
 
 
     document.getElementById('add_user_picture_form_pictureFile').addEventListener('change', e => {
+        
+        
         /** @type {HTMLInputElement} */
         const fileInput = e.target;
         const files = fileInput.files;
@@ -150,7 +156,7 @@ $(function() {
         })
         .done(data => {
             $('#successUploadedPicture').modal('open');
-            $('.user-profile-picture').attr('src', `/lib/img/${data.filename}`);
+            $('.user-profile-picture').attr('src', `/lib/img/user/${data.filename}`);
             $('.add-photo-btn').html('<i class="fa fa-pencil-alt"></i>');
         })
         .fail(err => console.log(err));

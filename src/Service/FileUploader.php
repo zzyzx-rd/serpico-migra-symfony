@@ -25,7 +25,6 @@ class FileUploader
         $fileSize = $file->getSize();
         $fileExtension = $file->guessExtension();
         $fileMime = $file->getMimeType();
-
         try {
             $file->move($this->getTargetDirectory(), $fileName);
         } catch (FileException $e) {
@@ -38,5 +37,10 @@ class FileUploader
     public function getTargetDirectory()
     {
         return $this->targetDirectory;
+    }
+
+    public function setTargetDirectory(string $targetDirectory)
+    {
+        $this->targetDirectory = $targetDirectory;
     }
 }

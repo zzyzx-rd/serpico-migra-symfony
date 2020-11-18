@@ -33,7 +33,7 @@
         <ul class="flex-center-sb">
         {#<h4 style="display:inline-block">{{'create_client.partner.prototype_title'|trans}} __clientNb__</h4>#}
         <div class="client-commname client-elmt" data-prefix-wo="{{ 'create_client.provide_name'|trans }}" data-prefix-w="{{ 'partner'|trans ~ ' : ' }}">
-            <a class="btn client-btn client-info-commname flex-center">
+            <a class="btn client-btn client-info-commname dd-orange-text flex-center">
                 <img class="selected-client-logo sm-right" src="{{ client ? asset(global.clientlogo(client)) : asset('lib/img/org/no-picture.png')}}" alt="">
                 <span class="m-right commname-value">
                     {{ client ? 'partner'|trans ~ ' : ' ~ client.name|trans : 'create_client.provide_name'|trans }}
@@ -51,7 +51,7 @@
         </div>
         <div class="partner-action-buttons">
             <div class="client-type client-elmt" data-prefix-wo="" data-prefix-w="{{'type'|trans ~ ' : '}}">
-            <a class="btn client-btn client-info-type flex-center">
+            <a class="btn client-btn client-info-type white-text flex-center">
                 <i class="fa fa-industry m-right"></i>
                 <span class="">{{'type'|trans ~ ' : ' ~ 'create_client.type.firm'|trans}}</span>
             </a>

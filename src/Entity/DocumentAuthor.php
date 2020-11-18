@@ -63,15 +63,11 @@ class DocumentAuthor extends DbObject
 
     public function __construct(
       ?int $id = 0,
-        $author = null,
         $createdBy = null,
-        $leader = false,
-        $document = null)
+        $leader = false)
     {
         parent::__construct($id, $createdBy , new DateTime());
         $this->leader = $leader;
-        $this->document = $document;
-        $this->author = $author;
     }
 
     public function isLeader(): ?bool

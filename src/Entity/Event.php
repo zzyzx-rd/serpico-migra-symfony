@@ -164,6 +164,7 @@ class Event extends DbObject
         $this->onsetDate = $onsetDate;
         $this->documents = $documents ?: new ArrayCollection;
         $this->comments = $comments ?: new ArrayCollection;
+        $this->updates = new ArrayCollection;
         $this->deleted = $deleted;
     }
 
@@ -376,6 +377,11 @@ class Event extends DbObject
     public function getOnsetdateU()
     {
         return $this->onsetDate->format('U');
+    }
+
+    public function getExpResDateU()
+    {
+        return $this->expResDate ? $this->expResDate->format('U') : null;
     }
 
     public function getPeriod()

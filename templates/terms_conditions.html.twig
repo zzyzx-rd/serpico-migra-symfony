@@ -7,13 +7,16 @@
 {% block css %}
 
     <style>
-
         section:first-of-type > p{
             margin:0;
         }
 
         section>p:last-of-type{
             margin-bottom:0;
+        }
+        .l-container{
+            width:90%;
+            margin:auto;
         }
     </style>
 {% endblock %}
@@ -28,7 +31,7 @@
 
 {% block content %}
 <main>
-    <div class="container" style="width: 90%">
+    <div class="l-container" style="width: 90%">
 
 
         <section style="padding-bottom: 0px;">
@@ -103,7 +106,23 @@
             <p>{% trans %}terms_conditions.updated_date{% endtrans %}</p>
         </section>
 
+
        {#<iframe src="{{ absolute_url(asset('lib/pdf/201812_Serpico_TC_FR.pdf'))}}" frameborder="0"></iframe>#}
     </div>
+    {% if not validatedCookieBanner %}
+        <div class="cookies-banner">
+            <div class="flex-center"> 
+            <div class="c-flex">
+                <span>{{'footer.cookies_banner_msg'|trans}}</span>
+                <span class="strong">{{'learn_more'|trans|capitalize}}</span>
+            </div>
+            <div class="btn">Ok</div>
+            </div>
+        </div>
+    {% endif %}
 </main>
+{% endblock %}
+
+{% block javascripts %}
+  <script src="{{ asset('js/base.js') }}"></script>
 {% endblock %}

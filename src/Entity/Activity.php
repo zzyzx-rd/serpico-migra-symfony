@@ -63,16 +63,6 @@ class Activity extends DbObject
     public string $visibility;
 
     /**
-     * @ORM\Column(name="act_startDate", type="datetime", nullable=true)
-     */
-    public ?DateTime $startdate;
-
-    /**
-     * @ORM\Column(name="act_endDate", type="datetime", nullable=true)
-     */
-    public ?DateTime $enddate;
-
-    /**
      * @ORM\Column(name="act_objectives", type="string", length=255, nullable=true)
      */
     public string $objectives;
@@ -271,8 +261,6 @@ class Activity extends DbObject
      * @param bool $simplified
      * @param string $name
      * @param string $visibility
-     * @param DateTime|null $startdate
-     * @param DateTime|null $enddate
      * @param bool $diffCriteria
      * @param bool $diffParticipants
      * @param int $nbParticipants
@@ -299,8 +287,6 @@ class Activity extends DbObject
         bool $simplified = true,
         ?string $name = null,
         string $visibility = 'public',
-        DateTime $startdate = null,
-        DateTime $enddate = null,
         bool $diffCriteria = false,
         bool $diffParticipants = false,
         int $nbParticipants = 0,
@@ -326,8 +312,6 @@ class Activity extends DbObject
         $this->simplified = $simplified;
         $this->name = $name;
         $this->visibility = $visibility;
-        $this->startdate = $startdate;
-        $this->enddate = $enddate;
         $this->diffCriteria = $diffCriteria;
         $this->diffParticipants = $diffParticipants;
         $this->nbParticipants = $nbParticipants;
@@ -359,19 +343,6 @@ class Activity extends DbObject
         $this->mails = new ArrayCollection;
         $this->updates = new ArrayCollection;
         $this->createdBy = $createdBy;
-        $this->act_gEndDate = new DateTime('1990-01-01');
-        //TODO Set la date et autres dans les controlleurs
-        foreach ($this->stages as $stage) {
-            if ($stage->getGEnddate() > $this->act_gEnddate) {
-                $this->act_gEnddate = $stage->getGEnddate();
-            }
-        }
-        $this->act_gStartDate = new DateTime('2099-01-01');
-        foreach ($this->stages as $stage) {
-            if ($stage->getStartdate() <  $this->act_gStartDate) {
-                $this->act_gStartDate = $stage->getStartDate();
-            }
-        }
     }
 
     public function getComplete(): ?bool
@@ -431,25 +402,6 @@ class Activity extends DbObject
     public function setVisibility(string $visibility): self
     {
         $this->visibility = $visibility;
-
-        return $this;
-    }
-
-    public function getStartdate(): ?DateTimeInterface
-    {
-        return $this->startdate;
-    }
-
-    public function setStartdate(DateTimeInterface $startdate): self
-    {
-        $this->startdate = $startdate;
-
-        return $this;
-    }
-
-    public function setEnddate(DateTimeInterface $enddate): self
-    {
-        $this->enddate = $enddate;
 
         return $this;
     }
@@ -942,6 +894,18 @@ class Activity extends DbObject
 
         return $this;
     }
+
+    public function getStartdate(): DateTime
+    {
+        $startDate = new DateTime('2099-01-01');
+        foreach ($this->stages as $stage) {
+            if ($stage->getStartdate() < $startDate) {
+                $startDate = $stage->getStartDate();
+            }
+        }
+        return $startDate;
+    }
+
     public function getStartdateU(): int
     {
         $startDate = new DateTime('2099-01-01');
@@ -972,7 +936,7 @@ class Activity extends DbObject
         return $sE - $sD;
     }
 
-    public function getEnddate()
+    public function getEnddate(): DateTime
     {
         $endDate = new DateTime('2000-01-01');
         foreach ($this->getStages() as $stage) {

@@ -2,9 +2,7 @@
 
 namespace App\Repository;
 
-use App\Entity\DynamicTranslation;
-use App\Entity\EventType;
-use App\Entity\Organization;
+use App\Entity\ElementUpdate;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -14,23 +12,11 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method InstitutionProcess[]    findAll()
  * @method InstitutionProcess[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class EventTypeRepository extends ServiceEntityRepository
+class ElementUpdateRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, EventType::class);
-    }
-
-    public function getDTrans(EventType $eventType, $locale, Organization $organization){
-        $translatables =  $this->_em->getRepository(DynamicTranslation::class)->findBy(['entity' => 'EventName', 'entityId' => $eventType->getEName()->getId(), 'entityProp' => 'name', 'organization' => [null, $organization]], ['organization' => 'ASC']);
-        if(!$translatables){
-            return $eventType->getEName()->getName();
-        } else {
-            /** @var DynamicTranslation */
-            $translatable = sizeof($translatables) > 1 ? $translatables[1] : $translatables[0];                
-            $translatable->locale = strtoupper($locale);
-            return $translatable->getDynTrans();
-        }
+        parent::__construct($registry, ElementUpdate::class);
     }
 
     // /**

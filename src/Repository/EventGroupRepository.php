@@ -2,7 +2,9 @@
 
 namespace App\Repository;
 
+use App\Entity\DynamicTranslation;
 use App\Entity\EventGroup;
+use App\Entity\Organization;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -19,9 +21,19 @@ class EventGroupRepository extends ServiceEntityRepository
         parent::__construct($registry, EventGroup::class);
     }
 
-    // /**
-    //  * @return InstitutionProcess[] Returns an array of InstitutionProcess objects
-    //  */
+    
+    public function getDTrans(EventGroup $eventGroup, $locale, Organization $organization){
+        $translatables =  $this->_em->getRepository(DynamicTranslation::class)->findBy(['entity' => 'EventGroupName', 'entityId' => $eventGroup->getEventGroupName()->getId(), 'entityProp' => 'name', 'organization' => [null, $organization]], ['organization' => 'ASC']);
+        if(!$translatables){
+            return $eventGroup->getEventGroupName()->getName();
+        } else {
+            /** @var DynamicTranslation */
+            $translatable = sizeof($translatables) > 1 ? $translatables[1] : $translatables[0];                
+            $translatable->locale = strtoupper($locale);
+            return $translatable->getDynTrans();
+        }
+    }
+
     /*
     public function findByExampleField($value)
     {

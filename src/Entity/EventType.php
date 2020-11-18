@@ -6,6 +6,7 @@ use App\Repository\EventTypeRepository;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -69,10 +70,6 @@ class EventType extends DbObject
      * @var EventName
      */
     protected $eName;
-
-    public ?Organization $org;
-    public ?EntityManager $em;
-    public ?string $locale;
 
     /**
      * EventType constructor.
@@ -195,32 +192,5 @@ class EventType extends DbObject
     public function isEnabled(): bool
     {
         return $this->enabled;
-    }
-
-    public function getDTrans(){
-        $translatables =  $this->em->getRepository(DynamicTranslation::class)->findBy(['entity' => 'EventName', 'entityId' => $this->getEName()->getId(), 'entityProp' => 'name', 'organization' => [null, $this->org]], ['organization' => 'ASC']);
-        if(!$translatables){
-            return $this->getEName()->getName();
-        } else {
-            /** @var DynamicTranslation */
-            $translatable = sizeof($translatables) > 1 ? $translatables[1] : $translatables[0];                
-            $translatable->locale = $this->locale;
-            return $translatable->getDynTrans();
-        }
-    }
-
-    public function setLocale($locale){
-        $this->locale = $locale;
-        return $this;
-    }
-
-    public function setEm($em){
-        $this->em = $em;
-        return $this;
-    }
-
-    public function setOrg($org){
-        $this->org = $org;
-        return $this;
     }
 }

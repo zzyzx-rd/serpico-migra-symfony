@@ -67,15 +67,16 @@ class Organization extends DbObject
      */
     public ?int $createdBy;
 
+
     /**
      * @ORM\Column(name="org_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
 
     /**
-     * @ORM\Column(name="org_validated", type="datetime", nullable=true)
+     * @ORM\Column(name="org_last_checked_plan", type="datetime", nullable=true)
      */
-    public $validated;
+    public $lastCheckedPlan;
 
     /**
      * @ORM\Column(name="org_expired", type="datetime", nullable=true)
@@ -264,7 +265,7 @@ class Organization extends DbObject
      * @param $oth_language
      * @param $weight_type
      * @param $createdBy
-     * @param $validated
+     * @param $lastCheckedPlan
      * @param $expired
      * @param $testing_reminder_sent
      * @param $deleted
@@ -278,7 +279,7 @@ class Organization extends DbObject
      * @param $decisions
      * @param $activities
      * @param $criteria
-     * @param Client[]|ArrayCollection $clients
+     * @param ArrayCollection|Client[] $clients
      * @param $criterionNames
      * @param $usersCSV
      * @param string $logo
@@ -288,7 +289,7 @@ class Organization extends DbObject
      * @param $options
      * @param $processes
      * @param $customerId
-     * @param InstitutionProcess[]|ArrayCollection $institutionProcesses
+     * @param ArrayCollection|InstitutionProcess[] $institutionProcesses
      * @param CriterionGroup[] $criterionGroups
      * @param $workerFirm
      */
@@ -304,7 +305,7 @@ class Organization extends DbObject
         $weight_type = "",
         $usersCSV = '',
         $createdBy = null,
-        $validated = null,
+        $lastCheckedPlan = null,
         $expired = null,
         $testing_reminder_sent = null,
         $deleted = null,
@@ -339,7 +340,7 @@ class Organization extends DbObject
         $this->isClient = $isClient;
         $this->oth_language = $oth_language;
         $this->weight_type = $weight_type;
-        $this->validated = $validated;
+        $this->lastCheckedPlan = $lastCheckedPlan;
         $this->expired = $expired;
         $this->reminderMailSent = $testing_reminder_sent;
         $this->deleted = $deleted;
@@ -365,7 +366,6 @@ class Organization extends DbObject
         $this->institutionProcesses = $institutionProcesses?: new ArrayCollection();
         $this->criterionGroups = $criterionGroups?: new ArrayCollection();
         $this->users = $users?: new ArrayCollection();
-        $this->workerFirm = $workerFirm;
         $this->customerId = $customerId;
         $this->eventGroups = new ArrayCollection();
         $this->eventTypes = new ArrayCollection();
@@ -377,17 +377,17 @@ class Organization extends DbObject
     /**
      * @return string
      */
-    public function getCustomerId(): string
+    public function getCustomerId(): ?string
     {
 
-        if($this->customerId == null){
+        /*if($this->customerId == null){
             $mail = ($this->masterUser == null) ? "" :$this->masterUser->getEmail();
             $cust = Stripe\Customer::create([
                 'email' => $mail,
             ]);
             $this->customerId = $cust->id;
             return $cust->id;
-        }
+        }*/
         return $this->customerId;
     }
 
@@ -503,15 +503,14 @@ class Organization extends DbObject
         return $this;
     }
 
-    public function getValidated(): ?DateTimeInterface
+    public function getLastCheckedPlan(): ?DateTimeInterface
     {
-        return $this->validated;
+        return $this->lastCheckedPlan;
     }
 
-    public function setValidated(DateTimeInterface $validated): self
+    public function setLastCheckedPlan(DateTimeInterface $lastCheckedPlan): self
     {
-        $this->validated = $validated;
-
+        $this->lastCheckedPlan = $lastCheckedPlan;
         return $this;
     }
 
@@ -671,7 +670,7 @@ class Organization extends DbObject
     }
 
     /**
-     * @return Criterion[]|ArrayCollection
+     * @return ArrayCollection|Criterion[]
      */
     public function getCriteria()
     {
@@ -679,19 +678,11 @@ class Organization extends DbObject
     }
 
     /**
-     * @return Client[]|ArrayCollection
+     * @return ArrayCollection|Client[]
      */
     public function getClients()
     {
         return $this->clients;
-    }
-
-    /**
-     * @param Client[]|ArrayCollection $clients
-     */
-    public function setClients($clients): void
-    {
-        $this->clients = $clients;
     }
 
     /**

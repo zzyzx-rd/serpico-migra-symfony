@@ -36,11 +36,8 @@ class AddUserPictureForm extends AbstractType
                     ]),
                     new Assert\NotBlank
                 ],
+                'mapped' => false
             ]);
     }
 
-    public function configureOptions(OptionsResolver $resolver)
-    {
-        $resolver->setDefault('data_class',User::class);
-    }
 }

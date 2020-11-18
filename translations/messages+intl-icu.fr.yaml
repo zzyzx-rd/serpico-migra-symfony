@@ -86,8 +86,14 @@ has: a
 have: ont
 the_activity: l'activité
 the_stage: la phase
+the_event: l'update
+the_document: le document
+the_commentaire: le document
+learn_more: En savoir plus
+
 updates:
 
+  last_notifications_title: Dernières notifications
   no_update_yet: Vous n'avez pas encore reçu de notification
 
   common_level:
@@ -96,12 +102,12 @@ updates:
     delete: supprimé
 
   comment_update_type:
-      withParent: a répondu à un commentaire de
-      withoutParent: a commenté
+      withParent: répondu à un
+      withoutParent: ajouté un
 
   document_update_level:
-    creation: a crée le document
-    update: a crée une nouvelle version du document
+    creation: créé le
+    update: créé une nouvelle version du
 
   update_msg: >-
     {update_type, select,
@@ -110,65 +116,65 @@ updates:
         {group, select,
           deliverable {
             {type, select, 
-              report                {{author} a {updateLevel} un rapport pour {actElmtMsg}}
-              presentation          {{author} a {updateLevel} une présentation pour {actElmtMsg}}
-              contract              {{author} a {updateLevel} un contrat pour {actElmtMsg}}
-              spreadsheet           {{author} a {updateLevel} une feuille de calcul pour {actElmtMsg}}
-              chart                 {{author} a {updateLevel} un graphique pour {actElmtMsg}}
-              dataset               {{author} a {updateLevel} un jeu de données pour {actElmtMsg}}
-              audio                 {{author} a {updateLevel} un fichier audio pour {actElmtMsg}}
-              video                 {{author} a {updateLevel} un fichier vidéo {actElmtMsg}}
-              visual_document       {{author} a {updateLevel} un document visuel {actElmtMsg}}
-              article               {{author} a {updateLevel} un article pour {actElmtMsg}}
-              social_media_post     {{author} a {updateLevel} un post pour {actElmtMsg}}
-              minutes               {{author} a {updateLevel} un compte-rendu pour {actElmtMsg}}
-              application           {{author} a {updateLevel} une candidature pour {actElmtMsg}}
-              estimate              {{author} a {updateLevel} un devis pour {actElmtMsg}}
-              physical_delivery     {{author} a {updateLevel} une livraison physique pour {actElmtMsg}}
+              report                {{author} a {updateLevel} <span class="strong">un rapport</span> pour {actElmtMsg}}
+              presentation          {{author} a {updateLevel} <span class="strong">une présentation</span> pour {actElmtMsg}}
+              contract              {{author} a {updateLevel} <span class="strong">un contrat</span> pour {actElmtMsg}}
+              spreadsheet           {{author} a {updateLevel} <span class="strong">une feuille de calcul</span> pour {actElmtMsg}}
+              chart                 {{author} a {updateLevel} <span class="strong">un graphique</span> pour {actElmtMsg}}
+              dataset               {{author} a {updateLevel} <span class="strong">un jeu de données</span> pour {actElmtMsg}}
+              audio                 {{author} a {updateLevel} <span class="strong">un fichier audio</span> pour {actElmtMsg}}
+              video                 {{author} a {updateLevel} <span class="strong">un fichier vidéo</span> pour {actElmtMsg}}
+              visual_document       {{author} a {updateLevel} <span class="strong">un document visuel</span> {actElmtMsg}}
+              article               {{author} a {updateLevel} <span class="strong">un article</span> pour {actElmtMsg}}
+              social_media_post     {{author} a {updateLevel} <span class="strong">un post</span> pour {actElmtMsg}}
+              minutes               {{author} a {updateLevel} <span class="strong">un compte-rendu</span> pour {actElmtMsg}}
+              application           {{author} a {updateLevel} <span class="strong">une candidature</span> pour {actElmtMsg}}
+              estimate              {{author} a {updateLevel} <span class="strong">un devis</span> pour {actElmtMsg}}
+              physical_delivery     {{author} a {updateLevel} <span class="strong">une livraison physique</span> pour {actElmtMsg}}
               other                   {Fallback problem}
             }
           }
           suggestion {
             {type, select, 
-              rescheduling          {{author} vous suggère un nouveau créneau pour {actElmtMsg}}
-              enhancement           {{author} vous suggère une amélioration pour {actElmtMsg}}
-              additional_service    {{author} vous suggère d'apporter un service supplémentaire pour {actElmtMsg}}
+              rescheduling          {{author} vous suggère <span class="strong">un nouveau créneau</span> pour {actElmtMsg}}
+              enhancement           {{author} vous suggère <span class="strong">une amélioration</span> pour {actElmtMsg}}
+              additional_service    {{author} vous suggère d'apporter <span class="strong">un service supplémentaire</span> pour {actElmtMsg}}
               other                   {Fallback problem}
             }
           }
           incident { 
             {type, select,
-              delivery                {{author} a reporté un incident de livraison pour {actElmtMsg}}
-              missing_payment         {{author} a reporté un incident de paiement pour {actElmtMsg}}
-              belated                 {{author} a reporté un délai inattendu pour {actElmtMsg}}
+              delivery                {{author} a reporté un <span class="strong">incident de livraison</span> pour {actElmtMsg}}
+              missing_payment         {{author} a reporté un <span class="strong">incident de paiement</span> pour {actElmtMsg}}
+              belated                 {{author} a reporté un <span class="strong">délai inattendu</span> pour {actElmtMsg}}
               other                   {Fallback problem}
             }
           }
           cashflow {
             {type, select, 
-              partial_payment         {{author} a procédé à un paiement partiel pour {actElmtMsg}}
-              full_payment            {{author} a procédé au paiement intégral pour {actElmtMsg}}
-              paiement                {{author} a procédé au paiement pour {actElmtMsg}}
-              partial_reimbursement   {{author} a procédé au remboursement partiel pour {actElmtMsg}}
-              full_reimbursement      {{author} a procédé au remboursement intégral {actElmtMsg}}
-              reimbursement           {{author} a procédé au remboursement pour {actElmtMsg}}
+              partial_payment         {{author} a procédé à un <span class="strong">paiement partiel</span> pour {actElmtMsg}}
+              full_payment            {{author} a procédé au <span class="strong">paiement intégral</span> pour {actElmtMsg}}
+              paiement                {{author} a procédé au <span class="strong">paiement</span> pour {actElmtMsg}}
+              partial_reimbursement   {{author} a procédé au <span class="strong">remboursement partiel</span> pour {actElmtMsg}}
+              full_reimbursement      {{author} a procédé au <span class="strong">remboursement intégral</span> pour {actElmtMsg}}
+              reimbursement           {{author} a procédé au <span class="strong">remboursement</span> pour {actElmtMsg}}
               other                   {Fallback problem}
             }
           }
           information {
             {type, select, 
-              feedback                {{author} vous a donné un feedback pour {actElmtMsg}}
-              additional_delay        {{author} vous informe de délai éventuels pour {actElmtMsg}}
-              changes                 {{author} vous informe de changements pour {actElmtMsg}}
-              info_needed             {{author} vous informe qu'il aurait besoin d'informations supplémentaires pour {actElmtMsg}}
+              feedback                {{author} vous a donné un <span class="strong">feedback</span> pour {actElmtMsg}}
+              additional_delay        {{author} vous informe de <span class="strong">délai éventuels</span> pour {actElmtMsg}}
+              changes                 {{author} vous informe de <span class="strong">changements</span> pour {actElmtMsg}}
+              info_needed             {{author} vous informe qu'il aurait besoin d'<span class="strong">informations supplémentaires</span> pour {actElmtMsg}}
               other                   {Fallback problem}
             }
           }
           other {Fallback problem}
         }    
       }
-      event_document  {{author} a {updateLevel} le document {docName} pour {actElmtMsg}}
-      event_comment   {{author} a {updateLevel} un commentaire pour {actElmtMsg}}
+      event_document  {{author} a {updateLevel} document <span class="strong">{docName}</span> pour {actElmtMsg}}
+      event_comment   {{author} a {updateLevel} <span class="strong">commentaire</span> pour {actElmtMsg}}
       other {Fallback problem}
     }
 
@@ -392,11 +398,13 @@ help:
 #    success_msg: Votre inscription a bien été prise en compte ! Vous serez rapidement tenu au courant par notre équipe ;)
 #    description: Plus qu'un pas avant de booster votre relation client !
 
-
 footer:
   title: Une marque de ZZYZX Road
-  tc: Conditions générales dutilisation
+  tc: Conditions générales d'utilisation
   data_gdpr: Politique de données
+  cookies_banner_msg: Nous utilisons des cookies afin de réaliser des statistiques et des mesures d’audience.
+  cookies_close_banner: Fermer cette bannière
+
 
 layout:
   create_account:
@@ -405,8 +413,30 @@ layout:
     modal_email_label: Adresse email
     modal_message: Vous pourrez créer gratuitement (jusque 5 utilisateurs) vos propres activités, afin de permettre à chaque membre de votre organisation de devenir acteur de son évaluation. Avec DealDrive, s'évaluer n'a jamais été aussi simple... et précis !
     validate: c'est parti !
+  upgrade_modal:
+    msg: Votre période d'essai touche à sa fin ! En conservant le modèle <span class="strong"> premium </span>, vous continuerez à pouvoir faire des updates sans limitation et recevoir des notifications instantanées de vos clients
+    upgrade_btn_msg: Je mets à jour mon abonnement
 
-
+cookies_policy:
+  title: Politique de cookies
+  intro_msg: Cette page vise à vous informer de l’usage de cookies à l’occasion de votre consultation des sites internet de DealDrive suivants (« Site Internet »)
+  section_1:
+    title: Qu'est-ce qu'un cookie ?
+    paragraph_1: Le terme « cookie » ou « traceur » désigne de petits fichiers contenant une chaîne de caractères, stockés par votre navigateur internet sur votre terminal (ordinateur, mobile, tablette etc.). Un cookie seul ne permet pas de vous identifier nominativement. En revanche, il enregistre des informations relatives à votre navigation sur le Site Internet, telles que vos préférences par exemple, qui pourront être directement lues par les serveurs DealDrive lors de vos visites et requêtes ultérieures sur le Site Internet.
+  section_2:
+    title: A quoi servent-ils ?
+    paragraph_1: La plupart de cookies qui peuvent être déposés ou lus lors de votre navigation sur le Site Internet ne servent qu’à optimiser votre navigation sur le Site Internet et vous permettre d’accéder à certains services sur le Site Internet. Un refus de ces cookies peut donc dégrader votre expérience sur le Site Internet, voire vous empêcher d’accéder à certains services proposés sur le Site Internet. DealDrive décline toute responsabilité 
+    paragraph_2: Des cookies indispensables à la fourniture du service que vous avez demandé peuvent également être déposés. Ils permettent par exemple de retenir vos choix de personnalisation de l’interface pendant toute votre navigation sur le Site Internet ou encore de maintenir votre session ouverte lors de votre navigation sur le Site Internet, après que vous vous soyez identifié et jusqu’à votre déconnexion.
+    paragraph_3: Certains cookies servent à des fins statistiques et de mesure d’audience afin que DealDrive améliore ses services et son Site Internet. Ces cookies sont anonymes.
+    paragraph_4: Enfin, des tiers peuvent déposer et utiliser des cookies sur le Site Internet. Ces cookies seront soumis à la politique de gestion des cookies de ces tiers, que nous vous recommandons de consulter. DealDrive n’a pas la maitrise des cookies que peuvent déposer ces tiers.
+  section_3:
+    title: Comment contrôler le stockage de vos cookies et/ou vous y opposer ?
+    paragraph_1: Le stockage de cookies sur votre terminal requière votre consentement, sauf lorsque qu’ils sont strictement nécessaires pour vous fournir un service que vous avez demandé ou ont pour finalité exclusive de permettre ou faciliter la communication par voie électronique. Les cookies utilisés exclusivement pour réaliser des statistiques ou mesures d’audience et qui sont anonymes, ne nécessitent pas votre consentement préalable mais vous pouvez vous opposer à leur dépôt sur votre terminal. Lors de votre visite sur le Site Internet, un bandeau vous informe de la présence de ces cookies et vous invite à consentir ou non à leur stockage sur votre terminal. Ils ne sont stockés que si vous les acceptez ou si vous poursuivez votre navigation sur le Site Internet en visitant une seconde page du Site Internet ou en cliquant sur un élément du Site Internet. Ce consentement est valable pendant 13 mois et correspond à la durée maximale de conservation de nos cookies. A l’issue de ce délai votre consentement vous sera à nouveau demandé.
+    paragraph_2: "Vous pouvez également à tout moment paramétrer vos cookies pour les accepter ou les refuser, comme indiqué ci-après : Vous avez la possibilité de paramétrer la réception de cookies sur votre terminal au moyen de l’option « préférences Internet » de votre navigateur. Néanmoins, le refus de certains cookies peut réduire voire rendre impossible votre accès à certains services proposés sur le Site. Vous pouvez vous opposer à l’enregistrement de cookies sur votre terminal en paramétrant votre navigateur."
+    paragraph_3: Enfin, vous pouvez régulièrement détruire les cookies stockés sur votre terminal.
+  section_4:
+    title: "Les cookies que nous utilisons :"
+    provider_1: "<span class=\"strong\">Google Analytics</span> : Nous utilisons les cookies Google Analytics afin d’analyser et d’établir des statistiques de performance de nos sites web et ainsi améliorer nos services, sans que cela ne représente un risque pour votre vie privée. Vous pouvez à tout moment vous exclure de ce dispositif grâce au <a class=\"dd-text\" href=\"https://tools.google.com/dlpage/gaoptout?hl=fr\">module complémentaire de navigation pour la désactivation de Google Analytics</a>."
 #landing:
 #  page_name: La solution d'évaluation collaborative
 #  serpico_motto: La solution d'évaluation et de rétribution collaborative
@@ -1556,6 +1586,29 @@ mails:
     msg_2: Accédez à votre dashboard pour prendre connaissance de cet événement
     button_text: Accéder à mon dashboard
 
+  updateNotification:
+    subject: Ce que vous avez peut-être manqué ces dernières 24 heures
+    msg: Voici le résumé journalier de vos derniers événements sur DealDrive
+    creations:
+      title: Nouveautés
+      added_to : Vous avez été ajouté à
+      a_new_document: Un nouveau document
+      a_new_comment: Un nouveau commentaire
+      a_new_event: Un nouvel update
+      action_msg_m: a été créé
+      action_msg_f: a été créée
+    modifications:
+      title: Modifications
+      action_msg: a été modifié
+      a_new_version: une nouvelle version
+      of_document: du document
+      a_document: un document
+      a_comment: un commentaire
+    deletions:
+      title: Suppressions
+      action_msg: a été supprimé
+    go_to_dashboard_msg: Vous pouvez accéder à toutes ces informations sur votre tableau personnel 
+  
   eventUpdate:
     subject: Vous avez reçu
     activity_msg : l'activité
@@ -1965,6 +2018,7 @@ tooltip:
 
 
 profile:
+  access_profile: Accéder à mon profil
   page_title: Mon profil
   mobile_header_title: Mon profil
   my_results: Mes résultats
@@ -2002,6 +2056,7 @@ profile:
     evaluation: Eval
     contribution: Contribution
     status: Statut
+    progress: Avancement
     participants: Participants
     days_remaining: Jours restants
     no_stages: Aucune répertoriée, créez ou demandez-en une si besoin !
@@ -2111,6 +2166,7 @@ activities:
       msg: "Qui vous permet de <span class=\"strong\">transmettre instanément</span> vos retours à vos partenaires. Au-delà, votre compte passera en mode Gratuit et vous pourrez l'upgrader pour continuer à bénéficier des fonctionnalités live avec vos partenaires"
       
   with: avec
+  added_by: créée par
   modal_error_creation_title: Avant de continuer...
   do_you_want_continue: Voulez vous continuer ?
   see_input: Voir mes contributions
@@ -2307,8 +2363,8 @@ activities:
 activity_elements:
   output: Retours programmés
   parameters: Paramètres
-  expected_output: Retours attendus
-  no_defined_output: Pas de retours définis
+  expected_output: Retours & updates
+  no_defined_output: Pas encore de retours ou updates
   no_int_act:
     main_msg: Aucune activité dans l'intervalle de temps
     closer_activity_ahead: Plus proche activité à venir
@@ -2377,8 +2433,8 @@ activity_elements:
       exp_res_date: Date de résolution espérée
       provide_exp_res_date: Indiquer une date de résolution espérée
     tooltip:
-      shared_documents: Documents partagés
-      comments: Commentaires
+      shared_document: document
+      comment: commentaire
       no_given_comments: Pas de commentaires donnés
     multiple_events_modal:
       title: Quel update voulez-vous voir en détail/modifier ?
@@ -2394,6 +2450,7 @@ activity_elements:
     comments:
       title: Commentaires
       add_comment: Ajouter un commentaire
+      upload_before_comment: La catégorie Rendu/Livrable étant sélectionnée, vous devez d'abord téléverser le livrable avant de commenter l'update
       comment:
         delete_msg: Etes-vous sûr de vouloir supprimer votre commentaire ? 
 

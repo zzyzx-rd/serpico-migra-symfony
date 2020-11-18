@@ -48,28 +48,17 @@ use App\Entity\Process;
 use App\Entity\WorkerFirm;
 use App\Entity\WorkerIndividual;
 use App\Repository\UserRepository;
+use App\Service\FileUploader;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class UserController extends MasterController
 {
     /*********** ADDITION, MODIFICATION, DELETION AND DISPLAY OF USERS *****************/
-    /**
-     * @param Request $request
-     * @return mixed
-     * @Route("/terms-conditions", name= "displayTC")
-     */
-    public function displayTCAction(Request $request) {
-        return $this->render(
-            'terms_conditions.html.twig',
-            [
-                'request' => $request
-            ]
-        );
-    }
 
     /**
      * @Route ("/trk/{trkToken}", name="trackMLinkClick")
@@ -1182,36 +1171,24 @@ class UserController extends MasterController
      * @return JsonResponse|Response
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/profile/picture", name="updatePicture")
+     * @Route("/home", name="updatePicture", methods={"POST"})
      */
-    public function updatePictureAction(Request $request)
+    public function updatePictureAction(Request $request, FileUploader $fileUploader)
     {
-        $user = self::getAuthorizedUser();
-        if (!$user) {
+        $fileUploader->setTargetDirectory('../public/lib/img/user');
+        $currentUser = $this->user;
+        $em = $this->em;
+
+        if (!$currentUser) {
             return new Response(null, Response::HTTP_UNAUTHORIZED);
         }
 
-        $this->em = self::getEntityManager();
-        /** @var App\FormFactoryInterface */
-        
-        $pictureForm = $this->createForm(AddUserPictureForm::class);
-        $pictureForm->handleRequest($request);
-        $userPicture = $user->getPicture();
-
-        // Delete existing image
-        if ($userPicture) {
-            unlink(__DIR__ . "/../../web/lib/img/$userPicture");
-        }
-
-        $path = $_FILES['profile-pic']['name'];
-        $rand = md5(rand());
-        $ext = pathinfo($path, PATHINFO_EXTENSION);
-        $fileName = "$rand.$ext";
-        move_uploaded_file($_FILES['profile-pic']['tmp_name'], __DIR__ . "/../../web/lib/img/$fileName");
-        $user->setPicture($fileName);
-        $this->em->persist($user);
-        $this->em->flush();
-        return new JsonResponse([ 'filename' => $fileName ]);
+        $pictureFile = new UploadedFile($_FILES['profile-pic']['tmp_name'], $_FILES['profile-pic']['name']);
+        $pictureFileInfo = $fileUploader->upload($pictureFile);
+        $currentUser->setPicture($pictureFileInfo['name']);
+        $em->persist($currentUser);
+        $em->flush();
+        return new JsonResponse(['filename' => $pictureFileInfo['name']]);
     }
 
     // Delete user (ajax call)
@@ -1483,7 +1460,7 @@ class UserController extends MasterController
      * @return mixed
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/home", name="home")
+     * @Route("/home", name="home", methods={"GET"})
      * @IsGranted("IS_AUTHENTICATED_REMEMBERED")
      */
     public function homeAction(Request $request)
@@ -1637,7 +1614,7 @@ class UserController extends MasterController
                     if ($theStage->getStatus() <= 1) {
                         // Ongoing and upcoming
                         if ($theActivity->getStatus() == 1) {
-                            if ($theStage->getGEnddate() >= new DateTime) {
+                            if ($theStage->getEnddate() >= new DateTime) {
                                 $nbOngoingStages++;
                                 $nbOngoingCriteria += count($theStage->getCriteria());
                             }
@@ -1665,10 +1642,10 @@ class UserController extends MasterController
             if ($notOrderedHotParticipations) {
                 $iterator = $myHotStageParticipations->getIterator();
                 $iterator->uasort(function ($first, $second) {
-                    if ($first->getStage()->getGEnddate() == $second->getStage()->getGEnddate()) {
+                    if ($first->getStage()->getEnddate() == $second->getStage()->getEnddate()) {
                         return 0;
                     }
-                    return $first->getStage()->getGEnddate() > $second->getStage()->getGEnddate()
+                    return $first->getStage()->getEnddate() > $second->getStage()->getEnddate()
                     ? 1
                     : -1;
                 });

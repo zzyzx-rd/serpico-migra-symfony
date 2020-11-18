@@ -140,6 +140,8 @@ class MailController extends MasterController {
                 $data['token'] = $settings['tokens'][$key];
             } else if ($actionType == 'updateProgressStatus'){
                 $data['stage'] = $settings['stages'][$key];
+            } else if ($actionType == 'updateNotification'){
+                $data['updates'] = $settings['updates'][$key];
             }
 
             $mailTemplate = $twig->load('mails/' . $actionType . '.html.twig');

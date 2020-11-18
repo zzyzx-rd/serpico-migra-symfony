@@ -9,6 +9,7 @@ use App\Entity\Decision;
 use App\Entity\Department;
 use App\Entity\ElementUpdate;
 use App\Entity\EventComment;
+use App\Entity\EventType;
 use App\Entity\EventGroup;
 use App\Entity\Organization;
 use App\Entity\OrganizationUserOption;
@@ -26,6 +27,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use App\Form\DelegateActivityForm;
 use App\Form\RequestActivityForm;
 use App\Repository\ActivityRepository;
+use App\Service\NotificationManager;
 use DateTime;
 use DateTimeZone;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -201,7 +203,6 @@ final class InstitutionController extends MasterController
         }
 
         $userArchivingPeriod = $currentUser->getActivitiesArchivingNbDays();
-
 
         // Add activities where current user is either is a leader, or at least a participant;
 
@@ -497,21 +498,15 @@ final class InstitutionController extends MasterController
             $em->flush();
         }
 
-        $locale = strtoupper($request->getLocale());
+        $locale = $request->getLocale();
         $org = $this->org;
+        $repoEG = $em->getRepository(EventGroup::class);
 
-        $eventGroups = $this->org->getEventGroups()->map(
-            function(EventGroup $eg) use ($em,$locale,$org){
-                $eg->em = $em;
-                $eg->locale = $locale;
-                $eg->org = $org;
-                return [
-                    'id' => $eg->getId(),
-                    'name' => $eg->getDTrans(),
-                    'evnId' => $eg->getEventGroupName()->getId(),
-                ];
-            }
-        )->getValues();
+        $eventGroups = $org->getEventGroups()->map(fn(EventGroup $eg) => [
+            'id' => $eg->getId(), 
+            'name' => $repoEG->getDTrans($eg,$locale,$org), 
+            'evnId' => $eg->getEventGroupName()->getId()
+        ])->getValues();
 
         return $this->render(
             'activities_dashboard.html.twig',
@@ -538,7 +533,52 @@ final class InstitutionController extends MasterController
         
     }
 
-    // Recurring function which loads new updates, and checks whether there should dynamic changes to dashboards
+
+    public function retrieveNewActElmts(Request $request, TranslatorInterface $translator){
+        $currentUser = $this->user;
+        if(!$currentUser){
+            return new JsonResponse(['error' => 'User not connected', 500]);
+        }
+        $newUpdates = $currentUser->getUpdates()->filter(fn(ElementUpdate $u) => $u->getViewed() == null && $u->getStage() != null);
+    }
+
+    // Sends mails recapitulating updates of the last 24 hours for users who have not seen them (by clicking on the notif button)
+
+    /**
+    * @Route("/users/notifications/check", name="checkNotificationMails")
+    * @return Response
+    */
+    public function checkNotificationMails(Request $request, NotificationManager $notificationManager){
+        
+        $em = $this->em;
+        $allUpdates = new ArrayCollection($em->getRepository(ElementUpdate::class)->findAll());
+        $lastMailedUpdate = $allUpdates->matching(Criteria::create()->orderBy(['mailed' => Criteria::DESC]))->first();
+        $now = new DateTime();
+        
+        if($lastMailedUpdate->getMailed() == null || $now->getTimestamp() - $lastMailedUpdate->getMailed()->getTimestamp() > 20 * 60){
+
+            $updateMailingData = $notificationManager->retrieveUpdatesToBeMailed();
+            $response = $this->forward('App\Controller\MailController::sendMail', [
+                'recipients' => $updateMailingData['recipients'], 
+                'settings' => [
+                    'updates' => $updateMailingData['updates'],
+                    'locale' => $request->getLocale(),
+                ], 
+                'actionType' => 'updateNotification'
+            ]);
+            if($response->getStatusCode() == 500){ 
+                return $response; 
+            } else {
+               return new JsonResponse(['nupdates' => 'utd']);
+            }
+            
+        } else {
+            return new JsonResponse(['nupdates' => 'ntu']);
+        }
+    }
+
+
+    // Recurring function which loads new updates for connected user, and checks whether there should dynamic changes to dashboards
 
     /**
     * @Route("/updates/retrieve", name="retrieveUpdates")
@@ -555,9 +595,9 @@ final class InstitutionController extends MasterController
         $newUIds = $request->get('newUIds') ?: [] ;
         $existingUIds = $request->get('existingUIds') ?: [];
         $modifyDashboard = $request->get('md');
-       
-        $updates = $currentUser->getUpdates()->filter(fn(ElementUpdate $u) => $u->getUser() == $currentUser)->matching(Criteria::create()->orderBy(['inserted' => Criteria::DESC, 'stage' => Criteria::ASC]));
-        //$unseenUpdates = $updates->filter(fn(ElementUpdate $u) => $u->getViewed() == null);
+        $updates = $currentUser->getUpdates()->matching(Criteria::create()->orderBy(['inserted' => Criteria::DESC, 'stage' => Criteria::ASC]));
+        $em = $this->em;
+        $repoET = $em->getRepository(EventType::class);
         
         if($updates->count() == sizeof($newUIds) + sizeof($existingUIds)){
             $dataUpdates['ntu'] = true;
@@ -595,6 +635,18 @@ final class InstitutionController extends MasterController
                     $currentUser->getInternalStages()->map(fn(Stage $s) => $s->getId())->getValues()
                 );
 
+                foreach($currentUser->getExternalStages() as $extStage){
+                    foreach($extStage->getEvents() as $event){
+                        $eventIds[] = $event->getId(); 
+                    }
+                }
+                foreach($currentUser->getInternalStages() as $intStage){
+                    foreach($intStage->getEvents() as $event){
+                        $eventIds[] = $event->getId(); 
+                    }
+                }
+                
+
                 $aIds = $request->get('aIds') ?: [];
                 $sIds = $request->get('sIds') ?: [];
                 $eIds = $request->get('eIds') ?: [];
@@ -615,6 +667,12 @@ final class InstitutionController extends MasterController
                         $dataUpdates['rSIds'][] = $sId;
                     }
                 }
+
+                foreach($eIds as $eId){
+                    if (!in_array($eId,$eventIds)){
+                        $dataUpdates['rEIds'][] = $eId;
+                    }
+                }
             }
 
             $newUpdates = $updates->filter(fn(ElementUpdate $u) => $u->getViewed() == null);
@@ -632,31 +690,49 @@ final class InstitutionController extends MasterController
                         $participation = $newUpdate->getParticipation();
                         $stage = $newUpdate->getStage();
                         $activity = $newUpdate->getActivity();
+                        $stageName = $stage->getName();
+                        $activityName = $activity->getName();
+                        $of = $translator->trans('of');
+                        $theStage = $translator->trans('the_phase');
+                        $theActivity = $translator->trans('the_activity');
+                    
+                        if($event && ($document || $comment)){
+                            $theEvent = $translator->trans('the_event');
+                            $eventType = $event->getEventType();
+                            $eventTypeName = strtolower($repoET->getDTrans($eventType, $locale, $this->org));
+                        }
     
                         $transParameters = [];
-                        $transParameters['actElmtMsg'] = $activity->getStages()->count() > 1 ? 
-                            $translator->trans('the_phase') . ' ' . $stage->getName() . ' ' . $translator->trans('of') . ' ' . $translator->trans('the_activity') . ' ' . $activity->getName() :
-                            $translator->trans('the_activity') . ' '. $activity->getName();
+                        $transParameters['actElmtMsg'] =
+                            ($event && ($document || $comment) ? "$theEvent $of <span class=\"strong\">$eventTypeName</span> $of " : "") .
+                            
+                            ($activity->getStages()->count() > 1 ? 
+                            "$theStage <span class=\"strong\">$stageName</span> $of $theActivity <span class=\"strong\">$activityName</span>" :
+                            "$theActivity <span class=\"strong\">$activityName</span>");
     
                         if($document != null || $comment != null){
                             $creator = $repoU->find($document ? $document->getCreatedBy() : $comment->getCreatedBy());
-                            $transParameters['updateType'] = $document ? 
-                                ($document->getParent() ? 
+                            $transParameters['updateType'] = $comment ? 
+                                ($comment->getParent() ? 
                                     $translator->trans('updates.comment_update_type.withParent') : 
                                     $translator->trans('updates.comment_update_type.withoutParent')
                                 ) : 
                                 ($newUpdate->getType() == ElementUpdate::CREATION ?
-                                    $translator->trans('updates.comment_update_type.withParent') : 
-                                    $translator->trans('updates.comment_update_type.withoutParent')
+                                    $translator->trans('updates.document_update_level.creation') : 
+                                    $translator->trans('updates.document_update_level.update')
                                 );
                             
                             $transParameters['update_type'] = $document ? 'event_document' : 'event_comment';
+                            if($document){
+                                $transParameters['docName'] = $document->getTitle();
+                            }
                             
-                        } else if ($event != null && $event->getUpdates()->filter(fn(ElementUpdate $u) => $u->getEventComment() || $u->getEventDocument())->count() == 0) {
+                        } else if ($event != null && $document == null && $comment == null) {
                             $creator = $repoU->find($event->getCreatedBy());
-                            $dataUpdate['update_type'] = 'event_creation';
-                            $transParameters['group'] = strtolower($event->getEventGroup()->getEventGroupName()->getName());
-                            $transParameters['type'] = strtolower($event->getEventType()->getEventName()->getName());
+                            $transParameters['update_type'] = 'event_creation';
+                            $eventType = $event->getEventType();
+                            $transParameters['type'] = strtolower(implode("_",explode(" ",$eventType->getEName()->getName())));
+                            $transParameters['group'] = strtolower($eventType->getEventGroup()->getEventGroupName()->getName());
                         } else if ($participation != null) {
                             $creator = $repoU->find($participation->getCreatedBy());
                             $dataUpdate['type'] = 'p';
@@ -670,7 +746,7 @@ final class InstitutionController extends MasterController
                         $dataUpdate['picture'] = $creator->getPicture() ?: 'no-picture.png';
                         $dataUpdate['inserted'] = $this->nicetime($newUpdate->getInserted()->setTimezone($tz), $locale);
                         $transParameters['author'] = $creator->getOrganization() != $currentUser->getOrganization() ? $creator->getFullName(). ' ('.$creator->getOrganization()->getCommname().')' : $creator->getFullName();
-                        $transParameters['updateLevel'] = $newUpdate->getType() == ElementUpdate::CREATION ? $translator->trans('updates.common_level.creation') : (ElementUpdate::CHANGE ? $translator->trans('updates.common_level.update') : $translator->trans('updates.common_level.delete'));
+                        $transParameters['updateLevel'] = $newUpdate->getType() == ElementUpdate::CREATION ? $translator->trans($document ? 'updates.document_update_level.creation' : 'updates.common_level.creation') : (ElementUpdate::CHANGE ? $translator->trans($document ? 'updates.document_update_level.update' : 'updates.common_level.update') : $translator->trans('updates.common_level.delete'));
                         $dataUpdate['msg'] = $translator->trans('updates.update_msg', $transParameters);
                         $dataUpdate['viewed'] = $newUpdate->getViewed() != null;
                         
@@ -684,7 +760,7 @@ final class InstitutionController extends MasterController
                 if($modifyDashboard){
                     
                     $stage = $newUpdate->getStage();
-                    if($stage && !in_array($stage->getId(), $sIds)){
+                    if(!$event && $stage && !in_array($stage->getId(), $sIds)){
                         $stageData = [];
                         $activity = $stage->getActivity();
                         $stageData['aid'] = $activity->getId();
@@ -693,16 +769,88 @@ final class InstitutionController extends MasterController
                             $stageData['ap'] = $activity->getPeriod();
                             $stageData['an'] = $activity->getName();
                             $stageData['apr'] = $progressStatuses[$activity->getProgress()];
+                            $stageData['as'] = $activity->getOrganization() == $currentUser->getOrganization() ? 1 : -1;
                         }
+
                         $stageData['sd'] = $stage->getStartdateU();
+                        $stageData['ssed'] = $stage->getStartdate()->format($locale != 'en' ? 'j/n' : 'n/j') . ($stage->getStartdate() == $stage->getEnddate() ? '' : ' - ' . $stage->getEnddate()->format($locale != 'en' ? 'j/n' : 'n/j'));
                         $stageData['p'] = $stage->getPeriod();
                         $stageData['n'] = $stage->getName();
                         $stageData['id'] = $stage->getId();
                         $stageData['pr'] = $progressStatuses[$stage->getProgress()];
+                        $stageData['s'] = $stage->getOrganization() == $currentUser->getOrganization() ? 1 : -1;
+
+                        foreach($stage->getParticipants() as $participant){
+                            $user = $participant->getUser();
+                            $partData = [];
+                            $clientOrgList = [];
+                            $partData['id'] = $participant->getId();
+                            $partData['fullname'] = $user->getFullname();
+                            $isSynthetic = $user->isSynthetic();
+                            if($user->getOrganization() != $currentUser->getOrganization()){
+                                $clientOrg = $user->getOrganization();
+                                $clientOrgName = $clientOrg->getCommname();
+                                if(!in_array($clientOrg,$clientOrgList)){
+                                    $clientList[] = $clientOrg;
+                                    $clientOrgData = [];
+                                    $clientOrgData['name'] = $clientOrgName;
+                                    $clientOrgData['logo'] = $clientOrg->getLogo() ?: ($clientOrg->getWorkerFirm()->getLogo() ?: '/lib/img/org/no-picture.png');
+                                    $stageData['clients'][] = $clientOrgData;
+                                }
+                                
+                                if(!$isSynthetic){
+                                    $partData['fullname'] .= " ($clientOrgName)";
+                                } else {
+                                    $partData['fullname'] = $clientOrgName;
+                                }
+                            }
+                            $partData['synth'] = $isSynthetic;
+                            $partData['picture'] = $isSynthetic ? '/lib/img/org/no-picture.png' : ($user->getPicture() ?: '/lib/img/user/no-picture.png');
+                            $stageData['participants'][] = $partData;
+                        }
+
                         $dataUpdates['stages'][] = $stageData;
+
+                    } else if ($event) {
+                        $eventData = [];
+                        $stage = $event->getStage();
+                        $repoET = $em->getRepository(EventType::class);
+                        $repoEG = $em->getRepository(EventGroup::class);
+                        $eventData['id'] = $event->getId();
+                        //if(!$comment && !$document){
+                            $eventData['sid'] = $stage->getId();
+                            $eventData['od'] = $event->getOnsetdateU();
+                            $eventData['rd'] = $event->getExpResDateU();
+                            $eventData['p'] = $event->getPeriod();
+                            $eventType = $event->getEventType();
+                            $eventData['t'] = $eventType->getId();
+                            $eventData['tt'] = $repoET->getDTrans($eventType, $locale, $this->org);
+                            $eventGroup = $eventType->getEventGroup();
+                            $eventData['g'] = $eventGroup->getId();
+                            $eventData['gn'] = $eventGroup->getEventGroupName()->getId();
+                            $eventData['gt'] = $repoEG->getDTrans($eventGroup, $locale, $this->org);
+                            $eventName = $eventType->getEName();
+                            $eventData['n'] = $eventName->getId();
+                            $eventData['it'] = $eventName->getIcon()->getType();
+                            $eventData['in'] = $eventName->getIcon()->getName();
+                            $eventData['nbd'] = $event->getComments()->count();
+                            $eventData['nbc'] = $event->getDocuments()->count();
+                            //} else {
+                            if($comment){
+                                $eventData['cid'] = $comment->getId();
+                                $eventData['cct'] = $comment->getContent();
+                                if($comment->getParent()){$eventData['cpid'] = $comment->getParent()->getId();}
+                            } else if ($document) {
+                                $eventData['did'] = $document->getId();
+                                $eventData['dn'] = $document->getTitle();
+                                $eventData['dt'] = $document->getType();
+                                $eventData['ds'] = $document->getSize();
+                                $eventData['dp'] = $document->getPath();
+                            }
+                        //}
+                        $dataUpdates['events'][] = $eventData;
                     }
                 }
-
             }
 
             $dataUpdates['nbNew'] = sizeof($dataUpdates['notifs']) - sizeof($dataUpdates['rUIds']);

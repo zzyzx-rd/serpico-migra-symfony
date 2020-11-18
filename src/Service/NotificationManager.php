@@ -2,8 +2,13 @@
 
 namespace App\Service;
 
+use App\Controller\MailController;
 use App\Entity\ElementUpdate;
 use App\Entity\Participation;
+use App\Entity\User;
+use DateTime;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\Security;
 
@@ -20,7 +25,7 @@ class NotificationManager
 
     }
 
-    public function registerUpdates($element, $status, $property = null)
+    public function registerUpdates($element, $status, $property = null, $toBeFlushed = false)
     {
         $em = $this->em;
         $currentUser = $this->user;
@@ -34,7 +39,7 @@ class NotificationManager
             case 'Event' :
                 if($elmtClass == 'EventDocument'){
                     $eventDocument = $element;
-                } else {
+                } elseif($elmtClass == 'EventComment') {
                     $eventComment = $element;
                 }
                 if($elmtClass != 'Event'){
@@ -84,13 +89,71 @@ class NotificationManager
         }
 
         $em->persist($element);
-        $em->flush();
+        if($toBeFlushed){
+            $em->flush();
+        }
         return true;
 
     }
 
-    public function sendNotifications()
+    public function retrieveUpdatesToBeMailed()
     {
-        return true;
+        $em = $this->em;
+        $now = new DateTime();
+        $yesterday = new DateTime('yesterday');
+        $allUsers = new ArrayCollection($em->getRepository(User::class)->findAll());
+
+        $mailableUsers = $allUsers->filter(fn(User $u) => !$u->isSynthetic() && $u->getLastConnected() ? $now->getTimestamp() - $u->getLastConnected()->getTimestamp() > 24 * 60 * 60 : true);
+        $recipients = [];
+        $updates = [];
+
+        
+        foreach($mailableUsers as $mailableUser){
+
+            $dataUpdate = [];
+
+            $unseenUpdates = $mailableUser->getUpdates()
+                ->filter(fn(ElementUpdate $eu) => $eu->getViewed() == null && $eu->getMailed() == null)
+                ->matching(Criteria::create()->orderBy(['type' => Criteria::ASC, 'activity' => Criteria::DESC, 'stage' => Criteria::ASC, 'event' => Criteria::ASC, 'eventDocument' => Criteria::ASC, 'eventComment' => Criteria::ASC]));
+
+            $creationUpdates = $unseenUpdates->filter(fn(ElementUpdate $eu) => $eu->getType() == ElementUpdate::CREATION);
+            if($creationUpdates->count() > 0){
+                $dataCreationUpdate['stages'] = $creationUpdates->filter(fn(ElementUpdate $eu) => $eu->getStage() != null && $eu->getParticipation() == null && $eu->getEvent() == null)->map(fn(ElementUpdate $eu) => $eu->getStage())->getValues();
+                $dataCreationUpdate['events'] = $creationUpdates->filter(fn(ElementUpdate $eu) => $eu->getEvent() != null && $eu->getEventDocument() == null && $eu->getEventComment() == null)->map(fn(ElementUpdate $eu) => $eu->getEvent())->getValues();
+                $dataCreationUpdate['documents'] = $creationUpdates->filter(fn(ElementUpdate $eu) => $eu->getEventDocument() != null)->map(fn(ElementUpdate $eu) => $eu->getEventDocument())->getValues();
+                $dataCreationUpdate['comments'] = $creationUpdates->filter(fn(ElementUpdate $eu) => $eu->getEventComment() != null)->map(fn(ElementUpdate $eu) => $eu->getEventComment())->getValues();
+                $dataUpdate['creations'] = $dataCreationUpdate;
+            }
+
+            $modificationUpdates = $unseenUpdates->filter(fn(ElementUpdate $eu) => $eu->getType() == ElementUpdate::CHANGE);
+            if($modificationUpdates->count() > 0){
+                $dataModificationUpdate['stages'] = $modificationUpdates->filter(fn(ElementUpdate $eu) => $eu->getStage() != null && $eu->getParticipation() == null && $eu->getEvent() == null)->map(fn(ElementUpdate $eu) => ['stage' => $eu->getStage(), 'property' => $eu->getProperty()])->getValues();
+                $dataModificationUpdate['events'] = $modificationUpdates->filter(fn(ElementUpdate $eu) => $eu->getEvent() != null && $eu->getEventDocument() == null && $eu->getEventComment() == null)->map(fn(ElementUpdate $eu) => ['event' => $eu->getEvent(), 'property' => $eu->getProperty()])->getValues();
+                $dataModificationUpdate['documents'] = $modificationUpdates->filter(fn(ElementUpdate $eu) => $eu->getEventDocument() != null)->map(fn(ElementUpdate $eu) => ['document' => $eu->getEventDocument(), 'property' => $eu->getProperty()])->getValues();
+                $dataModificationUpdate['comments'] = $modificationUpdates->filter(fn(ElementUpdate $eu) => $eu->getEventComment() != null)->map(fn(ElementUpdate $eu) => ['comment' => $eu->getEventComment(), 'property' => $eu->getProperty()])->getValues();
+                $dataUpdate['modifications'] = $dataModificationUpdate;
+            }
+
+            $deletionUpdates = $unseenUpdates->filter(fn(ElementUpdate $eu) => $eu->getType() == ElementUpdate::DELETION);
+            if($deletionUpdates->count() > 0){
+                $dataDeletionUpdate['stages'] = $deletionUpdates->filter(fn(ElementUpdate $eu) => $eu->getStage() != null && $eu->getParticipation() == null && $eu->getEvent() == null)->map(fn(ElementUpdate $eu) => $eu->getStage())->getValues();
+                $dataDeletionUpdate['events'] = $deletionUpdates->filter(fn(ElementUpdate $eu) => $eu->getEvent() != null && $eu->getEventDocument() == null && $eu->getEventComment() == null)->map(fn(ElementUpdate $eu) => $eu->getEvent())->getValues();
+                $dataDeletionUpdate['documents'] = $deletionUpdates->filter(fn(ElementUpdate $eu) => $eu->getEventDocument() != null)->map(fn(ElementUpdate $eu) => $eu->getEventDocument())->getValues();
+                $dataDeletionUpdate['comments'] = $deletionUpdates->filter(fn(ElementUpdate $eu) => $eu->getEventComment() != null)->map(fn(ElementUpdate $eu) => $eu->getEventComment())->getValues();
+                $dataUpdate['deletions'] = $dataDeletionUpdate;
+            }
+
+            if(sizeof($dataUpdate) > 0){
+                $updates[] = $dataUpdate;
+                $recipients[] = $mailableUser;
+            }
+
+            foreach($unseenUpdates as $unseenUpdate){
+                $unseenUpdate->setMailed(new DateTime());
+                $em->persist($unseenUpdate);
+            }
+        }
+        
+        return ['recipients' => $recipients, 'updates' => $updates];
     }
 }

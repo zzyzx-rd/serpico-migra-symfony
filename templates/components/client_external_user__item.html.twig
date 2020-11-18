@@ -40,7 +40,7 @@
             </ul>
         </li>
         <li class="element-input collection-item" {% if externalUser and externalUser.id and item.vars.valid %} style="display: none;" {% endif %}>
-            <div class="row no-margin">
+            <div class="row flex-center no-margin">
                 <div class="col m10 s12">
                     <div class="row">
                         <div class="col m6 s12">
@@ -96,9 +96,10 @@
                                 </div>
                             </div>
                         </div>
+                        
                         <div class="col m6 s12">
                             <ul class="flex-center-sb">
-                                
+                                {#}
                                 <div class="user-weight user-elmt" data-prefix-wo="{{'create_user.influence'|trans ~ ' : 100'}}" data-prefix-w="{{'create_user.influence'|trans ~ ' : '}}">
                                     <a class="btn user-btn user-info-weight flex-center">
                                         <i class="fa fa-vote-yea m-right"></i>
@@ -109,6 +110,8 @@
                                         {{ form_widget(item.weightValue) }}
                                     </div>
                                 </div>
+                                #}
+                                {#
                                 {% if client is null or client.virtual %}
                                     <div class="user-owner user-input">
                                         {{ form_widget(item.owner) }}
@@ -116,6 +119,7 @@
                                         <i class="fa fa-question-circle tooltipped" data-position="bottom" data-delay="50" data-tooltip="{% trans %}create_client.owner_tooltip{% endtrans %}"></i>
                                     </div>
                                 {% endif %}
+                                #}
                             </ul>
                         </div>
                     </div>

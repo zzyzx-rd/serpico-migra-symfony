@@ -299,6 +299,18 @@
         </div>
     </div>
     #}
+    {% if not validatedCookieBanner %}
+        <div class="cookies-banner">
+            <div class="flex-center"> 
+            <div class="c-flex">
+                <span>{{'footer.cookies_banner_msg'|trans}}</span>
+                <a class="strong black-text" href="{{ url('cookie_policy') }}">{{'learn_more'|trans|capitalize}}</span>
+            </div>
+            <div class="m-right btn">Ok</div>
+            </div>
+        </div>
+    {% endif %}
+
 {% endblock %}
 {% block javascripts %}
     <script src="{{ asset('js/home.js') }}"></script>

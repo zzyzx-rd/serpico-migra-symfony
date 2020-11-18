@@ -416,7 +416,7 @@ ul {
 #main-tabs-container > .tabs {
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 1;
 }
 
 #main-tabs-container > .tabs > .tab {
@@ -425,7 +425,7 @@ ul {
 
 #main-tabs-container > section {
   width: 100%;
-  max-width: 1400px;
+  max-width: 1100px;
   margin: 0 auto;
 }
 

@@ -70,6 +70,7 @@ class ExternalUserType extends AbstractType
                 ],
                 //'data' => ($user != null) ? $extUser->getPositionName() : null,
             ])
+            /*
             ->add('weightValue', IntegerType::class, [
                 //'data' => ($externalUser != null) ? $externalUser->getWeight() : null,
                 'label_format' => 'create_client.%name%',
@@ -77,10 +78,11 @@ class ExternalUserType extends AbstractType
                 'empty_data' => 100,
                 //'data' => ($user != null) ? $extUser->getWeightValue() : null,
             ])
+            */
             ->add('id', HiddenType::class, [
             ]);
 
-            if(!$hasClientActiveAdmin){
+            if(/*!$hasClientActiveAdmin*/false){
 
                 $builder->add('owner', CheckboxType::class, [
                     'attr' => [

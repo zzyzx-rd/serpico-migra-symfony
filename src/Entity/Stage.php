@@ -1289,7 +1289,7 @@ class Stage extends DbObject
 
     public function hasMinimumOutputConfig(): bool
     {
-        return $this->getSurvey() !== null || $this->getCriteria()->count() > 0;
+        return $this->getSurvey() !== null || $this->getCriteria()->count() > 0 || $this->getEvents()->count() > 0;
     }
 
     public function hasFeedbackExpired(): bool
@@ -1763,6 +1763,26 @@ class Stage extends DbObject
     {
         $this->updates->removeElement($update);
         return $this;
+    }
+
+    public function getNewUpdates(User $user){
+        $newUpdates = new ArrayCollection;
+        $updates = $this->updates;
+        foreach($this->updates->filter(fn(ElementUpdate $eu) => $eu->getUser() == $user && $eu->getViewed() == null)->getValues() as $newUpdate){
+            $newUpdates->add($newUpdate);
+        }
+
+        return $newUpdates;
+    }
+
+    public function getPctElapsed(){
+        $now = new DateTime();
+        if($now < $this->startdate){
+            return null;
+        }
+        $nowU = $now->format("U");
+        $startU = $this->startdate->format("U");
+        return round( min(100,100 * ($nowU - $startU) / $this->getPeriod()), 0);
     }
 
 }

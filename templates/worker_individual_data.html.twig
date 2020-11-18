@@ -54,11 +54,8 @@
 
 {% block content %}
     {% set now = "now"|date("Y/m/d") %}
+
         <div class="" style="width: 85%;margin:auto">
-            
-
-
-
             {{ form_start(form) }}
             
 
@@ -70,13 +67,7 @@
                         </a>
                     </div>
                     <div class="col s12 m3" style="margin-left: 60px; margin-right: 30px;position: relative">
-                        {% if currentuser.picture is null %}
-                        <img class="user-profile-picture clickable-image" src="{{ asset('lib/img/no-picture.png') }}" width="150px" height="150px" style="border-radius: 100%">
-                        <a class="btn-floating add-photo-btn clickable-image" style="position: absolute; top: 84%; left: 35%;"><i class="fa fa-camera"></i></a>
-                        {% else %}
-                        <img class="user-profile-picture" src="{{ asset('lib/img/' ~ currentuser.picture) }}" width="150px" height="150px" style="border-radius: 100%">
-                        <a class="btn-floating add-photo-btn" style="position: absolute; top: 84%; left: 35%;"><i class="fa fa-pencil-alt"></i></a>
-                        {% endif %}
+                        <img class="clickable-image" src="{{ asset(global.userpicture(currentuser)) }}" width="150px" height="150px" style="border-radius: 100%">
                     </div>
         
                     <div class="col s12 m5 element-data flex-center" style="flex-grow: 1;">
@@ -130,7 +121,7 @@
                 </ul>
             </div>
 
-            <ul class="experiences" style="margin-top:3em" data-prototype="{% include 'prototype_experience.twig' with { 'item': form.experiences.vars.prototype } %}">
+            <ul class="experiences" style="margin-top:3em" data-prototype="{% apply escape %}{% include 'prototype_experience.twig' with { 'item': form.experiences.vars.prototype } %}{% endapply %}">
                 {% set k = 0 %}
                 {% for key, experience in form.experiences %}
                     {% set k = k + 1 %}

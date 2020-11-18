@@ -146,6 +146,11 @@ class ElementUpdate extends DbObject
      * @ORM\Column(name="upd_viewed", type="datetime", nullable=true)
      */
     public ?DateTime $viewed;
+    
+    /**
+     * @ORM\Column(name="upd_mailed", type="datetime", nullable=true)
+     */
+    public ?DateTime $mailed;
 
     /**
      * @ORM\Column(name="upd_inserted", type="datetime", nullable=false, options={"default": "CURRENT_TIMESTAMP"})
@@ -160,10 +165,12 @@ class ElementUpdate extends DbObject
     public function __construct(
         $id = null,
         $type = null,
+        DateTime $mailed = null,
         DateTime $viewed = null)
     {
         parent::__construct($id, null, new DateTime);
         $this->type = $type;
+        $this->mailed = $mailed;
         $this->viewed = $viewed;
     }
     
@@ -411,6 +418,17 @@ class ElementUpdate extends DbObject
     public function setViewed(?DateTimeInterface $viewed): self
     {
         $this->viewed = $viewed;
+        return $this;
+    }
+
+    public function getMailed(): ?DateTimeInterface
+    {
+        return $this->mailed;
+    }
+
+    public function setMailed(?DateTimeInterface $mailed): self
+    {
+        $this->mailed = $mailed;
         return $this;
     }
 

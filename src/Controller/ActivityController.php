@@ -30,6 +30,8 @@ use App\Entity\Department;
 use App\Entity\ElementUpdate;
 use App\Entity\Event;
 use App\Entity\EventDocument;
+use App\Entity\EventGroup;
+use App\Entity\EventType;
 use App\Entity\ExternalUser;
 use App\Entity\GeneratedImage;
 use App\Entity\Grade;
@@ -59,6 +61,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use App\Service\FileUploader;
 use App\Service\NotificationManager;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\Response;
 
 class ActivityController extends MasterController
 {
@@ -72,15 +75,15 @@ class ActivityController extends MasterController
      * @return JsonResponse|RedirectResponse
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/activity/create",name="createActivity")
+     * @Route("/stage/create",name="createStage")
      */
-    public function createActivityAction(Request $request, NotificationManager $notificationManager)
+    public function createStageAction(Request $request, NotificationManager $notificationManager)
     {       
         $currentUser = $this->user;
         $organization = $this->org;
         $em = $this->em;
         $clickedBtn = $request->get('btn');
-
+        $actId = $request->get('aid');
         $stage = new Stage;
         /** @var Form */
         $createActivityForm = $this->createForm(ActivityMinElementForm::class, $stage, ['organization' => $organization, 'currentUser' => $currentUser]);
@@ -142,7 +145,7 @@ class ActivityController extends MasterController
 
                     $progress = (int) ($stage->getStartdate() < new DateTime('tomorrow'));
                     
-                    $activity = new Activity;
+                    $activity = $actId == 0 ? new Activity : $em->getRepository(Activity::class)->find($actId);
 
                     $stage  
                         ->setOrganization($organization)
@@ -187,8 +190,66 @@ class ActivityController extends MasterController
                         return new JsonResponse(['msg' => $response->getContent()], 500);
                     } else {
                     }*/
+                    $progressStatuses = [
+                        -5 => 'stopped',
+                        -4 => 'postponed',
+                        -3 => 'suspended',
+                        -2 => 'reopened',
+                        -1 => 'unstarted',
+                        0  => 'upcoming',
+                        1  => 'ongoing',
+                        2  => 'completed',
+                        3  => 'finalized',
+                    ];
+                    $locale = $request->getLocale();
+                    $participants = [];
+                    $clients = [];
+
+                    foreach($stage->getParticipants() as $participant){
+                        $user = $participant->getUser();
+                        $partData = [];
+                        $clientOrgList = [];
+                        $partData['id'] = $participant->getId();
+                        $partData['fullname'] = $user->getFullname();
+                        $externalUser = $participant->getExternalUser();
+                        $isSynthetic = $user->isSynthetic();
+                        if($externalUser){
+                            $clientOrg = $user->getOrganization();
+                            $clientOrgName = $clientOrg->getCommname();
+                            if(!in_array($clientOrg,$clientOrgList)){
+                                $clientList[] = $clientOrg;
+                                $clientOrgData = [];
+                                $clientOrgData['name'] = $clientOrgName;
+                                $clientOrgData['logo'] = $clientOrg->getLogo() ?: ($clientOrg->getWorkerFirm()->getLogo() ?: '/lib/img/org/no-picture.png');
+                                $clients[] = $clientOrgData;
+                            }
+                            
+                            if(!$isSynthetic){
+                                $partData['fullname'] .= " ($clientOrgName)";
+                            } else {
+                                $partData['fullname'] = $clientOrgName;
+                            }
+                        }
+                        $partData['synth'] = $isSynthetic;
+                        $partData['picture'] = $isSynthetic ? '/lib/img/org/no-picture.png' : ($user->getPicture() ?: '/lib/img/user/no-picture.png');
+                        $participants[] = $partData;
+                    }
                     
-                    return new JsonResponse(['actId' => $activity->getId(), 'stgId' => $stage->getId(), 'startdateU' => $stage->getStartdate()->format('U'), 'period' => $stage->getEnddate()->format('U') - $stage->getStartdate()->format('U')], 200);
+                    return new JsonResponse([
+                        'aid' => $activity->getId(),
+                        'ap' => $activity->getPeriod(),
+                        'an' => $activity->getName(),
+                        'apr' => $progressStatuses[$activity->getProgress()],
+                        'asd' => $activity->getStartdateU(),
+                        'sd' => $stage->getStartdateU(),
+                        'ssed' => $stage->getStartdate()->format($locale != 'en' ? 'j/n' : 'n/j') . ($stage->getStartdate() == $stage->getEnddate() ? '' : ' - ' . $stage->getEnddate()->format($locale != 'en' ? 'j/n' : 'n/j')),
+                        'p' => $stage->getPeriod(),
+                        'n' => $stage->getName(),
+                        'id' => $stage->getId(), 
+                        'pr' => $progressStatuses[$stage->getProgress()],
+                        'participants' => $participants,
+                        'clients' => $clients
+                    ], 200);
                 } else {
             
                     $errors = $this->buildErrorArray($createActivityForm);
@@ -259,11 +320,11 @@ class ActivityController extends MasterController
             $em->persist($organization);
         } else {
             $organization = new Organization;
+            $now = new DateTime();
             $organization
                 ->setCommname($firmName)
                 ->setType('F')
-                ->setValidated(new \DateTime)
-                ->setExpired(new \DateTime('2100-01-01 00:00:00'))
+                ->setExpired($now->add(new DateInterval('P21D')))
                 ->setWeightType('role')
                 ->setWorkerFirm($workerFirm)
                 ->setPlan(ORGANIZATION::PLAN_PREMIUM)
@@ -319,11 +380,11 @@ class ActivityController extends MasterController
         if(empty($_POST['oid'])){
 
             $clientOrganization = new Organization;
+            $now = new DateTime;
             $clientOrganization
                 ->setCommname($entityName)
                 ->setType($type != 'u' ? $type : 'F')
-                ->setValidated(new \DateTime)
-                ->setExpired(new \DateTime('2100-01-01 00:00:00'))
+                ->setExpired($now->add(new DateInterval('P21D')))
                 ->setWeightType('role')
                 ->setPlan(ORGANIZATION::PLAN_PREMIUM)
                 ->setWorkerFirm($workerFirm)
@@ -814,7 +875,8 @@ class ActivityController extends MasterController
     public function updateEvent(
         Request $request,
         int $eveId,
-        FileUploader $fileUploader
+        FileUploader $fileUploader,
+        NotificationManager $notificationManager
     ) {
         /** @var int */
         $stgId = $request->get('sid');
@@ -838,6 +900,10 @@ class ActivityController extends MasterController
             $event->setStage($stage)
                 ->setOrganization($this->org);
 
+            if(!$eveId){
+                $notificationManager->registerUpdates($event, ElementUpdate::CREATION);
+            }
+
             $documentsForm = $eventForm->get('documents');
             
             foreach($documentsForm as $documentForm){
@@ -852,15 +918,20 @@ class ActivityController extends MasterController
                     ->setSize($documentFileInfo['size'])
                     ->setMime($documentFileInfo['mime']);
                 $em->persist($document);
+
+                $notificationManager->registerUpdates($document, ElementUpdate::CREATION);
+
             }
 
             $comments = $event->getComments();
             foreach($comments as $comment){
                 $comment->setAuthor($currentUser);
+                $notificationManager->registerUpdates($comment, ElementUpdate::CREATION, 'content');
             }
 
-            $event->setOrganization($this->org);
+           
 
+            /*
             if($notification){
                 $recipients = $event->getStage()->getUniqueParticipations()->filter(fn(Participation $p) => $p->getUser() != $this->user)->map(fn(Participation $p) => $p->getUser())->getValues();
                 $settings['event'] = $event;
@@ -873,8 +944,11 @@ class ActivityController extends MasterController
                     'actionType' => 'eventNotification'
                 ]);
                 if($response->getStatusCode() == 500){ return $response; };
-            }
-
+            }*/
+                
+            $event
+                ->setOrganization($this->org)
+                ->setCreatedBy($currentUser->getId());
             $em->persist($event);
             $em->flush();
 
@@ -883,7 +957,31 @@ class ActivityController extends MasterController
             return $errors;
         }
 
-        return new JsonResponse(['msg' => 'Success'],200);
+        $locale = $request->getLocale();
+        $eventType = $event->getEventType();
+        $eventGroup = $eventType->getEventGroup();
+        $eventName = $eventType->getEName();
+        $repoET = $em->getRepository(EventType::class);
+        $repoEG = $em->getRepository(EventGroup::class);
+
+        $response = [
+            'sid' => $stage->getId(),
+            'id' => $event->getId(),
+            'od' => $event->getOnsetdateU(),
+            'rd' => $event->getExpResDateU(),
+            'p' => $event->getPeriod(),
+            't' => $eventType->getId(),
+            'tt' => $repoET->getDTrans($eventType,$locale,$this->org),
+            'g' => $eventGroup->getId(),
+            'gn' => $eventGroup->getEventGroupName()->getId(),
+            'gt' => $repoEG->getDTrans($eventGroup,$locale,$this->org),
+            'it' => $eventName->getIcon()->getType(),
+            'in' => $eventName->getIcon()->getName(),
+            'nbc' => $event->getComments()->count(),
+            'nbd' => $event->getDocuments()->count()
+        ];
+
+        return new JsonResponse($response,200);
     }
     
     /**

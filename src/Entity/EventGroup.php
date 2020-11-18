@@ -7,7 +7,6 @@ use App\Repository\EventGroupRepository;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -72,8 +71,6 @@ class EventGroup extends DbObject
      */
     public $eventGroupName;
 
-    public ?EntityManager $em;
-    public ?string $locale;
     
     /**
      * EventGroup constructor.
@@ -227,31 +224,4 @@ class EventGroup extends DbObject
         return $this;
     }
 
-    public function getDTrans(){
-        $translatables =  $this->em->getRepository(DynamicTranslation::class)->findBy(['entity' => 'EventGroupName', 'entityId' => $this->getEventGroupName()->getId(), 'entityProp' => 'name', 'organization' => [null, $this->org]], ['organization' => 'ASC']);
-        if(!$translatables){
-            return $this->getEventGroupName()->getName();
-        } else {
-            /** @var DynamicTranslation */
-            $translatable = sizeof($translatables) > 1 ? $translatables[1] : $translatables[0];                
-            $translatable->locale = $this->locale;
-            return $translatable->getDynTrans();
-        }
-    }
-
-    public function setLocale($locale){
-        $this->locale = $locale;
-        return $this;
-    }
-
-    public function setEm($em){
-        $this->em = $em;
-        return $this;
-    }
-
-    public function setOrg($org){
-        $this->org = $org;
-        return $this;
-    }
-    
 }

@@ -116,6 +116,7 @@ use Twig\Environment;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use App\Service\FileUploader;
 use App\Service\NotificationManager;
+use DateInterval;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class OrganizationController extends MasterController
@@ -1702,13 +1703,12 @@ class OrganizationController extends MasterController
                 $clientOrganization = $em->getRepository(Organization::class)->findOneByWorkerFirm($workerFirm);
 
                 if(!$clientOrganization){
-                    
+                    $now = new DateTime();
                     $clientOrganization = new Organization;
                     $clientOrganization
                         ->setCommname($client->getName())
                         ->setType($client->getType())
-                        ->setValidated(new \DateTime)
-                        ->setExpired(new \DateTime('2100-01-01 00:00:00'))
+                        ->setExpired($now->add(new DateInterval('P21D')))
                         ->setWeightType('role')
                         ->setWorkerFirm($workerFirm);
                     $em->persist($clientOrganization);
@@ -2519,14 +2519,14 @@ class OrganizationController extends MasterController
                     $clientOrganization->setType($clientUser['type']->getData());
                 } else {
                     $clientOrganization = new Organization;
+                    $now = new DateTime();
                     $clientOrganization
                         ->setType('I')
                         ->setIsClient(false)
                         ->setCommname($clientUser['firstname']->getData() . ' ' . $clientUser['lastname']->getData())
                         ->setWeight_type('role')
                         ->setCreatedBy($currentUser->getId())
-                        ->setValidated(new DateTime)
-                        ->setExpired(new DateTime('2100-01-01 00:00:00'));
+                        ->setExpired($now->add(new DateInterval('P21D')));
                     $client = new Client;
                     $client->setOrganization($organization)->setClientOrganization($clientOrganization);
                     $organization->addClient($client);
@@ -3199,7 +3199,7 @@ class OrganizationController extends MasterController
         $totalClientUsers  = 0;
 
         foreach ($clients as $client) {
-            $canSeeClient = ($user->getRole() == 4) || ($user->getRole() == 1) || ($client->getCreatedBy() == $user->getId());
+            $canSeeClient = $user->getRole() == 4 || $user->getRole() == 1 || $organization->getPlan() > ORGANIZATION::PLAN_ENTERPRISE || $client->getCreatedBy() == $user->getId();
             if ($canSeeClient) {
                 switch ($client->getClientOrganization()->getType()) {
                     case 'F':
@@ -6191,6 +6191,7 @@ class OrganizationController extends MasterController
             }
 
             if ($organizationForm->isValid()) {
+                $now = new DateTime();
                 $email             = $organizationForm->get('email')->getData();
                 $firstname         = $organizationForm->get('firstname')->getData();
                 $lastname          = $organizationForm->get('lastname')->getData();
@@ -6207,7 +6208,7 @@ class OrganizationController extends MasterController
                     ->setLegalname($orgCommercialName)
                     ->setIsClient(false)
                     ->setMasterUserId(0)
-                    ->setExpired(new DateTime("+1 month"));
+                    ->setExpired($now->add(new DateInterval('P21D')));
                 $em->persist($organization);
 
                 // Setting organization options
@@ -6783,6 +6784,7 @@ class OrganizationController extends MasterController
                 $orgUsers = $connectedUser->getOrganization()->getUsers();
                 foreach($orgUsers as $orgUser){
                     $externalUser = new ExternalUser;
+                    if($orgUser->isSynthetic()){$externalUser->setSynthetic(true);}
                     $externalUser->setUser($orgUser)
                         ->setWeightValue(!$orgUser->isSynthetic() ? 100 : null)
                         ->setEmail($orgUser->getEmail())
@@ -6943,22 +6945,15 @@ class OrganizationController extends MasterController
     public function getEventTypesFromEventGroup(Request $request){
         $evgId = $request->get('id');
         $em = $this->em;
-        $locale = strtoupper($request->getLocale());
+        $locale = $request->getLocale();
         $org = $this->org;
         $eventGroup = $em->getRepository(EventGroup::class)->find($evgId);
-        //$eventGroup = 
-        $eventTypes = $eventGroup->getEventTypes()->map(
-            function(EventType $et) use ($em,$locale,$org){
-                $et->em = $em;
-                $et->locale = $locale;
-                $et->org = $org;
-                return [
-                    'evnId' => $et->getEName()->getId(),
-                    'id' => $et->getId(),
-                    'name' => ($et->getIcon() ? '~' . $et->getIcon()->getUnicode() .'~ ' : '') . $et->getDTrans(),
-                ];
-            }
-        )->getValues();
+        $repoET = $em->getRepository(EventType::class);
+        $eventTypes = $eventGroup->getEventTypes()->map(fn(EventType $et) => [
+            'evnId' => $et->getEName()->getId(),
+            'id' => $et->getId(),
+            'name' => ($et->getIcon() ? '~' . $et->getIcon()->getUnicode() .'~ ' : '') . $repoET->getDTrans($et,$locale,$org),
+        ])->getValues();
         
         //dd($eventTypes);
         return new JsonResponse($eventTypes, 200);
@@ -7031,7 +7026,7 @@ class OrganizationController extends MasterController
         $oDateStr = $request->get('oDateStr');
         $expResDateStr = $request->get('expResDateStr');
         if($oDateStr != ""){$oDate = new DateTime($oDateStr);}
-        if($expResDateStr != ""){$expResDate = new DateTime($expResDateStr);}
+        $expResDate = $expResDateStr != "" ? new DateTime($expResDateStr) : null;
         $docTitle = $request->get('title');
         $documentFile = $request->files->get('file');
         $em = $this->em;
@@ -7049,6 +7044,7 @@ class OrganizationController extends MasterController
              $event->setEventType($eventType)
                 ->setOnsetDate($oDate)
                 ->setExpResDate($expResDate)
+                ->setOrganization($this->org)
                 ->setCreatedBy($this->user->getId());
              $stage->addEvent($event);
         } else {
@@ -7071,13 +7067,17 @@ class OrganizationController extends MasterController
                 ->setOrganization($this->org)
                 ->setCreatedBy($this->user->getId());
             $documentAuthor = new DocumentAuthor();
-            $documentAuthor->setAuthor($this->user);
+            $documentAuthor->setAuthor($this->user)->setDocument($document);
             $document->addDocumentAuthor($documentAuthor);
             $event->addDocument($document);
             $em->persist($event);
         } else {
             $document->setModified(new DateTime);
             $em->persist($document);
+        }
+
+        if(!$evtId){
+            $notificationManager->registerUpdates($event, ElementUpdate::CREATION);
         }
 
         $status = $docId ? ElementUpdate::CHANGE : ElementUpdate::CREATION;
@@ -7093,7 +7093,7 @@ class OrganizationController extends MasterController
                 ->setActivity($stage->getActivity());
             $event->addUpdate($update);
         }*/
-
+        
         if(!$evtId){
             $em->persist($stage);
         }
@@ -7135,8 +7135,9 @@ class OrganizationController extends MasterController
         $evtTypeId = $request->get('evtid');
         $oDateStr = $request->get('oDateStr');
         $expResDateStr = $request->get('expResDateStr');
+
         if($oDateStr != ""){$oDate = new DateTime($oDateStr);}
-        if($expResDateStr != ""){$expResDate = new DateTime($expResDateStr);}
+        $expResDate = $expResDateStr != "" ? new DateTime($expResDateStr) : null;
         $em = $this->em;
         /** @var EventComment */
         $comment = $comId ? $em->getRepository(EventComment::class)->find($comId) : new EventComment;
@@ -7160,6 +7161,7 @@ class OrganizationController extends MasterController
                 $event->setEventType($eventType)
                    ->setOnsetDate($oDate)
                    ->setExpResDate($expResDate)
+                   ->setOrganization($this->org)
                    ->setCreatedBy($this->user->getId());
                 $stage->addEvent($event);
            } else {
@@ -7171,7 +7173,7 @@ class OrganizationController extends MasterController
             $recipients = $event->getStage()->getUniqueParticipations()->filter(fn(Participation $p) => $p->getUser() != $this->user)->map(fn(Participation $p) => $p->getUser())->getValues();
             $event->addComment($comment);
             $em->persist($event);
-            $em->flush();
+            //$em->flush();
 
             /*$response = $this->forward('App\Controller\MailController::sendMail', [
                 'recipients' => $recipients, 
@@ -7189,13 +7191,18 @@ class OrganizationController extends MasterController
                 $comment->setContent($comContent)
                     ->setModified(new DateTime);
                 $em->persist($comment);
-                $em->flush();
+                //$em->flush();
             }
         }
 
+        if(!$evtId){
+            $notificationManager->registerUpdates($event, ElementUpdate::CREATION);
+        }
         if(!$comId){
             $notificationManager->registerUpdates($comment, ElementUpdate::CREATION, 'content');
         }
+
+        $em->flush();
         /*
         foreach($event->getStage()->getParticipants() as $participation){
             $update = new Update;
@@ -7320,7 +7327,9 @@ class OrganizationController extends MasterController
     public function retrieveStageData(Request $request){
         $stgId = $request->get('id');
         $em = $this->em;
-        $locale = strtoupper($request->getLocale());
+        $locale = $request->getLocale();
+        $repoET = $em->getRepository(EventType::class);
+        $repoEG = $em->getRepository(EventGroup::class);
         $currentUser = $this->user;
         $org = $this->org;
         /** @var Stage */
@@ -7340,11 +7349,9 @@ class OrganizationController extends MasterController
             $eventGroup = $event->getEventType()->getEventGroup();
             /** @var EventType */
             $eventType = $event->getEventType();
-            $eventType->setLocale($locale)->setEm($em)->setOrg($org);
-            $eventGroup->setLocale($locale)->setEm($em)->setOrg($org);
             $evtData['evgId'] = $eventGroup->getEventGroupName()->getId();
-            $evtData['evg'] = $eventGroup->getDTrans();
-            $evtData['evt'] = $eventType->getDTrans();
+            $evtData['evg'] = $repoEG->getDTrans($eventGroup, $locale, $org);
+            $evtData['evt'] = $repoET->getDTrans($eventType, $locale, $org);
             $evtData['odate'] = $event->getOnsetDate()->diff(new DateTime)->d > 5 ? $event->getOnsetDate() : $event->nicetime($event->getOnsetDate()->format('Y-m-d'));
             $evtData['rdate'] = $event->getExpResDate() == null ? null : ($event->getExpResDate()->diff(new DateTime)->d > 5 ? $event->getExpResDate() : $event->nicetime($event->getExpResDate()->format('Y-m-d')));
             $evtData['nbdocs'] = $event->getDocuments()->count();
@@ -7509,9 +7516,9 @@ class OrganizationController extends MasterController
         
         if($withActNames){
             if($request->getLocale() == 'en'){
-                $actNames = ['Marketing project', 'VP Recruitment', 'Contract Negotiation', 'Delivery', 'Proof of Concept', 'Deal Agreement', 'Trade Fair exhibition', 'Call for Tender'];
+                $actNames = ['Marketing project', 'VP Recruitment', 'Contract Negotiation', 'Delivery', 'Proof of Concept', 'Deal Agreement', 'Trade Fair exhibition', 'Call for Tender', 'Training - Logistics'];
             } else if($request->getLocale() == 'fr') {
-                $actNames = ['Projet marketing', 'Recrutement VP', 'Nego contractuelle', 'Réalisation prestation', 'Test client', 'Projet de collaboration', 'Salon - Expo', 'Appel d\'offres'];
+                $actNames = ['Projet marketing', 'Recrutement VP', 'Nego contractuelle', 'Réalisation prestation', 'Test client', 'Projet de collaboration', 'Salon - Expo', 'Appel d\'offres', 'Training - Logistique'];
             }
         }
         

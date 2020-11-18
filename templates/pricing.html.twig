@@ -1,11 +1,11 @@
 {% extends "layout.html.twig" %}
 
 {% block title %}
-Signup
+Pricing
 {% endblock %}
 
 {% block pagename %}
-Signup
+Pricing
 {% endblock %}
 
 {% block css %}
@@ -353,11 +353,11 @@ Signup
                                 #}
                             </li>
                             {#<li class="grey-text text-lighten-4"><a href="mailto:contact@dealdrive.lu" style="color:white;">contact@dealdrive.lu</a></li>#}
-                            {#
+                            
                             <li style="text-align:right">
                                 <a href="{{ path('terms_conditions') }}" class="white-text">{% trans %}footer.tc{% endtrans %}</a>
                             </li>
-                            #}
+                            
                         </ul>
                     </div>
                 </div>
@@ -365,8 +365,20 @@ Signup
         </div>
       </footer>
 
+      {% if not validatedCookieBanner %}
+        <div class="cookies-banner">
+          <div class="flex-center"> 
+            <div class="c-flex">
+              <span>{{'footer.cookies_banner_msg'|trans}}</span>
+              <a class="strong black-text" href="{{ url('cookie_policy') }}">{{'learn_more'|trans|capitalize}}</span>
+            </div>
+            <div class="btn">Ok</div>
+          </div>
+        </div>
+      {% endif %}
+
 {% endblock %}
 
 {% block javascripts %}
-  <script src="{{ asset('js/signup.js') }}"></script>
+  <script src="{{ asset('js/base.js') }}"></script>
 {% endblock %}

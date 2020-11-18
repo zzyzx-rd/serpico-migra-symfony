@@ -3,6 +3,7 @@ namespace App;
 use App\Entity\Activity;
 use App\Entity\Client;
 use App\Entity\ElementUpdate;
+use App\Entity\EventType;
 use App\Entity\EventComment;
 use App\Entity\Organization;
 use App\Entity\Stage;
@@ -53,9 +54,9 @@ class globalVar {
         return ["_locale" =>"fr"];
     }
 
-    public function userPicture(): string
+    public function userPicture(User $user = null): string
     {
-        $userPicture = $this->CurrentUser() ? $this->CurrentUser()->getPicture() : null;
+        $userPicture = $user ? $user->getPicture() : ($this->CurrentUser() ? $this->CurrentUser()->getPicture() : null);
         return 'lib/img/user/' . ($userPicture ?: 'no-picture.png');
     }
 
@@ -127,7 +128,7 @@ class globalVar {
     public function activeUsers(): ArrayCollection
     {
         $currentUser = $this->CurrentUser();
-        $org = $currentUser?$currentUser->getOrganization():null;
+        $org = $currentUser ? $currentUser->getOrganization():null;
         return new ArrayCollection($this->em->getRepository(User::class)
             ->findBy(['organization' => $org, 'deleted' => null],['lastname' => 'ASC']));
     }
@@ -136,8 +137,11 @@ class globalVar {
         $maxRetrieved = 7;
         /** @var User */
         $currentUser = $this->CurrentUser();
+        $org = $currentUser->getOrganization();
         $updates = $currentUser->getUpdates()->filter(fn(ElementUpdate $u) => $u->getUser() == $currentUser)->matching(Criteria::create()->orderBy(['viewed' => Criteria::DESC, 'stage' => Criteria::ASC]));
+        $em = $this->em;
         $dataUpdates = [];
+        $repoET = $em->getRepository(EventType::class);
         if($updates->count() > 0){
             
             $dataUpdates['nbNew'] = $updates->filter(fn(ElementUpdate $u) => $u->getViewed() == null)->count();
@@ -159,49 +163,65 @@ class globalVar {
                     $participation = $update->getParticipation();
                     $stage = $update->getStage();
                     $activity = $update->getActivity();
+                    $stageName = $stage->getName();
+                    $activityName = $activity->getName();
+                    $of = $translator->trans('of');
+                    $theStage = $translator->trans('the_phase');
+                    $theActivity = $translator->trans('the_activity');
+                
+                    if($event && ($document || $comment)){
+                        $theEvent = $translator->trans('the_event');
+                        $eventType = $event->getEventType();
+                        $eventTypeName = strtolower($repoET->getDTrans($eventType, $locale, $org));
+                    }
 
                     $transParameters = [];
-                    $transParameters['actElmtMsg'] = $activity->getStages()->count() > 1 ? 
-                        $translator->trans('the_phase') . ' ' . $stage->getName() . ' ' . $translator->trans('of') . ' ' . $translator->trans('the_activity') . ' ' . $activity->getName() :
-                        $translator->trans('the_activity') . ' '. $activity->getName();
+                    $transParameters['actElmtMsg'] = 
+                        ($event && ($document || $comment) ? "$theEvent $of <span class=\"strong\">$eventTypeName</span> $of " : "") .
+                        
+                        ($activity->getStages()->count() > 1 ? 
+                        "$theStage <span class=\"strong\">$stageName</span> $of $theActivity <span class=\"strong\">$activityName</span>" :
+                        "$theActivity <span class=\"strong\">$activityName</span>");
 
                     if($document != null || $comment != null){
                         $creator = $repoU->find($document ? $document->getCreatedBy() : $comment->getCreatedBy());
                         $transParameters['author'] = $creator->getOrganization() != $currentUser->getOrganization() ? $creator->getFullName(). ' ('.$creator->getOrganization()->getCommname().')' : $creator->getFullName();
                         //$dataUpdate['type'] = $document ? 'd' : 'c';
-                        $transParameters['updateLevel'] = $comment ? 
-                            ($document->getParent() ? 
+                        $transParameters['updateType'] = $comment ? 
+                            ($comment->getParent() ? 
                                 $translator->trans('updates.comment_update_type.withParent') : 
                                 $translator->trans('updates.comment_update_type.withoutParent')
                             ) : 
                             ($update->getType() == ElementUpdate::CREATION ?
                                 $translator->trans('updates.document_update_level.creation') : 
-                                $translator->trans('updates.comment_update_level.update')
+                                $translator->trans('updates.document_update_level.update')
                             );
                         
                         $transParameters['update_type'] = $document ? 'event_document' : 'event_comment';
                         if($document){
-                            $transParameters['docName'] = $document->getName();
+                            $transParameters['docName'] = $document->getTitle();
                         }
                         
-                    } else if ($event != null && $event->getUpdates()->filter(fn(ElementUpdate $u) => $u->getEventComment() || $u->getEventDocument())->count() == 0) {
+                    } else if ($event != null && $document == null && $comment == null) {
                         $creator = $repoU->find($event->getCreatedBy());
-                        $dataUpdate['update_type'] = 'event_creation';
-                        $transParameters['group'] = strtolower($event->getEventGroup()->getEventGroupName()->getName());
-                        $transParameters['type'] = strtolower($event->getEventType()->getEventName()->getName());
+                        $transParameters['update_type'] = 'event_creation';
+                        $eventType = $event->getEventType();
+                        $transParameters['type'] = strtolower(implode("_",explode(" ",$eventType->getEName()->getName())));
+                        $transParameters['group'] = strtolower($eventType->getEventGroup()->getEventGroupName()->getName());
                     } else if ($participation != null) {
                         $creator = $repoU->find($participation->getCreatedBy());
                         $dataUpdate['type'] = 'p';
                     } else {
                         $creator = $repoU->find($stage->getCreatedBy());
-                        $transParameters['author'] = $creator->getOrganization() != $currentUser->getOrganization() ? $creator->getFullName(). ' ('.$creator->getOrganization()->getCommname().')' : $creator->getFullName();
-                        $transParameters['updateLevel'] = $update->getType() == ElementUpdate::CREATION ? $translator->trans('updates.common_level.creation') : $translator->trans('updates.common_level.update');
+                        $dataUpdate['type'] = 's';
                         $transParameters['update_type'] = 'act_elmt_creation';
                     }
                     
-                    
+                    $dataUpdate['id'] = $update->getId();
                     $dataUpdate['picture'] = $creator->getPicture() ?: 'no-picture.png';
                     $dataUpdate['inserted'] = $this->nicetime($update->getInserted()->setTimezone($tz), $locale);
+                    $transParameters['author'] = $creator->getOrganization() != $currentUser->getOrganization() ? $creator->getFullName(). ' ('.$creator->getOrganization()->getCommname().')' : $creator->getFullName();
+                    $transParameters['updateLevel'] = $update->getType() == ElementUpdate::CREATION ? $translator->trans($document ? 'updates.document_update_level.creation' : 'updates.common_level.creation') : (ElementUpdate::CHANGE ? $translator->trans($document ? 'updates.document_update_level.update' : 'updates.common_level.update') : $translator->trans('updates.common_level.delete'));
                     $dataUpdate['msg'] = $translator->trans('updates.update_msg', $transParameters);
                     $dataUpdate['viewed'] = $update->getViewed() != null;
                     $dataUpdate['id'] = $update->getId();

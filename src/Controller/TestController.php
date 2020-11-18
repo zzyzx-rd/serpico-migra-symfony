@@ -10,7 +10,7 @@ class TestController extends MasterController
 {
 
     /**
-     * @Route("/test",name="test" )
+     * @Route("/test",name="test")
      * @return Response
      */
     public function test(){
@@ -39,8 +39,16 @@ class TestController extends MasterController
      */
     public function terms_index()
     {
+
+        if(!isset($_COOKIE['cb'])){ 
+            setcookie('cb', 0); 
+            $validatedCookieBanner = 0;
+        } else {
+            $validatedCookieBanner = $_COOKIE['cb'];
+        }
+
         return $this->render('terms_conditions.html.twig', [
-            'controller_name' => 'TestController',
+            'validatedCookieBanner' => $validatedCookieBanner,
         ]);
     }
 }

@@ -7,7 +7,6 @@
 {% endblock %}
 
 {% block css %}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.5.9/slick.min.css">
 
     <style>
         .old-times:before {
@@ -49,15 +48,6 @@
         var rurl = "{{ path('resetPassword') }}";
     </script>
 {% endblock %}
-
-
-{#{% block username %}#}
-{#    {% if currentuser is not null %}#}
-{#        {{ currentuser.firstname }}#}
-{#        {{ currentuser.lastname }}#}
-{#    {% endif %}#}
-{#{% endblock %}#}
-
 
 {% block pagename %}
     Login
@@ -140,23 +130,6 @@
 
 
 {% block javascripts %}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.5.9/slick.min.js" type="text/javascript"></script>
-    <script type="text/javascript">
-        $(document).ready(function () {
-            $(".banner-title").not('.slick-initialized').slick({
-                vertical: true,
-                autoplay: true,
-                autoplaySpeed: 3300,
-                speed: 700,
-                arrows: false,
-                useTransform: true,
-                cssEase: "cubic-bezier(0.695, -0.445, 0.265, 1.550)"
-            })
-        });
-    </script>
-
     <script src="{{ absolute_url(asset('js/home.js')) }}"></script>
     <script src="{{ absolute_url(asset('js/landing.js')) }}"></script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flexslider/2.7.0/jquery.flexslider.min.js"></script>
 {% endblock %}

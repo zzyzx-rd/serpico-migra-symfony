@@ -29,7 +29,7 @@ body[style="overflow: hidden;"] {
   background-color: #341f56;
 }
 
-.btn,.btn-large,.btn-floating{
+.btn:not(.user-btn),.btn-large,.btn-floating{
   background-color: #55318e!important;
 }
 
@@ -226,10 +226,11 @@ li + li.no-items-placeholder {
   height: 50%;
 }
 
-#nav .user-profile-picture {
+.user-nav-picture {
   display: block;
   height: 40%;
   margin-right: .4em;
+  border-radius: 50%;
 }
 
 #nav .lg-icon > .collapsible {
@@ -464,6 +465,11 @@ td a {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.c-flex{
+  display: flex;
+  flex-direction: column;
 }
 
 .c-flex-center {
@@ -2930,7 +2936,7 @@ h2.header {
   #serpicoNav {
     margin-left: 70px;
   }
-  #nav div ul li a:hover, .plan a:hover {
+  #nav div ul li a:not(.profile-link > a):hover, .plan a:hover {
     background-color: #341f56;
     color: white;
   }
@@ -3095,9 +3101,18 @@ h2.header {
   font-weight: 700;
 }
 
-.notif-list{
+.profile-zone{
+  width:100%;
+}
+
+.profile-link > a:hover{
+  background-color: inherit;
+  font-weight: 600;
+}
+
+.profile-notif-elmts{
   position: absolute;
-  bottom: calc((4rem + 12px)*(-1));
+  top: calc(4rem + 12px);
   background-color: white;
   border: 1px solid black;
   flex-direction: column;
@@ -3105,10 +3120,25 @@ h2.header {
   right: 140px;
   display:none;
   border-radius: 2px;
+  z-index:2;
 }
 
-.notif-list > li{
+.notif-list > li, .profile-zone{
   padding:10px;
+}
+
+.notifications-title{
+  padding:10px 0 0 10px;
+  text-transform: uppercase;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-top: 1px solid #ff9300;
+  width: 100%;
+}
+
+.notif-list > li:not(:first-child):not(:last-child){
+  border-top: 1px solid;
+  border-bottom: 1px solid;
 }
 
 .notif-list > li:not(.seen){
@@ -3119,9 +3149,21 @@ h2.header {
   display:inline-block;
 }
 
-.notif-user-picture img{
+.user-profile-picture{
   height: 15px;
-  width:15px;
+  width: 15px;
+  border-radius: 50%;
+}
+
+.user-profile-l-picture{
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+}
+
+.user-profile-xl-picture{
+  height: 25px;
+  width: 25px;
   border-radius: 50%;
 }
 
@@ -3136,4 +3178,47 @@ h2.header {
 .notif-time{
   float: right;
   font-size: 12px;
+}
+
+.user-table-part{
+  margin-left: -0.75rem;
+}
+
+.cookies-banner{
+  z-index: 1001;
+  position: fixed;
+  bottom: 0px;
+  border-style: solid;
+  border-color: rgb(168, 171, 178);
+  border-image: initial;
+  border-width: 1px 0px 0px;
+  background-color: rgb(255, 255, 255);
+  box-shadow: rgba(79, 5, 153, 0.2) 0px 0px 5px 2px;
+  padding: 16px 16px 32px;
+  width: 100%;
+  height: auto;
+  display: flex;
+  -webkit-box-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  justify-content: center;
+  flex-direction: column;
+  transition: transform 0.3s cubic-bezier(0.47, 1.13, 0.39, 1.19) 0s;
+  transform: translateY(24px);
+}
+
+.cookies-banner .btn{
+  margin-left: 40px;
+}
+
+.upgrade-img{
+  display: flex;
+  width: 60%;
+  margin: auto;
+}
+
+.update-plan-btn{
+    display: flex;
+    width: fit-content;
+    margin: auto;
 }

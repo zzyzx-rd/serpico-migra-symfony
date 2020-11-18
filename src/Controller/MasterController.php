@@ -133,8 +133,6 @@ abstract class MasterController extends AbstractController
             $this->org = $this->user->getOrganization();
         }
         $this->activityRepo = $this->em->getRepository(Activity::class);
-        $this->em = $em;
-        $this->security = $security;
 
         // Twig constants
 //        $loader = new FilesystemLoader('../templates');

@@ -8,3 +8,5 @@ twig:
         departmentM: '@App\Model\DepartmentM'
         freeAccessRoutes: '/'
         userRepo: '@App\Repository\UserRepository'
+        eventTypeRepo: '@App\Repository\EventTypeRepository'
+        eventGroupRepo: '@App\Repository\EventGroupRepository'
