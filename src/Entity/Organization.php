@@ -172,6 +172,13 @@ class Organization extends DbObject
      * @JoinColumn(name="master_user_id", referencedColumnName="usr_id", nullable=true)
      */
     private $masterUser;
+
+
+    /**
+     * @OneToOne(targetEntity="User", inversedBy="organization")
+     * @JoinColumn(name="payement_usr_id", referencedColumnName="usr_id",nullable=true)
+     */
+    private $paymentUser;
     /**
      * @Column(name="org_logo", type="string", nullable=true)
      * @var string
@@ -212,6 +219,10 @@ class Organization extends DbObject
      * @OneToMany(targetEntity="User", mappedBy="organization", cascade={"persist","remove"}, orphanRemoval=true)
      */
     public $users;
+    /**
+     * @OneToMany(targetEntity="OrganizationPaymentMethod", mappedBy="organization", cascade={"persist","remove"}, orphanRemoval=true)
+     */
+    public $paymentMethods;
     /**
      * @OneToMany(targetEntity="InstitutionProcess", mappedBy="organization", cascade={"persist","remove"}, orphanRemoval=true)
      * @var ArrayCollection|InstitutionProcess[]
@@ -292,6 +303,8 @@ class Organization extends DbObject
      * @param ArrayCollection|InstitutionProcess[] $institutionProcesses
      * @param CriterionGroup[] $criterionGroups
      * @param $workerFirm
+     * @param $paymentMethods
+     * @param $paymentUser
      */
     public function __construct(
       ?int $id = 0,
@@ -328,6 +341,7 @@ class Organization extends DbObject
         $options = null,
         $processes = null,
         $customerId = null,
+        $paymentUser = null ,
         $institutionProcesses = null,
         array $criterionGroups = null
         )
@@ -370,6 +384,7 @@ class Organization extends DbObject
         $this->eventGroups = new ArrayCollection();
         $this->eventTypes = new ArrayCollection();
         $this->translations = new ArrayCollection();
+        $this->paymentMethods = new ArrayCollection();
         $this->comments = new ArrayCollection();
         $this->documents = new ArrayCollection();
     }
@@ -383,9 +398,9 @@ class Organization extends DbObject
         /*if($this->customerId == null){
             $mail = ($this->masterUser == null) ? "" :$this->masterUser->getEmail();
             $cust = Stripe\Customer::create([
-                'email' => $mail,
+                'email' => $mail
             ]);
-            $this->customerId = $cust->id;
+
             return $cust->id;
         }*/
         return $this->customerId;
@@ -517,6 +532,22 @@ class Organization extends DbObject
     public function getExpired(): ?DateTimeInterface
     {
         return $this->expired;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPaymentUser()
+    {
+        return $this->paymentUser;
+    }
+
+    /**
+     * @param mixed $paymentUser
+     */
+    public function setPaymentUser($paymentUser): void
+    {
+        $this->paymentUser = $paymentUser;
     }
 
     public function setExpired(DateTimeInterface $expired): self
@@ -1150,6 +1181,34 @@ class Organization extends DbObject
     {
         $this->users->removeElement($user);
         return $this;
+    }
+    public function addPaymentMethods(OrganizationPaymentMethod $opm): Organization
+    {
+        $this->paymentMethods->add($opm);
+        $opm->setOrganization($this);
+        return $this;
+    }
+
+    public function removePaymentMethods(OrganizationPaymentMethod $opm): Organization
+    {
+        $this->users->removeElement($opm);
+        return $this;
+    }
+
+    /**
+     * @return ArrayCollection|OrganizationPaymentMethod []
+     */
+    public function getPaymentMethods()
+    {
+        return $this->paymentMethods;
+    }
+
+    /**
+     * @param ArrayCollection $paymentMethods
+     */
+    public function setPaymentMethods(ArrayCollection $paymentMethods): void
+    {
+        $this->paymentMethods = $paymentMethods;
     }
 
     public function addClient(Client $client): Organization

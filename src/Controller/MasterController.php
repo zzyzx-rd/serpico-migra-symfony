@@ -114,7 +114,7 @@ abstract class MasterController extends AbstractController
      */
     public function __construct(EntityManagerInterface $em, Security $security, RequestStack $stack, UserPasswordEncoderInterface $encoder, Environment $twig)
     {
-        Stripe::setApiKey('sk_test_51HZHYgHmuPtR98gqv3rds5W4VXvscTazOlR2lSbIN0xLH2vTrRan4RhhNKhaBzBpyxBxTjO27z5WJwVJEfowFwm500MTz3e2ob');
+        Stripe::setApiKey('sk_test_51Hn5ftLU0XoF52vKQ1r5r1cONYas5XjLLZu6rFg2P69nntllHxLs3G0wyCxoOQNUgjgD5LwCoaYTkGQp1qVK3g3A00LfW1k4Ep');
         $this->em = $em;
         $this->security = $security;
         $this->stack = $stack;
@@ -123,8 +123,7 @@ abstract class MasterController extends AbstractController
         $this->twig = $twig;
         $stripe = new Stripe;
         $this->stripe = $stripe = new \Stripe\StripeClient(
-            'sk_test_51HZHYgHmuPtR98gqv3rds5W4VXvscTazOlR2lSbIN0xLH2vTrRan4RhhNKhaBzBpyxBxTjO27z5WJwVJEfowFwm500MTz3e2ob'
-        );;
+            'sk_test_51Hn5ftLU0XoF52vKQ1r5r1cONYas5XjLLZu6rFg2P69nntllHxLs3G0wyCxoOQNUgjgD5LwCoaYTkGQp1qVK3g3A00LfW1k4Ep');
 //        if ($this->user === null) {
 //            dd('erreur de user');
 //            $this->redirectToRoute('login');

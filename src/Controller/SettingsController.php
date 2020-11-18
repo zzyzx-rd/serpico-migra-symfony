@@ -1,6 +1,7 @@
 <?php
 namespace App\Controller;
 
+use App\Entity\OrganizationPaymentMethod;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\OptimisticLockException;
@@ -186,23 +187,39 @@ class SettingsController extends MasterController
             $org->setCustomerId($cust->id);
         }*/
 
-        $this->org->setCustomerId($this->org->getCustomerId());
-        $em->flush();
+        $payacces = false;
+        Stripe\Stripe::setApiKey('sk_test_51Hn5ftLU0XoF52vKQ1r5r1cONYas5XjLLZu6rFg2P69nntllHxLs3G0wyCxoOQNUgjgD5LwCoaYTkGQp1qVK3g3A00LfW1k4Ep');
+
+        if (!$currentUser instanceof User) {
+            return $this->redirectToRoute('login');
+        }
+
+        if($this->org->getPaymentUser() == $this->user){
+            $payacces = true ;
+        }
+
+
         $organization = $this->org;
         $customer = $this->stripe->customers->retrieve(
-            $this->org->getCustomerId(),
+            $this->org->getCustomerId()
         );
+        $users =$this->org->getUsers();
 
 
 
-        //dd($customer->metadata->quantity);
         if($customer->metadata->sub_id == null){
             $val = 1;
             $start = " ";
+            $pdf =" ";
         } else {
             $sub = $this->stripe->subscriptions->retrieve(
                 $customer->metadata->sub_id,
                 );
+            $invoice =$this->stripe->invoices->all(['customer' =>   $this->org->getCustomerId()])->data[0];
+            $invoice= $this->stripe->invoices->sendInvoice($invoice->id,
+                []
+            );
+            $pdf = $invoice->invoice_pdf;
 
             $start = date('m/d/Y', $sub->current_period_start);
 
@@ -232,17 +249,23 @@ class SettingsController extends MasterController
             $name = "";
             $brand = "";
         }
+        $subscription =$this->stripe->subscriptions->all(['customer' => $customer]);
+
         return $this->render( 'price_management.html.twig' , [
 
-            'stripe_public_key' => 'pk_test_51HZHYgHmuPtR98gq78pZ4Orw0HliC7zhtkmv6FHQp2eVakz9X8IvYtYNwUuAt09tTXKeLZupQFlODr2tsLvTsH6o00PRmtxy8X',
             'currentPlan' => $organization->getPlan(),
             'val' => $val,
-            'custcard' => $pm,
+            'custcard' => sizeof($this->org->getPaymentMethods()),
             'dateend'  => $dateend,
             'last4'  => $last4,
             'name' => $name,
             'brand' => $brand,
-            'start' => $start
+            'start' => $start,
+            'payacces' => $payacces,
+            'cards' => $this->org->getPaymentMethods(),
+            'pdf'=>$pdf,
+            'user'=>$users,
+            'sub' => $subscription->data
         ]);
 
 
@@ -319,7 +342,7 @@ class SettingsController extends MasterController
      * @Route("/create-customer", name="stripWebook")
      */
     public function createCustomerManagementAction(Request $request){
-        Stripe\Stripe::setApiKey('sk_test_51HZHYgHmuPtR98gqv3rds5W4VXvscTazOlR2lSbIN0xLH2vTrRan4RhhNKhaBzBpyxBxTjO27z5WJwVJEfowFwm500MTz3e2ob');
+        Stripe\Stripe::setApiKey('sk_test_51Hn5ftLU0XoF52vKQ1r5r1cONYas5XjLLZu6rFg2P69nntllHxLs3G0wyCxoOQNUgjgD5LwCoaYTkGQp1qVK3g3A00LfW1k4Ep');
 
         $body =  json_decode(file_get_contents('php://input'), true);
         $stripe = $this->stripe;
@@ -340,7 +363,7 @@ class SettingsController extends MasterController
      * @throws Stripe\Exception\ApiErrorException
      */
     public function createSessionManagementAction(Request $request){
-        Stripe\Stripe::setApiKey('sk_test_51HZHYgHmuPtR98gqv3rds5W4VXvscTazOlR2lSbIN0xLH2vTrRan4RhhNKhaBzBpyxBxTjO27z5WJwVJEfowFwm500MTz3e2ob');
+        Stripe\Stripe::setApiKey('sk_test_51Hn5ftLU0XoF52vKQ1r5r1cONYas5XjLLZu6rFg2P69nntllHxLs3G0wyCxoOQNUgjgD5LwCoaYTkGQp1qVK3g3A00LfW1k4Ep');
 
         $session = \Stripe\Checkout\Session::create([
             'payment_method_types' => ['card'],
@@ -365,10 +388,9 @@ class SettingsController extends MasterController
 
         $em = $this->em;
         $currentUser = $this->user;
-        Stripe\Stripe::setApiKey('sk_test_51HZHYgHmuPtR98gqv3rds5W4VXvscTazOlR2lSbIN0xLH2vTrRan4RhhNKhaBzBpyxBxTjO27z5WJwVJEfowFwm500MTz3e2ob');
+        Stripe\Stripe::setApiKey('sk_test_51Hn5ftLU0XoF52vKQ1r5r1cONYas5XjLLZu6rFg2P69nntllHxLs3G0wyCxoOQNUgjgD5LwCoaYTkGQp1qVK3g3A00LfW1k4Ep');
         $body =  json_decode(file_get_contents('php://input'), true);
         $stripe = $this->stripe;
-
 
         $priceId = $body['priceId'];
         $customer = $this->org->getCustomerId();
@@ -436,7 +458,7 @@ class SettingsController extends MasterController
             ['metadata' => ['sub_id' => $subscription->id,
                 'quantity' => $body['quantity']]]
         );
-        dd($cust);
+
         $org->setCustomerId($customer);
 
         $em->flush();
@@ -456,23 +478,39 @@ class SettingsController extends MasterController
     public function createSubscriptionManagementAction(Request $request){
 
         $em = $this->em;
+        $repoO = $em->getRepository(OrganizationPaymentMethod::class);
+        $paymentList = $this->org->getPaymentMethods();
         $currentUser = $this->user;
-        Stripe\Stripe::setApiKey('sk_test_51HZHYgHmuPtR98gqv3rds5W4VXvscTazOlR2lSbIN0xLH2vTrRan4RhhNKhaBzBpyxBxTjO27z5WJwVJEfowFwm500MTz3e2ob');
+        Stripe\Stripe::setApiKey('sk_test_51Hn5ftLU0XoF52vKQ1r5r1cONYas5XjLLZu6rFg2P69nntllHxLs3G0wyCxoOQNUgjgD5LwCoaYTkGQp1qVK3g3A00LfW1k4Ep');
         $body =  json_decode(file_get_contents('php://input'), true);
         $stripe = $this->stripe;
         $priceIdStandard = ['price_1HZI3OHmuPtR98gq5OOPo6TX','price_1HZI3OHmuPtR98gqQ7DRFCEV','price_1HZHxfHmuPtR98gqhiyljbWj'];
         $priceIdPrenium = ['price_1HZI0THmuPtR98gq67btxwid','price_1HZI0THmuPtR98gqGKyedIG3','price_1HZI0THmuPtR98gqJNEUSfTq'];
-        $priceStandard = ["5","6","7"];
-        $pricePrenium = ["7","10","14"];
-        if($body['product'] == "prenium"){
+        $priceStandard = ["7","6","5"];
+        $pricePrenium = ["14","10","7"];
+        $period = ($body['period'] == "year") ? 10 : 1;
+        $quantity =  (int) $body['quantity'];
+        $priceTblStandardNew = [7*$quantity*$period,6*$quantity*$period,5*$quantity*$period];
+        $priceTblPremiumNew = [14*$quantity*$period,10*$quantity*$period,7*$quantity*$period] ;
+        if ($quantity < 99) {
+            $index = 0;
+        } else if ($quantity < 249) {
+            $index = 1;
+        } else {
+            $index = 2;
+        }
+
+        if($body['product'] == "premium"){
             $mainPriceId = $priceIdPrenium ;
             $mainPrice = $pricePrenium ;
-            $mainProd = 'prod_I9bCKiT9lhzxBW';
+            $mainPriceBase = $pricePrenium[$index];
+            $mainProd = 'prod_IPHWR3lzuAWWsL';
 
         } else {
             $mainPriceId = $priceIdStandard ;
             $mainPrice = $priceStandard ;
-            $mainProd = 'prod_I9b9NedY9kjwWr';
+            $mainPriceBase = $priceStandard[$index];
+            $mainProd = 'prod_IPHWDsnMYL3UFB';
 
         }
 
@@ -486,7 +524,7 @@ class SettingsController extends MasterController
         }*/
         $customer = $this->org->getCustomerId();
         $cust = Stripe\Customer::retrieve($customer);
-        $paymentm = ($body['paymentMethodId'] == " ") ? $cust->invoice_settings->default_payment_method : $body['paymentMethodId'];
+        $paymentm = ($body['paymentMethodId'] == " ") ? $paymentList[(int)$body['paymentMethodId']]->getPmid() : $body['paymentMethodId'];
 
         $priceResponse = $stripe->prices->create([
             'unit_amount' => $body['priceId']*100,
@@ -515,8 +553,20 @@ class SettingsController extends MasterController
         // Set the default payment method on the customer
 
             $pm = $cust->metadata->payment_method;
-            $pm = ($pm == null)  ? array() : $cust->metadata->payment_method;
+            $find = false;
+            for($p = 1 ; $p< sizeof($paymentList);$p++) {
 
+                if($paymentList[$p]->getPmId() == $paymentm){
+                    $find= true;
+                }
+
+            }
+            if(!$find){
+                $payment_object = new OrganizationPaymentMethod();
+                $payment_object->setPmId($paymentm);
+                $this->org->addPaymentMethods($payment_object);
+            }
+            var_dump(sizeof($this->org->getPaymentMethods()));
           //  $payList = array_push($pm,$paymentm);
 
 
@@ -526,25 +576,33 @@ class SettingsController extends MasterController
             ],
 
         ]);
+            try{
      if( $cust->metadata->sub_id != null) {
-         $cancel = $this->stripe->subscriptions->cancel(
-             $cust->metadata->sub_id,
 
-             );
-     }
+     } } catch (Exception $e){
+
+            }
 
 
 
         $subscription = $this->stripe->subscriptions->create([
             'customer' => $customer,
+            "collection_method" => "send_invoice",
             'items' => [
                 [
                     'price' => $priceId,
 
                 ],
             ],
+            "days_until_due" => 1,
             'expand' => ['latest_invoice.payment_intent'],
         ]);
+        $invoice =$this->stripe->invoices->all(['subscription' => $subscription->id])->data[0];
+      $invoice= $this->stripe->invoices->sendInvoice($invoice->id,
+            []
+        );
+      $pdf = $invoice->invoice_pdf;
+
 
         $p = $this->stripe->products->retrieve(
             $subscription->items->data['0']->price->product
@@ -561,16 +619,21 @@ class SettingsController extends MasterController
         }
         $cust = $this->stripe->customers->update(
             $customer,
-            ['metadata' => ['sub_id' => $subscription->id,'quantity' => $body['quantity']]]
+            ['metadata' => ['sub_id' => $subscription->id,'quantity' => $body['quantity'], 'priceInit' => $mainPriceBase]]
         );
 
+        $sub = Stripe\Subscription::update(
+            $subscription->id,
+            ['metadata' => ['pdf' => $pdf,
+                'quantity' => $body['quantity']]
+        ]);
         $org->setCustomerId($customer);
 
         $em->flush();
 
 
 
-        return new JsonResponse($p, 200);
+        return new JsonResponse((string)$pdf, 200);
     }
 
     /**
@@ -592,11 +655,96 @@ class SettingsController extends MasterController
 
         );
         $em = $this->em;
-        $organization->setPlan(3);
+        $sub =$this->stripe->subscriptions->all(['customer' => $custId]);
+        if(sizeof($sub->data)==0) {
+            $organization->setPlan(3);
+        }
         $em->flush();
         return new JsonResponse($cust->metadata->sub_id, 200);
     }
+    /**
+ * @param Request $request
+ * @return mixed
+ * @Route("/cancel-card", name="cancelCard")
+ * @throws Stripe\Exception\ApiErrorException
+ */
+    public function cancelCardManagementAction(Request $request){
+        $em = $this->em;
+        $cards = $this->org->getPaymentMethods();
+        $id = $request->get('data');
+        $this->org->removePaymentMethods($cards[(int) $id ]);
+        $em->remove($cards[(int) $id ]);
+        $em->flush();
+        return new JsonResponse(sizeof($cards), 200);
+    }
+    /**
+     * @param Request $request
+     * @return mixed
+     * @Route("/min-user-subscription", name="minUser")
+     * @throws Stripe\Exception\ApiErrorException
+     */
+    public function minUserSubscriptionAction(Request $request){
+        $em = $this->em;
+        $custid = $this->org->getCustomerId();
+        $cust = Stripe\Customer::retrieve(
+            $custid
+        );
 
+       $sub = Stripe\Subscription::retrieve(
+            $cust->metadata->sub_id,
+        );
+        $price = Stripe\Price::retrieve(
+            $sub->plan->id,
+            );
+
+       $price =  Stripe\Price::create(
+           ['unit_amount' => ($price->unit_amount - ($cust->metadata->priceInit*100)),
+            'currency' => 'eur',
+            'recurring' => ['interval' => $price->recurring->interval],
+            'product' =>  $price->product,]
+           );
+
+       $sub = Stripe\Subscription::update(
+           $cust->metadata->sub_id,
+           ['cancel_at' => $sub->current_period_end ]
+
+       );
+       dd("test");
+       $newSub = Stripe\Subscription::create(
+           $cust->metadata->sub_id,
+           ['cancel_at' => $sub->current_period_end ]
+
+       );
+       dd($sub->plan->amount);
+        $cust = Stripe\Customer::update(
+            $custid,
+            ['metadata' => ['quantity' => (((int)$cust->metadata->quantity)-1)]]
+        );
+        $id = $cust->metadata->sub_id;
+
+        return new JsonResponse((((int)$cust->metadata->quantity)-1), 200);
+    }
+    /**
+     * @param Request $request
+     * @return mixed
+     * @Route("/plus-user-subscription", name="plusUser")
+     * @throws Stripe\Exception\ApiErrorException
+     */
+    public function plusUserSubscriptionAction(Request $request){
+        $em = $this->em;
+        $custid = $this->org->getCustomerId();
+        $cust = Stripe\Customer::retrieve(
+            $custid
+        );
+
+        $cust = Stripe\Customer::update(
+            $custid,
+            ['metadata' => ['quantity' => (((int)$cust->metadata->quantity)+1)]]
+        );
+        $id = $cust->metadata->sub_id;
+
+        return new JsonResponse((((int)$cust->metadata->quantity)+1), 200);
+    }
         /**
      * @param Request $request
      * @param Application $app
