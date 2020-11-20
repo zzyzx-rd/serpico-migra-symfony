@@ -1,7 +1,7 @@
 //$(function() {
     $('.modal').modal();
 
-    const $upgradeModal = $('#upgradeAccount');
+    var $upgradeModal = $('#upgradeAccount');
     if($upgradeModal.length){
         $upgradeModal.modal({
             dismissible: false,
