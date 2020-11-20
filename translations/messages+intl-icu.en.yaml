@@ -2312,14 +2312,16 @@ activity_elements:
       insert_document: Share document
       insert_comment: Provide description/comment
       eventType: Update type
-      manage_dates: Manage dates
       notify_participants: Participants notification
       notify_all_articipants: Notify all
-      onset_date: Occurence
+    dates:
+      manage_dates: Manage dates
+      onset_date: Occurence date
       resolution_date: Resolution
       provide_onset_date: Provide an onset date
-      exp_res_date: Expected resolution date
-      provide_exp_res_date: Provide an expected resolution date
+      exp_res_date: Finalization date
+      provide_exp_res_date: Provide a finalization date
+
     tooltip:
       shared_document: Shared document
       comment: Comment

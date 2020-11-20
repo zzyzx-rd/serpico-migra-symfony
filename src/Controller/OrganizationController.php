@@ -7264,7 +7264,7 @@ class OrganizationController extends MasterController
      * Gets current data of related stage
      * @Route("/organization/stage/dates/update", name="updateStageDates")
      */
-    public function updateStageDates(Request $request){
+    public function updateStageDates(Request $request, NotificationManager $notificationManager){
         $stgId = $request->get('id');
         $startdateStr = $request->get('sd');
         $enddateStr = $request->get('ed');
@@ -7273,11 +7273,72 @@ class OrganizationController extends MasterController
         $em = $this->em;
         /** @var Stage */
         $stage = $em->getRepository(Stage::class)->find($stgId);
-        $stage->setStartdate($startdate)
-            ->setEnddate($enddate);
-        $em->persist($stage);
+        if($stage->getStartdate() != $startdate && $stage->getEnddate() != $enddate){
+            $property = 'startdate';
+        } else if ($stage->getStartdate() == $startdate && $stage->getEnddate() != $enddate){
+            $property = 'enddate';
+        }
+
+        if($property){
+
+            $stage->setStartdate($startdate)
+                ->setEnddate($enddate);
+            $notificationManager->registerUpdates($stage, ElementUpdate::CHANGE, $property);
+            $em->persist($stage);
+            $em->flush();
+        }
+        return new JsonResponse(['msg' => 'success'], 200);
+    }
+
+    /**
+     * Gets current data of related stage
+     * @Route("/organization/event/dates/update", name="updateEventDates")
+     */
+    public function updateEventDates(Request $request, NotificationManager $notificationManager){
+        $em = $this->em;
+        $evtId = $request->get('id');
+        $onsetDateStr = $request->get('sd');
+        $expResStr = $request->get('ed');
+        $stgId = $request->get('sid');
+        $evtTypeId = $request->get('evtid');
+        $onsetDate = new DateTime($onsetDateStr);
+        $expResDate = $expResStr ? new DateTime($expResStr) : null;
+        if(!$evtId){
+            /** @var Stage */
+            $stage = $em->getRepository(Stage::class)->find($stgId);
+            $eventType = $em->getRepository(EventType::class)->find($evtTypeId);
+            $event = new Event;
+            $event->setEventType($eventType)
+               ->setOnsetDate($onsetDate)
+               ->setExpResDate($expResDate)
+               ->setOrganization($this->org)
+               ->setCreatedBy($this->user->getId());
+            $stage->addEvent($event);
+            $notificationManager->registerUpdates($event, ElementUpdate::CREATION);
+
+        } else {
+            /** @var Event */
+            $event = $em->getRepository(Event::class)->find($evtId);
+            $stage = $event->getStage();
+            if($event->getOnsetDate() != $onsetDate && $expResDate == $event->getExpResDate()){
+               $property = 'onsetDate';
+            } else if ($event->getOnsetDate() == $onsetDate && $expResDate != $event->getExpResDate()){
+                $property = 'expResDate';
+            } else if ($event->getOnsetDate() != $onsetDate && $expResDate != $event->getExpResDate()){
+                $property = 'dates';
+            }
+
+            if($property){
+                $event->setOnsetDate($onsetDate)
+                    ->setExpResDate($expResDate);
+                $notificationManager->registerUpdates($event, ElementUpdate::CHANGE, $property);
+            }
+        }
+       
+        $em->persist($event);
         $em->flush();
         return new JsonResponse(['msg' => 'success'], 200);
+        
     }
 
     /**
@@ -7376,7 +7437,7 @@ class OrganizationController extends MasterController
                 }
             }
             $partData['synth'] = $isSynthetic;
-            $partData['picture'] = $isSynthetic ? '/lib/img/org/no-picture.png' : ($user->getPicture() ?: '/lib/img/user/no-picture.png');
+            $partData['picture'] = $isSynthetic ? '/lib/img/org/no-picture.png' : ($user->getPicture() ? '/lib/img/user/'.$user->getPicture() : '/lib/img/user/no-picture.png');
             $data['participants'][] = $partData;
         }
         
@@ -7396,7 +7457,7 @@ class OrganizationController extends MasterController
         $event = $em->getRepository(Event::class)->find($eveId);
         $data['sid'] = $event->getStage()->getId();
         $data['sname'] = $event->getStage()->getName();
-        $data['type'] = $event->getEventType()->getId();
+        $data['type'] = $event->getEventType()->getEName()->getId();
         $data['group'] = $event->getEventType()->getEventGroup()->getEventGroupName()->getId();
         $data['odate'] = $event->getOnsetDate();
         $data['expResDate'] = $event->getExpResDate();

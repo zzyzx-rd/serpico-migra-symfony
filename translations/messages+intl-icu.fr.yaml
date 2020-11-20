@@ -2423,15 +2423,16 @@ activity_elements:
       insert_document: Partager un document
       insert_comment: Commentaire/Description
       eventType: Type d'update
-      manage_dates^: Gestion des dates
       notify_participants: Notification des participants
       notify_all_articipants: Notifier tous les participants
-      onset_date: Survenance
-      resolution_date: Fin
       dates_mgt: Gestion des dates
+    dates:
+      manage_dates: Gérer les dates
+      onset_date: Date de survenance
+      resolution_date: Fin
       provide_onset_date: Indiquer une date de survenance
       exp_res_date: Date de résolution espérée
-      provide_exp_res_date: Indiquer une date de résolution espérée
+      provide_exp_res_date: Indiquer une date de finalisation
     tooltip:
       shared_document: document
       comment: commentaire

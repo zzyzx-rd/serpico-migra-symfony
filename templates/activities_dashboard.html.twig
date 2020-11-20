@@ -77,6 +77,7 @@
     var ddocurl = "{{ url('deleteDocument', {id: 0}) }}";
     var dpurl = "{{ url('deleteParticipant',{entity: 'activity', stgId: 0, elmtId: 0}) }}";
     var usdurl = "{{ url('updateStageDates') }}";
+    var uedurl = "{{ url('updateEventDates') }}";
     var udturl = "{{ url('updateDocumentTitle') }}";
     var udcurl = "{{ url('updateDocumentContent') }}";
     var usnurl = "{{ url('updateStageName') }}";
@@ -993,7 +994,7 @@
         text-align:center;
       }
 
-      #updateEvent .btn-flat, .doc-name-validate, .doc-upload-validate, .s-name-validate, .com-validate{
+      #updateEvent .btn-flat, .doc-name-validate, .doc-upload-validate, .s-name-validate, .com-validate, .dates-validate{
         height: 25px;
         line-height: 25px;
       }
@@ -1151,7 +1152,23 @@
         font-size: 15px;
         font-weight: 700;
       }
+
+      .e-set-exp-res-date{
+        font-size:13px;
+        text-align: end;
+        margin-bottom:0.5rem;
+        cursor: pointer;
+      }
       
+      .event-dates-content{
+        display:flex;
+        flex-wrap:wrap;
+        align-items:flex-end;
+      }
+
+      .e-dates-btn i{
+        font-size:1.2rem;
+      }
 
   </style>
 {% endblock %}
@@ -2594,6 +2611,7 @@
       <div id="updateEvent" class="modal">
         <div class="modal-content">
           {{ form_start(eventForm, {attr: {autocomplete: "off"}}) }}
+              {% set event = eventForm.vars.data %}
 
               <header class="flex-center-sb">
                 <h5 style="display:inline-block">
@@ -2647,44 +2665,46 @@
               </div>
               #}
 
-              <div class="no-margin flex-center-sb e-dates-header">
-                <div>
-                  <i class="fa fa-clock"></i>
-                  {% set occurenceDate = eventForm.vars.data is null ? date('now')|format_datetime('short', 'none', pattern='dd/MM') : eventForm.vars.data.onsetDate|format_datetime('short', 'none', pattern='dd/MM') %}
-                  <span class="dd-text">{{ 'activity_elements.events.add_event.onset_date'|trans|capitalize }}</span><span class="sm-left sm-right">:</span><span class="date-choice">{{ occurenceDate }} </span>  
-                  {% if not eventForm.vars.data is null and eventForm.vars.data.expResDate is null %}
-                    {% set resolutionDate = eventForm.vars.data.onsetDate|format_datetime('short', 'none', pattern='dd/MM') %}
-                    <span class="dd-text">{{ 'activity_elements.events.add_event.resolution_date'|trans|capitalize }}</span><span class="sm-left sm-right">:</span><span class="date-choice">{{ resolutionDate }} </span> 
-                  {% endif %}
+              <div class="no-margin">
+                <div class="e-dates-header flex-center-sb">
+                  <div>
+                    <i class="fa fa-clock"></i>
+                    {% set occurenceDate = event is null ? date('now')|format_datetime('short', 'none', pattern='dd/MM') : event.onsetDate|format_datetime('short', 'none', pattern='dd/MM') %}
+                    {% set isExpResDate = event is not null and event.expResDate is not null %}
+                    <span class="dd-text">{{ 'activity_elements.events.dates.onset_date'|trans|capitalize }}</span><span class="sm-left sm-right">:</span><span class="date-choice e-odate">{{ occurenceDate }} </span>  
+                    
+                    {% if isExpResDate %}
+                      {% set resolutionDate = event.onsetDate|format_datetime('short', 'none', pattern='dd/MM') %}
+                      <span class="dd-text">{{ 'activity_elements.events.dates.resolution_date'|trans|capitalize }}</span><span class="sm-left sm-right">:</span><span class="date-choice e-rdate">{{ resolutionDate }} </span> 
+                    {% endif %}
+                  </div>
+                  <div class="btn-flat dd-orange-text btn-e-update e-dates-btn tooltipped" data-tooltip="{{ 'activity_elements.events.dates.manage_dates'|trans }}">
+                      <i class="fa fa-pen"></i>
+                  </div>
                 </div>
-              
-
-                {#
-                <a class="event-dates-header flex-center">
-                  <i class="fa fa-calendar-alt sm-right"></i>
-                  <span>{{'activity_elements.events.add_event.manage_dates'|trans}}</span>
-                </a>
-                #}
-                <div class="event-dates-content" style="display:none">
-                  <div class="col m12 s12 onset-date-elmt">
-                      <div class="element-data">
-                        <i class="fa fa-clock"></i>
-                        <span>{{'activity_elements.events.add_event.onset_date'|trans }}</span>
-                      </div>
-                      <div class="element-input" style="display:none">
+                <div class="row flex-center event-dates-content" style="display:none">
+                  <div class="col m5 s12 onset-date-elmt">
+                      <div class="element-input">
                         {{ form_label(eventForm.onsetDate) }}
                         {{ form_widget(eventForm.onsetDate) }}
                       </div>
                   </div>
-                  <div class="col m12 s12 exp-res-date-elmt">
-                      <div class="element-data">
-                        <i class="fa fa-clock"></i>
-                        <span>{{'activity_elements.events.add_event.exp_res_date'|trans }}</span>
-                      </div>
-                      <div class="element-input" style="display:none">
+                  <div class="col m6 s12 exp-res-date-elmt">
+                      <div class="element-input" {% if not isExpResDate %}style="display:none"{% endif %}>
                         {{ form_label(eventForm.expResDate) }}
                         {{ form_widget(eventForm.expResDate) }}
                       </div>
+                      {% if not isExpResDate %}
+                        <div class="e-set-exp-res-date">
+                          <i class="dd-text fa fa-pen"></i>
+                          <span>{{'activity_elements.events.dates.provide_exp_res_date'|trans}}</span>
+                        </div>
+                      {% endif %}
+                  </div>
+                  <div class="col m1 s12">
+                    <div class="btn e-dates-validate btn-reduced-padding">
+                      <i class="material-icons">check</i>
+                    </div>
                   </div>
                 </div>
               </div>

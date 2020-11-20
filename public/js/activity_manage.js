@@ -201,7 +201,7 @@ $('#eventGSelector').on('change',function(){
 
 
 
-function updateEvents($evgnId = null, $evtId = null) {
+function updateEvents($evgnId = null, $evnId = null) {
   $evgSelect = $('#eventGSelector');
   $evtSelect = $('[id*="eventType"]');
   $evgId = null;
@@ -222,8 +222,9 @@ function updateEvents($evgnId = null, $evtId = null) {
         $evtSelect.append(`<option data-evnid="${e.evnId}" value="${e.id}">${e.name}</option>`);
       })
 
-      if($evtId){
-        $evtSelect.val($evtId);
+      if($evnId){
+        $consideredOption = $evtSelect.find(`option[data-evnid="${$evnId}"]`);
+        $consideredOption.prop('selected',true);
       }
 
       $stylizableSelects.material_select();
@@ -1338,7 +1339,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
     $('.s-dates-row').show();
   })
 
-  $(document).on('click','.dates-validate',function(){
+  $(document).on('click','.s-dates-validate',function(){
     const $this = $(this);
     const $modal = $this.closest('.modal');
     const $outputOptions = { month: 'numeric', day: 'numeric'};
@@ -1354,6 +1355,31 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         $('.s-elmt-date').empty().append(new Date(sdStr).toLocaleString(loc,$outputOptions));
         $('.e-elmt-date').empty().append(new Date(edStr).toLocaleString(loc,$outputOptions));
         $('.s-elmt-dates').show();
+      })
+  });
+
+  $(document).on('click','.e-dates-validate',function(){
+    const $this = $(this);
+    const $modal = $this.closest('.modal');
+    const $outputOptions = { month: 'numeric', day: 'numeric'};
+    const loc = `${lg}-${lg.toUpperCase()}`;
+    const sdStr = $modal.find('.dp-start').val().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const edStr = $modal.find('.dp-end').val().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    const sd = new Date(sdStr).toLocaleString('en-EN',$sentDatesOptions);
+    const ed = new Date(edStr).toLocaleString('en-EN',$sentDatesOptions);
+    const sid = $modal.find('.fa-external-link-alt').data('id');
+    const evtid = $('#updateEvent').data('id');
+    const $params = {id: $modal.attr('data-id'), sd: sd, ed: ed, sid: sid, evtid: evtid}  
+    $.post(uedurl,$params)
+      .done(function(data){
+        location.reload();
+        $('.s-dates-row').hide();
+        $('.e-odate').empty().append(new Date(sdStr).toLocaleString(loc,$outputOptions));
+        if(edStr != ""){
+          $('.e-rdate').empty().append(new Date(edStr).toLocaleString(loc,$outputOptions));
+        }
+        $('.event-dates-content').hide();
+        $('.e-dates-header').show();
       })
   });
 
@@ -1406,12 +1432,28 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         'data-tooltip' : $(this).attr('data-sid') ? evtAccStgMsg : evtAccActMsg,   
       }).tooltip();
       updateEvents();
+      $modal.find('.dp-start').pickadate('picker')
+          .set('select',new Date())
+          .set('min', new Date(parseInt($(`.stage-element[data-id="${$(this).attr('data-sid')}"]`).data('sd')) * 1000));
+      $modal.find('.e-dates-header').show();
+      $modal.find('.event-dates-content').hide();
       //$('.event-element-name').empty().append($(this).closest('.act-info').find('.act-info-name').text());
       $('.update-event-btn').attr('data-aid',$(this).attr('data-aid'));
       $('.update-event-btn').attr('data-sid',$(this).attr('data-sid'));
       $('.update-event-btn').attr('data-ms',$(this).attr('data-ms'));
       $('.update-event-btn').attr('data-eid',$(this).hasClass('btn-floating') ? 0 : $(this).attr('data-eid'));
     }
+  })
+
+  $('.e-set-exp-res-date').on('click',function(){
+    $(this).parent().find('.element-input').show();
+    $(this).hide();
+  });
+
+  $('.e-dates-btn').on('click',function(){
+    const $modal = $(this).closest('.modal');
+    $modal.find('.e-dates-header').hide();
+    $modal.find('.event-dates-content').show();
   })
 
   $('.add-e-document, .add-e-comment').on('click',function(e){
@@ -1539,7 +1581,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
   })
 
   $(document).on('click','.e-selectable',function(){
-    
+    const options = { month: 'numeric', day: 'numeric' };
     if($(this).hasClass('e-multiple-events')){
       $(this).removeClass('e-selectable');
     }
@@ -1553,6 +1595,14 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         $modal = $("#updateEvent");
         $modal.find('.btn-e-update, .e-create').hide();
         $modal.find('.btn-e-modify').show();
+        $modal.find('.dp-start').pickadate('picker')
+          .set('select',new Date(data.odate.date))
+          .set('min', new Date(parseInt($(`.stage-element[data-id="${data.sid}"]`).data('sd')) * 1000));
+        $modal.find('.e-odate').empty().append(new Date(data.odate.date).toLocaleDateString(lg+'-'+lg.toUpperCase(),options));
+        if(data.rdate){
+          $modal.find('.dp-end').pickadate('picker').set('select',new Date(data.rdate.date));
+          $modal.find('.e-rdate').empty().append(new Date(data.rdate.date).toLocaleDateString(lg+'-'+lg.toUpperCase(),options));
+        }
         if(data.documents){
           $modal.find('.documents-number').empty().append(data.documents.length);
         } else {
@@ -1835,7 +1885,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
 
   $(document).on('mouseover','.e-dates-header, .e-documents-header, .e-comments-header, .e-comment',function(){
     var $modal = $(this).closest('.modal');
-    if(!$modal.attr('data-id') || $modal.attr('data-id') && !$modal.find('input:visible,textarea:visible').length){
+    if(!$modal.attr('data-id') || $modal.attr('data-id') && !$modal.find('input:not(.select-dropdown):visible,textarea:visible').length){
       $(this).find('.btn-e-update').show();
     }
   }).on('mouseleave','.e-dates-header, .e-documents-header, .e-comments-header, .e-comment',function(){  
