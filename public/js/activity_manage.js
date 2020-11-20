@@ -47,7 +47,7 @@ $('#createStage').modal({
   }
 })
 
-$('#createParticipant').modal();
+$('#createParticipant, #deleteParticipant').modal();
 
 function initPickates(){
   switch(lg){
@@ -1242,6 +1242,25 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
   });
 
   $('[href="#createStage"]').on('click',function(){
+    const $modal = $('#createStage');
+    if($modal.data('id')){
+      $modal.removeAttr('data-id');
+      $modal.find('.participants-list--item').each(function(i,e){
+        $(e).remove();
+      })
+      $modal.find('.btn-participant-add').show();
+      $modal.find('.events-list').empty();
+      $modal.find('.nb-events').empty();
+      $modal.find('.events').hide();
+      $modal.find('.s-name').empty().append($modal.find('.s-name').data('create'));
+      $modal.find('.s-elmt-dates').empty();
+      $modal.find('.s-name-input input').val("");
+      $modal.find('.s-name-input').show();
+      $modal.find('.s-dates-row .dp-start').pickadate('picker').set('select',new Date());
+      $modal.find('.s-dates-row .dp-end').pickadate('picker').set('select',new Date()).set('min',new Date());
+      $modal.find('.nb-participants').empty().append('(1)');
+      $modal.find('.s-dates-row').show();
+    }
     if(!$('.setup-activity').find('.fa-cog').length){
       $('.setup-activity').prepend('<i class="fa fa-cog sm-right"></i>')/*.append('<i class="fa fa-question-circle sm-left"></i>')*/;
     }
@@ -1301,8 +1320,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
           $partElmt.find('.selected-participant-logo').attr('src', p.picture);
           $partElmt.find('.participant-btn').attr({
             'data-tooltip' : p.fullname + (p.synth ? ' (' + synthSuffix + ')' : ''),
-            'data-pid' : p.id,
-          }).addClass('existing deletable modal-trigger').attr('href','#deleteParticipant').append('<div class="p-delete-overlay flex-center" style="display:none;"><i class="fa fa-trash"></i></div>').show();
+          }).addClass('existing deletable').append(`<div class="p-delete-overlay modal-trigger flex-center" href="#deleteParticipant" data-pid="${p.id}" style="display:none;"><i class="fa fa-trash"></i></div>`).show();
           $partElmt.find('.tooltipped').tooltip();
           $partHolder.prepend($partElmt);
         })
@@ -2433,6 +2451,9 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
   })
 
   $(document).on('click','.participant-btn:not(.existing)',function(e){
+    if($('.participant-field-zone:visible').length){
+      return false;
+    }
     const $this = $(this);
     const $partHolder = $this.closest('.participants-list--item');
     $partHolder.addClass('edit');
@@ -2505,10 +2526,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         $.post(apurl,$params)
           .done(function(data){
             $partElmt.removeClass('edit');
-            $partElmt.find('.participant-btn').addClass('existing deletable modal-trigger').attr({
-              'href' : '#deleteParticipant',
-              'data-pid' : data.pid
-            }).append('<div class="p-delete-overlay flex-center" style="display:none;"><i class="fa fa-trash"></i></div>').show();
+            $partElmt.find('.participant-btn').addClass('existing deletable').append(`<div class="p-delete-overlay modal-trigger flex-center" href="#deleteParticipant" style="display:none;" data-pid="${data.pid}"><i class="fa fa-trash"></i></div>`).show();
             $partElmt.find('.participant-field-zone').hide(); 
           })    
       }
@@ -2587,10 +2605,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
           directInsert(type = data.type, id = data.uid, tn = data.tn, fn = data.fn, pic = data.pic, secId = data.euid);
           if(data.pid){
             const $partElmt = $('.participants-list--item').last();
-            $partElmt.find('.participant-btn').addClass('existing deletable modal-trigger').attr({
-              'href' : '#deleteParticipant',
-              'data-pid' : data.pid
-            }).append('<div class="p-delete-overlay flex-center" style="display:none;"><i class="fa fa-trash"></i></div>').show();
+            $partElmt.find('.participant-btn').addClass('existing deletable').append(`<div class="p-delete-overlay flex-center modal-trigger" href="#deleteParticipant" style="display:none;" data-pid="${data.pid}"><i class="fa fa-trash"></i></div>`).show();
           }
           $('#createStage').find('.red-text').remove();
           $('#interactPart, #legalPerson, #createParticipant').modal('close');

@@ -2221,7 +2221,7 @@
           <div class="modal-content">
             <div class="flex-center-sb modal-title">
               <div class="s-title-zone flex-center">
-                <h5 class="s-name">{{'activities.create.modal_title'|trans}}</h5>
+                <h5 class="s-name" data-create="{{'activities.create.modal_title'|trans}}">{{'activities.create.modal_title'|trans}}</h5>
                 <span class="s-name-update btn-s-update" style="display:none"><i class="m-left fa fa-pen dd-orange-text"></i></span>
               </div>
               {% if is_granted('ROLE_ENTREPRISE') %}
@@ -2237,7 +2237,7 @@
               <div class="s-elmt-dates"></div>
             </div>
             
-            <div class="input-field">
+            <div class="s-name-input input-field">
             {{form_label(newActivityForm.name)}}
             {{form_widget(newActivityForm.name)}}
             </div>
