@@ -142,12 +142,16 @@ function dTrans($elmts, $entity, $prop){
     })
 }
 
-$('.dp-start').on('change',function(){
-  const $selectedDate = $(this).pickadate('picker').get('select');
+$('.dp-start, .dp-end').on('change',function(){
+  const $cal = $(this);
+  const $selectedDate = $cal.pickadate('picker').get('select');
   const $modal = $(this).closest('.modal');
-  $relatedEndCal = $modal.find('.dp-end');
-  if($relatedEndCal.pickadate('picker').get('min').pick > $selectedDate.pick){
-    $relatedEndCal.pickadate('picker').set('min',new Date($selectedDate.pick))
+  if($cal.hasClass('dp-start')){
+    $relatedEndCal = $modal.find('.dp-end');
+    $relatedEndCal.pickadate('picker').set('min', new Date($selectedDate.pick))
+  } else {
+    $relatedStartCal = $modal.find('.dp-start');
+    $relatedStartCal.pickadate('picker').set('max', new Date($selectedDate.pick))
   }
 })
 

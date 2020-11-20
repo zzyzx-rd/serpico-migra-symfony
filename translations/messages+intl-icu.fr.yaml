@@ -154,7 +154,7 @@ updates:
             {type, select, 
               partial_payment         {{author} a procédé à un <span class="strong">paiement partiel</span> pour {actElmtMsg}}
               full_payment            {{author} a procédé au <span class="strong">paiement intégral</span> pour {actElmtMsg}}
-              paiement                {{author} a procédé au <span class="strong">paiement</span> pour {actElmtMsg}}
+              payment                 {{author} a procédé au <span class="strong">paiement</span> pour {actElmtMsg}}
               partial_reimbursement   {{author} a procédé au <span class="strong">remboursement partiel</span> pour {actElmtMsg}}
               full_reimbursement      {{author} a procédé au <span class="strong">remboursement intégral</span> pour {actElmtMsg}}
               reimbursement           {{author} a procédé au <span class="strong">remboursement</span> pour {actElmtMsg}}
@@ -163,18 +163,18 @@ updates:
           }
           information {
             {type, select, 
-              feedback                {{author} vous a donné un <span class="strong">feedback</span> pour {actElmtMsg}}
-              additional_delay        {{author} vous informe de <span class="strong">délai éventuels</span> pour {actElmtMsg}}
-              changes                 {{author} vous informe de <span class="strong">changements</span> pour {actElmtMsg}}
-              info_needed             {{author} vous informe qu'il aurait besoin d'<span class="strong">informations supplémentaires</span> pour {actElmtMsg}}
-              other                   {Fallback problem}
+              feedback                        {{author} vous a donné un <span class="strong">feedback</span> pour {actElmtMsg}}
+              possible_delay                  {{author} vous informe de <span class="strong">délais éventuels</span> pour {actElmtMsg}}
+              changes                         {{author} vous informe de <span class="strong">changements</span> pour {actElmtMsg}}
+              additional_information_needed   {{author} vous informe qu'il aurait besoin d'<span class="strong">informations supplémentaires</span> pour {actElmtMsg}}
+              other                           {Fallback problem}
             }
           }
           other {Fallback problem}
         }    
       }
-      event_document  {{author} a {updateLevel} document <span class="strong">{docName}</span> pour {actElmtMsg}}
-      event_comment   {{author} a {updateLevel} <span class="strong">commentaire</span> pour {actElmtMsg}}
+      event_document  {{author} a {updateLevel} un document <span class="strong">{docName}</span> pour {actElmtMsg}}
+      event_comment   {{author} a {updateLevel} un <span class="strong">commentaire</span> pour {actElmtMsg}}
       other {Fallback problem}
     }
 

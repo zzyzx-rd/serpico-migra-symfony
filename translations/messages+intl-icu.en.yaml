@@ -161,18 +161,18 @@ updates:
           }
           information {
             {type, select, 
-              feedback                {{author} has given you some feedback for {actElmtMsg}}
-              additional_delay        {{author} informs you of some possible delay for {actElmtMsg}}
-              changes                 {{author} informs you of some changes for {actElmtMsg}}
-              info_needed             {{author} informs you he may need additional info for {actElmtMsg}}
-              other                   {Fallback problem}
+              feedback                        {{author} has given you some feedback for {actElmtMsg}}
+              possible_delay                  {{author} informs you of some possible delay for {actElmtMsg}}
+              changes                         {{author} informs you of some changes for {actElmtMsg}}
+              additional_information_needed   {{author} informs you he may need additional info for {actElmtMsg}}
+              other                           {Fallback problem}
             }
           }
           other {Fallback problem}
         }    
       }
-      event_document {{author} has {updateLevel} document {docName} for {actElmtMsg}}
-      event_comment {{author} has {updateLevel} comment for {actElmtMsg}}
+      event_document {{author} has {updateLevel} a document {docName} for {actElmtMsg}}
+      event_comment {{author} has {updateLevel} a comment for {actElmtMsg}}
       other {Problem here}
     }
 
