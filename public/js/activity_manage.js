@@ -1303,8 +1303,13 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         $modal.find('.s-name').empty().append(data.name);
         $modal.find('input[name*="name"]').closest('.input-field').hide();
         $modal.find('.s-elmt-dates').empty().append(`<i class="fa fa-calendar"></i><span class="sm-left s-elmt-date">${new Date(data.sdate.date).toLocaleDateString(lg+'-'+lg.toUpperCase(),options)}</span><span class="sm-right sm-left">-</span><span class="e-elmt-date">${new Date(data.edate.date).toLocaleDateString(lg+'-'+lg.toUpperCase(),options)}</span><div class="s-modify-dates m-left"><i class="btn-s-update btn-s-dates fa fa-pen dd-orange-text" style="display:none"></i></div>`);
-        $modal.find('.dp-start').pickadate('picker').set('select',new Date(data.sdate.date));
-        $modal.find('.dp-end').pickadate('picker').set('select',new Date(data.edate.date)).set('min',new Date(data.sdate.date));
+        startDate = new Date(data.sdate.date);
+        endDate = new Date(data.edate.date);
+        $modal.find('.dp-start').pickadate('picker').set('select',startDate);
+        if(endDate - startDate > 24*60*60*1000){
+          $modal.find('.dp-start').pickadate('picker').set('max',new Date(endDate));
+        }
+        $modal.find('.dp-end').pickadate('picker').set('select',new Date(endDate)).set('min',new Date(startDate));
         $modal.find('.dp-start').closest('.row').hide();
         if(!$modal.find('.s-dates-row .dates-validate').length){$modal.find('.s-dates-row').append('<div class="btn dates-validate"><i class="material-icons">check</i></div>');}
         $modal.find('.s-dates-row').addClass('flex-center-sb').find('.col').removeClass('s6 m6');
