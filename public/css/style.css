@@ -2844,9 +2844,7 @@ h2.header {
 }
 
 @media screen and (max-width: 950px) {
-  #nav {
-    display: none;
-  }
+
   #logoHomepage {
     /*position: absolute;
     margin-top: 5px;*/

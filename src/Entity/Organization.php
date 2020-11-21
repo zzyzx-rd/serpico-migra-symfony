@@ -176,7 +176,7 @@ class Organization extends DbObject
 
     /**
      * @OneToOne(targetEntity="User", inversedBy="organization")
-     * @JoinColumn(name="payement_usr_id", referencedColumnName="usr_id",nullable=true)
+     * @JoinColumn(name="payment_usr_id", referencedColumnName="usr_id",nullable=true)
      */
     private $paymentUser;
     /**
