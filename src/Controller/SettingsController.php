@@ -200,56 +200,68 @@ class SettingsController extends MasterController
 
 
         $organization = $this->org;
-        $customer = $this->stripe->customers->retrieve(
-            $this->org->getCustomerId()
-        );
-        $users =$this->org->getUsers();
+        if($this->org->getCustomerId() != null) {
+            $customer = $this->stripe->customers->retrieve(
+                $this->org->getCustomerId()
+            );
+            $users = $this->org->getUsers();
 
 
+            if ($customer->metadata->sub_id == null) {
+                $val = 1;
+                $start = " ";
+                $pdf = " ";
+            } else {
+                $sub = $this->stripe->subscriptions->retrieve(
+                    $customer->metadata->sub_id,
+                    );
+                $invoice = $this->stripe->invoices->all(['customer' => $this->org->getCustomerId()])->data[0];
+                $invoice = $this->stripe->invoices->sendInvoice($invoice->id,
+                    []
+                );
+                $pdf = $invoice->invoice_pdf;
 
-        if($customer->metadata->sub_id == null){
+                $start = date('m/d/Y', $sub->current_period_start);
+
+                $val = $customer->metadata->quantity;
+            }
+            $pm = ($customer->invoice_settings->default_payment_method != null) ? true : false;
+            if ($pm) {
+                $payment_method = $this->stripe->paymentMethods->retrieve(
+                    $customer->invoice_settings->default_payment_method
+                );
+
+                $month = $payment_method->card->exp_month;
+                if ($month < 10) {
+                    $montheend = "0" . (string)$month;
+                } else {
+                    $montheend = $month;
+                }
+                $dateend = (string)$payment_method->card->exp_year;
+                $dateend = $montheend . "/" . $dateend[2] . $dateend[3];
+                $last4 = $payment_method->card->last4;
+                $name = $payment_method->billing_details->name;
+                $brand = $payment_method->card->brand;
+            } else {
+                $dateend = "";
+                $last4 = "";
+                $name = "";
+                $brand = "";
+            }
+            $subscription =$this->stripe->subscriptions->all(['customer' => $customer]);
+            $sub=  $subscription->data ;
+        } else {
             $val = 1;
             $start = " ";
-            $pdf =" ";
-        } else {
-            $sub = $this->stripe->subscriptions->retrieve(
-                $customer->metadata->sub_id,
-                );
-            $invoice =$this->stripe->invoices->all(['customer' =>   $this->org->getCustomerId()])->data[0];
-            $invoice= $this->stripe->invoices->sendInvoice($invoice->id,
-                []
-            );
-            $pdf = $invoice->invoice_pdf;
-
-            $start = date('m/d/Y', $sub->current_period_start);
-
-            $val = $customer->metadata->quantity;
-        }
-        $pm = ($customer->invoice_settings->default_payment_method != null) ? true : false;
-        if($pm) {
-            $payment_method = $this->stripe->paymentMethods->retrieve(
-                $customer->invoice_settings->default_payment_method
-            );
-
-            $month = $payment_method->card->exp_month;
-            if($month < 10){
-                $montheend = "0". (string)$month;
-            }
-            else {
-                $montheend = $month;
-            }
-            $dateend = (string) $payment_method->card->exp_year;
-            $dateend = $montheend . "/" . $dateend[2] . $dateend[3];
-            $last4 = $payment_method->card->last4;
-            $name = $payment_method->billing_details->name;
-            $brand = $payment_method->card->brand;
-        } else {
+            $pdf = " ";
             $dateend = "";
             $last4 = "";
             $name = "";
             $brand = "";
+            $users = $this->org->getUsers();
+            $sub= " ";
         }
-        $subscription =$this->stripe->subscriptions->all(['customer' => $customer]);
+
 
         return $this->render( 'price_management.html.twig' , [
 
@@ -265,7 +277,7 @@ class SettingsController extends MasterController
             'cards' => $this->org->getPaymentMethods(),
             'pdf'=>$pdf,
             'user'=>$users,
-            'sub' => $subscription->data
+            'sub' => $sub
         ]);
 
 
