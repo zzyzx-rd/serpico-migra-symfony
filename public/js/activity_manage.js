@@ -1622,14 +1622,20 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         $modal = $("#updateEvent");
         $modal.find('.btn-e-update, .e-create').hide();
         $modal.find('.btn-e-modify').show();
+        $stgElmt = $(`.stage-element[data-id="${data.sid}"]`);
         $modal.find('.dp-start').pickadate('picker')
           .set('select',new Date(data.odate.date))
-          .set('min', new Date(parseInt($(`.stage-element[data-id="${data.sid}"]`).data('sd')) * 1000));
+          .set('min', new Date(parseInt($stgElmt.data('sd')) * 1000))
+          .set('max', new Date((parseInt($stgElmt.data('sd')) + parseInt($stgElmt.data('p'))) * 1000));
         $modal.find('.e-odate').empty().append(new Date(data.odate.date).toLocaleDateString(lg+'-'+lg.toUpperCase(),options));
         if(data.rdate){
           $modal.find('.dp-end').pickadate('picker').set('select',new Date(data.rdate.date));
           $modal.find('.e-rdate').empty().append(new Date(data.rdate.date).toLocaleDateString(lg+'-'+lg.toUpperCase(),options));
         }
+        $modal.find('.dp-end').pickadate('picker')
+          .set('min', $modal.find('.dp-start').pickadate('picker').get('select'))
+          .set('max', new Date((parseInt($stgElmt.data('sd')) + parseInt($stgElmt.data('p'))) * 1000));
+
         if(data.documents){
           $modal.find('.documents-number').empty().append(data.documents.length);
         } else {

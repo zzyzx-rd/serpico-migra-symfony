@@ -26,6 +26,7 @@
                                 })|raw
                             }}</p>
                             <p style="text-align: center"><a href="{{ url('confirmEmailModif', {'token' : token }) }}" target="_blank"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;font-weight:600;text-transform:uppercase;">{% trans %}mails.emailModify.button_text{% endtrans %}</button></a></p>
+                            <p>{{ 'mails.emailModify.message_end'|trans }}</p>
                             <p>{{'thanks'|trans|capitalize ~ ','}}</p>
                         </td>
                         </tr>

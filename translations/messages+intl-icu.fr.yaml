@@ -1510,7 +1510,7 @@ mails:
 
   emailModify:
     subject: Confirmez votre nouvelle adresse e-mail DealDrive
-    message_start: Nous avons une requête de changement de votre adresse email de 
+    message_start: Nous avons reçu une requête de changement de votre adresse email de 
     message_end:  Si vous n'avez pas demandé un tel changement, merci de nous en informer immédiatement en répondant à cette e-mail.
     button_text: Confirmez votre nouvelle addresse e-mail
 
