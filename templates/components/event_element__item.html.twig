@@ -16,7 +16,7 @@
         <ul class="flex-center">
           <ul class="flex-center m-right">
             <i class="fa fa-calendar sm-right"></i>
-            <span class="t-od">{{ event.nicetime(event.onsetDate|date("m/d/Y")) }}</span>
+            <span class="t-od">{{ event.onsetDate|format_datetime('short', 'none', pattern='dd/MM') }}</span>
             {% if event.expResDate %}
               <i class="fa fa-calendar-check"></i>
               <span class="t-rd">{{ event.expResDate|format_datetime('short', 'none', pattern='dd/MM') }}</span>

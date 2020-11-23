@@ -10,7 +10,7 @@
         <style type="text/css">
             body {margin: 0; padding: 0; min-width: 100%!important;}
             .content {width: 100%; max-width: 800px;}
-            .dd-text {color: #55318e;font-weight:700;}
+            .dd-text {color: #55318e}
             .title {font-size:15px}
             .strong {font-weight:700}
         </style>
@@ -48,7 +48,7 @@
                             <p>{{ 'mails.updateNotification.msg'|trans ~  ' :' }}</p>
 
                             {% if creations %}
-                                <h5 class="dd-text title">{{ 'mails.updateNotification.creations.title'|trans }}</h5>
+                                <h5 class="dd-text strong title">{{ 'mails.updateNotification.creations.title'|trans }}</h5>
                                 {% set stages = creations.stages is defined ? creations.stages : null %}
                                 {% set events = creations.events is defined ? creations.events : null %}
                                 {% set documents = creations.documents is defined ? creations.documents : null %}
@@ -108,7 +108,7 @@
                             {% endif %}
 
                             {% if modifications %}
-                                <h5 class="dd-text">{{ 'mails.updateNotification.modifications.title'|trans }}</h5>
+                                <h5 class="dd-text strong title">{{ 'mails.updateNotification.modifications.title'|trans }}</h5>
                                 {% set stages = modifications.stages is defined ? modifications.stages : null %}
                                 {% set events = modifications.events is defined ? modifications.events : null %}
                                 {% set documents = modifications.documents is defined ? modifications.documents : null %}
@@ -197,7 +197,7 @@
                             {% endif %}
 
                             {% if deletions %}
-                                <h5 class="dd-text">{{ 'mails.updateNotification.deletions.title'|trans }}</h5>
+                                <h5 class="dd-text strong title">{{ 'mails.updateNotification.deletions.title'|trans }}</h5>
                                 {% set stages = deletions.stages is defined ? deletions.stages : null %}
                                 {% set events = deletions.events is defined ? deletions.events : null %}
                                 {% set documents = deletions.documents is defined ? deletions.documents : null %}

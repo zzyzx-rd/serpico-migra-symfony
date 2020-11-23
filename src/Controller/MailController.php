@@ -147,7 +147,9 @@ class MailController extends MasterController {
             $mailTemplate = $twig->load('mails/' . $actionType . '.html.twig');
             $email->htmlTemplate('mails/'. $actionType . '.html.twig')
             ->context($data);
-            $mailingEmailAddress = $recipientUsers ? $recipient->getEmail() : $recipient;
+            $mailingEmailAddress = $recipientUsers ? 
+                ($actionType != 'emailModify' ? $recipient->getEmail() : $recipient->getAltEmail()) 
+                : $recipient;
 
             $email->from('Dealdrive <no-reply@dealdrive.app>')
                 ->to($mailingEmailAddress)

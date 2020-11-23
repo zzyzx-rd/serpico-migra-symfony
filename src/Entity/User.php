@@ -88,6 +88,11 @@ class User extends DbObject implements  UserInterface, \Serializable
     public $email;
 
     /**
+     * @ORM\Column(name="usr_alt_email", type="string", length=255, nullable=true)
+     */
+    public $altEmail;
+
+    /**
      * @ORM\Column(name="usr_password", type="string", length=255, nullable=true)
      */
     public $password;
@@ -289,6 +294,7 @@ class User extends DbObject implements  UserInterface, \Serializable
      * @param string $nickname
      * @param $birthdate
      * @param string $email
+     * @param string $altEmail
      * @param string $password
      * @param $picture
      * @param null $pictureFile
@@ -333,6 +339,7 @@ class User extends DbObject implements  UserInterface, \Serializable
         $username = null,
         $nickname = null,
         $birthdate = null,
+        $altEmail = null,
         $email = null,
         $password = null,
         $picture = null,
@@ -372,6 +379,7 @@ class User extends DbObject implements  UserInterface, \Serializable
         $this->username = $username;
         $this->nickname = $nickname;
         $this->birthdate = $birthdate;
+        $this->altEmail = $altEmail;
         $this->email = $email;
         $this->password = $password;
         $this->positionName = $positionName;
@@ -496,6 +504,18 @@ class User extends DbObject implements  UserInterface, \Serializable
     public function setEmail(?string $email): self
     {
         $this->email = $email;
+
+        return $this;
+    }
+
+    public function getAltEmail(): ?string
+    {
+        return $this->altEmail;
+    }
+
+    public function setAltEmail(?string $altEmail): self
+    {
+        $this->altEmail = $altEmail;
 
         return $this;
     }

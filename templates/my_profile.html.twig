@@ -88,6 +88,7 @@
     .modify-profile-btn:hover {
       background-color: #55318e;
       color: #ff9300;
+      border:none;
     }
 
     .admin-choice-panel {
@@ -105,8 +106,9 @@
 
     .modify-profile-btn{
       backdrop-filter: blur(10px);
-      color:powderblue;
+      color: #ff9300;
       width: fit-content;
+      border: 1px solid #ff9300;
     }
 
     .act-int-ext{
@@ -146,13 +148,7 @@
   <div class="container data-container">
     <ul class="flex-center">
       <div class="col s12 m3" style="margin-right: 30px; position: relative">
-        {% if global.currentuser.picture is null %}
-          <img class="clickable-image" src="{{ asset(global.userpicture) }}" width="150px" height="150px" style="border-radius: 100%">
-          <a class="btn-floating add-photo-btn clickable-image" style="position: absolute; top: 84%; left: 35%;"><i class="fa fa-camera"></i></a>
-        {% else %}
-          <img src="{{ asset(global.userpicture) }}" width="150px" height="150px" style="border-radius: 100%">
-          <a class="btn-floating add-photo-btn" style="position: absolute; top: 84%; left: 35%;"><i class="fa fa-pencil-alt"></i></a>
-        {% endif %}
+        <img src="{{ asset(global.userpicture) }}" width="150px" height="150px" style="border-radius: 100%">
       </div>
 
       <div class="col s12 m9">
@@ -167,7 +163,7 @@
                         </span>
             {#{% if orgName == "Public" %}#}
               <a href="{{ url ('manageProfile') }}" class="btn-flat waves-effect modify-profile-btn">
-                Ajouter info
+                {{'home.my_profile_title'|trans}}
               </a>
             {#{% endif %}#}
           </h3>
@@ -599,53 +595,6 @@
         </div>
       </div>
     #}
-    <div class="p-form" style="display: none">
-      {{ form_start(pictureForm) }}
-      {{ form_label(pictureForm.pictureFile) }}
-      {{ form_widget(pictureForm.pictureFile) }}
-      {{ form_errors(pictureForm.pictureFile) }}
-      {{ form_rest(pictureForm) }}
-      {{ form_end(pictureForm) }}
-    </div>
-  </div>
-
-
-
-  <div id="errorFileType" class="modal">
-    <div class="modal-title">
-      <h4>{{ 'profile.file.unsupported_type.modal_title'|trans }}</h4>
-    </div>
-    <div class="modal-content">
-      <p>{{ 'profile.file.unsupported_type.modal_content'|trans }}</p>
-    </div>
-    <div class="modal-footer action-buttons">
-      <div class="button-field">
-        <a class="waves-effect waves-green btn-large modal-close">Ok</a>
-      </div>
-    </div>
-  </div>
-  <div id="errorFileSize" class="modal">
-    <div class="modal-title">
-      <h4>{{ 'profile.file.unsupported_size.modal_title'|trans }}</h4>
-    </div>
-    <div class="modal-content">
-      <p>{{ 'profile.file.unsupported_size.modal_content'|trans }}</p>
-    </div>
-    <div class="modal-footer action-buttons">
-      <div class="button-field">
-        <a class="waves-effect waves-green btn-large modal-close">Ok</a>
-      </div>
-    </div>
-  </div>
-  <div id="successUploadedPicture" class="modal">
-    <div class="modal-content">
-      <p>{{ 'profile.file.success.modal_content'|trans }}</p>
-    </div>
-    <div class="modal-footer action-buttons">
-      <div class="button-field">
-        <a class="waves-effect waves-green btn-large modal-close">Ok</a>
-      </div>
-    </div>
   </div>
 
   {% if not global.currentuser.isInternal %}

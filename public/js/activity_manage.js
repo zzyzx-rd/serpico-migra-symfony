@@ -2446,14 +2446,14 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
       $.delete(url,null)
         .done(function(){
           $('#deleteParticipant').modal('close');
-          $(`.participant-btn[data-pid=${pid}]`).closest('.participants-list--item').remove();
+          $(`[href="#deleteParticipant"][data-pid=${pid}]`).closest('.participants-list--item').remove();
           $('.nb-participants').empty().append(`(${$('.participants-list--item').length})`);
         })
 
     }
   });
 
-  $(document).on('click','.participant-btn.existing',function(){
+  $(document).on('click','[href="#deleteParticipant"]',function(){
     var $this = $(this);
     var $modal = $(this).closest('.modal');
     $('.participant-delete').attr({'data-id':$modal.data('id'),'data-pid':$this.data('pid')});
@@ -2494,9 +2494,10 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         $partElmt.find('.participant-fullname-zone').show();
         $partElmt.find('.participant-field-zone').hide();
       } else {
-        var creationModal = $('#createParticipant');
+        var $creationModal = $('#createParticipant');
+        $creationModal.find('[name="email"]').val("");
         var partFN = $partElmt.find('input.participant-fullname').val();
-        creationModal.find('.new-part-name').empty().append(partFN);
+        $creationModal.find('.new-part-name').empty().append(partFN);
         var partNameToPieces = partFN.split(' ');
         //if(!$('input[name="firstname"]').val().length){
           $('input[name="firstname"]').val(partNameToPieces[0]).prev().addClass('active');

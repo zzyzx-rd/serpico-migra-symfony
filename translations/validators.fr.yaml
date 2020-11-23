@@ -30,6 +30,7 @@ stage:
 
 password: 
   definition_rule: Le mot de passe doit contenir au moins 8 caractères dont au moins une majuscule et un chiffre
+  incorrect_current_password: Mot de passe incorrect
 
 signup:  
   email: "Votre adresse email doit être valide (exemple : toto@tutu.com)"

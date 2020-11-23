@@ -47,6 +47,7 @@ use App\Entity\InstitutionProcess;
 use App\Entity\Process;
 use App\Entity\WorkerFirm;
 use App\Entity\WorkerIndividual;
+use App\Form\PasswordForm;
 use App\Repository\UserRepository;
 use App\Service\FileUploader;
 use Symfony\Component\Form\FormFactoryInterface;
@@ -381,23 +382,23 @@ class UserController extends MasterController
 
         $entityManager = $this->em;
         
-        $workerIndividual = $currentUser->getWorkerIndividual();
-        $workerIndividualForm = $this->createForm(UpdateWorkerIndividualForm::class, $workerIndividual, ['standalone' => true]);
+        //$workerIndividual = $currentUser->getWorkerIndividual();
+        //$workerIndividualForm = $this->createForm(UpdateWorkerIndividualForm::class, $workerIndividual, ['standalone' => true]);
+        $workerIndividualForm = $this->createForm(UpdateWorkerIndividualForm::class, $currentUser, ['standalone' => true, 'currentUser' => $currentUser]);
         $workerIndividualForm->handleRequest($request);
+        $passwordForm = $this->createForm(PasswordForm::class, $currentUser, ['standalone' => true, 'mode' => 'modification']);
+        $passwordForm->handleRequest($request);
         $pictureForm = $this->createForm(AddUserPictureForm::class);
         $pictureForm->handleRequest($request);
 
         if ($workerIndividualForm->isSubmitted() && $workerIndividualForm->isValid()) {
             $repoWF = $entityManager->getRepository(WorkerFirm::class);
+            /*
             foreach($workerIndividualForm->get('experiences') as $key => $experienceForm){
                 $experience = $experienceForm->getData();
                 $experience->setFirm($repoWF->find((int) $experienceForm->get('firm')->getData()));
                 $entityManager->persist($experience);
-                /*
-                if($experience->getEnddate() == null){
-                    $workerIndividual->getExperiences()->get($key)->setEnddate(new \DateTime);
-                }*/
-            }
+            }*/
             $entityManager->persist($currentUser);
             $entityManager->flush();
             return $this->redirectToRoute('home');
@@ -406,7 +407,8 @@ class UserController extends MasterController
         return $this->render('worker_individual_data.html.twig',
         [
             'form' => $workerIndividualForm->createView(),
-            'pictureForm' => $pictureForm->createView()
+            'pictureForm' => $pictureForm->createView(),
+            'passwordModificationForm' => $passwordForm->createView()
         ]);
 
     }
@@ -1171,7 +1173,7 @@ class UserController extends MasterController
      * @return JsonResponse|Response
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/home", name="updatePicture", methods={"POST"})
+     * @Route("/user/picture/update", name="updatePicture", methods={"POST"})
      */
     public function updatePictureAction(Request $request, FileUploader $fileUploader)
     {
@@ -1181,6 +1183,11 @@ class UserController extends MasterController
 
         if (!$currentUser) {
             return new Response(null, Response::HTTP_UNAUTHORIZED);
+        }
+
+        $picture = $currentUser->getPicture();
+        if($picture){
+            unlink(dirname(dirname(__DIR__)) . "/public/lib/img/user/$picture");
         }
 
         $pictureFile = new UploadedFile($_FILES['profile-pic']['tmp_name'], $_FILES['profile-pic']['name']);
@@ -1486,8 +1493,6 @@ class UserController extends MasterController
                 $enabledUserSeeRanking = $orgOption->isOptionTrue();
             }
         }
-        $pictureForm = $this->createForm(AddUserPictureForm::class);
-        $pictureForm->handleRequest($request);
 
         $finalizeUserForm = $this->createForm(FinalizeUserForm::class,null,['user' => $user]);
         $finalizeUserForm->handleRequest($request);
@@ -1736,7 +1741,6 @@ class UserController extends MasterController
             'orgHasActiveAdmin' => $orgHasActiveAdmin,
             'addFirstAdminForm' => $addFirstAdminFormView,
             'userData' => $user->toArray(),
-            'pictureForm' => $pictureForm->createView(),
             'finalizeUserForm' => isset($finalizeUserForm) ? $finalizeUserForm->createView() : null,
             'organization' => $organization->getCommname(),
             'wRelPerfAbsRanking' => isset($userWPerfRanking) ? $userWPerfRanking->getAbsResult() : null,
@@ -1828,7 +1832,6 @@ class UserController extends MasterController
 
     /**
      * @param Request $request
-     * @param Application $app
      * @return mixed
      * @Route("/help", name="help")
      */
@@ -1839,5 +1842,110 @@ class UserController extends MasterController
                 'request' => $request
             ]
         );
+    }
+
+    /**
+     * @param Request $request
+     * @return mixed
+     * @Route("/user/self/update", name="saveUserSelfModifications")
+     */
+    public function saveUserSelfModification(Request $request){
+        $currentUser = $this->user;
+        $em = $this->em;
+        $currEmail =  $currentUser->getEmail();
+        $updateUserForm = $this->createForm(UpdateWorkerIndividualForm::class, $currentUser, ['standalone' => true, 'currentUser' => $currentUser]);
+        $updateUserForm->handleRequest($request);
+        if($updateUserForm->isSubmitted() && $updateUserForm->isValid()){
+            $email = $updateUserForm->get('email')->getData();
+            if($email != $currEmail){
+                $token = md5(rand());
+                $currentUser
+                    ->setAltEmail($email)
+                    ->setToken($token);
+                $settings = [];
+                $settings['token'] = $token;
+                $recipients = [];
+                $recipients[] = $currentUser;
+                $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'emailModify']);
+            }
+            $em->persist($currentUser);
+            $em->flush();
+            return new JsonResponse();
+        } else {
+            $errors = $this->buildErrorArray($updateUserForm);
+            return $errors;
+        }
+    }
+
+    /**
+     * @param Request $request
+     * @return mixed
+     * @Route("/user/email/confirm/{token}", name="confirmEmailModif")
+     */
+    public function confirmEmailModif(string $token, Request $request){
+        $em = $this->em;
+        $isValidToken = $em->getRepository(User::class)->findOneByToken($token) != null;
+        $params['isValidToken'] = $isValidToken;
+        
+        if($isValidToken){
+            
+            $currentUser = $em->getRepository(User::class)->findOneByToken($token);
+            $noUserToken = false;
+            $linkHasExpired = null;
+            $passwordForm = $this->createForm(PasswordForm::class, $currentUser, ['standalone' => true]);
+            $passwordForm->handleRequest($request);
+            $params['passwordForm'] = $passwordForm->createView();
+            $now = new DateTime();
+            $lastChangeInvitation = $em->getRepository(Mail::class)->findBy(['type' => 'emailModify','user' => $currentUser], ['inserted' => 'DESC'])[0];
+            if($lastChangeInvitation->getInserted()->getTimestamp() - $now->getTimestamp() > 24 * 60 * 60 && $currentUser->getAltEmail() != null){
+                $linkHasExpired = true;
+            } else {
+                $linkHasExpired = false;
+            }
+            $params['linkHasExpired'] = $linkHasExpired;
+            $params['currentUserMail'] = $currentUser->getEmail();
+
+            if($passwordForm->isSubmitted() && $passwordForm->isValid()){
+    
+                $currentUser->setEmail($currentUser->getAltEmail())
+                    ->setAltEmail(null)
+                    ->setToken(null);
+                $em->persist($currentUser);
+                $em->flush();
+                return $this->redirectToRoute('myActivities');
+    
+            }
+        }
+        
+        return $this->render('email_change_confirmation.html.twig', $params);
+        
+    }
+
+    /**
+     * @param Request $request
+     * @return mixed
+     * @Route("/user/password/modify", name="passwordSelfModification")
+     */
+    public function userPwdSelfModification(Request $request){
+        $currentUser = $this->user;
+        $em = $this->em;
+        $passwordForm = $this->createForm(PasswordForm::class, $currentUser, ['standalone' => true, 'mode' => 'modification']);
+        $passwordForm->handleRequest($request);
+        if($passwordForm->isValid()){
+            $newPassword = $this->encoder->encodePassword($currentUser, $passwordForm->get('newPassword')->getData());
+            $currentUser->setPassword($newPassword);
+            $recipients = [];
+            $settings = [];
+            $recipients[] = $currentUser;
+            $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'passwordChangeConfirmation']);
+            $em->persist($currentUser);
+            $em->flush();
+            $em->refresh($currentUser);
+            return new JsonResponse();
+        } else {
+            $errors = $this->buildErrorArray($passwordForm);
+            $em->refresh($currentUser);
+            return $errors;
+        }    
     }
 }

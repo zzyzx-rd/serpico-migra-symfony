@@ -1,0 +1,45 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>{% block subject %}{% trans %}mails.emailChangeConfirmation.subject{% endtrans %}{% endblock %}</title>
+        <style type="text/css">
+            body {margin: 0; padding: 0; min-width: 100%!important;}
+            .content {width: 100%; max-width: 800px;}
+        </style>
+    </head>
+
+    {% block body %}
+    <body bgcolor="white">
+        <table width="100%" bgcolor="white" border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td>
+                    <table class="content" align="left" cellpadding="0" cellspacing="0" border="0">
+                        <td>
+                            <p>{% trans %}mails.hello{% endtrans %} {{ recipient.firstname }},</p>
+                            <p>{{ 'your_email_changed_to new_email. just_to_let_you_know'|replace({
+                                        your_email_changed_to   : 'mails.emailChangeConfirmation.message_start'|trans,
+                                        new_email               : user.email,
+                                        just_to_let_you_know    : 'mails.emailChangeConfirmation.message_mid'|trans,
+                                    })
+                                }}
+                            </p>
+                            <p>{{ 'mails.emailChangeConfirmation.message_end'|trans }}</p>
+                        </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <p>{% trans %}mails.signature_team{% endtrans %}</p>
+                                <img src="cid:logo_img" alt="logo {{ company_name }}" style="width: {{ logo_width_px }}px">
+                                <p style="margin:0;"><strong>{{ 'mails.dealdrive_motto'|trans }}</strong><br>{{ address }} | {{ zipcode_city }}</p>
+                                {% if company_name == 'Serpico' %}<p>{{ phone }}</p>{% endif %}
+                                
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
+    {% endblock %}
+</html>

@@ -125,9 +125,11 @@ $(function(){
 
     $collectionHolder = $('ul.experiences');
 
+    /*
     if($collectionHolder.find('.experience').length == 0){
         addExperienceForm(); 
     }
+    */
 
     $('.insert-experience-btn').on('click',function(){
         addExperienceForm();
@@ -176,7 +178,7 @@ $(function(){
         data.append('profile-pic', file);
 
         $.ajax({
-            url: document.location.href,
+            url: upurl,
             method: 'post',
             contentType: false,
             cache: false,
@@ -185,19 +187,71 @@ $(function(){
         })
         .done(data => {
             $('#successUploadedPicture').modal('open');
-            $('.user-profile-picture').attr('src', `/lib/img/${data.filename}`);
-            $('.add-photo-btn').html('<i class="fa fa-pencil-alt"></i>');
+            $('.user-picture').attr('src', `/lib/img/user/${data.filename}`);
+            $('.add-photo-btn').html('<i class="fa fa-pen"></i>');
         })
         .fail(err => console.log(err));
     });
 
-    $('.modify-experience-btn, .modify-profile-info-btn').on('click',function(){
-        $(this).closest('.element-data').next().show().prev().hide();
+    $('.modify-experience-btn, .modify-btn').on('click',function(){
+        $('.element-data, .modify-btn').hide();
+        $('.element-input, .save-btn').show();
+        $('.cancel-btn').css('visibility','');
     });
 
     $('.validate-experience-btn, .validate-profile-info-btn').on('click',function(){
         $(this).closest('.element-input').prev().show().next().hide();
     });
+
+    $('.cancel-btn').on('click',function(){
+        $('.user-credential input').each(function(i,e){
+            $(e).val($(e).attr('value'));
+        })
+        $('.element-data, .modify-btn').show();
+        $('.element-input, .save-btn').hide();
+        $('.cancel-btn').css('visibility','hidden');
+    })
+
+    $('.user-credentials input').on('keyup',function(){
+        var isDiff = false;
+        $('.user-credentials input').each(function(i,e){
+            if($(e).val() != $(e).attr('value')){
+                isDiff = true;
+                return false;
+            }
+        })
+        isDiff ? $('.save-btn').removeClass('disabled-btn') : $('.save-btn').addClass('disabled-btn');
+    })
+
+    $('.save-btn').on('click',function(e){
+        e.preventDefault();
+        $.post(suurl,$(this).closest('form').serialize())
+            .done(function(data){
+                $('.element-data, .modify-btn').show();
+                $('.element-input, .save-btn').hide();
+                $('.cancel-btn').css('visibility','hidden');
+            })
+    })
+
+    $('.pwd-modify-btn').on('click',function(e){
+        e.preventDefault();
+        $('#modifyPassword .red-text').remove();
+        $.post(pmurl,$(this).closest('form').serialize())
+            .done(function(data){
+                $('#modifyPassword').modal('close');
+                $('#successPasswordChange').modal('open');
+            })
+            .fail(function(data){
+                $.each(data.responseJSON, function(key, value){
+                    $.each($('#modifyPassword input'),function(){
+                        if($(this).attr('name').indexOf(key) != -1){
+                            $(this).after('<div class="red-text"><strong>'+value+'</strong></div>');
+                            return false;
+                        }
+                    });
+                })
+            })
+    })
 
 
 });
