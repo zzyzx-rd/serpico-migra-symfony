@@ -29,8 +29,17 @@ body[style="overflow: hidden;"] {
   background-color: #341f56;
 }
 
-.btn:not(.user-btn),.btn-large,.btn-floating{
-  background-color: #55318e!important;
+.btn,.btn-large,.btn-floating{
+  background-color: #55318e;
+}
+
+.btn:hover{
+  background-color: #55318e;
+  color: white;
+}
+
+.return-btn{
+  background-color: aliceblue;
 }
 
 a.material-icons{
@@ -129,7 +138,7 @@ li + li.no-items-placeholder {
 }
 
 .dd-orange-text{
-  color: #FF9300;
+  color: #ff9300;
 }
 
 .mat-icon {
@@ -541,10 +550,6 @@ header h5 {
   margin-left: 50px;
 }
 */
-
-.add-photo-btn {
-  background-color: #15a6ae;
-}
 
 .picture-frame {
   width: 50px;

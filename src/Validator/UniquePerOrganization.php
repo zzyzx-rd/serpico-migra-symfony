@@ -26,9 +26,7 @@ class UniquePerOrganization extends Constraint
     public $property;
 
     public function __construct($options){
-
         parent::__construct($options);
-            
     }
 
     public function getOrganization(){

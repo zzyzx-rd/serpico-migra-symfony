@@ -30,6 +30,7 @@ stage:
 
 password:
   definition_rule: Password should contain at least 8 characters with a capital letter and a number
+  incorrect_current_password: Incorrect password 
   
 signup:
   email: "Please provide a valid email adress in this field (example : some@thing.com)."

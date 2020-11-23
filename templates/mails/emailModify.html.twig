@@ -1,0 +1,47 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>{% block subject %}{% trans %}mails.emailModify.subject{% endtrans %}{% endblock %}</title>
+        <style type="text/css">
+            body {margin: 0; padding: 0; min-width: 100%!important;}
+            .content {width: 100%; max-width: 800px;}
+            .dd-text {color: #55318e;}
+        </style>
+    </head>
+
+    {% block body %}
+    <body bgcolor="white">
+        <table width="100%" bgcolor="white" border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td>
+                    <table class="content" align="left" cellpadding="0" cellspacing="0" border="0">
+                        <td>
+                            <p>{% trans %}mails.hello{% endtrans %} {{ recipient.firstname }},</p>
+                            <p>{{ 'asking_change_from <span class="dd-text">current_email</span> to <span class="dd-text">new_email</span>'|replace({
+                                        asking_change_from: 'mails.emailModify.message_start'|trans,
+                                        current_email: recipient.email,
+                                        to: 'to'|trans,
+                                        new_email : recipient.altEmail
+                                })|raw
+                            }}</p>
+                            <p style="text-align: center"><a href="{{ url('confirmEmailModif', {'token' : token }) }}" target="_blank"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;font-weight:600;text-transform:uppercase;">{% trans %}mails.emailModify.button_text{% endtrans %}</button></a></p>
+                            <p>{{'thanks'|trans|capitalize ~ ','}}</p>
+                        </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <p>{% trans %}mails.signature_team{% endtrans %}</p>
+                                <img src="cid:logo_img" alt="logo {{ company_name }}" style="width: {{ logo_width_px }}px">
+                                <p style="margin:0;"><strong>{{ 'mails.dealdrive_motto'|trans }}</strong><br>{{ address }} | {{ zipcode_city }}</p>
+                                {% if company_name == 'Serpico' %}<p>{{ phone }}</p>{% endif %}
+                                
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
+    {% endblock %}
+</html>

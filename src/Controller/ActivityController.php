@@ -383,7 +383,7 @@ class ActivityController extends MasterController
             $now = new DateTime;
             $clientOrganization
                 ->setCommname($entityName)
-                ->setType($type != 'u' ? $type : 'F')
+                ->setType($type != 'u' ? strtoupper($type) : 'F')
                 ->setExpired($now->add(new DateInterval('P21D')))
                 ->setWeightType('role')
                 ->setPlan(ORGANIZATION::PLAN_PREMIUM)

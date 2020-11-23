@@ -5,7 +5,7 @@
       {% for firm in firms %}
         {% set externalUser = firm.aliveExternalUsers.first %}
         {% if externalUser %}
-          {% include "components/user_list__item.html.twig" with { user: externalUser.user } %}
+          {% include "components/user_list__item.html.twig" with { user: externalUser.user, roles: false } %}
         {% endif %}
       {% endfor %}
       {# placeholder for no user in list #}
