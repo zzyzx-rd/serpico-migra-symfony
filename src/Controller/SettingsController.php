@@ -194,7 +194,7 @@ class SettingsController extends MasterController
             return $this->redirectToRoute('login');
         }
 
-        if($this->org->getPaymentUser() == $this->user){
+        if($this->org->getPaymentUser() == $this->user || $this->org->getPaymentUser()== null){
             $payacces = true ;
         }
 
@@ -496,14 +496,8 @@ class SettingsController extends MasterController
         Stripe\Stripe::setApiKey('sk_test_51Hn5ftLU0XoF52vKQ1r5r1cONYas5XjLLZu6rFg2P69nntllHxLs3G0wyCxoOQNUgjgD5LwCoaYTkGQp1qVK3g3A00LfW1k4Ep');
         $body =  json_decode(file_get_contents('php://input'), true);
         $stripe = $this->stripe;
-        $priceIdStandard = ['price_1HZI3OHmuPtR98gq5OOPo6TX','price_1HZI3OHmuPtR98gqQ7DRFCEV','price_1HZHxfHmuPtR98gqhiyljbWj'];
-        $priceIdPrenium = ['price_1HZI0THmuPtR98gq67btxwid','price_1HZI0THmuPtR98gqGKyedIG3','price_1HZI0THmuPtR98gqJNEUSfTq'];
-        $priceStandard = ["7","6","5"];
-        $pricePrenium = ["14","10","7"];
-        $period = ($body['period'] == "year") ? 10 : 1;
+       $period = ($body['period'] == "year") ? 10 : 1;
         $quantity =  (int) $body['quantity'];
-        $priceTblStandardNew = [7*$quantity*$period,6*$quantity*$period,5*$quantity*$period];
-        $priceTblPremiumNew = [14*$quantity*$period,10*$quantity*$period,7*$quantity*$period] ;
         if ($quantity < 99) {
             $index = 0;
         } else if ($quantity < 249) {
@@ -511,17 +505,18 @@ class SettingsController extends MasterController
         } else {
             $index = 2;
         }
+        if($this->org->getPaymentUser()== null){
+            $this->org->setPaymentUser($this->user);
+        }
 
         if($body['product'] == "premium"){
-            $mainPriceId = $priceIdPrenium ;
-            $mainPrice = $pricePrenium ;
-            $mainPriceBase = $pricePrenium[$index];
+
+
             $mainProd = 'prod_IPHWR3lzuAWWsL';
 
         } else {
-            $mainPriceId = $priceIdStandard ;
-            $mainPrice = $priceStandard ;
-            $mainPriceBase = $priceStandard[$index];
+
+
             $mainProd = 'prod_IPHWDsnMYL3UFB';
 
         }
@@ -535,6 +530,14 @@ class SettingsController extends MasterController
 
         }*/
         $customer = $this->org->getCustomerId();
+        if($customer == null){
+            $mail = ($this->org->getMasterUser() == null) ? "" :$this->org->getMasterUser()->getEmail();
+            $cust = Stripe\Customer::create([
+                'email' => $mail
+            ]);
+            $customer = $cust->id;
+            $this->org->setCustomerId($customer);
+        }
         $cust = Stripe\Customer::retrieve($customer);
         $paymentm = ($body['paymentMethodId'] == " ") ? $paymentList[(int)$body['paymentMethodId']]->getPmid() : $body['paymentMethodId'];
 
@@ -631,7 +634,8 @@ class SettingsController extends MasterController
         }
         $cust = $this->stripe->customers->update(
             $customer,
-            ['metadata' => ['sub_id' => $subscription->id,'quantity' => $body['quantity'], 'priceInit' => $mainPriceBase]]
+            ['metadata' => ['sub_id' => $subscription->id,'quantity' => $body['quantity']
+            ]]
         );
 
         $sub = Stripe\Subscription::update(
@@ -661,7 +665,7 @@ class SettingsController extends MasterController
             $custId
         );
         $id = $cust->metadata->sub_id;
-
+        dd($cust->metadata);
         $sub = $this->stripe->subscriptions->cancel(
             $id,
 

@@ -660,7 +660,6 @@
 
         var stripe = Stripe('pk_test_51Hn5ftLU0XoF52vK8M36bvbf4dBV2ZDnSZnGCW9MDcEHUuznmIcSuDkU748TNbNfj9bGWbrvpfLu6qgkpMwNoylS00QptGVFj4');
         var elements = stripe.elements();
-        console.log(elements);
         var card = elements.create('card');
         card.on('change', showCardError);
         console.log(card);
@@ -735,7 +734,7 @@
         });
         var formcancel = document.getElementById('unsubscribe');
         formcancel.addEventListener('submit', function (ev) {
-
+            $('.currentsub').remove();
             ev.preventDefault();
                 fetch('/cancel-subscription', {
                     method: 'post',
@@ -749,6 +748,7 @@
 
                 })
                     .then((response) => {
+                        modal.close;
                         return response.json();
                     })
 
@@ -758,7 +758,7 @@
                             throw result;
 
                         } else {
-                            modal = $('.modal').modal('close');
+
                         }
                         return result;
                     })
@@ -766,6 +766,7 @@
 
                         showCardError(error);
                     })
+            modal = $('.modal').modal('close');
 
         });
         function removeExtraSpace(str)
@@ -788,8 +789,7 @@
             }
             var pm = $('.newpaymentmethod');
             console.log(pm.hasClass('activecard'));
-            if(custcard != 1 || pm.hasClass('activecard') ) {
-                console.log($('#name'));
+            if(custcard == 0 || pm.hasClass('activecard') ) {
                 let billingName = 'tes';
                 stripe.createPaymentMethod({
                     type: 'card',
