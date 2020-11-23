@@ -1855,10 +1855,8 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         form.append("expResDateStr",(edStr != "" ? new Date(edStr) : new Date()).toLocaleString('en-EN', $sentDatesOptions));
       }
 
+      form.append("eid",$evtElmt.data('id'));
       if(!isExisting){
-        if(isEvtExisting){
-          form.append("eid",$evtElmt.data('id'));
-        }
         form.append("title",$docElmt.find('input[type="text"]').val());
       } else {
         form.append("id", $hiddenDocElmt.attr('data-id'));
