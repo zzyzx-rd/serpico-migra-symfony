@@ -395,14 +395,7 @@ class Organization extends DbObject
     public function getCustomerId(): ?string
     {
 
-        /*if($this->customerId == null){
-            $mail = ($this->masterUser == null) ? "" :$this->masterUser->getEmail();
-            $cust = Stripe\Customer::create([
-                'email' => $mail
-            ]);
 
-            return $cust->id;
-        }*/
         return $this->customerId;
     }
 

@@ -2,7 +2,7 @@ $(document).ready(function () {
     $('.modal').modal();
     $valprec = "month";
     $('select').material_select();
-
+    var deletePanel;
     input = $('#freesubscription');
     console.log(input);
     val = $('.user').val();
@@ -193,6 +193,12 @@ $(document).ready(function () {
         $(this).addClass('active');
 
     })
+
+    $('.unsubscribe').on('click',function() {
+
+       $(this).parent().addClass('currentsub');
+
+    })
     $('.free').on('click',function() {
 
         $(this).closest('#subscription-form');
@@ -249,7 +255,7 @@ $(document).ready(function () {
     })
 
     $('.subscription-form button').on('click',function() {
-        alert('test');
+
 
     });
     $('.newpayment').on('click',function() {
