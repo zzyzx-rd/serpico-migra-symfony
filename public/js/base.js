@@ -93,6 +93,12 @@
         });
     }
 
+    Array.prototype.unique = function() {
+        return this.filter(function (value, index, self) { 
+            return self.indexOf(value) === index;
+        });
+    }
+
     function setCookie(key, value, expiry) {
         var expires = new Date();
         expires.setTime(expires.getTime() + (expiry * 24 * 60 * 60 * 1000));
@@ -201,7 +207,7 @@
                 });
             }
             nbExistingNewNotifs = $unvisitedNotifier.length ? parseInt($unvisitedNotifier.text()) : 0;
-            $params = {newUIds: newUIds, existingUIds: existingUIds, md: modifyDashboard};
+            $params = {newUIds: newUIds, existingUIds: existingUIds.unique(), md: modifyDashboard};
             if(modifyDashboard){
                 $params['aIds'] = aIds;
                 $params['sIds'] = sIds;

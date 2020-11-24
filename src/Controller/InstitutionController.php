@@ -805,7 +805,7 @@ final class InstitutionController extends MasterController
                                 }
                             }
                             $partData['synth'] = $isSynthetic;
-                            $partData['picture'] = $isSynthetic ? '/lib/img/org/no-picture.png' : ($user->getPicture() ?: '/lib/img/user/no-picture.png');
+                            $partData['picture'] = $isSynthetic ? '/lib/img/org/no-picture.png' : ($user->getPicture() ? 'lib/img/user/'.$user->getPicture() : '/lib/img/user/no-picture.png');
                             $stageData['participants'][] = $partData;
                         }
 

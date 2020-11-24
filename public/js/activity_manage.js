@@ -797,7 +797,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
       $this.parent().css('z-index',1);
   });
   
-
+  /*
   $(document).on('mouseover',function(e){
     var $this = $(e.target);
     if($this.closest('.virtual-activities-holder').length){
@@ -809,9 +809,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
       $('.no-activity-overlay').css('visibility','');
     }
   });
-  /*.on('mouseleave',function(){
-    $('.no-activity-overlay').css('visibility','');
-  });*/
+  */
 
     function dayDiff(d1, d2)
     {

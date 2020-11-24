@@ -242,7 +242,7 @@ class Client extends DbObject
     {
         $aliveExtUsers = new ArrayCollection;
         foreach ($this->externalUsers as $externalUser) {
-            if ($externalUser->getDeleted() == null) {
+            if ($externalUser->getDeleted() == null && !$externalUser->isSynthetic()) {
                 $aliveExtUsers->add($externalUser);
             }
         };
