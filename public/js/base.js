@@ -232,6 +232,11 @@
                     })
 
                     $(data.stages).each(function(i,s){
+                        
+                        if($('.no-activity-overlay:visible').length){
+                            location.reload();
+                        }
+
                         if(!s.asd){
 
                         } else {
@@ -263,7 +268,6 @@
                                 'data-aid' : s.aid,
                                 'data-sid' : s.id,
                             });
-
 
                             $stageTooltip = $($actElmt.find('.stage-element').attr('data-tooltip'));
 
