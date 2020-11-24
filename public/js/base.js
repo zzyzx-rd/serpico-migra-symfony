@@ -349,7 +349,7 @@
                         $notifElmt.attr('data-id',n.id).find('.notif-user-picture').append(`<img class="user-profile-picture" src="/lib/img/user/${n.picture}">`);
                         $notifElmt.find('.notif-time').append(`${n.inserted}`);
                         $notifElmt.find('.notif-msg').append(`${n.msg}`);
-                        $notifHolder.append($notifElmt);
+                        $notifHolder.prepend($notifElmt);
                     })
                     
                     var nbNewNotifs = data.nbNew;

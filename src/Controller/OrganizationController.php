@@ -7114,9 +7114,25 @@ class OrganizationController extends MasterController
         if($response->getStatusCode() == 500){ return $response; };
         */
 
-        $outputData = ['type' => $type, 'size' => $size, 'mime' => $mime, 'path' => $path, 'title' => $docTitle, 'id' => $document->getId()];
+        $outputData = ['type' => $type, 'size' => $size, 'mime' => $mime, 'path' => $path, 'title' => $docTitle, 'did' => $document->getId()];
         if(!$evtId){
+            $eventName = $eventType->getEName();
+            $eventGroup = $eventType->getEventGroup();
+            $locale = $request->getLocale();
+            $repoEG = $em->getRepository(EventGroup::class);
+            $repoET = $em->getRepository(EventType::class);
+            $outputData['sid'] = $stgId;
             $outputData['eid'] = $event->getId();
+            $outputData['od'] = $event->getOnsetdateU();
+            $outputData['rd'] = $event->getExpResDateU();
+            $outputData['p'] = $event->getPeriod();
+            $outputData['it'] = $eventName->getIcon()->getType();
+            $outputData['in'] = $eventName->getIcon()->getName();
+            $outputData['gn'] = $eventGroup->getEventGroupName()->getId();
+            $outputData['gt'] = $repoEG->getDTrans($eventGroup, $locale, $this->org);
+            $outputData['tt'] = $repoET->getDTrans($eventType, $locale, $this->org);
+            $outputData['nbc'] = $event->getComments()->count();
+            $outputData['nbd'] = $event->getDocuments()->count();
         }
         return new JsonResponse($outputData, 200);
     }
@@ -7214,11 +7230,27 @@ class OrganizationController extends MasterController
             $event->addUpdate($update);
         }*/
 
-        $outputResponse = ['msg' => 'success', 'author' => $this->user->getFullName(), 'modified' => $comment->getModified() != null, 'inserted' => $this->nicetime($comment->getInserted(),$locale), 'id' => $comment->getId()];
+        $outputData = ['msg' => 'success', 'author' => $this->user->getFullName(), 'modified' => $comment->getModified() != null, 'inserted' => $this->nicetime($comment->getInserted(),$locale), 'cid' => $comment->getId()];
         if(!$evtId){
-            $outputResponse['eid'] = $event->getId();
+            $outputData['sid'] = $stgId;
+            $outputData['eid'] = $event->getId();
+            $eventName = $eventType->getEName();
+            $eventGroup = $eventType->getEventGroup();
+            $locale = $request->getLocale();
+            $repoEG = $em->getRepository(EventGroup::class);
+            $repoET = $em->getRepository(EventType::class);
+            $outputData['od'] = $event->getOnsetdateU();
+            $outputData['rd'] = $event->getExpResDateU();
+            $outputData['p'] = $event->getPeriod();
+            $outputData['it'] = $eventName->getIcon()->getType();
+            $outputData['in'] = $eventName->getIcon()->getName();
+            $outputData['gn'] = $eventGroup->getEventGroupName()->getId();
+            $outputData['gt'] = $repoEG->getDTrans($eventGroup, $locale, $this->org);
+            $outputData['tt'] = $repoET->getDTrans($eventType, $locale, $this->org);
+            $outputData['nbc'] = $event->getComments()->count();
+            $outputData['nbd'] = $event->getDocuments()->count();
         }
-        return new JsonResponse($outputResponse, 200);
+        return new JsonResponse($outputData, 200);
     }
 
     /**
