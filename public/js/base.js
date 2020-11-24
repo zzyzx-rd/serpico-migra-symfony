@@ -300,6 +300,7 @@
                     });
 
                     $(data.events).each(function(i,e){
+                        $(`.e-selectable[data-id="${e.id}"]`).remove();
                         $evtElmt = $($actHolder.data('prototype-evt'));
                         $evtElmt.attr({
                             'data-id' : e.id,
