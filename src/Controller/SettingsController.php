@@ -3154,7 +3154,7 @@ class SettingsController extends MasterController
         
         $user = $this->user;
         $organization = $user ? $this->org : null;
-        $orgId = $organization->getId();
+        $orgId = $organization ? $organization->getId() : null;
         $clients = $organization ? $organization->getClients() : new ArrayCollection();
         $repoP = $em->getRepository(Participation::class);
         
