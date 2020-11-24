@@ -92,6 +92,8 @@ the_event: the update
 learn_more: Learn more
 thanks: thanks
 to: to
+cancel: Cancel
+features: Features
 
 updates:
 
@@ -3340,3 +3342,13 @@ email_confirm:
   expired_link_title: Verification link has expired
   expired_link_msg: Link expire after 24 hours, but we can send a new verified email to
   button_resend_link_msg: Send email again
+
+subscription:
+  payment: Payment
+  annually: Annually
+  monthly: Monthly
+  per_year: / year
+  per_month: / month
+  premium: Premium
+  free: Free
+  2_months_free: 2 months free

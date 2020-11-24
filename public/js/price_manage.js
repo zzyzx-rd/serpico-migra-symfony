@@ -14,7 +14,7 @@ $(document).ready(function () {
     console.log(val < 99 ,val < 249);
     period = $('.period').children("option:selected").val();
     $.each($('.price-period'),function(){
-        $(this).text("/ per "+period);
+        $(this).text($(this).closest('.pricing-elmts').data('m'));
     })
     if(period == "year"){
         $.each($('.reduction'),function(){
@@ -28,17 +28,17 @@ $(document).ready(function () {
     else if ( val < 99 ) {
         tblVal.push(priceTblStandard[0]*val);
         tblVal.push(priceTblPremium[0]*val);
-        standard.text((priceTblStandard[0]*val)+"€");
-        premium.text((priceTblPremium[0]*val)+"€");
+        standard.text((priceTblStandard[0]*val));
+        premium.text((priceTblPremium[0]*val));
     } else if ( val < 249) {
         tblVal.push(priceTblStandard[1]*val);
         tblVal.push(priceTblPremium[1]*val);
-        standard.text((priceTblStandard[1]*val)+"€");
-        premium.text((priceTblPremium[1]*val)+"€");
+        standard.text((priceTblStandard[1]*val));
+        premium.text((priceTblPremium[1]*val));
 
     } else {
-        standard.text((priceTblStandard[2]*val)+"€");
-        premium.text((priceTblPremium[2]*val)+"€");
+        standard.text((priceTblStandard[2]*val));
+        premium.text((priceTblPremium[2]*val));
 
     }
     $('.number').on('change',function() {
@@ -51,15 +51,15 @@ $(document).ready(function () {
 
         console.log(standard,premium);
         if ( val == "1" ) {
-        standard.text(priceTblStandard[0]+"€");
-            premium.text(priceTblPremium[0]+"€");
+        standard.text(priceTblStandard[0]);
+            premium.text(priceTblPremium[0]);
         } else if ( val == "100") {
-            standard.text(priceTblStandard[1]+"€");
-            premium.text(priceTblPremium[1]+"€");
+            standard.text(priceTblStandard[1]);
+            premium.text(priceTblPremium[1]);
 
         } else {
-            standard.text(priceTblStandard[2]+"€");
-            premium.text(priceTblPremium[2]+"€");
+            standard.text(priceTblStandard[2]);
+            premium.text(priceTblPremium[2]);
 
         }
     })
@@ -86,19 +86,19 @@ $(document).ready(function () {
         else if ( val < 100 ) {
             tblVal[0]=(priceTblStandard[0]*val)*period;
             tblVal[1]=(priceTblPremium[0]*val)*period;
-            standard.text(((priceTblStandard[0]*val)*period)+"€");
-            premium.text(((priceTblPremium[0]*val)*period)+"€");
+            standard.text(((priceTblStandard[0]*val)*period));
+            premium.text(((priceTblPremium[0]*val)*period));
         } else if ( val < 250) {
             tblVal[0]=(priceTblStandard[1]*val)*period;
             tblVal[1]=(priceTblPremium[1]*val)*period;
-            standard.text(((priceTblStandard[1]*val)*period)+"€");
-            premium.text(((priceTblPremium[1]*val)*period)+"€");
+            standard.text(((priceTblStandard[1]*val)*period));
+            premium.text(((priceTblPremium[1]*val)*period));
 
         } else if ( val > 250) {
             tblVal[0]=(priceTblStandard[2]*val)*period;
             tblVal[1]=(priceTblPremium[2]*val)*period;
-            standard.text(((priceTblStandard[2]*val)*period)+"€");
-            premium.text(((priceTblPremium[2]*val)*period)+"€");
+            standard.text(((priceTblStandard[2]*val)*period));
+            premium.text(((priceTblPremium[2]*val)*period));
 
         }
 
@@ -368,7 +368,38 @@ $(document).ready(function () {
         }
 
     });
+
+    $(this).find('.user-slider')[0].noUiSlider.on('slide', function (values, handle) {
+        const $card = $($(this)[0].target.closest('.card'));
+        var price_1 = $card.find('.switch input').is(':checked') ? 70 : 7;
+        var price_2 = $card.find('.switch input').is(':checked') ? 60 : 6;
+        var price_3 = $card.find('.switch input').is(':checked') ? 50 : 5;
+        $card.find('.user-slider')[0].nextElementSibling.innerHTML = Number(values[handle]);
+        $card.find('.price-standard')[0].innerHTML = 
+            Math.min(100,Number(values[handle])) * price_1 + Math.max(0, Math.min(150, Number(values[handle]) - 100)) * price_2 + Math.max(0,Math.min(1000,Number(values[handle]) - 250)) * price_3;
+        $userElmt = $card.find('.user-nb');
+        if(Number(values[handle]) == 1){
+            $userElmt.text($userElmt.text().slice(0,-1));
+        }   
+        if(Number(values[handle]) > 1 && $userElmt.text().charAt($userElmt.text().length - 1) != 's'){
+            $userElmt.text($userElmt.text() + 's');
+        }
+    });
+
+    $('.switch input').on('change',function(){
+        const $card = $(this).closest('.card');
+        if($(this).is(':checked')){
+            $card.find('.reduction').css('visibility','visible');
+            $card.find('.price-standard').text(parseInt($(this).closest('.card').find('.price-standard').text() * 10));
+            $card.find('.price-period').empty().append($(this).closest('.pricing-elmts').data('y'));
+        } else {
+            $card.find('.reduction').css('visibility','hidden');
+            $card.find('.price-standard').text(parseInt($(this).closest('.card').find('.price-standard').text() / 10));
+            $card.find('.price-period').empty().append($(this).closest('.pricing-elmts').data('m'));
+        }
+    })
 });
+
 
 
 

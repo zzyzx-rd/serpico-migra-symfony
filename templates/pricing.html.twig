@@ -193,24 +193,26 @@ Pricing
                   <i class="fa fa-dove premium-plan-icon"></i>
                   <div class="c-flex-center">
                     <div>{{'pricing.from'|trans}}</div>
-                    <div class="price-line"><span class="price-value">5</span><span class="price-ccy">€</span></div>
+                    <div class="price-line"><span class="price-value">7</span><span class="price-ccy">€</span></div>
                     <div><span>{{ '/' ~ 'month'|trans }}</span><span>{{ '/' ~ 'pricing.user'|trans }}</span><sup class="dd-text">1</sup></div>
                   </div>
                   <span class="table-title dd-text">{{'pricing.pricing_table.plan_premium'|trans|upper}}</span>
                 </div>
               </th>
+              {#
               <th>
                 <div class="table-headers">
                 
                   <i class="fa fa-building enterprise-plan-icon"></i>
                   <div class="c-flex-center">
                     <div>{{'pricing.from'|trans}}</div>
-                    <div class="price-line"><span class="price-value">7</span><span class="price-ccy enterprise-ccy">€</span></div>
+                    <div class="price-line"><span class="price-value">14</span><span class="price-ccy enterprise-ccy">€</span></div>
                     <div><span>{{ '/' ~ 'month'|trans }}</span><span>{{ '/' ~ 'pricing.user'|trans }}</span><sup class="dd-text">1</sup></div>
                   </div>
                   <span class="table-title dd-text">{{'pricing.pricing_table.plan_enterprise'|trans|upper}}<sup class="dd-text">3</sup></span>
                 </div>
               </th>
+              #}
             </tr>
           </thead>
           <tbody>
@@ -218,49 +220,51 @@ Pricing
               <td>{{'pricing.pricing_table.functionality_1'|trans}}</td>
               <td><i class="fa fa-check dd-text"></i></td>
               <td><i class="fa fa-check dd-text"></i></td>
-              <td><i class="fa fa-check dd-text"></i></td>
+              {#<td><i class="fa fa-check dd-text"></i></td>#}
             </tr>
             <tr>
               <td>{{'pricing.pricing_table.functionality_2'|trans}}</td>
               <td><i class="fa fa-check dd-text"></i></td>
               <td><i class="fa fa-check dd-text"></i></td>
-              <td><i class="fa fa-check dd-text"></i></td>
+              {#<td><i class="fa fa-check dd-text"></i></td>#}
             </tr>
             <tr>
               <td>{{'pricing.pricing_table.functionality_3'|trans}}</td>
               <td><span class="dd-text tooltipped" data-tooltip="{{'comments'|trans|capitalize}}"><i class="fa fa-comments"></i></span></td>
               <td><span class="dd-text tooltipped" data-tooltip="{{'comments'|trans|capitalize}}"><i class="fa fa-comments"></i></span><span class="sm-left sm-right">+</span><span class="dd-text tooltipped" data-tooltip="{{'documents'|trans|capitalize}}"><i class="fa fa-file"></i></span></td>
-              <td><span class="dd-text tooltipped" data-tooltip="{{'comments'|trans|capitalize}}"><i class="fa fa-comments"></i></span><span class="sm-left sm-right">+</span><span class="dd-text tooltipped" data-tooltip="{{'documents'|trans|capitalize}}"><i class="fa fa-file"></i></span></td>
+              {#<td><span class="dd-text tooltipped" data-tooltip="{{'comments'|trans|capitalize}}"><i class="fa fa-comments"></i></span><span class="sm-left sm-right">+</span><span class="dd-text tooltipped" data-tooltip="{{'documents'|trans|capitalize}}"><i class="fa fa-file"></i></span></td>#}
             </tr>
             <tr>
               <td>{{'pricing.pricing_table.functionality_4'|trans}}</td>
               <td><sup class="dd-text">a</sup></td>
               <td><sup class="dd-text">b</sup></td>
-              <td><sup class="dd-text">b</sup></td>
+              {#<td><sup class="dd-text">b</sup></td>#}
             </tr>
             <tr>
               <td>{{'pricing.pricing_table.functionality_5'|trans}}</td>
               <td><sup class="dd-text">c</sup></td>
               <td><sup class="dd-text">d</sup></td>
-              <td><sup class="dd-text">d</sup></td>
+              {#<td><sup class="dd-text">d</sup></td>#}
             </tr>
             <tr>
               <td>{{'pricing.pricing_table.functionality_6'|trans}}</td>
               <td></td>
               <td><i class="fa fa-check dd-text"></i></td>
-              <td><i class="fa fa-check dd-text"></i></td>
+              {#<td><i class="fa fa-check dd-text"></i></td>#}
             </tr>
+            {#
             <tr>
               <td>{{'pricing.pricing_table.functionality_7'|trans}}<sup class="dd-text">e</sup></td>
               <td></td>
               <td></td>
               <td><i class="fa fa-check dd-text"></i></td>
             </tr>
+            #}
             <tr>
               <td>{{'pricing.start_now'|trans}}</td>
               <td></td>
               <td><a class="btn waves-effect waves-light" href="{{ path('signup')}}">{{ 'pricing.trial_21_days_cta'|trans }}</a></td>
-              <td></td>
+              {#<td></td>#}
             </tr>
           </tbody>
         </table>
@@ -296,10 +300,12 @@ Pricing
           <sup class="dd-text">2</sup>
           <span>{{'pricing.note_2'|trans}}</span>
         </p>
+        {#}
         <p class="no-margin">
           <sup class="dd-text">3</sup>
           <span>{{'pricing.note_3'|trans}}</span>
         </p>
+        #}
       </div>
     </main>
 

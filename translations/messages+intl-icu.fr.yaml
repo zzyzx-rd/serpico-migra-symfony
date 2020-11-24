@@ -94,6 +94,9 @@ the_commentaire: le document
 learn_more: En savoir plus
 thanks: merci
 to: vers
+cancel: Annuler
+features: Fonctionnalités
+
 
 updates:
 
@@ -726,7 +729,7 @@ pricing:
   note_d: Les tableaux peuvent offrir plusieurs vues, de la vue utilisateur sur ses opérations propres, jusqu'à celle du départment et enfin de l'entreprise
   note_e: Vous pouvez configurer des updates plus poussés, et voir l'évolution de la performance des opérations dans la durée
   subscriptions: Abonnements
-  note_1: "Le prix mensuel par utilisateur est pour le Plan Premium, 7€ du 1er au 100ème, 6€ du 101ème au 250ème utilisateur, et 5€ au délà. Pour le tarif Entreprise, 14€ du 1er au 100ème, 10€ du 101ème au 250ème utilisateur, et 7€ au delà. <a class=\"dd-text\" href=\"/#\">Conditions tarifaires</a> applicables"
+  note_1: "Le prix mensuel par utilisateur est pour le Plan Premium, 7€ du 1er au 100ème, 6€ du 101ème au 250ème utilisateur, et 5€ au délà. <a class=\"dd-text\" href=\"/#\">Conditions tarifaires</a> applicables" #Pour le tarif Entreprise, 14€ du 1er au 100ème, 10€ du 101ème au 250ème utilisateur, et 7€ au delà. 
   note_2: Limité à 10 collaborateurs
   note_3: A venir prochainement
   trial_21_days_cta: 21 jours premium gratuits
@@ -3454,3 +3457,13 @@ email_confirm:
   expired_link_title: Le lien de vérification a expiré
   expired_link_msg: Les liens expirent après 24 heures, mais nous pouvons envoyer un autre e-mail de vérification à
   button_resend_link_msg: Renvoyer l'e-mail
+
+subscription:
+  payment: Paiement
+  annually: Annuel
+  monthly: Mensuel
+  per_year: / année
+  per_month: / mois
+  premium: Premium
+  free: Gratuit
+  2_months_free: 2 mois gratuits

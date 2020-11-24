@@ -227,6 +227,20 @@ $(function(){
         e.preventDefault();
         $.post(suurl,$(this).closest('form').serialize())
             .done(function(data){
+                $('.user-credentials .element-input').each(function(i,e){
+                    if($(e).find('input').length > 1){
+                        el = '';
+                        $(e).find('input').each(function(i,f){
+                            el = el.concat(' ',$(f).val());
+                        })
+                        el.trim();
+                    } else if($(e).find('input').length == 1) {
+                        el = $(e).find('input').val();
+                    }
+                    if($(e).prev().text() != el){
+                        $(e).prev().empty().append(el);
+                    }
+                })
                 $('.element-data, .modify-btn').show();
                 $('.element-input, .save-btn').hide();
                 $('.cancel-btn').css('visibility','hidden');
