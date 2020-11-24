@@ -173,10 +173,10 @@ class ActivityController extends MasterController
                     ->setMasterUser($stage->getMasterUser())
                     ->setCreatedBy($currentUser->getId());
                     $em->persist($activity);
-                    $em->flush();
-
+                    
                     $notificationManager->registerUpdates($activity, ElementUpdate::CREATION, 'content');
-
+                    
+                    $em->flush();
                     /*
                     $response = $this->forward('App\Controller\MailController::sendMail', [
                         'recipients' => $recipients, 

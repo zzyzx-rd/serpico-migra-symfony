@@ -47,7 +47,7 @@ $('#createStage').modal({
   }
 })
 
-$('#createParticipant, #deleteParticipant').modal();
+$('#createParticipant, #legalPerson, #deleteParticipant').modal();
 
 function initPickates(){
   switch(lg){
