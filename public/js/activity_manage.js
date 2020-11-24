@@ -2373,6 +2373,9 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
 
     $.post(scurl,data)
       .done(function(s){
+        if($('.no-activity-overlay:visible').length){
+          location.reload();
+        }
         $('#createStage').modal('close');
         
         $actHolder = $(document).find('.process-list').eq(0);
