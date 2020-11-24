@@ -77,7 +77,7 @@ class globalVar {
         } else if ($o && $o->getWorkerFirm() && $o->getWorkerFirm()->getLogo()){
             return 'lib/img/wf/' . $o->getWorkerFirm()->getLogo();
         } else {
-            return 'lib/img/org/no-picture.png';
+            return $o->getType() == 'I' ? "lib/img/org/indpt-no-picture.png" : "lib/img/org/no-picture.png";
         }
     }
     

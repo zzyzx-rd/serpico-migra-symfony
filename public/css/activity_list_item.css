@@ -160,9 +160,9 @@ ol.stages > li > .stage-item-button {
   color: orange;
 }
 .p-reopened .stage-item-button{
-  border: var(--strike-width) dotted #16AFB7;
-  background-color: #16AFB7;
-  color: #16AFB7;
+  border: var(--strike-width) solid #795548;
+  background-color: #795548;
+  color: #795548;
 }
 .p-unstarted .stage-item-button{
   border: var(--strike-width) solid grey;
