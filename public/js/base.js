@@ -357,7 +357,7 @@
                         nbExistingNewNotifs + nbNewNotifs == 0 ? $('.nb-updates-new').remove() : $unvisitedNotifier.empty().append(nbExistingNewNotifs + nbNewNotifs);
                     } else {
                         if(nbNewNotifs > 0){
-                            $('nav .user-profile-picture').closest('a').append(`<span class="nb-updates-new">${nbNewNotifs}</span>`);
+                            $('nav .user-nav-picture').closest('a').append(`<span class="nb-updates-new">${nbNewNotifs}</span>`);
                         }
                     }
 
