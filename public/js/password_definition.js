@@ -93,7 +93,7 @@ $(function() {
                     $selectorMElmts = $selector.closest('.select-wrapper')
                     $selector.prev().find('li').each(function(i,e){
                         logo = $selector.find('option').eq(i).attr('data-pic');
-                        folder = 'org';
+                        $selector.find('option').eq(i).attr('data-oid') ? 'org' : 'wf';
                         $(e).prepend(`<img class="s-firm-option-logo" src="/lib/img/${folder}/${logo ? logo : 'no-picture.png'}">`);
                         $(e).addClass('flex-center');
                     });
