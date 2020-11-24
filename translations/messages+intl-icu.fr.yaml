@@ -182,8 +182,8 @@ updates:
       }
       event_modification {
         {property, select,
-          onsetDate                 {{author} a modifié la date de début de {actElmtMsg}
-          expResDate                {{author} a modifié la date de fin de {actElmtMsg}
+          onsetDate                 {{author} a modifié la date de début de {actElmtMsg}}
+          expResDate                {{author} a modifié la date de fin de {actElmtMsg}}
           other                     {Fallback problem}
         }
       }
