@@ -187,7 +187,7 @@ class SettingsController extends MasterController
             $org->setCustomerId($cust->id);
         }*/
 
-        $payacces = false;
+        $payaccess  = false;
         Stripe\Stripe::setApiKey('sk_test_51Hn5ftLU0XoF52vKQ1r5r1cONYas5XjLLZu6rFg2P69nntllHxLs3G0wyCxoOQNUgjgD5LwCoaYTkGQp1qVK3g3A00LfW1k4Ep');
 
         if (!$currentUser instanceof User) {
@@ -195,7 +195,7 @@ class SettingsController extends MasterController
         }
 
         if($this->org->getPaymentUser() == $this->user || $this->org->getPaymentUser()== null){
-            $payacces = true ;
+            $payaccess  = true ;
         }
 
 
@@ -263,7 +263,7 @@ class SettingsController extends MasterController
         }
 
 
-        return $this->render( 'price_management.html.twig' , [
+        return $this->render('price_management.html.twig' , [
 
             'currentPlan' => $organization->getPlan(),
             'val' => $val,
@@ -273,7 +273,7 @@ class SettingsController extends MasterController
             'name' => $name,
             'brand' => $brand,
             'start' => $start,
-            'payacces' => $payacces,
+            'payaccess' => $payaccess,
             'cards' => $this->org->getPaymentMethods(),
             'pdf'=>$pdf,
             'user'=>$users,

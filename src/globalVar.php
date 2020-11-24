@@ -37,6 +37,11 @@ class globalVar {
      */
     private $em;
 
+    /**
+     * @var TranslatorInterface
+     */
+    private $translator;
+
     public function __construct(EntityManagerInterface $entityManager, RequestStack $requestStack, Security $security, TranslatorInterface $translator)
     {
         $this->requestStack = $requestStack;
