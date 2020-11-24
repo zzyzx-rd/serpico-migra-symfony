@@ -289,7 +289,7 @@
                             }
                             $actElmt.find('.tooltipped').tooltip();
                             $actElmt.hide();
-                            //$actHolder.find('.activity-list').prepend($actElmt);
+                            $actHolder.find('.activity-list').prepend($actElmt);
                         }
                     });
 
