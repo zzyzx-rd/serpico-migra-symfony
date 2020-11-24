@@ -185,6 +185,7 @@ updates:
           onsetDate                 {{author} a modifié la date de début de {actElmtMsg}
           expResDate                {{author} a modifié la date de fin de {actElmtMsg}
           other                     {Fallback problem}
+        }
       }
       event_document  {{author} a {updateLevel} un document <span class="strong">{docName}</span> pour {actElmtMsg}}
       event_comment   {{author} a {updateLevel} un <span class="strong">commentaire</span> pour {actElmtMsg}}
