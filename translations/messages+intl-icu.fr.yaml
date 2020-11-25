@@ -3459,6 +3459,7 @@ email_confirm:
   button_resend_link_msg: Renvoyer l'e-mail
 
 subscription:
+  user: Nombre de user
   payment: Paiement
   annually: Annuel
   monthly: Mensuel
