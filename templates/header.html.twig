@@ -5,7 +5,6 @@
 {% set difference = date('10/11/2020 10:00:00').diff(date('now')) %}
 {% set isLaunched = difference.invert == 0 %}
 
-<body>
 <header id="header" class="{{ not isLaunched ? 'tbl' : (atHome ? 'home' : '') }}" style="z-index: 1;">
   <nav id="nav">
     <div class="nav-wrapper">
@@ -133,4 +132,3 @@
     </div>
   </nav>
 </header>
-</body>

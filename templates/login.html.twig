@@ -3,7 +3,11 @@
 {# Login page for migration #}
 
 {% block title %}
-    {% trans %}landing.page_name{% endtrans %}
+    {{'login.title'|trans|capitalize}}
+{% endblock %}
+
+{% block mobile_title %}
+    {{'login.title'|trans|capitalize}}
 {% endblock %}
 
 {% block css %}
@@ -41,7 +45,7 @@
             display:flex;
             flex-flow: column;
             align-items:center;
-            margin-top:100px;
+            padding-top:100px;
         }
     </style>
     <script>

@@ -10,6 +10,10 @@
   {{ 'iprocesses.title'|trans }}
 {% endblock title %}
 
+{% block mobile_title %}
+  {{ 'iprocesses.title'|trans }}
+{% endblock mobile_title %}
+
 {% set actNameTruncVal = 22 %}
 
 {% set noActivities = orphanActivities is empty and processesActivities is empty %}

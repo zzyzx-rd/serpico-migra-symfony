@@ -94,6 +94,8 @@ thanks: thanks
 to: to
 cancel: Cancel
 features: Features
+logout: Logout
+notif_and_profile: Notifications & Profile
 
 updates:
 
@@ -759,7 +761,8 @@ pricing:
   trial_21_days_cta: 21 days premium for free
   start_now: Start now
     
-
+login:
+  title: Login
 
 solution:
   hr: HR

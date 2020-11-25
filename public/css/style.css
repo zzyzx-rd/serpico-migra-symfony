@@ -25,6 +25,21 @@ body[style="overflow: hidden;"] {
   color: #55318e;
 }
 
+nav .left-icon-zone{
+  display: inline-block;
+  height: inherit!important;
+}
+
+.left-icon-container{
+  display: flex;
+  height: inherit;
+  align-items: center;
+}
+
+.dd-logo{
+  height: 50%;
+}
+
 .dd-bg-color{
   background-color: #341f56;
 }
@@ -204,22 +219,22 @@ li + li.no-items-placeholder {
 }
 
 
-.nav-wrapper > ul,
-.nav-wrapper > ul > li,
-.nav-wrapper > ul > li > a:not(.login-btn) {
+
+.nav-desktop-btns > li,
+.nav-desktop-btns> li > a:not(.login-btn) {
   display: flex;
   align-items: center;
   height: 100%;
   color:#341f56;
-}
+}*/
 
-.nav-wrapper > ul > li > a:hover{
+.nav-desktop-btns > li > a:hover{
   color:white;
 }
 
-#nav * {
+/*#nav * {
   transition: none;
-}
+}*/
 
 
 #nav .logo {
@@ -240,6 +255,7 @@ li + li.no-items-placeholder {
   height: 40%;
   margin-right: .4em;
   border-radius: 50%;
+  border:1px solid #55318e;
 }
 
 #nav .lg-icon > .collapsible {
@@ -254,7 +270,7 @@ li + li.no-items-placeholder {
   height: auto;
 }
 
-#nav li:not(.logout) i {
+.hide-on-med-and-down li:not(.logout) i {
   padding-bottom: .15em;
   padding-right: .3em;
 }
@@ -267,6 +283,14 @@ li + li.no-items-placeholder {
   font-size: 2em;
 }
 
+.mobile-center-element{
+  height: inherit;
+  font-size: 16px;
+}
+
+.mobile-center-element > img{
+  height: 50%;
+}
 
 nav, nav .nav-wrapper i, nav a.button-collapse, nav a.button-collapse i {
   line-height: inherit !important;
@@ -384,7 +408,6 @@ body {
 
 main {
   width: 100%;
-  margin: auto;
 }
 
 .page-container {
@@ -1230,11 +1253,31 @@ div.col.s12.m2.linkedin {
 
 }
 
+
+
+@media screen and (max-width: 993px) {
+    .desktop-left-icon-container{
+      display: none;
+    }
+
+    .profile-notif-elmts{
+      right:0px;
+    }
+}
+
+@media screen and (min-width: 993px) {
+    .mobile-center-element{
+      display: none;
+    }
+    .profile-notif-elmts{
+      right:140px;
+    }
+}
+
 @media screen and (min-width: 601px) {
   
   body{
     font-size: 16px;
-    min-width: 993px;
   }
 
   .white-login-zone{
@@ -3120,7 +3163,6 @@ h2.header {
   border: 1px solid black;
   flex-direction: column;
   width: 350px;
-  right: 140px;
   display:none;
   border-radius: 2px;
   z-index:2;
@@ -3168,6 +3210,7 @@ h2.header {
   height: 25px;
   width: 25px;
   border-radius: 50%;
+  border:1px solid #55318e;
 }
 
 .notif-user-name, .notif-act-elmt{
