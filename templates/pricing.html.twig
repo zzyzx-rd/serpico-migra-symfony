@@ -13,8 +13,12 @@ Pricing
 {% endblock %}
 
 {% block css %}
-
+    <link rel="stylesheet" href="{{ asset('css/nouislider.css') }}">
   <style>
+      .period-year{
+          display: none;
+      }
+
       .old-times:before {
           content: "";
           background-image: url(/lib/img/place_paris.png);
@@ -136,6 +140,9 @@ Pricing
         width:80%;
         margin:auto;
       }
+      .noUi-connect {
+          background: #55318e;
+      }
 
       .pricing-table-section{
         margin: 50px 0;
@@ -175,7 +182,7 @@ Pricing
         <h4 class="center">{{'pricing.header_title'|trans|raw}}</h4>
       </section>
       <section class="pricing-table-section">
-  
+
         <table class="highlight centered">
           <thead>
             <tr>
@@ -198,7 +205,7 @@ Pricing
                   <div class="c-flex-center">
                     <div>{{'pricing.from'|trans}}</div>
                     <div class="price-line"><span class="price-value">7</span><span class="price-ccy">€</span></div>
-                    <div><span>{{ '/' ~ 'month'|trans }}</span><span>{{ '/' ~ 'pricing.user'|trans }}</span><sup class="dd-text">1</sup></div>
+                    <div><span class="period-month">{{ '/' ~ 'month'|trans }}</span><span class="period-year" >{{ '/' ~ 'year'|trans }}</span><span>{{ '/' ~ 'pricing.user'|trans }}</span><sup class="dd-text">1</sup></div>
                   </div>
                   <span class="table-title dd-text">{{'pricing.pricing_table.plan_premium'|trans|upper}}</span>
                 </div>
@@ -220,6 +227,31 @@ Pricing
             </tr>
           </thead>
           <tbody>
+            <tr>
+              <td>{{'subscription.payment'|trans }}</td>
+              <td></td>
+              <td>
+                  <div class="switch">
+                      <label class="black-text">
+                          {{'subscription.monthly'|trans}}
+                          <input type="checkbox">
+                          <span class="lever"></span>
+                          {{'subscription.annually'|trans}}
+                      </label >
+                  </div>
+              </td>
+            </tr>
+            <tr>
+                <td>{{'subscription.user'|trans }}</td>
+                <td></td>
+                <td>
+                    <div>
+                        <div class="user-slider" ></div>
+                        <div class="user-slider-range-value center" style="font-size:1.2rem;padding-top: 5px">1</div>
+                        <span class="user-nb">{{'user'|trans}}</span>
+                    </div>
+                </td>
+            </tr>
             <tr>
               <td>{{'pricing.pricing_table.functionality_1'|trans}}</td>
               <td><i class="fa fa-check dd-text"></i></td>
@@ -390,5 +422,21 @@ Pricing
 {% endblock %}
 
 {% block javascripts %}
-  <script src="{{ asset('js/base.js') }}"></script>
+    <script src="{{ asset('js/nouislider.js') }}"></script>
+    <script src="{{ asset('js/base.js') }}"></script>
+    <script src="{{ asset('js/pricing_manage.js') }}"></script>
+<script type="text/javascript">
+
+    noUiSlider.create($('.user-slider')[0], {
+        start: [1],
+        connect: [true, false],
+        range: {
+            'min': [1,1],
+            '30%': [10,1],
+            '50%': [50,10],
+            '75%': [250,50],
+            'max': [1000]
+        }
+    })
+    </script>
 {% endblock %}

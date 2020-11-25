@@ -3347,6 +3347,7 @@ email_confirm:
   button_resend_link_msg: Send email again
 
 subscription:
+  user: Number of users
   payment: Payment
   annually: Annually
   monthly: Monthly
