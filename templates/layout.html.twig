@@ -61,59 +61,256 @@
       height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     {% endif %}
     <div class="page-container">
+      <header>
+      
+        {% if global.route != 'confirmEmailModif' %}
+          <nav id="nav" class="white">
+            <div class="nav-wrapper flex-center-sb">
+              <a class="left-icon-zone hide-on-med-and-down" href="/">
+              <div class="xm-left left-icon-container desktop-left-icon-container">
+                <img class="dd-logo" src="{{ asset('lib/img/logo_dd_p_l.png') }}">
+              </div>
+              </a>
+              <a href="#" data-activates="mobile-menu" class="button-collapse left-icon-zone">
+                <div class="left-icon-container">
+                  <i class="material-icons dd-text">menu</i>
+                </div>
+              </a>
+              <div class="mobile-center-element flex-center">
+                <img src="{{ asset('lib/img/logo_dd_s_centered.png') }}">
+                <span class="dd-text m-left strong">{% block mobile_title '' %}</span>
+              </div>
+              <ul class="flex-center nav-desktop-btns" style="height:100%">
+                {% if is_granted('IS_AUTHENTICATED_REMEMBERED') and global.currentuser is not null %}
+                  {#<li class="logo">
+                  </li>#}
+                  <li class="plan hide-on-med-and-down">
+                    <div class="c-flex-center">
+                      <span> {{ organization.plan == 1 ? 'header.plan.enterprise'|trans|upper : (organization.plan == 2 ? 'header.plan.premium'|trans|upper : 'header.plan.free'|trans|upper) }} {{ date('now').diff(organization.inserted).days < 21 ? '(' ~ 'trial'|trans|upper ~ ')' }} </span>
+                      <a class="dd-orange-text" href="{{ path('priceManagement') }}">{{ 'header.plan.upgrade'|trans }}</a>
+                    </div>
+                  </li>
+                  {#
+                  <li>
+                    <a href="{{ path('help') }}">
+                      <i class="fa fa-question-circle" aria-hidden="true"></i>
+                      <span>{% trans %}header.help{% endtrans %}</span>
+                    </a>
+                  </li>
+                  #}
+                  {% if global.currentuser.is_root %}
+                    <li class="hide-on-med-and-down">
+                      <a href="{{ path('rootManagement') }}">
+                        <i class="fa fa-cogs" aria-hidden="true"></i>
+                        <span>{% trans %}header.root_mgt{% endtrans %}</span>
+                      </a>
+                    </li>
+                  {% endif %}
+                  {% if global.currentuser.is_admin %}
+                    <li class="hide-on-med-and-down">
+                      <a href="{{ path('firmSettings') }}">
+                        <i class="fa fa-cog" aria-hidden="true"></i>
+                        <span>{% trans %}header.settings{% endtrans %}</span>
+                      </a>
+                    </li>
+                  {% endif %}
+                  {# admins (1) can see processes for their institution, everyone else will see all institutions instead #}
+                  {#
+                  {% set sees_processes = userrole == 1 %}
+                  {% if not sees_processes %}
+                    <li>
+                      <a href="{{ path('displayAllInstitutions') }}">
+                        <i class="fa fa-hotel" aria-hidden="true"></i>
+                        {% set str = 'header.institutions' %}
+                        {{ str|trans }}
+                      </a>
+                    </li>
+                  {% endif %}
+                  #}
+                  {% if orgName != "Public" %}
+                    <li class="hide-on-med-and-down">
+                      <a href="{{ path(global.currentuser.is_admin ? 'manageUsers' : 'seeColleaguesTeams') }}">
+                        <i class="fa fa-users" aria-hidden="true"></i>
+                        {% set str = 'header.users' %}
+                        {{ str|trans }}
+                      </a>
+                    </li>
+                  {% endif %}
+                  <li class="hide-on-med-and-down">
+                    <a href="{{ path('myActivities') }}">
+                      <i class="fa fa-briefcase" aria-hidden="true"></i>
+                      <span>
+                        {% if orgName != "Public" %}
+                          {% trans %}header.firmActivities{% endtrans %}
+                        {% else %}
+                          {% trans %}header.my_actions{% endtrans %}
+                        {% endif %}
+                      </span>
+                    </a>
+                  </li>
+                  
+                  <li class="profile-notif-zone">
+                    <a href="{#{{ path('home') }}#}#" class="user-notif-link">
+                      <img class="user-nav-picture tooltipped" src="{{ asset(global.userpicture) }}" data-tooltip="{{ 'notif_and_profile'|trans }}" data-position="down">
+                      {% if updates|length > 0 and updates.nbNew > 0 %}
+                        <span class="nb-updates-new" data-nb-visited="{{ updates|length - updates.nbNew|number_format }}">{{ updates.nbNew }}</span>
+                      {% endif %}
+                    </a>
+                  
+                      
+                      <li>
+                        <ul class="profile-notif-elmts flex-center" style="display:none">
+                          
+                          <li class="profile-zone">
+                            <ul class="flex-center">
+                              <li class="m-right">
+                                <img class="user-profile-xl-picture" src="{{ asset(global.userpicture) }}" alt="">
+                              </li>
+                              <ul class="c-flex">
+                                
+                                <li>{{currentuser.fullname}}</li>
+                                <li class="profile-link">
+                                  <a class="dd-orange-text no-padding" href="{{ url('home') }}">{{'profile.access_profile'|trans}}</a>
+                                </li>
+                              </ul>
+                            </ul>
+                          </li>
 
-      {% if global.route != 'confirmEmailModif' %}
-        <nav id="nav" class="white">
-          <div class="nav-wrapper">
-            <ul>
-              {% if is_granted('IS_AUTHENTICATED_REMEMBERED') and global.currentuser is not null %}
-                <li class="logo">
-                  <a href="/"><img src="{{ asset('lib/img/logo_dd_p_l.png') }}"></a>
-                </li>
-                <li class="plan">
-                  <div class="c-flex-center">
-                    <span> {{ organization.plan == 1 ? 'header.plan.enterprise'|trans|upper : (organization.plan == 2 ? 'header.plan.premium'|trans|upper : 'header.plan.free'|trans|upper) }} {{ date('now').diff(organization.inserted).days < 21 ? '(' ~ 'trial'|trans|upper ~ ')' }} </span>
-                    <a class="dd-orange-text" href="{{ path('priceManagement') }}">{{ 'header.plan.upgrade'|trans }}</a>
+                          <li class="notifications-title">
+                            <span>{{'updates.last_notifications_title'|trans}}</span>
+                          </li>
+
+                          <ul class="notif-list" data-prototype="{% apply escape %}{% include "components/update_element__item.html.twig" %}{% endapply %}">
+                            {% if updates|length > 0 %}
+                              {% for update in updates.notifs %}
+                                {% include "components/update_element__item.html.twig" with { element: update, seen: update.viewed } %}
+                              {% endfor %}
+                            {% else %}
+                              <li class="no-update-msg">{{'updates.no_update_yet'|trans}}</li>
+                            {% endif %}
+                          </ul>
+                  
+                        </ul>
+                      </li>
+                    
+                  
+                  </li>
+                  
+                  <li class="logout hide-on-med-and-down">
+                    <a href="{{ path('logout') }}">
+                      <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+                      
+                    </a>
+                  </li>
+                {% else %}
+                  {#{% if global.routeParams|length == 1 and path(global.route) in freeAccessRoutes %}#}
+                    <li class="logo">
+                      <a href="{{ path('home_welcome') }}">
+                        <img src="{{ asset('lib/img/DD_logo_squared_t.png') }}">
+                      </a>
+                      {% trans %}landing.page_name{% endtrans %}
+                    </li>
+                  {#{% endif %}#}
+
+                    
+                    <li>
+                      <a class="product {{ global.route == 'pricing' ? 'strong'}}" href="{#{{ path('solution') }}#}{{ path('pricing') }}">
+                        {% trans %}header.pricing{% endtrans %}
+                      </a>
+                    </li>
+
+                    <li>
+                      <a class="product" href="{{ path('home_welcome') }}">
+                        {% trans %}header.product{% endtrans %}
+                      </a>
+                    </li>
+                      {% if '/' ~ global.route != path('login') and '/' ~ global.route != path('signup') and not is_granted('IS_AUTHENTICATED_REMEMBERED') %}
+
+                        <li>
+                            <a class="modal-trigger" href="{{ is_granted('IS_AUTHENTICATED_REMEMBERED') ? path('processesList') : path('login') }}">
+                              {% trans %}header.login{% endtrans %}
+                            </a>
+                          </li>
+
+                          <li>
+                            <a class="btn waves-effect waves-light login-btn" href="{{ path('signup') }}">
+                              {% trans %}header.register.start{% endtrans %}
+                            </a>
+                          </li>
+                      
+                      {% endif %}
+                  
+                {% endif %}
+                <li class="lg-icon hide-on-med-and-down">
+                  <div class="collapsible" data-collapsible="accordion">
+                    <div class="collapsible-header">
+                      <ul class="flex-center">
+                        <li>
+                          <div class="flag sm-right {{ locale }}"></div>
+                        </li>
+                        <li>
+                          <span class="country">{{ locale|upper }}</span>
+                        </li>
+                      </ul>
+                    </div>
+                    <ul class="collapsible-body lang-menu">
+                      {% if locale != 'en' %}
+                        <li>
+                          <a href="{{ path('change_locale', {'locale': 'en'}) }}" class="flex-center">
+                              <div class="flag en"></div>
+                              <span class="country">EN</span>
+                          </a>
+                        </li>
+                      {% endif %}
+                      {% if locale != 'fr' %}
+                        <li>
+                          <a href="{{ path('change_locale', {'locale': 'fr'}) }}" class="flex-center">
+                              <div class="flag fr"></div>
+                              <span class="country">FR</span>
+                          </a>
+                        </li>
+                      {% endif %}
+                    </ul>
                   </div>
                 </li>
-                {#
-                <li>
-                  <a href="{{ path('help') }}">
-                    <i class="fa fa-question-circle" aria-hidden="true"></i>
-                    <span>{% trans %}header.help{% endtrans %}</span>
-                  </a>
-                </li>
-                #}
-                {% if global.currentuser.is_root %}
-                  <li class="">
-                    <a href="{{ path('rootManagement') }}">
-                      <i class="fa fa-cogs" aria-hidden="true"></i>
-                      <span>{% trans %}header.root_mgt{% endtrans %}</span>
-                    </a>
-                  </li>
-                {% endif %}
-                {% if global.currentuser.is_admin %}
-                  <li class="">
-                    <a href="{{ path('firmSettings') }}">
-                      <i class="fa fa-cog" aria-hidden="true"></i>
-                      <span>{% trans %}header.settings{% endtrans %}</span>
-                    </a>
-                  </li>
-                {% endif %}
-                {# admins (1) can see processes for their institution, everyone else will see all institutions instead #}
-                {#
-                {% set sees_processes = userrole == 1 %}
-                {% if not sees_processes %}
+              </ul>
+              <ul class="side-nav" id="mobile-menu">
+                {% if is_granted('IS_AUTHENTICATED_REMEMBERED') and global.currentuser is not null %}
+
                   <li>
-                    <a href="{{ path('displayAllInstitutions') }}">
-                      <i class="fa fa-hotel" aria-hidden="true"></i>
-                      {% set str = 'header.institutions' %}
-                      {{ str|trans }}
+                    <a href="{{ url('home') }}">
+                      <div class="flex-center">
+                        <img class="user-profile-xl-picture" src="{{ asset(global.userpicture) }}">
+                        <span class="m-left">{{'profile.access_profile'|trans}}</span>
+                      </div>
                     </a>
                   </li>
-                {% endif %}
-                #}
-                {% if orgName != "Public" %}
+                  
+                  <li class="plan">
+                    <a class="c-flex-center" href="{{ path('priceManagement') }}">
+                      <span class="dd-text"> {{ organization.plan == 1 ? 'header.plan.enterprise'|trans|upper : (organization.plan == 2 ? 'header.plan.premium'|trans|upper : 'header.plan.free'|trans|upper) }} {{ date('now').diff(organization.inserted).days < 21 ? '(' ~ 'trial'|trans|upper ~ ')' }} </span>
+                      <span class="dd-orange-text">{{ 'header.plan.upgrade'|trans }}</span>
+                    </a>
+                  </li>
+              
+                  {% if global.currentuser.is_root %}
+                    <li class="">
+                      <a href="{{ path('rootManagement') }}">
+                        <i class="fa fa-cogs" aria-hidden="true"></i>
+                        <span>{% trans %}header.root_mgt{% endtrans %}</span>
+                      </a>
+                    </li>
+                  {% endif %}
+                  {#
+                  {% if global.currentuser.is_admin %}
+                    <li class="">
+                      <a href="{{ path('firmSettings') }}">
+                        <i class="fa fa-cog" aria-hidden="true"></i>
+                        <span>{% trans %}header.settings{% endtrans %}</span>
+                      </a>
+                    </li>
+                  {% endif %}
+                  #}  
                   <li>
                     <a href="{{ path(global.currentuser.is_admin ? 'manageUsers' : 'seeColleaguesTeams') }}">
                       <i class="fa fa-users" aria-hidden="true"></i>
@@ -121,148 +318,62 @@
                       {{ str|trans }}
                     </a>
                   </li>
-                {% endif %}
-                <li class="">
-                  <a href="{{ path('myActivities') }}">
-                    <i class="fa fa-briefcase" aria-hidden="true"></i>
-                    <span>
-                      {% if orgName != "Public" %}
-                        {% trans %}header.firmActivities{% endtrans %}
-                      {% else %}
-                        {% trans %}header.my_actions{% endtrans %}
-                      {% endif %}
-                    </span>
-                  </a>
-                </li>
-                
-                <li class="profile-notif-zone">
-                  <a href="{#{{ path('home') }}#}#" class="user-notif-link">
-                    <img class="user-nav-picture tooltipped" src="{{ asset(global.userpicture) }}" data-tooltip="{{ currentuser.fullname }}" data-position="down">
-                    {% if updates|length > 0 and updates.nbNew > 0 %}
-                      <span class="nb-updates-new" data-nb-visited="{{ updates|length - updates.nbNew|number_format }}">{{ updates.nbNew }}</span>
-                    {% endif %}
-                  </a>
-                
-                    
-                    <li>
-                      <ul class="profile-notif-elmts flex-center" style="display:none">
-                        
-                        <li class="profile-zone">
-                          <ul class="flex-center">
-                            <li class="m-right">
-                              <img class="user-profile-xl-picture" src="{{ asset(global.userpicture) }}" alt="">
-                            </li>
-                            <ul class="c-flex">
-                              
-                              <li>{{currentuser.fullname}}</li>
-                              <li class="profile-link">
-                                <a class="dd-orange-text no-padding" href="{{ url('home') }}">{{'profile.access_profile'|trans}}</a>
-                              </li>
-                            </ul>
-                          </ul>
-                        </li>
-
-                        <li class="notifications-title">
-                          <span>{{'updates.last_notifications_title'|trans}}</span>
-                        </li>
-
-                        <ul class="notif-list" data-prototype="{% apply escape %}{% include "components/update_element__item.html.twig" %}{% endapply %}">
-                          {% if updates|length > 0 %}
-                            {% for update in updates.notifs %}
-                              {% include "components/update_element__item.html.twig" with { element: update, seen: update.viewed } %}
-                            {% endfor %}
-                          {% else %}
-                            <li class="no-update-msg">{{'updates.no_update_yet'|trans}}</li>
-                          {% endif %}
-                        </ul>
-                
-                      </ul>
-                    </li>
-                  
-                
-                </li>
-                
-                <li class="logout">
-                  <a href="{{ path('logout') }}">
-                    <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
-                    
-                  </a>
-                </li>
-              {% else %}
-                {#{% if global.routeParams|length == 1 and path(global.route) in freeAccessRoutes %}#}
-                  <li class="logo">
-                    <a href="{{ path('home_welcome') }}">
-                      <img src="{{ asset('lib/img/DD_logo_squared_t.png') }}">
+                  <li class="">
+                    <a href="{{ path('myActivities') }}">
+                      <i class="fa fa-briefcase" aria-hidden="true"></i>
+                      <span>
+                        {% if orgName != "Public" %}
+                          {% trans %}header.firmActivities{% endtrans %}
+                        {% else %}
+                          {% trans %}header.my_actions{% endtrans %}
+                        {% endif %}
+                      </span>
                     </a>
-                    {% trans %}landing.page_name{% endtrans %}
                   </li>
-                {#{% endif %}#}
-
-                  
-                  <li>
-                    <a class="product {{ global.route == 'pricing' ? 'strong'}}" href="{#{{ path('solution') }}#}{{ path('pricing') }}">
-                      {% trans %}header.pricing{% endtrans %}
+                  <li class="logout">
+                    <a href="{{ path('logout') }}">
+                      <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+                      <span>{{'logout'|trans}}</span>
                     </a>
                   </li>
 
+                {% else %}
+                  
                   <li>
                     <a class="product" href="{{ path('home_welcome') }}">
                       {% trans %}header.product{% endtrans %}
                     </a>
                   </li>
-                    {% if '/' ~ global.route != path('login') and '/' ~ global.route != path('signup') and not is_granted('IS_AUTHENTICATED_REMEMBERED') %}
 
-                      <li>
-                          <a class="modal-trigger" href="{{ is_granted('IS_AUTHENTICATED_REMEMBERED') ? path('processesList') : path('login') }}">
-                            {% trans %}header.login{% endtrans %}
-                          </a>
-                        </li>
+                  <li>
+                    <a class="product" href="{#{{ path('solution') }}#}{{ path('pricing') }}">
+                      {% trans %}header.pricing{% endtrans %}
+                    </a>
+                  </li>
+                  
+                  <li>
+                    <a href="{{ is_granted('IS_AUTHENTICATED_REMEMBERED') ? path('processesList') : path('login') }}">
+                      {% trans %}header.login{% endtrans %}
+                    </a>
+                  </li>
+                  
+                  <li>
+                    <a class="btn waves-effect waves-light login-btn" href="{{ path('signup') }}">
+                      {% trans %}header.register.start{% endtrans %}
+                    </a>
+                  </li>
 
-                        <li>
-                          <a class="btn waves-effect waves-light login-btn" href="{{ path('signup') }}">
-                            {% trans %}header.register.start{% endtrans %}
-                          </a>
-                        </li>
-                    
-                    {% endif %}
-                
-              {% endif %}
-              <li class="lg-icon">
-                <div class="collapsible" data-collapsible="accordion">
-                  <div class="collapsible-header">
-                    <ul class="flex-center">
-                      <li>
-                        <div class="flag sm-right {{ locale }}"></div>
-                      </li>
-                      <li>
-                        <span class="country">{{ locale|upper }}</span>
-                      </li>
-                    </ul>
-                  </div>
-                  <ul class="collapsible-body lang-menu">
-                    {% if locale != 'en' %}
-                      <li>
-                        <a href="{{ path('change_locale', {'locale': 'en'}) }}" class="flex-center">
-                            <div class="flag en"></div>
-                            <span class="country">EN</span>
-                        </a>
-                      </li>
-                    {% endif %}
-                    {% if locale != 'fr' %}
-                      <li>
-                        <a href="{{ path('change_locale', {'locale': 'fr'}) }}" class="flex-center">
-                            <div class="flag fr"></div>
-                            <span class="country">FR</span>
-                        </a>
-                      </li>
-                    {% endif %}
-                  </ul>
-                </div>
-              </li>
-            </ul>
-          </div>
-        </nav>
-      {% endif %}
+                  <li>
+                    <a class="waves-effect waves-light modal-trigger btn-small" id="language" href='#languageModal'>
+                      {% trans %}language.selection{% endtrans %}
+                    </a>
+                  </li>
+                {% endif %}
+              </ul>
+            </div>
+          </nav>
+        {% endif %}
+      </header>
       {% block content %}{% endblock %}
       <div id="waitingSpinner" class="modal">
         <div class="modal-content">

@@ -96,6 +96,8 @@ thanks: merci
 to: vers
 cancel: Annuler
 features: Fonctionnalités
+logout: Déconnexion
+notif_and_profile: Notifications & Profil
 
 
 updates:
@@ -742,6 +744,8 @@ pricing:
   trial_21_days_cta: 21 jours premium gratuits
   start_now: Démarrez dès maintenant
 
+login:
+  title: Connexion
 
 solution:
   hr: RH
@@ -1522,17 +1526,17 @@ mails:
     subject: Confirmez votre nouvelle adresse e-mail DealDrive
     message_start: Nous avons reçu une requête de changement de votre adresse email de 
     message_end:  Si vous n'avez pas demandé un tel changement, merci de nous en informer immédiatement en répondant à cette e-mail.
-    button_text: Confirmez votre nouvelle addresse e-mail
+    button_text: Confirmez votre nouvelle adresse e-mail
 
   emailVerify:
     subject: Vérifiez votre email pour démarrer l'utilisation de DealDrive
     message_start: Vérifiez votre adresse e-mail afin que nous soyons sûrs que c'est bien vous - ce qui nous permettra de vous envoyer des informations importantes à propos de votre compte DealDrive
     message_end: Vous avez des questions ? Allez sur la page <a class="strong dd-text" href="https://www.dealdrive.app">DealDrive Support</a> ou contactez-nous via contact@dealdrive.lu. 
-    button_text: Confirmer votre addresse e-mail
+    button_text: Confirmer votre adresse e-mail
   
   emailChangeConfirmation:
     subject: Votre adresse e-mail DealDrive a changé
-    message_start: Votre addresse e-mail liée à votre compte DealDrive a été modifiée avec succès en 
+    message_start: Votre adresse e-mail liée à votre compte DealDrive a été modifiée avec succès en 
     message_mid:  Nous vous informons de cela sur votre ancienne adresse e-mail afin de vous assurer que vous avez approuvé ce changmeent.
     message_end: Si tel n'est pas le cas, merci de nous informer en réponse de cet email via contact@dealdrive.lu.
 
