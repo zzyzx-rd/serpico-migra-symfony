@@ -88,11 +88,6 @@ td a {
   align-items: center;
 }
 
-.flex-center {
-  display: flex;
-  align-items: center;
-}
-
 .c-flex {
   display: flex;
   flex-direction: column;
@@ -285,11 +280,6 @@ nav .collapsible-body {
   right: 0;
   z-index: 1;
   padding: 0
-}
-
-.lang-menu {
-  display: flex;
-  flex-direction: column;
 }
 
 /* align items */
@@ -1289,13 +1279,6 @@ header > ul {
   background-color: #55318e!important;
 }
 
-#nav {
-  background-color: #000;
-  --height: 5em;
-  height: var(--height);
-  line-height: var(--height);
-}
-
 .home #nav, .tbl #nav {
   background-color: transparent;
   box-shadow: none;
@@ -1529,18 +1512,12 @@ section h2 {
 .with-dashboard{
   margin-top:2rem;
   margin-bottom: 0!important;
+  margin-left: inherit;
+  margin-right: inherit;
 }
 
-.btn, .btn-floating{
+.btn-floating{
   background-color: #55318e!important;
-}
-
-.login-btn, .get-notified-launch-btn {
-  background-color: #FF9300!important;
-}
-
-.login-btn{
-  display: inline-block!important;
 }
 
 .client-logo {
@@ -1844,14 +1821,6 @@ nav .collapsible-header, nav .collapsible, nav .collapsible-body, nav .collapsib
 
 #deleteRModal {
   width: 85%!important;
-}
-
-.collapsible-header.active .fa-chevron-down, .collapsible-header .fa-chevron-right {
-  display: inline-block;
-}
-
-.collapsible-header.active .fa-chevron-right, .collapsible-header .fa-chevron-down {
-  display: none;
 }
 
 .activity-banner {

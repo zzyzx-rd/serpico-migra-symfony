@@ -221,12 +221,19 @@ li + li.no-items-placeholder {
 
 
 .nav-desktop-btns > li,
-.nav-desktop-btns> li > a:not(.login-btn) {
+.nav-desktop-btns> li > a:not(.signup-btn) {
   display: flex;
   align-items: center;
   height: 100%;
+}
+
+.landing-desktop-btns > li > a{
+  color:white;
+}
+
+.desktop-btns > li > a{
   color:#341f56;
-}*/
+}
 
 .nav-desktop-btns > li > a:hover{
   color:white;
@@ -288,7 +295,7 @@ li + li.no-items-placeholder {
   font-size: 16px;
 }
 
-.mobile-center-element > img{
+.mobile-center-element > .dd-logo{
   height: 50%;
 }
 
@@ -1205,6 +1212,21 @@ div.col.s12.m2.linkedin {
 
 @media screen and (max-width: 600px) {
 
+  .mobile-center-element > .dd-public-logo{
+    height: 35%;
+  }
+
+  .signup-btn{
+    padding:0 1rem;
+    height: 30px;
+    line-height:30px;
+  }
+
+  #loginLink{
+    color: #55318e;
+    font-weight: 700;
+  }
+
   .logo{
     background-image: url('../lib/img/logo_dd_l.png');
     background-repeat: no-repeat;
@@ -1263,6 +1285,14 @@ div.col.s12.m2.linkedin {
     .profile-notif-elmts{
       right:0px;
     }
+
+    header.home-header{
+      background:#55318e;
+    }
+
+    header.home-header .left-icon-container i{
+      color: white;
+    }
 }
 
 @media screen and (min-width: 993px) {
@@ -1272,10 +1302,18 @@ div.col.s12.m2.linkedin {
     .profile-notif-elmts{
       right:140px;
     }
+
+    header.home-header{
+      background:linear-gradient(to right, white, white 18%, #55318e 50%)
+    }
 }
 
 @media screen and (min-width: 601px) {
   
+  .mobile-center-element > .dd-public-logo{
+    height: 50%;
+  }
+
   body{
     font-size: 16px;
   }
@@ -1506,8 +1544,9 @@ nav ul a {
   padding: 0px 15px;
 }
 
-.login-btn {
+.signup-btn {
   background-color: #FF9300!important;
+  width: fit-content;
 };
 
 
