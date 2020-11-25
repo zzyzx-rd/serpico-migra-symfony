@@ -93,6 +93,12 @@
         });
     }
 
+    Array.prototype.unique = function() {
+        return this.filter(function (value, index, self) { 
+            return self.indexOf(value) === index;
+        });
+    }
+
     function setCookie(key, value, expiry) {
         var expires = new Date();
         expires.setTime(expires.getTime() + (expiry * 24 * 60 * 60 * 1000));
@@ -201,7 +207,7 @@
                 });
             }
             nbExistingNewNotifs = $unvisitedNotifier.length ? parseInt($unvisitedNotifier.text()) : 0;
-            $params = {newUIds: newUIds, existingUIds: existingUIds, md: modifyDashboard};
+            $params = {newUIds: newUIds, existingUIds: existingUIds.unique(), md: modifyDashboard};
             if(modifyDashboard){
                 $params['aIds'] = aIds;
                 $params['sIds'] = sIds;
@@ -226,6 +232,11 @@
                     })
 
                     $(data.stages).each(function(i,s){
+                        
+                        if($('.no-activity-overlay:visible').length){
+                            location.reload();
+                        }
+
                         if(!s.asd){
 
                         } else {
@@ -258,7 +269,6 @@
                                 'data-sid' : s.id,
                             });
 
-
                             $stageTooltip = $($actElmt.find('.stage-element').attr('data-tooltip'));
 
                             $stageTooltip.find('.t-stage-name').append(s.n);
@@ -289,11 +299,12 @@
                             }
                             $actElmt.find('.tooltipped').tooltip();
                             $actElmt.hide();
-                            //$actHolder.find('.activity-list').prepend($actElmt);
+                            $actHolder.find('.activity-list').prepend($actElmt);
                         }
                     });
 
                     $(data.events).each(function(i,e){
+                        $(`.e-selectable[data-id="${e.id}"]`).remove();
                         $evtElmt = $($actHolder.data('prototype-evt'));
                         $evtElmt.attr({
                             'data-id' : e.id,
@@ -349,7 +360,7 @@
                         $notifElmt.attr('data-id',n.id).find('.notif-user-picture').append(`<img class="user-profile-picture" src="/lib/img/user/${n.picture}">`);
                         $notifElmt.find('.notif-time').append(`${n.inserted}`);
                         $notifElmt.find('.notif-msg').append(`${n.msg}`);
-                        $notifHolder.append($notifElmt);
+                        $notifHolder.prepend($notifElmt);
                     })
                     
                     var nbNewNotifs = data.nbNew;
@@ -357,7 +368,7 @@
                         nbExistingNewNotifs + nbNewNotifs == 0 ? $('.nb-updates-new').remove() : $unvisitedNotifier.empty().append(nbExistingNewNotifs + nbNewNotifs);
                     } else {
                         if(nbNewNotifs > 0){
-                            $('nav .user-profile-picture').closest('a').append(`<span class="nb-updates-new">${nbNewNotifs}</span>`);
+                            $('nav .user-nav-picture').closest('a').append(`<span class="nb-updates-new">${nbNewNotifs}</span>`);
                         }
                     }
 

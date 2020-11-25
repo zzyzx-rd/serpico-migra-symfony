@@ -280,7 +280,7 @@
 
 
 
-        {%  if payacces %}
+        {%  if payaccess  %}
         <div id="subscription" class="modal div-sub subs" style="background-color: whitesmoke" >
             <a class="close-modal" style="margin-top: 1%;"> <i class="fas fa-times  fa-2x" ></i></a>
             <div class="offre row" >
@@ -572,14 +572,14 @@
                                     </tbody>
 
                                 </table>
-                                {%  if payacces %}
+                                {% if payaccess  %}
                                 <footer>
                                     
                                     {% if currentPlan != 1 %}
                                         <button class="btn-flat waves-light modal-trigger subscribe free" style="border: solid 1px #55318e;overflow:hidden;" href="#subscription">Go to free</button>
                                     {% else %}
                                         <button class="btn  waves-light modal-trigger unsubscribe " style="" href="#unsubscribe">Unsubscribe</button>
-                                    {%  endif %}
+                                    {% endif %}
                                 </footer>
                                 {%  endif %}
                             </div>
@@ -636,14 +636,14 @@
                                 </tr>
                             </tbody>
                         </table>
-                        {%  if payacces %}
                         <footer>
+                        {% if payaccess %}
                             {% if currentPlan != 2 %}
                                 <button class="btn  waves-light modal-trigger subscribe free" style="overflow:hidden;background-color: transparent!important;" href="#subscription">  Getting started</button>
                             {% else %}
-                                <button class="btn-flat waves-light modal-trigger unsubscribe" style="border: solid 1px orange" href="#unsubscribe">  Unsubscribe</button>
+                                <button class="btn-flat waves-light modal-trigger unsubscribe" style="border: solid 1px orange" href="#unsubscribe">{{ date('now').timestamp - organization.expired.timestamp > 0 ? 'unsubscribe'|trans : 'upgrade'|trans }}</button>
                             {%  endif %}
-                        {%  endif %}
+                        {% endif %}
                         </footer>
                             
                         
@@ -681,7 +681,7 @@
                                     </tr>
 
                                 </table>
-                                {%  if payacces %}
+                                {%  if payaccess  %}
                                 {% if currentPlan != 1 %}
                                     <button class="btn  waves-light modal-trigger subscribe free" style="width: 100%;border: solid 1px white!important;overflow:hidden;background-color: transparent!important;" href="#subscription">  Getting started</button>
                                 {% else %}
@@ -699,7 +699,7 @@
         </div>
     </div>
 
-        {%  if payacces %}
+        {%  if payaccess  %}
         <div class=" center" style="width: 70%; margin-left: auto;margin-right:auto; margin-top: 5% ">
             <h5> Subscription info </h5>
             {% for  o,subscription  in sub %}

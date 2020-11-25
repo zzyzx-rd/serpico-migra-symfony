@@ -729,7 +729,8 @@ final class InstitutionController extends MasterController
                             
                         } else if ($event != null && $document == null && $comment == null) {
                             $creator = $repoU->find($event->getCreatedBy());
-                            $transParameters['update_type'] = 'event_creation';
+                            $transParameters['update_type'] = ElementUpdate::CREATION ? 'event_creation' : 'event_modification';
+                            $transParameters['property'] = $newUpdate->getProperty();
                             $eventType = $event->getEventType();
                             $transParameters['type'] = strtolower(implode("_",explode(" ",$eventType->getEName()->getName())));
                             $transParameters['group'] = strtolower($eventType->getEventGroup()->getEventGroupName()->getName());
@@ -805,7 +806,7 @@ final class InstitutionController extends MasterController
                                 }
                             }
                             $partData['synth'] = $isSynthetic;
-                            $partData['picture'] = $isSynthetic ? '/lib/img/org/no-picture.png' : ($user->getPicture() ?: '/lib/img/user/no-picture.png');
+                            $partData['picture'] = $isSynthetic ? '/lib/img/org/no-picture.png' : ($user->getPicture() ? 'lib/img/user/'.$user->getPicture() : '/lib/img/user/no-picture.png');
                             $stageData['participants'][] = $partData;
                         }
 

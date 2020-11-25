@@ -47,7 +47,7 @@ $('#createStage').modal({
   }
 })
 
-$('#createParticipant, #deleteParticipant').modal();
+$('#createParticipant, #legalPerson, #deleteParticipant').modal();
 
 function initPickates(){
   switch(lg){
@@ -797,7 +797,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
       $this.parent().css('z-index',1);
   });
   
-
+  /*
   $(document).on('mouseover',function(e){
     var $this = $(e.target);
     if($this.closest('.virtual-activities-holder').length){
@@ -809,9 +809,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
       $('.no-activity-overlay').css('visibility','');
     }
   });
-  /*.on('mouseleave',function(){
-    $('.no-activity-overlay').css('visibility','');
-  });*/
+  */
 
     function dayDiff(d1, d2)
     {
@@ -1530,6 +1528,51 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
     $comElmt.remove();
   });
 
+  function prepareEvent(e){
+    $actHolder = $(document).find('.process-list').eq(0);
+    $evtElmt = $($actHolder.data('prototype-evt'));
+    $evtElmt.attr({
+      'data-id' : e.eid,
+      'data-od' : e.od,
+      'data-p' : e.p,  
+    }).css('visibility','hidden');
+
+    if(e.it.includes('fa')){
+        $evtElmt.find('.event-logo-container i').addClass(`fa fa-${e.in} evg-${e.gg}`);
+    } else {
+        $evtElmt.find('.event-logo-container i').addClass(`material-icons evg-${e.gg}`).append(e.in);
+    }
+    $eventTooltip = $($evtElmt.attr('data-tooltip'));
+    $eventTooltip.find('.evg').append(e.gt).addClass(`evg-${e.gn}`);
+    $eventTooltip.find('.t-od').append(new Date(e.od * 1000).toLocaleDateString(lg+'-'+lg.toUpperCase(),{ month: 'numeric', day: 'numeric' }));
+    if(e.rd){
+        $eventTooltip.find('.t-rd').append(new Date(e.rd * 1000).toLocaleDateString(lg+'-'+lg.toUpperCase(),{ month: 'numeric', day: 'numeric' }));
+    } else {
+        $eventTooltip.find('.t-rd, .fa-calendar-check').remove();
+    }
+    if(e.it.includes('fa')){
+        $eventTooltip.find('i:not(.fa)').addClass(`fa fa-${e.in} evg-${e.gn}`);
+    } else {
+        $eventTooltip.find('i:not(.fa)').addClass(`material-icons evg-${e.gn}`).append(e.in);
+    }
+    $eventTooltip.find('.evt').append(e.tt);
+    if(!e.nbd){
+        $eventTooltip.find('.event-documents').remove();
+    } else {
+        $eventTooltip.find('.event-documents span').append(`${e.nbd} ${$eventTooltip.data('document')}${e.nbd > 1 ? 's' : ''}`)
+    }   
+    if(!e.nbc){
+        $eventTooltip.find('.event-comments').remove();
+    } else {
+        $eventTooltip.find('.event-comments span').append(`${e.nbc} ${$eventTooltip.data('comment')}${e.nbc > 1 ? 's' : ''}`)
+    }
+
+    $evtElmt.attr('data-tooltip',$eventTooltip.html()).tooltip();
+    $indivActHolder = $(document).find(`.stage-element[data-id="${e.sid}"]`).closest('.activity-holder');
+    $indivActHolder.addClass('tbd');
+    $indivActHolder.find('.activity-component').append($evtElmt);
+  }
+
   $('.update-event-btn').on('click',function(e){
     e.preventDefault();
     const $this = $(this);
@@ -1549,48 +1592,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
       contentType: $this.closest('.modal').find('.e-documents').length == 0 ? 'application/x-www-form-urlencoded' : false,
     })
     .done(function(e){
-      $actHolder = $(document).find('.process-list').eq(0);
-      $evtElmt = $($actHolder.data('prototype-evt'));
-      $evtElmt.attr({
-          'data-id' : e.id,
-          'data-od' : e.od,
-          'data-p' : e.p,  
-      }).css('visibility','hidden');
-    
-      if(e.it.includes('fa')){
-          $evtElmt.find('.event-logo-container i').addClass(`fa fa-${e.in} evg-${e.gg}`);
-      } else {
-          $evtElmt.find('.event-logo-container i').addClass(`material-icons evg-${e.gg}`).append(e.in);
-      }
-      $eventTooltip = $($evtElmt.attr('data-tooltip'));
-      $eventTooltip.find('.evg').append(e.gt).addClass(`evg-${e.gn}`);
-      $eventTooltip.find('.t-od').append(new Date(e.od * 1000).toLocaleDateString(lg+'-'+lg.toUpperCase(),{ month: 'numeric', day: 'numeric' }));
-      if(e.rd){
-          $eventTooltip.find('.t-rd').append(new Date(e.rd * 1000).toLocaleDateString(lg+'-'+lg.toUpperCase(),{ month: 'numeric', day: 'numeric' }));
-      } else {
-          $eventTooltip.find('.t-rd, .fa-calendar-check').remove();
-      }
-      if(e.it.includes('fa')){
-          $eventTooltip.find('i:not(.fa)').addClass(`fa fa-${e.in} evg-${e.gn}`);
-      } else {
-          $eventTooltip.find('i:not(.fa)').addClass(`material-icons evg-${e.gn}`).append(e.in);
-      }
-      $eventTooltip.find('.evt').append(e.tt);
-      if(!e.nbd){
-          $eventTooltip.find('.event-documents').remove();
-      } else {
-          $eventTooltip.find('.event-documents span').append(`${e.nbd} ${$eventTooltip.data('document')}${e.nbd > 1 ? 's' : ''}`)
-      }   
-      if(!e.nbc){
-          $eventTooltip.find('.event-comments').remove();
-      } else {
-          $eventTooltip.find('.event-comments span').append(`${e.nbc} ${$eventTooltip.data('comment')}${e.nbc > 1 ? 's' : ''}`)
-      }
-
-      $evtElmt.attr('data-tooltip',$eventTooltip.html()).tooltip();
-      $indivActHolder = $(document).find(`.stage-element[data-id="${e.sid}"]`).closest('.activity-holder');
-      $indivActHolder.addClass('tbd');
-      $indivActHolder.find('.activity-component').append($evtElmt);
+      prepareEvent(e);
       $('#updateEvent').modal('close');
     });
     
@@ -1797,12 +1799,18 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
       }
       $.post(uccurl,$params)
         .done(function(c){
+          if(!isEvtExisting){
+            $evtElmt.find('[type="submit"]').hide().parent();
+            $evtElmt.find('.modal-close').show();
+            $evtElmt.find('[href="#deleteEvent"]').show();
+            prepareEvent(c);
+          }
           if($relatedDashEvt){
             $relatedDashEvt.addClass('self');
           }
           $comElmt.remove();
           if(!comExists || isReply){
-            $existingComElmt.attr('data-id',c.id).find('.e-com-author').append(c.author);
+            $existingComElmt.attr('data-id',c.cid).find('.e-com-author').append(c.author);
             $evtElmt.find('.comments-number').empty().append($comHolder.find('.e-comment').length);
           } 
           if(!comExists || isReply || c.modified){
@@ -1882,7 +1890,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
               $evtElmt.attr('data-id',data.eid);
             }
             $hiddenDocElmt.find('.e-doc-size').empty().append(`${Math.round(d.size/1000)} Ko`);
-            $hiddenDocElmt.attr('data-id',d.id).show();
+            $hiddenDocElmt.attr('data-id',d.did).show();
         } else {
             console.log("Error " + xhr.status + " occurred when trying to upload your file.<br \/>");
         }
@@ -2108,7 +2116,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
                 $selectorMElmts = $selector.closest('.select-wrapper')
                 $selector.prev().find('li').each(function(i,e){
                     logo = $selector.find('option').eq(i).attr('data-pic');
-                    folder = 'org';
+                    folder = $selector.find('option').eq(i).attr('data-oid') ? 'org' : 'wf';
                     $(e).prepend(`<img class="s-firm-option-logo" src="/lib/img/${folder}/${logo ? logo : 'no-picture.png'}">`);
                     $(e).addClass('flex-center');
                 });
@@ -2365,6 +2373,9 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
 
     $.post(scurl,data)
       .done(function(s){
+        if($('.no-activity-overlay:visible').length){
+          location.reload();
+        }
         $('#createStage').modal('close');
         
         $actHolder = $(document).find('.process-list').eq(0);
