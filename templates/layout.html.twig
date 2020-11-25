@@ -255,7 +255,7 @@
                           <div class="flag sm-right {{ locale }}"></div>
                         </li>
                         <li>
-                          <span class="country">{{ locale|upper }}</span>
+                          <span class="{{global.route != "home_welcome" ? 'country' : 'landing-country'}}">{{ locale|upper }}</span>
                         </li>
                       </ul>
                     </div>

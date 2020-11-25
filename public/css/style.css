@@ -227,11 +227,11 @@ li + li.no-items-placeholder {
   height: 100%;
 }
 
-.landing-desktop-btns > li > a{
+.landing-desktop-btns > li > a, .landing-country{
   color:white;
 }
 
-.desktop-btns > li > a{
+.desktop-btns > li > a, .country{
   color:#341f56;
 }
 
@@ -888,7 +888,7 @@ nav .collapsible-body {
   background-position: -80px -88px;
 }
 
-.country {
+.country, .landing-country {
   font-size: 14px;
 }
 
