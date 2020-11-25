@@ -24,12 +24,18 @@ $(document).ready(function () {
     });
     $('.switch input').on('change',function(){
         const $card = $(this).closest('.card');
-        if($(this).is(':checked')){
-            $('.period-year').css('display','contents');
-            $('.period-month').hide();
-            } else {
-            $('.period-year').hide();
-            $('.period-month').show();
-           }
+        var val = parseInt( $('.price-value').text());
+        if($(this).is(':checked'))
+            {
+                $('.period-year').css('display','contents');
+                $('.period-month').hide();
+                $('.price-value').text(val*10);
+            }
+        else
+            {
+                $('.period-year').hide();
+                $('.period-month').show();
+                $('.price-value').text(val/10);
+            }
     })
 });
