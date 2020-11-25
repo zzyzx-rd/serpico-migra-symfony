@@ -3205,6 +3205,7 @@ h2.header {
   display:none;
   border-radius: 2px;
   z-index:2;
+  color: #55318e;
 }
 
 .notif-list > li, .profile-zone{
