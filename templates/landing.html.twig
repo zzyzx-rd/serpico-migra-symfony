@@ -20,6 +20,50 @@
         var curl = "#";
         var sdurl = "{{ path('sendLaunchingMail') }}";
     </script>
+
+    <style>
+
+        .event {
+            position: absolute;
+            top: 0rem;
+            left: -0.3rem;
+        }
+
+        .event .event-marker{
+            position:relative;
+            font-size:2.1rem;
+        }
+
+        .event.self-last-update .event-marker{
+            color: #55318e;
+        }
+
+        .event:not(.self-last-update) .event-marker{
+            color: #ff9300;
+        }
+
+        .event-logo-container > .unique-event{
+            position:absolute;
+            left:19%;
+            top:16%;
+            font-size: 36%;
+        }
+
+        .event-logo-container{
+            border-radius: 100%;
+            background-color: white;
+            position: absolute;
+            height: 1.1rem;
+            width: 1.1rem;
+            top: 12%;
+            left: 15%;
+        }
+
+        .t-event-dates, .t-stage-dates{
+            margin-left:auto;
+        }
+    
+    </style>
 {% endblock %}
 
 
@@ -68,10 +112,17 @@
                             </ul>
                             {% for k in 0..2 %}
                                 <ul class="stages-holder no-margin" style="position:relative">
-                                    <ol class="activity-component">
-                                        {% set startdateU = random(7,160) %}
-                                        {% set period = random(max(0,15 - startdateU), 190 - startdateU) %}
-                                        {% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateU: startdateU, period: period, embeddedStages: null, visibleEl: true} %}
+                                    {% set startdate = random(7,160) %}
+                                    {% set period = random(max(0,15 - startdate), 190 - startdate) %}
+                                    <ol class="activity-component" data-sd="{{startdate}}" data-p="{{period}}">
+                                        {% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateU: startdate, period: period, embeddedStages: null, visibleEl: true, participants: workerFirmActDummies[k].participants, dummyActName: workerFirmActDummies[k].actName } %}
+
+                                        {% for l in 0..workerFirmActDummies[k].events|length - 1 %}
+                                            {% set onsetdate = startdate + random(max(0,15 - startdate),period) %}
+                                            {% set eperiod = random(0,startdate + period - onsetdate) %}
+                                            {% set m = random(0,workerFirmActDummies[k].events[l].types|length - 1) %}
+                                            {% include "components/home_event_temporal__item.html.twig" with {onsetdate: onsetdate, period: eperiod, eg_id: workerFirmActDummies[k].events[l].id, eg_name: workerFirmActDummies[k].events[l].name, et_name: workerFirmActDummies[k].events[l].types[m].name, icon_type: workerFirmActDummies[k].events[l].types[m].icon_type, icon_name: workerFirmActDummies[k].events[l].types[m].icon_name } %}
+                                        {% endfor %}
                                     </ol>
                                 </ul>
                             {% endfor %}

@@ -7592,7 +7592,7 @@ class OrganizationController extends MasterController
     public function getDummyClientsAndActNames(Request $request){
 
         $em = $this->em;
-        
+        $locale = $request->getLocale();
         $withActNames = $request->get('wa') ?: true;
         $totalDummies = $request->get('td') ?: 3;
 
@@ -7608,13 +7608,46 @@ class OrganizationController extends MasterController
 
         
         if($withActNames){
-            if($request->getLocale() == 'en'){
+            $repoEG = $em->getRepository(EventGroup::class);
+            $repoET = $em->getRepository(EventType::class);
+            $participants = [
+                    'Valentina Suarez',
+                    'Georges Dabault',
+                    'Piotr Civosky',
+                    'Qingxin Meng',
+                    'Daniela d\'Ambrozzo',
+                    'Sigur Olovson',
+                    'Dietmar Hengersen',
+                    'Cécile Argence',
+                    'Fabrice Cacault',
+                    'Denitsa Wooles',
+                    'Zack Finley',
+                    'Jackie Denson',
+                    'Lionel Manternach',
+                    'Ricco Stumper',
+                    'Aïssa Coulibaly',
+                    'Dimitra Papandreou'
+            ];
+            if($locale == 'en'){
                 $actNames = ['Marketing project', 'VP Recruitment', 'Contract Negotiation', 'Delivery', 'Proof of Concept', 'Deal Agreement', 'Trade Fair exhibition', 'Call for Tender', 'Training - Logistics'];
-            } else if($request->getLocale() == 'fr') {
+            } else if($locale == 'fr') {
                 $actNames = ['Projet marketing', 'Recrutement VP', 'Nego contractuelle', 'Réalisation prestation', 'Test client', 'Projet de collaboration', 'Salon - Expo', 'Appel d\'offres', 'Training - Logistique'];
             }
+            /** @var Organization */
+            $allOrgs = $em->getRepository(Organization::class)->findAll();
+            $fullOrg = $allOrgs[sizeof($allOrgs) - 1];
+            $eventGroups = $fullOrg->getEventGroups()->map(fn(EventGroup $eg) => 
+                [
+                    'id' => $eg->getId(),
+                    'name' => $repoEG->getDTrans($eg,$locale,$fullOrg),
+                    'types' => $eg->getEventTypes()->map(fn(EventType $et) => [
+                        'name' => $repoET->getDTrans($et,$locale,$fullOrg),
+                        'icon_type' => $et->getIcon()->getType(),
+                        'icon_name' => $et->getIcon()->getName(),
+                    ])->getValues(),
+                ])->getValues();
         }
-        
+
         $randomIds = [];
         $randomWFArrayKeys = [];
         $randomActNameArrayKeys = [];
@@ -7645,6 +7678,15 @@ class OrganizationController extends MasterController
             $output['name'] = $dummyClient->getName();
             $output['logo'] = $dummyClient->getLogo() ? "/lib/img/wf/".$dummyClient->getLogo() : "/lib/img/org/no-picture.png";
             $output['actName'] = $actNames[$randomActNameArrayKeys[$key]];
+            $output['events'] = [];
+            $output['participants'] = [];
+
+            for($j=0; $j < random_int(1,3); $j++){
+                $output['events'][] = $eventGroups[random_int(0,sizeof($eventGroups) - 1)];
+            }
+            for($j=0; $j < random_int(1,3); $j++){
+                $output['participants'][] = $participants[random_int(0,sizeof($participants) - 1)];
+            }
             $dummyElmts[] = $output; 
         }
 

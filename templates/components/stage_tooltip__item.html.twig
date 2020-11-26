@@ -5,13 +5,15 @@
           <li><i class="fa fa-cube" style="position: relative;top: -6%;left: 0%;font-size: 0.85rem;"></i></li>
           <li><i class="fa fa-cube" style="position: relative;top: 6%;left: -41%;font-size: 0.85rem;"></i></li>
         </ul>
-        <span class="t-stage-name">{{ stage ? stage.name : ''}}</span>
+        <span class="t-stage-name">{{ stage|default ? stage.name : (dummyActName|default ? dummyActName : '')}}</span>
       </li>
       <li class="t-stage-dates">
         <ul class="flex-center">
           <ul class="flex-center m-right">
             <i class="material-icons">access_time</i>
-            <span>{{ stage ? stage.startdate|format_datetime('short', 'none', pattern='dd/MM') ~ ' - ' ~ stage.enddate|format_datetime('short', 'none', pattern='dd/MM') : '' }}</span>
+            <span>{{ stage|default ? stage.startdate|format_datetime('short', 'none', pattern='dd/MM') ~ ' - ' ~ stage.enddate|format_datetime('short', 'none', pattern='dd/MM') :
+                        (dummySD|default ? dummySD|format_datetime('short', 'none', pattern='dd/MM') ~ ' - ' ~ dummyED|format_datetime('short', 'none', pattern='dd/MM') : '')
+            }}</span>
           </ul>
         </ul>
       </li>
@@ -20,12 +22,14 @@
     <div class="row">
       <div class="col m6 s12" style="text-align: left;border-right:1px solid white">
         {{ 'activity_elements.expected_output'|trans }}
-        {% if not stage or not stage.hasMinimumOutputConfig %}
+        {% if not stage|default or not stage.hasMinimumOutputConfig %}
+          {#
           <ul class="has-barred" style="display: block;">
             <i class="material-icons white-text" style="font-size: 15px;">edit</i>
             <i class="fa fa-minus barred t-fb-barred"></i>
             <span>{{'activity_elements.no_defined_output'|trans}}</span>
           </ul>
+          #}
         {% else %}
           {% if stage.survey == null %}
             <ul class="flex criteria-t-holder">
@@ -47,7 +51,7 @@
         {{ 'activity_elements.participants'|trans }}
         <ul class="flex participants-t-holder" data-prototype-no-participants="{% apply escape %}{% include "components/stage_tooltip_no_participant_elmt.html.twig" %}{% endapply %}" data-prototype="{% apply escape %}{% include "components/stage_tooltip_participant__item.html.twig" %}{% endapply %}">
 
-          {% if stage %}
+          {% if stage|default %}
           
             {% set participants = stage.participants %}
 
@@ -70,6 +74,13 @@
 
             {% endif %}
           
+          {% elseif dummyParticipants|default %}
+             {% for dummyParticipant in dummyParticipants %}
+                <li class="t-participant flex-center user-info">
+                  <img class="user-picture sm-right" src="/lib/img/user/no-picture.png" alt="" width="17px" height="17px">
+                  <span>{{ dummyParticipant }}</span>
+                </li>
+              {% endfor %}
           {% endif %}
         </ul>
       </div>

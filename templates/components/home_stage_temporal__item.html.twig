@@ -1,11 +1,12 @@
 
-<li class="stages stage-element tooltipped" data-sd="{{ startdateU }}" data-p="{{ period }}" data-tooltip='{% include "components/stage_holder__item.html.twig" with { stage: null, embeddedStages: null } %}' data-position="top" data-html="true">
+{% set startdate = date("first day of this month - 3 months")|date_modify("+" ~ startdateU ~ "days") %}
+{% set enddate = date("first day of this month - 3 months")|date_modify("+" ~ (startdateU + period) ~ "days") %}
+
+<li class="stages stage-element tooltipped" data-sd="{{ startdateU }}" data-p="{{ period }}" data-tooltip='{% include "components/stage_holder__item.html.twig" with { dummyParticipants: participants, dummyActName: dummyActName, dummySD: startdate, dummyED: enddate } %}' data-position="top" data-html="true">
 
   <section class="stage-container completed-stages-container"></section>
 
 
-      {% set startdate = date("first day of this month - 3 months")|date_modify("+" ~ startdateU ~ "days") %}
-      {% set enddate = date("first day of this month - 3 months")|date_modify("+" ~ (startdateU + period) ~ "days") %}
   
       {% set diffDays = startdate.diff(enddate) %}
   

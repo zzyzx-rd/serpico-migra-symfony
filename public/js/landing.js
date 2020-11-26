@@ -303,6 +303,23 @@ $(function() {
             'border-radius' : '0.3rem',  
             });
         });
+        
+        $this.find('.event').each(function(){
+            var sd = 0;
+            var p = l;
+            var ed = $(this).data("od");
+            var ep =  $(this).data("p");
+            
+            sPctWidthSD = (ed - sd) / p;
+            sPctWidthP = Math.max(3,(ep + 1)) / (p + 1);
+      
+            $(this).css({'margin-left': Math.round(10000 * sPctWidthSD) / 100 + "%",
+              'width': Math.max(1,Math.round(10000 * sPctWidthP) / 100) + "%",
+              'height' : '15px',
+              'border-radius' : '0.3rem',  
+            });
+
+        });
     });
 
     /*

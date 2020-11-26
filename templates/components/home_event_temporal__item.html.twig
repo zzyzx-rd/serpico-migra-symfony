@@ -1,0 +1,60 @@
+
+{% macro event_tooltip(eg_id, eg_name, et_name, od, rd, icon_type, icon_name) %}
+
+      {% set odate = date("first day of this month - 3 months")|date_modify("+" ~ od ~ "days") %}
+      {% set rdate = date("first day of this month - 3 months")|date_modify("+" ~ (rd) ~ "days") %}
+    
+    <div style="width:400px;">
+    <ul class="flex-center t-event-info">
+      <li>
+
+        <i class="{{ icon_type == 'fa' ? 'fa fa-' ~ icon_name : 'material-icons' }}">{{ icon_type == 'm' ? icon_name }}</i>
+        <span class="evg evg-{{ eg_id }} evg-text-shadow">{{ eg_name ~ ': ' ~ et_name}}</span>
+        {#<span class="sm-left sm-right">:</span>
+        <span class="evt">{{ et_name }}</span>
+        #}
+      </li>
+      <li class="t-event-dates">
+        <ul class="flex-center">
+          <ul class="flex-center m-right">
+            <i class="fa fa-calendar sm-right"></i>
+            <span class="t-od">{{ odate|format_datetime('short', 'none', pattern='dd/MM') }}</span>
+            {% if rdate %}
+              <i class="sm-left sm-right fa fa-calendar-check"></i>
+              <span class="t-rd">{{ rdate|format_datetime('short', 'none', pattern='dd/MM') }}</span>
+            {% endif %}
+          </ul>
+        </ul>
+      </li>
+    </ul>
+
+    {% set isThereDocs = random(0,1) %}
+
+    {% if isThereDocs %}
+      {% set nbDocs = random(1,5) %}
+      <div class="event-documents"  style="text-align: left;">
+          <i class="fa fa-file-alt"></i>
+          <span>{{ nbDocs ~ ' ' ~ 'activity_elements.events.tooltip.shared_document'|trans ~ (nbDocs > 1 ? 's' : '')}}</span>
+      </div>
+    {% endif %}
+
+    {% set isThereComs = random(0,1) %}
+  
+    {% if isThereDocs %}
+      {% set nbComs = random(1,5) %}
+      <div class="event-comments" style="text-align: left">
+          <i class="fa fa-comment"></i>
+          <span>{{ nbComs ~ ' ' ~ 'activity_elements.events.tooltip.comment'|trans ~ (nbComs > 1 ? 's' : '')}}</span>
+      </div>
+    {% endif %}
+
+  </div>
+{% endmacro %}
+
+<div class="event tooltipped e-selectable {{random(0,1) ? 'self-last-update'}}" data-od="{{ onsetdate }}" data-p="{{ period }}" data-html="true" data-tooltip="{% apply escape %}{{ _self.event_tooltip(eg_id, eg_name, et_name, onsetdate, onsetdate + period, icon_type, icon_name) }}{% endapply %}">
+  <i class="fa fa-map-marker event-marker">
+    <div class="event-logo-container">
+        <i class="{{icon_type ? 'fa' ? 'fa fa-' ~ icon_name : 'material-icons'}} evg-{{ eg_id }} event-type unique-event">{{ icon_type == 'm' ? icon_name }}</i>
+    </div>
+  </i>
+</div>

@@ -53,7 +53,7 @@
                   {% set visibleEl = false %}
                 {% endif %}
 
-                {% include "components/stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: isEmbedded, startdateU: stage.startdateU, period: stage.period, embeddedStages: embeddedStages, visibleEl: visibleEl } %}
+                {% include "components/stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: isEmbedded, startdateU: stage.startdateU, period: stage.period, embeddedStages: embeddedStages, visibleEl: visibleEl, dummyParticipants: null } %}
                 
                 {% set checkingEventIndex = -1 %}
 
@@ -110,13 +110,14 @@
             </ol>
           
           {% else %}
-
+              {#
               <ol class="activity-component" data-sd="{{ date("first day of january").timestamp }}" data-p="{{ 360 * 24 * 60 * 60 }}">
-                  {# these below values are not important as they are replaced in front #}
                   {% set startdateU = random(7,320) %}
                   {% set period = random(3, 350 - startdateU) %}
-                  {% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateU: startdateU, period: random(3,200), embeddedStages: null, visibleEl: true} %}
+                  {% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateU: startdateU, period: random(3,200), embeddedStages: null, visibleEl: true, dummyParticipants: null} %}
               </ol>
+              #}
+          
 
           {% endif %}
 
