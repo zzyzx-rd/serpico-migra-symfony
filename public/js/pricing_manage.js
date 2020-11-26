@@ -30,12 +30,14 @@ $(document).ready(function () {
                 $('.period-year').css('display','contents');
                 $('.period-month').hide();
                 $('.price-value').text(val*10);
+                $('.fa-map-marker').show();
             }
         else
             {
                 $('.period-year').hide();
                 $('.period-month').show();
                 $('.price-value').text(val/10);
+                $('.fa-map-marker').hide();
             }
     })
 });

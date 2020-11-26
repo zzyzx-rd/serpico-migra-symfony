@@ -179,17 +179,50 @@ Pricing
       }
 
       .user-slider{
-        width:70%;
-        padding:0;
+          width:70%;
+          padding:0;
+          margin-left: 5%;
       }
 
       .user-slider-range-value{
-        width:30%;
+        width:20%;
+          margin-right: 5%;
         font-size:1.2rem;
       }
 
-            
-
+      .free-month{
+          position: absolute;
+          top: -4rem;
+          transform: rotateZ(45deg);
+          font-size: 69px;
+          left: 2.2rem;
+          display: none;
+            }
+      .free-month-logo-content{
+          background-color: white;
+          border-radius: 50%;
+          font-family: 'Poppins';
+          position: absolute;
+          left: 0.2rem;
+          top: 0.2rem;
+          transform: rotateZ(-45deg);
+          width: 3rem;
+          height: 3rem;
+          padding: 0.6rem;
+      }
+      .free-month-number{
+          font-size: 44px;
+          color: #ff9300;
+           transform: rotateX(50deg);
+          position: absolute;
+      }
+      .free-month-promotion{
+          font-size: 24px;
+          color: #ff9300;
+          position: absolute;
+          left: 4rem;
+          text-align: left;
+      }
   </style>
 
 {% endblock %}
@@ -218,8 +251,16 @@ Pricing
               </th>
               <th>
                 <div class="table-headers">
-                
-                  <i class="fa fa-dove premium-plan-icon"></i>
+
+                    <i class="fa fa-dove premium-plan-icon" style="position: relative;">
+
+                        <i class="fa fa-map-marker event-marker free-month" >
+                            <div class="event-logo-container flex-center free-month-logo-content" >
+                                <span class="free-month-number">2</span>
+                                <span class="free-month-promotion">{{'subscription.months_free'|trans }}</span>
+                            </div>
+                        </i>
+                    </i>
                   <div class="c-flex-center">
                     <div>{{'pricing.from'|trans}}</div>
                     <div class="price-line"><span class="price-value">7</span><span class="price-ccy">€</span></div>
