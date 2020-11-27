@@ -158,6 +158,8 @@ class SettingsController extends MasterController
      * @param Application $app
      * @return mixed
      * @Route("/settings/root/management", name="rootManagement")
+     * @IsGranted("ROLE_ROOT", statusCode=404, message="Page not found")
+
      */
     public function rootManagementAction(Request $request){
 
@@ -766,6 +768,7 @@ class SettingsController extends MasterController
      * @param Application $app
      * @return mixed
      * @Route("/settings/root/organizations", name="manageOrganizations")
+         * @IsGranted("ROLE_ROOT", statusCode=404, message="Page not found")
      */
     public function manageOrganizationsAction(Request $request){
         $entityManager = $this->em;
@@ -794,12 +797,15 @@ class SettingsController extends MasterController
      * @param Application $app
      * @return mixed
      * @Route("/settings/root/workerFirms", name="manageWorkerFirms")
+     * @IsGranted("ROLE_ROOT", statusCode=404, message="Page not found")
      */
     public function manageWorkerFirmsAction(Request $request){
         $em = $this->em;
         $qb = $em->createQueryBuilder();
         $qb2 = $em->createQueryBuilder();
-
+        if (!$this->user) {
+            return $this->redirectToRoute('login');
+        }
         if(isset($_COOKIE['wf_s_p'])){
             $sortingProp = $_COOKIE['wf_s_p'];
         } else {

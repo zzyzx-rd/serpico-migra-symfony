@@ -24,7 +24,7 @@
       j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
       })(window,document,'script','dataLayer','GTM-5P5957V');</script>
-    
+
     {% endif %}
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('lib/img/favicon/favicon.ico') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('lib/img/favicon/favicon-32x32.png') }}">
@@ -54,7 +54,7 @@
     </script>
   </head>
 
-  
+
   {% set orgName = organization is not null ? organization.commname : '' %}
 
   <body>
@@ -64,12 +64,12 @@
     {% endif %}
     <div class="page-container">
       <header {% if global.route == "home_welcome" %}class="home-header"{% endif %}>
-      
+
         {% if global.route != 'confirmEmailModif' %}
           <nav id="nav" class="{{global.route != "home_welcome" ? 'white' : 'transparent'}}">
             <div class="nav-wrapper flex-center-sb">
               <a class="left-icon-zone hide-on-med-and-down" href="/">
-              <div class="xm-left left-icon-container desktop-left-icon-container">
+              <div class="xm-left left-icon-container desktop-left-icon-container sm-right">
                 <img class="dd-logo" src="{{ asset('lib/img/logo_dd_p_l.png') }}">
               </div>
               </a>
@@ -91,7 +91,7 @@
                   {#<li class="logo">
                   </li>#}
                   <li class="plan hide-on-med-and-down">
-                    <div class="c-flex-center">
+                    <div class="c-flex-center sm-right">
                       <span> {{ organization.plan == 1 ? 'header.plan.enterprise'|trans|upper : (organization.plan == 2 ? 'header.plan.premium'|trans|upper : 'header.plan.free'|trans|upper) }} {{ date('now').diff(organization.inserted).days < 21 ? '(' ~ 'trial'|trans|upper ~ ')' }} </span>
                       <a class="dd-orange-text" href="{{ path('priceManagement') }}">{{ 'header.plan.upgrade'|trans }}</a>
                     </div>
@@ -154,7 +154,7 @@
                       </span>
                     </a>
                   </li>
-                  
+
                   <li class="profile-notif-zone">
                     <a href="{#{{ path('home') }}#}#" class="user-notif-link">
                       <img class="user-nav-picture tooltipped" src="{{ asset(global.userpicture) }}" data-tooltip="{{ 'notif_and_profile'|trans }}" data-position="down">
@@ -162,18 +162,18 @@
                         <span class="nb-updates-new" data-nb-visited="{{ updates|length - updates.nbNew|number_format }}">{{ updates.nbNew }}</span>
                       {% endif %}
                     </a>
-                  
-                      
+
+
                       <li>
                         <ul class="profile-notif-elmts flex-center" style="display:none">
-                          
+
                           <li class="profile-zone">
                             <ul class="flex-center">
                               <li class="m-right">
                                 <img class="user-profile-xl-picture" src="{{ asset(global.userpicture) }}" alt="">
                               </li>
                               <ul class="c-flex">
-                                
+
                                 <li>{{currentuser.fullname}}</li>
                                 <li class="ma-content" style="display:none">
                                   <div class="flex-center">
@@ -207,17 +207,17 @@
                               <li class="no-update-msg">{{'updates.no_update_yet'|trans}}</li>
                             {% endif %}
                           </ul>
-                  
+
                         </ul>
                       </li>
-                    
-                  
+
+
                   </li>
-                  
+
                   <li class="logout hide-on-med-and-down">
                     <a href="{{ path('logout') }}">
                       <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
-                      
+
                     </a>
                   </li>
                 {% else %}
@@ -232,7 +232,7 @@
                     #}
                   {#{% endif %}#}
 
-                    
+
                     <li class="hide-on-med-and-down">
                       <a class="product {{ global.route == 'pricing' ? 'strong'}}" href="{#{{ path('solution') }}#}{{ path('pricing') }}">
                         {% trans %}header.pricing{% endtrans %}
@@ -257,9 +257,9 @@
                               {% trans %}header.register.start{% endtrans %}
                             </a>
                           </li>
-                      
+
                       {% endif %}
-                  
+
                 {% endif %}
                 <li class="lg-icon hide-on-med-and-down">
                   <div class="collapsible" data-collapsible="accordion">
@@ -305,18 +305,18 @@
                       </div>
                     </a>
                   </li>
-                  
+
                   <li class="plan">
-                    <a class="c-flex-center" href="{{ path('priceManagement') }}">
-                      <span class="dd-text"> {{ organization.plan == 1 ? 'header.plan.enterprise'|trans|upper : (organization.plan == 2 ? 'header.plan.premium'|trans|upper : 'header.plan.free'|trans|upper) }} {{ date('now').diff(organization.inserted).days < 21 ? '(' ~ 'trial'|trans|upper ~ ')' }} </span>
+                    <a class="c-flex-center " href="{{ path('priceManagement') }}">
+                      <span class="dd-text" style="color: #55318e;"> {{ organization.plan == 1 ? 'header.plan.enterprise'|trans|upper : (organization.plan == 2 ? 'header.plan.premium'|trans|upper : 'header.plan.free'|trans|upper) }} {{ date('now').diff(organization.inserted).days < 21 ? '(' ~ 'trial'|trans|upper ~ ')' }} </span>
                       <span class="dd-orange-text">{{ 'header.plan.upgrade'|trans }}</span>
                     </a>
                   </li>
-              
+
                   {% if global.currentuser.is_root %}
                     <li class="">
                       <a href="{{ path('rootManagement') }}">
-                        <i class="fa fa-cogs" aria-hidden="true"></i>
+                        <i class="fa fa-cogs sm-right" aria-hidden="true"></i>
                         <span>{% trans %}header.root_mgt{% endtrans %}</span>
                       </a>
                     </li>
@@ -330,17 +330,17 @@
                       </a>
                     </li>
                   {% endif %}
-                  #}  
+                  #}
                   <li>
                     <a href="{{ path(global.currentuser.is_admin ? 'manageUsers' : 'seeColleaguesTeams') }}">
-                      <i class="fa fa-users" aria-hidden="true"></i>
+                      <i class="fa fa-users sm-right" aria-hidden="true"></i>
                       {% set str = 'header.users' %}
                       {{ str|trans }}
                     </a>
                   </li>
                   <li class="">
                     <a href="{{ path('myActivities') }}">
-                      <i class="fa fa-briefcase" aria-hidden="true"></i>
+                      <i class="fa fa-briefcase sm-right" aria-hidden="true"></i>
                       <span>
                         {% if orgName != "Public" %}
                           {% trans %}header.firmActivities{% endtrans %}
@@ -352,13 +352,13 @@
                   </li>
                   <li class="logout">
                     <a href="{{ path('logout') }}">
-                      <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+                      <i class="fas fa-sign-out-alt " aria-hidden="true"></i>
                       <span>{{'logout'|trans}}</span>
                     </a>
                   </li>
 
                 {% else %}
-                  
+
                   <li>
                     <a class="product" href="{{ path('home_welcome') }}">
                       {% trans %}header.product{% endtrans %}
@@ -370,13 +370,13 @@
                       {% trans %}header.pricing{% endtrans %}
                     </a>
                   </li>
-                  
+
                   <li>
                     <a id="loginLink" href="{{ is_granted('IS_AUTHENTICATED_REMEMBERED') ? path('processesList') : path('login') }}">
                       {% trans %}header.login{% endtrans %}
                     </a>
                   </li>
-                  
+
                   <li>
                     <a class="btn waves-effect waves-light signup-btn" href="{{ path('signup') }}">
                       {% trans %}header.register.start{% endtrans %}
