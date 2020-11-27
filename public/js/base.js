@@ -181,8 +181,11 @@
     }
 
     function retrieveUpdates(modifyDashboard = false){
-        const $furls = ['/','/pricing','/terms-and-conditions', '/terms/conditions/cookies', '/login'];
-        if ($furls.indexOf(window.location.pathname) == -1){
+        const $furls = ['/','/pricing','/terms-and-conditions', '/terms/conditions/cookies', '/login','/password/define/'];
+        console.log(window.location.pathname);
+        var url = window.location.pathname.includes("/password/define/") ? false : true;
+        url = window.location.pathname.includes("/user/email/confirm/") ? false : true;
+        if (($furls.indexOf(window.location.pathname) == -1) && url){
 
             $unvisitedNotifier = $(document).find('.nb-updates-new');
             $notifHolder = $(document).find('.notif-list');
