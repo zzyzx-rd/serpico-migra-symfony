@@ -29,7 +29,7 @@
     {% for organization in organizations %}
       <ul class="organization collapsible expandMore expandLess" data-collapsible="accordion" data-id="{{ organization.id }}">
         <li>
-          <div class="collapsible-header{% if organizations|length == 1 %} active{% endif %}{% if organization.validated is null %} blue lighten-2{% endif %}">
+          <div class="collapsible-header{% if organizations|length == 1 %} active{% endif %}">
               <i id="activity-expand" class="fa fa-fw fa-chevron-down"></i>
               <i id="activity-expanded" class="fa fa-fw fa-chevron-right"></i>
             <!-- just giving the name an absolute position because it was interfering ith the button position -->
@@ -102,7 +102,7 @@
               #}
 
             <div class="row action-buttons">
-                {% if organization.validated is not null %}
+            
                 <div class="button-field">
                     <a class="btn-large waves-effect waves-light teal lighten-1" href="{{ url('rootManageUsers',{'orgId' : organization.id}) }}"> {% trans %}organizations.see_users{% endtrans %} </a>
                  </div>
@@ -120,11 +120,7 @@
                             <a class="btn-large waves-effect waves-light teal lighten-1" href="{{ url('setOrganizationToCriteriaAndStages',{'orgId' : organization.id}) }}">Set org to crit</a>
                         </div>
                     {% endif %}
-                {% else %}
-                <div class="button-field">
-                    <a class="btn-large waves-effect waves-light teal lighten-1" href="{{ url('validateOrganization',{'orgId' : organization.id}) }}"> {% trans %}organizations.decide{% endtrans %} </a>
-                </div>
-                {% endif %}
+               
             </div>
           </div>
         </li>

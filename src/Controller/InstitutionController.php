@@ -49,6 +49,12 @@ final class InstitutionController extends MasterController
      */
     public function processesListAction(Request $request): Response
     {
+        if(!isset($_COOKIE['ma'])){
+            $multiAccount = (bool) sizeof($em->getRepository(User::class)->findByEmail($currentUser->getEmail())) > 1;
+            setcookie('ma', $multiAccount);
+        } else {
+            $multiAccount = $_COOKIE['ma'];
+        }
         if(isset($_COOKIE['sorting_type'])){
             $sortingType = $_COOKIE['sorting_type'];
         } else {
@@ -130,6 +136,7 @@ final class InstitutionController extends MasterController
                 'orphanActivities'  => $orphanActivities,
                 'processesActivities' => $processActivities,
                 'addProcessForm' => $addProcessForm->createView(),
+                'multiAccount' => $multiAccount,
                 'sortingTypeCookie' => $sortingType,
                 'viewTypeCookie' => $viewType,
                 'dateTypeCookie' => $dateType,
@@ -167,6 +174,13 @@ final class InstitutionController extends MasterController
         $repoDec = $em->getRepository(Decision::class);
         $role = $currentUser->getRole();
         $repoS = $em->getRepository(Survey::class);
+
+        if(!isset($_COOKIE['ma'])){
+            $multiAccount = sizeof($em->getRepository(User::class)->findByEmail($currentUser->getEmail())) > 1;
+            setcookie('ma', $multiAccount ? 1 : 0);
+        } else {
+            $multiAccount = $_COOKIE['ma'];
+        }
 
         if(isset($_COOKIE['sorting_type'])){
             $sortingType = $_COOKIE['sorting_type'];
@@ -518,6 +532,7 @@ final class InstitutionController extends MasterController
                 'delegateForm' => $this->org ? $delegateActivityForm->createView() : null,
                 'validateRequestForm' => $this->org ? $validateRequestForm->createView() : null,
                 'requestForm' => $this->org ? $requestActivityForm->createView() : null,
+                'multiAccount' => $multiAccount,
                 'sortingTypeCookie' => $sortingType,
                 'viewTypeCookie' => $viewType,
                 'dateTypeCookie' => $dateType,

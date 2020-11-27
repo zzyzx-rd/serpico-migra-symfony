@@ -56,6 +56,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class UserController extends MasterController
 {
@@ -140,7 +141,7 @@ class UserController extends MasterController
      * @return mixed
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/password/define/{token}", name="definePassword")
+     * @Route("/password/define/{token}", name="definePassword", methods={"GET"})
      */
     public function definePasswordAction(Request $request, $token)
     {
@@ -151,15 +152,6 @@ class UserController extends MasterController
         $pwdForm = $this->createForm(PasswordDefinitionForm::class, $user, ['standalone' => true]);
         $pwdForm->handleRequest($request);
 
-        if ($pwdForm->isSubmitted() && $pwdForm->isValid()) {
-            $encoder = $app['security.encoder_factory']->getEncoder($user);
-            $password = $encoder->encodePassword($user->getPassword(), 'azerty');
-            $user->setPassword($password);
-            $entityManager->persist($user);
-            $entityManager->flush();
-            return $this->redirectToRoute('home_welcome');
-        }
-
         if (!$user) {
             return $this->render('user_no_token.html.twig');
         } else {
@@ -167,7 +159,7 @@ class UserController extends MasterController
             return $this->render('password_definition.html.twig',
                 [
                     'firstname' => $user->getFirstName(),
-                    'hasOrg' => $user->getOrganization() != null,
+                    'hasNotSetupOrg' => !$user->getLastConnected() && $user->getOrganization()->getType() == 'C',
                     'form' => $pwdForm->createView(),
                     'token' => $token,
                     'request' => $request,
@@ -323,7 +315,7 @@ class UserController extends MasterController
         }
     }
 
-    // Create pwd (AJAX submission)
+    // Save pwd
 
     /**
      * @param Request $request
@@ -332,31 +324,132 @@ class UserController extends MasterController
      * @return JsonResponse
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/ajax/password/{token}", name="createPasswordAJAX")
+     * * @Route("/password/define/{token}", name="savePassword", methods={"POST"})
      */
-    public function createPwdActionAJAX(Request $request, $token)
+    public function savePassword(Request $request, $token)
     {
-        $entityManager = $this->em;
-        $repoU = $entityManager->getRepository(User::class);
+        $em = $this->em;
+        $repoU = $em->getRepository(User::class);
         $user = $repoU->findOneByToken($token);
         $pwdForm = $this->createForm(PasswordDefinitionForm::class, $user, ['standalone' => true]);
         $pwdForm->handleRequest($request);
 
         if ($pwdForm->isValid()) 
-        {
+        {   
+
+            $needToSetOrg = !$user->getLastConnected() && $user->getOrganization()->getType() == 'C';
             $password = $this->encoder->encodePassword($user, $user->getPassword());
-            $user->setPassword($password);
-            if($user->getOrganization()){
-                $user->setToken(null);
+            $user->setPassword($password)
+                ->setToken(null);
+            $em->persist($user);
+            $em->flush();
+
+            if(!$needToSetOrg){
+
+                $individualUser = clone $user;
+                $individualUser
+                    ->setRole(1)
+                    ->setLastConnected(null)
+                    ->setAltEmail(null)
+                    ->setPosition(null)
+                    ->setDepartment(null)
+                    ->setTitle(null)
+                    ->setSuperior(null)
+                    ->setInserted(new DateTime);
+
+                $organization = new Organization();
+                $organization->setCommname($user->getUsername())
+                    ->setType('C')
+                    ->setMasterUser($user)
+                    ->addUser($individualUser);
+                
+                $this->forward('App\Controller\OrganizationController::updateOrgFeatures', ['organization' => $organization, 'nonExistingOrg' => true, 'createdAsClient' => false]);
+
+                $em->persist($organization);
+                $em->flush();
+
+                return $this->guardHandler->authenticateUserAndHandleSuccess(
+                    $user,
+                    $request,
+                    $this->authenticator,
+                    'main'
+                );
+
             }
-            $entityManager->persist($user);
-            $entityManager->flush();
-            return new JsonResponse(['message' => 'Success!', 'hasOrg' => $user->getOrganization() ? true : false], 200);
-            /*return $this->redirectToRoute('login')*/
+
+            return new JsonResponse(['id' => $user->getId(), 'needToSetupOrg' => $needToSetOrg], 200);
+
         } else {
             $errors = $this->buildErrorArray($pwdForm);
             return $errors;
         }
+    }
+
+    /**
+     * @return JsonResponse|RedirectResponse
+     * @throws ORMException
+     * @Route("/user/organization/set",name="setUserOrganization")
+     */
+    public function setOrganization(Request $request){
+        $em = $this->em;
+        if($_POST['assoc']){
+            $usrId = $_POST['id'];
+            $wfiId = $_POST['wid'];
+            $firmName = $_POST['firm'];
+            $token = $request->get('tk');
+            $currentUser = $em->getRepository(User::class)->find($usrId);
+            $currentOrgUser = clone $currentUser;
+            $currentOrgUser->setToken(null)
+            ->setInserted(new DateTime);
+            $em->persist($currentOrgUser);
+            if(!$wfiId){
+                $workerFirm = new WorkerFirm;
+                $workerFirm->setCommonName($firmName)
+                    ->setName($firmName)
+                    ->setCreatedBy($currentOrgUser->getId());
+                $em->persist($workerFirm);
+                $em->flush();
+            } else {
+                $workerFirm = $em->getRepository(WorkerFirm::class)->find($wfiId);
+            }
+    
+            $organization = $workerFirm->getOrganizations()->filter(fn(Organization $o) => $o->getCommname() == $firmName)->first();
+    
+            if($organization){
+                $organization->addUser($currentOrgUser);
+                $em->persist($organization);
+            } else {
+                $organization = new Organization;
+                $now = new DateTime();
+                $organization
+                    ->setCommname($firmName)
+                    ->setType('F')
+                    ->setExpired($now->add(new DateInterval('P21D')))
+                    ->setWeightType('role')
+                    ->setWorkerFirm($workerFirm)
+                    ->setPlan(ORGANIZATION::PLAN_PREMIUM)
+                    ->setCreatedBy($currentUser->getId());
+    
+                $em->persist($organization);
+                $em->persist($workerFirm);
+                $this->forward('App\Controller\OrganizationController::updateOrgFeatures', ['organization' => $organization, 'nonExistingOrg' => true, 'createdAsClient' => false]);
+            }
+            
+            $organization->addUser($currentUser);
+            $workerFirm->addOrganization($organization);
+            $em->persist($workerFirm);
+            $em->flush();
+
+        }
+
+        return $this->guardHandler->authenticateUserAndHandleSuccess(
+            $_POST['assoc'] ? $currentOrgUser : $currentUser,
+            $request,
+            $this->authenticator,
+            'main' // firewall name in security.yaml
+        );
+
+        return new JsonResponse(['msg' => 'success'], 200);
     }
 
     /**
@@ -1947,5 +2040,50 @@ class UserController extends MasterController
             $em->refresh($currentUser);
             return $errors;
         }    
+    }
+
+    /**
+     * Function which retrieves all accounts/organizations associated with user email
+     * @param Request $request
+     * @return mixed
+     * @Route("/user/accounts/list", name="getUserAccounts", methods={"GET"})
+     * @IsGranted("IS_AUTHENTICATED_REMEMBERED")
+     */
+    public function getAccounts(Request $request, TranslatorInterface $translator){
+        $currentUser = $this->user;
+        $em = $this->em;
+        $allUsersWithSameEmail = new ArrayCollection($em->getRepository(User::class)->findByEmail($currentUser->getEmail()));
+        return new JsonResponse(
+            $allUsersWithSameEmail->map(fn(User $u) => 
+            [
+                'id' => $u->getOrganization()->getId(),
+                'name' => $u->getOrganization()->getType() != 'C' ? $translator->trans('profile.my_firm_account',['accountName' => $u->getOrganization()->getCommname()]) : $translator->trans('profile.my_personal_account'),
+            ])->getValues()
+        );
+    }
+
+    /**
+     * @param Request $request
+     * @return mixed
+     * @Route("/user/accounts/change", name="changeUserAccount", methods={"POST"})
+     * @IsGranted("IS_AUTHENTICATED_REMEMBERED")
+     */
+    public function changeAccount(Request $request){
+        $currentUser = $this->user;
+        $em = $this->em;
+        $organization = $em->getRepository(Organization::class)->find($request->get('id'));
+        $user = $em->getRepository(User::class)->findOneBy(['email' => $currentUser->getEmail(), 'organization' => $organization]);
+
+        return $this->guardHandler->authenticateUserAndHandleSuccess(
+            $user,
+            $request,
+            $this->authenticator,
+            'main'
+        );
+
+        $user->setLastConnected(new DateTime());
+        $em->persist($user);
+        $em->flush();
+        return new JsonResponse();
     }
 }

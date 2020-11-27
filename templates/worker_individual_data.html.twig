@@ -138,264 +138,264 @@
 
 {% block content %}
     {% set now = "now"|date("Y/m/d") %}
+        <main>
+            <div class="" style="width: 85%;margin:auto">
+                {{ form_start(form) }}
+                
+                <div class="">
 
-        <div class="" style="width: 85%;margin:auto">
-            {{ form_start(form) }}
-            
+                    <div class="flex-center title-header">
+                        <a href="{{ path('home') }}" class="return-btn btn">
+                            Retour
+                        </a>
+                        <h4 class="page-title">{{'Mes informations'|trans}}</h4>
+                        <a class="btn-flat cancel-btn" style="visibility:hidden">{{'cancel'|trans}}</a>
+                        <a class="m-left modify-btn btn-flat dd-text">
+                            <span class="m-right">{{'modify'|trans}}</span>
+                            <i class="fa fa-pen"></i>
+                        </a>
 
-            <div class="">
-
-                <div class="flex-center title-header">
-                    <a href="{{ path('home') }}" class="return-btn btn">
-                        Retour
-                    </a>
-                    <h4 class="page-title">{{'Mes informations'|trans}}</h4>
-                    <a class="btn-flat cancel-btn" style="visibility:hidden">{{'cancel'|trans}}</a>
-                    <a class="m-left modify-btn btn-flat dd-text">
-                        <span class="m-right">{{'modify'|trans}}</span>
-                        <i class="fa fa-pen"></i>
-                    </a>
-
-                    {{ form_row(form.submit) }}
-                </div>
-                <section class="user-credentials"> 
-                    <div class="row flex-center">
-                    
-                        <div class="col s12 m3" style="position: relative">
-                            <img class="clickable-image user-picture" src="{{ asset(global.userpicture(currentuser)) }}" width="150px" height="150px">
-                            <a class="btn-floating add-photo-btn clickable-image"><i class="fa fa-camera"></i></a>
-                        </div>
-            
-                        <div class="col s12 m9 c-flex user-fields" style="flex-grow: 1;">
+                        {{ form_row(form.submit) }}
+                    </div>
+                    <section class="user-credentials"> 
+                        <div class="row flex-center">
                         
-                            <div class="flex-center">
-                                <span class="field-name">{{'name'|trans|capitalize}}</span>
-                                <span class="element-data">{{ currentuser.fullname }}</span>
-                                <div class="element-input">
-                                    {#
+                            <div class="col s12 m3" style="position: relative">
+                                <img class="clickable-image user-picture" src="{{ asset(global.userpicture(currentuser)) }}" width="150px" height="150px">
+                                <a class="btn-floating add-photo-btn clickable-image"><i class="fa fa-camera"></i></a>
+                            </div>
+                
+                            <div class="col s12 m9 c-flex user-fields" style="flex-grow: 1;">
+                            
+                                <div class="flex-center">
+                                    <span class="field-name">{{'name'|trans|capitalize}}</span>
+                                    <span class="element-data">{{ currentuser.fullname }}</span>
+                                    <div class="element-input">
+                                        {#
+                                        <div class="" style="display: inline-block;">
+                                            {{ form_row(form.male) }}
+                                        </div>
+                                        #}
+                                        <div class="input-field no-margin" style="display: inline-block;">
+                                            {{ form_label(form.firstname) }}
+                                            {{ form_widget(form.firstname, {attr:{style: "margin:0"}}) }}
+                                        </div>
+                                        <div class="input-field no-margin" style="display: inline-block;">
+                                            {{ form_label(form.lastname) }}
+                                            {{ form_widget(form.lastname, {attr:{style: "margin:0"}}) }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex-center">
+                                    <span class="field-name">{{'email'|trans|capitalize}}</span>
+                                    <span class="element-data">{{ currentuser.email }}</span>
+                                    <div class="element-input user-email">
+                                        {{ form_row(form.email) }}
+                                    </div>
+                                </div>
+
+                                <div class="flex-center">
+                                    <span class="field-name">{{'password'|trans|capitalize}}</span>
+                                    <span class="element-data">••••••••</span>
+                                    <div class="element-input">
+                                        <a class="btn m-pwd-btn modal-trigger" href="#modifyPassword">{{'mails.passwordModify.button_text'|trans ~ '...'}}</a>
+                                    </div>
+
+                                </div>
+                            
+                                <div style="margin-left: auto;margin-right:2.5%">
+                                    
+                                </div>
+                            </div>
+
+                        </div>
+                        {{ form_rest(form) }}
+                        {{ form_end(form) }}
+                    </section>
+                    {#
+                    <ul class="element-input flex-center" style="display: none;justify-content:space-between;flex-grow:1">
+                        <li>
+                            <ul class="flex" style="flex-direction: column;">
+                                <li>
                                     <div class="" style="display: inline-block;">
                                         {{ form_row(form.male) }}
                                     </div>
-                                    #}
-                                    <div class="input-field no-margin" style="display: inline-block;">
+                                    <div class="input-field" style="display: inline-block;">
                                         {{ form_label(form.firstname) }}
                                         {{ form_widget(form.firstname, {attr:{style: "margin:0"}}) }}
                                     </div>
-                                    <div class="input-field no-margin" style="display: inline-block;">
+                                    <div class="input-field" style="display: inline-block;">
                                         {{ form_label(form.lastname) }}
                                         {{ form_widget(form.lastname, {attr:{style: "margin:0"}}) }}
                                     </div>
-                                </div>
-                            </div>
-
-                            <div class="flex-center">
-                                <span class="field-name">{{'email'|trans|capitalize}}</span>
-                                <span class="element-data">{{ currentuser.email }}</span>
-                                <div class="element-input user-email">
-                                    {{ form_row(form.email) }}
-                                </div>
-                            </div>
-
-                            <div class="flex-center">
-                                <span class="field-name">{{'password'|trans|capitalize}}</span>
-                                <span class="element-data">••••••••</span>
-                                <div class="element-input">
-                                    <a class="btn m-pwd-btn modal-trigger" href="#modifyPassword">{{'mails.passwordModify.button_text'|trans ~ '...'}}</a>
-                                </div>
-
-                            </div>
-                        
-                            <div style="margin-left: auto;margin-right:2.5%">
-                                
-                            </div>
-                        </div>
-
-                    </div>
-                     {{ form_rest(form) }}
-                    {{ form_end(form) }}
-                </section>
+                                </li>
+                                <li>
+                                    <div class="">
+                                        {{ form_row(form.email) }}
+                                    </div>
+                                </li>
+                            </ul>
+                        </li>
+                        <li style=""><a class="validate-profile-info-btn waves-effect waves-light btn blue darken-2 tooltip"><i class="fa fa-check"></i></a></li>
+                    </ul>
+                    #}
+                </div>
+                
                 {#
-                <ul class="element-input flex-center" style="display: none;justify-content:space-between;flex-grow:1">
-                    <li>
-                        <ul class="flex" style="flex-direction: column;">
-                            <li>
-                                <div class="" style="display: inline-block;">
-                                    {{ form_row(form.male) }}
+                <ul class="experiences" style="margin-top:3em" data-prototype="{% apply escape %}{% include 'prototype_experience.twig' with { 'item': form.experiences.vars.prototype } %}{% endapply %}">
+                    {% set k = 0 %}
+                    {% for key, experience in form.experiences %}
+                        {% set k = k + 1 %}
+                        
+
+                        <li class="row element-data" style="width:95%;">
+                            <ul class="flex-center" style="justify-content:space-between">
+                                <li>
+                                    <div style="font-size:17px">{{experience.vars.data.position}}</div>
+                                    <div>{{experience.vars.data.firm.name}}</div>
+                                </li>
+                                <li style="margin-left: auto;">
+                                    {% set startdate = experience.vars.data.startdate %}
+                                    {% set enddate = experience.vars.data.enddate %}
+
+                                    {% if startdate is not null and enddate is not null %}
+                                        <span>
+                                            {{ experience.vars.data.startdate|format_date('short', 'none', null, null, 'MM/yy') }} -
+                                            {{ experience.vars.data.enddate|format_date('short', 'none', null, null, 'MM/yy') }}
+                                        </span>
+                                    {% elseif enddate is null %}
+                                        <span>
+                                            {{ experience.vars.data.startdate|format_date('short', 'none', null, null, 'MM/yy') }} -
+                                            Present
+                                        </span>
+                                    {% elseif startdate is null and enddate is null %}
+                                        <span> Dates non précisées </span>
+                                    {% endif %}
+                                </li>
+                                <li>
+                                    <a class="modify-experience-btn btn-flat" style="margin-left: auto;">
+                                        <i class="fa fa-pencil-alt"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                                        
+                        <li class="experience element-input" style="width:95%;display:none">
+                            <ul class="flex-center row" style="justify-content: space-between;">
+                                <li class="stage-title">
+                                    <h4> {% trans %} worker_individual_data.experience.title {% endtrans %} {{ k }}</h4>
+                                </li>
+                                <li style="margin-left:auto;margin-right:10px"><a class="validate-experience-btn waves-effect waves-light btn blue darken-2 tooltip"><i class="fa fa-check"></i></a></li>
+                            </ul>
+                            <div class="row">
+                                <div class="input-field col s12 m4">
+                                    {{ form_row(experience.position) }}
                                 </div>
-                                <div class="input-field" style="display: inline-block;">
-                                    {{ form_label(form.firstname) }}
-                                    {{ form_widget(form.firstname, {attr:{style: "margin:0"}}) }}
+                                <div class="input-field w-firm col s12 m4">
+                                    {{ form_row(experience.firm,{attr:{class:"no-margin"}}) }}
+                                    <select name="firmSelector" style="margin-top:45px"></select>
                                 </div>
-                                <div class="input-field" style="display: inline-block;">
-                                    {{ form_label(form.lastname) }}
-                                    {{ form_widget(form.lastname, {attr:{style: "margin:0"}}) }}
+                                <div class="col s12 m4">
+                                    {{ form_widget(experience.active) }}
+                                    {{ form_label(experience.active) }}
                                 </div>
-                            </li>
-                            <li>
-                                <div class="">
-                                    {{ form_row(form.email) }}
+                            </div>
+                            <div class="row">
+                                <div class="input-field col s12 m4">
+                                    {{ form_row(experience.location) }}
                                 </div>
-                            </li>
-                        </ul>
-                    </li>
-                    <li style=""><a class="validate-profile-info-btn waves-effect waves-light btn blue darken-2 tooltip"><i class="fa fa-check"></i></a></li>
+                                <div class="col s12 m4">
+                                    {{ form_row(experience.startdate) }}
+                                </div>
+                                <div class="col s12 m4">
+                                    {{ form_row(experience.enddate) }}
+                                </div>
+                            </div>
+                        </li>
+                    {% endfor %}
+                    <a href="#" class="waves-effect waves-light btn insert-experience-btn"><i class="fa fa-plus" style="margin-right: 10px;"></i><span>Ajouter une expérience</span></a>
                 </ul>
                 #}
-            </div>
-            
-            {#
-            <ul class="experiences" style="margin-top:3em" data-prototype="{% apply escape %}{% include 'prototype_experience.twig' with { 'item': form.experiences.vars.prototype } %}{% endapply %}">
-                {% set k = 0 %}
-                {% for key, experience in form.experiences %}
-                    {% set k = k + 1 %}
-                    
 
-                    <li class="row element-data" style="width:95%;">
-                        <ul class="flex-center" style="justify-content:space-between">
-                            <li>
-                                <div style="font-size:17px">{{experience.vars.data.position}}</div>
-                                <div>{{experience.vars.data.firm.name}}</div>
-                            </li>
-                            <li style="margin-left: auto;">
-                                {% set startdate = experience.vars.data.startdate %}
-                                {% set enddate = experience.vars.data.enddate %}
-
-                                {% if startdate is not null and enddate is not null %}
-                                    <span>
-                                        {{ experience.vars.data.startdate|format_date('short', 'none', null, null, 'MM/yy') }} -
-                                        {{ experience.vars.data.enddate|format_date('short', 'none', null, null, 'MM/yy') }}
-                                    </span>
-                                {% elseif enddate is null %}
-                                    <span>
-                                        {{ experience.vars.data.startdate|format_date('short', 'none', null, null, 'MM/yy') }} -
-                                        Present
-                                    </span>
-                                {% elseif startdate is null and enddate is null %}
-                                    <span> Dates non précisées </span>
-                                {% endif %}
-                            </li>
-                            <li>
-                                <a class="modify-experience-btn btn-flat" style="margin-left: auto;">
-                                    <i class="fa fa-pencil-alt"></i>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                                    
-                    <li class="experience element-input" style="width:95%;display:none">
-                        <ul class="flex-center row" style="justify-content: space-between;">
-                            <li class="stage-title">
-                                <h4> {% trans %} worker_individual_data.experience.title {% endtrans %} {{ k }}</h4>
-                            </li>
-                            <li style="margin-left:auto;margin-right:10px"><a class="validate-experience-btn waves-effect waves-light btn blue darken-2 tooltip"><i class="fa fa-check"></i></a></li>
-                        </ul>
-                        <div class="row">
-                            <div class="input-field col s12 m4">
-                                {{ form_row(experience.position) }}
-                            </div>
-                             <div class="input-field w-firm col s12 m4">
-                                {{ form_row(experience.firm,{attr:{class:"no-margin"}}) }}
-                                <select name="firmSelector" style="margin-top:45px"></select>
-                            </div>
-                            <div class="col s12 m4">
-                                {{ form_widget(experience.active) }}
-                                {{ form_label(experience.active) }}
-                            </div>
+                <div id="modifyPassword" class="modal">
+                    {{form_start(passwordModificationForm)}}
+                    <div class="modal-content">
+                        <p>{{ 'profile.manage.password_modification_modal.title'|trans }}</p>
+                        
+                        <div class="input-field">
+                            {{form_row(passwordModificationForm.password)}}
                         </div>
-                        <div class="row">
-                            <div class="input-field col s12 m4">
-                                {{ form_row(experience.location) }}
-                            </div>
-                            <div class="col s12 m4">
-                                {{ form_row(experience.startdate) }}
-                            </div>
-                            <div class="col s12 m4">
-                                {{ form_row(experience.enddate) }}
-                            </div>
+                        <div class="input-field">
+                            {{form_row(passwordModificationForm.newPassword)}}
                         </div>
-                    </li>
-                {% endfor %}
-                <a href="#" class="waves-effect waves-light btn insert-experience-btn"><i class="fa fa-plus" style="margin-right: 10px;"></i><span>Ajouter une expérience</span></a>
-            </ul>
-            #}
-
-            <div id="modifyPassword" class="modal">
-                {{form_start(passwordModificationForm)}}
-                <div class="modal-content">
-                    <p>{{ 'profile.manage.password_modification_modal.title'|trans }}</p>
-                    
-                    <div class="input-field">
-                        {{form_row(passwordModificationForm.password)}}
                     </div>
-                    <div class="input-field">
-                        {{form_row(passwordModificationForm.newPassword)}}
+                    <div class="modal-footer action-buttons">
+                    <div class="button-field">
+                        {{form_row(passwordModificationForm.submit)}}
+                    </div>
+                    </div>
+                    {{form_rest(passwordModificationForm)}}
+                    {{form_end(passwordModificationForm)}}
+                </div>
+
+                <div id="successUploadedPicture" class="modal">
+                    <div class="modal-content">
+                    <p>{{ 'profile.file.success.modal_content'|trans }}</p>
+                    </div>
+                    <div class="modal-footer action-buttons">
+                    <div class="button-field">
+                        <a class="waves-effect waves-green btn modal-close">Ok</a>
+                    </div>
                     </div>
                 </div>
-                <div class="modal-footer action-buttons">
-                <div class="button-field">
-                    {{form_row(passwordModificationForm.submit)}}
+                <div id="successPasswordChange" class="modal">
+                    <div class="modal-content">
+                        <p>{{ 'profile.manage.s_password_modification_modal.content'|trans }}</p>
+                    </div>
+                    <div class="modal-footer action-buttons">
+                    <div class="button-field">
+                        <a class="waves-effect waves-green btn modal-close">Ok</a>
+                    </div>
+                    </div>
                 </div>
+                <div id="errorFileType" class="modal">
+                    <div class="modal-title">
+                    <h4>{{ 'profile.file.unsupported_type.modal_title'|trans }}</h4>
+                    </div>
+                    <div class="modal-content">
+                    <p>{{ 'profile.file.unsupported_type.modal_content'|trans }}</p>
+                    </div>
+                    <div class="modal-footer action-buttons">
+                    <div class="button-field">
+                        <a class="waves-effect waves-green btn modal-close">Ok</a>
+                    </div>
+                    </div>
                 </div>
-                {{form_rest(passwordModificationForm)}}
-                {{form_end(passwordModificationForm)}}
-            </div>
-
-            <div id="successUploadedPicture" class="modal">
-                <div class="modal-content">
-                <p>{{ 'profile.file.success.modal_content'|trans }}</p>
+                <div id="errorFileSize" class="modal">
+                    <div class="modal-title">
+                    <h4>{{ 'profile.file.unsupported_size.modal_title'|trans }}</h4>
+                    </div>
+                    <div class="modal-content">
+                    <p>{{ 'profile.file.unsupported_size.modal_content'|trans }}</p>
+                    </div>
+                    <div class="modal-footer action-buttons">
+                    <div class="button-field">
+                        <a class="waves-effect waves-green btn modal-close">Ok</a>
+                    </div>
+                    </div>
                 </div>
-                <div class="modal-footer action-buttons">
-                <div class="button-field">
-                    <a class="waves-effect waves-green btn modal-close">Ok</a>
-                </div>
-                </div>
-            </div>
-            <div id="successPasswordChange" class="modal">
-                <div class="modal-content">
-                    <p>{{ 'profile.manage.s_password_modification_modal.content'|trans }}</p>
-                </div>
-                <div class="modal-footer action-buttons">
-                <div class="button-field">
-                    <a class="waves-effect waves-green btn modal-close">Ok</a>
-                </div>
-                </div>
-            </div>
-            <div id="errorFileType" class="modal">
-                <div class="modal-title">
-                <h4>{{ 'profile.file.unsupported_type.modal_title'|trans }}</h4>
-                </div>
-                <div class="modal-content">
-                <p>{{ 'profile.file.unsupported_type.modal_content'|trans }}</p>
-                </div>
-                <div class="modal-footer action-buttons">
-                <div class="button-field">
-                    <a class="waves-effect waves-green btn modal-close">Ok</a>
-                </div>
-                </div>
-            </div>
-            <div id="errorFileSize" class="modal">
-                <div class="modal-title">
-                <h4>{{ 'profile.file.unsupported_size.modal_title'|trans }}</h4>
-                </div>
-                <div class="modal-content">
-                <p>{{ 'profile.file.unsupported_size.modal_content'|trans }}</p>
-                </div>
-                <div class="modal-footer action-buttons">
-                <div class="button-field">
-                    <a class="waves-effect waves-green btn modal-close">Ok</a>
-                </div>
+                <div id="emailConfirmation" class="modal">
+                    <div class="modal-content">
+                        <h5>{{ 'profile.manage.email_confirmation_modal.title'|trans }}</h5>
+                        <p>{{ 'profile.manage.email_confirmation_modal.content'|trans|raw }}</p>
+                    </div>
+                    <div class="modal-footer">
+                        <a class="modal-action waves-effect btn">Ok</a>
+                    </div>
                 </div>
             </div>
-            <div id="emailConfirmation" class="modal">
-                <div class="modal-content">
-                    <h5>{{ 'profile.manage.email_confirmation_modal.title'|trans }}</h5>
-                    <p>{{ 'profile.manage.email_confirmation_modal.content'|trans|raw }}</p>
-                </div>
-                <div class="modal-footer">
-                    <a class="modal-action waves-effect btn">Ok</a>
-                </div>
-            </div>
-    </div>
+        </main>
 
     <div style="display: none">
         {{ form_start(pictureForm) }}

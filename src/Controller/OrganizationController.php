@@ -96,6 +96,7 @@ use App\Form\AddOrganizationForm;
 use App\Form\AddSignupUserForm;
 use App\Form\ManageProcessForm;
 use App\Repository\OrganizationRepository;
+use App\Security\LoginFormAuthenticator;
 use DateTimeZone;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -118,13 +119,14 @@ use App\Service\FileUploader;
 use App\Service\NotificationManager;
 use DateInterval;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
 
 class OrganizationController extends MasterController
 {
     private $notFoundResponse;
 
-    public function __construct(EntityManagerInterface $em, Security $security, RequestStack $stack, UserPasswordEncoderInterface $encoder, Environment $twig) {
-        parent::__construct($em, $security, $stack, $encoder, $twig);
+    public function __construct(EntityManagerInterface $em, Security $security, RequestStack $stack, UserPasswordEncoderInterface $encoder, GuardAuthenticatorHandler $guardHandler, LoginFormAuthenticator $authenticator, Environment $twig) {
+        parent::__construct($em, $security, $stack, $encoder, $guardHandler, $authenticator, $twig);
         $this->notFoundResponse = new Response(null, Response::HTTP_NOT_FOUND);
     }
 
@@ -6112,12 +6114,23 @@ class OrganizationController extends MasterController
         if ($signupForm->isSubmitted()) {
 
             if ($signupForm->isValid()) {
+                
+                $username = $user->getFirstname() . ' ' . $user->getLastname();
 
                 $token = md5(rand());
                 $user->setToken($token)
-                    ->setUsername($user->getFirstname() . ' '. $user->getLastname())
+                    ->setUsername($username)
                     ->setRole(1);
-                $em->persist($user);
+
+                $organization = new Organization();
+                $organization->setCommname($username)
+                    ->setType('C')
+                    ->setMasterUser($user)
+                    ->addUser($user);
+                
+                $this->forward('App\Controller\OrganizationController::updateOrgFeatures', ['organization' => $organization, 'nonExistingOrg' => true, 'createdAsClient' => false]);
+
+                $em->persist($organization);
                 $em->flush();
 
                 //Sending mail to DealDrive root users 
@@ -6141,7 +6154,6 @@ class OrganizationController extends MasterController
                 setcookie('signup', 'y');
                 return $this->redirectToRoute('home_welcome');
             }
-
         }
 
         return $this->render('organization_add.html.twig',

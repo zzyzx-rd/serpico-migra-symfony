@@ -46,9 +46,11 @@
       var ruurl ="{{ url('retrieveUpdates') }}";
       var vuurl ="{{ url('viewUpdates') }}";
       {% if orgInFreemiumMode %}
-      var caurl ="{{ url('checkPlans') }}";
+      var cpurl ="{{ url('checkPlans') }}";
       {% endif %}
       var cnurl ="{{ url('checkNotificationMails') }}";
+      var gaurl ="{{ url('getUserAccounts') }}";
+      var caurl ="{{ url('changeUserAccount') }}";
     </script>
   </head>
 
@@ -173,6 +175,18 @@
                               <ul class="c-flex">
                                 
                                 <li>{{currentuser.fullname}}</li>
+                                <li class="ma-content" style="display:none">
+                                  <div class="flex-center">
+                                    <span>
+                                      {{ 'my_account'|trans ~ ' :' }}
+                                    </span>
+                                    <span class="sm-left strong">{{ (organization.type != 'C' ? (organization.commname|length > 10 ? organization.commname|slice(0,10) ~ '...') : 'individual'|trans) }}</span>
+                                    <a class="dd-orange-text modal-trigger change-account" href="#changeAccount">{{'shift'|trans|upper}}</a>
+                                  </div>
+                                </li>
+                                <li class="add-account" style="display:none">
+                                    <a href="" class="dd-text strong no-padding">{{'profile.add_firm_account'|trans}}</a>
+                                </li>
                                 <li class="profile-link">
                                   <a class="dd-orange-text no-padding" href="{{ url('home') }}">{{'profile.access_profile'|trans}}</a>
                                 </li>
@@ -396,14 +410,20 @@
           </div>
         </div>
       {% endif %}
+        <div id="changeAccount" class="modal">
+          <div class="modal-content">
+            <h5>{{'profile.change_account_modal.title'|trans}}</h5>
+            <p>{{'profile.change_account_modal.msg'|trans}}</p>
+            <div class="input-field">
+              <select name="accountSelector"></select>
+            </div>
+             <a class="btn waves-light waves-effect select-account-btn">Ok</a>
+              </div>
+            </div>
+          </div>
+        </div>
     </div>
-    {#}
-    <footer id="master-footer">
-      {% if not is_granted('IS_AUTHENTICATED_FULLY') or global.route == path('home_welcome') %}
-        {% include "not_authenticated_footer.html.twig" %}
-      {% endif %}
-    </footer>
-    #}
+
     <script src="{{ asset('build/runtime.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.js"></script>

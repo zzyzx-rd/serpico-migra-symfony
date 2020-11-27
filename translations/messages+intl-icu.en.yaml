@@ -32,7 +32,7 @@ firm_member : Firm / Institution member
 firstname: First name
 lastname: Last name
 name: name
-email: email
+email: Email
 password: password
 ascending: ASC
 descending: DESC
@@ -96,6 +96,13 @@ cancel: Cancel
 features: Features
 logout: Logout
 notif_and_profile: Notifications & Profile
+my_account: My account
+individual: Individual
+shift: Shift
+
+signup:
+  do_not_associate_org: I prefer not to associate an organization account right now
+  personal_usage_tooltip: You can still associate an account linkedin to a firm thereafter, but your account as an individual will always be distinct from your account as being part of an organization
 
 updates:
 
@@ -756,7 +763,7 @@ pricing:
   note_e: You can setup advanced updates, and see the evolution of operations and performance along the time
   subscriptions: Subscriptions
   note_1: "Monthly user fee is for Premium plan, €7 from 1st up to 100th user, 6€ from 101th up to 250th, and 5€ beyond. For Entreprise plan, 14€ from 1st up to 100th user, 10€ from 101th up to 250th, and 7€ beyond. <a class=\"dd-text\" href=\"/#\">TCs</a> apply"
-  note_2: Limited to 10 collaborators
+  note_2: Limited to 3 collaborators
   note_3: To come soon
   trial_21_days_cta: 21 days premium for free
   start_now: Start now
@@ -1949,7 +1956,14 @@ contact_mail:
   team: The DealDrive Team
 
 profile:
+  my_firm_account: My {accountName} account
+  my_personal_account: My individual account
+  add_account: Add account
+  add_firm_account: Add firm account
   access_profile: Access my profile
+  change_account_modal:
+    title: Account change
+    msg: Select which account you want to shift to
   page_title: My profile
   mobile_header_title: My profile
   my_results: My results

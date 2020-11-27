@@ -1,5 +1,8 @@
 {% import "macros/user_list__macros.html.twig" as macros %}
 
+{% if externalUser %}
+  {% set user = externalUser.user %}
+{% endif %}
 {% set settings = settings is defined ? settings : true %}
 {% set stats = stats is defined ? stats : true %}
 {% set roles = roles is defined ? roles : true %}
@@ -36,12 +39,29 @@
     {% if roles %}
       {{ macros.user_role_badge(user) }}
     {% else %}
+      {#
       {% if not stats %}
         {% if not user.lastConnected %}
           {{ macros.render_badge('virtual-badge', 'V') }}
         {% endif %}
       {% endif %}
+      #}
     {% endif %}
+
+    
+    {% if not user.lastConnected %}
+      {{ macros.render_badge(
+        'virtual-badge', 'V', 'tooltip.user.role.virtual'|trans
+      ) }}
+    {% endif %}
+    {% if orgEnabledUserCreatingUser and user.enabledCreatingUser %}
+      {{ macros.render_badge(
+        'user-creator-badge', user_icon, 'tooltip.user.enabledCreatingUser'|trans
+      ) }}
+    {% endif %}
+
+    
+     
 
     {% if settings %}
     
@@ -63,15 +83,28 @@
           
         {% endif %}
 
+        {#
         <a class="material-icons {{ not hasCompletedActivities ? 'disabled' }}"
             href="{{ url('elementOverview', { entity: 'user', elmtId: user.id }) }}"
-            tooltip="{{ 'user_list.overview'|trans }}">show_chart</a>
+            tooltip="{{ 'user_list.overview'|trans }}">show_chart
+        </a>
+        #}
+        <div class="nb-activities flex-center tooltipped" data-tooltip="{{'tooltip.user.activity_ongoing_futur'|trans}}" data-position="top">
+          <i class="fa fa-briefcase"></i>
+          <span class="sm-left black-text">
+              {{ userM.nbCompletedActivities(user) }} + {{ userM.nbScheduledActivities(user) }}
+          </span>
+        </div>
+        {% if externalUser %}
+          <a class="m-left material-icons tooltipped" href="{{ url('createClientUser', { cliId: externalUser.client.id }) }}" data-tooltip="{{ 'user_list.modify'|trans }}" data-position="top">settings</a>
+        {% endif %}
       </div>
     
     {% endif %}
 
   </header>
 
+  {#
   {% if stats %}
     <div class="item-body">
       <div class="badges">
@@ -156,4 +189,5 @@
       </div>
     </div>
   {% endif %}
+  #}
 </li>

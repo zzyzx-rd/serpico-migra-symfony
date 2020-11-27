@@ -15,6 +15,24 @@
 
 {% block css %}
   <link rel="stylesheet" href="{{ asset('build/user_list.css') }}">
+  <style>
+    .nb-activities{
+      margin-left: auto;
+      background-color: #e6d9f1;
+      border-radius: 10px;
+      padding: 0 0.4rem;
+      font-size: 1rem;
+    }
+
+    .client-individuals .user-picture{
+      font-size:2.5rem;
+    }
+
+    .client-employees .nb-activities{
+      margin-right: 66px;
+    }
+
+  </style>
 {% endblock %}
 
 {% set user_icon %}
@@ -93,13 +111,15 @@
       </section>
 
       <section id="clients">
-        <ul class="client-type-list">
+        <ul class="client-type-list client-employees">
           {% include "components/user_list__firms_item.html.twig" with { firms: clientFirms } %}
         </ul>
+        {#
         <ul class="client-type-list">
           {% include "components/user_list__ext_team_item.html.twig" with { firms: clientTeams } %}
         </ul>
-        <ul class="client-type-list">
+        #}
+        <ul class="client-type-list client-individuals">
           {% include "components/user_list__individuals_item.html.twig" with { firms: clientIndividuals } %}
         </ul>
       </section>

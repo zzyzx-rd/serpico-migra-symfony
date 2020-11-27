@@ -2745,24 +2745,6 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
     $('.remove-activity').data('id',$(this).attr('data-aid'));
   })
 
-  $('.set-usr-org-btn').on('click',function(e){
-      e.preventDefault();
-      var $this = $(this);
-      $.post(suourl, $this.closest('form').serialize())
-        .done(function(data){
-          $('#firstConnectionModal').modal('close');
-          $('#beforeStarting img').attr({
-            'src' : $('.client-logo').eq(1).attr('src'),
-            'data-tooltip': $('.client-logo').eq(1).parent().attr('data-tooltip')
-          }).tooltip();
-          $('#beforeStarting').modal('open');
-
-        })
-        .fail(function(data){
-          console.log(data);
-        });
-  });
-
   if(currentWfiId && fc){
     setTimeout(function(){
         $('#beforeStarting img').attr({

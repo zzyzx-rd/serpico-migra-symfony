@@ -62,7 +62,7 @@
     var fc = parseInt("{{ firstConnection }}");
     var eurl = "{{ url('updateEvent', {eveId : 0}) }}";
     var scurl = "{{ url('createStage') }}";
-    var currentWfiId = "{{ currentuser.organization.workerFirm.id }}";
+    var currentWfiId = "{{ currentuser.organization.type != 'C' ? currentuser.organization.workerFirm.id : 0 }}";
     var uid = "{{ currentuser.id }}";
     var un = "{{ currentuser.fullname }}";
     var userPic = "{{ asset(global.userpicture) }}";
@@ -70,7 +70,6 @@
     var pcurl = "{{ url('createParticipant') }}";
     var dcurl = "{{ url('getDummyClients') }}";
     var daurl = "{{ url('activityDelete') }}";
-    var suourl = "{{ url('setUserOrganization') }}";
     var dturl = "{{ url('getDynamicTranslations') }}";
     var geurl = "{{ url('getEventTypesFromEventGroup') }}";
     var notConfirmingPartError = "{{ 'getEventTypesFromEventGroup'|trans }}";

@@ -9,7 +9,7 @@ $(function() {
     $('#definePwdSuccess').modal({
         dismissible: true,
         complete: function() {
-            window.location = homeUrl;
+            window.location = landingPageUrl;
         }
     });
 
@@ -26,12 +26,14 @@ $(function() {
     $('form').submit(function(e) {
         e.preventDefault();
         $('.red-text').empty();
-        $.post(url, $(this).serialize())
+        $.post(window.location.pathname, $(this).serialize())
         .done(function(data) {
-            if(!hasOrg){
+
+            if(data.needToSetupOrg){
+                $('.set-usr-org-btn').attr('data-id',data.id);
                 $('#firstConnectionModal').modal('open');
             } else {
-                setTimeout(() => window.location = homeUrl, 2000);
+                setTimeout(() => window.location = landingPageUrl, 2000);
             }
            
 
@@ -139,11 +141,11 @@ $(function() {
     $('.set-usr-org-btn').on('click',function(e){
         e.preventDefault();
         var $this = $(this);
-        var params = {tk: window.location.href.split('/')[window.location.href.split('/').length - 1]}
+        var params = {id: $this.data('id'), assoc: $('#noOrgAssoc').is(':checked')}
         $.post(suourl, $this.closest('form').serialize() + '&' + $.param(params))
             .done(function(data){
             $('#firstConnectionModal').modal('close');
-            setTimeout(() => window.location = homeUrl, 1000);
+            setTimeout(() => window.location = landingPageUrl, 1000);
             })
             .fail(function(data){
             console.log(data);

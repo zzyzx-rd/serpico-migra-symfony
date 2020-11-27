@@ -218,6 +218,15 @@ li + li.no-items-placeholder {
   line-height: var(--nav-height);
 }
 
+.ma-content{
+  font-size: 14px;
+  flex-wrap: nowrap;
+}
+
+.change-account{
+  font-size: 12px;
+}
+
 
 
 .nav-desktop-btns > li,
@@ -3190,7 +3199,7 @@ h2.header {
   width:100%;
 }
 
-.profile-link > a:hover{
+.profile-zone a:hover{
   background-color: inherit;
   font-weight: 600;
 }
