@@ -67,7 +67,7 @@
           <nav id="nav" class="{{global.route != "home_welcome" ? 'white' : 'transparent'}}">
             <div class="nav-wrapper flex-center-sb">
               <a class="left-icon-zone hide-on-med-and-down" href="/">
-              <div class="xm-left left-icon-container desktop-left-icon-container">
+              <div class="xm-left left-icon-container desktop-left-icon-container sm-right">
                 <img class="dd-logo" src="{{ asset('lib/img/logo_dd_p_l.png') }}">
               </div>
               </a>
@@ -89,7 +89,7 @@
                   {#<li class="logo">
                   </li>#}
                   <li class="plan hide-on-med-and-down">
-                    <div class="c-flex-center">
+                    <div class="c-flex-center sm-right">
                       <span> {{ organization.plan == 1 ? 'header.plan.enterprise'|trans|upper : (organization.plan == 2 ? 'header.plan.premium'|trans|upper : 'header.plan.free'|trans|upper) }} {{ date('now').diff(organization.inserted).days < 21 ? '(' ~ 'trial'|trans|upper ~ ')' }} </span>
                       <a class="dd-orange-text" href="{{ path('priceManagement') }}">{{ 'header.plan.upgrade'|trans }}</a>
                     </div>
@@ -293,8 +293,8 @@
                   </li>
                   
                   <li class="plan">
-                    <a class="c-flex-center" href="{{ path('priceManagement') }}">
-                      <span class="dd-text"> {{ organization.plan == 1 ? 'header.plan.enterprise'|trans|upper : (organization.plan == 2 ? 'header.plan.premium'|trans|upper : 'header.plan.free'|trans|upper) }} {{ date('now').diff(organization.inserted).days < 21 ? '(' ~ 'trial'|trans|upper ~ ')' }} </span>
+                    <a class="c-flex-center " href="{{ path('priceManagement') }}">
+                      <span class="dd-text" style="color: #55318e;"> {{ organization.plan == 1 ? 'header.plan.enterprise'|trans|upper : (organization.plan == 2 ? 'header.plan.premium'|trans|upper : 'header.plan.free'|trans|upper) }} {{ date('now').diff(organization.inserted).days < 21 ? '(' ~ 'trial'|trans|upper ~ ')' }} </span>
                       <span class="dd-orange-text">{{ 'header.plan.upgrade'|trans }}</span>
                     </a>
                   </li>
@@ -302,7 +302,7 @@
                   {% if global.currentuser.is_root %}
                     <li class="">
                       <a href="{{ path('rootManagement') }}">
-                        <i class="fa fa-cogs" aria-hidden="true"></i>
+                        <i class="fa fa-cogs sm-right" aria-hidden="true"></i>
                         <span>{% trans %}header.root_mgt{% endtrans %}</span>
                       </a>
                     </li>
@@ -319,14 +319,14 @@
                   #}  
                   <li>
                     <a href="{{ path(global.currentuser.is_admin ? 'manageUsers' : 'seeColleaguesTeams') }}">
-                      <i class="fa fa-users" aria-hidden="true"></i>
+                      <i class="fa fa-users sm-right" aria-hidden="true"></i>
                       {% set str = 'header.users' %}
                       {{ str|trans }}
                     </a>
                   </li>
                   <li class="">
                     <a href="{{ path('myActivities') }}">
-                      <i class="fa fa-briefcase" aria-hidden="true"></i>
+                      <i class="fa fa-briefcase sm-right" aria-hidden="true"></i>
                       <span>
                         {% if orgName != "Public" %}
                           {% trans %}header.firmActivities{% endtrans %}
@@ -338,7 +338,7 @@
                   </li>
                   <li class="logout">
                     <a href="{{ path('logout') }}">
-                      <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+                      <i class="fas fa-sign-out-alt " aria-hidden="true"></i>
                       <span>{{'logout'|trans}}</span>
                     </a>
                   </li>
