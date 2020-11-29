@@ -79,7 +79,7 @@
                 </div>
               </a>
               <div class="mobile-center-element flex-center">
-                {% if is_granted('IS_AUTHENTICATED_REMEMBERED') and global.currentuser is not null %}
+                {% if is_granted('IS_AUTHENTICATED_REMEMBERED') and global.currentuser is not null and global.route != "home_welcome" %}
                   <img class="dd-logo" src="{{ asset('lib/img/logo_dd_s_centered.png') }}">
                   <span class="dd-text m-left strong">{% block mobile_title '' %}</span>
                 {% else %}
@@ -107,36 +107,27 @@
                   {% if global.currentuser.is_root %}
                     <li class="hide-on-med-and-down">
                       <a href="{{ path('rootManagement') }}">
-                        <i class="fa fa-cogs" aria-hidden="true"></i>
+                        <i class="fa fa-cogs sm-right" aria-hidden="true"></i>
                         <span>{% trans %}header.root_mgt{% endtrans %}</span>
                       </a>
                     </li>
                   {% endif %}
+
+                  {#
                   {% if global.currentuser.is_admin %}
                     <li class="hide-on-med-and-down">
                       <a href="{{ path('firmSettings') }}">
-                        <i class="fa fa-cog" aria-hidden="true"></i>
+                        <i class="fa fa-cog sm-right" aria-hidden="true"></i>
                         <span>{% trans %}header.settings{% endtrans %}</span>
                       </a>
                     </li>
                   {% endif %}
-                  {# admins (1) can see processes for their institution, everyone else will see all institutions instead #}
-                  {#
-                  {% set sees_processes = userrole == 1 %}
-                  {% if not sees_processes %}
-                    <li>
-                      <a href="{{ path('displayAllInstitutions') }}">
-                        <i class="fa fa-hotel" aria-hidden="true"></i>
-                        {% set str = 'header.institutions' %}
-                        {{ str|trans }}
-                      </a>
-                    </li>
-                  {% endif %}
                   #}
+
                   {% if orgName != "Public" %}
                     <li class="hide-on-med-and-down">
                       <a href="{{ path(global.currentuser.is_admin ? 'manageUsers' : 'seeColleaguesTeams') }}">
-                        <i class="fa fa-users" aria-hidden="true"></i>
+                        <i class="fa fa-users sm-right" aria-hidden="true"></i>
                         {% set str = 'header.users' %}
                         {{ str|trans }}
                       </a>
@@ -144,7 +135,7 @@
                   {% endif %}
                   <li class="hide-on-med-and-down">
                     <a href="{{ path('myActivities') }}">
-                      <i class="fa fa-briefcase" aria-hidden="true"></i>
+                      <i class="fa fa-briefcase sm-right" aria-hidden="true"></i>
                       <span>
                         {% if orgName != "Public" %}
                           {% trans %}header.firmActivities{% endtrans %}
