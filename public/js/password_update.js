@@ -14,10 +14,10 @@ $(function() {
     });
 
     $('.fa-eye').on('mousedown', function() {  
-        $pwdElmt = $(this).closest('.password').find('input');
+        $pwdElmt = $(this).closest('.password-field').find('input');
         $pwdElmt.attr('type') == 'password' ? $pwdElmt.attr('type', 'text') : '';
     }).on('mouseup',function(){
-        $pwdElmt = $(this).closest('.password').find('input');
+        $pwdElmt = $(this).closest('.password-field').find('input');
         $pwdElmt.attr('type') == 'text' ? $pwdElmt.attr('type', 'password') : '';
     })
 
@@ -29,15 +29,13 @@ $(function() {
         $.post(window.location.pathname, $(this).serialize())
         .done(function(data) {
 
-            if(data.needToSetupOrg){
+            if(data.needToSetOrg){
                 $('.set-usr-org-btn').attr('data-id',data.id);
                 $('#firstConnectionModal').modal('open');
             } else {
                 setTimeout(() => window.location = landingPageUrl, 2000);
             }
-           
-
-            return true;
+            
         })
         .fail(function(_data) {
             const data = _data.responseJSON;
@@ -52,7 +50,6 @@ $(function() {
                 );
             }
         });
-        return false;
     });
 
 
@@ -141,7 +138,7 @@ $(function() {
     $('.set-usr-org-btn').on('click',function(e){
         e.preventDefault();
         var $this = $(this);
-        var params = {id: $this.data('id'), assoc: $('#noOrgAssoc').is(':checked')}
+        var params = {id: $this.data('id'), assoc: !$('#noOrgAssoc').is(':checked') ? 1 : 0}
         $.post(suourl, $this.closest('form').serialize() + '&' + $.param(params))
             .done(function(data){
             $('#firstConnectionModal').modal('close');

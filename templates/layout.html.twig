@@ -175,21 +175,24 @@
                               <ul class="c-flex">
 
                                 <li>{{currentuser.fullname}}</li>
-                                <li class="ma-content" style="display:none">
-                                  <div class="flex-center">
-                                    <span>
-                                      {{ 'my_account'|trans ~ ' :' }}
-                                    </span>
-                                    <span class="sm-left strong">{{ (organization.type != 'C' ? (organization.commname|length > 10 ? organization.commname|slice(0,10) ~ '...') : 'individual'|trans) }}</span>
-                                    <a class="dd-orange-text modal-trigger change-account" href="#changeAccount">{{'shift'|trans|upper}}</a>
-                                  </div>
-                                </li>
-                                <li class="add-account" style="display:none">
-                                    <a href="" class="dd-text strong no-padding">{{'profile.add_firm_account'|trans}}</a>
-                                </li>
                                 <li class="profile-link">
                                   <a class="dd-orange-text no-padding" href="{{ url('home') }}">{{'profile.access_profile'|trans}}</a>
                                 </li>
+                                {% if currentuser.userGlobal.userAccounts|length > 1 %}
+                                  <li class="ma-content">
+                                    <div class="flex-center">
+                                      <span>
+                                        {{ 'my_account'|trans ~ ' :' }}
+                                      </span>
+                                      <span class="sm-left strong">{{ (organization.type != 'C' ? (organization.commname|length > 10 ? organization.commname|slice(0,10) ~ '...') : 'individual'|trans) }}</span>
+                                      <a class="dd-orange-text change-account">{{'shift'|trans|upper}}</a>
+                                    </div>
+                                  </li>
+                                {% else %}
+                                  <li class="add-account">
+                                      <a href="{{ url('manageProfile',{aa: 1}) }}" class="dd-text strong no-padding">{{'profile.add_firm_account'|trans}}</a>
+                                  </li>
+                                {% endif %}
                               </ul>
                             </ul>
                           </li>
@@ -247,7 +250,7 @@
                       {% if '/' ~ global.route != path('login') and '/' ~ global.route != path('signup') and not is_granted('IS_AUTHENTICATED_REMEMBERED') %}
 
                         <li class="hide-on-med-and-down">
-                            <a class="modal-trigger" href="{{ is_granted('IS_AUTHENTICATED_REMEMBERED') ? path('processesList') : path('login') }}">
+                            <a class="" href="{{ is_granted('IS_AUTHENTICATED_REMEMBERED') ? path('processesList') : path('login') }}">
                               {% trans %}header.login{% endtrans %}
                             </a>
                           </li>

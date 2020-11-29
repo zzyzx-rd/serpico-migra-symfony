@@ -168,11 +168,10 @@ class Organization extends DbObject
     private $workerFirm;
 
     /**
-     * @ORM\ManyToOne(targetEntity=User::class)
-     * @JoinColumn(name="master_user_id", referencedColumnName="usr_id", nullable=true)
+     * @ORM\OneToMany(targetEntity=UserMaster::class, mappedBy="organization", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|UserMaster[]
      */
-    private $masterUser;
-
+    private $userMasters;
 
     /**
      * @OneToOne(targetEntity="User", inversedBy="organization")
@@ -251,11 +250,11 @@ class Organization extends DbObject
     /**
      * @OneToMany(targetEntity="EventDocument", mappedBy="organization", cascade={"persist","remove"})
      */
-    protected $documents;
+    protected $eventDocuments;
     /**
      * @OneToMany(targetEntity="EventComment", mappedBy="organization", cascade={"persist","remove"})
      */
-    protected $comments;
+    protected $eventComments;
     /**
      * @OneToMany(targetEntity="DynamicTranslation", mappedBy="organization", cascade={"persist","remove"})
      */
@@ -387,6 +386,7 @@ class Organization extends DbObject
         $this->paymentMethods = new ArrayCollection();
         $this->comments = new ArrayCollection();
         $this->documents = new ArrayCollection();
+        $this->userMasters = new ArrayCollection();
     }
 
     /**
@@ -1140,21 +1140,6 @@ class Organization extends DbObject
         return (string) $this->id;
     }
 
-
-    //TODO userSortedDepartement et le removePosition
-
-    public function getMasterUser(): ?User
-    {
-        return $this->masterUser;
-    }
-
-    public function setMasterUser(?User $masterUser): self
-    {
-        $this->masterUser = $masterUser;
-
-        return $this;
-    }
-
     /**
      * @return ArrayCollection|User[]
      */
@@ -1338,42 +1323,42 @@ class Organization extends DbObject
     /**
     * @return ArrayCollection|EventDocument[]
     */
-    public function getDocuments()
+    public function getEventDocuments()
     {
-        return $this->documents;
+        return $this->eventDocuments;
     }
 
-    public function addDocument(EventDocument $document): self
+    public function addEventDocument(EventDocument $eventDocument): self
     {
-        $this->documents->add($document);
-        $document->setOrganization($this);
+        $this->eventDocuments->add($eventDocument);
+        $eventDocument->setOrganization($this);
         return $this;
     }
 
-    public function removeEventDocument(EventDocument $document): self
+    public function removeEventDocument(EventDocument $eventDocument): self
     {
-        $this->documents->removeElement($document);
+        $this->eventDocuments->removeElement($eventDocument);
         return $this;
     }
     
     /**
     * @return ArrayCollection|EventComment[]
     */
-    public function getComments()
+    public function getEventComments()
     {
-        return $this->comments;
+        return $this->eventComments;
     }
 
-    public function addComment(EventComment $comment): self
+    public function addEventComment(EventComment $eventComment): self
     {
-        $this->comments->add($comment);
-        $comment->setOrganization($this);
+        $this->eventComments->add($eventComment);
+        $eventComment->setOrganization($this);
         return $this;
     }
 
-    public function removeEventComment(EventComment $comment): self
+    public function removeEventComment(EventComment $eventComment): self
     {
-        $this->comments->removeElement($comment);
+        $this->eventComments->removeElement($eventComment);
         return $this;
     }
 
@@ -1397,6 +1382,28 @@ class Organization extends DbObject
         $this->events->removeElement($event);
         return $this;
     }
+
+    /**
+    * @return ArrayCollection|UserMaster[]
+    */
+    public function getUserMasters()
+    {
+        return $this->userMasters;
+    }
+
+    public function addUserMaster(UserMaster $userMaster): self
+    {
+        $this->userMasters->add($userMaster);
+        $userMaster->setOrganization($this);
+        return $this;
+    }
+
+    public function removeUserMaster(UserMaster $userMaster): self
+    {
+        $this->userMasters->removeElement($userMaster);
+        return $this;
+    }
+
 
     public function getExternalActivities(){
         $allExternalParticipations = [];

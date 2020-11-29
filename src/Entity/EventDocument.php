@@ -69,7 +69,7 @@ class EventDocument extends DbObject
     protected $event;
 
     /**
-     * @ManyToOne(targetEntity="Organization", inversedBy="documents")
+     * @ManyToOne(targetEntity="Organization", inversedBy="eventDocuments")
      * @JoinColumn(name="organization_org_id", referencedColumnName="org_id", nullable=true)
      * @var Organization
      */

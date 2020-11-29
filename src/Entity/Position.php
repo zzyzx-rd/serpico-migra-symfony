@@ -85,6 +85,12 @@ class Position extends DbObject
     public $updates;
 
     /**
+     * @ORM\OneToMany(targetEntity=UserMaster::class, mappedBy="position", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|UserMaster[]
+     */
+    private $userMasters;
+
+    /**
      * Position constructor.
      * @param ?int$id
      * @param $name
@@ -113,6 +119,7 @@ class Position extends DbObject
         $this->options = new ArrayCollection();
         $this->targets = new ArrayCollection();
         $this->users = $users ?: new ArrayCollection();
+        $this->userMasters = new ArrayCollection();
     }
 
 
@@ -295,6 +302,27 @@ class Position extends DbObject
     public function removeUpdate(ElementUpdate $update): self
     {
         $this->updates->removeElement($update);
+        return $this;
+    }
+
+    /**
+    * @return ArrayCollection|UserMaster[]
+    */
+    public function getUserMasters()
+    {
+        return $this->userMasters;
+    }
+
+    public function addUserMaster(UserMaster $userMaster): self
+    {
+        $this->userMasters->add($userMaster);
+        $userMaster->setPosition($this);
+        return $this;
+    }
+
+    public function removeUserMaster(UserMaster $userMaster): self
+    {
+        $this->userMasters->removeElement($userMaster);
         return $this;
     }
 

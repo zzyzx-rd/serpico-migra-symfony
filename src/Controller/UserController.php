@@ -45,8 +45,10 @@ use App\Entity\Position;
 use App\Entity\Activity;
 use App\Entity\InstitutionProcess;
 use App\Entity\Process;
+use App\Entity\UserGlobal;
 use App\Entity\WorkerFirm;
 use App\Entity\WorkerIndividual;
+use App\Form\AddSignupUserForm;
 use App\Form\PasswordForm;
 use App\Repository\UserRepository;
 use App\Service\FileUploader;
@@ -56,6 +58,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\Translation\Translator;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class UserController extends MasterController
@@ -141,9 +144,9 @@ class UserController extends MasterController
      * @return mixed
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/password/define/{token}", name="definePassword", methods={"GET"})
+     * @Route("/password/update/{token}", name="updatePassword", methods={"GET"})
      */
-    public function definePasswordAction(Request $request, $token)
+    public function updatePasswordAction(Request $request, $token)
     {
         $entityManager = $this->getEntityManager();
         $repository = $entityManager->getRepository(User::class);
@@ -156,9 +159,10 @@ class UserController extends MasterController
             return $this->render('user_no_token.html.twig');
         } else {
 
-            return $this->render('password_definition.html.twig',
+            return $this->render('password_update.html.twig',
                 [
                     'firstname' => $user->getFirstName(),
+                    'hasConnectedAlready' => $user->getLastConnected(),
                     'hasNotSetupOrg' => !$user->getLastConnected() && $user->getOrganization()->getType() == 'C',
                     'form' => $pwdForm->createView(),
                     'token' => $token,
@@ -168,67 +172,78 @@ class UserController extends MasterController
     }
 
     /**
-     * @Route("/accounts/signup", name="insticoSignup")
      * @param Request $request
      * @param Application $app
-     * @return string
+     * @return mixed
      * @throws ORMException
      * @throws OptimisticLockException
-     *
+     * @Route("/signup", name="signup")
      */
     public function signupAction(Request $request)
     {
-        $entityManager = $this->getEntityManager();
 
-        
+        $em = $this->em;
+        /** @var User */
         $user = new User;
-        $signupForm = $this->createForm(SignUpForm::class, $user, ['standalone' => true]);
+        $signupForm = $this->createForm(AddSignupUserForm::class, $user);
         $signupForm->handleRequest($request);
 
-        if ($signupForm->isSubmitted() && $signupForm->isValid()) {
+        if ($signupForm->isSubmitted()) {
+            if ($signupForm->isValid()) {
+                $username = $user->getUsername();
+                $nameElmts = explode(" ", $username, 2); 
+                $firstname = trim($nameElmts[0]);
+                $lastname = trim($nameElmts[1]);
+                $token = md5(rand());
+                $user->setToken($token)
+                    ->setFirstname($firstname)
+                    ->setLastname($lastname)
+                    ->setRole(1);
 
-            $encoder = $app['security.encoder_factory']->getEncoder($user);
-            $unencodedPwd = $user->getPassword();
-            $password = $encoder->encodePassword($unencodedPwd, 'azerty');
-            $repoO = $entityManager->getRepository(Organization::class);
-            $repoWI = $entityManager->getRepository(WorkerIndividual::class);
-            $user->setPassword($password)->setRole(3)->setOrgId($repoO->findOneByCommname('Public')->getId());
-            $entityManager->persist($user);
-            $entityManager->flush();
+                $organization = new Organization();
+                $organization->setCommname($username)
+                    ->setType('C')
+                    ->addUser($user);
 
-            $workerIndividual = $repoWI->findBy(['firstname' => $user->getFirstname(), 'lastname' => $user->getLastname()]);
-            if(!$workerIndividual){
-                $workerIndividual = new WorkerIndividual;
-                $workerIndividual
-                    ->setFirstname($user->getFirstname())
-                    ->setLastname($user->getLastname())
-                    ->setCreated(true);
+                $userGlobal = new UserGlobal();
+                $userGlobal->setUsername($username)
+                    ->addUser($user);
+                
+                $this->forward('App\Controller\OrganizationController::updateOrgFeatures', ['organization' => $organization, 'nonExistingOrg' => true, 'createdAsClient' => false,  'createSynthUser' => false]);
+
+                $em->persist($organization);
+                $em->persist($userGlobal);
+                $em->flush();
+
+                //Sending mail to DealDrive root users 
+                //$serpicoOrg = $repoO->findOneByCommname('Serpico');
+                $repoU = $em->getRepository(User::class);
+                $recipients = $repoU->findBy(['role' => 4]);
+
+                $settings['fullname']   = $username;
+                $settings['userEmail']      = $user->getEmail();
+                
+                $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'userSignupInfo']);
+                
+                //Sending mail acknowledgment receipt to the requester
+                $recipients          = [];
+                $recipients[]        = $user;
+                $settings            = [];
+                $settings['token'] = $user->getToken();
+
+                $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'subscriptionConfirmation']);
+                
+                setcookie('signup', 'y');
+                return $this->redirectToRoute('home_welcome');
+
             }
-
-            $workerIndividual
-                ->setEmail($user->getEmail())
-                ->setCreatedBy($user->getId());
-
-            $entityManager->persist($workerIndividual);
-            $user->setWorkerIndividual($workerIndividual);
-
-            $recipients = [];
-            $recipients[] = $user;
-            $settings = [];
-            $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'signup']);
-
-
-            return $this->redirectToRoute('home');
         }
 
-
-        return $this->render(
-            'signup.html.twig',
+        return $this->render('signup.html.twig',
             [
                 'form' => $signupForm->createView(),
-                'request' => $request,
-            ]
-        );
+            ]);
+
     }
 
     /**
@@ -324,13 +339,14 @@ class UserController extends MasterController
      * @return JsonResponse
      * @throws ORMException
      * @throws OptimisticLockException
-     * * @Route("/password/define/{token}", name="savePassword", methods={"POST"})
+     * * @Route("/password/update/{token}", name="savePassword", methods={"POST"})
      */
     public function savePassword(Request $request, $token)
     {
         $em = $this->em;
         $repoU = $em->getRepository(User::class);
         $user = $repoU->findOneByToken($token);
+        $settablePasswordUsers = $em->getRepository(User::class)->findByEmail($user->getEmail());
         $pwdForm = $this->createForm(PasswordDefinitionForm::class, $user, ['standalone' => true]);
         $pwdForm->handleRequest($request);
 
@@ -342,33 +358,47 @@ class UserController extends MasterController
             $user->setPassword($password)
                 ->setToken(null);
             $em->persist($user);
+
+            if(sizeof($settablePasswordUsers) > 1){
+                foreach($settablePasswordUsers as $settablePasswordUser){
+                    if($settablePasswordUser != $user){
+                        $user->setPassword($password)
+                        ->setToken(null);
+                        $em->persist($settablePasswordUser);
+                    }
+                }
+            }
+
             $em->flush();
 
             if(!$needToSetOrg){
+                if(sizeof($settablePasswordUsers) == 1){
 
-                $individualUser = clone $user;
-                $individualUser
-                    ->setRole(1)
-                    ->setLastConnected(null)
-                    ->setAltEmail(null)
-                    ->setPosition(null)
-                    ->setDepartment(null)
-                    ->setTitle(null)
-                    ->setSuperior(null)
-                    ->setInserted(new DateTime);
-
-                $organization = new Organization();
-                $organization->setCommname($user->getUsername())
-                    ->setType('C')
-                    ->setMasterUser($user)
-                    ->addUser($individualUser);
+                    $individualUser = clone $user;
+                    $individualUser
+                        ->setRole(1)
+                        ->setLastConnected(null)
+                        ->setAltEmail(null)
+                        ->setPosition(null)
+                        ->setDepartment(null)
+                        ->setTitle(null)
+                        ->setSuperior(null)
+                        ->setUserGlobal($user->getUserGlobal())
+                        ->setInserted(new DateTime);
+    
+                    $organization = new Organization();
+                    $organization->setCommname($user->getUsername())
+                        ->setType('C')
+                        ->addUser($individualUser);
+                    
+                    $this->forward('App\Controller\OrganizationController::updateOrgFeatures', ['organization' => $organization, 'nonExistingOrg' => true, 'createdAsClient' => false, 'createSynthUser' => false]);
+    
+                    $em->persist($organization);
+                    $em->flush();
                 
-                $this->forward('App\Controller\OrganizationController::updateOrgFeatures', ['organization' => $organization, 'nonExistingOrg' => true, 'createdAsClient' => false]);
+                }
 
-                $em->persist($organization);
-                $em->flush();
-
-                return $this->guardHandler->authenticateUserAndHandleSuccess(
+                $this->guardHandler->authenticateUserAndHandleSuccess(
                     $user,
                     $request,
                     $this->authenticator,
@@ -377,7 +407,7 @@ class UserController extends MasterController
 
             }
 
-            return new JsonResponse(['id' => $user->getId(), 'needToSetupOrg' => $needToSetOrg], 200);
+            return new JsonResponse(['id' => $user->getId(), 'needToSetOrg' => $needToSetOrg], 200);
 
         } else {
             $errors = $this->buildErrorArray($pwdForm);
@@ -388,19 +418,31 @@ class UserController extends MasterController
     /**
      * @return JsonResponse|RedirectResponse
      * @throws ORMException
-     * @Route("/user/organization/set",name="setUserOrganization")
+     * @Route("/user/account/add",name="addAccount")
      */
-    public function setOrganization(Request $request){
+    public function addAccount(Request $request, TranslatorInterface $translator){
         $em = $this->em;
-        if($_POST['assoc']){
-            $usrId = $_POST['id'];
-            $wfiId = $_POST['wid'];
+        $wfiId = $_POST['wid'];
+
+        if(strpos($request->headers->get('referer'), 'password/update') !== false){
+            $assoc = $request->get('assoc');
+            $usrId = $request->get('id');
+            $currentUser = $em->getRepository(User::class)->find($usrId);
+        } else {
+            $currentUser = $this->user;
+            $errorMsg = $translator->trans('profile.duplicate_account');
+            if($wfiId && in_array($wfiId, $currentUser->getUserGlobal()->getUserAccounts()->map(fn(User $u) => $u->getOrganization()->getWorkerFirm())->getValues()) !== false){
+                return new JsonResponse(['msg' => $errorMsg], 500);
+            }
+            $assoc = true;
+        }
+        if($assoc){
             $firmName = $_POST['firm'];
             $token = $request->get('tk');
-            $currentUser = $em->getRepository(User::class)->find($usrId);
             $currentOrgUser = clone $currentUser;
             $currentOrgUser->setToken(null)
-            ->setInserted(new DateTime);
+                ->setInserted(new DateTime)
+                ->setUserGlobal($currentUser->getUserGlobal());
             $em->persist($currentOrgUser);
             if(!$wfiId){
                 $workerFirm = new WorkerFirm;
@@ -429,21 +471,20 @@ class UserController extends MasterController
                     ->setWorkerFirm($workerFirm)
                     ->setPlan(ORGANIZATION::PLAN_PREMIUM)
                     ->setCreatedBy($currentUser->getId());
-    
                 $em->persist($organization);
                 $em->persist($workerFirm);
                 $this->forward('App\Controller\OrganizationController::updateOrgFeatures', ['organization' => $organization, 'nonExistingOrg' => true, 'createdAsClient' => false]);
+                $organization->addUser($currentOrgUser);
+                $workerFirm->addOrganization($organization);
+                $em->persist($workerFirm);
             }
             
-            $organization->addUser($currentUser);
-            $workerFirm->addOrganization($organization);
-            $em->persist($workerFirm);
             $em->flush();
 
         }
 
-        return $this->guardHandler->authenticateUserAndHandleSuccess(
-            $_POST['assoc'] ? $currentOrgUser : $currentUser,
+        $this->guardHandler->authenticateUserAndHandleSuccess(
+            $assoc ? $currentOrgUser : $currentUser,
             $request,
             $this->authenticator,
             'main' // firewall name in security.yaml
@@ -451,6 +492,37 @@ class UserController extends MasterController
 
         return new JsonResponse(['msg' => 'success'], 200);
     }
+
+
+    // TODO : renforcer security
+    /**
+     * @return JsonResponse|RedirectResponse
+     * @throws ORMException
+     * @Route("/user/account/remove",name="deleteAccount")
+     */
+    public function removeAccount(Request $request){
+        $em = $this->em;
+        $usrId = $request->get('id');
+        $orgId = $request->get('oid');
+
+        $user = $em->getRepository(User::class)->find($usrId);
+        $userGlobal = $user->getUserGlobal();
+        $connectedUserAfterRemoval = $userGlobal->getUserAccounts()->filter(fn(User $u) => $u->getOrganization()->getId() != $orgId)->first();
+
+        $this->guardHandler->authenticateUserAndHandleSuccess(
+            $connectedUserAfterRemoval,
+            $request,
+            $this->authenticator,
+            'main'
+        );
+        
+        $organization = $user->getOrganization();
+        $organization->removeUser($user);
+        $em->persist($organization);
+        $em->flush();
+        return new JsonResponse();
+    }
+
 
     /**
      * @param Request $request
@@ -706,17 +778,16 @@ class UserController extends MasterController
                 //return $activityController->addActivityId('activity', $inpId, $actName);
             }
 
-// We duplicate activity process/iprocess
+            // We duplicate activity process/iprocess
             $activity
                 ->setName($actName !== '' ? $actName : $institutionProcess->getName())
                 ->setOrganization($institution)
-                ->setMasterUserId(
-                    $institutionProcess->getMasterUser() ?
-                        $institutionProcess->getMasterUser()->getId() :
-                        $repoU->findOneBy(['firstname' => 'ZZ', 'lastname' => 'ZZ', 'orgId' => $institution->getId()])->getId()
-                )
                 ->setCreatedBy($currentUser->getId())
                 ->setStatus($institutionProcess->isApprovable() ? -3 : 1);
+
+            foreach($institutionProcess->getUserMasters() as $userMaster){
+                $activity->addUserMaster($userMaster);
+            }
 
             if ($institutionProcess->isApprovable() & !$fromInternal) {
                 $recipients = [];
@@ -809,16 +880,17 @@ class UserController extends MasterController
 
                 $stage
                     ->setName($pStage->getName())
-                    ->setMasterUserId($pStage->getMasterUserId())
                     ->setVisibility($pStage->getVisibility())
                     ->setAccessLink($accessLink)
                     ->setWeight(1)
                     ->setStartdate($startdate)
                     ->setEnddate($enddate)
-                    ->setGstartdate($gStartdate)
-                    ->setGenddate($gEnddate)
                     ->setMode(1)
                     ->setCreatedBy($currentUser->getId());
+                
+                foreach($pStage->getUserMasters() as $userMaster){
+                    $stage->addUserMaster($userMaster);
+                }
 
 
                 if ($pStage->getVisibility() === 2) {
@@ -931,25 +1003,30 @@ class UserController extends MasterController
     public function resetPwdAction(Request $request)
     {
 
-        
         $entityManager = $this->em;
         $repository = $entityManager->getRepository(User::class);
-        $user = $repository->findOneByEmail($_POST['email']);
+        $users = $repository->findByEmail($_POST['email']);
+        $isSentMail = false;
+        $token = md5(rand());
 
-        if($user){
-            $token = md5(rand());
-            $user->setToken($token);
-            $user->setPassword('');
-            $entityManager->persist($user);
-            $entityManager->flush();
-            $settings['token'] = $token;
+        if(sizeof($users) > 0){
+            foreach($users as $user){
 
-            $recipients = [];
-            $recipients[] = $user;
-            $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'passwordModify']);
-
+                $user->setToken($token);
+                $user->setPassword(null);
+                $entityManager->persist($user);
+                $entityManager->flush();
+                if(!$isSentMail){
+                    $settings['token'] = $token;
+                    $recipients = [];
+                    $recipients[] = $user;
+                    $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'passwordModify']);
+                    $isSentMail = true;
+                }
+            }
         }
         return new JsonResponse(['message' => 'success'],200);
+
     }
 
     // Modify pwd
@@ -2053,6 +2130,24 @@ class UserController extends MasterController
         $currentUser = $this->user;
         $em = $this->em;
         $allUsersWithSameEmail = new ArrayCollection($em->getRepository(User::class)->findByEmail($currentUser->getEmail()));
+        
+        if(sizeof($allUsersWithSameEmail) == 2){
+            foreach($allUsersWithSameEmail as $user){
+                if($user != $currentUser){
+                    $this->guardHandler->authenticateUserAndHandleSuccess(
+                        $user,
+                        $request,
+                        $this->authenticator,
+                        'main'
+                    );
+                    $user->setLastConnected(new DateTime());
+                    $em->persist($user);
+                    $em->flush();
+                    return new JsonResponse(['changed' => true]);
+                }
+            }
+        }
+        
         return new JsonResponse(
             $allUsersWithSameEmail->map(fn(User $u) => 
             [
@@ -2074,7 +2169,7 @@ class UserController extends MasterController
         $organization = $em->getRepository(Organization::class)->find($request->get('id'));
         $user = $em->getRepository(User::class)->findOneBy(['email' => $currentUser->getEmail(), 'organization' => $organization]);
 
-        return $this->guardHandler->authenticateUserAndHandleSuccess(
+        $this->guardHandler->authenticateUserAndHandleSuccess(
             $user,
             $request,
             $this->authenticator,

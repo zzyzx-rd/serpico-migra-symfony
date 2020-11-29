@@ -10,6 +10,8 @@ use App\Entity\OptionName;
 use App\Entity\Organization;
 use App\Entity\OrganizationUserOption;
 use App\Entity\User;
+use App\Entity\UserGlobal;
+use App\Entity\UserMaster;
 use App\Entity\Weight;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
@@ -161,12 +163,20 @@ class Firm extends Fixture
             ->setRole(1);
         $manager->persist($masterUser);
 
+        $userMaster = new UserMaster();
+        $userMaster->setUser($masterUser);
+
         $serpico = new Organization();
         $serpico->setType('f')
             ->setIsClient(1)
             ->setCommname("Serpico")
             ->setLegalname("Serpico")
-            ->setMasterUser($masterUser);
+            ->addUserMaster($userMaster);
+        
+        $userGlobal = new UserGlobal();
+        $userGlobal->setUsername("Guillaume Chatelain")
+        ->addUser($masterUser);
+        $manager->persist($userGlobal);
 
          // Settling default options
         /** @var OptionName[] */
@@ -264,14 +274,24 @@ class Firm extends Fixture
             ->setLastname("Jobs")
             ->setRole(1)
             ->setPassword($this->encoder->encodePassword($jobs, "Serpico2019"));
+        
+        $userGlobalJobs = new UserGlobal();
+        $userGlobalJobs->setUsername("Steve Jobs")
+            ->addUser($masterUser);
+        $manager->persist($userGlobalJobs);
 
-        $gdbdg = new User();
-        $gdbdg->setEmail("gdbdg@yopmail.com")
-            ->setUsername("Guillaume dBdG")
-            ->setFirstname("Guillaume")
-            ->setLastname("dBdG")
+        $treicher = new User();
+        $treicher->setEmail("treicher@yopmail.com")
+            ->setUsername("Thomas Reicher")
+            ->setFirstname("Thomas")
+            ->setLastname("Reicher")
             ->setRole(3)
-            ->setPassword($this->encoder->encodePassword($gdbdg, "Serpico2019"));
+            ->setPassword($this->encoder->encodePassword($treicher, "Serpico2019"));
+
+        $userGlobalReicher = new UserGlobal();
+        $userGlobalReicher->setUsername("Thomas Reicher")
+            ->addUser($masterUser);
+        $manager->persist($userGlobalReicher);
 
         $synth = new User();
         $synth//->setUsername("ZZ - ".$serpico->getCommname())
@@ -280,11 +300,11 @@ class Firm extends Fixture
             ->setSynthetic(true);
 
         $departement = new Department();
-        $departement->setMasterUser($masterUser)
+        $departement->addUserMaster($userMaster)
             ->setName("Development");
 
-        $weight->addUser($masterUser)->addUser($gdbdg)->addUser($jobs);
-        $serpico->addUser($masterUser)->addUser($gdbdg)->addUser($jobs);
+        $weight->addUser($masterUser)->addUser($treicher)->addUser($jobs);
+        $serpico->addUser($masterUser)->addUser($treicher)->addUser($jobs);
         $serpico->addWeight($weight);
         $serpico->addDepartment($departement);
         $manager->persist($serpico);

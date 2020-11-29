@@ -1857,12 +1857,6 @@ nav .collapsible-header, nav .collapsible, nav .collapsible-body, nav .collapsib
   max-width: 12vw;
 }
 
-.mini-user-picture {
-  border-radius: 100%;
-  max-height: 50px;
-  max-width: 12vw;
-}
-
 .participant-name {
   text-align: center;
   font-size: 85%;

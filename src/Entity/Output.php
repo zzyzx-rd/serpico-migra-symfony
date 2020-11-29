@@ -78,6 +78,13 @@ class Output extends DbObject
     public $updates;
 
     /**
+     * @ORM\OneToMany(targetEntity=UserMaster::class, mappedBy="output", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|UserMaster[]
+     */
+    private $userMasters;
+
+
+    /**
      * Stage constructor.
      * @param ?int$id
      * @param null $masterUser
@@ -96,6 +103,7 @@ class Output extends DbObject
         parent::__construct($id, $createdBy, new DateTime);
         $this->criteria = new ArrayCollection;
         $this->updates = new ArrayCollection;
+        $this->userMasters = new ArrayCollection();
         $this->startdate = new DateTime;
         $this->enddate = new DateTime;
     }
@@ -206,6 +214,27 @@ class Output extends DbObject
     public function removeUpdate(ElementUpdate $update): self
     {
         $this->updates->removeElement($update);
+        return $this;
+    }
+
+    /**
+    * @return ArrayCollection|UserMaster[]
+    */
+    public function getUserMasters()
+    {
+        return $this->userMasters;
+    }
+
+    public function addUserMaster(UserMaster $userMaster): self
+    {
+        $this->userMasters->add($userMaster);
+        $userMaster->setOutput($this);
+        return $this;
+    }
+
+    public function removeUserMaster(UserMaster $userMaster): self
+    {
+        $this->userMasters->removeElement($userMaster);
         return $this;
     }
 

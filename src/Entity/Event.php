@@ -106,6 +106,12 @@ class Event extends DbObject
     public $resDate;
 
     /**
+     * @ORM\OneToMany(targetEntity=UserMaster::class, mappedBy="event", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|UserMaster[]
+     */
+    private $userMasters;
+
+    /**
      * @ORM\Column(name="eve_inserted", type="datetime", nullable=true, options={"default": "CURRENT_TIMESTAMP"})
      */
     public DateTime $inserted;
@@ -165,6 +171,7 @@ class Event extends DbObject
         $this->documents = $documents ?: new ArrayCollection;
         $this->comments = $comments ?: new ArrayCollection;
         $this->updates = new ArrayCollection;
+        $this->userMasters = new ArrayCollection;
         $this->deleted = $deleted;
     }
 
@@ -536,6 +543,27 @@ class Event extends DbObject
     public function removeUpdate(ElementUpdate $update): Event
     {
         $this->updates->removeElement($update);
+        return $this;
+    }
+
+    /**
+    * @return ArrayCollection|UserMaster[]
+    */
+    public function getUserMasters()
+    {
+        return $this->userMasters;
+    }
+
+    public function addUserMaster(UserMaster $userMaster): self
+    {
+        $this->userMasters->add($userMaster);
+        $userMaster->setDepartment($this);
+        return $this;
+    }
+
+    public function removeUserMaster(UserMaster $userMaster): self
+    {
+        $this->userMasters->removeElement($userMaster);
         return $this;
     }
 

@@ -222,10 +222,10 @@ class Activity extends DbObject
     protected ?DateTime $archived;
 
     /**
-     * @ORM\ManyToOne(targetEntity=User::class)
-     * @ORM\JoinColumn(name="act_master_usr_id", referencedColumnName="usr_id", nullable=false)
+     * @ORM\OneToMany(targetEntity=UserMaster::class, mappedBy="activity", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|UserMaster[]
      */
-    public ?User $masterUser;
+    private $userMasters;
 
     /**
      * @ORM\Column(type="boolean", nullable=true)
@@ -343,6 +343,7 @@ class Activity extends DbObject
         $this->mails = new ArrayCollection;
         $this->updates = new ArrayCollection;
         $this->createdBy = $createdBy;
+        $this->userMasters = new ArrayCollection();
     }
 
     public function getComplete(): ?bool
@@ -845,18 +846,6 @@ class Activity extends DbObject
     public function setArchived(DateTime $archived): void
     {
         $this->archived = $archived;
-    }
-
-    public function getMasterUser(): ?User
-    {
-        return $this->masterUser;
-    }
-
-    public function setMasterUser(?User $master_usr): self
-    {
-        $this->masterUser = $master_usr;
-
-        return $this;
     }
 
     public function getDiffCriteria(): ?bool
@@ -1501,6 +1490,27 @@ class Activity extends DbObject
     public function removeUpdate(ElementUpdate $update): Activity
     {
         $this->updates->removeElement($update);
+        return $this;
+    }
+
+    /**
+    * @return ArrayCollection|UserMaster[]
+    */
+    public function getUserMasters()
+    {
+        return $this->userMasters;
+    }
+
+    public function addUserMaster(UserMaster $userMaster): self
+    {
+        $this->userMasters->add($userMaster);
+        $userMaster->setActivity($this);
+        return $this;
+    }
+
+    public function removeUserMaster(UserMaster $userMaster): self
+    {
+        $this->userMasters->removeElement($userMaster);
         return $this;
     }
 

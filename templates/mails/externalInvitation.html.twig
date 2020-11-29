@@ -27,7 +27,7 @@
                             <p>{% trans %}mails.hello{% endtrans %} {{ recipient.firstname }},</p>
                             <p>{{ invitingOrganization.commname|raw ~ ' ' ~ 'mails.externalInvitation.message1'|trans  ~ (token is defined ? '. ' ~ 'mails.externalInvitation.message2'|trans ~ ':' : ':') }}</p>
                             <p style="text-align: center">
-                                <a href="{{ token is defined ? url('definePassword', {'token' : token }) : url('myActivities') }}" target="_blank"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;font-weight:600;text-transform:uppercase;">{{ token is defined ? 'mails.externalInvitation.new_user_button_text'|trans : 'mails.externalInvitation.existing_user_button_text'|trans }}</button></a>    
+                                <a href="{{ token is defined ? url('updatePassword', {'token' : token }) : url('myActivities') }}" target="_blank"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;font-weight:600;text-transform:uppercase;">{{ token is defined ? 'mails.externalInvitation.new_user_button_text'|trans : 'mails.externalInvitation.existing_user_button_text'|trans }}</button></a>    
                             </p>
                             {% if token is defined %}
                                 <p>{% trans %}mails.externalInvitation.message3{% endtrans %}</p>

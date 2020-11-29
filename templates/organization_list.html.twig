@@ -77,10 +77,12 @@
                     <i class="fas fa-crown" aria-hidden="true"></i> {% trans %}organizations.master_user{% endtrans %}
                 </div>
                 <div class="col s6 m8">
-                    {% if organization.masterUser is not null %}
+                    {% if organization.userMasters is not null %}
                         <div class="flex-center">
-                            <img class="mini-user-picture" src="{{ (organization.masterUser.picture != "") ? asset('lib/img/' ~ organization.masterUser.picture) : asset('lib/img/no-picture.png') }}" alt="">
-                            <span>{{ organization.masterUser.firstname }} {{ organization.masterUser.lastname }}</span>
+                            {% for userMaster in organization.userMasters  %} 
+                                <img class="user-profile-xl-picture tooltipped" src="{{ (userMaster.user.picture != "") ? asset('lib/img/user/' ~ organization.userMaster.user.picture) : asset('lib/img/user/no-picture.png') }}" alt="" data-tooltip="{{userMaster.user.username}}" data-position="top">
+                            {% endfor %}
+                            {#<span>{{ organization.masterUser.firstname }} {{ organization.masterUser.lastname }}</span>#}
                         </div>
                     {% else %}
                         <span> {{ 'organization_elements.no_master_user'|trans }} </span>
@@ -102,7 +104,7 @@
               #}
 
             <div class="row action-buttons">
-            
+
                 <div class="button-field">
                     <a class="btn-large waves-effect waves-light teal lighten-1" href="{{ url('rootManageUsers',{'orgId' : organization.id}) }}"> {% trans %}organizations.see_users{% endtrans %} </a>
                  </div>

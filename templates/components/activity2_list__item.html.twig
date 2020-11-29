@@ -12,7 +12,7 @@
       
       <div class="curDate"></div>
 
-      <ul class="stages-holder">
+      <ul class="stages-holder" data-dummy="{% apply escape %}{% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateU: 0, period: random(3,200), embeddedStages: null, visibleEl: true, participants: null, dummyActName: null} %}{% endapply %}">
 
           {% if activity is defined %}
           
@@ -108,17 +108,7 @@
               {% endfor %}
               #}
             </ol>
-          
-          {% else %}
-              {#
-              <ol class="activity-component" data-sd="{{ date("first day of january").timestamp }}" data-p="{{ 360 * 24 * 60 * 60 }}">
-                  {% set startdateU = random(7,320) %}
-                  {% set period = random(3, 350 - startdateU) %}
-                  {% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateU: startdateU, period: random(3,200), embeddedStages: null, visibleEl: true, dummyParticipants: null} %}
-              </ol>
-              #}
-          
-
+    
           {% endif %}
 
 

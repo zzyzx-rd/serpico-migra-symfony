@@ -58,7 +58,7 @@ class PasswordForm extends AbstractType {
 
         if($options['standalone']) {
             $builder->add('submit', SubmitType::class,[
-                'label_format' => 'password_definition.%name%',
+                'label_format' => 'password_update.%name%',
                 'attr' => [
                     'class' => 'waves-effect waves-light btn pwd-modify-btn',
                     /*'disabled' => 'disabled'*/

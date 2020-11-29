@@ -45,7 +45,7 @@ class EventComment extends DbObject
     protected $event;
 
     /**
-     * @ManyToOne(targetEntity="Organization", inversedBy="comments")
+     * @ManyToOne(targetEntity="Organization", inversedBy="eventComments")
      * @JoinColumn(name="organization_org_id", referencedColumnName="org_id", nullable=true)
      * @var Organization
      */

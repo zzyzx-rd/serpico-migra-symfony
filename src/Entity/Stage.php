@@ -311,12 +311,12 @@ class Stage extends DbObject
      */
     public $updates;
 
-
     /**
-     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="stagesWhereMaster")
-     * @JoinColumn(name="usr_id", referencedColumnName="usr_id", nullable=true)
+     * @ORM\OneToMany(targetEntity=UserMaster::class, mappedBy="stage", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|UserMaster[]
      */
-    public ?User $masterUser;
+    private $userMasters;
+
     /**
      * @var Security
      */
@@ -331,7 +331,6 @@ class Stage extends DbObject
      * @param bool $complete
      * @param null $activity
      * @param int $visibility
-     * @param null $masterUser
      * @param string $name
      * @param string $accessLink
      * @param int $status
@@ -351,7 +350,6 @@ class Stage extends DbObject
         $complete = false,
         $activity = null,
         $visibility = 3,
-        $masterUser = null,
         ?string $name = null,
         $accessLink = null,
         $status = 0,
@@ -370,7 +368,6 @@ class Stage extends DbObject
         parent::__construct($id, $createdBy, new DateTime);
         $this->complete = $complete;
         $this->activity = $activity;
-        $this->masterUser = $masterUser;
         $this->name = $name;
         $this->mode = 1;
         $this->visibility = $visibility;
@@ -409,6 +406,7 @@ class Stage extends DbObject
         $this->rankingTeams = new ArrayCollection;
         $this->historicalRankingTeams = new ArrayCollection;
         $this->mails = new ArrayCollection;
+        $this->userMasters = new ArrayCollection;
     }
 
 
@@ -910,17 +908,6 @@ class Stage extends DbObject
         $this->template = $template;
     }
 
-    public function getMasterUser(): ?User
-    {
-        return $this->masterUser;
-    }
-
-    public function setMasterUser(?User $masterUser): self
-    {
-        $this->masterUser = $masterUser;
-
-        return $this;
-    }
     public function getActiveWeight(){
         $sumWeightCompletedStages = 0;
         /** @var ArrayCollection|Stage[] */
@@ -1439,7 +1426,7 @@ class Stage extends DbObject
     {
         $sD = $this->startdate->format("U");
         $sE = $this->enddate->format("U");
-        return $sE - $sD;
+        return max(1,$sE - $sD);
     }
 
     /**
@@ -1783,6 +1770,27 @@ class Stage extends DbObject
         $nowU = $now->format("U");
         $startU = $this->startdate->format("U");
         return round( min(100,100 * ($nowU - $startU) / $this->getPeriod()), 0);
+    }
+    
+    /**
+    * @return ArrayCollection|UserMaster[]
+    */
+    public function getUserMasters()
+    {
+        return $this->userMasters;
+    }
+
+    public function addUserMaster(UserMaster $userMaster): self
+    {
+        $this->userMasters->add($userMaster);
+        $userMaster->setStage($this);
+        return $this;
+    }
+
+    public function removeUserMaster(UserMaster $userMaster): self
+    {
+        $this->userMasters->removeElement($userMaster);
+        return $this;
     }
 
 }

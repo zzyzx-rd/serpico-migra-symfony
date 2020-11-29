@@ -5,22 +5,32 @@
     width: 250px;
 }
 
-.container.data-container {
+.data-container {
     position: relative;
+    /*margin: -320px 7.5vw 0 7.5vw;
     margin-top: -320px;
     height: 320px;
+    */
+    margin: -30vw 7.5vw -2vw 7.5vw;
+    margin-top: -30vw;
+    height: 30vw;
+    display:flex;
+    align-items: flex-end;
     color: #fff;
+    /*width: 85%;
+    margin-left:7.5vw;*/
+
 }
 
-.container.data-container > ul {
+/*.data-container > ul {
     position: absolute;
     left: 0;
     right: 0;
     top: 0;
     bottom: 40px;
-}
+}*/
 
-.container.data-container > ul > .m4 > ul {
+.data-container > ul > .m4 > ul {
     width: 250px;
     justify-content: space-evenly;
 }

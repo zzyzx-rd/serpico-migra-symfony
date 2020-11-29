@@ -1,8 +1,6 @@
 //$(function() {
     $('.modal').modal();
 
-    typeof getCookie('ma') != "undefined" && parseInt(getCookie('ma')) ? $('.ma-content').show() : $('.add-account').show();
-
     var $upgradeModal = $('#upgradeAccount');
     if($upgradeModal.length){
         $upgradeModal.modal({
@@ -99,6 +97,11 @@
         return this.filter(function (value, index, self) { 
             return self.indexOf(value) === index;
         });
+    }
+
+    function isEmail(email) {
+        const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(String(email).toLowerCase());
     }
 
     function setCookie(key, value, expiry) {
@@ -429,14 +432,19 @@
         setCookie('cb',1,365);
     })
 
-    $('[href="#changeAccount"]').on('click',function(){
+    $('.change-account').on('click',function(){
         $.get(gaurl)
         .done(function(data){
-            const $accountSelector = $('[name="accountSelector"]');
-            $.each(data,function(i,e){
-                $accountSelector.append(`<option value="${e.id}">${e.name}</option>`);
-            })
-            $accountSelector.material_select();
+            if(data.changed){
+                location.reload();
+            } else {
+                const $accountSelector = $('[name="accountSelector"]');
+                $.each(data,function(i,e){
+                    $accountSelector.append(`<option value="${e.id}">${e.name}</option>`);
+                })
+                $accountSelector.material_select();
+                $('#changeAccount').modal('open');
+            }
         })
     })
 

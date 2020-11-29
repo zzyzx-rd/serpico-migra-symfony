@@ -1,6 +1,6 @@
 {% import "macros/user_list__macros.html.twig" as macros %}
 
-{% if externalUser %}
+{% if externalUser|default %}
   {% set user = externalUser.user %}
 {% endif %}
 {% set settings = settings is defined ? settings : true %}
@@ -95,7 +95,7 @@
               {{ userM.nbCompletedActivities(user) }} + {{ userM.nbScheduledActivities(user) }}
           </span>
         </div>
-        {% if externalUser %}
+        {% if externalUser|default %}
           <a class="m-left material-icons tooltipped" href="{{ url('createClientUser', { cliId: externalUser.client.id }) }}" data-tooltip="{{ 'user_list.modify'|trans }}" data-position="top">settings</a>
         {% endif %}
       </div>

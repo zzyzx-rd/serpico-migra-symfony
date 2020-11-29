@@ -47,6 +47,8 @@ use App\Entity\Survey;
 use App\Entity\Team;
 use App\Entity\Member;
 use App\Entity\User;
+use App\Entity\UserGlobal;
+use App\Entity\UserMaster;
 use App\Entity\WorkerFirm;
 use App\Form\ActivityMinElementForm;
 use App\Form\AddEventForm;
@@ -147,11 +149,14 @@ class ActivityController extends MasterController
                     
                     $activity = $actId == 0 ? new Activity : $em->getRepository(Activity::class)->find($actId);
 
+                    $userMaster = new UserMaster;
+                    $userMaster->setUser($currentUser);
+
                     $stage  
                         ->setOrganization($organization)
                         ->setProgress($progress)
                         ->setStatus($progress)
-                        ->setMasterUser($currentUser)
+                        ->addUserMaster($userMaster)
                         ->setCreatedBy($currentUser->getId());
     
                     foreach($stage->getParticipants() as $participation){
@@ -170,7 +175,7 @@ class ActivityController extends MasterController
                     ->setProgress($progress)
                     ->setStatus($progress)
                     ->setOrganization($organization)
-                    ->setMasterUser($stage->getMasterUser())
+                    ->addUserMaster($userMaster)
                     ->setCreatedBy($currentUser->getId());
                     $em->persist($activity);
                     
@@ -380,16 +385,23 @@ class ActivityController extends MasterController
                 $user = $em->getRepository(User::class)->findOneBy(['organization' => $clientOrganization, 'firstname' => $_POST['firstname'], 'lastname' => $_POST['lastname']]);
             }
             if(!$user){
+
+                
                 $newUser = true;
                 $user = new User;
                 $user->setFirstname($firstname)
-                    ->setLastname($lastname)
-                    ->setEmail(!empty($email) ? $email : null)
-                    ->setToken(!empty($email) ? md5(rand()) : null)
-                    ->setUsername("$firstname $lastname")
-                    ->setRole(USER::ROLE_AM)
-                    ->setCreatedBy($currentUser->getId());
+                ->setLastname($lastname)
+                ->setEmail(!empty($email) ? $email : null)
+                ->setToken(!empty($email) ? md5(rand()) : null)
+                ->setUsername("$firstname $lastname")
+                ->setRole(USER::ROLE_AM)
+                ->setCreatedBy($currentUser->getId());
                 $clientOrganization->addUser($user);
+                
+                $userGlobal = new UserGlobal();
+                $userGlobal->setUsername("$firstname $lastname")
+                ->addUser($user);
+                $em->persist($userGlobal);
             }
 
             if($clientOrganization != $organization){
@@ -493,10 +505,13 @@ class ActivityController extends MasterController
         $activityName = $actName !== '' ? $actName : $actDefaultName;
         $stageName = $actName !== '' ? $actName : $stgDefaultName;
 
+        $userMaster = new UserMaster;
+        $userMaster->setUser($currentUser);
+
         $activity
             ->setName($activityName)
             ->setOrganization($currentUser->getOrganization())
-            ->setMasterUser($currentUser)
+            ->addUserMaster($userMaster)
             ->addStage($stage)
             ->setCreatedBy($currentUser->getId());
 
@@ -506,7 +521,7 @@ class ActivityController extends MasterController
 
         $stage
             ->setName($stageName)
-            ->setMasterUser($currentUser)
+            ->addUserMaster($userMaster)
             ->setWeight(1)
             ->setStartdate($activityStartDate)
             ->setEnddate($activityEndDate)
@@ -568,9 +583,12 @@ class ActivityController extends MasterController
             /** @var CriterionName */
             $defaultCriterionName = $repoCN->findOneBy(['organization' => $currentUser->getOrganization()]);
 
+            $userMaster = new UserMaster;
+            $userMaster->setUser($activityLeader);
+
             $activity = (new Activity)
                 ->setName($activityName)
-                ->setMasterUserId($activityLeader->getId())
+                ->addUserMaster($userMaster)
                 ->setOrganization($currentUser->getOrganization())
                 ->setObjectives($activityDescription)
                 ->setStatus(-2)
@@ -580,7 +598,7 @@ class ActivityController extends MasterController
 
             $stage = (new Stage)
                 ->setName($activityName)
-                ->setMasterUserId($activityLeader->getId())
+                ->addUserMaster($userMaster)
                 ->setWeight(1)
                 ->setMode(1)
                 ->setStartdate(clone $startDate)
@@ -657,7 +675,6 @@ class ActivityController extends MasterController
 
             $activity->setName($activityName);
             // Activity is created without Master user, waiting for validation before attributing leadership to validating user
-            $activity->setMasterUserId(0);
             $activity->setOrganization($organization);
             $activity->setObjectives($activityObjectives);
             $activity->setStatus(-3);
@@ -774,15 +791,18 @@ class ActivityController extends MasterController
                     $activityLeaderId = $validateRequestForm->get('activityLeader')->getData();
                     $activityLeader = $repoU->find($activityLeaderId);
                 } else {
-                    $activityLeaderId = $currentUser->getId();
+                    $activityLeader = $currentUser;
                 }
+
+                $userMaster = new UserMaster();
+                $userMaster->setUser($activityLeader);
 
                 $activity
                     ->setName($activityName)
                     ->setObjectives($activityDescription)
-                    ->setMasterUserId($activityLeaderId);
+                    ->addUserMaster($userMaster);
                 $stage = $activity->getStages()->first();
-                $stage->setMasterUserId($activityLeaderId);
+                $stage->addUserMaster($userMaster);
                 $activity->setStatus(-2);
                 $em->persist($activity);
                 $em->persist($stage);
