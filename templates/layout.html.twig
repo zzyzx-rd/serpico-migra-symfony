@@ -300,19 +300,36 @@
               <ul class="side-nav" id="mobile-menu">
                 {% if is_granted('IS_AUTHENTICATED_REMEMBERED') and global.currentuser is not null %}
 
+                  <li class="side-logo-holder flex-center">
+                    <img class="dd-logo" src="{{ asset('lib/img/logo_dd_p_l.png') }}">
+                  </li>
                   <li>
-                    <a href="{{ url('home') }}">
+                    <a href="{{ url('home') }}" class="profile-link">
                       <div class="flex-center">
                         <img class="user-profile-xl-picture" src="{{ asset(global.userpicture) }}">
-                        <span class="m-left">{{'profile.access_profile'|trans}}</span>
+                        <span>{{'profile.access_profile'|trans}}</span>
                       </div>
                     </a>
                   </li>
 
-                  <li class="plan">
-                    <a class="c-flex-center " href="{{ path('priceManagement') }}">
-                      <span class="dd-text" style="color: #55318e;"> {{ organization.plan == 1 ? 'header.plan.enterprise'|trans|upper : (organization.plan == 2 ? 'header.plan.premium'|trans|upper : 'header.plan.free'|trans|upper) }} {{ date('now').diff(organization.inserted).days < 21 ? '(' ~ 'trial'|trans|upper ~ ')' }} </span>
-                      <span class="dd-orange-text">{{ 'header.plan.upgrade'|trans }}</span>
+                  <li class="">
+                    <a href="{{ path('myActivities') }}">
+                      <i class="fa fa-briefcase sm-right" aria-hidden="true"></i>
+                      <span>
+                        {% if orgName != "Public" %}
+                          {% trans %}header.firmActivities{% endtrans %}
+                        {% else %}
+                          {% trans %}header.my_actions{% endtrans %}
+                        {% endif %}
+                      </span>
+                    </a>
+                  </li>
+                  
+                  <li>
+                    <a href="{{ path(global.currentuser.is_admin ? 'manageUsers' : 'seeColleaguesTeams') }}">
+                      <i class="fa fa-users sm-right" aria-hidden="true"></i>
+                      {% set str = 'header.users' %}
+                      {{ str|trans }}
                     </a>
                   </li>
 
@@ -333,26 +350,7 @@
                       </a>
                     </li>
                   {% endif %}
-                  #}
-                  <li>
-                    <a href="{{ path(global.currentuser.is_admin ? 'manageUsers' : 'seeColleaguesTeams') }}">
-                      <i class="fa fa-users sm-right" aria-hidden="true"></i>
-                      {% set str = 'header.users' %}
-                      {{ str|trans }}
-                    </a>
-                  </li>
-                  <li class="">
-                    <a href="{{ path('myActivities') }}">
-                      <i class="fa fa-briefcase sm-right" aria-hidden="true"></i>
-                      <span>
-                        {% if orgName != "Public" %}
-                          {% trans %}header.firmActivities{% endtrans %}
-                        {% else %}
-                          {% trans %}header.my_actions{% endtrans %}
-                        {% endif %}
-                      </span>
-                    </a>
-                  </li>
+                  #}            
                   <li class="logout">
                     <a href="{{ path('logout') }}">
                       <i class="fas fa-sign-out-alt " aria-hidden="true"></i>
@@ -392,6 +390,16 @@
                     </a>
                   </li>
                 {% endif %}
+
+                <li class="plan">
+                  <a class="c-flex-center " href="{{ path('priceManagement') }}">
+                    <span class="dd-text" style="color: #55318e;"> {{ 'Plan'|trans|upper ~ ' : ' ~ (organization.plan == 1 ? 'header.plan.enterprise'|trans|upper : (organization.plan == 2 ? 'header.plan.premium'|trans|upper : 'header.plan.free'|trans|upper)) }} {{ date('now').diff(organization.inserted).days < 21 ? '(' ~ 'trial'|trans|upper ~ ')' }} </span>
+                    {% if organization.plan != 1 %}
+                      <span class="dd-orange-text">{{ 'header.plan.upgrade'|trans }}</span>
+                    {% endif %}
+                  </a>
+                </li>
+
               </ul>
             </div>
           </nav>
