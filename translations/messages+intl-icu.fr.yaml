@@ -106,6 +106,7 @@ fullname: Votre nom complet
 parameters: Paramètres
 
 signup:
+  title: Inscription
   do_not_associate_org: Je préfère ne pas associer mon compte à une entreprise pour l'instant
   personal_usage_tooltip: Vous pourrez toujours associer un compte rattaché à une entreprise par la suite, sachant que votre compte en tant qu'individu sera toujours distinct de votre compte rattaché à une entreprise
 
@@ -124,7 +125,7 @@ updates:
       withoutParent: ajouté un
 
   document_update_level:
-    creation: créé le
+    creation: créé
     update: créé une nouvelle version du
 
   update_msg: >-

@@ -2934,7 +2934,7 @@ class SettingsController extends MasterController
             ->getResult();
 
             $qb2 = $em->createQueryBuilder();
-            $elementsExtUsers = $qb2->select('wf.name AS orgName', 'wf.id AS wfiId','wf.logo', 'o.id AS orgId', 'CONCAT(eu.firstname,\' \', eu.lastname) AS username', 'eu.lastname AS l', 'eu.synthetic AS s', 'eu.id AS extUsrId, u.picture AS usrPicture, u.id AS usrId')
+            $elementsExtUsers = $qb2->select('wf.name AS orgName', 'wf.id AS wfiId','wf.logo', 'o.id AS orgId', 'CONCAT(eu.firstname,\' \', eu.lastname) AS username', 'eu.lastname AS l', 'eu.synthetic AS s', 'eu.id AS extUsrId', 'u.picture AS usrPicture', 'u.id AS usrId')
                 ->from('App\Entity\ExternalUser', 'eu')
                 ->innerJoin('App\Entity\User', 'u', 'WITH', 'u.id = eu.user')
                 ->innerJoin('App\Entity\Client', 'c', 'WITH', 'c.id = eu.client')
@@ -2988,6 +2988,7 @@ class SettingsController extends MasterController
                     ->leftJoin('App\Entity\Organization', 'o', 'WITH', 'o.workerFirm = wf.id')
                     ->leftJoin('App\Entity\Client', 'c', 'WITH', 'c.clientOrganization = o.id')
                     ->where('wf.name LIKE :name')
+                    ->groupBy('o.id')
                 //->andWhere('c.organization = :org')
                     ->setParameter('name', '%'. $name .'%')
                 //->setParameter('org', $organization)

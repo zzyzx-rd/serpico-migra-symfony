@@ -148,6 +148,9 @@ $('.dp-start, .dp-end').on('change',function(){
   const $modal = $(this).closest('.modal');
   if($cal.hasClass('dp-start')){
     $relatedEndCal = $modal.find('.dp-end');
+    if($relatedEndCal.pickadate('picker').get('select') && $selectedDate.pick > $relatedEndCal.pickadate('picker').get('select').pick){
+      $relatedEndCal.pickadate('picker').set('select',new Date($selectedDate.pick));
+    }
     $relatedEndCal.pickadate('picker').set('min', new Date($selectedDate.pick))
   } else {
     $relatedStartCal = $modal.find('.dp-start');
@@ -1019,6 +1022,9 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
     $partFZone.find('.participant-fullname').prev().addClass('active');
     var $img = $partBtn.find('.selected-participant-logo');
     $img.attr('src',pic);
+    if(tn == myself){
+      $partElmt.addClass('self');
+    }
     $partBtn.attr('data-tooltip',tn).tooltip();
     switch(type){
       case 'eu' : 
@@ -1457,9 +1463,25 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         'data-tooltip' : $(this).attr('data-sid') ? evtAccStgMsg : evtAccActMsg,   
       }).tooltip();
       updateEvents();
+      $stgElmt = $(`.stage-element[data-id="${$(this).attr('data-sid')}"]`);
+      //$modal.find('.dp-start').pickadate('picker')
+          
+      //    .set('min', new Date(parseInt($(`.stage-element[data-id="${$(this).attr('data-sid')}"]`).data('sd')) * 1000));
+
+
+      //$stgElmt = $(`.stage-element[data-id="${$modal.find('.fa-external-link-alt').data('id')}"]`);
+      sdate = new Date(parseInt($stgElmt.data('sd')) * 1000);
+      edate = new Date((parseInt($stgElmt.data('sd')) + parseInt($stgElmt.data('p'))) * 1000);
+
       $modal.find('.dp-start').pickadate('picker')
-          .set('select',new Date())
-          .set('min', new Date(parseInt($(`.stage-element[data-id="${$(this).attr('data-sid')}"]`).data('sd')) * 1000));
+        .set('select',Math.min(edate, Math.max(sdate,new Date())))
+        .set('min', sdate)
+        .set('max', edate);
+      $modal.find('.dp-end').pickadate('picker')
+        //.set('select',new Date())
+        .set('min', sdate)
+        .set('max', edate);
+      
       $modal.find('.e-dates-header').show();
       $modal.find('.event-dates-content').hide();
       //$('.event-element-name').empty().append($(this).closest('.act-info').find('.act-info-name').text());
@@ -2149,7 +2171,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
     }
     $selectorMElmts = $selector.closest('.select-wrapper');
     const p = [];
-    $('.participants-list--item').not($partElmt).each(function(i,e){
+    $('.participants-list--item:not(.self)').each(function(i,e){
       if(!$partHolder.find('.existing').length){
         $(e).find('.participant-field-zone input:not(.select-dropdown)').each(function(i,f){
           if($(f).attr('value')){
@@ -2158,9 +2180,12 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         });
       } else {
         $(e).find('.participant-btn').each(function(i,f){
-          p.push({id: $(f).data('pid')});
+          p.push({id: $(f).find('[href="#deleteParticipant"]').data('pid')});
         });
       }
+      $(selfAcctIds.split(',')).each(function(i,f){
+        p.push({el: 'u', id : parseInt(f)});
+      })
     })
 
     if($this.val().length >= 3 /*&& event.keyCode != 8*/){
@@ -2461,7 +2486,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
       $.delete(url,null)
         .done(function(){
           $('#deleteParticipant').modal('close');
-          $(`[href="#deleteParticipant"][data-pid=${pid}]`).closest('.participants-list--item').remove();
+          $(document).find(`[href="#deleteParticipant"][data-pid=${pid}]`).closest('.participants-list--item').remove();
           $('.nb-participants').empty().append(`(${$('.participants-list--item').length})`);
         })
 
@@ -2501,7 +2526,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
   $(document).on('click','.participant-validate',function(){
     const $this = $(this);
     const $partElmt = $this.closest('.participants-list--item');
-    if(!$('.participant-btn.existing').length){
+    if(!$(document).find('.participant-btn.existing').length){
 
 
       if($partElmt.find('input.participant-fullname').hasClass('part-feeded')){

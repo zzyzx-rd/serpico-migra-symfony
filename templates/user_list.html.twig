@@ -57,9 +57,11 @@
         <li class="tab">
           <a href="#clients">{{ 'user_list.external_users_tab'|trans }}</a>
         </li>
+        {#
         <li class="tab">
           <a href="#teams">{{ 'user_list.teams_tab'|trans }}</a>
         </li>
+        #}
         <li class="tab">
           <a href="#users">{{ 'user_list.internal_users_tab'|trans }}</a>
         </li>
@@ -106,6 +108,7 @@
         </ul>
       </section>
 
+      {#
       <section id="teams">
         <ul class="teams-list">
           {% for team in viewableTeams|merge(dealingTeams) %}
@@ -113,6 +116,7 @@
           {% endfor %}
         </ul>
       </section>
+      #}
 
       <section id="clients">
         <ul class="client-type-list client-employees">
@@ -167,7 +171,6 @@
     <a id="scrolltop" href="#serpicoapp" class="btn-floating btn-large blue">
       <i class="material-icons">arrow_upward</i>
     </a>
-
 
     <div id="client-icon-modal" class="modal">
       <div class="modal-content">

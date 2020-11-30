@@ -1,43 +1,18 @@
 {% extends "layout.html.twig" %}
 
 {% block title %}
-Signup
+  {{'signup.title'|trans}}
 {% endblock %}
 
 {% block pagename %}
-Signup
+  {{'signup.title'|trans}}
+{% endblock %}
+
+{% block mobile_title %}
+  {{'signup.title'|trans}}
 {% endblock %}
 
 {% block css %}
-
-  <style>
-      .db-LoginBackground-gridContainer{
-        display: grid;
-        -ms-grid-columns: [start] 1fr [left-gutter] (86.6px)[16] [left-gutter] 1fr [end];
-        grid-template-columns: [start] 1fr [left-gutter] repeat(16,7vw) [left-gutter] 1fr [end];
-        -ms-grid-rows: [top] 1fr [top-gutter] (64px)[8] [bottom-gutter] 1fr [bottom];
-        grid-template-rows: [top] 1fr [top-gutter] repeat(8,64px) [bottom-gutter] 1fr [bottom];
-        justify-content: center;
-        margin: 5% -2%;
-        transform: rotate(-12deg) skew(-12deg);
-        position: absolute;
-        bottom: 0;
-        z-index:-1;
-      }
-
-      .Box-background--blue {
-          background-color: #5469d4;
-      }
-
-      .Box-background--orange {
-          background-color: #ffbd45;
-      }
-
-      .Flex-flex {
-          display: flex;
-      }
-  </style>
-
   <script type="text/javascript">
     var homeUrl = "{{ url('login') }}";
   </script>
@@ -45,37 +20,7 @@ Signup
 
 {% block content %}
 
-  <div class="db-LoginBackground-gridContainer">
-        <div class="Box-root Flex-flex" style="grid-area: top / start / 8 / end;">
-          <div class="Box-root" style="background-image: linear-gradient(white 0%, rgb(247, 250, 252) 33%); flex-grow: 1;"></div>
-        </div>
-        <div class="Box-root Flex-flex" style="grid-area: 4 / 2 / auto / 5;">
-          <div class="Box-root Box-divider--light-all-2" style="flex-grow: 1;"></div>
-        </div>
-        <div class="Box-root Flex-flex" style="grid-area: 6 / start / auto / 5;">
-          <div class="Box-root Box-background--blue" style="flex-grow: 1;"></div>
-        </div>
-        <div class="Box-root Flex-flex" style="grid-area: 7 / start / auto / 4;">
-          <div class="Box-root Box-background--orange" style="flex-grow: 1;">
-          </div>
-        </div>
-        <div class="Box-root Flex-flex" style="grid-area: 8 / 4 / auto / 6;">
-          <div class="Box-root Box-background--gray100" style="flex-grow: 1;">
-          </div>
-        </div>
-        <div class="Box-root Flex-flex" style="grid-area: 2 / 15 / auto / end;">
-          <div class="Box-root Box-background--orange" style="flex-grow: 1;"></div>
-        </div>
-        <div class="Box-root Flex-flex" style="grid-area: 3 / 14 / auto / end;">
-          <div class="Box-root Box-background--blue" style="flex-grow: 1;"></div>
-        </div>
-        <div class="Box-root Flex-flex" style="grid-area: 4 / 17 / auto / 20;">
-          <div class="Box-root Box-background--gray100" style="flex-grow: 1;"></div>
-        </div>
-        <div class="Box-root Flex-flex" style="grid-area: 5 / 14 / auto / 17;">
-          <div class="Box-root Box-divider--light-all-2" style="flex-grow: 1;"></div>
-        </div>
-    </div>
+    {% include "components/background_grid.html.twig" %}
     
     <div class="small-container">
         <div class="row" style="text-align: center; align-items: center">

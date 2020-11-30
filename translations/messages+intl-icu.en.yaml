@@ -104,6 +104,7 @@ fullname: Your full name
 parameters: Parameters
 
 signup:
+  title: Signup
   do_not_associate_org: I prefer not to associate an organization account right now
   personal_usage_tooltip: You can still associate an account linkedin to a firm thereafter, but your account as an individual will always be distinct from your account as being part of an organization
 
