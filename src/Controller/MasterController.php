@@ -35,8 +35,7 @@ use App\Entity\Team;
 use App\Entity\User;
 use App\Repository\ParticipationRepository;
 use App\Repository\UserRepository;
-
-
+use App\Security\LoginFormAuthenticator;
 use Stripe\Stripe;
 use Swift_Image;
 use Swift_Mailer;
@@ -58,6 +57,7 @@ use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Generator\UrlGenerator;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
 use Symfony\Component\Translation\Translator;
 use Symfony\Component\Validator\Constraints\DateTime;
 use Twig\Environment;
@@ -84,7 +84,7 @@ abstract class MasterController extends AbstractController
      * @var Security
      */
     protected $security;
-     /**
+    /**
      * @var UserPasswordEncoderInterface
      */
     protected $encoder;
@@ -112,7 +112,7 @@ abstract class MasterController extends AbstractController
      * @param RequestStack $stack
      * @param Stripe $stripe
      */
-    public function __construct(EntityManagerInterface $em, Security $security, RequestStack $stack, UserPasswordEncoderInterface $encoder, Environment $twig)
+    public function __construct(EntityManagerInterface $em, Security $security, RequestStack $stack, UserPasswordEncoderInterface $encoder, GuardAuthenticatorHandler $guardHandler, LoginFormAuthenticator $authenticator, Environment $twig)
     {
         Stripe::setApiKey('sk_test_51Hn5ftLU0XoF52vKQ1r5r1cONYas5XjLLZu6rFg2P69nntllHxLs3G0wyCxoOQNUgjgD5LwCoaYTkGQp1qVK3g3A00LfW1k4Ep');
         $this->em = $em;
@@ -120,6 +120,8 @@ abstract class MasterController extends AbstractController
         $this->stack = $stack;
         $this->user = $security->getUser();
         $this->encoder = $encoder;
+        $this->guardHandler = $guardHandler;
+        $this->authenticator = $authenticator;
         $this->twig = $twig;
         $stripe = new Stripe;
         $this->stripe = $stripe = new \Stripe\StripeClient(

@@ -32,7 +32,7 @@ firm_member : Firm / Institution member
 firstname: First name
 lastname: Last name
 name: name
-email: email
+email: Email
 password: password
 ascending: ASC
 descending: DESC
@@ -96,6 +96,16 @@ cancel: Cancel
 features: Features
 logout: Logout
 notif_and_profile: Notifications & Profile
+my_account: My account
+individual: Individual
+shift: Shift
+welcome: Welcome
+fullname: Your full name
+parameters: Parameters
+
+signup:
+  do_not_associate_org: I prefer not to associate an organization account right now
+  personal_usage_tooltip: You can still associate an account linkedin to a firm thereafter, but your account as an individual will always be distinct from your account as being part of an organization
 
 updates:
 
@@ -756,7 +766,7 @@ pricing:
   note_e: You can setup advanced updates, and see the evolution of operations and performance along the time
   subscriptions: Subscriptions
   note_1: "Monthly user fee is for Premium plan, €7 from 1st up to 100th user, 6€ from 101th up to 250th, and 5€ beyond. For Entreprise plan, 14€ from 1st up to 100th user, 10€ from 101th up to 250th, and 7€ beyond. <a class=\"dd-text\" href=\"/#\">TCs</a> apply"
-  note_2: Limited to 10 collaborators
+  note_2: Limited to 3 collaborators
   note_3: To come soon
   trial_21_days_cta: 21 days premium for free
   start_now: Start now
@@ -1123,7 +1133,7 @@ template_manage:
   no_templates_msg: No existing templates
   create_btn: Create template
 
-password_definition:
+password_update:
   title: Password definition
   welcome_msg: Welcome to DealDrive
   username: Fullname
@@ -1142,7 +1152,7 @@ home:
   page_title: Home
   mobile_header_title: Home
 #  my_profile_title: My profile
-  my_profile_title: Access to my profile and see my feedbacks/performance
+  my_profile_title: My profile
   activities: Activities & Projects
   my_settings_title: My Settings
   my_settings_description: Manage your profile
@@ -1949,7 +1959,20 @@ contact_mail:
   team: The DealDrive Team
 
 profile:
+  my_firm_account: My {accountName} account
+  my_individual_account: My individual account
+  add_account: Add account
+  my_credentials: Account credentials
+  my_accounts: My accounts
+  add_firm_account: Add firm account
+  duplicate_account: You already have an account associated to this firm
+  no_firm_account: You don't have any related firm account
   access_profile: Access my profile
+  total_nb_activities: Total number of activities
+  administrator: Administrator
+  change_account_modal:
+    title: Account change
+    msg: Select which account you want to shift to
   page_title: My profile
   mobile_header_title: My profile
   my_results: My results
@@ -1970,6 +1993,13 @@ profile:
       new_password: New password
     s_password_modification_modal:
       content: Your password has successfully been changed !
+    add_account_modal:
+      title: Add an organization account
+      content: Type here the firm you want to be associated with
+    delete_account_modal:
+      title: Organization account deletion
+      content: Are you sure to delete your account associated to firm
+      end: This operation cannot be undone, and will remove you from all related activities and events.
   performance_feedbacks: My performance & feedbacks
   targets_goals: My objectives
   performance_indicators: My Performance Indicators
@@ -3311,7 +3341,7 @@ user_no_token:
   page_name: Oops - Page not found
   title: Oops - Page not found
   mobile_header_title: Page not found
-  description: You already have defined your password. If you dont remember it or want to reset it, please provide your email address, we will send you a mail to redefine one
+  description: This link has expired. If you don't remember your password or want to reset it, please provide your email address, we will send you a redifinition link
   home_button_title: Go to main page
 
 password_modify:

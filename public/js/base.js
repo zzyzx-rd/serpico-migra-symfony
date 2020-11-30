@@ -99,6 +99,11 @@
         });
     }
 
+    function isEmail(email) {
+        const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(String(email).toLowerCase());
+    }
+
     function setCookie(key, value, expiry) {
         var expires = new Date();
         expires.setTime(expires.getTime() + (expiry * 24 * 60 * 60 * 1000));
@@ -158,13 +163,13 @@
         return "";
     }*/
 
-    function checkAccount(){
+    function checkPlan(){
         if(!$('#upgradeAccount').length || !$('#upgradeAccount .modal-content').length){
             window.location.href = '/logout';
         }
         const $furls = ['/','/pricing','/terms-and-conditions', '/terms/conditions/cookies', '/login'];
         if ($furls.indexOf(window.location.pathname) == -1){
-            $.get(caurl,null)
+            $.get(cpurl,null)
             .done(function(data){
                 if(data.la){
                     $('#upgradeAccount').modal('open');
@@ -388,8 +393,8 @@
 
     interval = setInterval(function() {retrieveUpdates(window.location.pathname == '/myactivities')}, 15000);
     
-    if(typeof caurl != "undefined"){
-        newInterval = setInterval(function() {checkAccount()}, 60*60*1000);
+    if(typeof cpurl != "undefined"){
+        newInterval = setInterval(function() {checkPlan()}, 60*60*1000);
     }
 
     if(typeof cnurl != "undefined"){
@@ -425,6 +430,27 @@
     $('.cookies-banner .btn').on('click', function(){
         $('.cookies-banner').remove();
         setCookie('cb',1,365);
+    })
+
+    $('.change-account').on('click',function(){
+        $.get(gaurl)
+        .done(function(data){
+            if(data.changed){
+                location.reload();
+            } else {
+                const $accountSelector = $('[name="accountSelector"]');
+                $.each(data,function(i,e){
+                    $accountSelector.append(`<option value="${e.id}">${e.name}</option>`);
+                })
+                $accountSelector.material_select();
+                $('#changeAccount').modal('open');
+            }
+        })
+    })
+
+    $('.select-account-btn').on('click',function(){
+        $.post(caurl,{id: $('[name="accountSelector"]').val()})
+            .done(() => location.reload());
     })
 
 

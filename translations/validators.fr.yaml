@@ -1,5 +1,5 @@
  
-password_definition: 
+password_update: 
   unmatching_msg: Les mots de passe ne correspondent pas
 
 activity_elements: 

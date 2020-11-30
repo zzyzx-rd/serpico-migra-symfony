@@ -49,6 +49,7 @@ final class InstitutionController extends MasterController
      */
     public function processesListAction(Request $request): Response
     {
+        $em = $this->em;
         if(isset($_COOKIE['sorting_type'])){
             $sortingType = $_COOKIE['sorting_type'];
         } else {
@@ -92,7 +93,6 @@ final class InstitutionController extends MasterController
 
         $orphanActivities  = $this->activityRepo->getOrgOrphanActivities($this->org);
         $processActivities = $this->activityRepo->getOrgProcessActivities($this->org, $viewType);
-        $em = $this->em;
         $locale = strtoupper($request->getLocale());
         $org = $this->org;
         $eventGroups = $this->org->getEventGroups()->map(
@@ -161,7 +161,7 @@ final class InstitutionController extends MasterController
             return $this->redirectToRoute('login');
         }
         
-        $em = $this->getEntityManager();
+        $em = $this->em;
         $repoA = $em->getRepository(Activity::class);
         $repoP = $em->getRepository(Participation::class);
         $repoDec = $em->getRepository(Decision::class);

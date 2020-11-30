@@ -41,7 +41,7 @@
       {{ macros.render_badge('virtual-badge', 'V', 'tooltip.user.external_user_virtual'|trans) }}
     {% endif %}
 
-    {% if settings %}
+    {#{% if settings %}#}
     
       <div class="user-actions">
         
@@ -61,12 +61,22 @@
           
         {% endif %}
 
+        {#
         <a class="material-icons {{ not hasCompletedActivities ? 'disabled' }}"
             href="{{ url('elementOverview', { entity: 'user', elmtId: user.id }) }}"
             tooltip="{{ 'user_list.overview'|trans }}">show_chart</a>
+        #}
+
+        <div class="nb-activities flex-center tooltipped" data-tooltip="{{'tooltip.user.activity_ongoing_futur'|trans}}" data-position="top">
+          <i class="fa fa-briefcase"></i>
+          <span class="sm-left black-text">
+              {{ userM.nbCompletedActivities(user) }} + {{ userM.nbScheduledActivities(user) }}
+          </span>
+        </div>
+        
       </div>
     
-    {% endif %}
+    {#{% endif %}#}
 
   </header>
 

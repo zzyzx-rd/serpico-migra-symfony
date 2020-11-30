@@ -70,10 +70,10 @@ class InstitutionProcess extends DbObject
      */
     protected ?Process $process;
     /**
-     * @ManyToOne(targetEntity="User")
-     * @JoinColumn(name="masterUser_usr_id", referencedColumnName="usr_id", nullable=true)
+     * @ORM\OneToMany(targetEntity=UserMaster::class, mappedBy="institutionProcess", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|UserMaster[]
      */
-    protected $masterUser;
+    private $userMasters;
     /**
      * @ManyToOne(targetEntity="InstitutionProcess", inversedBy="children")
      * @JoinColumn(name="parent_id", referencedColumnName="inp_id", nullable=true)
@@ -139,6 +139,7 @@ class InstitutionProcess extends DbObject
         $this->stages = new ArrayCollection();
         $this->activities = new ArrayCollection();
         $this->updates = new ArrayCollection();
+        $this->userMasters = new ArrayCollection();
     }
 
 
@@ -241,24 +242,7 @@ class InstitutionProcess extends DbObject
         $this->process = $process;
         return $this;
     }
-
-    /**
-     * @return mixed
-     */
-    public function getMasterUser()
-    {
-        return $this->masterUser;
-    }
-
-    /**
-     * @param mixed $masterUser
-     */
-    public function setMasterUser(?User $masterUser): self
-    {
-        $this->masterUser = $masterUser;
-        return $this;
-    }
-
+    
     /**
      * @return mixed
      */
@@ -406,6 +390,27 @@ class InstitutionProcess extends DbObject
     public function removeUpdate(ElementUpdate $update): self
     {
         $this->updates->removeElement($update);
+        return $this;
+    }
+
+    /**
+    * @return ArrayCollection|UserMaster[]
+    */
+    public function getUserMasters()
+    {
+        return $this->userMasters;
+    }
+
+    public function addUserMaster(UserMaster $userMaster): self
+    {
+        $this->userMasters->add($userMaster);
+        $userMaster->setInstitutionProcess($this);
+        return $this;
+    }
+
+    public function removeUserMaster(UserMaster $userMaster): self
+    {
+        $this->userMasters->removeElement($userMaster);
         return $this;
     }
 

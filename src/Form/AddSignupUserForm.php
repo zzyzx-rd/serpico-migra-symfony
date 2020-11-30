@@ -19,6 +19,14 @@ class AddSignupUserForm extends AbstractType
     {
        
         $builder
+        ->add('username', TextType::class, 
+            [
+                'label_format' => 'fullname',
+                'constraints' => new Assert\NotBlank,
+                'required' => false,
+            ]
+        )
+        /*
         ->add('firstname', TextType::class,
             [
                 'label_format' => '%name%',
@@ -32,7 +40,7 @@ class AddSignupUserForm extends AbstractType
                 'constraints' => new Assert\NotBlank,
                 'required' => false,
             ]
-        )
+        )*/
         ->add('email', TextType::class,
             [
                 'label_format' => '%name%',

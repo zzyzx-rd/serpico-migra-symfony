@@ -1,5 +1,5 @@
  
-password_definition:
+password_update:
   unmatching_msg: Passwords do not match each other
 
 activity_elements:

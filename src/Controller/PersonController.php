@@ -7,6 +7,7 @@ use App\Entity\Client;
 use App\Entity\ExternalUser;
 use App\Entity\Organization;
 use App\Entity\User;
+use App\Entity\UserGlobal;
 use App\Entity\WorkerFirm;
 use App\Form\Type\ClientType;
 use App\Form\Type\ExternalUserType;
@@ -450,7 +451,14 @@ class PersonController extends MasterController
                     ->setRole(3)
                     ->setToken($token);
                 $em->persist($user);
+
+                $userGlobal = new UserGlobal();
+                $userGlobal->setUsername($externalUser->getFirstname().' '.$externalUser->getLastname())
+                    ->addUser($user);
+                $em->persist($userGlobal);
+
                 $em->flush();
+
                 $settings = [];
                 $settings['tokens'][] = $token;
                 $settings['invitingUser'] = $currentUser;

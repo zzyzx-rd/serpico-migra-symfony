@@ -1,5 +1,10 @@
 $(function(){
 
+    $('select').material_select();
+    const urlParams = new URLSearchParams(window.location.search);
+    if(urlParams.get('aa')){$('#addAccount').modal('open');}
+    
+
     $("input[name*='firm']").each(function(){
         var el = $(this);
         var firmParentId = el.val();
@@ -25,79 +30,86 @@ $(function(){
         $(this).prev().attr("disabled",false);
     })
 
-    $(document).on('keyup','input[name*="firm"]',function(event){
-        var el = $(this);
-        var index = $("input[name*='firm']").index($(this));
-        var $selector = $('select[name="firmSelector"]').eq(index);
-        $selectorMElmts = $selector.closest('.select-wrapper');
+    $(document).on('keyup','input[name*="firm"]',function(e){
 
-        if($(this).val().length >= 3 /*&& event.keyCode != 8*/){
-            //urlToPieces = surl.split('/');
-            //urlToPieces[urlToPieces.length - 1] = $(this).val();
-            //surl = urlToPieces.join('/');
-            const params = {name: $(this).val()};
+        var $this = $(this);
+        var $selector = $('[name="firmSelector"]');
+        if($selector.find('option:selected').length && $this.val() != $selector.find('option:selected').text()){
+            $inputZone = $this.parent();
+            $inputZone.find('input').not($this).each(function(i,e){
+            $(e).removeAttr('value');
+            })
+            $inputZone.find('.input-f-img').remove();
+            $this.removeClass('part-feeded');
+        }
+        $selectorMElmts = $selector.closest('.select-wrapper');
+    
+        if($this.val().length >= 3){
+            
+            const params = {name: $this.val(), type:'firm'};
             $.post(surl,params)
                 .done(function(data){
-
-                    if(!data.workerFirms.length){
-                        $selectorMElmts.prev().find('input').removeAttr('value');
-                        $selectorMElmts.hide();
+    
+                    if(!data.qParts.length){
+                        $this.removeAttr('value');
+                        $selector.empty();
+                        $selector.material_select();
+                        //$selectorMElmts.hide();
                         return false;
                     }
-
-                    $(`<select name="firmSelector"></select>`)
                     
                     $selector.closest('.select-wrapper').find('img').remove();
                     $selector.empty();
-                    $.each(data.workerFirms,function(key,firm){
-                        //$option = $(`<option class="flex-center" value=${firm.id}></option>`);
-                        //$option.append(`<img class="firm-option-logo" src="/lib/img/org/${firm.logo ? firm.logo : 'no-picture.png'}">`)
-                        //$option.append(`<span>${firm.name}</span>`);
-                        $selector.append(`<option value="${firm.id}">${firm.name}</option`);
+                    $.each(data.qParts,function(key,el){
+                        let elName = el.orgName;
+                        let elPic = el.logo;
+                        $selector.append(`<option value="${el.wfiId}" data-wid="${el.wfiId}" data-oid="${el.orgId ? el.orgId : ''}" data-cid="${el.cliId ? el.cliId : ''}" data-pic="${elPic ? elPic : ""}">${elName}</option`);
                     })
-                    //el.val(selector.find(":selected").text());
-                    el.attr("value",$selector.find(":selected").val());
                     $selector.material_select();
                     $selectorMElmts = $selector.closest('.select-wrapper')
                     $selector.prev().find('li').each(function(i,e){
-                        $(e).prepend(`<img class="firm-option-logo" src="/lib/img/org/${data.workerFirms[i].logo ? data.workerFirms[i].logo : 'no-picture.png'}">`)
-                        //$option.append(`<span>${firm.name}</span>`);
-                        //selector.append($option);
+                        logo = $selector.find('option').eq(i).attr('data-pic');
+                        folder = $selector.find('option').eq(i).attr('data-oid') ? 'org' : 'wf';
+                        $(e).prepend(`<img class="s-firm-option-logo" src="/lib/img/${folder}/${logo ? logo : 'no-picture.png'}">`);
+                        $(e).addClass('flex-center');
                     });
-                    //$selectorMElmts.prepend(`<img class="firm-input-logo" src="/lib/img/org/${data.workerFirms[0].logo ? data.workerFirms[0].logo : 'no-picture.png'}">`);
-
-
-                    //$('select[name="firmSelector"]').eq(index).show();
+                    
                 })
                 .fail(function(data){
-                   console.log(data);
+                    console.log(data);
                 })
         } else {
             //if($selectorMElmts){
                 $selectorMElmts.hide();
             //}
         }
-    })
+    
+        });
 
-    /*$(document).on('click','.w-firm .dropdown-content li', function(){
-        //var $this = $(this);
-        var index = $('select[name="firmSelector"]').index($(this));
-        $("input[name*='firm']").eq(index).val($(this).find(":selected").text());
-        $("input[name*='firm']").eq(index).attr("value",$(this).val());
-        $(this).hide();
-
-    })*/
-
-    /*$("#update_worker_firm_form_firmParent").on("input",function(){
-        $('#parentSelector').hide();
-    })*/
-
-
-    $(document).on('change','select[name="firmSelector"]',function(){
-        var index = $('select[name="firmSelector"]').index($(this));
-        $("input[name*='firm']").eq(index).val($(this).find(":selected").text());
-        $("input[name*='firm']").eq(index).attr("value",$(this).val());
-        $(this).prev().css('visibility','hidden');
+        $('[name*="firmSelector').on('change',function(){
+        var $this = $(this);
+        var $selectedOpt = $this.find(":selected");
+        const $usrElmts = $this.closest('.user-inputs');
+        $usrElmts.find('input[name="wid"]').val($selectedOpt.attr('data-wid'));
+        $usrElmts.find('.firm-name').val($selectedOpt.text());
+        var img = $this.prev().find('li').eq($this.find('option').index($this.find('option:selected'))).find('img');
+        if(!$usrElmts.find('.input-f-img').length){
+            var inputImg = img.clone();
+            inputImg.attr('class','');
+            inputImg.addClass('input-f-img');
+            inputImg.css({
+            'position': 'absolute',
+            'left': '0.75rem',
+            'top': '15%',
+            'height': '30px',
+            });
+            $usrElmts.find('.firm-name').addClass('part-feeded');
+            //inputElmt.css({'padding-left':'3rem!important'});
+            $usrElmts.find('.firm-field-zone').append(inputImg);
+        }
+        if($this.val() != ""){
+            $this.prev().attr('style','display:none!important');
+        }
     });
 
     $('form[name="update_worker_individual_form"]').on("submit",function(e){
@@ -193,8 +205,8 @@ $(function(){
         .fail(err => console.log(err));
     });
 
-    $('.modify-experience-btn, .modify-btn').on('click',function(){
-        $('.element-data, .modify-btn').hide();
+    $('.modify-experience-btn, .modify-credentials-btn').on('click',function(){
+        $('.element-data, .modify-credentials-btn').hide();
         $('.element-input, .save-btn').show();
         $('.cancel-btn').css('visibility','');
     });
@@ -207,7 +219,7 @@ $(function(){
         $('.user-credential input').each(function(i,e){
             $(e).val($(e).attr('value'));
         })
-        $('.element-data, .modify-btn').show();
+        $('.element-data, .modify-credentials-btn').show();
         $('.element-input, .save-btn').hide();
         $('.cancel-btn').css('visibility','hidden');
     })
@@ -241,7 +253,7 @@ $(function(){
                         $(e).prev().empty().append(el);
                     }
                 })
-                $('.element-data, .modify-btn').show();
+                $('.element-data, .modify-credentials-btn').show();
                 $('.element-input, .save-btn').hide();
                 $('.cancel-btn').css('visibility','hidden');
             })
@@ -266,6 +278,44 @@ $(function(){
                 })
             })
     })
+
+    $('.set-usr-org-btn').on('click',function(e){
+        e.preventDefault();
+        var $this = $(this);
+        $.post(suourl, $this.closest('form').serialize())
+            .done(function(data){
+            $('#addAccount').modal('close');
+            location.reload();
+            //setTimeout(() => window.location = landingPageUrl, 1000);
+            })
+            .fail(function(data){
+            console.log(data);
+            });
+    });
+
+    $('.firm-accounts li').on('mouseover',function(){
+        $(this).find('.delete-account-btn').css('visibility','');
+    }).on('mouseleave',function(){
+        $(this).find('.delete-account-btn').css('visibility','hidden');
+    })
+
+    $('.delete-account-btn').on('click',function(){
+        $('.account-delete-name').empty().append($(this).closest('.account').find('.account-name'));
+        $('#deleteAccount .delete-btn').attr('data-id',$(this).data('id'));
+    });
+
+    $('#deleteAccount .delete-btn').on('click',function(){
+        const id = $(this).data('id');
+        const params = {id: id}
+        $.post(daurl,params)
+            .done(function(){
+                $(`.delete-account-btn[data-id="${id}"]`).closest('.account').remove();
+                $('#deleteAccount').modal('close');
+            })
+        
+    });
+
+
 
 
 });

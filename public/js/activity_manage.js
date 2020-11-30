@@ -2656,7 +2656,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
 
     $actHeight = !$('.stages-holder:visible').length ? 75 : $('.stages-holder:visible').eq(0).height();
     $mainHeaderElmtsHeight = $('.sorting-type').height() + $('.timescale').height() + $('.tabs-t-view').height();
-    $mainHeight = Math.min(1000, $('main').height());
+    $mainHeight = Math.min(1000, $(window).height());
     $actList = $();
     totalPotentialAct = Math.floor(($mainHeight - $mainHeaderElmtsHeight) / $actHeight);
     nbVisibleAct = $('.stages-holder:visible').length;
@@ -2674,10 +2674,22 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
           //var p = moment.duration(moment(sed).diff(moment(ssd)));
           var sdate = new Date(annee, 0, sdOffDays);
           var edate = new Date(annee, 0 , sdOffDays + periodDays);
+          var sdateU = sdate.getTime() / 1000;
+          var periodU = (edate.getTime() - sdate.getTime()) / 1000;
+          $actComponent = $(`<ol class="activity-component" data-sd="${sdateU}" data-p="${periodU}"></ol>`);
+          $stgElmt = $($actProto.find('.stages-holder').data('dummy'));
+          $stgElmt.attr('data-sd',sdateU);
+          $stgElmt.attr('data-p', periodU);
+          $stgElmt.find('.s-day').empty().append(sdate.getDate());
+          $stgElmt.find('.e-day').empty().append(edate.getDate());
+          $actComponent.append($stgElmt);
+          $actProto.find('.stages-holder').append($actComponent);
+          /*
           $actProto.find('.stage-element').attr('data-sd',sdate.getTime() / 1000);
           $actProto.find('.stage-element').attr('data-p', (edate.getTime() - sdate.getTime()) / 1000);
           $actProto.find('.s-day').empty().append(sdate.getDate());
           $actProto.find('.e-day').empty().append(edate.getDate());
+          */
           //} 
   
           $actList = $actList.add($actProto);
@@ -2692,7 +2704,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
           });
         } else {
           const $toBeFeededActs = $actList;
-          const dummyParams = {wa:1, td: totalPotentialAct - nbVisibleAct + 1};
+          const dummyParams = {wa:1, td: totalPotentialAct - nbVisibleAct };
           $.post(dcurl,dummyParams)
             .done(function(data){
   
@@ -2744,24 +2756,6 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
   $(document).on('click','[href="#deleteActivity"]',function(e){
     $('.remove-activity').data('id',$(this).attr('data-aid'));
   })
-
-  $('.set-usr-org-btn').on('click',function(e){
-      e.preventDefault();
-      var $this = $(this);
-      $.post(suourl, $this.closest('form').serialize())
-        .done(function(data){
-          $('#firstConnectionModal').modal('close');
-          $('#beforeStarting img').attr({
-            'src' : $('.client-logo').eq(1).attr('src'),
-            'data-tooltip': $('.client-logo').eq(1).parent().attr('data-tooltip')
-          }).tooltip();
-          $('#beforeStarting').modal('open');
-
-        })
-        .fail(function(data){
-          console.log(data);
-        });
-  });
 
   if(currentWfiId && fc){
     setTimeout(function(){

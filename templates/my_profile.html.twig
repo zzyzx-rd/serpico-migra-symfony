@@ -8,6 +8,10 @@
   {{ 'profile.mobile_header_title'|trans }}
 {% endblock %}
 
+{% block mobile_title %}
+  {{ 'profile.page_title'|trans }}
+{% endblock %}
+
 {% block username %}
   {{ global.currentuser.firstname }} {{ global.currentuser.lastname }}
 {% endblock %}
@@ -126,6 +130,42 @@
       max-width:50px;
     }
 
+    @media screen and (min-width: 993px) {
+
+        .data-container img{
+            width:150px;
+            height:150px;
+        }
+
+        .user-header{
+          font-size: 2.9rem
+        }
+
+    }
+
+     @media screen and (max-width: 992px) {
+
+        .data-container img{
+            width:120px;
+            height:120px;
+        }
+
+         .user-header{
+          font-size: 2rem;
+        }
+
+         .data-container > ul{
+            justify-content:center;
+        }
+
+    }
+
+    @media screen and (max-width:600px) {
+        .user-header{
+          align-items: center;
+        }
+    }
+
   </style>
   {% if not orgHasActiveAdmin %}
   <script>
@@ -139,59 +179,65 @@
 
 {% block content %}
   <div class="menu">
+    <div class="image-container">
+    
+    
+    </div>
+    {#
     <div class="container background-container" style="position:relative">
       {% if nbResultsStages > 0 and global.currentuser.role != 3 or nbPublishedStages > 0 and global.currentuser.role == 3 %}
         <a href="{{ path('elementOverview', {entity: 'user', 'elmtId' : global.currentuser.id}) }}" class="btn btn-large white-text waves-effect waves-light teal lighten-1"><ul class="flex-center" style="margin: 0;justify-content:center;"><i class="fa fa-chart-bar" style="margin-right: 17px;"></i><span>{{ 'profile.my_results'|trans }}</span></ul></a>
       {% endif %}
     </div>
-  </div>
-  <div class="container data-container">
-    <ul class="flex-center">
-      <div class="col s12 m3" style="margin-right: 30px; position: relative">
-        <img src="{{ asset(global.userpicture) }}" width="150px" height="150px" style="border-radius: 100%">
-      </div>
+    #}
+    <div class="data-container">
+      <ul class="flex-center">
+        <div class="col s12 m3" style="margin-right: 30px; position: relative">
+          <img src="{{ asset(global.userpicture) }}" style="border-radius: 50%">
+        </div>
 
-      <div class="col s12 m9">
-        <ul>
-          <h3 class="header c-flex">
-                        <span>
-                        {% if global.currentuser.nickname != null %}
-                          {{ global.currentuser.nickname }}
-                        {% else %}
-                          {{ global.currentuser.fullname }}
-                        {% endif %}
-                        </span>
-            {#{% if orgName == "Public" %}#}
-              <a href="{{ url ('manageProfile') }}" class="btn-flat waves-effect modify-profile-btn">
-                {{'home.my_profile_title'|trans}}
-              </a>
-            {#{% endif %}#}
-          </h3>
-          {#
-          {% if orgName != "Public" %}
-            <h5 class="header flex-center stats-elmts"><span style="margin-right: 10px">{{global.currentuser.positionName}} </span>
-              {% if global.currentuser.role == 4 %}
-                <div class="root-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{{ 'tooltip.user.role.root'|trans }}">
-                  <span>R</span>
-                </div>
-              {% elseif global.currentuser.role == 2 %}
-                <div class="am-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{{ 'tooltip.user.role.activity_manager'|trans }}">
-                  <span>M</span>
-                </div>
-              {% elseif global.currentuser.role == 3 %}
-                <div class="collaborator-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{{ 'tooltip.user.role.collaborator'|trans }}">
-                  <span>C</span>
-                </div>
-              {% elseif global.currentuser.role == 1 %}
-                <div class="admin-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{{ 'tooltip.user.role.admin'|trans }}">
-                  <span>A</span>
-                </div>
-              {% endif %}
-            </h5>
-          {% endif %}
-          #}
-        </ul>
-      </div>
+        <div class="col s12 m9">
+          <ul>
+            <div class="user-header c-flex">
+                          <span>
+                          {% if global.currentuser.nickname != null %}
+                            {{ global.currentuser.nickname }}
+                          {% else %}
+                            {{ global.currentuser.fullname }}
+                          {% endif %}
+                          </span>
+              {#{% if orgName == "Public" %}#}
+                <a href="{{ url ('manageProfile') }}" class="btn-flat waves-effect modify-profile-btn">
+                  {{'parameters'|trans}}
+                </a>
+              {#{% endif %}#}
+            </div>
+            {#
+            {% if orgName != "Public" %}
+              <h5 class="header flex-center stats-elmts"><span style="margin-right: 10px">{{global.currentuser.positionName}} </span>
+                {% if global.currentuser.role == 4 %}
+                  <div class="root-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{{ 'tooltip.user.role.root'|trans }}">
+                    <span>R</span>
+                  </div>
+                {% elseif global.currentuser.role == 2 %}
+                  <div class="am-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{{ 'tooltip.user.role.activity_manager'|trans }}">
+                    <span>M</span>
+                  </div>
+                {% elseif global.currentuser.role == 3 %}
+                  <div class="collaborator-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{{ 'tooltip.user.role.collaborator'|trans }}">
+                    <span>C</span>
+                  </div>
+                {% elseif global.currentuser.role == 1 %}
+                  <div class="admin-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{{ 'tooltip.user.role.admin'|trans }}">
+                    <span>A</span>
+                  </div>
+                {% endif %}
+              </h5>
+            {% endif %}
+            #}
+          </ul>
+        </div>
+  </div>
 
 
 

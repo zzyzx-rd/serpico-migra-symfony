@@ -49,10 +49,10 @@ class Department extends DbObject
     public $deleted;
 
     /**
-     * @ManyToOne(targetEntity="User", inversedBy="leadingDepartments")
-     * @JoinColumn(name="masterUser_usr_id", referencedColumnName="usr_id", nullable=false)
+     * @ORM\OneToMany(targetEntity=UserMaster::class, mappedBy="department", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|UserMaster[]
      */
-    protected $masterUser;
+    private $userMasters;
 
     /**
      * @OneToMany(targetEntity="Position", mappedBy="department", cascade={"persist", "remove"})
@@ -141,6 +141,8 @@ class Department extends DbObject
         $this->targets = $targets?:new ArrayCollection();
         $this->users = $users?:new ArrayCollection();
         $this->updates = new ArrayCollection();
+        $this->userMasters = new ArrayCollection();
+
     }
 
 
@@ -178,24 +180,7 @@ class Department extends DbObject
 
         return $this;
     }
-
-    /**
-     * @return mixed
-     */
-    public function getMasterUser()
-    {
-        return $this->masterUser;
-    }
-
-    /**
-     * @param mixed $masterUser
-     */
-    public function setMasterUser($masterUser): Department
-    {
-        $this->masterUser = $masterUser;
-        return $this;
-    }
-
+    
     /**
      * @return mixed
      */
@@ -371,5 +356,26 @@ class Department extends DbObject
     public function __toString()
     {
         return $this->name;
+    }
+
+    /**
+    * @return ArrayCollection|UserMaster[]
+    */
+    public function getUserMasters()
+    {
+        return $this->userMasters;
+    }
+
+    public function addUserMaster(UserMaster $userMaster): self
+    {
+        $this->userMasters->add($userMaster);
+        $userMaster->setDepartment($this);
+        return $this;
+    }
+
+    public function removeUserMaster(UserMaster $userMaster): self
+    {
+        $this->userMasters->removeElement($userMaster);
+        return $this;
     }
 }

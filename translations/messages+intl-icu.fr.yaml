@@ -98,7 +98,16 @@ cancel: Annuler
 features: Fonctionnalités
 logout: Déconnexion
 notif_and_profile: Notifications & Profil
+my_account: Mon compte
+individual: Individuel
+shift: Changer
+welcome: Bienvenue
+fullname: Votre nom complet
+parameters: Paramètres
 
+signup:
+  do_not_associate_org: Je préfère ne pas associer mon compte à une entreprise pour l'instant
+  personal_usage_tooltip: Vous pourrez toujours associer un compte rattaché à une entreprise par la suite, sachant que votre compte en tant qu'individu sera toujours distinct de votre compte rattaché à une entreprise
 
 updates:
 
@@ -739,7 +748,7 @@ pricing:
   note_e: Vous pouvez configurer des updates plus poussés, et voir l'évolution de la performance des opérations dans la durée
   subscriptions: Abonnements
   note_1: "Le prix mensuel par utilisateur est pour le Plan Premium, 7€ du 1er au 100ème, 6€ du 101ème au 250ème utilisateur, et 5€ au délà. <a class=\"dd-text\" href=\"/#\">Conditions tarifaires</a> applicables" #Pour le tarif Entreprise, 14€ du 1er au 100ème, 10€ du 101ème au 250ème utilisateur, et 7€ au delà. 
-  note_2: Limité à 10 collaborateurs
+  note_2: Limité à 3 collaborateurs
   note_3: A venir prochainement
   trial_21_days_cta: 21 jours premium gratuits
   start_now: Démarrez dès maintenant
@@ -1184,9 +1193,8 @@ template_manage:
   no_templates_msg: Pas de templates existants
   create_btn: Créer un template
 
-password_definition:
+password_update:
   title: Définition du mot de passe
-  welcome_msg: Bienvenue sur DealDrive
   description: Inscrivez-vous pour pouvoir évaluer les institutions publiques dans votre quotidien
   username: Nom complet
   nickname: Nom d'utilisateur
@@ -2061,7 +2069,20 @@ tooltip:
 
 
 profile:
+  my_firm_account: Mon compte {accountName}
+  my_individual_account: Mon compte individuel
+  add_account: Ajouter un compte
+  my_credentials: Données du compte
+  my_accounts: Mes comptes
+  add_firm_account: Ajouter un compte entreprise
+  duplicate_account: Vous avez déjà un compte associé à cette entreprise
+  no_firm_account: Vous n'avez pas de compte entreprise associé
   access_profile: Accéder à mon profil
+  total_nb_activities: Nombre total d'activités
+  administrator: Administrateur
+  change_account_modal:
+    title: Changement de compte
+    msg: Sélectionnez le compte sur lequel vous souhaitez passer
   page_title: Mon profil
   mobile_header_title: Mon profil
   my_results: Mes résultats
@@ -2086,6 +2107,13 @@ profile:
       new_password: Nouveau mot de passe
     s_password_modification_modal:
       content: Votre mot de passe a bien été modifié !
+    add_account_modal:
+      title: Ajouter un compte entreprise
+      content: Saisissez l'entreprie à laquelle vous souhaitez être associé
+    delete_account_modal:
+      title: Suppression de compte entreprise
+      content: Etes-vous sûr de vouloir supprimer votre compte associé à l'entreprise 
+      end: Cette opération irréversible vous enlèvera de toutes les activités et événements liés.
   target:
     title: Objectif(s)
     organization: Mon objectif d'entreprise
@@ -3401,7 +3429,7 @@ templates:
 user_no_token:
   title: Oops - Page non trouvée
   mobile_header_title: Page non trouvée
-  description: Cette page n'existe plus car vous avez certainement déjà créé votre mot de passe. Si vous ne vous en souvenez plus, renseignez votre mail et nous vous enverrons un lien pour le redéfinir
+  description: Le lien a expiré. Si vous ne vous souvenez de votre mot de passe, renseignez votre adresse e-mail et nous vous enverrons un lien pour le redéfinir
   home_button_title: Retour à la page principale
 
 password_modify:

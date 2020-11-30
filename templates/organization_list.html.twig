@@ -29,7 +29,7 @@
     {% for organization in organizations %}
       <ul class="organization collapsible expandMore expandLess" data-collapsible="accordion" data-id="{{ organization.id }}">
         <li>
-          <div class="collapsible-header{% if organizations|length == 1 %} active{% endif %}{% if organization.validated is null %} blue lighten-2{% endif %}">
+          <div class="collapsible-header{% if organizations|length == 1 %} active{% endif %}">
               <i id="activity-expand" class="fa fa-fw fa-chevron-down"></i>
               <i id="activity-expanded" class="fa fa-fw fa-chevron-right"></i>
             <!-- just giving the name an absolute position because it was interfering ith the button position -->
@@ -77,10 +77,12 @@
                     <i class="fas fa-crown" aria-hidden="true"></i> {% trans %}organizations.master_user{% endtrans %}
                 </div>
                 <div class="col s6 m8">
-                    {% if organization.masterUser is not null %}
+                    {% if organization.userMasters is not null %}
                         <div class="flex-center">
-                            <img class="mini-user-picture" src="{{ (organization.masterUser.picture != "") ? asset('lib/img/' ~ organization.masterUser.picture) : asset('lib/img/no-picture.png') }}" alt="">
-                            <span>{{ organization.masterUser.firstname }} {{ organization.masterUser.lastname }}</span>
+                            {% for userMaster in organization.userMasters  %} 
+                                <img class="user-profile-xl-picture tooltipped" src="{{ (userMaster.user.picture != "") ? asset('lib/img/user/' ~ organization.userMaster.user.picture) : asset('lib/img/user/no-picture.png') }}" alt="" data-tooltip="{{userMaster.user.username}}" data-position="top">
+                            {% endfor %}
+                            {#<span>{{ organization.masterUser.firstname }} {{ organization.masterUser.lastname }}</span>#}
                         </div>
                     {% else %}
                         <span> {{ 'organization_elements.no_master_user'|trans }} </span>
@@ -102,7 +104,7 @@
               #}
 
             <div class="row action-buttons">
-                {% if organization.validated is not null %}
+
                 <div class="button-field">
                     <a class="btn-large waves-effect waves-light teal lighten-1" href="{{ url('rootManageUsers',{'orgId' : organization.id}) }}"> {% trans %}organizations.see_users{% endtrans %} </a>
                  </div>
@@ -120,11 +122,7 @@
                             <a class="btn-large waves-effect waves-light teal lighten-1" href="{{ url('setOrganizationToCriteriaAndStages',{'orgId' : organization.id}) }}">Set org to crit</a>
                         </div>
                     {% endif %}
-                {% else %}
-                <div class="button-field">
-                    <a class="btn-large waves-effect waves-light teal lighten-1" href="{{ url('validateOrganization',{'orgId' : organization.id}) }}"> {% trans %}organizations.decide{% endtrans %} </a>
-                </div>
-                {% endif %}
+               
             </div>
           </div>
         </li>

@@ -222,11 +222,6 @@ class User extends DbObject implements  UserInterface, \Serializable
     public $results;
 
     /**
-     * @ORM\OneToMany(targetEntity=Stage::class, mappedBy="masterUser")
-     */
-    public $stagesWhereMaster;
-
-    /**
      * @ORM\OneToMany(targetEntity=Member::class, mappedBy="user")
      */
     public $members;
@@ -262,9 +257,10 @@ class User extends DbObject implements  UserInterface, \Serializable
     public $organization;
 
     /**
-     * @OneToMany(targetEntity="Department", mappedBy="masterUser",cascade={"persist", "remove"}, orphanRemoval=true)
+     * @ORM\ManyToOne(targetEntity=UserGlobal::class, inversedBy="userAccounts")
+     * @ORM\JoinColumn(name="user_global_usg_id", referencedColumnName="usg_id", nullable=true, onDelete="CASCADE")
      */
-    public $leadingDepartments;
+    public $userGlobal;
 
     /**
      * @ORM\OneToMany(targetEntity="User", mappedBy="superior")
@@ -278,6 +274,11 @@ class User extends DbObject implements  UserInterface, \Serializable
 
     private $roles;
 
+    /**
+     * @ORM\OneToMany(targetEntity=UserMaster::class, mappedBy="user", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|UserMaster[]
+     */
+    private $masterings;
 
     /**
      * @var UploadedFile
@@ -407,11 +408,11 @@ class User extends DbObject implements  UserInterface, \Serializable
         $this->position = $position;
         $this->department = $department;
         $this->title = $title;
-        $this->leadingDepartments = new ArrayCollection();
         $this->subordinates = new ArrayCollection();
         $this->participations = new ArrayCollection();
         $this->roles = new ArrayCollection();
         $this->updates = new ArrayCollection();
+        $this->masterings = new ArrayCollection();
     }
 
 
@@ -902,37 +903,6 @@ class User extends DbObject implements  UserInterface, \Serializable
     }
 
     /**
-     * @return ArrayCollection|Stage[]
-     */
-    public function getStagesWhereMaster()
-    {
-        return $this->stagesWhereMaster;
-    }
-
-    public function addStagesWhereMaster(Stage $stagesWhereMaster): self
-    {
-        if (!$this->stagesWhereMaster->contains($stagesWhereMaster)) {
-            $this->stagesWhereMaster[] = $stagesWhereMaster;
-            $stagesWhereMaster->setMasterUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeStagesWhereMaster(Stage $stagesWhereMaster): self
-    {
-        if ($this->stagesWhereMaster->contains($stagesWhereMaster)) {
-            $this->stagesWhereMaster->removeElement($stagesWhereMaster);
-            // set the owning side to null (unless already changed)
-            if ($stagesWhereMaster->getMasterUser() === $this) {
-                $stagesWhereMaster->setMasterUser(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
      * @return ArrayCollection|Member[]
      */
     public function getMembers()
@@ -1018,9 +988,20 @@ class User extends DbObject implements  UserInterface, \Serializable
     public function setOrganization(Organization $organization): self
     {
         $this->organization = $organization;
-
         return $this;
     }
+
+    public function getUserGlobal(): ?UserGlobal
+    {
+        return $this->userGlobal;
+    }
+
+    public function setUserGlobal(UserGlobal $userGlobal): self
+    {
+        $this->userGlobal = $userGlobal;
+        return $this;
+    }
+
     public function getFullName(): string
     {
         if ($this->deleted) {
@@ -1340,6 +1321,27 @@ class User extends DbObject implements  UserInterface, \Serializable
     public function removeUpdate(ElementUpdate $update): User
     {
         $this->updates->removeElement($update);
+        return $this;
+    }
+
+    /**
+    * @return ArrayCollection|Mastering[]
+    */
+    public function getMasterings()
+    {
+        return $this->masterings;
+    }
+
+    public function addMastering(UserMaster $userMaster): self
+    {
+        $this->masterings->add($userMaster);
+        $userMaster->setUser($this);
+        return $this;
+    }
+
+    public function removeMastering(UserMaster $userMaster): self
+    {
+        $this->masterings->removeElement($userMaster);
         return $this;
     }
 

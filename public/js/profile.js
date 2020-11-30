@@ -61,10 +61,9 @@ $(function() {
         $('.container > ul > div').removeAttr('style').css('text-align','center');
         $('.stats-elmts').css('justify-content','center');
         $('.col').css('margin-top','5px').css('margin-bottom','5px');
-        $('.menu').css('padding','250px 0px');
         $('.container .row').css('margin-left','0px').css('margin-right','0px');
         $('.action-buttons').removeAttr('style');
-        $('h5').css({'font-size':'1.28rem','text-align':'center'});
+        $('h5').css({'font-size':'1.28rem'});
         $('table').css('font-size','0.85rem');
         $('.fa-paper-plane').css('margin-right','5px');
         $('.fa-paper-plane').closest('a').css({'font-size':'0.9rem','padding-left':'1rem','padding-right':'1rem'})
