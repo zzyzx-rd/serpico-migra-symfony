@@ -56,7 +56,7 @@
           {% set logo_url = asset(global.workerFirmLogo(workerFirm)) %}
           <li class="firms-list--item hierarchized-item" data-id="{{ workerFirm.id }}">
             <header class="flex-center">
-              <img src="{{ logo_url }}" alt="" class="client-logo">
+              <img src="{{ logo_url }}" alt="" class="account-logo">
               <span class="firm-name">{{ workerFirm.name }}</span>
               {% if not selectedCountry and workerFirm.country %}
                 <span class="flag m-left {{ workerFirm.country.abbr|lower }}"></span>

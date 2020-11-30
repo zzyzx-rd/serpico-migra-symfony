@@ -8,7 +8,7 @@
               {% set logo_url = asset(global.clientLogo(firm)) %}
               <li class="firms-list--item hierarchized-item" data-id="{{ firm.id }}">
                 <header class="flex-center">
-                  <img src="{{ logo_url }}" alt="" class="client-logo">
+                  <img src="{{ logo_url }}" alt="" class="account-logo">
                   <span class="firm-name">{{ firm.clientOrganization.commname }}</span>
                   <div class="user-actions">
                     <a class="material-icons" href="{{ url('createClientUser', { cliId: firm.id }) }}" tooltip="{{ 'user_list.modify'|trans }}">settings</a>
@@ -38,7 +38,7 @@
               {% set logo_url = asset(global.organizationLogo(firm)) %}
               <li class="firms-list--item hierarchized-item" data-id="{{ firm.id }}">
                 <header class="flex-center">
-                  <img src="{{ logo_url }}" alt="" class="client-logo">
+                  <img src="{{ logo_url }}" alt="" class="account-logo">
                   <span class="firm-name">{{ firm.commname }}</span>
                   <div class="user-actions">
                     {#<a class="material-icons" href="{{ url('createClientUser', { cliId: firm.id }) }}" tooltip="{{ 'user_list.modify'|trans }}">settings</a>#}

@@ -552,7 +552,7 @@ li.no-items-placeholder {
   margin-bottom: .5em;
 }
 
-.users-list--item .user-picture, .firms-list--item .client-logo {
+.users-list--item .user-picture, .firms-list--item .account-logo {
   --size: 4.5em;
   font-size: var(--size);
   height: 1em;
