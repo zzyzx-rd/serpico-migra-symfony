@@ -21,9 +21,8 @@ class ExceptionListener {
     public function onKernelException(ExceptionEvent $event) : void
     {
 
-        $response = new RedirectResponse("http://127.0.0.1:8111/error/error/error");
+       $response = new RedirectResponse("/error/error/error");
         $response->send();
-        dd($event);
          return;
         if (
             $_ENV['APP_ENV'] != 'prod'
