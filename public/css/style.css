@@ -254,11 +254,11 @@ li + li.no-items-placeholder {
   height: 100%;
 }
 
-.landing-desktop-btns > li > a, .landing-country{
+.landing-desktop-btns > li > a, .landing-country, .landing-plan-info{
   color:white;
 }
 
-.desktop-btns > li > a, .country{
+.desktop-btns > li > a, .country, .plan-info{
   color:#341f56;
 }
 

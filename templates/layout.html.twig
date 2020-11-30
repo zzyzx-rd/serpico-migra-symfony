@@ -92,7 +92,7 @@
                   </li>#}
                   <li class="plan hide-on-med-and-down">
                     <div class="c-flex-center sm-right">
-                      <span> {{ organization.plan == 1 ? 'header.plan.enterprise'|trans|upper : (organization.plan == 2 ? 'header.plan.premium'|trans|upper : 'header.plan.free'|trans|upper) }} {{ date('now').diff(organization.inserted).days < 21 ? '(' ~ 'trial'|trans|upper ~ ')' }} </span>
+                      <span class="{{global.route != "home_welcome" ? 'plan-info' : 'landing-plan-info'}}"> {{ organization.plan == 1 ? 'header.plan.enterprise'|trans|upper : (organization.plan == 2 ? 'header.plan.premium'|trans|upper : 'header.plan.free'|trans|upper) }} {{ date('now').diff(organization.inserted).days < 21 ? '(' ~ 'trial'|trans|upper ~ ')' }} </span>
                       <a class="dd-orange-text" href="{{ path('priceManagement') }}">{{ 'header.plan.upgrade'|trans }}</a>
                     </div>
                   </li>
