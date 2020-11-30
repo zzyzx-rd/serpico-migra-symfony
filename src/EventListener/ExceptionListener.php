@@ -20,7 +20,7 @@ class ExceptionListener {
     }
     public function onKernelException(ExceptionEvent $event) : void
     {
-
+        /*
        $response = new RedirectResponse("/error/error/error");
         $response->send();
          return;
@@ -31,6 +31,7 @@ class ExceptionListener {
         ) {
             return;
         }
+        */
 
 
     }

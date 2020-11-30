@@ -454,7 +454,7 @@ class PersonController extends MasterController
 
                 $userGlobal = new UserGlobal();
                 $userGlobal->setUsername($externalUser->getFirstname().' '.$externalUser->getLastname())
-                    ->addUser($user);
+                    ->addUserAccount($user);
                 $em->persist($userGlobal);
 
                 $em->flush();

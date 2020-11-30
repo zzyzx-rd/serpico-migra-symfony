@@ -2686,7 +2686,7 @@ class DeprecatedController extends MasterController
                 $em->flush();
                 $userGlobal = new UserGlobal();
                 $userGlobal->setUsername($organizationForm->get('firstname')->getData() .' '. $organizationForm->get('lastname')->getData())
-                    ->addUser($user);
+                    ->addUserAccount($user);
                 $em->persist($userGlobal);
 
                 $organization->setMasterUserId($user->getId());
@@ -2813,7 +2813,7 @@ class DeprecatedController extends MasterController
 
                     $userGlobal = new UserGlobal();
                     $userGlobal->setUsername("$firstname $lastname")
-                        ->addUser($user);
+                        ->addUserAccount($user);
                     $em->persist($userGlobal);
 
                     $userMaster = new UserMaster();

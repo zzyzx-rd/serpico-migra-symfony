@@ -207,7 +207,7 @@ class UserController extends MasterController
 
                 $userGlobal = new UserGlobal();
                 $userGlobal->setUsername($username)
-                    ->addUser($user);
+                    ->addUserAccount($user);
                 
                 $this->forward('App\Controller\OrganizationController::updateOrgFeatures', ['organization' => $organization, 'nonExistingOrg' => true, 'createdAsClient' => false,  'createSynthUser' => false]);
 
@@ -515,7 +515,7 @@ class UserController extends MasterController
             $this->authenticator,
             'main'
         );
-        
+
         $organization = $user->getOrganization();
         $organization->removeUser($user);
         $em->persist($organization);

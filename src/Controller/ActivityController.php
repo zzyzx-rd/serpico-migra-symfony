@@ -400,7 +400,7 @@ class ActivityController extends MasterController
                 
                 $userGlobal = new UserGlobal();
                 $userGlobal->setUsername("$firstname $lastname")
-                ->addUser($user);
+                ->addUserAccount($user);
                 $em->persist($userGlobal);
             }
 

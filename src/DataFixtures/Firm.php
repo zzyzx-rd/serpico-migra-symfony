@@ -175,7 +175,7 @@ class Firm extends Fixture
         
         $userGlobal = new UserGlobal();
         $userGlobal->setUsername("Guillaume Chatelain")
-        ->addUser($masterUser);
+        ->addUserAccount($masterUser);
         $manager->persist($userGlobal);
 
          // Settling default options

@@ -1761,7 +1761,7 @@ class OrganizationController extends MasterController
                     ->setToken($token);
                 $userGlobal = new UserGlobal();
                 $userGlobal->setUsername($externalUser->getFirstname().' '.$externalUser->getLastname())
-                    ->addUser($user);
+                    ->addUserAccount($user);
                 $em->persist($userGlobal);
                 $em->flush();
                 $settings = [];
@@ -1865,7 +1865,7 @@ class OrganizationController extends MasterController
                         $em->persist($user);
                         $userGlobal = new UserGlobal();
                         $userGlobal->setUsername($individual->getFirstname().' '.$individual->getLastname())
-                            ->addUser($user);
+                            ->addUserAccount($user);
                         $em->persist($userGlobal);
                         $recipients[] = $user;
                     } else {
