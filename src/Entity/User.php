@@ -323,7 +323,6 @@ class User extends DbObject implements  UserInterface, \Serializable
      * @param $workerIndividual
      * @param $Reccuring
      * @param $results
-     * @param $stagesWhereMaster
      * @param $members
      * @param $weight
      * @param $position
@@ -366,7 +365,6 @@ class User extends DbObject implements  UserInterface, \Serializable
         $workerIndividual = null,
         $Reccuring = null,
         $results = null,
-        $stagesWhereMaster = null,
         $members = null,
         $weight = null,
         $title = null)
@@ -402,7 +400,6 @@ class User extends DbObject implements  UserInterface, \Serializable
         $this->workerIndividual = $workerIndividual;
         $this->Reccuring = $Reccuring;
         $this->results = new ArrayCollection();
-        $this->stagesWhereMaster = $stagesWhereMaster;
         $this->members = $members;
         $this->weight = $weight;
         $this->position = $position;
