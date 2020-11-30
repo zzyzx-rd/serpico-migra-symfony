@@ -45,7 +45,14 @@
 
 {% block content %}
   <main>
-    <div class="user-search-container">
+    <ul class="flex-center-fs">
+      <a class="btn-flat no-padding flex-center my-account account-mention dd-text">
+        <span>{{ 'my_account'|trans ~ ' :' }}</span>
+        <img class="account-logo sm-left sm-right" src="{{ asset(global.organizationLogo(currentuser.organization)) }}">
+        <span>{{ currentuser.organization.commname }}</span>
+      </a>
+    </ul>
+    <div class="user-search-container" style="display:none">
       {#}
       <input type="text" id="user-search" class="browser-default"
         spellcheck="false" placeholder="Recherche rapide" autocomplete="off">

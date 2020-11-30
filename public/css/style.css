@@ -371,7 +371,7 @@ table.striped td {
   user-select: none;
 }
 
-.user-picture-l, .user-profile-picture, .user-picture, .client-logo {
+.user-picture-l, .user-profile-picture, .user-picture, .account-logo {
   object-fit: cover;
   border-radius: 9999px;
 }
@@ -2631,7 +2631,7 @@ section h2 {
 .image-container {
   background-color: #9e9e9e;
   color: white;
-  padding: 10vw 0px;
+  padding: 1vw 0px;
   background-image: url(../lib/img/menu-bg.webp);
   background-position-y: -60px;
   background-size: max(100%,800px);
@@ -3369,4 +3369,22 @@ h2.header {
     display: flex;
     width: fit-content;
     margin: auto;
+}
+
+.account-logo {
+  --size: 1.2em;
+  font-size: var(--size);
+  height: 1em;
+  width: 1em;
+  border: 1.5px solid #e0e0e0;
+  margin-right: .25em;
+}
+
+.my-account{
+  font-size: 12px;
+  cursor: initial;
+}
+
+.account-mention{
+  margin: 20px 0 0 3em;
 }

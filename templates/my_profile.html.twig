@@ -164,6 +164,20 @@
         .user-header{
           align-items: center;
         }
+
+        .account-zone{
+          display:none;
+        }
+
+        .profile-zone, .profile-zone .col{
+          margin:0;
+        }
+    }
+
+    @media screen and (min-width:450px) {
+        .profile-zone .col{
+          margin-right:30px;
+        }
     }
 
   </style>
@@ -178,9 +192,17 @@
 
 
 {% block content %}
+
   <div class="menu">
     <div class="image-container">
     
+    <ul class="flex-center-fs account-zone">
+      <a class="btn-flat no-padding flex-center my-account white-text account-mention dd-text" style="margin-top:-10px">
+        <span>{{ 'my_account'|trans ~ ' :' }}</span>
+        <img class="account-logo sm-left sm-right" src="{{ asset(global.organizationLogo(currentuser.organization)) }}">
+        <span>{{ currentuser.organization.commname }}</span>
+      </a>
+    </ul>
     
     </div>
     {#
@@ -191,8 +213,8 @@
     </div>
     #}
     <div class="data-container">
-      <ul class="flex-center">
-        <div class="col s12 m3" style="margin-right: 30px; position: relative">
+      <ul class="flex-center profile-zone">
+        <div class="col s12 m3">
           <img src="{{ asset(global.userpicture) }}" style="border-radius: 50%">
         </div>
 

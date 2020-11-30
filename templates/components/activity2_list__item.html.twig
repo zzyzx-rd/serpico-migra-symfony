@@ -220,7 +220,7 @@
               {% if activity.organization != currentuser.organization %}
                 <small> - {{ 'with'|trans }}</small>
                 <a class="badge-container activity-client-name tooltipped" data-tooltip="{{activity.organization.commname}}">
-                  <img class="client-logo sm-left" src="{{ asset(global.organizationLogo(activity.organization)) }}" alt="">
+                  <img class="account-logo sm-left" src="{{ asset(global.organizationLogo(activity.organization)) }}" alt="">
                 </a>
                 {% set activityClients = activityClients|filter((v,k) => v.clientOrganization != currentuser.organization) %}
               {% endif %}
@@ -233,7 +233,7 @@
                     {% if k < 2 %}
 
                         <a class="badge-container activity-client-name tooltipped" data-tooltip="{{client.name}}">
-                          <img class="client-logo" src="{{ asset(global.clientLogo(client)) }}" alt="">
+                          <img class="account-logo" src="{{ asset(global.clientLogo(client)) }}" alt="">
                         </a>
 
                       {% set k = k + 1 %}

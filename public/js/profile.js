@@ -60,7 +60,7 @@ $(function() {
         $('.container > ul').removeClass('flex-center').addClass('row').removeAttr('justify-content').css('top','70px');
         $('.container > ul > div').removeAttr('style').css('text-align','center');
         $('.stats-elmts').css('justify-content','center');
-        $('.col').css('margin-top','5px').css('margin-bottom','5px');
+    
         $('.container .row').css('margin-left','0px').css('margin-right','0px');
         $('.action-buttons').removeAttr('style');
         $('h5').css({'font-size':'1.28rem'});

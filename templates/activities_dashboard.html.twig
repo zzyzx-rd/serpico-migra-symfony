@@ -254,12 +254,8 @@
         padding: 0 3em;
       }
 
-      .sorting-type .btn-flat, .sorting-type .btn-flat>i{
-        
+      .sorting-type .btn-flat, .sorting-type .btn-flat>i{     
         font-size: 12px;
-      }
-      .sorting-type .btn-flat:last-of-type{
-        padding-left : 7px;
       }
 
       .view-type-value, .change-view-type, .change-timescale-type{
@@ -302,7 +298,7 @@
         line-height: 10px;
       }
 
-      .client-logo {
+      .account-logo {
         --size: 1.2em;
         font-size: var(--size);
         height: 1em;
@@ -1666,9 +1662,9 @@
       {#{% if is_granted('ROLE_ADMIN') %}#}   
       <ul class="no-margin">
         <li>
-          <a class="btn-flat flex-center my-firm dd-text">
-            <span>{{ 'my_firm'|trans ~ ' :' }}</span>
-            <img class="client-logo sm-left sm-right" src="{{ asset(global.organizationLogo(currentuser.organization)) }}">
+          <a class="btn-flat no-padding flex-center my-account dd-text">
+            <span>{{ 'my_account'|trans ~ ' :' }}</span>
+            <img class="account-logo sm-left sm-right" src="{{ asset(global.organizationLogo(currentuser.organization)) }}">
             <span>{{ currentuser.organization.commname }}</span>
           </a>
         </li>
@@ -2963,7 +2959,7 @@
           <p>
             {{ 'activities.before_starting_modal.creation_mode.msg'|trans|raw }} 
             {{ 'activities.before_starting_modal.creation_mode.msg_2'|trans|raw }}
-            <img class="client-logo tooltipped" src="" alt="">
+            <img class="account-logo tooltipped" src="" alt="">
             {{'. ' ~ 'activities.before_starting_modal.creation_mode.msg_3'|trans|raw }}
           </p>
         <h6>{{ 'activities.before_starting_modal.event_sharing.title'|trans|raw }}</h6>
