@@ -342,7 +342,7 @@
                             <li class="firm-accounts">
                                 <ul>
                                     {% if currentuser.userGlobal.userAccounts|length > 1 %}
-                                        {% for userAccount in currentuser.userGlobal.userAccounts|filter(a => a.type != 'C') %}
+                                        {% for userAccount in currentuser.userGlobal.userAccounts|filter(a => a.organization.type != 'C') %}
                                             <li class="account flex-center-sb">
                                                 <div>  
                                                     <img class="user-profile-l-picture" src="{{ asset(global.organizationLogo(userAccount.organization)) }}" alt="">
