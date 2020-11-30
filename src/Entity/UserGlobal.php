@@ -6,6 +6,7 @@ use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\ElementUpdateRepository;
 use DateTime;
 use DateTimeInterface;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
@@ -56,6 +57,7 @@ class UserGlobal extends DbObject
         parent::__construct($id, null, new DateTime);
         $this->username = $username;
         $this->phoneNumber = $phoneNumber;
+        $this->userAccounts = new ArrayCollection;
     }
     
     public function getUsername(): ?string
