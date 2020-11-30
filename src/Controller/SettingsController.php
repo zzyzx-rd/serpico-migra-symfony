@@ -646,7 +646,7 @@ class SettingsController extends MasterController
                 'quantity' => $body['quantity']]
         ]);
         $org->setCustomerId($customer);
-
+        $em->refresh($currentUser);
         $em->flush();
 
 
@@ -662,12 +662,13 @@ class SettingsController extends MasterController
      */
     public function cancelSubscriptionManagementAction(Request $request){
         $organization = $this->org;
+        $currentUser = $this->user;
         $custId = $organization->getCustomerId();
         $cust = Stripe\Customer::retrieve(
             $custId
         );
         $id = $cust->metadata->sub_id;
-        dd($cust->metadata);
+
         $sub = $this->stripe->subscriptions->cancel(
             $id,
 
@@ -677,6 +678,7 @@ class SettingsController extends MasterController
         if(sizeof($sub->data)==0) {
             $organization->setPlan(3);
         }
+        $em->refresh($currentUser);
         $em->flush();
         return new JsonResponse($cust->metadata->sub_id, 200);
     }
