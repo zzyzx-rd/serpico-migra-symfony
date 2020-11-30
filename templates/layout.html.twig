@@ -298,7 +298,7 @@
                     <a href="{{ url('home') }}" class="profile-link">
                       <div class="flex-center">
                         <img class="user-profile-xl-picture" src="{{ asset(global.userpicture) }}">
-                        <span>{{'profile.access_profile'|trans}}</span>
+                        <span class="dd-text">{{'profile.access_profile'|trans}}</span>
                       </div>
                     </a>
                   </li>
@@ -306,7 +306,7 @@
                   <li class="">
                     <a href="{{ path('myActivities') }}">
                       <i class="fa fa-briefcase sm-right" aria-hidden="true"></i>
-                      <span>
+                      <span class="dd-text strong">
                         {% if orgName != "Public" %}
                           {% trans %}header.firmActivities{% endtrans %}
                         {% else %}
@@ -319,8 +319,7 @@
                   <li>
                     <a href="{{ path(global.currentuser.is_admin ? 'manageUsers' : 'seeColleaguesTeams') }}">
                       <i class="fa fa-users sm-right" aria-hidden="true"></i>
-                      {% set str = 'header.users' %}
-                      {{ str|trans }}
+                      <span class="dd-text">{{ 'header.users'|trans }}</span>
                     </a>
                   </li>
 
@@ -328,7 +327,7 @@
                     <li class="">
                       <a href="{{ path('rootManagement') }}">
                         <i class="fa fa-cogs sm-right" aria-hidden="true"></i>
-                        <span>{% trans %}header.root_mgt{% endtrans %}</span>
+                        <span class="dd-text">{% trans %}header.root_mgt{% endtrans %}</span>
                       </a>
                     </li>
                   {% endif %}
@@ -345,12 +344,12 @@
                   <li class="logout">
                     <a href="{{ path('logout') }}">
                       <i class="fas fa-sign-out-alt " aria-hidden="true"></i>
-                      <span>{{'logout'|trans}}</span>
+                      <span class="dd-text">{{'logout'|trans}}</span>
                     </a>
                   </li>
                   <li class="plan">
-                    <a class="c-flex-center " href="{{ path('priceManagement') }}">
-                      <span class="dd-text" style="color: #55318e;"> {{ 'Plan'|trans|upper ~ ' : ' ~ (organization.plan == 1 ? 'header.plan.enterprise'|trans|upper : (organization.plan == 2 ? 'header.plan.premium'|trans|upper : 'header.plan.free'|trans|upper)) }} {{ date('now').diff(organization.inserted).days < 21 ? '(' ~ 'trial'|trans|upper ~ ')' }} </span>
+                    <a class="c-flex-center" href="{{ path('priceManagement') }}">
+                      <span class="dd-orange-text"> {{ 'Plan'|trans|upper ~ ' : ' ~ (organization.plan == 1 ? 'header.plan.enterprise'|trans|upper : (organization.plan == 2 ? 'header.plan.premium'|trans|upper : 'header.plan.free'|trans|upper)) }} {{ date('now').diff(organization.inserted).days < 21 ? '(' ~ 'trial'|trans|upper ~ ')' }} </span>
                       {% if organization.plan != 1 %}
                         <span class="dd-orange-text">{{ 'header.plan.upgrade'|trans }}</span>
                       {% endif %}
@@ -382,13 +381,13 @@
                       {% trans %}header.register.start{% endtrans %}
                     </a>
                   </li>
+                {% endif %}
 
                   <li>
                     <a class="waves-effect waves-light modal-trigger btn-small" id="language" href='#languageModal'>
-                      {% trans %}language.selection{% endtrans %}
+                      <span class="dd-text">{{'language.selection'|trans}}</span>
                     </a>
                   </li>
-                {% endif %}
 
 
               </ul>
@@ -422,6 +421,25 @@
              <a class="btn waves-light waves-effect select-account-btn">Ok</a>
               </div>
             </div>
+          </div>
+        </div>
+        <div id="languageModal" class="modal">
+          <div class="modal-content">
+            <h5>{{ "language.choose"|trans }}</h5>
+            <ul class="c-flex-center">
+                <li>
+                    <a class="btn flex-center" href="{{ path('change_locale', {'locale': 'en'}) }}">
+                        <img style="height:50%;" src="{{ asset('lib/img/FlagEngland.png') }}" alt="english">
+                        <span class="m-left">English</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="btn flex-center" href="{{ path('change_locale', {'locale': 'fr'}) }}">
+                        <img style="height:50%;" src="{{ asset('lib/img/FlagFrance.png') }}" alt="français">
+                        <span class="m-left">Français</span>    
+                    </a>
+                </li>
+            </ul>
           </div>
         </div>
     </div>

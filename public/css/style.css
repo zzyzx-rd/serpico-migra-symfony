@@ -270,6 +270,11 @@ li + li.no-items-placeholder {
   transition: none;
 }*/
 
+#languageModal a{
+  min-width: 170px;
+  margin: 0.5rem 0;
+  justify-content: flex-start;
+}
 
 #nav .logo {
   margin-right: auto;
