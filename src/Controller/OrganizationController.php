@@ -4264,6 +4264,10 @@ class OrganizationController extends MasterController
         if(!$event){
             return new JsonResponse(['msg' => 'error'], 500);
         }
+        foreach($event->getDocuments() as $document){
+            $path = $document->getPath();
+            unlink(dirname(dirname(__DIR__)) . "/public/lib/evt/$path");
+        }
         $stage = $event->getStage();
         $stage->removeEvent($event);
         $em->persist($stage);

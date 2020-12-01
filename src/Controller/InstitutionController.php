@@ -679,7 +679,7 @@ final class InstitutionController extends MasterController
             
             foreach ($newUpdates as $newUpdate){
 
-                if(!in_array($newUpdate, array_merge($newUIds,$existingUIds))){
+                if(!in_array($newUpdate->getId(), array_merge($newUIds,$existingUIds))){
 
                     if($newUpdate->getActivity()){
                         // Different case : first, updates related to activities.
