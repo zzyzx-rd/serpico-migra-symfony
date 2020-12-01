@@ -143,6 +143,25 @@ final class InstitutionController extends MasterController
         );
     }
 
+    public function logLastUpdatedUser(Request $request){
+        $em = $this->em;
+        $lastNotifs = $em->getRepository(ElementUpdate::class)->findBy(['user' => $this->user->getUserGlobal()->getUserAccounts()->getValues()],['inserted' => 'DESC']);
+        if($lastNotifs){
+            $lastConnectedUser = $lastNotifs[0]->getUser();
+            if($lastConnectedUser != $this->user){
+                $this->guardHandler->authenticateUserAndHandleSuccess(
+                    $lastConnectedUser,
+                    $request,
+                    $this->authenticator,
+                    'main'
+                );
+            }
+        }
+        $em->refresh($lastConnectedUser);
+        $em->flush();
+        return new JsonResponse();
+    }
+
     /**
      * @param Request $request
      * Cookies :
@@ -157,22 +176,11 @@ final class InstitutionController extends MasterController
     public function myActivitiesListAction(Request $request): Response
     {
         $currentUser = $this->user;
+        $comesFromLogin = strpos($request->headers->get('referer'),'login') !== false;
         if(!$currentUser){
             return $this->redirectToRoute('login');
         }
         $em = $this->em;
-        $lastNotifs = $em->getRepository(ElementUpdate::class)->findBy(['user' => $currentUser->getUserGlobal()->getUserAccounts()->getValues()],['inserted' => 'DESC']);
-        if($lastNotifs){
-            $lastConnectedUser = $lastNotifs[0]->getUser();
-            if($lastConnectedUser != $currentUser){
-                $this->guardHandler->authenticateUserAndHandleSuccess(
-                    $lastConnectedUser,
-                    $request,
-                    $this->authenticator,
-                    'main'
-                );
-            }
-        }
         $repoA = $em->getRepository(Activity::class);
         $repoP = $em->getRepository(Participation::class);
         $repoDec = $em->getRepository(Decision::class);
@@ -536,6 +544,7 @@ final class InstitutionController extends MasterController
                 'firstConnection' => (int) $firstConnection,
                 'eventGroups' => $eventGroups,
                 'em' => $em,
+                'comesFromLogin' => $comesFromLogin,
             ]
         );
 

@@ -96,7 +96,11 @@
     var synthSuffix = "{{ 'activity_elements.synth_user_suffix'|trans }}";
     var lkEvtToStgMsg = "{{ 'activity_elements.stages.multiple_stages_modal.add_event_title'|trans }}";
     var modifiedMsg = "{{ 'modified'|trans }}";
-    var selfAcctIds = "{{ currentuser.userGlobal.userAccounts|map(u => u.id)|join(', ') }}"
+    var selfAcctIds = "{{ currentuser.userGlobal.userAccounts|map(u => u.id)|join(', ') }}";
+    {% if comesFromLogin %}
+      var luurl = "{{ url('logLastUpdatedUser') }}";
+    {% endif %}
+
   </script>
   <style>
       .elmts{
