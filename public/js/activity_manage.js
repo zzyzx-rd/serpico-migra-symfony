@@ -1697,7 +1697,9 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         $comHolder = $modal.find('.e-comments');
         $comHolder.empty();
         $(data.comments).each(function(i,c){
+            $comAndReplies = $('<div></div>');
             $comElmt = $($comHolder.data('prototype-existing'));
+            $comAndReplies.append($comElmt);
             $comElmt.attr('data-id',c.id);
             $comElmt.find('.e-com-author').append(c.author);
             $comElmt.find('.e-com-content').append(c.content);      
@@ -1726,9 +1728,9 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
                 }
                 $repliesHolder.append($reply);
               })
-              $comElmt.before($repliesHolder);
+              $comAndReplies.append($repliesHolder);
             }
-            $comHolder.append($comElmt);
+            $comHolder.append($comAndReplies);
 
         });
 
