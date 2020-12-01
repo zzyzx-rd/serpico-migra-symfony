@@ -201,7 +201,6 @@ updates:
           other                     {Fallback problem}
         }
       }
-      other {Fallback problem}
       event_change {
         {property, select,
           onsetDate                 {{author} a modifié la date de début de {actElmtMsg}}
