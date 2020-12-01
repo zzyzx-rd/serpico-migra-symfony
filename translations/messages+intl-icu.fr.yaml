@@ -184,7 +184,8 @@ updates:
               additional_information_needed   {{author} vous informe qu'il aurait besoin d'<span class="strong">informations supplémentaires</span> pour {actElmtMsg}}
               other                           {Fallback problem}
             }
-          } 
+          }
+          other {Fallback problem} 
         }    
       }
       comment_creation {{author} a {commentLevel} un <span class="strong">commentaire</span> pour {actElmtMsg}}
