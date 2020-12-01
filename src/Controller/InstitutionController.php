@@ -149,6 +149,7 @@ final class InstitutionController extends MasterController
     public function logLastUpdatedUser(Request $request){
         $em = $this->em;
         $lastNotifs = $em->getRepository(ElementUpdate::class)->findBy(['user' => $this->user->getUserGlobal()->getUserAccounts()->getValues()],['inserted' => 'DESC']);
+        $hasToBeReloaded = false;
         if($lastNotifs){
             $lastConnectedUser = $lastNotifs[0]->getUser();
             if($lastConnectedUser != $this->user){
@@ -158,11 +159,12 @@ final class InstitutionController extends MasterController
                     $this->authenticator,
                     'main'
                 );
+                $hasToBeReloaded = true;
             }
         }
         $em->refresh($lastConnectedUser);
         $em->flush();
-        return new JsonResponse();
+        return new JsonResponse(['hasToBeReloaded' => $hasToBeReloaded]);
     }
 
     /**
