@@ -1451,6 +1451,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
   $(document).on('click','[href="#updateEvent"]', function(e){
     if($(e.target).hasClass('add-direct-evt') || $(e.target).parent().hasClass('add-direct-evt')){
       $modal = $('#updateEvent');
+      $modal.removeAttr('data-id');
       $modal.find('.btn-e-update, .e-create').show();
       $modal.find('.event-selection').show();
       $modal.find('.btn-e-modify').hide();
@@ -1783,7 +1784,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
 
   $(document).on('mouseover','.e-document',function(){
       var $modal = $(this).closest('.modal');
-      if(!$modal.find('.doc-name-validate:visible, input:visible, textarea:visible').length){
+      if(!$modal.find('.doc-name-validate:visible, input:not(.select-dropdown):visible, textarea:visible').length){
         $(this).find('.doc-actions').show();
       }
   }).on('mouseleave','.e-document',function(){
@@ -1915,10 +1916,12 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
               $evtElmt.find('.documents-number').empty().append($evtElmt.find('.e-document').length);
             }
             if(!isEvtExisting){
-              $evtElmt.attr('data-id',data.eid);
+              $evtElmt.attr('data-id',d.eid);
             }
             $hiddenDocElmt.find('.e-doc-size').empty().append(`${Math.round(d.size/1000)} Ko`);
+            $hiddenDocElmt.find('.doc-actions').show();
             $hiddenDocElmt.attr('data-id',d.did).show();
+            $evtElmt.find('.add-e-comment').removeClass('tooltipped').removeAttr('data-tooltip');
         } else {
             console.log("Error " + xhr.status + " occurred when trying to upload your file.<br \/>");
         }
@@ -1952,7 +1955,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
 
   $(document).on('mouseover','.e-dates-header, .e-documents-header, .e-comments-header, .e-comment',function(){
     var $modal = $(this).closest('.modal');
-    if(!$modal.attr('data-id') || $modal.attr('data-id') && !$modal.find('input:not(.select-dropdown):visible,textarea:visible').length){
+    if(!$modal.find('input:not(.select-dropdown):visible,textarea:visible').length){
       $(this).find('.btn-e-update').show();
     }
   }).on('mouseleave','.e-dates-header, .e-documents-header, .e-comments-header, .e-comment',function(){  
