@@ -1917,6 +1917,10 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
             }
             if(!isEvtExisting){
               $evtElmt.attr('data-id',d.eid);
+              $evtElmt.find('[type="submit"]').hide().parent();
+              $evtElmt.find('.modal-close').show();
+              $evtElmt.find('[href="#deleteEvent"]').show();
+              prepareEvent(c);
             }
             $hiddenDocElmt.find('.e-doc-size').empty().append(`${Math.round(d.size/1000)} Ko`);
             $hiddenDocElmt.find('.doc-actions').show();
