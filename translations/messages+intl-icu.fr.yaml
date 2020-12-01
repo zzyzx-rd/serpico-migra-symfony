@@ -120,7 +120,7 @@ updates:
     update: modifié
     delete: supprimé
 
-  comment_update_level:
+  comment_level:
       withParent: répondu à
       withoutParent: ajouté
 

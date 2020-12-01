@@ -118,7 +118,7 @@ updates:
     update: updated
     delete: deleted
 
-  comment_update_level:
+  comment_level:
     withParent: replied to the
     withoutParent: added the
 

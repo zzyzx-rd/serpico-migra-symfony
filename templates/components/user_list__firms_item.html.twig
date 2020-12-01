@@ -10,9 +10,11 @@
                 <header class="flex-center">
                   <img src="{{ logo_url }}" alt="" class="account-logo">
                   <span class="firm-name">{{ firm.clientOrganization.commname }}</span>
+                  {#
                   <div class="user-actions">
                     <a class="material-icons" href="{{ url('createClientUser', { cliId: firm.id }) }}" tooltip="{{ 'user_list.modify'|trans }}">settings</a>
                   </div>
+                  #}
                 </header>
                 <div class="item-body">
                   {#}
