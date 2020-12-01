@@ -4822,7 +4822,7 @@ class OrganizationController extends MasterController
                 $replyData['inserted'] = $this->nicetime($reply->getInserted()->setTimezone($tz), $locale);
                 $replyData['modified'] = $reply->getModified() != null;
                 $replyData['oid'] = $reply->getOrganization()->getId();
-                $commData['replies'][] = $replyData;
+                $comData['replies'][] = $replyData;
             }
             $data['comments'][] = $comData;
         }
