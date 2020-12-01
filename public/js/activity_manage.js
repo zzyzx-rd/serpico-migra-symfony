@@ -1506,7 +1506,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
 
   $('.add-e-document, .add-e-comment').on('click',function(e){
     const $this = $(this);
-    if($this.closest('.modal').find('#eventGSelector option:selected').data('evgid') == 1){
+    if($this.hasClass('add-e-comment') && $this.closest('.modal').find('#eventGSelector option:selected').data('evgid') == 1){
       return false;
     }
     e.preventDefault();
