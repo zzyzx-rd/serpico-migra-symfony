@@ -189,6 +189,7 @@ updates:
       comment_creation {{author} has {commentLevel} a <span class="strong">comment</span> for {actElmtMsg}}
       comment_change {
          {property, select,
+          content                   {{author} has updated its comment for {actElmtMsg}}
           other                     {Fallback problem}
         }
       }
