@@ -143,6 +143,9 @@ final class InstitutionController extends MasterController
         );
     }
 
+     /**
+     * @Route("/log/last/updated/user", name="logLastUpdatedUser")
+     */
     public function logLastUpdatedUser(Request $request){
         $em = $this->em;
         $lastNotifs = $em->getRepository(ElementUpdate::class)->findBy(['user' => $this->user->getUserGlobal()->getUserAccounts()->getValues()],['inserted' => 'DESC']);
