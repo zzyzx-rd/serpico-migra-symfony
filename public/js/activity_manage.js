@@ -2450,7 +2450,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         } else {
             $.each(s.clients,function(i,c){
                 $clientProto = $($clientZone.data('prototype'));
-                $clientProto.attr('data-tooltip',c.name).find('.client-logo').attr('src',c.logo);
+                $clientProto.attr('data-tooltip',c.name).find('.account-logo').attr('src',c.logo);
                 $clientZone.append($clientProto);
             })
         }
@@ -2740,7 +2740,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
               $toBeFeededActs.each(function(i,e){
                   $(e).find('.act-info-name').append(data.dummyElmts[i].actName);
                   $(e).find('.activity-client-name').attr('data-tooltip',data.dummyElmts[i].name).tooltip();
-                  $(e).find('.client-logo').attr('src',data.dummyElmts[i].logo);
+                  $(e).find('.account-logo').attr('src',data.dummyElmts[i].logo);
                 
               })
             })
@@ -2789,8 +2789,8 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
   if(currentWfiId && fc){
     setTimeout(function(){
         $('#beforeStarting img').attr({
-          'src' : $('.client-logo').eq(1).attr('src'),
-          'data-tooltip': $('.client-logo').eq(1).parent().attr('data-tooltip')
+          'src' : $('.account-logo').eq(1).attr('src'),
+          'data-tooltip': $('.account-logo').eq(1).parent().attr('data-tooltip')
         }).tooltip();
         $('#beforeStarting').modal('open');
     },300);
