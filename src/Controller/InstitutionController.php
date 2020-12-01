@@ -160,8 +160,19 @@ final class InstitutionController extends MasterController
         if(!$currentUser){
             return $this->redirectToRoute('login');
         }
-        
         $em = $this->em;
+        $lastNotifs = $em->getRepository(ElementUpdate::class)->findBy(['user' => $currentUser->getUserGlobal()->getUserAccounts()->getValues()],['inserted' => 'DESC']);
+        if($lastNotifs){
+            $lastConnectedUser = $lastNotifs[0]->getUser();
+            if($lastConnectedUser != $currentUser){
+                $this->guardHandler->authenticateUserAndHandleSuccess(
+                    $lastConnectedUser,
+                    $request,
+                    $this->authenticator,
+                    'main'
+                );
+            }
+        }
         $repoA = $em->getRepository(Activity::class);
         $repoP = $em->getRepository(Participation::class);
         $repoDec = $em->getRepository(Decision::class);
@@ -491,22 +502,7 @@ final class InstitutionController extends MasterController
 
         ksort($displayedStatuses);
 
-        $firstConnection = $currentUser->getLastConnected() == null;
-
-        $lastNotifs = $em->getRepository(ElementUpdate::class)->findBy(['user' => $currentUser->getUserGlobal()->getUserAccounts()->getValues()],['inserted' => 'DESC']);
-        
-        if($lastNotifs){
-            $lastConnectedUser = $lastNotifs[0];
-            if($lastConnectedUser != $currentUser){
-                $this->guardHandler->authenticateUserAndHandleSuccess(
-                    $lastConnectedUser,
-                    $request,
-                    $this->authenticator,
-                    'main'
-                );
-            }
-        }
-        
+        $firstConnection = $currentUser->getLastConnected() == null;        
         $currentUser->setLastConnected(new \DateTime);
         $em->persist($currentUser);
         $em->flush();
