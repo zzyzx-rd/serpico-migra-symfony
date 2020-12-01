@@ -1891,7 +1891,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         form.append("expResDateStr",(edStr != "" ? new Date(edStr) : new Date()).toLocaleString('en-EN', $sentDatesOptions));
       }
 
-      form.append("eid",$evtElmt.data('id'));
+      form.append("eid",$evtElmt.data('id') ? $evtElmt.data('id') : 0);
       if(!isExisting){
         form.append("title",$docElmt.find('input[type="text"]').val());
       } else {
