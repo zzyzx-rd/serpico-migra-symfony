@@ -4370,6 +4370,8 @@ class OrganizationController extends MasterController
             $event->addDocument($document);
             $em->persist($event);
         } else {
+            $path = $document->getPath();
+            unlink(dirname(dirname(__DIR__)) . "/public/lib/evt/$path");
             $document->setModified(new DateTime);
             $em->persist($document);
         }

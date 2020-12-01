@@ -125,7 +125,7 @@ updates:
       withoutParent: ajouté
 
   document_update_level:
-    creation: créé
+    creation: créé un
     update: créé une nouvelle version du
 
   update_msg: >-
@@ -199,7 +199,7 @@ updates:
           other                     {Fallback problem}
         }
       }
-      event_document  {{author} a {updateType} un document <span class="strong">{docName}</span> pour {actElmtMsg}}
+      event_document  {{author} a {updateType} document <span class="strong">{docName}</span> pour {actElmtMsg}}
       event_comment   {{author} a {updateType} un <span class="strong">commentaire</span> pour {actElmtMsg}}
       other {Fallback problem}
     }
