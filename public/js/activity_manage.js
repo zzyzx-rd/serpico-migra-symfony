@@ -1810,6 +1810,9 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
       const content = $comElmt.find('textarea').val();
 
       $params = {id: $comElmt.data('id'), eid: $evtElmt.data('id'), content: content};
+      if(isReply){
+        $params['cid'] = $comElmt.prev().data('id');
+      }
       if($comElmt.data('pid')){$params['pid'] = $comElmt.data('pid');}
       if(!$comElmt.data('id') && $comElmt.prev().hasClass('being-replied')){$params['cid'] = $comElmt.prev().data('id');}
       if(!isEvtExisting){
