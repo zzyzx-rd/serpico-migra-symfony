@@ -118,13 +118,9 @@ updates:
     update: updated
     delete: deleted
 
-  comment_update_type:
+  comment_update_level:
     withParent: replied to the
     withoutParent: added the
-
-  document_update_level:
-    creation: created the
-    update: uploaded a new version of
 
   update_msg: >-
     {update_type, select,
@@ -190,8 +186,27 @@ updates:
           other {Fallback problem}
         }    
       }
-      event_document {{author} has {updateLevel} a document {docName} for {actElmtMsg}}
-      event_comment {{author} has {updateLevel} a comment for {actElmtMsg}}
+      comment_creation {{author} has {commentLevel} a <span class="strong">comment</span> for {actElmtMsg}}
+      comment_change {
+         {property, select,
+          other                     {Fallback problem}
+        }
+      }
+      document_creation {{author} has created the document <span class="strong">{docName}</span> for {actElmtMsg}}
+      document_change {
+         {property, select,
+          title                     {{author} has renamed the document <span class="strong">{docName}</span> de {actElmtMsg}}
+          content                   {{author} has uploaded a new version of document <span class="strong">{docName}</span> de {actElmtMsg}}
+          other                     {Fallback problem}
+        }
+      }
+      event_change {
+        {property, select,
+          onsetDate                 {{author} has modified occurance date of {actElmtMsg}}
+          expResDate                {{author} has modified resolution date of {actElmtMsg}}
+          other                     {Fallback problem}
+        }
+      }
       other {Problem here}
     }
 

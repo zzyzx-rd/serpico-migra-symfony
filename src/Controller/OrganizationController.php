@@ -4557,13 +4557,14 @@ class OrganizationController extends MasterController
      * Gets current data of related stage
      * @Route("/organization/document/title/update", name="updateDocumentTitle")
      */
-    public function updateDocumentTitle(Request $request){
+    public function updateDocumentTitle(Request $request, NotificationManager $notificationManager){
         $docId = $request->get('id');
         $docTitle = $request->get('title');
         $em = $this->em;
         /** @var EventDocument */
         $document = $em->getRepository(EventDocument::class)->find($docId);
         $document->setTitle($docTitle);
+        $notificationManager->registerUpdates($document, ElementUpdate::CHANGE, 'title');
         $em->persist($document);
         $em->flush();
         return new JsonResponse(['msg' => 'success'], 200);
@@ -4573,7 +4574,7 @@ class OrganizationController extends MasterController
      * Gets current data of related stage
      * @Route("/organization/stage/name/update", name="updateStageName")
      */
-    public function updateStageName(Request $request){
+    public function updateStageName(Request $request, NotificationManager $notificationManager){
         $stgId = $request->get('id');
         $stgName = $request->get('name');
         $em = $this->em;
@@ -4587,6 +4588,7 @@ class OrganizationController extends MasterController
             $em->persist($activity);
         }
         $stage->setName($stgName);
+        $notificationManager->registerUpdates($stage, ElementUpdate::CHANGE, 'name');
         $em->persist($stage);
         $em->flush();
         return new JsonResponse(['msg' => 'success', 'actNameChg' => $actNameChg], 200);

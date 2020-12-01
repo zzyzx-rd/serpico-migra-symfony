@@ -120,13 +120,9 @@ updates:
     update: modifié
     delete: supprimé
 
-  comment_update_type:
+  comment_update_level:
       withParent: répondu à
       withoutParent: ajouté
-
-  document_update_level:
-    creation: créé un
-    update: créé une nouvelle version du
 
   update_msg: >-
     {update_type, select,
@@ -188,19 +184,31 @@ updates:
               additional_information_needed   {{author} vous informe qu'il aurait besoin d'<span class="strong">informations supplémentaires</span> pour {actElmtMsg}}
               other                           {Fallback problem}
             }
-          }
-          other {Fallback problem}
+          }, 
         }    
       }
-      event_modification {
+      comment_creation {{author} a {commentLevel} un <span class="strong">commentaire</span> pour {actElmtMsg}}
+      comment_change {
+         {property, select,
+          other                     {Fallback problem}
+        }
+      }
+      document_creation {{author} a créé un document <span class="strong">{docName}</span> pour {actElmtMsg}}
+      document_change {
+         {property, select,
+          title                     {{author} a renommé un document <span class="strong">{docName}</span> de {actElmtMsg}}
+          content                   {{author} a créé une nouvelle version du document <span class="strong">{docName}</span> de {actElmtMsg}}
+          other                     {Fallback problem}
+        }
+      }
+      other {Fallback problem}
+      event_change {
         {property, select,
           onsetDate                 {{author} a modifié la date de début de {actElmtMsg}}
           expResDate                {{author} a modifié la date de fin de {actElmtMsg}}
           other                     {Fallback problem}
         }
       }
-      event_document  {{author} a {updateType} document <span class="strong">{docName}</span> pour {actElmtMsg}}
-      event_comment   {{author} a {updateType} un <span class="strong">commentaire</span> pour {actElmtMsg}}
       other {Fallback problem}
     }
 

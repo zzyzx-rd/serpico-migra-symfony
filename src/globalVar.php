@@ -181,6 +181,7 @@ class globalVar {
                     }
 
                     $transParameters = [];
+                    $transParameters['property'] = $update->getProperty();
                     $transParameters['actElmtMsg'] = 
                         ($event && ($document || $comment) ? "$theEvent $of <span class=\"strong\">$eventTypeName</span> $of " : "") .
                         
@@ -192,24 +193,17 @@ class globalVar {
                         $creator = $repoU->find($document ? $document->getCreatedBy() : $comment->getCreatedBy());
                         $transParameters['author'] = $creator->getOrganization() != $currentUser->getOrganization() ? $creator->getFullName(). ' ('.$creator->getOrganization()->getCommname().')' : $creator->getFullName();
                         //$dataUpdate['type'] = $document ? 'd' : 'c';
-                        $transParameters['updateType'] = $comment ? 
-                            ($comment->getParent() ? 
-                                $translator->trans('updates.comment_update_type.withParent') : 
-                                $translator->trans('updates.comment_update_type.withoutParent')
-                            ) : 
-                            ($update->getType() == ElementUpdate::CREATION ?
-                                $translator->trans('updates.document_update_level.creation') : 
-                                $translator->trans('updates.document_update_level.update')
-                            );
-                        
-                        $transParameters['update_type'] = $document ? 'event_document' : 'event_comment';
                         if($document){
                             $transParameters['docName'] = $document->getTitle();
+                            $transParameters['update_type'] = $update->getType() == ElementUpdate::CREATION ? 'document_creation' : 'document_change';
+                        } else {
+                            $transParameters['commentLevel'] = $comment->getParent() ? $translator->trans('updates.comment_level.withParent') : $translator->trans('updates.comment_level.withoutParent');
+                            $transParameters['update_type'] = $update->getType() == ElementUpdate::CREATION ? 'comment_creation' : 'comment_change';
                         }
-                        
+                      
                     } else if ($event != null && $document == null && $comment == null) {
                         $creator = $repoU->find($event->getCreatedBy());
-                        $transParameters['update_type'] = $update->getType() == ElementUpdate::CREATION ? 'event_creation' : 'event_modification';
+                        $transParameters['update_type'] = $update->getType() == ElementUpdate::CREATION ? 'event_creation' : 'event_change';
                         $eventType = $event->getEventType();
                         $transParameters['type'] = strtolower(implode("_",explode(" ",$eventType->getEName()->getName())));
                         $transParameters['group'] = strtolower($eventType->getEventGroup()->getEventGroupName()->getName());
