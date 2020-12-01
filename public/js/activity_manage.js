@@ -1400,7 +1400,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
     const ed = new Date(edStr).toLocaleString('en-EN',$sentDatesOptions);
     const sid = $modal.find('.fa-external-link-alt').data('id');
     const id = $('#updateEvent').data('id');
-    const evtId = $('[name*="eventType"]').val();
+    const evtid = $('[name*="eventType"]').val();
     const $params = {id: $modal.attr('data-id'), sd: sd, ed: ed, sid: sid, id: id, evtid: evtid}  
     $.post(uedurl,$params)
       .done(function(data){
