@@ -2701,14 +2701,18 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
           var edate = new Date(annee, 0 , sdOffDays + periodDays);
           var sdateU = sdate.getTime() / 1000;
           var periodU = (edate.getTime() - sdate.getTime()) / 1000;
-          $actComponent = $(`<ol class="activity-component" data-sd="${sdateU}" data-p="${periodU}"></ol>`);
+          //$actComponent = $(`<ol class="activity-component" data-sd="${sdateU}" data-p="${periodU}"></ol>`);
+          $actComponent = $actProto.find('.activity-component').attr({
+            'data-sd': sdateU,
+            'data-p' : periodU
+          });
           $stgElmt = $($actProto.find('.stages-holder').data('dummy'));
           $stgElmt.attr('data-sd',sdateU);
           $stgElmt.attr('data-p', periodU);
           $stgElmt.find('.s-day').empty().append(sdate.getDate());
           $stgElmt.find('.e-day').empty().append(edate.getDate());
           $actComponent.append($stgElmt);
-          $actProto.find('.stages-holder').append($actComponent);
+          //$actProto.find('.stages-holder').append($actComponent);
           /*
           $actProto.find('.stage-element').attr('data-sd',sdate.getTime() / 1000);
           $actProto.find('.stage-element').attr('data-p', (edate.getTime() - sdate.getTime()) / 1000);

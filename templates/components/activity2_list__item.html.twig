@@ -14,9 +14,10 @@
 
       <ul class="stages-holder" data-dummy="{% apply escape %}{% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateU: 0, period: random(3,200), embeddedStages: null, visibleEl: true, participants: null, dummyActName: null} %}{% endapply %}">
 
+          <ol class="stages activity-component" data-sd="{{ activity is defined ? activity.startdateU : 0 }}" data-p="{{ activity is defined ? activity.period : 0 }}">
+          
           {% if activity is defined %}
           
-            <ol class="stages activity-component" data-sd="{{ activity.startdateU }}" data-p="{{ activity.period }}">
               
               {% set checkingStageIndex = -1 %}
 
@@ -107,10 +108,9 @@
               
               {% endfor %}
               #}
-            </ol>
-    
           {% endif %}
-
+          
+          </ol>
 
       </ul>
   </div>
