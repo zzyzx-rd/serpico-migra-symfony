@@ -197,7 +197,7 @@
             newUIds = [];
             existingUIds = [];
             $notifHolder.find('.notif-elmt').each(function(_i,e){
-                $(e).hasClass('seen') ? newUIds.push($(e).data(('id'))) : existingUIds.push($(e).data(('id')));
+                $(e).hasClass('seen') ? existingUIds.push($(e).data(('id'))) : newUIds.push($(e).data(('id')));
             });
             if(modifyDashboard){
                 $actHolder = $(document).find('.process-list').eq(0);
