@@ -492,11 +492,24 @@ final class InstitutionController extends MasterController
         ksort($displayedStatuses);
 
         $firstConnection = $currentUser->getLastConnected() == null;
-        if($firstConnection){
-            $currentUser->setLastConnected(new \DateTime);
-            $em->persist($currentUser);
-            $em->flush();
+
+        $lastNotifs = $em->getRepository(ElementUpdate::class)->findBy(['user' => $currentUser->getUserGlobal()->getUserAccounts()->getValues()],['inserted' => 'DESC']);
+        
+        if($lastNotifs){
+            $lastConnectedUser = $lastNotifs[0];
+            if($lastConnectedUser != $currentUser){
+                $this->guardHandler->authenticateUserAndHandleSuccess(
+                    $lastConnectedUser,
+                    $request,
+                    $this->authenticator,
+                    'main'
+                );
+            }
         }
+        
+        $currentUser->setLastConnected(new \DateTime);
+        $em->persist($currentUser);
+        $em->flush();
 
         $locale = $request->getLocale();
         $org = $this->org;
