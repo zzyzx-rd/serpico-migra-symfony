@@ -113,7 +113,7 @@
             {# NOT TO REMOVE, MANIPULATED AFTERWARDS #}
             {% set startdateU = random(7,320) %}
             {% set period = random(3, 350 - startdateU) %}
-            {% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateU: startdateU, period: random(3,200), embeddedStages: null, visibleEl: true, dummyParticipants: null} %}
+            {% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateU: startdateU, period: random(3,200), embeddedStages: null, visibleEl: true, participants: null, dummyActName: null} %}
 
           {% endif %}
           </ol>
