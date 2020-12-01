@@ -729,7 +729,7 @@ final class InstitutionController extends MasterController
                             
                         } else if ($event != null && $document == null && $comment == null) {
                             $creator = $repoU->find($event->getCreatedBy());
-                            $transParameters['update_type'] = ElementUpdate::CREATION ? 'event_creation' : 'event_modification';
+                            $transParameters['update_type'] = $event->getType() == ElementUpdate::CREATION ? 'event_creation' : 'event_modification';
                             $transParameters['property'] = $newUpdate->getProperty();
                             $eventType = $event->getEventType();
                             $transParameters['type'] = strtolower(implode("_",explode(" ",$eventType->getEName()->getName())));
