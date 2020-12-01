@@ -834,8 +834,8 @@ final class InstitutionController extends MasterController
                             $eventData['n'] = $eventName->getId();
                             $eventData['it'] = $eventName->getIcon()->getType();
                             $eventData['in'] = $eventName->getIcon()->getName();
-                            $eventData['nbd'] = $event->getComments()->count();
-                            $eventData['nbc'] = $event->getDocuments()->count();
+                            $eventData['nbd'] = $event->getDocuments()->count();
+                            $eventData['nbc'] = $event->getComments()->count();
                             //} else {
                             if($comment){
                                 $eventData['cid'] = $comment->getId();
