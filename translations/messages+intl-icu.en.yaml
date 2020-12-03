@@ -1421,7 +1421,7 @@ mails:
     message2: "Click into this link to define your password and access your dashboard"
     new_user_button_text: Access DealDrive
     existing_user_button_text: Access my dahshboard
-    message3: "DealDrive will always be free. Take note you benefit from a 21-day Premium account, which enables you to inform immediately your prospects through updates and documents. May you have any remark, suggestion or see any bug fix, feel free to write to our team through contact@dealdrive.app, we are continuously trying to ease client experience !"
+    message3: "Take note you benefit from a 21-day Premium account, which enables you to inform immediately your prospects through updates and documents. May you have any remark, suggestion or see any bug fix, feel free to write to our team through contact@dealdrive.app, we are continuously trying to ease client experience !"
 
   launchingFollowupConfirmation:
     subject: "Thank you for following Dealdrive's launching !"
@@ -1438,7 +1438,7 @@ mails:
     message1: Ease your business follow-up by adding your dealflow with your partners ! Give them updates  at any time through your interactive dashboard
     message2: Click onto this link to define your password and access to your dashboard
     button_text: Access DealDrive
-    message3: DealDrive will always be free. However you benefit from a 21-day Premium account, which enables you to inform immediately your prospects through updates. Would you have any remark, suggestion or notice any bug, feel free to write to our team through contact@dealdrive.app, as we will endlessly continue to ease client experience !
+    message3: Benefit from a 21-day Premium account, which enables you to inform immediately your prospects through updates. Would you have any remark, suggestion or notice any bug, feel free to write to our team through contact@dealdrive.app, as we will endlessly continue to ease client experience !
 
   subscriptionAcknowledgmentReceipt:
     subject: Demande de création de compte
