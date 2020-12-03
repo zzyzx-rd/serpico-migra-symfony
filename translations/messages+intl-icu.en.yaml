@@ -2176,7 +2176,7 @@ activities:
       msg_3: You can always add real participants thereafter
     event_sharing:
       title: Communicate your updates & progress with your partners
-      msg: "By clicking on add feedback button <i class=\"material-icons dd-text\">offline_bolt</i> you provide them suggestions, documents... whatever sets the pace in your business relation"
+      msg: "By clicking on the 'Add update' button within an activity <i class=\"material-icons dd-text\">offline_bolt</i> you provide them remarks, issues, suggestions, documents... whatever sets the pace in your business relation"
     premium_info:
       title: A Premium account for 21 days... at least 🥳
       msg: "Which enables you to give <span class=\"strong\">instant feedbacks to your partners</span>. Beyond that period, your account will shift to our Free Plan unless you upgrade it to keep benefiting from live functionalities with your clients"

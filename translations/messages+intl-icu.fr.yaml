@@ -2279,7 +2279,7 @@ activities:
       msg_3: Vous pourrez toujours ajouter des participants ensuite
     event_sharing:
       title: Communiquez votre avancement avec vos partenaires
-      msg: "En cliquant sur le bouton d'ajout de retour <i class=\"material-icons dd-text\">offline_bolt</i></a> vous leur transmettez suggestions, documents... tout ce qui rythme votre relation business"
+      msg: "En cliquant sur le bouton 'Ajouter un update' d'une activité <i class=\"material-icons dd-text\">offline_bolt</i></a> vous leur transmettez remarques, incidents, suggestions, documents... tout ce qui rythme votre relation business"
     premium_info:
       title: Un compte Premium pendant 21 jours... au moins 🥳
       msg: "Qui vous permet de <span class=\"strong\">transmettre instanément</span> vos retours à vos partenaires. Au-delà, votre compte passera en mode Gratuit et vous pourrez l'upgrader pour continuer à bénéficier des fonctionnalités live avec vos partenaires"
