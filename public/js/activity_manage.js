@@ -43,6 +43,14 @@ function ndDayPerYears(annee) {
 $('#firstConnectionModal, #beforeStarting').modal({
   dismissible: false,
 })
+$('#beforeStarting').modal({
+  ready: function(){
+    $('#beforeStarting').find('img').attr({
+      'src' : $('.account-logo').eq(1).attr('src'),
+      'data-tooltip': $('.account-logo').eq(1).parent().attr('data-tooltip')
+    }).tooltip();
+  }
+})
 
 $('.event').tooltip({
   complete: function(){
