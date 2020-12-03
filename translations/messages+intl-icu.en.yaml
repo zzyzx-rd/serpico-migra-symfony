@@ -94,6 +94,7 @@ thanks: thanks
 to: to
 cancel: Cancel
 features: Features
+functionalities: Functionalities
 logout: Logout
 notif_and_profile: Notifications & Profile
 my_account: My account
@@ -768,13 +769,38 @@ pricing:
     plan_free: Free
     plan_premium: Premium
     plan_enterprise: Enterprise
-    functionality_1: Operations management
-    functionality_2: Client onboarding
-    functionality_3: Shared information
-    functionality_4: Updates & notifications
-    functionality_5: Data scope
-    functionality_6: Firm settings
-    functionality_7: Analytics & followup
+    group_1: 
+      title: Account & users
+      functionality_1: Users in a firm account
+      functionality_2: User self-accounts
+      functionality_2_detail: A DealDrive user always has an individual account, in addition with one potential account linked to an organization
+    group_2: 
+      title: Clients
+      functionality_1: Total Number
+      functionality_2: Type
+      functionality_2_detail: Free plan user need to add clients by their username and link them to an organization, whereas Premium users can add a client without defining a person (client legal person). More important, the invited client individual can refuse to join an activity, and in this case only Premium users can continue their activity creation with a client legal person
+    group_3: 
+      title: Updates
+      functionality_1: Exchanged data
+      functionality_2: Type & groups
+      functionality_2_free: Predefined
+      functionality_2_premium: Configurable
+      functionality_2_detail: Updates are sorted by group, and you can create one one out of a predetermined list. As a Premium user you can also setup these groups to match perfectly to your organization
+    group_4: 
+      title: Notifications
+      functionality_1: Type
+      functionality_1_free: Instantly
+      functionality_1_premium: Instantly
+      functionality_2: Daily recap
+      functionality_2_detail: A daily e-mail is sent to each user, in case some updates or modifications have been recorded on his/her activities
+    group_5:
+      title: Settings
+      functionality_1: User rights
+      functionality_1_free: Identical
+      functionality_1_premium: Configurable
+      functionality_2: Firm
+      functionality_2_free: Predefined
+      functionality_2_premium: Configurable
   features: Features
   note_a: Updates from your partners and colleagues are instantly visible in your dashboard, you receive a mail notification at the latest the following day of the update
   note_b: Updates from your partners and colleagues are instantly visible in your dashboard, and you get immediately notified by mail

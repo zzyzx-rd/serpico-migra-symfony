@@ -6,6 +6,7 @@ namespace App\Model;
 
 use App\Entity\Participation;
 use App\Entity\Stage;
+use App\Entity\UserMaster;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
@@ -246,7 +247,7 @@ class StageM extends ModelEntity
             return true;
         }
 
-        if ($stage->getMasterUser() == $connectedUser && ($stage->getGraderParticipants() === null || !$stage->getGraderParticipants()->exists(static function(int $i, Participation $p){return $p->isLeader();}))) {
+        if ($stage->getUserMasters()->exists(fn(int $i, UserMaster $m) => $m->getUser() == $connectedUser) && ($stage->getGraderParticipants() === null || !$stage->getGraderParticipants()->exists(static function(int $i, Participation $p){return $p->isLeader();}))) {
             return true;
         }
 

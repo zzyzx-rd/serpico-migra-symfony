@@ -139,7 +139,7 @@ class globalVar {
     }
 
     public function updates(){
-        $maxRetrieved = 7;
+        $maxRetrieved = 5;
         /** @var User */
         $currentUser = $this->CurrentUser();
         $org = $currentUser->getOrganization();

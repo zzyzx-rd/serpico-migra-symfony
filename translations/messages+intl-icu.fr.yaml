@@ -95,7 +95,8 @@ learn_more: En savoir plus
 thanks: merci
 to: vers
 cancel: Annuler
-features: Fonctionnalités
+features: Features
+functionalities: Fonctionnalités
 logout: Déconnexion
 notif_and_profile: Notifications & Profil
 my_account: Mon compte
@@ -743,13 +744,38 @@ pricing:
     plan_free: Gratuit
     plan_premium: Premium
     plan_enterprise: Entreprise
-    functionality_1: Gestion des opérations
-    functionality_2: Ajout de clients
-    functionality_3: Informations échangées
-    functionality_4: Ajout d'événements et updates
-    functionality_5: Visibilité des données
-    functionality_6: Paramétrage entreprise
-    functionality_7: Données analytiques de suivi
+    group_1: 
+      title: Comptes & utilisateurs
+      functionality_1: Rattaché à une entreprise
+      functionality_2: Nombre de comptes$
+      functionality_2_detail: Un utilisateur DealDrive possède un compte individuel, ainsi qu'un éventuel compte rattaché à une entreprise
+    group_2: 
+      title: Clients
+      functionality_1: Ajout / Gestion
+      functionality_2: Type
+      functionality_2_detail: Les utilisateurs optant pour le plan gratuit renseignent les clients individuellement et les rattachent à une entreprise, quand les utilisateurs Premium peuvent définir un client sans préciser son représentant, on parle alors d'une personne morale. Plus important, le client nominatif a le choix de décliner une activité à laquelle il est invité, et dans ce cas seul l'utilisateur Premium pourra continuer à créer l'activité avec un client personne morale.
+    group_3: 
+      title: Updates
+      functionality_1: Données échangées
+      functionality_2: Nature
+      functionality_2_free: Prédéfinie
+      functionality_2_premium: Configurable
+      functionality_2_detail: Les updates sont classées par groupes, et vous pouvez choisir parmi une liste prédéfinie. En tant qu'utilisateur Premium vous pouvez même configurer ces groupes de manière à coller parfaitement à ce que réalise votre entreprise
+    group_4: 
+      title: Notifications
+      functionality_1: Type
+      functionality_1_free: Instantanées
+      functionality_1_premium: Instantanées
+      functionality_2: Récap journalier
+      functionality_2_detail: Un mail journalier est envoyé à chaque utilisateur, si des nouveautés ou modifications ont été apportées sur ses activités
+    group_5:
+      title: Paramétrage
+      functionality_1: Droits utilisateurs
+      functionality_1_free: Tous administrateurs
+      functionality_1_premium: Configurables
+      functionality_2: Entreprise
+      functionality_2_free: Prédéfinis
+      functionality_2_premium: Configurable
   features: Fonctionnalités
   note_a: Les updates de vos collègues et partenaires sont immédiatement visibles sur votre dashboard, vous recevez une notification par mail au plus tard le lendemain de l'update
   note_b: Les updates de vos collègues et partenaires sont immédiatement visibles sur votre dashboard, et vous en êtes immédiatement notifiés par mail
@@ -3508,8 +3534,8 @@ email_confirm:
   button_resend_link_msg: Renvoyer l'e-mail
 
 subscription:
-  user: Nombre de user
-  payment: Paiement
+  user: Nombre d'utilisateurs
+  payment: Fréquence de paiement
   annually: Annuel
   monthly: Mensuel
   per_year: / année

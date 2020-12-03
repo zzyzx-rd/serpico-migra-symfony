@@ -1,5 +1,5 @@
 
-if(typeof luurl != "undefined"){
+if(performance.getEntriesByType("navigation")[0].type == "navigate" && typeof luurl != "undefined"){
   $.get(luurl)
     .done(function(data){
       if(data.hasToBeReloaded){
