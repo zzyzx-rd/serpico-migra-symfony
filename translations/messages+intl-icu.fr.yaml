@@ -707,6 +707,7 @@ header:
     description: Plus qu'un pas avant de booster votre relation client !
   product: La solution
   pricing: Tarifs
+  features_pricing: Fonctionnalités & Tarifs
   about: A propos
   login: Connexion
   firmSettings: "Entreprise :"
@@ -3536,7 +3537,7 @@ email_confirm:
 
 subscription:
   user: Nombre d'utilisateurs
-  payment: Fréquence de paiement
+  payment: Paiement
   annually: Annuel
   monthly: Mensuel
   per_year: / an
