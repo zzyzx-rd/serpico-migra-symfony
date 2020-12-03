@@ -49,7 +49,8 @@ curr_language: en
 result: Results
 powered_by: Powered by
 year: year
-year_short: Y
+year_short: year
+year_letter: Y
 trimester: quarter
 trimester_short: T
 month: month
@@ -770,9 +771,9 @@ pricing:
     plan_premium: Premium
     plan_enterprise: Enterprise
     group_1: 
-      title: Account & users
-      functionality_1: Users in a firm account
-      functionality_2: User self-accounts
+      title: Users
+      functionality_1: Linked to you firm
+      functionality_2: Accounts per user
       functionality_2_detail: A DealDrive user always has an individual account, in addition with one potential account linked to an organization
     group_2: 
       title: Clients
@@ -796,7 +797,7 @@ pricing:
     group_5:
       title: Settings
       functionality_1: User rights
-      functionality_1_free: Identical
+      functionality_1_free: All admins
       functionality_1_premium: Configurable
       functionality_2: Firm
       functionality_2_free: Predefined

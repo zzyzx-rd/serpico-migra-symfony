@@ -49,7 +49,8 @@ users_list.no_teams_msg: Aucune équipe
 result: Résultats
 powered_by: Une marque de
 year: année
-year_short: A
+year_short: an
+year_letter: A
 trimester: trimestre
 trimester_short: T
 month: mois
@@ -745,9 +746,9 @@ pricing:
     plan_premium: Premium
     plan_enterprise: Entreprise
     group_1: 
-      title: Comptes & utilisateurs
-      functionality_1: Rattaché à une entreprise
-      functionality_2: Nombre de comptes$
+      title: Utilisateurs
+      functionality_1: Liés à votre entreprise
+      functionality_2: Comptes par utilisateur
       functionality_2_detail: Un utilisateur DealDrive possède un compte individuel, ainsi qu'un éventuel compte rattaché à une entreprise
     group_2: 
       title: Clients
@@ -771,7 +772,7 @@ pricing:
     group_5:
       title: Paramétrage
       functionality_1: Droits utilisateurs
-      functionality_1_free: Tous administrateurs
+      functionality_1_free: Tous admin
       functionality_1_premium: Configurables
       functionality_2: Entreprise
       functionality_2_free: Prédéfinis
@@ -3538,7 +3539,7 @@ subscription:
   payment: Fréquence de paiement
   annually: Annuel
   monthly: Mensuel
-  per_year: / année
+  per_year: / an
   per_month: / mois
   premium: Premium
   free: Gratuit

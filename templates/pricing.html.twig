@@ -189,40 +189,6 @@ Pricing
         font-size:1.2rem;
       }
 
-      .free-month{
-          position: absolute;
-          top: -4rem;
-          transform: rotateZ(45deg);
-          font-size: 69px;
-          left: 2.2rem;
-          display: none;
-            }
-      .free-month-logo-content{
-          background-color: white;
-          border-radius: 50%;
-          font-family: 'Poppins';
-          position: absolute;
-          left: 0.2rem;
-          top: 0.2rem;
-          transform: rotateZ(-45deg);
-          width: 3rem;
-          height: 3rem;
-          padding: 0.6rem;
-      }
-      .free-month-number{
-          font-size: 44px;
-          color: #ff9300;
-           transform: rotateX(50deg);
-          position: absolute;
-      }
-      .free-month-promotion{
-          font-size: 24px;
-          color: #ff9300;
-          position: absolute;
-          left: 4rem;
-          text-align: left;
-      }
-
       thead, tr/*:first-of-type, tr:nth-of-type(2)*/{
         border: none;
       }
@@ -244,17 +210,13 @@ Pricing
         position: relative;
       }
 
-
-
       .feature-title{
         position:absolute;
         top:-15px;
-        left: 2rem;
       }
 
       thead th:first-of-type, tr td:first-of-type{
         text-align: left!important;
-        padding-left: 2rem;
       }
 
       thead th:nth-of-type(3), 
@@ -281,13 +243,138 @@ Pricing
         font-size:20px;
       }
 
-      .cta-table-bottom span{
-        padding-left: 2rem;
-      }
-
       tbody tr td:nth-of-type(2){
         text-align:left!important;
       }
+
+
+      @media screen and (min-width: 601px) {
+        thead th:first-of-type, tr td:first-of-type, .cta-table-bottom span{
+          padding-left: 2rem;
+        }
+
+        .feature-title{
+          left: 2rem;
+        }
+
+        .free-month{
+          position: absolute;
+          top: -4rem;
+          transform: rotateZ(45deg);
+          font-size: 69px;
+          left: 2.2rem;
+          display: none;
+        }
+        .free-month-logo-content{
+            background-color: white;
+            border-radius: 50%;
+            font-family: 'Poppins';
+            position: absolute;
+            left: 0.2rem;
+            top: 0.2rem;
+            transform: rotateZ(-45deg);
+            width: 3rem;
+            height: 3rem;
+            padding: 0.6rem;
+        }
+        .free-month-number{
+            font-size: 44px;
+            color: #ff9300;
+            transform: rotateX(50deg);
+            position: absolute;
+        }
+        .free-month-promotion{
+            font-size: 24px;
+            color: #ff9300;
+            position: absolute;
+            left: 4rem;
+            text-align: left;
+        }
+
+      }
+
+      @media screen and (max-width: 600px){
+        
+        .cta-table-bottom{
+          flex-direction:column;
+        }
+
+        .feature-title{
+           flex-direction:column;
+           min-width:90px;
+        }
+
+        .slider-container{
+          padding-top: 10px;
+        }
+
+        .slider-holder{
+          flex-direction:column;
+        }
+
+        .free-month{
+          position: absolute;
+          top: -4rem;
+          transform: rotateZ(-45deg);
+          font-size: 69px;
+          left: -2.2rem;
+          display: none;
+        }
+
+        .free-month-logo-content{
+            background-color: white;
+            border-radius: 50%;
+            font-family: 'Poppins';
+            position: absolute;
+            left: 0.2rem;
+            top: 0.2rem;
+            transform: rotateZ(45deg);
+            width: 3rem;
+            height: 3rem;
+            padding: 0.6rem;
+        }
+
+        .free-month-number{
+            font-size: 44px;
+            color: #ff9300;
+            left:-13.5rem;
+            transform: rotateX(50deg);
+            position: absolute;
+            background-color: white;
+            border: 7px solid darkblue;
+            border-right: none;
+            border-bottom-left-radius: 10px;
+            border-top-left-radius: 10px;
+            padding: 11px 8px;
+            padding-right: 16px;
+        }
+
+        .free-month-promotion{
+            font-size: 24px;
+            color: #ff9300;
+            position: absolute;
+            left: -10rem;
+            text-align: left;
+            background-color: white;
+            border: 5px solid darkblue;
+            border-right: none;
+            border-left: none;
+            border-radius: 4px;
+            padding: 9px 0;
+        }
+
+        label{
+          font-size: 1em;
+        }
+       
+      }
+
+       td, .price-value{
+          max-width: 21vw;
+          text-overflow: ellipsis;
+          /*overflow: hidden;
+          white-space: nowrap;*/
+        }
 
   </style>
 
@@ -331,7 +418,7 @@ Pricing
                   <div class="c-flex-center">
                     <div>{{'pricing.from'|trans}}</div>
                     <div class="price-line"><span class="price-value">7</span><span class="price-ccy">€</span></div>
-                    <div><span class="period-month">{{ '/' ~ 'month'|trans }}</span><span class="period-year" >{{ '/' ~ 'year'|trans }}</span><span>{{ '/' ~ 'pricing.user'|trans }}</span><sup class="dd-text">1</sup></div>
+                    <div><span class="period-month">{{ '/' ~ 'month'|trans }}</span><span class="period-year" >{{ '/' ~ 'year_short'|trans }}</span><span>{{ '/' ~ 'pricing.user'|trans }}</span><sup class="dd-text">1</sup></div>
                   </div>
                   <span class="table-title dd-text">{{'pricing.pricing_table.plan_premium'|trans|upper}}</span>
                 </div>
@@ -384,7 +471,7 @@ Pricing
             </tr>
             <tr>
               <td class="strong">{{'features'|trans}}</td>
-              <td class="strong">{{'functionalities'|trans}}</td>
+              <td class="strong">{#{{'functionalities'|trans}}#}</td>
               <td></td>
               <td></td>
               {#<td><i class="fa fa-check dd-text"></i></td>#}
