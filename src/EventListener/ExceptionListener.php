@@ -35,7 +35,7 @@ class ExceptionListener {
         $request = $event->getRequest();
 
         // We only store non 404 errors happening in prod environment, others are manager through SF error interface/profiler
-        if($request->server->get('APP_ENV') !='dev' && $event->getResponse()->getStatusCode() != 404 && $event->getThrowable()){
+        if($request->server->get('APP_ENV') !='dev' && $event->getThrowable() && $event->getThrowable()->getStatusCode() != 404){
 
             $mailer = $this->mailer;
             $container = $this->container;
