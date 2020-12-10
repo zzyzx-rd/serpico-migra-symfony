@@ -176,7 +176,11 @@ $('.dp-start, .dp-end').on('change',function(){
     $relatedEndCal.pickadate('picker').set('min', new Date($selectedDate.pick))
   } else {
     $relatedStartCal = $modal.find('.dp-start');
-    $relatedStartCal.pickadate('picker').set('max', new Date($selectedDate.pick))
+    if(new Date($selectedDate.pick) - $cal.closest('.modal').find('.dp-start').pickadate('picker').get('select').pick > 24*60*60*1000){
+      $relatedStartCal.pickadate('picker').set('max', new Date($selectedDate.pick))
+    } else {
+      $relatedStartCal.pickadate('picker').set('max',false);
+    }
   }
 })
 
