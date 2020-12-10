@@ -184,7 +184,7 @@ class GeneratedError extends DbObject
         return $this->route;
     }
 
-    public function setRoute(string $route): self
+    public function setRoute(?string $route): self
     {
         $this->route = $route;
         return $this;
