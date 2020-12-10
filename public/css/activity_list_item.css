@@ -409,9 +409,3 @@ section li.no-items-placeholder {
 .ongoing-period{
   margin-left: auto;
 }
-
-.event{
-  position: absolute;
-  top: -2.1rem;
-  left:-0.3rem;
-}

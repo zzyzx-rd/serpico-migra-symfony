@@ -92,34 +92,6 @@ td a {
   display: flex;
   flex-direction: column;
 }
-
-.cookies-banner{
-  z-index: 1001;
-  position: fixed;
-  bottom: 0px;
-  border-style: solid;
-  border-color: rgb(168, 171, 178);
-  border-image: initial;
-  border-width: 1px 0px 0px;
-  background-color: rgb(255, 255, 255);
-  box-shadow: rgba(79, 5, 153, 0.2) 0px 0px 5px 2px;
-  padding: 16px 16px 32px;
-  width: 100%;
-  height: auto;
-  display: flex;
-  -webkit-box-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  justify-content: center;
-  flex-direction: column;
-  transition: transform 0.3s cubic-bezier(0.47, 1.13, 0.39, 1.19) 0s;
-  transform: translateY(24px);
-}
-
-.cookies-banner .btn{
-  margin-left: 40px;
-}
-
 /***header***/
 
 @media screen and (max-width: 950px)
@@ -1145,15 +1117,6 @@ div.col.s12.m2.linkedin {
 
   .black-bg {
     background-color: black !important;
-  }
-
-  #linkFooter ul {
-    flex-direction: column
-  }
-
-  #linkFooter img {
-    width: auto !important;
-    height: 30px;
   }
 
   #video-steps {

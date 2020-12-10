@@ -63,65 +63,41 @@ $(document).ready(function () {
 
         }
     })
+
     $('.user').on('input',function() {
-
-        val = parseInt($(this).val());
-        console.log(val);
-        priceTblStandard = [7,6,5];
-        priceTblPremium = [14,10,7] ;
-        nbUser = $(this).closest('.div-sub').find('.nb-user ');
-        standard = $(this).closest('.div-sub').find('.price-standard ');
-        premium = $(this).closest('.div-sub').find('.price-premium ');
-        period = 1;
-        if( $valprec == "year"){
-            period = 10;
-        }
-
-        nbUser.text(val);
-
-        if(val == 0) {
-
-            $(this).val(1);
-        }
-        else if ( val < 100 ) {
-            tblVal[0]=(priceTblStandard[0]*val)*period;
-            tblVal[1]=(priceTblPremium[0]*val)*period;
-            standard.text(((priceTblStandard[0]*val)*period));
-            premium.text(((priceTblPremium[0]*val)*period));
-        } else if ( val < 250) {
-            tblVal[0]=(priceTblStandard[1]*val)*period;
-            tblVal[1]=(priceTblPremium[1]*val)*period;
-            standard.text(((priceTblStandard[1]*val)*period));
-            premium.text(((priceTblPremium[1]*val)*period));
-
-        } else if ( val > 250) {
-            tblVal[0]=(priceTblStandard[2]*val)*period;
-            tblVal[1]=(priceTblPremium[2]*val)*period;
-            standard.text(((priceTblStandard[2]*val)*period));
-            premium.text(((priceTblPremium[2]*val)*period));
-
-        }
-
-        if($(this).closest('.div-sub').find('.sub-choice').hasClass('premium-choice')){
-            ;
-            $('.account-price').text(premium.text());
-            $('.price-user').text((pricePremium*p)+ "€"+"/ per "+$valprec);
-        }
-        else{
-
-            $('.account-price').text(standard.text());
-            $('.price-user').text((priceStandard*p)+ "€"+"/ per "+$valprec);
-        }
-        console.log(tblVal);
+        const nbUsers = $(this).val();
+        const isYearly = $('.switch input').is(':checked');
+        var totalPrice = Math.min(100,nbUsers) * (isYearly ? 70 : 7) + Math.max(0, Math.min(250,nbUsers) - 100) * (isYearly ? 60 : 6) +  Math.max(0, nbUsers - 250) * (isYearly ? 50 : 5);
+        var VATPrice = (Math.round(totalPrice * 0.17 * 100) / 100);
+        var chargedPrice = (Math.round((totalPrice + VATPrice) * 100) / 100);
+        $('.total-price').empty().append(totalPrice.toString().replace('.',','));
+        $('.vat-price').empty().append(VATPrice.toString().replace('.',','));
+        $('.charged-price').empty().append(chargedPrice.toString().replace('.',','));
     })
-    $('.period').on('change',function() {
 
+    $('.switch input').on('change',function() {
+        
+        const nbUsers = $('.user').val();
+        const isYearly = $(this).is(':checked');
+        isYearly ? $('.reduction').css('visibility','visible') : $('.reduction').css('visibility','hidden');
+        var totalPrice = Math.min(100,nbUsers) * (isYearly ? 70 : 7) + Math.max(0, Math.min(250,nbUsers) - 100) * (isYearly ? 60 : 6) +  Math.max(0, nbUsers - 250) * (isYearly ? 50 : 5);
+        var VATPrice = (Math.round(totalPrice * 0.17 * 100) / 100);
+        var chargedPrice = (Math.round((totalPrice + VATPrice) * 100) / 100);
+        $('.total-price').empty().append(totalPrice.toString().replace('.',','));
+        $('.vat-price').empty().append(VATPrice.toString().replace('.',','));
+        $('.charged-price').empty().append(chargedPrice.toString().replace('.',','));
+    })
+
+    /*
+    $('.switch input').on('change',function() {
+
+        const $this = $(this);
 
         priceTblStandard = [7,6,5];
         priceTblPremium = [14,10,7] ;
-        standard = $(this).closest('.div-sub').find('.price-standard ');
-        premium = $(this).closest('.div-sub').find('.price-premium ');
-        period = $('.period').children("option:selected").val();
+        standard = $(this).closest('.div-sub').find('.price-standard');
+        premium = $(this).closest('.div-sub').find('.price-premium');
+        isYearly = $this.is(':checked');
         if ( val < 100 ) {
             pricePremium=priceTblPremium[0];
             priceStandard=priceTblStandard[0];
@@ -133,11 +109,9 @@ $(document).ready(function () {
             priceStandard=priceTblStandard[2];
 
         }
-        if(period == "year"){
-            p=10;
-        } else {
-            p=1;
-        }
+
+        p = isYearly ? 10 : 1; 
+
         console.log($(this).closest('.div-sub').find('.sub-choice').hasClass('premium-choice'));
         if($(this).closest('.div-sub').find('.sub-choice').hasClass('premium-choice')){
         ;
@@ -160,31 +134,33 @@ $(document).ready(function () {
         }
 
 
-            if (val == "month") {
-                $.each($(reduction),function(){
-                    $(this).hide();
+        if (!isYearly) {
+            $.each($(reduction),function(){
+                $(this).hide();
+            })
+            if($valprec != "month"){
+            console.log(parseInt(standard.text()) / 10);
+            standard.text((parseInt(standard.text()) / 10) + "€");
+            premium.text((parseInt(premium.text()) / 10) + "€");
+            $valprec = val;
+        }}
+        if(isYearly) {
+
+                $.each($('.reduction'),function(){
+                    $(this).show();
                 })
-                if($valprec != "month"){
-                console.log(parseInt(standard.text()) / 10);
-                standard.text((parseInt(standard.text()) / 10) + "€");
-                premium.text((parseInt(premium.text()) / 10) + "€");
+
+            if($valprec != "year") {
+                console.log(parseInt(standard.text()) * 10);
+                standard.text((parseInt(standard.text()) * 10) + "€");
+                premium.text((parseInt(premium.text()) * 10) + "€");
                 $valprec = val;
-            }}
-            if(val == "year") {
-
-                    $.each($('.reduction'),function(){
-                        $(this).show();
-                    })
-
-                if($valprec != "year") {
-                    console.log(parseInt(standard.text()) * 10);
-                    standard.text((parseInt(standard.text()) * 10) + "€");
-                    premium.text((parseInt(premium.text()) * 10) + "€");
-                    $valprec = val;
-                }
             }
+        }
 
     })
+    */
+
     $('.modal-trigger').on('click',function() {
 
         $.each($('.modal-trigger'),function(){
@@ -284,7 +260,7 @@ $(document).ready(function () {
         } else if ( val < 250) {
             pricePremium=priceTblPremium[1];
             priceStandard=priceTblStandard[1];
-        } else if ( val > 250) {
+        } else if ( val > 250) {    
             pricePremium=priceTblPremium[2];
             priceStandard=priceTblStandard[2];
 
@@ -398,6 +374,58 @@ $(document).ready(function () {
             $card.find('.price-period').empty().append($(this).closest('.pricing-elmts').data('m'));
         }
     })
+
+    var index = $('.existing-plans td').index($('.s-plan'));
+    $('table').not('.existing-plans').find('td').each(function(i,e){
+        if(i % 4 == index){$(e).css('background-color',$('.s-plan').hasClass('free-plan') ? '#eefff6' : '#f5eeff')};
+    })
+
+    $('.p-plan').on('mouseenter',function(){
+        $('.p-plan').css({
+            'background-color' : $('.s-plan').hasClass('premium-plan') ? '#684896' : '#f5eeff',
+            'color' : $('.s-plan').hasClass('premium-plan') ? 'white' : '',
+            'border' : $('.s-plan').hasClass('premium-plan') ? '1px solid white' : '',
+        });
+
+        $('.p-plan .dd-text').removeClass('dd-text').addClass('dd-orange-text');
+
+    }).on('mouseleave',function(){
+        $('.p-plan').css({
+            'background-color' : $('.s-plan').hasClass('premium-plan') ? '#f5eeff' : 'white',
+            'color' : '',
+            'border' : '1px solid #55318e',
+        });
+
+        $('.p-plan .dd-orange-text').removeClass('dd-orange-text').addClass('dd-text');
+    })
+
+
+    $('.f-plan').on('mouseenter',function(){
+        $('.f-plan').css({
+            'background-color' : $('.s-plan').hasClass('free-plan') ? '#378a5e' : '#eefff6',
+            'color' : $('.s-plan').hasClass('free-plan') ? 'white' : 'black',
+            'border-bottom' : $('.s-plan').hasClass('free-plan') ? '1px solid white' : '',
+        });
+    }).on('mouseleave',function(){
+        $('.f-plan').css({
+            'background-color' : $('.s-plan').hasClass('free-plan') ? '#eefff6' : 'white',
+            'color' : 'black',
+            'border-bottom' : '1px solid #55318e',
+        });
+       
+    })
+
+    $('[name="payment_choice"]').on('change',function(){
+        if($('#card_choice').is(':checked')){
+            $('.by-card').show();
+            $('.by-wire-transfer').hide();
+        } else {
+            $('.by-card').hide();
+            $('.by-wire-transfer').show();
+        }
+    })
+
+
 });
 
 

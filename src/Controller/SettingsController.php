@@ -157,17 +157,57 @@ class SettingsController extends MasterController
 
     /**
      * @param Request $request
-     * @param Application $app
      * @return mixed
      * @Route("/settings/root/management", name="rootManagement")
      * @IsGranted("ROLE_ROOT", statusCode=404, message="Page not found")
-
      */
     public function rootManagementAction(Request $request){
-
         return $this->render('root_management.html.twig');
+    }
+
+
+    /**
+     * @param Request $request
+     * @return mixed
+     * @Route("/settings/manage/subscriptions", name="manageSubscriptions")
+     */
+    public function manageSubscriptionsAction(Request $request){
+
+        if(strpos("dealdrive.app",$_SERVER["HTTP_HOST"]) === false){
+            $apiKey = 'sk_test_51Hn5ftLU0XoF52vKQ1r5r1cONYas5XjLLZu6rFg2P69nntllHxLs3G0wyCxoOQNUgjgD5LwCoaYTkGQp1qVK3g3A00LfW1k4Ep';
+        } else {
+            $apiKey = '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';
+        }
+
+        Stripe\Stripe::setApiKey($apiKey);
+        $organization = $this->org;
+        $em = $this->em;
+
+        $cId = $organization->getCustomerId();
+        
+        if($cId == null){
+            $mail = $this->user->getEmail();
+            $customer = Stripe\Customer::create([
+                'email' => $mail
+            ]);
+            $cId = $customer->id;
+            $organization->setCustomerId($cId);
+            $em->persist($organization);
+            $em->flush();
+        }
+
+        $session = \Stripe\BillingPortal\Session::create([
+            'customer' => $cId,
+          ]);
+          
+        return new JsonResponse(['cpurl' => $session->url],200);
+        
+        // Redirect to the customer portal.
+        //header("Location: " . $session->url); exit();
 
     }
+
+
    /**
      * @param Request $request
      * @return mixed
@@ -266,8 +306,7 @@ class SettingsController extends MasterController
             $sub= " ";
         }
 
-
-        return $this->render('price_management.html.twig' , [
+        return $this->render('account_management.html.twig' , [
 
             'currentPlan' => $organization->getPlan(),
             'val' => $val,
@@ -291,63 +330,43 @@ class SettingsController extends MasterController
      * @param Request $request
      * @param Application $app
      * @return mixed
-     * @Route("/stripe-webhook", name="stripWebook")
+     * @Route("/stripe/listen/webhooks", name="listenStripeWebhooks")
      */
     public function stripWebookManagementAction(Request $request){
 
-        $logger = $this->get('logger');
-        $event = $request->getParsedBody();
-        $stripe = $this->stripe;
-
-        // Parse the message body (and check the signature if possible)
-        $webhookSecret = getenv('STRIPE_WEBHOOK_SECRET');
-        if ($webhookSecret) {
-            try {
-                $event = $stripe->webhooks->constructEvent(
-                    $request->getBody(),
-                    $request->getHeaderLine('stripe-signature'),
-                    $webhookSecret
-                );
-
-            } catch (Exception $e) {
-                return new JsonResponse(['error' => $e->getMessage()  ], 403);
-            }
-        } else {
-            $event = $request->getParsedBody();
+        $apiKey = 'sk_test_51Hn5ftLU0XoF52vKQ1r5r1cONYas5XjLLZu6rFg2P69nntllHxLs3G0wyCxoOQNUgjgD5LwCoaYTkGQp1qVK3g3A00LfW1k4Ep';
+        Stripe\Stripe::setApiKey($apiKey);
+        $payload = @file_get_contents('php://input');
+        $event = null;
+        try {
+            $event = \Stripe\Event::constructFrom(
+                json_decode($payload, true)
+            );
+        } catch(\UnexpectedValueException $e) {
+            // Invalid payload
+            http_response_code(400);
+            exit();
         }
-        $type = $event['type'];
-        $object = $event['data']['object'];
 
         // Handle the event
-        // Review important events for Billing webhooks
-        // https://stripe.com/docs/billing/webhooks
-        // Remove comment to see the various objects sent for this sample
-        switch ($type) {
-            case 'invoice.paid':
-                // The status of the invoice will show up as paid. Store the status in your
-                // database to reference when a user accesses your service to avoid hitting rate
-                // limits.
-                $logger->info('🔔  Webhook received! ' . $object);
+        switch ($event->type) {
+            case 'payment_intent.succeeded':
+                $paymentIntent = $event->data->object; // contains a \Stripe\PaymentIntent
+                // Then define and call a method to handle the successful payment intent.
+                // handlePaymentIntentSucceeded($paymentIntent);
                 break;
-            case 'invoice.payment_failed':
-                // If the payment fails or the customer does not have a valid payment method,
-                // an invoice.payment_failed event is sent, the subscription becomes past_due.
-                // Use this webhook to notify your user that their payment has
-                // failed and to retrieve new card details.
-                $logger->info('🔔  Webhook received! ' . $object);
-                break;
-            case 'customer.subscription.deleted':
-                // handle subscription cancelled automatically based
-                // upon your subscription settings. Or if the user
-                // cancels it.
-                $logger->info('🔔  Webhook received! ' . $object);
+            case 'payment_method.attached':
+                $paymentMethod = $event->data->object; // contains a \Stripe\PaymentMethod
+                // Then define and call a method to handle the successful attachment of a PaymentMethod.
+                // handlePaymentMethodAttached($paymentMethod);
                 break;
             // ... handle other event types
             default:
-                // Unhandled event type
+                echo 'Received unknown event type ' . $event->type;
         }
 
-        return new JsonResponse(['status' => 'success' ], 200);
+        dd('good');
+        http_response_code(200);
 
 
     }
@@ -484,6 +503,50 @@ class SettingsController extends MasterController
         return new JsonResponse($p, 200);
     }
 
+    public function createDefaultSubscription(Request $request, Organization $organization, string $email){
+        // Create Stripe Customer id and default plan
+        $em = $this->em;
+        
+        if(strpos("dealdrive.app",$_SERVER["HTTP_HOST"]) === false){
+            $pId = 'price_1HvOxOLU0XoF52vKPrzatN2O';
+            $apiKey = 'sk_test_51Hn5ftLU0XoF52vKQ1r5r1cONYas5XjLLZu6rFg2P69nntllHxLs3G0wyCxoOQNUgjgD5LwCoaYTkGQp1qVK3g3A00LfW1k4Ep';
+        } else {
+            $pId = '';
+            $apiKey = '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';
+        }
+
+        Stripe\Stripe::setApiKey($apiKey);
+        $stripe = new \Stripe\StripeClient($apiKey);
+
+        // 1 - Create customer ID
+        $customer = Stripe\Customer::create([
+            'email' => $email
+        ]);
+
+        $cId = $customer->id;
+        $organization->setCustomerId($cId);
+        //$em->persist($organization);
+
+        // 2 - Create payment method and attach it to customer
+
+        // 3 - Create createSubscription
+        $subscription = $stripe->subscriptions->create([
+            'customer' => $cId,
+            'items' => [
+                ['price' => $pId],
+            ],
+            'trial_period_days' => 21,
+        ]);
+        
+
+        \Stripe\Subscription::update($subscription->id, [
+            'trial_end' => 'now',
+        ]);
+
+        return new JsonResponse();
+        
+    }
+
     /**
      * @param Request $request
      * @param Application $app
@@ -497,131 +560,97 @@ class SettingsController extends MasterController
         $repoO = $em->getRepository(OrganizationPaymentMethod::class);
         $paymentList = $this->org->getPaymentMethods();
         $currentUser = $this->user;
-        Stripe\Stripe::setApiKey('sk_test_51Hn5ftLU0XoF52vKQ1r5r1cONYas5XjLLZu6rFg2P69nntllHxLs3G0wyCxoOQNUgjgD5LwCoaYTkGQp1qVK3g3A00LfW1k4Ep');
-        $body =  json_decode(file_get_contents('php://input'), true);
-        $stripe = $this->stripe;
-       $period = ($body['period'] == "year") ? 10 : 1;
-        $quantity =  (int) $body['quantity'];
-        if ($quantity < 99) {
-            $index = 0;
-        } else if ($quantity < 249) {
-            $index = 1;
+        
+        if(strpos("dealdrive.app",$_SERVER["HTTP_HOST"]) === false){
+            $prices = [
+                'p' => [
+                    'm' => 'price_1HvOxOLU0XoF52vKPrzatN2O',
+                    'y' => 'price_1HvWV7LU0XoF52vKgOwLtq8B'
+                ],
+                'e' => [
+                    'm' => 'price_1HvWTLLU0XoF52vK6PRFqDgT',
+                    'y' => 'price_1HvWSeLU0XoF52vKnewnk43W'
+                ]
+            ];
+            $apiKey = 'sk_test_51Hn5ftLU0XoF52vKQ1r5r1cONYas5XjLLZu6rFg2P69nntllHxLs3G0wyCxoOQNUgjgD5LwCoaYTkGQp1qVK3g3A00LfW1k4Ep';
         } else {
-            $index = 2;
+            $prices = [
+                'p' => [
+                    'm' => 'price_1HoAmcLU0XoF52vKHDggsDpq',
+                    'y' => 'price_1HoAnRLU0XoF52vKlyRASsYA'
+                ],
+                'e' => [
+                    'm' => 'price_1HoAdRLU0XoF52vKtxHCoxRw',
+                    'y' => 'price_1HvVyiLU0XoF52vKbCuG7Xd5'
+                ]
+            ];
+            $apiKey = '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';
         }
-        if($this->org->getPaymentUser()== null){
+
+        Stripe\Stripe::setApiKey($apiKey);
+        $stripe = new \Stripe\StripeClient($apiKey);
+        $body = json_decode(file_get_contents('php://input'), true);
+        $plan = $body['pl'];
+        $period = $body['p'];
+        $quantity =  (int) $body['q'];
+        $product = $body['product'] == "p" ? 'prod_IPHWR3lzuAWWsL' : 'prod_IPHWDsnMYL3UFB'; 
+        $paymentm = ($body['pmId'] == " ") ? $paymentList[(int)$body['pmId']]->getPmid() : $body['pmId'];
+        
+        if($this->org->getPaymentUser() == null){
             $this->org->setPaymentUser($this->user);
         }
 
-        if($body['product'] == "premium"){
-
-
-            $mainProd = 'prod_IPHWR3lzuAWWsL';
-
-        } else {
-
-
-            $mainProd = 'prod_IPHWDsnMYL3UFB';
-
-        }
-
-        /*
-        for($i =0 ; $i < sizeof($mainPrice);$i++){
-            if($mainPrice[$i] == $body['priceId']) {
-                $priceId = $mainPriceId[$i];
-               
-            }
-
-        }*/
-        $customer = $this->org->getCustomerId();
-        if($customer == null){
-            $mail = ($this->org->getMasterUser() == null) ? "" :$this->org->getMasterUser()->getEmail();
-            $cust = Stripe\Customer::create([
+        $cId = $this->org->getCustomerId();
+        
+        if($cId == null){
+            $mail = ($this->org->getUserMasters() == null) ? "" : $this->org->getUserMasters()->first()->getUser()->getEmail();
+            $customer = Stripe\Customer::create([
                 'email' => $mail
             ]);
-            $customer = $cust->id;
-            $this->org->setCustomerId($customer);
+            $cId = $customer->id;
+            $this->org->setCustomerId($cId);
+        } else {
+            $customer = Stripe\Customer::retrieve($cId);
         }
-        $cust = Stripe\Customer::retrieve($customer);
-        $paymentm = ($body['paymentMethodId'] == " ") ? $paymentList[(int)$body['paymentMethodId']]->getPmid() : $body['paymentMethodId'];
 
-        $priceResponse = $stripe->prices->create([
-            'unit_amount' => $body['priceId']*100,
-            'currency' => 'eur',
-            'recurring' => ['interval' => $body['period']],
-            'product' =>  $mainProd,
-        ]);
-        $priceId = $priceResponse->id;
-
-
-        $payment_method = $this->stripe->paymentMethods->retrieve(
-            $paymentm
-        );
-
-        $payment_method->attach([
-            'customer' => $customer,
-        ]);
-
-
-
-
-
-
-
+        $priceId = $prices[$plan][$period];
+        $payment_method = $this->stripe->paymentMethods->retrieve($paymentm);
+        $payment_method->attach(['customer' => $cId]);
 
         // Set the default payment method on the customer
-
-            $pm = $cust->metadata->payment_method;
-            $find = false;
-            for($p = 1 ; $p< sizeof($paymentList);$p++) {
-
-                if($paymentList[$p]->getPmId() == $paymentm){
-                    $find= true;
-                }
-
+        $pm = $customer->metadata->payment_method;
+        $found = false;
+        for($p = 1; $p < sizeof($paymentList); $p++) {
+            if($paymentList[$p]->getPmId() == $paymentm){
+                $found = true;
+                break;
             }
-            if(!$find){
-                $payment_object = new OrganizationPaymentMethod();
-                $payment_object->setPmId($paymentm);
-                $this->org->addPaymentMethods($payment_object);
-            }
-            var_dump(sizeof($this->org->getPaymentMethods()));
-          //  $payList = array_push($pm,$paymentm);
-
-
-            $cust = Stripe\Customer::update($customer, [
-            'invoice_settings' => [
-                'default_payment_method' => $paymentm
-            ],
-
-        ]);
-            try{
-     if( $cust->metadata->sub_id != null) {
-
-     } } catch (Exception $e){
-
-            }
-
-
+        }
+        if(!$found){
+            $payment_object = new OrganizationPaymentMethod();
+            $payment_object->setPmId($paymentm);
+            $this->org->addPaymentMethods($payment_object);
+        }
+        
+        $stripe->customers->update($cId, 
+            ['invoice_settings' => 
+                ['default_payment_method' => $paymentm],
+            ]
+        );
 
         $subscription = $this->stripe->subscriptions->create([
             'customer' => $customer,
             "collection_method" => "send_invoice",
             'items' => [
-                [
-                    'price' => $priceId,
-
-                ],
+                ['price' => $priceId],
             ],
             "days_until_due" => 1,
             'expand' => ['latest_invoice.payment_intent'],
         ]);
-        $invoice =$this->stripe->invoices->all(['subscription' => $subscription->id])->data[0];
-      $invoice= $this->stripe->invoices->sendInvoice($invoice->id,
-            []
-        );
-      $pdf = $invoice->invoice_pdf;
 
+        $invoice = $this->stripe->invoices->all(['subscription' => $subscription->id])->data[0];
+        $invoice = $this->stripe->invoices->sendInvoice($invoice->id,[]);
+        $pdf = $invoice->invoice_pdf;
 
         $p = $this->stripe->products->retrieve(
             $subscription->items->data['0']->price->product
@@ -629,30 +658,29 @@ class SettingsController extends MasterController
 
         $p = $p->name;
         $org = $this->org;
-        if ( $p == "abonnement standard" ) {
-            $org->setPlan(2);
+        $p == "p" ? $org->setPlan(2) : $org->setPlan(1);
 
-        } else {
-            $org->setPlan(1);
-
-        }
-        $cust = $this->stripe->customers->update(
-            $customer,
-            ['metadata' => ['sub_id' => $subscription->id,'quantity' => $body['quantity']
-            ]]
+        $stripe->customers->update($cId,
+            ['metadata' => [
+                'sub_id' => $subscription->id,
+                'quantity' => $quantity
+                ]
+            ]
         );
 
         $sub = Stripe\Subscription::update(
             $subscription->id,
-            ['metadata' => ['pdf' => $pdf,
-                'quantity' => $body['quantity']]
-        ]);
+            ['metadata' => 
+                [   
+                    'pdf' => $pdf,
+                    'quantity' => $quantity
+                ]
+            ]
+        );
+
         $org->setCustomerId($customer);
         $em->refresh($currentUser);
         $em->flush();
-
-
-
         return new JsonResponse((string)$pdf, 200);
     }
 
@@ -673,8 +701,8 @@ class SettingsController extends MasterController
 
         $sub = $this->stripe->subscriptions->cancel(
             $id,
-
         );
+
         $em = $this->em;
         $sub =$this->stripe->subscriptions->all(['customer' => $custId]);
         if(sizeof($sub->data)==0) {
@@ -685,11 +713,11 @@ class SettingsController extends MasterController
         return new JsonResponse($cust->metadata->sub_id, 200);
     }
     /**
- * @param Request $request
- * @return mixed
- * @Route("/cancel-card", name="cancelCard")
- * @throws Stripe\Exception\ApiErrorException
- */
+     * @param Request $request
+     * @return mixed
+     * @Route("/cancel-card", name="cancelCard")
+     * @throws Stripe\Exception\ApiErrorException
+     */
     public function cancelCardManagementAction(Request $request){
         $em = $this->em;
         $cards = $this->org->getPaymentMethods();
@@ -699,6 +727,7 @@ class SettingsController extends MasterController
         $em->flush();
         return new JsonResponse(sizeof($cards), 200);
     }
+
     /**
      * @param Request $request
      * @return mixed
@@ -731,13 +760,13 @@ class SettingsController extends MasterController
            ['cancel_at' => $sub->current_period_end ]
 
        );
-       dd("test");
+
        $newSub = Stripe\Subscription::create(
            $cust->metadata->sub_id,
            ['cancel_at' => $sub->current_period_end ]
 
        );
-       dd($sub->plan->amount);
+
         $cust = Stripe\Customer::update(
             $custid,
             ['metadata' => ['quantity' => (((int)$cust->metadata->quantity)-1)]]

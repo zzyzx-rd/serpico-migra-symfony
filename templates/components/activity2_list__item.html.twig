@@ -7,124 +7,125 @@
 
 {% endif %}
 
-  <div class="row no-margin flex-center {{activity is defined ? actStatus : 'dummy-activity'}} activity-holder" data-id="{{activity is defined ? activity.id}}" {% if activity is defined and not visible %}style="display:none"{% endif %}>
-    <div class="col s9 center no-padding activity-content-stage" style="background-color: #feffe9;">
-      
-      <div class="curDate"></div>
+<div class="row no-margin flex-center activity-holder {{activity is defined ? actStatus : 'dummy-activity'}} {{mobile_rendering ? 'mr'}}" data-id="{{activity is defined ? activity.id}}" {% if activity is defined and not visible %}style="display:none"{% endif %}>
+  <div class="col s{{mobile_rendering ? 12 : 9}} center no-padding activity-content-stage {{mobile_rendering ? 'mr'}}" style="background-color: #feffe9;">
+    
+    <div class="curDate"></div>
 
-      <ul class="stages-holder" data-dummy="{% apply escape %}{% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateU: 0, period: random(3,200), embeddedStages: null, visibleEl: true, participants: null, dummyActName: null} %}{% endapply %}">
+    <ul class="stages-holder {{mobile_rendering ? 'mr'}}" data-dummy="{% apply escape %}{% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateU: 0, period: random(3,200), embeddedStages: null, visibleEl: true, participants: null, dummyActName: null} %}{% endapply %}" {% if mobile_rendering %}data-act-name="{{ activity.name|upper }}"{% endif %}>
 
-          <ol class="stages activity-component" data-sd="{{ activity is defined ? activity.startdateU : 0 }}" data-p="{{ activity is defined ? activity.period : 0 }}">
-          
-          {% if activity is defined %}
-          
-              
-              {% set checkingStageIndex = -1 %}
+        <ol class="stages activity-component" data-sd="{{ activity is defined ? activity.startdateU : 0 }}" data-p="{{ activity is defined ? activity.period : 0 }}">
+        
+        {% if activity is defined %}
+        
+            
+            {% set checkingStageIndex = -1 %}
 
-              {#}
-              {% for stage in activity.stages %}
-                {% for e, event in stage.events %}
+            {#}
+            {% for stage in activity.stages %}
+              {% for e, event in stage.events %}
 
-                    <div class="event tooltipped" data-id="{{ event.id }}" data-od="{{ event.onsetdateU }}" data-p="{{ event.period }}" data-html="true" data-tooltip="{% apply escape %}{% include "components/event__item.html.twig" with { event: event, em: em } %}{% endapply %}">
-                      <i class="fa fa-map-marker event-marker">
-                        <div class="event-logo-container">
-                          <i class="fa fa-{{event.eventType.icon.name}} evg-{{ event.eventType.eventGroup.eventGroupName.id }} event-type"></i>
-                        </div>
-                      </i>
-                    </div>
+                  <div class="event tooltipped" data-id="{{ event.id }}" data-od="{{ event.onsetdateU }}" data-p="{{ event.period }}" data-html="true" data-tooltip="{% apply escape %}{% include "components/event__item.html.twig" with { event: event, em: em } %}{% endapply %}">
+                    <i class="fa fa-map-marker event-marker">
+                      <div class="event-logo-container">
+                        <i class="fa fa-{{event.eventType.icon.name}} evg-{{ event.eventType.eventGroup.eventGroupName.id }} event-type"></i>
+                      </div>
+                    </i>
+                  </div>
 
-                {% endfor %}
               {% endfor %}
-              #}
+            {% endfor %}
+            #}
 
-              {% for s, stage in activity.sortedStagesPerPeriod %}
+            {% for s, stage in activity.sortedStagesPerPeriod %}
 
-  
-                {% set embeddedStages = null %}
 
-                {% if s > checkingStageIndex %}
-                  {% set isEmbedded = false %}
-                  {% set embeddedStages = stage.embeddedStages(timescaleCookie,3) %}
-                  {% if embeddedStages is not empty %}
-                    {% set checkingStageIndex = s + embeddedStages|length %}
-                  {% endif %}
-                  {% set visibleEl = dateTypeCookie == 's' %}
-                {% else %}
-                  {% set isEmbedded = true %}
-                  {% set visibleEl = false %}
+              {% set embeddedStages = null %}
+
+              {% if s > checkingStageIndex %}
+                {% set isEmbedded = false %}
+                {% set embeddedStages = stage.embeddedStages(timescaleCookie,3) %}
+                {% if embeddedStages is not empty %}
+                  {% set checkingStageIndex = s + embeddedStages|length %}
                 {% endif %}
+                {% set visibleEl = dateTypeCookie == 's' %}
+              {% else %}
+                {% set isEmbedded = true %}
+                {% set visibleEl = false %}
+              {% endif %}
 
-                {% include "components/stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: isEmbedded, startdateU: stage.startdateU, period: stage.period, embeddedStages: embeddedStages, visibleEl: visibleEl, dummyParticipants: null } %}
+              {% include "components/stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: isEmbedded, startdateU: stage.startdateU, period: stage.period, embeddedStages: embeddedStages, visibleEl: visibleEl, dummyParticipants: null } %}
+              
+              {% set checkingEventIndex = -1 %}
+
+                  {% for e, event in stage.sortedEventsPerPeriod %}
+
+                      {% set embeddedEvents = null %}
+                    
+                      {% do event.setEm(em) %}
+                      {% do event.setCurrentUser(currentuser) %}
                 
-                {% set checkingEventIndex = -1 %}
-
-                    {% for e, event in stage.sortedEventsPerPeriod %}
-
-                        {% set embeddedEvents = null %}
-                      
-                        {% do event.setEm(em) %}
-                        {% do event.setCurrentUser(currentuser) %}
-                  
-                        {% if e > checkingEventIndex %}
-                          {% set isEmbedded = false %}
-                          {% set embeddedEvents = event.embeddedEvents(timescaleCookie, 3) %}
-                          {% if embeddedEvents is not empty %}  
-                            {% set checkingEventIndex = e + embeddedEvents|length %}
-                          {% endif %}
-                          {% set visibleEl = true %}
-                        {% else %}
-                          {% set isEmbedded = true %}
-                          {% set visibleEl = false %}
+                      {% if e > checkingEventIndex %}
+                        {% set isEmbedded = false %}
+                        {% set embeddedEvents = event.embeddedEvents(timescaleCookie, 3) %}
+                        {% if embeddedEvents is not empty %}  
+                          {% set checkingEventIndex = e + embeddedEvents|length %}
                         {% endif %}
+                        {% set visibleEl = true %}
+                      {% else %}
+                        {% set isEmbedded = true %}
+                        {% set visibleEl = false %}
+                      {% endif %}
 
-                        {% include "components/event_temporal__item.html.twig" with { isEmbedded: isEmbedded, lastUpdateSelf: event.lastUpdateSelf, onsetdateU: event.onsetDateU, period: event.period, embeddedEvents: embeddedEvents, visibleEl: visibleEl } %}
-                        
+                      {% include "components/event_temporal__item.html.twig" with { isEmbedded: isEmbedded, lastUpdateSelf: event.lastUpdateSelf, onsetdateU: event.onsetDateU, period: event.period, embeddedEvents: embeddedEvents, visibleEl: visibleEl } %}
+                      
 
-                    {% endfor %}    
+                  {% endfor %}    
 
-              {% endfor %}
+            {% endfor %}
 
+            
+            {#
+            {% set checkingIndex = -1 %}
+
+            {% for s, stage in activity.sortedStagesPerPeriod('output') %}
               
-              {#
-              {% set checkingIndex = -1 %}
-
-              {% for s, stage in activity.sortedStagesPerPeriod('output') %}
-                
-                {% set embeddedStages = null %}
-              
-                {% if s > checkingIndex %}
-                  {% set isEmbedded = false %}
-                  {% set embeddedStages = stage.embeddedStages('output') %}
-                  {% if embeddedStages is not empty %}  
-                    {% set checkingIndex = s + embeddedStages|length %}
-                  {% endif %}
-                  {% set visibleEl = dateTypeCookie == 'o' %}
-                {% else %}
-                  {% set isEmbedded = true %}
-                  {% set visibleEl = false %}
+              {% set embeddedStages = null %}
+            
+              {% if s > checkingIndex %}
+                {% set isEmbedded = false %}
+                {% set embeddedStages = stage.embeddedStages('output') %}
+                {% if embeddedStages is not empty %}  
+                  {% set checkingIndex = s + embeddedStages|length %}
                 {% endif %}
+                {% set visibleEl = dateTypeCookie == 'o' %}
+              {% else %}
+                {% set isEmbedded = true %}
+                {% set visibleEl = false %}
+              {% endif %}
 
-                {% include "components/stage_temporal__item.html.twig" with { dateType: 'o', isEmbedded: isEmbedded, startdateU: stage.startdateU('output'), period: stage.period('output'), embeddedStages: embeddedStages, visibleEl: visibleEl } %}
-              
-              {% endfor %}
-              #}
-          {% else %}
+              {% include "components/stage_temporal__item.html.twig" with { dateType: 'o', isEmbedded: isEmbedded, startdateU: stage.startdateU('output'), period: stage.period('output'), embeddedStages: embeddedStages, visibleEl: visibleEl } %}
+            
+            {% endfor %}
+            #}
+        {% else %}
 
-            {# NOT TO REMOVE, MANIPULATED AFTERWARDS #}
-            {% set startdateU = random(7,320) %}
-            {% set period = random(3, 350 - startdateU) %}
-            {% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateU: startdateU, period: random(3,200), embeddedStages: null, visibleEl: true, participants: null, dummyActName: null} %}
+          {# NOT TO REMOVE, MANIPULATED AFTERWARDS #}
+          {% set startdateU = random(7,320) %}
+          {% set period = random(3, 350 - startdateU) %}
+          {% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateU: startdateU, period: random(3,200), embeddedStages: null, visibleEl: true, participants: null, dummyActName: null} %}
 
-          {% endif %}
-          </ol>
+        {% endif %}
+        </ol>
 
-      </ul>
+    </ul>
   </div>
 
-  <div class="col s3 act-info">
+  {% if not mobile_rendering %}
+    
+    
+    <div class="col s3 act-info">
 
-    
-    
       <div class="{{activity is defined ? sortingType ~ '-' ~ actStatus}}" style="display: inline-block;">
         <div class="stage-item-button"></div>
       </div>
@@ -197,75 +198,76 @@
         {% endif %}
       </div>
 
-        {% set actName = activity is defined ? activity.name : '' %}
-        {% set isTooLong = actName|length > actNameTruncVal %}
-        {% if isTooLong %}
-            <span class="act-info-name tooltipped" data-tooltip="{{actName}}">
+      {% set actName = activity is defined ? activity.name : '' %}
+      {% set isTooLong = actName|length > actNameTruncVal %}
+      {% if isTooLong %}
+          <span class="act-info-name tooltipped" data-tooltip="{{actName}}">
+            {% if activity is not defined or date(activity.inserted).diff(date('now')).days < 2 %}
+              <span class="new-stage sm-right dd-orange-text">{{ 'new'|trans }}</span>
+            {% endif %}
+            {{actName|slice(0,actNameTruncVal) ~ '...' }}
+          </span>
+      {% else %}
+          <span class="act-info-name">
               {% if activity is not defined or date(activity.inserted).diff(date('now')).days < 2 %}
                 <span class="new-stage sm-right dd-orange-text">{{ 'new'|trans }}</span>
               {% endif %}
-              {{actName|slice(0,actNameTruncVal) ~ '...' }}
-            </span>
-        {% else %}
-            <span class="act-info-name">
-                {% if activity is not defined or date(activity.inserted).diff(date('now')).days < 2 %}
-                  <span class="new-stage sm-right dd-orange-text">{{ 'new'|trans }}</span>
-                {% endif %}
-              {{ actName }}
-            </span>
-        {% endif %}
+            {{ actName }}
+          </span>
+      {% endif %}
 
-        {% if activity is defined %}
-        
-        
-          {% set activityClients =  activity.independantUniqueParticipatingClients %}
-          {% if activityClients|length != 0 %}
-
-
-            <div class="activity-clients flex-center">
-              {% if activity.organization != currentuser.organization %}
-                <small> - {{ 'with'|trans }}</small>
-                <a class="badge-container activity-client-name tooltipped" data-tooltip="{{activity.organization.commname}}">
-                  <img class="account-logo sm-left" src="{{ asset(global.organizationLogo(activity.organization)) }}" alt="">
-                </a>
-                {% set activityClients = activityClients|filter((v,k) => v.clientOrganization != currentuser.organization) %}
-              {% endif %}
-              {% if activityClients|length != 0 %}
-
-                  <small class="sm-right">{{ ' - ' ~ 'with'|trans }}</small>
-
-                  {% set k = 0 %}
-                  {% for client in activityClients %}
-                    {% if k < 2 %}
-
-                        <a class="badge-container activity-client-name tooltipped" data-tooltip="{{client.name}}">
-                          <img class="account-logo" src="{{ asset(global.clientLogo(client)) }}" alt="">
-                        </a>
-
-                      {% set k = k + 1 %}
-                    {% endif %}
-                  {% endfor %}
-
-                  {% if activityClients|length - k > 0 %}
-                        {{'and '|trans }}
-                        <span class="activity-client-name tooltipped" data-position="top" data-html="true" data-tooltip="
-                        {% for c, client in activityClients %}
-                            {% if c >= k %}
-                              {{ activityClients[c].commname }} <br>
-                            {% endif %}
-                        {% endfor %}
-                        "
-                        >{{ (activityClients|length - k) ~ ' other'|trans ~ (activityClients|length - k > 1 ? 's' : '')}}</span>
-                  {% endif %}
-              {% endif %}
-            </div>
-          {% endif %}
+      {% if activity is defined %}
       
-        {% else %}
-          <div class="activity-clients flex-center" data-prototype="{% apply escape %}{% include "components/activity_client__item.html.twig" %}{% endapply %}">
-            <small class="sm-right">{{ ' - ' ~ 'with'|trans }}</small>
+      
+        {% set activityClients =  activity.independantUniqueParticipatingClients %}
+        {% if activityClients|length != 0 %}
+
+
+          <div class="activity-clients flex-center">
+            {% if activity.organization != currentuser.organization %}
+              <small> - {{ 'with'|trans }}</small>
+              <a class="badge-container activity-client-name tooltipped" data-tooltip="{{activity.organization.commname}}">
+                <img class="account-logo sm-left" src="{{ asset(global.organizationLogo(activity.organization)) }}" alt="">
+              </a>
+              {% set activityClients = activityClients|filter((v,k) => v.clientOrganization != currentuser.organization) %}
+            {% endif %}
+            {% if activityClients|length != 0 %}
+
+                <small class="sm-right">{{ ' - ' ~ 'with'|trans }}</small>
+
+                {% set k = 0 %}
+                {% for client in activityClients %}
+                  {% if k < 2 %}
+
+                      <a class="badge-container activity-client-name tooltipped" data-tooltip="{{client.name}}">
+                        <img class="account-logo" src="{{ asset(global.clientLogo(client)) }}" alt="">
+                      </a>
+
+                    {% set k = k + 1 %}
+                  {% endif %}
+                {% endfor %}
+
+                {% if activityClients|length - k > 0 %}
+                      {{'and '|trans }}
+                      <span class="activity-client-name tooltipped" data-position="top" data-html="true" data-tooltip="
+                      {% for c, client in activityClients %}
+                          {% if c >= k %}
+                            {{ activityClients[c].commname }} <br>
+                          {% endif %}
+                      {% endfor %}
+                      "
+                      >{{ (activityClients|length - k) ~ ' other'|trans ~ (activityClients|length - k > 1 ? 's' : '')}}</span>
+                {% endif %}
+            {% endif %}
           </div>
         {% endif %}
+    
+      {% else %}
+        <div class="activity-clients flex-center" data-prototype="{% apply escape %}{% include "components/activity_client__item.html.twig" %}{% endapply %}">
+          <small class="sm-right">{{ ' - ' ~ 'with'|trans }}</small>
+        </div>
+      {% endif %}
+    </div>
+  {% endif %}
 
-  </div>
 </div>

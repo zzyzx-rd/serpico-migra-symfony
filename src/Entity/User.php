@@ -162,6 +162,12 @@ class User extends DbObject implements  UserInterface, \Serializable
      * @var int
      */
     protected $role;
+    
+    /**
+     * @Column(name="usr_sub_id", type="string", nullable=true)
+     * @var string
+     */
+    protected $subscriptionId;
 
     /**
      * @OneToMany(targetEntity="ExternalUser", mappedBy="user",cascade={"persist", "remove"}, orphanRemoval=true)
@@ -367,7 +373,8 @@ class User extends DbObject implements  UserInterface, \Serializable
         $results = null,
         $members = null,
         $weight = null,
-        $title = null)
+        $title = null,
+        $subscriptionId = null)
     {
         parent::__construct($id, $createdBy, new DateTime());
         $this->pictureFile = $pictureFile;
@@ -405,6 +412,7 @@ class User extends DbObject implements  UserInterface, \Serializable
         $this->position = $position;
         $this->department = $department;
         $this->title = $title;
+        $this->subscriptionId = $subscriptionId;
         $this->subordinates = new ArrayCollection();
         $this->participations = new ArrayCollection();
         $this->roles = new ArrayCollection();
@@ -412,6 +420,22 @@ class User extends DbObject implements  UserInterface, \Serializable
         $this->masterings = new ArrayCollection();
     }
 
+    /**
+     * @return string
+     */
+    public function getSubscriptionId(): ?string
+    {
+        return $this->subscriptionId;
+    }
+
+    /**
+     * @param string $subscriptionId
+     */
+    public function setSubscriptionId(string $subscriptionId): self
+    {
+        $this->subscriptionId = $subscriptionId;
+        return $this;
+    }
 
     public function isInternal(): ?bool
     {

@@ -149,6 +149,7 @@ final class InstitutionController extends MasterController
     public function logLastUpdatedUser(Request $request){
         $em = $this->em;
         $lastNotifs = $em->getRepository(ElementUpdate::class)->findBy(['user' => $this->user->getUserGlobal()->getUserAccounts()->getValues()],['inserted' => 'DESC']);
+        $lastConnectedUser = $this->user;
         $hasToBeReloaded = false;
         if($lastNotifs){
             $lastConnectedUser = $lastNotifs[0]->getUser();
@@ -530,8 +531,11 @@ final class InstitutionController extends MasterController
             'evnId' => $eg->getEventGroupName()->getId()
         ])->getValues();
 
+        //dd($request->headers->get('user_agent'));
+        $renderedTwigFile = strpos($request->headers->get('user_agent'),"Mobile") === false ? 'activities_dashboard.html.twig' : 'mobile_activities_dashboard.html.twig';
+
         return $this->render(
-            'activities_dashboard.html.twig',
+            $renderedTwigFile,
             [
                 'displayedStatuses'  => $displayedStatuses,
                 'orphanActivities'  => $orphanActivities,

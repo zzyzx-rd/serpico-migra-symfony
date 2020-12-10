@@ -349,7 +349,7 @@ class ActivityController extends MasterController
         } else {
 
             $clientOrganization = $em->getRepository(Organization::class)->find($_POST['oid']);
-            if(empty($_POST['cid'])){
+            if($clientOrganization != $currentUser->getOrganization() && empty($_POST['cid'])){
                 $this->forward('App\Controller\OrganizationController::updateOrgFeatures', ['organization' => $clientOrganization, 'nonExistingOrg' => false, 'createdAsClient' => true]);
             }
 
@@ -394,7 +394,10 @@ class ActivityController extends MasterController
                 ->setEmail(!empty($email) ? $email : null)
                 ->setToken(!empty($email) ? md5(rand()) : null)
                 ->setUsername("$firstname $lastname")
-                ->setRole(USER::ROLE_AM)
+                ->setRole(
+                    empty($_POST['oid']) ? USER::ROLE_ADMIN : 
+                        ($organization->getPlan() == ORGANIZATION::PLAN_FREE || $organization->getPlan() != ORGANIZATION::PLAN_FREE && new DateTime() > $organization->getExpired() ? USER::ROLE_ADMIN : USER::ROLE_AM)
+                )
                 ->setCreatedBy($currentUser->getId());
                 $clientOrganization->addUser($user);
                 

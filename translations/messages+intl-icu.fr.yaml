@@ -107,6 +107,9 @@ welcome: Bienvenue
 fullname: Votre nom complet
 parameters: Paramètres
 
+head_meta:  
+  content: Traitement des opérations client et business en ligne sous la forme de tableaux interactifs. Dealdrive offre une solution de suivi client organisé sous d'un calendrier interactif, où l'on peut échanger documents et updates; dans un but d'un suivi plus fluide et d'une réduction des emails. Utilisez la solution de suivi clients Dealdrive afin d'améliorer vos intéractions clients et collobateurs. 
+
 signup:
   title: Inscription
   do_not_associate_org: Je préfère ne pas associer mon compte à une entreprise pour l'instant
@@ -634,7 +637,7 @@ countdown:
   cta_msg: Inscrivez-vous & bénécifiez de 2 mois d'essai
   your_email: Votre email
   keep_in_touch: Je participe au lancement !
-  thank_you_followup_modal: "Merci de nous suivre dès le début, vous serez prévenu personnellement par notre équipe lors du lancement. A très vite pour construire ensemble révolution de l'expérience client !" 
+  thank_you_followup_modal: "Merci de nous suivre dès le début, vous serez prévenu personnellement par notre équipe lors du lancement. A très vite pour construire ensemble révolution de l'expérience client !"
 
 landing:
   page_name: Votre assistant de suivi des opérations
@@ -736,7 +739,7 @@ header:
     upgrade: Mise à niveau
   
 pricing:
-  page_title: Tarifs
+  page_title: Fonctionnalités & Tarifs
   header_title: "Gérez vos <span class=\"dd-text\">opérations</span> à <span class=\"dd-orange-text\">moindre frais</span>"
   from: À partir de
   user: user
@@ -779,17 +782,30 @@ pricing:
       functionality_2_free: Prédéfinis
       functionality_2_premium: Configurable
   features: Fonctionnalités
-  note_a: Les updates de vos collègues et partenaires sont immédiatement visibles sur votre dashboard, vous recevez une notification par mail au plus tard le lendemain de l'update
-  note_b: Les updates de vos collègues et partenaires sont immédiatement visibles sur votre dashboard, et vous en êtes immédiatement notifiés par mail
-  note_c: Vous et vos collègues voyez le même tableau des opérations
-  note_d: Les tableaux peuvent offrir plusieurs vues, de la vue utilisateur sur ses opérations propres, jusqu'à celle du départment et enfin de l'entreprise
-  note_e: Vous pouvez configurer des updates plus poussés, et voir l'évolution de la performance des opérations dans la durée
   subscriptions: Abonnements
-  note_1: "Le prix mensuel par utilisateur est pour le Plan Premium, 7€ du 1er au 100ème, 6€ du 101ème au 250ème utilisateur, et 5€ au délà. <a class=\"dd-text\" href=\"/#\">Conditions tarifaires</a> applicables" #Pour le tarif Entreprise, 14€ du 1er au 100ème, 10€ du 101ème au 250ème utilisateur, et 7€ au delà. 
+  note_1: Le prix mensuel par utilisateur est pour le Plan Premium, 7€ du 1er au 100ème, 6€ du 101ème au 250ème utilisateur, et 5€ au délà. <a class=\"dd-text\" href="/terms-and-conditions">Conditions tarifaires</a> applicables #Pour le tarif Entreprise, 14€ du 1er au 100ème, 10€ du 101ème au 250ème utilisateur, et 7€ au delà. 
   note_2: Limité à 3 collaborateurs
-  note_3: A venir prochainement
   trial_21_days_cta: 21 jours premium gratuits
   start_now: Démarrez dès maintenant
+
+account_management:
+  title: Abonnements
+  header_title: Vos abonnements
+  your_plan: Votre plan
+  left_days: >- 
+    {days, plural,
+      =0    {Passez à l'abonnement Premium}
+      one   {1 jour d'essai restant}
+      other {# jours d'essai restants}
+    }
+  subscribe: Souscrire
+  see_account_details: Voir détails
+  my_account_details: Détails de mon compte
+  account_created_on: Créé le
+  unsubscribe: Résilier
+  nb_accounts: Nombre de comptes
+  nb_accounts_info: Nombre de comptes utilisateur au sein de votre entreprise
+  upgrade: Mettre à niveau
 
 login:
   title: Connexion
@@ -2290,6 +2306,7 @@ activities:
   do_you_want_continue: Voulez vous continuer ?
   see_input: Voir mes contributions
   orphans: Orphelines
+  unlinked: Non liée(s)
   my_activities_page_title: Mes activités
   firm_activities_page_title: Activités de l'entité
   mobile_header_title: Activités

@@ -8,10 +8,7 @@
     <!-- CSS custom -->
     <link rel="stylesheet" href="{{ asset('css/styleLanding.css') }}">
     <link rel="stylesheet" href="{{ asset('css/homepage.css') }}">
-    <!-- Font awesome-->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css">
-    <!-- Materialize icons -->
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/footer.css') }}">  
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
 
@@ -71,249 +68,165 @@
     Login
 {% endblock %}
 
-  {% set difference = date('10/11/2020 10:00:00').diff(date('now')) %}
-  {% set isLaunched = difference.invert == 0 %}
-
 {% block content %}
+
     <div class="page-container">
-
-        {% if isLaunched %}
-
-            <section class="row with-dashboard">
-                <div class="col m5 s12">
-                    
-                    <h3 class="motto motto-elmt">{{'landing.motto'|trans}}</h3>
-                    <h5 class="motto-elmt">{{ 'landing.motto_promise'|trans }}</h5>
-                </div>
-                {% set startCalDate = date("first day of " ~ date('now - 3 months')|format_datetime('short','none', pattern="MMMM", locale="en") ~ " " ~ date('now - 3 months')|format_datetime('short','none',pattern='Y')) %}
-                {% set endCalDate = date("last day of " ~ date('now + 3 months')|format_datetime('short','none', pattern="MMMM", locale="en") ~ " " ~ date('now + 3 months')|format_datetime('short','none',pattern='Y')) %}
-                {% set currentDateDays = date('now').diff(startCalDate).days %}
-                {% set lengthCalDays = endCalDate.diff(startCalDate).days %}
-
-                <div class="col m7 s12 calendar-element" data-c="{{ currentDateDays }}" data-l="{{ lengthCalDays }}">
-                    <div class="row calendar-holder no-margin">
-                        <div class="col no-padding m9 s8 activity-holder">
-                            <div class="curDate"></div>
-                            {% set monthMinus3 = date('now')|date_modify("-3 months")|format_datetime('short','none',pattern='MMMMM') %}
-                            {% set monthMinus2 = date('now')|date_modify("-2 months")|format_datetime('short','none',pattern='MMMMM') %}
-                            {% set monthMinus1 = date('now')|date_modify("-1 months")|format_datetime('short','none',pattern='MMMMM') %}
-                            {% set monthMinus0 = date('now')|date_modify("+0 months")|format_datetime('short','none',pattern='MMMMM') %}
-                            {% set monthPlus1 = date('now')|date_modify("+1 months")|format_datetime('short','none',pattern='MMMMM') %}
-                            {% set monthPlus2 = date('now')|date_modify("+2 months")|format_datetime('short','none',pattern='MMMMM') %}
-                            {% set monthPlus3 = date('now')|date_modify("+3 months")|format_datetime('short','none',pattern='MMMMM') %}
-                            <ul class="months-holder">
-                                <li>{{monthMinus3}}</li>
-                                <li>{{monthMinus2}}</li>
-                                <li>{{monthMinus1}}</li>
-                                <li>{{monthMinus0}}</li>
-                                <li>{{monthPlus1}}</li>
-                                <li>{{monthPlus2}}</li>
-                                <li>{{monthPlus3}}</li>
-                            </ul>
-                            {% for k in 0..2 %}
-                                <ul class="stages-holder no-margin" style="position:relative">
-                                    {% set startdate = random(7,160) %}
-                                    {% set period = random(max(0,15 - startdate), 190 - startdate) %}
-                                    <ol class="activity-component" data-sd="{{startdate}}" data-p="{{period}}">
-                                        {% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateU: startdate, period: period, embeddedStages: null, visibleEl: true, participants: workerFirmActDummies[k].participants, dummyActName: workerFirmActDummies[k].actName } %}
-
-                                        {% for l in 0..workerFirmActDummies[k].events|length - 1 %}
-                                            {% set onsetdate = startdate + random(max(0,15 - startdate),period) %}
-                                            {% set eperiod = random(0,startdate + period - onsetdate) %}
-                                            {% set m = random(0,workerFirmActDummies[k].events[l].types|length - 1) %}
-                                            {% include "components/home_event_temporal__item.html.twig" with {onsetdate: onsetdate, period: eperiod, eg_id: workerFirmActDummies[k].events[l].id, eg_name: workerFirmActDummies[k].events[l].name, et_name: workerFirmActDummies[k].events[l].types[m].name, icon_type: workerFirmActDummies[k].events[l].types[m].icon_type, icon_name: workerFirmActDummies[k].events[l].types[m].icon_name } %}
-                                        {% endfor %}
-                                    </ol>
-                                </ul>
-                            {% endfor %}
-                            <span class="dd-text dummy-data-disclaimer">{{'landing.dummy_data_disclaimer'|trans}}</span>
-                        </div>
-
-                        <div class="col m3 s4 act-infos">
-
-                            {% for k in 0..2 %}
-                                <div style="position:relative;" class="act-elmt-info">
-                                    <span class="act-info-name">{{ workerFirmActDummies[k].actName }}</span>
-                                    <div class="activity-clients flex-center">
-                                        <small class="sm-right">{{ ' - ' ~ 'with'|trans }}</small>
-                                        <a class="badge-container activity-client-name tooltipped" data-tooltip="{{ workerFirmActDummies[k].name }}">
-                                            <img class="client-logo" src="{{ workerFirmActDummies[k].logo }}" alt="">
-                                        </a>
-                                    </div>
-
-                                    <div class="fixed-action-btn modified-fixed-btn" style="visibility: hidden;">
-                            
-                                        <a class="btn-floating">
-                                            <i class="material-icons">create</i>
-                                        </a>
-                        
-                                        <ul class="flex-center act-action-buttons">
-                                            <li>
-                                                <a class="btn-floating act-btn tooltipped modal-trigger" href="#updateEvent" data-tooltip="{{ 'activities.instant_add'|trans }}" data-position="top" data-aid="{{k}}" data-sid="{{ 10+k }}"><i class="material-icons">offline_bolt</i></a>
-                                            </li>
-                                            <li>
-                                                <a class="btn-floating act-btn tooltipped modal-trigger" href="#updateStageProgressStatus" data-position="top" data-html="true" data-tooltip="{{ 'activities.update_status'|trans}}" data-eid="{{ k }}"><i class="material-icons">update</i></a>
-                                            </li>
-                                            <li>
-                                                <a class="btn-floating act-btn tooltipped" href="#" data-position="top" data-html="true" data-tooltip="{{ 'activities.modify'|trans}}"><i class="material-icons">settings</i></a>
-                                            </li>                           
-                                            <li>
-                                                <a class="btn-floating act-btn tooltipped" data-tooltip="{{ 'activities.provide_my_feedbacks'|trans }}" data-position="top" href="#"><i class="fa fa-pen-alt"></i></a>
-                                            </li>
-                                            {#}
-                                            {% if true %}
-                                            <li>
-                                                <a class="btn-floating act-btn tooltipped" data-tooltip="{{ 'result'|trans }}" data-position="top" href="{{ path('activityResults', { actId: k }) }}"><i class="material-icons">show_chart</i></a>
-                                            </li>
-                                            {% endif %}
-                                            #}
-                                        </ul>    
-                                    </div>
-                                </div>
-
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <img class="arrow-hand-elmt" src="{{ asset('lib/img/arrow_by_hand.png')}}" alt="Arrow by hand">
-                </div>
-        
-            </section>
-
-            <section class="" style="font-size:17px">
-                <div class="row valign-wrapper landing-section-steps-r">
-                    <div class="col m6 s12">
-                        <h4>{% trans %}landing.section_1.title{% endtrans %}</h4>
-                        <p>{% trans %}landing.section_1.paragraph_1{% endtrans %}</p>
-                        <ul class="section-detailed-func">
-                            <li>{% trans %}landing.section_1.item_1{% endtrans %}</li>
-                            <li>{% trans %}landing.section_1.item_2{% endtrans %}</li>
-                            <li>{% trans %}landing.section_1.item_3{% endtrans %}</li>
-                        </ul>
-                    </div>
-                    <div class="col m6 s12">
-                        <div style="width:80%;margin:auto">
-                            <img src="{{ asset('lib/img/client_relation_enhanced.png') }}" alt="Circle with all firm actors" style="width:100%">
-                        </div>
-                    </div>
-                </div>
-                <div class="row valign-wrapper landing-section-steps">
-                    <div class="col m6 s12">
-                        <div>
-                            <ul class="landing-section-steps-elements">
-                                <li><span>{% trans %}landing.section_2.step_1{% endtrans %}</span></li>
-                                <li><span>{% trans %}landing.section_2.step_2{% endtrans %}</span></li>
-                                <li><span>{% trans %}landing.section_2.step_3{% endtrans %}</span></li>
-                                <li><span>{% trans %}landing.section_2.step_4{% endtrans %}</span></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col m6 s12">
-                        <h4>{% trans %}landing.section_2.title{% endtrans %}</h4>
-                        <p>{% trans %}landing.section_2.paragraph_1{% endtrans %}</p>
-                        <ul class="section-detailed-func">
-                            <li>{% trans %}landing.section_2.item_1{% endtrans %}</li>
-                            <li>{% trans %}landing.section_2.item_2{% endtrans %}</li>
-                            <li>{% trans %}landing.section_2.item_3{% endtrans %}</li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="row valign-wrapper landing-section-steps-r">
-                    <div class="col m6 s12">
-                        <h4>{% trans %}landing.section_3.title{% endtrans %}</h4>
-                        <p>{% trans %}landing.section_3.paragraph_1{% endtrans %}</p>
-                        <p>{% trans %}landing.section_3.paragraph_2{% endtrans %}</p>
-                        <p>{% trans %}landing.section_3.paragraph_3{% endtrans %}</p>
-                    </div>
-                    <div class="col m6 s12">
-                        <div style="width:50%;margin:auto">
-                            <img src="{{ asset('lib/img/secure-web-hosting.jpeg') }}" alt="Secure web hosting" style="width:100%">
-                        </div>
-                    </div>
-                </div>
-
-            </section>
-        
-        {% else %}
-            <main>
-                <div class="countdown-page">
+        <section class="row with-dashboard">
+            <div class="col m5 s12">
                 
-                    {#<div class="row no-margin white-text ">#}
-                    <ul class="flex-center">
-                        <div class="s-title"></div>
-                        <li class="macbook-with-dd">
-                            <img src="{{asset('lib/img/macbook_with_DD_in_browser.png')}}" alt="">
-                        </li>
-                        <li class="white-text cta-dd">
-                            <div class="m-title">
-                                <h3 class="white-text" style="font-weight:700;">{{'countdown.motto'|trans}}</h3>
-                            </div>
-                            
-                            <div class="countdown-elmts">
-                                <div>{{ 'countdown.coming_live_soon'|trans ~ ' 🐣' }}</div>
-                                <h5 id="countdown">
-                                    <ul class="flex-center" style="justify-content:space-between; width:100%">
-                                        <li class="ct-elmt">
-                                            <ul>
-                                                <li id="ct-d"></li>
-                                                <li>{{'days'|trans}}</li>
-                                            </ul>
-                                        </li>
-                                        <li class="ct-elmt">
-                                            <ul>
-                                                <li id="ct-h"></li>
-                                                <li>{{'hours'|trans}}</li>
-                                            </ul>
-                                        </li>
-                                        <li class="ct-elmt">
-                                            <ul>
-                                                <li id="ct-m"></li>
-                                                <li>{{'minutes'|trans}}</li>
-                                            </ul>
-                                        </li>
-                                        <li class="ct-elmt">
-                                            <ul>
-                                                <li id="ct-s"></li>
-                                                <li>{{'seconds'|trans}}</li>
-                                            </ul>
-                                        </li>
-                                    </ul>
-                                </h5>
-                            </div>
+                <h3 class="motto motto-elmt">{{'landing.motto'|trans}}</h3>
+                <h5 class="motto-elmt">{{ 'landing.motto_promise'|trans }}</h5>
+            </div>
+            {% set startCalDate = date("first day of " ~ date('now - 3 months')|format_datetime('short','none', pattern="MMMM", locale="en") ~ " " ~ date('now - 3 months')|format_datetime('short','none',pattern='Y')) %}
+            {% set endCalDate = date("last day of " ~ date('now + 3 months')|format_datetime('short','none', pattern="MMMM", locale="en") ~ " " ~ date('now + 3 months')|format_datetime('short','none',pattern='Y')) %}
+            {% set currentDateDays = date('now').diff(startCalDate).days %}
+            {% set lengthCalDays = endCalDate.diff(startCalDate).days %}
 
-                            {{'countdown.cta_msg'|trans ~' 😍'}}
-                            <form action="" method="post">
-                                <div class="row input-field">
-                                    <label for="follower">{{'countdown.your_email'|trans}}</label>
-                                    <input type="text" class="no-margin" name="follower">
+            <div class="col m7 s12 calendar-element" data-c="{{ currentDateDays }}" data-l="{{ lengthCalDays }}">
+                <div class="row calendar-holder no-margin">
+                    <div class="col no-padding m9 s8 activity-holder">
+                        <div class="curDate"></div>
+                        {% set monthMinus3 = date('now')|date_modify("-3 months")|format_datetime('short','none',pattern='MMMMM') %}
+                        {% set monthMinus2 = date('now')|date_modify("-2 months")|format_datetime('short','none',pattern='MMMMM') %}
+                        {% set monthMinus1 = date('now')|date_modify("-1 months")|format_datetime('short','none',pattern='MMMMM') %}
+                        {% set monthMinus0 = date('now')|date_modify("+0 months")|format_datetime('short','none',pattern='MMMMM') %}
+                        {% set monthPlus1 = date('now')|date_modify("+1 months")|format_datetime('short','none',pattern='MMMMM') %}
+                        {% set monthPlus2 = date('now')|date_modify("+2 months")|format_datetime('short','none',pattern='MMMMM') %}
+                        {% set monthPlus3 = date('now')|date_modify("+3 months")|format_datetime('short','none',pattern='MMMMM') %}
+                        <ul class="months-holder">
+                            <li>{{monthMinus3}}</li>
+                            <li>{{monthMinus2}}</li>
+                            <li>{{monthMinus1}}</li>
+                            <li>{{monthMinus0}}</li>
+                            <li>{{monthPlus1}}</li>
+                            <li>{{monthPlus2}}</li>
+                            <li>{{monthPlus3}}</li>
+                        </ul>
+                        {% for k in 0..2 %}
+                            <ul class="stages-holder no-margin" style="position:relative">
+                                {% set startdate = random(7,160) %}
+                                {% set period = random(max(0,15 - startdate), 190 - startdate) %}
+                                <ol class="activity-component" data-sd="{{startdate}}" data-p="{{period}}">
+                                    {% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateU: startdate, period: period, embeddedStages: null, visibleEl: true, participants: workerFirmActDummies[k].participants, dummyActName: workerFirmActDummies[k].actName } %}
+
+                                    {% for l in 0..workerFirmActDummies[k].events|length - 1 %}
+                                        {% set onsetdate = startdate + random(max(0,15 - startdate),period) %}
+                                        {% set eperiod = random(0,startdate + period - onsetdate) %}
+                                        {% set m = random(0,workerFirmActDummies[k].events[l].types|length - 1) %}
+                                        {% include "components/home_event_temporal__item.html.twig" with {onsetdate: onsetdate, period: eperiod, eg_id: workerFirmActDummies[k].events[l].id, eg_name: workerFirmActDummies[k].events[l].name, et_name: workerFirmActDummies[k].events[l].types[m].name, icon_type: workerFirmActDummies[k].events[l].types[m].icon_type, icon_name: workerFirmActDummies[k].events[l].types[m].icon_name } %}
+                                    {% endfor %}
+                                </ol>
+                            </ul>
+                        {% endfor %}
+                        <span class="dd-text dummy-data-disclaimer">{{'landing.dummy_data_disclaimer'|trans}}</span>
+                    </div>
+
+                    <div class="col m3 s4 act-infos">
+
+                        {% for k in 0..2 %}
+                            <div style="position:relative;" class="act-elmt-info">
+                                <span class="act-info-name">{{ workerFirmActDummies[k].actName }}</span>
+                                <div class="activity-clients flex-center">
+                                    <small class="sm-right">{{ ' - ' ~ 'with'|trans }}</small>
+                                    <a class="badge-container activity-client-name tooltipped" data-tooltip="{{ workerFirmActDummies[k].name }}">
+                                        <img class="client-logo" src="{{ workerFirmActDummies[k].logo }}" alt="">
+                                    </a>
                                 </div>
-                                <a class="btn waves-effect waves-light orange get-notified-launch-btn">{{'countdown.keep_in_touch'|trans}}</a>
-                            </form>
-                        </li>
-                       
+
+                                <div class="fixed-action-btn modified-fixed-btn" style="visibility: hidden;">
+                        
+                                    <a class="btn-floating">
+                                        <i class="material-icons">create</i>
+                                    </a>
                     
-                    </ul>
+                                    <ul class="flex-center act-action-buttons no-wrap">
+                                        <li>
+                                            <a class="btn-floating act-btn tooltipped modal-trigger" href="#updateEvent" data-tooltip="{{ 'activities.instant_add'|trans }}" data-position="top" data-aid="{{k}}" data-sid="{{ 10+k }}"><i class="material-icons">offline_bolt</i></a>
+                                        </li>
+                                        <li>
+                                            <a class="btn-floating act-btn tooltipped modal-trigger" href="#updateStageProgressStatus" data-position="top" data-html="true" data-tooltip="{{ 'activities.update_status'|trans}}" data-eid="{{ k }}"><i class="material-icons">update</i></a>
+                                        </li>
+                                        <li>
+                                            <a class="btn-floating act-btn tooltipped" href="#" data-position="top" data-html="true" data-tooltip="{{ 'activities.modify'|trans}}"><i class="material-icons">settings</i></a>
+                                        </li>                           
+                                        <li>
+                                            <a class="btn-floating act-btn tooltipped" data-tooltip="{{ 'activities.provide_my_feedbacks'|trans }}" data-position="top" href="#"><i class="fa fa-pen-alt"></i></a>
+                                        </li>
+                                        {#}
+                                        {% if true %}
+                                        <li>
+                                            <a class="btn-floating act-btn tooltipped" data-tooltip="{{ 'result'|trans }}" data-position="top" href="{{ path('activityResults', { actId: k }) }}"><i class="material-icons">show_chart</i></a>
+                                        </li>
+                                        {% endif %}
+                                        #}
+                                    </ul>    
+                                </div>
+                            </div>
 
-                   
-                    {#</div>#}
+                        {% endfor %}
+                    </div>
                 </div>
-            </main>
+                <img class="arrow-hand-elmt" src="{{ asset('lib/img/arrow_by_hand.png')}}" alt="Arrow by hand">
+            </div>
+    
+        </section>
 
-            <div id="subscribed" class="modal">
-                <div class="modal-content">
-                    <p>{{ 'countdown.thank_you_followup_modal'|trans ~ ' 🚀'}}</p>
-                    <div class="flex-center" style="justify-content:flex-end;">
-                        <div class="button-field">
-                            <a class="waves-effect waves-green btn modal-close">Ok</a>
-                        </div>
+        <section class="" style="font-size:17px">
+            <div class="row valign-wrapper landing-section-steps-r">
+                <div class="col m6 s12">
+                    <h4>{% trans %}landing.section_1.title{% endtrans %}</h4>
+                    <p>{% trans %}landing.section_1.paragraph_1{% endtrans %}</p>
+                    <ul class="section-detailed-func">
+                        <li>{% trans %}landing.section_1.item_1{% endtrans %}</li>
+                        <li>{% trans %}landing.section_1.item_2{% endtrans %}</li>
+                        <li>{% trans %}landing.section_1.item_3{% endtrans %}</li>
+                    </ul>
+                </div>
+                <div class="col m6 s12">
+                    <div style="width:80%;margin:auto">
+                        <img src="{{ asset('lib/img/client_relation_enhanced.png') }}" alt="Circle with all firm actors" style="width:100%">
+                    </div>
+                </div>
+            </div>
+            <div class="row valign-wrapper landing-section-steps">
+                <div class="col m6 s12">
+                    <div>
+                        <ul class="landing-section-steps-elements">
+                            <li><span>{% trans %}landing.section_2.step_1{% endtrans %}</span></li>
+                            <li><span>{% trans %}landing.section_2.step_2{% endtrans %}</span></li>
+                            <li><span>{% trans %}landing.section_2.step_3{% endtrans %}</span></li>
+                            <li><span>{% trans %}landing.section_2.step_4{% endtrans %}</span></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col m6 s12">
+                    <h4>{% trans %}landing.section_2.title{% endtrans %}</h4>
+                    <p>{% trans %}landing.section_2.paragraph_1{% endtrans %}</p>
+                    <ul class="section-detailed-func">
+                        <li>{% trans %}landing.section_2.item_1{% endtrans %}</li>
+                        <li>{% trans %}landing.section_2.item_2{% endtrans %}</li>
+                        <li>{% trans %}landing.section_2.item_3{% endtrans %}</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="row valign-wrapper landing-section-steps-r">
+                <div class="col m6 s12">
+                    <h4>{% trans %}landing.section_3.title{% endtrans %}</h4>
+                    <p>{% trans %}landing.section_3.paragraph_1{% endtrans %}</p>
+                    <p>{% trans %}landing.section_3.paragraph_2{% endtrans %}</p>
+                    <p>{% trans %}landing.section_3.paragraph_3{% endtrans %}</p>
+                </div>
+                <div class="col m6 s12">
+                    <div style="width:50%;margin:auto">
+                        <img src="{{ asset('lib/img/secure-web-hosting.jpeg') }}" alt="Secure web hosting" style="width:100%">
                     </div>
                 </div>
             </div>
 
-        {% endif %}
-
-        
-    
+        </section>
     </div>
+
+    {% include "components/footer.html.twig" with {validatedCookieBanner: validatedCookieBanner} %}
 
     {% if global.request.cookies.get('signup') is not null %}
 
@@ -345,17 +258,6 @@
         </div>
     </div>
     #}
-    {% if not validatedCookieBanner %}
-        <div class="cookies-banner">
-            <div class="flex-center"> 
-            <div class="c-flex">
-                <span>{{'footer.cookies_banner_msg'|trans}}</span>
-                <a class="strong black-text" href="{{ url('cookie_policy') }}">{{'learn_more'|trans|capitalize}}</a>
-            </div>
-            <div class="m-right btn">Ok</div>
-            </div>
-        </div>
-    {% endif %}
 
 {% endblock %}
 {% block javascripts %}

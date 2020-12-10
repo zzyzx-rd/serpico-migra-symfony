@@ -1,0 +1,192 @@
+<table class="{% if not subscribedPlan|default %}highlight{% endif %} centered pricing-table">
+
+    <thead {% if planDetailsHidden %}style="display:none"{% endif %}>
+        <tr>
+            <th>{{'pricing.pricing_table.plan_title'|trans}}</th>
+            <th></th>
+            <th> 
+                <div class="table-headers">
+                    <i class="fa fa-seedling free-plan-icon"></i>
+                    <div class="c-flex-center">
+                        <div>{{'pricing.free_column_title'|trans|raw}}</div>
+                    </div>
+                    <span class="table-title dd-text">{{'pricing.pricing_table.plan_free'|trans|upper}}<sup class="dd-text">2</sup></span>
+                </div>
+            </th>
+            <th>
+                <div class="table-headers">
+                    <i class="fa fa-dove premium-plan-icon" style="position: relative;">
+                        {% if isDiscountMsgSagByDove %}
+                        <i class="fa fa-map-marker free-month">
+                            <div class="event-logo-container flex-center free-month-logo-content" >
+                                <span class="free-month-number">2</span>
+                                <span class="free-month-promotion">{{'subscription.months_free'|trans }}</span>
+                            </div>
+                        </i>
+                        {% endif %}
+                    </i>
+                    <div class="c-flex-center">
+                    <div>{{'pricing.from'|trans}}</div>
+                    <div class="price-line"><span class="price-value">7</span><span class="price-ccy">€</span></div>
+                    <div><span class="period-month">{{ '/' ~ 'month'|trans }}</span><span class="period-year" >{{ '/' ~ 'year_short'|trans }}</span><sup class="dd-text">1</sup></div>
+                    </div>
+                    <span class="table-title dd-text">{{'pricing.pricing_table.plan_premium'|trans|upper}}</span>
+                </div>
+            </th>
+            {#
+            <th>
+            <div class="table-headers">
+                <i class="fa fa-building enterprise-plan-icon"></i>
+                <div class="c-flex-center">
+                <div>{{'pricing.from'|trans}}</div>
+                <div class="price-line"><span class="price-value">14</span><span class="price-ccy enterprise-ccy">€</span></div>
+                <div><span>{{ '/' ~ 'month'|trans }}</span><span>{{ '/' ~ 'pricing.user'|trans }}</span><sup class="dd-text">1</sup></div>
+                </div>
+                <span class="table-title dd-text">{{'pricing.pricing_table.plan_enterprise'|trans|upper}}<sup class="dd-text">3</sup></span>
+            </div>
+            </th>
+            #}
+        </tr>
+    </thead>
+    <tbody>
+        <tr {% if planDetailsHidden %}style="display:none"{% endif %}>
+            <td class="pricing-param">{{'subscription.payment'|trans }}</td>
+            <td></td>
+            <td></td>
+            <td>
+                <div class="switch">
+                    <label class="black-text">
+                        {{'subscription.monthly'|trans}}
+                        <input type="checkbox">
+                        <span class="lever"></span>
+                        {{'subscription.annually'|trans}}
+                    </label>
+                </div>
+            </td>
+        </tr>
+        <tr {% if planDetailsHidden %}style="display:none"{% endif %}>
+            <td class="pricing-param">{{'subscription.user'|trans }}</td>
+            <td></td>
+            <td></td>
+            <td>
+                <div class="center slider-container">
+                    <div class="flex-center slider-holder">
+                    <div class="user-slider"></div>
+                    <div class="user-slider-range-value">1</div>
+
+                    </div>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td class="strong">{{'functionalities'|trans}}</td>
+            <td class="strong">{#{{'functionalities'|trans}}#}</td>
+            {% if subscribedPlan|default %}
+                <td class="strong f-plan">{{ 'pricing.pricing_table.plan_free'|trans|upper }}</td>
+                <td class="strong p-plan">{{ 'pricing.pricing_table.plan_premium'|trans|upper }}</td>
+            {% else %}
+                <td></td>
+                <td></td>
+            {% endif %}
+            {#<td><i class="fa fa-check dd-text"></i></td>#}
+        </tr>
+        <tr class="stripable">
+            <td></td>
+            <td>{{'pricing.pricing_table.group_1.functionality_1'|trans}}</td>
+            <td class="{{ subscribedPlan|default ? 'f-plan' }}">3</td>
+            <td class="dd-text strong {{ subscribedPlan|default ? 'p-plan' }}">{{'unlimited'|trans|capitalize}}</td>
+            {#<td><i class="fa fa-check dd-text"></i></td>#}
+        </tr>
+        <tr class="stripable">
+            <td>
+            
+            <span class="feature-title flex-center"><i class="fa fa-wallet sm-right"></i>{{'pricing.pricing_table.group_1.title'|trans}}</span>
+            </td>
+            <td>{{'pricing.pricing_table.group_1.functionality_2'|trans}}<i class="fa fa-question-circle sm-left tooltipped" data-tooltip="{{'pricing.pricing_table.group_1.functionality_2_detail'|trans}}"></i></td>
+            <td class="{{ subscribedPlan|default ? 'f-plan' }}">2</td>
+            <td class="dd-text strong {{ subscribedPlan|default ? 'p-plan' }}">{{'unlimited'|trans|capitalize}}</td>
+            {#<td><i class="fa fa-check dd-text"></i></td>#}
+        </tr>
+        <tr class="stripable">
+            <td></td>
+            <td>{{'pricing.pricing_table.group_2.functionality_1'|trans}}</td>
+            <td class="{{ subscribedPlan|default ? 'f-plan' }}">{{'unlimited'|trans|capitalize}}</td>
+            <td class="{{ subscribedPlan|default ? 'p-plan' }}">{{'unlimited'|trans|capitalize}}</td>
+            {#<td><i class="fa fa-check dd-text"></i></td>#}
+        </tr>
+        <tr class="stripable">
+            <td>
+            <span class="feature-title flex-center"><i class="fa fa-user-tag sm-right"></i>{{'pricing.pricing_table.group_2.title'|trans}}</span>
+            </td>
+            <td>{{'pricing.pricing_table.group_2.functionality_2'|trans}}<i class="fa fa-question-circle sm-left tooltipped" data-tooltip="{{'pricing.pricing_table.group_2.functionality_2_detail'|trans}}"></i></td>
+            <td class="{{ subscribedPlan|default ? 'f-plan' }}"><i class="fa fa-user"></i></td>
+            <td class="{{ subscribedPlan|default ? 'p-plan' }}"><i class="fa fa-user sm-right"></i> + <i class="fa dd-text strong fa-user-circle sm-left"></i></td>
+            {#<td><i class="fa fa-check dd-text"></i></td>#}
+        </tr>
+        <tr class="stripable">
+            <td></td>
+            <td>{{'pricing.pricing_table.group_3.functionality_1'|trans}}</td>
+            <td class="{{ subscribedPlan|default ? 'f-plan' }}">
+                <ul class="flex-center no-margin exchanged-data">
+                    <li>
+                        <i class="fa fa-comments tooltipped" data-tooltip="{{'comments'|trans|capitalize}}" data-position="top"></i>
+                        <span class="sm-left sm-right">+</span>
+                        <i class="fa fa-file tooltipped" data-tooltip="{{'documents'|trans|capitalize}}" data-position="top"></i>
+                    </li>
+                    <li>
+                        <span class="xm-left">1 Go</span>
+                    </li>
+                </ul>
+            </td>
+            <td class="{{ subscribedPlan|default ? 'p-plan' }}">
+                <ul class="flex-center no-margin exchanged-data">
+                    <li>
+                        <i class="fa fa-comments tooltipped" data-tooltip="{{'comments'|trans|capitalize}}" data-position="top"></i>
+                        <span class="sm-left sm-right">+</span>
+                        <i class="fa fa-file tooltipped" data-tooltip="{{'documents'|trans|capitalize}}" data-position="top"></i>
+                    </li>
+                    <li>
+                        <span class="dd-text strong xm-left">20 Go</span>
+                    </li>
+                </ul>
+            </td>
+            {#<td><span class="dd-text tooltipped" data-tooltip="{{'comments'|trans|capitalize}}"><i class="fa fa-comments"></i></span><span class="sm-left sm-right">+</span><span class="dd-text tooltipped" data-tooltip="{{'documents'|trans|capitalize}}"><i class="fa fa-file"></i></span></td>#}
+        </tr>
+        <tr class="stripable">
+            <td>
+            <span class="feature-title flex-center"><i class="fa fa-map-marker m-right"></i>{{'pricing.pricing_table.group_3.title'|trans}}</span>
+            </td>
+            <td>{{'pricing.pricing_table.group_3.functionality_2'|trans}}<i class="fa fa-question-circle sm-left tooltipped" data-tooltip="{{'pricing.pricing_table.group_3.functionality_2_detail'|trans}}"></i></td>
+            <td class="{{ subscribedPlan|default ? 'f-plan' }}">{{'pricing.pricing_table.group_3.functionality_2_free'|trans}}</td>
+            <td class="dd-text strong {{ subscribedPlan|default ? 'p-plan' }}">{{'pricing.pricing_table.group_3.functionality_2_premium'|trans}}</td>
+        </tr>
+        <tr class="stripable">
+            <td></td>
+            <td>{{'pricing.pricing_table.group_4.functionality_1'|trans}}</td>
+            <td class="{{ subscribedPlan|default ? 'f-plan' }}">{{'pricing.pricing_table.group_4.functionality_1_free'|trans}}</td>
+            <td class="{{ subscribedPlan|default ? 'p-plan' }}">{{'pricing.pricing_table.group_4.functionality_1_premium'|trans}}</td>
+        </tr>
+        <tr class="stripable">
+            <td>
+            <span class="feature-title flex-center"><i class="fa material-icons sm-right">looks_one</i>{{'pricing.pricing_table.group_4.title'|trans}}</span>
+            </td>
+            <td>{{'pricing.pricing_table.group_4.functionality_2'|trans}}<i class="fa fa-question-circle sm-left tooltipped" data-tooltip="{{'pricing.pricing_table.group_4.functionality_2_detail'|trans}}"></td>
+            <td class="{{ subscribedPlan|default ? 'f-plan' }}"></td>
+            <td class="{{ subscribedPlan|default ? 'p-plan' }}"><i class="fa fa-check dd-text"></i></td>
+        </tr>
+        <tr class="stripable">
+            <td></td>
+            <td>{{'pricing.pricing_table.group_5.functionality_1'|trans}}</td>
+            <td class="{{ subscribedPlan|default ? 'f-plan' }}">{{'pricing.pricing_table.group_5.functionality_1_free'|trans}}</td>
+            <td class="dd-text strong {{ subscribedPlan|default ? 'p-plan' }}">{{'pricing.pricing_table.group_5.functionality_1_premium'|trans}}</td>
+        </tr>
+        <tr class="stripable">
+            <td>
+            <span class="feature-title flex-center"><i class="fa fa-cog sm-right"></i>{{'pricing.pricing_table.group_5.title'|trans}}</span>
+            </td>
+            <td>{{'pricing.pricing_table.group_5.functionality_2'|trans}}</td>
+            <td class="{{ subscribedPlan|default ? 'f-plan' }}">{{'pricing.pricing_table.group_5.functionality_2_free'|trans}}</td>
+            <td class="dd-text strong {{ subscribedPlan|default ? 'p-plan' }}">{{'pricing.pricing_table.group_5.functionality_2_premium'|trans}}</td>
+        </tr>
+    </tbody>
+</table>

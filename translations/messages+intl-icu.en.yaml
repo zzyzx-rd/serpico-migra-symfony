@@ -105,6 +105,9 @@ welcome: Welcome
 fullname: Your full name
 parameters: Parameters
 
+head_meta:
+  content: Business & client operations management through an online and interactive dashboard. DealDrive offers a solution connecting clients client through a calendar dashboard, where one can share documents and updates; in order to enhance client operations and reduce email workload. Use the client followup DealDrive solution improve interactions with your clients and colleagues. 
+
 signup:
   title: Signup
   do_not_associate_org: I prefer not to associate an organization account right now
@@ -804,18 +807,30 @@ pricing:
       functionality_2_free: Predefined
       functionality_2_premium: Configurable
   features: Features
-  note_a: Updates from your partners and colleagues are instantly visible in your dashboard, you receive a mail notification at the latest the following day of the update
-  note_b: Updates from your partners and colleagues are instantly visible in your dashboard, and you get immediately notified by mail
-  note_c: You and your colleagues share the same operation dashboard view
-  note_d: Dashboard offer several views, from the user view related to his own operations, and department view up to organization view 
-  note_e: You can setup advanced updates, and see the evolution of operations and performance along the time
+  functionalities: Features
   subscriptions: Subscriptions
   note_1: "Monthly user fee is for Premium plan, €7 from 1st up to 100th user, 6€ from 101th up to 250th, and 5€ beyond. For Entreprise plan, 14€ from 1st up to 100th user, 10€ from 101th up to 250th, and 7€ beyond. <a class=\"dd-text\" href=\"/#\">TCs</a> apply"
   note_2: Limited to 3 collaborators
-  note_3: To come soon
   trial_21_days_cta: 21 days premium for free
   start_now: Start now
-    
+
+account_management:
+  title: Subscriptions
+  header_title: Your subscriptions
+  left_days: >- 
+    {days, plural,
+      =0    {Upgrade to Premium}
+      one   {one trial day left}
+      other {# trial days left}
+    }
+  subscribe: Subscribe
+  see_account_details: See details
+  my_account_details: My account details
+  account_created_on: Created on
+  unsubscribe: Unsubscribe
+  nb_accounts: Number of accounts
+  upgrade: Upgrade
+
 login:
   title: Login
 
@@ -2186,6 +2201,7 @@ activities:
   modal_error_creation_title: Before going further...
   see_input: See my input
   orphans: Orphans
+  unlinked: Unlinked
   my_activities_page_title: My activities
   firm_activities_page_title: Organization activities
   mobile_header_title: Activities list

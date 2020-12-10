@@ -103,6 +103,12 @@
 
   </script>
   <style>
+
+      main {
+        font-size:20px;
+        margin: 1em 0;
+      }
+
       .elmts{
         background-color: #f1f1f1;
         border-radius: 3px;
@@ -511,11 +517,6 @@
         line-height: 11px;
         z-index: 1;
         font-size: 15px;
-      }
-
-      .participants-t-holder, .criteria-t-holder{
-        flex-direction: column;
-        justify-content: flex-start;
       }
 
       .t-users-barred, .t-fb-barred{
@@ -1182,6 +1183,28 @@
         display: flex;
         justify-content: flex-end;
         margin-top: -20px;
+      }
+
+      .curDate{
+        position: absolute;
+        border-left: 1px dashed black;
+        height: 100%;
+      }
+
+      .chevron{
+        position: absolute;
+        top:-46px;
+        /*
+        background-color: black;
+        width: 2px;
+        height: 45px;
+        */
+      }
+
+      .event{
+        position: absolute;
+        top: -2.1rem;
+        left:-0.3rem;
       }
 
   </style>
@@ -1936,7 +1959,7 @@
             <div class="col s{{ displayProcesses ? 10 : 12}} no-padding">
               <div class="row no-padding no-margin">
                 <div class="col s9 no-padding">
-                  <div class="row no-padding no-margin months-ref">
+                  <div class="row no-padding no-margin ts-scale">
                       <div class="col s1">J</div>
                       <div class="col s1">F</div>
                       <div class="col s1">M</div>
@@ -1999,7 +2022,9 @@
         #}
 
         
-        <ul class="process-list process-list-t no-margin" data-prototype="{% apply escape %}{% include "components/activity2_list__item.html.twig" with {em: em} %}{% endapply %}" data-prototype-no-int-act="{% apply escape %}{% include "components/activity_no_int_act_overlay.html.twig" %}{% endapply %}" data-prototype-evt="{% apply escape %}{% include "components/event_temporal__item.html.twig" %}{% endapply %}">
+        <ul class="process-list process-list-t no-margin" data-prototype="{% apply escape %}{% include "components/activity2_list__item.html.twig" with {em: em, mobile_rendering: false} %}{% endapply %}" data-prototype-no-int-act="{% apply escape %}{% include "components/activity_no_int_act_overlay.html.twig" %}{% endapply %}" data-prototype-evt="{% apply escape %}{% include "components/event_temporal__item.html.twig" %}{% endapply %}">
+          
+          {# We first display activities unlinked to any process #}
           {% if orphanActivities is not empty %}
 
             <li class="process-list--item hierarchized-item">
@@ -2029,7 +2054,7 @@
                             {% set actStatusName = actStatuses[sortingTypeCookie][actStatus] %}
                             {% set showable = global.request.cookies.get('r_s_' ~ sortingTypeCookie ~ '_' ~ actStatusName) is null %}
                           {#{% endif %}#}
-                          {% include "components/activity2_list__item.html.twig" with { activity: activity, showable: showable, sortingType: sortingTypeCookie, actStatus: actStatusName, em:em } %}
+                          {% include "components/activity2_list__item.html.twig" with { activity: activity, showable: showable, sortingType: sortingTypeCookie, actStatus: actStatusName, em:em, mobile_rendering: false } %}
                         {% endfor %}
                       {% endfor %}
                     {% else %}
@@ -2039,7 +2064,7 @@
                             {% set actStatusName = actStatuses[sortingTypeCookie][actStatus] %}
                             {% set showable = global.request.cookies.get('r_s_' ~ sortingTypeCookie ~ '_' ~ actStatusName) is null %}
                           {#{% endif %}#}
-                          {% include "components/activity2_list__item.html.twig" with { activity: activity, showable: showable, sortingType: sortingTypeCookie, actStatus: actStatusName, em:em } %}
+                          {% include "components/activity2_list__item.html.twig" with { activity: activity, showable: showable, sortingType: sortingTypeCookie, actStatus: actStatusName, em:em, mobile_rendering: false } %}
                         {% endfor %}
                     {% endif %}
                     </ul>
@@ -2075,7 +2100,7 @@
 
                         {% for activity in processStatusActivities %}
 
-                          {% include "components/activity2_list__item.html.twig" with { activity: activity, showable: showable, sortingType: sortingTypeCookie, dateType: dateTypeCookie, actStatus: actStatusName, em:em } %}
+                          {% include "components/activity2_list__item.html.twig" with { activity: activity, showable: showable, sortingType: sortingTypeCookie, dateType: dateTypeCookie, actStatus: actStatusName, em:em, mobile_rendering: false } %}
                           
                         {% endfor %}
                       {% endfor %}

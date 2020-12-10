@@ -1,11 +1,19 @@
 {% extends "layout.html.twig" %}
 
 {% block title %}
-    {% trans %}terms_conditions.page_name{% endtrans %}
+    {{'terms_conditions.page_name'|trans}}
+{% endblock %}
+
+{% block mobile_title %}
+    {{'terms_conditions.page_name'|trans}}
+{% endblock %}
+
+{% block pagename %}
+    {{'terms_conditions.page_name'|trans}}
 {% endblock %}
 
 {% block css %}
-
+    <link rel="stylesheet" href="{{ asset('css/footer.css') }}">
     <style>
         section:first-of-type > p{
             margin:0;
@@ -23,10 +31,6 @@
 
 {% block username %}
     {{ currentuser.firstname }} {{ currentuser.lastname }}
-{% endblock %}
-
-{% block pagename %}
-    {% trans %}terms_conditions.header_title{% endtrans %}
 {% endblock %}
 
 {% block content %}
@@ -106,20 +110,9 @@
             <p>{% trans %}terms_conditions.updated_date{% endtrans %}</p>
         </section>
 
-
        {#<iframe src="{{ absolute_url(asset('lib/pdf/201812_Serpico_TC_FR.pdf'))}}" frameborder="0"></iframe>#}
     </div>
-    {% if not validatedCookieBanner %}
-        <div class="cookies-banner">
-            <div class="flex-center"> 
-            <div class="c-flex">
-                <span>{{'footer.cookies_banner_msg'|trans}}</span>
-                <a class="strong black-text" href="{{ url('cookie_policy') }}">{{'learn_more'|trans|capitalize}}</a>
-            </div>
-            <div class="btn">Ok</div>
-            </div>
-        </div>
-    {% endif %}
+    {% include "components/footer.html.twig" with {validatedCookieBanner: validatedCookieBanner} %}
 </main>
 {% endblock %}
 

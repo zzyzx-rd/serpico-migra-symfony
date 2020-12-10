@@ -191,6 +191,7 @@ class UserController extends MasterController
         if ($signupForm->isSubmitted()) {
             if ($signupForm->isValid()) {
                 $username = $user->getUsername();
+                $email = $signupForm->get('email')->getData();
                 $nameElmts = explode(" ", $username, 2); 
                 $firstname = trim($nameElmts[0]);
                 $lastname = trim($nameElmts[1]);
@@ -208,11 +209,13 @@ class UserController extends MasterController
                 $userGlobal = new UserGlobal();
                 $userGlobal->setUsername($username)
                     ->addUserAccount($user);
+                $em->persist($userGlobal);
                 
                 $this->forward('App\Controller\OrganizationController::updateOrgFeatures', ['organization' => $organization, 'nonExistingOrg' => true, 'createdAsClient' => false,  'createSynthUser' => false]);
-
                 $em->persist($organization);
-                $em->persist($userGlobal);
+                $em->flush();
+                $this->forward('App\Controller\SettingsController::createDefaultSubscription',['organization' => $organization, 'email' => $email]);
+                $em->persist($organization);
                 $em->flush();
 
                 //Sending mail to DealDrive root users 
@@ -220,8 +223,8 @@ class UserController extends MasterController
                 $repoU = $em->getRepository(User::class);
                 $recipients = $repoU->findBy(['role' => 4]);
 
-                $settings['fullname']   = $username;
-                $settings['userEmail']      = $user->getEmail();
+                $settings['fullname'] = $username;
+                $settings['userEmail'] = $user->getEmail();
                 
                 $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'userSignupInfo']);
                 
@@ -480,7 +483,9 @@ class UserController extends MasterController
             }
             
             $em->flush();
-
+            $this->forward('App\Controller\SettingsController::createDefaultSubscription',['organization' => $organization, 'email' => $currentUser->getEmail()]);
+            $em->persist($organization);
+            $em->flush();
         }
 
         $this->guardHandler->authenticateUserAndHandleSuccess(

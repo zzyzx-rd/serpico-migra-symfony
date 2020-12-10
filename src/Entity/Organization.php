@@ -394,21 +394,17 @@ class Organization extends DbObject
      */
     public function getCustomerId(): ?string
     {
-
-
         return $this->customerId;
     }
 
     /**
      * @param string $customerId
      */
-    public function setCustomerId(string $customerId): void
+    public function setCustomerId(string $customerId): self
     {
         $this->customerId = $customerId;
+        return $this;
     }
-
-
-
 
     public function getOrgId(): ?int
     {
@@ -1174,7 +1170,7 @@ class Organization extends DbObject
     }
 
     /**
-     * @return ArrayCollection|OrganizationPaymentMethod []
+     * @return ArrayCollection|OrganizationPaymentMethod[]
      */
     public function getPaymentMethods()
     {

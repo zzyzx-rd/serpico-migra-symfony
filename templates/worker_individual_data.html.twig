@@ -32,6 +32,7 @@
         var surl = "{{path('dynamicSearchParticipant')}}";
         var suourl = "{{ url('addAccount') }}";
         var daurl = "{{ url('deleteAccount') }}";
+        var csurl = "{{ url('manageSubscriptions') }}";
     </script>
     <style>
         .firm-option-logo{
@@ -322,6 +323,16 @@
                         </div>
                         {{ form_rest(form) }}
                         {{ form_end(form) }}
+                    </section>
+
+                    <section>
+                        <div class="flex-center-sb">
+                            <h5>Mes abonnements</h5>
+                            <a class="btn-flat add-account-btn dd-text modify-btn check-subscriptions" href="">
+                                <span class="sm-right">{{'manage'|trans}}</span>
+                                <i class="fa fa-cog"></i>
+                            </a>
+                        </div>
                     </section>
 
                     <section>
@@ -658,7 +669,16 @@
                     }
                 })
 
-            })
+
+                $('.check-subscriptions').on('click',function(e){
+                    e.preventDefault();
+                    $.get(csurl)
+                        .done(function(data){
+                            window.location = data.cpurl;
+                        })
+                });
+
+            });
         </script>
         <script src="{{ absolute_url(asset('js/worker_individual_update.js')) }}"></script>
 {% endblock %}

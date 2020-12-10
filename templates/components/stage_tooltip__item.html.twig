@@ -32,7 +32,7 @@
           #}
         {% else %}
           {% if stage.survey == null %}
-            <ul class="flex criteria-t-holder">
+            <ul class="c-flex criteria-t-holder">
               {% for criterion in stage.criteria %}
                 <li class="t-criterion">
                   <span class="cn-icon"  style="width:15px"><i class="{{criterion.cName.icon.type}} fa-{{criterion.cName.icon.name}}"></i></span>
@@ -49,7 +49,7 @@
       </div>
       <div class="col m6 s12 t-participants-zone" style="text-align: left;">
         {{ 'activity_elements.participants'|trans }}
-        <ul class="flex participants-t-holder" data-prototype-no-participants="{% apply escape %}{% include "components/stage_tooltip_no_participant_elmt.html.twig" %}{% endapply %}" data-prototype="{% apply escape %}{% include "components/stage_tooltip_participant__item.html.twig" %}{% endapply %}">
+        <ul class="flex participants-t-holder c-flex" data-prototype-no-participants="{% apply escape %}{% include "components/stage_tooltip_no_participant_elmt.html.twig" %}{% endapply %}" data-prototype="{% apply escape %}{% include "components/stage_tooltip_participant__item.html.twig" %}{% endapply %}">
 
           {% if stage|default %}
           

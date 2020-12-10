@@ -135,6 +135,11 @@ var anneeSuiv = annee + 1;
 const $sentDatesOptions = { month: 'numeric', day: 'numeric', year: 'numeric'};
 var ts = getCookie("ts");
 var ci = getCookie("ci");
+var mr = $('#activities-container').hasClass('mr') ? 1 : 0;
+
+if(mr){
+  $('.ts-scale > *').not('.chevron').css('min-height', Math.round(900 / $('.ts-scale').children().not('.chevron').length).toString() + 'px');
+}
 
 function dTrans($elmts, $entity, $prop){
   var tElmts = [];
@@ -333,7 +338,7 @@ $(function () {
     $('.start-int-value').empty().append('1/1');
     $('.end-int-value').empty().append('31/12');
   }
-  var centralElWidth = $('.activity-content-stage:visible').eq(0).width();
+  var centralElSize = mr ? 900 : $('.activity-content-stage:visible').eq(0).width();
   var now = new Date();
   var annee = now.getFullYear();
   var c = now;
@@ -372,7 +377,7 @@ $(function () {
 //var dateChevron = $('.chevron');
 
 
-//var echelle = centralElWidth / tDays;
+//var echelle = centralElSize / tDays;
   
 
 /*
@@ -394,8 +399,8 @@ $(function () {
    */
   function displayTemporalActivities($activities, $nbSubInt, $nonEmptySet, $setEvents){
 
-    var centralElWidth = $('.activity-content-stage:visible').length ? $('.activity-content-stage:visible').eq(0).width() : ($('.dummy-activities-container').length ? $('.dummy-activities-container').width() * 0.75 : $('.no-int-act-overlay').width() * 0.75);
-    var echelle = centralElWidth / tDays;
+    var centralElSize = mr ? 900 : ($('.activity-content-stage:visible').length ? $('.activity-content-stage:visible').eq(0).width() : ($('.dummy-activities-container').length ? $('.dummy-activities-container').width() * 0.75 : $('.no-int-act-overlay').width() * 0.75));
+    var echelle = centralElSize / tDays;
     var $actCurDate = $activities.find('.curDate');
     cOf = Math.max(0, moment.duration(moment().diff(moment(si),'days')).milliseconds());
 
@@ -403,15 +408,15 @@ $(function () {
       
       $actCurDate.show();
       $actCurDate.each(function(i,e){
-        $(e).css('left', Math.round(10000 * c / tDays) / 100 + '%');
+        $(e).css((mr ? 'top' : 'left'), Math.round(10000 * c / tDays) / 100 + '%');
       });
     
     } else {
       $actCurDate.hide();
     }
     
-    $activities.find('.activity-content-stage').css({
-      'background' : 'repeating-linear-gradient(90deg, #f3ccff2b, #63009445 '+ centralElWidth / $nbSubInt +'px, #ffffff '+ centralElWidth / $nbSubInt +'px, #ffffff '+ centralElWidth / ($nbSubInt/2) +'px)'
+    $activities.find('.activity-content-stage').each(function(_i,e){
+      $(e).css({'background' : `repeating-linear-gradient(${mr ? 0 : 90}deg, #f3ccff2b, #63009445 ${centralElSize / $nbSubInt}px, #ffffff ${centralElSize / $nbSubInt}px, #ffffff ${centralElSize / ($nbSubInt/2) }px)`})
     });
 
     if($nonEmptySet){
@@ -421,13 +426,9 @@ $(function () {
         var sd = $this.data("sd");
         var p =  $this.data("p");
         var id = $this.data("id");
-        pxWidthP = (p + 1) * echelle;
-        pxWidthSD = sd * echelle;
-        pctWidthSD = getPercentage(pxWidthSD, centralElWidth);
-        pctWidthP = getPercentage(pxWidthP, centralElWidth);
     
-        $this.css({'margin-left': pctWidthSD + "%" });
-        $this.css({'width': pctWidthP + "%" });
+        $this.css(mr ? {'top': "0 %"} : {'margin-left': "0%" });
+        $this.css(mr ? {'width' : "100%" } : {'height' : "100%" });
     
         $this.find('.stage-element').each(function(){
           var ssd = $(this).data("sd");
@@ -436,12 +437,23 @@ $(function () {
           sPctWidthSD = (ssd - sd) / p;
           sPctWidthP = Math.max(3,(sp + 1)) / (p + 1);
     
-          $(this).css({'margin-left': Math.round(10000 * sPctWidthSD) / 100 + "%",
-            'width': Math.round(10000 * sPctWidthP) / 100 + "%",
-            'background' : ssd >= c ? '#5CD08F' : (ssd + sp > c ? 'linear-gradient(to right, transparent, transparent ' + Math.round(10000 * (c - ssd) / sp) / 100 + '%, #7942d0 '+ Math.round(10000 * (c - ssd) / sp) / 100 +'%), repeating-linear-gradient(61deg, #7942d0, #7942d0 0.5rem, transparent 0.5px, transparent 1rem)' : 'gray'),
-            'height' : '7px',
+          $(this).css({
+            'background'    : ssd >= c ? '#5CD08F' : (ssd + sp > c ? 'linear-gradient('+ (mr ? 'to bottom' : 'to right') +', transparent, transparent ' + Math.round(10000 * (c - ssd) / sp) / 100 + '%, #7942d0 '+ Math.round(10000 * (c - ssd) / sp) / 100 +'%), repeating-linear-gradient(61deg, #7942d0, #7942d0 0.5rem, transparent 0.5px, transparent 1rem)' : 'gray'),
             'border-radius' : '0.3rem',  
           });
+          if(mr){
+            $(this).css({
+              'top'     : Math.round(10000 * sPctWidthSD) / 100 + "%",
+              'height'  : Math.round(10000 * sPctWidthP) / 100 + "%",
+              'width'   : '7px',
+            })
+          } else {
+            $(this).css({
+              'margin-left' : Math.round(10000 * sPctWidthSD) / 100 + "%",
+              'width'       : Math.round(10000 * sPctWidthP) / 100 + "%",
+              'height'      : '7px',
+            })
+          }
         });
       });
     
@@ -456,14 +468,25 @@ $(function () {
           sPctWidthSD = (ed - sd) / p;
           sPctWidthP = Math.max(3,(ep + 1)) / (p + 1);
     
-          $(this).css({'margin-left': Math.round(10000 * sPctWidthSD) / 100 + "%",
-            'width': Math.max(1,Math.round(10000 * sPctWidthP) / 100) + "%",
-            'height' : '15px',
+          $(this).css({
             'border-radius' : '0.3rem',  
           });
+          
+          if(mr){
+            $(this).css({
+              'top'   : Math.round(10000 * sPctWidthSD) / 100 + "%",
+              'height' : Math.max(1,Math.round(10000 * sPctWidthP) / 100) + "%",
+              'width' : '15px',
+            });
+          } else {
+            $(this).css({
+              'margin-left'   : Math.round(10000 * sPctWidthSD) / 100 + "%",
+              'width' : Math.max(1,Math.round(10000 * sPctWidthP) / 100) + "%",
+              'height' : '15px',
+            });
+          }
         });
-      
-      }
+      } 
     }
   }
 
@@ -471,16 +494,16 @@ $(function () {
 
   $(window).on('resize',function(){
     //setTimeout(function(){
-      var centralElWidth = $('.activity-content-stage:visible').eq(0).width();  
+      var centralElSize = $('.activity-content-stage:visible').eq(0).width();  
       var dateChevron = $('.chevron');
       var actCurDate = $('.curDate');
-      var nbIntSubElmts = $('.months-ref').children().not('.chevron').length;
-      dateChevron.css({'left': 'calc('+Math.round(10000 * (c / tDays )) / 100 + '% - 10px)' });
+      var nbIntSubElmts = $('.ts-scale').children().not('.chevron').length;
+      dateChevron.css({'left': 'calc('+Math.round(10000 * (c - si) / (ei - si)) / 100 + '% - 10px)' });
       actCurDate.each(function(i,e){
-        $(e).css({'left': Math.round(10000 * (c / tDays )) / 100 + '%' });
+        $(e).css({'left': Math.round(10000 * (c - si) / (ei - si)) / 100 + '%' });
       });
       $('.activity-content-stage').css({
-        'background' : 'repeating-linear-gradient(90deg, #f3ccff2b, #63009445 '+ centralElWidth / nbIntSubElmts +'px, #ffffff '+ centralElWidth / nbIntSubElmts +'px, #ffffff '+ centralElWidth / (nbIntSubElmts/2) +'px)'
+        'background' : 'repeating-linear-gradient(90deg, #f3ccff2b, #63009445 '+ centralElSize / nbIntSubElmts +'px, #ffffff '+ centralElSize / nbIntSubElmts +'px, #ffffff '+ centralElSize / (nbIntSubElmts/2) +'px)'
       });
     //}, 200);
   });
@@ -514,17 +537,18 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
       $('.s-day').css('padding-left','');
       $('.e-day').css('padding-right','');
       var month = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
-      $('#activities-container').find('.months-ref').children().not('.chevron').remove();
+      $('#activities-container').find('.ts-scale').children().not('.chevron').remove();
+      $timescale = $('#activities-container').find('.ts-scale');
 
       if (ts == "y") {
           for (var i = 0; i < 12; i++) {
-              $('#activities-container').find('.months-ref').append('<div class="col s1">' + month[i] + '</div>');
+              $('#activities-container').find('.ts-scale').append('<div class="col s1">' + month[i] + '</div>');
           }
           $('.curr-int-value').empty().append(parseInt(ci));
           $('.prev-interval-val').empty().append((parseInt(ci) - 1));
           $('.next-interval-val').empty().append((parseInt(ci) + 1));  
       } else {
-          $('.months-ref').removeClass('row').addClass('flex-center-sa'); 
+          $('.ts-scale').removeClass('row').addClass('flex-center-sa'); 
           var cDivider = ts == 't' ? 5 : (ts == 'w' && moment(`${y+1}-01-01`).day() > 3 ? 54 : 53);
           var pDivider = ts == 't' ? 5 : (ts == 'w' && moment(`${y}-01-01`).day() > 3 ? 54 : 53);
           pInt = (pDivider + cInt - 1) % pDivider;
@@ -556,7 +580,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
           //width = 100 / 13;
           //week = moment(si).week();
           wDate = moment(si);
-          $timescale = $('#activities-container').find('.months-ref');
+          
           currDiffWDaysUSEU = moment.duration(moment(datesInterval(ts,y,1)[0]).diff(moment(`${y}-01-01`))).days();
           nextDiffWDaysUSEU = moment.duration(moment(datesInterval(ts,y+1,1)[0]).diff(moment(`${y+1}-01-01`))).days();
           
@@ -587,23 +611,31 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
             }
   
           }
+
+          
+        }
+      
+      if(mr){
+        $timescale.find('> *').not('.chevron').addClass('flex-center').css('min-height', Math.round(900 / $timescale.children().not('.chevron').length).toString() + 'px');
+      } else {
+        $timescale.find('> *').css('text-align','center');
       }
-  
-      div = $('.months-ref').children().length - 1;
+        
+      div = $('.ts-scale').children().length - 1;
   
       $('.activity-content-stage').css({
-          'background': 'repeating-linear-gradient(90deg, #f3ccff2b, #63009445 ' + (((centralElWidth) / div)) + 'px, #ffffff ' + (((centralElWidth) / div)) + 'px, #ffffff ' + ((centralElWidth) / (div / 2)) + 'px)'
+          'background': 'repeating-linear-gradient('+ (mr ? 0 : 90).toString() +'deg, #f3ccff2b, #63009445 ' + (((centralElSize) / div)) + 'px, #ffffff ' + (((centralElSize) / div)) + 'px, #ffffff ' + ((centralElSize) / (div / 2)) + 'px)'
       });
   
       var dateChevron = $('.chevron');
       var actCurDate = $('.curDate');
   
-      var echelle = centralElWidth / (ei - si);
+      var echelle = centralElSize / (ei - si);
       if (ei > now && now > si) {
           dateChevron.show();
-          dateChevron.css({'left': 'calc(' + Math.round(10000 * (c - si) / (ei - si)) / 100 + '% - 10px)'});
+          dateChevron.css(mr ? {'top': 'calc(' + Math.round(10000 * (c - si) / (ei - si)) / 100 + '% - 2.5rem)'} :  {'left': 'calc(' + Math.round(10000 * (c - si) / (ei - si)) / 100 + '% - 10px)'});
           actCurDate.each(function (i, e) {
-              $(e).css({'left': Math.round(10000 * (c - si) / (ei - si)) / 100 + '%'});
+              $(e).css(mr ? {'top': Math.round(10000 * (c - si) / (ei - si)) / 100 + '%'} : {'left': Math.round(10000 * (c - si) / (ei - si)) / 100 + '%'});
               $(e).show();
           });
       } else {
@@ -630,16 +662,16 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         $this.show();
 
         if($this.closest('.activity-holder').hasClass('tbd')){
-          nbSubInt = $('.months-ref').children().not('.chevron').length;
+          nbSubInt = $('.ts-scale').children().not('.chevron').length;
           var $actContentStage = $(this).closest('.activity-content-stage');
           $actContentStage.css({
-            'background' : 'repeating-linear-gradient(90deg, #f3ccff2b, #63009445 '+ centralElWidth / nbSubInt +'px, #ffffff '+ centralElWidth / nbSubInt +'px, #ffffff '+ centralElWidth / (nbSubInt/2) +'px)'
+            'background' : 'repeating-linear-gradient('+ mr ? 0 : 90 +'deg, #f3ccff2b, #63009445 '+ centralElSize / nbSubInt +'px, #ffffff '+ centralElSize / nbSubInt +'px, #ffffff '+ centralElSize / (nbSubInt/2) +'px)'
           });
           actCurDate = $actContentStage.find('.curDate');
-          (ei > now && now > si) ? actCurDate.css({'left': Math.round(10000 * (c - si) / (ei - si)) / 100 + '%'}).show() : actCurDate.hide(); 
+          (ei > now && now > si) ? actCurDate.css(mr ? {'top': Math.round(10000 * (c - si) / (ei - si)) / 100 + '%'} : {'left': Math.round(10000 * (c - si) / (ei - si)) / 100 + '%'}).show() : actCurDate.hide(); 
         }
 
-        $(this).closest('.activity-holder').show();
+        if(!mr){$(this).closest('.activity-holder').show()};
         var sdU = parseInt($this.data("sd"));
         var p = parseInt($this.data("p"));
         var id = $this.data("id");
@@ -649,8 +681,9 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         ced = Math.min(ei,ea);
         actOff = (Math.min(ei,csd) - si) / (ei - si);
         actW = (ced - csd) / (ei - si);
-        $this.css({'margin-left': Math.round(10000 * actOff) / 100 + "%"});
-        $this.css({'width': Math.round(10000 * actW) / 100  + "%"});
+        $this.css(mr ? {'top': Math.round(10000 * actOff) / 100 + "%"} : {'margin-left': Math.round(10000 * actOff) / 100 + "%"});
+      
+        $this.css(mr ? {'height': Math.round(10000 * actW) / 100  + "%"} : {'width': Math.round(10000 * actW) / 100  + "%"});
         $this.parent().css({'overflow': "hidden"});
 
         $this.find('.stage-element').each(function () {
@@ -684,12 +717,23 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
             ssd > ei || sed < si ? $(this).css('display',"none") : $(this).css('display',"block");
 
             $(this).css({
-                'margin-left': Math.round(10000 * sOff) / 100 + "%",
-                'width': Math.round(10000 * sW) / 100 + "%",
-                'background': ssd >= c ? '#5CD08F' : (sed > c ? 'linear-gradient(to right, transparent, transparent ' + Math.max(1, Math.round(10000 * (c - csd) / (ced - csd)) / 100) + '%, #7942d0 ' + Math.round(10000 * (c - csd) / (ced - csd)) / 100 + '%), repeating-linear-gradient(61deg, #7942d0, #7942d0 0.5rem, transparent 0.5px, transparent 1rem)' : 'gray'),
-                'height': '7px',
-                'border-radius': '0.3rem',
+              'background'    : ssd >= c ? '#5CD08F' : (sed > c ? 'linear-gradient('+ (mr ? 'to bottom' : 'to right') +', transparent, transparent ' + Math.max(1, Math.round(10000 * (c - csd) / (ced - csd)) / 100) + '%, #7942d0 ' + Math.round(10000 * (c - csd) / (ced - csd)) / 100 + '%), repeating-linear-gradient(61deg, #7942d0, #7942d0 0.5rem, transparent 0.5px, transparent 1rem)' : 'gray'),
+              'border-radius' : '0.3rem',
             });
+            
+            if(mr){
+              $(this).css({
+                'top'     : Math.round(10000 * sOff) / 100 + "%",
+                'height'  : Math.round(10000 * sW) / 100 + "%",
+                'width'   : '7px',
+              })
+            } else {
+              $(this).css({
+                'margin-left'   : Math.round(10000 * sOff) / 100 + "%",
+                'width'   : Math.round(10000 * sW) / 100 + "%",
+                'height'  : '7px',
+              })
+            }
 
         });
 
@@ -705,11 +749,22 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
             od > ei || erd < si ? $(this).css('visibility',"hidden") : $(this).css('visibility','');
 
             $(this).css({
-                'margin-left': Math.round(10000 * eOff) / 100 + "%",
-                'width': Math.round(10000 * eW) / 100 + "%",
-                'height': '15px',
-                'border-radius': '0.3rem',
+              'border-radius': '0.3rem',
             });
+            
+            if(mr){
+              $(this).css({
+                'top': Math.round(10000 * eOff) / 100 + "%",
+                'height'  : Math.round(10000 * eW) / 100 + "%",
+                'width'   : '15px',
+              })
+            } else {
+              $(this).css({
+                'margin-left': Math.round(10000 * eOff) / 100 + "%",
+                'width'   : Math.round(10000 * eW) / 100 + "%",
+                'height'  : '15px',
+              })
+            }
         });
 
         if($this.find('.stage-element').length && !$this.find('.stage-element:visible').length){
@@ -1310,7 +1365,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
     $(this).find('.p-delete-overlay').hide();
   }),
 
-  $(document).on('click','.stage-element',function(){
+  $(document).on('click','.stage-element, .m-act-update',function(){
     if($(this).hasClass('s-multiple-events')){
       $(this).removeClass('s-selectable');
     }
@@ -1336,7 +1391,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         }
         $modal.find('.dp-end').pickadate('picker').set('select',new Date(endDate)).set('min',new Date(startDate));
         $modal.find('.dp-start').closest('.row').hide();
-        if(!$modal.find('.s-dates-row .dates-validate').length){$modal.find('.s-dates-row').append('<div class="btn dates-validate"><i class="material-icons">check</i></div>');}
+        if(!$modal.find('.s-dates-row .dates-validate').length){$modal.find('.s-dates-row').append('<div class="btn dates-validate s-dates-validate"><i class="material-icons">check</i></div>');}
         $modal.find('.s-dates-row').addClass('flex-center-sb').find('.col').removeClass('s6 m6');
         $modal.find('.events').show();
         $partHolder = $modal.find('ul.participants-list');
@@ -2863,6 +2918,21 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         }
     },15000);
   },1500)
+
+  $('.prev-act-btn, .next-act-btn').on('click',function(){
+      const $this = $(this);
+      index = $('.activity-holder').index($('.activity-holder:visible'));
+      $showableAct = $('.activity-holder').eq($this.hasClass('prev-act-btn') ? index-1 : (index == $('.activity-holder').length - 1 ? 0 : index + 1));
+      $showableAct.show();
+      $('.activity-holder').eq(index).hide();
+      $('.header-m-row .act-name').empty().append($showableAct.find('.stages-holder').data('act-name'));
+      $('.m-act-update').attr('data-id',$('.stage-element:visible').data('id'));
+      $('.add-direct-evt').attr({
+        'data-sid' : $('.stage-element:visible').data('id'),
+        'data-aid' : $('.activity-holder:visible').data('id')
+      });
+
+  })
 
 });
 
