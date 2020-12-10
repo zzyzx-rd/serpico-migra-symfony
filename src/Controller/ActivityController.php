@@ -447,15 +447,15 @@ class ActivityController extends MasterController
             if($newUser){
                 $settings['tokens'][] = $user->getToken();
             }
+
             $settings['invitingUser'] = $currentUser;
             $settings['invitingOrganization'] = $currentUser->getOrganization();
             $recipients[] = $user;
-            if($externalUser->getEmail() != ""){
-                $response = $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'externalInvitation']);
-                if($response->getStatusCode() == 500){
-                    return $response->getContent();
-                }
+            $response = $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'externalInvitation']);
+            if($response->getStatusCode() == 500){
+                return $response->getContent();
             }
+            
         }
 
         $picFolder = $type == 'u' || $type == 'i' ? 'user' : ($type == 'f' ? 'org' : 'team');
