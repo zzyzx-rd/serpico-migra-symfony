@@ -1,10 +1,46 @@
 {% extends 'layout.html.twig' %}
 
-{% block content %}
-    <h1>Page not found</h1>
+{% block css %}
+<style>
+    h1{
+        margin-top:0.4rem;
+    }
 
-    <p>
-        The requested page couldn't be located. Checkout for any URL
-        misspelling or <a href="{{ path('home_welcome') }}">return to the homepage</a>.
-    </p>
+    .center{
+        margin:auto;
+    }
+    i.material-icons{
+        font-size: 80px;
+        color:#5469d4;
+        position:relative
+    }
+
+    i.material-icons>span{
+        position:absolute;
+        left:25%;
+        bottom:25%;
+        height:40px;
+        width:40px;
+        background-color:#ffbd45;
+        transform:rotateZ(45deg);
+        z-index: -1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+    {% include "components/background_grid.html.twig" %}
+
+    <div class="center">
+        <i class="material-icons dd-text">
+            directions
+            <span></span>
+        </i>
+        <h1>Page not found</h1>
+        <p>
+            The requested page couldn't be located. Checkout for any URL
+            misspelling or <a href="{{ path('home_welcome') }}">return to the homepage</a>.
+        </p>
+    </div>
 {% endblock %}

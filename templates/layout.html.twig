@@ -55,6 +55,19 @@
         font-weight: 400;
         src: url("{{ asset('css/material-icons/material-icons.woff2') }}") format('woff2');
       }
+      
+      @font-face {
+        font-family: 'Poppins';
+        src:  url("{{ asset('fonts/Poppins/Poppins-Black.ttf') }}") format('truetype') font-weight-normal,
+              url("{{ asset('fonts/Poppins/Poppins-BlackItalic.ttf') }}") format('truetype') font-weight-normal font-italic,
+              url("{{ asset('fonts/Poppins/Poppins-Bold.ttf') }}") format('truetype') font-weight-bold,
+              url("{{ asset('fonts/Poppins/Poppins-BoldItalic.ttf') }}") format('truetype') font-weight-bold font-italic,
+              url("{{ asset('fonts/Poppins/Poppins-Light.ttf') }}") format('truetype') font-italic font-weight-bold,
+              url("{{ asset('fonts/Poppins/Poppins-Black.ttf') }}") format('truetype') font-weight-bold,
+              url("{{ asset('fonts/Poppins/Poppins-Black.ttf') }}") format('truetype') font-italic font-weight-bold;
+      }
+
+
 
       .material-icons {
         font-family: 'Material Icons';
@@ -485,8 +498,8 @@
     </div>
 
     <script src="{{ asset('build/runtime.js') }}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.js"></script>
+    <script src="{{ asset('js/jquery.min.js') }}"></script>
+    <script src="{{ asset('js/materialize.js') }}"></script>
     <script src="{{ asset('js/base.js') }}"></script>
     {% block javascripts %}{% endblock %}
   </body>

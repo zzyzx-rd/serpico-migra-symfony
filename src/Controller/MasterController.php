@@ -37,12 +37,14 @@ use App\Repository\ParticipationRepository;
 use App\Repository\UserRepository;
 use App\Security\LoginFormAuthenticator;
 use Stripe\Stripe;
+use Stripe\StripeClient;
 use Swift_Image;
 use Swift_Mailer;
 use Swift_Message;
 use Swift_SpoolTransport;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\TwigBundle\DependencyInjection\Configurator\EnvironmentConfigurator;
 use Symfony\Bundle\TwigBundle\TwigEngine;
 use Symfony\Component\Form\FormFactory;
 use Symfony\Component\Form\FormInterface;
@@ -96,6 +98,10 @@ abstract class MasterController extends AbstractController
      * @var LoaderInterface
      */
     private $loader;
+    /**
+     * @var Request
+     */
+    private $request;
 
     /**
      * @var User
@@ -115,21 +121,25 @@ abstract class MasterController extends AbstractController
     public function __construct(EntityManagerInterface $em, Security $security, RequestStack $stack, UserPasswordEncoderInterface $encoder, GuardAuthenticatorHandler $guardHandler, LoginFormAuthenticator $authenticator, Environment $twig)
     {
         //Stripe::setApiKey('sk_test_51Hn5ftLU0XoF52vKQ1r5r1cONYas5XjLLZu6rFg2P69nntllHxLs3G0wyCxoOQNUgjgD5LwCoaYTkGQp1qVK3g3A00LfW1k4Ep');
+        
         $this->em = $em;
         $this->security = $security;
         $this->stack = $stack;
+        $this->request = $stack->getCurrentRequest();
+
         $this->user = $security->getUser();
         $this->encoder = $encoder;
         $this->guardHandler = $guardHandler;
         $this->authenticator = $authenticator;
         $this->twig = $twig;
-        //$stripe = new Stripe;
-        //$this->stripe = $stripe = new \Stripe\StripeClient(
-        //    'sk_test_51Hn5ftLU0XoF52vKQ1r5r1cONYas5XjLLZu6rFg2P69nntllHxLs3G0wyCxoOQNUgjgD5LwCoaYTkGQp1qVK3g3A00LfW1k4Ep');
-//        if ($this->user === null) {
-//            dd('erreur de user');
-//            $this->redirectToRoute('login');
-//        }
+        if($this->request->server->get('APP_ENV') == 'dev'){
+            $apiKey = 'sk_test_51Hn5ftLU0XoF52vKQ1r5r1cONYas5XjLLZu6rFg2P69nntllHxLs3G0wyCxoOQNUgjgD5LwCoaYTkGQp1qVK3g3A00LfW1k4Ep';
+        } else {
+            $apiKey = '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';
+        }
+        Stripe::setApiKey($apiKey);
+        $this->stripe = new StripeClient($apiKey);
+
         if ($this->user){
             $this->org = $this->user->getOrganization();
         }

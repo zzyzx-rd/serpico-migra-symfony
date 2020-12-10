@@ -956,8 +956,9 @@ settings:
 
 root_management:
   manage_processes: Process Management
-  manage_organizations: Organization & Institution Management
+  manage_organizations: Worker Firm Management
   our_clients: Our clients
+  error_management: Production errors
 
 processes:
   backToMyActivity: Return
@@ -1716,7 +1717,7 @@ mails:
   userSignupInfo:
     subject: Subscription of
     message1: For your info, user
-    message2: has join DealDrive !
+    message2: has joined DealDrive !
 
   validateOrgSubscription:
     subject: Validation du compte
@@ -1728,6 +1729,18 @@ mails:
     button_text: Valider le compte
     message6: Merci pour votre rapidité, administrateur chéri !
     message7: Léquipe de DealDrive à elle-même
+  
+  errorNotification:
+    server_error: Server error
+    method: Method
+    requestURI: Requested URI
+    route: Route
+    referer: Referer
+    locale: Locale
+    user_agent: User agent
+    file: File
+    line: Line
+    message: Message
 
 
 #terms_conditions:
@@ -3413,18 +3426,22 @@ password_modify:
   password_rules: It should contain at least 1 capital, 1 number and have at least 8 characters
 
 error_500:
-  page_name: Oops - Error
-  title: Oops - An error has occured
-  description: We experienced a problem, please refresh or go to main page !
+  page_title: Server error
+  title: An error happened on our side
+  description: We experienced a small problem, this happens sometimes. The most important is that we have been notified of this <span class="dd-text strong">right now</span>, so that our developers team will be handling this issue - if they did not started already. Depending of its magnitude, our team will send you a mail confirming its resolution; meanwhile, continue browsing on Dealdrive or
+  link_text: get back to our homepage
 
 error_404:
-  page_title: Oops - Page not found
-  title: Oops - Page not found
-  description: This page does not exist!
+  page_title: Page not found
+  title: Page not found
+  description: The required page has not been found. Checkout for any URL misspelling or
+  link_text: get back to our homepage
 
 error_403:
-  page_title: Oops - Forbidden access
-  description: You may not have access to this page !
+  page_title: Forbidden access
+  title: Forbidden access
+  description: Sorry, but don't have access to this page. If necessary,
+  link_text: get back to our homepage
 
 modal:
   logout: Are you sure you would you like to Log Out?

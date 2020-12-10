@@ -1014,8 +1014,9 @@ settings:
 
 root_management:
   manage_processes: Gestion des processus
-  manage_organizations: Gestion des entreprises & institutions
+  manage_organizations: Gestion des worker firms
   our_clients: Nos clients
+  error_management: Erreurs de production
 
 processes:
   backToMyActivity: Retour
@@ -1857,6 +1858,19 @@ mails:
     message6: Merci pour votre rapidité !
     message7: L'équipe de DealDrive à elle-même
 
+  errorNotification:
+    server_error: Erreur serveur
+    method: Méthode
+    requestURI: URI demandée
+    route: Route
+    referer: En provenance de
+    locale: Locale
+    user_agent: Agent de navigation
+    file: Fichier
+    line: Ligne
+    message: Message
+    
+
 
 #terms_conditions:
 #  page_name: Conditions générales dutilisation
@@ -2510,6 +2524,7 @@ activity_elements:
       add_event_title: A quelle phase voulez-vous rattacher cet update ?
       title: Quelle phase voulez-vous voir en détail/modifier ?
   criteria: Critères
+  participant_adding_label: Nom de la personne ou de l'entreprise participante
   participants: Participants
   iprocess: Process
   complexify: Ajouter phases/critères
@@ -3495,19 +3510,22 @@ password_modify:
   password_rules: Il doit contenir au moins une majuscule, un chiffre et avoir une longueur dau moins 8 caratères
 
 error_500:
-  page_title: Oops - Erreur
-  title: Oops - Une erreur est survenue
-  description: Nous avons rencontré un petit problème. Rafraîchissez la page ou rendez-vous à l'accueil !
+  page_title: Erreur serveur
+  title: Une erreur est survenue de notre coté
+  description: Nous avons rencontré un petit problème, cela arrive. Le plus important est que nous en avons été notifié à <span class="dd-text strong">l'instant</span>, de sorte nos développeurs vont s'occuper du problème - s'ils n'ont pas déjà commencé ! Selon l'importance de l'erreur, l'équipe vous enverra un mail confirmant sa résolution, en attendant continuez à naviguer sur DealDrive ou
+  link_text: retournez à notre page d'accueil
 
 error_404:
-  page_title: Oops - Page non trouvée
-  title: Oops - Page non trouvée
-  description: Cette page n'existe pas !
+  page_title: Page introuvable
+  title: Page non trouvée 
+  description: La page demandée n'a pas pu être trouvée. Vérifiez si l'URL tapée ne contient pas d'ereur, ou
+  link_text: retournez à notre page d'accueil
 
 error_403:
-  page_title: Oops - Accès non autorisé
-  title: Oops
-  description: Vous ne pouvez pas accéder à cette page !
+  page_title: Page non accessible
+  title: Page non accessible
+  description: Désolé, mais cette page ne vous est pas accessible. Si besoin,
+  link_text: retournez à notre page d'accueil
 
 modal:
   logout: Êtes-vous sûr de vouloir vous déconnecter ?

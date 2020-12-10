@@ -60,6 +60,7 @@ use App\Entity\Position;
 use App\Entity\Activity;
 use App\Entity\CriterionGroup;
 use App\Entity\CriterionName;
+use App\Entity\GeneratedError;
 use App\Entity\InstitutionProcess;
 use App\Entity\Mail;
 use App\Entity\UserGlobal;
@@ -173,13 +174,6 @@ class SettingsController extends MasterController
      */
     public function manageSubscriptionsAction(Request $request){
 
-        if(strpos("dealdrive.app",$_SERVER["HTTP_HOST"]) === false){
-            $apiKey = 'sk_test_51Hn5ftLU0XoF52vKQ1r5r1cONYas5XjLLZu6rFg2P69nntllHxLs3G0wyCxoOQNUgjgD5LwCoaYTkGQp1qVK3g3A00LfW1k4Ep';
-        } else {
-            $apiKey = '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';
-        }
-
-        Stripe\Stripe::setApiKey($apiKey);
         $organization = $this->org;
         $em = $this->em;
 
@@ -232,14 +226,13 @@ class SettingsController extends MasterController
         }*/
 
         $payaccess  = false;
-        Stripe\Stripe::setApiKey('sk_test_51Hn5ftLU0XoF52vKQ1r5r1cONYas5XjLLZu6rFg2P69nntllHxLs3G0wyCxoOQNUgjgD5LwCoaYTkGQp1qVK3g3A00LfW1k4Ep');
 
         if (!$currentUser instanceof User) {
             return $this->redirectToRoute('login');
         }
 
         if($this->org->getPaymentUser() == $this->user || $this->org->getPaymentUser()== null){
-            $payaccess  = true ;
+            $payaccess  = true;
         }
 
 
@@ -334,8 +327,6 @@ class SettingsController extends MasterController
      */
     public function stripWebookManagementAction(Request $request){
 
-        $apiKey = 'sk_test_51Hn5ftLU0XoF52vKQ1r5r1cONYas5XjLLZu6rFg2P69nntllHxLs3G0wyCxoOQNUgjgD5LwCoaYTkGQp1qVK3g3A00LfW1k4Ep';
-        Stripe\Stripe::setApiKey($apiKey);
         $payload = @file_get_contents('php://input');
         $event = null;
         try {
@@ -377,11 +368,9 @@ class SettingsController extends MasterController
      * @Route("/create-customer", name="stripWebook")
      */
     public function createCustomerManagementAction(Request $request){
-        Stripe\Stripe::setApiKey('sk_test_51Hn5ftLU0XoF52vKQ1r5r1cONYas5XjLLZu6rFg2P69nntllHxLs3G0wyCxoOQNUgjgD5LwCoaYTkGQp1qVK3g3A00LfW1k4Ep');
 
         $body =  json_decode(file_get_contents('php://input'), true);
         $stripe = $this->stripe;
-
         $customer = \Stripe\Customer::create([
             'email' => $body['email'],
         ]);
@@ -940,6 +929,26 @@ class SettingsController extends MasterController
 
     }
 
+    /**
+     * @param Request $request
+     * @Route("/settings/root/processes", name="manageProdErrors")
+     * @IsGranted("ROLE_ROOT", statusCode=404)
+     */
+    public function manageProdErrors(Request $request){
+
+        $em = $this->em;
+        $repoGE = $em->getRepository(GeneratedError::class);
+        $errors = $repoGE->findAll();
+        usort($errors, fn($first,$second) => $second->getInserted() <=> $first->getInserted());
+
+        return $this->render('prod_errors_management.html.twig',
+        [
+            'errors' => $errors,
+        ]) ;
+
+
+    }
+
 
     /**
      * @param Request $request
@@ -948,7 +957,7 @@ class SettingsController extends MasterController
      * @throws ORMException
      * @throws OptimisticLockException
      * @Route("/settings/root/processes", name="manageProcesses")
-     * @IsGranted("ROLE_ROOT", statusCode=404, message="Page not found")
+     * @IsGranted("ROLE_ROOT", statusCode=404)
      */
     public function manageProcessesAction(Request $request){
         $em = $this->em;
