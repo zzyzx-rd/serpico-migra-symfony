@@ -159,7 +159,7 @@ class GeneratedError extends DbObject
         return $this;
     }
 
-    public function getMethod(): ?string
+    public function getMethod(): string
     {
         return $this->method;
     }
@@ -174,7 +174,7 @@ class GeneratedError extends DbObject
         return $this->requestURI;
     }
 
-    public function setRequestURI(string $requestURI): self
+    public function setRequestURI(?string $requestURI): self
     {
         $this->requestURI = $requestURI;
         return $this;
@@ -194,7 +194,7 @@ class GeneratedError extends DbObject
         return $this->referer;
     }
 
-    public function setReferer(string $referer): self
+    public function setReferer(?string $referer): self
     {
         $this->referer = $referer;
         return $this;
