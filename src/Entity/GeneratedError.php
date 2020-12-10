@@ -23,7 +23,7 @@ class GeneratedError extends DbObject
     public ?int $id;
 
     /**
-     * @ORM\Column(name="err_ust_id", type="integer", nullable=true)
+     * @ORM\Column(name="err_usr_id", type="integer", nullable=true)
      */
     public $usrId;
 

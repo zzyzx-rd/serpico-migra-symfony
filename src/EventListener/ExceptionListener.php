@@ -69,15 +69,15 @@ class ExceptionListener {
                 $data['line'] = $throwable->getLine();
                 $data['message'] = $throwable->getMessage();
                 $data['user'] = $user;
-                $error = new GeneratedError();
-    
+
                 $error = $em->getRepository(GeneratedError::class)->findOneBy(['message' => $data['message'], 'file' => $data['file']]);
                 if(!$error){
-    
-                    $error->setUsrId($usrId)
+
+                        $error = new GeneratedError();
+                        $error->setUsrId($usrId)
                         ->setMethod($data['method'])
                         ->setRequestURI($data['requestURI'])
-                        ->getRoute($data['route'])
+                        ->setRoute($data['route'])
                         ->setAgent($data['user_agent'])
                         ->setReferer($data['referer'])
                         ->setLocale($data['locale'])
