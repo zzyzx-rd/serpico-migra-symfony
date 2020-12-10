@@ -456,7 +456,6 @@ class ActivityController extends MasterController
                     return $response->getContent();
                 }
             }
-            $externalUser->setClient($client)->setUser($user);
         }
 
         $picFolder = $type == 'u' || $type == 'i' ? 'user' : ($type == 'f' ? 'org' : 'team');
