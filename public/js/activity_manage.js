@@ -2315,7 +2315,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
                     elType = $selector.find('option').eq(i).attr('data-type');
                     synth = $selector.find('option').eq(i).attr('data-s');
                     orgName = $selector.find('option').eq(i).attr('data-fname');
-                    folder = elType == 'f' || elType == 'eu' && synth == '1' ? 'org' : (elType == 'u' || elType == 'eu' ? 'user' : 'team');
+                    folder = elType == 'f' || elType == 'eu' && synth == '1' ? 'wf' : (elType == 'u' || elType == 'eu' ? 'user' : 'team');
                     //$selector.prev().find('li').index($(e)) == 0 ? ($(e).find('span').css('color','black'), $(e).prepend(`<img class="firm-option-logo" src="/lib/img/org/new-firm.png">`)) :
                     $(e).prepend(`<img class="firm-option-logo" src="/lib/img/${folder}/${logo ? logo : 'no-picture.png'}">`);
                     $(e).append(`<span class="el-type">${elType == 'eu' && synth == 0 ? orgName : (elType == 'eu' && synth == 1 ? 'Client' : (elType == 'f' ? 'New partner' : (elType == 'u' ? 'user' : 'team'))) }</span>`);
