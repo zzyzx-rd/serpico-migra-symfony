@@ -1,0 +1,188 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+  {{ 'updates_management.title'|trans }}
+{% endblock title %}
+
+{% block mobile_title %}
+  {{ 'updates_management.title'|trans }}
+{% endblock mobile_title %}
+
+{% block css %}
+
+<style>
+    .evg-b-1{
+        background-color: purple;
+    }
+    .evg-b-2{
+        background-color: blue;
+    }
+    .evg-b-3{
+        background-color: red; 
+    }
+    .evg-b-4{
+        background-color: green;
+    }
+    .evg-b-5{
+        background-color: orange;
+    }
+    .evg-b-6{
+        background-color: brown;
+    }
+
+    main {
+        width:90%;
+        margin-left:auto!important;
+        margin-right:auto!important;
+        margin-top: -400px!important;
+    }
+
+    .logo-zone{
+        width:25px;
+    }
+
+    .event-type-zone{
+        height:36px;
+    }
+
+    .db-LoginBackground-gridContainer{
+        position:sticky;
+    }
+
+    @media screen and (max-width: 993px) {
+
+        .page-title{
+            display:none;
+        }
+    }
+
+</style>
+{% endblock %}
+
+{% block pagename %}
+    Contact
+{% endblock %}
+
+{% block content %}
+
+    {% include "components/background_grid.html.twig" %}
+
+    {% set organization = eventGroups.first.organization %}
+    {% set locale = global.request.locale %}
+
+    <main class="card-panel purple lighten-5">
+        <h4 class="center page-title">{{ (global.request.get('orgId') ? organization.commname ~ ' - ' : '') ~ 'updates_management.title'|trans }}</h4>
+
+        {% for eventGroup in eventGroups %}
+
+            <section>
+                <h5 class="flex-center-sb">
+                    <span>{{ eventGroupRepo.dTrans(eventGroup,locale,organization) }}</span>
+                    <a href="#addEventType" class="btn-flat modal-trigger" data-id="{{eventGroup.id}}" tooltip="{{ 'updates_management.add_type'|trans }}">
+                        <i class="fa fa-plus"></i>
+                    </a>
+                </h5>
+                {% for eventType in eventGroup.eventTypes %}
+                    <div class="flex-center-sb event-type-zone">
+                        <div class="xm-left">
+                            <i class="logo-zone dd-text center {{ 'fa' in eventType.icon.type ? eventType.icon.type ~ ' ' ~ 'fa-' ~ eventType.icon.name : 'material-icons' }}">{{ 'fa' not in eventType.icon.type ? eventType.icon.name : '' }}</i>
+                            <span>{{ eventTypeRepo.dTrans(eventType,locale,organization) }}</span>
+                        </div>
+                        <div class="event-type-act-btns flex-center" style="display:none">
+                            {% if eventType not in organization.events|map(e => e.eventType) %}
+                                <div class="btn-flat">
+                                    <i class="fa fa-times dd-orange-text"></i>
+                                </div>
+                            {% endif %}
+                            <div class="btn-flat">
+                                <i class="fa fa-icons dd-orange-text" tooltip="{{ 'updates_management.change_icons'|trans }}"></i>
+                            </div>
+                            <div class="btn-flat">
+                                <i class="fa fa-edit dd-orange-text" tooltip="{{ 'updates_management.edit_trans'|trans }}"></i>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </section>
+            
+        {% endfor %}
+
+        <div class="input-field">
+            <a href="#addEventGroup" class="btn-large modal-trigger xm-left">{{'updates_management.add_group'|trans}}</a>
+        </div>
+    </main>
+
+
+    <div id="addEventGroup" class="modal">
+        <div class="modal-content">
+            <h4>{{'updates_management.event_group_modal.choice_selection'|trans ~ ' : '}}</h4>
+
+            <div class="input-field">
+                {#<label for="templateSelect" class="required" style="font-size: 1rem; color: black">{% trans %}overview.criterion_type{% endtrans %}</label>#}
+                <select id="eventGroupSelector">
+                    {% for eventGroupName in allEventGroupNames %}
+                        <option value="{{ eventGroupName.id }}" class="cli_option" {{ eventGroupName.name in eventGroups|map(eg => eg.eventGroupName.name) ? 'disabled' }}>{{ eventGroupName.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+        </div>
+        <div class="modal-footer action-buttons">
+            <div class="button-field">
+                <a class="modal-close waves-effect waves-green btn-large">{% trans %}Ok{% endtrans %}</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="addEventType" class="modal">
+        <div class="modal-content">
+            <h4>{{'updates_management.event_type_modal.title'|trans ~ ' : '}}</h4>
+
+            <div class="input-field">
+                {#<label for="templateSelect" class="required" style="font-size: 1rem; color: black">{% trans %}overview.criterion_type{% endtrans %}</label>#}
+                <select id="eventTypeSelector">
+                    {% for eventName in allEventNames %}
+                        <option value="{{ eventName.id }}">{{ eventName.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+        </div>
+        <div class="modal-footer action-buttons">
+            <div class="button-field">
+                <a class="modal-close waves-effect waves-green btn-large">{% trans %}Ok{% endtrans %}</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="addEventType" class="modal">
+        <div class="modal-content">
+            <h4>{{'updates_management.event_type_modal.title'|trans ~ ' : '}}</h4>
+
+            <div class="input-field">
+                {#<label for="templateSelect" class="required" style="font-size: 1rem; color: black">{% trans %}overview.criterion_type{% endtrans %}</label>#}
+                <select id="eventTypeSelector">
+                    {% for eventName in allEventNames %}
+                        <option value="{{ eventName.id }}">{{ eventName.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+        </div>
+        <div class="modal-footer action-buttons">
+            <div class="button-field">
+                <a class="modal-close waves-effect waves-green btn-large">{% trans %}Ok{% endtrans %}</a>
+            </div>
+        </div>
+    </div>
+
+
+
+    
+
+{% endblock %}
+
+
+{% block javascripts %}
+    <script src="{{ asset('js/event_manage.js') }}"></script>
+{% endblock %}

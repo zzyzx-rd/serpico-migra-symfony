@@ -60,6 +60,7 @@ use App\Entity\Position;
 use App\Entity\Activity;
 use App\Entity\CriterionGroup;
 use App\Entity\CriterionName;
+use App\Entity\EventGroupName;
 use App\Entity\GeneratedError;
 use App\Entity\InstitutionProcess;
 use App\Entity\Mail;
@@ -69,6 +70,7 @@ use DateTime;
 use Symfony\Component\Form\FormFactory;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
 
@@ -946,6 +948,39 @@ class SettingsController extends MasterController
             'errors' => $errors,
         ]) ;
 
+
+    }
+
+    /**
+     * @param Request $request
+     * @Route("/settings/updates/manage", name="manageUpdates")
+    * @IsGranted("ROLE_ADMIN", statusCode=404)
+     */
+    public function manageUpdates(Request $request){
+
+        $em = $this->em;
+        $currentUser = $this->user;
+
+        if($request->get('orgId') && $currentUser->getRole() != 4){
+            throw new NotFoundHttpException();
+        }
+
+        $organization = $request->get('orgId') ? $em->getRepository(Organization::class)->find($request->get('orgId')): $currentUser->getOrganization();
+        /** @var EventGroupName[] */
+        $allEventGroupNames = $em->getRepository(EventGroupName::class)->findAll();
+        $allEventNames = [];
+        foreach($allEventGroupNames as $eventGroupName){
+            foreach($eventGroupName->getEventNames() as $eventName){
+                $allEventNames[] = $eventName;
+            }
+        }
+
+        return $this->render('updates_management.html.twig',
+        [
+            'eventGroups' => $organization->getEventGroups(),
+            'allEventGroupNames' => $allEventGroupNames,
+            'allEventNames' => $allEventNames
+        ]);
 
     }
 

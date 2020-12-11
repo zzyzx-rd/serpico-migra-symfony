@@ -35,6 +35,7 @@
         var csurl = "{{ url('manageSubscriptions') }}";
     </script>
     <style>
+
         .firm-option-logo{
             float: left!important;
         }
@@ -185,7 +186,8 @@
         main{
             display:flex;
             flex-direction:column;
-            flex-grow:1;
+            width:90%;
+            margin:auto!important;
         }
 
         .user-picture{
@@ -238,8 +240,10 @@
 {% endblock %}
 
 {% block content %}
+{% include "components/background_grid.html.twig" %}
+
     {% set now = "now"|date("Y/m/d") %}
-        <main>
+        <main class="card-panel purple lighten-5">
             <div class="flex-center title-header">
                 <a href="{{ path('home') }}" class="return-btn btn">
                     Retour

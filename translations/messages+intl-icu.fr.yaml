@@ -641,8 +641,8 @@ countdown:
 
 landing:
   page_name: Votre assistant de suivi des opérations
-  motto: Echangez sereinement avec vos clients
-  motto_promise: Projetez vos opérations sur un tableau... et remplacez vos tableurs et mails !
+  motto: Passez un cran dans l'expérience client 
+  motto_promise: Interagissez dynamiquement sur un tableau avec eux... et remplacez vos tableurs et mails !
   dummy_data_disclaimer: Données à titre d'exemple
   section_1:
     title: "Une nouvelle manière d'aborder les interactions business, plus intuitive"
@@ -3581,3 +3581,6 @@ subscription:
   free: Gratuit
   2_months_free: 2 mois gratuits
   months_free: mois gratuits
+
+updates_management:
+  title: Gestion des updates

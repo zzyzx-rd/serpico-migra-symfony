@@ -106,6 +106,10 @@
             <div class="row action-buttons">
 
                 <div class="button-field">
+                    <a class="btn-large waves-effect waves-light teal lighten-1" href="{{ url('manageUpdates',{orgId: organization.id}) }}"> {% trans %}updates{% endtrans %}</a>   
+                </div>
+
+                <div class="button-field">
                     <a class="btn-large waves-effect waves-light teal lighten-1" href="{{ url('rootManageUsers',{'orgId' : organization.id}) }}"> {% trans %}organizations.see_users{% endtrans %} </a>
                  </div>
                 <div class="button-field">

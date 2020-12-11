@@ -89,7 +89,13 @@
   <link href="{{ asset('css/home.css') }}" rel="stylesheet" type="text/css">
 
   <style>
-    .modify-profile-btn:hover {
+
+     main {
+        width:90%;
+        margin:auto!important;
+     }
+
+    .modify-profile-btn {
       background-color: #55318e;
       color: #ff9300;
       border:none;
@@ -108,12 +114,10 @@
       min-height: 550px;
     }
 
-    .modify-profile-btn{
-      backdrop-filter: blur(10px);
-      color: #ff9300;
+    /*.modify-profile-btn{
+      background-color: #ff9300;
       width: fit-content;
-      border: 1px solid #ff9300;
-    }
+    }*/
 
     .act-int-ext{
       position: relative;
@@ -130,24 +134,39 @@
       max-width:50px;
     }
 
+   
+    tbody tr:nth-of-type(even){
+      background-color: #673ab73b;
+    }
+
+    .my-profile-image{
+      border-radius: 50%;
+    }
+
     @media screen and (min-width: 993px) {
-
-        .data-container img{
-            width:150px;
-            height:150px;
+    
+        .my-profile-image{
+            width:120px;
+            height:120px;
         }
-
         .user-header{
           font-size: 2.9rem
+        }
+
+        .col.m8{
+          width:66.66%;
+        }
+        .col.m4{
+          width:33.33%;
         }
 
     }
 
      @media screen and (max-width: 992px) {
 
-        .data-container img{
-            width:120px;
-            height:120px;
+        .my-profile-image{
+            width:100px;
+            height:100px;
         }
 
          .user-header{
@@ -156,6 +175,13 @@
 
          .data-container > ul{
             justify-content:center;
+        }
+
+        .col.m8{
+          width:100%!important;
+        }
+        .col.m4{
+          width:100%!important;
         }
 
     }
@@ -172,11 +198,21 @@
         .profile-zone, .profile-zone .col{
           margin:0;
         }
+
+        .my-profile-zone{
+          flex-direction:column;
+        }
     }
 
     @media screen and (min-width:450px) {
         .profile-zone .col{
           margin-right:30px;
+        }
+    }
+
+    @media screen and (min-width:601px) {
+      .my-profile-zone{
+          margin-left: 20px;
         }
     }
 
@@ -190,21 +226,59 @@
 
 {% endblock %}
 
-
+  
 {% block content %}
+{% include "components/background_grid.html.twig" %}
 
-  <div class="menu">
+  <main class="card-panel purple lighten-5">
+   
+    
     <div class="image-container">
-    
-    <ul class="flex-center-fs account-zone">
-      <a class="btn-flat no-padding flex-center my-account white-text account-mention dd-text" style="margin-top:-10px">
-        <span>{{ 'my_account'|trans ~ ' :' }}</span>
-        <img class="account-logo sm-left sm-right" src="{{ asset(global.organizationLogo(currentuser.organization)) }}">
-        <span>{{ currentuser.organization.commname }}</span>
-      </a>
-    </ul>
-    
+      <div class="menu">
+
+        {#<img src="{{asset('lib/img/menu-bg.webp')}}" alt="">#}
+      
+        <ul class="flex-center-sb account-zone no-margin">
+          <div class="flex-center-fs">
+            <a class="btn-flat no-padding flex-center my-account account-mention white-text" style="margin-top:-10px">
+              <span>{{ 'my_account'|trans ~ ' :' }}</span>
+              <img class="account-logo sm-left sm-right white-text" src="{{ asset(global.organizationLogo(currentuser.organization)) }}">
+              <span>{{ currentuser.organization.commname }}</span>
+            </a>
+          </div>
+          <a href="{{ url ('manageProfile') }}" class="btn waves-effect modify-profile-btn xm-right">
+            {{'parameters'|trans}}
+          </a>
+
+        </ul>
+        <div {#class="data-container"#}>
+          <ul class="flex-center my-profile-zone">
+            <div class="xm-right">
+              <img class="my-profile-image" src="{{ asset(global.userpicture) }}">
+            </div>
+
+            <div class="">
+              <ul>
+                <div class="user-header c-flex">
+                              <span>
+                              {% if global.currentuser.nickname != null %}
+                                {{ global.currentuser.nickname }}
+                              {% else %}
+                                {{ global.currentuser.fullname }}
+                              {% endif %}
+                              </span>
+                  {#{% if orgName == "Public" %}#}
+                  
+                  {#{% endif %}#}
+                </div>
+              
+              </ul>
+            </div>
+          </ul>
+        </div>
+      </div>
     </div>
+    
     {#
     <div class="container background-container" style="position:relative">
       {% if nbResultsStages > 0 and global.currentuser.role != 3 or nbPublishedStages > 0 and global.currentuser.role == 3 %}
@@ -212,445 +286,137 @@
       {% endif %}
     </div>
     #}
-    <div class="data-container">
-      <ul class="flex-center profile-zone">
-        <div class="col s12 m3">
-          <img src="{{ asset(global.userpicture) }}" style="border-radius: 50%">
-        </div>
+      
+    <div>
 
-        <div class="col s12 m9">
-          <ul>
-            <div class="user-header c-flex">
-                          <span>
-                          {% if global.currentuser.nickname != null %}
-                            {{ global.currentuser.nickname }}
-                          {% else %}
-                            {{ global.currentuser.fullname }}
-                          {% endif %}
-                          </span>
-              {#{% if orgName == "Public" %}#}
-                <a href="{{ url ('manageProfile') }}" class="btn-flat waves-effect modify-profile-btn">
-                  {{'parameters'|trans}}
-                </a>
-              {#{% endif %}#}
-            </div>
-            {#
+      <div class="row" style="margin-top: 30px">
+        <div class="col {%if myHotStageParticipations|length == 0 %}m12 {%else%}m8{% endif%} s12">
+          <h5><i class="fa fa-thermometer-three-quarters" style="margin-right: 20px"></i>
             {% if orgName != "Public" %}
-              <h5 class="header flex-center stats-elmts"><span style="margin-right: 10px">{{global.currentuser.positionName}} </span>
-                {% if global.currentuser.role == 4 %}
-                  <div class="root-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{{ 'tooltip.user.role.root'|trans }}">
-                    <span>R</span>
-                  </div>
-                {% elseif global.currentuser.role == 2 %}
-                  <div class="am-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{{ 'tooltip.user.role.activity_manager'|trans }}">
-                    <span>M</span>
-                  </div>
-                {% elseif global.currentuser.role == 3 %}
-                  <div class="collaborator-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{{ 'tooltip.user.role.collaborator'|trans }}">
-                    <span>C</span>
-                  </div>
-                {% elseif global.currentuser.role == 1 %}
-                  <div class="admin-badge tooltipped" data-position="top" data-delay="50" data-tooltip="{{ 'tooltip.user.role.admin'|trans }}">
-                    <span>A</span>
-                  </div>
-                {% endif %}
-              </h5>
+              {{ 'profile.hotStages.title'|trans }}
+            {% else %}
+              {{ 'profile.hotStages.public_title'|trans }}
             {% endif %}
-            #}
-          </ul>
-        </div>
-  </div>
-
-
-
-      {#
-      {% if global.currentuser.role != 3 %}
-        {% set userAccess = true %}
-      {% else %}
-        {% set userAccess = false %}
-      {% endif %}
-
-      <div class="col s12 m4" style="margin-left: auto">
-        <ul class="flex-center stats-elmts" style="font-size: 25px;margin-top: 15px;margin-bottom: 15px;position:relative">
-          <li>
-            <ul class="flex-center" style="flex-direction: column">
-              <li>
-                <ul class="profile-stat-elmt">
-                  <i class="fa fa-chart-line tooltipped" data-position="top" data-tooltip="{{ 'tooltip.user.performance'|trans }}"></i>
-                  <span>{% if userRepo.ranking('A','P','W', userAccess, global.currentuser) is null or userRepo.ranking('A','P','W', userAccess, global.currentuser) is empty %} -{% else %} {{ (100 * userRepo.ranking('A','P','W', userAccess, global.currentuser)[0].value)|round(0) }} %{% endif %}</span>
-                </ul>
-              </li>
-              {% if enabledUserSeeRanking and userRepo.ranking('A','P','W', userAccess, global.currentuser) is not null and userRepo.ranking('A','P','W', userAccess, global.currentuser) is not empty %}
-                <li>
-                  <span {% if userRepo.ranking('A','P','W', userAccess, global.currentuser)[0].relResult < 0.34 %}class="green-text text-accent-4"{% elseif userRepo.ranking('A','P','W', userAccess, global.currentuser)[0].relResult > 0.67 %}class="orange-text text-accent-4"{% endif %}>{{ userRepo.ranking('A','P','W', userAccess, global.currentuser)[0].absResult }}</span><span style="font-size: 1.2rem"> / {{ (userRepo.ranking('A','P','W', userAccess, global.currentuser)[0].absResult / userRepo.ranking('A','P','W', userAccess, global.currentuser)[0].relResult)|round(0) }}</span>
-                </li>
-              {% endif %}
-            </ul>
-          </li>
-          <li>
-            <ul class="flex-center" style="flex-direction: column">
-              <li>
-                <ul class="profile-stat-elmt">
-                  <i class="fa fa-arrows-alt-h tooltipped" data-position="top" data-tooltip="{{ 'tooltip.user.distance'|trans }}"></i>
-                  <span>{% if userRepo.ranking('A','P','W', userAccess, global.currentuser) is null or userRepo.ranking('A','P','W', userAccess, global.currentuser) is empty %} -{% else %} {{ (100 * userRepo.ranking('A','P','W', userAccess, global.currentuser)[0].value)|round(0) }} %{% endif %}</span>
-                </ul>
-              </li>
-              {% if enabledUserSeeRanking and userRepo.ranking('A','P','W', userAccess, global.currentuser) is not null and userRepo.ranking('A','P','W', userAccess, global.currentuser) is not empty %}
-                <li>
-                  <span {% if userRepo.ranking('A','P','W', userAccess, global.currentuser)[0].relResult < 0.34 %}class="green-text text-accent-4"{% elseif userRepo.ranking('A','P','W', userAccess, global.currentuser)[0].relResult > 0.67 %}class="orange-text text-accent-4"{% endif %}>{{ userRepo.ranking('A','P','W', userAccess, global.currentuser)[0].absResult }}</span><span style="font-size: 1.2rem"> / {{ (userRepo.ranking('A','P','W', userAccess, global.currentuser)[0].absResult / userRepo.ranking('A','P','W', userAccess, global.currentuser)[0].relResult)|round(0) }}</span>
-                </li>
-              {% endif %}
-            </ul>
-          </li>
-        </ul>
-      </div>
-      #}
-
-    </ul>
-  </div>
-  <div style="width: 85%; margin: 0 auto;">
-
-    {#
-      <div class="row" style="margin-top: 30px">
-        <h5 class="no-margin no-padding"><i class="far fa-gem" style="margin-right: 20px"></i>{{ 'profile.performance_indicators'|trans }}</h5>
-      </div>
-      <div class="row">
-        {% set tooltip_texts = {
-          indiv: 'profile.target.individual'|trans,
-          pos: 'profile.target.position'|trans,
-          dpt: 'profile.target.department'|trans,
-          org: 'profile.target.organization'|trans
-        } %}
-        {% set always_visible_row_count = 5 %}
-        <input type="checkbox" id="toggle-hidden-rows" hidden autocomplete="off">
-        <table id="kpis" class="striped">
-          <thead>
-          <tr>
-            <th class="criterion">{{ 'profile.criterion'|trans }}</th>
-            <th class="count">#</th>
-            <th class="performance">{{ 'profile.perf'|trans }}</th>
-            <th class="targets">{{ 'profile.target.title'|trans }}</th>
-          </tr>
-          </thead>
-          <tbody>
-          {% for criterion in topPerformingCriteria %}
-            {% set cname = criterion.criterion %}
-            {% set targets = criterion.target|filter(t => t) %}
-            {% set progressBarStyle %}
-              style="width: {{ criterion.performance }}%"
-            {% endset %}
-            <tr class="{{ always_visible_row_count <= 0 ? 'hidden-unless-shown' }}">
-              <td class="criterion">{{ cname.name }}</td>
-              <td class="count">{{ criterion.count }}</td>
-              <td class="performance">
-                <div class="performance-container">
-                  <div class="criterion-bars">
-                    <div class="progress">
-                      <div class="determinate" {{ progressBarStyle }}></div>
-                    </div>
-                    {% for type, target in targets %}
-                      {% set progressBarStyle %}
-                        style="width: {{ target.value }}%"
-                      {% endset %}
-                      <div class="progress {{ type }}-progress">
-                        <div class="determinate" {{ progressBarStyle }}></div>
-                      </div>
-                    {% endfor %}
-                  </div>
-                  <div class="percentage">{{ criterion.performance }} %</div>
-                </div>
-              </td>
-              <td class="targets">
-                <div class="targets-container">
-                  {% if targets is empty %}
-                    <em>{{ 'profile.target.all_unset'|trans }}</em>
-                  {% else %}
-                    {% for type, target in targets %}
-                      <span class="target {{ type }}-target" tooltip="{{ tooltip_texts[type] }}">
-                                                    {{ target_signs[target.sign] }} {{ target.value }} %
-                                                </span>
-                    {% endfor %}
-                  {% endif %}
-                </div>
-              </td>
-            </tr>
-            {% set always_visible_row_count = always_visible_row_count - 1 %}
-          {% endfor %}
-          {% for target in ungradedTargets %}
-            {% set value = target.value %}
-            {% set type = target.type %}
-            {% set sign = target.sign %}
-            <tr class="{{ always_visible_row_count <= 0 ? 'hidden-unless-shown' }}">
-              <td class="criterion">{{ target.criterion }}</td>
-              <td class="count">0</td>
-              <td class="performance">
-                <div class="performance-container">
-                  <div class="criterion-bars">
-                    <div class="progress"></div>
-                    {% set progressBarStyle %}
-                      style="width: {{ value }}%"
-                    {% endset %}
-                    <div class="progress {{ type }}-progress">
-                      <div class="determinate" {{ progressBarStyle }}></div>
-                    </div>
-                  </div>
-                  <div class="percentage">N/A</div>
-                </div>
-              </td>
-              <td class="targets">
-                <div class="targets-container">
-                  <span class="target {{ type }}-target" tooltip="{{ tooltip_texts[type] }}">
-                      {{ target_signs[sign] }} {{ value }} %
-                  </span>
-                </div>
-              </td>
-            </tr>
-            {% set always_visible_row_count = always_visible_row_count - 1 %}
-          {% endfor %}
-          </tbody>
-        </table>
-        {% if always_visible_row_count < 0 %}
-          <label for="toggle-hidden-rows" id="toggle-hidden-rows-label" class="btn">
-            <span class="show-less">{{ 'show_less'|trans }}</span>
-            <span class="show-more">{{ 'show_all'|trans }}</span>
-          </label>
-        {% endif %}
-      </div>
-    #}
-    <div class="row" style="margin-top: 30px">
-      <div class="col {%if myHotStageParticipations|length == 0 %}m12 {%else%}m8{% endif%} s12">
-        <h5><i class="fa fa-thermometer-three-quarters" style="margin-right: 20px"></i>
-          {% if orgName != "Public" %}
-            {{ 'profile.hotStages.title'|trans }}
-          {% else %}
-            {{ 'profile.hotStages.public_title'|trans }}
-          {% endif %}
-        </h5>
-        {% if myHotStageParticipations|length > 0 %}
-          <table class="striped">
-            <thead>
-            <tr>
-              <th>#</th>
-              <th>{{ 'report.user.table.activity_title'|trans ~ ' - ' ~ 'report.user.table.stage_title'|trans }}</th>
-              <th>I/E</th>
-              <th class="criterion-column">{{ 'updates'|trans|capitalize }}</th>
-              <th class="participant-column">{{ 'profile.hotStages.participants'|trans }}</th>
-              <th>{{ 'profile.hotStages.status'|trans }}</th>
-              <th>{{ 'profile.hotStages.progress'|trans }}</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% set now = "now"|date("Y/m/d") %}
-            {% set k = 1 %}
-            {% for participation in myHotStageParticipations %}
-
-              {% set stage = participation.stage %}
-              {% set diffStageDateInterval = stage.enddate.diff(date(now)) %}
-              {% set diffGradingDays = diffStageDateInterval.days %}
-              {% if stage.enddate|date("Y/m/d") < now %}
-                {% set diffGradingDays = -diffGradingDays %}
-              {% endif %}
-              {% set clickable = diffGradingDays >= 0 and participation.type != -1 and participation.status < 3 and stage.status > 0 %}
-              {% set clickable = false %}
-              {# Determination of stage type : pure FB, evaluation, contribution or mixed #}
-              {% set stageMixed = false %}
-
-
-              {% set stageType = stage.criteria|length > 0 ? stage.criteria[0].type : -1 %}
-
-              {% for criterion in stage.criteria %}
-                {% if criterion.type != stageType and (not stageMixed) %}
-                  {% set stageMixed = true %}
-                {% endif %}
-              {% endfor %}
-              <tr>
-                <td>{% if clickable %}
-                  {% if stage.criteria|length > 0 %}
-                  <a href="{{ url('newStageGrade',{'stgId' : stage.id})}}" class="no-padding">
-                    {% else %}
-                    <a href="{{ url('answerSurvey',{'stgId' : stage.id})}}" class="no-padding">
-                      {% endif %}
-                      {% endif %}
-                      {{ k }}
-                      {% if clickable %}</a>{% endif %}
-                </td>
-                <td>{% if clickable %}
-                  {% if stage.criteria|length > 0 %}
-                  <a href="{{ url('newStageGrade',{'stgId' : stage.id})}}" class="no-padding">
-                    {% else %}
-                    <a href="{{ url('answerSurvey',{'stgId' : stage.id})}}" class="no-padding">
-                      {% endif %}
-                      {% endif %}
-                      {{ stage.activity.stages|length > 1 ? (stage.activity.name ~ ' - ' ~ '<span class="strong">' ~ stage.name ~ '</span>')|raw : stage.activity.name}}
-                      {% if clickable %}</a>{% endif %}
-                </td>
-                <td>
-                  {% if stage.organization != currentuser.organization %}
-                    <i class="act-int-ext fa fa-square dd-text tooltipped" data-html="true" data-position="top" data-tooltip="{% apply escape %}{{ _self.added_by_tooltip(stage.organization) }}{% endapply %}">
-                      <i class="act-int-ext-arrow fa fa-long-arrow-alt-right dd-orange-text"></i>
-                    </i>
-                  {% endif %}
-                </td>
-                <td>
-                  {% if clickable %}
-                    {% if stage.criteria|length > 0 %}
-                    <a href="{{ url('newStageGrade',{'stgId' : stage.id})}}" class="no-padding">
-                      {% else %}
-                      <a href="{{ url('answerSurvey',{'stgId' : stage.id})}}" class="no-padding">
-                      {% endif %}
-                  {% endif %}
-
-
-                    {{stage.updates|length ? 
-                      stage.updates|length ~ (stage.newUpdates(currentuser)|length > 0 ? ' (' ~ stage.newUpdates(currentuser)|length ~ ')' : '') :
-                      '-'
-                    }}
-
-                  {% if clickable %}</a>{% endif %}
-                </td>
-                <td>
-                  {% if clickable %}
-                    {% if stage.criteria|length > 0 %}
-                      <a href="{{ url('newStageGrade',{'stgId' : stage.id})}}" class="no-padding">
-                    {% else %}
-                      <a href="{{ url('answerSurvey',{'stgId' : stage.id})}}" class="no-padding">
-                    {% endif %}
-                  {% endif %}
-                  {% for participant in stage.participants %}
-                    {{ _self.user_badge(participant.user) }}
-                  {% endfor %}
-                  {% if clickable %}</a>{% endif %}
-                </td>
-                <td>
-                  {% if clickable %}
-                  {% if stage.criteria|length > 0 %}
-                  <a href="{{ url('newStageGrade',{'stgId' : stage.id})}}" class="no-padding">
-                    {% else %}
-                    <a href="{{ url('answerSurvey',{'stgId' : stage.id})}}" class="no-padding">
-                      {% endif %}
-                      {% endif %}
-
-                      {{ actStatuses['p'][global.request.locale][stage.progress]|capitalize }}
-
-                      {% if clickable %}</a>{% endif %}
-                </td>
-                <td>
-                  {% if stage.pctElapsed %}
-                    <div class="flex-center-sb">
-                      <div class="progress">
-                          <div class="determinate" style="width: {{stage.pctElapsed}}%"></div>
-                      </div>
-                      <span>{{stage.pctElapsed ~ '%' }}</span>
-                    </div>
-                  {% else %}
-                    <span>-</span>
-                  {% endif %}
-                </td>
-              </tr>
-              {% set k = k + 1 %}
-            {% endfor %}
-            </tbody>
-          </table>
-        {% else %}
-          <span>{{ 'profile.hotStages.no_stages'|trans }}</span>
-        {% endif %}
-      </div>
-      <div class="col {{ myHotStageParticipations|length == 0 ? 'm12' : 'm4' }} s12">
-        <h5><i class="fa fa-ticket-alt" style="margin-right: 20px"></i>{{ 'profile.participations.title'|trans }}</h5>
-
-        {% if nbActivities == 0 %}
-          <span>{{ 'profile.participations.no_participations'|trans }}</span>
-        {% else %}
-          <table class="striped">
-            <thead>
-            <tr>
-              <th></th>
-              <th>
-                <i class="fa fa-cubes tooltipped" data-position="top" data-delay="50" data-tooltip="{{ 'profile.participations.activities_title'|trans }}" style="color: #ee6e73; margin-right:7px"></i>
-              </th>
-              <th>
-                <ul style="display: inline-flex; color: #2196F3; margin-right:3px" class="tooltipped no-margin no-padding" data-position="top" data-delay="50" data-tooltip="{{ 'profile.participations.stages_title'|trans }}">
-                  <li>
-                    <i class="fa fa-cube" style="position: relative;top: -6%;left: 0%;font-size: 0.85rem;"></i>
-                  </li>
-                  <li>
-                    <i class="fa fa-cube" style="position: relative;top: 6%;left: -41%;font-size: 0.85rem;"></i>
-                  </li>
-                </ul>
-              </th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-              <td>{{ 'profile.participations.upcoming'|trans }}</td>
-              <td>{% if nbUpcomingActivities > 0 %} {{ nbUpcomingActivities }} {% else %} - {% endif %}</td>
-              <td>{% if nbUpcomingStages > 0 %} {{ nbUpcomingStages }} {% else %} - {% endif %}</td>
-            </tr>
-            <tr>
-              <td>{{ 'profile.participations.ongoing'|trans }}</td>
-              <td>{% if nbOngoingActivities > 0 %} {{ nbOngoingActivities }} {% else %} - {% endif %}</td>
-              <td>{% if nbOngoingStages > 0 %} {{ nbOngoingStages }} {% else %} - {% endif %}</td>
-            </tr>
-            <tr>
-              <td>{{ 'profile.participations.computed'|trans }}</td>
-              <td>{% if nbResultsActivities > 0 %} {{ nbResultsActivities }} {% else %} - {% endif %}</td>
-              <td>{% if nbResultsStages > 0 %} {{ nbResultsStages }} {% else %} - {% endif %}</td>
-            </tr>
-            <tr style="border-top: 1px solid black">
-              <td>{{ 'profile.participations.total_activities'|trans }}</td>
-              <td>{% if nbUpcomingActivities + nbOngoingActivities + nbResultsActivities > 0 %} {{ nbUpcomingActivities + nbOngoingActivities + nbResultsActivities }} {% else %} - {% endif %}</td>
-              <td>{% if nbUpcomingStages + nbOngoingStages + nbResultsStages > 0 %} {{ nbUpcomingStages + nbOngoingStages + nbResultsStages }} {% else %} - {% endif %}</td>
-            </tr>
-            {#
-            <tr style="font-style:italic;border-top: 1px solid black">
-              <td>{{ 'profile.participations.total_unreleased_msg'|trans }}</td>
-              <td>{% if nbResultsActivities - nbPublishedActivities > 0 %} {{ nbResultsActivities - nbPublishedActivities }} {% else %} - {% endif %}</td>
-              <td>{% if nbResultsStages - nbPublishedStages > 0 %} {{ nbResultsStages - nbPublishedStages }} {% else %} - {% endif %}</td>
-            </tr>
-            #}
-            </tbody>
-          </table>
-        {% endif %}
-      </div>
-    </div>
-
-    {#
-      <div class="row" style="margin-top: 30px">
-        <h5 class="no-margin no-padding"><i class="fa fa-users" style="margin-right: 20px"></i>{{ 'profile.teams.title'|trans }}</h5>
-      </div>
-      <div class="row">
-        <div class="col s12 m12">
-
-          {% if teamParticipations is not empty %}
+          </h5>
+          {% if myHotStageParticipations|length > 0 %}
             <table class="striped">
               <thead>
               <tr>
-                <th>{{ 'profile.teams.table.team_title'|trans }}</th>
-                <th>{{  'profile.teams.table.nbParticipants_title'|trans }}</th>
-                <th>{{ 'profile.teams.table.mean_perf_title'|trans }}</th>
-                <th>{{ 'profile.teams.table.mean_dist_title'|trans }}</th>
-                <th></th>
+                <th>#</th>
+                <th>{{ 'report.user.table.activity_title'|trans ~ ' - ' ~ 'report.user.table.stage_title'|trans }}</th>
+                <th>I/E</th>
+                <th class="criterion-column">{{ 'updates'|trans|capitalize }}</th>
+                <th class="participant-column">{{ 'profile.hotStages.participants'|trans }}</th>
+                <th>{{ 'profile.hotStages.status'|trans }}</th>
+                <th>{{ 'profile.hotStages.progress'|trans }}</th>
               </tr>
               </thead>
               <tbody>
               {% set now = "now"|date("Y/m/d") %}
               {% set k = 1 %}
-              {% for teamParticipation in teamParticipations %}
+              {% for participation in myHotStageParticipations %}
 
+                {% set stage = participation.stage %}
+                {% set diffStageDateInterval = stage.enddate.diff(date(now)) %}
+                {% set diffGradingDays = diffStageDateInterval.days %}
+                {% if stage.enddate|date("Y/m/d") < now %}
+                  {% set diffGradingDays = -diffGradingDays %}
+                {% endif %}
+                {% set clickable = diffGradingDays >= 0 and participation.type != -1 and participation.status < 3 and stage.status > 0 %}
+                {% set clickable = false %}
+                {# Determination of stage type : pure FB, evaluation, contribution or mixed #}
+                {% set stageMixed = false %}
+
+
+                {% set stageType = stage.criteria|length > 0 ? stage.criteria[0].type : -1 %}
+
+                {% for criterion in stage.criteria %}
+                  {% if criterion.type != stageType and (not stageMixed) %}
+                    {% set stageMixed = true %}
+                  {% endif %}
+                {% endfor %}
                 <tr>
-                  <td>{{teamParticipation.name}}</td>
-                  <td>{{teamParticipation.nbParticipants}}</td>
-                  <td>{% if teamParticipation.meanPerf is not null %}{{ (100 * teamParticipation.meanPerf)|round(0) }} %{% else %} - {% endif %}</td>
-                  <td>{% if teamParticipation.meanDist is not null %}{{ (100 * teamParticipation.meanDist)|round(0) }} %{% else %} - {% endif %}</td>
+                  <td>{% if clickable %}
+                    {% if stage.criteria|length > 0 %}
+                    <a href="{{ url('newStageGrade',{'stgId' : stage.id})}}" class="no-padding">
+                      {% else %}
+                      <a href="{{ url('answerSurvey',{'stgId' : stage.id})}}" class="no-padding">
+                        {% endif %}
+                        {% endif %}
+                        {{ k }}
+                        {% if clickable %}</a>{% endif %}
+                  </td>
+                  <td>{% if clickable %}
+                    {% if stage.criteria|length > 0 %}
+                    <a href="{{ url('newStageGrade',{'stgId' : stage.id})}}" class="no-padding">
+                      {% else %}
+                      <a href="{{ url('answerSurvey',{'stgId' : stage.id})}}" class="no-padding">
+                        {% endif %}
+                        {% endif %}
+                        {{ stage.activity.stages|length > 1 ? (stage.activity.name ~ ' - ' ~ '<span class="strong">' ~ stage.name ~ '</span>')|raw : stage.activity.name}}
+                        {% if clickable %}</a>{% endif %}
+                  </td>
                   <td>
-                    <a href="{{ url('elementOverview',{entity: 'team', 'elmtId' : teamParticipation.id})}}"
-                       class="btn white-text waves-effect waves-light teal lighten-1 team-results-btn"
-                       style="padding: 0px 10px; display: flex; align-items: center; justify-content: center">
-                      <div class="flex-center" style="margin: 0;justify-content:center;">
-                        <i class="fa fa-chart-bar" style="margin-right: 17px;"></i>
-                        <span>{{ 'profile.teams.table.results_title'|trans }}</span>
+                    {% if stage.organization != currentuser.organization %}
+                      <i class="act-int-ext fa fa-square dd-text tooltipped" data-html="true" data-position="top" data-tooltip="{% apply escape %}{{ _self.added_by_tooltip(stage.organization) }}{% endapply %}">
+                        <i class="act-int-ext-arrow fa fa-long-arrow-alt-right dd-orange-text"></i>
+                      </i>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if clickable %}
+                      {% if stage.criteria|length > 0 %}
+                      <a href="{{ url('newStageGrade',{'stgId' : stage.id})}}" class="no-padding">
+                        {% else %}
+                        <a href="{{ url('answerSurvey',{'stgId' : stage.id})}}" class="no-padding">
+                        {% endif %}
+                    {% endif %}
+
+
+                      {{stage.updates|length ? 
+                        stage.updates|length ~ (stage.newUpdates(currentuser)|length > 0 ? ' (' ~ stage.newUpdates(currentuser)|length ~ ')' : '') :
+                        '-'
+                      }}
+
+                    {% if clickable %}</a>{% endif %}
+                  </td>
+                  <td>
+                    {% if clickable %}
+                      {% if stage.criteria|length > 0 %}
+                        <a href="{{ url('newStageGrade',{'stgId' : stage.id})}}" class="no-padding">
+                      {% else %}
+                        <a href="{{ url('answerSurvey',{'stgId' : stage.id})}}" class="no-padding">
+                      {% endif %}
+                    {% endif %}
+                    {% for participant in stage.participants %}
+                      {{ _self.user_badge(participant.user) }}
+                    {% endfor %}
+                    {% if clickable %}</a>{% endif %}
+                  </td>
+                  <td>
+                    {% if clickable %}
+                    {% if stage.criteria|length > 0 %}
+                    <a href="{{ url('newStageGrade',{'stgId' : stage.id})}}" class="no-padding">
+                      {% else %}
+                      <a href="{{ url('answerSurvey',{'stgId' : stage.id})}}" class="no-padding">
+                        {% endif %}
+                        {% endif %}
+
+                        {{ actStatuses['p'][global.request.locale][stage.progress]|capitalize }}
+
+                        {% if clickable %}</a>{% endif %}
+                  </td>
+                  <td>
+                    {% if stage.pctElapsed %}
+                      <div class="flex-center-sb">
+                        <div class="progress">
+                            <div class="determinate" style="width: {{stage.pctElapsed}}%"></div>
+                        </div>
+                        <span>{{stage.pctElapsed ~ '%' }}</span>
                       </div>
-                    </a>
+                    {% else %}
+                      <span>-</span>
+                    {% endif %}
                   </td>
                 </tr>
                 {% set k = k + 1 %}
@@ -658,11 +424,68 @@
               </tbody>
             </table>
           {% else %}
-            <span>{{ 'profile.teams.no_belongings'|trans }}</span>
+            <span>{{ 'profile.hotStages.no_stages'|trans }}</span>
+          {% endif %}
+        </div>
+        <div class="col {{ myHotStageParticipations|length == 0 ? 'm12' : 'm4' }} s12">
+          <h5><i class="fa fa-ticket-alt" style="margin-right: 20px"></i>{{ 'profile.participations.title'|trans }}</h5>
+
+          {% if nbActivities == 0 %}
+            <span>{{ 'profile.participations.no_participations'|trans }}</span>
+          {% else %}
+            <table class="striped">
+              <thead>
+              <tr>
+                <th></th>
+                <th>
+                  <i class="fa fa-cubes tooltipped" data-position="top" data-delay="50" data-tooltip="{{ 'profile.participations.activities_title'|trans }}" style="color: #ee6e73; margin-right:7px"></i>
+                </th>
+                <th>
+                  <ul style="display: inline-flex; color: #2196F3; margin-right:3px" class="tooltipped no-margin no-padding" data-position="top" data-delay="50" data-tooltip="{{ 'profile.participations.stages_title'|trans }}">
+                    <li>
+                      <i class="fa fa-cube" style="position: relative;top: -6%;left: 0%;font-size: 0.85rem;"></i>
+                    </li>
+                    <li>
+                      <i class="fa fa-cube" style="position: relative;top: 6%;left: -41%;font-size: 0.85rem;"></i>
+                    </li>
+                  </ul>
+                </th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td>{{ 'profile.participations.upcoming'|trans }}</td>
+                <td>{% if nbUpcomingActivities > 0 %} {{ nbUpcomingActivities }} {% else %} - {% endif %}</td>
+                <td>{% if nbUpcomingStages > 0 %} {{ nbUpcomingStages }} {% else %} - {% endif %}</td>
+              </tr>
+              <tr>
+                <td>{{ 'profile.participations.ongoing'|trans }}</td>
+                <td>{% if nbOngoingActivities > 0 %} {{ nbOngoingActivities }} {% else %} - {% endif %}</td>
+                <td>{% if nbOngoingStages > 0 %} {{ nbOngoingStages }} {% else %} - {% endif %}</td>
+              </tr>
+              <tr>
+                <td>{{ 'profile.participations.computed'|trans }}</td>
+                <td>{% if nbResultsActivities > 0 %} {{ nbResultsActivities }} {% else %} - {% endif %}</td>
+                <td>{% if nbResultsStages > 0 %} {{ nbResultsStages }} {% else %} - {% endif %}</td>
+              </tr>
+              <tr style="border-top: 1px solid black">
+                <td>{{ 'profile.participations.total_activities'|trans }}</td>
+                <td>{% if nbUpcomingActivities + nbOngoingActivities + nbResultsActivities > 0 %} {{ nbUpcomingActivities + nbOngoingActivities + nbResultsActivities }} {% else %} - {% endif %}</td>
+                <td>{% if nbUpcomingStages + nbOngoingStages + nbResultsStages > 0 %} {{ nbUpcomingStages + nbOngoingStages + nbResultsStages }} {% else %} - {% endif %}</td>
+              </tr>
+              {#
+              <tr style="font-style:italic;border-top: 1px solid black">
+                <td>{{ 'profile.participations.total_unreleased_msg'|trans }}</td>
+                <td>{% if nbResultsActivities - nbPublishedActivities > 0 %} {{ nbResultsActivities - nbPublishedActivities }} {% else %} - {% endif %}</td>
+                <td>{% if nbResultsStages - nbPublishedStages > 0 %} {{ nbResultsStages - nbPublishedStages }} {% else %} - {% endif %}</td>
+              </tr>
+              #}
+              </tbody>
+            </table>
           {% endif %}
         </div>
       </div>
-    #}
+    </div>
   </div>
 
   {% if not global.currentuser.isInternal %}

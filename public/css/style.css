@@ -15,6 +15,39 @@ body[style="overflow: hidden;"] {
   height: 100vh;
 }
 
+[tooltip] {
+  position: relative;
+}
+
+[tooltip]::after {
+  font-weight: normal;
+  font-family: Poppins;
+  content: attr(tooltip);
+  position: absolute;
+  margin: 0 auto;
+  right: 0rem;
+  top: 0rem;
+  font-size: 1rem;
+  padding: 10px 8px;
+  line-height: 120%;
+  border-radius: 2px;
+  background-color: #323232;
+  color: #fff;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(0, -50%);
+  transition-property: opacity, transform;
+  transition-duration: .25s;
+  z-index: 2;
+  border-radius: 2px;
+}
+
+[tooltip]:hover::after {
+  opacity: 1;
+  transform: translate(0em, -3rem);
+}
+
 .db-LoginBackground-gridContainer{
   display: grid;
   -ms-grid-columns: [start] 1fr [left-gutter] (7vw)[15] [left-gutter] 1fr [end];
@@ -2626,13 +2659,13 @@ section h2 {
   background-color: #9e9e9e;
   color: white;
   padding: 1vw 0px;
-  background-image: url(../lib/img/menu-bg.webp);
-  background-position-y: -60px;
+  background-image: url(../lib/img/desert_eagle.png);
+  background-position-y: -3px;
   background-size: max(100%,800px);
   background-attachment: inherit;
   background-repeat: no-repeat;
   background-blend-mode: multiply;
-  min-height: 230px;
+  border-radius:5px;
 }
 
 @media (max-aspect-ratio: 5/4) {
