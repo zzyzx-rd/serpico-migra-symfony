@@ -2,7 +2,6 @@
 
 {% import "macros/user_list__macros.html.twig" as macros %}
 
-
 {% block data_params %}
   {{ global.html_data_params({
     'set-client-icon': url('setClientIcon', { clientId: 0 })|raw
@@ -19,6 +18,7 @@
 
 {% block css %}
   <link rel="stylesheet" href="{{ asset('build/user_list.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/add_client_user_modal.css') }}">
   <style>
     .nb-activities{
       margin-left: auto;
@@ -32,24 +32,65 @@
       font-size:2.5rem;
     }
 
-    .client-employees .nb-activities{
+    .client-employees .nb-activities, .client-individuals .nb-activities{
       margin-right: 66px;
     }
 
+    .client-individuals .nb-activities{
+      height: 23px;
+    }
+
+    .add-user-btn:hover {
+      background-color: #ff9300;
+    }
+
+    .client-profile-picture{
+      border-radius: 50%;
+      width: 2em;
+      height:2em;
+    }
+
+    .client-username-data{
+      padding-left: 0.75rem;
+      min-height:66px;
+    }
+
+    .change-username{
+      pointer-events:all!important;
+      font-size:20px;
+      cursor: pointer;
+    }
+
+    .account-mention{
+      padding-left: 3em;
+    }
+
   </style>
+  <script>
+    var surl = "{{ path('dynamicSearch') }}";
+    var acurl = "{{ path('addClient') }}";
+    var aeuurl = "{{ path('addClientUser', {cliId:0}) }}";
+    var alreadyExistingMsg = "{{ 'already_existing'|trans }}";
+    var dcurl = "{{ path('clientDelete', {cliId: 0}) }}"
+    var ucuurl = "{{ url('updateClientUser', {cliId: 0, extUsrId: 0 }) }}";
+    var privateMsg = "{{ 'private'|trans }}";
+    var independentMsg = "{{ 'independant'|trans|capitalize }}";
+  </script>
 {% endblock %}
 
 {% set user_icon %}
   <i class="fa fa-user"></i>
 {% endset %}
 
+
 {% block content %}
+  {% set organization = currentuser.organization %}
   <main>
     <ul class="flex-center-fs">
-      <a class="btn-flat no-padding flex-center my-account account-mention dd-text">
-        <span>{{ 'my_account'|trans ~ ' :' }}</span>
-        <img class="account-logo sm-left sm-right" src="{{ asset(global.organizationLogo(currentuser.organization)) }}">
-        <span>{{ currentuser.organization.commname }}</span>
+      <a class="btn-flat no-margin flex-center my-account account-mention dd-text">
+        <span >{{ 'my_account'|trans}}</span>
+        <img class="account-logo sm-left sm-right" src="{{ asset(global.organizationLogo(organization)) }}">
+        <span class="strong {{organization.type == 'C' or organization.type == 'I' ? 'dd-orange-text' : ''}}">{{ organization.type == 'C' ? 'profile.private_suffix'|trans : (organization.type == 'I' ? 'profile.independant_suffix'|trans : organization.commname) }}</span>
       </a>
     </ul>
     <div class="user-search-container" style="display:none">
@@ -126,26 +167,28 @@
       #}
 
       <section id="clients">
-        <ul class="client-type-list client-employees">
-          {% include "components/user_list__firms_item.html.twig" with { firms: clientFirms } %}
+        <ul class="client-type-list client-employees" data-prototype-client="{% apply escape %}{% include "components/user_list__firm_item.html.twig" %}{% endapply %}" data-prototype-user="{% apply escape %}{% include "components/user_list__ext_user_item.html.twig" %}{% endapply %}">
+          {% include "components/user_list__firms_item.html.twig" with { clients: clientFirms } %}
         </ul>
         {#
         <ul class="client-type-list">
           {% include "components/user_list__ext_team_item.html.twig" with { firms: clientTeams } %}
         </ul>
         #}
-        <ul class="client-type-list client-individuals">
-          {% include "components/user_list__individuals_item.html.twig" with { firms: clientIndividuals } %}
+        <ul class="client-type-list client-individuals" data-prototype-client="{% apply escape %}{% include "components/user_list__item.html.twig" with {isIndivIndep: true, roles: false} %}{% endapply %}">
+          {% include "components/user_list__individuals_item.html.twig" with { clients: clientIndividuals } %}
         </ul>
       </section>
     </section>
     
     {% set user_create_route = is_root ? 'rootCreateUser' : 'createUser' %}
-    {#
+    
     <div class="fixed-action-btn">
-      <a class="btn-floating btn-large teal">
+      <a class="btn-floating btn-large add-user-btn tooltipped modal-trigger" href="#addUserClient" data-tooltip="{{'user_list.add_user_btn_tooltip'|trans}}" data-position="top">
         <i class="large material-icons">add</i>
       </a>
+
+      {#
       <ul>
         <li>
           <a href="{{ url(user_create_route, { orgId: currentuser.organization }) }}"
@@ -172,8 +215,8 @@
           </a>
         </li>
       </ul>
+      #}
     </div>
-    #}
 
     <a id="scrolltop" href="#serpicoapp" class="btn-floating btn-large blue">
       <i class="material-icons">arrow_upward</i>
@@ -188,8 +231,152 @@
       </div>
     </div>
   </main>
+
+  {% include "components/add_client_user_modal.html.twig" with {creationType: 'unk', isEmailMandatory: false} %}
+
+  <div id="updateClientUser" class="modal">
+    <div class="modal-content">
+      <form method="post">
+        <h5>Détails de l'utilisateur</h5>
+        <div class="c-flex">
+          <div class="client-username-data flex-center">
+            <img src="" alt="" class="client-profile-picture">
+            <div class="flex-center">
+              <span class="client-user-name m-left"></span>
+              <i class="sm-left material-icons dd-orange-text change-username">create</i>
+            </div>
+          </div>
+          <div class="row no-margin flex-center client-username-input" style="display:none">  
+            <div class="col s12 m2">
+              <span>Nom complet</span>
+            </div>
+            <div class="col s12 m10">
+              <input type="text" name="eu-username">
+            </div>
+          </div>
+        </div>
+        <div class="c-flex">
+          <div class="row no-margin flex-center">
+            <div class="col s12 m2">
+              <span>Email</span>
+            </div>
+            <div class="col s12 m10">
+              <input type="text" name="email" value="">
+            </div>
+          </div>
+          <div class="row no-margin flex-center">
+            <div class="col s12 m2">
+              <span>Position</span>
+            </div>
+            <div class="col s12 m10">
+              <input type="text" name="position" placeholder="Renseigner position" value="">
+            </div>
+          </div>
+        </div>
+        <div class="flex-center-fe">
+          <a class="waves-effect waves-light modal-close btn-flat">{{'back'|trans}}</a>
+          <a class="btn waves-effect waves-light save-user-updates">Ok</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="deleteClient" class="modal">
+    <div class="modal-title"></div>
+    <div class="modal-content">
+      <h5>{% trans %}client.delete_external_user.modal_title{% endtrans %}</h5>
+      <p>{% trans %}client.delete_external_user.modal_content{% endtrans %}</p>
+      <div class="flex-center-fe">
+        <a class="btn waves-effect waves-light modal-close remove-client">{% trans %}stages.deleteStage.accept{% endtrans %}</a>
+        <a class="waves-effect waves-light modal-close btn-flat red-text">{% trans %}stages.deleteStage.cancel{% endtrans %}</a>
+      </div>
+    </div>
+  </div>
+
 {% endblock %}
 
 {% block javascripts %}
   <script defer src="{{ asset('build/user_list.js') }}"></script>
+  <script src="{{ asset('js/add_client_user.js') }}"></script>
+  <script>
+      $(function(){
+
+        $(document).on('click','.remove-client',function(){
+          id = $(this).data('id');
+          urlToPieces = dcurl.split('/');
+          urlToPieces[urlToPieces.length - 2] = id;
+          url = urlToPieces.join('/');
+          $.delete(url,null)
+              .done(function(){
+                  $(`.client-individuals .users-list--item[data-id="${id}"]`).remove();
+                  nbIndivIndeps = parseInt($('.nb-individuals-indep').text());
+                  $('.nb-individuals-indep').empty().text(nbIndivIndeps - 1);
+                  if(nbIndivIndeps == 0){
+                    $('.client-individuals .no-items-placeholder').text($('.client-individuals .user-list').data('no-user-msg'));
+                  }
+              })
+              .fail(function(data){
+                  console.log(data);
+              })
+        })
+
+        $(document).on('click','[href="#deleteClient"]',function(){
+            $('.remove-client').data('id',$(this).closest('.users-list--item').data('id'));
+        });
+
+        $('.save-user-updates').on('click',function(){
+          const $this = $(this);
+          const $modal = $(this).closest('.modal');
+          id = $this.data('id');
+          const $userElmts = $(`.client-individuals .users-list--item[data-id="${id}"]`);
+          urlToPieces = ucuurl.split('/');
+          urlToPieces[urlToPieces.length - 4] = id;
+          urlToPieces[urlToPieces.length - 2] = $userElmts.data('eid');
+          url = urlToPieces.join('/');
+          $.post(url,$this.closest('form').serialize())
+              .done(function(){
+                  $('#updateClientUser .client-username-input').hide();
+                  $('#updateClientUser .client-username-data').show();
+                  
+                  $('#updateClientUser').modal('close');
+                  if($modal.find('input[name="eu-username"]').val()){
+                      $userElmts.find('.user-ext-fullname').empty().append($modal.find('input[name="eu-username"]').val());
+                  }
+                  if($modal.find('input[name="position"]').val() != ""){
+                      $('.user-ext-position-name').empty().append($modal.find('input[name="position"]').val());
+                  }
+                  if(!$userElmts.find('.fa-envelope.has-email').length && $modal.find('input[name="email"]').val() != ""){
+                      $userElmts.find('.fa-envelope')
+                          .removeClass('lime-text text-darken-3 has-email');
+                      $('.client-user-barred').show();
+                  } else if($userElmts.find('.fa-envelope.has-email').length && $modal.find('input[name="email"]').val() == "") {
+
+                      $('.client-user-barred').hide();
+                      $userElmts.find('.fa-envelope')
+                          .addClass('lime-text text-darken-3 has-email')
+                          .attr('data-tooltip', $modal.find('input[name="email"]').val()).tooltip();
+                  } else {
+                      $userElmts.find('.fa-envelope').attr('data-tooltip',$modal.find('input[name="email"]').val()).tooltip();
+                  }
+              })      
+
+        })
+
+        $(document).on('click','.update-client-btn',function(){
+          const $clientElmt = $(this).closest('.users-list--item');
+          const $modal = $('#updateClientUser');
+          $modal.find('input').val("");
+          $modal.find('.save-user-updates').attr('data-id',$clientElmt.data('id'));
+          $modal.find('.client-user-name').empty().append($clientElmt.find('.user-name').text());
+          $modal.find('.client-profile-picture').attr('src',$clientElmt.find('.user-picture').attr('src'));
+          $modal.find('input[name="email"]').val($clientElmt.data('email'));
+          if($clientElmt.data('position').length){
+              $modal.find('input[name="position"]').val($clientElmt.data('position'));
+          }
+          $modal.modal('open');
+        })
+
+      })  
+  </script>
+
 {% endblock %}

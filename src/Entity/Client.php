@@ -72,7 +72,7 @@ class Client extends DbObject
      * @ManyToOne(targetEntity="WorkerFirm", inversedBy="clients")
      * @JoinColumn(name="worker_firm_wfi_id", referencedColumnName="wfi_id", nullable=true)
      */
-    protected $workerFirm;
+    protected ?WorkerFirm $workerFirm;
 
     /**
      * @OneToMany(targetEntity="ExternalUser", mappedBy="client", cascade={"persist","remove"}, orphanRemoval=true)
@@ -200,7 +200,7 @@ class Client extends DbObject
     /**
      * @return mixed
      */
-    public function getWorkerFirm()
+    public function getWorkerFirm(): ?WorkerFirm
     {
         return $this->workerFirm;
     }
@@ -208,7 +208,7 @@ class Client extends DbObject
     /**
      * @param mixed $workerFirm
      */
-    public function setWorkerFirm(WorkerFirm $workerFirm): self
+    public function setWorkerFirm(?WorkerFirm $workerFirm): self
     {
         $this->workerFirm = $workerFirm;
         return $this;
@@ -240,21 +240,7 @@ class Client extends DbObject
      */
     public function getAliveExternalUsers(): ArrayCollection
     {
-        $aliveExtUsers = new ArrayCollection;
-        foreach ($this->externalUsers as $externalUser) {
-            if ($externalUser->getDeleted() == null && !$externalUser->isSynthetic()) {
-                $aliveExtUsers->add($externalUser);
-            }
-        };
-        return $aliveExtUsers;
-    }
-
-    /**
-     * @return ArrayCollection|ExternalUser[]
-     */
-    public function getAliveExternalUsersWithoutSync(): ArrayCollection
-    {
-        return $this->getExternalUsers()->filter(fn(ExternalUser $eu) => !$eu->getDeleted() && !$eu->isSynthetic());
+        return $this->getExternalUsers()->filter(fn(ExternalUser $eu) => !$eu->getDeleted() && !($eu->isSynthetic() && $eu->getUser()->getFirstname() == 'ZZ'));
     }
 
     public function addAliveExternalUser(ExternalUser $externalUser): Client

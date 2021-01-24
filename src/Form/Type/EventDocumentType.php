@@ -70,7 +70,7 @@ class EventDocumentType extends AbstractType
             $builder->add('submit', SubmitType::class,[
                 'label' => 'Soumettre',
                 'attr' => [
-                    'class' => 'btn-large waves-effect waves-light teal lighten-1 user-submit',
+                    'class' => 'btn waves-effect waves-light doc-upload-validate',
                 ]
             ]);
         }

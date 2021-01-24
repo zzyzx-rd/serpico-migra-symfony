@@ -8,6 +8,7 @@
 {% set organization = currentuser ? currentuser.organization : null %}
 {# A freemium user is one user, necessarily admin, who has not a customer Id and is not in free plan #}
 {% set orgInFreemiumMode = currentuser and currentuser.role == 1 and not organization.customerId and organization.plan != 3 %}
+{% set indivClass = currentuser and currentuser.organization.type == 'C' ? 'indiv-acct' : '' %}
 
 
 <!DOCTYPE html>
@@ -156,7 +157,7 @@
                     </a>
                   </li>
                   #}
-                  {% if global.currentuser.is_root %}
+                  {% if currentuser.is_root %}
                     <li class="hide-on-med-and-down">
                       <a href="{{ path('rootManagement') }}">
                         <i class="fa fa-cogs sm-right" aria-hidden="true"></i>
@@ -165,8 +166,7 @@
                     </li>
                   {% endif %}
 
-                  {#
-                  {% if global.currentuser.is_admin %}
+                  {% if currentuser.is_admin and organization.type != 'C' %}
                     <li class="hide-on-med-and-down">
                       <a href="{{ path('firmSettings') }}">
                         <i class="fa fa-cog sm-right" aria-hidden="true"></i>
@@ -174,17 +174,22 @@
                       </a>
                     </li>
                   {% endif %}
-                  #}
 
-                  {% if orgName != "Public" %}
-                    <li class="hide-on-med-and-down">
-                      <a href="{{ path(global.currentuser.is_admin ? 'manageUsers' : 'seeColleaguesTeams') }}">
-                        <i class="fa fa-users sm-right" aria-hidden="true"></i>
-                        {% set str = 'header.users' %}
-                        {{ str|trans }}
-                      </a>
-                    </li>
-                  {% endif %}
+                  <li class="hide-on-med-and-down">
+                    <a href="{{ path(global.currentuser.is_admin ? 'manageUsers' : 'seeColleaguesTeams') }}">
+                      <i class="fa fa-users sm-right" aria-hidden="true"></i>
+                      {% set str = 'header.users' %}
+                      {{ str|trans }}
+                    </a>
+                  </li>
+
+                  <li class="hide-on-med-and-down">
+                    <a href="{{ path('manageDocuments') }}">
+                      <i class="fa fa-file-excel sm-right" aria-hidden="true"></i>
+                      <span>{% trans %}header.my_documents{% endtrans %}</span>
+                    </a>
+                  </li>
+     
                   <li class="hide-on-med-and-down">
                     <a href="{{ path('myActivities') }}">
                       <i class="fa fa-briefcase sm-right" aria-hidden="true"></i>
@@ -200,7 +205,7 @@
 
                   <li class="profile-notif-zone">
                     <a href="{#{{ path('home') }}#}#" class="user-notif-link">
-                      <img class="user-nav-picture tooltipped" src="{{ asset(global.userpicture) }}" data-tooltip="{{ 'notif_and_profile'|trans }}" data-position="down">
+                      <img class="user-nav-picture {{indivClass}} tooltipped" src="{{ asset(global.userpicture) }}" data-tooltip="{{ 'notif_and_profile'|trans }}" data-position="down">
                       {% if updates|length > 0 and updates.nbNew > 0 %}
                         <span class="nb-updates-new" data-nb-visited="{{ updates|length - updates.nbNew|number_format }}">{{ updates.nbNew }}</span>
                       {% endif %}
@@ -213,7 +218,7 @@
                           <li class="profile-zone">
                             <ul class="flex-center">
                               <li class="m-right">
-                                <img class="user-profile-xl-picture" src="{{ asset(global.userpicture) }}" alt="">
+                                <img class="user-profile-xl-picture {{indivClass}}" src="{{ asset(global.userpicture) }}" alt="">
                               </li>
                               <ul class="c-flex">
 
@@ -367,6 +372,24 @@
                       </span>
                     </a>
                   </li>
+
+                  {% if currentuser.is_admin and organization.type != 'C' %}
+                    <li class="">
+                      <a href="{{ path('firmSettings') }}">
+                        <i class="fa fa-cog sm-right" aria-hidden="true"></i>
+                        <span>{% trans %}header.settings{% endtrans %}</span>
+                      </a>
+                    </li>
+                  {% endif %}
+
+                  
+                  <li class="">
+                    <a href="{{ path('manageDocuments') }}">
+                      <i class="fa fa-file-excel sm-right" aria-hidden="true"></i>
+                      <span>{% trans %}header.my_documents{% endtrans %}</span>
+                    </a>
+                  </li>
+                 
                   
                   <li>
                     <a href="{{ path(global.currentuser.is_admin ? 'manageUsers' : 'seeColleaguesTeams') }}">

@@ -22,7 +22,7 @@ class EventTypeRepository extends ServiceEntityRepository
     }
 
     public function getDTrans(EventType $eventType, $locale, Organization $organization){
-        $translatables =  $this->_em->getRepository(DynamicTranslation::class)->findBy(['entity' => 'EventName', 'entityId' => $eventType->getEName()->getId(), 'entityProp' => 'name', 'organization' => [null, $organization]], ['organization' => 'ASC']);
+        $translatables = $this->_em->getRepository(DynamicTranslation::class)->findBy(['entity' => ['EventType', 'EventName'], 'entityId' => [$eventType->getId(), $eventType->getEName()->getId()], 'entityProp' => 'name', 'organization' => [null, $organization]], ['organization' => 'ASC']);
         if(!$translatables){
             return $eventType->getEName()->getName();
         } else {

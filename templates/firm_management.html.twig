@@ -1,0 +1,365 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+  {{'firm_management.page_title'|trans}}
+{% endblock %}
+
+{% block pagename %}
+  {{'firm_management.page_title'|trans}}
+{% endblock %}
+
+{% block mobile_title %}
+  {{'firm_management.page_title'|trans}}
+{% endblock %}
+
+{% block username %}
+  {{ currentuser.firstname }}
+  {{ currentuser.lastname }}
+{% endblock %}
+
+{% block css %}
+  <style>
+
+    main {
+        width:90%;
+        margin:auto!important;
+    }
+
+    section:not(:last-of-type){
+      border-bottom: 1px solid grey;
+    }
+
+    section .btn-large {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      max-width: 500px;
+      margin-bottom: 1em;
+      line-height: inherit;
+      margin-right: auto;
+      margin-left:auto;
+
+    }
+
+    section .btn-large i {
+      font-size: 1.2em;
+      padding-bottom: .1em;
+      padding-right: .3em;
+    }
+
+    .collapsible{
+      border:none;
+      box-shadow: none;
+    }
+    .collapsible-header{
+      background-color:inherit;
+    }
+
+    section:not(.collapsible) .section-title{
+      margin-left:30px;
+    }
+
+    section > * {
+      width: 100%;
+    }
+
+    .collapsible-header{
+      padding-top: 0;
+      padding-bottom: 0;
+      border: none;
+    }
+
+    .collapsible-body{
+      border:none;
+      padding-right:0;
+    }
+
+    .nb-users{
+      font-size: 15px;
+      line-height: 15px;
+    }
+
+    .user-section-title{
+      width:100%;
+    }
+
+    .user-section-title i{
+      margin-right:0;
+    }
+
+    .add-user-btn{
+      border: 1px dashed orange;
+      padding: 0 2rem;
+    }
+
+    .add-user-btn > i{
+      width:20px;
+      font-size:1.3rem;
+    }
+
+    @media screen and (max-width: 993px) {
+
+      .page-title{
+        display: none;
+      }
+
+    }
+
+  </style>
+  <script>
+    var auurl = "{{ url('addUser') }}";
+    var duurl = "{{ url('deleteUser',{usrId:0}) }}";
+  </script>
+{% endblock css %}
+
+
+{% block content %}
+
+  {% include "components/background_grid.html.twig" %}
+
+
+  <main class="card-panel purple lighten-5">
+    <h5 class="center strong dd-text page-title">{{'firm_management.page_title'|trans}}</h5>
+    
+    <section class="flex">
+      <div class="flex-center-sb">
+        <h5 class="section-title">{{ 'firm_management.profile.title'|trans }}</h5>
+        <a class="btn-flat waves-effect waves-light" href="{{ path('manageOrgProfile') }}">
+          <i class="fa fa-cog"></i>
+        </a>
+      </div>
+    </section>
+
+    <section class="flex">
+      <div class="flex-center-sb">
+        <h5 class="section-title">{{'firm_management.manage_updates'|trans}}</h5>
+        <a class="btn-flat waves-effect waves-light" href="{{ path('manageUpdates') }}">
+          <i class="fa fa-cog"></i>
+        </a>
+      </div>
+    </section>
+
+    <section class="flex collapsible no-margin">
+
+        {% set totalAliveUsers = currentuser.organization.users|filter(u => not u.synthetic and not u.deleted) %}
+
+        <ul class="collapsible no-margin" data-collapsible="accordion">
+          <li>
+            <div class="collapsible-header no-padding">
+              <h5 class="section-title user-section-title flex-center-sb">
+                <div class="flex-center">
+                  <i class="fa fa-chevron-right"></i>
+                  <i class="fa fa-chevron-down"></i>
+                  <span>{{'firm_management.manage_admin'|trans }}</span>
+                  <span class="nb-users sm-left">({{ totalAliveUsers|length }})</span>
+                </div>
+                <div>
+                  <ul class="flex-center user-section-act-btns" style="visibility:hidden;">
+                    <a href="#" class="btn-flat">{{ 'see_details'|trans }}</a>
+                    <a href="#addUser" class="btn-flat not-collapse add-user-btn modal-trigger"><i class="fa fa-plus dd-text"></i></a>
+                  </ul>
+                </div>
+              </h5> 
+            </div>
+            <div class="collapsible-body">
+              <ul class="firm-users">
+                {% for user in totalAliveUsers %}
+                  <li class="account flex-center-sb">
+                    <div class="flex-center">  
+                        <img class="user-profile-l-picture sm-right" src="{{ asset(global.userPicture(user)) }}" alt="">
+                        <span class="user-name">{{user.fullname}}</span>
+                    </div>
+                    <div class="account-action-zone">
+                        <div class="btn-flat nb-activites-info tooltipped" data-tooltip="{{ 'profile.total_nb_activities'|trans }}" data-position="top">
+                            <i class="fa fa-briefcase"></i>
+                            <span>{{user.internalActivities|length + user.externalActivities|length }}</span>
+                        </div> 
+                        {% if user.role == 1 %}
+                          <div class="btn-flat user-master-btn">
+                              <i class="fa fa-user-cog"></i>
+                              <span class="user-master-name">{{ 'profile.administrator'|trans }}</span>
+                          </div> 
+                        {% endif %}
+                        <div class="btn-flat delete-user-btn tooltipped modal-trigger" href="#deleteUser" data-id="{{user.id}}" data-tooltip="{{'delete'|trans}}" data-position="top" style="visibility:hidden;">
+                            <i class="dd-orange-text fa fa-times"></i>
+                        </div>
+                    </div>
+                </li>
+                {% endfor %}
+              
+              </ul>
+            </div>
+          </li>
+        </ul>
+    </section>
+
+    <section class="flex">
+      <div class="flex-center-sb">
+        <h5 class="section-title">{{'firm_management.manage_activity'|trans}}</h5>
+        {#
+        <a class="btn-flat waves-effect waves-light" href="{{ path('manageUpdates') }}">
+          <i class="fa fa-cog"></i>
+        </a>
+        #}
+      </div>
+    </section>
+
+  </main>
+
+  {#
+      <a class="btn-large waves-effect waves-light" href="{{ manage_wfs }}">
+        <i class="fa fa-hotel"></i>
+        <span>{% trans %}root_management.manage_organizations{% endtrans %}</span>
+      </a>
+      <a class="btn-large waves-effect waves-light" href="{{ manage_errors }}">
+        <i class="fa fa-bahai"></i>
+        <span>{% trans %}root_management.error_management{% endtrans %}</span>
+      </a>
+      #}
+
+  {#
+    <div>
+      <a class="btn-large waves-effect waves-light" href="{{ manage_orgs }}">
+        <img class="dd-logo sm-right" src="{{ asset('lib/img/logo_dd_s_centered.png') }}">
+        <span class="orange-text">{% trans %}root_management.our_clients{% endtrans %}</span>
+      </a>
+    </div>
+    #}
+    <div id="addUser" class="modal">
+      <form mathod="post">
+      <div class="modal-content">
+        <div class="flex-center"> 
+          <img class="user-profile-xl-picture" src="{{ asset(global.organizationLogo(organization)) }}" alt="">
+          <h5 class="m-left">{{'create_user.modal.title'|trans}}</h5>
+        </div>
+        <div class="username-part">
+          <div class="input-field">
+            <label for="user-fullname">{{'create_user.modal.label_fullname'|trans}}</label>
+            <input id="user-fullname" class="no-margin" name="fn" type="text">
+            <small class="dd-orange-text error-fullname" style="visibility:hidden">{{'create_user.modal.error_fullname'|trans}}</small>
+          </div>
+          <div class="flex-center-fe">
+            <div class="btn waves-effect waves-light go-to-email disabled-btn">{{'next'|trans}}</div>
+          </div>
+        </div>
+        <div class="email-part" style="display:none">
+            <div class="input-field">
+              <label for="user-email" data-lval="{{'create_user.modal.label_email'|trans}}"></label>
+              <input id="user-email" class="no-margin" name="email" type="text">
+              <small class="dd-orange-text error-email" style="visibility:hidden" data-bf="{{'create_user.modal.error_email'|trans}}">{{'create_user.modal.error_email'|trans}}</small>
+            </div>
+            <div class="flex-center-fe">
+              <div class="btn-flat waves-effect waves-light go-prev m-right">{{'back'|trans}}</div>
+              <div class="btn btn-add-user waves-effect waves-light disabled-btn">{{'ok'|trans}}</div>
+            </div>
+        </div>
+      </div>
+      </form>
+    </div>
+
+    <div id="deleteUser" class="modal">
+      <div class="modal-content">
+        <div class="modal-content">
+          <h5>{% trans %}user_update.delete_modal.title{% endtrans %}</h5>
+          <p>{{ 'start_msg <span class="d-user-fullname strong dd-text"></span> ? end_msg'|replace({
+                  'start_msg' : 'delete_user.modal.start_msg'|trans,
+                  'end_msg'   : 'delete_user.modal.end_msg'|trans,
+                })|raw 
+              }} </p>
+      </div>
+      <div class="modal-footer">
+          <a class=" modal-action modal-close submit-button waves-effect waves-green btn btn-delete-user">{% trans %}user_update.delete_modal.confirm{% endtrans %}</a>
+          <a class=" modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+      </div>
+      </div>
+    </div>
+    
+{% endblock %}
+
+{% block javascripts %}
+  <script>
+    $(function(){
+
+        $('.user-section-title').on('mouseover',function(){
+            $('.user-section-act-btns').css('visibility','');
+        }).on('mouseleave',function(){
+            $('.user-section-act-btns').css('visibility','hidden');
+        })
+
+        $('.firm-users li').on('mouseover',function(){
+            $(this).find('.delete-user-btn').css('visibility','');
+        }).on('mouseleave',function(){
+            $(this).find('.delete-user-btn').css('visibility','hidden');
+        })
+
+        $('.go-to-email').on('click',function(){
+          if($('[name="fn"]').val().split(' ').length < 2){
+            $('.error-fullname').css('visibility','');
+          } else {
+            $('#addUser .username-part').hide();
+            $('#addUser .email-part').find('label[for="user-email"]').empty().append(`${$('#addUser .email-part').find('label[for="user-email"]').data('lval')} ${$('[name="fn"]').val()}`);
+            $('#addUser .email-part').show();
+          }
+        });
+
+        $('.go-prev').on('click',function(){
+            $('#addUser .username-part').show();
+            $('#addUser .email-part').hide();
+        })
+
+        $('.btn-add-user').on('click',function(){
+          if(!isEmail($('[name="email"]').val())){
+            $('.error-email').css('visibility','');
+          } else {
+            $.post(auurl,$(this).closest('form').serialize())
+              .done(function(data){
+                $('#addUser').modal('close');
+              })
+              .fail(function(data){
+                if(data.msg == 'existingUser'){
+                  $('.error-email').empty().append(`{{ 'create_user.modal.error_duplicate'|trans }}`);
+                  $('.error-email').css('visibility','');
+                }
+              })
+          }
+        });
+
+        $('[href="#deleteUser"]').on('click',function(){
+          $('.d-user-fullname').empty().append($(this).closest('.account').find('.user-name').text());
+          $('.btn-delete-user').attr('data-id',$(this).data('id'));
+        })
+
+        $('.btn-delete-user').on('click',function(){
+          uid = $(this).data('id');
+          var urlToPieces = duurl.split('/');
+          urlToPieces[urlToPieces.length - 2] = uid;
+          url = urlToPieces.join('/');
+          $.delete(url)
+            .done(function(){
+              $(`.delete-user-btn[data-id="${uid}"]`).closest('.account').remove();
+            })
+        });
+
+
+
+        $('[name="fn"]').on('keyup',function(){
+          $('.error-fullname').css('visibility','hidden');
+          if ($(this).val().length > 0){
+            $('.go-to-email').removeClass('disabled-btn');
+          } else {
+            $('.go-to-email').addClass('disabled-btn');
+          }
+        })
+
+        $('[name="email"]').on('keyup',function(){
+          $('.error-email').css('visibility','hidden');
+          if ($(this).val().length > 0){
+            $('.btn-add-user').removeClass('disabled-btn');
+          } else {
+            $('.btn-add-user').addClass('disabled-btn');
+          }
+        })
+    })
+  </script>
+{% endblock %}

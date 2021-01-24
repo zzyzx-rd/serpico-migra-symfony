@@ -1,22 +1,37 @@
 {% extends "layout.html.twig" %}
 
 {% block title %}
-    {% trans %}create_client.page_title{% endtrans %}
+  {{'create_client.page_title'|trans ~ client.name }}
 {% endblock %}
+
+{% block pagename %}
+  {{'create_client.page_title'|trans}}
+{% endblock %}
+
+{% block mobile_title %}
+  {{'create_client.mobile_header_title'|trans}}
+{% endblock %}
+
+{% set clientHasUsers = client.aliveExternalUsers|length %}
 
 
   {% block css %}
     <!-- Dropify -->
-    <link href="{{ asset('css/dropify.min.css') }}" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="{{ asset('css/dropify.min.css') }}" type="text/css">
+    <link rel="stylesheet" href="{{ asset('css/add_client_user_modal.css') }}">
     <script>
         var url = "{{ url('ajaxClientUserAdd') }}";
-        var dcurl = "{{ url('clientDelete', {cliId : global.request.get('cliId') ?: 0 }) }}";
+        var dcurl = "{{ url('clientDelete', {cliId : client.id }) }}";
         var diurl = "{{ url('clientUserDelete', {extId : 0}) }}";
-        var vcurl = "{{ url('validateClient', {cliId : global.request.get('cliId') ?: 0 }) }}";
-        var viurl = "{{ url('validateClientUser', {cliId : global.request.get('cliId') ?: 0, extId : 0}) }}";
-        var surl = "{{ path('dynamicSearchParentFirm')}}";
+        var vcurl = "{{ url('validateClient', {cliId : client.id}) }}";
+        var viurl = "{{ url('validateClientUser', {cliId : client.id, extId : 0}) }}";
+        var ucuurl = "{{ url('updateClientUser', {cliId: client.id, extUsrId: 0 }) }}"
+        var surl = "{{ path('dynamicSearch')}}";
         var noFirm = "{{ 'create_client.partner.unexisting_worker_firm'|trans }}";
         var multCreation = "{{ global.request.get('cliId') ? 0 : 1 }}";
+        var aeuurl = "{{ path('addClientUser', {cliId: client.id}) }}";
+        var alreadyExistingMsg = "{{ 'already_existing'|trans }}";
+        var independentMsg = "{{ 'independant'|trans|capitalize }}";
     </script>
     <style>
 
@@ -113,6 +128,7 @@
       .back-btn{
         position: absolute;
         left: 40px;
+        background-color: aliceblue;
       }
 
       .client-zone{
@@ -191,13 +207,72 @@
         margin-left: auto;
       }
 
+      main {
+          width:90%;
+          margin-left:auto!important;
+          margin-right:auto!important;
+          margin-top:2rem!important;
+      }
+
+      .client-name h5{
+        margin-bottom:0;
+      }
+
+      .no-user-holder, .no-user-holder p{
+        text-align:center;
+      }
+
+      .client-picture-zone{
+        margin-right: 20px;
+      }
+
+      .client-profile-picture{
+        border-radius: 50%;
+        width: 2em;
+        height:2em;
+      }
+
+      .client-username-data{
+        padding-left: 0.75rem;
+        min-height:66px;
+      }
+
+      .change-username{
+        font-size:20px;
+        cursor: pointer;
+      }
+
+      @media screen and (max-width: 930px) {
+        .no-user-holder img  {
+          width: 80%;
+        }
+      }
+      @media screen and (min-width: 931px) {
+        .no-user-holder img  {
+          width: 55%;
+        }
+      }
+
+      .inactive-user-badge{
+        height:17px;
+        width:17px;
+        background-color:#707172;
+        border-radius:50%;
+        justify-content:center;
+        
+      }
+
+      .inactive-user-badge > *{
+        font-size:12px;
+        font-weight:700;
+        line-height:18px;
+        pointer-events:none;
+      }
+
+
+
     </style>
   {% endblock %}
-
-
-{% block pagename %}
-    {% trans %}create_client.mobile_header_title{% endtrans %}
-{% endblock %}
 
 {% block username %}
   {{ currentuser.firstname }}
@@ -205,43 +280,100 @@
 {% endblock %}
 
 {% block content %}
-    <main>
+
+    {% include "components/background_grid.html.twig" %}
+
+    <main class="card-panel purple lighten-5">
       <header id="main-header">
-        <a class="waves-effect waves-green btn back-btn" href="{{ url('manageUsers')}}">{{ 'team.go_back_users'|trans }}</a>
+        <a class="waves-effect waves-green btn back-btn black-text" href="{{ url('manageUsers')}}">{{ 'back'|trans }}</a>
       </header>
       <div class="client-zone">
-        {{ form_start(client) }}
         <div class="client">
-          {% include "components/client__item.html.twig" with { item: client } %}
+            <div class="client-data-zone">
+                <ul class="flex-center" style="width:100%">
+                    <li style="margin-right: 20px;position:relative">
+                        <img class="client-logo-zone" src="{{ asset(global.clientlogo(client)) }}">
+                    </li>
+                    <li>
+                        <div class="client-name c-flex">
+                            <h5>{{ client.name }}</h5>
+                            <small>{{ (clientHasUsers ? (clientHasUsers ~ ' ' ~ 'user'|trans ~ (clientHasUsers > 1 ? 's' : '')) ~ ' - ' : '') ~ ('create_client.partner.' ~ (client.clientOrganization.type == 'F' ? 'firm' : 'independant') ~ '_added_on')|trans ~ ' ' ~ client.inserted|format_datetime('long','none') }}</small>
+                        </div>
+                    </li>
+                    <li class="client-action-btns flex-center" style="visibility:hidden;">
+                        <div class="btn-flat delete-client-btn tooltipped modal-trigger" href="#deleteClient" data-id="{{client.id}}" data-tooltip="{{'delete'|trans}}" data-position="top">
+                            <i class="dd-orange-text fa fa-times"></i>
+                        </div>
+                        {#
+                        <div>
+                            <a class="modify-client-btn btn-flat"><i class="material-icons">create</i></a>
+                        </div>
+                        #}
+                    </li>
+                </ul>   
+            </div>
+
+            <div class="client-input-zone" style="display:none">
+                <ul class="flex-center-sb">
+                {#<h4 style="display:inline-block">{{'create_client.partner.prototype_title'|trans}} __clientNb__</h4>#}
+                <div class="client-commname client-elmt">
+                    <a class="btn client-btn client-info-commname dd-orange-text flex-center">
+                        <img class="selected-client-logo sm-right" src="{{ asset(global.clientlogo(client)) }}" alt="">
+                        <span class="m-right commname-value">
+                            {{ 'partner'|trans ~ ' : ' ~ client.name|trans }}
+                        </span>
+                    </a>
+                </div>
+                <div class="partner-action-buttons">
+                    <a class="validate-client-btn waves-effect waves-light btn tooltip" data-cid="{{client and client.id ? client.id : 0}}"><i class="fa fa-check"></i></a>
+                    <a href="#deleteClient" class="waves-effect waves-light accent-4 btn-flat modal-trigger" data-cid="{{client and client.id ? client.id : 0}}"><i class="fa fa-trash"></i></a>
+                </div>
+                </ul> 
+            </div>
+            <ul class="individuals collection no-padding" data-prototype="{% apply escape %}{% include 'components/client_external_user__item.html.twig' with { externalUser: null } %}{% endapply %}"
+            {#{% if not client or client.aliveExternalUsers|length == 0 %}style="display:none"{% endif %}#}
+            >
+                
+                {% for externalUser in client.aliveExternalUsers %}
+                    {% include "components/client_external_user__item.html.twig" with { item: externalUser } %}
+                {% endfor %}
+
+                {% if not clientHasUsers %}
+                    <div class="no-user-holder">
+                        <img src="{{asset('lib/img/legal-person-l.png')}}" alt="legal-person">
+                        <h5>{{'create_client.partner.no_added_users.title'|trans}}</h5>
+                        <p>{{'create_client.partner.no_added_users.content'|trans}}</p>
+                    </div>
+                {% endif %}
+            
+            </ul>
+                {#
+                <div class="button-field add-user-zone" style="{% if client is null %}display:none ;{% endif %}position: absolute">
+                    <a class="btn waves-effect waves-light  insert-individual-btn data-cid="{{ client ? client.id : 0 }}"">
+                        <span>Ajouter utilisateur</span>
+                    </a>
+                </div>
+                #}
+            </div>
+
+            <div class="fixed-action-btn">
+              <a class="btn-floating btn-large add-user-btn tooltipped modal-trigger" href="#addUserClient" data-tooltip="{{'user_list.add_user_btn_tooltip'|trans}}" data-position="top">
+                <i class="large material-icons">add</i>
+              </a>
+            </div>
         </div>
       </div>
     </main>
-    <footer>
-      <div class="button-field center-button">
-          {{ form_widget(client.submit) }}
-      </div>
-    </footer>
-    {{ form_rest(client) }}
-    {{ form_end(client) }}
-
-  <div class="i-form" style="display: none;">
-    {{ form_start(individualForm) }}
-    {{ form_rest(individualForm) }}
-    {{ form_end(individualForm) }}
-  </div>
 
   <div id="deleteExternalUser" class="modal">
-    <div class="modal-title">
-      <h5 style="margin-left: 20px;">{% trans %}client.delete_external_user.modal_title{% endtrans %}</h5>
-    </div>
+    <div class="modal-title"></div>
     <div class="modal-content">
+      <h5>{% trans %}client.delete_external_user.modal_title{% endtrans %}</h5>
       <p>{% trans %}client.delete_external_user.modal_content{% endtrans %}</p>
-    </div>
-    <div class="modal-footer">
-      <a
-        class="btn waves-effect waves-light modal-close remove-client-user">{% trans %}stages.deleteStage.accept{% endtrans %}</a>
-      <a
-        class="waves-effect waves-light modal-close btn-flat red-text">{% trans %}stages.deleteStage.cancel{% endtrans %}</a>
+      <div class="flex-center-fe">
+        <a class="btn waves-effect waves-light modal-close remove-client-user">{% trans %}stages.deleteStage.accept{% endtrans %}</a>
+        <a class="waves-effect waves-light modal-close btn-flat red-text">{% trans %}stages.deleteStage.cancel{% endtrans %}</a>
+      </div>
     </div>
   </div>
 
@@ -260,9 +392,57 @@
     </div>
   </div>
   
-  <div id="addClientSuccess" class="modal">
+  <div id="updateClientUser" class="modal">
     <div class="modal-content">
-      <p>{% trans %}create_client.create_organization.success_msg{% endtrans %}</p>
+      <form method="post">
+        <h5>Détails de l'utilisateur</h5>
+        <div class="c-flex">
+          <div class="client-username-data flex-center">
+            <img src="" alt="" class="client-profile-picture">
+            <div class="flex-center">
+              <span class="client-user-name m-left"></span>
+              <i class="sm-left material-icons dd-orange-text change-username">create</i>
+            </div>
+          </div>
+          <div class="row no-margin flex-center client-username-input" style="display:none">  
+            <div class="col s12 m2">
+              <span>Nom complet</span>
+            </div>
+            <div class="col s12 m10">
+              <input type="text" name="eu-username">
+            </div>
+          </div>
+        </div>
+        <div class="c-flex">
+          <div class="row no-margin flex-center email-update">
+            <div class="col s12 m2">
+              <span>Email</span>
+            </div>
+            <div class="col s12 m10">
+              <input type="text" name="email" value="">
+              <small class="dd-orange-text error-email" style="display:none" data-bf="{{'create_user.modal.error_email'|trans}}">{{'create_user.modal.error_email'|trans}}</small>
+            </div>
+          </div>
+          <div class="row no-margin flex-center">
+            <div class="col s12 m2">
+              <span>Position</span>
+            </div>
+            <div class="col s12 m10">
+              <input type="text" name="position" placeholder="Renseigner position" value="">
+            </div>
+          </div>
+        </div>
+        <div class="flex-center-fe">
+          <a class="waves-effect waves-light modal-close btn-flat">{{'back'|trans}}</a>
+          <a class="btn waves-effect waves-light save-user-updates">Ok</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="addEmailSuccess" class="modal">
+    <div class="modal-content">
+      <p>{{''|trans}}</p>
     </div>
 
     <div class="modal-footer">
@@ -272,39 +452,15 @@
     </div>
   </div>
 
-  {% if not client.vars.valid %}
-
-    <div id="errors" class="modal">
-      <div class="modal-content">
-        <h5>{{ 'activities.modal_error_creation_title'|trans }}</h5>
-        <div class="gen-error">
-          {{form_errors(client)}}
-        </div>     
-            
-            <div style="padding: 15px 0px">
-              {% for ikey, externalUser in client.aliveExternalUsers %}
-                {{ 'user'|trans ~ ' ' ~ (ikey + 1) ~ ' (' ~ externalUser.vars.data.firstname|trans ~ ' ' ~ externalUser.vars.data.lastname|trans ~ ') :' }}
-                  {% for child in externalUser.children %}
-                    {% if not child.vars.valid %}
-                      <div style="margin-left: 20px;">{{form_label(child)}}<span style="display:inline-block;width: 30%;"></span> {{ form_errors(child) }}</div>
-                    {% endif %}
-                  {% endfor %}
-              {% endfor %}
-            </div>
-        
-      </div>
-      <div class="modal-footer">
-        <a class=" modal-action modal-close waves-effect waves-green btn notifyModalClose">Ok</a>
-      </div>
-    </div>
-	{% endif %}
+  {% include "components/add_client_user_modal.html.twig" with {creationType: 'ext', isEmailMandatory: false} %}
 
 {% endblock %}
 
 {% block javascripts %}
 <script>$('select').material_select();</script>
 <script src="{{ asset('js/dropify.min.js') }}"></script>
-<script src="{{ asset('js/client_user_create.js') }}"></script>
+<script src="{{ asset('js/client_update.js') }}"></script>
+<script src="{{ asset('js/add_client_user.js') }}"></script>
 
 
 {% endblock %}

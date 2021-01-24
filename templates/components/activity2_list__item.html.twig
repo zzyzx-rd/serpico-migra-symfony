@@ -8,7 +8,7 @@
 {% endif %}
 
 <div class="row no-margin flex-center activity-holder {{activity is defined ? actStatus : 'dummy-activity'}} {{mobile_rendering ? 'mr'}}" data-id="{{activity is defined ? activity.id}}" {% if activity is defined and not visible %}style="display:none"{% endif %}>
-  <div class="col s{{mobile_rendering ? 12 : 9}} center no-padding activity-content-stage {{mobile_rendering ? 'mr'}}" style="background-color: #feffe9;">
+  <div class="col s{{mobile_rendering ? 12 : 9}} center no-padding activity-content-stage {{ (mobile_rendering ? 'mr ' : '') ~ (activity is not defined ? 'dummy' : '') }}" style="background-color: #feffe9;">
     
     <div class="curDate"></div>
 
@@ -141,7 +141,7 @@
         
         
             <ul class="flex-center no-wrap">
-              {% if activity.organization == currentuser.organization %}
+              {% if currentuser and activity.organization == currentuser.organization %}
                 <li>
                   <a class="btn-floating act-btn tooltipped modal-trigger" href="#deleteActivity" data-tooltip="{{ 'activities.delete_activity'|trans }}" data-position="top" data-aid="{{ activity.id }}"><i class="fa fa-trash"></i></a>
                 </li>
@@ -219,46 +219,68 @@
       {% if activity is defined %}
       
       
-        {% set activityClients =  activity.independantUniqueParticipatingClients %}
-        {% if activityClients|length != 0 %}
+        {% set activityClients = activity.independantUniqueParticipatingClients %}
+        {% set activityOrganizations = activity.involvedOrganizations  %}
+        {% set isExternal = false %}
+
+        {% if activityOrganizations|length != 0 %}
 
 
           <div class="activity-clients flex-center">
-            {% if activity.organization != currentuser.organization %}
-              <small> - {{ 'with'|trans }}</small>
+            {% if not currentuser or activity.organization != currentuser.organization %}
+              <small> - {{ 'from'|trans }}</small>
               <a class="badge-container activity-client-name tooltipped" data-tooltip="{{activity.organization.commname}}">
                 <img class="account-logo sm-left" src="{{ asset(global.organizationLogo(activity.organization)) }}" alt="">
               </a>
-              {% set activityClients = activityClients|filter((v,k) => v.clientOrganization != currentuser.organization) %}
+              {# Removing org which created activity from other org participants #}
+              {% set activityOrganizations = activityOrganizations|filter((o,k) => o != activity.organization) %}
+              {% set isExternal = true %}
             {% endif %}
-            {% if activityClients|length != 0 %}
 
+            {% if not isExternal %}
+              {% set activityOrganizations = activityOrganizations|filter((o,k) => o != currentuser.organization) %}
+            {% endif %}
+
+            {% if activityOrganizations|length %}
+  
                 <small class="sm-right">{{ ' - ' ~ 'with'|trans }}</small>
 
                 {% set k = 0 %}
-                {% for client in activityClients %}
+                {% for activityOrganization in activityOrganizations %}
                   {% if k < 2 %}
-
-                      <a class="badge-container activity-client-name tooltipped" data-tooltip="{{client.name}}">
-                        <img class="account-logo" src="{{ asset(global.clientLogo(client)) }}" alt="">
+                      <a class="badge-container activity-client-name tooltipped" data-tooltip="{{activityOrganization.commname}}">
+                        {% if activityOrganization.type != 'I' %}
+                          <img class="account-logo" src="{{ asset(global.organizationLogo(activityOrganization)) }}" alt="">
+                        {% else %}
+                          <div class="account-logo independent-logo dd-orange-bg flex-center">
+                              <span class="independent-letter white-text">I</span>
+                          </div>
+                        {% endif %}
                       </a>
-
                     {% set k = k + 1 %}
                   {% endif %}
                 {% endfor %}
 
-                {% if activityClients|length - k > 0 %}
-                      {{'and '|trans }}
+                {% if activityOrganizations|length - k > 0 %}
+                    <small>
+                    
+                      <span>{{'and'|trans }}</span>
                       <span class="activity-client-name tooltipped" data-position="top" data-html="true" data-tooltip="
-                      {% for c, client in activityClients %}
-                          {% if c >= k %}
-                            {{ activityClients[c].name }} <br>
-                          {% endif %}
-                      {% endfor %}
-                      "
-                      >{{ (activityClients|length - k) ~ ' other'|trans ~ (activityClients|length - k > 1 ? 's' : '')}}</span>
+                        {% for i, activityOrganization in activityOrganizations %}
+                            {% if i > k %}
+                              {{ activityOrganization.commname }} <br>
+                            {% endif %}
+                        {% endfor %}
+                        "
+                      >
+                        {{ (activityOrganizations|length - k) ~ ' other'|trans ~ (activityOrganizations|length - k > 1 ? 's' : '')}}
+                      </span>
+                    </small>
+                    
                 {% endif %}
+
             {% endif %}
+
           </div>
         {% endif %}
     

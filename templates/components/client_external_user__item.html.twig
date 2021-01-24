@@ -1,142 +1,54 @@
-{% set externalUser = item.vars.data ? item.vars.data : null %}
-{% set client = client.vars.data ? client.vars.data : null %}
 {% set mailTruncVal = 30 %}
-<li class="individual">
+{% set hasNoEmail = not(externalUser and externalUser.user.email) %}
+<li class="individual" data-id="{{ externalUser ? externalUser.id : 0 }}">
     <ul>
-        <li class="row element-data collection-item" {% if not externalUser or not externalUser.id or not item.vars.valid %} style="display: none;" {% endif %}>
+        <li class="row element-data collection-item">
             <ul class="flex-center-sb">
                 <li>
                     <ul class="flex-center">
-                    
-                        <li style="margin-right: 20px;">
-                            <img class="user-profile-picture" src="{{ externalUser and externalUser.user ? asset(global.userpicture(externalUser.user)) : asset('lib/img/user/no-picture.png') }}" width="50px" height="50px" style="border-radius: 100%">
+                        <li class="client-picture-zone">
+                            <img class="client-profile-picture" src="{{ hasNoEmail ? asset('lib/img/user/virtual-user.png') : asset(global.userpicture(externalUser.user)) }}">
                         </li>
-                    
                         <li>
                             <div class="flex-center">
-                                <div style="font-size:17px" class="user-ext-fullname">
+                                <div style="font-size:17px" class="user-ext-fullname {{ hasNoEmail ? 'grey-text text-lighten-1' }}">
                                     {{externalUser ? externalUser.fullname : ''}}
                                 </div>
                                 <div style="font-size:17px" class="m-left user-ext-email">
-                                    {% if externalUser and externalUser.email is not null %}
-                                        <i class="fa fa-envelope lime-text text-darken-3 tooltipped" data-tooltip="{{ externalUser.email }}"></i>
-                                    {% else %}
-                                        <i class="fa fa-envelope tooltipped" data-tooltip="{{ 'create_user.no_provided_email'|trans }}"></i>
-                                        <i class="fa fa-minus white-text barred client-user-barred"></i>
+                                    
+                                    {% if externalUser %}
+                                        {% if externalUser.user.email and externalUser.user.lastConnected is not null %}
+                                            <i class="fa fa-check-circle dd-text is-active tooltipped" data-tooltip="{{'client_update.external_user.active_badge_msg'|trans}}"></i>
+                                        {% else %}
+                                            {% if not externalUser.user.email %}
+                                                <div class="inactive-user-badge flex white-text tooltipped" data-tooltip="{{'client_update.external_user.inactive_virtual_msg'|trans}}">
+                                                    <span>V</span>
+                                                </div>
+                                            {% else %}
+                                                <div class="inactive-user-badge flex white-text tooltipped" data-tooltip="{{'client_update.external_user.inactive_unconnected_msg'|trans}}">
+                                                    <i class="fa fa-plug"></i>
+                                                </div>
+                                            {% endif %}
+                                        {% endif %}
                                     {% endif %}
                                 </div>
                             </div>
-                            <div class="user-ext-position-name">{{externalUser ? externalUser.positionName : ''}}</div>
-            
+                            <small class="user-ext-position-name {{ externalUser and externalUser.positionName ? 'has-position' : 'grey-text text-lighten-1' }}" data-wo="{{'create_client.unknown_position'|trans}}">{{externalUser and externalUser.positionName ? externalUser.positionName : 'create_client.unknown_position'|trans }}</small>
                         </li>
                     </ul>
                 </li>
-                <li>
+                <li class="user-action-btns" style="visibility:hidden">
                     {#<a href="#deleteExternalUser" class="waves-effect waves-light accent-4 btn-flat modal-trigger" data-eid="{{ individual.vars.data.id }}" style="margin-left: auto;"><i class="fa fa-times"></i></a>#}
-                    <a class="modify-ext-user-btn btn-flat">
-                    <i class="fa fa-pencil-alt"></i>
+                    
+                    <a class="update-ext-user-btn btn-flat">
+                        <i class="material-icons">create</i>
                     </a>
+                   
+                    <a class="delete-ext-user-btn btn-flat modal-trigger" href="#deleteExternalUser">
+                        <i class="fa fa-times"></i>
+                    </a> 
                 </li>
             </ul>
-        </li>
-        <li class="element-input collection-item" {% if externalUser and externalUser.id and item.vars.valid %} style="display: none;" {% endif %}>
-            <div class="row flex-center no-margin">
-                <div class="col m10 s12">
-                    <div class="row">
-                        <div class="col m6 s12">
-                            <div class="user-fullname user-elmt" data-prefix-wo="" data-prefix-w="{{'create_user.fullname'|trans ~ ' : '}}">
-                    
-                                <a class="btn user-btn user-info-fullname flex-center" {% if not externalUser or not item.vars.valid %}style="display: none;"{% endif %}>
-                                    <span>{{ externalUser ? 'create_user.fullname'|trans ~ ' : ' ~ externalUser.fullname : '' }}</span>
-                                </a>
-                                <div class="user-select-fullname user-input flex-center" {% if externalUser and item.firstname.vars.valid and item.lastname.vars.valid %}style="display: none;"{% endif %}>
-                                    <div class="input-field user-firstname">
-                                        {{ form_label(item.firstname) }}
-                                        {{ form_widget(item.firstname) }}
-                                    </div>
-                                    <div class="input-field user-lastname">
-                                        {{ form_label(item.lastname) }}
-                                        {{ form_widget(item.lastname) }}
-                                    </div>
-                                </div>
-                            </div>
-            
-                        </div>
-                        <div class="col m6 s12">
-                            <div class="user-position user-elmt" data-prefix-wo="{{ 'create_user.provide_position'|trans }}" data-prefix-w="{{'create_user.position'|trans ~ ' : '}}">
-                                <a class="btn user-btn user-info-position flex-center" {% if not externalUser %} style="display: none;"{% endif %}>
-                                    <i class="fa fa-bezier-curve m-right"></i>
-                                    <span class="m-right">{{'create_user.provide_position'|trans}}</span>
-                                </a>
-                                <div class="user-select-position user-input input-field"  {% if externalUser and item.positionName.vars.valid %}style="display: none;"{% endif %}>
-                                    {{ form_label(item.positionName) }}
-                                    {{ form_widget(item.positionName) }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row no-margin">
-                        <div class="col m6 s12">
-                            <div class="flex-center-sb">
-                                <div class="user-email user-elmt" data-prefix-wo="{{'create_user.provide_email'|trans }}" data-prefix-w="{{'create_user.email_short'|trans ~ ' : '}}">
-                    
-                                    {% set isTooLong = externalUser and externalUser.email|length > mailTruncVal %}
-                                    {% if not isTooLong %}
-                                    <a class="btn user-btn user-info-email flex-center">
-                                    {% else %}
-                                    <a class="btn-flat user-btn user-info-email flex-center tooltipped" data-position="top" data-tooltip="{{externalUser.email}}">
-                                    {% endif %}
-                                        <i class="fa lime-text text-darken-3 fa-envelope m-right"></i>
-                                        <span>{{ externalUser and externalUser.email is not null ? 'create_user.email_short'|trans ~ ' : ' ~ (isTooLong ? externalUser.email|slice(0,mailTruncVal) ~ '...' : externalUser.email) : 'create_user.provide_email'|trans }}</span>
-                                    </a>
-                                    <div class="user-select-email user-input input-field" style="display:none">
-                                        {{ form_label(item.email) }}
-                                        {{ form_widget(item.email) }}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="col m6 s12">
-                            <ul class="flex-center-sb">
-                                {#}
-                                <div class="user-weight user-elmt" data-prefix-wo="{{'create_user.influence'|trans ~ ' : 100'}}" data-prefix-w="{{'create_user.influence'|trans ~ ' : '}}">
-                                    <a class="btn user-btn user-info-weight flex-center">
-                                        <i class="fa fa-vote-yea m-right"></i>
-                                        <span class="m-right">{{'create_user.influence'|trans}} : 100</span>
-                                    </a>
-                                    <div class="user-select-weight user-input" style="display: none;">
-                                        {{ form_label(item.weightValue) }}
-                                        {{ form_widget(item.weightValue) }}
-                                    </div>
-                                </div>
-                                #}
-                                {#
-                                {% if client is null or client.virtual %}
-                                    <div class="user-owner user-input">
-                                        {{ form_widget(item.owner) }}
-                                        {{ form_label(item.owner) }}
-                                        <i class="fa fa-question-circle tooltipped" data-position="bottom" data-delay="50" data-tooltip="{% trans %}create_client.owner_tooltip{% endtrans %}"></i>
-                                    </div>
-                                {% endif %}
-                                #}
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="col s12 m2">
-                    <ul class="flex-center">
-                        {% if not externalUser or not externalUser.id %}
-                            <a class="remove-client-user waves-effect waves-light btn-flat" data-eid="0"><i class="fa fa-trash"></i></a>
-                        {% else %}
-                            <a class="waves-effect waves-light btn-flat modal-trigger" href="#deleteExternalUser" data-eid="{{ externalUser.id }}"><i class="fa fa-trash"></i></a>
-                        {% endif %}
-                        
-                        <a class="validate-ext-user-btn waves-effect waves-light btn blue darken-2 tooltip" data-cid="{{ client and client.id ? client.id : 0 }}" data-eid="{{ externalUser and externalUser.id ? externalUser.id : 0 }}"><i class="fa fa-check"></i></a>
-                    </ul>
-                </div>
-                {{ form_widget(item.id) }}
-            </div>        
         </li>
     </ul>
 </li>

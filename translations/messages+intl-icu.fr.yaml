@@ -106,6 +106,14 @@ shift: Changer
 welcome: Bienvenue
 fullname: Votre nom complet
 parameters: Paramètres
+not_provided: Non renseigné
+over: sur
+see_details: Voir détails
+member: Membre
+partner_firm: Entreprise partenaire
+added_on: Ajouté le
+private: Privé
+already_existing: Déjà existant
 
 head_meta:  
   content: Traitement des opérations client et business en ligne sous la forme de tableaux interactifs. Dealdrive offre une solution de suivi client organisé sous d'un calendrier interactif, où l'on peut échanger documents et updates; dans un but d'un suivi plus fluide et d'une réduction des emails. Utilisez la solution de suivi clients Dealdrive afin d'améliorer vos intéractions clients et collobateurs. 
@@ -641,7 +649,7 @@ countdown:
 
 landing:
   page_name: Votre assistant de suivi des opérations
-  motto: Passez un cran dans l'expérience client 
+  motto: Grimpez d'un cran dans l'expérience client 
   motto_promise: Interagissez dynamiquement sur un tableau avec eux... et remplacez vos tableurs et mails !
   dummy_data_disclaimer: Données à titre d'exemple
   section_1:
@@ -715,6 +723,7 @@ header:
   login: Connexion
   firmSettings: "Entreprise :"
   my_actions: Mes actions et démarches
+  my_documents: Mes documents
   firmActivities: Activités
   firmConfig: Paramètres groupe
   firms: Entreprises
@@ -1331,7 +1340,7 @@ targets:
 client:
   delete_external_user:
     modal_title: Suppression d'un membre du client
-    modal_content: Etes-vous certain de supprimer l'utilisateur en question ? Ses éventuels retours et résultats passés seront anonymisés, et ses participations à venir supprimées.
+    modal_content: Etes-vous certain de supprimer l'utilisateur en question ? Ses participations en cours et à venir dans des activités ou phases que vous avez créées seront supprimées.
 
   delete:
     modal_title: Supression du client
@@ -1529,6 +1538,12 @@ mails:
     button_text: Accédez à DealDrive
     message3: Vous pourrez prendre part aux activités avec vos partenaires, afin de recueillir leurs avis et les satisfaire au mieux ! Si vous avez des questions, n'hésitez pas à en référer à votre responsable ou en nous contactant via contact@serpicoapp.com, nous tâcherons d'y répondre dans les meilleurs délais. Nous vous souhaitons tout cas une agréable expérience sur notre plateforme de suivi collaboratif !
 
+  internalInvitation:
+    subject: Bienvenue sur DealDrive ! Invitation de
+    message1: vous invite à suivre vos activités clients et internes. Prenez aussi le temps d'insérer aussi votre dealflow et faites le lien avec vos partenaires via votre tableau interactif
+    message2: Cliquez dès à présent sur ce lien afin d'y définir votre mot de passe et remplir votre profil
+    new_user_button_text: Accédez à DealDrive
+    
   externalInvitation:
     new_user_subject_begin: Invitation de
     new_user_subject_end: Bienvenue sur DealDrive, la solution de suivi relation client collaborative
@@ -2139,6 +2154,8 @@ tooltip:
 profile:
   my_firm_account: Mon compte {accountName}
   my_individual_account: Mon compte individuel
+  private_suffix: personnel privé
+  independant_suffix: d'indépendant/freelance
   add_account: Ajouter un compte
   my_credentials: Données du compte
   my_accounts: Mes comptes
@@ -2516,13 +2533,16 @@ activity_elements:
   expected_output: Retours & updates
   no_defined_output: Pas encore de retours ou updates
   no_int_act:
-    main_msg: Aucune activité dans l'intervalle de temps
+    main_msg: Aucune activité sur cette plage
     closer_activity_ahead: Plus proche activité à venir
     closer_activity_passed: Plus proche activité passée
   stages: 
     multiple_stages_modal:
       add_event_title: A quelle phase voulez-vous rattacher cet update ?
       title: Quelle phase voulez-vous voir en détail/modifier ?
+    open_enddate: Ouverte
+    open_enddate_info: En laissant la date de fin ouverte, la phase se déroule jusqu'à ce que vous lui fixiez une date de fin; idéal quand vous ne savez pas exactement quand elle se termine.
+    define_enddate: Définir une date de fin
   criteria: Critères
   participant_adding_label: Nom de la personne ou de l'entreprise participante
   participants: Participants
@@ -3280,6 +3300,18 @@ create_user:
   no_provided_email: Pas d'email renseigné
   undefined_department: Département indéfini
   undefined_position: Poste indéfini
+  modal:
+    title: Ajout d'un utilisateur interne
+    label_fullname: Nom complet
+    label_email: Adresse email de
+    error_fullname: Assurez-vous d'insérer un nom complet avant de continuer
+    error_email: Le formatage de l'adresse email n'est pas correct, vérifiez-là !
+    error_duplicate: Il existe déjà un compte associé à cette adresse mail. Merci d'en choisir une autre
+
+delete_user:
+  modal:
+    start_msg: Etes-vous sûr de supprimer l'utilisateur
+    end_msg: Cette opération est <span class="strong">irréversible</span>; il sera enlevé de toutes les activités/phases programmées ou en cours pour son compte entreprise - ses données concernant des phases/activitées passées auxquelles il a participé seront conservées
 
 team_manage:
   page_title_create: Création déquipe
@@ -3300,11 +3332,11 @@ team_manage:
     decline: Annuler
 
 create_client:
-  page_title: Nouveaux partenaires
+  page_title: Détails du partenaire
 #  partner: Partenaire
   add_button: Ajouter un utilisateur externe
   prototype_form_title: Utilisateur externe
-  mobile_header_title: Ajout de partenaires
+  mobile_header_title: Détail partenaire
   csv_description: Importer plusieurs utilisateurs via un fichier...
   manual_description: "Ajouter un ou plusieurs partenaires ci-dessous :"
   firstname: Prénom
@@ -3331,10 +3363,17 @@ create_client:
   emailClientSmallText: Si l'adresse mail n'est pas renseignée ainsi que pour aucun de ses utilisateurs, le partenaire ne pourra pas participer ni accéder à un échange d'informations/d'évaluation
   emailSmallText: En laissant ce champ vide, l'utilisateur pourra être évalué mais ne pourra participer à aucune évaluation
   weightSmallText: Par défaut l'utilisateur héritera d'un poids de vote de 100
+  unknown_position: Fonction non renseignée
   partner:
+    firm_added_on: Partenaire ajouté le
+    independant_added_on: Indépendant ajouté le
     add_button: Ajouter partenaire
     prototype_title: Partenaire
     unexisting_worker_firm: Aucune de celles-ci
+    no_added_users:
+      title: Pas encore d'utilisateurs renseignés
+      content: Seul existe l'utilisateur représentant l'entreprise, n'hésitez pas à en rajouter via le bouton en bas à droite
+
 
   individual:
     add_button: Ajouter des membres
@@ -3466,14 +3505,33 @@ user_list:
   no_teams_msg: Pas déquipe encore créée
   no_attributed_department_title: Pas de département attribué
   no_defined_user: Pas d'utilisateur défini
+  no_defined_firm: Pas d'entreprise définie
   myself: Moi-même
   my_department: Mon département
-  define_superior:
+  define_superior:  
     modal_title: Définion d'un supérieur
     no_superior_option: n'a pas de manager
     success_title: Le supérieur hiérarchique a bien été défini pour l'utilisateur sélectionné !
     cancel: Annuler
     undefined: (Non défini)
+  add_user_btn_tooltip: Ajouter utilisateur/partenaire
+  add_user_modal:
+    type_title: Choisissez ce que vous voulez ajouter
+    internal: Membre de mon entreprise
+    external: Membre d'un partenaire
+    firm_title: Nom du partenaire/client
+    email_title: Dernière étape
+    int_user_title: Ajout d'un membre interne
+    ext_user_title: Ajout d'un membre du partenaire/client
+    independant_user_title: Ajout d'un indépendant
+    participant_title: Ajout d'un participant
+    firm_creation_info: En crééant le partenaire, vous pourrez y ajouter des utilisateurs. Un utilisateur spécial a aussi été créé, et représente l'entreprise en tant que personne morale - vous pourrez l'ajouter à vos activités si besoin
+    independant_creation_info: La personne indépendante et son entreprise représentent une seule et même entité
+    without_email_info: Si vous ne renseignez pas d'adresse email, cet utilisateur ne pourra pas interagir avec vous - vous pouvez toujours la renseigner par la suite
+    new_firm_database: Nouvelle entreprise en base
+    new_user_database: Nouvel utilisateur en base
+    unexisting_client: Aucun de vos partenaires ne semble avoir ce nom. Vous pouvez en créer un nouveau en cliquant sur <span class="strong">Retour</span>, afin d'y insérer le nouvel utilisateur
+    selecting_account_title_suffix: via son compte
 
 
 user_update:
@@ -3488,6 +3546,7 @@ user_update:
     content_ext_user: comme utilisateur externe de votre entreprise ?
     confirm: Oui
     decline: Retour
+
 
 
 templates:
@@ -3584,3 +3643,65 @@ subscription:
 
 updates_management:
   title: Gestion des updates
+  add_group: Ajouter un groupe d'update
+  change_icons: Modifier l'icône
+  add_type: Ajouter un type
+  edit_trans: Gestion des traductions
+  add_event_type_modal:
+    title: Nouveau type d'update
+    input_label: Nom du type d'update
+    choice_title: Créez ce type parmi
+    creation_from_list_choice: Une liste prédéfinie de type
+    creation_manual_choice: En l'ajoutant manuellement
+    msg_2: ou bien créez le votre
+  select_icon_modal:
+    title: Sélectionnez un nouvel icône
+  manage_translation_modal:
+    title: Gestion des traductions
+
+activities_dashboard:
+  create_stage_modal:
+    participants_add_first_choice: Ajout direct via
+    participants_add_second_choice: Lien d'invitation
+
+firm_management:
+  page_title: Paramètres d'entreprise
+  
+  manage_updates: Updates
+  manage_admin: Administrateurs et utilisateurs
+  manage_activity: Activités
+  profile:
+    title: Données du compte
+    identity_logo: 
+      title: Identité, logo et abonnement
+      commname: Nom commercial
+      legalname: Appellation légale
+    general_info:
+      title: Autres informations
+      member_since: Membre depuis
+      total_users: Nombre total d'utilisateurs (dont actifs)
+
+stage_invitation_modal:
+  modal_title: Invitation
+  title: Gérez vos opérations avec vos clients
+  
+  invitation_msg: souhaiterait collaborer avec vous sur cette activité
+  connection_btn_msg: Connectez-vous
+  signup_msg: créez votre compte
+  end_msg: afin d'interagir avec votre client
+  link_msg: Avec lesquels de vos comptes souhaitez-vous associer cette activité en commun
+  decline: Décliner
+
+documents_management:
+  title: Gestion des documents
+  add_document_btn: Ajouter un document
+  no_docs_title: Versez vos documents afin de les conserver et partager à vos clients
+  add_document_modal: 
+    title: Nouveau document
+
+client_update:
+  external_user:
+    active_badge_msg: Utilisateur actif - Peut interagir avec vous
+    inactive_unconnected_msg: L'utilisateur ne s'est pas encore connecté
+    inactive_virtual_msg: Utilisateur virtuel - renseignez son adresse email afin qu'il interagisse avec vous
+    added_email_success_msg: Email L'utilisateur a reçu une invitation à participer aux activités communes

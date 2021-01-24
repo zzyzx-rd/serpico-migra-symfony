@@ -1,11 +1,17 @@
 <li class="client-type-list--item client-firms hierarchized-item">
-  <header>{{ 'user_list.individuals'|trans }}</header>
+  <header>
+    {{ 'individuals_indep_title (<span class="nb-individuals-indep">nbIndivIndeps</span>)'|replace({
+          'individuals_indep_title' : 'user_list.individuals'|trans,
+          'nbIndivIndeps' : clients|length,
+    })|raw }}
+  </header>
+  
   <div class="item-body">
-    <ul class="user-list">
-      {% for firm in firms %}
-        {% set externalUser = firm.aliveExternalUsers.first %}
+    <ul class="user-list" data-no-user-msg="{{ 'user_list.no_defined_user'|trans }}">
+      {% for client in clients %}
+        {% set externalUser = client.aliveExternalUsers.first %}
         {% if externalUser %}
-          {% include "components/user_list__item.html.twig" with { externalUser: externalUser, roles: false } %}
+          {% include "components/user_list__item.html.twig" with { isIndivIndep: true, externalUser: externalUser, roles: false } %}
         {% endif %}
       {% endfor %}
       {# placeholder for no user in list #}

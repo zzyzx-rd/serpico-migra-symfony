@@ -25,42 +25,42 @@ class DynamicTranslation extends DbObject
     /**
      * @ORM\Column(name="dtr_entity", type="string", length=255)
      */
-    private string $entity;
+    private ?string $entity;
 
     /**
      * @ORM\Column(name="dtr_entity_id", type="integer")
      */
-    private int $entityId;
+    private ?int $entityId;
     
     /**
      * @ORM\Column(name="dtr_entity_prop", type="string", length=255)
      */
-    private string $entityProp;
+    private ?string $entityProp;
 
     /**
      * @ORM\Column(name="dtr_fr", type="string", length=255, nullable=true)
      */
-    private string $FR;
+    private ?string $FR;
 
     /**
      * @ORM\Column(name="dtr_en", type="string", length=255, nullable=true)
      */
-    private string $EN;
+    private ?string $EN;
 
     /**
      * @ORM\Column(name="dtr_de", type="string", length=255, nullable=true)
      */
-    private string $DE;
+    private ?string $DE;
 
     /**
      * @ORM\Column(name="dtr_es", type="string", length=255, nullable=true)
      */
-    private string $ES;
+    private ?string $ES;
 
     /**
      * @ORM\Column(name="dtr_lu", type="string", length=255, nullable=true)
      */
-    private string $LU;
+    private ?string $LU;
 
     /**
      * @ManyToOne(targetEntity="Organization", inversedBy="dTranslations")

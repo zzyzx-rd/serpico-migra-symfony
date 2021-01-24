@@ -62,13 +62,14 @@ class ActivityMinElementForm extends AbstractType
                     'widget' => 'single_text',
                     'label_format' => 'stages.stage.%name%',
                     'html5' => false,
-                    'attr' => ['class' => 'dp-end'],
-                    'constraints' => [
+                    'attr' => ['class' => 'dp-end no-margin dp-stage-enddate'],
+                    /*'constraints' => [
                         new Assert\NotBlank,
                         //new EDGreaterThanSD
-                    ]
+                    ]*/
                 ])
-
+            
+            
             ->add('participants', CollectionType::class,
                 [
                     'label' => false,

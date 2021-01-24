@@ -21,10 +21,10 @@ use Doctrine\ORM\Mapping\OrderBy;
  */
 class IProcessStage extends DbObject
 {
-    public const STAGE_UNSTARTED    = 0;
-    public const STAGE_ONGOING      = 1;
-    public const STAGE_COMPLETED  = 2;
-    public const STAGE_PUBLISHED    = 3;
+    public const STATUS_UNSTARTED    = 0;
+    public const STATUS_ONGOING      = 1;
+    public const STATUS_COMPLETED  = 2;
+    public const STATUS_PUBLISHED    = 3;
 
     public const VISIBILITY_public = 0;
     public const VISIBILITY_UNLISTED = 1;

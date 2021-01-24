@@ -136,7 +136,10 @@
 {% endblock %}
 
 {% block content %}
-    <main>
+
+  {% include "components/background_grid.html.twig" %}
+
+    <main class="card-panel purple lighten-5">
 
       <header id="main-header" class="no-margin">
         <a class="waves-effect waves-green btn back-btn" href="{{ url('manageUsers')}}">{{ 'team.go_back_users'|trans }}</a>

@@ -23,9 +23,11 @@ $(function() {
 
     $('input').on('cut copy paste selectstart drag drop', e => e.preventDefault());
 
+    /*
     $('form').submit(function(e) {
         e.preventDefault();
         $('.red-text').empty();
+        const params = {prior_check: 1};
         $.post(window.location.pathname, $(this).serialize())
         .done(function(data) {
 
@@ -39,9 +41,6 @@ $(function() {
         })
         .fail(function(_data) {
             const data = _data.responseJSON;
-            /**
-             * @type {{}}
-             */
             const errorMessages = data.password;
             for (const field in errorMessages) {
                 if (!errorMessages.hasOwnProperty(field)) continue;
@@ -51,8 +50,37 @@ $(function() {
             }
         });
     });
+    */
 
+    $('.update-pwd-btn').on('click',function(e){
+        
+        e.preventDefault();
+        const params = {prior_check: 1};
+        $.post(window.location.pathname, $(this).closest('form').serialize()  + '&' + $.param(params))
+            .fail(function(_data) {
+                const data = _data.responseJSON;
+                /**
+                 * @type {{}}
+                 */
+                const errorMessages = data.password;
+                for (const field in errorMessages) {
+                    if (!errorMessages.hasOwnProperty(field)) continue;
+                    $(`[name$="[password][${field}]"]`).closest('li').children('.errors').html(
+                        errorMessages[field]
+                    );
+                }
+            })
+            .done(function(data){
+                $('.set-usr-org-btn').attr('data-id',data.id);
+                if(data.needToSetOrg){
+                    $('#firstConnectionModal').modal('open');
+                } else {
+                    setTimeout(() => window.location = landingPageUrl, 1000);
+                }
+            })
+    })
 
+    /*
     $(document).on('keyup','input[name*="firm"]',function(e){
 
         var $this = $(this);
@@ -69,7 +97,7 @@ $(function() {
     
         if($this.val().length >= 3){
             
-            const params = {name: $this.val(), type:'firm'};
+            const params = {name: $this.val(), type: 'f'};
             $.post(surl,params)
                 .done(function(data){
     
@@ -134,18 +162,24 @@ $(function() {
             $this.prev().attr('style','display:none!important');
         }
     });
+    */
 
     $('.set-usr-org-btn').on('click',function(e){
         e.preventDefault();
         var $this = $(this);
-        var params = {id: $this.data('id'), assoc: !$('#noOrgAssoc').is(':checked') ? 1 : 0}
-        $.post(suourl, $this.closest('form').serialize() + '&' + $.param(params))
-            .done(function(data){
-            $('#firstConnectionModal').modal('close');
-            setTimeout(() => window.location = landingPageUrl, 1000);
+        const pwdParams = {prior_check: 0};
+
+        $.post(window.location.pathname, $('.update-pwd-btn').closest('form').serialize()  + '&' + $.param(pwdParams))
+            .done(function(){
+                var params = {id: $this.data('id'), assoc: !$('#noOrgAssoc').is(':checked') ? 1 : 0}
+                $.post(suourl, $this.closest('form').serialize() + '&' + $.param(params))
+                    .done(function(data){
+                    $('#firstConnectionModal').modal('close');
+                        setTimeout(() => window.location = landingPageUrl, 1000);
+                    })
+                    .fail(function(data){
+                    console.log(data);
+                    });
             })
-            .fail(function(data){
-            console.log(data);
-            });
     });
 });

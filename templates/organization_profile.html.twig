@@ -26,8 +26,8 @@
         {% endif %}
         #}
 
-        var suurl = "{{ path('saveUserSelfModifications') }}";
-        var upurl = "{{ path('updatePicture',{element:'user'}) }}";
+        var sourl = "{{ path('saveOrganizationSelfModifications') }}";
+        var upurl = "{{ path('updatePicture',{element: 'organization'}) }}";
         var pmurl = "{{ path('passwordSelfModification') }}"
         var surl = "{{path('dynamicSearch')}}";
         var suourl = "{{ url('addAccount') }}";
@@ -242,17 +242,15 @@
 {% endblock %}
 
 {% block content %}
-
-{% set indivAccount = currentuser.userGlobal.userAccounts|filter(a => a.organization.type == 'C')|first %}
 {% include "components/background_grid.html.twig" %}
 
     {% set now = "now"|date("Y/m/d") %}
         <main class="card-panel purple lighten-5">
             <div class="flex-center title-header">
-                <a href="{{ path('home') }}" class="return-btn btn">
+                <a href="{{ path('firmSettings') }}" class="return-btn btn">
                     Retour
                 </a>
-                <h4 class="page-title">{{'parameters'|trans}}</h4>
+                <h4 class="page-title">{{'firm_management.profile.title'|trans}}</h4>
                 {#
                 <a class="btn-flat cancel-btn" style="visibility:hidden">{{'cancel'|trans}}</a>
                 <a class="m-left modify-btn btn-flat dd-text">
@@ -267,10 +265,10 @@
                 <div class="">
 
 
-                    <section class="user-credentials">
+                    <section class="organization-credentials">
                         {{ form_start(form) }}
                         <div class="flex-center-sb">
-                            <h5>{{'profile.my_credentials'|trans}}</h5>
+                            <h5>{{'firm_management.profile.identity_logo.title'|trans}}</h5>
                             <div class="flex-center">
                                 <a class="btn-flat cancel-btn" style="visibility:hidden">{{'cancel'|trans}}</a>
                                 <a class="m-left modify-btn modify-credentials-btn btn-flat dd-text">
@@ -283,40 +281,40 @@
                         <div class="row flex-center">
                         
                             <div class="col s12 m3 user-picture-zone" style="position: relative">
-                                <img class="clickable-image user-picture" src="{{ asset(global.userpicture(currentuser)) }}">
+                                <img class="clickable-image user-picture" src="{{ asset(global.organizationLogo(organization)) }}">
                                 <a class="btn-floating add-photo-btn clickable-image"><i class="fa fa-camera"></i></a>
                             </div>
                 
                             <div class="col s12 m9 c-flex user-fields" style="flex-grow: 1;">
                             
                                 <div class="flex-center">
-                                    <span class="field-name">{{'name'|trans|capitalize}}</span>
-                                    <span class="element-data">{{ currentuser.fullname }}</span>
-                                    <div class="element-input">
-                                        {#
-                                        <div class="" style="display: inline-block;">
-                                            {{ form_row(form.male) }}
-                                        </div>
-                                        #}
-                                        <div class="input-field no-margin" style="display: inline-block;">
-                                            {{ form_label(form.firstname) }}
-                                            {{ form_widget(form.firstname, {attr:{style: "margin:0"}}) }}
-                                        </div>
-                                        <div class="input-field no-margin" style="display: inline-block;">
-                                            {{ form_label(form.lastname) }}
-                                            {{ form_widget(form.lastname, {attr:{style: "margin:0"}}) }}
-                                        </div>
+                                    <span class="field-name">{{'firm_management.profile.identity_logo.commname'|trans|capitalize}}</span>
+                                    <span class="element-data bold-1">{{ organization.commname }}</span>
+                                    <div class="element-input input-field no-margin">
+                                            {{ form_label(form.commname) }}
+                                            {{ form_widget(form.commname, {attr:{style: "margin:0"}}) }}
                                     </div>
                                 </div>
-
                                 <div class="flex-center">
-                                    <span class="field-name">{{'email'|trans|capitalize}}</span>
-                                    <span class="element-data">{{ currentuser.email }}</span>
-                                    <div class="element-input user-email">
-                                        {{ form_row(form.email) }}
+                                    <span class="field-name">{{'firm_management.profile.identity_logo.legalname'|trans|capitalize}}</span>
+                                    <span class="element-data bold-1">{{ not organization.legalname|default ? ('(' ~ 'not_provided'|trans ~ ')') : organization.legalname }}</span>
+                                    <div class="element-input input-field no-margin">
+                                            {{ form_label(form.legalname) }}
+                                            {{ form_widget(form.legalname, {attr:{style: "margin:0"}}) }}
+                                        
                                     </div>
                                 </div>
 
+                                
+                                <div class="flex-center">
+                                    <span class="field-name">{{'account_management.your_plan'|trans|capitalize}}</span>
+                                    <span class="element-data bold-1">{{ organization.plan == 3 ? 'subscription.free'|trans : 'subscription.premium'|trans }}</span>
+                                    <div class="element-input user-email">
+                                        {{ form_row(form.plan) }}
+                                    </div>
+                                </div>
+
+                                {#
                                 <div class="flex-center">
                                     <span class="field-name">{{'password'|trans|capitalize}}</span>
                                     <span class="element-data">••••••••</span>
@@ -325,6 +323,7 @@
                                     </div>
 
                                 </div>
+                                #}
                             
                             </div>
 
@@ -332,17 +331,27 @@
                         {{ form_rest(form) }}
                         {{ form_end(form) }}
                     </section>
-
+                    
                     <section>
-                        <div class="flex-center-sb">
-                            <h5>Mes abonnements</h5>
-                            <a class="btn-flat add-account-btn dd-text modify-btn check-subscriptions" href="">
-                                <span class="sm-right">{{'manage'|trans}}</span>
-                                <i class="fa fa-cog"></i>
-                            </a>
-                        </div>
-                    </section>
 
+                        <h5>{{'firm_management.profile.general_info.title'|trans}}</h5>
+                        <div class="user-fields">
+                        
+                            <div class="flex-center-sb">
+                                <span>{{ 'firm_management.profile.general_info.member_since'|trans }}</span>
+                                <span>{{ organization.inserted|format_datetime('short', 'none', pattern='dd/MM/yy') }}</span>
+                            </div>
+                            <div class="flex-center-sb">
+                                <span>{{ 'firm_management.profile.general_info.total_users'|trans }}</span>
+                                <span>{{ organization.users|filter(u => not u.synthetic)|length ~ ' (' ~ organization.users|filter(u => not u.deleted and not u.synthetic)|length ~ ')' }}</span>
+                            </div>
+                        </div>
+                        
+                    </section>
+                    
+
+
+                    {#
                     <section>
                         <div class="flex-center-sb">
                             <h5>{{'profile.my_accounts'|trans}}</h5>
@@ -352,22 +361,15 @@
                             </a>
                         </div>
                         <ul class="accounts-zone">
-                            {% if indivAccount %}
-                                <li class="flex-center">
-                                    <img class="user-profile-l-picture" src="{{ asset(global.userpicture(indivAccount)) }}" alt="">
-                                    {#<i class="material-icons dd-text">person_pin</i>#}
-                                    <span class="m-left">{{'profile.my_individual_account'|trans}}</span>
-                                </li>
-                            {% endif %}
                             <li class="firm-accounts">
                                 <ul>
-                                    {% if currentuser.userGlobal.userAccounts|length > 1 %}
-                                        {% for userAccount in currentuser.userGlobal.userAccounts|filter(a => a.organization.type != 'C') %}
+                                    {% if organization.|length > 1 %}
+                                        {% for userAccount in organization.users|filter(u => !u.synthetic) %}
                                             <li class="account flex-center-sb">
-                                                <div class="flex-center">  
+                                                <div>  
                                                     <img class="user-profile-l-picture" src="{{ asset(global.organizationLogo(userAccount.organization)) }}" alt="">
-                                                    <span class="account-prefix m-left">{{'my_account'|trans}}</span>
-                                                    <span class="account-name sm-left">{{userAccount.organization.commname}}</span>
+                                                    <span class="account-prefix">{{'my_account'|trans}}</span>
+                                                    <span class="account-name">{{userAccount.organization.commname}}</span>
                                                 </div>
                                                 <div class="account-action-zone">
                                                     
@@ -396,6 +398,8 @@
                             </li>
                         </ul>
                     </section>
+                    #}
+
                     {#
                     <ul class="element-input flex-center" style="display: none;justify-content:space-between;flex-grow:1">
                         <li>
@@ -501,27 +505,6 @@
                 </ul>
                 #}
 
-                <div id="modifyPassword" class="modal">
-                    {{form_start(passwordModificationForm)}}
-                    <div class="modal-content">
-                        <p>{{ 'profile.manage.password_modification_modal.title'|trans }}</p>
-                        
-                        <div class="input-field">
-                            {{form_row(passwordModificationForm.password)}}
-                        </div>
-                        <div class="input-field">
-                            {{form_row(passwordModificationForm.newPassword)}}
-                        </div>
-                    </div>
-                    <div class="modal-footer action-buttons">
-                    <div class="button-field">
-                        {{form_row(passwordModificationForm.submit)}}
-                    </div>
-                    </div>
-                    {{form_rest(passwordModificationForm)}}
-                    {{form_end(passwordModificationForm)}}
-                </div>
-
                 <div id="successUploadedPicture" class="modal">
                     <div class="modal-content">
                     <p>{{ 'profile.file.success.modal_content'|trans }}</p>
@@ -532,16 +515,7 @@
                     </div>
                     </div>
                 </div>
-                <div id="successPasswordChange" class="modal">
-                    <div class="modal-content">
-                        <p>{{ 'profile.manage.s_password_modification_modal.content'|trans }}</p>
-                    </div>
-                    <div class="modal-footer action-buttons">
-                    <div class="button-field">
-                        <a class="waves-effect waves-green btn modal-close">Ok</a>
-                    </div>
-                    </div>
-                </div>
+                
                 <div id="errorFileType" class="modal">
                     <div class="modal-title">
                     <h4>{{ 'profile.file.unsupported_type.modal_title'|trans }}</h4>
@@ -583,14 +557,9 @@
                             <h5>{{ 'profile.manage.add_account_modal.title'|trans }}</h5>
                             <p>{{ 'profile.manage.add_account_modal.content'|trans ~ ' :' }}</p>
                             <div class="input-field firm-field-zone">
-                            <input class="firm-name no-margin" type="text" name="firmname">
-                            <div class="c-flex m-bottom"> 
-                                <small class="dd-orange-text new-firm" style="visibility:hidden">{{'user_list.add_user_modal.new_firm_database'|trans}}</small>
-                                <small class="dd-orange-text error-fullname" style="display:none">{{'create_user.modal.error_fullname'|trans}}</small>
-                            </div>
-                            <select name="firmSelector" id=""></select>
-                            <input type="hidden" name="wid">
-                            <input type="hidden" name="oid">
+                                <input class="firm-name" type="text" name="firm">
+                                <select name="firmSelector" id=""></select>
+                                <input type="hidden" name="wid">
                             </div>
                             <div class="action-buttons">
                                 <div class="button-field">
@@ -626,74 +595,5 @@
 {% endblock %}
 
 {% block javascripts %}
-        <script>
-            $(function(){
-                $(document).on('click','.validate-btn',function(e){
-                    e.preventDefault();
-                    urlToPieces = $('.validate-btn').attr('href').split('/');
-                    urlToPieces[urlToPieces.length - 4] = $("input[name*='firstname']").val();
-                    urlToPieces[urlToPieces.length - 3] = $("input[name*='lastname']").val();
-                    urlToPieces[urlToPieces.length - 2] = $("select[name*='male']").val();
-                    urlToPieces[urlToPieces.length - 1] = $("input[name*='email']").val();
-                    var murl = urlToPieces.join('/');
-                    $('.mailMsg').empty();
-                    $.post(murl,null)
-                        .done(function(data){
-                            $('.mailMsg').append(data.message);
-                            $('#validateEmailSuccess').modal('open');
-                            $('.validate-btn').text('validated').removeClass('validate-btn').removeClass('btn').addClass('btn-flat grey lighten-3').attr("href","");
-                            $('.write-btn').removeClass('btn-flat grey lighten-3').addClass('btn modal-trigger').attr("href", "#writeMailModal");
-                        })
-                        .fail(function(data){
-                            $('.mailMsg').append(data.message);
-                            $('#validateEmailSuccess').modal('open');
-                        })
-                })
-                $('input[type="checkbox"]').on('change',function(){
-                    row = $(this).closest('.row').next();
-                    lastChild = row.children().last();
-                    if($(this).is(':checked')){
-                        lastChild.find('input').attr("disabled",true);
-                        lastChild.hide();
-                        row.children().first().removeClass('m4').addClass('m8');
-
-                    } else {
-                        lastChild.find('input').attr("disabled",false);
-                        lastChild.show();
-                        row.children().first().removeClass('m8').addClass('m4');
-
-                    }
-                })
-                $('input[type="checkbox"]').each(function(key,elmt){
-                    if($(this).is(':checked')){
-                        var row = $('.experience').eq(key).find('input[name*="enddate"]').closest('.row');
-                        row.children().last().hide();
-                        row.children().first().removeClass('m4').addClass('m8');
-                    }
-                });
-                $('input[name*="email"]').on('change',function(){
-                    actionBtns = $('.validation-btn').parent();
-                    if($('.validation-btn').hasClass('grey')){
-                        $('.validation-btn').remove();
-                        {% if workerIndividual is defined %}
-                            actionBtns.prepend($('<a class="waves-effect waves-light btn validate-btn" href="{{ url('validateWorkerEmailFromSelfPage',{'wiId' : workerIndividual.id, 'firstname' :'a', 'lastname' : 'b', 'male' : 1, 'wiEmail' : 'a'}) }}">Validate</a>'))
-                        {% else %}
-                            actionBtns.prepend($('<a class="waves-effect waves-light btn validate-btn" href="{{ url('validateWorkerEmailFromSelfPage',{'wiId' : 0, 'firstname' :'a', 'lastname' : 'b', 'male' : 1, 'wiEmail' : 'a'}) }}">Validate</a>'))
-                        {% endif %}
-                    }
-                })
-
-
-                $('.check-subscriptions').on('click',function(e){
-                    e.preventDefault();
-                    $.get(csurl)
-                        .done(function(data){
-                            window.location = data.cpurl;
-                        })
-                });
-
-            });
-        </script>
-        <script src="{{ absolute_url(asset('js/add_client_user.js')) }}"></script>
-        <script src="{{ absolute_url(asset('js/worker_individual_update.js')) }}"></script>
+        <script src="{{ absolute_url(asset('js/organization_profile.js')) }}"></script>
 {% endblock %}

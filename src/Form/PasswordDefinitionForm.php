@@ -51,7 +51,7 @@ class PasswordDefinitionForm extends AbstractType {
             $builder->add('submit', SubmitType::class,[
                 'label_format' => 'password_update.%name%',
                 'attr' => [
-                    'class' => 'waves-effect waves-light btn',
+                    'class' => 'waves-effect waves-light btn update-pwd-btn',
                     /*'disabled' => 'disabled'*/
                 ]
             ]);

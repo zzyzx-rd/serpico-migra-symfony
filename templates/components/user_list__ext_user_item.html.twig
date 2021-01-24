@@ -1,16 +1,13 @@
 {% import "macros/user_list__macros.html.twig" as macros %}
 
-{% set settings = settings is defined ? settings : true %}
-{% set stats = stats is defined ? stats : true %}
-{% set roles = roles is defined ? roles : true %}
+{% set settings = settings|default(false) %}
+{% set stats = stats|default(false) %}
+{% set roles = roles|default(false) %}
 {% set displayOrg = displayOrg is defined ? orgName : false %}
-{#{% set myself = user == currentuser %}
-{% set perf = user.ranking('A','P','W', true) %}
-{% set dev = user.ranking('A','D','W', true) %}
-{% set weight = user.weight %}#}
+{% set externalUser = externalUser|default(null) %}
 
 {% set user = externalUser.user ?? null %}
-{% set picture_url = user ? (user.synthetic ? '/lib/img/org/no-picture.png' : asset(global.userPicture(user))) : '/lib/img/user/no-picture.png' %}
+{#{% set picture_url = user ? (user.synthetic ? '/lib/img/org/no-picture.png' : asset(global.userPicture(user))) : '/lib/img/user/no-picture.png' %}#}
 
 {#}
 {% set hasCompletedActivities = user.nbCompletedActivities > 0 %}
@@ -19,10 +16,10 @@
 
 <li class="users-list--item hierarchized-item {{ not stats ? 'no-stats' }}">
   <header>
-    <img src="{{ picture_url }}" alt="" class="user-picture">
+    <img src="{{ asset(global.userPicture(user)) }}" alt="" class="user-picture" data-synth-pic="{{ asset(global.userPicture(null,true)) }}">
 
-    <div class="user-name {{ externalUser.synthetic ? 'synth' }}">
-      {{ externalUser.synthetic ? 'legal_person'|trans|capitalize : externalUser.fullname }}
+    <div class="user-name {{ externalUser and externalUser.synthetic ? 'synth' }}" data-synth-msg="{{ 'legal_person'|trans|capitalize }}">
+      {{ externalUser ? (externalUser.synthetic ? 'legal_person'|trans|capitalize : externalUser.fullname) : '' }}
     </div>
 
     {% if user %}
@@ -37,7 +34,12 @@
           #}
         {% endif %}
       {% endif %}
+    {#
     {% else %}
+      {{ macros.render_badge('virtual-badge', 'V', 'tooltip.user.external_user_virtual'|trans) }}
+    #}
+    {% endif %}
+    {% if not user or user and not user.synthetic and not user.email %}
       {{ macros.render_badge('virtual-badge', 'V', 'tooltip.user.external_user_virtual'|trans) }}
     {% endif %}
 
@@ -50,12 +52,12 @@
           {% if is_admin or user.createdBy == currentuser.id %}
             {% set path = is_root ? 'rootUpdateUser' : 'updateUser' %}
             <a class="material-icons"
-                href="{{ url(path, { usrId: user.id, orgId: user.orgId }) }}"
+                href="{{ url(path, { usrId: user ? user.id : 0, orgId: user ? user.orgId : 0 }) }}"
                 tooltip="{{ 'user_list.modify'|trans }}">settings</a>
           {% endif %}
         
           <a class="fa fa-bullseye"
-              href="{{ url('updateElementTargets', { entity: 'user', elmtId: user.id }) }}"
+              href="{{ url('updateElementTargets', { entity: 'user', elmtId: user ? user.id : 0 }) }}"
               tooltip="{{ 'user_list.targets'|trans }}">
           </a>
           
@@ -70,7 +72,13 @@
         <div class="nb-activities flex-center tooltipped" data-tooltip="{{'tooltip.user.activity_ongoing_futur'|trans}}" data-position="top">
           <i class="fa fa-briefcase"></i>
           <span class="sm-left black-text">
-              {{ userM.nbCompletedActivities(user) }} + {{ userM.nbScheduledActivities(user) }}
+              {{ user ? 'nb_completed_act + nb_scheduled_act'|replace({
+                            nb_completed_act: userM.nbCompletedActivities(user),
+                            nb_scheduled_act: (userM.nbScheduledActivities(user))
+                          }) 
+                      : '0 + 0' 
+              
+              }}
           </span>
         </div>
         
@@ -80,6 +88,8 @@
 
   </header>
 
+
+  {#
   {% if stats %}
     <div class="item-body">
       <div class="badges">
@@ -98,7 +108,7 @@
       <div class="user-info tiles-container">
         <div class="tile activity-count">
           {% set text %}
-            {{ user.nbCompletedActivities(app) }} + {{ user.nbScheduledActivities(app) }}
+            {{ userM.nbCompletedActivities(user) }} + {{ userM.nbScheduledActivities(user) }}
           {% endset %}
           {{ macros.render_tile(
             'tooltip.user.activity_ongoing_futur'|trans, 'fa fa-briefcase', text
@@ -164,4 +174,5 @@
       </div>
     </div>
   {% endif %}
+  #}
 </li>

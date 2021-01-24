@@ -64,6 +64,7 @@ use App\Service\FileUploader;
 use App\Service\NotificationManager;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class ActivityController extends MasterController
 {
@@ -91,19 +92,94 @@ class ActivityController extends MasterController
         $createActivityForm = $this->createForm(ActivityMinElementForm::class, $stage, ['organization' => $organization, 'currentUser' => $currentUser]);
         $createActivityForm->handleRequest($request);
 
-        //return new JsonResponse(['coucou'],200);
-
         if($createActivityForm->isSubmitted()){
 
             $participants = $createActivityForm->get('participants')->getData();
             $participantData = $createActivityForm->get('participants');
-            //dd($participants);
-            
-            //return ['coucou'];
+
             foreach($participants as $key => $participant){
                 if($participantData[$key]->get('userPart')->getData() != null){
+
                     $usrId = $participantData[$key]->get('userPart')->getData();
                     $user = $em->getRepository(User::class)->find($usrId);
+                    
+                    // Is participant user existing as a client ?
+                    if ($user->getOrganization() != $currentUser->getOrganization()){
+                        
+                        if($participantData[$key]->get('externalUserPart')->getData() == null){
+ 
+                            $clientOrganization = $user->getOrganization();
+                            if($organization->getType() == 'I'){
+                                $addedClientUsers = [$currentUser];
+                            } else {
+                                $addedClientUsers = $organization->getUsers()->filter(fn(User $u) => $u == $currentUser || $u->isSynthetic())->getValues();
+                            }
+
+                            $this->forward('App\Controller\OrganizationController::updateOrgFeatures', ['organization' => $clientOrganization, 'addedAsClient' => true, 'addedClientUsers' => $addedClientUsers]);
+                            
+                            $type = $clientOrganization->getType();
+                            $isClientIndiv = $type == 'C';
+                            $isClientIndep = $type == 'I';
+                            $client = new Client;
+                            $client
+                            ->setName($organization->getCommname())
+                            ->setOrganization($organization)
+                            ->setClientOrganization($clientOrganization)
+                            ->setType($type)
+                            ->setWorkerFirm($clientOrganization->getWorkerFirm())
+                            ->setCreatedBy($currentUser->getId());
+                            
+                            if(!$isClientIndiv){
+                                $externalSynthUser = new ExternalUser;
+                                $externalSynthUser->setFirstname($organization->getCommname())
+                                    ->setLastname($clientOrganization->getCommname())
+                                    ->setSynthetic(true)
+                                    ->setUser($clientOrganization->getUsers()->filter(fn(User $u) => $u->isSynthetic())->first());
+                                $client->addExternalUser($externalSynthUser);
+                            }
+                            if(!$user->isSynthetic()){
+                                $externalUser = new ExternalUser;
+                                $externalUser->setFirstname($user->getFirstname())
+                                    ->setLastname($user->getLastname())
+                                    ->setEmail($user->getEmail())
+                                    ->setUser($user);
+                                $client->addExternalUser($externalUser);
+                            } else {
+                                $externalUser = $externalSynthUser;
+                            }
+
+                            $em->persist($client);
+                        
+                        } else {
+
+                            $extId = $participantData[$key]->get('externalUserPart')->getData();
+                            $externalUser = $em->getRepository(ExternalUser::class)->find($extId);
+                        }
+                        
+                        $participant->setExternalUser($externalUser);
+
+                        $email = $participantData[$key]->get('email')->getData();
+
+                        if($email != null){
+
+                            $externalUser->setEmail($email);
+                            $user->setEmail($email);
+                            $em->persist($externalUser);
+                            $em->persist($user);
+                            $em->flush();
+
+                            $recipients[] = $user;
+                            $settings['tokens'][] = $user->getToken();
+                            $settings['invitingUser'] = $currentUser;
+                            $settings['invitingOrganization'] = $organization;
+                            $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'externalInvitation']);
+
+                        }
+
+                    } else {
+                        $participant->setExternalUser(null);
+                    }
+
                     if($user == $currentUser){
                         $participant->setLeader(true);
                     }
@@ -111,6 +187,7 @@ class ActivityController extends MasterController
                 } else {
                     $participant->setUser(null);
                 }
+
                 if ($participantData[$key]->get('teamPart')->getData() != null){
                     $teaId = $participantData[$key]->get('teamPart')->getData();
                     /** @var Team */
@@ -132,13 +209,7 @@ class ActivityController extends MasterController
                 } else {
                     $participant->setTeam(null);
                 }
-                if ($participantData[$key]->get('externalUserPart')->getData() != null){
-                    $extId = $participantData[$key]->get('externalUserPart')->getData();
-                    $externalUser = $em->getRepository(ExternalUser::class)->find($extId);
-                    $participant->setExternalUser($externalUser);
-                } else {
-                    $participant->setExternalUser(null);
-                }
+               
             }
 
             if($clickedBtn == 'submit'){
@@ -225,7 +296,8 @@ class ActivityController extends MasterController
                                 $clientList[] = $clientOrg;
                                 $clientOrgData = [];
                                 $clientOrgData['name'] = $clientOrgName;
-                                $clientOrgData['logo'] = $clientOrg->getLogo() ?: ($clientOrg->getWorkerFirm()->getLogo() ?: '/lib/img/org/no-picture.png');
+                                $clientOrgData['type'] = $clientOrg->getType();
+                                $clientOrgData['logo'] = $clientOrg->getLogo() ?: ($clientOrg->getType() != 'I' ? ($clientOrg->getWorkerFirm()->getLogo() ?: '/lib/img/org/no-picture.png') : '');
                                 $clients[] = $clientOrgData;
                             }
                             
@@ -247,7 +319,7 @@ class ActivityController extends MasterController
                         'apr' => $progressStatuses[$activity->getProgress()],
                         'asd' => $activity->getStartdateU(),
                         'sd' => $stage->getStartdateU(),
-                        'ssed' => $stage->getStartdate()->format($locale != 'en' ? 'j/n' : 'n/j') . ($stage->getStartdate() == $stage->getEnddate() ? '' : ' - ' . $stage->getEnddate()->format($locale != 'en' ? 'j/n' : 'n/j')),
+                        'ssed' => $stage->getStartdate()->format($locale != 'en' ? 'j/n' : 'n/j') . ($stage->getStartdate() == $stage->getEnddate() ? '' : ' - ' . ($stage->getEnddate() ? $stage->getEnddate()->format($locale != 'en' ? 'j/n' : 'n/j') : '...')),
                         'p' => $stage->getPeriod(),
                         'n' => $stage->getName(),
                         'id' => $stage->getId(), 
@@ -310,6 +382,7 @@ class ActivityController extends MasterController
         $lastname = $_POST['lastname'];
         $firm = $_POST['firm'];
         $email = $_POST['email'];
+        $hasOrgMainFolder = true;
 
         $newUser = false;
 
@@ -344,13 +417,14 @@ class ActivityController extends MasterController
 
             $em->persist($clientOrganization);
 
-            $this->forward('App\Controller\OrganizationController::updateOrgFeatures', ['organization' => $clientOrganization, 'nonExistingOrg' => true, 'createdAsClient' => true]);
+            $this->forward('App\Controller\OrganizationController::updateOrgFeatures', ['organization' => $clientOrganization, 'existingOrg' => false, 'createSynthUser' => true, 'addedAsClient' => true, 'addedClientUsers' => [$currentUser]]);
+            $hasOrgMainFolder = false;
 
         } else {
 
             $clientOrganization = $em->getRepository(Organization::class)->find($_POST['oid']);
             if($clientOrganization != $currentUser->getOrganization() && empty($_POST['cid'])){
-                $this->forward('App\Controller\OrganizationController::updateOrgFeatures', ['organization' => $clientOrganization, 'nonExistingOrg' => false, 'createdAsClient' => true]);
+                $this->forward('App\Controller\OrganizationController::updateOrgFeatures', ['organization' => $clientOrganization, 'addedAsClient' => true, 'addedClientUsers' => [$currentUser]]);
             }
 
         }
@@ -441,6 +515,13 @@ class ActivityController extends MasterController
         }
         
         $em->flush();
+
+        if(!$hasOrgMainFolder){
+            $orgId = $clientOrganization->getId();
+            $orgName = strtolower(implode("-",explode(" ",$entityName)));
+            mkdir(dirname(dirname(__DIR__)) . "/public/lib/cdocs/{$orgId}-{$orgName}");
+        }
+
         if(!empty($email)){
 
             $settings = [];
@@ -480,7 +561,7 @@ class ActivityController extends MasterController
      * @return JsonResponse|RedirectResponse
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/{entity}/{inpId}/{actName}/create",name="activityInitialisation")
+     * @Route("/{entity}/{inpId}/{actName}/create",name="activityInitialisation",requirements={"inpId" ="\d+"})
      */
     public function addActivityId(string $entity, int $inpId = 0, string $actName = '')
     {
@@ -4476,7 +4557,7 @@ class ActivityController extends MasterController
         /** @var Stage[] */
         $activityStages = $activity->getStages()->getValues();
         foreach ($activityStages as $stage) {
-            $stage->setStatus(Stage::STAGE_PUBLISHED);
+            $stage->setStatus(Stage::STATUS_PUBLISHED);
             $em->persist($stage);
         }
         $activity->setStatus(3);
@@ -4502,4 +4583,93 @@ class ActivityController extends MasterController
         $em->flush();
         return true;
     }
+
+    /**
+     * @param Request $request
+     * @param $token
+     * @return bool|RedirectResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/s/{token}", name="accessStageThroughInvit")
+     */
+    public function accessStageThroughInvit(Request $request, string $token){
+        
+        $em = $this->em;
+        $stage = $em->getRepository(Stage::class)->findOneByAccessLink($token);
+        if(!$stage){
+            throw new NotFoundHttpException();
+        }
+
+        if(isset($_COOKIE['sorting_type'])){
+            $sortingType = $_COOKIE['sorting_type'];
+        } else {
+            setcookie('sorting_type', 'p');
+            $sortingType = 'p';
+        }
+        if(isset($_COOKIE['ts'])){
+            $timescaleCookie = $_COOKIE['ts'];
+        } else {
+            setcookie('ts', 'y');
+            $timescaleCookie = 'y';
+        }
+
+        setcookie("is", $stage->getId(), time() + 60*60*24*30, '/');
+
+        if($this->security->getUser()){
+
+            return $this->forward('App\Controller\InstitutionController::myActivitiesListAction', []);
+            
+        } else {
+        
+            $statuses = [
+                -5 => $sortingType == 'o' ? 'cancelled' : 'stopped',
+                -4 => $sortingType == 'o' ? 'discarded' : 'postponed',
+                -3 => $sortingType == 'o' ? 'requested' : 'suspended',
+                -2 => $sortingType == 'o' ? 'attributed' : 'reopened',
+                -1 => $sortingType == 'o' ? 'incomplete' : 'unstarted',
+                0  => $sortingType == 'o' ? 'future' : 'upcoming',
+                1  => $sortingType == 'o' ? 'current' : 'ongoing',
+                2  => 'completed',
+                3  => $sortingType == 'o' ? 'published' : 'finalized',
+            ];
+
+
+            //dd($request->headers->get('user_agent'));
+            $renderedTwigFile = strpos($request->headers->get('user_agent'), "Mobile") === false ? 'activities_dashboard.html.twig' : 'mobile_activities_dashboard.html.twig';
+            
+            return $this->render(
+                $renderedTwigFile,
+                [
+                    'displayedStatuses'  => [$statuses[(string) $stage->getActivity()->getProgress()]],
+                    'orphanActivities'  => [$stage->getActivity()],
+                    'processesActivities' => null,
+                    'addProcessForm' => null,
+                    'delegateForm' => null,
+                    'validateRequestForm' => null,
+                    'requestForm' => null,
+                    'sortingTypeCookie' => $sortingType,
+                    'viewTypeCookie' => 't',
+                    'dateTypeCookie' => 's',
+                    'timescaleCookie' => $timescaleCookie,
+                    'eventForm' => null,
+                    'newActivityForm' => null,
+                    'firstConnection' => false,
+                    'eventGroups' => null,
+                    'em' => $em,
+                    'comesFromLogin' => false,
+                ]
+            );
+        }
+    }
+
+            
+    /*         return $this->render('stage_invitation.html.twig',[
+                'stage' => $stage,
+                'em' => $em,
+                'timescaleCookie' => 'y',
+                'dateTypeCookie' => 's',
+            ]);
+        }
+    }
+    */
 }

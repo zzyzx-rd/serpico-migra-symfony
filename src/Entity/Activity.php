@@ -912,11 +912,14 @@ class Activity extends DbObject
         $enddate = new DateTime('2000-01-01');
 
         foreach ($this->stages as $stage) {
+
+            $stageEndDate = $stage->getEnddate() ?: new DateTime;
+
             if ($stage->getStartdate() < $startDate) {
                 $startDate = $stage->getStartDate();
             }
-            if ($stage->getEnddate() > $enddate) {
-                $enddate = $stage->getEnddate();
+            if ($stageEndDate > $enddate) {
+                $enddate = $stageEndDate;
             }
         }
 
@@ -993,7 +996,7 @@ class Activity extends DbObject
     {
         $stages = $this->stages;
         return $stages->filter(static function (Stage $stage) {
-            return $stage->getStatus() >= STAGE::STAGE_COMPLETED;
+            return $stage->getStatus() >= STAGE::STATUS_COMPLETED;
         });
     }
 
@@ -1512,6 +1515,40 @@ class Activity extends DbObject
     {
         $this->userMasters->removeElement($userMaster);
         return $this;
+    }
+
+    /**
+    * @return ArrayCollection|Organization[]
+    */
+    public function getInvolvedOrganizations()
+    {
+        $allOrganizations = [];
+        foreach($this->stages as $stage){
+            $stageOrganizations = $stage->getParticipations()->map(fn(Participation $p) => $p->getUser()->getOrganization());
+            foreach($stageOrganizations as $stageOrganization){
+                $allOrganizations[] = $stageOrganization;
+            }
+        }
+        $allUniqueOrganizations = array_unique($allOrganizations);       
+        return $allUniqueOrganizations;
+    }
+
+    /**
+    * @return ArrayCollection|Organization[]
+    */
+    public function getInvolvedClientOrganizations()
+    {
+        $userClientOrganizations = $this->currentUser->getOrganization()->getClients()->map(fn(Client $c) => $c->getClientOrganization());
+        $clientOrganizations = new ArrayCollection();
+        foreach($this->stages as $stage){
+            $stageOrganizations = $stage->getParticipations()->map(fn(Participation $p) => $p->getUser()->getOrganization());
+            foreach($stageOrganizations as $stageOrganization){
+                if(!$clientOrganizations->contains($stageOrganization) && $userClientOrganizations->contains($stageOrganization)){
+                    $clientOrganizations->add($stageOrganization);
+                }
+            }
+        }       
+        return $clientOrganizations;
     }
 
 }

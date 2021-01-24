@@ -78,8 +78,9 @@ class ActivityM extends ModelEntity {
             : null;
     }
 
-    public function userCanEdit(Activity $activity, User $u): bool
+    public function userCanEdit(Activity $activity, ?User $u): bool
     {
+        if(!$u){return false;}
         $role = $u->getRole();
 
         /*if (

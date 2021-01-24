@@ -1,4 +1,5 @@
 {% set client = item.vars.data ? item.vars.data : null %}
+{% set clientHasUsers = client ? client.aliveExternalUsers|length : 0 %}
 
     <div class="client {% if item.parent is not null %}collection-item{% endif %}">
     <div class="client-data-zone" {% if not client %}style="display:none"{% endif %}>
@@ -8,11 +9,12 @@
             </li>
             <li>
 
-                <h5 style="display: inline-block;" class="client-name">
+                <div class="client-name c-flex">
                     {% if client and client.name is not empty %}
-                    {{ client.name }}
+                    <h5>{{ client.name }}</h5>
+                    <small>{{ (clientHasUsers ? (clientHasUsers ~ ' ' ~ 'user'|trans ~ (clientHasUsers > 1 ? 's' : '')) ~ ' - ' : '') ~ ('create_client.partner.' ~ (client.clientOrganization.type == 'F' ? 'firm' : 'independant') ~ '_added_on')|trans ~ ' ' ~ client.inserted|format_datetime('long','none') }}</small>
                     {% endif %}
-                </h5>
+                </div>
                 {#<a href="#deleteClient" class="waves-effect waves-light accent-4 btn-flat modal-trigger" style="margin-left: auto;"><i class="fa fa-times"></i></a>#}
             
                 {#
@@ -21,9 +23,13 @@
                 </div>
                 #}
             </li>
-            <li>
+            <li class="client-action-btns flex-center" style="visibility:hidden;">
+
+                <div class="btn-flat delete-user-btn tooltipped modal-trigger" href="#deleteClient" data-id="{{clientData.id}}" data-tooltip="{{'delete'|trans}}" data-position="top">
+                    <i class="dd-orange-text fa fa-times"></i>
+                </div>
                 <div>
-                    <a class="modify-client-btn btn-flat"><i class="fa fa-pencil-alt"></i></a>
+                    <a class="modify-client-btn btn-flat"><i class="material-icons">create</i></a>
                 </div>
             </li>
         </ul>   
@@ -66,18 +72,34 @@
         {{ form_widget(item.id) }}
         </ul> 
     </div>
-    <ul class="individuals collection no-padding" data-prototype="{% apply escape %}{% include 'components/client_external_user__item.html.twig' with { item: item.aliveExternalUsersWithoutSync.vars.prototype, client: item } %}{% endapply %}"
-    {% if not client or client.aliveExternalUsersWithoutSync|length == 0 %}style="display:none"{% endif %}
+    <ul class="individuals collection no-padding" data-prototype="{% apply escape %}{% include 'components/client_external_user__item.html.twig' with { item: item.aliveExternalUsers.vars.prototype, client: item } %}{% endapply %}"
+    {#{% if not client or client.aliveExternalUsers|length == 0 %}style="display:none"{% endif %}#}
     >
         
-        {% for ikey, individual in item.aliveExternalUsersWithoutSync %}
-            {% include "components/client_external_user__item.html.twig" with { item: individual, client: item } %}
+        {% for ikey, individual in item.aliveExternalUsers %}
+            {% include "components/client_external_user__item_old.html.twig" with { item: individual, client: item } %}
         {% endfor %}
+
+        {% if not clientHasUsers %}
+            <div class="no-user-holder">
+                <img src="{{asset('lib/img/legal-person-l.png')}}" alt="legal-person">
+                <h5>{{'create_client.partner.no_added_users.title'|trans}}</h5>
+                <p>{{'create_client.partner.no_added_users.content'|trans}}</p>
+            </div>
+        {% endif %}
     
     </ul>
+        {#
         <div class="button-field add-user-zone" style="{% if client is null %}display:none ;{% endif %}position: absolute">
             <a class="btn waves-effect waves-light  insert-individual-btn data-cid="{{ client ? client.id : 0 }}"">
                 <span>Ajouter utilisateur</span>
             </a>
         </div>
+        #}
+    </div>
+
+    <div class="fixed-action-btn">
+      <a class="btn-floating btn-large add-user-btn tooltipped modal-trigger" href="#addUserClient" data-tooltip="{{'user_list.add_user_btn_tooltip'|trans}}" data-position="top">
+        <i class="large material-icons">add</i>
+      </a>
     </div>

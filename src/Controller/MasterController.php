@@ -133,9 +133,9 @@ abstract class MasterController extends AbstractController
         $this->authenticator = $authenticator;
         $this->twig = $twig;
         if($this->request->server->get('APP_ENV') == 'dev'){
-            $apiKey = 'sk_test_51Hn5ftLU0XoF52vKQ1r5r1cONYas5XjLLZu6rFg2P69nntllHxLs3G0wyCxoOQNUgjgD5LwCoaYTkGQp1qVK3g3A00LfW1k4Ep';
+            $apiKey = $this->request->server->get('STRIPE_DEV_KEY');
         } else {
-            $apiKey = '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';
+            $apiKey = $this->request->server->get('STRIPE_PROD_KEY');
         }
         Stripe::setApiKey($apiKey);
         $this->stripe = new StripeClient($apiKey);

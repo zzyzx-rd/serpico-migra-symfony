@@ -1,0 +1,359 @@
+{% extends "layout.html.twig" %}
+
+{% set clientData = client.vars.data %}
+
+{% block title %}
+  {{'create_client.page_title'|trans ~ (clientData ? ' ' ~ clientData.name : '') }}
+{% endblock %}
+
+{% block pagename %}
+  {{'create_client.page_title'|trans}}
+{% endblock %}
+
+{% block mobile_title %}
+  {{'create_client.mobile_header_title'|trans}}
+{% endblock %}
+
+
+  {% block css %}
+    <!-- Dropify -->
+    <link rel="stylesheet" href="{{ asset('css/dropify.min.css') }}" type="text/css">
+    <link rel="stylesheet" href="{{ asset('css/add_client_user_modal.css') }}">
+    <script>
+        var url = "{{ url('ajaxClientUserAdd') }}";
+        var dcurl = "{{ url('clientDelete', {cliId : global.request.get('cliId') ?: 0 }) }}";
+        var diurl = "{{ url('clientUserDelete', {extId : 0}) }}";
+        var vcurl = "{{ url('validateClient', {cliId : global.request.get('cliId') ?: 0 }) }}";
+        var viurl = "{{ url('validateClientUser', {cliId : global.request.get('cliId') ?: 0, extId : 0}) }}";
+        var surl = "{{ path('dynamicSearch')}}";
+        var noFirm = "{{ 'create_client.partner.unexisting_worker_firm'|trans }}";
+        var multCreation = "{{ global.request.get('cliId') ? 0 : 1 }}";
+        var acuurl = "{{ path('addClientUser', {cliId: clientData.id}) }}";
+    </script>
+    <style>
+
+
+      #main-header{
+        --actions-width: 200px;
+        --padding: 16px;
+        display: flex;
+        justify-content: center;
+        padding: 1em;
+        margin-bottom: 2em;
+        position: relative;
+      }
+
+      header .page-title{
+          display: inline-block;
+          text-align: center;
+      }
+
+      footer{
+      padding-bottom: 40px;
+      }
+
+      /*.collection{
+        overflow: unset;
+      } */
+
+      .collection {
+        padding: 20px!important;
+        border: none!important;
+      }
+      .collection-item{
+        padding: 20px!important;
+        border: 1px solid #e0e0e0!important;
+        margin: 10px 0px!important;
+      }
+
+      .client-type{
+        display: inline-block;
+        min-width: 250px;
+      }
+
+      .client-select-type{
+        padding: 0 2rem;
+      }
+
+      .fa-slash{
+        transform: rotate(87deg);
+      }
+
+      .add-individual-btn-row{
+        display: flex;
+        justify-content:flex-end;
+        margin-top: 1em;
+      }
+
+      .firm-option-logo{
+          float: left!important;
+      }
+      .firm-input-logo{
+          position: absolute;
+          height: 20px;
+          margin: auto 0;
+          top: 0;
+          left: 0;
+          bottom: 0;
+      }
+
+      .w-firm .dropdown-content{
+        opacity: 1!important;
+        display: block!important;
+      }
+
+      .w-firm .select-wrapper input, .w-firm .select-wrapper .caret{
+          display: none!important;
+      }
+
+      .add-members{
+        display: flex;
+        justify-content: flex-end;
+        padding: 1em;
+      }
+
+      .add-partner-zone{
+        margin-top: 20px;
+      }
+
+      .client-logo-zone{
+        width: 75px;
+        height: 75px;
+        border-radius: 9999px;
+      }
+
+      .back-btn{
+        position: absolute;
+        left: 40px;
+        background-color: aliceblue;
+      }
+
+      .client-zone{
+        margin: 0 auto;
+        width: 90%;
+      }
+
+      .page-title{
+        font-size: 30px;
+      }
+
+      .client{
+        overflow-y: unset;
+      }
+
+      .selected-client-logo{
+        height: 15px;
+      }
+
+      .client-btn {
+        background-color: #55318e4a!important;
+        margin: 1.4em auto;
+        display: inline-block;
+      }
+
+      .user-btn {
+          background-color: aliceblue;
+          color: black;
+      }
+
+      /*.client-info-commname, .client-info-type{
+        color: white;
+        justify-content: center;
+      }*/
+      
+      .user-select-fullname, .user-email{
+        width: 100%;
+      }
+
+      .user-email .input-field{
+        margin-top: 0;
+      }
+
+      .user-fullname .input-field, .user-position .input-field{
+        width: 100%;
+        margin: 0 1em;
+      }
+
+      .other-user-elmts{
+        padding: 0 1em;
+        width: 50%;
+      }
+
+      .user-position, .user-weight{
+        display: inline-block;
+      }
+
+      .user-ext-email{
+        position:relative;
+      }
+
+      .client-user-barred{
+        left:5%;
+        bottom:12%;
+      }
+
+      .client-input{
+        min-width:250px;
+      }
+
+      .client-input .select-dropdown{
+        width: 100%;
+      }
+
+      .client-data-zone li:last-of-type{
+        margin-left: auto;
+      }
+
+      main {
+          width:90%;
+          margin-left:auto!important;
+          margin-right:auto!important;
+          margin-top:2rem!important;
+      }
+
+      .client-name h5{
+        margin-bottom:0;
+      }
+
+      .no-user-holder, .no-user-holder p{
+        text-align:center;
+      }
+
+      .client-picture-zone{
+        margin-right: 20px;
+      }
+
+      .client-profile-picture{
+        border-radius: 50%;
+        width: 2em;
+        height:2em;
+      }
+
+      @media screen and (max-width: 930px) {
+        .no-user-holder img  {
+          width: 80%;
+        }
+      }
+      @media screen and (min-width: 931px) {
+        .no-user-holder img  {
+          width: 55%;
+        }
+      }
+
+    </style>
+  {% endblock %}
+
+{% block username %}
+  {{ currentuser.firstname }}
+  {{ currentuser.lastname }}
+{% endblock %}
+
+{% block content %}
+
+    {% include "components/background_grid.html.twig" %}
+
+    <main class="card-panel purple lighten-5">
+      <header id="main-header">
+        <a class="waves-effect waves-green btn back-btn black-text" href="{{ url('manageUsers')}}">{{ 'back'|trans }}</a>
+      </header>
+      <div class="client-zone">
+        {{ form_start(client) }}
+        <div class="client">
+          {% include "components/client__item.html.twig" with { item: client } %}
+        </div>
+      </div>
+    </main>
+    {#
+    <footer>
+      <div class="button-field center-button">
+          {{ form_widget(client.submit) }}
+      </div>
+    </footer>
+    #}
+    {{ form_rest(client) }}
+    {{ form_end(client) }}
+
+  <div class="i-form" style="display: none;">
+    {{ form_start(individualForm) }}
+    {{ form_rest(individualForm) }}
+    {{ form_end(individualForm) }}
+  </div>
+
+  <div id="deleteExternalUser" class="modal">
+    <div class="modal-title"></div>
+    <div class="modal-content">
+      <h5>{% trans %}client.delete_external_user.modal_title{% endtrans %}</h5>
+      <p>{% trans %}client.delete_external_user.modal_content{% endtrans %}</p>
+      <div class="flex-center-fe">
+        <a class="btn waves-effect waves-light modal-close remove-client-user">{% trans %}stages.deleteStage.accept{% endtrans %}</a>
+        <a class="waves-effect waves-light modal-close btn-flat red-text">{% trans %}stages.deleteStage.cancel{% endtrans %}</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="deleteClient" class="modal">
+    <div class="modal-title">
+      <h5 style="margin-left: 20px;">{% trans %}client.delete.modal_title{% endtrans %}</h5>
+    </div>
+    <div class="modal-content">
+      <p>{% trans %}client.delete.modal_content{% endtrans %}</p>
+    </div>
+    <div class="modal-footer">
+      <a
+        class="btn waves-effect waves-light modal-close remove-client">{% trans %}stages.deleteStage.accept{% endtrans %}</a>
+      <a
+        class="waves-effect waves-light modal-close btn-flat red-text">{% trans %}stages.deleteStage.cancel{% endtrans %}</a>
+    </div>
+  </div>
+  
+  <div id="addClientSuccess" class="modal">
+    <div class="modal-content">
+      <p>{% trans %}create_client.create_organization.success_msg{% endtrans %}</p>
+    </div>
+
+    <div class="modal-footer">
+      <div class="button-field">
+        <a class=" modal-action modal-close waves-effect btn btn-large">Ok</a>
+      </div>
+    </div>
+  </div>
+
+  {% if not client.vars.valid %}
+
+    <div id="errors" class="modal">
+      <div class="modal-content">
+        <h5>{{ 'activities.modal_error_creation_title'|trans }}</h5>
+        <div class="gen-error">
+          {{form_errors(client)}}
+        </div>     
+            
+            <div style="padding: 15px 0px">
+              {% for ikey, externalUser in client.aliveExternalUsers %}
+                {{ 'user'|trans ~ ' ' ~ (ikey + 1) ~ ' (' ~ externalUser.vars.data.firstname|trans ~ ' ' ~ externalUser.vars.data.lastname|trans ~ ') :' }}
+                  {% for child in externalUser.children %}
+                    {% if not child.vars.valid %}
+                      <div style="margin-left: 20px;">{{form_label(child)}}<span style="display:inline-block;width: 30%;"></span> {{ form_errors(child) }}</div>
+                    {% endif %}
+                  {% endfor %}
+              {% endfor %}
+            </div>
+        
+      </div>
+      <div class="modal-footer">
+        <a class=" modal-action modal-close waves-effect waves-green btn notifyModalClose">Ok</a>
+      </div>
+    </div>
+	{% endif %}
+
+  {% include "components/add_client_user_modal.html.twig" with {creationType: 'ext', isEmailMandatory: false} %}
+
+{% endblock %}
+
+{% block javascripts %}
+<script>$('select').material_select();</script>
+<script src="{{ asset('js/dropify.min.js') }}"></script>
+<script src="{{ asset('js/client_update.js') }}"></script>
+<script src="{{ asset('js/add_client_user.js') }}"></script>
+
+
+{% endblock %}

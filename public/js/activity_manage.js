@@ -8,11 +8,6 @@ if(performance.getEntriesByType("navigation")[0].type == "navigate" && typeof lu
     })
 }
 
-function isEmail(email) {
-  var regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
-  return regex.test(email);
-}
-
 function getRandomInt(min, max) {
   min = Math.ceil(min);
   max = Math.floor(max);
@@ -40,7 +35,7 @@ function ndDayPerYears(annee) {
   }
 }
 
-$('#firstConnectionModal, #beforeStarting').modal({
+$('#firstConnectionModal, #beforeStarting, #invitationStage').modal({
   dismissible: false,
 })
 $('#beforeStarting').modal({
@@ -64,7 +59,7 @@ $('#createStage').modal({
   }
 })
 
-$('#createParticipant, #legalPerson, #deleteParticipant').modal();
+$('#createParticipant, #legalPerson, #deleteParticipant, #addUserClient').modal();
 
 function initPickates(){
   switch(lg){
@@ -136,6 +131,8 @@ const $sentDatesOptions = { month: 'numeric', day: 'numeric', year: 'numeric'};
 var ts = getCookie("ts");
 var ci = getCookie("ci");
 var mr = $('#activities-container').hasClass('mr') ? 1 : 0;
+const $partHolder = $('ul.participants-list');
+const $stageModal = $('#createStage');
 
 if(mr){
   $('.ts-scale > *').not('.chevron').css('min-height', Math.round(900 / $('.ts-scale').children().not('.chevron').length).toString() + 'px');
@@ -167,19 +164,21 @@ function dTrans($elmts, $entity, $prop){
 $('.dp-start, .dp-end').on('change',function(){
   const $cal = $(this);
   const $selectedDate = $cal.pickadate('picker').get('select');
-  const $modal = $(this).closest('.modal');
-  if($cal.hasClass('dp-start')){
-    $relatedEndCal = $modal.find('.dp-end');
-    if($relatedEndCal.pickadate('picker').get('select') && $selectedDate.pick > $relatedEndCal.pickadate('picker').get('select').pick){
-      $relatedEndCal.pickadate('picker').set('select',new Date($selectedDate.pick));
-    }
-    $relatedEndCal.pickadate('picker').set('min', new Date($selectedDate.pick))
-  } else {
-    $relatedStartCal = $modal.find('.dp-start');
-    if(new Date($selectedDate.pick) - $cal.closest('.modal').find('.dp-start').pickadate('picker').get('select').pick > 24*60*60*1000){
-      $relatedStartCal.pickadate('picker').set('max', new Date($selectedDate.pick))
+  if($selectedDate){
+    const $modal = $(this).closest('.modal');
+    if($cal.hasClass('dp-start')){
+      $relatedEndCal = $modal.find('.dp-end');
+      if($relatedEndCal.pickadate('picker').get('select') && $selectedDate.pick > $relatedEndCal.pickadate('picker').get('select').pick){
+        $relatedEndCal.pickadate('picker').set('select',new Date($selectedDate.pick));
+      }
+      $relatedEndCal.pickadate('picker').set('min', new Date($selectedDate.pick))
     } else {
-      $relatedStartCal.pickadate('picker').set('max',false);
+      $relatedStartCal = $modal.find('.dp-start');
+      if(new Date($selectedDate.pick) - $cal.closest('.modal').find('.dp-start').pickadate('picker').get('select').pick > 24*60*60*1000){
+        $relatedStartCal.pickadate('picker').set('max', new Date($selectedDate.pick))
+      } else {
+        $relatedStartCal.pickadate('picker').set('max',false);
+      }
     }
   }
 })
@@ -512,7 +511,7 @@ $(function () {
     //}, 200);
   });
 
-  if(!$('.activity-component').length){
+  if(!$('.activity-content-stage').length){
     feedDashboardScreen();
   }
 
@@ -651,148 +650,156 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
     
     }
 
-    if(actSet == null){
-      $actElmts = $(document).find('.activity-component');
-    } else {
-      $actHolders = $('');
-      $.each(actSet, function(i,e){
-        $actHolders = $actHolders.add($(document).find(`.activity-holder[data-id="${e}"]`));
-      })
-      $actElmts = $actHolders.find('.activity-component');
-    }
+    //if(!$('.dummy-activities-container').length){
 
-    $.each($actElmts, function () {
-        var $this = $(this);
-        $this.show();
 
-        if($this.closest('.activity-holder').hasClass('tbd')){
-          nbSubInt = $('.ts-scale').children().not('.chevron').length;
-          var $actContentStage = $(this).closest('.activity-content-stage');
-          $actContentStage.css({
-            'background' : 'repeating-linear-gradient('+ mr ? 0 : 90 +'deg, #f3ccff2b, #63009445 '+ centralElSize / nbSubInt +'px, #ffffff '+ centralElSize / nbSubInt +'px, #ffffff '+ centralElSize / (nbSubInt/2) +'px)'
-          });
-          actCurDate = $actContentStage.find('.curDate');
-          (ei > now && now > si) ? actCurDate.css(mr ? {'top': Math.round(10000 * (c - si) / (ei - si)) / 100 + '%'} : {'left': Math.round(10000 * (c - si) / (ei - si)) / 100 + '%'}).show() : actCurDate.hide(); 
-        }
-
-        if(!mr){$(this).closest('.activity-holder').show()};
-        var sdU = parseInt($this.data("sd"));
-        var p = parseInt($this.data("p"));
-        var id = $this.data("id");
-        var sa = new Date(sdU * 1000);
-        var ea = new Date((sdU + p) * 1000);
-        csd = Math.max(si,sa);
-        ced = Math.min(ei,ea);
-        actOff = (Math.min(ei,csd) - si) / (ei - si);
-        actW = (ced - csd) / (ei - si);
-        $this.css(mr ? {'top': Math.round(10000 * actOff) / 100 + "%"} : {'margin-left': Math.round(10000 * actOff) / 100 + "%"});
-      
-        $this.css(mr ? {'height': Math.round(10000 * actW) / 100  + "%"} : {'width': Math.round(10000 * actW) / 100  + "%"});
-        $this.parent().css({'overflow': "hidden"});
-
-        $this.find('.stage-element').each(function () {
-
-            var sdVal = $(this).data("sd");
-            var spVal = $(this).data("p");
-            ssd = new Date(sdVal * 1000);
-            sed = new Date((sdVal + spVal)  * 1000);
-
-            if(ssd < ei){
-                $(this).find('.s-day').text(getCookie('ts') == 'y' ? ssd.getDate() : ssd.getDate() + '/' + (ssd.getMonth() + 1));
-                $(this).find('.e-day').text(getCookie('ts') == 'y' ? sed.getDate() : sed.getDate() + '/' + (sed.getMonth() + 1));
-
-            } else {
-                $(this).find('.s-day').text(getCookie('ts') == 'y' ? ssd.getDate() : ssd.getDate() + '/' + (ssd.getMonth() + 1));
-                $(this).find('.e-day').text(sed.getDate() + '/' + (sed.getMonth() + 1));
-
-            }
-            if (ssd > ei) {
-                $(this).css({
-                    'display': "none",
-                });
-            } else {
-                $(this).css({
-                    'display': "block",
-                });
-            }
-            sOff = (Math.min(ea,Math.max(sa,ssd)) - sa) / (ea - sa);
-            sW = (Math.min(sed,ea) - Math.max(sa,ssd)) / (ea - sa);
-
-            ssd > ei || sed < si ? $(this).css('display',"none") : $(this).css('display',"block");
-
-            $(this).css({
-              'background'    : ssd >= c ? '#5CD08F' : (sed > c ? 'linear-gradient('+ (mr ? 'to bottom' : 'to right') +', transparent, transparent ' + Math.max(1, Math.round(10000 * (c - csd) / (ced - csd)) / 100) + '%, #7942d0 ' + Math.round(10000 * (c - csd) / (ced - csd)) / 100 + '%), repeating-linear-gradient(61deg, #7942d0, #7942d0 0.5rem, transparent 0.5px, transparent 1rem)' : 'gray'),
-              'border-radius' : '0.3rem',
-            });
-            
-            if(mr){
-              $(this).css({
-                'top'     : Math.round(10000 * sOff) / 100 + "%",
-                'height'  : Math.round(10000 * sW) / 100 + "%",
-                'width'   : '7px',
-              })
-            } else {
-              $(this).css({
-                'margin-left'   : Math.round(10000 * sOff) / 100 + "%",
-                'width'   : Math.round(10000 * sW) / 100 + "%",
-                'height'  : '7px',
-              })
-            }
-
-        });
-
-        $this.find('.event').each(function () {
-            var odU = $(this).data("od");
-            var ep = $(this).data("p") ? $(this).data("p") : 0;
-
-            od = new Date(odU * 1000);
-            erd = new Date((odU + ep)  * 1000);
-            eOff = (Math.min(ced,Math.max(csd,od)) - csd) / (ced - csd);
-            eW = (Math.min(erd,ced) - Math.max(csd,od)) / (ced - csd);
-
-            od > ei || erd < si ? $(this).css('visibility',"hidden") : $(this).css('visibility','');
-
-            $(this).css({
-              'border-radius': '0.3rem',
-            });
-            
-            if(mr){
-              $(this).css({
-                'top': Math.round(10000 * eOff) / 100 + "%",
-                'height'  : Math.round(10000 * eW) / 100 + "%",
-                'width'   : '15px',
-              })
-            } else {
-              $(this).css({
-                'margin-left': Math.round(10000 * eOff) / 100 + "%",
-                'width'   : Math.round(10000 * eW) / 100 + "%",
-                'height'  : '15px',
-              })
-            }
-        });
-
-        if($this.find('.stage-element').length && !$this.find('.stage-element:visible').length){
-          $this.closest('.activity-holder').hide();  
+        if(actSet == null){
+          $actElmts = $(document).find('.activity-component');
         } else {
-          $this.closest('.activity-holder').show();
+          $actHolders = $('');
+          $.each(actSet, function(i,e){
+            $actHolders = $actHolders.add($(document).find(`.activity-holder[data-id="${e}"]`));
+          })
+          $actElmts = $actHolders.find('.activity-component');
         }
+    
+        $.each($actElmts, function () {
+            var $this = $(this);
+            $this.show();
+    
+            if($this.closest('.activity-holder').hasClass('tbd')){
+              nbSubInt = $('.ts-scale').children().not('.chevron').length;
+              var $actContentStage = $(this).closest('.activity-content-stage');
+              $actContentStage.css({
+                'background' : 'repeating-linear-gradient('+ mr ? 0 : 90 +'deg, #f3ccff2b, #63009445 '+ centralElSize / nbSubInt +'px, #ffffff '+ centralElSize / nbSubInt +'px, #ffffff '+ centralElSize / (nbSubInt/2) +'px)'
+              });
+              actCurDate = $actContentStage.find('.curDate');
+              (ei > now && now > si) ? actCurDate.css(mr ? {'top': Math.round(10000 * (c - si) / (ei - si)) / 100 + '%'} : {'left': Math.round(10000 * (c - si) / (ei - si)) / 100 + '%'}).show() : actCurDate.hide(); 
+            }
+    
+            if(!mr){$(this).closest('.activity-holder').show()};
+            var sdU = parseInt($this.data("sd"));
+            var p = parseInt($this.data("p"));
+            var id = $this.data("id");
+            var sa = new Date(sdU * 1000);
+            var ea = new Date((sdU + p) * 1000);
+            csd = Math.max(si,sa);
+            ced = Math.min(ei,ea);
+            actOff = (Math.min(ei,csd) - si) / (ei - si);
+            actW = (ced - csd) / (ei - si);
+            $this.css(mr ? {'top': Math.round(10000 * actOff) / 100 + "%"} : {'margin-left': Math.round(10000 * actOff) / 100 + "%"});
+          
+            $this.css(mr ? {'height': Math.round(10000 * actW) / 100  + "%"} : {'width': Math.round(10000 * actW) / 100  + "%"});
+            $this.parent().css({'overflow': "hidden"});
+    
+            $this.find('.stage-element').each(function () {
+    
+                var sdVal = $(this).data("sd");
+                var spVal = $(this).data("p");
+                ssd = new Date(sdVal * 1000);
+                sed = new Date((sdVal + spVal)  * 1000);
+    
+                if(ssd < ei){
+                    $(this).find('.s-day').text(getCookie('ts') == 'y' ? ssd.getDate() : ssd.getDate() + '/' + (ssd.getMonth() + 1));
+                    $(this).find('.e-day').text(getCookie('ts') == 'y' ? sed.getDate() : sed.getDate() + '/' + (sed.getMonth() + 1));
+    
+                } else {
+                    $(this).find('.s-day').text(getCookie('ts') == 'y' ? ssd.getDate() : ssd.getDate() + '/' + (ssd.getMonth() + 1));
+                    $(this).find('.e-day').text(sed.getDate() + '/' + (sed.getMonth() + 1));
+    
+                }
+                if (ssd > ei && !$(this).closest('.activity-content-stage').hasClass('dummy')) {
+                    $(this).css({
+                        'display': "none",
+                    });
+                } else {
+                    $(this).css({
+                        'display': "block",
+                    });
+                }
+                sOff = (Math.min(ea,Math.max(sa,ssd)) - sa) / (ea - sa);
+                sW = (Math.min(sed,ea) - Math.max(sa,ssd)) / (ea - sa);
+    
+                ssd > ei || sed < si ? $(this).css('display',"none") : $(this).css('display',"block");
+    
+                $(this).css({
+                  'background'    : ssd >= c ? '#5CD08F' : (sed > c ? 'linear-gradient('+ (mr ? 'to bottom' : 'to right') +', transparent, transparent ' + Math.max(1, Math.round(10000 * (c - csd) / (ced - csd)) / 100) + '%, #7942d0 ' + Math.round(10000 * (c - csd) / (ced - csd)) / 100 + '%), repeating-linear-gradient(61deg, #7942d0, #7942d0 0.5rem, transparent 0.5px, transparent 1rem)' : 'gray'),
+                  'border-radius' : '0.3rem',
+                });
+                
+                if(mr){
+                  $(this).css({
+                    'top'     : Math.round(10000 * sOff) / 100 + "%",
+                    'height'  : Math.round(10000 * sW) / 100 + "%",
+                    'width'   : '7px',
+                  })
+                } else {
+                  $(this).css({
+                    'margin-left'   : Math.round(10000 * sOff) / 100 + "%",
+                    'width'   : Math.round(10000 * sW) / 100 + "%",
+                    'height'  : '7px',
+                  })
+                }
+    
+            });
+    
+            $this.find('.event').each(function () {
+                var odU = $(this).data("od");
+                var ep = $(this).data("p") ? $(this).data("p") : 0;
+    
+                od = new Date(odU * 1000);
+                erd = new Date((odU + ep)  * 1000);
+                eOff = (Math.min(ced,Math.max(csd,od)) - csd) / (ced - csd);
+                eW = (Math.min(erd,ced) - Math.max(csd,od)) / (ced - csd);
+    
+                od > ei || erd < si ? $(this).css('visibility',"hidden") : $(this).css('visibility','');
+    
+                $(this).css({
+                  'border-radius': '0.3rem',
+                });
+                
+                if(mr){
+                  $(this).css({
+                    'top': Math.round(10000 * eOff) / 100 + "%",
+                    'height'  : Math.round(10000 * eW) / 100 + "%",
+                    'width'   : '15px',
+                  })
+                } else {
+                  $(this).css({
+                    'margin-left': Math.round(10000 * eOff) / 100 + "%",
+                    'width'   : Math.round(10000 * eW) / 100 + "%",
+                    'height'  : '15px',
+                  })
+                }
+            });
+    
+            if($this.find('.stage-element').length && !$this.find('.stage-element:visible').length && !$(this).closest('.dummy-activities-container').length){
+              $this.closest('.activity-holder').hide();  
+            } else {
+              $this.closest('.activity-holder').show();
+            }
+    
+            $this.closest('.activity-holder').removeClass('tbd');
+        })
+    
+        if(!$('.stage-element:visible').length){
+          if(!$('.no-int-act-overlay').length){
+            proto = $('.process-list').data('prototype-no-int-act');
+            $('.process-list').append($(proto));
+          }
+        } else { 
+           $('.no-int-act-overlay').remove();
+        }
+    
+          
+        //});
+        
+        feedDashboardScreen();
+        if($('.activity-list>.activity-holder:visible').length && $('.virtual-activities-holder>.activity-holder:visible').length){
+          $('.virtual-activities-holder').remove();
+        } 
+    //}
 
-        $this.closest('.activity-holder').removeClass('tbd');
-    })
-
-    if(!$('.stage-element:visible').length){
-      if(!$('.no-int-act-overlay').length){
-        proto = $('.process-list').data('prototype-no-int-act');
-        $('.process-list').append($(proto));
-      }
-    } else { 
-       $('.no-int-act-overlay').remove();
-    }
-
-       
-    //});
-
-    feedDashboardScreen();
 };
 
     function getNbJoursMois(mois, annee) {
@@ -897,7 +904,9 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         return new Number(d2 - d1).toFixed(0);
     }
 
-  updateEvents();
+    if(oid != 0){
+      updateEvents();
+    }
 
     $('.prev-int-btn, .next-int-btn').on('click', function (e) {
         
@@ -1078,57 +1087,6 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
 
 
   })
-
-  /** Function which directly insert participant in the activity - tn for tooltip, fn fullname, secId in case of extUsr  */
-  function directInsert(type, id, tn, fn, pic = null, secId = null){
-
-    if($('.participants-list--item.edit').length){
-      $partElmt = $('.participants-list--item.edit');
-    } else {
-      var prototype = $('.participants-list').data('prototype');
-      var newForm = prototype
-        .replace(/__name__/g, $('.participants-list--item').length);
-      $partElmt = $(newForm);
-    } 
-
-    $partElmt.find('.validation-buttons').after('<select name="participantSelector" style="margin-top:45px"></select>');
-    $partBtn = $partElmt.find('.participant-btn');
-    $partFZone = $partElmt.find('.participant-field-zone');
-    $partFZone.find('.participant-fullname').val(fn).addClass('part-feeded');
-    $partFZone.find('.participant-fullname').prev().addClass('active');
-    var $img = $partBtn.find('.selected-participant-logo');
-    $img.attr('src',pic);
-    if(tn == myself){
-      $partElmt.addClass('self');
-    }
-    $partBtn.attr('data-tooltip',tn).tooltip();
-    switch(type){
-      case 'eu' : 
-        $partFZone.find('input.u').attr('value',id);
-        $partFZone.find('input.eu').attr('value',secId);
-        break;
-      case 'u' :
-        $partFZone.find('input.u').attr('value',id);
-        break;
-      case 't' :
-        $partFZone.find('input.t').attr('value',id);
-        break;
-    }
-    var $inputImg = $img.clone();
-    $inputImg.attr('class','');
-    $inputImg.addClass('input-img');
-    $inputImg.css({
-      'position': 'absolute',
-      'left': '0',
-      'top': '15%',
-      'height': '30px',
-    });
-    $partFZone.append($inputImg);
-    $partBtn.show();
-    $partElmt.removeClass('edit');       
-    $partFZone.hide();
-    $('.btn-participant-add').before($partElmt);
-  }
 
   function eraseCookie(name) {
       createCookie(name,"",-1);
@@ -1341,15 +1299,25 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
       $modal.find('.s-name-input input').val("");
       $modal.find('.s-name-input').show();
       $modal.find('.s-dates-row .dp-start').pickadate('picker').set('select',new Date());
-      $modal.find('.s-dates-row .dp-end').pickadate('picker').set('select',new Date()).set('min',new Date());
+      //$modal.find('.s-dates-row .dp-end').pickadate('picker').set('select',new Date()).set('min',new Date());
+      $modal.find('.s-dates-row .dp-end').pickadate('picker').clear();
       $modal.find('.nb-participants').empty().append('(1)');
       $modal.find('.s-dates-row').show();
+      $modal.find('.s-link').attr('data-value',generateToken());
+    } else {
+      $modal.find('.s-dates-row .dp-end').pickadate('picker').clear();
+      if(!$('.participants-btn').length){
+        proto = $partHolder.data('prototype');
+        proto = proto.replace(/__name__/g, $partHolder.children().length - 1);
+        $partElmt = $(proto);
+        $partElmt.find('.selected-participant-logo').attr('src', userPic);
+        $partElmt.attr('data-tooltip',myself).tooltip();
+        $partElmt.find('.u').val(uid);
+        $partHolder.prepend($partElmt);
+      }
     }
     if(!$('.setup-activity').find('.fa-cog').length){
       $('.setup-activity').prepend('<i class="fa fa-cog sm-right"></i>')/*.append('<i class="fa fa-question-circle sm-left"></i>')*/;
-    }
-    if(!$('.participants-list--item').length){
-      directInsert('u', uid, myself, un, userPic);
     }
     $('#addParticipant').removeAttr('id');
   });
@@ -1398,20 +1366,26 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         if(!$modal.find('.s-dates-row .dates-validate').length){$modal.find('.s-dates-row').append('<div class="btn dates-validate s-dates-validate"><i class="material-icons">check</i></div>');}
         $modal.find('.s-dates-row').addClass('flex-center-sb').find('.col').removeClass('s6 m6');
         $modal.find('.events').show();
-        $partHolder = $modal.find('ul.participants-list');
-        $partHolder.find('.participants-list--item').remove();
+        $partHolder.find('.participant-btn').remove();
         $partHolder.find('.btn-participant-add').attr('id','addParticipant');
         $modal.find('.nb-participants').empty().append(`(${data.participants ? data.participants.length : 0})`);
         $(data.participants).each(function(i,p){
           $partElmt = $($partHolder.data('prototype'));
+          /*
           $partElmt.find('.participant-field-zone').remove();
           $partElmt.find('');
+          */
           $partElmt.find('.selected-participant-logo').attr('src', p.picture);
-          $partElmt.find('.participant-btn').attr({
-            'data-tooltip' : p.fullname + (p.synth ? ' (' + synthSuffix + ')' : ''),
-          }).addClass('existing deletable').append(`<div class="p-delete-overlay modal-trigger flex-center" href="#deleteParticipant" data-pid="${p.id}" style="display:none;"><i class="fa fa-trash"></i></div>`).show();
-          $partElmt.find('.tooltipped').tooltip();
+          $partElmt
+            .attr({
+              'data-tooltip' : p.fullname + (p.synth ? ' (' + synthSuffix + ')' : ''),
+            })
+            .addClass('existing deletable')
+            .tooltip()
+            .append(`<div class="p-delete-overlay modal-trigger flex-center" href="#deleteParticipant" data-pid="${p.id}" style="display:none;"><i class="fa fa-trash"></i></div>`)
+            .show();
           $partHolder.prepend($partElmt);
+          
         })
         $evtHolder = $modal.find('ul.events-list');
         $evtHolder.empty();
@@ -1464,6 +1438,8 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         $('.s-elmt-dates').show();
       })
   });
+
+
 
   $(document).on('click','.e-dates-validate',function(){
     const $this = $(this);
@@ -2023,12 +1999,22 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
       $docElmt.hide();
   });
 
-  $(document).on('mouseover','.s-elmt-dates, ul.participants-list, .events-title, .s-title-zone',function(){
+  $(document).on('mouseover','.s-elmt-dates, .events-title, .s-title-zone',function(){
     if(!$(this).closest('.modal').find('input:visible').length){
       $(this).find('.btn-s-update').show();
     }
-  }).on('mouseleave','.s-elmt-dates, ul.participants-list, .events-title, .s-title-zone',function(){  
+  }).on('mouseleave','.s-elmt-dates, .events-title, .s-title-zone',function(){  
     if(!$(this).find('input').length){
+      $(this).find('.btn-s-update').hide();
+    }
+  })
+
+  $(document).on('mouseover','ul.participants-list',function(){
+    if($stageModal.data('id')){
+      $(this).find('.btn-s-update').show();
+    }
+  }).on('mouseleave','ul.participants-list',function(){  
+    if($stageModal.data('id')){
       $(this).find('.btn-s-update').hide();
     }
   })
@@ -2165,6 +2151,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
     $('.red-text').remove();
   })
 
+  /*
   $('.btn-participant-add').on('click',function(){
       const $this = $(this);
       if(!$this.parent().find('.edit').length){
@@ -2178,6 +2165,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         $('.participants-list').css('margin-bottom','60px');
       }
   })
+  */
 
   $('.btn-add-event').on('click',function(){
     var $modal = $(this).closest('.modal');
@@ -2187,156 +2175,6 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
     $(`[href="#updateEvent"][data-sid="${$modal.data('id')}"]`).find('i').click();
     $modal.modal('close');
   })
-
-  $(document).on('keyup','input[name*="firm"]',function(e){
-
-    var $this = $(this);
-    var $selector = $('[name="firmSelector"]');
-    if($selector.find('option:selected').length && $this.val() != $selector.find('option:selected').text()){
-      $inputZone = $this.parent();
-      $inputZone.find('input').not($this).each(function(i,e){
-        $(e).removeAttr('value');
-      })
-      $inputZone.find('.input-f-img').remove();
-      $this.removeClass('part-feeded');
-    }
-    $selectorMElmts = $selector.closest('.select-wrapper');
-
-    if($this.val().length >= 3){
-        
-        const params = {name: $this.val(), type:'firm'};
-        $.post(surl,params)
-            .done(function(data){
-
-                if(!data.qParts.length){
-                    $this.removeAttr('value');
-                    $selector.empty();
-                    $selector.material_select();
-                    //$selectorMElmts.hide();
-                    return false;
-                }
-                
-                $selector.closest('.select-wrapper').find('img').remove();
-                $selector.empty();
-                $.each(data.qParts,function(key,el){
-                    let elName = el.orgName;
-                    let elPic = el.logo;
-                    $selector.append(`<option value="${el.wfiId}" data-wid="${el.wfiId}" data-oid="${el.orgId ? el.orgId : ''}" data-cid="${el.cliId ? el.cliId : ''}" data-pic="${elPic ? elPic : ""}">${elName}</option`);
-                })
-                $selector.material_select();
-                $selectorMElmts = $selector.closest('.select-wrapper')
-                $selector.prev().find('li').each(function(i,e){
-                    logo = $selector.find('option').eq(i).attr('data-pic');
-                    folder = /*$selector.find('option').eq(i).attr('data-oid') ? 'org' :*/'wf';
-                    $(e).prepend(`<img class="s-firm-option-logo" src="/lib/img/${folder}/${logo ? logo : 'no-picture.png'}">`);
-                    $(e).addClass('flex-center');
-                });
-              
-            })
-            .fail(function(data){
-                console.log(data);
-            })
-    } else {
-        //if($selectorMElmts){
-            $selectorMElmts.hide();
-        //}
-    }
-
-  });
-
-  $(document).on('keyup','input[name*="fullname"]',function(event){
-    var $this = $(this);
-    var $partElmt = $(this).closest('.participants-list--item');
-    var $partHolder = $(this).closest('.participants-list');
-    var $selector = $partElmt.find('[name*="participantSelector"]');
-    if($selector.find('option:selected').length && $this.val() != $selector.find('option:selected').text()){
-      $partInputZone = $this.parent();
-      $partInputZone.find('input').not($this).each(function(i,e){
-        $(e).removeAttr('value');
-      })
-      $partInputZone.find('.input-img').remove();
-      $this.removeClass('part-feeded');
-
-    }
-    $selectorMElmts = $selector.closest('.select-wrapper');
-    const p = [];
-    $('.participants-list--item:not(.self)').each(function(i,e){
-      if(!$partHolder.find('.existing').length){
-        $(e).find('.participant-field-zone input:not(.select-dropdown)').each(function(i,f){
-          if($(f).attr('value')){
-            p.push({el: $(f).attr('class'), id: $(f).attr('value')});
-          }
-        });
-      } else {
-        $(e).find('.participant-btn').each(function(i,f){
-          p.push({id: $(f).find('[href="#deleteParticipant"]').data('pid')});
-        });
-      }
-      $(selfAcctIds.split(',')).each(function(i,f){
-        p.push({el: 'u', id : parseInt(f)});
-      })
-    })
-
-    if($this.val().length >= 3 /*&& event.keyCode != 8*/){
-        //urlToPieces = surl.split('/');
-        //urlToPieces[urlToPieces.length - 1] = $(this).val();
-        //surl = urlToPieces.join('/');
-        const params = {name: $this.val(), type: 'all', p: p};
-        
-        $.post(surl,params)
-            .done(function(data){
-
-                if(!data.qParts.length){
-                    $this.removeAttr('value');
-                    //$selectorMElmts.hide();
-                    $selector.empty();
-                    $selector.material_select();
-                    return false;
-                }
-                
-                $selector.closest('.select-wrapper').find('img').remove();
-                $selector.empty();
-                $.each(data.qParts,function(key,el){
-                    let elId = el.e == 't' ? el.teaId : (el.e == 'f' ? el.wfiId : (el.e == 'eu' ? el.extUsrId : el.usrId));
-                    let elName = el.e == 'f' ? el.orgName : (el.e == 't' ? el.teaName : el.username);
-                    let elPic = el.e == 'f' || el.e == 'eu' && el.s ? el.logo : (el.e == 't' ? el.teaPicture : el.usrPicture);
-                    //$option = $(`<option class="flex-center" value=${firm.id}></option>`);
-                    //$option.append(`<img class="firm-option-logo" src="/lib/img/org/${firm.logo ? firm.logo : 'no-picture.png'}">`)
-                    //$option.append(`<span>${firm.name}</span>`);
-                    $selector.append(`<option value="${elId}" data-type="${el.e}" data-s="${el.s ? 1 : 0}" data-fname="${el.wfiId != currentWfiId ? el.orgName : ''}" data-wid="${el.wfiId}" data-oid="${el.orgId ? el.orgId : ""}" data-pic="${elPic ? elPic : ""}" data-uid="${el.usrId}">${elName}</option`);
-                })
-                //el.val(selector.find(":selected").text());
-                //$selector.prepend(`<option value>(${noFirm})</option>`);
-                //$this.attr("value",$selector.find(":selected").val());
-                $selector.material_select();
-                $selectorMElmts = $selector.closest('.select-wrapper')
-                $selector.prev().find('li').each(function(i,e){
-                    logo = $selector.find('option').eq(i).attr('data-pic');
-                    elType = $selector.find('option').eq(i).attr('data-type');
-                    synth = $selector.find('option').eq(i).attr('data-s');
-                    orgName = $selector.find('option').eq(i).attr('data-fname');
-                    folder = elType == 'f' || elType == 'eu' && synth == '1' ? 'wf' : (elType == 'u' || elType == 'eu' ? 'user' : 'team');
-                    //$selector.prev().find('li').index($(e)) == 0 ? ($(e).find('span').css('color','black'), $(e).prepend(`<img class="firm-option-logo" src="/lib/img/org/new-firm.png">`)) :
-                    $(e).prepend(`<img class="firm-option-logo" src="/lib/img/${folder}/${logo ? logo : 'no-picture.png'}">`);
-                    $(e).append(`<span class="el-type">${elType == 'eu' && synth == 0 ? orgName : (elType == 'eu' && synth == 1 ? 'Client' : (elType == 'f' ? 'New partner' : (elType == 'u' ? 'user' : 'team'))) }</span>`);
-                    $(e).addClass('flex-center');
-                    //$option.append(`<span>${firm.name}</span>`);
-                    //selector.append($option);
-                });
-                //$selectorMElmts.prepend(`<img class="firm-input-logo" src="/lib/img/org/${data.workerFirms[0].logo ? data.workerFirms[0].logo : 'no-picture.png'}">`);
-
-
-                //$('select[name="firmSelector"]').eq(index).show();
-            })
-            .fail(function(data){
-              console.log(data);
-            })
-    } else {
-        //if($selectorMElmts){
-            $selectorMElmts.hide();
-        //}
-    }
-  });
 
   /*
   $('.btn-s-modify:not(.modal-close').on('click',function(){
@@ -2348,7 +2186,6 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
     $modal.find('.btn-s-update').show();
   })
   */
-
 
   $(document).on('click',function(e){
     var $this = $(e.target);
@@ -2378,98 +2215,6 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
 
   })
 
-
-
-  $(document).on('change','[name*="participantSelector"]',function(){
-      var $this = $(this);
-      var $partElmt = $this.closest('.participants-list--item');
-      var $selectedOpt = $this.find(":selected");
-
-      if($selectedOpt.attr('data-s') == 1 || $selectedOpt.attr('data-type') == 'f'){
-        $('#legalPerson').modal('open');
-      }
-      //var index = $('.participants-list--item').index($this.closest('.participants-list--item'));
-      if($this.val() != ""){
-          $partElmt.find('.tooltipped').attr('data-tooltip',`${$selectedOpt.text()} ${$selectedOpt.data('fname').length > 0 ? ' (' + $selectedOpt.data('fname') + ')' : ''}`).tooltip();
-          $this.prev().attr('style','display:none!important');
-
-          if(!$selectedOpt.attr('data-oid')){
-            // ** AJAX CREATE CLIENT IN DB
-          }
-
-          switch($selectedOpt.attr('data-type')){
-            case 'f':
-              $partElmt.find('input[name*="workerFirm"]').attr('value',$this.val());
-              break;
-            case 'eu':
-              $partElmt.find('input[name*="externalUser"]').attr('value',$this.val());
-              $partElmt.find('input[name*="user"]').attr('value',$selectedOpt.attr('data-uid'));
-              break;
-            case 't':
-              $partElmt.find('input[name*="team"]').attr('value',$this.val());
-              break;
-            case 'u':
-              $partElmt.find('input[name*="user"]').attr('value',$this.val());
-              break;
-          }
-
-          $this.closest('.participant-field-zone').find('input.participant-fullname').val($selectedOpt.text());
-          var img = $this.prev().find('li').eq($this.find('option').index($this.find('option:selected'))).find('img');
-          if(!$partElmt.find('.input-img').length){
-            var inputImg = img.clone();
-            inputImg.attr('class','');
-            inputImg.addClass('input-img');
-            inputImg.css({
-              'position': 'absolute',
-              'left': '0',
-              'top': '15%',
-              'height': '30px',
-            });
-            $partElmt.find('.participant-fullname').addClass('part-feeded');
-            //inputElmt.css({'padding-left':'3rem!important'});
-            $partElmt.find('.participant-field-zone').append(inputImg);
-          }
-          $partElmt.find('.selected-participant-logo').attr('src', img.attr('src'));
-          if($selectedOpt.attr('data-s') != 1 && $selectedOpt.attr('data-type') != 'f' && !$('.participant-btn.existing').length){
-            $partElmt.removeClass('edit');
-            $partElmt.closest('.participants-list').css('margin-bottom','');
-            $partElmt.find('.participant-fullname-zone').show();
-            $partElmt.find('.participant-field-zone').hide();
-          }
-          
-      } else {
-          $this.parent().hide();
-          $this.val("");
-      }
-  });
-
-  $('[name*="firmSelector').on('change',function(){
-      var $this = $(this);
-      var $selectedOpt = $this.find(":selected");
-      const $usrElmts = $this.closest('.user-inputs');
-      $usrElmts.find('input[name="wid"]').val($selectedOpt.attr('data-wid'));
-      if(!$this.closest('#firstConnectionModal').length){
-        $usrElmts.find('input[name="oid"]').val($selectedOpt.attr('data-oid'));
-        $usrElmts.find('input[name="cid"]').val($selectedOpt.attr('data-cid'));
-      }
-      $usrElmts.find('.firm-name').val($selectedOpt.text());
-      var img = $this.prev().find('li').eq($this.find('option').index($this.find('option:selected'))).find('img');
-      if(!$usrElmts.find('.input-f-img').length){
-        var inputImg = img.clone();
-        inputImg.attr('class','');
-        inputImg.addClass('input-f-img');
-        inputImg.css({
-          'position': 'absolute',
-          'left': '0.75rem',
-          'top': '15%',
-          'height': '30px',
-        });
-        $usrElmts.find('.firm-name').addClass('part-feeded');
-        //inputElmt.css({'padding-left':'3rem!important'});
-        $usrElmts.find('.firm-field-zone').append(inputImg);
-      }
-  });
-
   $('.setup-activity, .create-stage').on('click',function(e){
     e.preventDefault();
     const $this = $(this);
@@ -2482,7 +2227,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
       return false;
     }
 
-    const params = {aid: 0, btn: $this.hasClass('create-stage') ? 'submit' : 'complexify'};
+    const params = {aid: 0, link: $('.s-link').data('tooltip'), btn: $this.hasClass('create-stage') ? 'submit' : 'complexify'};
     var data = $this.closest('form').serialize() + '&' + $.param(params)
 
     $.post(scurl,data)
@@ -2566,7 +2311,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
     var $this = $(this);
     pid = $this.data('pid');
     if(!pid){
-      $(this).closest('.participants-list--item').remove();
+      $(this).closest('.participant-btn').remove();
     } else {
       urlToPieces = dpurl.split('/');
       urlToPieces[urlToPieces.length - 4] = $this.data('id');
@@ -2575,8 +2320,8 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
       $.delete(url,null)
         .done(function(){
           $('#deleteParticipant').modal('close');
-          $(document).find(`[href="#deleteParticipant"][data-pid=${pid}]`).closest('.participants-list--item').remove();
-          $('.nb-participants').empty().append(`(${$('.participants-list--item').length})`);
+          $(document).find(`[href="#deleteParticipant"][data-pid="${pid}"]`).closest('.participant-btn').remove();
+          $('.nb-participants').empty().append(`(${$('.participant-btn').length})`);
         })
 
     }
@@ -2586,90 +2331,6 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
     var $this = $(this);
     var $modal = $(this).closest('.modal');
     $('.participant-delete').attr({'data-id':$modal.data('id'),'data-pid':$this.data('pid')});
-  })
-
-  $(document).on('click','.participant-btn:not(.existing)',function(e){
-    if($('.participant-field-zone:visible').length){
-      return false;
-    }
-    const $this = $(this);
-    const $partHolder = $this.closest('.participants-list--item');
-    $partHolder.addClass('edit');
-    $partHolder.parent().css('margin-bottom','60px');
-    $this.hide();
-    $this.next().show();
-    /*
-    const $partHolder = $this.closest('.participants-list--item');
-    $partHolder.find('input').each(function(i,e){
-      if($(e).attr('value')){
-        $('#deleteParticipant')
-          .attr('data-e',$(e).attr('class'))
-          .attr('data-eid',$(e).attr('value'))
-      }
-    })
-    $(this).closest('.participants-list--item').remove();
-    */
-
-  });
-
-  $(document).on('click','.participant-validate',function(){
-    const $this = $(this);
-    const $partElmt = $this.closest('.participants-list--item');
-    if(!$(document).find('.participant-btn.existing').length){
-
-
-      if($partElmt.find('input.participant-fullname').hasClass('part-feeded')){
-        $partElmt.removeClass('edit');
-        $partElmt.find('.participant-fullname-zone').show();
-        $partElmt.find('.participant-field-zone').hide();
-      } else {
-        var $creationModal = $('#createParticipant');
-        $creationModal.find('[name="email"]').val("");
-        var partFN = $partElmt.find('input.participant-fullname').val();
-        $creationModal.find('.new-part-name').empty().append(partFN);
-        var partNameToPieces = partFN.split(' ');
-        //if(!$('input[name="firstname"]').val().length){
-          $('input[name="firstname"]').val(partNameToPieces[0]).prev().addClass('active');
-          $('input[name="lastname"]').val(partNameToPieces.slice(1).join(' ')).prev().addClass('active');
-        //}
-        $('#createParticipant').modal('open');
-      }
-
-    } else {
-
-      const $partInputs = $this.closest('.participant-field-zone').find('input');
-      const $modal = $this.closest('.modal');
-      $params = {};
-      $partInputs.each(function(i,e){
-        value = $(e).attr('value');
-        c = $(e).attr('class')
-        if(value){
-          $params[c] = value;
-        }
-      })
-      
-      if (isEmpty($params)){
-        var creationModal = $('#createParticipant');
-        var partFN = $partElmt.find('input.participant-fullname').val();
-        creationModal.find('.new-part-name').empty().append(partFN);
-        var partNameToPieces = partFN.split(' ');
-        //if(!$('input[name="firstname"]').val().length){
-          $('input[name="firstname"]').val(partNameToPieces[0]).prev().addClass('active');
-          $('input[name="lastname"]').val(partNameToPieces.slice(1).join(' ')).prev().addClass('active');
-          //}
-          $('#createParticipant').modal('open');
-
-      } else {
-          
-        $params.id = $modal.attr('data-id');
-        $.post(apurl,$params)
-          .done(function(data){
-            $partElmt.removeClass('edit');
-            $partElmt.find('.participant-btn').addClass('existing deletable').append(`<div class="p-delete-overlay modal-trigger flex-center" href="#deleteParticipant" style="display:none;" data-pid="${data.pid}"><i class="fa fa-trash"></i></div>`).show();
-            $partElmt.find('.participant-field-zone').hide(); 
-          })    
-      }
-    }
   })
 
   $('#choice-indpt').on('change',function(){
@@ -2705,63 +2366,6 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
     }
   })
 
-  $('.create-part-button').on('click',function(e){
-
-    const $this = $(this);
-    if($('#createParticipant').is(':visible') || $('#legalPerson').is(':visible') && $('.participant-field-zone:visible').find('input.f').attr('value')){
-      
-      // In case new client
-      if($('.participant-field-zone:visible').find('input.f').attr('value')){
-        $('#createParticipant').find('input[name="wid"]').val($('.participant-field-zone:visible').find('input.f').attr('value'));
-        $('#createParticipant').find('input[name="oid"]').val($('.participant-field-zone:visible [name*="participantSelector"] option:selected').attr('data-oid'));
-        nc = 1;
-      } else {
-        nc = 0;
-      }
-
-      var $emailInput = $('.user-inputs').find('input[name="email"]');
-
-      if($emailInput.is(':visible') && !isEmail($emailInput.val()) && !$('#interactPart').is(':visible')){
-        $('#interactPart').modal('open');
-        return false;
-      }
-      if($('#choice-firm').is(':checked') && !$('#legalPerson').is(':visible')){
-        $('#legalPerson').modal('open');
-        return false;
-      }
-
-      let type =  $('#choice-firm').is(':checked') || nc == 1 ? 'f' : ($('#choice-indpt').is(':checked') ? 'i' : 'u');
-      let uname = $('.new-part-name').text();
-      params = {type: type, uname: uname};
-      sid = $('#createStage').attr('data-id');
-      if(sid){
-        params['sid'] = sid;
-      }
-      
-      $.post(pcurl,$('#createParticipant form').serialize() + '&' + $.param(params))
-        .done(function(data){
-          
-          directInsert(type = data.type, id = data.uid, tn = data.tn, fn = data.fn, pic = data.pic, secId = data.euid);
-          if(data.pid){
-            const $partElmt = $('.participants-list--item').last();
-            $partElmt.find('.participant-btn').addClass('existing deletable').append(`<div class="p-delete-overlay flex-center modal-trigger" href="#deleteParticipant" style="display:none;" data-pid="${data.pid}"><i class="fa fa-trash"></i></div>`).show();
-          }
-          $('#createStage').find('.red-text').remove();
-          $('#interactPart, #legalPerson, #createParticipant').modal('close');
-        })
-        .fail(function(data){
-          console.log(data);
-        })
-
-
-
-
-    } else {
-      $('.participant-validate:visible').click();
-    }
-
-  })
-
   //if(getCookie('view_type') == 't'){
 
   //feedDashboardScreen();
@@ -2773,10 +2377,13 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
     $mainHeight = Math.min(1000, $(window).height());
     $actList = $();
     totalPotentialAct = Math.floor(($mainHeight - $mainHeaderElmtsHeight) / $actHeight);
-    nbVisibleAct = $('.stages-holder:visible').length;
+    nbVisibleAct = $('.activity-content-stage:visible:not(.dummy)').length;
+    if(nbVisibleAct){
+      $('.activity-list').attr('data-pNb',$('.activity-content-stage:visible:not(.dummy)').length);
+    }
     nbAct = $('.stages-holder').length;
-    if (nbVisibleAct < totalPotentialAct){
-        for(k = nbVisibleAct; k < totalPotentialAct; k++){
+    if (nbVisibleAct == 0 /* && !$('.virtual-activities-holder').length*/){
+        for(k = 0; k < parseInt($('.activity-list').attr('data-pNb') ?  $('.activity-list').attr('data-pNb') : totalPotentialAct); k++){
           actProto = $('.process-list-t').data('prototype');
           $actProto = $(actProto);
   
@@ -2822,7 +2429,8 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
           });
         } else {
           const $toBeFeededActs = $actList;
-          const dummyParams = {wa:1, td: totalPotentialAct - nbVisibleAct };
+          const totalPotentialAct = Math.floor(($mainHeight - $mainHeaderElmtsHeight) / $actHeight);
+          const dummyParams = {wa:1, td: totalPotentialAct};
           $.post(dcurl,dummyParams)
             .done(function(data){
   
@@ -2836,23 +2444,27 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
             .fail(function(data){
               console.log(data);
             })
-        }
-        
-        var $actHolder = $('<div class="virtual-activities-holder"></div>');
-  
-        $actList.each(function(i,e){
-          $actHolder.append($(e));
-        })
-        
-        if(!nbAct){
-          $actHolder.append(noActOverlay);
-        }
-  
-        $appenedElmt = $('.activity-list:visible').length ? $('.activity-list:visible').last() : $('.dummy-activities-container');
-        $appenedElmt.append($actHolder);
-        
+          }
 
+          if(!$('.virtual-activities-holder').length){
 
+              var $actHolder = $('<div class="virtual-activities-holder"></div>');
+              
+              if(!nbVisibleAct){
+                $actList.each(function(i,e){
+                  $actHolder.append($(e));
+                })
+              }
+              
+            
+              $appenedElmt = $('.activity-list:visible').length ? $('.activity-list:visible').last().parent() : $('.dummy-activities-container');
+              $appenedElmt.append($actHolder);
+          }
+
+          if(!nbAct){
+            $actHolder.append(noActOverlay);
+          }
+          
       }
   
   }
@@ -2936,6 +2548,42 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         'data-aid' : $('.activity-holder:visible').data('id')
       });
 
+  })
+
+  if($('#invitationStage').length){
+    $('#invitationStage select').material_select();
+    $('#invitationStage').modal('open');
+  }
+
+  $('.link-accept-stage-btn').on('click',function(){
+    const $params = {id: $(this).data('id'), aid: $('[name="stageAccountSelector"]').val()}
+    $.post(lsurl,$params)
+      .done(function(data){
+        location.reload();
+      })
+  })
+
+  $('.link-decline-stage-btn').on('click',function(){
+    eraseCookie('is');
+  })
+
+  $('.add-enddate-zone').on('click',function(){
+    $('.enddate-input').show();
+    $('.add-enddate-zone').parent().hide();
+    $endCal = $('.s-dates-row .dp-end');
+    if(!$endCal.pickadate('picker').get('select')){
+      $endCal.pickadate('picker').set({
+        'select' : Date.now(),
+        'min' :  new Date($('.s-dates-row .dp-start').pick),
+      });
+    }
+  })
+
+  $('.set-open-enddate').on('click',function(){
+    $('.enddate-input').hide();
+    $('.add-enddate-zone').parent().show();
+    $endCal = $('.s-dates-row .dp-end');
+    $endCal.pickadate('picker').clear();
   })
 
 });

@@ -1,0 +1,198 @@
+{% set addingParticipant = addingParticipant|default(null) %}
+
+<div id="addUserClient" class="modal">
+    <form id="userClientForm">
+        <div class="modal-content">
+            {% if creationType == 'unk' %}
+                <div class="type-part" {% if addingParticipant %}style="display:none"{% endif %}>
+                    <div class="flex-center"> 
+                        <h5 class="m-left">{{'user_list.add_user_modal.type_title'|trans ~ ' :' }}</h5>
+                    </div>
+                    <div class="c-flex">
+                        <div class="row independant-row">
+                            <div class="col s12 m12">
+                                <input type="radio" id="independant" name="gen-type" value="i">
+                                <label for="independant">
+                                    {#
+                                    <div class="independant-icon-holder icon-holder flex-center">
+                                        <i class="fa fa-house-user dd-text"></i>
+                                    </div>
+                                    #}
+                                    <div class="icon-holder flex-center">
+                                        <span class="independent-letter white-text">I</span>
+                                    </div>
+                                    <span class="sm-left">{{ 'independant'|trans|capitalize }}</span>
+                                    <i class="sm-left fa fa-question-circle tooltipped" data-tooltip="{{ 'user_list.add_user_modal.independant_creation_info'|trans }}" data-position="top"></i>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="row firm-row">
+                            <div class="col s12 m12">
+                                <input type="radio" id="firm" name="gen-type" value="f">
+                                <label for="firm">
+                                    <div class="firm-icon-holder icon-holder flex-center">
+                                        <i class="fa fa-industry white-text"></i>
+                                    </div>
+                                    <span class="sm-left">{{ 'partner_firm'|trans|capitalize }}</span>
+                                    <i class="sm-left fa fa-question-circle tooltipped" data-tooltip="{{ 'user_list.add_user_modal.firm_creation_info'|trans }}" data-position="top"></i>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="row flex-center user-section">
+                            <div class="col s12 m6">
+                                <input type="radio" id="user" name="gen-type" value="u" checked>
+                                <label for="user">
+                                    <img class="user-profile-xl-picture" src="{{ asset('lib/img/user/no-picture.png')}}" alt="">
+                                    <span class="sm-left">{{ 'member'|trans|capitalize }}</span>
+                                </label>
+                            </div>
+                            <div class="col s12 m6">
+                                <div class="flex-center user-choices">
+                                    <div>
+                                        <input type="radio" id="external" name="user-type" value="ext" checked>
+                                        <label for="external">
+                                            <i class="fa fa-user-circle dd-orange-text"></i>
+                                            <span class="sm-left">{{ 'user_list.add_user_modal.external'|trans|capitalize }}</span>
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <input type="radio" id="internal" name="user-type" value="int">
+                                        <label for="internal">
+                                            <i class="fa fa-user-circle dd-text"></i>
+                                            <span class="sm-left">{{ 'user_list.add_user_modal.internal'|trans|capitalize }}</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex-center-fe">
+                        <div class="btn waves-effect waves-light go-next">{{'next'|trans}}</div>
+                    </div>
+                </div>
+                <div class="firmname-part" style="display:none">
+                    <div class="title flex-center">
+                        <div class="firm-icon-holder icon-holder flex-center">
+                        <i class="fa fa-industry white-text"></i>
+                        </div>
+                        <h5 class="m-left">{{ 'user_list.add_user_modal.firm_title'|trans }}</span>
+                    </div>
+                    <div class="input-field firm-field-zone m-bottom"> 
+                        <label for="firm">{{ 'firm'|trans|capitalize ~ ', ' ~ 'organization'|trans|capitalize }}</label>
+                        <input type="text" class="firm-name no-margin" name="firmname">
+                        <div class="c-flex">
+                            <small class="dd-orange-text new-firm" style="visibility:hidden">{{'user_list.add_user_modal.new_firm_database'|trans}}</small>
+                            <small class="dd-orange-text unexisting-client" style="visibility:hidden">{{'user_list.add_user_modal.unexisting_client'|trans|raw}}</small>
+                        </div>
+                        <select name="firmSelector" style="display:none;"></select>
+                        <input type="hidden" name="wid">
+                        <input type="hidden" name="oid">
+                        <input type="hidden" name="cid">
+                    </div>
+                    <div class="flex-center-fe">
+                        <div class="btn-flat waves-effect waves-light go-prev m-right">{{'back'|trans}}</div>
+                        <div class="btn waves-effect waves-light go-next firm-btn disabled-btn" data-btn-final="{{ 'create'|trans }}" data-btn-interm="{{ 'next'|trans }}"></div>
+                    </div> 
+                </div>
+            {% endif %}
+            <div class="username-part" {% if creationType != 'ext' and not addingParticipant %}style="display:none"{% endif %}>
+                <div class="title">
+                    {% if not addingParticipant %}
+                        {% if creationType != 'ext' %}
+                            <div class="flex-center int-org" style="display:none"> 
+                                <i class="fa fa-user-circle dd-text"></i>
+                                <h5 class="m-left">{{'user_list.add_user_modal.int_user_title'|trans}}</h5>
+                            </div>
+                            
+                            <div class="flex-center independant-org"> 
+                                <div class="independant-xl-icon-holder icon-holder flex-center">
+                                    <span class="independent-letter white-text">I</span>
+                                </div>
+                                <h5 class="m-left">{{'user_list.add_user_modal.independant_user_title'|trans}}</h5>
+                            </div>
+                        {% endif %} 
+                        <div class="flex-center ext-org"> 
+                            <i class="fa fa-user-circle dd-orange-text"></i>
+                            <h5 class="m-left m-right">{{'user_list.add_user_modal.ext_user_title'|trans}}</h5>
+                            <img class="icon-holder" data-wo="{{ asset('lib/img/org/no-picture.png') }}" src="{{ asset('lib/img/org/no-picture.png') }}" alt="">
+                        </div>
+                    {% else %}
+                        <div class="flex-center ext-org"> 
+                            <i class="fa fa-user-circle dd-text"></i>
+                            <h5 class="m-left m-right">{{'user_list.add_user_modal.participant_title'|trans}}</h5>
+                            <img class="icon-holder" data-wo="{{ asset('lib/img/org/no-picture.png') }}" src="{{ asset('lib/img/org/no-picture.png') }}" alt="">
+                        </div>
+                    
+                    {% endif %}
+                    
+                </div>
+                <div class="input-field user-field-zone">
+                    <label for="user-fullname">{{addingParticipant ? 'activity_elements.participant_adding_label'|trans : 'create_user.modal.label_fullname'|trans}}</label>
+                    <input id="user-fullname" class="no-margin" name="username" type="text">
+                    <div class="c-flex"> 
+                        <small class="dd-orange-text new-user" style="visibility:hidden">{{'user_list.add_user_modal.new_user_database'|trans}}</small>
+                        <small class="dd-orange-text error-fullname" style="visibility:hidden">{{'create_user.modal.error_fullname'|trans}}</small>
+                    </div>
+                    <select name="userSelector" style="display:none;"></select>
+                    <input type="hidden" name="uid">
+                    {% if creationType != 'ext' %}
+                        <input type="hidden" name="ioid">
+                        <input type="hidden" name="icid">
+                    {% endif %}
+                    {% if addingParticipant %}
+                        <input type="hidden" name="iuid">
+                        <input type="hidden" name="euid">
+                        <input type="hidden" name="tid">
+                    {% endif %}
+                </div>
+                <div class="flex-center-fe">
+                    {% if creationType != 'ext' %}
+                        <div class="btn-flat waves-effect waves-light go-prev m-right">{{'back'|trans}}</div>
+                    {% endif %}
+                    <div class="btn waves-effect waves-light go-next go-to-email disabled-btn">{{'next'|trans}}</div>
+                </div>
+            </div>
+            {% if addingParticipant %}
+            <div class="account-part" style="display:none">
+                <div class="title">
+                    <h5>{{'add <span class="selected-user"></span> through_account'|replace({
+                            'add' : 'add'|trans|capitalize,
+                            'through_account' : 'user_list.add_user_modal.selecting_account_title_suffix'|trans
+                        })|raw 
+                    }}</h5>
+                </div>
+                <div class="input-field account-field-zone m-bottom"> 
+                    <select name="partAccountSelector" style="display:none;"></select>
+                    <input type="hidden" name="iuid">
+                    <input type="hidden" name="euid">
+                    <input type="hidden" name="tid">
+                </div>
+                <div class="flex-center-fe">
+                    <div class="btn-flat waves-effect waves-light go-prev m-right">{{'back'|trans}}</div>
+                    <div class="btn waves-effect waves-light account-add-btn">{{'add'|trans}}</div>
+                </div>
+            </div>
+            {% endif %}
+            <div class="email-part" style="display:none">
+                <div class="title flex-center">
+                <h5>
+                    <span>{{ 'user_list.add_user_modal.email_title'|trans }}</span>
+                    <i class="fa fa-paper-plane dd-orange-text"></i>
+                </h5>
+                {% if not isEmailMandatory %}
+                    <i class="fa fa-question-circle m-left tooltipped" data-tooltip="{{'user_list.add_user_modal.without_email_info'|trans}}" data-position="top"></i>
+                {% endif %}
+                </div>
+                <div class="input-field">
+                    <label for="user-email" data-lval="{{'create_user.modal.label_email'|trans}}"></label>
+                    <input id="user-email" class="no-margin" name="email" type="text">
+                    <small class="dd-orange-text error-email" style="visibility:hidden" data-bf="{{'create_user.modal.error_email'|trans}}">{{'create_user.modal.error_email'|trans}}</small>
+                </div>
+                <div class="flex-center-fe">
+                    <div class="btn-flat waves-effect waves-light go-prev m-right">{{'back'|trans}}</div>
+                    <div class="btn btn-add-user waves-effect waves-light {% if isEmailMandatory %}disabled-btn{% endif %}">{{'ok'|trans}}</div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

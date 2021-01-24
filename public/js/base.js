@@ -125,6 +125,13 @@
         });
     }
 
+    function isArrayNull(inputArray) {
+        for (var i = 0, len = inputArray.length; i < len; i += 1)
+          if (inputArray[i] !== null)
+            return false;
+        return true;
+      }
+
     function isEmail(email) {
         const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         return re.test(String(email).toLowerCase());
@@ -161,6 +168,11 @@
             document.body.removeChild(a);
             }, 0)
         }
+    }
+
+    function generateToken() {
+        return Math.floor(1000000000000000 + Math.random() * 9000000000000000)
+              .toString(36).substr(0, 15)
     }
 
     function isEmpty(obj) {

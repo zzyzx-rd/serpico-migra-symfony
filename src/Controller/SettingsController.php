@@ -60,13 +60,23 @@ use App\Entity\Position;
 use App\Entity\Activity;
 use App\Entity\CriterionGroup;
 use App\Entity\CriterionName;
+use App\Entity\DynamicTranslation;
+use App\Entity\EventDocument;
+use App\Entity\EventGroup;
 use App\Entity\EventGroupName;
+use App\Entity\EventName;
+use App\Entity\EventType;
 use App\Entity\GeneratedError;
 use App\Entity\InstitutionProcess;
 use App\Entity\Mail;
+use App\Entity\Stage;
 use App\Entity\UserGlobal;
 use App\Entity\UserMaster;
+use App\Form\Type\EventDocumentType;
+use App\Repository\EventGroupRepository;
+use App\Repository\EventTypeRepository;
 use DateTime;
+use Proxies\__CG__\App\Entity\Icon;
 use Symfony\Component\Form\FormFactory;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -977,12 +987,82 @@ class SettingsController extends MasterController
 
         return $this->render('updates_management.html.twig',
         [
-            'eventGroups' => $organization->getEventGroups(),
             'allEventGroupNames' => $allEventGroupNames,
-            'allEventNames' => $allEventNames
+            'allEventNames' => $allEventNames,
+            'organization' => $organization, 
+            'allIcons' => $em->getRepository(Icon::class)->findAll()
         ]);
 
     }
+
+    /**
+     * 
+     * @param Request $request
+     * @Route("/settings/element/retrieve-trans", name="retrieveTrans")
+     * @IsGranted("ROLE_ADMIN", statusCode=404)
+     */
+    public function retrieveTrans(Request $request){
+        $entityType = $request->get('e');
+        $em = $this->em;
+        $id = $request->get('id');
+        $prop = $request->get('p');
+        $locale = $request->getLocale();
+        $organization = $request->get('oid') ? $em->getRepository(Organization::class)->find($request->get('oid')) : $this->org;
+        switch($entityType){
+            case 'g' :
+                $eventGroup = $em->getRepository(EventGroup::class)->getDTrans($em->getRepository(EventGroup::class)->find($id),$locale,$organization);
+                $dynTrans = new ArrayCollection($em->getRepository(DynamicTranslation::class)->findBy(['entity' => 'EventGroupName', 'entityId' => [$eventGroup->getId(), $eventGroup->getEventGroupName()->getId()], 'entityProp' => 'name', 'organization' => [null, $organization]], ['organization' => 'ASC']));
+                break;
+            case 't' :
+                $eventType = $em->getRepository(EventType::class)->find($id);
+                $dynTrans = new ArrayCollection($em->getRepository(DynamicTranslation::class)->findBy(['entity' => ['EventType', 'EventName'], 'entityId' => [$eventType->getId(), $eventType->getEName()->getId()], 'entityProp' => 'name', 'organization' => [null, $organization]], ['organization' => 'ASC']));
+                break;
+            case 'n' :
+                $entity = 'EventName';
+                break;
+            case 'gn' :
+                $entity = 'EventGroupName';
+                break;
+        }
+        
+        /* $dynTrans = $repository->getDTrans($em->getRepository($entity->getCla)->find($id), $request->getLocale(), $organization);
+        if($dynTrans->count() > 0){
+            $element = $em->getRepository($entityType == 'g' ? EventGroup::class : EventType::class)->find($id);
+            $motherElmtId = $entityType == 'g' ? $element->getEventGroupName()->getId() : $element->getEName()->getId();
+            $dynTrans = new ArrayCollection([$em->getRepository(DynamicTranslation::class)->findOneBy(['entity' => $motherEntity, 'entityId' => $motherElmtId, 'entityProp' => $request->get('p')])]);
+        }*/
+        return new JsonResponse($dynTrans->map(fn(DynamicTranslation $dt) => ['fr' => $dt->getFR(), 'en' => $dt->getEN()])->getValues(), 200);
+    }
+
+    /**
+     * @param Request $request
+     * @param int $cnId
+     * @return JsonResponse|Response
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/element/icon/set", name="setCriterionIcon")
+     * @IsGranted("ROLE_ADMIN", statusCode=404)
+     */
+    public function setEventTypeIcon(Request $request) {
+        $evtId = $request->get('id');
+        $icoId = $request->get('icoId');
+        $em = $this->em;
+        /** @var Icon|null */
+        $icon = $icoId === -1 ? null : $em->getRepository(Icon::class)->find($icoId);
+        /** @var EventType */
+        $eventType = $em->getRepository(EventType::class)->find($evtId);
+
+        $eventType->setIcon($icon);
+        $em->persist($eventType);
+        $em->flush();
+
+        return new JsonResponse([
+            'icon' => $icon ? $icon->getChar() : null,
+            'type' => $icon ? $icon->getType() : null
+        ], 200);
+    }
+
+    
 
 
     /**
@@ -1261,7 +1341,45 @@ class SettingsController extends MasterController
             ]);
     }
 
-
+    /**
+     * @param Request $request
+     * @param $orgId
+     * @return mixed
+     * @Route("/settings/organization/users/add", name="addUser")
+     */
+    public function addUserAction(Request $request){
+        $fullname = $_POST['fn'];
+        $email = $_POST['email'];
+        $em = $this->em;
+        $existingUser = $em->getRepository(User::class)->findByEmail($email);
+        if($existingUser){
+            return new JsonResponse(['msg' => 'existingUser'], 500);
+        } else {
+            $user = new User();
+            $nameElmts = explode(" ", $fullname, 2); 
+            $firstname = trim($nameElmts[0]);
+            $lastname = trim($nameElmts[1]);
+            $token = md5(rand());
+            $user
+                ->setUsername($fullname)
+                ->setFirstname($firstname)
+                ->setLastname($lastname)
+                ->setEmail($email)
+                ->setToken($token)
+                ->setOrganization($this->org)
+                ->setRole(1);
+            $em->persist($user);
+            $em->flush();
+            $settings = [];
+            $settings['token'] = $user->getToken();
+            $settings['invitingUser'] = $this->user;
+            $response = $this->forward('App\Controller\MailController::sendMail', ['recipients' => [$user], 'settings' => $settings, 'actionType' => 'internalInvitation']);
+            if($response->getStatusCode() == 500){
+                return new JsonResponse(['msg' => $response->getContent()], 500);
+            }     
+            return new JsonResponse();
+        }
+    }
 
     //Modifies organization (limited to root master)
     public function modifyOrganizationAction(Request $request){
@@ -1272,7 +1390,6 @@ class SettingsController extends MasterController
 
     /**
      * @param Request $request
-     * @param Application $app
      * @param $orgId
      * @return mixed
      * @Route("/settings/organization/activities/{orgId}", name="organizationActivities")
@@ -2921,19 +3038,51 @@ class SettingsController extends MasterController
 
     }
 
-    /**
-     * @param Request $request
-     * @param Application $app
-     * @return JsonResponse
-     * @Route("/workers/participants/search", name="dynamicSearchParticipant")
-     */
-    public function dynamicSearchParticipant(Request $request){
 
-        $name = $request->get('name');
+    /**
+     * 
+     * Function which queries on our database, depending of query type.
+     * Could be either : participants, organizations (clients, non-clients or both), workerfirms, clients, external users or internal users
+     * Query paramater defines this
+     * 
+     * @param Request $request
+     * @return JsonResponse
+     * @Route("/search/dynamic/elements", name="dynamicSearch")
+     */
+    public function dynamicSearchElements(Request $request){
+
         $em = $this->em;
         $qb = $em->createQueryBuilder();
-        $type = $request->get('type');
+        $elmtUserIds = [];
+        $elmtExtUserIds = [];
+        $elmtFirmIds = [];
+        $elmtTeamIds = [];
+        $elmtClientIds = [];
+        $qType = $request->get('qt');
+        $name = $request->get('name');
+        $qEntityId = $request->get('qid');
 
+        // Already existing element ids for current organization
+   
+        if($qType == 'p'){
+            $organization = $this->org;
+            if($qEntityId){
+                $existingElements = $em->getRepository(Stage::class)->find($qEntityId)->getParticipants();
+                $elmtUserIds = $existingElements->filter(fn(Participation $p) => $p->getUser() != null && $p->getTeam() == null)->map(fn(Participation $p) => $p->getUser()->getId())->getValues();
+                $elmtFirmIds = $existingElements->filter(fn(Participation $p) => $p->getUser()->isSynthetic())->map(fn(Participation $p) => $p->getUser()->getOrganization()->getId())->getValues();
+                $elmtTeamIds = $existingElements->filter(fn(Participation $p) => $p->getTeam() != null)->map(fn(Participation $p) => $p->getTeam()->getId())->getValues();
+            }
+        } else if($qType == 'c' || $qType == 'nc' || $qType == 'i'){
+            $elmtClientIds = $this->org->getClients()->map(fn(Client $c) => $c->getId())->getValues();
+        } else if($qType == 'eu'){
+            //$existingElements = $em->getRepository(Client::class)->find($qEntityId)->getAliveExternalUsers()); 
+            $elmtExtUserIds = $em->getRepository(Client::class)->find($qEntityId)->getAliveExternalUsers()->map(fn(ExternalUser $eu) => $eu->getId())->getValues();
+        } else if($qType == 'u'){
+            $elmtUserIds = $this->org->getUsers()->map(fn(User $u) => $u->getId())->getValues();
+        }
+
+
+        //return new JsonResponse($elmtClientIds);
         
         $user = $this->user;
         $organization = $user ? $this->org : null;
@@ -2948,31 +3097,32 @@ class SettingsController extends MasterController
         }
         $clientIds = substr($clientIds,0,-2);*/
     
-
-        $participants = $request->get('p') ?: [];
+        // PAS TRES MALIN COMME QUERY, ON POURRAIT LA CHANGER POUR PRENDRE L'ELEMENT RACINE (STAGE) ET VERIFIER LES EXISTANTS
+        /*
+        $existingElementsInSelection = $request->get('p') ?: [];
         $partUsers = [0];
         $partTeams = [0];
         $partFirms = [0];
         $partExtUsers = [0];
 
-        foreach ($participants as $participant) {
-            if(isset($participant['el'])){
-                switch($participant['el']){
+        foreach ($existingElementsInSelection as $existingElementInSelection) {
+            if(isset($existingElementInSelection['el'])){
+                switch($existingElementInSelection['el']){
                     case 'u':
-                        $partUsers[] = $participant['id'];
+                        $elementUsers[] = $existingElementInSelection['id'];
                         break;
                     case 't':
-                        $partTeams[] = $participant['id'];
+                        $elementTeams[] = $existingElementInSelection['id'];
                         break;
                     case 'f':
-                        $partFirms[] = $participant['id'];
+                        $elementFirms[] = $existingElementInSelection['id'];
                         break;
                     case 'eu':
-                        $partExtUsers[] = $participant['id'];
+                        $elementExtUsers[] = $existingElementInSelection['id'];
                         break;
                 }
             } else {
-                $participant = $repoP->find($participant['id']);
+                $participant = $repoP->find($existingElementInSelection['id']);
                 $externalUser = $participant->getExternalUser();
                 if($participant->getTeam()){
                     $partTeams[] = $participant->getTeam()->getId();
@@ -2985,101 +3135,231 @@ class SettingsController extends MasterController
                     $partUsers[] = $participant->getUser()->getId();
                 }
             }
-
         }
 
         //return new JsonResponse($partExtUsers,200);
+        */
 
+        if($qType == 'p' || $qType == 'eu' || $qType == 'u' || $qType == 'i'){
 
-        if($type == 'all'){
-            //$elements = new ArrayCollection($qb->select('wf.name AS orgName','wf.id AS wfiId','wf.logo','identity(wf.organization) AS orgId', 'u.id AS usrId', 'u.username', 'u.picture AS usrPicture', 'eu.id AS extUsrId', 't.id AS teaId', 't.name AS teaName', 't.picture AS teaPicture')
-            $elementsUsrTeams = $qb->select('u.id AS usrId', 'u.username', 'u.picture AS usrPicture'/*, 'eu.id AS extUsrId'*/, 't.id AS teaId', 't.name AS teaName', 't.picture AS teaPicture')
-            ->from('App\Entity\User', 'u')
-            ->leftJoin('App\Entity\Team', 't', 'WITH', 't.organization = u.organization')
-            ->where('u.organization = :oid')    
-            ->andWhere('u.username LIKE :name AND u.id NOT IN (:partUsers)')
-            ->orWhere('t.name LIKE :name AND t.id NOT IN (:partTeams)')
-            ->setParameter('name', '%'. $name .'%')
-            ->setParameter('partUsers', $partUsers)
-            ->setParameter('partTeams', $partTeams)
-            ->setParameter('oid', $organization)
-            ->getQuery()
-            ->getResult();
-
-            $qb2 = $em->createQueryBuilder();
-            $elementsExtUsers = $qb2->select('wf.name AS orgName', 'wf.id AS wfiId','wf.logo', 'o.id AS orgId', 'CONCAT(eu.firstname,\' \', eu.lastname) AS username', 'eu.lastname AS l', 'eu.synthetic AS s', 'eu.id AS extUsrId', 'u.picture AS usrPicture', 'u.id AS usrId')
-                ->from('App\Entity\ExternalUser', 'eu')
-                ->innerJoin('App\Entity\User', 'u', 'WITH', 'u.id = eu.user')
-                ->innerJoin('App\Entity\Client', 'c', 'WITH', 'c.id = eu.client')
-                ->innerJoin('App\Entity\Organization', 'o', 'WITH', 'o.id = c.clientOrganization')
-                ->innerJoin('App\Entity\WorkerFirm', 'wf', 'WITH', 'wf.id = o.workerFirm')
-                ->where('CONCAT(eu.firstname,\' \', eu.lastname) LIKE :name AND eu.synthetic IS NULL OR eu.lastname LIKE :name AND eu.synthetic = TRUE')
-                ->andWhere('eu.id NOT IN (:partExtUsers)')
-                ->andWhere('eu.client IN (:clients)')
-                ->setParameter('partExtUsers',$partExtUsers)
-                ->setParameter('name', '%'. $name .'%')
-                ->setParameter('clients', $clients)
-                ->getQuery()
-                ->getResult();
+            $userElmts = $qb->select('ug.username', 'ug.id', 'u.picture AS usrPicture', 'u.id AS usrId', 'u.email AS usrEmail', 'u.synthetic AS synth', 'o.commname AS orgName', 'o.type AS orgType','wf.logo AS wfiLogo', 'wf.id AS wfiId', 'o.logo AS orgLogo', 'o.id AS orgId')
+                ->from('App\Entity\User', 'u')
+                ->leftJoin('App\Entity\UserGlobal', 'ug', 'WITH', 'ug.id = u.userGlobal')
+                ->leftJoin('App\Entity\Organization', 'o', 'WITH', 'o.id = u.organization')
+                ->leftJoin('App\Entity\WorkerFirm', 'wf', 'WITH', 'wf.id = o.workerFirm')
+                ->where('u.username LIKE :startOpt1 OR u.username LIKE :startOpt2');
             
-            $arrangedExtUsers = [];
-            foreach($elementsExtUsers as $elementsExtUser){
-                $arrangedExtUser = $elementsExtUser;
-                if($elementsExtUser['s']){
-                    $arrangedExtUser['username'] = $elementsExtUser['l'];
+            if($qType == 'p' && sizeof($elmtUserIds)){
+                $qb->andWhere('u.id NOT IN (:elmtUserIds)')
+                ->setParameter('elmtUserIds', $elmtUserIds);
+            }
+            $qb->setParameter('startOpt1', '% '. $name .'%')
+                ->setParameter('startOpt2', $name .'%')
+                //->groupBy('o.id')
+                ->orderBy('ug.id','ASC');
+
+            $userElmts = $qb->getQuery()->getResult();
+
+            $arrangedUserElmts = [];
+            $arrangedUserElmt = null;
+            $currentUserGlobalValue = null;
+            $existing = false;
+            foreach($userElmts as $userElmt){
+
+                /*if($qType == 'u' && in_array($userElmt['usrId'], $elmtUserIds) !== false || $qType == 'eu' && in_array($userElmt['extUsrId'], $elmtExtUserIds) !== false){
+                    continue;
+                }*/
+                
+                $client = $this->org->getClients()->filter(fn(Client $c) => $c->getClientOrganization()->getId() == $userElmt['orgId'])->first();
+                $externalUser = $client ? $client->getExternalUsers()->filter(fn(ExternalUser $eu) => $eu->getUser()->getId() == $userElmt['usrId'])->first() : null;
+                
+                if($userElmt['id'] != $currentUserGlobalValue){
+                    if($currentUserGlobalValue){
+                        $arrangedUserElmts[] = $arrangedUserElmt;
+                    }
+                    $currentUserGlobalValue = $userElmt['id'];
+                    $arrangedUserElmt = $userElmt;
+                    unset($arrangedUserElmt['synth']);
+                    unset($arrangedUserElmt['usrId']);
+                    unset($arrangedUserElmt['orgId']);
+                    unset($arrangedUserElmt['wfiId']);
+                    unset($arrangedUserElmt['orgName']);
+                    unset($arrangedUserElmt['orgType']);
+                    unset($arrangedUserElmt['wfiLogo']);
+                    unset($arrangedUserElmt['usrEmail']);
+                    $existing = false;
                 }
-                $arrangedExtUser['l'] = "";
-                $arrangedExtUsers[] = $arrangedExtUser;
+                
+                $externalUserExists = $client && $externalUser;
+                $arrangedUserElmt['usrId'][] = $userElmt['usrId'];
+                $arrangedUserElmt['extUsrId'][] = $externalUserExists ? $externalUser->getId() : null;
+                $arrangedUserElmt['wfiId'][] = $userElmt['wfiId'];
+                $arrangedUserElmt['synth'][] = $userElmt['synth'] ? 1 : 0;
+                $arrangedUserElmt['orgId'][] = $userElmt['orgId'];
+                $arrangedUserElmt['cliId'][] = $externalUserExists ? $externalUser->getClient()->getId() : null;
+                $arrangedUserElmt['orgName'][] = $userElmt['orgType'] == 'C' ? '' : $userElmt['orgName'];
+                $arrangedUserElmt['orgLogo'][] = $userElmt['orgLogo'];
+                $arrangedUserElmt['wfiLogo'][] = $userElmt['wfiLogo'];
+                $arrangedUserElmt['hasEm'][] = $userElmt['usrEmail'] ? 1 : 0;
+                if(!array_key_exists('usrPicture', $arrangedUserElmt))  {
+                    $arrangedUserElmt['usrPicture'] = $userElmt['usrPicture'];
+                }
+
+                $externalUserExistsCondition = !$existing && $qType == 'eu' && $externalUser && sizeof($elmtExtUserIds) > 0 && in_array($externalUser->getId(),$elmtExtUserIds) !== false;
+                // For independant we check client and not external
+                $clientExistsCondition = !$existing && $qType == 'i' && $client && sizeof($elmtClientIds) > 0 && in_array($client->getId(),$elmtClientIds) !== false;
+
+                if($externalUserExistsCondition || $clientExistsCondition){
+                    $existing = true;
+                    $arrangedUserElmt['ex'] = 1;
+                }
+                   
             }
 
+            if(sizeof($userElmts)){
+                $arrangedUserElmts[] = $arrangedUserElmt;
+            } 
 
+        }
+
+        
+
+        if($qType == 'p'){
+
+            $qb2 = $em->createQueryBuilder();
+            $teamElmts = $qb2->select('t.name', 't.id AS teaId')
+                ->from('App\Entity\Team', 't')
+                ->leftJoin('App\Entity\Participation', 'p', 'WITH', 'p.team = t.id')
+                ->where('t.name LIKE :startOpt1 OR t.name LIKE :startOpt2')
+                ->andWhere('p.team NOT IN (:elmtTeamIds)')
+                ->setParameter('elmtTeamIds', $elmtTeamIds)
+                ->setParameter('startOpt1', '% '. $name .'%')
+                ->setParameter('startOpt2', $name .'%')
+                ->getQuery()
+                ->getResult();
 
             $qb3 = $em->createQueryBuilder();
-            $elementsFirms = $qb3->select('wf.name AS orgName','wf.id AS wfiId','wf.logo', 'o.id AS orgId', 'c.id AS cliId')
-            ->from('App\Entity\WorkerFirm', 'wf')
-            // Join is made to prevent selection of clients
-            ->leftJoin('App\Entity\Organization', 'o', 'WITH', 'o.workerFirm = wf.id')
-            ->leftJoin('App\Entity\Client', 'c', 'WITH', 'c.clientOrganization = o.id')
-            ->where('wf.name LIKE :name')
-            ->andWhere('wf.id NOT IN (:partFirms)')
-            // Line below prevents selection of firm which is already client (existing as synth ext user), and user self firm mirrored as client for its clients
-            ->andWhere('c.organization IS NULL OR (c.organization != :oid AND c.clientOrganization != :oid)')
-            ->setParameter('name', '%'. $name .'%')
-            ->setParameter('oid', $organization)
-            ->setParameter('partFirms',$partFirms)
-            ->getQuery()
-            ->getResult();
+            $firmElmts = $qb3->select('wf.name AS orgName','wf.id AS wfiId', 'wf.logo AS wfiLogo', 'o.logo AS orgLogo', 'o.id AS orgId', 'c.id AS cliId', 'u.id AS usrId', 'eu.id AS extUsrId')
+                ->from('App\Entity\WorkerFirm', 'wf')
+                // Join is made to prevent selection of clients
+                ->leftJoin('App\Entity\Organization', 'o', 'WITH', 'o.workerFirm = wf.id')
+                ->leftJoin('App\Entity\User', 'u', 'WITH', 'u.organization = o.id')
+                ->leftJoin('App\Entity\Client', 'c', 'WITH', 'c.clientOrganization = o.id')
+                ->leftJoin('App\Entity\ExternalUser', 'eu', 'WITH', 'eu.client = c.id')
+                ->where('wf.name LIKE :startOpt1 OR wf.name LIKE :startOpt2')
+                //->where('(o.id IS NULL AND wf.name LIKE :startOpt1 OR wf.name LIKE :startOpt2) OR (u.lastname LIKE :startOpt1 OR wf.name LIKE :startOpt2 AND u.synthetic IS TRUE o.id IS NULL)')
+                ->andWhere('o.id NOT IN (:elmtFirmIds)')
+                ->andWhere('u.synthetic = TRUE')
+                ->andWhere('eu.synthetic = TRUE')
+                // Line below prevents selection of firm which is already client (existing as synth ext user), and user self firm mirrored as client for its clients
+                //->andWhere('c.organization IS NULL OR (c.organization != :oid AND c.clientOrganization != :oid)')
+                ->setParameter('startOpt1', '% '. $name .'%')
+                ->setParameter('startOpt2', $name .'%')
+                //->setParameter('oid', $organization)
+                ->setParameter('elmtFirmIds', $elmtFirmIds)
+                ->getQuery()
+                ->getResult();
 
-            $elements = new ArrayCollection(array_merge($elementsUsrTeams,$arrangedExtUsers,$elementsFirms));
+            //$elements = new ArrayCollection(array_merge($internalNonFirmElmts, $externalNonFirmElmts, $firmElmts));
+            $elements = new ArrayCollection(array_filter(array_merge($arrangedUserElmts, $teamElmts, $firmElmts)));
 
 
-        } else {
+        } else if($qType == 'u' || $qType == 'eu' || $qType == 'i'){
+            
+            $elements = new ArrayCollection($arrangedUserElmts);
 
-            $elements = new ArrayCollection(
-                $qb->select('wf.name AS orgName','wf.id AS wfiId','wf.logo','o.id AS orgId', 'c.id AS cliId', 'IDENTITY(c.organization) AS cOrg')
+
+        } else if ($qType == 'wf' || $qType == 'f' || $qType == 'nc' || $qType == 'c') {
+
+            if($qType == 'c'){
+                $qb->select('wf.name AS orgName', 'wf.id AS wfiId', 'wf.logo as wfiLogo', 'o.id AS orgId', 'o.logo as orgLogo', 'c.id AS cliId', 'IDENTITY(c.organization) AS cOrg')
                     ->from('App\Entity\WorkerFirm', 'wf')
                     ->leftJoin('App\Entity\Organization', 'o', 'WITH', 'o.workerFirm = wf.id')
-                    ->leftJoin('App\Entity\Client', 'c', 'WITH', 'c.clientOrganization = o.id')
-                    ->where('wf.name LIKE :name')
-                    ->groupBy('o.id')
-                //->andWhere('c.organization = :org')
-                    ->setParameter('name', '%'. $name .'%')
-                //->setParameter('org', $organization)
-                    ->getQuery()
-                    ->getResult()
-                );
+                    ->leftJoin('App\Entity\Client', 'c', 'WITH', 'c.clientOrganization = o.id');
+            } else {
+                $qb->select('wf.name AS orgName','wf.id AS wfiId','wf.logo as wfiLogo','o.id AS orgId', 'o.logo as orgLogo')
+                    ->from('App\Entity\WorkerFirm', 'wf')
+                    ->leftJoin('App\Entity\Organization', 'o', 'WITH', 'o.workerFirm = wf.id');
+            }
+
+            $qb->where('wf.name LIKE :startOpt1 OR wf.name LIKE :startOpt2')
+                ->groupBy('o.id')
+                ->setParameter('startOpt1', '% '. $name .'%')
+                ->setParameter('startOpt2', $name .'%')
+                ->orderBy('wf.commonName','ASC')
+                ->getQuery()->getResult();
+            
+            if($qType == 'c'){
+                $qb->andWhere('c.id IN (:elmtClientIds)')
+                    ->setParameter('elmtClientIds', $elmtClientIds);
+            }
+
+            $firmElements = $qb->getQuery()->getResult();
+            
+            if($qType == 'nc' || $qType == 'f'){
+                $arrangedFirmElements = [];
+                foreach($firmElements as $firmElement){
+
+                    $arrangedFirmElement = $firmElement;
+                    $client = $this->org->getClients()->filter(fn(Client $c) => $c->getClientOrganization()->getId() == $firmElement['orgId'])->first();
+                    if($client){
+                            $arrangedFirmElement['cliId'] = $client->getId();
+                            if($qType == 'nc'){
+                                $arrangedFirmElement['ex'] = 1;
+                            }
+                            $arrangedFirmElements[] = $arrangedFirmElement;
+                    } else {
+                        $arrangedFirmElements[] = $arrangedFirmElement;
+                    }
+                }
+            } else {
+                $arrangedFirmElements = $firmElements;
+            }
+            /*
+            $elements = $elements->map(function($e) use ($qType){
+                $output = [];
+                $output['orgName'] = $e['orgName'];
+                $output['wfiId'] = $e['wfiId'];
+                $output['logo'] = $e['logo'];
+                $output['orgId'] = $e['orgId'];
+
+                if($qType == 'f'){
+                    $client = $this->org->getClients()->filter(fn(Client $c) => $c->getClientOrganization()->getId() == $e['orgId'])->first();
+                    if($client){
+                        $output['cliId'] = $client->getId();
+                    }
+                }
+                //}
+                return $output;
+            });
+            */
+            $elements = new ArrayCollection($arrangedFirmElements);
+
+            
+        }/* else if($qType == 'i'){
+
+            $qb->select('o.id AS orgId', 'o.commname AS orgName', 'o.logo', 'c.id AS cliId', 'IDENTITY(c.organization) AS cOrg')
+                ->from('App\Entity\Organization', 'o')
+                ->leftJoin('App\Entity\Client', 'c', 'WITH', 'c.clientOrganization = o.id')
+                ->where('o.commname LIKE :startOpt1 OR o.commname LIKE :startOpt2')
+                ->andWhere('o.type != :type')
+                ->andWhere('c.id NOT IN (:elmtClientIds)')
+                ->groupBy('o.id')
+                ->setParameter('startOpt1', '% '. $name .'%')
+                ->setParameter('startOpt2', $name .'%')
+                ->setParameter('type', 'F')
+                ->setParameter('elmtClientIds', $elmtClientIds);
+        
+            $elements = new ArrayCollection($qb->getQuery()->getResult());
 
             $elements = $elements->map(fn($e) => [
                 'orgName' => $e['orgName'],
-                'wfiId' => $e['wfiId'],
                 'logo' => $e['logo'],
                 'orgId' => $e['orgId'],
                 'cliId' => $e['cOrg'] == $orgId ? $e['cliId'] : ""
             ]);
-            
-        }
 
-
+        }*/
 
         $qParts = [];
         foreach($elements as $element){
@@ -4079,5 +4359,37 @@ class SettingsController extends MasterController
         }
 
         return new JsonResponse(['firms' => json_encode($firmsData)], 200);
+    }
+
+    /**
+    * @param Request $request
+    * @Route("/settings/documents/manage", name="manageDocuments")
+    * @IsGranted("ROLE_ADMIN", statusCode=404)
+    */
+    public function manageDocuments(Request $request){
+
+        $em = $this->em;
+        $currentUser = $this->user;
+        $orgDocuments = $em->getRepository(EventDocument::class)->findByOrganization($this->org);
+        $addDocumentForm = $this->createForm(EventDocumentType::class, null,['standalone' => true, 'currentUser' => $this->user]);
+
+        //Following 6 lines are here to create eventual account cloud folder in there were none, is managed on subscription, to remove in the short term
+        $orgId = $this->org->getId();
+        $fullName = $this->org->getType() == 'C' ? $currentUser->getUsername() :  $this->org->getCommname();
+        $fullNameWithoutAccentString = $this->forward('App\Controller\InstitutionController::skipAccents', ['str' => $fullName])->getContent();
+        $name = strtolower(implode("-",explode(" ", $fullNameWithoutAccentString)));
+        $parentFolderPrefix = $this->org->getType() == 'C' ? 'i' : 'c';
+        $dirPath = dirname(dirname(__DIR__)) . "/public/lib/{$parentFolderPrefix}docs/{$orgId}-{$name}";
+
+        if(!is_dir($dirPath)){
+            mkdir($dirPath);
+        }
+        
+        return $this->render('documents_management.html.twig',
+        [
+            'documents' => $orgDocuments,
+            'addDocumentForm' => $addDocumentForm->createView(),
+        ]);
+
     }
 }

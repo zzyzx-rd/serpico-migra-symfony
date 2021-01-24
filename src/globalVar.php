@@ -59,10 +59,15 @@ class globalVar {
         return ["_locale" =>"fr"];
     }
 
-    public function userPicture(User $user = null): string
+    public function userPicture(User $user = null, bool $isSynth = false, bool $isIndivIndep = false): string
     {
-        $userPicture = $user ? $user->getPicture() : ($this->CurrentUser() ? $this->CurrentUser()->getPicture() : null);
-        return 'lib/img/user/' . ($userPicture ?: 'no-picture.png');
+        /** @var User|null */
+        $consideredUser = $user ?: $this->CurrentUser();
+        $folder = $consideredUser && $consideredUser->isSynthetic() && $consideredUser->getFirstname() == 'ZZ' ? 'org' : 'user';
+        $suffix = $consideredUser && $consideredUser->getPicture() ? $consideredUser->getPicture() : (
+            $consideredUser->getOrganization()->getType() == 'C' || $consideredUser->getOrganization()->getType() == 'I' || $isIndivIndep ? 'no-picture-i.png' : 'no-picture.png'
+        );
+        return "lib/img/$folder/$suffix";
     }
 
 
@@ -82,7 +87,9 @@ class globalVar {
         } else if ($o && $o->getWorkerFirm() && $o->getWorkerFirm()->getLogo()){
             return 'lib/img/wf/' . $o->getWorkerFirm()->getLogo();
         } else {
-            return $o->getType() == 'I' ? "lib/img/org/indpt-no-picture.png" : "lib/img/org/no-picture.png";
+            return $o->getType() == 'C' ? 
+                "lib/img/user/no-picture-i.png" : 
+                "lib/img/org/no-picture.png";
         }
     }
     

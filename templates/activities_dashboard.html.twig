@@ -18,6 +18,8 @@
 
 {% set noActivities = orphanActivities is empty and processesActivities is empty %}
 
+{% set route = global.request.attributes.get('_route') %}
+
 {% set actStatuses = 
   { 'o' : {
         '-5' : 'cancelled',
@@ -45,26 +47,27 @@
   %}
 
 {% block css %}
+
   <link rel="stylesheet" href="{{ asset('css/activity_list_item.css') }}">
   <link rel="stylesheet" href="{{ asset('css/iprocess_list.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/add_client_user_modal.css') }}">
   <link rel="stylesheet" href="{{ asset('css/dropify.min.css') }}">
   <script>
-    var oid = "{{ currentuser.organization.id }}";
-    var uid = "{{ currentuser.id }}";
+    var oid = "{{ currentuser ? currentuser.organization.id : 0 }}";
+    var uid = "{{ currentuser ? currentuser.id : 0 }}";
     var ipurl = "{{ url('getIProcesses') }}";
     var gcurl = "{{ url('getElementConfig', {entity:'activity', elmtId : 0}) }}";
     var gsurl = "{{ url('getGradableStages', {actId : 0}) }}";
-    var surl = "{{path('dynamicSearchParticipant')}}";
+    var surl = "{{ path('dynamicSearch') }}";
     var aurl = "{{ url('createUserProcessActivity', { inpId: 0 }) }}";
     var adurl = "{{ url('activityDelegate') }}";
     var usurl= "{{ url('updateStageStatus', {stgId : 0}) }}";
-    var cpurl = "{{ currentuser.organization ? url('createProcessRequest', {orgId : currentuser.organization.id}): '' }}";
+    var cpurl = "{{ currentuser ? url('createProcessRequest', {orgId : currentuser.organization.id}): '' }}";
     var fc = parseInt("{{ firstConnection }}");
     var eurl = "{{ url('updateEvent', {eveId : 0}) }}";
     var scurl = "{{ url('createStage') }}";
-    var currentWfiId = "{{ currentuser.organization.type != 'C' ? currentuser.organization.workerFirm.id : 0 }}";
-    var uid = "{{ currentuser.id }}";
-    var un = "{{ currentuser.fullname }}";
+    var currentWfiId = "{{ currentuser and currentuser.organization.type != 'C' ? currentuser.organization.workerFirm.id : 0 }}";
+    var un = "{{ currentuser ? currentuser.fullname  : '' }}";
     var userPic = "{{ asset(global.userpicture) }}";
     var myself = "{{ 'myself'|trans|capitalize }}";
     var pcurl = "{{ url('createParticipant') }}";
@@ -85,7 +88,7 @@
     var udcurl = "{{ url('updateDocumentContent') }}";
     var usnurl = "{{ url('updateStageName') }}";
     var uccurl = "{{ url('updateCommentContent') }}";
-    var apurl = "{{ url('addParticipantStage') }}";
+    var apurl = "{{ url('addParticipantStage',{stgId: 0}) }}";
     var msgDocInsert = "{{ 'activity_elements.events.documents.dropify_insert_msg'|trans }}";
     var msgDocReplace = "{{ 'remove'|trans }}";
     var msgDocRemove = "{{ 'replace'|trans }}";
@@ -96,17 +99,25 @@
     var synthSuffix = "{{ 'activity_elements.synth_user_suffix'|trans }}";
     var lkEvtToStgMsg = "{{ 'activity_elements.stages.multiple_stages_modal.add_event_title'|trans }}";
     var modifiedMsg = "{{ 'modified'|trans }}";
-    var selfAcctIds = "{{ currentuser.userGlobal.userAccounts|map(u => u.id)|join(', ') }}";
+    var selfAcctIds = "{{ currentuser ? currentuser.userGlobal.userAccounts|map(u => u.id)|join(', ') : '' }}";
+    var stageInvUrl = "{{ url('accessStageThroughInvit', {token: 0}) }}";
+    var privateMsg = "{{ 'private'|trans }}";
+    var independentMsg = "{{ 'independant'|trans|capitalize }}";
     {% if comesFromLogin %}
       var luurl = "{{ url('logLastUpdatedUser') }}";
     {% endif %}
+    {% if invitationStage|default %}
+      var lsurl = "{{ url('linkStageInvitationToAccount') }}";
+    {% endif %}
+
 
   </script>
   <style>
 
       main {
+        width:90%;
+        margin:auto!important;
         font-size:20px;
-        margin: 1em 0;
       }
 
       .elmts{
@@ -308,15 +319,6 @@
         line-height: 10px;
       }
 
-      .account-logo {
-        --size: 1.2em;
-        font-size: var(--size);
-        height: 1em;
-        width: 1em;
-        border: 1.5px solid #e0e0e0;
-        margin-right: .25em;
-      }
-
       ol.simult.stages{
         --button-size:1em;
       }
@@ -483,7 +485,10 @@
         position: -webkit-sticky; /* Safari */
         position: sticky;
         top: 0;
-        background-color: white;
+       
+        overflow-y: visible;  
+        z-index: 1;
+
       }
 
       .act-info > .fixed-action-btn{
@@ -590,6 +595,7 @@
 
       .participant-btn {
         position: relative;
+        margin: 0 0.2rem;
       }
 
       .no-activity-msg {
@@ -650,7 +656,7 @@
       }
 
       .participants{
-        margin-bottom: 1rem;
+        margin: 1rem 0;
       }
 
       .participant-field-zone .dropdown-content, .firm-field-zone .dropdown-content{
@@ -662,16 +668,6 @@
       .f-prefix{
         margin-top: auto;
         margin-bottom: 7px;
-      }
-
-      .select-dropdown li img{
-        float: left;
-      }
-
-      .select-dropdown li img.s-firm-option-logo{
-        height: 20px;
-        width: 20px;
-        margin: 5px 10px;
       }
 
       .el-type{
@@ -1153,7 +1149,6 @@
         margin-left: auto;
         margin-right: auto;
         text-align:center;
-        max-width:50%;
       }
 
       .new-stage{
@@ -1193,12 +1188,8 @@
 
       .chevron{
         position: absolute;
-        top:-46px;
-        /*
-        background-color: black;
-        width: 2px;
-        height: 45px;
-        */
+        top: 22px;
+
       }
 
       .event{
@@ -1206,6 +1197,137 @@
         top: -2.1rem;
         left:-0.3rem;
       }
+
+      .add-f-icon{
+        background-color: #55318e;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .add-f-icon i {
+        font-size: 13px;
+      }
+
+      .s-link{
+        cursor: pointer;
+      }
+
+      .ts-scale{
+        position: relative;
+      }
+
+      .inviting-org-logo-container{
+          justify-content:center;
+          padding:20px 0;
+      }
+      .inviting-org-logo{
+          width:50px;
+          height:50px;
+          border-radius:50%;
+      }
+
+      #invitationStage .select-wrapper input.select-dropdown {
+        margin: 0;
+      }
+
+      .open-zone{
+        width:100%;
+      }
+
+      .open-text{
+        height:2rem;      
+      }
+
+      .add-enddate-zone{
+        width: 100%;
+        font-size:14px;
+        cursor:pointer;
+      }
+
+      .set-open-enddate{
+        cursor:pointer;
+      }
+
+      .badge-container.activity-client-name{
+        height:32px;
+      }
+
+      .independent-logo{
+        justify-content:center;
+      }
+
+      .independent-logo > .independent-letter{
+        font-size:14px;
+      }
+
+      {% if route == 'accessStageThroughInvit' %}
+
+        header{
+          display:none;
+        }
+
+        #sharingActivity .modal-title{
+          padding: 15px 0;
+        }
+
+        main{
+          position:relative;
+        }
+
+        .dd-logo{
+          width:200px;
+        }
+
+        .collapsible{
+          border:none;
+          box-shadow: none;
+        }
+        .collapsible-header{
+          background-color:inherit;
+        }
+
+        #lg-icon .collapsible-header{
+          height: 50px;
+          border-bottom: none;
+        }
+
+        #lg-icon .collapsible-body li a{
+          height: 50px;
+        }
+
+        .collapsible-header, .collapsible-body{
+          background-color: white;
+        }
+
+        #lg-icon .country{
+          color: black!important;
+        }
+
+        .lg-icon > .collapsible {
+          position: relative;
+        }
+
+        .lg-icon:hover .lang-menu {
+          display: block;
+        }
+
+        .invited-header-logo{
+          position: absolute;
+          width:100%;
+          z-index: -1;
+          top: 20px;
+        }
+
+        .invited-content{
+          justify-content:center;
+          margin-top:40px;
+        }
+
+      {% endif %}
 
   </style>
 {% endblock %}
@@ -1670,6 +1792,7 @@
     });
   </script>
   <script src="{{ asset('js/activity_manage.js') }}"></script>
+  <script src="{{ asset('js/add_client_user.js') }}"></script>
   <script src="{{ asset('js/dropify.min.js') }}"></script>
 {% endblock %}
 
@@ -1683,37 +1806,38 @@
 
 {% block content %}
 
-  {% set organization = currentuser.organization %}
+  {% set organization = currentuser ? currentuser.organization : null %}
   {% set displayProcesses = organization and organization.plan != 3 and organization.institutionProcesses|length > 0 %}
 
-  <main>
+  {% include "components/background_grid.html.twig" %}
 
-    <div class="sorting-type dashboard-btns flex-center-sb">
-
-      {#{% if is_granted('ROLE_ADMIN') %}#}   
-      <ul class="no-margin">
-        <li>
-          <a class="btn-flat no-padding flex-center my-account dd-text">
-            <span>{{ 'my_account'|trans ~ ' :' }}</span>
-            <img class="account-logo sm-left sm-right" src="{{ asset(global.organizationLogo(currentuser.organization)) }}">
-            <span>{{ currentuser.organization.commname }}</span>
-          </a>
-        </li>
-        {% if is_granted('ROLE_ENTREPRISE') %}
+    <div class="sorting-type dashboard-btns flex-center-{{organization ? 'sb' : 'fe' }}">
+      {#{% if is_granted('ROLE_ADMIN') %}#}  
+      {% if organization %}
+        <ul class="no-margin">
           <li>
-          {% if global.route == "myActivities" %}
-              <a href="{{ url('processesList') }}" class="btn-flat dd-text switch-org-self-btn waves-effect waves-light">{% trans %}activities.firm_activities{% endtrans %}</a>
-          {% else %}
-              <a href="{{ url('myActivities') }}" class="btn-flat dd-text switch-org-self-btn waves-effect waves-light">{% trans %}activities.my_activities{% endtrans %}</a>
+            <a class="btn-flat no-padding flex-center my-account dd-text">
+              <span >{{ 'my_account'|trans}}</span>
+              <img class="account-logo sm-left sm-right" src="{{ asset(global.organizationLogo(organization)) }}">
+              <span class="strong {{organization.type == 'C' or organization.type == 'I' ? 'dd-orange-text' : ''}}">{{ organization.type == 'C' ? 'profile.private_suffix'|trans : (organization.type == 'I' ? 'profile.independant_suffix'|trans : organization.commname) }}</span>
+            </a>
+          </li>
+          {% if is_granted('ROLE_ENTREPRISE') %}
+            <li>
+            {% if global.route == "myActivities" %}
+                <a href="{{ url('processesList') }}" class="btn-flat dd-text switch-org-self-btn waves-effect waves-light">{% trans %}activities.firm_activities{% endtrans %}</a>
+            {% else %}
+                <a href="{{ url('myActivities') }}" class="btn-flat dd-text switch-org-self-btn waves-effect waves-light">{% trans %}activities.my_activities{% endtrans %}</a>
+            {% endif %}
+            </li>    
           {% endif %}
-          </li>    
-        {% endif %}
-      </ul>
+        </ul>
+      {% endif %}
 
       <ul class="no-margin">
         
-        <ul class="flex-center-fe view-settings no-margin">
           {#
+        <ul class="flex-center-fe view-settings no-margin">
           <li class="flex-center">
             <a class="btn-flat no-padding flex-center">
               <div class="view-type-value flex-center">
@@ -1778,9 +1902,10 @@
               
               
               
-              {% endif %}#}
+              {% endif %}
             
         </ul>
+        #}
         <ul class="flex-center-fe scale-settings">
           <li class="flex-center">
               <div class="view-type-value flex-center">
@@ -1805,11 +1930,71 @@
 
             </a>
           </li>
+          {% if route == 'accessStageThroughInvit' %}
+            <li class="lg-icon" id="lg-icon">
+              <div class="collapsible" data-collapsible="accordion">
+                <div class="collapsible-header">
+                  <ul class="flex-center">
+                    <li>
+                      <div class="flag sm-right {{ locale }}"></div>
+                    </li>
+                    <li>
+                      <span class="{{global.route != "home_welcome" ? 'country' : 'landing-country'}}">{{ locale|upper }}</span>
+                    </li>
+                  </ul>
+                </div>
+                <ul class="collapsible-body lang-menu no-padding">
+                  {% if locale != 'en' %}
+                    <li>
+                      <a href="{{ path('change_locale', {'locale': 'en'}) }}" class="flex-center">
+                          <div class="flag en"></div>
+                          <span class="country">EN</span>
+                      </a>
+                    </li>
+                  {% endif %}
+                  {% if locale != 'fr' %}
+                    <li>
+                      <a href="{{ path('change_locale', {'locale': 'fr'}) }}" class="flex-center">
+                          <div class="flag fr"></div>
+                          <span class="country">FR</span>
+                      </a>
+                    </li>
+                  {% endif %}
+                </ul>
+              </div>
+            </li>
+          {% endif %}
         </ul>
       </ul>
 
 
     </div>
+
+    {% if route == 'accessStageThroughInvit' %}
+
+      {% set organization = orphanActivities[0].organization %}
+
+        <div class="c-flex-center invited-header-logo">
+          <img class="dd-logo" src="{{ asset('lib/img/logo_dd_p_l.png') }}">
+          <span>{{'landing.motto'|trans}}</span>
+        </div>
+
+      <div class="flex-center invited-content">
+          <div class="center">
+            <p>
+              <div class="flex-center inviting-org-logo-container no-padding">
+                <img class="inviting-org-logo" src="{{ asset(global.organizationLogo(organization)) }}" alt="">
+                <span class="strong dd-text m-left sm-right">{{organization.commname}}</span>
+                <span>{{'stage_invitation_modal.invitation_msg'|trans}}</span>
+              </div>
+            </p>
+          </div>
+
+    {% endif %}
+
+
+  <main class="card-panel purple lighten-5">
+
       {#
       <div style="padding: 0 3em;
     justify-content: flex-end;">
@@ -1972,7 +2157,7 @@
                       <div class="col s1">N</div>
                       <div class="col s1">D</div>
                       <div class="chevron">
-                        <i class="fa fa-location-arrow"></i>
+                        <i class="fa fa-location-arrow dd-text"></i>
                       </div>
                   </div>
                 </div>
@@ -2042,27 +2227,26 @@
                 <div class="col s{{ displayProcesses ? 10 : 12 }} no-padding">
                   <div class="item-body">
                     <ul class="activity-list">
-
-                    {% if global.route != 'myActivities' %}
+                    
+                    {% if global.route == 'processesList' %}
                       {% for s, status in displayedStatuses %}
-                        {#{% set acptStatus = null %}#}
-                       {#{% set showable = false %}#}
+                      
                         {% for activity in orphanActivities[s] %}
-                          {#{% if activity.status is not null %}#}
+                          
                             {% set actStatus = sortingTypeCookie == 'o' ? activity.status : activity.progress %}
                             {% set actStatusName = actStatuses[sortingTypeCookie][actStatus] %}
                             {% set showable = global.request.cookies.get('r_s_' ~ sortingTypeCookie ~ '_' ~ actStatusName) is null %}
-                          {#{% endif %}#}
+                        
                           {% include "components/activity2_list__item.html.twig" with { activity: activity, showable: showable, sortingType: sortingTypeCookie, actStatus: actStatusName, em:em, mobile_rendering: false } %}
                         {% endfor %}
                       {% endfor %}
                     {% else %}
                       {% for activity in orphanActivities %}
-                          {#{% if activity.status is not null %}#}
+                          
                             {% set actStatus = sortingTypeCookie == 'o' ? activity.status : activity.progress %}
                             {% set actStatusName = actStatuses[sortingTypeCookie][actStatus] %}
                             {% set showable = global.request.cookies.get('r_s_' ~ sortingTypeCookie ~ '_' ~ actStatusName) is null %}
-                          {#{% endif %}#}
+                        
                           {% include "components/activity2_list__item.html.twig" with { activity: activity, showable: showable, sortingType: sortingTypeCookie, actStatus: actStatusName, em:em, mobile_rendering: false } %}
                         {% endfor %}
                     {% endif %}
@@ -2228,7 +2412,7 @@
      
     {% endif %} #}
 
-    {% if organization and currentuser.role != 3 %}
+    {% if currentuser and currentuser.role != 3 %}
       <div id="fixedButton create-act-btn" class="fixed-action-btn">
           <a class="btn-floating btn-large modal-trigger" href="#createStage" onclick="onAddProcessClick('{{ currentuser.organization.id }}')" data-oid="{{currentuser.organization.id}}"><i class="material-icons">add</i></a>
           {#
@@ -2249,10 +2433,21 @@
 
   </main>
 
-  {% if organization is not null %}
-  
-  
-  
+  {% if route == 'accessStageThroughInvit' %}
+
+  </div>
+
+  <p class="center">
+    <a class="btn" href="{{path('login')}}">{{'stage_invitation_modal.connection_btn_msg'|trans}}</a>
+    {{'or'|trans}}
+    <a class="dd-text strong" href="{{path('signup')}}">{{'stage_invitation_modal.signup_msg'|trans}}</a>
+    <span>{{'stage_invitation_modal.end_msg'|trans}}</span>
+  </p>
+
+  {% endif %}
+
+  {% if currentuser is not null %}
+    
       <div id="createStage" class="modal">
         {{ form_start(newActivityForm) }}
           <div class="modal-content">
@@ -2284,33 +2479,56 @@
                   {{ form_label(newActivityForm.startdate) }}
                   {{ form_widget(newActivityForm.startdate) }}
                 </div>
-                <div class="col s6 m6 input-field">
-                  {{ form_label(newActivityForm.enddate) }}
-                  {{ form_widget(newActivityForm.enddate) }}
+                <div class="col s6 m6">
+                  <div class="enddate-input input-field" style="display:none">
+                    {{ form_label(newActivityForm.enddate) }}
+                    {{ form_widget(newActivityForm.enddate) }}
+                    <small class="dd-text set-open-enddate">Laisser la date de fin ouverte</small>
+                  </div>
+
+                  <div class="c-flex-center">
+                    <div class="input-field open-zone">  
+                      <label class="active">Date de fin</label>
+                      <span class="open-text flex-center">{{'activity_elements.stages.open_enddate'|trans}} <i class="sm-left fa fa-question-circle tooltipped" data-tooltip="{{ 'activity_elements.stages.open_enddate_info'|trans }}" data-position="top"></i></span>
+                    </div>
+                    <div class="flex-center add-enddate-zone">
+                      <span class="dd-text">{{'activity_elements.stages.define_enddate'|trans}}</span>
+                      <i class="dd-text fa fa-calendar-day sm-left"></i>
+                    </div>
+                  </div>
+
                 </div>
             </div>
             <div class="participants">
-                <div class="participants-title">
-                  <i class="fa fa-users m-right"></i>
-                  <span>{{'activities.participants'|trans}}</span><span class="nb-participants sm-left"></span>
+                <div class="participants-title flex-center-sb">
+                  <div>
+                    <i class="fa fa-users m-right"></i>
+                    <span class="bold-1">{{ 'activities.participants'|trans }}</span>
+                    <span class="nb-participants bold-1"></span>
+                  </div>
+                  <div>
+                    <span class="black-text">{{'activities_dashboard.create_stage_modal.participants_add_second_choice'|trans|upper }}</span>
+                    <i class="fa fa-link sm-left s-link dd-orange-text"></i>
+                  </div>
                 
                 </div>
 
-                <ul class="participants-list flex-center" data-prototype="{% apply escape %}{% include "components/participant_list__item.html.twig" with { participant: newActivityForm.participants.vars.prototype } %}{% endapply %}">
+                <ul class="participants-list flex-center" data-prototype="{% apply escape %}{% include "components/participant_list__item.html.twig" with {participant: newActivityForm.participants.vars.prototype} %}{% endapply %}">
                   {% for participant in newActivityForm.participants.vars.data %}
                       {{ participant.user }}
                   {% endfor %}  
-                    <li class="sm-left btn btn-s-update btn-participant-add flex-center tooltipped" data-tooltip="{{'activities.create.add_participant'|trans}}" data-position="top">
+                    <li class="sm-left btn btn-s-update btn-participant-add flex-center tooltipped modal-trigger" href="#addUserClient" data-tooltip="{{'activities.create.add_participant'|trans}}" data-position="top">
                       <i class="fa fa-plus"></i>
                     </li>
                 </ul>
+                
             </div>
 
             <div class="events" style="display:none">
                 <div class="events-title flex-center-sb">
                   <div class="flex-center">
                     <i class="material-icons m-right">offline_bolt</i>
-                    <span>{{'activities.events'|trans}}</span><span class="nb-events sm-left"></span>
+                    <span class="bold-1">{{'activities.events'|trans}}</span><span class="nb-events sm-left bold-1"></span>
                   </div>
                   <div>
                     <i class="btn-s-update fa fa-plus dd-orange-text tooltipped btn-add-event" data-tooltip="{{ 'activity_elements.events.add_event.btn_msg'|trans }}"></i>
@@ -2847,13 +3065,13 @@
         </div>
       </div>
       <div id="deleteDocument" class="modal">
-        <div class="modal-content">
-            <p>{{ 'activity_elements.events.documents.document.delete_msg'|trans }}</p>
-        </div>
-        <div class="modal-footer">
-            <a class="modal-action modal-close waves-effect waves-green btn e-doc-delete">{% trans %}user_update.delete_modal.confirm{% endtrans %}</a>
-            <a class="modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
-        </div>
+          <div class="modal-content">
+              <p>{{ 'activity_elements.events.documents.document.delete_msg'|trans }}</p>
+          </div>
+          <div class="modal-footer">
+              <a class="modal-action modal-close waves-effect waves-green btn e-doc-delete">{% trans %}user_update.delete_modal.confirm{% endtrans %}</a>
+              <a class="modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+          </div>
       </div>
       <div id="deleteComment" class="modal">
         <div class="modal-content">
@@ -3006,4 +3224,59 @@
         </div>
       </div>
     </div>
+
+    {% if invitationStage|default %}
+    
+      <div id="invitationStage" class="modal">
+        <div class="modal-content">
+        
+          <h5>{{ 'stage_invitation_modal.modal_title'|trans ~ ' - ' ~ invitationStage.activity.name }}</h5>
+          <p>
+            <div class="flex-center no-padding">
+              <img class="inviting-org-logo" src="{{ asset(global.organizationLogo(organization)) }}" alt="">
+              <span class="strong dd-text m-left sm-right">{{invitationStage.organization.commname}}</span>
+              <span>{{'stage_invitation_modal.invitation_msg'|trans}}</span>
+            </div>
+            <div class="input-field">
+              <span>{{'stage_invitation_modal.link_msg'|trans ~ ':'}}</span>
+              <select name="stageAccountSelector">
+                {% for account in currentuser.userGlobal.userAccounts %}
+                    <option value="{{account.id}}">{{ account.organization.type == 'C' ? 'profile.my_individual_account'|trans : account.organization.commname }}</option>
+                {% endfor %}
+              </select>
+              <small><i class="fa fa-plus dd-text sm-right"></i><a href="{{ url('manageProfile',{aa: 1}) }}" class="dd-text strong no-padding">{{'profile.add_firm_account'|trans}}</a></small>
+            </div>
+          </p>
+
+          <div class="flex-center-fe">
+              <a class="waves-effect waves-light modal-close btn-flat red-text link-decline-stage-btn">{{'stage_invitation_modal.decline'|trans}}</a>
+              <a class="btn waves-effect waves-light modal-close link-accept-stage-btn" data-id="{{invitationStage.id}}">Confirmer</a>
+          </div>
+        </div>
+
+      </div>
+    {% endif %}
+
+    <div id="linkManage" class="modal">
+        
+        <div class="modal-content">
+          <h5>{{ 'stage_invitation_modal.modal_title'|trans ~ ' - ' ~ 'coucou' }}</h5>
+          <p>
+            <div class="flex-center no-padding">
+            </div>
+            <div class="input-field">
+              <span>{{'stage_invitation_modal.link_msg'|trans ~ ':'}}</span>
+            </div>
+          </p>
+
+          <div class="flex-center-fe">
+              <a class="waves-effect waves-light modal-close btn-flat red-text link-decline-stage-btn">{{'stage_invitation_modal.decline'|trans}}</a>
+              <a class="btn waves-effect waves-light modal-close link-accept-stage-btn">Confirmer</a>
+          </div>
+        </div>
+
+    </div>
+
+    {% include "components/add_client_user_modal.html.twig" with {creationType: 'unk', isEmailMandatory: false, addingParticipant: true} %}
+
 {% endblock content %}

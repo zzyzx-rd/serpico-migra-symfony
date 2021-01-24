@@ -90,10 +90,12 @@
 
   <style>
 
-     main {
+    main {
         width:90%;
-        margin:auto!important;
-     }
+        margin-left:auto!important;
+        margin-right:auto!important;
+        margin-top: 2rem!important;
+    }
 
     .modify-profile-btn {
       background-color: #55318e;
@@ -228,6 +230,8 @@
 
   
 {% block content %}
+
+{% set organization = currentuser.organization %}
 {% include "components/background_grid.html.twig" %}
 
   <main class="card-panel purple lighten-5">
@@ -241,9 +245,9 @@
         <ul class="flex-center-sb account-zone no-margin">
           <div class="flex-center-fs">
             <a class="btn-flat no-padding flex-center my-account account-mention white-text" style="margin-top:-10px">
-              <span>{{ 'my_account'|trans ~ ' :' }}</span>
-              <img class="account-logo sm-left sm-right white-text" src="{{ asset(global.organizationLogo(currentuser.organization)) }}">
-              <span>{{ currentuser.organization.commname }}</span>
+              <span >{{ 'my_account'|trans}}</span>
+              <img class="account-logo sm-left sm-right" src="{{ asset(global.organizationLogo(organization)) }}">
+              <span class="strong {{organization.type == 'C' or organization.type == 'I' ? 'dd-orange-text' : ''}}">{{ organization.type == 'C' ? 'profile.private_suffix'|trans : (organization.type == 'I' ? 'profile.independant_suffix'|trans : organization.commname) }}</span>
             </a>
           </div>
           <a href="{{ url ('manageProfile') }}" class="btn waves-effect modify-profile-btn xm-right">
@@ -317,8 +321,12 @@
               {% for participation in myHotStageParticipations %}
 
                 {% set stage = participation.stage %}
-                {% set diffStageDateInterval = stage.enddate.diff(date(now)) %}
-                {% set diffGradingDays = diffStageDateInterval.days %}
+                {% if stage.enddate %}
+                  {% set diffStageDateInterval = stage.enddate.diff(date(now)) %}
+                  {% set diffGradingDays = diffStageDateInterval.days %}
+                {% else %}
+                  {% set diffGradingDays = 0 %}
+                {% endif %}
                 {% if stage.enddate|date("Y/m/d") < now %}
                   {% set diffGradingDays = -diffGradingDays %}
                 {% endif %}
@@ -357,7 +365,7 @@
                         {% if clickable %}</a>{% endif %}
                   </td>
                   <td>
-                    {% if stage.organization != currentuser.organization %}
+                    {% if stage.organization != organization %}
                       <i class="act-int-ext fa fa-square dd-text tooltipped" data-html="true" data-position="top" data-tooltip="{% apply escape %}{{ _self.added_by_tooltip(stage.organization) }}{% endapply %}">
                         <i class="act-int-ext-arrow fa fa-long-arrow-alt-right dd-orange-text"></i>
                       </i>

@@ -227,6 +227,18 @@ final class InstitutionController extends MasterController
             }
         }
 
+        if($currentUser->getParticipations()->count() == 0){
+            $now = new DateTime;
+            setcookie('ts', 'y' ,time() + 30 * 60 * 60 * 24, '/');
+            setcookie('ci', $now->format('Y'), time() + 30 * 60 * 60 * 24, '/');
+        } else {
+
+        }
+
+
+        /** @var Stage */
+        $invitationStage = isset($_COOKIE['is']) ? $em->getRepository(Stage::class)->find(intval($_COOKIE['is'])) : null;
+
         $userArchivingPeriod = $currentUser->getActivitiesArchivingNbDays();
 
         // Add activities where current user is either is a leader, or at least a participant;
@@ -532,7 +544,7 @@ final class InstitutionController extends MasterController
         ])->getValues();
 
         //dd($request->headers->get('user_agent'));
-        $renderedTwigFile = strpos($request->headers->get('user_agent'),"Mobile") === false ? 'activities_dashboard.html.twig' : 'mobile_activities_dashboard.html.twig';
+        $renderedTwigFile = strpos($request->headers->get('user_agent'), "Mobile") === false ? 'activities_dashboard.html.twig' : 'mobile_activities_dashboard.html.twig';
 
         return $this->render(
             $renderedTwigFile,
@@ -554,6 +566,7 @@ final class InstitutionController extends MasterController
                 'eventGroups' => $eventGroups,
                 'em' => $em,
                 'comesFromLogin' => $comesFromLogin,
+                'invitationStage' => $invitationStage
             ]
         );
 
@@ -979,6 +992,15 @@ final class InstitutionController extends MasterController
                 return $j == 0 ? $nowMsg : "{$tense} $difference $periods[$j]";
         }
         
+    }
+
+    public static function skipAccents( $str, $charset='utf-8' ) {
+    
+        $str = htmlentities( $str, ENT_NOQUOTES, $charset );
+        $str = preg_replace( '#&([A-za-z])(?:acute|cedil|caron|circ|grave|orn|ring|slash|th|tilde|uml);#', '\1', $str );
+        $str = preg_replace( '#&([A-za-z]{2})(?:lig);#', '\1', $str );
+        $str = preg_replace( '#&[^;]+;#', '', $str );
+        return new Response($str);
     }
 
 }

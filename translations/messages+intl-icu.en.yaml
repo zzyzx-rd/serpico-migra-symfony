@@ -104,6 +104,14 @@ shift: Shift
 welcome: Welcome
 fullname: Your full name
 parameters: Parameters
+not_provided: Non provided
+over: over
+see_details: See details
+member: Member
+partner_firm: Partner firm
+added_on: Added on
+private: Private
+already_existing: Already existing
 
 head_meta:
   content: Business & client operations management through an online and interactive dashboard. DealDrive offers a solution connecting clients client through a calendar dashboard, where one can share documents and updates; in order to enhance client operations and reduce email workload. Use the client followup DealDrive solution improve interactions with your clients and colleagues. 
@@ -664,7 +672,7 @@ countdown:
 
 landing:
   page_name: Your Operation Follow-up Assistant
-  motto: Move one step bewond with your clients
+  motto: Get one step beyond with your clients
   motto_promise: Cruise and interact with them on a single dashboard... and replace your mails and spreadsheets !
   dummy_data_disclaimer: Data given as an exemple
   section_1:
@@ -3166,6 +3174,18 @@ create_user:
   no_provided_email: No email provided
   undefined_department: Undefined department
   undefined_position: Undefined position
+  modal:
+    title: New internal user
+    label_fullname: Full name
+    label_email: Email address
+    error_fullname: Please insert a full name before going on
+    error_email: Email address format is not correct, check it out!
+    error_duplicate: There's already an existing account associated to this address, you should select another one
+  
+delete_user:
+  modal:
+    start_msg: Are you sure to delete user
+    end_msg: This operation <span class="strong">cannot be undone</span>; he will removed from all ongoing or scheduled activities/stages for his:her firm account - data concerning past activities/stages will be kept
 
 team_manage:
   page_title_create: Team creation
@@ -3216,8 +3236,9 @@ create_client:
   emailSmallText: If left blank, user can be graded, but cannot participate to any evaluation
   weightSmallText: If left blank, user will be attributed a grading vote of 100
   extOrgId: Group / client name
-#  partner: Partner
   partner:
+    firm_added_on: Partner added on
+    independant_added_on: Independant added on
     add_button: Add partner
     prototype_title: Partner
     unexisting_worker_firm: None of these
@@ -3348,6 +3369,7 @@ user_list:
   no_teams_msg: No teams have been already created
   no_attributed_department_title: No attributed department
   no_defined_user: No defined user
+  no_defined_firm: No defined firm
   myself: Myself
   my_department: My department
   define_superior:
@@ -3356,6 +3378,24 @@ user_list:
     success_title: Superior has successfully been linked to specified user!
     cancel: Cancel
     undefined: (Undefined)
+  add_user_btn_tooltip: Add user/partner
+  add_user_modal:
+    type_title: Choose what you want to add
+    int_org_title:
+    internal: Belongs to my firm
+    external: Belongs to a partner
+    firm_title: Partner/client name
+    email_title: Last step
+    int_user_title: New internal member
+    ext_user_title: New partner/client member
+    independant_user_title: New independant
+    firm_creation_info: By creating this partner, you will able to add users belonging to it. A legal person user, representing the firm has also been created - whom you can select by convenience in your activities
+    independant_creation_info: The independant person and his/her organization are considered the same
+    without_email_info: If you do not provide email address, this user will not be interact with you - you can still add it after
+    new_firm_database: New firm in database
+    new_user_database: New user in database
+    unexisting_client: None of your partners seem to be named this way. You can create a new one by clicking on <span class="strong">Back</span>, to then insert the new user
+    selecting_account_title_suffix: through one his/her accounts
 
 
 user_update:
@@ -3465,3 +3505,45 @@ subscription:
   free: Free
   2_months_free: 2 months free
   months_free:  months free
+
+updates_management:
+  title: Updates management
+  add_group: Add update group
+  change_icons: Change icon
+  add_type: Add update type
+  edit_trans: Manage translations
+  add_event_type_modal:
+    title: New update type
+    input_label: Name of update type
+    choice_title: Create this type from
+    creation_from_list_choice: A predefined list
+    creation_manual_choice: By adding it manually
+    msg_2: or create yours
+  select_icon_modal:
+    title: Select a new icon
+  manage_translation_modal:
+    title: Translation management
+
+activities_dashboard:
+  create_stage_modal:
+    participants_add_first_choice: Direct add via
+    participants_add_second_choice: Invitation link
+
+firm_management:
+  page_title: Firm settings
+
+stage_invitation_modal:
+  title: Manage operations with your clients
+  invitation_msg: would like to collaborate with you on this activity
+  connection_btn_msg: Log in
+  signup_msg: create your account
+  end_msg: in order to interact with them
+  link_msg: To which of your accounts you want to associate this common activity
+  decline: Decline
+
+documents_management:
+  title: Documents management
+  add_document_btn: Add a document
+  no_docs_title: Start uploading documents here to share them after
+  add_document_modal: 
+    title: New document

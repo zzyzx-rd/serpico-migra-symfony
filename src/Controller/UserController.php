@@ -12,7 +12,7 @@ use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use App\Form\AddFirstAdminForm;
-use App\Form\AddUserPictureForm;
+use App\Form\AddPictureForm;
 use App\Form\DelegateActivityForm;
 use App\Form\FinalizeUserForm;
 use App\Form\RequestActivityForm;
@@ -46,6 +46,7 @@ use App\Entity\Activity;
 use App\Entity\InstitutionProcess;
 use App\Entity\Process;
 use App\Entity\UserGlobal;
+use App\Entity\UserMaster;
 use App\Entity\WorkerFirm;
 use App\Entity\WorkerIndividual;
 use App\Form\AddSignupUserForm;
@@ -211,9 +212,15 @@ class UserController extends MasterController
                     ->addUserAccount($user);
                 $em->persist($userGlobal);
                 
-                $this->forward('App\Controller\OrganizationController::updateOrgFeatures', ['organization' => $organization, 'nonExistingOrg' => true, 'createdAsClient' => false,  'createSynthUser' => false]);
+                // Creating user citizen organization
+                $this->forward('App\Controller\OrganizationController::updateOrgFeatures', ['organization' => $organization, 'existingOrg' => false, 'addedAsClient' => false]);
                 $em->persist($organization);
                 $em->flush();
+
+                $orgId = $organization->getId();
+                $individualName = strtolower(implode("-",explode(" ",$username)));
+                mkdir(dirname(dirname(__DIR__)) . "/public/lib/idocs/{$orgId}-{$individualName}");
+             
                 $this->forward('App\Controller\SettingsController::createDefaultSubscription',['organization' => $organization, 'email' => $email]);
                 $em->persist($organization);
                 $em->flush();
@@ -346,6 +353,7 @@ class UserController extends MasterController
      */
     public function savePassword(Request $request, $token)
     {
+        $priorValidationCheck = intval($request->get('prior_check'));
         $em = $this->em;
         $repoU = $em->getRepository(User::class);
         $user = $repoU->findOneByToken($token);
@@ -355,62 +363,72 @@ class UserController extends MasterController
 
         if ($pwdForm->isValid()) 
         {   
-
             $needToSetOrg = !$user->getLastConnected() && $user->getOrganization()->getType() == 'C';
-            $password = $this->encoder->encodePassword($user, $user->getPassword());
-            $user->setPassword($password)
-                ->setToken(null);
-            $em->persist($user);
+            
+            if($needToSetOrg && $priorValidationCheck){
+                return new JsonResponse(['id' => $user->getId(), 'needToSetOrg' => true]);
+            } else {
 
-            if(sizeof($settablePasswordUsers) > 1){
-                foreach($settablePasswordUsers as $settablePasswordUser){
-                    if($settablePasswordUser != $user){
-                        $user->setPassword($password)
-                        ->setToken(null);
-                        $em->persist($settablePasswordUser);
+                $password = $this->encoder->encodePassword($user, $user->getPassword());
+                $user->setPassword($password)
+                    ->setToken(null);
+                $em->persist($user);
+    
+                if(sizeof($settablePasswordUsers) > 1){
+                    foreach($settablePasswordUsers as $settablePasswordUser){
+                        if($settablePasswordUser != $user){
+                            $user->setPassword($password)
+                            ->setToken(null);
+                            $em->persist($settablePasswordUser);
+                        }
                     }
                 }
-            }
-
-            $em->flush();
-
-            if(!$needToSetOrg){
-                if(sizeof($settablePasswordUsers) == 1){
-
-                    $individualUser = clone $user;
-                    $individualUser
-                        ->setRole(1)
-                        ->setLastConnected(null)
-                        ->setAltEmail(null)
-                        ->setPosition(null)
-                        ->setDepartment(null)
-                        ->setTitle(null)
-                        ->setSuperior(null)
-                        ->setUserGlobal($user->getUserGlobal())
-                        ->setInserted(new DateTime);
     
-                    $organization = new Organization();
-                    $organization->setCommname($user->getUsername())
-                        ->setType('C')
-                        ->addUser($individualUser);
+                $em->flush();
+    
+                // In the case person has been added in an organization, and did not sign up
+                if(!$needToSetOrg){
+                    if(sizeof($settablePasswordUsers) == 1){
+    
+                        $individualUser = clone $user;
+                        $individualUser
+                            ->setRole(1)
+                            ->setLastConnected(null)
+                            ->setAltEmail(null)
+                            ->setPosition(null)
+                            ->setDepartment(null)
+                            ->setTitle(null)
+                            ->setSuperior(null)
+                            ->setUserGlobal($user->getUserGlobal())
+                            ->setInserted(new DateTime);
+        
+                        $organization = new Organization();
+                        $organization->setCommname($user->getUsername())
+                            ->setType('C')
+                            ->addUser($individualUser);
+                        
+                        // Updating new citizen org
+                        $this->forward('App\Controller\OrganizationController::updateOrgFeatures', ['organization' => $organization, 'existingOrg' => false, 'addedAsClient' => false]);
+        
+                        $em->persist($organization);
+                        $em->flush();
+    
+                        $orgId = $organization->getId();
+                        $individualName = strtolower(implode("-",explode(" ",$user->getUsername())));
+                        mkdir(dirname(dirname(__DIR__)) . "/public/lib/idocs/{$orgId}-{$individualName}");
+    
                     
-                    $this->forward('App\Controller\OrganizationController::updateOrgFeatures', ['organization' => $organization, 'nonExistingOrg' => true, 'createdAsClient' => false, 'createSynthUser' => false]);
+                    }
     
-                    $em->persist($organization);
-                    $em->flush();
-                
+                    $this->guardHandler->authenticateUserAndHandleSuccess(
+                        $user,
+                        $request,
+                        $this->authenticator,
+                        'main'
+                    );
                 }
-
-                $this->guardHandler->authenticateUserAndHandleSuccess(
-                    $user,
-                    $request,
-                    $this->authenticator,
-                    'main'
-                );
-
+                return new JsonResponse(['id' => $user->getId(), 'needToSetOrg' => $needToSetOrg], 200);
             }
-
-            return new JsonResponse(['id' => $user->getId(), 'needToSetOrg' => $needToSetOrg], 200);
 
         } else {
             $errors = $this->buildErrorArray($pwdForm);
@@ -440,7 +458,7 @@ class UserController extends MasterController
             $assoc = true;
         }
         if($assoc){
-            $firmName = $_POST['firm'];
+            $firmName = $_POST['firmname'];
             $token = $request->get('tk');
             $currentOrgUser = clone $currentUser;
             $currentOrgUser->setToken(null)
@@ -459,11 +477,9 @@ class UserController extends MasterController
             }
     
             $organization = $workerFirm->getOrganizations()->filter(fn(Organization $o) => $o->getCommname() == $firmName)->first();
-    
-            if($organization){
-                $organization->addUser($currentOrgUser);
-                $em->persist($organization);
-            } else {
+            
+            $noPriorOrganization = !$organization;
+            if($noPriorOrganization){
                 $organization = new Organization;
                 $now = new DateTime();
                 $organization
@@ -476,13 +492,21 @@ class UserController extends MasterController
                     ->setCreatedBy($currentUser->getId());
                 $em->persist($organization);
                 $em->persist($workerFirm);
-                $this->forward('App\Controller\OrganizationController::updateOrgFeatures', ['organization' => $organization, 'nonExistingOrg' => true, 'createdAsClient' => false]);
+                $this->forward('App\Controller\OrganizationController::updateOrgFeatures', ['organization' => $organization, 'existingOrg' => false, 'createSynthUser' => true, 'addedAsClient' => false]);
                 $organization->addUser($currentOrgUser);
                 $workerFirm->addOrganization($organization);
                 $em->persist($workerFirm);
+            } else {
+                $organization->addUser($currentOrgUser);
+                $em->persist($organization);
             }
             
             $em->flush();
+            if($noPriorOrganization){
+                $wfiId = $organization->getId();
+                $orgName = strtolower(implode("-", explode(" ", $firmName)));
+                mkdir(dirname(dirname(__DIR__)) . "/public/lib/cdocs/{$wfiId}-{$orgName}");
+            }
             $this->forward('App\Controller\SettingsController::createDefaultSubscription',['organization' => $organization, 'email' => $currentUser->getEmail()]);
             $em->persist($organization);
             $em->flush();
@@ -558,7 +582,7 @@ class UserController extends MasterController
         $workerIndividualForm->handleRequest($request);
         $passwordForm = $this->createForm(PasswordForm::class, $currentUser, ['standalone' => true, 'mode' => 'modification']);
         $passwordForm->handleRequest($request);
-        $pictureForm = $this->createForm(AddUserPictureForm::class);
+        $pictureForm = $this->createForm(AddPictureForm::class);
         $pictureForm->handleRequest($request);
 
         if ($workerIndividualForm->isSubmitted() && $workerIndividualForm->isValid()) {
@@ -1348,27 +1372,30 @@ class UserController extends MasterController
      * @return JsonResponse|Response
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/user/picture/update", name="updatePicture", methods={"POST"})
+     * @Route("/{element}/picture/update", name="updatePicture", methods={"POST"})
      */
-    public function updatePictureAction(Request $request, FileUploader $fileUploader)
+    public function updatePictureAction(Request $request, string $element, FileUploader $fileUploader)
     {
-        $fileUploader->setTargetDirectory('../public/lib/img/user');
+
+        $folder = $element == 'user' ? 'user' : 'org';
         $currentUser = $this->user;
+        $organization = $this->org;
+        $fileUploader->setTargetDirectory("../public/lib/img/$folder");
+        $picture = $element == 'user' ? $currentUser->getPicture() : $organization->getLogo();
         $em = $this->em;
 
-        if (!$currentUser) {
+        if ($element == 'user' && !$currentUser || $element == 'organization' && $currentUser->getMasterings()->filter(fn(UserMaster $um) => $um->getOrganization() == $organization)->count() == 0) {
             return new Response(null, Response::HTTP_UNAUTHORIZED);
         }
 
-        $picture = $currentUser->getPicture();
         if($picture){
-            unlink(dirname(dirname(__DIR__)) . "/public/lib/img/user/$picture");
+            unlink(dirname(dirname(__DIR__)) . "/public/lib/img/$folder/$picture");
         }
 
         $pictureFile = new UploadedFile($_FILES['profile-pic']['tmp_name'], $_FILES['profile-pic']['name']);
         $pictureFileInfo = $fileUploader->upload($pictureFile);
-        $currentUser->setPicture($pictureFileInfo['name']);
-        $em->persist($currentUser);
+        $element == 'user' ? $currentUser->setPicture($pictureFileInfo['name']) : $organization->setLogo($pictureFileInfo['name']);
+        $em->persist($element == 'user' ? $currentUser : $organization);
         $em->flush();
         return new JsonResponse(['filename' => $pictureFileInfo['name']]);
     }
@@ -2184,6 +2211,48 @@ class UserController extends MasterController
         $user->setLastConnected(new DateTime());
         $em->persist($user);
         $em->flush();
+        return new JsonResponse();
+    }
+
+    /**
+     * @param Request $request
+     * @return mixed
+     * @Route("/user/invitations/stage/link", name="linkStageInvitationToAccount", methods={"POST"})
+     * @IsGranted("IS_AUTHENTICATED_REMEMBERED")
+     */
+    public function linkStageInvitationToAccount(Request $request){
+        $stgId = $request->get('id');
+        $usrId = $request->get('aid');
+        $em = $this->em;
+        /** @var User */
+        $user = $em->getRepository(User::class)->find($usrId);
+        $organization = $user->getOrganization();
+        /** @var Stage */
+        $stage = $em->getRepository(Stage::class)->find($stgId);
+        if($stage->getParticipants()->filter(fn(Participation $p) => $p->getUser() == $user)->count() == 0){
+            if($stage->getOrganization() != $organization){
+                $this->forward('App\Controller\OrganizationController::updateOrgFeatures', ['organization' => $organization, 'requestingUser' => $user, 'addedAsClient' => true, 'addedClientUsers' => [$user]]);
+            }
+            $participation = new Participation();
+            $participation->setUser($user);
+            $stage->addParticipant($participation);
+            $em->persist($stage);
+        }
+
+        // Connect to account which stage was linked to
+        if($this->user != $user){
+            $this->guardHandler->authenticateUserAndHandleSuccess(
+                $user,
+                $request,
+                $this->authenticator,
+                'main'
+            );  
+            $user->setLastConnected(new DateTime());
+            $em->persist($user);
+            $em->flush();
+        }
+        setcookie('is', "", time() - 30,'/');
+
         return new JsonResponse();
     }
 }

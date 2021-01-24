@@ -1,62 +1,21 @@
 <li class="client-type-list--item client-firms hierarchized-item">
-  <header>{{ 'user_list.firms'|trans }}</header>
+  
+  <header>
+    {{ 'firms_title (<span class="nb-client-firms">nbFirms</span>)'|replace({
+          'firms_title' : 'user_list.firms'|trans,
+          'nbFirms' : clients|length,
+    })|raw }}
+  </header>
+
   <div class="item-body">
     <ul class="firms-list">
-      {% for firm in firms %}
-          {% if firm.clientOrganization is defined %}
-        
-              {% set logo_url = asset(global.clientLogo(firm)) %}
-              <li class="firms-list--item hierarchized-item" data-id="{{ firm.id }}">
-                <header class="flex-center">
-                  <img src="{{ logo_url }}" alt="" class="account-logo">
-                  <span class="firm-name">{{ firm.clientOrganization.commname }}</span>
-                  {#
-                  <div class="user-actions">
-                    <a class="material-icons" href="{{ url('createClientUser', { cliId: firm.id }) }}" tooltip="{{ 'user_list.modify'|trans }}">settings</a>
-                  </div>
-                  #}
-                </header>
-                <div class="item-body">
-                  {#}
-                  <div class="firm-actions">
-                    <a class="btn-flat" href="{{ url('createClientUser', { cliId: firm.id }) }}">
-                      <i class="material-icons left">person_add</i>
-                      {{ 'user_list.add_users_button'|trans }}
-                    </a>
-                  </div>
-                  #}
-                  <ul class="user-list">
-                    {% for externalUser in firm.externalUsers %}
-                      {% include "components/user_list__ext_user_item.html.twig" with { externalUser: externalUser, stats: false, roles: false, settings: false } %}
-                    {% endfor %}
-                  </ul>
-                </div>
-              </li>
-
-          {% else %}
-
-              {# we have a dealing organization #}
-
-              {% set logo_url = asset(global.organizationLogo(firm)) %}
-              <li class="firms-list--item hierarchized-item" data-id="{{ firm.id }}">
-                <header class="flex-center">
-                  <img src="{{ logo_url }}" alt="" class="account-logo">
-                  <span class="firm-name">{{ firm.commname }}</span>
-                  <div class="user-actions">
-                    {#<a class="material-icons" href="{{ url('createClientUser', { cliId: firm.id }) }}" tooltip="{{ 'user_list.modify'|trans }}">settings</a>#}
-                  </div>
-                </header>
-                <div class="item-body">
-                  <ul class="user-list">
-                    {% for user in firm.users|filter(user => user.deleted is null) %}
-                      {% include "components/user_list__item.html.twig" with { user: user, stats: false, roles: false, settings: false } %}
-                    {% endfor %}
-                  </ul>
-                </div>
-              </li>
-
-          {% endif %}
+      {% for client in clients %}
+        {% include "components/user_list__firm_item.html.twig" with { client: client } %}
       {% endfor %}
+      {# placeholder for no firms in list #}
+      <li class="no-items-placeholder">
+        {{ 'user_list.no_defined_firm'|trans }}
+      </li>
     </ul>
   </div>
 </li>

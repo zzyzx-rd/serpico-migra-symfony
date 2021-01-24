@@ -27,11 +27,14 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 class Stage extends DbObject
 {
-    public const STAGE_INCOMPLETE = -1;
-    public const STAGE_UNSTARTED = 0;
-    public const STAGE_ONGOING = 1;
-    public const STAGE_COMPLETED = 2;
-    public const STAGE_PUBLISHED = 3;
+
+    // IMPORTANT : STAGE PROGRESS IS A STATIC VARIABLE MODIFIABLE BY USER, WHEREAS STATUS ONLY DEPENDS OF STAGE SELF STATE (DATES AND OUTPUT) 
+
+    public const STATUS_INCOMPLETE = -1;
+    public const STATUS_UNSTARTED = 0;
+    public const STATUS_ONGOING = 1;
+    public const STATUS_COMPLETED = 2;
+    public const STATUS_PUBLISHED = 3;
 
     public const PROGRESS_STOPPED = -5;
     public const PROGRESS_POSTPONED = -4;
@@ -146,7 +149,7 @@ class Stage extends DbObject
     /**
      * @ORM\Column(name="stg_enddate", type="datetime", nullable=true)
      */
-    public DateTime $enddate;
+    public ?DateTime $enddate;
 
 
     /**
@@ -209,6 +212,11 @@ class Stage extends DbObject
      * @ORM\Column(name="stg_deleted", type="datetime", nullable=true)
      */
     public ?DateTime $deleted;
+
+    /**
+     * @ORM\Column(name="stg_invit_closed", type="datetime", nullable=true)
+     */
+    public ?DateTime $invitClosed;
 
     /**
      * @ORM\Column(name="stg_gcompleted", type="datetime", nullable=true)
@@ -362,6 +370,7 @@ class Stage extends DbObject
         $finalized = null,
         $lastReopened = null,
         $deleted = null,
+        $invitClosed = null,
         $gcompleted = null
         )
     {
@@ -391,6 +400,7 @@ class Stage extends DbObject
         $this->finalized = $finalized;
         $this->gcompleted = $gcompleted;
         $this->deleted = $deleted;
+        $this->invitClosed = $invitClosed;
         $this->reopened = false;
         $this->lastReopened = $lastReopened;
         $this->criteria = new ArrayCollection;
@@ -542,7 +552,7 @@ class Stage extends DbObject
         return $this->enddate;
     }
 
-    public function setEnddate(DateTimeInterface $enddate): self
+    public function setEnddate(?DateTimeInterface $enddate): self
     {
         $this->enddate = $enddate;
         return $this;
@@ -611,7 +621,17 @@ class Stage extends DbObject
     public function setDeleted(DateTimeInterface $deleted): self
     {
         $this->deleted = $deleted;
+        return $this;
+    }
 
+    public function getInvitClosed(): ?DateTimeInterface
+    {
+        return $this->invitClosed;
+    }
+
+    public function setInvitClosed(DateTimeInterface $invitClosed): self
+    {
+        $this->invitClosed = $invitClosed;
         return $this;
     }
 
@@ -958,7 +978,7 @@ class Stage extends DbObject
     }
     public function userCanSeeOutput(User $u): bool
     {
-        return ($this->status == self::STAGE_ONGOING) && $this->userHasGivenOutput($u);
+        return ($this->status == self::STATUS_ONGOING) && $this->userHasGivenOutput($u);
     }
 
     public function userHasGivenOutput(User $u): ?bool
@@ -1249,7 +1269,7 @@ class Stage extends DbObject
 
     public function userCanGiveOutput(User $u)
     {
-        if($this->status == $this::STAGE_ONGOING){
+        if($this->status == $this::STATUS_ONGOING){
             return $this->getGraderParticipants()->exists(function (int $i,Participation $p) use ($u) {
                 return $p->getUser() === $u && $p->getType() !== -1 && $p->getStatus() < 3;
             }
@@ -1283,7 +1303,7 @@ class Stage extends DbObject
     {
         $yesterdayDate = new DateTime;
         $yesterdayDate->sub(new DateInterval('P1D'));
-        return $this->genddate <= $yesterdayDate && $this->status < STAGE::STAGE_COMPLETED;
+        return $this->genddate <= $yesterdayDate && $this->status < STAGE::STATUS_COMPLETED;
     }
 
     public function isComplete(): bool
@@ -1425,7 +1445,12 @@ class Stage extends DbObject
     public function getPeriod()
     {
         $sD = $this->startdate->format("U");
-        $sE = $this->enddate->format("U");
+        if($this->enddate){
+            $sE = $this->enddate->format("U");
+        } else {
+            $now = new DateTime();
+            $sE = $now->format("U");
+        }
         return max(1,$sE - $sD);
     }
 

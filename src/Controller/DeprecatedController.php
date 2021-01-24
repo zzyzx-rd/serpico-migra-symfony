@@ -2785,7 +2785,7 @@ class DeprecatedController extends MasterController
                     ->setExpired($now->add(new DateInterval('P21D')))
                     ->setWorkerFirm($workerFirm);
 
-                $this->forward('App\Controller\OrganizationController::updateOrgFeatures', ['organization' => $organization, 'nonExistingOrg' => true, 'createdAsClient' => false]);
+                $this->forward('App\Controller\OrganizationController::updateOrgFeatures', ['organization' => $organization, 'nonExistingOrg' => true, 'addedAsClient' => false]);
                 
                 /** @var string */
                 $positionName = $organizationForm->get('position')->getData();

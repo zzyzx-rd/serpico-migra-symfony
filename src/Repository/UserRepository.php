@@ -67,7 +67,7 @@ class UserRepository extends ServiceEntityRepository
             $qb->setMaxResults($count);
         }
 
-        $result = $qb->getQuery()->execute([ 'status' => Stage::STAGE_PUBLISHED, 'user' => $u ]);
+        $result = $qb->getQuery()->execute([ 'status' => Stage::STATUS_PUBLISHED, 'user' => $u ]);
 
         $indivTargets = $u->getTargets()->map($targetMapCallback)->getValues();
         $posTargets = $usrPos ? $usrPos->getTargets()->map($targetMapCallback)->getValues() : [];

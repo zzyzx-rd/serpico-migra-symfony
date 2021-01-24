@@ -1,31 +1,31 @@
 {% import "macros/user_list__macros.html.twig" as macros %}
 
-{% if externalUser|default %}
-  {% set user = externalUser.user %}
-{% endif %}
+{% set isIndivIndep = isIndivIndep|default(false) %}
+{% set user = externalUser is defined ? externalUser.user : user|default(null) %}
+{% set isSynth = user ? user.synthetic : isIndivIndep %}
 {% set settings = settings is defined ? settings : true %}
 {% set stats = stats is defined ? stats : true %}
 {% set roles = roles is defined ? roles : true %}
 {% set tleader = tleader is defined ? tleader : false %}
 {% set displayOrg = displayOrg is defined ? orgName : false %}
-{% set myself = user == currentuser %}
-{% set perf = userM.ranking(user,'A','P','W', true) %}
-{% set dev = userM.ranking(user,'A','D','W', true) %}
-{% set weight = user.weight %}
-{% set picture_url = asset(global.userPicture(user)) %}
-{% set hasCompletedActivities = userM.NbCompletedActivities(user) > 0 %}
+{% set myself = user and user == currentuser %}
+{% set perf = user ? userM.ranking(user,'A','P','W', true) : null %}
+{% set dev = user ? userM.ranking(user,'A','D','W', true) : null %}
+{% set weight = user ? user.weight : null %}
+{% set picture_url = asset(global.userPicture(user, isSynth, isIndivIndep)) %}
+{% set hasCompletedActivities = user and userM.NbCompletedActivities(user) > 0 %}
 
 
-<li class="users-list--item hierarchized-item {{ not stats ? 'no-stats' }}">
+<li class="users-list--item hierarchized-item {{  not stats ? 'no-stats' }}" {% if externalUser|default %}data-id="{{externalUser.client.id}}" data-eid="{{externalUser.id}}" data-email="{{externalUser.email}}" data-position="{{externalUser.positionName}}"{% endif %}>
   <header class="{{ myself ? 'myself' }}">
     <img src="{{ picture_url }}" alt="" class="user-picture">
 
     <div class="user-name">
-      {{ user.fullname }}
+      {{ user ? user.fullname }}
       {% if myself %}
         ({{ 'user_list.myself'|trans }})
       {% endif %}
-      {% if displayOrg and user.organization != currentuser.organization %}
+      {% if user and displayOrg and user.organization != currentuser.organization %}
         ({{ user.organization.commname }})
       {% endif %}
     </div>
@@ -48,12 +48,18 @@
       #}
     {% endif %}
 
-    
-    {% if not user.lastConnected %}
-      {{ macros.render_badge(
-        'virtual-badge', 'V', 'tooltip.user.role.virtual'|trans
-      ) }}
+    {% if not isIndivIndep %}
+      {% if not user.lastConnected %}
+        {{ macros.render_badge(
+          'virtual-badge', 'V', 'tooltip.user.role.virtual'|trans
+        ) }}
+      {% endif %}
+    {% else %}
+      {% if user is null or (user and not user.email) %}
+        {{ macros.render_badge('virtual-badge', 'V', 'tooltip.user.external_user_virtual'|trans) }}
+      {% endif %}
     {% endif %}
+
     {% if orgEnabledUserCreatingUser and user.enabledCreatingUser %}
       {{ macros.render_badge(
         'user-creator-badge', user_icon, 'tooltip.user.enabledCreatingUser'|trans
@@ -65,7 +71,7 @@
 
     {% if settings %}
     
-      <div class="user-actions">
+      <div class="user-actions flex-center">
         
         {% if roles %}
 
@@ -89,15 +95,33 @@
             tooltip="{{ 'user_list.overview'|trans }}">show_chart
         </a>
         #}
-        <div class="nb-activities flex-center tooltipped" data-tooltip="{{'tooltip.user.activity_ongoing_futur'|trans}}" data-position="top">
-          <i class="fa fa-briefcase"></i>
-          <span class="sm-left black-text">
-              {{ userM.nbCompletedActivities(user) }} + {{ userM.nbScheduledActivities(user) }}
-          </span>
-        </div>
-        {% if externalUser|default %}
-          <a class="m-left material-icons tooltipped" href="{{ url('createClientUser', { cliId: externalUser.client.id }) }}" data-tooltip="{{ 'user_list.modify'|trans }}" data-position="top">settings</a>
-        {% endif %}
+        
+        
+
+          {% if isIndivIndep %}
+            <a class="update-client-btn btn-flat no-margin" style="visibility:hidden">
+              <i class="dd-orange-text material-icons">create</i>
+            </a>
+          
+            <a class="delete-client-btn btn-flat no-margin modal-trigger" href="#deleteClient" style="visibility:hidden">
+                <i class="dd-orange-text fa fa-times"></i>
+            </a> 
+          {% endif %}
+
+
+          <div class="nb-activities flex-center tooltipped" data-tooltip="{{'tooltip.user.activity_ongoing_futur'|trans}}" data-position="top">
+            <i class="fa fa-briefcase"></i>
+            <span class="sm-left black-text">
+                {{ user ? 'nb_completed_act + nb_scheduled_act'|replace({
+                            nb_completed_act: userM.nbCompletedActivities(user),
+                            nb_scheduled_act: (userM.nbScheduledActivities(user))
+                          }) 
+                        : '0 + 0' 
+                }}
+            </span>
+          </div>
+        
+        
       </div>
     
     {% endif %}

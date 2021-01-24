@@ -309,7 +309,7 @@ class Organization extends DbObject
       ?int $id = 0,
         $isClient = null,
         $plan = 3,
-        $legalname = '',
+        $legalname = null,
         $commname = '',
         $type = '',
         $oth_language = 'FR',
@@ -427,7 +427,7 @@ class Organization extends DbObject
         return $this->legalname;
     }
 
-    public function setLegalname(string $legalname): self
+    public function setLegalname(?string $legalname): self
     {
         $this->legalname = $legalname;
         return $this;
@@ -1425,6 +1425,13 @@ class Organization extends DbObject
             }
         })->map(fn(Participation $p) => $p->getStage()->getActivity());
 
+    }
+
+    /**
+     * Returns total size of hosted docs for the organization, in Ko
+     */
+    public function getHostingSize(){
+        return round(array_sum($this->getEventDocuments()->map(fn(EventDocument $ed) => $ed->getSize())->getValues()) / 1000,1);
     }
 
 

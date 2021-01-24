@@ -108,7 +108,7 @@ class ClientType extends AbstractType
 
         if($options['hasChildrenElements'] != false){
 
-            $builder->add('aliveExternalUsersWithoutSync', CollectionType::class,
+            $builder->add('aliveExternalUsers', CollectionType::class,
                 [
                     'entry_type' => ExternalUserType::class,
                     'entry_options' => [

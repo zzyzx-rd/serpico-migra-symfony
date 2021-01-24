@@ -34,7 +34,6 @@ class ParticipantMinType extends AbstractType
         $builder->addEventListener(FormEvents::PRE_SET_DATA, static function (FormEvent $event) use ($organization, $query, $currentUser) {
 
             $form = $event->getForm();
-        
             $form->add('userPart', HiddenType::class,[
                 'property_path' => 'user',
                 'attr' => ['class' => 'u']
@@ -47,7 +46,12 @@ class ParticipantMinType extends AbstractType
                 'property_path' => 'team',
                 'attr' => ['class' => 't']
             ])
-            ->add('workerFirm', HiddenType::class,['attr' => ['class' => 'f']]);
+            
+            ->add('email', HiddenType::class,[
+                'mapped' => false,
+                'attr' => ['class' => 'em']
+            ]);
+
         });
 
         if ($options['standalone']) {
