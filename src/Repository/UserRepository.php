@@ -309,5 +309,27 @@ class UserRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('u')->where('u.picture is not null');
 
         return $qb->getQuery()->getResult();
-    }    
+    }
+
+    public function getNbOngoingFutureActivities(User $consideredUser, User $loggedUser)
+    {
+        $loggedUserOrganization = $loggedUser->getOrganization();
+        $scheduledParticipations = $consideredUser->getParticipations()->filter(fn(Participation $p) => 
+            $p->getStage()->getProgress() < STAGE::PROGRESS_COMPLETED &&
+            $p->getStage()->getParticipations()->exists(fn($i, Participation $p) => $p->getUser()->getOrganization() == $loggedUserOrganization)     
+        )->getValues();
+        $nbScheduledActivities = sizeof(array_unique($scheduledParticipations,SORT_REGULAR));
+        return $nbScheduledActivities;
+    }
+
+    public function getNbCompletedActivities(User $consideredUser, User $loggedUser)
+    {
+        $loggedUserOrganization = $loggedUser->getOrganization();
+        $scheduledParticipations = $consideredUser->getParticipations()->filter(fn(Participation $p) => 
+            $p->getStage()->getProgress() >= STAGE::PROGRESS_COMPLETED &&
+            $p->getStage()->getParticipations()->exists(fn($i, Participation $p) => $p->getUser()->getOrganization() == $loggedUserOrganization)     
+        )->getValues();
+        $nbScheduledActivities = sizeof(array_unique($scheduledParticipations,SORT_REGULAR));
+        return $nbScheduledActivities;
+    }
 }

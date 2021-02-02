@@ -1370,6 +1370,4 @@ class User extends DbObject implements  UserInterface, \Serializable
         return $this;
     }
 
-
-
 }

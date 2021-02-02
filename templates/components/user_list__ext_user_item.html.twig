@@ -72,9 +72,9 @@
         <div class="nb-activities flex-center tooltipped" data-tooltip="{{'tooltip.user.activity_ongoing_futur'|trans}}" data-position="top">
           <i class="fa fa-briefcase"></i>
           <span class="sm-left black-text">
-              {{ user ? 'nb_completed_act + nb_scheduled_act'|replace({
-                            nb_completed_act: userM.nbCompletedActivities(user),
-                            nb_scheduled_act: (userM.nbScheduledActivities(user))
+              {{ user ? 'nb_completed_act + nb_ongoing_fut_act'|replace({
+                            nb_completed_act: userRepo.nbCompletedActivities(user,currentuser),
+                            nb_ongoing_fut_act: userRepo.nbOngoingFutureActivities(user,currentuser)
                           }) 
                       : '0 + 0' 
               

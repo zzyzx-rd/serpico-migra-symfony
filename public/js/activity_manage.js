@@ -1392,7 +1392,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
           $partElmt.find('');
           */
           $partElmt.find('.selected-participant-logo').attr('src', p.picture)
-          p.firmLogo ? $partElmt.find('.p-firm-logo').attr('src',p.firmLogo) : $partElmt.find('.p-firm-logo').remove();
+          p.firmLogo ? $partElmt.find('.p-firm-logo').attr('src',p.firmLogo).show() : $partElmt.find('.p-firm-logo').hide();
           $partElmt
             .attr({
               'data-tooltip' : p.fullname + (p.synth ? ' (' + synthSuffix + ')' : ''),

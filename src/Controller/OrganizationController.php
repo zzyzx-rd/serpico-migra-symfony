@@ -4816,7 +4816,7 @@ class OrganizationController extends MasterController
      * @Route("/organization/stage/{stgId}/participants/add", name="addParticipantStage")
      */
     public function addParticipantStage(Request $request, int $stgId, TranslatorInterface $translator){
-        $usrId = $_POST['uid'] ?: $_POST['iuid'];
+        $usrId = $_POST['uid'] != "" ? $_POST['uid'] : $_POST['iuid'];
         $extUsrId = $_POST['euid'];
         $teaId = $_POST['tid'];
         $genType = $_POST['gen-type'];
@@ -5534,7 +5534,7 @@ class OrganizationController extends MasterController
             $currentUsrId = $userElmts[0]['usrId'];
             $trigger = false;
             $offset = 0;
-
+            $usersGroupedById = [];
             // We did not group by usrId previous query, in order users who may be already user clients out of them. We simply determine out of
             // all users results having same user id, whether it is client or not, and we group the data.
             if($openUserQueries){
@@ -5542,8 +5542,11 @@ class OrganizationController extends MasterController
                     if($userElmt['usrId'] != $currentUsrId){
                         $currentUsrId = $userElmt['usrId'];
                         if($offset){
-                            $userElmt[$key - 1]['cliId'] = $userElmts[$key - $offset]['cliId'];
-                            $userElmt[$key - 1]['extUsrId'] = $userElmts[$key - $offset]['extUsrId'];
+                            $userElmts[$key - 1]['cliId'] = $userElmts[$key - $offset]['cliId'];
+                            $userElmts[$key - 1]['extUsrId'] = $userElmts[$key - $offset]['extUsrId'];
+                        } else {
+                            $userElmts[$key - 1]['cliId'] = '';
+                            $userElmts[$key - 1]['extUsrId'] = '';
                         }
                         $usersGroupedById[] = $userElmts[$key - 1];
                         $offset = 0;
@@ -5559,8 +5562,11 @@ class OrganizationController extends MasterController
                 }
                 if($userElmts[sizeof($userElmts) - 1]['usrId'] != $userElmts[sizeof($userElmts) - 2]['usrId']){
                     if($offset){
-                        $userElmt[sizeof($userElmts) - 1]['cliId'] = $userElmts[sizeof($userElmts) - 1 - $offset]['cliId'];
-                        $userElmt[sizeof($userElmts) - 1]['extUsrId'] = $userElmts[sizeof($userElmts) - 1 - $offset]['extUsrId'];
+                        $userElmts[sizeof($userElmts) - 1]['cliId'] = $userElmts[sizeof($userElmts) - 1 - $offset]['cliId'];
+                        $userElmts[sizeof($userElmts) - 1]['extUsrId'] = $userElmts[sizeof($userElmts) - 1 - $offset]['extUsrId'];
+                    } else {
+                        $userElmts[sizeof($userElmts) - 1]['cliId'] = '';
+                        $userElmts[sizeof($userElmts) - 1]['extUsrId'] = '';
                     }
                     $usersGroupedById[] = $userElmts[sizeof($userElmts) - 1];
                 }

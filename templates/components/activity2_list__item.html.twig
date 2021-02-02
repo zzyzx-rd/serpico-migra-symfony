@@ -267,7 +267,7 @@
                       <span>{{'and'|trans }}</span>
                       <span class="activity-client-name tooltipped" data-position="top" data-html="true" data-tooltip="
                         {% for i, activityOrganization in activityOrganizations %}
-                            {% if i > k %}
+                            {% if i >= k %}
                               {{ activityOrganization.commname }} <br>
                             {% endif %}
                         {% endfor %}

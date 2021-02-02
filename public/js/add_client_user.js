@@ -332,12 +332,12 @@ $(function(){
             $inputZone.find(`input[name="${element}name"]`).val($selectedOpt.text());
             var images = $this.prev().find('li').eq($this.find('option').index($this.find('option:selected'))).find('img');
             var isUser = images.has('s-user-option-logo');
-            if(!$inputZone.find('.input-f-img').length){
+            if(!$inputZone.find('.input-img').length){
                 $.each(images,function(_i,e){
                     $img = $(e);
                     var $inputImg = $img.clone();
                     $inputImg.attr('class','');
-                    $inputImg.addClass($(e).hasClass('s-user-option-logo') ? 'input-u-img' : 'input-f-img');
+                    $inputImg.addClass($(e).hasClass('s-user-option-logo') ? 's-user-option-logo input-img' : 's-firm-option-logo input-img');
                     $inputImg.css({
                     'position': 'absolute',
                     'top': '10%',
@@ -409,7 +409,7 @@ $(function(){
             } else {
                 
                 $clientProto.attr('data-id',data.cid);
-                $clientProto.find('.account-logo').attr('src',$('.input-f-img').attr('src'));
+                $clientProto.find('.account-logo').attr('src',$('.s-firm-option-logo').attr('src'));
                 $clientProto.find('.firm-name').append($('input[name="firmname"]').val());
                 var modifyLink = $clientProto.find('.firm-modify-btn').attr('href');
                 urlToPieces = modifyLink.split('/');
@@ -497,14 +497,14 @@ $(function(){
     function addParticipant(){
 
         proto = $partHolder.data('prototype');
-        if($stageModal.data('id')){
+        if($stageModal.attr('data-id')){
             $partElmt = $(proto);
             urlToPieces = apurl.split('/');
             urlToPieces[urlToPieces.length - 3] = $("#createStage").attr('data-id');
             url = urlToPieces.join('/');
             $.post(url,$addUserElmtModal.find('form').serialize())
             .done(function(data){
-                if($('[name="userSelector"] option:selected').length){
+                /*if($('[name="userSelector"] option:selected').length){
                     isAccountChosen = $('[name="partAccountSelector"] option:selected').length;
                     $userMSelectElmt = $('[name="userSelector"]').prev().find('li').eq($('[name="userSelector"]').find('option').index('[name="userSelector"] option:selected'));
                     if(isAccountChosen){
@@ -543,15 +543,36 @@ $(function(){
         } else {
             proto = proto.replace(/__name__/g, $partHolder.children().length - 1);
             $partElmt = $(proto);
-            $partElmt.find('.selected-participant-logo').attr('src', $('[name*="userSelector"]').prev().find('li').eq($('[name*="userSelector"] option').index($('[name*="userSelector"] option:selected'))).find('img').attr('src'));
-            $partElmt.attr('data-tooltip',$('[name*="userSelector"] option:selected').text()).tooltip();
             $partElmt.find('.u').val($('.account-part input[name="iuid"]').val() ? $('.account-part input[name="iuid"]').val() : $('.username-part input[name="iuid"]').val());
             $partElmt.find('.eu').val($('.account-part input[name="iuid"]').val() ? $('.account-part input[name="euid"]').val() : $('.username-part input[name="euid"]').val());
             $partElmt.find('.t').val($('.account-part input[name="tid"]').val() ? $('.account-part input[name="tid"]').val() : $('.username-part input[name="tid"]').val());
             if($('.email-part input[name="email"]').val()){
                 $partElmt.find('.em').val($('.email-part input[name="email"]').val());
             }
-            $partHolder.find('.btn-participant-add').before($partElmt);
+        }
+        $selectedOption = $('[name*="userSelector"] option:selected');
+        $MSelectedOption = $('[name*="userSelector"]').prev().find('li').eq($('[name*="userSelector"] option').index($selectedOption));
+        $partElmt.find('.selected-participant-logo').attr('src', $MSelectedOption.find('.s-user-option-logo').attr('src'));
+        isAccountChosen = $('[name="partAccountSelector"] option:selected').length;
+        if(isAccountChosen){
+            $chosenAccountId = $('[name="partAccountSelector"]').val();
+            accountSelectedPos = $.inArray($chosenAccountId,$selectedOption.attr('data-uid').split(','));
+            $firmImg = $MSelectedOption.find('.org-img-holder').children().eq(accountSelectedPos);
+            accountFirmName = $selectedOption.attr('data-org-name').split(',')[accountSelectedPos];
+        } else {
+            $firmImg = $MSelectedOption.find('.s-firm-option-logo');
+            accountFirmName = $selectedOption.attr('data-org-name');
+        }
+
+        username = `${$selectedOption.text()}${accountFirmName ? ' (' + accountFirmName + ')' : ''}`; 
+
+        if($firmImg.length){
+            $partElmt.find('.p-firm-logo').attr('src',$firmImg.attr('src'));
+            $partElmt.find('.p-firm-logo').show();
+        }
+
+        $partElmt.attr('data-tooltip',username).tooltip();
+        $partHolder.find('.btn-participant-add').before($partElmt);
             /*$('#addUserClient').find('input[name="email"], input[name="username"], input[name="firmname"]').val("");
             $('#addUserClient').find('.input-u-img, .input-f-img').remove();
             $('#addUserClient').find('label[for="firm"]').removeClass('active');
@@ -560,7 +581,7 @@ $(function(){
                 $('.username-part').show();
             }*/
             sanitizeAddUserElmtModal();
-        }
+        
         //$('#addUserClient').modal('close');
     }
 
@@ -812,8 +833,8 @@ $(function(){
                                     // Inserting logo firms
                                     $orgImagesHolder = $('<div class="org-img-holder flex-center"></div>');
                                     $.each(uIds, function(j,u){
-                                        hasOrgLogo = oLogos != null && oLogos[j] != null;
-                                        hasWfLogo = wLogos != null && wLogos[j] != null;
+                                        hasOrgLogo = oLogos != null && oLogos[j] != "";
+                                        hasWfLogo = wLogos != null && wLogos[j] != "";
                                         logo = hasOrgLogo ? oLogos[j] :
                                             hasWfLogo ? wLogos[j] : 'no-picture.png';
                                         folder = hasOrgLogo ? 'org' : 'wf';
