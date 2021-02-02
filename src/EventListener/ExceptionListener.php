@@ -35,6 +35,8 @@ class ExceptionListener {
         $request = $event->getRequest();
 
         // We only store non 404 errors happening in prod environment, others are manager through SF error interface/profiler
+        
+        /*
         if($request->server->get('APP_ENV') !='dev' && $event->getThrowable() && $event->getThrowable()->getStatusCode() != 404){
 
             $mailer = $this->mailer;
@@ -44,7 +46,7 @@ class ExceptionListener {
             if (!$em->isOpen()) {
                 $em = $container->get('doctrine')->resetManager();  
             }
-            /** @var User|null */
+            
             $user = $this->security->getUser();
             $usrId = $user ? $user->getId() : null;
             $throwable = $event->getThrowable();
@@ -97,9 +99,9 @@ class ExceptionListener {
             }
             
         }
+        */
 
         return;
-        
 
         /*
        $response = new RedirectResponse("/error/error/error");
