@@ -5582,9 +5582,7 @@ class OrganizationController extends MasterController
                 }
 
                 $userElmts = $usersGroupedById;
-
             }
-
         }
 
 
