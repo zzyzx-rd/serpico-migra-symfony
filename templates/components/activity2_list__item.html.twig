@@ -134,7 +134,7 @@
       <div class="fixed-action-btn modified-fixed-btn" style="visibility: hidden;">
                 
         <a class="btn-floating trigger-act-btn">
-            <i class="material-icons">create</i>
+            <i class="mi create"></i>
         </a>
         
         {% if activity is defined %}
@@ -148,7 +148,7 @@
               {% endif %}
               {% if activityM.userCanEdit(activity,currentuser) %}  
                 <li>
-                  <a class="btn-floating act-btn tooltipped modal-trigger" href="#updateStageProgressStatus" data-position="top" data-html="true" data-tooltip="{{ activity.progress != 2 ? 'activities.update_status'|trans : 'activities.reopen_activity'|trans }}" data-eid="{{ activity.id }}" data-sid="{{ activity.stages.first.id }}" data-progress="{{ activity.progress }}" data-r="{{ activity.stages.first.reopened }}"><i class="material-icons">update</i></a>
+                  <a class="btn-floating act-btn tooltipped modal-trigger" href="#updateStageProgressStatus" data-position="top" data-html="true" data-tooltip="{{ activity.progress != 2 ? 'activities.update_status'|trans : 'activities.reopen_activity'|trans }}" data-eid="{{ activity.id }}" data-sid="{{ activity.stages.first.id }}" data-progress="{{ activity.progress }}" data-r="{{ activity.stages.first.reopened }}"><i class="mi update"></i></a>
                 </li>
                 {#
                 <li>
@@ -159,7 +159,7 @@
 
               {% if activity.progress < 2 %}
                 <li>
-                  <a class="btn-floating act-btn tooltipped modal-trigger add-direct-evt" href="#updateEvent" data-tooltip="{{ 'activities.instant_add'|trans }}" data-position="top" data-aid="{{ activity.id }}" data-sid="{{ activity.stages|length == 1 ? activity.stages.first.id }}"><i class="material-icons">offline_bolt</i></a>
+                  <a class="btn-floating act-btn tooltipped modal-trigger add-direct-evt" href="#updateEvent" data-tooltip="{{ 'activities.instant_add'|trans }}" data-position="top" data-aid="{{ activity.id }}" data-sid="{{ activity.stages|length == 1 ? activity.stages.first.id }}"><i class="mi offline_bolt"></i></a>
                 </li>
               {% endif %} 
 
@@ -189,10 +189,10 @@
               <a class="btn-floating act-btn tooltipped modal-trigger" href="#deleteActivity" data-tooltip="{{ 'activities.delete_activity'|trans }}" data-position="top" data-aid=""><i class="fa fa-trash"></i></a>
             </li>
             <li>
-              <a class="btn-floating act-btn tooltipped modal-trigger" href="#updateStageProgressStatus" data-position="top" data-html="true" data-tooltip="{{ 'activities.update_status'|trans }}" data-eid="" data-sid="" data-progress="" data-r="0"><i class="material-icons">update</i></a>
+              <a class="btn-floating act-btn tooltipped modal-trigger" href="#updateStageProgressStatus" data-position="top" data-html="true" data-tooltip="{{ 'activities.update_status'|trans }}" data-eid="" data-sid="" data-progress="" data-r="0"><i class="mi update"></i></a>
             </li>
             <li>
-              <a class="btn-floating act-btn tooltipped modal-trigger add-direct-evt" href="#updateEvent" data-tooltip="{{ 'activities.instant_add'|trans }}" data-position="top" data-aid="" data-sid=""><i class="material-icons">offline_bolt</i></a>
+              <a class="btn-floating act-btn tooltipped modal-trigger add-direct-evt" href="#updateEvent" data-tooltip="{{ 'activities.instant_add'|trans }}" data-position="top" data-aid="" data-sid=""><i class="mi offline_bolt"></i></a>
             </li>
           </ul>
         {% endif %}

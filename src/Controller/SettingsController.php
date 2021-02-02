@@ -387,8 +387,7 @@ class SettingsController extends MasterController
             'email' => $body['email'],
         ]);
 
-
-        return new JsonResponse(['customer' => $customer ], 200);
+        return new JsonResponse(['customer' => $customer], 200);
     }
 
     /**
@@ -399,8 +398,6 @@ class SettingsController extends MasterController
      * @throws Stripe\Exception\ApiErrorException
      */
     public function createSessionManagementAction(Request $request){
-        Stripe\Stripe::setApiKey('sk_test_51Hn5ftLU0XoF52vKQ1r5r1cONYas5XjLLZu6rFg2P69nntllHxLs3G0wyCxoOQNUgjgD5LwCoaYTkGQp1qVK3g3A00LfW1k4Ep');
-
         $session = \Stripe\Checkout\Session::create([
             'payment_method_types' => ['card'],
             'line_items' => [[
@@ -424,7 +421,6 @@ class SettingsController extends MasterController
 
         $em = $this->em;
         $currentUser = $this->user;
-        Stripe\Stripe::setApiKey('sk_test_51Hn5ftLU0XoF52vKQ1r5r1cONYas5XjLLZu6rFg2P69nntllHxLs3G0wyCxoOQNUgjgD5LwCoaYTkGQp1qVK3g3A00LfW1k4Ep');
         $body =  json_decode(file_get_contents('php://input'), true);
         $stripe = $this->stripe;
 
@@ -507,17 +503,8 @@ class SettingsController extends MasterController
     public function createDefaultSubscription(Request $request, Organization $organization, string $email){
         // Create Stripe Customer id and default plan
         $em = $this->em;
-        
-        if(strpos("dealdrive.app",$_SERVER["HTTP_HOST"]) === false){
-            $pId = 'price_1HvOxOLU0XoF52vKPrzatN2O';
-            $apiKey = 'sk_test_51Hn5ftLU0XoF52vKQ1r5r1cONYas5XjLLZu6rFg2P69nntllHxLs3G0wyCxoOQNUgjgD5LwCoaYTkGQp1qVK3g3A00LfW1k4Ep';
-        } else {
-            $pId = '';
-            $apiKey = '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';
-        }
-
-        Stripe\Stripe::setApiKey($apiKey);
-        $stripe = new \Stripe\StripeClient($apiKey);
+        $pId = strpos("dealdrive.app",$_SERVER["HTTP_HOST"]) === false ? 'price_1HvOxOLU0XoF52vKPrzatN2O' : $pId = '';
+        $stripe = $this->stripe;
 
         // 1 - Create customer ID
         $customer = Stripe\Customer::create([
@@ -573,7 +560,6 @@ class SettingsController extends MasterController
                     'y' => 'price_1HvWSeLU0XoF52vKnewnk43W'
                 ]
             ];
-            $apiKey = 'sk_test_51Hn5ftLU0XoF52vKQ1r5r1cONYas5XjLLZu6rFg2P69nntllHxLs3G0wyCxoOQNUgjgD5LwCoaYTkGQp1qVK3g3A00LfW1k4Ep';
         } else {
             $prices = [
                 'p' => [
@@ -585,11 +571,9 @@ class SettingsController extends MasterController
                     'y' => 'price_1HvVyiLU0XoF52vKbCuG7Xd5'
                 ]
             ];
-            $apiKey = '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';
         }
 
-        Stripe\Stripe::setApiKey($apiKey);
-        $stripe = new \Stripe\StripeClient($apiKey);
+        $stripe = $this->stripe;
         $body = json_decode(file_get_contents('php://input'), true);
         $plan = $body['pl'];
         $period = $body['p'];
@@ -1339,46 +1323,6 @@ class SettingsController extends MasterController
                 'enabledCreatingUser' => true,
                 'creationPage' => true,
             ]);
-    }
-
-    /**
-     * @param Request $request
-     * @param $orgId
-     * @return mixed
-     * @Route("/settings/organization/users/add", name="addUser")
-     */
-    public function addUserAction(Request $request){
-        $fullname = $_POST['fn'];
-        $email = $_POST['email'];
-        $em = $this->em;
-        $existingUser = $em->getRepository(User::class)->findByEmail($email);
-        if($existingUser){
-            return new JsonResponse(['msg' => 'existingUser'], 500);
-        } else {
-            $user = new User();
-            $nameElmts = explode(" ", $fullname, 2); 
-            $firstname = trim($nameElmts[0]);
-            $lastname = trim($nameElmts[1]);
-            $token = md5(rand());
-            $user
-                ->setUsername($fullname)
-                ->setFirstname($firstname)
-                ->setLastname($lastname)
-                ->setEmail($email)
-                ->setToken($token)
-                ->setOrganization($this->org)
-                ->setRole(1);
-            $em->persist($user);
-            $em->flush();
-            $settings = [];
-            $settings['token'] = $user->getToken();
-            $settings['invitingUser'] = $this->user;
-            $response = $this->forward('App\Controller\MailController::sendMail', ['recipients' => [$user], 'settings' => $settings, 'actionType' => 'internalInvitation']);
-            if($response->getStatusCode() == 500){
-                return new JsonResponse(['msg' => $response->getContent()], 500);
-            }     
-            return new JsonResponse();
-        }
     }
 
     //Modifies organization (limited to root master)
@@ -3047,7 +2991,7 @@ class SettingsController extends MasterController
      * 
      * @param Request $request
      * @return JsonResponse
-     * @Route("/search/dynamic/elements", name="dynamicSearch")
+     * @Route("/old/search/dynamic/elements", name="oldDynamicSearch")
      */
     public function dynamicSearchElements(Request $request){
 
@@ -4364,7 +4308,6 @@ class SettingsController extends MasterController
     /**
     * @param Request $request
     * @Route("/settings/documents/manage", name="manageDocuments")
-    * @IsGranted("ROLE_ADMIN", statusCode=404)
     */
     public function manageDocuments(Request $request){
 
@@ -4392,4 +4335,25 @@ class SettingsController extends MasterController
         ]);
 
     }
+
+    /**
+    * @param Request $request
+    * @Route("/settings/super-admin/update", name="updateSuperAdmin")
+    */
+    public function updateSuperAdminAction(Request $request){
+        $usrId = $_POST['uid'];
+        $em = $this->em;
+        $previousSuperAdmin = $this->org->getUsers()->filter(fn(User $u) => $u->getRole() == USER::ROLE_SUPER_ADMIN)->first();
+        if($previousSuperAdmin){
+            $previousSuperAdmin->setRole(USER::ROLE_AM);
+            $em->persist($previousSuperAdmin);
+            $em->refresh($previousSuperAdmin);        
+        }
+        $newSuperAdmin = $em->getRepository(User::class)->find($usrId);
+        $newSuperAdmin->setRole(USER::ROLE_SUPER_ADMIN);
+        $em->persist($newSuperAdmin);
+        $em->flush();
+        return new JsonResponse();
+    }
+
 }

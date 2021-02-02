@@ -26,14 +26,12 @@
       border-radius: 10px;
       padding: 0 0.4rem;
       font-size: 1rem;
+      width:77px;
+      justify-content:center;
     }
 
     .client-individuals .user-picture{
       font-size:2.5rem;
-    }
-
-    .client-employees .nb-activities, .client-individuals .nb-activities{
-      margin-right: 66px;
     }
 
     .client-individuals .nb-activities{
@@ -44,13 +42,13 @@
       background-color: #ff9300;
     }
 
-    .client-profile-picture{
+    #updateUser .user-picture{
       border-radius: 50%;
       width: 2em;
       height:2em;
     }
 
-    .client-username-data{
+    #updateUser .username-data{
       padding-left: 0.75rem;
       min-height:66px;
     }
@@ -69,10 +67,13 @@
   <script>
     var surl = "{{ path('dynamicSearch') }}";
     var acurl = "{{ path('addClient') }}";
+    var auurl = "{{ path('addUser') }}";
     var aeuurl = "{{ path('addClientUser', {cliId:0}) }}";
     var alreadyExistingMsg = "{{ 'already_existing'|trans }}";
     var dcurl = "{{ path('clientDelete', {cliId: 0}) }}"
+    var duurl = "{{ path('deleteUser', {usrId: 0}) }}"
     var ucuurl = "{{ url('updateClientUser', {cliId: 0, extUsrId: 0 }) }}";
+    var uuurl = "{{ url('updateUser', {usrId: 0 }) }}";
     var privateMsg = "{{ 'private'|trans }}";
     var independentMsg = "{{ 'independant'|trans|capitalize }}";
   </script>
@@ -116,39 +117,29 @@
       </ul>
 
       <section id="users">
-        <ul class="departments-list">
-          {% for dpt in viewableDepartments %}
-            {% set my_dpt = dpt == currentuser.department %}
+        <ul class="departments-list" data-prototype-department="{% apply escape %}{% include "components/department_list__item.html.twig" %}{% endapply %}" data-prototype-user="{% apply escape %}{% include "components/user_list__item.html.twig" %}{% endapply %}">
+          {% for department in viewableDepartments %}
+            {% set my_dpt = department == currentuser.department %}
 
-            <li class="department-list--item hierarchized-item">
-              <header class="{{ my_dpt ? 'my-dpt' }}">
-                {{ dpt.name }}
-                {% if my_dpt %}
-                  ({{ 'user_list.my_department'|trans }})
-                {% endif %}
-              </header>
-              <div class="item-body">
-                <ul class="users-list">
-                  {% for user in departmentM.viewableUsers(dpt) %}
-                    {% include "components/user_list__item.html.twig" with { user: user } %}
-                  {% endfor %}
-                  {# placeholder for no user in list #}
-                  <li class="no-items-placeholder">
-                    (aucun utilisateur)
-                  </li>
-                </ul>
-              </div>
-            </li>
+
+            {% include "components/department_list__item.html.twig" with {department: department} %}
+
           {% endfor %}
 
-          <li class="department-list--item hierarchized-item">
+          <li class="department-list--item hierarchized-item no-department-holder">
             <header class="{{ not currentuser.department ? 'my-dpt' }}">
-              <em>({{ 'user_list.no_attributed_department_title'|trans }})</em>
+              <em>          
+                {{'<span>no_attrib_dept</span> (<span class="nb-department-users">nbDptUsers</span>)'|replace({
+                    'no_attrib_dept' :  'user_list.no_attributed_department_title'|trans,
+                    'nbDptUsers' : usersWithoutDpt|length,
+                })|raw }}
+              </em>
             </header>
             <div class="item-body">
               <ul class="users-list">
                 {% for user in usersWithoutDpt %}
-                  {% include "components/user_list__item.html.twig" with { user: user, stats: currentuser.role == 1 or currentuser.role == 4, roles: currentuser.role == 1 or currentuser.role == 4 } %}
+                  {#{% include "components/user_list__item.html.twig" with { user: user, stats: currentuser.role == 1 or currentuser.role == 4, roles: currentuser.role == 1 or currentuser.role == 4 } %}#}
+                  {% include "components/user_list__item.html.twig" with { user: user, settings: currentuser.role == 1, stats: false } %}
                 {% endfor %}
               </ul>
             </div>
@@ -175,7 +166,7 @@
           {% include "components/user_list__ext_team_item.html.twig" with { firms: clientTeams } %}
         </ul>
         #}
-        <ul class="client-type-list client-individuals" data-prototype-client="{% apply escape %}{% include "components/user_list__item.html.twig" with {isIndivIndep: true, roles: false} %}{% endapply %}">
+        <ul class="client-type-list client-individuals" data-prototype-client="{% apply escape %}{% include "components/user_list__item.html.twig" with {isIndivIndep: true, settings:true, roles: false} %}{% endapply %}">
           {% include "components/user_list__individuals_item.html.twig" with { clients: clientIndividuals } %}
         </ul>
       </section>
@@ -185,7 +176,7 @@
     
     <div class="fixed-action-btn">
       <a class="btn-floating btn-large add-user-btn tooltipped modal-trigger" href="#addUserClient" data-tooltip="{{'user_list.add_user_btn_tooltip'|trans}}" data-position="top">
-        <i class="large material-icons">add</i>
+        <i class="large mi add"></i>
       </a>
 
       {#
@@ -219,7 +210,7 @@
     </div>
 
     <a id="scrolltop" href="#serpicoapp" class="btn-floating btn-large blue">
-      <i class="material-icons">arrow_upward</i>
+      <i class="mi arrow_upward"></i>
     </a>
 
     <div id="client-icon-modal" class="modal">
@@ -232,55 +223,18 @@
     </div>
   </main>
 
-  {% include "components/add_client_user_modal.html.twig" with {creationType: 'unk', isEmailMandatory: false} %}
-
-  <div id="updateClientUser" class="modal">
+  <div id="deleteClient" class="modal">
+    <div class="modal-title"></div>
     <div class="modal-content">
-      <form method="post">
-        <h5>Détails de l'utilisateur</h5>
-        <div class="c-flex">
-          <div class="client-username-data flex-center">
-            <img src="" alt="" class="client-profile-picture">
-            <div class="flex-center">
-              <span class="client-user-name m-left"></span>
-              <i class="sm-left material-icons dd-orange-text change-username">create</i>
-            </div>
-          </div>
-          <div class="row no-margin flex-center client-username-input" style="display:none">  
-            <div class="col s12 m2">
-              <span>Nom complet</span>
-            </div>
-            <div class="col s12 m10">
-              <input type="text" name="eu-username">
-            </div>
-          </div>
-        </div>
-        <div class="c-flex">
-          <div class="row no-margin flex-center">
-            <div class="col s12 m2">
-              <span>Email</span>
-            </div>
-            <div class="col s12 m10">
-              <input type="text" name="email" value="">
-            </div>
-          </div>
-          <div class="row no-margin flex-center">
-            <div class="col s12 m2">
-              <span>Position</span>
-            </div>
-            <div class="col s12 m10">
-              <input type="text" name="position" placeholder="Renseigner position" value="">
-            </div>
-          </div>
-        </div>
-        <div class="flex-center-fe">
-          <a class="waves-effect waves-light modal-close btn-flat">{{'back'|trans}}</a>
-          <a class="btn waves-effect waves-light save-user-updates">Ok</a>
-        </div>
-      </form>
+      <h5>{% trans %}client.delete_external_user.modal_title{% endtrans %}</h5>
+      <p>{% trans %}client.delete_external_user.modal_content{% endtrans %}</p>
+      <div class="flex-center-fe">
+        <a class="btn waves-effect waves-light modal-close remove-client">{% trans %}stages.deleteStage.accept{% endtrans %}</a>
+        <a class="waves-effect waves-light modal-close btn-flat red-text">{% trans %}stages.deleteStage.cancel{% endtrans %}</a>
+      </div>
     </div>
   </div>
-
+  
   <div id="deleteClient" class="modal">
     <div class="modal-title"></div>
     <div class="modal-content">
@@ -297,7 +251,6 @@
 
 {% block javascripts %}
   <script defer src="{{ asset('build/user_list.js') }}"></script>
-  <script src="{{ asset('js/add_client_user.js') }}"></script>
   <script>
       $(function(){
 
@@ -324,57 +277,23 @@
             $('.remove-client').data('id',$(this).closest('.users-list--item').data('id'));
         });
 
-        $('.save-user-updates').on('click',function(){
-          const $this = $(this);
-          const $modal = $(this).closest('.modal');
-          id = $this.data('id');
-          const $userElmts = $(`.client-individuals .users-list--item[data-id="${id}"]`);
-          urlToPieces = ucuurl.split('/');
-          urlToPieces[urlToPieces.length - 4] = id;
-          urlToPieces[urlToPieces.length - 2] = $userElmts.data('eid');
-          url = urlToPieces.join('/');
-          $.post(url,$this.closest('form').serialize())
-              .done(function(){
-                  $('#updateClientUser .client-username-input').hide();
-                  $('#updateClientUser .client-username-data').show();
-                  
-                  $('#updateClientUser').modal('close');
-                  if($modal.find('input[name="eu-username"]').val()){
-                      $userElmts.find('.user-ext-fullname').empty().append($modal.find('input[name="eu-username"]').val());
-                  }
-                  if($modal.find('input[name="position"]').val() != ""){
-                      $('.user-ext-position-name').empty().append($modal.find('input[name="position"]').val());
-                  }
-                  if(!$userElmts.find('.fa-envelope.has-email').length && $modal.find('input[name="email"]').val() != ""){
-                      $userElmts.find('.fa-envelope')
-                          .removeClass('lime-text text-darken-3 has-email');
-                      $('.client-user-barred').show();
-                  } else if($userElmts.find('.fa-envelope.has-email').length && $modal.find('input[name="email"]').val() == "") {
-
-                      $('.client-user-barred').hide();
-                      $userElmts.find('.fa-envelope')
-                          .addClass('lime-text text-darken-3 has-email')
-                          .attr('data-tooltip', $modal.find('input[name="email"]').val()).tooltip();
-                  } else {
-                      $userElmts.find('.fa-envelope').attr('data-tooltip',$modal.find('input[name="email"]').val()).tooltip();
-                  }
-              })      
-
+        $(document).on('mouseover','.firms-list--item header',function(){
+            $(this).find('.user-actions .firm-modify-btn').css('visibility','');
+        }).on('mouseleave','.firms-list--item header',function(){
+            $(this).find('.user-actions .firm-modify-btn').css('visibility','hidden');
         })
 
-        $(document).on('click','.update-client-btn',function(){
-          const $clientElmt = $(this).closest('.users-list--item');
-          const $modal = $('#updateClientUser');
-          $modal.find('input').val("");
-          $modal.find('.save-user-updates').attr('data-id',$clientElmt.data('id'));
-          $modal.find('.client-user-name').empty().append($clientElmt.find('.user-name').text());
-          $modal.find('.client-profile-picture').attr('src',$clientElmt.find('.user-picture').attr('src'));
-          $modal.find('input[name="email"]').val($clientElmt.data('email'));
-          if($clientElmt.data('position').length){
-              $modal.find('input[name="position"]').val($clientElmt.data('position'));
-          }
-          $modal.modal('open');
+        $(document).on('mouseover','.departments-list .users-list--item header, .client-individuals .users-list--item header',function(){
+            $(this).find('.user-actions a').css('visibility','');
+        }).on('mouseleave','.departments-list .users-list--item header, .client-individuals .users-list--item header',function(){
+            $(this).find('.user-actions a').css('visibility','hidden');
         })
+
+        $('.add-user-btn').on('click',function(){
+          setTimeout(function(){
+            $('#addUserClient').find('[class*="-part"]:visible').addClass('initial-part');
+          },200);
+        });
 
       })  
   </script>

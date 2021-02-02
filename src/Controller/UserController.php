@@ -200,7 +200,7 @@ class UserController extends MasterController
                 $user->setToken($token)
                     ->setFirstname($firstname)
                     ->setLastname($lastname)
-                    ->setRole(1);
+                    ->setRole(USER::ROLE_ADMIN);
 
                 $organization = new Organization();
                 $organization->setCommname($username)
@@ -226,9 +226,8 @@ class UserController extends MasterController
                 $em->flush();
 
                 //Sending mail to DealDrive root users 
-                //$serpicoOrg = $repoO->findOneByCommname('Serpico');
                 $repoU = $em->getRepository(User::class);
-                $recipients = $repoU->findBy(['role' => 4]);
+                $recipients = $repoU->findBy(['role' => USER::ROLE_ROOT]);
 
                 $settings['fullname'] = $username;
                 $settings['userEmail'] = $user->getEmail();
@@ -392,7 +391,7 @@ class UserController extends MasterController
     
                         $individualUser = clone $user;
                         $individualUser
-                            ->setRole(1)
+                            ->setRole(USER::ROLE_ADMIN)
                             ->setLastConnected(null)
                             ->setAltEmail(null)
                             ->setPosition(null)
@@ -451,15 +450,14 @@ class UserController extends MasterController
             $currentUser = $em->getRepository(User::class)->find($usrId);
         } else {
             $currentUser = $this->user;
-            $errorMsg = $translator->trans('profile.duplicate_account');
             if($wfiId && in_array($wfiId, $currentUser->getUserGlobal()->getUserAccounts()->map(fn(User $u) => $u->getOrganization()->getWorkerFirm())->getValues()) !== false){
+                $errorMsg = $translator->trans('profile.duplicate_account');
                 return new JsonResponse(['msg' => $errorMsg], 500);
             }
             $assoc = true;
         }
         if($assoc){
             $firmName = $_POST['firmname'];
-            $token = $request->get('tk');
             $currentOrgUser = clone $currentUser;
             $currentOrgUser->setToken(null)
                 ->setInserted(new DateTime)
@@ -493,10 +491,12 @@ class UserController extends MasterController
                 $em->persist($organization);
                 $em->persist($workerFirm);
                 $this->forward('App\Controller\OrganizationController::updateOrgFeatures', ['organization' => $organization, 'existingOrg' => false, 'createSynthUser' => true, 'addedAsClient' => false]);
+                $currentOrgUser->setRole(User::ROLE_ADMIN);
                 $organization->addUser($currentOrgUser);
                 $workerFirm->addOrganization($organization);
                 $em->persist($workerFirm);
             } else {
+                $currentOrgUser->setRole(!$organization->hasActiveAdmin() ? User::ROLE_ADMIN : USER::ROLE_AM);
                 $organization->addUser($currentOrgUser);
                 $em->persist($organization);
             }
@@ -508,6 +508,7 @@ class UserController extends MasterController
                 mkdir(dirname(dirname(__DIR__)) . "/public/lib/cdocs/{$wfiId}-{$orgName}");
             }
             $this->forward('App\Controller\SettingsController::createDefaultSubscription',['organization' => $organization, 'email' => $currentUser->getEmail()]);
+            $em->refresh($currentOrgUser);
             $em->persist($organization);
             $em->flush();
         }
@@ -844,7 +845,7 @@ class UserController extends MasterController
                 }
 
                 if (!$recipients) {
-                    $firstAliveAdministrator = $repoU->findOneBy(['role' => 1, 'deleted' => null, 'orgId' => $institution->getId()]);
+                    $firstAliveAdministrator = $repoU->findOneBy(['role' => 2, 'deleted' => null, 'orgId' => $institution->getId()]);
                     $recipients[] = $firstAliveAdministrator;
                 }
 
@@ -1384,7 +1385,7 @@ class UserController extends MasterController
         $picture = $element == 'user' ? $currentUser->getPicture() : $organization->getLogo();
         $em = $this->em;
 
-        if ($element == 'user' && !$currentUser || $element == 'organization' && $currentUser->getMasterings()->filter(fn(UserMaster $um) => $um->getOrganization() == $organization)->count() == 0) {
+        if ($element == 'user' && !$currentUser || $element == 'organization' && $currentUser->getRole() > USER::ROLE_SUPER_ADMIN/*&& $currentUser->getMasterings()->filter(fn(UserMaster $um) => $um->getOrganization() == $organization)->count() == 0*/) {
             return new Response(null, Response::HTTP_UNAUTHORIZED);
         }
 
@@ -1398,218 +1399,6 @@ class UserController extends MasterController
         $em->persist($element == 'user' ? $currentUser : $organization);
         $em->flush();
         return new JsonResponse(['filename' => $pictureFileInfo['name']]);
-    }
-
-    // Delete user (ajax call)
-    public function deleteUserAction(Request $request, $id){
-        $manager = $app['orm.em'];
-        $repository = $manager->getRepository(User::class);
-        $user = $repository->find($id);
-
-        if (!$user) {
-            $message = sprintf('User %d not found', $id);
-            return $app->json(['status' => 'error', 'message' => $message], 404);
-        }
-        $user->setDeleted(new DateTime);
-        $manager->persist($user);
-        //$manager->remove($user);
-        $manager->flush();
-
-        return $app->json(['status' => 'done']);
-    }
-
-    /************ CONTACT PAGE **********************************/
-
-    public function displayContactAction(Request $request){
-
-            return $this->render('contact.html.twig',[
-                'last_username' => $app['session']->get('security.last_username'),
-                'error' => $app['security.last_error']($request),
-                'request' => $request,
-            ]);
-
-    }
-
-    /************ NEWS PAGE **********************************/
-
-    public function displayNewsAction(Request $request){
-
-        return $this->render('news.html.twig',[
-            'error' => $app['security.last_error']($request),
-            'request' => $request,
-        ]);
-
-    }
-
-    /*********** USER LOGIN AND CONTEXTUAL MENU *****************/
-
-    /**
-     * @param Request $request
-     * @param Application $app
-     * @return mixed
-     * @Route("/about", name="about")
-     */
-    public function displayAboutPageAction(Request $request,Application $app){
-
-            $csrf_token = $app['csrf.token_manager']->getToken('token_id');
-
-            return $this->render('about.html.twig',
-            [
-                'csrf_token' => $csrf_token,
-                'error' => $app['security.last_error']($request),
-                'last_username' => $app['session']->get('security.last_username'),
-                'request' => $request,
-            ]);
-    }
-
-     public function displaySolutionPageAction(Request $request,Application $app){
-
-            $csrf_token = $app['csrf.token_manager']->getToken('token_id');
-
-            return $this->render('use_cases.html.twig',
-            [
-                'csrf_token' => $csrf_token,
-                'error' => $app['security.last_error']($request),
-                'last_username' => $app['session']->get('security.last_username'),
-                'request' => $request,
-            ]);
-    }
-
-    /**
-     * @param Request $request
-     * @param Application $app
-     * @return mixed
-     * @Route("some-use-cases", name="useCases")
-     */
-    public function displayUseCasesAction(Request $request,Application $app){
-
-        $csrf_token = $app['csrf.token_manager']->getToken('token_id');
-
-        return $this->render('use_cases.html.twig',
-        [
-            'csrf_token' => $csrf_token,
-            'error' => $app['security.last_error']($request),
-            'last_username' => $app['session']->get('security.last_username'),
-            'request' => $request,
-        ]);
-}
-
-    //Save registering user
-
-    /**
-     * @param Request $request
-     * @param Application $app
-     * @return JsonResponse
-     * @throws ORMException
-     * @throws OptimisticLockException
-     * @Route("/contact/{type}/{isAborted}", name="contact_us")
-     * @Route("/contact", name="contact")
-     * To do à la fin
-     */
-    public function contactAction(Request $request,Application $app){
-        //Insert Grades
-        $entityManager = $this->em;
-        //$repoR = $entityManager->getRepository(Contact::class);
-        $contact = new Contact;
-        $repoO = $entityManager->getRepository(Organization::class);
-        $repoU = $entityManager->getRepository(User::class);
-        
-        $csrf_token = $app['csrf.token_manager']->getToken('token_id');
-        $contactForm = $this->createForm(ContactForm::class,$contact,['standalone' => true]);
-        $contactForm->handleRequest($request);
-
-        if($contactForm->isValid()){
-
-            $entityManager->persist($contact);
-            $entityManager->flush();
-
-            $rootSettings = [];
-            $rootSettings['email'] = $contactForm->get('mail')->getData();
-            $rootSettings['fullName'] = $contactForm->get('fullName')->getData();
-            $rootSettings['company'] = $contactForm->get('company')->getData();
-            $rootSettings['address'] = $contactForm->get('address')->getData();
-            $rootSettings['zipcode'] = $contactForm->get('zipcode')->getData();
-            $rootSettings['city'] = $contactForm->get('city')->getData();
-            $rootSettings['country'] = $contactForm->get('country')->getData();
-            $rootSettings['message'] = $contactForm->get('message')->getData();
-            $rootSettings['meetingDate'] = $contactForm->get('meetingDate')->getData();
-            $rootSettings['meetingTime'] = $contactForm->get('meetingTime')->getData();
-
-            $settings = [];
-            $settings['email'] = $rootSettings['email'];
-            $settings['fullName'] = $rootSettings['fullName'];
-            $settings['company'] = $rootSettings['company'];
-            $settings['address'] = $rootSettings['address'];
-            $settings['zipcode'] =  $rootSettings['zipcode'];
-            $settings['city'] = $rootSettings['city'];
-            $settings['country'] = $rootSettings['country'];
-            $settings['message'] = $rootSettings['message'];
-            $settings['meetingDate'] = $rootSettings['meetingDate'];
-            $settings['meetingTime'] = $rootSettings['meetingTime'];
-            $settings['recipientUsers'] = false;
-            $recipients[] = $settings['email'];
-            // Send mail acknowledgment to meeting requester
-            $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'meetingValidation']);
-
-
-            // Notify Serpico administrators
-            $serpicoOrg = $repoO->findOneByCommname('Serpico');
-            $serpiValidatingUsers = $repoU->findBy(['role' => 4, 'orgId' => $serpicoOrg->getId()]);
-            $this->forward('App\Controller\MailController::sendMail', ['recipients' => $serpiValidatingUsers, 'settings' => $rootSettings, 'actionType' => 'meetingValidation']);
-            return new JsonResponse(['message' => 'Success'],200);
-        } else {
-            $errors = $this->buildErrorArray($contactForm);
-            return $errors;
-        }
-
-
-    }
-
-    // Display all users (when HR clicks on "users" from /settings)
-
-    /**
-     * @param Request $request
-     * @param Application $app
-     * @param $usrId
-     * @return JsonResponse
-     * @throws ORMException
-     * @throws OptimisticLockException
-     * @Route("/settings/user/{usrId}/finalize", name="finalizeUser")
-     */
-    public function finalizeUserAction(Request $request, $usrId)
-    {
-        $entityManager = $this->em;
-        $repoO = $entityManager->getRepository(Organization::class);
-        
-        $user = MasterController::getAuthorizedUser($app);
-        $orgId = $user->getOrgId();
-        $organization = $repoO->findOneById($orgId);
-        $finalizeUserForm = $this->createForm(FinalizeUserForm::class,null,['user' => $user]);
-        $finalizeUserForm->handleRequest($request);
-        if($finalizeUserForm->isValid()){
-            $department = new Department;
-            $department->setName($finalizeUserForm->get('department')->getData());
-            $position = new Position;
-            $position->setName($finalizeUserForm->get('position')->getData());
-            $department->addPosition($position);
-            $organization->addPosition($position);
-            $user->setFirstname($finalizeUserForm->get('firstname')->getData());
-            $user->setLastname($finalizeUserForm->get('lastname')->getData());
-            $user->setPositionName(null);
-            $entityManager->persist($user);
-            $organization->addDepartment($department);
-            $entityManager->persist($organization);
-            $entityManager->flush();
-            $user
-                ->setPosId($position->getId())
-                ->setDptId($department->getId());
-            $entityManager->persist($user);
-            $entityManager->flush();
-            return new JsonResponse(['message' => 'Success'],200);
-        } else {
-            $errors = $this->buildErrorArray($finalizeUserForm);
-            return $errors;
-        }
     }
 
     //Displays the menu in relation with user role
@@ -1979,71 +1768,6 @@ class UserController extends MasterController
             'enabledUserSeeRanking' => $enabledUserSeeRanking ?? false,
             'userpicture' => 'lib/img/' . ($user->getPicture() ?: 'no-picture.png'),
         ]);
-    }
-
-    /*********** ADDITION, MODIFICATION AND DELETION *****************/
-
-    /**
-     * @param Application $app
-     * @return mixed
-     * @Route("/user/display/profile", name="displayProfile")
-     */
-    public function displayProfile(Application $app)
-    {
-        $entityManager = $this->getEntityManager();
-        $repoP = $entityManager->getRepository(Participation::class);
-        $repoO = $entityManager->getRepository(Organization::class);
-        $user = self::getAuthorizedUser();
-        $organization = $repoO->find($user->getOrgId());
-        $totalParticipations = $repoP->findBy([ 'usrId' => $user->getId(), 'activity' => 'ASC' ]);
-
-        // We consider each graded activity as having at least one releasable criterion an nothing more
-        $totalGradedActivity = 0;
-        $totalUngradedActivity = 0;
-
-        if ($totalParticipations) {
-            $ungradedActivity = 1;
-            $skipParticipations = 0;
-            $actId = $totalParticipations[0]->getActId();
-
-            foreach ($totalParticipations as $participation) {
-                if ($participation->getActId() != $actId) {
-                    $skipParticipations = 0;
-                    if ($ungradedActivity == 1) {
-                        ++$totalUngradedActivity;
-                    }
-                    $actId = $participation->getId();
-                } else {
-                    if ($participation->getStatus() >= 3 and $skipParticipations == 0) {
-                        $ungradedActivity = 0;
-                        $totalGradedActivity++;
-                        $skipParticipations = 1;
-                    }
-                }
-            }
-        }
-
-        return $this->render('my_profile.html.twig',
-            [
-                'organization' => $organization->getCommname(),
-                'validatedActivities' => $totalGradedActivity,
-                'unvalidatedActivities' => $totalUngradedActivity,
-            ]
-        );
-    }
-
-    /**
-     * @param Request $request
-     * @return mixed
-     * @Route("/help", name="help")
-     */
-    public function helpAction(Request $request)
-    {
-        return $this->render('help.html.twig',
-            [
-                'request' => $request
-            ]
-        );
     }
 
     /**

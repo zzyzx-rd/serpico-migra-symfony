@@ -912,8 +912,11 @@ class Activity extends DbObject
         $enddate = new DateTime('2000-01-01');
 
         foreach ($this->stages as $stage) {
-
-            $stageEndDate = $stage->getEnddate() ?: new DateTime;
+            if(!$stage->getEnddate()){
+                return null;
+            } else {
+                $stageEndDate = $stage->getEnddate();
+            }
 
             if ($stage->getStartdate() < $startDate) {
                 $startDate = $stage->getStartDate();

@@ -743,7 +743,7 @@ li.no-items-placeholder {
 
 .users-list--item.no-stats .user-actions > a {
   border: none;
-  padding: 0;
+  /*padding: 0;*/
 }
 
 

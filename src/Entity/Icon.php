@@ -240,11 +240,6 @@ class Icon extends DbObject
     }
 
     public function getChar() {
-        $i = $this->type;
-        if ($i === 'm') {
-            return $this->name;
-        }
-
         return IntlChar::chr(hexdec($this->unicode));
     }
 

@@ -1,23 +1,18 @@
-{% set addingParticipant = addingParticipant|default(null) %}
+{% set route = global.route %}
 
 <div id="addUserClient" class="modal">
     <form id="userClientForm">
         <div class="modal-content">
-            {% if creationType == 'unk' %}
-                <div class="type-part" {% if addingParticipant %}style="display:none"{% endif %}>
+            {% if route != 'manageClient' %}
+                <div class="type-part" {% if route == 'myActivities' %}style="display:none"{% endif %}>
                     <div class="flex-center"> 
-                        <h5 class="m-left">{{'user_list.add_user_modal.type_title'|trans ~ ' :' }}</h5>
+                        <h5 class="m-left">{{ (route == 'myActivities' ? 'user_list.add_user_modal.type_act_title'|trans : 'user_list.add_user_modal.type_title'|trans ) ~ ' :' }}</h5>
                     </div>
                     <div class="c-flex">
                         <div class="row independant-row">
                             <div class="col s12 m12">
                                 <input type="radio" id="independant" name="gen-type" value="i">
                                 <label for="independant">
-                                    {#
-                                    <div class="independant-icon-holder icon-holder flex-center">
-                                        <i class="fa fa-house-user dd-text"></i>
-                                    </div>
-                                    #}
                                     <div class="icon-holder flex-center">
                                         <span class="independent-letter white-text">I</span>
                                     </div>
@@ -49,7 +44,7 @@
                             <div class="col s12 m6">
                                 <div class="flex-center user-choices">
                                     <div>
-                                        <input type="radio" id="external" name="user-type" value="ext" checked>
+                                        <input type="radio" id="external" name="user-type" value="ext" {{ route != 'myActivities' ? 'checked' }}>
                                         <label for="external">
                                             <i class="fa fa-user-circle dd-orange-text"></i>
                                             <span class="sm-left">{{ 'user_list.add_user_modal.external'|trans|capitalize }}</span>
@@ -67,9 +62,10 @@
                         </div>
                     </div>
                     <div class="flex-center-fe">
-                        <div class="btn waves-effect waves-light go-next">{{'next'|trans}}</div>
+                        <div class="btn waves-effect waves-light go-to-firmname go-next">{{'next'|trans}}</div>
                     </div>
                 </div>
+
                 <div class="firmname-part" style="display:none">
                     <div class="title flex-center">
                         <div class="firm-icon-holder icon-holder flex-center">
@@ -78,11 +74,11 @@
                         <h5 class="m-left">{{ 'user_list.add_user_modal.firm_title'|trans }}</span>
                     </div>
                     <div class="input-field firm-field-zone m-bottom"> 
-                        <label for="firm">{{ 'firm'|trans|capitalize ~ ', ' ~ 'organization'|trans|capitalize }}</label>
+                        <label for="firmname">{{ 'firm'|trans|capitalize ~ ', ' ~ 'organization'|trans|capitalize }}</label>
                         <input type="text" class="firm-name no-margin" name="firmname">
-                        <div class="c-flex">
-                            <small class="dd-orange-text new-firm" style="visibility:hidden">{{'user_list.add_user_modal.new_firm_database'|trans}}</small>
-                            <small class="dd-orange-text unexisting-client" style="visibility:hidden">{{'user_list.add_user_modal.unexisting_client'|trans|raw}}</small>
+                        <div class="c-flex query-info-holder">
+                            <small class="dd-orange-text new-firm" style="display:none">{{'user_list.add_user_modal.new_firm_database'|trans}}</small>
+                            <small class="dd-orange-text unexisting-element" style="display:none"></small>
                         </div>
                         <select name="firmSelector" style="display:none;"></select>
                         <input type="hidden" name="wid">
@@ -91,108 +87,214 @@
                     </div>
                     <div class="flex-center-fe">
                         <div class="btn-flat waves-effect waves-light go-prev m-right">{{'back'|trans}}</div>
-                        <div class="btn waves-effect waves-light go-next firm-btn disabled-btn" data-btn-final="{{ 'create'|trans }}" data-btn-interm="{{ 'next'|trans }}"></div>
+                        <div class="btn waves-effect waves-light go-next firm-btn disabled-btn {{route == 'myActivities' ? 'go-to-email'}}" data-btn-final="{{ 'create'|trans }}" data-btn-interm="{{ 'next'|trans }}"></div>
                     </div> 
                 </div>
             {% endif %}
-            <div class="username-part" {% if creationType != 'ext' and not addingParticipant %}style="display:none"{% endif %}>
+            <div class="username-part" {% if route not in ['myActivities','manageClient'] %}style="display:none"{% endif %}>
                 <div class="title">
-                    {% if not addingParticipant %}
-                        {% if creationType != 'ext' %}
-                            <div class="flex-center int-org" style="display:none"> 
-                                <i class="fa fa-user-circle dd-text"></i>
-                                <h5 class="m-left">{{'user_list.add_user_modal.int_user_title'|trans}}</h5>
+                    
+                    {#{% if route != 'myActivities' %}#}
+                        
+                        <div class="flex-center int-org" style="display:none"> 
+                            <i class="fa fa-user-circle dd-text"></i>
+                            <h5 class="m-left">{{'user_list.add_user_modal.int_user_title'|trans}}</h5>
+                        </div>
+                        <div class="flex-center independent-org" style="display:none"> 
+                            <div class="independant-xl-icon-holder icon-holder flex-center">
+                                <span class="independent-letter white-text">I</span>
                             </div>
-                            
-                            <div class="flex-center independant-org"> 
-                                <div class="independant-xl-icon-holder icon-holder flex-center">
-                                    <span class="independent-letter white-text">I</span>
-                                </div>
-                                <h5 class="m-left">{{'user_list.add_user_modal.independant_user_title'|trans}}</h5>
-                            </div>
-                        {% endif %} 
+                            <h5 class="m-left">{{'user_list.add_user_modal.independant_user_title'|trans}}</h5>
+                        </div>
                         <div class="flex-center ext-org"> 
                             <i class="fa fa-user-circle dd-orange-text"></i>
-                            <h5 class="m-left m-right">{{'user_list.add_user_modal.ext_user_title'|trans}}</h5>
+                            <h5 class="m-left m-right">{{ route != 'myActivities' ? 'user_list.add_user_modal.ext_user_title'|trans : 'user_list.add_user_modal.participant_title'|trans }}</h5>
                             <img class="icon-holder" data-wo="{{ asset('lib/img/org/no-picture.png') }}" src="{{ asset('lib/img/org/no-picture.png') }}" alt="">
                         </div>
-                    {% else %}
+                    {#{% else %}
                         <div class="flex-center ext-org"> 
                             <i class="fa fa-user-circle dd-text"></i>
                             <h5 class="m-left m-right">{{'user_list.add_user_modal.participant_title'|trans}}</h5>
                             <img class="icon-holder" data-wo="{{ asset('lib/img/org/no-picture.png') }}" src="{{ asset('lib/img/org/no-picture.png') }}" alt="">
                         </div>
                     
-                    {% endif %}
+                    {% endif %}#}
+                    
                     
                 </div>
                 <div class="input-field user-field-zone">
-                    <label for="user-fullname">{{addingParticipant ? 'activity_elements.participant_adding_label'|trans : 'create_user.modal.label_fullname'|trans}}</label>
+                    <label for="user-fullname">{{route == 'myActivities' ? 'activity_elements.participant_adding_label'|trans : 'create_user.modal.label_fullname'|trans}}</label>
                     <input id="user-fullname" class="no-margin" name="username" type="text">
-                    <div class="c-flex"> 
-                        <small class="dd-orange-text new-user" style="visibility:hidden">{{'user_list.add_user_modal.new_user_database'|trans}}</small>
-                        <small class="dd-orange-text error-fullname" style="visibility:hidden">{{'create_user.modal.error_fullname'|trans}}</small>
+                    <div class="c-flex query-info-holder"> 
+                        <small class="dd-orange-text new-user" style="display:none">{{ global.route == 'myActivities' ? 'user_list.add_user_modal.new_participant_database'|trans : 'user_list.add_user_modal.new_user_database'|trans}}</small>
+                        <small class="dd-orange-text error-fullname" style="display:none">{{'create_user.modal.error_fullname'|trans}}</small>
+                        <small class="dd-orange-text unexisting-element" style="display:none"></small>
                     </div>
                     <select name="userSelector" style="display:none;"></select>
                     <input type="hidden" name="uid">
-                    {% if creationType != 'ext' %}
+                    {% if route != 'manageClient' %}
                         <input type="hidden" name="ioid">
                         <input type="hidden" name="icid">
                     {% endif %}
-                    {% if addingParticipant %}
+                    {% if route == 'myActivities' %}
                         <input type="hidden" name="iuid">
                         <input type="hidden" name="euid">
                         <input type="hidden" name="tid">
                     {% endif %}
                 </div>
                 <div class="flex-center-fe">
-                    {% if creationType != 'ext' %}
-                        <div class="btn-flat waves-effect waves-light go-prev m-right">{{'back'|trans}}</div>
-                    {% endif %}
-                    <div class="btn waves-effect waves-light go-next go-to-email disabled-btn">{{'next'|trans}}</div>
-                </div>
-            </div>
-            {% if addingParticipant %}
-            <div class="account-part" style="display:none">
-                <div class="title">
-                    <h5>{{'add <span class="selected-user"></span> through_account'|replace({
-                            'add' : 'add'|trans|capitalize,
-                            'through_account' : 'user_list.add_user_modal.selecting_account_title_suffix'|trans
-                        })|raw 
-                    }}</h5>
-                </div>
-                <div class="input-field account-field-zone m-bottom"> 
-                    <select name="partAccountSelector" style="display:none;"></select>
-                    <input type="hidden" name="iuid">
-                    <input type="hidden" name="euid">
-                    <input type="hidden" name="tid">
-                </div>
-                <div class="flex-center-fe">
                     <div class="btn-flat waves-effect waves-light go-prev m-right">{{'back'|trans}}</div>
-                    <div class="btn waves-effect waves-light account-add-btn">{{'add'|trans}}</div>
+                    <div class="btn waves-effect waves-light go-next {{ route == 'myActivities' ? 'go-to-type' : 'go-to-email' }} disabled-btn">{{'next'|trans}}</div>
                 </div>
             </div>
+
+            {% if route == 'myActivities' %}
+                <div class="account-part" style="display:none">
+                    <div class="title">
+                        <h5>{{'add <span class="selected-user"></span> through_account'|replace({
+                                'add' : 'add'|trans|capitalize,
+                                'through_account' : 'user_list.add_user_modal.selecting_account_title_suffix'|trans
+                            })|raw 
+                        }}</h5>
+                    </div>
+                    <div class="input-field account-field-zone m-bottom"> 
+                        <select name="partAccountSelector" style="display:none;"></select>
+                        <input type="hidden" name="iuid">
+                        <input type="hidden" name="euid">
+                        <input type="hidden" name="tid">
+                    </div>
+                    <div class="flex-center-fe">
+                        <div class="btn-flat waves-effect waves-light go-prev m-right">{{'back'|trans}}</div>
+                        <div class="btn waves-effect waves-light go-next">{{'add'|trans}}</div>
+                    </div>
+                </div>
             {% endif %}
+
             <div class="email-part" style="display:none">
                 <div class="title flex-center">
                 <h5>
                     <span>{{ 'user_list.add_user_modal.email_title'|trans }}</span>
                     <i class="fa fa-paper-plane dd-orange-text"></i>
                 </h5>
-                {% if not isEmailMandatory %}
                     <i class="fa fa-question-circle m-left tooltipped" data-tooltip="{{'user_list.add_user_modal.without_email_info'|trans}}" data-position="top"></i>
-                {% endif %}
                 </div>
                 <div class="input-field">
                     <label for="user-email" data-lval="{{'create_user.modal.label_email'|trans}}"></label>
                     <input id="user-email" class="no-margin" name="email" type="text">
-                    <small class="dd-orange-text error-email" style="visibility:hidden" data-bf="{{'create_user.modal.error_email'|trans}}">{{'create_user.modal.error_email'|trans}}</small>
+                    <div class="non-query-info-holder">
+                        <small class="dd-orange-text error-email" style="display:none" data-bf="{{'create_user.modal.error_email'|trans}}">{{'create_user.modal.error_email'|trans}}</small>
+                    </div>
                 </div>
                 <div class="flex-center-fe">
                     <div class="btn-flat waves-effect waves-light go-prev m-right">{{'back'|trans}}</div>
-                    <div class="btn btn-add-user waves-effect waves-light {% if isEmailMandatory %}disabled-btn{% endif %}">{{'ok'|trans}}</div>
+                    <div class="btn go-next waves-effect waves-light">{{'ok'|trans}}</div>
                 </div>
             </div>
         </div>
     </form>
+</div>
+
+<div id="updateUser" class="modal">
+    <form id="updateUserForm" method="post">
+        <div class="modal-content">
+            <h5>Détails de l'utilisateur</h5>
+            <div class="c-flex">
+                <div class="username-data flex-center-sb">
+                    
+                    <div class="flex-center">
+                        <img src="" alt="" class="user-picture">
+                        <span class="user-name m-left"></span>
+                        <i class="sm-left mi create dd-orange-text change-username"></i>
+                    </div>
+                    {% if currentuser and currentuser.role == 1 %} 
+                        <div class="btn-flat delete-user-btn tooltipped modal-trigger" href="#deleteUser" data-tooltip="Supprimer" data-position="top" style="visibility: hidden;">
+                            <i class="dd-orange-text fa fa-times"></i>
+                        </div>
+                    {% endif %}
+                    
+                </div>
+                <div class="row no-margin flex-center username-input" style="display:none">  
+                    <div class="col s12 m3">
+                        <span>Nom complet</span>
+                    </div>
+                    <div class="col s12 m9">
+                        <input type="text" name="username">
+                    </div>
+                </div>
+            </div>
+            <div class="c-flex">
+                <div class="row no-margin flex-center email-update">
+                    <div class="col s12 m3">
+                        <span>Email</span>
+                    </div>
+                    <div class="col s12 m9">
+                        <input type="text" name="email" value="">
+                        <small class="dd-orange-text error-email" style="display:none" data-bf="{{'create_user.modal.error_email'|trans}}">{{'create_user.modal.error_email'|trans}}</small>
+                    </div>
+                </div>
+                <div class="row no-margin flex-center">
+                    <div class="col s12 m3">
+                        <span>{{'position'|trans}}</span>
+                    </div>
+                    <div class="col s12 m9">
+                        <input type="text" name="position" placeholder="Renseigner position" value="">
+                    </div>
+                </div>
+                {% if route in ['manageUsers','seeColleaguesTeams'] %}
+                    <div class="row no-margin flex-center">
+                        <div class="col s12 m3">
+                            <span>{{'department'|trans}}</span>
+                        </div>
+                        <div class="col s12 m9">
+                            <input type="text" name="department" placeholder="Renseigner département" value="">
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="flex-center-fe">
+                <a class="waves-effect waves-light modal-close btn-flat">{{'back'|trans}}</a>
+                <a class="btn waves-effect waves-light save-user-updates">Ok</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div id="deleteClient" class="modal">
+    <div class="modal-content">
+        <h5 style="margin-left: 20px;">{% trans %}client.delete.modal_title{% endtrans %}</h5>
+        <p>{% trans %}client.delete.modal_content{% endtrans %}</p>
+        <div class="flex-center-fe">
+            <a class="btn waves-effect waves-light modal-close remove-client">{% trans %}stages.deleteStage.accept{% endtrans %}</a>
+            <a class="waves-effect waves-light modal-close btn-flat red-text">{% trans %}stages.deleteStage.cancel{% endtrans %}</a>
+        </div>
+    </div>
+</div>
+
+<div id="deleteExternalUser" class="modal">
+    <div class="modal-title"></div>
+    <div class="modal-content">
+        <h5>{% trans %}client.delete_external_user.modal_title{% endtrans %}</h5>
+        <p>{% trans %}client.delete_external_user.modal_content{% endtrans %}</p>
+        <div class="flex-center-fe">
+            <a class="btn waves-effect waves-light modal-close remove-client-user">{% trans %}stages.deleteStage.accept{% endtrans %}</a>
+            <a class="waves-effect waves-light modal-close btn-flat red-text">{% trans %}stages.deleteStage.cancel{% endtrans %}</a>
+        </div>
+    </div>
+</div>
+
+<div id="deleteUser" class="modal">
+    <div class="modal-content">
+    <div class="modal-content">
+        <h5>{% trans %}user_update.delete_modal.title{% endtrans %}</h5>
+        <p>{{ 'start_msg <span class="d-user-fullname strong dd-text"></span> ? end_msg'|replace({
+                'start_msg' : 'delete_user.modal.start_msg'|trans,
+                'end_msg'   : 'delete_user.modal.end_msg'|trans,
+            })|raw 
+            }} </p>
+    </div>
+    <div class="modal-footer">
+        <a class=" modal-action modal-close submit-button waves-effect waves-green btn remove-user">{% trans %}user_update.delete_modal.confirm{% endtrans %}</a>
+        <a class=" modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+    </div>
+    </div>
 </div>

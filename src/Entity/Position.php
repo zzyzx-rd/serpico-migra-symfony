@@ -11,6 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
+use Doctrine\ORM\Mapping\OrderBy;
 
 /**
  * @ApiResource()
@@ -75,7 +76,8 @@ class Position extends DbObject
     public $targets;
 
     /**
-     * @OneToMany(targetEntity="User", mappedBy="position",cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="User", mappedBy="position",cascade={"persist", "remove"})
+     * @OrderBy({"lastname" = "ASC"})
      */
     private $users;
 

@@ -702,38 +702,6 @@ abstract class MasterController extends AbstractController
         return true;
     }
 
-    public function sendOrganizationTestingReminders()
-    {
-        $allOrganizations = new ArrayCollection($this->em->getRepository(Organization::class)->findAll());
-        $expiringOrganizations =
-            $allOrganizations->matching(
-                Criteria::create()
-                    ->where(Criteria::expr()->neq('expired', new \DateTime('2100-01-01 00:00:00')))
-                    ->andWhere(Criteria::expr()->neq('expired', null))
-                    ->andWhere(Criteria::expr()->neq('reminderMailSent', true)
-                    )
-            );
-        $repoU = $this->em->getRepository(User::class);
-
-        foreach ($expiringOrganizations as $expiringOrganization) {
-            // Sending testing organization administration to motivate them onboard activities
-            if (date_diff(new \DateTime, $expiringOrganization->getExpired())->days < 15) {
-                $administrators = $repoU->findBy(['orgId' => $expiringOrganization->getId(), 'role' => [1, 4]]);
-                $nonAdministrators = $repoU->findBy(['orgId' => $expiringOrganization->getId(), 'role' => [2, 3]]);
-                $adminSettings['expiringDate'] = $expiringOrganization->getExpired();
-                $nonAdminSettings['expiringDate'] = $expiringOrganization->getExpired();
-                $adminSettings['forAdministrators'] = true;
-                $nonAdminSettings['forAdministrators'] = false;
-                self::sendMail(null, $administrators, 'firstMailReminderTPeriod', $adminSettings);
-                self::sendMail(null, $nonAdministrators, 'firstMailReminderTPeriod', $nonAdminSettings);
-                $expiringOrganization->setReminderMailSent(true);
-                $this->em->persist($expiringOrganization);
-            }
-        }
-        $this->em->flush();
-        return true;
-    }
-
     //Return an array with original array doublon(s) values only, otherwise null
     public static function array_doublon($array)
     {
@@ -849,159 +817,6 @@ abstract class MasterController extends AbstractController
 
     }
 
-    // Function to create and update activities of recurring activities
-    // TimeFrame can be either 'D', 'W', 'M', 'Y'
-    public static function createRecurringActivities($app, Organization $organization, Recurring $recurring, User $masterUser, $name, $frequency, \DateTime $definedStartDate, $timeFrame, $gStartDateInterval, $gStartDateTimeFrame, $gEndDateInterval, $gEndDateTimeFrame, $type, $lowerbound = 0, $upperbound = 5, $step = 0.5, $maxTimeFrame = '1Y', \DateTime $definedEndDate = null)
-    {
-
-        if (!$currentUser instanceof User) {
-            return new Response(null, 401);
-        }
-
-        $em = $app['orm.em'];
-        $startDate = clone $definedStartDate;
-        $endDate = ($definedEndDate) ?: clone $definedStartDate->add(new DateInterval('P' . $maxTimeFrame));
-        $ongoingFutCurrActivities = $recurring->getOngoingFutCurrActivities();
-
-        //1 - Count the the number of activities to be created in the system
-        switch ($timeFrame) {
-            case 'D':
-                $nbActivitiesToCreate = floor(date_diff($endDate, $startDate)->days / $frequency);
-                break;
-            case 'W':
-                $nbActivitiesToCreate = floor(date_diff($endDate, $startDate)->days / (7 * $frequency));
-                break;
-            case 'M':
-                $nbActivitiesToCreate = floor(date_diff($endDate, $startDate)->m / $frequency);
-                break;
-            case 'Y':
-                $nbActivitiesToCreate = floor(date_diff($endDate, $startDate)->y / $frequency);
-                break;
-        }
-
-        if (count($ongoingFutCurrActivities) > 1) {
-            $k = 0;
-
-            while (count($ongoingFutCurrActivities) + $k < $nbActivitiesToCreate + 1) {
-
-                $firstFutureActivity = $recurring->getOngoingFutCurrActivities()->first();
-
-                $activity = new Activity;
-                $activity->setRecurring($recurring)->setMasterUserId($masterUser->getId())->setOrganization($organization);
-                $recurring->addActivity($activity);
-
-                foreach ($firstFutureActivity->getStages() as $firstFutureActivityStage) {
-                    $stage = clone $firstFutureActivityStage;
-                    $stage->setActivity($activity);
-                    $stage->setCreatedBy($currentUser->getId());
-                    $activity->addStage($stage);
-
-                    foreach ($firstFutureActivityStage->getCriteria() as $firstFutureActivityStageCriterion) {
-                        $criterion = clone $firstFutureActivityStageCriterion;
-                        $criterion->setStage($stage)->setType($type);
-                        $criterion->setCreatedBy($currentUser->getId());
-                        $stage->addCriterion($criterion);
-                        $em->persist($criterion);
-
-                    }
-
-                    foreach ($firstFutureActivityStage->getParticipants() as $firstFutureActivityStageParticipant) {
-                        $participant = clone $firstFutureActivityStageParticipant;
-                        $participant->setStage($stage);
-                        $participant->setCreatedBy($currentUser->getId());
-                        $stage->addParticipant($participant);
-                        $em->persist($participant);
-                    }
-
-                    $em->persist($stage);
-
-                }
-                /*
-                if ($type == 1) {
-                $criterion->setLowerbound($lowerbound)->setUpperbound($upperbound)->setStep($step);
-                }
-                 */
-                $k++;
-
-                $em->persist($activity);
-                $em->flush();
-            }
-            $k = 0;
-            while (count($ongoingFutCurrActivities) - $k > $nbActivitiesToCreate) {
-                $activity = $ongoingFutCurrActivities->last();
-                $recurring->removeActivity($activity);
-                $em->persist($recurring);
-                $k++;
-                /*
-            foreach ($recurring->getActivities() as $activity) {
-            while (count($ongoingFutCurrActivities) > $nbActivitiesToCreate +1) {
-            $recurring->removeActivity($activity);
-
-            }
-            }*/
-            }
-            $em->flush();
-
-        } else {
-
-            //$recurring->getActivities()->first()->setName(null)
-            //->getStages()->first()->setStartDate(null)->setEndDate(null)->setGStartDate(null)->setGEndDate(null);
-
-            for ($k = 1; $k <= $nbActivitiesToCreate; $k++) {
-                $activity = new Activity;
-                $activity->setRecurring($recurring)->setMasterUserId($masterUser->getId())->setOrganization($organization)->setStatus($recurring->getStatus());
-                $recurring->addActivity($activity);
-
-                $stage = new Stage;
-                $stage->setActivity($activity);
-                $stage->setCreatedBy($currentUser->getId());
-                $activity->addStage($stage);
-
-                $criterion = new Criterion;
-                $criterion->setStage($stage)->setType($type)->setName('General');
-                $criterion->setCreatedBy($currentUser->getId());
-                $stage->addCriterion($criterion);
-
-                $em->persist($recurring);
-                $em->persist($activity);
-                $em->persist($stage);
-                $em->persist($criterion);
-
-                if ($type == 1) {
-                    $criterion->setLowerbound($lowerbound)->setUpperbound($upperbound)->setStep($step);
-                }
-            }
-            $em->flush();
-        }
-
-        $ongoingFutCurrActivities = $recurring->getOngoingFutCurrActivities();
-
-        for ($k = 1; $k <= count($ongoingFutCurrActivities); $k++) {
-            $activity = ($k == 1) ? $ongoingFutCurrActivities->first() : $ongoingFutCurrActivities->next();
-
-            $activityStartDate = clone $startDate;
-            $activityStartDate2 = clone $startDate;
-            $activityEndDate = clone $startDate->add(new \DateInterval('P' . $frequency . $timeFrame)) /*->sub(new \DateInterval('P1D'))*/;
-            $activityGStartDate = clone $activityStartDate2->add(new \DateInterval('P' . $gStartDateInterval . $gStartDateTimeFrame));
-            //$cloneGStartDate = clone $activityGStartDate;
-            $cloneEndDate = clone $activityEndDate;
-            $activityGEndDate = clone $cloneEndDate->add(new DateInterval('P' . $gEndDateInterval . $gEndDateTimeFrame));
-            $activity->setName($name . /*' ('.$activityStartDate->format("j F y").' - '.$activityEndDate->format("j F y").')'*/ ' ' . $k)
-                ->getStages()->first()->setName($name . /*' ('.$activityStartDate->format("j F y").' - '.$activityEndDate->format("j F y").')'*/ ' ' . $k)->setStartDate($activityStartDate)->setEndDate($activityEndDate)->setGStartDate($activityGStartDate)->setGEndDate($activityGEndDate)->setMasterUserId($masterUser->getId())
-                ->getCriteria()->first()->setType($type)->setLowerbound(($type == 1) ? $lowerbound : null)->setUpperbound(($type == 1) ? $upperbound : null)->setStep(($type == 1) ? $step : null);
-            $em->persist($recurring);
-        }
-
-        //$em->flush();
-
-        $lastActEndDate = clone $definedEndDate;
-        $lastActGStartDate = clone $definedEndDate->add(new DateInterval('P1D'));
-        $lastActGEndDate = clone $definedEndDate->add(new DateInterval('P' . $gEndDateInterval . $gEndDateTimeFrame));
-        $recurring->getOngoingFutCurrActivities()->last()->getStages()->first()->setEndDate($lastActEndDate)->setGStartDate($lastActGStartDate)->setGEndDate($lastActGEndDate);
-        $em->persist($recurring);
-        $em->flush();
-    }
-
     // Function which checks if stage is computable, if it is the case sends mail to activity manager to access results
     public function checkStageComputability(Request $request, Stage $stage, bool $addInDb = true)
     {
@@ -1024,19 +839,19 @@ abstract class MasterController extends AbstractController
                 }
             } else {
                 $nbValidated++;
-                $user = $uniqueNonPassiveParticipation->getDirectUser();
+                $user = $uniqueNonPassiveParticipation->getUser();
                 // Only receive mail about results being releasable, per order of importance :
                 // 1 - Administrators participants, or activity managers who are leaders
                 // 2 - Otherwise the department managers of collaborator leaders
-                if ($user->getRole() == 1 || $user->getRole() == 4) {
+                if ($user->getRole() <= USER::ROLE_ADMIN) {
                     $recipients[] = $user;
                 } else {
                     if ($uniqueNonPassiveParticipation->isLeader()) {
-                        if ($user->getRole() == 2) {
+                        if ($user->getRole() == USER::ROLE_AM) {
                             $recipients[] = $user;
                         } elseif ($user->getDepartment()) {
-                            $headOfDptUser = $user->getDepartment()->getMasterUser();
-                            if ($headOfDptUser) {
+                            $headOfDptUsers = $user->getDepartment()->getUserMasters();
+                            foreach($headOfDptUsers as $headOfDptUser){
                                 $recipients[] = $headOfDptUser;
                             }
                         }
@@ -1140,7 +955,7 @@ abstract class MasterController extends AbstractController
         # The repos to access the data in the database
         $repoP = $em->getRepository(Participation::class);
         # The user who created the activity
-        $currentUser = $this->user;;
+        $currentUser = $this->user;
         $criteria = $stage->getCriteria();
 
 
@@ -1161,20 +976,20 @@ abstract class MasterController extends AbstractController
         $concernedTeam = null;
 
         foreach ($participations as $p) {
-            $jsonData["userWeights"][$au->getUsrId()] = $au->getDirectUser()->getWeight()->getValue();
-            $jsonGlobalDataStage["user"][] = $au->getUsrId();
+            $jsonData["userWeights"][$p->getUsrId()] = $p->getDirectUser()->getWeight()->getValue();
+            $jsonGlobalDataStage["user"][] = $p->getUsrId();
             # if new team
-            if ($au->getTeam() !== null && $au->getTeam() != $concernedTeam && $stageMode != MasterController::STAGE_ONLY) {
-                $concernedTeam = $au->getTeam();
+            if ($p->getTeam() !== null && $p->getTeam() != $concernedTeam && $stageMode != MasterController::STAGE_ONLY) {
+                $concernedTeam = $p->getTeam();
                 $jsonData["teams"][$concernedTeam->getId()] = [];
                 $jsonData["teamWeights"][$concernedTeam->getId()] = 0;
                 $jsonGlobalDataStage["team"][] = $concernedTeam->getId();
             }
-            if ($au->getTeam() != null  && $stageMode != MasterController::STAGE_ONLY) {
+            if ($p->getTeam() != null  && $stageMode != MasterController::STAGE_ONLY) {
                 # add the team member id in the teams id
-                $jsonData["teams"][$concernedTeam->getId()][] = $au->getUsrId();
+                $jsonData["teams"][$concernedTeam->getId()][] = $p->getUsrId();
                 # add the weight of the member in the team weight
-                $jsonData["teamWeights"][$concernedTeam->getId()] += $au->getDirectUser()->getWeight()->getValue();
+                $jsonData["teamWeights"][$concernedTeam->getId()] += $p->getDirectUser()->getWeight()->getValue();
             }
         }
         # If the stage is graded

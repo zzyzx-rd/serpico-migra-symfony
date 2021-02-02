@@ -62,6 +62,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Service\FileUploader;
 use App\Service\NotificationManager;
+use DateTimeZone;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -469,8 +470,8 @@ class ActivityController extends MasterController
                 ->setToken(!empty($email) ? md5(rand()) : null)
                 ->setUsername("$firstname $lastname")
                 ->setRole(
-                    empty($_POST['oid']) ? USER::ROLE_ADMIN : 
-                        ($organization->getPlan() == ORGANIZATION::PLAN_FREE || $organization->getPlan() != ORGANIZATION::PLAN_FREE && new DateTime() > $organization->getExpired() ? USER::ROLE_ADMIN : USER::ROLE_AM)
+                    empty($_POST['oid']) || !$organization->hasSuperAdmin() ? USER::ROLE_SUPER_ADMIN : 
+                        ($organization->getPlan() == ORGANIZATION::PLAN_FREE || $organization->getPlan() != ORGANIZATION::PLAN_FREE && new DateTime() > $organization->getExpired() ? USER::ROLE_AM : USER::ROLE_ADMIN)
                 )
                 ->setCreatedBy($currentUser->getId());
                 $clientOrganization->addUser($user);
@@ -945,10 +946,12 @@ class ActivityController extends MasterController
         $eventForm->handleRequest($request);
         if($eventForm->isSubmitted() && $eventForm->isValid()){
 
-            $now = new DateTime;
-            if(!$event->getOnsetDate()){!$eventInitOnsetDate ? $event->setOnsetDate($now) : $event->setOnsetDate(null);}
-            $event->setStage($stage)
-                ->setOrganization($this->org);
+            $now = new DateTime();
+            
+            if(!$event->getOnsetDate()){
+                !$eventInitOnsetDate ? $event->setOnsetDate($now) : $event->setOnsetDate(null);}
+                $event->setStage($stage)
+                    ->setOrganization($this->org);
 
             if(!$eveId){
                 $notificationManager->registerUpdates($event, ElementUpdate::CREATION);

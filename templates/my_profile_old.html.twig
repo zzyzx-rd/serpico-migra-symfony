@@ -415,19 +415,15 @@
                         {% if clickable %}</a>{% endif %}
                   </td>
                   <td>
-                    {% if not stage.period %}
-                      <span>{{'open_end'|trans}}</span>
-                    {% else %}
-                      {% if stage.pctElapsed %}
-                        <div class="flex-center-sb">
-                          <div class="progress">
-                              <div class="determinate" style="width: {{stage.pctElapsed}}%"></div>
-                          </div>
-                          <span>{{stage.pctElapsed ~ '%' }}</span>
+                    {% if stage.pctElapsed %}
+                      <div class="flex-center-sb">
+                        <div class="progress">
+                            <div class="determinate" style="width: {{stage.pctElapsed}}%"></div>
                         </div>
-                      {% else %}
-                        <span>-</span>
-                      {% endif %}
+                        <span>{{stage.pctElapsed ~ '%' }}</span>
+                      </div>
+                    {% else %}
+                      <span>-</span>
                     {% endif %}
                   </td>
                 </tr>
@@ -500,7 +496,188 @@
     </div>
   </div>
 
+  {% if not global.currentuser.isInternal %}
+    <div id="finalizeUser" class="modal">
+      <div class="modal-title">
+        <h4>{{ 'profile.finalizeUserCreation.modal_title'|trans }}</h4>
+      </div>
+      <div class="modal-content">
+        {{ form_start(finalizeUserForm) }}
+        {{ form_row(finalizeUserForm.firstname) }}
+        {{ form_row(finalizeUserForm.lastname) }}
+        {{ form_row(finalizeUserForm.department) }}
+        {{ form_row(finalizeUserForm.position) }}
+      </div>
+      <div class="modal-footer action-buttons">
+        <div class="button-field">
+          {{ form_row(finalizeUserForm.submit) }}
+          {{ form_rest(finalizeUserForm) }}
+          {{ form_end(finalizeUserForm) }}
+        </div>
+      </div>
+    </div>
+    <div id="finalizeUserSucess" class="modal">
+      <div class="modal-content">
+        <p>{{ 'profile.finalizeUserCreation.modal_success_msg'|trans }}</p>
+      </div>
+      <div class="modal-footer action-buttons">
+        <div class="button-field">
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+  {% if firstConnection == 0 %}
+    <div id="tutoModal" class="modal" style="text-align: center">
+
+      <div class="modal-content" style="text-align: center" >
+        <br>
+        <h5>Nouveau sur Serpico ? Nous sommes là pour vous aider !</h5>
+        <br>
+        {% if global.currentuser.role== 1 %}
+          <div class="page-modal" id="0">
+            <img src="{{ asset('lib/gif/create-activity.gif') }}">
+            <p>En cliquant sur l'onglet Activités, vous pouvez dès à présent créer une activité .</p>
+          </div>
+
+          <div class="page-modal" id="1">
+            <img src="{{ asset('lib/gif/stage-result.gif') }}" style="height: 400%">
+
+            <p>Vous pouvez ensuite observer les résultats des notations dès que tous les participants ont noté  </p>
+          </div>
+          <div class="page-modal" id="2">
+            <img src="{{ asset('lib/gif/user-result.gif') }}" style="height: 400%">
+
+            <p> Il y a aussi possibilité de voir ces résultats personnel en cliquant sur le boutton  mes résultats </p>
+          </div>
+          <div class="page-modal" id="3">
+            <img src="{{ asset('lib/gif/see-users.gif') }}">
+
+            <p>En cliquant sur l'onglet Utilisateur,Vous pouvez voir la liste des utilisateurs de votre organisation</p>
+          </div>
+          <div class="page-modal" id="4">
+            <img src="{{ asset('lib/gif/parameter.gif') }}">
+
+            <p>En cliquant sur l'onglet Paramètres, vous avez la possibilité de changer les paramètres de l'entreprise.</p>
+          </div>
+        {% endif %}
+        {% if global.currentuser.role== 2 %}
+
+          <div class="page-modal" id="0">
+            <img src="{{ asset('lib/gif/create-activity.gif') }}">
+            <p>En cliquant sur l'onglet Activités, vous pouvez dès à présent créer une Activité .</p>
+          </div>
+
+          <div class="page-modal" id="1">
+            <img src="{{ asset('lib/gif/stage-result.gif') }}" style="height: 400%">
+
+            <p>Vous pouvez ensuite observer les résultats des notations dès que tout les participants on noté  </p>
+          </div>
+          <div class="page-modal" id="2">
+            <img src="{{ asset('lib/gif/user-result.gif') }}" style="height: 400%">
+
+            <p> Il y a aussi possibilité de voir ces résultats personnel en cliquant sur le boutton  mes résultats </p>
+          </div>
+          <div class="page-modal" id="3">
+            <img src="{{ asset('lib/gif/see-users.gif') }}">
+
+            <p>En cliquant sur l'onglet Utilisateur,Vous pouvez voir la liste des utilisateurs de votre organisation</p>
+          </div>
+
+        {% endif %}
+        {% if global.currentuser.role==3  %}
+
+          <div class="page-modal" id="0">
+            <img src="{{ asset('lib/gif/note-dashboard.gif') }}">
+            <p>En cliquant sur l'onglet Activités, vous pouvez dès à présent voir les activités vous concernant . Sur cette page vous allez pouvoir   noter des critères et répondre à des sondages </p>
+          </div>
+
+          <div class="page-modal" id="1">
+            <img src="{{ asset('lib/gif/critere-response.gif') }}">
+
+            <p>Vous pouvez noter le processus selon des critères  </p>
+          </div>
+
+          <div class="page-modal" id="2">
+            <img src="{{ asset('lib/gif/stage-result.gif') }}" style="height: 400%">
+
+            <p>Vous pouvez ensuite observer les résultats des notations dès que tous les participants ont noté  </p>
+          </div>
+          <div class="page-modal" id="3">
+            <img src="{{ asset('lib/gif/user-result.gif') }}" style="height: 400%">
+
+            <p> Il y a aussi possibilité de voir ces résultats personnel en cliquant sur le boutton  mes résultats </p>
+          </div>
+        {% endif %}
+        {% if not orgHasActiveAdmin %}
+
+          <div class="page-modal admin-choice-panel" id="{{ global.currentuser.role == 1 ? 5 : 4 }}">
+            <p>{{'profile.first_connection.add_first_admin.modal_msg'|trans}}</p>
+            <div>
+              <input type="checkbox" id="self_admin" name="self_admin" class="filled-in admin-choice" checked data-id="{{global.currentuser.id}}">
+              <label for="self_admin">{{'profile.first_connection.add_first_admin.self_keeping_option'|trans}}</label>
+            </div>
+            <div>
+              <input type="checkbox" id="other_admin" name="other_admin" class="filled-in admin-choice">
+              <label for="other_admin">{{'profile.first_connection.add_first_admin.give_ownership_option'|trans}}</label>
+              <div class="admin-select-zone" style="display: none;">
+                <select id="userSelector" multiple>
+                  {% for user in global.activeUsers %}
+                    {% if user != global.currentuser and user.lastname != "ZZ" %}
+                      <option value="{{ user.id }}">{{ user.fullname }}</option>
+                    {% endif %}
+                  {% endfor %}
+                </select>
+                <a class="modal-trigger" href="#addAdmin"><i class="fas fa-plus"></i>{{ 'profile.first_connection.add_first_admin.modal_trigger_btn'|trans }}</a>
+              </div>
+            </div>
+          </div>        
+        {% endif %}
+      </div>
+
+
+
+      <div style="text-align: center" class="modal-footer">
+        <a><i style="display: none" class="btn-previous-page btn waves-effect waves-light fas fa-arrow-left"></i></a>
+        <a value="Confirmer" style="display: none"
+           class="roger btn waves-effect waves-light">{{ 'profile.first_connection.finalize_btn'|trans }}</a>
+        <a><i class="btn-next-page btn waves-effect waves-light fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+
+    {% endif %}
+    
+    {% if not orgHasActiveAdmin %}
+      <div id="addAdmin" class="modal" style="z-index: 1050;">
+        {{ form_start(addFirstAdminForm, {attr: {autocomplete: "off" }}) }}
+        <div class="modal-content">
+          
+          <h4>{{ 'profile.first_connection.add_first_admin.modal_trigger_btn'|trans }}</h4>
+          <p>{{ 'profile.first_connection.add_first_admin.modal_title'|trans }}</p>
+          {{ form_row(addFirstAdminForm.firstname) }}
+          {{ form_row(addFirstAdminForm.lastname) }}
+          {{ form_row(addFirstAdminForm.email) }}
+        </div>
+        <div class="modal-footer action-buttons">
+          <div class="button-field">
+            <a class="modal-close btn-flat waves-effect waves-light">
+              <i class="fas fa-arrow-left sm-right"></i>
+              <span>{{ 'back'|trans }}</span>
+            </a>
+          </div>
+          <div class="button-field">
+            {{ form_row(addFirstAdminForm.submit) }}
+          </div>
+        </div>
+        {{ form_rest(addFirstAdminForm) }}
+        {{ form_end(addFirstAdminForm) }}
+      </div>
+    {% endif %}
+
 {% endblock %}
+
+
+
 
 {% block javascripts %}
   <script src="{{ asset('js/profile.js') }}"></script>

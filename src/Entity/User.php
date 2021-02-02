@@ -34,10 +34,11 @@ use Symfony\Component\Security\Core\User\UserInterface;
 class User extends DbObject implements  UserInterface, \Serializable
 {
 
-    public const ROLE_ADMIN = 1;
-    public const ROLE_ROOT = 4;
-    public const ROLE_AM = 2;
-    public const ROLE_COLLAB = 3;
+    public const ROLE_ROOT = 0;
+    public const ROLE_SUPER_ADMIN = 1;
+    public const ROLE_ADMIN = 2;
+    public const ROLE_AM = 3;
+    public const ROLE_COLLAB = 4;
     /**
      * @Id()
      * @GeneratedValue()
@@ -673,7 +674,7 @@ class User extends DbObject implements  UserInterface, \Serializable
         return $this->deleted;
     }
 
-    public function setDeleted(DateTimeInterface $deleted): self
+    public function setDeleted(?DateTimeInterface $deleted): self
     {
         $this->deleted = $deleted;
         return $this;
@@ -1130,17 +1131,20 @@ class User extends DbObject implements  UserInterface, \Serializable
         }
 
         switch($this->role){
-            case 4 :
-                $roles[] = 'ROLE_ROOT';
-                break;
-            case 3:
+            case 4:
                 $roles[] = 'ROLE_COLLABORATOR';
                 break;
-            case 2:
+            case 3:
                 $roles[] = 'ROLE_ACTIVITY_MANAGER';
                 break;
-            case 1:
+            case 2:
                 $roles[] = 'ROLE_ADMIN';
+                break;
+            case 1:
+                $roles[] = 'ROLE_SUPER_ADMIN';
+                break;
+            case 0:
+                $roles[] = 'ROLE_ROOT';
                 break;
         }
 

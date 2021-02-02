@@ -1,11 +1,13 @@
 {% set locale = app.request.getLocale() in ['fr','en'] ? app.request.getLocale() : en %}
 {% set currentuser = global.currentuser %}
-{% if currentuser != null %}
-  {% set is_admin = currentuser.role == 4 or currentuser.role == 1 %}
-  {% set is_root = currentuser.role == 4 %}
-  {% set updates = global.updates %}
-{% endif %}
 {% set organization = currentuser ? currentuser.organization : null %}
+
+{% set is_root = (currentuser and currentuser.role == 0)|default(false) %}
+{% set is_super_admin = (currentuser and currentuser.role <= 1)|default(false) %}
+{% set is_admin = (currentuser and currentuser.role <= 2)|default(false) %}
+{% set updates = currentuser ? global.updates : null %}
+{% set is_super_admin_undefined = organization and organization.type != 'C' and not organization.hasSuperAdmin %}
+
 {# A freemium user is one user, necessarily admin, who has not a customer Id and is not in free plan #}
 {% set orgInFreemiumMode = currentuser and currentuser.role == 1 and not organization.customerId and organization.plan != 3 %}
 {% set indivClass = currentuser and currentuser.organization.type == 'C' ? 'indiv-acct' : '' %}
@@ -49,7 +51,8 @@
     <link rel="stylesheet" href="{{ asset('css/font-awesome/5.15/css/all.min.css') }}">
     <link rel="stylesheet" href="{{ asset('lib/materialize/css/materialize.css') }}">
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/material-icons/css/material-icons.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/material-icons-css-selectors-master/material-icons.css') }}">
+    {#<link rel="stylesheet" href="{{ asset('css/material-icons/css/material-icons.css') }}">#}
     <style>
       @font-face {
         font-family: 'Material Icons';
@@ -70,23 +73,6 @@
               url("{{ asset('fonts/Poppins/Poppins-Black.ttf') }}") format('truetype') font-italic font-weight-bold;
       }
 
-
-
-      .material-icons {
-        font-family: 'Material Icons';
-        font-weight: normal;
-        font-style: no  rmal;
-        font-size: 24px;
-        line-height: 1;
-        letter-spacing: normal;
-        text-transform: none;
-        display: inline-block;
-        white-space: nowrap;
-        word-wrap: normal;
-        direction: ltr;
-        -webkit-font-feature-settings: 'liga';
-        -webkit-font-smoothing: antialiased;
-      }
     </style>
 
     {% block css %}    
@@ -97,11 +83,14 @@
       var ruurl ="{{ url('retrieveUpdates') }}";
       var vuurl ="{{ url('viewUpdates') }}";
       {% if orgInFreemiumMode %}
-      var cpurl ="{{ url('checkPlans') }}";
+        var cpurl ="{{ url('checkPlans') }}";
       {% endif %}
       var cnurl ="{{ url('checkNotificationMails') }}";
       var gaurl ="{{ url('getUserAccounts') }}";
       var caurl ="{{ url('changeUserAccount') }}";
+      {% if is_super_admin_undefined %}
+        var usuurl = "{{ url('updateSuperAdmin') }}";
+      {% endif %}
     </script>
   </head>
 
@@ -141,7 +130,7 @@
                 {% if is_granted('IS_AUTHENTICATED_REMEMBERED') and global.currentuser is not null %}
                   {#<li class="logo">
                   </li>#}
-                  {% if currentuser.role == 1 or currentuser.role == 4 %}
+                  {% if is_admin %}
                     <li class="plan hide-on-med-and-down">
                       <div class="c-flex-center sm-right">
                         <span class="{{global.route != "home_welcome" ? 'plan-info' : 'landing-plan-info'}}"> {{ organization.plan == 1 ? 'header.plan.enterprise'|trans|upper : (organization.plan == 2 ? 'header.plan.premium'|trans|upper : 'header.plan.free'|trans|upper) }} {{ date('now').diff(organization.inserted).days < 21 ? '(' ~ 'trial'|trans|upper ~ ')' }} </span>
@@ -157,7 +146,7 @@
                     </a>
                   </li>
                   #}
-                  {% if currentuser.is_root %}
+                  {% if is_root %}
                     <li class="hide-on-med-and-down">
                       <a href="{{ path('rootManagement') }}">
                         <i class="fa fa-cogs sm-right" aria-hidden="true"></i>
@@ -166,17 +155,22 @@
                     </li>
                   {% endif %}
 
-                  {% if currentuser.is_admin and organization.type != 'C' %}
-                    <li class="hide-on-med-and-down">
-                      <a href="{{ path('firmSettings') }}">
+                  {% if is_super_admin or is_super_admin_undefined %}
+                    <li class="firm-settings hide-on-med-and-down">
+                      <a href="{{ is_super_admin_undefined ? '#defineSuperAdmin' : path('firmSettings') }}" {{ is_super_admin_undefined ? 'class="modal-trigger"' }}>
                         <i class="fa fa-cog sm-right" aria-hidden="true"></i>
-                        <span>{% trans %}header.settings{% endtrans %}</span>
+                        <div class="c-flex-center">
+                          <span>{% trans %}header.settings{% endtrans %}</span>
+                          {% if is_super_admin_undefined %}
+                            <span class="dd-orange-text tbd-msg">{{'tbd'|trans}}</span>
+                          {% endif %}
+                        </div>
                       </a>
                     </li>
                   {% endif %}
 
                   <li class="hide-on-med-and-down">
-                    <a href="{{ path(global.currentuser.is_admin ? 'manageUsers' : 'seeColleaguesTeams') }}">
+                    <a href="{{ path(is_admin ? 'manageUsers' : 'seeColleaguesTeams') }}">
                       <i class="fa fa-users sm-right" aria-hidden="true"></i>
                       {% set str = 'header.users' %}
                       {{ str|trans }}
@@ -194,11 +188,7 @@
                     <a href="{{ path('myActivities') }}">
                       <i class="fa fa-briefcase sm-right" aria-hidden="true"></i>
                       <span>
-                        {% if orgName != "Public" %}
-                          {% trans %}header.firmActivities{% endtrans %}
-                        {% else %}
-                          {% trans %}header.my_actions{% endtrans %}
-                        {% endif %}
+                          {{ 'header.activities'|trans }}   
                       </span>
                     </a>
                   </li>
@@ -364,20 +354,19 @@
                     <a href="{{ path('myActivities') }}">
                       <i class="fa fa-briefcase sm-right" aria-hidden="true"></i>
                       <span class="dd-text strong">
-                        {% if orgName != "Public" %}
-                          {% trans %}header.firmActivities{% endtrans %}
-                        {% else %}
-                          {% trans %}header.my_actions{% endtrans %}
-                        {% endif %}
+                        {{'header.activities'|trans}}
                       </span>
                     </a>
                   </li>
 
-                  {% if currentuser.is_admin and organization.type != 'C' %}
+                  {% if is_super_admin or is_super_admin_undefined %}
                     <li class="">
-                      <a href="{{ path('firmSettings') }}">
+                      <a href="{{ is_super_admin_undefined ? '#defineSuperAdmin' : path('firmSettings') }}" {{ is_super_admin_undefined ? 'class="modal-trigger"' }}>
                         <i class="fa fa-cog sm-right" aria-hidden="true"></i>
                         <span>{% trans %}header.settings{% endtrans %}</span>
+                        {% if is_super_admin_undefined %}
+                          <span class="dd-orange-text tbd-msg">{{'tbd'|trans}}</span>
+                        {% endif %}
                       </a>
                     </li>
                   {% endif %}
@@ -392,13 +381,13 @@
                  
                   
                   <li>
-                    <a href="{{ path(global.currentuser.is_admin ? 'manageUsers' : 'seeColleaguesTeams') }}">
+                    <a href="{{ path(is_admin ? 'manageUsers' : 'seeColleaguesTeams') }}">
                       <i class="fa fa-users sm-right" aria-hidden="true"></i>
                       <span class="dd-text">{{ 'header.users'|trans }}</span>
                     </a>
                   </li>
 
-                  {% if global.currentuser.is_root %}
+                  {% if is_root %}
                     <li class="">
                       <a href="{{ path('rootManagement') }}">
                         <i class="fa fa-cogs sm-right" aria-hidden="true"></i>
@@ -422,7 +411,7 @@
                       <span class="dd-text">{{'logout'|trans}}</span>
                     </a>
                   </li>
-                  {% if currentuser.role == 1 or currentuser.role == 4 %}
+                  {% if is_admin %}
                     <li class="plan">
                       <a class="c-flex-center" href="{{ path('priceManagement') }}">
                         <span class="dd-orange-text"> {{ 'Plan'|trans|upper ~ ' : ' ~ (organization.plan == 1 ? 'header.plan.enterprise'|trans|upper : (organization.plan == 2 ? 'header.plan.premium'|trans|upper : 'header.plan.free'|trans|upper)) }} {{ date('now').diff(organization.inserted).days < 21 ? '(' ~ 'trial'|trans|upper ~ ')' }} </span>
@@ -520,12 +509,48 @@
             </ul>
           </div>
         </div>
+
+        {# below search component should not exist in public pages #}
+        {% if global.route not in ["signup", "pricing", "terms_conditions", "cookie_policy", "home_welcome"] %}
+        
+          {% include "components/add_client_user_modal.html.twig" %}
+
+          {% if is_super_admin_undefined %}
+            <div id="defineSuperAdmin" class="modal" data-id="{{currentuser.id}}">
+              <form>   
+                <div class="modal-content">
+                  <h5>
+                    <span>{{ 'profile.defining_initial_super_user_modal.title'|trans}}</span>
+                    <i class="m-left fa fa-crown"></i>
+                  </h5>
+                  <p>{{'profile.defining_initial_super_user_modal.msg'|trans|raw}}</p>
+                  <div class="su-choice-zone">
+                      <div class="radio-holder">
+                        <input type="radio" id="selfSU" name="super_admin_choice" required="required" value="self" checked="checked">
+                        <label for="selfSU" class="required black-text"> {{'profile.defining_initial_super_user_modal.choice_self'|trans|raw }}</label>
+                      </div>
+                      <div class="radio-holder">
+                        <input type="radio" id="otherSU" name="super_admin_choice" required="required" value="other">
+                        <label for="otherSU" class="required black-text">{{'profile.defining_initial_super_user_modal.choice_other'|trans|raw }}</label>
+                      </div>
+                      <input type="hidden" name="uid">
+                  </div>
+                  <div class="flex-center-fe">
+                    <div class="btn-flat waves-effect waves-light go-prev m-right">{{'back'|trans}}</div>
+                    <div class="btn waves-effect waves-light add-su-btn">Ok</div>
+                  </div> 
+                </div>
+              </form>
+            </div>
+          {% endif %}
+        {% endif %}
     </div>
 
     <script src="{{ asset('build/runtime.js') }}"></script>
     <script src="{{ asset('js/jquery.min.js') }}"></script>
     <script src="{{ asset('js/materialize.js') }}"></script>
     <script src="{{ asset('js/base.js') }}"></script>
+    <script src="{{ asset('js/add_client_user.js') }}"></script>
     {% block javascripts %}{% endblock %}
   </body>
 </html>

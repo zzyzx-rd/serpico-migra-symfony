@@ -76,14 +76,14 @@
                     if($('.spinner-layer').length == 0){
                         $("#waitingSpinner .spinninAround").append(spinner);
                     }
-                    $('#waitingSpinner').modal("open");
+                    $('#waitingSpinner').css('z-index',9998).modal("open");
                 },1300)
             } else if (k==2) {
                 displaySpinner_2 = setTimeout(function(){
                     if($('.spinner-layer').length == 0){
                         $("#waitingSpinner .spinninAround").append(spinner);
                     }
-                    $('#waitingSpinner').modal("open");
+                    $('#waitingSpinner').css('z-index',9999).modal("open");
                 },1300)
             }
 
@@ -183,6 +183,15 @@
         return true;
     }
 
+    function copyToClipboard(element) {
+        var $temp = $("<input>");
+        $("body").append($temp);
+        $temp.val($(element).text()).select();
+        document.execCommand("copy");
+        $temp.remove();
+    }
+
+
     /*
     function getCookie(cname) {
         var name = cname + "=";
@@ -200,6 +209,22 @@
         }
         return "";
     }*/
+
+    function getTimeZoneOffset(date, timeZone) {
+        // Abuse the Intl API to get a local ISO 8601 string for a given time zone.
+        let iso = date.toLocaleString('en-CA', { timeZone, hour12: false }).replace(', ', 'T');
+      
+        // Include the milliseconds from the original timestamp
+        iso += '.' + date.getMilliseconds().toString().padStart(3, '0');
+      
+        // Lie to the Date object constructor that it's a UTC time.
+        const lie = new Date(iso + 'Z');
+      
+        // Return the difference in timestamps, as minutes
+        // Positive values are West of GMT, opposite of ISO 8601
+        // this matches the output of `Date.getTimeZoneOffset`
+        return -(lie - date) / 60 / 1000;
+    }
 
     function checkPlan(){
         if(!$('#upgradeAccount').length || !$('#upgradeAccount .modal-content').length){
@@ -357,12 +382,9 @@
                             'data-od' : e.od,
                             'data-p' : e.p,  
                         }).css('visibility','hidden');
+                    
+                        $evtElmt.find('.event-logo-container i').addClass(`${e.it.includes('fa') ? 'fa fa-' : 'mi '}${e.in} evg-${e.gg}`);
                         
-                        if(e.it.includes('fa')){
-                            $evtElmt.find('.event-logo-container i').addClass(`fa fa-${e.in} evg-${e.gg}`);
-                        } else {
-                            $evtElmt.find('.event-logo-container i').addClass(`material-icons evg-${e.gg}`).append(e.in);
-                        }
                         $eventTooltip = $($evtElmt.attr('data-tooltip'));
                         $eventTooltip.find('.evg').append(e.gt).addClass(`evg-${e.gn}`);
                         $eventTooltip.find('.t-od').append(new Date(e.od * 1000).toLocaleDateString(lg+'-'+lg.toUpperCase(),{ month: 'numeric', day: 'numeric' }));
@@ -491,5 +513,65 @@
             .done(() => location.reload());
     })
 
+    $('[name="super_admin_choice"]').on('change',function(){
+        if($('#otherSU').is(':checked')){
+            $('#addUserClient').find('.username-part .go-prev, .username-part .go-next').addClass('go-to-sam');
+            $('#addUserClient').find('.username-part .title').find('.independent-org, .ext-org').hide();
+            $('#addUserClient').find('.username-part .title').find('.int-org').show();
+            $('#addUserClient').find('.username-part').show();
+            $('#addUserClient').find('.type-part').hide();
+            $('#addUserClient').modal({dismissible:false})
+            $('#addUserClient').css('z-index', +$(this).closest('.modal').css('z-index') + 10).modal('open');
+            $('.modal-overlay.velocity-animating').css('z-index', +$(this).closest('.modal').css('z-index') + 9);
+        } else {
+            $('.chosen-su-user').remove();
+            $('#defineSuperAdmin').find('input[name="uid"]').val($('#defineSuperAdmin').data('id'));
+        }
+    })
+
+    $(document).on('click','.go-prev.go-to-sam, .go-next.go-to-sam',function(){
+        const $this = $(this);
+        var $modal = $this.closest('.modal');
+        if($this.hasClass('go-prev')){
+            $('#selfSU').prop('checked',true);
+        } else {
+            $('#defineSuperAdmin').find('input[name="uid"]').val($modal.find('input[name="uid"]').val());
+            isThereSUHolder = $('.chosen-su-user').length;
+            $suHolder = isThereSUHolder ? $('.chosen-su-user') : $(`
+                <div class="flex-center chosen-su-user">
+                    <span class="su-name m-left"></span>
+                    <i class="mi create dd-text change-su-user" style="display:none"></i>
+                </div>
+            `);
+            $suHolder.find('.input-u-img').remove();
+            $suHolder.find('.su-name').empty().append($modal.find('input[name="username"]').val());
+            $suPic = $modal.find('.input-u-img').clone();
+            $suPic.css('position','');
+            $suHolder.prepend($suPic);
+            if(!isThereSUHolder){
+                $('.su-choice-zone').append($suHolder);
+            }
+        } 
+            
+        $modal.modal('close');
+    })
+
+    $(document).on('click','.add-su-btn',function(){
+        $.post(usuurl,$('#defineSuperAdmin form').serialize())
+            .done(function(){
+                location.reload();
+            })
+    });
+
+    $(document).on('mouseover','.chosen-su-user',function(){
+        $('.change-su-user').show();
+    }).on('mouseleave','.chosen-su-user',function(){
+        $('.change-su-user').hide();
+    })
+
+    $(document).on('click','.change-su-user',function(){
+        $('#addUserClient').find('.username-part').show();
+        $('#addUserClient').modal('open');
+    });
 
 //});

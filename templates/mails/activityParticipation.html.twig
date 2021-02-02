@@ -7,7 +7,7 @@
             {% set stageEl = stage is defined and stage is not null ? stage : activity.stages.first %}
             {% set formattedSD = stageEl.startdate|format_datetime('short', 'none', pattern='dd/MM') %}
             {% set formattedED = stageEl.enddate|format_datetime('short', 'none', pattern='dd/MM') %}
-            {% set moreThanADay = stageEl.enddate.diff(stageEl.startdate).days > 0 %}
+            {% set moreThanADay = not stageEl.enddate or stageEl.enddate.diff(stageEl.startdate).days > 0 %}
             {% if stage is defined and stage is not null %}
                 {{ 'mails.activityParticipation.stage_subject_message_1'|trans ~ stage.name|raw ~ 'mails.activityParticipation.stage_subject_message_2'|trans ~ stage.activity.name|raw ~ 
                 (teamParticipation is defined ? 'mails.activityParticipation.subject_team_suffix'|trans : '') ~
@@ -30,7 +30,7 @@
         {% set stageEl = stage is defined and stage is not null ? stage : activity.stages.first %}
         {% set formattedSD = stageEl.startdate|format_datetime('short', 'none', pattern='dd/MM') %}
         {% set formattedED = stageEl.enddate|format_datetime('short', 'none', pattern='dd/MM') %}
-        {% set moreThanADay = stageEl.enddate.diff(stageEl.startdate).days > 0 %}
+        {% set moreThanADay = not stageEl.enddate or stageEl.enddate.diff(stageEl.startdate).days > 0 %}
     <body bgcolor="white">
         <table width="100%" bgcolor="white" border="0" cellpadding="0" cellspacing="0">
             <tr>
@@ -62,8 +62,7 @@
                                <p>{% trans %}mails.signature_team{% endtrans %}</p>
                                 <img src="cid:logo_img" alt="logo {{ company_name }}" style="width: {{ logo_width_px }}px">
                                 <p style="margin:0;"><strong>{{ 'mails.dealdrive_motto'|trans }}</strong><br>{{ address }} | {{ zipcode_city }}</p>
-                                {% if company_name == 'Serpico' %}<p>{{ phone }}</p>{% endif %}
-                                
+                                {% if company_name == 'Serpico' %}<p>{{ phone }}</p>{% endif %}    
                             </td>
                         </tr>
                     </table>

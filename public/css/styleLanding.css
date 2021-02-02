@@ -1644,7 +1644,7 @@ nav .collapsible-header, nav .collapsible, nav .collapsible-body, nav .collapsib
   margin-right: 17px !important;
 }*/
 
-.am-badge, .root-badge, .admin-badge, .collaborator-badge, .virtual-badge, .user-creator-badge {
+.am-badge, .root-badge, .super-admin-badge, .admin-badge, .collaborator-badge, .virtual-badge, .user-creator-badge {
   width: 1.7rem;
   height: 1.7rem;
   display: flex;
@@ -1665,7 +1665,7 @@ nav .collapsible-header, nav .collapsible, nav .collapsible-body, nav .collapsib
 
 @media screen and (max-width: 700px) {
 
-  .am-badge, .root-badge, .admin-badge, .collaborator-badge, .virtual-badge, .user-creator-badge {
+  .am-badge, .root-badge, .super-admin-badge, .admin-badge, .collaborator-badge, .virtual-badge, .user-creator-badge {
     width: 1.6rem;
     height: 1.6rem;
   }

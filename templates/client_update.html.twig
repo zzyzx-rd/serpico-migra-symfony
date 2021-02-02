@@ -24,7 +24,6 @@
         var dcurl = "{{ url('clientDelete', {cliId : client.id }) }}";
         var diurl = "{{ url('clientUserDelete', {extId : 0}) }}";
         var vcurl = "{{ url('validateClient', {cliId : client.id}) }}";
-        var viurl = "{{ url('validateClientUser', {cliId : client.id, extId : 0}) }}";
         var ucuurl = "{{ url('updateClientUser', {cliId: client.id, extUsrId: 0 }) }}"
         var surl = "{{ path('dynamicSearch')}}";
         var noFirm = "{{ 'create_client.partner.unexisting_worker_firm'|trans }}";
@@ -222,17 +221,17 @@
         text-align:center;
       }
 
-      .client-picture-zone{
+      .picture-zone{
         margin-right: 20px;
       }
 
-      .client-profile-picture{
+      .user-picture{
         border-radius: 50%;
         width: 2em;
         height:2em;
       }
 
-      .client-username-data{
+      #updateUser .username-data{
         padding-left: 0.75rem;
         min-height:66px;
       }
@@ -304,11 +303,6 @@
                         <div class="btn-flat delete-client-btn tooltipped modal-trigger" href="#deleteClient" data-id="{{client.id}}" data-tooltip="{{'delete'|trans}}" data-position="top">
                             <i class="dd-orange-text fa fa-times"></i>
                         </div>
-                        {#
-                        <div>
-                            <a class="modify-client-btn btn-flat"><i class="material-icons">create</i></a>
-                        </div>
-                        #}
                     </li>
                 </ul>   
             </div>
@@ -358,88 +352,13 @@
 
             <div class="fixed-action-btn">
               <a class="btn-floating btn-large add-user-btn tooltipped modal-trigger" href="#addUserClient" data-tooltip="{{'user_list.add_user_btn_tooltip'|trans}}" data-position="top">
-                <i class="large material-icons">add</i>
+                <i class="large mi add"></i>
               </a>
             </div>
         </div>
       </div>
     </main>
-
-  <div id="deleteExternalUser" class="modal">
-    <div class="modal-title"></div>
-    <div class="modal-content">
-      <h5>{% trans %}client.delete_external_user.modal_title{% endtrans %}</h5>
-      <p>{% trans %}client.delete_external_user.modal_content{% endtrans %}</p>
-      <div class="flex-center-fe">
-        <a class="btn waves-effect waves-light modal-close remove-client-user">{% trans %}stages.deleteStage.accept{% endtrans %}</a>
-        <a class="waves-effect waves-light modal-close btn-flat red-text">{% trans %}stages.deleteStage.cancel{% endtrans %}</a>
-      </div>
-    </div>
-  </div>
-
-  <div id="deleteClient" class="modal">
-    <div class="modal-title">
-      <h5 style="margin-left: 20px;">{% trans %}client.delete.modal_title{% endtrans %}</h5>
-    </div>
-    <div class="modal-content">
-      <p>{% trans %}client.delete.modal_content{% endtrans %}</p>
-    </div>
-    <div class="modal-footer">
-      <a
-        class="btn waves-effect waves-light modal-close remove-client">{% trans %}stages.deleteStage.accept{% endtrans %}</a>
-      <a
-        class="waves-effect waves-light modal-close btn-flat red-text">{% trans %}stages.deleteStage.cancel{% endtrans %}</a>
-    </div>
-  </div>
   
-  <div id="updateClientUser" class="modal">
-    <div class="modal-content">
-      <form method="post">
-        <h5>Détails de l'utilisateur</h5>
-        <div class="c-flex">
-          <div class="client-username-data flex-center">
-            <img src="" alt="" class="client-profile-picture">
-            <div class="flex-center">
-              <span class="client-user-name m-left"></span>
-              <i class="sm-left material-icons dd-orange-text change-username">create</i>
-            </div>
-          </div>
-          <div class="row no-margin flex-center client-username-input" style="display:none">  
-            <div class="col s12 m2">
-              <span>Nom complet</span>
-            </div>
-            <div class="col s12 m10">
-              <input type="text" name="eu-username">
-            </div>
-          </div>
-        </div>
-        <div class="c-flex">
-          <div class="row no-margin flex-center email-update">
-            <div class="col s12 m2">
-              <span>Email</span>
-            </div>
-            <div class="col s12 m10">
-              <input type="text" name="email" value="">
-              <small class="dd-orange-text error-email" style="display:none" data-bf="{{'create_user.modal.error_email'|trans}}">{{'create_user.modal.error_email'|trans}}</small>
-            </div>
-          </div>
-          <div class="row no-margin flex-center">
-            <div class="col s12 m2">
-              <span>Position</span>
-            </div>
-            <div class="col s12 m10">
-              <input type="text" name="position" placeholder="Renseigner position" value="">
-            </div>
-          </div>
-        </div>
-        <div class="flex-center-fe">
-          <a class="waves-effect waves-light modal-close btn-flat">{{'back'|trans}}</a>
-          <a class="btn waves-effect waves-light save-user-updates">Ok</a>
-        </div>
-      </form>
-    </div>
-  </div>
-
   <div id="addEmailSuccess" class="modal">
     <div class="modal-content">
       <p>{{''|trans}}</p>
@@ -452,15 +371,10 @@
     </div>
   </div>
 
-  {% include "components/add_client_user_modal.html.twig" with {creationType: 'ext', isEmailMandatory: false} %}
-
 {% endblock %}
 
 {% block javascripts %}
 <script>$('select').material_select();</script>
 <script src="{{ asset('js/dropify.min.js') }}"></script>
 <script src="{{ asset('js/client_update.js') }}"></script>
-<script src="{{ asset('js/add_client_user.js') }}"></script>
-
-
 {% endblock %}

@@ -9,6 +9,7 @@ use App\Entity\Stage;
 use App\Entity\Team;
 use App\Entity\Member;
 use App\Entity\User;
+use App\Entity\UserMaster;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
@@ -31,7 +32,7 @@ class DepartmentM extends ModelEntity {
         $departmentUsers = $department->getUsers();
         $viewableUsers = new ArrayCollection;
 
-        if($user->getRole() == 1 || $user->getRole() == 4 || $department->getMasterUser() == $user || $orgFullViewOption){
+        if($user->getRole() <= USER::ROLE_ADMIN || $department->getUserMasters()->exists(fn(int $i, UserMaster $um) => $um->getUser() == $user) || $orgFullViewOption){
 
             $viewableUsers = $departmentUsers;
 

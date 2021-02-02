@@ -205,12 +205,12 @@ class Firm extends Fixture
                 // * Results Participation Condition (opt_string_value, optionSValue property) : defines whether user accesses activity results without condition ('none'), if he is activity owner ('owner'), or if he is participating ('participant')
 
                 $optionAdmin = $optionValid;
-                $optionAdmin->setRole(1)->setOptionTrue(true)->setOptionIValue(1)->setOptionSecondaryIValue(2)->setOptionFValue(1)->setOptionSValue('none');
+                $optionAdmin->setRole(USER::ROLE_ADMIN)->setOptionTrue(true)->setOptionIValue(1)->setOptionSecondaryIValue(2)->setOptionFValue(1)->setOptionSValue('none');
                 $serpico->addOption($optionAdmin);
 
                 $optionAM = (new OrganizationUserOption)
                     ->setOName($option)
-                    ->setRole(2)
+                    ->setRole(USER::ROLE_AM)
                     ->setOptionTrue(true)
                     ->setOptionIValue(2)
                     ->setOptionSecondaryIValue(2)
@@ -220,7 +220,7 @@ class Firm extends Fixture
 
                 $optionC = (new OrganizationUserOption)
                     ->setOName($option)
-                    ->setRole(3)
+                    ->setRole(USER::ROLE_COLLAB)
                     ->setOptionTrue(false)
                     ->setOptionIValue(3)
                     ->setOptionSecondaryIValue(3)
@@ -272,12 +272,12 @@ class Firm extends Fixture
             ->setUsername("Steve Jobs")
             ->setFirstname("Steve")
             ->setLastname("Jobs")
-            ->setRole(1)
+            ->setRole(USER::ROLE_ADMIN)
             ->setPassword($this->encoder->encodePassword($jobs, "Serpico2019"));
         
         $userGlobalJobs = new UserGlobal();
         $userGlobalJobs->setUsername("Steve Jobs")
-            ->addUser($masterUser);
+            ->addUserAccount($masterUser);
         $manager->persist($userGlobalJobs);
 
         $treicher = new User();
@@ -285,12 +285,12 @@ class Firm extends Fixture
             ->setUsername("Thomas Reicher")
             ->setFirstname("Thomas")
             ->setLastname("Reicher")
-            ->setRole(3)
+            ->setRole(USER::ROLE_COLLAB)
             ->setPassword($this->encoder->encodePassword($treicher, "Serpico2019"));
 
         $userGlobalReicher = new UserGlobal();
         $userGlobalReicher->setUsername("Thomas Reicher")
-            ->addUser($masterUser);
+            ->addUserAccount($masterUser);
         $manager->persist($userGlobalReicher);
 
         $synth = new User();

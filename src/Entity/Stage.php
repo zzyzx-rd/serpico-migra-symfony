@@ -50,6 +50,10 @@ class Stage extends DbObject
     public const VISIBILITY_UNLISTED = 1;
     public const VISIBILITY_PRIVATE = 2;
 
+    public const INVIT_STATUS_CLOSED = -1;
+    public const INVIT_STATUS_CHECK = 0;
+    public const INVIT_STATUS_OPEN = 1;
+
     public const GRADED_STAGE = 0;
     public const GRADED_PARTICIPANTS = 1;
     public const GRADED_STAGE_PARTICIPANTS = 2;
@@ -85,6 +89,16 @@ class Stage extends DbObject
      * @ORM\Column(name="stg_access_link", type="string", length=255, nullable=true)
      */
     public ?string $accessLink;
+
+    /**
+     * @ORM\Column(name="stg_invit_status", type="integer", nullable=true)
+     */
+    public ?int $invitStatus;
+
+    /**
+     * @ORM\Column(name="stg_invit_closed", type="datetime", nullable=true)
+     */
+    public ?DateTime $invitClosed;
 
     /**
      * @ORM\Column(name="stg_status", type="integer", nullable=true)
@@ -214,11 +228,6 @@ class Stage extends DbObject
     public ?DateTime $deleted;
 
     /**
-     * @ORM\Column(name="stg_invit_closed", type="datetime", nullable=true)
-     */
-    public ?DateTime $invitClosed;
-
-    /**
      * @ORM\Column(name="stg_gcompleted", type="datetime", nullable=true)
      */
     public ?DateTime $gcompleted;
@@ -255,7 +264,7 @@ class Stage extends DbObject
 
     /**
      * @OneToMany(targetEntity="Participation", mappedBy="stage", cascade={"persist", "remove"}, orphanRemoval=true)
-     * @OrderBy({"team" = "ASC"})
+     * @OrderBy({"inserted" = "DESC", "id" = "DESC", "team" = "ASC"})
      */
     public $participations;
 
@@ -360,6 +369,7 @@ class Stage extends DbObject
         $visibility = 3,
         ?string $name = null,
         $accessLink = null,
+        $invitStatus = null,
         $status = 0,
         $description = null,
         $progress = -1,
@@ -388,6 +398,7 @@ class Stage extends DbObject
         $this->fFrequency = 'D';
         $this->fOrigin = 2;
         $this->accessLink = $accessLink;
+        $this->invitStatus = $invitStatus;
         $this->status = $status;
         $this->description = $description;
         $this->progress = $progress;
@@ -439,7 +450,6 @@ class Stage extends DbObject
     public function setMode(int $mode): self
     {
         $this->mode = $mode;
-
         return $this;
     }
 
@@ -451,7 +461,6 @@ class Stage extends DbObject
     public function setVisibility(int $visibility): self
     {
         $this->visibility = $visibility;
-
         return $this;
     }
 
@@ -463,7 +472,6 @@ class Stage extends DbObject
     public function setAccessLink(string $accessLink): self
     {
         $this->accessLink = $accessLink;
-
         return $this;
     }
 
@@ -475,7 +483,17 @@ class Stage extends DbObject
     public function setStatus(int $status): self
     {
         $this->status = $status;
+        return $this;
+    }
 
+    public function getInvitStatus(): ?int
+    {
+        return $this->invitStatus;
+    }
+
+    public function setInvitStatus(int $invitStatus): self
+    {
+        $this->invitStatus = $invitStatus;
         return $this;
     }
 
@@ -487,7 +505,6 @@ class Stage extends DbObject
     public function setDescription(string $description): self
     {
         $this->description = $description;
-
         return $this;
     }
 
@@ -1448,8 +1465,7 @@ class Stage extends DbObject
         if($this->enddate){
             $sE = $this->enddate->format("U");
         } else {
-            $now = new DateTime();
-            $sE = $now->format("U");
+           return null;
         }
         return max(1,$sE - $sD);
     }

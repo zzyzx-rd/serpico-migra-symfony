@@ -11,7 +11,7 @@
       {% for client in clients %}
         {% set externalUser = client.aliveExternalUsers.first %}
         {% if externalUser %}
-          {% include "components/user_list__item.html.twig" with { isIndivIndep: true, externalUser: externalUser, roles: false } %}
+          {% include "components/user_list__item.html.twig" with { isIndivIndep: true, settings: currentuser.role == 1, externalUser: externalUser, roles: false } %}
         {% endif %}
       {% endfor %}
       {# placeholder for no user in list #}

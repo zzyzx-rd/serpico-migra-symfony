@@ -8,7 +8,7 @@
     <ul class="flex-center t-event-info">
       <li>
 
-        <i class="{{ icon_type == 'fa' ? 'fa fa-' ~ icon_name : 'material-icons' }}">{{ icon_type == 'm' ? icon_name }}</i>
+        <i class="{{ ('fa' in icon_type ? (icon_type ~' fa-') : 'mi ') ~ icon_name}}"></i>
         <span class="evg evg-{{ eg_id }} evg-text-shadow">{{ eg_name ~ ': ' ~ et_name}}</span>
         {#<span class="sm-left sm-right">:</span>
         <span class="evt">{{ et_name }}</span>
@@ -54,7 +54,7 @@
 <div class="event tooltipped e-selectable {{random(0,1) ? 'self-last-update'}}" data-od="{{ onsetdate }}" data-p="{{ period }}" data-html="true" data-tooltip="{% apply escape %}{{ _self.event_tooltip(eg_id, eg_name, et_name, onsetdate, onsetdate + period, icon_type, icon_name) }}{% endapply %}">
   <i class="fa fa-map-marker event-marker">
     <div class="event-logo-container">
-        <i class="{{icon_type ? 'fa' ? 'fa fa-' ~ icon_name : 'material-icons'}} evg-{{ eg_id }} event-type unique-event">{{ icon_type == 'm' ? icon_name }}</i>
+        <i class="{{('fa' in icon_type ? (icon_type ~' fa-') : 'mi ') ~ icon_name}} evg-{{ eg_id }} event-type unique-event"></i>
     </div>
   </i>
 </div>

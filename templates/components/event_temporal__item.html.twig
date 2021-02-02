@@ -1,12 +1,16 @@
 {% if event is defined %}
 
+  {% set icon = event.eventType.icon %}
+
   <div class="event tooltipped {{ (embeddedEvents is not empty ? 'e-multiple-events' : (visibleEl ? 'e-selectable' : '') ~ ' ' ~ (lastUpdateSelf ? 'self-last-update' : ''))|trim }}" data-id="{{ event.id }}" data-od="{{ onsetdateU }}" data-p="{{ event.period }}" data-html="true" data-tooltip="{% apply escape %}{% include "components/event_holder__item.html.twig" with { event: event, em: em, embeddedEvents: embeddedEvents } %}{% endapply %}" {% if not visibleEl %}style="display:none"{% endif %}>
     <i class="fa fa-map-marker event-marker">
       <div class="event-logo-container">
         {% if embeddedEvents is not empty %}
           <span>{{ embeddedEvents|length + 1 }}</span>
         {% else %}
-          <i class="fa fa-{{event.eventType.icon.name}} evg-{{ event.eventType.eventGroup.eventGroupName.id }} event-type unique-event"></i>
+          {% if icon %}
+            <i class="{{icon.type == 'fa' ? 'fa fa-' : 'mi '}}{{icon.name}} evg-{{ event.eventType.eventGroup.eventGroupName.id }} event-type unique-event"></i>
+          {% endif %}
         {% endif %}
       </div>
     </i>

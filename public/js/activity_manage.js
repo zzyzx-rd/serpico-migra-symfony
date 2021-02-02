@@ -1,13 +1,3 @@
-
-if(performance.getEntriesByType("navigation")[0].type == "navigate" && typeof luurl != "undefined"){
-  $.get(luurl)
-    .done(function(data){
-      if(data.hasToBeReloaded){
-        location.reload();
-      }
-    })
-}
-
 function getRandomInt(min, max) {
   min = Math.ceil(min);
   max = Math.floor(max);
@@ -45,7 +35,7 @@ $('#beforeStarting').modal({
       'data-tooltip': $('.account-logo').eq(1).parent().attr('data-tooltip')
     }).tooltip();
   }
-})
+});
 
 $('.event').tooltip({
   complete: function(){
@@ -55,7 +45,26 @@ $('.event').tooltip({
 
 $('#createStage').modal({
   complete: function(){
-    $(this)[0].$el.find('.s-elmt-dates').show();
+    $modal = $(this)[0].$el;
+    $modal.find('.s-elmt-dates').show();
+    $modal.removeAttr('data-id');
+    $modal.removeAttr('data-id');
+    $modal.find('.participant-btn').each(function(i,e){
+      $(e).remove();
+    })
+    $modal.find('.btn-participant-add').show();
+    $modal.find('.events-list').empty();
+    $modal.find('.nb-events').empty();
+    $modal.find('.events').hide();
+    $modal.find('.s-name').empty().append($modal.find('.s-name').data('create'));
+    $modal.find('.s-elmt-dates').empty();
+    $modal.find('.s-name-input input').val("");
+    $modal.find('.s-name-input').show();
+    $modal.find('.s-dates-row .dp-start').pickadate('picker').set('select',new Date());
+    //$modal.find('.s-dates-row .dp-end').pickadate('picker').set('select',new Date()).set('min',new Date());
+    $modal.find('.s-dates-row .dp-end').pickadate('picker').clear();
+    $modal.find('.nb-participants').empty().append('(1)');
+    $modal.find('.s-dates-row').show();
   }
 })
 
@@ -133,6 +142,18 @@ var ci = getCookie("ci");
 var mr = $('#activities-container').hasClass('mr') ? 1 : 0;
 const $partHolder = $('ul.participants-list');
 const $stageModal = $('#createStage');
+const $eventModal = $('#updateEvent');
+const regExp = /~(.+)~/;
+var savedTZ = getCookie('tz') ? getCookie('tz') : 'Europe/Paris';
+var TZOffset = (getTimeZoneOffset(new Date(), savedTZ) - getTimeZoneOffset(new Date(), 'UTC')) * 60 * 1000;
+var c = new Date(+new Date() + TZOffset);
+var now = new Date(+new Date() + TZOffset);
+var annee = now.getFullYear();
+if (ts == "y"){
+    annee = parseInt(ci);
+}
+anneeSuiv=(annee + 1);
+
 
 if(mr){
   $('.ts-scale > *').not('.chevron').css('min-height', Math.round(900 / $('.ts-scale').children().not('.chevron').length).toString() + 'px');
@@ -232,6 +253,16 @@ $('#eventGSelector').on('change',function(){
 })
 
 
+$('[id*="eventType"]').on('change',function(){
+  const $this = $(this);
+  const $selectedOption = $(this).find('option:selected');
+  const $input = $this.parent().find('input[class*="select-dropdown"]');
+  const match = $selectedOption.text().match(regExp);
+  let icon = String.fromCodePoint && match && match[1] ? String.fromCodePoint('0x' + match[1]) : '';
+  if (!match) return;
+  $input.val($selectedOption.text().replace(regExp, icon));
+})
+
 
 function updateEvents($evgnId = null, $evnId = null) {
   $evgSelect = $('#eventGSelector');
@@ -278,8 +309,6 @@ function updateEvents($evgnId = null, $evnId = null) {
         }
       })
 
-      const regExp = /~(.+)~/;
-
       $('.select-with-fa .select-dropdown').each(function (_i, e) {
         const $this = $(e);
         const match = $this.val().match(regExp);
@@ -323,28 +352,21 @@ function updateEvents($evgnId = null, $evnId = null) {
   
 }
 
-$(function () {
+/*$(function () {*/
 
   $('a:has(.fa-plus)').on('click', function () {
     $('.process-name').empty().append($(this).closest('ul').find('header').text())
     $('.start-btn,.launch-btn,.modify-btn').removeData().data('pid', $(this).data('pid'));
   });
 
-    var now = new Date();
-    var annee = now.getFullYear();
-    if (ts == "y"){
-        annee = parseInt(ci) ;
-    }
-    anneeSuiv=(annee + 1);
   $('.curr-int-value').append(annee);
   if(ts == 'y'){
     $('.start-int-value').empty().append('1/1');
     $('.end-int-value').empty().append('31/12');
   }
   var centralElSize = mr ? 900 : $('.activity-content-stage:visible').eq(0).width();
-  var now = new Date();
   var annee = now.getFullYear();
-  var c = now;
+  //var c = now;
   
   if(ts == 't' || ts == 'w'){
     ci = getCookie("ci");
@@ -426,7 +448,7 @@ $(function () {
       
       $activities.find('.activity-component').each(function (){
         var $this = $(this);
-        var sd = $this.data("sd");
+        var sd = new Date(+new Date($this.data("sd")) + TZOffset);
         var p =  $this.data("p");
         var id = $this.data("id");
     
@@ -434,7 +456,7 @@ $(function () {
         $this.css(mr ? {'width' : "100%" } : {'height' : "100%" });
     
         $this.find('.stage-element').each(function(){
-          var ssd = $(this).data("sd");
+          var ssd = +new Date(+$(this).data("sd") + TZOffset);
           var sp =  $(this).data("p");
           
           sPctWidthSD = (ssd - sd) / p;
@@ -524,11 +546,10 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
     var ci = getCookie("ci");
     y = parseInt(ci.split('-').slice(-1)[0]);
     cInt = parseInt(ci.split('-')[1]);
-    var now = new Date(); 
-    var c = new Date();
+    var c = new Date(+new Date() + TZOffset);
     if (ts == "y") {
-      si = new Date(ci, 0, 1);
-      ei = new Date((parseInt(ci) + 1), 0, 1);
+      si = new Date(+new Date(ci, 0, 1) + TZOffset);
+      ei = new Date(+new Date((parseInt(ci) + 1), 0, 1) + TZOffset);
     } else {
       var datesInt = datesInterval(ts, y, cInt);
       var si = datesInt[0];
@@ -634,7 +655,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
       var actCurDate = $('.curDate');
   
       var echelle = centralElSize / (ei - si);
-      if (ei > now && now > si) {
+      if (ei > c && c > si) {
           dateChevron.show();
           dateChevron.css(mr ? {'top': 'calc(' + Math.round(10000 * (c - si) / (ei - si)) / 100 + '% - 2.5rem)'} :  {'left': 'calc(' + Math.round(10000 * (c - si) / (ei - si)) / 100 + '% - 10px)'});
           actCurDate.each(function (i, e) {
@@ -671,33 +692,35 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
               nbSubInt = $('.ts-scale').children().not('.chevron').length;
               var $actContentStage = $(this).closest('.activity-content-stage');
               $actContentStage.css({
-                'background' : 'repeating-linear-gradient('+ mr ? 0 : 90 +'deg, #f3ccff2b, #63009445 '+ centralElSize / nbSubInt +'px, #ffffff '+ centralElSize / nbSubInt +'px, #ffffff '+ centralElSize / (nbSubInt/2) +'px)'
+                'background' : 'repeating-linear-gradient('+ (mr ? 0 : 90).toString() +'deg, #f3ccff2b, #63009445 '+ centralElSize / nbSubInt +'px, #ffffff '+ centralElSize / nbSubInt +'px, #ffffff '+ centralElSize / (nbSubInt/2) +'px)'
               });
               actCurDate = $actContentStage.find('.curDate');
-              (ei > now && now > si) ? actCurDate.css(mr ? {'top': Math.round(10000 * (c - si) / (ei - si)) / 100 + '%'} : {'left': Math.round(10000 * (c - si) / (ei - si)) / 100 + '%'}).show() : actCurDate.hide(); 
+              (ei > c && c > si) ? actCurDate.css(mr ? {'top': Math.round(10000 * (c - si) / (ei - si)) / 100 + '%'} : {'left': Math.round(10000 * (c - si) / (ei - si)) / 100 + '%'}).show() : actCurDate.hide(); 
             }
     
             if(!mr){$(this).closest('.activity-holder').show()};
-            var sdU = parseInt($this.data("sd"));
-            var p = parseInt($this.data("p"));
+            var sdU = +$this.attr("data-sd");
+            var p = $this.attr("data-p") ? +$this.attr("data-p") : null;
             var id = $this.data("id");
-            var sa = new Date(sdU * 1000);
-            var ea = new Date((sdU + p) * 1000);
+            var sa = new Date(+new Date(sdU * 1000) + TZOffset);
+            var ea = p ? new Date(+new Date((sdU + p) * 1000) + TZOffset) : c;
             csd = Math.max(si,sa);
             ced = Math.min(ei,ea);
             actOff = (Math.min(ei,csd) - si) / (ei - si);
             actW = (ced - csd) / (ei - si);
-            $this.css(mr ? {'top': Math.round(10000 * actOff) / 100 + "%"} : {'margin-left': Math.round(10000 * actOff) / 100 + "%"});
+            minPctVisibility = 2;
+            tinyOffset = Math.round(10000 * actW) / 100 < minPctVisibility ? - minPctVisibility/2 : 0;
+            $this.css(mr ? {'top': Math.round(10000 * actOff) / 100 + tinyOffset + "%"} : {'margin-left': Math.round(10000 * actOff) / 100 + tinyOffset + "%"});
           
-            $this.css(mr ? {'height': Math.round(10000 * actW) / 100  + "%"} : {'width': Math.round(10000 * actW) / 100  + "%"});
+            $this.css(mr ? {'height': Math.max(minPctVisibility,Math.round(10000 * actW) / 100) + "%"} : {'width': Math.max(minPctVisibility,Math.round(10000 * actW) / 100) + "%"});
             $this.parent().css({'overflow': "hidden"});
     
             $this.find('.stage-element').each(function () {
     
-                var sdVal = $(this).data("sd");
-                var spVal = $(this).data("p");
-                ssd = new Date(sdVal * 1000);
-                sed = new Date((sdVal + spVal)  * 1000);
+                var sdVal = parseInt($(this).attr("data-sd"));
+                var spVal = $this.attr("data-p") ? +$(this).attr("data-p") : null;
+                ssd = new Date(+new Date(sdVal * 1000) + TZOffset);
+                sed = spVal ? new Date(+new Date((sdVal + spVal) * 1000) + TZOffset) : c;
     
                 if(ssd < ei){
                     $(this).find('.s-day').text(getCookie('ts') == 'y' ? ssd.getDate() : ssd.getDate() + '/' + (ssd.getMonth() + 1));
@@ -723,7 +746,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
                 ssd > ei || sed < si ? $(this).css('display',"none") : $(this).css('display',"block");
     
                 $(this).css({
-                  'background'    : ssd >= c ? '#5CD08F' : (sed > c ? 'linear-gradient('+ (mr ? 'to bottom' : 'to right') +', transparent, transparent ' + Math.max(1, Math.round(10000 * (c - csd) / (ced - csd)) / 100) + '%, #7942d0 ' + Math.round(10000 * (c - csd) / (ced - csd)) / 100 + '%), repeating-linear-gradient(61deg, #7942d0, #7942d0 0.5rem, transparent 0.5px, transparent 1rem)' : 'gray'),
+                  'background'    : ssd >= c ? '#5CD08F' : (sed >= c ? 'linear-gradient('+ (mr ? 'to bottom' : 'to right') +', transparent, transparent ' + Math.max(1, Math.round(10000 * (c - csd) / (ced - csd)) / 100) + '%, #7942d0 ' + Math.round(10000 * (c - csd) / (ced - csd)) / 100 + '%), repeating-linear-gradient(61deg, #7942d0, #7942d0 0.5rem, transparent 0.5px, transparent 1rem)' : 'gray'),
                   'border-radius' : '0.3rem',
                 });
                 
@@ -744,11 +767,11 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
             });
     
             $this.find('.event').each(function () {
-                var odU = $(this).data("od");
-                var ep = $(this).data("p") ? $(this).data("p") : 0;
+                var odU = parseInt($(this).attr("data-od"));
+                var ep = $(this).attr("data-p") ? parseInt($(this).attr("data-p")) : null;
     
-                od = new Date(odU * 1000);
-                erd = new Date((odU + ep)  * 1000);
+                od = new Date(+new Date(odU * 1000) + TZOffset);
+                erd = new Date(+new Date((ep ? odU + ep : c)  * 1000) + TZOffset);
                 eOff = (Math.min(ced,Math.max(csd,od)) - csd) / (ced - csd);
                 eW = (Math.min(erd,ced) - Math.max(csd,od)) / (ced - csd);
     
@@ -1285,26 +1308,8 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
 
   $('[href="#createStage"]').on('click',function(){
     const $modal = $('#createStage');
-    if($modal.data('id')){
-      $modal.removeAttr('data-id');
-      $modal.find('.participants-list--item').each(function(i,e){
-        $(e).remove();
-      })
-      $modal.find('.btn-participant-add').show();
-      $modal.find('.events-list').empty();
-      $modal.find('.nb-events').empty();
-      $modal.find('.events').hide();
-      $modal.find('.s-name').empty().append($modal.find('.s-name').data('create'));
-      $modal.find('.s-elmt-dates').empty();
-      $modal.find('.s-name-input input').val("");
-      $modal.find('.s-name-input').show();
-      $modal.find('.s-dates-row .dp-start').pickadate('picker').set('select',new Date());
-      //$modal.find('.s-dates-row .dp-end').pickadate('picker').set('select',new Date()).set('min',new Date());
-      $modal.find('.s-dates-row .dp-end').pickadate('picker').clear();
-      $modal.find('.nb-participants').empty().append('(1)');
-      $modal.find('.s-dates-row').show();
-      $modal.find('.s-link').attr('data-value',generateToken());
-    } else {
+    
+      $modal.find('.manage-invit-btn').addClass('s-unsaved tooltipped').tooltip();
       $modal.find('.s-dates-row .dp-end').pickadate('picker').clear();
       if(!$('.participants-btn').length){
         proto = $partHolder.data('prototype');
@@ -1315,10 +1320,10 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         $partElmt.find('.u').val(uid);
         $partHolder.prepend($partElmt);
       }
-    }
-    if(!$('.setup-activity').find('.fa-cog').length){
-      $('.setup-activity').prepend('<i class="fa fa-cog sm-right"></i>')/*.append('<i class="fa fa-question-circle sm-left"></i>')*/;
-    }
+    
+      if(!$('.setup-activity').find('.fa-cog').length){
+        $('.setup-activity').prepend('<i class="fa fa-cog sm-right"></i>')/*.append('<i class="fa fa-question-circle sm-left"></i>')*/;
+      }
     $('#addParticipant').removeAttr('id');
   });
 
@@ -1354,17 +1359,28 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         $modal.find('.btn-s-modify').show();
         $modal.find('.s-name').empty().append(data.name);
         $modal.find('input[name*="name"]').closest('.input-field').hide();
-        $modal.find('.s-elmt-dates').empty().append(`<i class="fa fa-calendar"></i><span class="sm-left s-elmt-date">${new Date(data.sdate.date).toLocaleDateString(lg+'-'+lg.toUpperCase(),options)}</span><span class="sm-right sm-left">-</span><span class="e-elmt-date">${new Date(data.edate.date).toLocaleDateString(lg+'-'+lg.toUpperCase(),options)}</span><div class="s-modify-dates m-left"><i class="btn-s-update btn-s-dates fa fa-pen dd-orange-text" style="display:none"></i></div>`);
-        startDate = new Date(data.sdate.date);
-        endDate = new Date(data.edate.date);
+        $modal.find('.s-elmt-dates').empty().append(`<i class="fa fa-calendar"></i><span class="sm-left s-elmt-date">${new Date(data.sdate.date ).toLocaleDateString(lg+'-'+lg.toUpperCase(),options)}</span><span class="sm-right sm-left">-</span><span class="e-elmt-date">${data.edate ? new Date(data.edate.date).toLocaleDateString(lg+'-'+lg.toUpperCase(),options) : '...'}</span><div class="s-modify-dates m-left"><i class="btn-s-update btn-s-dates fa fa-pen dd-orange-text" style="display:none"></i></div>`);
+        startDate = new Date(data.sdate.date); //new Date(+new Date(data.sdate.date) + TZOffset);
+        endDate = data.edate ? new Date(data.edate.date) : null; //new Date(+new Date(data.edate.date) + TZOffset) : null;
         $modal.find('.dp-start').pickadate('picker').set('select',startDate);
-        if(endDate - startDate > 24*60*60*1000){
+        if(endDate && endDate - startDate > 24*60*60*1000){
           $modal.find('.dp-start').pickadate('picker').set('max',new Date(endDate));
         }
-        $modal.find('.dp-end').pickadate('picker').set('select',new Date(endDate)).set('min',new Date(startDate));
+        if(endDate){
+          $modal.find('.dp-end').pickadate('picker').set('select',new Date(endDate)).set('min',new Date(startDate));
+        } else {
+          $modal.find('.dp-end').pickadate('picker').clear();
+        }
         $modal.find('.dp-start').closest('.row').hide();
-        if(!$modal.find('.s-dates-row .dates-validate').length){$modal.find('.s-dates-row').append('<div class="btn dates-validate s-dates-validate"><i class="material-icons">check</i></div>');}
+        if(!$modal.find('.s-dates-row .dates-validate').length){$modal.find('.s-dates-row').append('<div class="btn dates-validate s-dates-validate"><i class="mi check"></i></div>');}
         $modal.find('.s-dates-row').addClass('flex-center-sb').find('.col').removeClass('s6 m6');
+        $modal.find('.manage-invit-btn').removeClass('s-unsaved tooltipped').tooltip();
+        if(data.link){
+          $('input[name="link"]').val(`${window.location.origin}/s/${data.link}`);
+          if(data.istatus != -1){
+            $('#istatus').prop('checked', !data.istatus);
+          }
+        }
         $modal.find('.events').show();
         $partHolder.find('.participant-btn').remove();
         $partHolder.find('.btn-participant-add').attr('id','addParticipant');
@@ -1375,7 +1391,8 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
           $partElmt.find('.participant-field-zone').remove();
           $partElmt.find('');
           */
-          $partElmt.find('.selected-participant-logo').attr('src', p.picture);
+          $partElmt.find('.selected-participant-logo').attr('src', p.picture)
+          p.firmLogo ? $partElmt.find('.p-firm-logo').attr('src',p.firmLogo) : $partElmt.find('.p-firm-logo').remove();
           $partElmt
             .attr({
               'data-tooltip' : p.fullname + (p.synth ? ' (' + synthSuffix + ')' : ''),
@@ -1428,14 +1445,42 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
     const sdStr = $modal.find('.dp-start').val().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     const edStr = $modal.find('.dp-end').val().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     const sd = new Date(sdStr).toLocaleString('en-EN',$sentDatesOptions);
-    const ed = new Date(edStr).toLocaleString('en-EN',$sentDatesOptions);
-    const $params = {id: $modal.attr('data-id'), sd: sd, ed: ed}  
+    
+    const id = $modal.attr('data-id');
+    const $params = {id: id, sd: sd};
+    if(edStr.length){
+      $params['ed'] = new Date(edStr).toLocaleString('en-EN',$sentDatesOptions);
+    }
     $.post(usdurl,$params)
       .done(function(data){
         $('.s-dates-row').hide();
         $('.s-elmt-date').empty().append(new Date(sdStr).toLocaleString(loc,$outputOptions));
-        $('.e-elmt-date').empty().append(new Date(edStr).toLocaleString(loc,$outputOptions));
+        $('.e-elmt-date').empty().append(edStr.length ? new Date(edStr).toLocaleString(loc,$outputOptions) : '...');
         $('.s-elmt-dates').show();
+        $actHolder = $(`.stage-element[data-id=${id}]`).closest('.activity-holder');
+        $actElmt = $(`.stage-element[data-id=${id}]`).closest('.activity-component');
+
+        aid = $actHolder.data('id');
+        $(`.stage-element[data-id=${id}]`).attr({
+          'data-sd' : data.sd,
+          'data-p' : data.p,
+        });
+        asd = $actElmt.data('sd');
+        ap = $actElmt.data('p');
+        if($actElmt.find('.stage-element').length == 1){
+          $actElmt.attr('data-sd',data.sd);
+          $actElmt.attr('data-p',data.p);
+        } else {
+          
+          if(data.sd < asd){
+            $actElmt.attr('data-sd',data.sd);
+          }
+          if(data.sd + data.p > asd + ap){
+            $actElmt.attr('data-p',data.p);
+          }
+        
+        }
+        dateUpdate(false, [aid]);
       })
   });
 
@@ -1524,6 +1569,11 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
 
 
       //$stgElmt = $(`.stage-element[data-id="${$modal.find('.fa-external-link-alt').data('id')}"]`);
+      
+      $modal.find('.dp-start').pickadate('picker').clear();
+      $modal.find('.dp-end').pickadate('picker').clear();
+
+      /*
       sdate = new Date(parseInt($stgElmt.data('sd')) * 1000);
       edate = new Date((parseInt($stgElmt.data('sd')) + parseInt($stgElmt.data('p'))) * 1000);
 
@@ -1535,6 +1585,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         //.set('select',new Date())
         .set('min', sdate)
         .set('max', edate);
+      */
       
       $modal.find('.e-dates-header').show();
       $modal.find('.event-dates-content').hide();
@@ -1546,7 +1597,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
     }
   })
 
-  $('.e-set-exp-res-date').on('click',function(){
+  $('.e-set-exp-res-date, .e-set-onset-date').on('click',function(){
     $(this).parent().find('.element-input').show();
     $(this).hide();
   });
@@ -1613,11 +1664,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
       'data-p' : e.p,  
     }).css('visibility','hidden');
 
-    if(e.it.includes('fa')){
-        $evtElmt.find('.event-logo-container i').addClass(`fa fa-${e.in} evg-${e.gg}`);
-    } else {
-        $evtElmt.find('.event-logo-container i').addClass(`material-icons evg-${e.gg}`).append(e.in);
-    }
+    $evtElmt.find('.event-logo-container i').addClass(`${e.it.includes('fa') ? 'fa fa-':'mi '}${e.in} evg-${e.gg}`);   
     $eventTooltip = $($evtElmt.attr('data-tooltip'));
     $eventTooltip.find('.evg').append(e.gt).addClass(`evg-${e.gn}`);
     $eventTooltip.find('.t-od').append(new Date(e.od * 1000).toLocaleDateString(lg+'-'+lg.toUpperCase(),{ month: 'numeric', day: 'numeric' }));
@@ -1626,11 +1673,9 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
     } else {
         $eventTooltip.find('.t-rd, .fa-calendar-check').remove();
     }
-    if(e.it.includes('fa')){
-        $eventTooltip.find('i:not(.fa)').addClass(`fa fa-${e.in} evg-${e.gn}`);
-    } else {
-        $eventTooltip.find('i:not(.fa)').addClass(`material-icons evg-${e.gn}`).append(e.in);
-    }
+
+    $eventTooltip.find('i:not(.fa)').addClass(`${e.it.includes('fa') ? 'fa fa-' : 'mi '}${e.in} evg-${e.gn}`);
+    
     $eventTooltip.find('.evt').append(e.tt);
     if(!e.nbd){
         $eventTooltip.find('.event-documents').remove();
@@ -1696,7 +1741,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
     
     $.post(edurl,{id: id})
       .done(function(data){
-        $("#eventGSelector").val(data.group);
+        //$("#eventGSelector").val(data.group);
         $modal = $("#updateEvent");
         $modal.find('.btn-e-update, .e-create').hide();
         $modal.find('.btn-e-modify').show();
@@ -1788,7 +1833,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         });
 
         $modal.find('.ev-info').remove();
-        updateEvents(data.group, data.type);
+        //updateEvents(data.group, data.type);
         setTimeout(function(){
           var $evtSelector = $('[id*="eventType"]');
           //$('[id*="eventType"]').val(data.type);
@@ -1804,9 +1849,9 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
           var $headerEVG = $('<div class="ev-info flex-center"></div>');
           $headerEVG
             .append($evgCircle)
-            .append(`<span class="sm-left">${$("#eventGSelector option:selected").text()}</span>`)
+            .append(`<span class="sm-left">${data.ext ? data.group : $("#eventGSelector option:selected").text()}</span>`)
             .append('<span class="sm-left sm-right">:</span>')
-            .append(`<span>${$('[id*="eventType"] option:selected').text().split('~').slice(-1)[0].trim()}</span>`)
+            .append(`<span>${data.ext ? data.type : $('[id*="eventType"] option:selected').text().split('~').slice(-1)[0].trim()}</span>`)
             //.append(`<div class="btn-flat btn-e-update modal-trigger" href="#deleteEvent" data-id="${id}" style="display:none;"><i class="fa fa-trash"></i><div>`)
             .append(`<div class="btn-flat btn-e-update" style="display:none;"><i class="fa fa-cog"></i><div>`);
             $modal.find('header>h5').prepend($headerEVG);
@@ -1993,7 +2038,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
       $proto.addClass('updating');
       $proto.find('.dropify').dropify();
       $proto.find('.input-field').empty().append(`<span>${docTitle}</span>`);
-      $proto.find('.col:last-of-type').empty().append('<div class="btn doc-upload-validate btn-reduced-padding"><i class="material-icons">check</i></div>')
+      $proto.find('.col:last-of-type').empty().append('<div class="btn doc-upload-validate btn-reduced-padding"><i class="mi check"></i></div>')
       $proto.find('.dropify-message p').css('margin','auto');
       $docElmt.after($proto);
       $docElmt.hide();
@@ -2035,7 +2080,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
       const $sName = $modal.find('.s-name');
       $sName.hide();
       $this.find('.fa-pen').hide();
-      $this.prepend(`<div class="s-name-input-zone"><input type="text" class="s-name-input-name" value="${$sName.text()}"><div class="btn btn-reduced-padding s-name-validate"><i class="material-icons">check</i></div><div>`);
+      $this.prepend(`<div class="s-name-input-zone"><input type="text" class="s-name-input-name" value="${$sName.text()}"><div class="btn btn-reduced-padding s-name-validate"><i class="mi check"></i></div><div>`);
     } 
   })
 
@@ -2124,7 +2169,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
     const $doc = $(this).closest('.e-document');
     $doc.find('.e-doc-size').hide();
     $docTitle = $doc.find('.e-doc-title');
-    $docTitle.after(`<div class="doc-input-zone"><input type="text" class="doc-input-name" value="${$docTitle.text()}"><div class="btn btn-reduced-padding doc-name-validate"><i class="material-icons">check</i></div><div>`);
+    $docTitle.after(`<div class="doc-input-zone"><input type="text" class="doc-input-name" value="${$docTitle.text()}"><div class="btn btn-reduced-padding doc-name-validate"><i class="mi check"></i></div><div>`);
     $docTitle.hide();
 
   })
@@ -2151,21 +2196,12 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
     $('.red-text').remove();
   })
 
-  /*
+  
   $('.btn-participant-add').on('click',function(){
-      const $this = $(this);
-      if(!$this.parent().find('.edit').length){
-        const prototype = $('.participants-list').data('prototype');
-        var newForm = prototype
-              .replace(/__name__/g, $('.participants-list--item').length);
-        let $newForm = $(newForm);
-        $newForm.find('.validation-buttons').after('<select name="participantSelector" style="margin-top:45px"></select>');
-        $newForm.addClass('edit');
-        $this.before($newForm);
-        $('.participants-list').css('margin-bottom','60px');
-      }
-  })
-  */
+    setTimeout(function(){
+      $('#addUserClient').find('[class*="-part"]:visible').addClass('initial-part');
+    },200);
+  });
 
   $('.btn-add-event').on('click',function(){
     var $modal = $(this).closest('.modal');
@@ -2567,7 +2603,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
     eraseCookie('is');
   })
 
-  $('.add-enddate-zone').on('click',function(){
+  $('.add-enddate-zone, .add-on').on('click',function(){
     $('.enddate-input').show();
     $('.add-enddate-zone').parent().hide();
     $endCal = $('.s-dates-row .dp-end');
@@ -2586,7 +2622,65 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
     $endCal.pickadate('picker').clear();
   })
 
-});
+  $('.e-set-onset-date, .e-set-exp-res-date').on('click',function(){
+      $stgElmt = $(`.stage-element[data-id="${$eventModal.attr('data-sid')}"]`);
+      sdate = new Date(parseInt($stgElmt.data('sd')) * 1000);
+      edate = new Date((parseInt($stgElmt.data('sd')) + parseInt($stgElmt.data('p'))) * 1000);
+      if($(this).hasClass('e-set-onset-date')){
+        $modal.find('.dp-start').pickadate('picker')
+          .set('select',Math.min(edate, Math.max(sdate,new Date())))
+          .set('min', sdate)
+          .set('max', edate);
+      } else {
+        $modal.find('.dp-end').pickadate('picker')
+        .set('min', sdate)
+        .set('max', edate);
+      }
+  })
+
+  $(document).on('click','.manage-invit-btn:not(.s-unsaved)',function(){
+    var $modal = $('#manageStageInvit');
+    var $this = $(this);
+    $modal.find('.s-name').empty().append($stageModal.find('.s-name').text());
+    
+    if($modal.find('input[name="link"]').val() == ""){
+      
+      urlToPieces = cslurl.split('/');
+      urlToPieces[urlToPieces.length - 2] = $stageModal.data('id') ? $stageModal.data('id') : 0;
+      url = urlToPieces.join('/');
+      $.post(url,null)
+        .done(function(data){
+          $('input[name="link"]').val(`${window.location.origin}/s/${data.link}`);
+        })
+    }
+    $modal.css('z-index',+$stageModal.css('z-index') + 2).modal('open');
+    $('.modal-overlay.velocity-animating').css('z-index', +$stageModal.css('z-index') + 1);
+  })
+  
+  $('.s-link').on('click',function(){
+      copyToClipboard($('input[name="link"]'));
+      var $toast = $(`<span class="toast-link">${copiedLinkMsg}</span>`)
+      Materialize.toast($toast,1500);
+  });
+
+  $('.save-i-pref-btn').on('click',function(){
+    urlToPieces = uisurl.split('/');
+    urlToPieces[urlToPieces.length - 3] = $stageModal.data('id') ? $stageModal.data('id') : 0;
+    url = urlToPieces.join('/');
+    istatus = $('#istatus').is(':checked') ? 0 : 1;
+    const params = {istatus: istatus};
+    $.post(url,params)
+      .done(function(data){
+        $('#manageStageInvit').modal('close');
+      })
+  });
+
+
+
+
+
+
+//});
 
 
 

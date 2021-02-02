@@ -6,8 +6,8 @@
             <ul class="flex-center-sb">
                 <li>
                     <ul class="flex-center">
-                        <li class="client-picture-zone">
-                            <img class="client-profile-picture" src="{{ hasNoEmail ? asset('lib/img/user/virtual-user.png') : asset(global.userpicture(externalUser.user)) }}">
+                        <li class="picture-zone">
+                            <img class="user-picture" src="{{ hasNoEmail ? asset('lib/img/user/virtual-user.png') : asset(global.userpicture(externalUser.user)) }}">
                         </li>
                         <li>
                             <div class="flex-center">
@@ -38,15 +38,10 @@
                     </ul>
                 </li>
                 <li class="user-action-btns" style="visibility:hidden">
-                    {#<a href="#deleteExternalUser" class="waves-effect waves-light accent-4 btn-flat modal-trigger" data-eid="{{ individual.vars.data.id }}" style="margin-left: auto;"><i class="fa fa-times"></i></a>#}
-                    
-                    <a class="update-ext-user-btn btn-flat">
-                        <i class="material-icons">create</i>
+                    {#<a href="#deleteExternalUser" class="waves-effect waves-light accent-4 btn-flat modal-trigger" data-eid="{{ individual.vars.data.id }}" style="margin-left: auto;"><i class="fa fa-times"></i></a>#}            
+                    <a class="update-user-btn btn-flat">
+                        <i class="mi create"></i>
                     </a>
-                   
-                    <a class="delete-ext-user-btn btn-flat modal-trigger" href="#deleteExternalUser">
-                        <i class="fa fa-times"></i>
-                    </a> 
                 </li>
             </ul>
         </li>

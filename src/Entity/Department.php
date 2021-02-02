@@ -89,7 +89,8 @@ class Department extends DbObject
     public $targets;
 
     /**
-     * @OneToMany(targetEntity="User", mappedBy="department",cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="User", mappedBy="department",cascade={"persist","remove"})
+     * @OrderBy({"lastname" = "ASC"})
      */
     public $users;
 

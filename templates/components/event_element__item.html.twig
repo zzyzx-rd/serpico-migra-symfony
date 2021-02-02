@@ -7,10 +7,10 @@
     <ul class="flex-center t-event-info">
       <li>
         {% set eventIcon = eventType.icon %}
-        <span class="evg evg-{{eventGroup.eventGroupName.id}} evg-text-shadow">{{ eventGroupRepo.dTrans(eventGroup,global.request.locale,currentuser.organization) }}</span>
+        <span class="evg evg-{{eventGroup.eventGroupName.id}} evg-text-shadow">{{ currentuser ? eventGroupRepo.dTrans(eventGroup,global.request.locale,currentuser.organization) }}</span>
         <span class="sm-left sm-right">:</span>
         <i class="{{ eventIcon.type == 'fa' ? 'fa fa-' ~ eventIcon.name : 'material-icons' }}">{{ eventIcon.type == 'm' ? eventIcon.name }}</i>
-        <span class="evt">{{ eventTypeRepo.dTrans(eventType,global.request.locale,currentuser.organization) }}</span>
+        <span class="evt">{{ currentuser ? eventTypeRepo.dTrans(eventType,global.request.locale,currentuser.organization) }}</span>
       </li>
       <li class="t-event-dates">
         <ul class="flex-center">

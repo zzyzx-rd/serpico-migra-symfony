@@ -12,6 +12,7 @@ use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\OneToOne;
+use Doctrine\ORM\Mapping\OrderBy;
 
 /**
  * @ApiResource()
@@ -76,6 +77,8 @@ class Client extends DbObject
 
     /**
      * @OneToMany(targetEntity="ExternalUser", mappedBy="client", cascade={"persist","remove"}, orphanRemoval=true)
+     * @OrderBy({"synthetic" = "DESC", "lastname" = "ASC"})
+     * 
      * @var ArrayCollection|ExternalUser[]
      */
     public $externalUsers;

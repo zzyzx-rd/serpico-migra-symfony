@@ -103,9 +103,10 @@
     var stageInvUrl = "{{ url('accessStageThroughInvit', {token: 0}) }}";
     var privateMsg = "{{ 'private'|trans }}";
     var independentMsg = "{{ 'independant'|trans|capitalize }}";
-    {% if comesFromLogin %}
-      var luurl = "{{ url('logLastUpdatedUser') }}";
-    {% endif %}
+    var alreadyExistingMsg = "{{ 'already_existing'|trans }}";
+    var copiedLinkMsg = "{{ 'stage_invitation_modal.copied_link_msg'|trans }}";
+    var cslurl = "{{ url('createStageInvitationLink', {stgId: 0}) }}";
+    var uisurl = "{{ url('updateStageInvitationStatus', {stgId: 0}) }}";
     {% if invitationStage|default %}
       var lsurl = "{{ url('linkStageInvitationToAccount') }}";
     {% endif %}
@@ -263,7 +264,7 @@
         margin: 1rem 0;
       }
 
-      #updateStageProgressStatus, #createStage, #requestNewProcess{
+      #updateStageProgressStatus, #createStage, #requestNewProcess, #updateEvent{
         overflow-y: unset;
       }
 
@@ -579,12 +580,27 @@
       .p-delete-overlay{
         position:absolute;
         height: 50%;
-        bottom: 0;
+        bottom: -7px;
         left:25%;
         width: 50%;
         opacity:0.9;
         background-color: #FF9300;
         border-radius:50%;
+      }
+
+      .p-firm-logo{
+        position:absolute;
+        height: 50%;
+        bottom: -7px;
+        left:25%;
+        width: 50%;
+        opacity:0.9;
+        border-radius:50%;
+      }
+
+      .p-firm-logo img{
+        height:inherit;
+        width:inherit;
       }
 
       .p-delete-overlay i{
@@ -807,11 +823,11 @@
 
       .et-icon::before {
         content: attr(data-icon);
-        font-family: "Font Awesome 5 Free", "Font Awesome 5 Brands";
+        font-family: "Font Awesome 5 Free", "Font Awesome 5 Brands", "Material Icons";
         font-weight: 900;
         margin-right: .25em;
       }
-
+      /*
       .et-icon[data-icon-type="m"]::before {
         font-family: "Material Icons";
         font-weight: normal;
@@ -819,6 +835,7 @@
       .et-icon[data-icon-type="fa"]::before, .et-icon[data-icon-type="fab"]::before{
         font-family: "Font Awesome 5 Free";
       }
+      */
 
       .evg-b-1{
         background-color: purple;
@@ -1157,7 +1174,7 @@
         font-weight: 700;
       }
 
-      .e-set-exp-res-date{
+      .e-set-exp-res-date, .e-set-onset-date{
         font-size:13px;
         text-align: end;
         margin-bottom:0.5rem;
@@ -1195,7 +1212,7 @@
       .event{
         position: absolute;
         top: -2.1rem;
-        left:-0.3rem;
+        left:-0.7rem;
       }
 
       .add-f-icon{
@@ -1212,7 +1229,7 @@
         font-size: 13px;
       }
 
-      .s-link{
+      .manage-invit-btn{
         cursor: pointer;
       }
 
@@ -1228,6 +1245,7 @@
           width:50px;
           height:50px;
           border-radius:50%;
+          border:1px solid #55318e;
       }
 
       #invitationStage .select-wrapper input.select-dropdown {
@@ -1262,6 +1280,26 @@
 
       .independent-logo > .independent-letter{
         font-size:14px;
+      }
+
+      .picker__holder{
+        overflow-y: visi  ble;
+      }
+
+      .s-link > i{
+        font-size: 1rem;
+      }
+
+      #manageStageInvit label{
+        font-size: 16px;
+      }
+
+      .invit-status-zone{
+        padding: 1em 0;
+      }
+
+      #toast-container{
+        right:20%;
       }
 
       {% if route == 'accessStageThroughInvit' %}
@@ -1423,6 +1461,8 @@
         const params = {status: $('#progressStatusSelect').val()};
           $.post(url,params)
             .done(function(data){
+                location.reload();
+                /*
                 $triggerEl = $(`[href="#updateStageProgressStatus"][data-sid="${sid}"]`);
                 $triggerEl.data('progress',+$('#progressStatusSelect').val());
                 if($('#progressStatusSelect').val() == -2){
@@ -1430,6 +1470,8 @@
                 }
                 $(`[href="#updateStageProgressStatus"][data-sid="${sid}"]`).prev().find('.stage-progress-status-name').empty().append($('#progressStatusSelect option:selected').text());
                 $('#updateStageProgressStatus').modal('close');
+                */
+                
             })
             .fail(function(data){
 
@@ -1448,20 +1490,28 @@
         $option2 = $(`<option></option>`);
         $option3 = $(`<option></option>`);
         $option4 = $(`<option></option>`);
+        $option5 = $(`<option></option>`);
 
         switch($(this).data('progress')){
 
           case -4:
             $select.append($option0.attr('value',-5).append('{{"stages.stage.progress.stopped"|trans}}'))
-              .append($option1.attr('value',-4).append('{{"stages.stage.progress.suspended"|trans}}').prop('disabled',true))
+              .append($option1.attr('value',-4).append('{{"stages.stage.progress.postponed"|trans}}').prop('selected',true))
+              .append($option2.attr('value',-3).append('{{"stages.stage.progress.suspended"|trans}}'))
               .append($option2.attr('value',0).append('{{"stages.stage.progress.upcoming"|trans}}'))
               .append($option3.attr('value',1).append('{{"stages.stage.progress.ongoing"|trans}}'))
-              .append($option4.attr('value',2).append('{{"stages.stage.progress.completed"|trans}}').prop('selected',true));break;
+              .append($option4.attr('value',2).append('{{"stages.stage.progress.completed"|trans}}'));
+              break;
           case -3:
             $select.append($option0.attr('value',-5).append('{{"stages.stage.progress.stopped"|trans}}'))
-              .append($option1.attr('value',2).append('{{"stages.stage.progress.completed"|trans}}').prop('disabled',true).prop('selected',true));break;
+              .append($option1.attr('value',-4).append('{{"stages.stage.progress.postponed"|trans}}'))
+              .append($option2.attr('value',-3).append('{{"stages.stage.progress.suspended"|trans}}').prop('selected',true))
+              .append($option3.attr('value',0).append('{{"stages.stage.progress.upcoming"|trans}}'))
+              .append($option4.attr('value',1).append('{{"stages.stage.progress.ongoing"|trans}}'))
+              .append($option5.attr('value',2).append('{{"stages.stage.progress.completed"|trans}}').prop('disabled',true));
+              break;
           case -2:
-            $select.append($option0.attr('value',-2).append('{{"stages.stage.progress.reopened"|trans}}').prop('disabled',true).prop('selected',true))
+            $select.append($option0.attr('value',-2).append('{{"stages.stage.progress.reopened"|trans}}').prop('selected',true))
               .append($option1.attr('value',2).append('{{"stages.stage.progress.completed"|trans}}'));
               if(r){
                 $select.append($option2.attr('value',3).append('{{"stages.stage.progress.finalized"|trans}}'));
@@ -1469,19 +1519,25 @@
               break;
           case 0:
             $select.append($option0.attr('value',-5).append('{{"stages.stage.progress.stopped"|trans}}'))
-              .append($option1.attr('value',-3).append('{{"stages.stage.progress.suspended"|trans}}'))
-              .append($option2.attr('value',0).append('{{"stages.stage.progress.upcoming"|trans}}').prop('disabled',true))
-              .append($option3.attr('value',1).append('{{"stages.stage.progress.ongoing"|trans}}').prop('selected',true))
-              .append($option4.attr('value',2).append('{{"stages.stage.progress.completed"|trans}}'));break;
+              .append($option1.attr('value',-4).append('{{"stages.stage.progress.postponed"|trans}}'))
+              .append($option2.attr('value',-3).append('{{"stages.stage.progress.suspended"|trans}}'))
+              .append($option3.attr('value',0).append('{{"stages.stage.progress.upcoming"|trans}}').prop('selected',true))
+              .append($option4.attr('value',1).append('{{"stages.stage.progress.ongoing"|trans}}'))
+              .append($option5.attr('value',2).append('{{"stages.stage.progress.completed"|trans}}'));
+              break;
           case 1:
             $select.append($option0.attr('value',-5).append('{{"stages.stage.progress.stopped"|trans}}'))
-              .append($option1.attr('value',-3).append('{{"stages.stage.progress.suspended"|trans}}'))
-              .append($option2.attr('value',1).append('{{"stages.stage.progress.ongoing"|trans}}').prop('disabled',true))
-              .append($option3.attr('value',2).append('{{"stages.stage.progress.completed"|trans}}').prop('selected',true));break;
+              .append($option1.attr('value',-4).append('{{"stages.stage.progress.postponed"|trans}}'))
+              .append($option2.attr('value',-3).append('{{"stages.stage.progress.suspended"|trans}}'))
+              .append($option3.attr('value',0).append('{{"stages.stage.progress.upcoming"|trans}}'))
+              .append($option4.attr('value',1).append('{{"stages.stage.progress.ongoing"|trans}}').prop('selected',true))
+              .append($option5.attr('value',2).append('{{"stages.stage.progress.completed"|trans}}'));
+              break;
           case 2:
             $select.append($option0.attr('value',-2).append('{{"stages.stage.progress.reopened"|trans}}'))
               .append($option1.attr('value',1).append('{{"stages.stage.progress.ongoing"|trans}}'))
-              .append($option2.attr('value',2).append('{{"stages.stage.progress.completed"|trans}}').prop('disabled',true).prop('selected',true));break;
+              .append($option2.attr('value',2).append('{{"stages.stage.progress.completed"|trans}}').prop('selected',true));
+              break;
         };
         $select.material_select();
     })
@@ -1533,7 +1589,7 @@
                 if($btn.hasClass('final-step-btn')){
                   actIPInfoHmtl = /*html*/`<div class="ip-info">
                       <a class="btn-flat no-padding">
-                        <i class="material-icons">layers</i>
+                        <i class="mi layers"></i>
                         <span>${data.name}</span>
                       </a>
                       ${data.canEdit ? '<a class="btn-flat tooltipped" href="{{ url("manageActivityElement",{entity:"iprocess", elmtId: "~" }) }}" data-position="top" data-tooltip="{% trans %}processes.modify_prior_launching_act{% endtrans %}"><i class="fa fa-cog"></i></a>' : ''}
@@ -1608,7 +1664,7 @@
                         {% trans %}stages.stage.progress.title{% endtrans %} : <span class="stage-progress-status-name">${msg}</span>
                       </div>
                       <div class="btn-flat no-padding modal-trigger" href="#updateStageProgressStatus" data-progress="${stage.progress}" data-sid="${stage.id}" data-r="${stage.r}">
-                        <i class="material-icons">create</i>
+                        <i class="mi create"></i>
                       </div>
                     </div>`);
 
@@ -1633,7 +1689,7 @@
 
                     $datesElmt = $(`<div class="stage-dates">
                           <span class="stage-duration">
-                            <i class="material-icons">access_time</i>
+                            <i class="mi access_time"></i>
                             <span>{% trans %}process_stages.dates_definition.defined_duration.timespan{% endtrans %} :</span>
                             ${stage.ddates ? new Date(stage.startdate.date).toLocaleDateString('{% trans %}long_locale{% endtrans %}',dateOptions) + ' - ' + new Date(stage.enddate.date).toLocaleDateString('{% trans %}long_locale{% endtrans %}',dateOptions) : stage.dperiod + stage.dfreq }
                           </span>
@@ -1651,7 +1707,7 @@
                       $crtElmts = $(`<section class="output">
                       <div class="title">
                         <i class="fa fa-cubes green-text"></i>{% trans %}stages.output_type.title{% endtrans %} : {% trans %}activity_elements.criteria{% endtrans %}
-                        ${stage.oReadiness ? '<i class="material-icons green-text readiness">check_circle</i>' : '<i class="material-icons orange-text readiness tooltipped" data-position="top" data-tooltip="{% trans %}activity_elements.to_configure{% endtrans %}">error</i>'}
+                        ${stage.oReadiness ? '<i class="mi check_circle green-text readiness"></i>' : '<i class="mi error orange-text readiness tooltipped" data-position="top" data-tooltip="{% trans %}activity_elements.to_configure{% endtrans %}"></i>'}
                       </div>
                       </section>`);
                       $crtElmts.find('.tooltipped').tooltip();
@@ -1667,7 +1723,7 @@
                       $crtElmts = $(`<section class="output">
                       <div class="title">
                         <i class="fa fa-cubes green-text"></i>{% trans %}stages.output_type.title{% endtrans %} : {% trans %}activity_elements.survey{% endtrans %}
-                        ${stage.oReadiness ? '<i class="material-icons green-text readiness">check_circle</i>' : '<i class="material-icons orange-text readiness tooltipped" data-position="top" data-tooltip="{% trans %}activity_elements.to_configure{% endtrans %}">error</i>'}
+                        ${stage.oReadiness ? '<i class="mi check_circle green-text readiness"></i>' : '<i class="mi error orange-text readiness tooltipped" data-position="top" data-tooltip="{% trans %}activity_elements.to_configure{% endtrans %}"></i>'}
                       </div>
                       </section>`);
                       $crtElmts.find('.tooltipped').tooltip();
@@ -1683,7 +1739,7 @@
                     const $partElmts = $(`<section class="participants">
                       <div class="title">
                         <i class="fa fa-users blue-text"></i>{% trans %}activity_elements.participants{% endtrans %}
-                        ${stage.pReadiness ? '<i class="material-icons green-text readiness">check_circle</i>' : '<i class="material-icons orange-text readiness tooltipped" data-position="top" data-tooltip="{% trans %}activity_elements.to_configure{% endtrans %}">error</i>'}
+                        ${stage.pReadiness ? '<i class="mi check_circle green-text readiness"></i>' : '<i class="mi error orange-text readiness tooltipped" data-position="top" data-tooltip="{% trans %}activity_elements.to_configure{% endtrans %}"></i>'}
                       </div>
                     </section>`);
                     $partElmts.find('.tooltipped').tooltip();
@@ -1698,7 +1754,7 @@
                           ${team.img ? '<img src="'+team.img+'"' : '<span class="no-picture tooltipped" data-position="top" data-html="true" data-tooltip="'+tooltipMsg+'"><i class="fa fa-users"></i></span>'}
 
                           ${team.name} ${team.type == 0 ? '(T)' : (team.type == -1 ? '(P)' : '')}
-                          ${team.status == 3 ? '<i class="material-icons green-text readiness">check_circle</i>' : ''}
+                          ${team.status == 3 ? '<i class="mi check_circle green-text readiness"></i>' : ''}
                           </div>`);
                         $partElmt.find('.tooltipped').tooltip();
                         $partElmts.append($partElmt);
@@ -1708,7 +1764,7 @@
                           ${individual.img ? '<img src="'+individual.img+'"' : '<span class="no-picture">'+individual.fnfl.toUpperCase()+'</span>'}
 
                           ${individual.name} ${individual.type == 0 ? '(T)' : (individual.type == -1 ? '(P)' : '')}
-                          ${individual.status == 3 ? '<i class="material-icons green-text readiness">check_circle</i>' : ''}
+                          ${individual.status == 3 ? '<i class="mi check_circle green-text readiness"></i>' : ''}
                           </div>`);
                         $partElmts.append($partElmt);
                     });
@@ -1792,7 +1848,6 @@
     });
   </script>
   <script src="{{ asset('js/activity_manage.js') }}"></script>
-  <script src="{{ asset('js/add_client_user.js') }}"></script>
   <script src="{{ asset('js/dropify.min.js') }}"></script>
 {% endblock %}
 
@@ -1909,7 +1964,7 @@
         <ul class="flex-center-fe scale-settings">
           <li class="flex-center">
               <div class="view-type-value flex-center">
-                <i class="material-icons">fiber_smart_record</i>
+                <i class="mi fiber_smart_record"></i>
                 <span class="sm-left">{{ 'scale'|trans|upper ~ ' :'}}</span>
                 <div class="timescale-zone">
                   <a class="btn-flat no-padding timescale-change-btn flex-center">
@@ -1985,7 +2040,7 @@
               <div class="flex-center inviting-org-logo-container no-padding">
                 <img class="inviting-org-logo" src="{{ asset(global.organizationLogo(organization)) }}" alt="">
                 <span class="strong dd-text m-left sm-right">{{organization.commname}}</span>
-                <span>{{'stage_invitation_modal.invitation_msg'|trans}}</span>
+                <span>{{'stage_invitation_page.invitation_msg'|trans}}</span>
               </div>
             </p>
           </div>
@@ -2037,8 +2092,8 @@
             
             <li class="flex-center status-selector {{ sortingTypeCookie ~'-'~ status }} {% if outputStatusCookie is null %}showable{% endif %}" data-{{sortingTypeCookie}}-status="{{ status }}">
               <div class="stage-item-button no-margin">
-                <i class="material-icons white-text tooltipped to-hide" data-position="top" data-tooltip="{{ 'activities.hide_group'|trans }}" style="display: none;color:inherit!important">clear</i>
-                <i class="material-icons white-text tooltipped to-show" data-position="top" data-tooltip="{{ 'activities.display_group'|trans }}" style="display: none;">check</i>
+                <i class="mi clear white-text tooltipped to-hide" data-position="top" data-tooltip="{{ 'activities.hide_group'|trans }}" style="display: none;color:inherit!important"></i>
+                <i class="mi check white-text tooltipped to-show" data-position="top" data-tooltip="{{ 'activities.display_group'|trans }}" style="display: none;"></i>
               </div>
               <span class="m-left">{{ ('activities.' ~ sortingTypeCookie ~ '_status.' ~ status)|trans }}</span>
             </li>
@@ -2218,7 +2273,7 @@
                 {% if displayProcesses %}
                   <div class="col s2 center">
                     <div class="flex-center process-detail">
-                      <i class="material-icons">layers</i>
+                      <i class="mi layers"></i>
                       <span class="m-left">{{ 'activities.orphans'|trans }}</span>
                     </div>
                   </div>
@@ -2264,7 +2319,7 @@
               <div class="row no-margin flex-center">
                 <div class="col s2 center">
                   <div class="flex-center process-detail">
-                    <i class="material-icons">layers</i>
+                    <i class="mi layers"></i>
                     <span class="m-left">{{ process_name }}</span>
                   </div>
                 </div>
@@ -2414,7 +2469,7 @@
 
     {% if currentuser and currentuser.role != 3 %}
       <div id="fixedButton create-act-btn" class="fixed-action-btn">
-          <a class="btn-floating btn-large modal-trigger" href="#createStage" onclick="onAddProcessClick('{{ currentuser.organization.id }}')" data-oid="{{currentuser.organization.id}}"><i class="material-icons">add</i></a>
+          <a class="btn-floating btn-large modal-trigger" href="#createStage" onclick="onAddProcessClick('{{ currentuser.organization.id }}')" data-oid="{{currentuser.organization.id}}"><i class="mi add"></i></a>
           {#
           <ul>
               <li><a class="btn-floating orange lighten-2 tooltipped modal-trigger" data-position="left" data-delay="50" data-tooltip="{% trans %}tooltip.template.create_from_scratch{% endtrans %}" href="{{ path('activityInitialisation',{'elmt' : 'template'}) }}">
@@ -2438,10 +2493,10 @@
   </div>
 
   <p class="center">
-    <a class="btn" href="{{path('login')}}">{{'stage_invitation_modal.connection_btn_msg'|trans}}</a>
+    <a class="btn" href="{{path('login')}}">{{'stage_invitation_page.connection_btn_msg'|trans}}</a>
     {{'or'|trans}}
-    <a class="dd-text strong" href="{{path('signup')}}">{{'stage_invitation_modal.signup_msg'|trans}}</a>
-    <span>{{'stage_invitation_modal.end_msg'|trans}}</span>
+    <a class="dd-text strong" href="{{path('signup')}}">{{'stage_invitation_page.signup_msg'|trans}}</a>
+    <span>{{'stage_invitation_page.end_msg'|trans}}</span>
   </p>
 
   {% endif %}
@@ -2460,10 +2515,10 @@
                 <div class="flex-center ip-zone">
                   <span class="sm-right sm-left">{{'activities.create.linked_to'|trans}}</span>
                   <div class="ip-value flex-center">
-                    <i class="material-icons">layers</i>
+                    <i class="mi layers"></i>
                     <span class="sm-right sm-left">{{'activities.create.no_ip'|trans}}</span>
                   </div>
-                  <i class="material-icons">create</i>
+                  <i class="mi create"></i>
                 </div>
               {% endif %}
               <div class="s-elmt-dates"></div>
@@ -2508,7 +2563,7 @@
                   </div>
                   <div>
                     <span class="black-text">{{'activities_dashboard.create_stage_modal.participants_add_second_choice'|trans|upper }}</span>
-                    <i class="fa fa-link sm-left s-link dd-orange-text"></i>
+                    <i class="fa fa-cog sm-left dd-orange-text manage-invit-btn tooltipped" data-tooltip="{{'stage_invitation_modal.save_stage_before_config'|trans}}"></i>
                   </div>
                 
                 </div>
@@ -2527,7 +2582,7 @@
             <div class="events" style="display:none">
                 <div class="events-title flex-center-sb">
                   <div class="flex-center">
-                    <i class="material-icons m-right">offline_bolt</i>
+                    <i class="mi offline_bolt m-right"></i>
                     <span class="bold-1">{{'activities.events'|trans}}</span><span class="nb-events sm-left bold-1"></span>
                   </div>
                   <div>
@@ -2556,30 +2611,22 @@
               </div>
             </div>      
             #}
-        </div>
-            
+          <div class="flex-center-fe">
+              <div class="btn btn-s-modify waves-effect waves-light modal-close" style="display:none">
+                Ok
+              </div>
 
-        <div class="modal-footer flex-center-fe">
-            {#
-            <div class="button-field">
-            {{ form_widget(newActivityForm.complexify) }}
-            </div>
-            #}
-            {#}
-            <div class="btn-flat btn-s-modify modify-update dd-text flex-center" style="display:none">
-              <i class="fa fa-cog sm-right"></i>
-              <span>{{ 'update'|trans ~ ' / ' ~ 'modify'|trans }}</span>
-            </div>
-            #}
-            <div class="btn btn-s-modify waves-effect waves-light modal-close" style="display:none">
-              Ok
-            </div>
-
-            <div class="button-field">
-              {#<a class="waves-effect waves-green btn final-step-btn modal-close">{% trans %}activities.create.submit{% endtrans %}</a>#}
-              {{ form_widget(newActivityForm.submit) }}
-            </div>
+              <div class="button-field">
+                {#<a class="waves-effect waves-green btn final-step-btn modal-close">{% trans %}activities.create.submit{% endtrans %}</a>#}
+                {{ form_widget(newActivityForm.submit) }}
+              </div>
+          </div>
         </div>
+
+        {#
+        <div class="modal-footer flex-center-fe">            
+        </div>
+        #}
         {{ form_rest(newActivityForm) }}
         {{ form_end(newActivityForm) }}
       </div>
@@ -2924,9 +2971,10 @@
                 <div class="e-dates-header flex-center-sb">
                   <div>
                     <i class="fa fa-clock"></i>
-                    {% set occurenceDate = event is null ? date('now')|format_datetime('short', 'none', pattern='dd/MM') : event.onsetDate|format_datetime('short', 'none', pattern='dd/MM') %}
+                    {#{% set occurenceDate = event is null ? date('now')|format_datetime('short', 'none', pattern='dd/MM') : event.onsetDate|format_datetime('short', 'none', pattern='dd/MM') %}#}
+                    {% set isOnsetDate = event is not null and event.onsetDate is not null %}
                     {% set isExpResDate = event is not null and event.expResDate is not null %}
-                    <span class="dd-text">{{ 'activity_elements.events.dates.onset_date'|trans|capitalize }}</span><span class="sm-left sm-right">:</span><span class="date-choice e-odate">{{ occurenceDate }} </span>  
+                    <span class="dd-text">{{ 'activity_elements.events.dates.onset_date'|trans|capitalize }}</span><span class="sm-left sm-right">:</span><span class="date-choice e-odate">{{ 'now'|trans }} </span>  
                     
                     {% if isExpResDate %}
                       {% set resolutionDate = event.onsetDate|format_datetime('short', 'none', pattern='dd/MM') %}
@@ -2939,10 +2987,16 @@
                 </div>
                 <div class="row flex-center event-dates-content" style="display:none">
                   <div class="col m5 s12 onset-date-elmt">
-                      <div class="element-input">
+                      <div class="element-input" {% if not isOnsetDate %}style="display:none"{% endif %}>
                         {{ form_label(eventForm.onsetDate) }}
                         {{ form_widget(eventForm.onsetDate) }}
                       </div>
+                       {% if not isOnsetDate %}
+                        <div class="e-set-onset-date flex-center">
+                          <i class="dd-text fa fa-pen"></i>
+                          <span>{{'activity_elements.events.dates.provide_onset_date'|trans}}</span>
+                        </div>
+                      {% endif %}
                   </div>
                   <div class="col m6 s12 exp-res-date-elmt">
                       <div class="element-input" {% if not isExpResDate %}style="display:none"{% endif %}>
@@ -2950,7 +3004,7 @@
                         {{ form_widget(eventForm.expResDate) }}
                       </div>
                       {% if not isExpResDate %}
-                        <div class="e-set-exp-res-date">
+                        <div class="e-set-exp-res-date flex-center-fe">
                           <i class="dd-text fa fa-pen"></i>
                           <span>{{'activity_elements.events.dates.provide_exp_res_date'|trans}}</span>
                         </div>
@@ -2958,7 +3012,7 @@
                   </div>
                   <div class="col m1 s12">
                     <div class="btn e-dates-validate btn-reduced-padding">
-                      <i class="material-icons">check</i>
+                      <i class="mi check"></i>
                     </div>
                   </div>
                 </div>
@@ -2968,7 +3022,7 @@
                 <div class="e-documents-header flex-center-sb">
                   <div>
                     <i class="fa fa-file"></i>
-                    <span class="dd-text">{{ 'activity_elements.events.documents.title'|trans|capitalize }}</span><span class="sm-left sm-right">:</span><span class="documents-number" data-none="{{ 'none_m'|trans }}">{{ '(' ~ 'none_m'|trans ~ ')' }} </span>
+                    <span class="dd-text">{{ 'activity_elements.events.documents.title'|trans|capitalize }}</span><span class="sm-left sm-right">:</span><span class="documents-number" data-none="{{ 'none_m'|trans|capitalize }}">{{ '(' ~ 'none_m'|trans|capitalize ~ ')' }} </span>
                   </div>
 
                   <div class="btn-flat dd-orange-text btn-e-update add-e-document tooltipped" data-tooltip="{{ 'activity_elements.events.documents.add_document'|trans }}">
@@ -2984,7 +3038,7 @@
               <div class="no-margin flex-center-sb e-comments-header">
                 <div>
                   <i class="fa fa-comments"></i>
-                  <span class="dd-text">{{ 'activity_elements.events.comments.title'|trans|capitalize }}</span><span class="sm-left sm-right">:</span><span class="comments-number" data-none="{{ 'none_m'|trans }}">{{ '(' ~ 'none_m'|trans ~ ')' }} </span>  
+                  <span class="dd-text">{{ 'activity_elements.events.comments.title'|trans|capitalize }}</span><span class="sm-left sm-right">:</span><span class="comments-number" data-none="{{ 'none_m'|trans|capitalize }}">{{ '(' ~ 'none_m'|trans|capitalize ~ ')' }} </span>  
                 </div>
                 <div> 
                   <div class="btn-flat dd-orange-text btn-e-update add-e-comment tooltipped" data-tooltip="{{ 'activity_elements.events.comments.add_comment'|trans }}" data-normal-msg="{{ 'activity_elements.events.comments.add_comment'|trans }}" data-upload-msg="{{ 'activity_elements.events.comments.upload_before_comment'|trans }}">
@@ -3257,26 +3311,31 @@
       </div>
     {% endif %}
 
-    <div id="linkManage" class="modal">
+    <div id="manageStageInvit" class="modal">
         
         <div class="modal-content">
-          <h5>{{ 'stage_invitation_modal.modal_title'|trans ~ ' - ' ~ 'coucou' }}</h5>
+          <h5>{{ '<span class="s-name"></span> - invit_mgt_title'|replace({
+                    'invit_mgt_title' : 'stage_invitation_modal.modal_title'|trans,
+                })|raw }}
+          </h5>
           <p>
-            <div class="flex-center no-padding">
+            <div class="flex-center">
+              <span>{{'stage_invitation_modal.msg_link'|trans }}</span>
+              <a href="#" class="btn s-link s-unsaved small-control-btn sm-left dd-orange-bg"><i class="fa fa-link"></i></a>
+              <input type="hidden" name="link" value="">
             </div>
-            <div class="input-field">
-              <span>{{'stage_invitation_modal.link_msg'|trans ~ ':'}}</span>
+            <div class="invit-status-zone">
+              <input type="checkbox" class="filled-in" id="istatus" name="istatus" checked/>
+              <label class="black-text" for="istatus">{{'stage_invitation_modal.manage_every_invit'|trans}}</label>
             </div>
           </p>
 
           <div class="flex-center-fe">
-              <a class="waves-effect waves-light modal-close btn-flat red-text link-decline-stage-btn">{{'stage_invitation_modal.decline'|trans}}</a>
-              <a class="btn waves-effect waves-light modal-close link-accept-stage-btn">Confirmer</a>
+              <a class="waves-effect waves-light modal-close btn-flat">{{'back'|trans}}</a>
+              <a class="btn waves-effect waves-light save-i-pref-btn">{{'save'|trans}}</a>
           </div>
         </div>
 
     </div>
-
-    {% include "components/add_client_user_modal.html.twig" with {creationType: 'unk', isEmailMandatory: false, addingParticipant: true} %}
 
 {% endblock content %}

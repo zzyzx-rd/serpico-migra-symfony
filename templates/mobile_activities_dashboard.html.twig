@@ -97,10 +97,6 @@
     var lkEvtToStgMsg = "{{ 'activity_elements.stages.multiple_stages_modal.add_event_title'|trans }}";
     var modifiedMsg = "{{ 'modified'|trans }}";
     var selfAcctIds = "{{ currentuser.userGlobal.userAccounts|map(u => u.id)|join(', ') }}";
-    {% if comesFromLogin %}
-      var luurl = "{{ url('logLastUpdatedUser') }}";
-    {% endif %}
-
   </script>
   <style>
       .elmts{
@@ -566,12 +562,27 @@
       .p-delete-overlay{
         position:absolute;
         height: 50%;
-        bottom: 0;
+        bottom: -7px;
         left:25%;
         width: 50%;
         opacity:0.9;
         background-color: #FF9300;
         border-radius:50%;
+      }
+
+      .p-firm-logo{
+        position:absolute;
+        height: 50%;
+        bottom: -7px;
+        left:25%;
+        width: 50%;
+        opacity:0.9;
+        border-radius:50%;
+      }
+
+      .p-firm-logo img{
+        height:inherit;
+        width:inherit;
       }
 
       .p-delete-overlay i{

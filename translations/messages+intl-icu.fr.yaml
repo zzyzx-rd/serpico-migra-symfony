@@ -34,6 +34,8 @@ lastname: Nom
 name: nom
 password: mot de passe
 email: Email
+position: Poste/Fonction
+department: Département
 ascending: ASC
 descending: DESC
 sort: Tri
@@ -114,6 +116,10 @@ partner_firm: Entreprise partenaire
 added_on: Ajouté le
 private: Privé
 already_existing: Déjà existant
+now: Maintenant
+tbd: A déterminer
+open_end: Fin ouverte
+yourself: Vous-même
 
 head_meta:  
   content: Traitement des opérations client et business en ligne sous la forme de tableaux interactifs. Dealdrive offre une solution de suivi client organisé sous d'un calendrier interactif, où l'on peut échanger documents et updates; dans un but d'un suivi plus fluide et d'une réduction des emails. Utilisez la solution de suivi clients Dealdrive afin d'améliorer vos intéractions clients et collobateurs. 
@@ -724,7 +730,7 @@ header:
   firmSettings: "Entreprise :"
   my_actions: Mes actions et démarches
   my_documents: Mes documents
-  firmActivities: Activités
+  activities: Activités
   firmConfig: Paramètres groupe
   firms: Entreprises
   root_mgt: Gestion avancée
@@ -2165,9 +2171,16 @@ profile:
   access_profile: Accéder à mon profil
   total_nb_activities: Nombre total d'activités
   administrator: Administrateur
+  super_administrator: Super Administrateur
   change_account_modal:
     title: Changement de compte
     msg: Sélectionnez le compte sur lequel vous souhaitez passer
+  defining_initial_super_user_modal:
+    title: Choix du super administrateur initial
+    msg: Vous souhaitez accéder aux <span class="strong">paramètres d'entreprise</span>, <span class="dd-text strong">uniquement réservés à un super administrateur</span> pour des questions de sécurité, et qui n'existe pas encore dans votre entreprise. Confirmez-vous vouloir devenir cet utilisateur ?
+    choice_self: <span class="strong">Oui</span>, je confirme avoir les habilitations nécessaires à devenir ce super administrateur
+    choice_other: <span class="strong">Non</span>, je préfère définir un utilisateur à qui sera conféré ce role
+
   page_title: Mon profil
   mobile_header_title: Mon profil
   my_results: Mes résultats
@@ -2183,6 +2196,7 @@ profile:
   perf: Performance
   no_perf: Aucun critère de performance
   manage:
+    modify_revoke: Modifier / Révoquer les droits
     email_confirmation_modal:
       title: Confirmation de l'adresse email
       content: Pour finaliser la modification de votre adresse e-mail, nous avons envoyé un e-mail à l'adresse <span class="strong email-confirm-address"></span>. Il vous suffit de cliquer sur le lien figurant dans l'e-mail pour terminer l'opération.
@@ -2199,6 +2213,10 @@ profile:
       title: Suppression de compte entreprise
       content: Etes-vous sûr de vouloir supprimer votre compte associé à l'entreprise 
       end: Cette opération irréversible vous enlèvera de toutes les activités et événements liés.
+    revoking_super_admin_modal:
+      title: Votre role actuel de super admninistrateur
+      content: Souhaitez-vous révoquer votre role de super administrateur ? Choisissez qui héritera de ce rôle dans votre entreprise
+      end: Le nouveau super administrateur pourra modifier votre role, qui repasse par défaut à celui de simple administrateur.
   target:
     title: Objectif(s)
     organization: Mon objectif d'entreprise
@@ -2601,8 +2619,8 @@ activity_elements:
       manage_dates: Gérer les dates
       onset_date: Date de survenance
       resolution_date: Fin
-      provide_onset_date: Indiquer une date de survenance
       exp_res_date: Date de résolution espérée
+      provide_onset_date: Indiquer une date de survenance
       provide_exp_res_date: Indiquer une date de finalisation
     tooltip:
       shared_document: document
@@ -3517,6 +3535,7 @@ user_list:
   add_user_btn_tooltip: Ajouter utilisateur/partenaire
   add_user_modal:
     type_title: Choisissez ce que vous voulez ajouter
+    type_act_title: Ce participant est un
     internal: Membre de mon entreprise
     external: Membre d'un partenaire
     firm_title: Nom du partenaire/client
@@ -3530,7 +3549,8 @@ user_list:
     without_email_info: Si vous ne renseignez pas d'adresse email, cet utilisateur ne pourra pas interagir avec vous - vous pouvez toujours la renseigner par la suite
     new_firm_database: Nouvelle entreprise en base
     new_user_database: Nouvel utilisateur en base
-    unexisting_client: Aucun de vos partenaires ne semble avoir ce nom. Vous pouvez en créer un nouveau en cliquant sur <span class="strong">Retour</span>, afin d'y insérer le nouvel utilisateur
+    new_participant_database: Nouveau participant en base
+    unexisting_element: Aucun de vos {element}s ne semble avoir ce nom. Vous pouvez en créer un nouveau en cliquant sur <span class="strong">Retour</span>, afin de l'insérer
     selecting_account_title_suffix: via son compte
 
 
@@ -3666,9 +3686,8 @@ activities_dashboard:
 
 firm_management:
   page_title: Paramètres d'entreprise
-  
   manage_updates: Updates
-  manage_admin: Administrateurs et utilisateurs
+  manage_admin: Administrateurs et droits associés
   manage_activity: Activités
   profile:
     title: Données du compte
@@ -3682,15 +3701,21 @@ firm_management:
       total_users: Nombre total d'utilisateurs (dont actifs)
 
 stage_invitation_modal:
-  modal_title: Invitation
+  modal_title: Gestion des invitations
+  msg_link: Envoyez le lien aux personnes concernées en cliquant sur l'icone
+  manage_every_invit: Valider au préalable chaque personne demandant à rejoindre l'activité
+  copied_link_msg: Lien copié !
+  save_stage_before_config: Avant de paramétrer les droits d'invitation, crééz d'abord cette phase d'activité en appuyant sur Ok
   title: Gérez vos opérations avec vos clients
-  
-  invitation_msg: souhaiterait collaborer avec vous sur cette activité
+  link_msg: Avec lesquels de vos comptes souhaitez-vous associer cette activité en commun
+  decline: Décliner 
+
+stage_invitation_page:
+  invitation_msg: partage avec vous cette activité
   connection_btn_msg: Connectez-vous
   signup_msg: créez votre compte
-  end_msg: afin d'interagir avec votre client
-  link_msg: Avec lesquels de vos comptes souhaitez-vous associer cette activité en commun
-  decline: Décliner
+  end_msg: afin de la suivre et d'y collaborer
+
 
 documents_management:
   title: Gestion des documents

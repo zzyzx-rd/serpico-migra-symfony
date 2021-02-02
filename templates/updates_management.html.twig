@@ -187,12 +187,10 @@
                     <div class="flex-center-sb event-type-zone" data-id="{{eventType.id}}">
                         <div class="xm-left">
                             {% set icon = eventType.icon %}
-
-                            {#<i class="logo-zone dd-text center {{ 'fa' in icon.type ? icon.type ~ ' ' ~ 'fa-' ~ icon.name : 'material-icons' }}" data-id="{{icon.id}}">{{ 'fa' not in icon.type ? icon.name : '' }}</i>#}
                             
                             <button type="button" tabindex="-1" class="btn-flat modal-trigger existing-icon logo-zone"
                                 data-target="selectIcons"
-                                data-id="{{icon.id}}" data-icon="{{icon}}" data-placeholder="Sélectionner icône">
+                                data-id="{{icon.id}}" data-icon="{{icon}}" data-coucou="{{icon}}" data-placeholder="Sélectionner icône">
                             </button>
 
                             <span>{{ eventTypeRepo.dTrans(eventType,locale,organization) }}</span>
@@ -204,7 +202,7 @@
                                 </div>
                             {% endif %}
                             <div class="btn-flat">
-                                <i class="material-icons dd-orange-text modal-trigger" href="#manageTrans" tooltip="{{ 'updates_management.edit_trans'|trans }}">translate</i>
+                                <i class="mi translate dd-orange-text modal-trigger" href="#manageTrans" tooltip="{{ 'updates_management.edit_trans'|trans }}"></i>
                             </div>
                         </div>
                     </div>

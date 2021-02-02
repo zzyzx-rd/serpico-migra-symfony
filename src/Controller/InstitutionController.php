@@ -143,31 +143,6 @@ final class InstitutionController extends MasterController
         );
     }
 
-     /**
-     * @Route("/log/last/updated/user", name="logLastUpdatedUser")
-     */
-    public function logLastUpdatedUser(Request $request){
-        $em = $this->em;
-        $lastNotifs = $em->getRepository(ElementUpdate::class)->findBy(['user' => $this->user->getUserGlobal()->getUserAccounts()->getValues()],['inserted' => 'DESC']);
-        $lastConnectedUser = $this->user;
-        $hasToBeReloaded = false;
-        if($lastNotifs){
-            $lastConnectedUser = $lastNotifs[0]->getUser();
-            if($lastConnectedUser != $this->user){
-                $this->guardHandler->authenticateUserAndHandleSuccess(
-                    $lastConnectedUser,
-                    $request,
-                    $this->authenticator,
-                    'main'
-                );
-                $hasToBeReloaded = true;
-            }
-        }
-        $em->refresh($lastConnectedUser);
-        $em->flush();
-        return new JsonResponse(['hasToBeReloaded' => $hasToBeReloaded]);
-    }
-
     /**
      * @param Request $request
      * Cookies :
@@ -182,11 +157,40 @@ final class InstitutionController extends MasterController
     public function myActivitiesListAction(Request $request): Response
     {
         $currentUser = $this->user;
-        $comesFromLogin = strpos($request->headers->get('referer'),'login') !== false;
         if(!$currentUser){
             return $this->redirectToRoute('login');
         }
         $em = $this->em;
+        
+
+        // In case user comes from login, we log him to his last updated, otherwise last connected account
+        $comesFromLogin = strpos($request->headers->get('referer'),'login') !== false;
+
+        if($comesFromLogin){
+
+            $lastNotifs = $em->getRepository(ElementUpdate::class)->findBy(['user' => $this->user->getUserGlobal()->getUserAccounts()->getValues()],['inserted' => 'DESC']);
+            $lastConnectedUser = $currentUser->getUserGlobal()->getUserAccounts()->first();
+            $lastUpdatedUser = $lastNotifs ? $lastNotifs[0]->getUser() : null;
+    
+            $newCurrentUser = $lastUpdatedUser && $lastUpdatedUser != $currentUser ? $lastUpdatedUser : (
+                $lastConnectedUser && $lastConnectedUser != $currentUser ? $lastConnectedUser : $currentUser
+            );
+    
+            if($newCurrentUser != $currentUser){
+
+                $currentUser = $newCurrentUser;
+
+                $this->guardHandler->authenticateUserAndHandleSuccess(
+                    $currentUser,
+                    $request,
+                    $this->authenticator,
+                    'main'
+                );
+                $em->refresh($currentUser);
+            }
+        }
+
+
         $repoA = $em->getRepository(Activity::class);
         $repoP = $em->getRepository(Participation::class);
         $repoDec = $em->getRepository(Decision::class);
@@ -303,7 +307,7 @@ final class InstitutionController extends MasterController
                 // 1/ Get requested activities (as currentuser is not a participant, we have to retrieve them with a different query)
                 // passing through Decision table
     
-                if ($role == 3){
+                if ($role == USER::ROLE_COLLAB){
                     $pendingDecisions = $repoDec->findBy(['requester' => $checkingIds, 'validated' => null]);
                     foreach($pendingDecisions as $pendingDecision){
                         $userActivities->add($pendingDecision->getActivity());
@@ -753,11 +757,11 @@ final class InstitutionController extends MasterController
     
                         if($comment != null){
                             $transParameters['update_type'] = $newUpdate->getType() == ElementUpdate::CREATION ? 'comment_creation' : 'comment_change';
-                            $creator = $comment->getCreatedBy();
+                            $creator = $repoU->find($comment->getCreatedBy());
                             $transParameters['commentLevel'] = $comment->getParent() ? $translator->trans('updates.comment_level.withParent') : $translator->trans('updates.comment_level.withoutParent');
                         } else if($document != null){
                             $transParameters['update_type'] = $newUpdate->getType() == ElementUpdate::CREATION ? 'document_creation' : 'document_change';
-                            $creator = $document->getCreatedBy();
+                            $creator = $repoU->find($document->getCreatedBy());
                             $transParameters['docName'] = $document->getTitle();
                         } else if ($event != null && $document == null && $comment == null) {
                             $creator = $repoU->find($event->getCreatedBy());

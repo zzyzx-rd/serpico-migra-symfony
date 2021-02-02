@@ -93,12 +93,12 @@ class Event extends DbObject
     /**
      * @ORM\Column(name="eve_onset_date", type="datetime", nullable=true)
      */
-    public $onsetDate;
+    public ?DateTime $onsetDate;
 
     /**
      * @ORM\Column(name="eve_expres_date", type="datetime", nullable=true)
      */
-    public $expResDate;
+    public ?DateTime $expResDate;
 
     /**
      * @ORM\Column(name="eve_res_date", type="datetime", nullable=true)
@@ -122,7 +122,7 @@ class Event extends DbObject
     public $deleted;
 
     public Organization $org;
-    public User $currentUser;
+    public ?User $currentUser;
 
     /**
      * Criterion constructor.
@@ -338,7 +338,7 @@ class Event extends DbObject
         return $this->expResDate;
     }
 
-    public function setExpResDate($expResDate): self
+    public function setExpResDate(?DateTimeInterface $expResDate): self
     {
         $this->expResDate = $expResDate;
         return $this;
@@ -349,7 +349,7 @@ class Event extends DbObject
         return $this->onsetDate;
     }
 
-    public function setOnsetDate($onsetDate): self
+    public function setOnsetDate(?DateTimeInterface $onsetDate): self
     {
         $this->onsetDate = $onsetDate;
         return $this;
@@ -453,16 +453,30 @@ class Event extends DbObject
         return $embeddedStages;
     }
 
-    function nicetime($date)
+    function nicetime(DateTime $date, string $locale)
     {
         if(empty($date)) {
             return "No date provided";
         }
-    
-        $periods         = array("second", "minute", "hour", "day", "week", "month", "year", "decade");
+        
+        switch($locale){
+            case 'en' :
+                $periods = array("second", "minute", "hour", "day", "week", "month", "year", "decade");
+                $nowMsg = "Now";
+                break;
+            case 'fr' :
+                $periods = array("seconde", "minute", "heure", "jour", "semaine", "mois", "année", "décennie");
+                $nowMsg = "A l'instant";
+                break;
+            case 'es' :
+                $periods = array("secundo", "minuto", "hora", "dia", "semana", "mes", "año", "decena");
+                $nowMsg = "Ahora";
+                break;
+        }
+
         $lengths         = array("60","60","24","7","4.35","12","10");
         $now             = time();
-        $unix_date       = strtotime($date);
+        $unix_date       = $date->getTimestamp();
     
         // check validity of date
         if(empty($unix_date)) {   
@@ -471,12 +485,32 @@ class Event extends DbObject
 
         // is it future date or past date
         if($now > $unix_date) {   
-            $difference     = $now - $unix_date;
-            $tense         = "ago";
+            $difference = $now - $unix_date;
+            switch($locale){
+                case 'fr' :
+                    $tense = "il y a ";
+                    break;
+                case 'en' :
+                    $tense = "ago";
+                    break;
+                case 'es' :
+                    $tense = "hace";
+                    break;
+            }
         
         } else {
-            $difference     = $unix_date - $now;
-            $tense         = "from now";
+            $difference = $unix_date - $now;
+            switch($locale){
+                case 'fr' :
+                    $tense = "dans";
+                    break;
+                case 'en' :
+                    $tense = "from now";
+                    break;
+                case 'es' :
+                    $tense = "en";
+                    break;
+            }
         }
     
         for($j = 0; $difference >= $lengths[$j] && $j < count($lengths)-1; $j++) {
@@ -488,8 +522,15 @@ class Event extends DbObject
         if($difference != 1) {
             $periods[$j].= "s";
         }
-    
-        return "$difference $periods[$j] {$tense}";
+
+        switch($locale){
+            case 'en' :
+                return $j == 0 ? $nowMsg : "$difference $periods[$j] {$tense}";
+            case 'fr' :
+            case 'es' :
+                return $j == 0 ? $nowMsg : "{$tense} $difference $periods[$j]";
+        }
+        
     }
 
     public function setEm(EntityManager $em){
@@ -497,12 +538,16 @@ class Event extends DbObject
         return $this;
     }
 
-    public function setCurrentUser(User $currentUser){
+    public function setCurrentUser(?User $currentUser){
         $this->currentUser = $currentUser;
         return $this;
     }
 
     public function isLastUpdateSelf(){
+
+        if(!$this->currentUser){
+            return false;
+        }
         
         if($this->documents->count() == 0 && $this->comments->count() == 0){
             $lastUpdatedElmt = $this;

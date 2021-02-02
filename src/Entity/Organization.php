@@ -110,8 +110,8 @@ class Organization extends DbObject
     public $stages;
     /**
      * @OneToMany(targetEntity="Department", mappedBy="organization", cascade={"persist", "remove"},orphanRemoval=true)
+     * @OrderBy({"name" = "ASC"})
      */
-//     * @OrderBy({"name" = "ASC"})
     public $departments;
     /**
      * @OneToMany(targetEntity="Position", mappedBy="organization", cascade={"persist", "remove"},orphanRemoval=true)
@@ -216,6 +216,7 @@ class Organization extends DbObject
     public $processes;
     /**
      * @OneToMany(targetEntity="User", mappedBy="organization", cascade={"persist","remove"}, orphanRemoval=true)
+     * @OrderBy({"lastname" = "ASC"})
      */
     public $users;
     /**
@@ -894,6 +895,12 @@ class Organization extends DbObject
         return $this;
     }
 
+    public function removePosition(Position $position): Organization
+    {
+        $this->positions->removeElement($position);
+        return $this;
+    }
+
     public function addOption(OrganizationUserOption $option): Organization
     {
 
@@ -1200,14 +1207,7 @@ class Organization extends DbObject
 
     public function getActiveUsers(){
         return $this->users->filter(function(User $u){
-            return !$u->getDeleted() && $u->getLastname() == 'ZZ';
-        });
-    }
-
-    public function hasActiveAdmin(){
-        return $this->getActiveUsers()
-        ->exists(function(int $i, User $u){
-            return $u->getRole() == USER::ROLE_ADMIN && $u->getLastConnected() != null;
+            return !$u->getDeleted() && !$u->isSynthetic();
         });
     }
 
@@ -1432,6 +1432,30 @@ class Organization extends DbObject
      */
     public function getHostingSize(){
         return round(array_sum($this->getEventDocuments()->map(fn(EventDocument $ed) => $ed->getSize())->getValues()) / 1000,1);
+    }
+
+    public function getOrganizationLogo()
+    {
+        if($this->logo){
+            return 'lib/img/org/'. $this->logo;
+        } else if ($this->workerFirm && $this->workerFirm->getLogo()){
+            return 'lib/img/wf/' . $this->workerFirm->getLogo();
+        } else {
+            return $this->type == 'C' ? 
+                "lib/img/user/no-picture-i.png" : 
+                "lib/img/org/no-picture.png";
+        }
+    }
+
+    public function hasSuperAdmin(){
+        return $this->getActiveUsers()->exists(fn(int $i,User $u) => $u->getRole() === USER::ROLE_SUPER_ADMIN);
+    }
+
+    public function hasActiveAdmin(){
+        return $this->getActiveUsers()
+        ->exists(function(int $i, User $u){
+            return $u->getRole() == USER::ROLE_ADMIN && $u->getLastConnected() != null;
+        });
     }
 
 

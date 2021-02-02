@@ -63,11 +63,19 @@ class globalVar {
     {
         /** @var User|null */
         $consideredUser = $user ?: $this->CurrentUser();
-        $folder = $consideredUser && $consideredUser->isSynthetic() && $consideredUser->getFirstname() == 'ZZ' ? 'org' : 'user';
-        $suffix = $consideredUser && $consideredUser->getPicture() ? $consideredUser->getPicture() : (
-            $consideredUser->getOrganization()->getType() == 'C' || $consideredUser->getOrganization()->getType() == 'I' || $isIndivIndep ? 'no-picture-i.png' : 'no-picture.png'
-        );
-        return "lib/img/$folder/$suffix";
+        if(!$consideredUser){
+            return "lib/img/user/no-picture.png";
+        } else {
+
+        
+            $folder = $consideredUser->isSynthetic() && $consideredUser->getFirstname() == 'ZZ' ? 'org' : 'user';
+            $suffix = $consideredUser->getPicture() ? $consideredUser->getPicture() : (
+                $consideredUser->getOrganization()->getType() == 'C' || $consideredUser->getOrganization()->getType() == 'I' || $isIndivIndep ? 'no-picture-i.png' : (
+                    $this->currentUser() && $this->currentUser()->getOrganization() == $consideredUser->getOrganization() && !$consideredUser->getLastConnected() ? 'virtual-user.png' : 'no-picture.png'
+                )
+            );
+            return "lib/img/$folder/$suffix";
+        }
     }
 
 

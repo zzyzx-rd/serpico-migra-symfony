@@ -1,5 +1,7 @@
 {% extends "layout.html.twig" %}
 
+{% import "macros/user_list__macros.html.twig" as macros %}
+
 {% block title %}
   {{'firm_management.page_title'|trans}}
 {% endblock %}
@@ -98,6 +100,18 @@
       font-size:1.3rem;
     }
 
+    .badge-container > div {
+      font-size: 1em;
+      width: 1.2em;
+      height: 1.2em;
+    }
+
+    .user-master-btn {
+      min-width:250px;
+      padding-right:0;
+    }
+
+
     @media screen and (max-width: 993px) {
 
       .page-title{
@@ -142,7 +156,7 @@
 
     <section class="flex collapsible no-margin">
 
-        {% set totalAliveUsers = currentuser.organization.users|filter(u => not u.synthetic and not u.deleted) %}
+        {% set totalAliveAdminUsers = currentuser.organization.users|filter(u => not u.synthetic and not u.deleted and u.role <= 2) %}
 
         <ul class="collapsible no-margin" data-collapsible="accordion">
           <li>
@@ -152,7 +166,7 @@
                   <i class="fa fa-chevron-right"></i>
                   <i class="fa fa-chevron-down"></i>
                   <span>{{'firm_management.manage_admin'|trans }}</span>
-                  <span class="nb-users sm-left">({{ totalAliveUsers|length }})</span>
+                  <span class="nb-users sm-left">({{ totalAliveAdminUsers|length }})</span>
                 </div>
                 <div>
                   <ul class="flex-center user-section-act-btns" style="visibility:hidden;">
@@ -164,25 +178,20 @@
             </div>
             <div class="collapsible-body">
               <ul class="firm-users">
-                {% for user in totalAliveUsers %}
+                {% for user in totalAliveAdminUsers %}
+                  {% set isYourself = user.fullname == currentuser.fullname %}
                   <li class="account flex-center-sb">
                     <div class="flex-center">  
                         <img class="user-profile-l-picture sm-right" src="{{ asset(global.userPicture(user)) }}" alt="">
-                        <span class="user-name">{{user.fullname}}</span>
+                        <span class="user-name {{isYourself ? 'strong'}}">{{ isYourself ? 'yourself'|trans : user.fullname }}</span>
                     </div>
-                    <div class="account-action-zone">
-                        <div class="btn-flat nb-activites-info tooltipped" data-tooltip="{{ 'profile.total_nb_activities'|trans }}" data-position="top">
-                            <i class="fa fa-briefcase"></i>
-                            <span>{{user.internalActivities|length + user.externalActivities|length }}</span>
+                    <div class="account-action-zone flex-center">
+                        <div class="btn-flat user-master-btn flex-center-sb">
+                              {{ macros.user_role_badge(user) }}
+                              <span class="user-master-name">{{ user.role == 1 ? 'profile.super_administrator'|trans : 'profile.administrator'|trans }}</span>
                         </div> 
-                        {% if user.role == 1 %}
-                          <div class="btn-flat user-master-btn">
-                              <i class="fa fa-user-cog"></i>
-                              <span class="user-master-name">{{ 'profile.administrator'|trans }}</span>
-                          </div> 
-                        {% endif %}
-                        <div class="btn-flat delete-user-btn tooltipped modal-trigger" href="#deleteUser" data-id="{{user.id}}" data-tooltip="{{'delete'|trans}}" data-position="top" style="visibility:hidden;">
-                            <i class="dd-orange-text fa fa-times"></i>
+                        <div class="btn-flat delete-user-btn tooltipped modal-trigger" href="#deleteUser" data-id="{{user.id}}" data-tooltip="{{'profile.manage.modify_revoke'|trans}}" data-position="top" style="visibility:hidden;">
+                            <i class="dd-orange-text mi create"></i>
                         </div>
                     </div>
                 </li>

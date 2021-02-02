@@ -1,11 +1,13 @@
 {% import "macros/user_list__macros.html.twig" as macros %}
 
 {% set isIndivIndep = isIndivIndep|default(false) %}
-{% set user = externalUser is defined ? externalUser.user : user|default(null) %}
-{% set isSynth = user ? user.synthetic : isIndivIndep %}
-{% set settings = settings is defined ? settings : true %}
-{% set stats = stats is defined ? stats : true %}
-{% set roles = roles is defined ? roles : true %}
+{% set externalUser = externalUser|default(null) %}
+
+{% set user = externalUser ? externalUser.user : user|default(null) %}
+{% set isSynth = user ? user.synthetic == true : isIndivIndep %}
+{% set settings = settings|default(false) %}
+{% set stats = stats|default(false) %}
+{#{% set roles = roles|default(true) %}#}
 {% set tleader = tleader is defined ? tleader : false %}
 {% set displayOrg = displayOrg is defined ? orgName : false %}
 {% set myself = user and user == currentuser %}
@@ -16,18 +18,48 @@
 {% set hasCompletedActivities = user and userM.NbCompletedActivities(user) > 0 %}
 
 
-<li class="users-list--item hierarchized-item {{  not stats ? 'no-stats' }}" {% if externalUser|default %}data-id="{{externalUser.client.id}}" data-eid="{{externalUser.id}}" data-email="{{externalUser.email}}" data-position="{{externalUser.positionName}}"{% endif %}>
+<li class="users-list--item hierarchized-item {{ not stats ? 'no-stats' }}" 
+  {% if currentuser.role <= 2 %}
+    {% if externalUser|default %}
+      data-cid="{{externalUser.client.id}}" 
+      data-eid="{{externalUser.id}}" 
+      data-email="{{externalUser.email}}" 
+      data-position="{{externalUser.positionName}}"
+    {% elseif user|default %}
+      data-id="{{user.id}}"
+      data-email="{{user.email}}" 
+      data-position="{{user.position.name|default('')}}" 
+    {% endif %}
+  {% endif %}
+>
   <header class="{{ myself ? 'myself' }}">
     <img src="{{ picture_url }}" alt="" class="user-picture">
 
-    <div class="user-name">
+    <div>
+      <span class="user-name">
       {{ user ? user.fullname }}
-      {% if myself %}
-        ({{ 'user_list.myself'|trans }})
-      {% endif %}
       {% if user and displayOrg and user.organization != currentuser.organization %}
         ({{ user.organization.commname }})
       {% endif %}
+      </span>
+
+      {% if myself %}
+        <span>({{ 'user_list.myself'|trans }})</span>
+      {% endif %}
+    
+
+    {% if not user or user.position is not null %} 
+      
+        <span>
+          -
+          <em>
+            <span class="position-name">
+              {{ user ? user.position.name }}
+            </span>
+          </em>
+        </span>
+      
+    {% endif %}
     </div>
 
     {% if tleader %}
@@ -36,9 +68,9 @@
         </span>
     {% endif %}
 
-    {% if roles %}
-      {{ macros.user_role_badge(user) }}
-    {% else %}
+    
+      {{ not externalUser and user and user.role <= 2 ? macros.user_role_badge(user) }}
+   
       {#
       {% if not stats %}
         {% if not user.lastConnected %}
@@ -46,10 +78,10 @@
         {% endif %}
       {% endif %}
       #}
-    {% endif %}
+   
 
     {% if not isIndivIndep %}
-      {% if not user.lastConnected %}
+      {% if user is null or not user.lastConnected %}
         {{ macros.render_badge(
           'virtual-badge', 'V', 'tooltip.user.role.virtual'|trans
         ) }}
@@ -73,6 +105,8 @@
     
       <div class="user-actions flex-center">
         
+        
+        {#
         {% if roles %}
 
           {% if is_admin or user.createdBy == currentuser.id %}
@@ -88,6 +122,7 @@
           </a>
           
         {% endif %}
+        #}
 
         {#
         <a class="material-icons {{ not hasCompletedActivities ? 'disabled' }}"
@@ -98,14 +133,16 @@
         
         
 
-          {% if isIndivIndep %}
-            <a class="update-client-btn btn-flat no-margin" style="visibility:hidden">
-              <i class="dd-orange-text material-icons">create</i>
+          {% if currentuser.role <= 2 %}
+            <a class="update-user-btn btn-flat no-margin" style="visibility:hidden">
+              <i class="dd-orange-text mi create"></i>
             </a>
           
-            <a class="delete-client-btn btn-flat no-margin modal-trigger" href="#deleteClient" style="visibility:hidden">
+            {#
+            <a class="delete-user-btn btn-flat no-margin modal-trigger" href="#deleteUser" style="visibility:hidden">
                 <i class="dd-orange-text fa fa-times"></i>
             </a> 
+            #}
           {% endif %}
 
 

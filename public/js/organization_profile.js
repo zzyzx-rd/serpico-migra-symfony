@@ -1,10 +1,11 @@
+
 $(function(){
 
     var clickedOnce = false;
     $('.clickable-image, .add-photo-btn').on('click', e => {
         clickedOnce = false;
         if (!clickedOnce) {
-            $('input').click();
+            $('input[type="file"]').click();
         }
     });
 

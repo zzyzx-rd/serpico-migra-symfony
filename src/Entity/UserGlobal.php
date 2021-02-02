@@ -38,7 +38,13 @@ class UserGlobal extends DbObject
     public $username;
 
     /**
+     * @ORM\Column(name="usg_email", type="string", length=255, nullable=true)
+     */
+    public $email;
+
+    /**
      * @ORM\OneToMany(targetEntity=User::class, mappedBy="userGlobal", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @ORM\OrderBy({"lastConnected" = "DESC"})
      * @var ArrayCollection|User[]
      */
     private $userAccounts;
@@ -47,15 +53,18 @@ class UserGlobal extends DbObject
      * UserGlobal constructor.
      * @param $id
      * @param $username
+     * @param $email
      * @param $phoneNumber
      */
     public function __construct(
         $id = null,
         $username = null,
+        $email = null,
         $phoneNumber = null)
     {
         parent::__construct($id, null, new DateTime);
         $this->username = $username;
+        $this->email = $email;
         $this->phoneNumber = $phoneNumber;
         $this->userAccounts = new ArrayCollection;
     }
@@ -68,6 +77,17 @@ class UserGlobal extends DbObject
     public function setUsername(string $username): self
     {
         $this->username = $username;
+        return $this;
+    }
+
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function setEmail(string $email): self
+    {
+        $this->email = $email;
         return $this;
     }
 

@@ -32,8 +32,10 @@ firm_member : Firm / Institution member
 firstname: First name
 lastname: Last name
 name: name
-email: Email
 password: password
+email: Email
+position: Position
+department: Department
 ascending: ASC
 descending: DESC
 sort: Sort
@@ -112,6 +114,11 @@ partner_firm: Partner firm
 added_on: Added on
 private: Private
 already_existing: Already existing
+now: Now
+tbd: TBD
+open_end: Open end
+yourself: Yourself
+
 
 head_meta:
   content: Business & client operations management through an online and interactive dashboard. DealDrive offers a solution connecting clients client through a calendar dashboard, where one can share documents and updates; in order to enhance client operations and reduce email workload. Use the client followup DealDrive solution improve interactions with your clients and colleagues. 
@@ -747,7 +754,8 @@ header:
   firms: Firms
   root_mgt: Root Management
   my_actions: My requests & actions
-  firmActivities: Activities
+  activities: Activities
+  my_documents: My documents
   firmConfig: Configuration
   add_activity: Create activity
   profile: My profile
@@ -825,6 +833,7 @@ pricing:
 account_management:
   title: Subscriptions
   header_title: Your subscriptions
+  your_plan: Your plan
   left_days: >- 
     {days, plural,
       =0    {Upgrade to Premium}
@@ -2051,9 +2060,16 @@ profile:
   access_profile: Access my profile
   total_nb_activities: Total number of activities
   administrator: Administrator
+  super_administrator: Super Administrator
   change_account_modal:
     title: Account change
     msg: Select which account you want to shift to
+  defining_initial_super_user_modal:
+    title: Initial choice of super administrator
+    msg: You want to access <span class="strong">firm settings</span>, <span class="dd-text strong">restricted to a single super administrator</span> for security reasons, and who do not exist yet in your firm. Do you confirm you want to become such user ?
+    choice_self: <span class="strong">Yes</span>, I have the required qualities to become this super administrator
+    choice_other: <span class="strong">No</span>, I prefer to attribute this role to another user
+
   page_title: My profile
   mobile_header_title: My profile
   my_results: My results
@@ -2065,6 +2081,7 @@ profile:
   perf: performence
   no_perf: No performance criterion
   manage:
+    modify_revoke: Modify / revoke permissions
     email_confirmation_modal:
       title: Email address confirmation
       content: To finalize email address change, we have sent an email to the address <span class="strong email-confirm-address"></span>. You need to access the email and click to the related link to confirm the operation.
@@ -2081,6 +2098,10 @@ profile:
       title: Organization account deletion
       content: Are you sure to delete your account associated to firm
       end: This operation cannot be undone, and will remove you from all related activities and events.
+    revoking_super_admin_modal:
+      title: Your actual role as super administrator
+      content: Do you want to revoke your role of super administrator ? Please choose who will inheritate of this role in your firm
+      end: The new super administrator will be able to change your role, which is updated by default to simple administrator.
   performance_feedbacks: My performance & feedbacks
   targets_goals: My objectives
   performance_indicators: My Performance Indicators
@@ -2478,8 +2499,8 @@ activity_elements:
       manage_dates: Manage dates
       onset_date: Occurence date
       resolution_date: Resolution
-      provide_onset_date: Provide an onset date
       exp_res_date: Finalization date
+      provide_onset_date: Provide an onset date
       provide_exp_res_date: Provide a finalization date
 
     tooltip:
@@ -3394,6 +3415,7 @@ user_list:
     without_email_info: If you do not provide email address, this user will not be interact with you - you can still add it after
     new_firm_database: New firm in database
     new_user_database: New user in database
+    new_participant_database: New participant in database
     unexisting_client: None of your partners seem to be named this way. You can create a new one by clicking on <span class="strong">Back</span>, to then insert the new user
     selecting_account_title_suffix: through one his/her accounts
 
@@ -3531,15 +3553,32 @@ activities_dashboard:
 
 firm_management:
   page_title: Firm settings
+  manage_updates: Updates
+  manage_admin: Administrators and permissions
+  manage_activity: Activities
+  profile:
+    title: General data
+    identity_logo: 
+      title: Identity, logo et membership
+      commname: Commercial name
+      legalname: Legal name
+    general_info:
+      title: Other information
+      member_since: Member since
+      total_users: Total number of users (incl. active)
 
 stage_invitation_modal:
-  title: Manage operations with your clients
-  invitation_msg: would like to collaborate with you on this activity
+  modal_title: Invitations management
+  msg_link: Share the link to concerned people by clicking on icon
+  manage_every_invit: Make a prior validation for each request to join the activity
+  copied_link_msg: Link copied !
+  save_stage_before_config: Before configuring/getting invitation link, please create this activity stage by clicking on Ok button
+
+stage_invitation_page:
+  invitation_msg: shares this activity with you
   connection_btn_msg: Log in
   signup_msg: create your account
-  end_msg: in order to interact with them
-  link_msg: To which of your accounts you want to associate this common activity
-  decline: Decline
+  end_msg: in order to follow it and collaborate 
 
 documents_management:
   title: Documents management

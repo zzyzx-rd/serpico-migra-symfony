@@ -17,6 +17,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class DeprecatedController extends MasterController
@@ -2966,5 +2967,995 @@ class DeprecatedController extends MasterController
             $errors = $this->buildErrorArray($addFirstAdminForm);
             return $errors;
         }
-    }  
+    }
+    
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $usrId
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
+    public function updateUserActionAJAX(Request $request, $usrId)
+    {
+        $em            = $this->em;
+        $repoO         = $em->getRepository(Organization::class);
+        $repoOC        = $em->getRepository(Client::class);
+        $searchedUser  = $em->getRepository(User::class)->find($usrId);
+        $connectedUser = $this->user;
+        if (!$connectedUser instanceof User) {
+            return $this->redirectToRoute('login');
+        }
+        
+
+        $searchedUserOrganization  = $repoO->find($searchedUser->getOrgId());
+        $orgOptions                = $searchedUserOrganization->getOptions();
+        $enabledCreatingUserOption = false;
+        foreach ($orgOptions as $orgOption) {
+            if ($orgOption->getOName()->getName() == 'enabledUserCreatingUser') {
+                $enabledCreatingUserOption = $orgOption->isOptionTrue();
+            }
+        }
+
+        $departments = ($searchedUser->getOrgId() == $connectedUser->getOrgId() || $connectedUser->getRole() == 4) ? $searchedUserOrganization->getDepartments() : null;
+
+        // Look through organization clients if user belongs to org clients
+        if ($searchedUser->getOrgId() != $connectedUser->getOrgId()) {
+
+            $connectedUserOrganization = $repoO->find($connectedUser->getOrgId());
+            $connectedUserOrgClients   = $repoOC->findByOrganization($connectedUserOrganization);
+            $connectedUserClients      = [];
+            foreach ($connectedUserOrgClients as $connectedUserOrgClient) {
+                $connectedUserClients[] = $connectedUserOrgClient->getClientOrganization();
+            }
+
+            if (!in_array($searchedUserOrganization, $connectedUserClients) && $connectedUser->getRole() != 4) {
+                return $this->render('errors/403.html.twig');
+            }
+
+            $userForm = (!in_array($searchedUserOrganization, $connectedUserClients)) ?
+                $this->createForm(UserType::class, $searchedUser, ['standalone' => true, 'organization' => $searchedUserOrganization]) :
+                $this->createForm(ClientUserType::class, $searchedUser, ['standalone' => true, 'clients' => $connectedUserOrgClients]);
+
+        } else {
+            if ($connectedUser->getRole() == 2 || $connectedUser->getRole() == 3) {
+                return $this->render('errors/403.html.twig');
+            }
+
+            $userForm = $this->createForm(UserType::class, $searchedUser, ['standalone' => true, 'organization' => $searchedUserOrganization, 'enabledCreatingUser' => $enabledCreatingUserOption]);
+        }
+
+        $userForm->handleRequest($request);
+
+        if ($userForm->isValid()) {
+
+            if ($searchedUser->getOrgId() == $connectedUser->getOrgId() || !in_array($searchedUserOrganization, $connectedUserClients)) {
+
+                $repoW = $em->getRepository(Weight::class);
+
+                $dptId = $userForm->get('dptId')->getData();
+                $posId   = $userForm->get('posId')->getData();
+                $wgtId   = $userForm->get('wgtId')->getData();
+                $superiorUser   = $userForm->get('superiorUser')->getData();
+
+                $searchedUser->setDptId($dptId ? $dptId->getId() : null)
+                    ->setPosId($posId ? $posId->getId() : null)
+                    ->setWgtId($wgtId ? $wgtId->getId() : null)
+                    ->setSuperiorUser($superiorUser);
+
+                $searchedUser
+                    ->setFirstname($userForm->get('firstname')->getData())
+                    ->setLastname($userForm->get('lastname')->getData())
+                    ->setRole($userForm->get('role')->getData());
+
+                if ($enabledCreatingUserOption) {
+                    $searchedUser
+                        ->setEnabledCreatingUser($userForm->get('enabledCreatingUser')->getData());
+                }
+
+                if ($searchedUser->getEmail() != $userForm->get('email')->getData()) {
+                    $repicients        = [];
+                    $recipients[]      = $searchedUser;
+                    $token             = md5(rand());
+                    $settings['token'] = $token;
+                    $searchedUser->setPassword(null)->setToken($token)->setEmail($userForm->get('email')->getData());
+                    $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'emailChangeNotif']);
+
+                }
+
+                $existingWeight = $repoW->find($userForm->get('wgtId')->getData());
+                $searchedUser->setWeightIni($existingWeight->getValue());
+
+                $em->persist($searchedUser);
+                $em->flush();
+
+            } else {
+
+                $externalUser = $searchedUser->getExternalUser();
+
+                if ($externalUser->getEmail() != $userForm->get('email')->getData()) {
+                    $repicients        = [];
+                    $recipients[]      = $searchedUser;
+                    $token             = md5(rand());
+                    $settings['token'] = $token;
+                    $searchedUser->setPassword(null)->setToken($token)->setEmail($userForm->get('email')->getData());
+                    $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'emailChangeNotif']);
+
+                }
+
+                $externalUser
+                    ->setFirstname($userForm->get('firstname')->getData())
+                    ->setLastname($userForm->get('lastname')->getData())
+                    ->setPositionName($userForm->get('positionName')->getData())
+                    ->setWeightValue($userForm->get('weightValue')->getData());
+
+                if ($userForm->get('type')->getData() != 'I') {
+                    $searchedUser->setOrgId($userForm->get('orgId')->getData());
+                    $clientOrganization = $repoO->find(intval($userForm->get('orgId')->getData()));
+                    $clientOrganization->setType($userForm->get('type')->getData());
+                } else {
+                    $clientOrganization = new Organization;
+                    $clientOrganization->setType('I')->setIsClient(false)->setCommname($userForm->get('firstname')->getData() . ' ' . $userForm->get('lastname')->getData())->setWeight_type('role');
+                    $client = new Client;
+                    $client->setOrganization($connectedUserOrganization)->setClientOrganization($clientOrganization);
+                    $connectedUserOrganization->addClient($client);
+                }
+
+                $em->persist($externalUser);
+                $em->persist($clientOrganization);
+                $em->persist($connectedUserOrganization);
+                $em->flush();
+
+            }
+
+            /*
+            $usrPosition = $repoP->find($userForm->get('position')->getData());
+
+            // Weight mgt (new weight is created only if weight associated with selected value doesn't belong to any user)
+            $existingUsrWeight = $repoW->findOneBy(['position' => $usrPosition, 'usrId' => $usrId]);
+
+            $submittedWeight = $repoW->find($userForm->get('weightIni')->getData());
+
+            if ($existingUsrWeight->getPosition() != $usrPosition || $existingUsrWeight->getValue() != $submittedWeight->getValue()) {
+            $existingUsrWeight->setUsrId(null);
+            $em->persist($existingUsrWeight);
+
+            $existingNewSubmittedNullWeight = $repoW->findOneBy(['value' => $submittedWeight->getValue(), 'position' => $usrPosition, 'usrId' => null]);
+            if (!$existingNewSubmittedNullWeight) {
+            $newWeight = new Weight;
+            $newWeight->setUsrId($user->getId())->setValue($submittedWeight)->setInterval(0)->setTimeframe('D');
+            $usrPosition->addWeight();
+            $em->persist($newWeight);
+            } if ($existingNewSubmittedNullWeight) {
+            $existingNewSubmittedNullWeight->setUsrId($usrId);
+            $em->persist($existingNewSubmittedNullWeight);
+            }
+            }
+
+            $em->flush();
+             */
+            //$organization = $repoO->find($orgId);
+            //$submittedDptName = $userForm->get('department')->getData();
+            //$submittedPosName = $userForm->get('position')->getData();
+
+            return $this->redirectToRoute('manageUsers');
+            //return new JsonResponse(['message' => 'Success!'], 200);
+
+        } else {
+            $errors = $this->buildErrorArray($userForm);
+            return $errors;
+        }
+    }
+
+     /************ CONTACT PAGE **********************************/
+
+     public function displayContactAction(Request $request){
+
+        return $this->render('contact.html.twig',[
+            'last_username' => $app['session']->get('security.last_username'),
+            'error' => $app['security.last_error']($request),
+            'request' => $request,
+        ]);
+
+    }
+
+    /************ NEWS PAGE **********************************/
+
+    public function displayNewsAction(Request $request){
+
+        return $this->render('news.html.twig',[
+            'error' => $app['security.last_error']($request),
+            'request' => $request,
+        ]);
+
+    }
+
+    /*********** USER LOGIN AND CONTEXTUAL MENU *****************/
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return mixed
+     * @Route("/about", name="about")
+     */
+    public function displayAboutPageAction(Request $request,Application $app){
+
+            $csrf_token = $app['csrf.token_manager']->getToken('token_id');
+
+            return $this->render('about.html.twig',
+            [
+                'csrf_token' => $csrf_token,
+                'error' => $app['security.last_error']($request),
+                'last_username' => $app['session']->get('security.last_username'),
+                'request' => $request,
+            ]);
+    }
+
+    public function displaySolutionPageAction(Request $request,Application $app){
+
+            $csrf_token = $app['csrf.token_manager']->getToken('token_id');
+
+            return $this->render('use_cases.html.twig',
+            [
+                'csrf_token' => $csrf_token,
+                'error' => $app['security.last_error']($request),
+                'last_username' => $app['session']->get('security.last_username'),
+                'request' => $request,
+            ]);
+    }
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return mixed
+     * @Route("some-use-cases", name="useCases")
+     */
+    public function displayUseCasesAction(Request $request,Application $app){
+
+        $csrf_token = $app['csrf.token_manager']->getToken('token_id');
+
+        return $this->render('use_cases.html.twig',
+        [
+            'csrf_token' => $csrf_token,
+            'error' => $app['security.last_error']($request),
+            'last_username' => $app['session']->get('security.last_username'),
+            'request' => $request,
+        ]);
+    }
+
+    //Save registering user
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/contact/{type}/{isAborted}", name="contact_us")
+     * @Route("/contact", name="contact")
+     * To do à la fin
+     */
+    public function contactAction(Request $request,Application $app){
+        //Insert Grades
+        $entityManager = $this->em;
+        //$repoR = $entityManager->getRepository(Contact::class);
+        $contact = new Contact;
+        $repoO = $entityManager->getRepository(Organization::class);
+        $repoU = $entityManager->getRepository(User::class);
+        
+        $csrf_token = $app['csrf.token_manager']->getToken('token_id');
+        $contactForm = $this->createForm(ContactForm::class,$contact,['standalone' => true]);
+        $contactForm->handleRequest($request);
+
+        if($contactForm->isValid()){
+
+            $entityManager->persist($contact);
+            $entityManager->flush();
+
+            $rootSettings = [];
+            $rootSettings['email'] = $contactForm->get('mail')->getData();
+            $rootSettings['fullName'] = $contactForm->get('fullName')->getData();
+            $rootSettings['company'] = $contactForm->get('company')->getData();
+            $rootSettings['address'] = $contactForm->get('address')->getData();
+            $rootSettings['zipcode'] = $contactForm->get('zipcode')->getData();
+            $rootSettings['city'] = $contactForm->get('city')->getData();
+            $rootSettings['country'] = $contactForm->get('country')->getData();
+            $rootSettings['message'] = $contactForm->get('message')->getData();
+            $rootSettings['meetingDate'] = $contactForm->get('meetingDate')->getData();
+            $rootSettings['meetingTime'] = $contactForm->get('meetingTime')->getData();
+
+            $settings = [];
+            $settings['email'] = $rootSettings['email'];
+            $settings['fullName'] = $rootSettings['fullName'];
+            $settings['company'] = $rootSettings['company'];
+            $settings['address'] = $rootSettings['address'];
+            $settings['zipcode'] =  $rootSettings['zipcode'];
+            $settings['city'] = $rootSettings['city'];
+            $settings['country'] = $rootSettings['country'];
+            $settings['message'] = $rootSettings['message'];
+            $settings['meetingDate'] = $rootSettings['meetingDate'];
+            $settings['meetingTime'] = $rootSettings['meetingTime'];
+            $settings['recipientUsers'] = false;
+            $recipients[] = $settings['email'];
+            // Send mail acknowledgment to meeting requester
+            $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'meetingValidation']);
+
+
+            // Notify Serpico administrators
+            $serpicoOrg = $repoO->findOneByCommname('Serpico');
+            $serpiValidatingUsers = $repoU->findBy(['role' => 4, 'orgId' => $serpicoOrg->getId()]);
+            $this->forward('App\Controller\MailController::sendMail', ['recipients' => $serpiValidatingUsers, 'settings' => $rootSettings, 'actionType' => 'meetingValidation']);
+            return new JsonResponse(['message' => 'Success'],200);
+        } else {
+            $errors = $this->buildErrorArray($contactForm);
+            return $errors;
+        }
+
+
+    }
+
+    // Display all users (when HR clicks on "users" from /settings)
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $usrId
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/user/{usrId}/finalize", name="finalizeUser")
+     */
+    public function finalizeUserAction(Request $request, $usrId)
+    {
+        $entityManager = $this->em;
+        $repoO = $entityManager->getRepository(Organization::class);
+        
+        $user = MasterController::getAuthorizedUser($app);
+        $orgId = $user->getOrgId();
+        $organization = $repoO->findOneById($orgId);
+        $finalizeUserForm = $this->createForm(FinalizeUserForm::class,null,['user' => $user]);
+        $finalizeUserForm->handleRequest($request);
+        if($finalizeUserForm->isValid()){
+            $department = new Department;
+            $department->setName($finalizeUserForm->get('department')->getData());
+            $position = new Position;
+            $position->setName($finalizeUserForm->get('position')->getData());
+            $department->addPosition($position);
+            $organization->addPosition($position);
+            $user->setFirstname($finalizeUserForm->get('firstname')->getData());
+            $user->setLastname($finalizeUserForm->get('lastname')->getData());
+            $user->setPositionName(null);
+            $entityManager->persist($user);
+            $organization->addDepartment($department);
+            $entityManager->persist($organization);
+            $entityManager->flush();
+            $user
+                ->setPosId($position->getId())
+                ->setDptId($department->getId());
+            $entityManager->persist($user);
+            $entityManager->flush();
+            return new JsonResponse(['message' => 'Success'],200);
+        } else {
+            $errors = $this->buildErrorArray($finalizeUserForm);
+            return $errors;
+        }
+    }
+
+    /*********** ADDITION, MODIFICATION AND DELETION *****************/
+
+    /**
+     * @param Application $app
+     * @return mixed
+     * @Route("/user/display/profile", name="displayProfile")
+     */
+    public function displayProfile(Application $app)
+    {
+        $entityManager = $this->getEntityManager();
+        $repoP = $entityManager->getRepository(Participation::class);
+        $repoO = $entityManager->getRepository(Organization::class);
+        $user = self::getAuthorizedUser();
+        $organization = $repoO->find($user->getOrgId());
+        $totalParticipations = $repoP->findBy([ 'usrId' => $user->getId(), 'activity' => 'ASC' ]);
+
+        // We consider each graded activity as having at least one releasable criterion an nothing more
+        $totalGradedActivity = 0;
+        $totalUngradedActivity = 0;
+
+        if ($totalParticipations) {
+            $ungradedActivity = 1;
+            $skipParticipations = 0;
+            $actId = $totalParticipations[0]->getActId();
+
+            foreach ($totalParticipations as $participation) {
+                if ($participation->getActId() != $actId) {
+                    $skipParticipations = 0;
+                    if ($ungradedActivity == 1) {
+                        ++$totalUngradedActivity;
+                    }
+                    $actId = $participation->getId();
+                } else {
+                    if ($participation->getStatus() >= 3 and $skipParticipations == 0) {
+                        $ungradedActivity = 0;
+                        $totalGradedActivity++;
+                        $skipParticipations = 1;
+                    }
+                }
+            }
+        }
+
+        return $this->render('my_profile.html.twig',
+            [
+                'organization' => $organization->getCommname(),
+                'validatedActivities' => $totalGradedActivity,
+                'unvalidatedActivities' => $totalUngradedActivity,
+            ]
+        );
+    }
+
+    /**
+     * @param Request $request
+     * @return mixed
+     * @Route("/help", name="help")
+     */
+    public function helpAction(Request $request)
+    {
+        return $this->render('help.html.twig',
+            [
+                'request' => $request
+            ]
+        );
+    }
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $cliId
+     * @param $extId
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
+    public function validateClientUserAction(Request $request, $cliId, $extId){
+
+        $em = $this->em;
+        $currentUser = $this->user;
+        if (!$currentUser instanceof User) {
+            return $this->redirectToRoute('login');
+        }
+        
+        $repoC = $em->getRepository(Client::class);
+        $repoE = $em->getRepository(ExternalUser::class);
+        /** @var Client */
+        $client = $repoC->find($cliId);
+        $externalUser = $extId == 0 ? new ExternalUser : $repoE->find($extId);
+        $individualForm = $this->createForm(ExternalUserType::class, $externalUser, ['standalone' => true]);
+        $individualForm->handleRequest($request);
+        if ($individualForm->isValid()) {
+            if($extId == 0){
+
+                $token = md5(rand());
+                $user = new User;
+                $user->setFirstname($externalUser->getFirstname())
+                    ->setLastname($externalUser->getLastname())
+                    ->setEmail($externalUser->getEmail())
+                    ->setOrganization($client->getClientOrganization())
+                    ->setCreatedBy($currentUser->getId())
+                    ->setRole(3)
+                    ->setToken($token);
+                $userGlobal = new UserGlobal();
+                $userGlobal->setUsername($externalUser->getFirstname().' '.$externalUser->getLastname())
+                    ->addUserAccount($user);
+                $em->persist($userGlobal);
+                $em->flush();
+                $settings = [];
+                $settings['tokens'][] = $token;
+                $settings['invitingUser'] = $currentUser;
+                $settings['invitingOrganization'] = $currentUser->getOrganization();
+                $recipients[] = $user;
+                $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'externalInvitation']);
+                $externalUser->setClient($client)->setUser($user);
+            }
+            $em->persist($externalUser);
+            $em->flush();
+            return $extId == 0 ?
+                $this->json(['status' => 'done', 'extId' => $externalUser->getId()], 200) :
+                $this->json(['status' => 'done'], 200);
+        } else {
+            return $this->buildErrorArray($individualForm);
+        }
+    }
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return mixed
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/old/settings/clients/create", name="createClient")
+     */
+    public function OldAddClientAction(Request $request)
+    {
+        $currentUser = $this->user;
+        if (!$currentUser instanceof User) {
+            return $this->redirectToRoute('login');
+        }
+        $em           = $this->em;
+        $repoO        = $em->getRepository(Organization::class);
+        $repoC        = $em->getRepository(Client::class);
+        $organization = $currentUser->getOrganization();
+
+        $orgOptions = $organization->getOptions();
+        foreach ($orgOptions as $orgOption) {
+            if ($orgOption->getOName()->getName() == 'enabledUserCreatingUser') {
+                $orgEnabledCreatingUser = $orgOption->isOptionTrue();
+            }
+        }
+
+        if ($currentUser->getRole() != 4 && $currentUser->getRole() != 1 && !($currentUser->getDepartment($app)->getMasterUser() == $currentUser || $orgEnabledCreatingUser && $currentUser->isEnabledCreatingUser())) {
+            return $this->render('errors/403.html.twig');
+        }
+
+        $organizationClients = $organization->getClients();
+        $clients             = [];
+        foreach ($organizationClients as $organizationClient) {
+            $clients[] = $organizationClient->getClientOrganization();
+        }
+
+        $clientsForm = $this->createForm(AddClientForm::class, null, ['standalone' => true, 'organization' => $organization]);
+        $clientForm = $this->createForm(ClientType::class, null, [ 'standalone' => false, 'hasChildrenElements' => false, 'currentUser' => $currentUser]);
+        $individualForm = $this->createForm(ExternalUserType::class, null, ['standalone' => true]);
+
+        $clientsForm->handleRequest($request);
+        $clientForm->handleRequest($request);
+        $individualForm->handleRequest($request);
+
+        if ($clientsForm->isSubmitted() && $clientsForm->isValid()) {
+
+            $settings           = [];
+            $recipients         = [];
+            $existingRecipients = [];
+            foreach ($clientsForm->get('clients') as $clientForm) {
+
+                /** @var Client $client */
+                $client = $repoC->findOneBy(['organization' => $currentUser->getOrganization(), 'commname' => $clientForm->getData()->getCommname()]);
+                /** @var Organization */
+                $organization = $client->getClientOrganization();
+
+                foreach ($clientForm->get('aliveExternalUsers') as $individualForm) {
+
+                    $individual = $individualForm->getData();
+                    $defaultOrgWeight = $em->getRepository(Weight::class)->findOneBy(['organization' => $organization, 'position' => null, 'usrId' => null]);
+
+                    // Create internal user CPTY
+
+                    $user = $em->getRepository(User::class)->findOneBy(['firstname' => $individual->getFirstname(), 'lastname' => $individual->getLastname()]);
+                    if ($user == null) {
+                        
+                        
+                        $settings['tokens'][] = $token;
+                        $token                = md5(rand());
+                        $user                 = new User;
+                        $user
+                        ->setToken($token)
+                        ->setFirstname($individual->getFirstname())
+                        ->setLastname($individual->getLastname())
+                        ->setEmail($individual->getEmail())
+                        ->setRole(2)
+                        ->setWgtId($defaultOrgWeight->getId())
+                        ->setWeightIni($defaultOrgWeight->getValue())
+                        ->setCreatedBy($currentUser->getId())
+                        ->setOrgId($organization->getId());
+                        $em->persist($user);
+                        $userGlobal = new UserGlobal();
+                        $userGlobal->setUsername($individual->getFirstname().' '.$individual->getLastname())
+                            ->addUserAccount($user);
+                        $em->persist($userGlobal);
+                        $recipients[] = $user;
+                    } else {
+                        $existingRecipients[] = $user;
+                    }
+
+                    $individual
+                        ->setUser($user)
+                        ->setCreatedBy($currentUser->getId())
+                        ->setClient($client);
+
+                    $em->persist($individual);
+                }
+            }
+
+            $em->flush();
+
+            $settings['invitingUser'] = $currentUser;
+            $settings['invitingOrganization'] = $currentUser->getOrganization();
+            $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'externalInvitation']);
+            return $this->redirectToRoute('manageUsers');
+
+        }
+
+        return $this->render('client_create.html.twig',
+            [
+                'form'                   => $clientsForm->createView(),
+                'multipleClientCreation' => true,
+                'clientForm' => $clientForm->createView(),
+                'individualForm' => $individualForm->createView(),
+            ]);
+    }
+
+    /**
+     * @param Request $request
+     * @param $cliId
+     * @return mixed
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/old/settings/client/{cliId}/users/create", name="createClientUser")
+     */
+    public function oldAddClientUserAction(Request $request, $cliId)
+    {
+        $currentUser = $this->user;
+        if (!$currentUser instanceof User) {
+            return $this->redirectToRoute('login');
+        }
+        $em    = $this->em;
+        $repoC = $em->getRepository(Client::class);
+
+        $client             = $repoC->find($cliId);
+        $clientOrganization = $client->getClientOrganization();
+        
+        //$clientUserForm = $this->createForm(ClientType::class, $client, ['standalone' => true, 'currentUser' => $currentUser]);
+        $clientForm = $this->createForm(ClientType::class, $client, ['standalone' => false, 'currentUser' => $currentUser ]);
+        $individualForm = $this->createForm(ExternalUserType::class, null, ['standalone' => true]);
+        //$clientUserForm->handleRequest($request);
+        $clientForm->handleRequest($request);
+        $individualForm->handleRequest($request);
+
+        /*if ($clientUserForm->isSubmitted() && $clientUserForm->isValid()) {
+            $existingRecipients = [];
+            $recipients         = [];
+
+            $client->setWorkerFirm($em->getRepository(WorkerFirm::class)->find($client->getWorkerFirm()));
+            $em->persist($client);
+
+            foreach ($clientUserForm->get('aliveExternalUsers') as $externalUserForm) {
+
+                $externalUser = $externalUserForm->getData();
+
+                // Create internal user CPTY
+
+                $user = $em->getRepository(User::class)->findOneBy(['firstname' => $externalUser->getFirstname(), 'lastname' => $externalUser->getLastname(), 'organization' => $clientOrganization]);
+
+                if ($externalUser->getEmail() != null && $user == null) {
+                    $token                = md5(rand());
+                    $settings['tokens'][] = $token;
+                    $user                 = new User;
+                    $token                = md5(rand());
+                    $userGlobal = new UserGlobal();
+                    $user
+                        ->setToken($token)
+                        ->setFirstname($externalUser->getFirstname())
+                        ->setLastname($externalUser->getLastname())
+                        ->setEmail($externalUser->getEmail())
+                        ->setRole(!$clientOrganization->hasActiveAdmin() ? 2 : 3)
+                        ->setWeightIni($externalUser->getWeightValue() ?: 100)
+                        ->setOrganization($clientOrganization)
+                        ->setCreatedBy($currentUser->getId());
+                    
+                    $userGlobal->setUsername($externalUser->getFirstname().' '.$externalUser->getLastname());
+                    $userGlobal->addUser($user);
+                    $em->persist($userGlobal);
+                    $recipients[] = $user;
+                } else {
+                    //$existingRecipients[] = $user;
+                }
+
+                $externalUser
+                    ->setUser($user)
+                    ->setCreatedBy($currentUser->getId())
+                    ->setClient($client);
+
+                $em->persist($externalUser);
+            }
+
+            $em->flush();
+
+            $settings['adminFullName'] = $currentUser->getFullName();
+            $settings['rootCreation']  = false;
+            $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'registration']);
+
+            return $this->redirectToRoute('manageUsers');
+        }*/
+
+        return $this->render('client_update_old.html.twig',
+            [
+                'client' => $clientForm->createView(),
+                'individualForm' => $individualForm->createView(),
+            ]);
+    }
+
+         // Display user info, enables modification. Note : root user can modify users from other organizations
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $usrId
+     * @return mixed
+     * @Route("/settings/user/{usrId}", name="oldUpdateUser", methods={"GET","POST"})
+     */
+    public function updateUserAction(Request $request, $usrId)
+    {
+
+        $em            = $this->em;
+        $repoO         = $em->getRepository(Organization::class);
+        $repoC         = $em->getRepository(Client::class);
+        $searchedUser  = $em->getRepository(User::class)->find($usrId);
+        $connectedUser = $this->user;
+        if (!$connectedUser instanceof User) {
+            return $this->redirectToRoute('login');
+        }
+
+        $connectedUserOrganization = $connectedUser->getOrganization();
+        $searchedUserOrganization  = $repoO->find($searchedUser->getOrganization());
+
+        $departments = ($searchedUserOrganization == $connectedUserOrganization || $connectedUser->getRole() == 4) ? $searchedUserOrganization->getDepartments() : null;
+
+        // Look through organization clients if user belongs to org clients
+        if ($searchedUserOrganization != $connectedUserOrganization) {
+
+            $connectedUserOrganization = $repoO->find($connectedUser->getOrganization());
+            $connectedUserOrgClients   = $repoC->findByOrganization($connectedUserOrganization);
+            $connectedUserClients      = [];
+            foreach ($connectedUserOrgClients as $connectedUserOrgClient) {
+                $connectedUserClients[] = $connectedUserOrgClient->getClientOrganization();
+            }
+
+            if (!in_array($searchedUserOrganization, $connectedUserClients) && $connectedUser->getRole() != 4) {
+                return $this->render('errors/403.html.twig');
+            }
+
+            if (in_array($searchedUserOrganization, $connectedUserClients)) {
+                $modifyIntern = false;
+                $userForm     = $this->createForm(ClientUserType::class, null, ['standalone' => true, 'user' => $searchedUser, 'app' => $app, 'clients' => $connectedUserClients]);
+            } else {
+                // This case only applies to root users
+                $modifyIntern = true;
+                $userForm     = $this->createForm(UserType::class, null, ['standalone' => true, 'app' => $app, 'departments' => $departments, 'user' => $searchedUser]);
+            }
+
+        } else {
+            if ($connectedUser->getRole() == 2 || $connectedUser->getRole() == 3) {
+                return $this->render('errors/403.html.twig');
+            }
+
+            $modifyIntern = true;
+        }
+
+        $orgOptions                = $searchedUserOrganization->getOptions();
+        $enabledCreatingUserOption = false;
+        foreach ($orgOptions as $orgOption) {
+            if ($orgOption->getOName()->getName() == 'enabledUserCreatingUser') {
+                $enabledCreatingUserOption = $orgOption->isOptionTrue();
+            }
+        }
+
+        if ($modifyIntern) {
+
+            $updateUserForm          = $this->createForm(UserType::class, $searchedUser, ['standalone' => true, 'standalone' => true, 'organization' => $searchedUserOrganization]);
+            $organizationElementForm = $this->createForm(OrganizationElementType::class, null, ['usedForUserCreation' => false, 'standalone' => true, 'organization' => $searchedUserOrganization]);
+            $updateUserForm->handleRequest($request);
+            $organizationElementForm->handleRequest($request);
+
+            if($updateUserForm->isSubmitted() && $updateUserForm->isValid()){
+                $em->persist($searchedUser);
+                $em->flush();
+                return $this->redirectToRoute('manageUsers');
+            }
+
+            return $this->render('user_update.html.twig',
+                [
+                    'form'                    => $updateUserForm->createView(),
+                    'organizationElementForm' => $organizationElementForm->createView(),
+                    'orgId'                   => $searchedUserOrganization->getId(),
+                    'enabledCreatingUser'     => $enabledCreatingUserOption,
+                    'creationPage'            => false,
+                ]);
+        }
+
+        return $this->render('user_update.html.twig',
+            [
+                'modifyIntern'        => $modifyIntern,
+                'form'                => $userForm->createView(),
+                'user'                => $searchedUser,
+                'orgId'               => $searchedUserOrganization->getId(),
+                'clientForm'          => ($modifyIntern) ? null : $this->createForm(AddClientForm::class, null, ['standalone' => true])->createView(),
+                'enabledCreatingUser' => $enabledCreatingUserOption,
+            ]);
+
+    }
+
+    public function sendOrganizationTestingReminders()
+    {
+        $allOrganizations = new ArrayCollection($this->em->getRepository(Organization::class)->findAll());
+        $expiringOrganizations =
+            $allOrganizations->matching(
+                Criteria::create()
+                    ->where(Criteria::expr()->neq('expired', new \DateTime('2100-01-01 00:00:00')))
+                    ->andWhere(Criteria::expr()->neq('expired', null))
+                    ->andWhere(Criteria::expr()->neq('reminderMailSent', true)
+                    )
+            );
+        $repoU = $this->em->getRepository(User::class);
+
+        foreach ($expiringOrganizations as $expiringOrganization) {
+            // Sending testing organization administration to motivate them onboard activities
+            if (date_diff(new \DateTime, $expiringOrganization->getExpired())->days < 15) {
+                $administrators = $repoU->findBy(['orgId' => $expiringOrganization->getId(), 'role' => [1, 4]]);
+                $nonAdministrators = $repoU->findBy(['orgId' => $expiringOrganization->getId(), 'role' => [2, 3]]);
+                $adminSettings['expiringDate'] = $expiringOrganization->getExpired();
+                $nonAdminSettings['expiringDate'] = $expiringOrganization->getExpired();
+                $adminSettings['forAdministrators'] = true;
+                $nonAdminSettings['forAdministrators'] = false;
+                self::sendMail(null, $administrators, 'firstMailReminderTPeriod', $adminSettings);
+                self::sendMail(null, $nonAdministrators, 'firstMailReminderTPeriod', $nonAdminSettings);
+                $expiringOrganization->setReminderMailSent(true);
+                $this->em->persist($expiringOrganization);
+            }
+        }
+        $this->em->flush();
+        return true;
+    }
+
+    // Function to create and update activities of recurring activities
+    // TimeFrame can be either 'D', 'W', 'M', 'Y'
+    public static function createRecurringActivities($app, Organization $organization, Recurring $recurring, User $masterUser, $name, $frequency, \DateTime $definedStartDate, $timeFrame, $gStartDateInterval, $gStartDateTimeFrame, $gEndDateInterval, $gEndDateTimeFrame, $type, $lowerbound = 0, $upperbound = 5, $step = 0.5, $maxTimeFrame = '1Y', \DateTime $definedEndDate = null)
+    {
+
+        if (!$currentUser instanceof User) {
+            return new Response(null, 401);
+        }
+
+        $em = $app['orm.em'];
+        $startDate = clone $definedStartDate;
+        $endDate = ($definedEndDate) ?: clone $definedStartDate->add(new DateInterval('P' . $maxTimeFrame));
+        $ongoingFutCurrActivities = $recurring->getOngoingFutCurrActivities();
+
+        //1 - Count the the number of activities to be created in the system
+        switch ($timeFrame) {
+            case 'D':
+                $nbActivitiesToCreate = floor(date_diff($endDate, $startDate)->days / $frequency);
+                break;
+            case 'W':
+                $nbActivitiesToCreate = floor(date_diff($endDate, $startDate)->days / (7 * $frequency));
+                break;
+            case 'M':
+                $nbActivitiesToCreate = floor(date_diff($endDate, $startDate)->m / $frequency);
+                break;
+            case 'Y':
+                $nbActivitiesToCreate = floor(date_diff($endDate, $startDate)->y / $frequency);
+                break;
+        }
+
+        if (count($ongoingFutCurrActivities) > 1) {
+            $k = 0;
+
+            while (count($ongoingFutCurrActivities) + $k < $nbActivitiesToCreate + 1) {
+
+                $firstFutureActivity = $recurring->getOngoingFutCurrActivities()->first();
+
+                $activity = new Activity;
+                $activity->setRecurring($recurring)->setMasterUserId($masterUser->getId())->setOrganization($organization);
+                $recurring->addActivity($activity);
+
+                foreach ($firstFutureActivity->getStages() as $firstFutureActivityStage) {
+                    $stage = clone $firstFutureActivityStage;
+                    $stage->setActivity($activity);
+                    $stage->setCreatedBy($currentUser->getId());
+                    $activity->addStage($stage);
+
+                    foreach ($firstFutureActivityStage->getCriteria() as $firstFutureActivityStageCriterion) {
+                        $criterion = clone $firstFutureActivityStageCriterion;
+                        $criterion->setStage($stage)->setType($type);
+                        $criterion->setCreatedBy($currentUser->getId());
+                        $stage->addCriterion($criterion);
+                        $em->persist($criterion);
+
+                    }
+
+                    foreach ($firstFutureActivityStage->getParticipants() as $firstFutureActivityStageParticipant) {
+                        $participant = clone $firstFutureActivityStageParticipant;
+                        $participant->setStage($stage);
+                        $participant->setCreatedBy($currentUser->getId());
+                        $stage->addParticipant($participant);
+                        $em->persist($participant);
+                    }
+
+                    $em->persist($stage);
+
+                }
+                /*
+                if ($type == 1) {
+                $criterion->setLowerbound($lowerbound)->setUpperbound($upperbound)->setStep($step);
+                }
+                 */
+                $k++;
+
+                $em->persist($activity);
+                $em->flush();
+            }
+            $k = 0;
+            while (count($ongoingFutCurrActivities) - $k > $nbActivitiesToCreate) {
+                $activity = $ongoingFutCurrActivities->last();
+                $recurring->removeActivity($activity);
+                $em->persist($recurring);
+                $k++;
+                /*
+            foreach ($recurring->getActivities() as $activity) {
+            while (count($ongoingFutCurrActivities) > $nbActivitiesToCreate +1) {
+            $recurring->removeActivity($activity);
+
+            }
+            }*/
+            }
+            $em->flush();
+
+        } else {
+
+            //$recurring->getActivities()->first()->setName(null)
+            //->getStages()->first()->setStartDate(null)->setEndDate(null)->setGStartDate(null)->setGEndDate(null);
+
+            for ($k = 1; $k <= $nbActivitiesToCreate; $k++) {
+                $activity = new Activity;
+                $activity->setRecurring($recurring)->setMasterUserId($masterUser->getId())->setOrganization($organization)->setStatus($recurring->getStatus());
+                $recurring->addActivity($activity);
+
+                $stage = new Stage;
+                $stage->setActivity($activity);
+                $stage->setCreatedBy($currentUser->getId());
+                $activity->addStage($stage);
+
+                $criterion = new Criterion;
+                $criterion->setStage($stage)->setType($type)->setName('General');
+                $criterion->setCreatedBy($currentUser->getId());
+                $stage->addCriterion($criterion);
+
+                $em->persist($recurring);
+                $em->persist($activity);
+                $em->persist($stage);
+                $em->persist($criterion);
+
+                if ($type == 1) {
+                    $criterion->setLowerbound($lowerbound)->setUpperbound($upperbound)->setStep($step);
+                }
+            }
+            $em->flush();
+        }
+
+        $ongoingFutCurrActivities = $recurring->getOngoingFutCurrActivities();
+
+        for ($k = 1; $k <= count($ongoingFutCurrActivities); $k++) {
+            $activity = ($k == 1) ? $ongoingFutCurrActivities->first() : $ongoingFutCurrActivities->next();
+
+            $activityStartDate = clone $startDate;
+            $activityStartDate2 = clone $startDate;
+            $activityEndDate = clone $startDate->add(new \DateInterval('P' . $frequency . $timeFrame)) /*->sub(new \DateInterval('P1D'))*/;
+            $activityGStartDate = clone $activityStartDate2->add(new \DateInterval('P' . $gStartDateInterval . $gStartDateTimeFrame));
+            //$cloneGStartDate = clone $activityGStartDate;
+            $cloneEndDate = clone $activityEndDate;
+            $activityGEndDate = clone $cloneEndDate->add(new DateInterval('P' . $gEndDateInterval . $gEndDateTimeFrame));
+            $activity->setName($name . /*' ('.$activityStartDate->format("j F y").' - '.$activityEndDate->format("j F y").')'*/ ' ' . $k)
+                ->getStages()->first()->setName($name . /*' ('.$activityStartDate->format("j F y").' - '.$activityEndDate->format("j F y").')'*/ ' ' . $k)->setStartDate($activityStartDate)->setEndDate($activityEndDate)->setGStartDate($activityGStartDate)->setGEndDate($activityGEndDate)->setMasterUserId($masterUser->getId())
+                ->getCriteria()->first()->setType($type)->setLowerbound(($type == 1) ? $lowerbound : null)->setUpperbound(($type == 1) ? $upperbound : null)->setStep(($type == 1) ? $step : null);
+            $em->persist($recurring);
+        }
+
+        //$em->flush();
+
+        $lastActEndDate = clone $definedEndDate;
+        $lastActGStartDate = clone $definedEndDate->add(new DateInterval('P1D'));
+        $lastActGEndDate = clone $definedEndDate->add(new DateInterval('P' . $gEndDateInterval . $gEndDateTimeFrame));
+        $recurring->getOngoingFutCurrActivities()->last()->getStages()->first()->setEndDate($lastActEndDate)->setGStartDate($lastActGStartDate)->setGEndDate($lastActGEndDate);
+        $em->persist($recurring);
+        $em->flush();
+    }
+
 }
