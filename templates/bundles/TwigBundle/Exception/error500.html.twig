@@ -75,6 +75,9 @@
             })|raw
            }}
         </p>
-        <p>{{ status_text }}</p>
+        {#
+        <p>{{ exception.file ~ ' line ' ~ exception.line }}</p>
+        <p>{{ exception.message }}</p>
+        #}
     </div>
 {% endblock %}
