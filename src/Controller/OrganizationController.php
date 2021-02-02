@@ -4927,6 +4927,7 @@ class OrganizationController extends MasterController
         /** @var Stage */
         $stage = $em->getRepository(Stage::class)->find($stgId);
         $activity = $stage->getActivity();
+        $data['ap'] = (int) ($activity->getOrganization() == $currentUser->getOrganization());
         $data['ms'] =  $activity->getStages()->count() > 1;
         $data['aname'] = $activity->getName();
         $data['name'] = $stage->getName();

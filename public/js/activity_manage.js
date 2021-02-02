@@ -133,6 +133,15 @@ function initPickates(){
 }
 
 initPickates();
+
+var $linkAccessElmt = $(`
+<div class="link-access-element">
+  <span class="black-text">${linkAccessMsg}</span>
+  <i class="fa fa-cog sm-left dd-orange-text manage-invit-btn tooltipped" data-tooltip="{{'stage_invitation_modal.save_stage_before_config'|trans}}"></i>
+</div>
+`);
+
+
 var now = new Date();
 var annee   = now.getFullYear();
 var anneeSuiv = annee + 1;
@@ -1311,6 +1320,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
     
       $modal.find('.manage-invit-btn').addClass('s-unsaved tooltipped').tooltip();
       $modal.find('.s-dates-row .dp-end').pickadate('picker').clear();
+      $modal.find('.participants-title').append($linkAccessElmt);
       if(!$('.participants-btn').length){
         proto = $partHolder.data('prototype');
         proto = proto.replace(/__name__/g, $partHolder.children().length - 1);
@@ -1359,7 +1369,29 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         $modal.find('.btn-s-modify').show();
         $modal.find('.s-name').empty().append(data.name);
         $modal.find('input[name*="name"]').closest('.input-field').hide();
-        $modal.find('.s-elmt-dates').empty().append(`<i class="fa fa-calendar"></i><span class="sm-left s-elmt-date">${new Date(data.sdate.date ).toLocaleDateString(lg+'-'+lg.toUpperCase(),options)}</span><span class="sm-right sm-left">-</span><span class="e-elmt-date">${data.edate ? new Date(data.edate.date).toLocaleDateString(lg+'-'+lg.toUpperCase(),options) : '...'}</span><div class="s-modify-dates m-left"><i class="btn-s-update btn-s-dates fa fa-pen dd-orange-text" style="display:none"></i></div>`);
+        if(data.ap){
+          $modal.find('.participants-title').append($linkAccessElmt);
+          $partHolder.find('.btn-participant-add').attr('id','addParticipant');
+          $modifyTitleElmt = $(`<span class="s-name-update btn-s-update" style="display:none"><i class="m-left fa fa-pen dd-orange-text"></i></span>`);
+          $modal.find('.s-title-zone').append($modifyTitleElmt);
+        } else {
+          $modal.find('.link-access-element').remove();
+          $partHolder.find('.btn-participant-add').remove();
+        }
+        
+        $datesElmt = $(`
+          <i class="fa fa-calendar"></i>
+          <span class="sm-left s-elmt-date">${new Date(data.sdate.date ).toLocaleDateString(lg+'-'+lg.toUpperCase(),options)}</span>
+          <span class="sm-right sm-left">-</span>
+          <span class="e-elmt-date">${data.edate ? new Date(data.edate.date).toLocaleDateString(lg+'-'+lg.toUpperCase(),options) : '...'}</span>
+        `);
+
+        if(data.ap){
+          $datesElmt.add(` <div class="s-modify-dates m-left"><i class="btn-s-update btn-s-dates fa fa-pen dd-orange-text" style="display:none"></i></div>`);
+        }
+        
+        $modal.find('.s-elmt-dates').empty().append($datesElmt);
+        
         startDate = new Date(data.sdate.date); //new Date(+new Date(data.sdate.date) + TZOffset);
         endDate = data.edate ? new Date(data.edate.date) : null; //new Date(+new Date(data.edate.date) + TZOffset) : null;
         $modal.find('.dp-start').pickadate('picker').set('select',startDate);
@@ -1383,7 +1415,6 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         }
         $modal.find('.events').show();
         $partHolder.find('.participant-btn').remove();
-        $partHolder.find('.btn-participant-add').attr('id','addParticipant');
         $modal.find('.nb-participants').empty().append(`(${data.participants ? data.participants.length : 0})`);
         $(data.participants).each(function(i,p){
           $partElmt = $($partHolder.data('prototype'));
@@ -1398,9 +1429,11 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
               'data-tooltip' : p.fullname + (p.synth ? ' (' + synthSuffix + ')' : ''),
             })
             .addClass('existing deletable')
-            .tooltip()
-            .append(`<div class="p-delete-overlay modal-trigger flex-center" href="#deleteParticipant" data-pid="${p.id}" style="display:none;"><i class="fa fa-trash"></i></div>`)
-            .show();
+            .tooltip();
+          if(!data.ap){
+            $partElmt.find('.p-delete-overlay').remove();
+          }
+          $partElmt.show();
           $partHolder.prepend($partElmt);
           
         })

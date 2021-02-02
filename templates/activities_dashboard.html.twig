@@ -107,6 +107,7 @@
     var copiedLinkMsg = "{{ 'stage_invitation_modal.copied_link_msg'|trans }}";
     var cslurl = "{{ url('createStageInvitationLink', {stgId: 0}) }}";
     var uisurl = "{{ url('updateStageInvitationStatus', {stgId: 0}) }}";
+    var linkAccessMsg = "{{'activities_dashboard.create_stage_modal.participants_add_second_choice'|trans|upper }}";
     {% if invitationStage|default %}
       var lsurl = "{{ url('linkStageInvitationToAccount') }}";
     {% endif %}
@@ -596,6 +597,7 @@
         width: 50%;
         opacity:0.9;
         border-radius:50%;
+        border:1px solid #55318e;
       }
 
       .p-firm-logo img{
@@ -2509,7 +2511,6 @@
             <div class="flex-center-sb modal-title">
               <div class="s-title-zone flex-center">
                 <h5 class="s-name" data-create="{{'activities.create.modal_title'|trans}}">{{'activities.create.modal_title'|trans}}</h5>
-                <span class="s-name-update btn-s-update" style="display:none"><i class="m-left fa fa-pen dd-orange-text"></i></span>
               </div>
               {% if is_granted('ROLE_ENTREPRISE') %}
                 <div class="flex-center ip-zone">
@@ -2560,12 +2561,7 @@
                     <i class="fa fa-users m-right"></i>
                     <span class="bold-1">{{ 'activities.participants'|trans }}</span>
                     <span class="nb-participants bold-1"></span>
-                  </div>
-                  <div>
-                    <span class="black-text">{{'activities_dashboard.create_stage_modal.participants_add_second_choice'|trans|upper }}</span>
-                    <i class="fa fa-cog sm-left dd-orange-text manage-invit-btn tooltipped" data-tooltip="{{'stage_invitation_modal.save_stage_before_config'|trans}}"></i>
-                  </div>
-                
+                  </div>        
                 </div>
 
                 <ul class="participants-list flex-center" data-prototype="{% apply escape %}{% include "components/participant_list__item.html.twig" with {participant: newActivityForm.participants.vars.prototype} %}{% endapply %}">
