@@ -19,12 +19,12 @@ $(document).ready(function () {
         
         $('.user-slider')[0].nextElementSibling.innerHTML = nbUsers;
 
-        var price_1 = $('.switch input').is(':checked') ? 70 : 7;
-        var price_2 = $('.switch input').is(':checked') ? 60 : 6;
-        var price_3 = $('.switch input').is(':checked') ? 50 : 5;
-        $('.price-value')[0].innerHTML =
-            Math.min(100,nbUsers) * price_1 + Math.max(0, Math.min(150, nbUsers - 100)) * price_2 + Math.max(0,Math.min(1000,nbUsers - 250)) * price_3;
-        console.log(Math.min(100,nbUsers) * price_1 + Math.max(0, Math.min(150, nbUsers - 100)) * price_2 + Math.max(0,Math.min(1000,nbUsers - 250)) * price_3);
+        var price_1 = $('.switch input').is(':checked') ? 150 : 15;
+        var price_2 = $('.switch input').is(':checked') ? 150 : 15;
+        var price_3 = $('.switch input').is(':checked') ? 150 : 15;
+
+        $('.price-value')[0].innerHTML = Math.min(100,nbUsers) * price_1 + Math.max(0, Math.min(150, nbUsers - 100)) * price_2 + Math.max(0,Math.min(1000,nbUsers - 250)) * price_3;
+       
 
        $userElmt = $('.user-nb');
 

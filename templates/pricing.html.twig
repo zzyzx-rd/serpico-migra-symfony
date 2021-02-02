@@ -199,13 +199,19 @@
       noUiSlider.create($('.user-slider')[0], {
           start: [1],
           connect: [true, false],
+          /*
           range: {
               'min': [1,1],
               '30%': [10,1],
               '50%': [50,10],
               '75%': [250,50],
               'max': [1000]
-          }
+          }*/
+          range: {
+              'min': 1,
+              'max': 50,
+          },
+          step: 1
     })
     </script>
 {% endblock %}

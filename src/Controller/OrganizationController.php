@@ -5517,7 +5517,7 @@ class OrganizationController extends MasterController
                 ->leftJoin('App\Entity\Organization', 'o', 'WITH', 'o.id = u.organization')
                 ->leftJoin('App\Entity\WorkerFirm', 'wf', 'WITH', 'wf.id = o.workerFirm')
                 ->leftJoin('App\Entity\Client', 'c', 'WITH', 'c.clientOrganization = u.organization')
-                ->leftJoin('App\Entity\ExternalUser','eu','WITH','eu.client = c.id')
+                ->leftJoin('App\Entity\ExternalUser','eu','WITH','eu.user = u.id')
                 ->where('u.username LIKE :startOpt1 OR u.username LIKE :startOpt2 AND u.deleted IS NULL');
                 if($qType == 'iu'){
                     $qb->andWhere('u.organization = :org');
@@ -5530,20 +5530,24 @@ class OrganizationController extends MasterController
                 ->addOrderBy('u.id','ASC');
 
             $userElmts = $qb->getQuery()->getResult();
+           
+            if($openUserQueries && sizeof($userElmts)){
 
-            $currentUsrId = $userElmts[0]['usrId'];
-            $trigger = false;
-            $offset = 0;
-            $usersGroupedById = [];
-            // We did not group by usrId previous query, in order users who may be already user clients out of them. We simply determine out of
-            // all users results having same user id, whether it is client or not, and we group the data.
-            if($openUserQueries){
+                $currentUsrId = $userElmts[0]['usrId'];
+                $trigger = false;
+                $offset = 0;
+                $usersGroupedById = [];
+                $differentUsers = false;
+                
+                // We did not group by usrId previous query, in order users who may be already user clients out of them. We simply determine out of
+                // all users results having same user id, whether it is client or not, and we group the data.
+
                 foreach($userElmts as $key => $userElmt){
                     if($userElmt['usrId'] != $currentUsrId){
                         $currentUsrId = $userElmt['usrId'];
                         if($offset){
-                            $userElmts[$key - 1]['cliId'] = $userElmts[$key - $offset]['cliId'];
-                            $userElmts[$key - 1]['extUsrId'] = $userElmts[$key - $offset]['extUsrId'];
+                            $userElmts[$key - 1]['cliId'] = $userElmts[$key - 1 - $offset + 1]['cliId'];
+                            $userElmts[$key - 1]['extUsrId'] = $userElmts[$key - 1 - $offset + 1]['extUsrId'];
                         } else {
                             $userElmts[$key - 1]['cliId'] = '';
                             $userElmts[$key - 1]['extUsrId'] = '';
@@ -5551,6 +5555,9 @@ class OrganizationController extends MasterController
                         $usersGroupedById[] = $userElmts[$key - 1];
                         $offset = 0;
                         $trigger = false;
+                        if(!$differentUsers){
+                            $differentUsers = true;
+                        }
                     } else {
                         if(in_array($userElmt['cliId'], $existingClientIds) !== false){
                             $trigger = true;
@@ -5560,10 +5567,13 @@ class OrganizationController extends MasterController
                         }
                     }
                 }
-                if($userElmts[sizeof($userElmts) - 1]['usrId'] != $userElmts[sizeof($userElmts) - 2]['usrId']){
+
+                
+
+                if(!$differentUsers || $userElmts[sizeof($userElmts) - 1]['usrId'] != $userElmts[sizeof($userElmts) - 2]['usrId']){
                     if($offset){
-                        $userElmts[sizeof($userElmts) - 1]['cliId'] = $userElmts[sizeof($userElmts) - 1 - $offset]['cliId'];
-                        $userElmts[sizeof($userElmts) - 1]['extUsrId'] = $userElmts[sizeof($userElmts) - 1 - $offset]['extUsrId'];
+                        $userElmts[sizeof($userElmts) - 1]['cliId'] = $userElmts[sizeof($userElmts) - 1 - $offset + 1]['cliId'];
+                        $userElmts[sizeof($userElmts) - 1]['extUsrId'] = $userElmts[sizeof($userElmts) - 1 - $offset + 1]['extUsrId'];
                     } else {
                         $userElmts[sizeof($userElmts) - 1]['cliId'] = '';
                         $userElmts[sizeof($userElmts) - 1]['extUsrId'] = '';
@@ -5572,8 +5582,11 @@ class OrganizationController extends MasterController
                 }
 
                 $userElmts = $usersGroupedById;
+
             }
+
         }
+
 
         if($qType == 'p'){
 
@@ -5667,7 +5680,6 @@ class OrganizationController extends MasterController
         $excluding = false;
         
         //if($qType == 'p' || $qType == 'eu' || $qType == 'u' || $qType == 'i' || $qType == 'iu'){
-        //return new JsonResponse($elements);
 
             foreach($elements as $element){
 
@@ -5687,12 +5699,17 @@ class OrganizationController extends MasterController
                     }
                     
                     if(!$isFirmQuery){
+
+                        $differentGlobalUsers = false;
                         
                         // Aggregating by global user
     
                         if($element['id'] != $currentUserGlobalValue){
                             if($currentUserGlobalValue){
                                 $arrangedElmts[] = $arrangedElmt;
+                                if(!$differentGlobalUsers){
+                                    $differentGlobalUsers = true;
+                                }
                             }
                             $currentUserGlobalValue = $element['id'];
                             $arrangedElmt = $element;
@@ -5709,7 +5726,7 @@ class OrganizationController extends MasterController
                             unset($arrangedElmt['orgType']);
                             unset($arrangedElmt['orgLogo']);
                             unset($arrangedElmt['wfiLogo']);
-                            $existing = false;
+                            $excluding = false;
                         }
     
                         
@@ -5727,11 +5744,12 @@ class OrganizationController extends MasterController
                         $arrangedElmt['orgName'][] = $element['orgType'] == 'C' ? '' : $element['orgName'];
                         $arrangedElmt['orgLogo'][] = $element['orgLogo'];
                         $arrangedElmt['wfiLogo'][] = $element['wfiLogo'];
-            
-                        if(!$excluding && sizeof($excludingElementIds) > 0 && in_array($potentialExcludingElmtId,$excludingElementIds) !== false){
+
+                        if(!$excluding && sizeof($excludingElementIds) > 0 && in_array($potentialExcludingElmtId, $excludingElementIds) !== false){
                             $excluding = true;
                             $arrangedElmt['ex'] = 1;
                         }
+
                     } else {
 
                         $arrangedElmt = $element;
@@ -5776,7 +5794,7 @@ class OrganizationController extends MasterController
             }
         
         // Adding last prepared element for user queries as we leave the loop before adding it
-        if(!$isFirmQuery && sizeof($elements)){
+        if(!$isFirmQuery && !$differentGlobalUsers){
             $arrangedElmts[] = $arrangedElmt;
         } 
 

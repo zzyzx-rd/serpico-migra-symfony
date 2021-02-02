@@ -2143,7 +2143,7 @@ tooltip:
     performance: Performance
     distance: Ecart de notation
     activity: Activité(s)
-    activity_ongoing_futur: Activités réalisées + à venir
+    activity_ongoing_futur: Activités réalisées + en cours et à venir
     userRole: "Administrateur : possède les droits les plus étendus, gère notamment les utilisateurs, paramètres d'entreprise et accède au reporting, Manager d'activité : peut créer des activités, et accéder aux résultats globaux des participants, Collaborateur : est rajouté dans les activités, peut en demander la création"
     create_internal: Créer un utilisateur interne
     create_external: Créer un utilisateur externe (client...)

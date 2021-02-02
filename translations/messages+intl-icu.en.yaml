@@ -2000,7 +2000,7 @@ tooltip:
     performance: Performance
     distance: Grading spread
     activity: Activities
-    activity_ongoing_futur: Completed activities (ongoing activities)
+    activity_ongoing_futur: Completed + ongoing and future activities
     userRole: "Administrator : has privileged rights, managing users and organization settings and gets access to reporting, Activity manager : can create activities, and access to participants global results, Collaborator : is added within activities, can request their creation"
     create_internal: Create internal user
     create_external: "Create external user (client...)"
