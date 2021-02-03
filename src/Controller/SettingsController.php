@@ -4341,7 +4341,6 @@ class SettingsController extends MasterController
     * @Route("/settings/super-admin/update", name="updateSuperAdmin")
     */
     public function updateSuperAdminAction(Request $request){
-        $usrId = $_POST['uid'];
         $em = $this->em;
         $previousSuperAdmin = $this->org->getUsers()->filter(fn(User $u) => $u->getRole() == USER::ROLE_SUPER_ADMIN)->first();
         if($previousSuperAdmin){
@@ -4349,7 +4348,7 @@ class SettingsController extends MasterController
             $em->persist($previousSuperAdmin);
             $em->refresh($previousSuperAdmin);        
         }
-        $newSuperAdmin = $em->getRepository(User::class)->find($usrId);
+        $newSuperAdmin = $usrId = $_POST['uid'] != "" ? $em->getRepository(User::class)->find($_POST['uid']) : $this->user; 
         $newSuperAdmin->setRole(USER::ROLE_SUPER_ADMIN);
         $em->persist($newSuperAdmin);
         $em->flush();
