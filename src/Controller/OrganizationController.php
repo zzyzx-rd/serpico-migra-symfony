@@ -5793,7 +5793,7 @@ class OrganizationController extends MasterController
             }
         
         // Adding last prepared element for user queries as we leave the loop before adding it
-        if(!$isFirmQuery && !$differentGlobalUsers){
+        if(sizeof($elements) && !$isFirmQuery && !$differentGlobalUsers){
             $arrangedElmts[] = $arrangedElmt;
         } 
 
