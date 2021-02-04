@@ -290,10 +290,28 @@
         })
 
         $('.add-user-btn').on('click',function(){
+          if(typeof $('#addUserClient').attr('data-qt') === typeof undefined || $('#addUserClient').attr('data-qt') === false){
+            $('#addUserClient').attr('data-qt','eu');
+          }
           setTimeout(function(){
             $('#addUserClient').find('[class*="-part"]:visible').addClass('initial-part');
           },200);
         });
+
+        $('input[name*="user-type"]').on('change',function(){
+          $('#addUserClient').attr('data-qt',$('input[name*="user-type"][value="ext"]').is(':checked') ? 'c' : 'u');
+        })
+
+        $('input[name*="gen-type"]').on('change',function(){
+          if($('input[name*="gen-type"][value="f"]').is(':checked')){
+            qt = 'nc';
+          } else if($('input[name*="gen-type"][value="i"]').is(':checked')){
+            qt = 'i';
+          } else {
+            qt = $('input[name*="user-type"][value="ext"]').is(':checked') ? 'c' : 'u';
+          }
+          $('#addUserClient').attr('data-qt',qt);
+        })
 
       })  
   </script>

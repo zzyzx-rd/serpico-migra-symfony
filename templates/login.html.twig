@@ -85,6 +85,12 @@
             position: relative;
         }
 
+        .email-field button{
+            position: absolute;
+            right: 0;
+            top: 0%;
+          }
+
     </style>
     <script>
         var rurl = "{{ path('resetPassword') }}";
@@ -232,9 +238,9 @@
                 <p>{% trans %}landing.retrieve_pwd.msg_2{% endtrans %}</p>
             </div>
             <form id="retrievePwdForm" action="" method="post">
-                <input type="email" name="email" required="required"/>
-                <div class="modal-footer">
-                    <button type="submit" name="" value="home" class="btn waves-effect waves-light modal-close">{% trans %}landing.retrieve_pwd.submit{% endtrans %}</button>
+                <div class="input-field email-field btn-disabled">
+                    <input type="email" name="email" required="required"/>
+                    <button type="submit" name="" value="home" class="btn waves-effect waves-light disabled-btn modal-close">{% trans %}landing.retrieve_pwd.submit{% endtrans %}</button>
                 </div>
             </form>
         </div>
@@ -251,6 +257,27 @@
 
 
 {% block javascripts %}
-    <script src="{{ absolute_url(asset('js/home.js')) }}"></script>
-    <script src="{{ absolute_url(asset('js/landing.js')) }}"></script>
+    <script>
+        $(function(){
+            $('input[type="email"]').on('keyup',function(){
+                if(isEmail($(this).val())){
+                    $('.email-field button').removeClass('disabled-btn');
+                }
+            })
+        })
+
+        $('#retrievePwdForm').on('submit',function(e){
+            e.preventDefault();
+            var formSerialize =  $(this).serialize();
+            $.post(rurl, formSerialize)
+            .done(function(data){
+                $('.modal').modal('close');
+                $('#retrievePwdForm').find("[type=email]").val("");
+                $('#retrievePwdSuccess').modal('open');
+            })
+            .fail(function(data){
+                console.log(data);
+            })
+    });
+    </script>
 {% endblock %}

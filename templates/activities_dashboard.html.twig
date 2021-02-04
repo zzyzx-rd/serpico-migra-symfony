@@ -2469,9 +2469,9 @@
      
     {% endif %} #}
 
-    {% if currentuser and currentuser.role != 3 %}
-      <div id="fixedButton create-act-btn" class="fixed-action-btn">
-          <a class="btn-floating btn-large modal-trigger" href="#createStage" onclick="onAddProcessClick('{{ currentuser.organization.id }}')" data-oid="{{currentuser.organization.id}}"><i class="mi add"></i></a>
+    {% if currentuser and currentuser.role < 4 %}
+      <div class="fixed-action-btn">
+          <a id="fixedButton" class="btn-floating create-act-btn btn-large modal-trigger" href="#createStage" onclick="onAddProcessClick('{{ currentuser.organization.id }}')" data-oid="{{currentuser.organization.id}}"><i class="mi add"></i></a>
           {#
           <ul>
               <li><a class="btn-floating orange lighten-2 tooltipped modal-trigger" data-position="left" data-delay="50" data-tooltip="{% trans %}tooltip.template.create_from_scratch{% endtrans %}" href="{{ path('activityInitialisation',{'elmt' : 'template'}) }}">
@@ -2485,6 +2485,12 @@
               <li><a class="btn-floating teal accent-4 tooltipped" data-position="left" data-delay="50" data-tooltip="{% trans %}tooltip.activity.create_from_scratch{% endtrans %}" href="#createStage" onclick="onAddProcessClick('{{ currentuser.orgId }}')" data-oid="{{currentuser.orgId}}"><i class="material-icons">create</i></a></li>
           </ul>
           #}
+      </div>
+      <div class="tap-target dd-bg" data-activates="fixedButton">
+          <div class="tap-target-content white-text">
+            <h5>{{'activity_elements.first_connection_title'|trans}}</h5>
+            <p>{{'activity_elements.first_connection_helper'|trans}}</p>
+          </div>
       </div>
     {% endif %}
 

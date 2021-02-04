@@ -31,6 +31,7 @@ $(function(){
     */
 
     $('.add-user-btn').on('click',function(){
+        $('#addUserClient').attr('data-qt','eu');
         setTimeout(function(){
             $('#addUserClient').find('[class*="-part"]:visible').addClass('initial-part');
         },200);

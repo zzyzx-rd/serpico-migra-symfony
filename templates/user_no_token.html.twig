@@ -23,6 +23,9 @@
           }
 
       </style>
+      <script>
+        var rurl = "{{ path('resetPassword') }}";
+      </script>
 
   {% endblock %}
 
@@ -63,26 +66,28 @@
           </div>
       </div>
 
-    {#
-    <div class="container">
-      <div class="row center">
-        <img src="{{ asset('lib/img/missing-target.png') }}" alt="">
-        <h5>{% trans %}user_no_token.title{% endtrans %}</h5>
-        <p>{% trans %}user_no_token.description{% endtrans %}</p>
+      <div id="retrievePwd" class="modal">
+          <div class="container">
+              <div class="modal-content">
+                  <p>{% trans %}landing.retrieve_pwd.msg{% endtrans %}</p>
+                  <p>{% trans %}landing.retrieve_pwd.msg_2{% endtrans %}</p>
+              </div>
+              <form id="retrievePwdForm" action="" method="post">
+                  <div class="input-field email-field btn-disabled">
+                      <input type="email" name="email" required="required"/>
+                      <button type="submit" name="" value="home" class="btn waves-effect waves-light disabled-btn modal-close">{% trans %}landing.retrieve_pwd.submit{% endtrans %}</button>
+                  </div>
+              </form>
+          </div>
       </div>
-      <div class="row">
-        <form id="retrievePwdForm" action="" method="post">
-          <input type="email" name="email" required="required">
-          <button type="submit" name="" value="home" class="btn waves-effect waves-light modal-close">{% trans %}landing.retrieve_pwd.submit{% endtrans %}</button>
-        </form>
+      <div id="retrievePwdSuccess" class="modal">
+          <div class="modal-content">
+              <p>{% trans %}landing.retrieve_pwd.success_msg{% endtrans %}</p>
+          </div>
+          <div class="modal-footer">
+              <button class="btn waves-effect waves-light modal-close">{% trans %}Ok{% endtrans %}</button>
+          </div>
       </div>
-      <div class="row col center">
-        <div class="button-field">
-          <a class="btn btn-large waves-effect waves-light" href="{{ url('login') }}"><i class="fa fa-home" aria-hidden="true"></i>{% trans %}user_no_token.home_button_title{% endtrans %}</a>
-        </div>
-      </div>
-    </div>
-    #}
 {% endblock %}
 
 {% block javascripts %}
@@ -91,10 +96,23 @@
     $(function(){
       $('input[type="email"]').on('keyup',function(){
           if(isEmail($(this).val())){
-            $('.email-field button').removeClass('btn-disabled');
+            $('.email-field button').removeClass('disabled-btn');
           }
       })
-    })
+       $('#retrievePwdForm').on('submit',function(e){
+        e.preventDefault();
+        var formSerialize =  $(this).serialize();
+        $.post(rurl, formSerialize)
+        .done(function(data){
+            $('.modal').modal('close');
+            $('#retrievePwdForm').find("[type=email]").val("");
+            $('#retrievePwdSuccess').modal('open');
+        })
+        .fail(function(data){
+            console.log(data);
+        })
+      })
+    });
   
   </script>
 {% endblock %}

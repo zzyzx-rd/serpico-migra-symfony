@@ -11,6 +11,8 @@ function getRandomInt(min, max) {
   return Math.floor((Aujourdhui - PremierJour) / (1000 * 60 * 60 * 24));
 }*/
 
+
+
 function dateFromDay(year, day){
   var date = new Date(year, 0); // initialize a date in `year-01-01`
   return new Date(date.setDate(day)); // add the number of days
@@ -1432,6 +1434,11 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
             .tooltip();
           if(!data.ap){
             $partElmt.find('.p-delete-overlay').remove();
+          } else {
+            $partElmt.find('.p-delete-overlay').removeClass('participant-delete').addClass('modal-trigger').attr({
+              'href' : '#deleteParticipant',
+              'data-pid' : p.id
+            })
           }
           $partElmt.show();
           $partHolder.prepend($partElmt);
@@ -2231,6 +2238,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
 
   
   $('.btn-participant-add').on('click',function(){
+    $('#addUserClient').attr('data-qt','p');
     setTimeout(function(){
       $('#addUserClient').find('[class*="-part"]:visible').addClass('initial-part');
     },200);
@@ -2568,9 +2576,9 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
 
   $('.letz-start-btn').on('click',function(e){
     e.preventDefault();
-    if(!currentWfiId){
-      location.reload();
-    }
+    setTimeout(function(){
+      $('.tap-target').tapTarget('open');
+    },1000)
   })
 
   $('.timescale-change-btn').on('click',function(){
@@ -2691,7 +2699,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
   })
   
   $('.s-link').on('click',function(){
-      copyToClipboard($('input[name="link"]'));
+      copyToClipboard($('input[name="link"]').val());
       var $toast = $(`<span class="toast-link">${copiedLinkMsg}</span>`)
       Materialize.toast($toast,1500);
   });
@@ -2706,6 +2714,14 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
       .done(function(data){
         $('#manageStageInvit').modal('close');
       })
+  });
+
+  $('input[name*="user-type"]').on('change',function(){
+    if($('input[name*="user-type"][value="ext"]').is(':checked')){
+      $('#addUserClient').attr('data-qt','f');    
+    } else {
+      $('#addUserClient').attr('data-qt', 'p'); 
+    } 
   });
 
 

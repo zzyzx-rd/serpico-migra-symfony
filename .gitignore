@@ -4,7 +4,6 @@ var
 vendor/
 .env
 .DS_Store
-migrations/
 node_modules/
 public/lib/img/
 public/lib/evt/

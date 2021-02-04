@@ -2546,6 +2546,9 @@ activities:
 
 
 activity_elements:
+  first_connection_title: Dashboard des activités
+  first_connection_helper: Rajoutez ici vos premières activités avec vos partenaires
+
   output: Retours programmés
   parameters: Paramètres
   expected_output: Retours & updates
@@ -3535,16 +3538,18 @@ user_list:
   add_user_btn_tooltip: Ajouter utilisateur/partenaire
   add_user_modal:
     type_title: Choisissez ce que vous voulez ajouter
-    type_act_title: Ce participant est un
-    internal: Membre de mon entreprise
-    external: Membre d'un partenaire
+    type_act_title: Ce participant est un...
+    internal_user: Membre de mon entreprise
+    partner_user: Membre d'un partenaire
+    external_user: Membre d'une entreprise externe
+    legal_person: Personne morale (entreprise...)
     firm_title: Nom du partenaire/client
     email_title: Dernière étape
     int_user_title: Ajout d'un membre interne
     ext_user_title: Ajout d'un membre du partenaire/client
     independant_user_title: Ajout d'un indépendant
     participant_title: Ajout d'un participant
-    firm_creation_info: En crééant le partenaire, vous pourrez y ajouter des utilisateurs. Un utilisateur spécial a aussi été créé, et représente l'entreprise en tant que personne morale - vous pourrez l'ajouter à vos activités si besoin
+    firm_creation_info: Vous pourrez toujours changer/ajouter des personnes représentant pour cette personne morale par la suite
     independant_creation_info: La personne indépendante et son entreprise représentent une seule et même entité
     without_email_info: Si vous ne renseignez pas d'adresse email, cet utilisateur ne pourra pas interagir avec vous - vous pouvez toujours la renseigner par la suite
     new_firm_database: Nouvelle entreprise en base

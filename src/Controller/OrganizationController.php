@@ -1809,7 +1809,7 @@ class OrganizationController extends MasterController
         $em = $this->em;
         $organization = $this->org;
         $client = empty($_POST['cid']) ? new Client : $em->getRepository(Client::class)->find($_POST['cid']);
-        $type = $_POST['gen-type'];
+        $type = $_POST['gen-type'] == 'i' ? 'i' : 'f';
         $isIndependant = $type == 'i';
         $entityName = $isIndependant ? $_POST['username'] : $_POST['firmname'];
         $hasOrgMainFolder = true;
@@ -1864,7 +1864,7 @@ class OrganizationController extends MasterController
 
         $synthUser = $em->getRepository(User::class)->findOneBy(['organization' => $clientOrganization, 'synthetic' => true]);
         
-        if($clientOrganization != $organization && (empty($_POST['cid']) || empty($_POST['oid']))){
+        if($clientOrganization != $organization && empty($_POST['cid'])){
 
             /** @var ExternalUser */
             $externalSynthUser = new ExternalUser;
@@ -4816,38 +4816,36 @@ class OrganizationController extends MasterController
      * @Route("/organization/stage/{stgId}/participants/add", name="addParticipantStage")
      */
     public function addParticipantStage(Request $request, int $stgId, TranslatorInterface $translator){
-        $usrId = $_POST['uid'] != "" ? $_POST['uid'] : $_POST['iuid'];
+        
+        $usrId = $_POST['uid'];
         $extUsrId = $_POST['euid'];
         $teaId = $_POST['tid'];
         $genType = $_POST['gen-type'];
-        $userType = isset($_POST['user-type']) ? $_POST['user-type'] : null;
-        $firmname = $_POST['firmname'];
-        $username = $_POST['username'];
+        $userType = isset($_POST['user-type']) ? $_POST['user-type'] : null;        
         $cliId = $_POST['cid'];
-        $orgId = $_POST['oid'];
 
         if($genType == 'i' || $genType == 'f' || $userType == 'ext'){
             if(!$cliId){
                 // We create client relationship...
                 $clientJsonResponse = $this->addClientAction($request);
-                $clientResponse = json_decode($clientJsonResponse,true);
-                $cliId = $clientResponse['cid'];
+                $clientData = json_decode($clientJsonResponse->getContent(),true);
+                $cliId = $clientData['cid'];
             }
             if($genType != 'i'){
                 if(!$extUsrId){
                     $clientUserJsonResponse = $this->addClientUserAction($request, $cliId, $translator);
-                    $clientUserResponse = json_decode($clientUserJsonResponse,true);
-                    $extUsrId = $clientUserResponse['euid'];
+                    $clientUserData = json_decode($clientUserJsonResponse->getContent(),true);
+                    $extUsrId = $clientUserData['eid'];
                     if(!$usrId){
-                        $usrId = $clientUserResponse['id'];
+                        $usrId = $clientUserData['id'];
                     }
                 } 
             }
         } else {
             if(!$usrId){
                 $userJsonResponse = $this->addUserAction($request);
-                $userResponse = json_decode($userJsonResponse,true);
-                $usrId = $userResponse['id'];
+                $userData = json_decode($userJsonResponse->getContent(),true);
+                $usrId = $userData['id'];
             }
         }
 
@@ -4855,37 +4853,7 @@ class OrganizationController extends MasterController
         /** @var Stage */
         $stage = $em->getRepository(Stage::class)->find($stgId);
         $user = $usrId ? $em->getRepository(User::class)->find($usrId) : null;
-        $organization = $this->org;
-        $userOrganization = $user->getOrganization();
-        if($userOrganization != $organization){
-            // It means this user does not belong to a client organization, we need to add it)
-            if(!$extUsrId){
-                $client = new Client;
-                $client->setOrganization($this->org)
-                    ->setClientOrganization($userOrganization)
-                    ->setName($userOrganization->getCommname())
-                    ->setWorkerFirm($userOrganization->getWorkerFirm());
-                    
-                $nameElmts = explode(" ", $user->getUsername(), 2); 
-                $firstname = trim($nameElmts[0]);
-                $lastname = trim($nameElmts[1]);
-
-                $externalUser = new ExternalUser();
-                $externalUser->setFirstname($firstname)
-                    ->setLastname($lastname)
-                    ->setEmail($user->getEmail())
-                    ->setUser($user);
-
-                $client->addExternalUser($externalUser);
-                $organization->addClient($client);
-                $em->persist($organization);
-                $em->flush();
-                $this->updateOrgFeatures($userOrganization, null, true, false, true, [$this->user]);
-
-            } else {
-                $externalUser = $em->getRepository(ExternalUser::class)->find($extUsrId);
-            }
-        }
+        $externalUser = $extUsrId ? $em->getRepository(ExternalUser::class)->find($extUsrId) : null;
         $team = $teaId ? $em->getRepository(Team::class)->find($teaId) : null;
         $participant = new Participation;
         $participant->setUser($user)
@@ -4896,7 +4864,7 @@ class OrganizationController extends MasterController
         $em->flush();
 
         // Adding oneself does not trigger any email sending
-        if($user != $this->user){
+        if($user->getEmail() && $user != $this->user){
             $recipients = $team ? $team->getMembers()->map(fn(Member $m) => [$m->getUser()])->getValues()[0] : [$user];
             $activity = $stage->getActivity();
             $response = $this->forward('App\Controller\MailController::sendMail', [
@@ -4907,8 +4875,8 @@ class OrganizationController extends MasterController
                 ], 
                 'actionType' => 'activityParticipation']
             );
+            if($response->getStatusCode() == 500){ return $response; };
         }
-        if($response->getStatusCode() == 500){ return $response; };
         return new JsonResponse(['msg' => 'success','pid' => $participant->getId()], 200);
     }
 
@@ -5586,7 +5554,6 @@ class OrganizationController extends MasterController
             }
         }
 
-
         if($qType == 'p'){
 
             $qb2 = $em->createQueryBuilder();
@@ -5600,22 +5567,21 @@ class OrganizationController extends MasterController
                 ->getResult();
 
             $qb3 = $em->createQueryBuilder();
-            $firmElmts = $qb3->select('wf.name AS orgName','wf.id AS wfiId', 'wf.logo AS wfiLogo', 'o.logo AS orgLogo', 'o.id AS orgId', 'c.id AS cliId', 'u.id AS usrId', 'eu.id AS extUsrId')
+            $firmElmts = $qb3->select('wf.name AS orgName','wf.id AS wfiId', 'wf.logo AS wfiLogo'/*, 'o.logo AS orgLogo', 'o.id AS orgId', 'c.id AS cliId', 'u.id AS usrId', 'eu.id AS extUsrId'*/)
                 ->from('App\Entity\WorkerFirm', 'wf')
-                ->leftJoin('App\Entity\Organization', 'o', 'WITH', 'o.workerFirm = wf.id')
-                ->leftJoin('App\Entity\User', 'u', 'WITH', 'u.organization = o.id')
-                ->leftJoin('App\Entity\Client', 'c', 'WITH', 'c.clientOrganization = o.id')
-                ->leftJoin('App\Entity\ExternalUser', 'eu', 'WITH', 'eu.client = c.id')
+                //->leftJoin('App\Entity\Organization', 'o', 'WITH', 'o.workerFirm = wf.id')
+                //->leftJoin('App\Entity\User', 'u', 'WITH', 'u.organization = o.id')
+                //->leftJoin('App\Entity\Client', 'c', 'WITH', 'c.clientOrganization = o.id')
+                //->leftJoin('App\Entity\ExternalUser', 'eu', 'WITH', 'eu.client = c.id')
                 ->where('wf.name LIKE :startOpt1 OR wf.name LIKE :startOpt2')
-                ->andWhere('u.synthetic = TRUE')
-                ->andWhere('eu.synthetic = TRUE')
+                //->andWhere('u.synthetic = TRUE')
+                //->andWhere('eu.synthetic = TRUE')
                 ->setParameter('startOpt1', '% '. $name .'%')
                 ->setParameter('startOpt2', $name .'%')
                 ->getQuery()
                 ->getResult();
 
             $elements = new ArrayCollection(array_filter(array_merge($userElmts, $teamElmts, $firmElmts)));
-
 
         } else if($qType == 'u' || $qType == 'eu' || $qType == 'i' || $qType == 'iu'){
             
@@ -5679,9 +5645,13 @@ class OrganizationController extends MasterController
         $excluding = false;
         
         //if($qType == 'p' || $qType == 'eu' || $qType == 'u' || $qType == 'i' || $qType == 'iu'){
-
+        
             foreach($elements as $element){
 
+                $isWorkerFirmLike = !isset($element['id']);
+
+                if(!$isWorkerFirmLike){
+                    
                     switch($qType){
                         case 'eu':
                             $potentialExcludingElmtId = $element['extUsrId'];
@@ -5703,7 +5673,7 @@ class OrganizationController extends MasterController
                         
                         // Aggregating by global user
     
-                        if($element['id'] != $currentUserGlobalValue){
+                        if(!isset($element['id']) || $element['id'] != $currentUserGlobalValue){
                             if($currentUserGlobalValue){
                                 $arrangedElmts[] = $arrangedElmt;
                                 if(!$differentGlobalUsers){
@@ -5757,6 +5727,11 @@ class OrganizationController extends MasterController
                         }
                         $arrangedElmts[] = $arrangedElmt;
                     }
+                
+                } else {
+                    $arrangedElmts[] = $element;
+                    
+                }
                     
                 //}
 

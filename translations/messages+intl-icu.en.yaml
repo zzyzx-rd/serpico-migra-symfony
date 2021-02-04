@@ -2444,6 +2444,7 @@ activity_elements:
       add_event_title: To which stage do you want to attach thsis event ?
       title: Which stage do you want to look at/modify ?
   criteria: Criteria
+  participant_adding_label: Name of participating user or firm
   participants: Participants
   iprocess: Process
   complexify: Add stages/criteria
@@ -3402,15 +3403,18 @@ user_list:
   add_user_btn_tooltip: Add user/partner
   add_user_modal:
     type_title: Choose what you want to add
-    int_org_title:
-    internal: Belongs to my firm
-    external: Belongs to a partner
+    type_act_title: This participant is a(n)...
+    internal_user: Belongs to my firm
+    partner_user: Belongs to a partner
+    external_user: Belongs to an external firm
+    legal_person: Legal person (firm...)
     firm_title: Partner/client name
     email_title: Last step
     int_user_title: New internal member
     ext_user_title: New partner/client member
     independant_user_title: New independant
-    firm_creation_info: By creating this partner, you will able to add users belonging to it. A legal person user, representing the firm has also been created - whom you can select by convenience in your activities
+    participant_title: New participant
+    firm_creation_info: You will still be able to modify or add people representing this legal person thereafter
     independant_creation_info: The independant person and his/her organization are considered the same
     without_email_info: If you do not provide email address, this user will not be interact with you - you can still add it after
     new_firm_database: New firm in database

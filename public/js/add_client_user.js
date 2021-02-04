@@ -289,8 +289,8 @@ $(function(){
                     oLogos ? $option.attr('data-org-logo',oLogos[i]) : ''; 
                     wLogos ? $option.attr('data-wf-logo',wLogos[i]) : '';
                     if($accountSelectedOpt){
-                        $('.account-part').find('input[name="iuid"]').val(uIds[i]);
-                        $('.account-part').find('input[name="euid"]').val(euIds[i]);
+                        $('.username-part').find('input[name="uid"]').val(uIds[i]);
+                        $('.username-part').find('input[name="euid"]').val(euIds[i]);
                     }
                     $selector.append($option);
                 })
@@ -306,8 +306,9 @@ $(function(){
 
                 if(($selectedOpt.attr('data-uid') != "" || $selectedOpt.attr('data-euid') != "")){
                     if(onActivityPage){
-                        $inputZone.find('input[name="iuid"]').val($selectedOpt.attr('data-uid'));
+                        $inputZone.find('input[name="uid"]').val($selectedOpt.attr('data-uid'));
                         $inputZone.find('input[name="euid"]').val($selectedOpt.attr('data-euid'));
+                        $addUserElmtModal.find('input[name="cid"]').val($selectedOpt.attr('data-cid'));
                         $inputZone.find('input[name="tid"]').val($selectedOpt.attr('data-tid'));
                     } else {
                         $inputZone.find('input[name="uid"]').val($selectedOpt.attr('data-uid'));
@@ -366,10 +367,10 @@ $(function(){
     $('[name="partAccountSelector"]').on('change',function(){
         var $this = $(this);
         var $selectedOpt = $this.find(":selected");
-        $('.account-part').find('input[name="iuid"]').val($selectedOpt.attr('value'));
-        $('.account-part').find('input[name="cid"]').val($selectedOpt.attr('data-cid'));
-        $('.account-part').find('input[name="euid"]').val($selectedOpt.attr('data-euid'));
-        $('.account-part').find('input[name="tid"]').val($selectedOpt.attr('data-tid'));
+        $('.username-part').find('input[name="cid"]').val($selectedOpt.attr('data-cid'));
+        $('.username-part').find('input[name="euid"]').val($selectedOpt.attr('data-euid'));
+        $('.username-part').find('input[name="uid"]').val($selectedOpt.attr('value'));
+        $('.username-part').find('input[name="tid"]').val($selectedOpt.attr('data-tid'));
     })
 
     $('.change-username').on('click',function(){
@@ -497,6 +498,13 @@ $(function(){
     function addParticipant(){
 
         proto = $partHolder.data('prototype');
+        wid = $('.firmname-part input[name="wid"]').val();
+        uid = $('.username-part input[name="uid"]').val();
+        euid = $('.username-part input[name="euid"]').val();
+        tid = $('.username-part input[name="tid"]').val();
+        
+        isNew = !uid && !uid && !euid && !tid;
+
         if($stageModal.attr('data-id')){
             $partElmt = $(proto);
             urlToPieces = apurl.split('/');
@@ -504,85 +512,67 @@ $(function(){
             url = urlToPieces.join('/');
             $.post(url,$addUserElmtModal.find('form').serialize())
             .done(function(data){
-                /*if($('[name="userSelector"] option:selected').length){
-                    isAccountChosen = $('[name="partAccountSelector"] option:selected').length;
-                    $userMSelectElmt = $('[name="userSelector"]').prev().find('li').eq($('[name="userSelector"]').find('option').index('[name="userSelector"] option:selected'));
-                    if(isAccountChosen){
-                        $partImg = $userMSelectElmt.find('.s-user-option-logo');
-                        $chosenAccountId = $('[name="partAccountSelector"]').val();
-                        accountSelectedPos = $.inArray($chosenAccountId,$('[name="userSelector"] option:selected').attr('data-uid').split(','));
-                        $firmImg = $userMSelectElmt.find('.org-img-holder').children().eq(accountSelectedPos);
-                        accountFirmName = $('[name="userSelector"] option:selected').attr('data-org-name').split(',')[accountSelectedPos];
-                    } else {
-                        $partImg = $userMSelectElmt.find('.input-u-img') ? $userMSelectElmt.find('.input-u-img') : $userMSelectElmt.find('.input-f-img');
-                        firmImg =  $userMSelectElmt.find('.input-f-img');
-                    }
-                    username = `${$('[name="userSelector"] option:selected').text()}${accountFirmName ? ' (' + accountFirmName + ')' : ''}`
-
-                } else {
-                    username = $('.username-part input[name="username"]').val();
-                    $firmImg = null;
-                }
-
-                $partElmt.find('.selected-participant-logo').attr('src', $partImg.attr('src'));
-
-                if($firmImg){
-                    $partElmt.find('.p-firm-logo').attr('src', $firmImg.attr('src'));
-                }
-                $partElmt.addClass('existing deletable').append(`<div class="p-delete-overlay modal-trigger flex-center" href="#deleteParticipant" style="display:none;" data-pid="${data.pid}"><i class="fa fa-trash"></i></div>`);
-                $partElmt.attr('data-tooltip',username).tooltip();
-                $partHolder.find('.btn-participant-add').before($partElmt);
-                $('.nb-participants').empty().append(`(${$('.participant-btn').length})`);
-                /*$('#addUserClient').find('select').empty().material_select();
-                $('#addUserClient').find('input').val('');
-                $('#addUserClient').find('.input-u-img, .input-f-img').remove();
-                $('.go-prev[class*="go-to"]').closest('[class*="-part"]').hide();
-                $('.initial-part').show();*/
+                $partElmt.find('.p-delete-overlay').addClass('modal-trigger').removeClass('participant-delete').attr({
+                    'data-pid' :data.pid,
+                    'href' : '#deleteParticipant',
+                });
                 sanitizeAddUserElmtModal();
             })
         } else {
             proto = proto.replace(/__name__/g, $partHolder.children().length - 1);
             $partElmt = $(proto);
-            $partElmt.find('.u').val($('.account-part input[name="iuid"]').val() ? $('.account-part input[name="iuid"]').val() : $('.username-part input[name="iuid"]').val());
-            $partElmt.find('.eu').val($('.account-part input[name="iuid"]').val() ? $('.account-part input[name="euid"]').val() : $('.username-part input[name="euid"]').val());
-            $partElmt.find('.t').val($('.account-part input[name="tid"]').val() ? $('.account-part input[name="tid"]').val() : $('.username-part input[name="tid"]').val());
+            $partElmt.find('.u').val(iud);
+            $partElmt.find('.eu').val(euid);
+            $partElmt.find('.t').val(tid);
             if($('.email-part input[name="email"]').val()){
                 $partElmt.find('.em').val($('.email-part input[name="email"]').val());
             }
+
         }
+        
         $selectedOption = $('[name*="userSelector"] option:selected');
-        $MSelectedOption = $('[name*="userSelector"]').prev().find('li').eq($('[name*="userSelector"] option').index($selectedOption));
-        $partElmt.find('.selected-participant-logo').attr('src', $MSelectedOption.find('.s-user-option-logo').attr('src'));
-        isAccountChosen = $('[name="partAccountSelector"] option:selected').length;
-        if(isAccountChosen){
-            $chosenAccountId = $('[name="partAccountSelector"]').val();
-            accountSelectedPos = $.inArray($chosenAccountId,$selectedOption.attr('data-uid').split(','));
-            $firmImg = $MSelectedOption.find('.org-img-holder').children().eq(accountSelectedPos);
-            accountFirmName = $selectedOption.attr('data-org-name').split(',')[accountSelectedPos];
+        
+        if($selectedOption.length){
+            
+            $MSelectedOption = $('[name*="userSelector"]').prev().find('li').eq($('[name*="userSelector"] option').index($selectedOption));
+            $partElmt.find('.selected-participant-logo').attr('src', $MSelectedOption.find('.s-user-option-logo').attr('src'));
+            isAccountChosen = $('[name="partAccountSelector"] option:selected').length;
+            
+            if(isAccountChosen){
+                $chosenAccountId = $('[name="partAccountSelector"]').val();
+                accountSelectedPos = $.inArray($chosenAccountId,$selectedOption.attr('data-uid').split(','));
+                firmImgPath = $MSelectedOption.find('.org-img-holder').children().eq(accountSelectedPos).attr('src');
+                accountFirmName = $selectedOption.attr('data-org-name').split(',')[accountSelectedPos];
+            } else {
+                firmImgPath = $MSelectedOption.find('.s-firm-option-logo').attr('src');
+                accountFirmName = $selectedOption.attr('data-org-name');
+            }
+                
+            username = `${$selectedOption.text()}${accountFirmName ? ' (' + accountFirmName + ')' : ''}`; 
+        
         } else {
-            $firmImg = $MSelectedOption.find('.s-firm-option-logo');
-            accountFirmName = $selectedOption.attr('data-org-name');
+
+            $firmSelectedOption = $('[name*="firmSelector"] option:selected');
+            if($firmSelectedOption.length){
+                $MSelectedOption = $('[name*="firmSelector"]').prev().find('li').eq($('[name*="firmSelector"] option').index($firmSelectedOption));
+                firmImgPath = $MSelectedOption.find('.s-firm-option-logo').attr('src');
+            } else {
+                if($('[name="firmname"]').val()){
+                    firmImgPath = '/lib/img/org/no-picture.png';
+                }
+            }
+
+            username = $('[name="firmname"]').val() ? `${$('[name="username"]').val()} (${$('[name="firmname"]').val()})` : $('[name="username"]').val();
         }
-
-        username = `${$selectedOption.text()}${accountFirmName ? ' (' + accountFirmName + ')' : ''}`; 
-
-        if($firmImg.length){
-            $partElmt.find('.p-firm-logo').attr('src',$firmImg.attr('src'));
+        
+        $partElmt.attr('data-tooltip',username).tooltip();
+        if(firmImgPath){
+            $partElmt.find('.p-firm-logo').attr('src',firmImgPath)
             $partElmt.find('.p-firm-logo').show();
         }
-
-        $partElmt.attr('data-tooltip',username).tooltip();
-        $partHolder.find('.btn-participant-add').before($partElmt);
-            /*$('#addUserClient').find('input[name="email"], input[name="username"], input[name="firmname"]').val("");
-            $('#addUserClient').find('.input-u-img, .input-f-img').remove();
-            $('#addUserClient').find('label[for="firm"]').removeClass('active');
-            if($addUserElmtModal.find('.account-part').is(':visible')){
-                $('.account-part').hide();
-                $('.username-part').show();
-            }*/
-            sanitizeAddUserElmtModal();
+        $partHolder.find('.btn-participant-add').before($partElmt);      
+        sanitizeAddUserElmtModal();
         
-        //$('#addUserClient').modal('close');
     }
 
     function searchDyn(element){
@@ -598,27 +588,7 @@ $(function(){
                 qt = 'f';
             }
         } else {
-            // This super admin user can be defined in virtually every page, so need to check first
-            if($('#defineSuperAdmin').is(':visible')){
-                qt = 'iu';
-            } else {
-                
-                if(onClientPage){
-                    qt = 'eu';
-                } else {
-                    if(onActivityPage && 
-                        $('input[name*="gen-type"][value="u"]').is(':checked') && 
-                        !$('input[name*="user-type"][value="int"], input[name*="user-type"][value="ext"]').is(':checked')){
-                           qt = 'p';
-                    } else {
-                        qt = $('input[name*="gen-type"][value="i"]').is(':checked') ? 'i' : (
-                            $('input[name*="user-type"][value="ext"]').is(':checked') ? 'eu' : 'u'
-                        );
-                    }
-                }
-            
-            }
-
+            qt = $addUserElmtModal.attr('data-qt');
         };
 
         var qid = 
@@ -809,9 +779,11 @@ $(function(){
                             if($relatedOpt.is(':disabled')){
                                 $(e).find('span').append(`<small class="dd-orange-text sm-left">- ${alreadyExistingMsg}</small>`);
                             }
+
+                            var usrAttr = $relatedOpt.attr('data-uid');
                             
                             if(element != 'firm'){
-                                uIds = $relatedOpt.attr('data-uid').split(',');
+                                uIds = $relatedOpt.attr('data-uid') ? $relatedOpt.attr('data-uid').split(',') : [];
                                 euIds = $relatedOpt.attr('data-euid') ? $relatedOpt.attr('data-euid').split(',') : [];
                                 hasEms = $relatedOpt.attr('data-em') ? $relatedOpt.attr('data-em').split(',') : [];
                             }
@@ -823,7 +795,8 @@ $(function(){
                             wLogos = $relatedOpt.attr('data-wf-logo') ? $relatedOpt.attr('data-wf-logo').split(',') : null;
                             synth = $relatedOpt.attr('data-synth') ? $relatedOpt.attr('data-synth').split(',') : null;
                             
-                            if(qt == 'p' || qt == 'eu' || qt == 'u' || qt == 'i'|| qt == 'iu'){
+                            //if(qt == 'p' || qt == 'eu' || qt == 'u' || qt == 'i'|| qt == 'iu'){
+                            if(typeof usrAttr !== typeof undefined && usrAttr !== false){
                                 if(typeof $selector.find('option').eq(i).attr('data-usr-picture') != "undefined"){
                                     picture = $selector.find('option').eq(i).attr('data-usr-picture');
                                     $(e).prepend(`<img class="s-user-option-logo" src="/lib/img/user/${picture ? picture : 'no-picture.png'}">`);
@@ -1120,7 +1093,7 @@ $(function(){
     // Only present in client page
     
     $(document).on('click','[href="#deleteExternalUser"]',function(){
-        $('.remove-client-user').attr('data-id',$updateModal.find('.save-user-updates').data('id'));
+        $('.remove-client-user').attr('data-id',$updateModal.find('.save-user-updates').data('eid'));
     })
 
     $(document).on('click','.remove-client-user',function(){

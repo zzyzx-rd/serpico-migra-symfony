@@ -6,7 +6,7 @@
             {% if route != 'manageClient' %}
                 <div class="type-part" {% if route == 'myActivities' %}style="display:none"{% endif %}>
                     <div class="flex-center"> 
-                        <h5 class="m-left">{{ (route == 'myActivities' ? 'user_list.add_user_modal.type_act_title'|trans : 'user_list.add_user_modal.type_title'|trans ) ~ ' :' }}</h5>
+                        <h5 class="m-left">{{ route == 'myActivities' ? 'user_list.add_user_modal.type_act_title'|trans : 'user_list.add_user_modal.type_title'|trans }}</h5>
                     </div>
                     <div class="c-flex">
                         <div class="row independant-row">
@@ -28,7 +28,7 @@
                                     <div class="firm-icon-holder icon-holder flex-center">
                                         <i class="fa fa-industry white-text"></i>
                                     </div>
-                                    <span class="sm-left">{{ 'partner_firm'|trans|capitalize }}</span>
+                                    <span class="sm-left">{{ global.route == 'myActivities' ? 'user_list.add_user_modal.legal_person'|trans|capitalize : 'partner_firm'|trans|capitalize }}</span>
                                     <i class="sm-left fa fa-question-circle tooltipped" data-tooltip="{{ 'user_list.add_user_modal.firm_creation_info'|trans }}" data-position="top"></i>
                                 </label>
                             </div>
@@ -44,17 +44,17 @@
                             <div class="col s12 m6">
                                 <div class="flex-center user-choices">
                                     <div>
-                                        <input type="radio" id="external" name="user-type" value="ext" {{ route != 'myActivities' ? 'checked' }}>
+                                        <input type="radio" id="external" name="user-type" value="ext" checked }}>
                                         <label for="external">
                                             <i class="fa fa-user-circle dd-orange-text"></i>
-                                            <span class="sm-left">{{ 'user_list.add_user_modal.external'|trans|capitalize }}</span>
+                                            <span class="sm-left">{{ global.route == 'myActivities' ? 'user_list.add_user_modal.external_user'|trans|capitalize : 'user_list.add_user_modal.partner_user'|trans|capitalize }}</span>
                                         </label>
                                     </div>
                                     <div>
                                         <input type="radio" id="internal" name="user-type" value="int">
                                         <label for="internal">
                                             <i class="fa fa-user-circle dd-text"></i>
-                                            <span class="sm-left">{{ 'user_list.add_user_modal.internal'|trans|capitalize }}</span>
+                                            <span class="sm-left">{{ 'user_list.add_user_modal.internal_user'|trans|capitalize }}</span>
                                         </label>
                                     </div>
                                 </div>
@@ -132,15 +132,11 @@
                     </div>
                     <select name="userSelector" style="display:none;"></select>
                     <input type="hidden" name="uid">
-                    {% if route != 'manageClient' %}
-                        <input type="hidden" name="ioid">
-                        <input type="hidden" name="icid">
-                    {% endif %}
-                    {% if route == 'myActivities' %}
-                        <input type="hidden" name="iuid">
-                        <input type="hidden" name="euid">
-                        <input type="hidden" name="tid">
-                    {% endif %}
+                    <input type="hidden" name="euid">
+                    <input type="hidden" name="tid">
+                    <input type="hidden" name="ioid">
+                    <input type="hidden" name="icid">
+
                 </div>
                 <div class="flex-center-fe">
                     <div class="btn-flat waves-effect waves-light go-prev m-right">{{'back'|trans}}</div>
@@ -159,9 +155,6 @@
                     </div>
                     <div class="input-field account-field-zone m-bottom"> 
                         <select name="partAccountSelector" style="display:none;"></select>
-                        <input type="hidden" name="iuid">
-                        <input type="hidden" name="euid">
-                        <input type="hidden" name="tid">
                     </div>
                     <div class="flex-center-fe">
                         <div class="btn-flat waves-effect waves-light go-prev m-right">{{'back'|trans}}</div>
@@ -206,7 +199,7 @@
                         <span class="user-name m-left"></span>
                         <i class="sm-left mi create dd-orange-text change-username"></i>
                     </div>
-                    {% if currentuser and currentuser.role == 1 %} 
+                    {% if currentuser and currentuser.role < 2 %} 
                         <div class="btn-flat delete-user-btn tooltipped modal-trigger" href="#deleteUser" data-tooltip="Supprimer" data-position="top" style="visibility: hidden;">
                             <i class="dd-orange-text fa fa-times"></i>
                         </div>

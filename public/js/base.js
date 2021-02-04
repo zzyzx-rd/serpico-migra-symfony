@@ -183,10 +183,10 @@
         return true;
     }
 
-    function copyToClipboard(element) {
+    function copyToClipboard(txtToCopy) {
         var $temp = $("<input>");
         $("body").append($temp);
-        $temp.val($(element).text()).select();
+        $temp.val(txtToCopy).select();
         document.execCommand("copy");
         $temp.remove();
     }
@@ -515,6 +515,7 @@
 
     $('[name="super_admin_choice"]').on('change',function(){
         if($('#otherSU').is(':checked')){
+            $('#addUserClient').attr('data-qt','iu');
             $('#addUserClient').find('.username-part .go-prev, .username-part .go-next').addClass('go-to-sam');
             $('#addUserClient').find('.username-part .title').find('.independent-org, .ext-org').hide();
             $('#addUserClient').find('.username-part .title').find('.int-org').show();

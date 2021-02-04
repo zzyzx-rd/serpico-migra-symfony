@@ -3601,3 +3601,11 @@ h2.header {
 .account-mention{
   margin: 20px 0 0 3em;
 }
+
+#fixedButton:focus{
+  background-color: #916b35;
+}
+
+#fixedButton:hover{
+  background-color: #ff9300;
+}
