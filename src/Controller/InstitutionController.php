@@ -16,6 +16,7 @@ use App\Entity\OrganizationUserOption;
 use App\Entity\Stage;
 use App\Entity\Survey;
 use App\Entity\User;
+use App\Entity\UserMaster;
 use App\Entity\WorkerFirm;
 use App\Form\ActivityMinElementForm;
 use App\Form\AddEventForm;
@@ -171,7 +172,8 @@ final class InstitutionController extends MasterController
             $lastNotifs = $em->getRepository(ElementUpdate::class)->findBy(['user' => $this->user->getUserGlobal()->getUserAccounts()->getValues()],['inserted' => 'DESC']);
             $lastConnectedUser = $currentUser->getUserGlobal()->getUserAccounts()->first();
             $lastUpdatedUser = $lastNotifs ? $lastNotifs[0]->getUser() : null;
-    
+            
+            /** @var User */
             $newCurrentUser = $lastUpdatedUser && $lastUpdatedUser != $currentUser ? $lastUpdatedUser : (
                 $lastConnectedUser && $lastConnectedUser != $currentUser ? $lastConnectedUser : $currentUser
             );
@@ -239,9 +241,35 @@ final class InstitutionController extends MasterController
 
         }
 
+        $followingStages = $currentUser->getMasterings()->filter(fn(UserMaster $m) => $m->getStage() != null && $m->getProperty() == 'followableStatus' && $m->getType() >= UserMaster::ADDED)->map(fn(UserMaster $m) => $m->getStage());
+        $followingActivities = new ArrayCollection(array_unique($followingStages->map(fn(Stage $s) => $s->getActivity())->getValues(), SORT_REGULAR));
 
-        /** @var Stage */
-        $invitationStage = isset($_COOKIE['is']) ? $em->getRepository(Stage::class)->find(intval($_COOKIE['is'])) : null;
+        if(isset($_COOKIE['is'])){
+
+            $followingStageIds = $followingStages->map(fn(Stage $s) => $s->getId())->getValues();
+            // If invitation stage cookie exists with a stage id value relative to an already followed one - case occurs when an unlogged user clicks to a invitation link for a stage he's already following
+            // we need to remove that value
+            $values = preg_split("/\,/", $_COOKIE['is']);
+            foreach($values as $key => $value){
+                if(in_array($value,$followingStageIds) !== false){
+                    unset($values[$key]);
+                }
+            }
+            if(!$values){
+                setcookie("is", "", time()-3600);
+            } else {
+                setcookie("is", serialize($values), time());
+            }
+            if($values){
+                $invitationStages = new ArrayCollection($em->getRepository(Stage::class)->findById($values));
+                $potentialInvitationActivities = new ArrayCollection(array_unique($invitationStages->map(fn(Stage $s) => $s->getActivity())->getValues(), SORT_REGULAR));
+            } else {
+                $potentialInvitationActivities = new ArrayCollection;
+            }
+
+        } else {
+            $potentialInvitationActivities = new ArrayCollection;
+        }
 
         $userArchivingPeriod = $currentUser->getActivitiesArchivingNbDays();
 
@@ -277,120 +305,7 @@ final class InstitutionController extends MasterController
         $checkingIds = [$currentUser->getId()];
         $userActivities = new ArrayCollection;
 
-        // 1 - Retrieving activities 
-        // Depends on either organization plan (for free organization, no privacy/segregation) and/or user rights/roles
-
-        if($this->org && $this->org->getPlan() == Organization::PLAN_FREE){
-
-            $externalOrgActivities = $this->org->getExternalActivities();
-            $userActivities = new ArrayCollection($orgActivities + (array)$externalOrgActivities->toArray());
-        } else {
-
-            if($existingAccessAndResultsViewOption){
-                $activitiesAccess = $existingAccessAndResultsViewOption->getOptionIValue();
-                $statusAccess = $existingAccessAndResultsViewOption->getOptionSecondaryIValue();
-                $noParticipationRestriction = $existingAccessAndResultsViewOption->getOptionSValue() == 'none';
-                /*if($activitiesAccess == 1){
-                    $userActivities = new ArrayCollection($orgActivities);
-                } else if ($activitiesAccess == 2){*/
-                    $departmentUsers = $currentUser->getDepartment() != null ? $currentUser->getDepartment()->getUsers() : [];
-                    foreach($departmentUsers as $departmentUser){
-                        $checkingIds[] = $departmentUser->getId();
-                    }
-                //}
-            }
-    
-            $userArchivedActivities = new ArrayCollection;
-    
-            //if($existingAccessAndResultsViewOption == null || $activitiesAccess != 1){
-    
-                // 1/ Get requested activities (as currentuser is not a participant, we have to retrieve them with a different query)
-                // passing through Decision table
-    
-                if ($role == USER::ROLE_COLLAB){
-                    $pendingDecisions = $repoDec->findBy(['requester' => $checkingIds, 'validated' => null]);
-                    foreach($pendingDecisions as $pendingDecision){
-                        $userActivities->add($pendingDecision->getActivity());
-                    }
-                } else {
-                    $pendingDecisions = $repoDec->findBy(['decider' => $checkingIds, 'validated' => null]);
-                    foreach($pendingDecisions as $pendingDecision){
-                        $userActivities->add($pendingDecision->getActivity());
-                    }
-                }
-    
-                // IDs of activities in which at least one *graded* participant is a direct or indirect subordinate
-                $subordinates = $this->user->getSubordinates();
-                /** @var Participation[] */
-                $subordinatesParticipations = $repoP->findBy(['user' => $subordinates->toArray(), 'type' => [ -1, 1 ] ]);
-                $activitiesWithSubordinates_IDs = array_map(function (Participation $p) {
-                    return $p->getStage()->getActivity()->getId();
-                }, $subordinatesParticipations);
-    
-                foreach($orgActivities as $orgActivity){
-                    if (
-                        $orgActivity->getStatus() == -2 && in_array($orgActivity->getMasterUserId(), $checkingIds) ||
-                        in_array($orgActivity->getId(), $activitiesWithSubordinates_IDs)
-                    ){
-                        $userActivities->add($orgActivity);
-                    }
-    
-                    // 3/ Get all activities in which current user is participating
-    
-                    if(!in_array($orgActivity->getId(), $activitiesWithSubordinates_IDs)){
-                        if(!$orgActivity->getArchived()){
-    
-                            $isParticipant = 0;
-                            $isMasterUserId = 0;
-                            foreach ($orgActivity->getStages() as $orgStage){
-    
-                                $orgStage->currentUser = $currentUser;
-    
-                                foreach ($orgStage->getParticipations() as $orgParticipant){
-                                    if (in_array($orgParticipant->getUser()->getId(), $checkingIds)){
-
-                                        $isParticipant = 1;
-                                        ($orgParticipant->getStatus() != 5) ? $userActivities->add($orgActivity) : $userArchivedActivities->add($orgActivity);
-                                        break;
-                                    }
-                                }
-    
-                                if ($isParticipant == 1){
-                                    break;
-                                } 
-                                /*
-                                elseif(in_array($orgStage->getMasterUser()->getId(), $checkingIds) && (!$orgStage->getOwnerUserId() || in_array($orgStage->getOwnerUserId(), $checkingIds))){
-                                    $isMasterUserId = 1;
-                                    break;
-                                }
-                                */
-                            }
-                            
-                            /*
-                            if($isMasterUserId == 1 && $isParticipant == 0 && $orgActivity->getStatus() != -2){
-                                $userActivities->add($orgActivity);
-                            }*/
-    
-                        } else {
-                            $userArchivedActivities->add($orgActivity);
-                        }
-                    }
-                }
-
-                //Get activities where user is participating as external user
-                $externalActivities = $currentUser->getExternalActivities();
-                //  $userActivities = new ArrayCollection(  $userActivities->toArray() + $externalActivities);
-                $copiedUserActivities = clone $userActivities;
-                $userActivities = new ArrayCollection();
-                foreach($copiedUserActivities as $copiedUserActivity){
-                    $userActivities->add($copiedUserActivity);
-                }
-                foreach($externalActivities as $externalActivity){
-                    $userActivities->add($externalActivity);
-                }
-                //$mergedActivities = new ArrayCollection([$userActivities->getValues() + $externalActivities->getValues()]);
-            //}
-        }
+        
 
         if($this->org){
             $addProcessForm = $this->createForm(AddProcessForm::class, null, ['standalone' => true]);
@@ -405,15 +320,10 @@ final class InstitutionController extends MasterController
             $createForm = $this->createForm(ActivityMinElementForm::class, new Stage, ['currentUser' => $this->user]);
         }
 
-        // In case they might access results depending on user participation, then we need to feed all stages and feed a collection which will be analysed therefore in hideResultsFromStages function
-        if($existingAccessAndResultsViewOption && empty($noParticipationRestriction)){
-            $userStages = new ArrayCollection;
-            foreach($userActivities as $activity){
-                foreach($activity->getStages() as $stage){
-                    $userStages->add($stage);
-                }
-            }
-        }
+        $userActivities = new ArrayCollection(array_merge(
+            $currentUser->getExternalActivities()->getValues(), 
+            $currentUser->getInternalActivities()->getValues()
+        ));
 
         // 2 - Sorting activities per status and process
 
@@ -550,11 +460,21 @@ final class InstitutionController extends MasterController
         //dd($request->headers->get('user_agent'));
         $renderedTwigFile = strpos($request->headers->get('user_agent'), "Mobile") === false ? 'activities_dashboard.html.twig' : 'mobile_activities_dashboard.html.twig';
 
+        $invitationActivities = new ArrayCollection();
+
+        foreach($potentialInvitationActivities as $potentialInvitationActivity){
+            if(!$orphanActivities->contains($potentialInvitationActivity) && !$processesActivities->contains($potentialInvitationActivity)){
+                $invitationActivities->add($potentialInvitationActivity);
+            }
+        }
+
         return $this->render(
             $renderedTwigFile,
             [
+                'invitationActivities' => $invitationActivities,
                 'displayedStatuses'  => $displayedStatuses,
                 'orphanActivities'  => $orphanActivities,
+                'followingActivities' => $followingActivities,
                 'processesActivities' => $this->org ? $structuredProcessesActivities : null,
                 'addProcessForm' => $this->org ? $addProcessForm->createView() : null,
                 'delegateForm' => $this->org ? $delegateActivityForm->createView() : null,
@@ -570,7 +490,7 @@ final class InstitutionController extends MasterController
                 'eventGroups' => $eventGroups,
                 'em' => $em,
                 'comesFromLogin' => $comesFromLogin,
-                'invitationStage' => $invitationStage
+                //'invitationStages' => $invitationStages
             ]
         );
 
@@ -675,8 +595,8 @@ final class InstitutionController extends MasterController
             if($modifyDashboard){
 
                 $stageIds = array_merge(
-                    $currentUser->getExternalStages()->map(fn(Stage $s) => $s->getId())->getValues(), 
-                    $currentUser->getInternalStages()->map(fn(Stage $s) => $s->getId())->getValues()
+                        $currentUser->getExternalStages()->map(fn(Stage $s) => $s->getId())->getValues(), 
+                        $currentUser->getInternalStages()->map(fn(Stage $s) => $s->getId())->getValues()
                 );
 
                 foreach($currentUser->getExternalStages() as $extStage){
@@ -719,6 +639,7 @@ final class InstitutionController extends MasterController
                 }
             }
 
+            /** @var ArrayCollection|ElementUpdate[] */
             $newUpdates = $updates->filter(fn(ElementUpdate $u) => $u->getViewed() == null);
             
             foreach ($newUpdates as $newUpdate){
@@ -754,40 +675,57 @@ final class InstitutionController extends MasterController
                             ($activity->getStages()->count() > 1 ? 
                             "$theStage <span class=\"strong\">$stageName</span> $of $theActivity <span class=\"strong\">$activityName</span>" :
                             "$theActivity <span class=\"strong\">$activityName</span>");
+
+                        $joinableFollowableUpdateTypes = ['join_request','join_direct','follow_request','follow_direct'];
+                        $joinableFollowableStageUpdate = array_search($newUpdate->getProperty(), $joinableFollowableUpdateTypes);
     
                         if($comment != null){
-                            $transParameters['update_type'] = $newUpdate->getType() == ElementUpdate::CREATION ? 'comment_creation' : 'comment_change';
-                            $creator = $repoU->find($comment->getCreatedBy());
+                            $transParameters['update_type'] = $newUpdate->getStatus() == ElementUpdate::CREATION ? 'comment_creation' : 'comment_change';
+                            $creator = $comment->getInitiator();
                             $transParameters['commentLevel'] = $comment->getParent() ? $translator->trans('updates.comment_level.withParent') : $translator->trans('updates.comment_level.withoutParent');
                         } else if($document != null){
-                            $transParameters['update_type'] = $newUpdate->getType() == ElementUpdate::CREATION ? 'document_creation' : 'document_change';
-                            $creator = $repoU->find($document->getCreatedBy());
+                            $transParameters['update_type'] = $newUpdate->getStatus() == ElementUpdate::CREATION ? 'document_creation' : 'document_change';
+                            $creator = $document->getInitiator();
                             $transParameters['docName'] = $document->getTitle();
                         } else if ($event != null && $document == null && $comment == null) {
-                            $creator = $repoU->find($event->getCreatedBy());
-                            $transParameters['update_type'] = $newUpdate->getType() == ElementUpdate::CREATION ? 'event_creation' : 'event_change';
+                            $creator = $event->getInitiator();
+                            $transParameters['update_type'] = $newUpdate->getStatus() == ElementUpdate::CREATION ? 'event_creation' : 'event_change';
                             $eventType = $event->getEventType();
                             $transParameters['type'] = strtolower(implode("_",explode(" ",$eventType->getEName()->getName())));
                             $transParameters['group'] = strtolower($eventType->getEventGroup()->getEventGroupName()->getName());
                         } else if ($participation != null) {
-                            $creator = $repoU->find($participation->getCreatedBy());
+                            $creator = $participation->getInitiator();
                             $dataUpdate['type'] = 'p';
+                        } else if ($joinableFollowableStageUpdate !== false){
+                            $transParameters['update_type'] = $joinableFollowableUpdateTypes[$joinableFollowableStageUpdate];
+                            $creator = $newUpdate->getInitiator();
                         } else {
-                            $creator = $repoU->find($stage->getCreatedBy());
+                            $creator = $stage->getInitiator();
                             $dataUpdate['type'] = 's';
                             $transParameters['update_type'] = 'act_elmt_creation';
                         }
+                 
                         
-                        $dataUpdate['id'] = $newUpdate->getId();
-                        $dataUpdate['picture'] = $creator->getPicture() ?: 'no-picture.png';
-                        $dataUpdate['inserted'] = $this->nicetime($newUpdate->getInserted()->setTimezone($tz), $locale);
-                        $transParameters['author'] = $creator->getOrganization() != $currentUser->getOrganization() ? $creator->getFullName(). ' ('.$creator->getOrganization()->getCommname().')' : $creator->getFullName();
-                        $transParameters['updateLevel'] = $newUpdate->getType() == ElementUpdate::CREATION ? $translator->trans($document ? 'updates.document_update_level.creation' : 'updates.common_level.creation') : (ElementUpdate::CHANGE ? $translator->trans($document ? 'updates.document_update_level.update' : 'updates.common_level.update') : $translator->trans('updates.common_level.delete'));
-                        $dataUpdate['msg'] = $translator->trans('updates.update_msg', $transParameters);
-                        $dataUpdate['viewed'] = $newUpdate->getViewed() != null;
+                    } else if  ($newUpdate->getUser()) {
+                    
+                        $concernedUser = $newUpdate->getUser();
                         
+                        if($newUpdate->getProperty() == 'role'){
+                            $transParameters['update_type'] = 'user_role';
+                            $transParameters['role'] = $newUpdate->getValue() == User::ROLE_SUPER_ADMIN ? $translator->trans('profile.super_administrator') : (
+                                $newUpdate->getValue() == User::ROLE_ADMIN ? $translator->trans('profile.administrator') : $translator->trans('create_user.collaborator')
+                            );  
+                        }
                     }
-    
+
+                    $dataUpdate['id'] = $newUpdate->getId();
+                    $dataUpdate['picture'] = $creator->getPicture() ?: 'no-picture.png';
+                    $dataUpdate['inserted'] = $this->nicetime($newUpdate->getInserted()->setTimezone($tz), $locale);
+                    $transParameters['author'] = $creator->getOrganization() != $currentUser->getOrganization() ? $creator->getFullName(). ' ('.$creator->getOrganization()->getCommname().')' : $creator->getFullName();
+                    $transParameters['updateLevel'] = $newUpdate->getStatus() == ElementUpdate::CREATION ? $translator->trans($document ? 'updates.document_update_level.creation' : 'updates.common_level.creation') : (ElementUpdate::CHANGE ? $translator->trans($document ? 'updates.document_update_level.update' : 'updates.common_level.update') : $translator->trans('updates.common_level.delete'));
+                    $dataUpdate['msg'] = $translator->trans('updates.update_msg', $transParameters);
+                    $dataUpdate['viewed'] = $newUpdate->getViewed() != null;
+                    
                     $dataUpdates['notifs'][] = $dataUpdate;
                     //$nbRetrieved++;
                 }

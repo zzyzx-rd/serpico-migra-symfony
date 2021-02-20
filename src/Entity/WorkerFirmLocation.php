@@ -7,6 +7,8 @@ use App\Repository\WorkerFirmLocationRepository;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\JoinColumn;
 
 /**
  * @ApiResource()
@@ -38,9 +40,10 @@ class WorkerFirmLocation extends DbObject
     public $HQCountry;
 
     /**
-     * @ORM\Column(name="wfl_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="workerFirmLocationInitiatives")
+     * @JoinColumn(name="wfl_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="wfl_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
@@ -53,16 +56,14 @@ class WorkerFirmLocation extends DbObject
      * @param $wfl_hq_city
      * @param $wfl_hq_state
      * @param $wfl_hq_country
-     * @param $wfl_createdBy
      */
     public function __construct(
       ?int $id = 0,
-        $wfl_createdBy = null,
         $wfl_hq_city = null,
         $wfl_hq_state = null,
         $wfl_hq_country = null)
     {
-        parent::__construct($id, $wfl_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->HQCity = $wfl_hq_city;
         $this->HQState = $wfl_hq_state;
         $this->HQCountry = $wfl_hq_country;

@@ -43,7 +43,7 @@ class OptionType extends AbstractType
                 case 'enabledCNamesOutsideCGroups' :
                 case 'enabledUserSeeRanking' :
                     $form->add('optionTrue', CheckboxType::class, [
-                        'label_format' => 'firm_settings.users.privileges.'.strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $optionName)),
+                        'label_format' => 'firm_settings_old.users.privileges.'.strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $optionName)),
                         'required' => true,
                         'attr' => [
                             'class' => 'filled-in',
@@ -52,7 +52,7 @@ class OptionType extends AbstractType
                     break;
                 case 'mailDeadlineNbDays' : 
                     $form->add('optionFValue', IntegerType::class, [
-                        'label_format' => 'firm_settings.users.mail_deadline_nb_days',
+                        'label_format' => 'firm_settings_old.users.mail_deadline_nb_days',
                         'required' => true,
                         'constraints' => [
                             new Assert\GreaterThan(0),
@@ -71,9 +71,9 @@ class OptionType extends AbstractType
                             ],
                             'label' => null,
                             'choices' => [
-                                'firm_settings.users.privileges.'.strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $optionName)).'.activity_access.firm' => 1,
-                                'firm_settings.users.privileges.'.strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $optionName)).'.activity_access.department' => 2,
-                                'firm_settings.users.privileges.'.strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $optionName)).'.activity_access.own' => 3,
+                                'firm_settings_old.users.privileges.'.strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $optionName)).'.activity_access.firm' => 1,
+                                'firm_settings_old.users.privileges.'.strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $optionName)).'.activity_access.department' => 2,
+                                'firm_settings_old.users.privileges.'.strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $optionName)).'.activity_access.own' => 3,
                             ]
                         ])
                     ->add('optionSecondaryIValue', ChoiceType::class,
@@ -83,10 +83,10 @@ class OptionType extends AbstractType
                             ],
                             'label' => null,
                             'choices' => [
-                                //'firm_settings.users.privileges.'.strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $optionName)).'.results_access.live' => 0,
-                                //'firm_settings.users.privileges.'.strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $optionName)).'.results_access.incomplete' => 1,
-                                'firm_settings.users.privileges.'.strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $optionName)).'.results_access.unpublished' => 2,
-                                'firm_settings.users.privileges.'.strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $optionName)).'.results_access.published' => 3,
+                                //'firm_settings_old.users.privileges.'.strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $optionName)).'.results_access.live' => 0,
+                                //'firm_settings_old.users.privileges.'.strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $optionName)).'.results_access.incomplete' => 1,
+                                'firm_settings_old.users.privileges.'.strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $optionName)).'.results_access.unpublished' => 2,
+                                'firm_settings_old.users.privileges.'.strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $optionName)).'.results_access.published' => 3,
                             ]
                         ])
                         ->add('optionTrue', ChoiceType::class,
@@ -96,8 +96,8 @@ class OptionType extends AbstractType
                             ],
                             'label' => null,
                             'choices' => [
-                                'firm_settings.users.privileges.'.strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $optionName)).'.scope.all_participations' => 1,
-                                'firm_settings.users.privileges.'.strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $optionName)).'.scope.own_participations' => 0,
+                                'firm_settings_old.users.privileges.'.strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $optionName)).'.scope.all_participations' => 1,
+                                'firm_settings_old.users.privileges.'.strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $optionName)).'.scope.own_participations' => 0,
                             ]
                         ])
                         
@@ -108,8 +108,8 @@ class OptionType extends AbstractType
                             ],
                             'label' => null,
                             'choices' => [
-                                'firm_settings.users.privileges.'.strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $optionName)).'.results_details.detailed' => 1,
-                                'firm_settings.users.privileges.'.strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $optionName)).'.results_details.consolidated' => 0,
+                                'firm_settings_old.users.privileges.'.strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $optionName)).'.results_details.detailed' => 1,
+                                'firm_settings_old.users.privileges.'.strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $optionName)).'.results_details.consolidated' => 0,
                             ]
                         ])
                         ->add('optionSValue', ChoiceType::class,
@@ -119,16 +119,16 @@ class OptionType extends AbstractType
                             ],
                             'label' => null,
                             'choices' => [
-                                'firm_settings.users.privileges.'.strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $optionName)).'.participation_condition.none' => 'none',
-                                'firm_settings.users.privileges.'.strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $optionName)).'.participation_condition.owner' => 'owner',
-                                'firm_settings.users.privileges.'.strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $optionName)).'.participation_condition.participant' => 'participant',
+                                'firm_settings_old.users.privileges.'.strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $optionName)).'.participation_condition.none' => 'none',
+                                'firm_settings_old.users.privileges.'.strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $optionName)).'.participation_condition.owner' => 'owner',
+                                'firm_settings_old.users.privileges.'.strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $optionName)).'.participation_condition.participant' => 'participant',
                             ]
                         ])
                         ;
                         break;
                 default:
                    /* $form->add('optionFValue', NumberType::class, [
-                        'label_format' => 'firm_settings.users.%name%',
+                        'label_format' => 'firm_settings_old.users.%name%',
                         'required' => true,
                         ]);*/
                     break;
@@ -145,12 +145,12 @@ class OptionType extends AbstractType
             
             if($option->getOName()->getName() != 'enabledCreatingUser'){
                 $form->add('optionFValue', NumberType::class, [
-                    'label_format' => 'firm_settings.users.%name%',
+                    'label_format' => 'firm_settings_old.users.%name%',
                     'required' => true,
                     ]);
             } else {
                 $form->add('optionTrue', CheckboxType::class, [
-                    'label_format' => 'firm_settings.users.enabled_creating_user',
+                    'label_format' => 'firm_settings_old.users.enabled_creating_user',
                     'required' => true,
                     'attr' => [
                         'class' => 'filled-in',
@@ -163,7 +163,7 @@ class OptionType extends AbstractType
 
 
         /*$builder->add('value', NumberType::class, [
-        'label_format' => 'firm_settings.users.%name%',
+        'label_format' => 'firm_settings_old.users.%name%',
         'required' => true,
         ]);
         */

@@ -52,6 +52,7 @@ use App\Entity\UserMaster;
 use App\Entity\WorkerFirm;
 use App\Form\ActivityMinElementForm;
 use App\Form\AddEventForm;
+use App\Model\UserM;
 use App\Repository\UserRepository;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormError;
@@ -63,9 +64,12 @@ use Symfony\Component\Routing\Annotation\Route;
 use App\Service\FileUploader;
 use App\Service\NotificationManager;
 use DateTimeZone;
+use Symfony\Bundle\FrameworkBundle\Translation\Translator;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+
 
 class ActivityController extends MasterController
 {
@@ -89,14 +93,20 @@ class ActivityController extends MasterController
         $clickedBtn = $request->get('btn');
         $actId = $request->get('aid');
         $stage = new Stage;
+        $activity = $actId == 0 ? new Activity : $em->getRepository(Activity::class)->find($actId);
+        $stage->setActivity($activity);
         /** @var Form */
         $createActivityForm = $this->createForm(ActivityMinElementForm::class, $stage, ['organization' => $organization, 'currentUser' => $currentUser]);
         $createActivityForm->handleRequest($request);
 
         if($createActivityForm->isSubmitted()){
 
+            /** @var ArrayCollection|Participation[] */
             $participants = $createActivityForm->get('participants')->getData();
             $participantData = $createActivityForm->get('participants');
+            /** @var ArrayCollection|UserMaster[] */
+            $followers = $createActivityForm->get('userMasters')->getData();
+            $followerData = $createActivityForm->get('userMasters');
 
             foreach($participants as $key => $participant){
                 if($participantData[$key]->get('userPart')->getData() != null){
@@ -128,7 +138,7 @@ class ActivityController extends MasterController
                             ->setClientOrganization($clientOrganization)
                             ->setType($type)
                             ->setWorkerFirm($clientOrganization->getWorkerFirm())
-                            ->setCreatedBy($currentUser->getId());
+                            ->setInitiator($currentUser);
                             
                             if(!$isClientIndiv){
                                 $externalSynthUser = new ExternalUser;
@@ -210,7 +220,98 @@ class ActivityController extends MasterController
                 } else {
                     $participant->setTeam(null);
                 }
-               
+                $participant->setOrganization($user->getOrganization());
+            }
+
+            foreach($followers as $key => $follower){
+                if($followerData[$key]->get('userPart')->getData() != null){
+                    
+                    $usrId = $followerData[$key]->get('userPart')->getData();
+                    $user = $em->getRepository(User::class)->find($usrId);
+                    
+                    // Is participant user existing as a client ?
+                    if ($user->getOrganization() != $currentUser->getOrganization()){
+                        
+                        if($followerData[$key]->get('externalUserPart')->getData() == null){
+ 
+                            $clientOrganization = $user->getOrganization();
+                            if($organization->getType() == 'I'){
+                                $addedClientUsers = [$currentUser];
+                            } else {
+                                $addedClientUsers = $organization->getUsers()->filter(fn(User $u) => $u == $currentUser || $u->isSynthetic())->getValues();
+                            }
+
+                            $this->forward('App\Controller\OrganizationController::updateOrgFeatures', ['organization' => $clientOrganization, 'addedAsClient' => true, 'addedClientUsers' => $addedClientUsers]);
+                            
+                            $type = $clientOrganization->getType();
+                            $isClientIndiv = $type == 'C';
+                            $isClientIndep = $type == 'I';
+                            $client = new Client;
+                            $client
+                            ->setName($organization->getCommname())
+                            ->setOrganization($organization)
+                            ->setClientOrganization($clientOrganization)
+                            ->setType($type)
+                            ->setWorkerFirm($clientOrganization->getWorkerFirm())
+                            ->setInitiator($currentUser);
+                            
+                            if(!$isClientIndiv){
+                                $externalSynthUser = new ExternalUser;
+                                $externalSynthUser->setFirstname($organization->getCommname())
+                                    ->setLastname($clientOrganization->getCommname())
+                                    ->setSynthetic(true)
+                                    ->setUser($clientOrganization->getUsers()->filter(fn(User $u) => $u->isSynthetic())->first());
+                                $client->addExternalUser($externalSynthUser);
+                            }
+                            if(!$user->isSynthetic()){
+                                $externalUser = new ExternalUser;
+                                $externalUser->setFirstname($user->getFirstname())
+                                    ->setLastname($user->getLastname())
+                                    ->setEmail($user->getEmail())
+                                    ->setUser($user);
+                                $client->addExternalUser($externalUser);
+                            } else {
+                                $externalUser = $externalSynthUser;
+                            }
+
+                            $em->persist($client);
+                        
+                        } else {
+
+                            $extId = $followerData[$key]->get('externalUserPart')->getData();
+                            $externalUser = $em->getRepository(ExternalUser::class)->find($extId);
+                            $clientOrganization = $externalUser->getClient()->getClientOrganization();
+                        }
+
+                        $follower->setOrganization($clientOrganization);
+
+                        $email = $followerData[$key]->get('email')->getData();
+
+                        if($email != null){
+
+                            $externalUser->setEmail($email);
+                            $user->setEmail($email);
+                            $em->persist($externalUser);
+                            $em->persist($user);
+                            $em->flush();
+
+                            $recipients[] = $user;
+                            $settings['tokens'][] = $user->getToken();
+                            $settings['invitingUser'] = $currentUser;
+                            $settings['invitingOrganization'] = $organization;
+                            $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'externalInvitation']);
+
+                        }
+
+                    } else {
+                        $follower->setOrganization($this->org);
+                    }
+                    $follower->setUser($user);
+                } else {
+                    $follower->setUser(null);
+                }
+                
+                $follower->setProperty('followableStatus')->setType(UserMaster::ADDED);
             }
 
             if($clickedBtn == 'submit'){
@@ -219,21 +320,21 @@ class ActivityController extends MasterController
 
                     $progress = (int) ($stage->getStartdate() < new DateTime('tomorrow'));
                     
-                    $activity = $actId == 0 ? new Activity : $em->getRepository(Activity::class)->find($actId);
-
                     $userMaster = new UserMaster;
-                    $userMaster->setUser($currentUser);
+                    $userMaster->setUser($currentUser)
+                    ->setProperty('leader')
+                    ->setType(UserMaster::ADDED);
 
                     $stage  
                         ->setOrganization($organization)
                         ->setProgress($progress)
                         ->setStatus($progress)
                         ->addUserMaster($userMaster)
-                        ->setCreatedBy($currentUser->getId());
+                        ->setInitiator($currentUser);
     
                     foreach($stage->getParticipants() as $participation){
                         $participation->setActivity($activity)
-                            ->setCreatedBy($currentUser->getId());
+                            ->setInitiator($currentUser);
                     }
 
                     $toBeMailedParticipants = $stage->getUniqueParticipations()->filter(fn(Participation $p) => $p->getUser() && !$p->getUser()->isSynthetic());
@@ -243,15 +344,18 @@ class ActivityController extends MasterController
                     }
 
                     $activity->addStage($stage)
-                    ->setName($stage->getName())
-                    ->setProgress($progress)
-                    ->setStatus($progress)
-                    ->setOrganization($organization)
-                    ->addUserMaster($userMaster)
-                    ->setCreatedBy($currentUser->getId());
+                        ->setName($stage->getName())
+                        ->setProgress($progress)
+                        ->setStatus($progress)
+                        ->setOrganization($organization)
+                        ->addUserMaster($userMaster)
+                        ->setInitiator($currentUser);
+                    
                     $em->persist($activity);
                     
-                    $notificationManager->registerUpdates($activity, ElementUpdate::CREATION, 'content');
+                    $notifiedUsers = $stage->getParticipants()->map(fn(Participation $p) => $p->getUser());
+
+                    $notificationManager->registerUpdates($activity, $notifiedUsers, ElementUpdate::CREATION, 'content');
                     
                     $em->flush();
                     /*
@@ -261,7 +365,7 @@ class ActivityController extends MasterController
                             'activity' => $activity->getStages()->count() > 1 ? null : $activity, 
                             'stage' => $activity->getStages()->count() > 1 ? $stage : null,
                         ], 
-                        'actionType' => 'activityParticipation']
+                        'actionType' => 'activityParticipationFollowing']
                     );
                     if($response->getStatusCode() == 500){
                         return new JsonResponse(['msg' => $response->getContent()], 500);
@@ -328,6 +432,7 @@ class ActivityController extends MasterController
                         'participants' => $participants,
                         'clients' => $clients
                     ], 200);
+
                 } else {
             
                     $errors = $this->buildErrorArray($createActivityForm);
@@ -395,7 +500,7 @@ class ActivityController extends MasterController
             $workerFirm = new WorkerFirm;
             $workerFirm->setCommonName($entityName)
                 ->setName($entityName)
-                ->setCreatedBy($currentUser->getId());
+                ->setInitiator($currentUser);
             
             $em->persist($workerFirm);
             $em->flush();
@@ -414,7 +519,7 @@ class ActivityController extends MasterController
                 ->setWeightType('role')
                 ->setPlan(ORGANIZATION::PLAN_PREMIUM)
                 ->setWorkerFirm($workerFirm)
-                ->setCreatedBy($currentUser->getId());
+                ->setInitiator($currentUser);
 
             $em->persist($clientOrganization);
 
@@ -447,7 +552,7 @@ class ActivityController extends MasterController
             ->setOrganization($organization)
             ->setClientOrganization($clientOrganization)
             ->setWorkerFirm($workerFirm)
-            ->setCreatedBy($currentUser->getId());
+            ->setInitiator($currentUser);
 
             $em->persist($client);
             
@@ -473,7 +578,7 @@ class ActivityController extends MasterController
                     empty($_POST['oid']) || !$organization->hasSuperAdmin() ? USER::ROLE_SUPER_ADMIN : 
                         ($organization->getPlan() == ORGANIZATION::PLAN_FREE || $organization->getPlan() != ORGANIZATION::PLAN_FREE && new DateTime() > $organization->getExpired() ? USER::ROLE_AM : USER::ROLE_ADMIN)
                 )
-                ->setCreatedBy($currentUser->getId());
+                ->setInitiator($currentUser);
                 $clientOrganization->addUser($user);
                 
                 $userGlobal = new UserGlobal();
@@ -490,7 +595,7 @@ class ActivityController extends MasterController
                     ->setEmail(!empty($email) ? $email : null)
                     ->setWeightValue(100)
                     ->setClient($client)
-                    ->setCreatedBy($currentUser->getId());
+                    ->setInitiator($currentUser);
                 $user->addExternalUser($externalUser);
                 $em->persist($clientOrganization);
             } else {
@@ -597,7 +702,7 @@ class ActivityController extends MasterController
             ->setOrganization($currentUser->getOrganization())
             ->addUserMaster($userMaster)
             ->addStage($stage)
-            ->setCreatedBy($currentUser->getId());
+            ->setInitiator($currentUser);
 
         if ($inpId !== 0) {
             $activity->setInstitutionProcess($this->em->getRepository(InstitutionProcess::class)->find($inpId));
@@ -611,7 +716,7 @@ class ActivityController extends MasterController
             ->setEnddate($activityEndDate)
             ->setMode(1)
             ->setProgress(STAGE::PROGRESS_ONGOING)
-            ->setCreatedBy($usrId);
+            ->setInitiator($currentUser);
 
         if ($isActivity) {
             $activity
@@ -676,7 +781,7 @@ class ActivityController extends MasterController
                 ->setOrganization($currentUser->getOrganization())
                 ->setObjectives($activityDescription)
                 ->setStatus(-2)
-                ->setCreatedBy($currentUserId);
+                ->setInitiator($currentUser);
             $em->persist($activity);
             $em->flush();
 
@@ -687,12 +792,12 @@ class ActivityController extends MasterController
                 ->setMode(1)
                 ->setStartdate(clone $startDate)
                 ->setEnddate(clone $startDate)
-                ->setCreatedBy($currentUserId);
+                ->setInitiator($currentUser);
 
             /*$criterion = (new Criterion)
                 ->setCName($defaultCriterionName)
                 ->setStage($stage)
-                ->setCreatedBy($currentUserId);
+                ->setInitiator($currentUser);
 
             $stage->addCriterion($criterion);
             */
@@ -772,12 +877,12 @@ class ActivityController extends MasterController
             $activityGStartDate = clone $startDate;
             $activityGEndDate = clone $startDate;
             $stage->setName($activityName)->setActivity($activity)->setStartdate($activityStartDate)->setEnddate($activityEndDate)->setGstartdate($activityGStartDate)->setGenddate($activityGEndDate);
-            $stage->setCreatedBy($currentUser->getId());
+            $stage->setInitiator($currentUser);
             $em->persist($stage);
 
             $criterion = new Criterion;
             $criterion->setStage($stage)->setCName($organization->getCriterionNames()->first());
-            $criterion->setCreatedBy($currentUser->getId());
+            $criterion->setInitiator($currentUser);
             $em->persist($criterion);
             $em->flush();
 
@@ -790,7 +895,7 @@ class ActivityController extends MasterController
 
                 $decision = new Decision;
                 $decision->setType(1)->setRequester($currentUser->getId())->setAnonymousRequest($isRequestAnon)->setAnonymousDecision(false)->setDecider($recipient->getId())->setOrganization($organization)->setActivity($activity)->setStage($stage);
-                $decision->setCreatedBy($currentUser->getId());
+                $decision->setInitiator($currentUser);
                 $em->persist($decision);
 
             }
@@ -946,6 +1051,8 @@ class ActivityController extends MasterController
         $eventForm->handleRequest($request);
         if($eventForm->isSubmitted() && $eventForm->isValid()){
 
+            $notifiedUsers = $stage->getParticipants()->map(fn(Participation $p) => $p->getUser());
+
             $now = new DateTime();
             
             if(!$event->getOnsetDate()){
@@ -954,7 +1061,7 @@ class ActivityController extends MasterController
                     ->setOrganization($this->org);
 
             if(!$eveId){
-                $notificationManager->registerUpdates($event, ElementUpdate::CREATION);
+                $notificationManager->registerUpdates($event, $notifiedUsers, ElementUpdate::CREATION);
             }
 
             $documentsForm = $eventForm->get('documents');
@@ -972,14 +1079,14 @@ class ActivityController extends MasterController
                     ->setMime($documentFileInfo['mime']);
                 $em->persist($document);
 
-                $notificationManager->registerUpdates($document, ElementUpdate::CREATION);
+                $notificationManager->registerUpdates($document, $notifiedUsers, ElementUpdate::CREATION);
 
             }
 
             $comments = $event->getComments();
             foreach($comments as $comment){
                 $comment->setAuthor($currentUser);
-                $notificationManager->registerUpdates($comment, ElementUpdate::CREATION, 'content');
+                $notificationManager->registerUpdates($comment, $notifiedUsers, ElementUpdate::CREATION, 'content');
             }
 
            
@@ -1001,7 +1108,7 @@ class ActivityController extends MasterController
                 
             $event
                 ->setOrganization($this->org)
-                ->setCreatedBy($currentUser->getId());
+                ->setInitiator($currentUser);
             $em->persist($event);
             $em->flush();
 
@@ -1035,379 +1142,6 @@ class ActivityController extends MasterController
         ];
 
         return new JsonResponse($response,200);
-    }
-    
-    /**
-     * @param Request $request
-     * @param int $stgId
-     * @param string $entity
-     * @param int $elmtId
-     * @return JsonResponse|void
-     * @throws ORMException
-     * @throws OptimisticLockException
-     * @Route("/{entity}/stage/{stgId}/participant/validate/{elmtId}", name="validateParticipant")
-     */
-    public function validateParticipantAction(
-        Request $request,
-        int $stgId,
-        string $entity,
-        int $elmtId
-    ) {
-
-        $currentUser = $this->user;
-
-        if (!$currentUser) {
-            throw new Exception('current user is null');
-        }
-
-        /** @var int */
-        $type = $request->get('type');
-        /** @var string */
-        $precomment = $request->get('precomment');
-        /** @var bool */
-        $leader = $request->get('leader');
-        /** @var string */
-        $pEntity = $request->get('pEntity');
-        /** @var int */
-        $pId = $request->get('pId');
-
-        $em = $this->em;
-        switch($entity){
-            case 'iprocess' :
-                $repoS = $em->getRepository(IProcessStage::class);
-                $repoP = $em->getRepository(IProcessParticipation::class);
-                break;
-            case 'activity' :
-                $repoS = $em->getRepository(Stage::class);
-                $repoP = $em->getRepository(Participation::class);
-                break;
-        }
-        $repoU = $em->getRepository(User::class);
-        $repoPEntity = $pEntity == 'user' ? $repoU : $em->getRepository(Team::class);
-        /** @var User|Team */
-        $pElement = $repoPEntity->find($pId);
-
-        $repoG = $em->getRepository(Grade::class);
-
-        /** @var Stage|TemplateStage|IProcessStage */
-        $stage = $repoS->find($stgId);
-        var_dump($stage->getId());
-        /** @var Activity|TemplateActivity|InstitutionProcess */
-        $element = $entity != 'iprocess' ? $stage->getActivity() : $stage->getInstitutionProcess();
-        $activityOrganization = $element->getOrganization();
-
-        $stage->currentUser = $currentUser;
-        $element->currentUser = $currentUser;
-
-        if (!$stage->isModifiable()) {
-            throw new Exception('unauthorized');
-        }
-
-        /** @var Participation|IProcessParticipation|TemplateParticipation|null */
-        $participation = $repoP->find($elmtId);
-
-
-        if (!$participation) {
-
-            // Checking if there is compatibility user/team, otherwise return exception
-            if($pEntity == 'user'){
-
-                $doublonParticipant = $stage->getParticipants()->filter(function($p) use ($pId){
-                    return $p->getUser()->getId() == $pId;
-                })->first();
-
-                if($doublonParticipant){
-                    return new JsonResponse(['msg' => 'duplicateWithTeam', 'name' => $doublonParticipant->getTeam()->getName()],500);
-                }
-
-            } else {
-
-                $doublonParticipant = $stage->getParticipants()->filter(function($p) use ($pElement){
-                        return $pElement->getMembers()->exists(function(int $i, Member $tu) use ($p){
-                            return $tu->getUser() == $p->getUsrId();
-                        });
-                    })->first();
-
-                if($doublonParticipant){
-                    return new JsonResponse(['msg' => 'duplicateWithUser', 'name' => $doublonParticipant->getDirectUser()->getFullname()],500);
-                }
-            }
-
-            $iterableElements = sizeof($stage->getCriteria()) > 0 ? $stage->getCriteria() : new ArrayCollection([$stage]);
-
-        } else {
-
-            // Checking whether participant has already been subject to grades (by himself or others), and adapting grade type if necessary
-            // If we do not change related type, it will alter results computation !!!
-            $gradedPElementGrades = $repoG->findBy([
-                'stage' => $stage,
-                'gradedUsrId' => $participation->getUser()->getId(),
-                'gradedTeaId' => $participation->getTeam() ? $participation->getTeam()->getId() : null
-            ]);
-
-            foreach ($gradedPElementGrades as $gradedPElementGrade) {
-                if ($gradedPElementGrade->getType() == $type) {
-                    break;
-                } else {
-                    $gradedPElementGrade->setType($type);
-                    $em->persist($gradedPElementGrade);
-                }
-            }
-
-
-            // Getting participations depending of part elmt type
-            if($pEntity == 'user'){
-                /** @var Participation[]|IProcessParticipation[]|TemplateParticipation[] */
-                $participations = $repoP->findBy([
-                    'stage' => $stage,
-                    'user' => $participation->getUser(),
-                    'team' => null,
-                ]);
-            } else {
-                 /** @var Participation[]|IProcessParticipation[]|TemplateParticipation[] */
-                 $participations = $repoP->findBy([
-                    'stage' => $stage,
-                    'team' => $participation->getTeam(),
-                ]);
-            }
-            $iterableElements = $participations;
-        }
-
-        if($entity == 'activity' && ($participation == null || $participation->getType() == 0 && $type != 0)){
-
-            // Checking if we need to unvalidate participations (we decide to unlock all stage participations and not only the modified one)
-            $completedStageParticipations = $stage->getParticipants()->filter(function(Participation $p){
-                return $p->getStatus() == 3;
-            });
-
-            if($completedStageParticipations->count() > 0){
-
-                $mailRecipients = [];
-                $mailRecipientIds = [];
-                foreach($completedStageParticipations as $completedParticipation){
-                    if(in_array($completedParticipation->getUsrId(),$mailRecipientIds) === false){
-                        $mailRecipients[] = $completedParticipation->getDirectUser();
-                        $mailRecipientIds[] = $completedParticipation->getUsrId();
-                    }
-                    $completedParticipation->setStatus(2);
-                    $em->persist($completedParticipation);
-                }
-                $em->flush();
-
-                self::sendMail(
-                    $app,
-                    $mailRecipients,
-                    'unvalidateOutputDueToChange',
-                    ['stage' => $stage, 'actElmt' => 'participant']
-                );
-            }
-        }
-
-        $participation = null;
-
-        foreach ($iterableElements as $iterableElement) {
-
-            // If participations are existing for submitted participant
-            if ($iterableElement instanceof Participation || $iterableElement instanceof IProcessParticipation || $iterableElement instanceof TemplateParticipation) {
-                $participation = $iterableElement;
-                $criterion = $participation->getCriterion();
-                $consideredParticipations[] = $participation;
-
-            } else {
-
-                $consideredParticipations = [];
-
-                switch($entity){
-                    case 'activity' :
-                        if($pEntity == 'user'){
-                            $participation = new Participation;
-                            $consideredParticipations[] = $participation;
-                        } else {
-                            foreach($pElement->getCurrentMembers() as $currentMember){
-//                                var_dump($currentMember->getUsrId());
-                                $participation = new Participation;
-                                $participation->setUser($currentMember)
-                                    ->setExternalUser($currentMember->getExternalUser());
-                                $consideredParticipations[] = $participation;
-                            }
-                        }
-                        break;
-                    case 'iprocess' :
-                        if($pEntity == 'user'){
-                            $participation = new IProcessParticipation;
-                            $consideredParticipations[] = $participation;
-                        } else {
-                            foreach($pElement->getCurrentMembers() as $currentMember){
-                                $participation = new IProcessParticipation;
-                                $participation->setUser($currentMember)
-                                    ->setExternalUser($currentMember->getExternalUser());
-                                $consideredParticipations[] = $participation;
-                            }
-                        }
-                        break;
-                    case 'template' :
-                        if($pEntity == 'user'){
-                            $participation = new TemplateParticipation;
-                            $consideredParticipations[] = $participation;
-                        } else {
-                            foreach($pElement->getCurrentMembers() as $currentMember){
-                                $participation = new TemplateParticipation;
-                                $participation->setUsrId($currentMember->getUsrId())
-                                    ->setExtUsrId($currentMember->getExtUsrId());
-                                $consideredParticipations[] = $participation;
-                            }
-                        }
-                        break;
-                }
-                $criterion = sizeof($stage->getCriteria()) > 0 ? $iterableElement : null;
-            }
-            foreach($consideredParticipations as $consideredParticipation){
-
-                if (!$consideredParticipation) {
-                    continue; return;
-                }
-
-                $consideredParticipation
-                    ->setType($type)
-                    ->setStage($stage)
-                    ->setCreatedBy($currentUser->getId());
-
-                if($pEntity == 'team'){
-                    $consideredParticipation->setTeam($pElement);
-                } else {
-                    $consideredParticipation->setUser($pElement);
-                }
-
-
-                $userOrganization = $pElement->getOrganization();
-                $currentUserOrganization = $currentUser->getOrganization();
-
-                if($userOrganization != $currentUserOrganization){
-                    /** @var Client */
-                    $client = $currentUserOrganization->getClients()->filter(function(Client $c) use ($userOrganization){
-                        return $c->getClientOrganization() == $userOrganization;
-                    })->first();
-                    $externalUser = $client->getExternalUsers()->filter(function(ExternalUser $e) use ($pElement){
-                        return $e->getUser() == $pElement;
-                    })->first();
-
-                    $consideredParticipation->setExternalUser($externalUser);
-                }
-
-
-                if($leader){$consideredParticipation->setLeader($leader);}
-
-                if ($consideredParticipation instanceof IProcessParticipation) {
-                    $consideredParticipation->setInstitutionProcess($element);
-                } else {
-                    $consideredParticipation->setActivity($element);
-                }
-
-                if ($precomment) {
-                    $consideredParticipation->setPrecomment($precomment);
-                } else if ($consideredParticipation->getPrecomment() !== null) {
-                    $consideredParticipation->setPrecomment(null);
-                }
-
-                if ($consideredParticipation instanceof Participation) {
-                    //$consideredParticipation->setIsMailed(false);
-
-                    if ($leader) {
-                        // Removing leadership to all old previous (criterion) leading participations
-
-                        /** @var Criterion|Stage */
-                        $queryableElmt = $criterion ?: $stage;
-
-                        $previousOwningParticipants = $queryableElmt->getParticipations()->filter(function(Participation $p) use ($consideredParticipation){
-                            return ($consideredParticipation->getTeam() ?
-                                $p->getTeam() != $consideredParticipation->getTeam() :
-                                $p->getUser() != $consideredParticipation->getUser())
-                                && $p->isLeader();
-                        });
-
-                        foreach ($previousOwningParticipants as $previousOwningParticipant) {
-                            $previousOwningParticipant->setLeader(false);
-                            $queryableElmt->addParticipant($previousOwningParticipant);
-                        }
-                        //$consideredParticipation->setLeader(true);
-                    } else {
-                        //$consideredParticipation->setLeader(false);
-                    }
-                }
-
-                $criterion ? $criterion->addParticipation($consideredParticipation) : $stage->addParticipation($consideredParticipation);
-
-            }
-
-            if($iterableElement instanceof Criterion){
-                $stage->addCriterion($criterion);
-            }
-
-        }
-
-        /*
-        $mailed = null;
-        $finalizable = (
-            $entity == 'activity'
-            && $participation && $participation->getType() != 0
-            && (count($stage->getCriteria()) > 0 || count($stage->getCriteria()) > 0)
-        );
-        */
-
-        if ($entity == 'activity' and $element->getStatus() === 1) {
-            $mailedUsrIds = [];
-            $recipients = [];
-
-            foreach($consideredParticipations as $consideredParticipation){
-
-
-                if(!$consideredParticipation->getisMailed()){
-
-                    $participationUsrId = $consideredParticipation->getUser()->getId();
-
-                    if(in_array($participationUsrId,$mailedUsrIds) === false){
-                        $mailedUsrIds[] = $participationUsrId;
-                        $user = $repoU->find($participationUsrId);
-                        if(!($user->getLastname() == 'ZZ' && $user->getEmail() == null)){
-                            $repicients[] = $user;
-                        }
-                    }
-                    $consideredParticipation->setIsMailed(true);
-                    $em->persist($consideredParticipation);
-                }
-            }
-
-            if(sizeof($recipients) > 0){
-                $sendMail = self::sendMail(
-                    $app,
-                    $recipients,
-                    'activityParticipation',
-                    [
-                        'activity' => $element,
-                        'stage' => $stage,
-                    ]
-                );
-            }
-        }
-
-        $em->persist($stage);
-        $em->flush();
-
-        /*$user = $participation->getDirectUser();
-        if ( !($user instanceof User) ) {
-            throw new \Exception;
-        }*/
-
-        return new JsonResponse([
-            'eid' => $consideredParticipations[0]->getId(),
-            //'finalizable' => $finalizable,
-            'pElement' => [
-                'picture' => $pEntity == 'user' ?
-                    ($pElement->getPicture() ?? 'no-picture.png') :
-                    ($pElement->getPicture() ? 'team/'.$pElement->getPicture() : 'team/no-picture.png')
-            ],
-            'canSetup' => !$element->getActiveModifiableStages()->isEmpty(),
-        ], 200);
     }
 
     /**
@@ -1530,7 +1264,7 @@ class ActivityController extends MasterController
                             ->setType($line->getType())
                             ->setActivity($line->getActivity())
                             ->setUser($concernedUser)
-                            ->setCreatedBy($currentUser->getId())
+                            ->setInitiator($currentUser)
                             ->setTeam($repoT->findOneBy(['id' => $teaId]))
                             ->setStage($line->getStage())
                             ->setCriterion($line->getCriterion())
@@ -1546,7 +1280,7 @@ class ActivityController extends MasterController
 
         $member->setLeader($leader)
         ->setUsrId($usrId)
-        ->setCreatedBy($currentUser->getId());
+        ->setInitiator($currentUser);
 
         if($member->isDeleted()){
             $member->toggleIsDeleted();
@@ -1584,7 +1318,7 @@ class ActivityController extends MasterController
      * @return JsonResponse
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/{_locale}/{entity}/stage/{stgId}/participant/delete/{elmtId}", name="deleteParticipant")
+     * @Route("/{_locale}/{entity}/stage/{stgId}/participant/{elmtId}/delete", name="deleteParticipant")
      */
     public function deleteParticipantAction(Request $request, $stgId, $entity, $elmtId)
     {
@@ -1645,6 +1379,31 @@ class ActivityController extends MasterController
 
     }
 
+     /**
+     * @param Request $request
+     * @param $stgId
+     * @param $entity
+     * @param $elmtId
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/stage/{stgId}/follower/{elmtId}/delete", name="deleteFollower")
+     */
+    public function deleteFollowerAction(Request $request, int $stgId, int $elmtId)
+    {
+
+        $em = $this->em;
+        $currentUser = $this->user;
+        /** @var Stage */
+        $stage = $em->getRepository(Stage::class)->find($stgId);
+        $mastering = $em->getRepository(UserMaster::class)->find($elmtId);
+        $stage->removeUserMaster($mastering);
+        $em->persist($stage);
+        $em->flush();
+        return new JsonResponse();
+
+    }
+
     /**
      * @param Request $request
      * @param $memId
@@ -1671,7 +1430,7 @@ class ActivityController extends MasterController
         $currentUserOrganization = $currentUser->getOrganization();
         $teamLeader = $repoM->findOneBy(['team' => $team,'leader' => true]);
         $userTeamLeader = $repoM->findOneBy(['team' => $team, 'leader' => true, 'usrId' => $currentUser->getId()]);
-        $hasUserInfGrantedRights = ($teamLeader && $userTeamLeader || !$teamLeader && $team->getCreatedBy() == $currentUser->getId());
+        $hasUserInfGrantedRights = ($teamLeader && $userTeamLeader || !$teamLeader && $team->getInitiator() == $currentUser->getId());
         $hasPageAccess = true;
 
         if ($currentUser->getRole() != 4 && ($teamOrganization != $currentUserOrganization || $currentUser->getRole() != 1 && !$hasUserInfGrantedRights)) {
@@ -1748,7 +1507,7 @@ class ActivityController extends MasterController
 
             $criterionName = new CriterionName;
             $criterionName->setName($submittedCriterionName)->setType($createCriterionForm->get('type')->getData())->setIcon($repoI->findOneByName(substr($submittedIcon, 3)));
-            $criterionName->setCreatedBy($currentUser->getId());
+            $criterionName->setInitiator($currentUser);
             $organization->addCriterionName($criterionName);
             $em->persist($organization);
             $em->flush();
@@ -1825,12 +1584,12 @@ class ActivityController extends MasterController
             array_push($tblId,$answer->getField()->getId());
         }
 
-        if ($repo1->findBy(array('survey' => $survey, 'createdBy' => $currentUser->getId())) == null) {
+        if ($repo1->findBy(array('survey' => $survey, 'initiator' => $currentUser)) == null) {
             for ($i = 0; $i < count($surveyfield); $i++) {
                 $answer = new Answer;
                 $answer->setSurvey($survey);
                 $answer->setField($surveyfield[$i]);
-                $answer->setCreatedBy($currentUser->getId());
+                $answer->setInitiator($currentUser);
                 $answer->setParticipant($activity);
                 $survey->AddUserAnswer($answer);
                 $em->persist($answer);
@@ -1855,7 +1614,7 @@ class ActivityController extends MasterController
                     $answer->setField($surveyfield[$p]);
                     array_push($tblId ,$surveyfield[$p]->getId());
                     $p = -1;
-                    $answer->setCreatedBy($currentUser->getId());
+                    $answer->setInitiator($currentUser);
                     $answer->setParticipant($activity);
                     $survey->addAnswer($answer);
                     $em->persist($answer);
@@ -1887,7 +1646,7 @@ class ActivityController extends MasterController
 
                             $answer = new Answer;
                             $answer->setField($surveyfield[$i]);
-                            $answer->setCreatedBy($currentUser->getId());
+                            $answer->setInitiator($currentUser);
                             $answer->setParticipant($activity);
                             $answer->setDesc(0);
                             $survey->addAnswer($answer);
@@ -4595,84 +4354,372 @@ class ActivityController extends MasterController
      * @throws OptimisticLockException
      * @Route("/s/{token}", name="accessStageThroughInvit")
      */
-    public function accessStageThroughInvit(Request $request, string $token){
+    public function accessStageThroughInvit(Request $request, string $token, TranslatorInterface $translator){
         
         $em = $this->em;
+        /** @var Stage */
         $stage = $em->getRepository(Stage::class)->findOneByAccessLink($token);
         if(!$stage){
             throw new NotFoundHttpException();
         }
 
-        if(isset($_COOKIE['sorting_type'])){
-            $sortingType = $_COOKIE['sorting_type'];
+        if($stage->getVisibility() == STAGE::VISIBILITY_PRIVATE){
+            if($this->security->getUser()){
+                setcookie('ps', $stage->getId());
+                return $this->redirectToRoute('myActivities');
+            } else {
+                return $this->render('stage_privatized.html.twig');
+            }
         } else {
-            setcookie('sorting_type', 'p');
-            $sortingType = 'p';
-        }
-        if(isset($_COOKIE['ts'])){
-            $timescaleCookie = $_COOKIE['ts'];
-        } else {
-            setcookie('ts', 'y');
-            $timescaleCookie = 'y';
-        }
-
-        setcookie("is", $stage->getId(), time() + 60*60*24*30, '/');
-
-        if($this->security->getUser()){
-
-            return $this->forward('App\Controller\InstitutionController::myActivitiesListAction', []);
             
-        } else {
-        
-            $statuses = [
-                -5 => $sortingType == 'o' ? 'cancelled' : 'stopped',
-                -4 => $sortingType == 'o' ? 'discarded' : 'postponed',
-                -3 => $sortingType == 'o' ? 'requested' : 'suspended',
-                -2 => $sortingType == 'o' ? 'attributed' : 'reopened',
-                -1 => $sortingType == 'o' ? 'incomplete' : 'unstarted',
-                0  => $sortingType == 'o' ? 'future' : 'upcoming',
-                1  => $sortingType == 'o' ? 'current' : 'ongoing',
-                2  => 'completed',
-                3  => $sortingType == 'o' ? 'published' : 'finalized',
-            ];
-
-
-            //dd($request->headers->get('user_agent'));
-            $renderedTwigFile = strpos($request->headers->get('user_agent'), "Mobile") === false ? 'activities_dashboard.html.twig' : 'mobile_activities_dashboard.html.twig';
-            
-            return $this->render(
-                $renderedTwigFile,
-                [
-                    'displayedStatuses'  => [$statuses[(string) $stage->getActivity()->getProgress()]],
-                    'orphanActivities'  => [$stage->getActivity()],
-                    'processesActivities' => null,
-                    'addProcessForm' => null,
-                    'delegateForm' => null,
-                    'validateRequestForm' => null,
-                    'requestForm' => null,
-                    'sortingTypeCookie' => $sortingType,
-                    'viewTypeCookie' => 't',
-                    'dateTypeCookie' => 's',
-                    'timescaleCookie' => $timescaleCookie,
-                    'eventForm' => null,
-                    'newActivityForm' => null,
-                    'firstConnection' => false,
-                    'eventGroups' => null,
-                    'em' => $em,
-                    'comesFromLogin' => false,
-                ]
+            $joinableStatus = $stage->getJoinableStatus();
+            $followableStatus = $stage->getFollowableStatus();
+            if ($followableStatus > Stage::FOLLOWABLE_FORBIDDEN) {
+                if ($joinableStatus > Stage::JOINABLE_FORBIDDEN) {
+                    $joinableFollowableMsg = $translator->trans('stage_invitation_page.joinable_followable_msg');
+                    $fjStatus = 'fj';
+                } else {
+                    $joinableFollowableMsg = $translator->trans('stage_invitation_page.followable_msg');
+                    $fjStatus = 'f';
+                }
+            } else {
+                if ($joinableStatus > Stage::JOINABLE_FORBIDDEN) {
+                    $joinableFollowableMsg = $translator->trans('stage_invitation_page.joinable_msg');
+                    $fjStatus = 'j';
+                }
+            }
+    
+            if(isset($_COOKIE['sorting_type'])){
+                $sortingType = $_COOKIE['sorting_type'];
+            } else {
+                setcookie('sorting_type', 'p');
+                $sortingType = 'p';
+            }
+            if(isset($_COOKIE['ts'])){
+                $timescaleCookie = $_COOKIE['ts'];
+            } else {
+                setcookie('ts', 'y');
+                $timescaleCookie = 'y';
+            }
+    
+            $isStageAlreadyVisibleToUser = $this->user && (
+                $this->user->getParticipations()->exists(fn(int $i, Participation $p) => $p->getStage() == $stage) || 
+                $this->user->getMasterings()->exists(fn(int $i, UserMaster $m) => $m->getStage() == $stage && $m->getProperty() == 'followableStatus' && $m->getType() >= UserMaster::ACCEPTED)
             );
+    
+            if(isset($_COOKIE['is'])){
+                $values = preg_split("/\,/", $_COOKIE['is']);
+                if(in_array($stage->getId(),$values) === false){
+                    $values[] = $stage->getId();
+                    if(!$isStageAlreadyVisibleToUser){
+                        setcookie("is", serialize($values), time() + 60*60*24*30, '/');
+                    }
+                }
+            } else {
+                if(!$isStageAlreadyVisibleToUser){
+                    setcookie("is", $stage->getId(), time() + 60*60*24*30, '/');
+                }
+            }
+    
+            if($this->security->getUser()){
+                return $this->redirectToRoute('myActivities');
+                
+            } else {
+            
+                $statuses = [
+                    -5 => $sortingType == 'o' ? 'cancelled' : 'stopped',
+                    -4 => $sortingType == 'o' ? 'discarded' : 'postponed',
+                    -3 => $sortingType == 'o' ? 'requested' : 'suspended',
+                    -2 => $sortingType == 'o' ? 'attributed' : 'reopened',
+                    -1 => $sortingType == 'o' ? 'incomplete' : 'unstarted',
+                    0  => $sortingType == 'o' ? 'future' : 'upcoming',
+                    1  => $sortingType == 'o' ? 'current' : 'ongoing',
+                    2  => 'completed',
+                    3  => $sortingType == 'o' ? 'published' : 'finalized',
+                ];
+    
+                $renderedTwigFile = strpos($request->headers->get('user_agent'), "Mobile") === false ? 'activities_dashboard.html.twig' : 'mobile_activities_dashboard.html.twig';
+                
+                return $this->render(
+                    $renderedTwigFile,
+                    [
+                        'displayedStatuses'  => [$statuses[(string) $stage->getActivity()->getProgress()]],
+                        'orphanActivities'  => null,
+                        'processesActivities' => null,
+                        'addProcessForm' => null,
+                        'delegateForm' => null,
+                        'validateRequestForm' => null,
+                        'requestForm' => null,
+                        'sortingTypeCookie' => $sortingType,
+                        'viewTypeCookie' => 't',
+                        'dateTypeCookie' => 's',
+                        'timescaleCookie' => $timescaleCookie,
+                        'eventForm' => null,
+                        'newActivityForm' => null,
+                        'firstConnection' => false,
+                        'eventGroups' => null,
+                        'em' => $em,
+                        'comesFromLogin' => false,
+                        'invitationActivities' => new ArrayCollection([$stage->getActivity()]),
+                        'followingActivities' => null,
+                        'fjStatus' => $fjStatus,
+                        'fjMessage' => $joinableFollowableMsg,
+                    ]
+                );
+            }
         }
     }
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/activity/{actId}/requesters", name="getActivityRequests")
+     */
+    public function retrieveActivityRequests(Request $request, int $actId, TranslatorInterface $translator){
+
+        $em = $this->em;
+        $activity = $em->getRepository(Activity::class)->find($actId);
+        $requestUsersData = $activity->getRequesters()->map(function(User $u) use ($activity, $translator) {
+            $userRequests = $u->getMasterings()->filter(fn(UserMaster $m) => $activity->getActiveStages()->contains($m->getStage()) && $m->getType() == UserMaster::PENDING && ($m->getProperty() == 'followableStatus' || $m->getProperty() == 'joinableStatus'))
+                ->map(fn(UserMaster $m) => [
+                    'id' => $m->getId(), 
+                    'sname' => $m->getStage()->getName(),
+                    'type' => $m->getProperty() == 'joinableStatus' ? $translator->trans('stage_visibility_modal.joinable_title') : $translator->trans('stage_visibility_modal.followable_title')
+                    ])->getValues();
             
-    /*         return $this->render('stage_invitation.html.twig',[
-                'stage' => $stage,
-                'em' => $em,
-                'timescaleCookie' => 'y',
-                'dateTypeCookie' => 's',
-            ]);
-        }
+            return [
+                    'picture' => $u->getPicturePath(),
+                    'fullname' => $u->getFullname(),
+                    'requests' => $userRequests
+            ];
+        })->getValues();
+        return new JsonResponse($requestUsersData);
+        
     }
-    */
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/activity/{actId}/requests/manage", name="manageActivityRequests")
+     */
+    public function manageActivityRequests(Request $request, int $actId, NotificationManager $notificationManager){
+
+        $em = $this->em;
+        $activity = $em->getRepository(Activity::class)->find($actId);
+        $decisions = [];
+        $response = [];
+        $usmIds = [];
+
+        foreach($_POST as $key => $value){
+            $usmId = explode('_',$key)[1];
+            $usmIds[] = $usmId;
+            $decisions[] = $value;
+        }
+
+        /** @var UserMaster[] */
+        $activityRequests = $em->getRepository(UserMaster::class)->findById($usmIds);
+
+        foreach($activityRequests as $key => $activityRequest){
+            $activityRequest->setType($decisions[$key]);
+            if($decisions[$key] == UserMaster::ACCEPTED){
+                $activityRequest->setType(UserMaster::ACCEPTED);
+                $em->persist($activityRequest);
+                $property = $activityRequest->getProperty() == 'followableStatus' ? 'follow_accept' : 'join_accept';
+
+                //if($property == 'join_accept'){
+
+                    /** @var User */
+                    $stageRequester = $activityRequest->getUser();
+
+                    // Removing eventual following mastering from user
+                    $followingMastering = $stageRequester->getMasterings()->filter(fn(UserMaster $m) => $m->getStage() == $activityRequest->getStage() && $m->getProperty() == 'followableStatus')->first();
+                    if($followingMastering){
+                        $stageRequester->removeMastering($followingMastering);
+                        $em->persist($stageRequester);
+                    }
+
+                    $stage = $activityRequest->getStage();
+                    $_POST['uid'] = $stageRequester->getId();
+                    $_POST['oid'] = $stageRequester->getOrganization()->getId();
+                    $_POST['wid'] = $stageRequester->getOrganization()->getWorkerFirm()->getId();
+                    if($stageRequester->getOrganization() != $stage->getOrganization()){
+                        /** @var Client|null */
+                        $userOrgClient = $stageRequester->getOrganization()->getClients()->filter(fn(Client $c) => $c->getClientOrganization() == $this->org)->first();
+                        if($userOrgClient){
+                            $_POST['cid'] = $userOrgClient->getId();
+                            //$request->attributes->set('cid', $userOrgClient->getId());
+                            $userExternalUser = $userOrgClient->getAliveExternalUsers()->filter(fn(ExternalUser $eu) => $eu->getUser() == $this->user)->first();
+                            if($userExternalUser){
+                                $_POST['euid'] = $userExternalUser->getId();
+                                //$request->attributes->set('euid',$userExternalUser->getId());
+                            }
+                        }
+                    } else {
+                        $_POST['user-type'] = 'int';
+                    }
+
+                    /** @var JsonResponse */
+                    $participantJsonResponse = $this->forward('App\Controller\OrganizationController::addStageParticipantFollower', ['stgId' => $stage->getId(), 'fjType' => $property == 'follow_accept' ? 'follower' : 'participant']);
+                    $participantData = json_decode($participantJsonResponse->getContent(),true);
+                    $response['pids'][] = $participantData['pid'];
+                //}
+
+                $notificationManager->registerUpdates($activityRequest, [$activityRequest->getUser()], ElementUpdate::CREATION, $property);
+            }
+        }
+
+        $em->flush();
+        return new JsonResponse($response);
+        
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/stage/{stgId}/join", name="joinStage")
+     */
+    public function joinFollowedStage(Request $request, int $stgId, NotificationManager $notificationManager){
+
+        $em = $this->em;
+        $response = [];
+        $stage = $em->getRepository(Stage::class)->find($stgId);
+        /** @var UserMaster[] */
+        $joinRequest = $this->user->getMasterings()->filter(fn(UserMaster $m) =>
+            $m->getProperty() == 'joinableStatus' && $m->getStage() == $stage
+        )->first();
+        if(!$joinRequest){
+            $joinRequest = new UserMaster();
+            $joinRequest->setProperty('joinableStatus')
+            ->setStage($stage)
+            ->setType($stage->getJoinableStatus() == Stage::JOINABLE_DIRECT ? UserMaster::ADDED : UserMaster::PENDING);
+            
+            if($stage->getJoinableStatus() == Stage::JOINABLE_DIRECT){
+                $removableFollowingMastering = $this->user->getMasterings()->filter(fn(UserMaster $m) => $m->getProperty() == 'followableStatus' && $m->getStage() == $stage)->first();
+                $response['removableId'] = $removableFollowingMastering->getId();
+                $this->user->removeMastering($removableFollowingMastering);
+
+                $_POST['uid'] = $this->user->getId();
+                $_POST['oid'] = $this->user->getOrganization()->getId();
+                $_POST['wid'] = $this->user->getOrganization()->getWorkerFirm()->getId();
+                if($this->user->getOrganization() != $stage->getOrganization()){
+                    /** @var Client|null */
+                    $userOrgClient = $this->user->getOrganization()->getClients()->filter(fn(Client $c) => $c->getClientOrganization() == $this->org)->first();
+                    if($userOrgClient){
+                        $_POST['cid'] = $userOrgClient->getId();
+                        $userExternalUser = $userOrgClient->getAliveExternalUsers()->filter(fn(ExternalUser $eu) => $eu->getUser() == $this->user)->first();
+                        if($userExternalUser){
+                            $_POST['euid'] = $userExternalUser->getId();
+                        }
+                    }
+                } else {
+                    $_POST['user-type'] = 'int';
+                }
+                $participantJsonResponse = $this->forward('App\Controller\OrganizationController::addStageParticipantFollower', ['stgId' => $stage->getId(), 'fjType' => 'participant']);
+                $participantData = json_decode($participantJsonResponse->getContent(),true);
+                $response['pid'] = $participantData['pid'];
+            }
+            
+            $this->user->addMastering($joinRequest);
+            $em->persist($joinRequest);
+            $notificationManager->registerUpdates($stage, $stage->getLeaders(), ElementUpdate::CREATION, 'join_request');
+        } 
+        $em->flush();
+        return new JsonResponse($response);
+        
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/stage/followers/{usmId}/remove", name="removeStageFollower")
+     */
+    public function removeStageFollower(Request $request, int $usmId){
+
+        $em = $this->em;
+        $followerMaster = $em->getRepository(UserMaster::class)->find($usmId);
+        /** @var User */
+        $follower = $followerMaster->getUser();
+        $follower->removeMastering($followerMaster);
+        $em->flush($follower);
+        return new JsonResponse();
+        
+    }
+
+    /**
+     * @param Request $request
+     * @param $stgId
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/stage/{stgId}/visibility/update", name="updateStageVisibilityParams")
+     */
+    public function updateStageVisibilityParams(Request $request, $stgId){
+        $em = $this->em;
+        $repoS  = $em->getRepository(Stage::class);
+        $currentUser = $this->user;
+        if (!$currentUser instanceof User) {
+            return $this->redirectToRoute('login');
+        }
+        /** @var Stage */
+        $stage = $repoS->find($stgId);
+        $visibilityStatus = $_POST['visibilityTypeSelector'];
+        $joinableStatus = $visibilityStatus != -1 ? (
+            isset($_POST["js_direct"]) ? 1 : (
+                isset($_POST["js_check"]) ? 0 : -1
+            )
+        ) : null;
+        $followableStatus = $visibilityStatus != -1 ? (
+            isset($_POST["fs_direct"]) ? 1 : (
+                isset($_POST["fs_check"]) ? 0 : -1
+            )
+        ) : null;
+        $stage
+            ->setVisibility($visibilityStatus)
+            ->setFollowableStatus($followableStatus)
+            ->setJoinableStatus($joinableStatus);
+        $em->persist($stage);
+        $em->flush();
+        return new JsonResponse();
+    }
+
+
+      /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/stage/{stgId}/visibility/privatize", name="privatizeStage")
+     */
+    public function privatizeStage(Request $request, int $stgId){
+
+        $em = $this->em;
+        $repoS  = $em->getRepository(Stage::class);
+        $currentUser = $this->user;
+        if (!$currentUser instanceof User) {
+            return $this->redirectToRoute('login');
+        }
+        /** @var Stage */
+        $stage = $repoS->find($stgId);
+        $_POST['visibilityTypeSelector'] = -1;
+        $this->updateStageVisibilityParams($request, $stgId);
+        $areFollowersRemovable = $request->get('rf');
+        if($areFollowersRemovable){
+            foreach($stage->getFollowerMasters() as $stageMaster){
+                $stageMaster->setType(UserMaster::EXTERNAL_REMOVAL);
+                $em->persist($stageMaster);
+            }
+        }
+        $em->flush();
+        return new JsonResponse();
+        
+    }
+
+
 }

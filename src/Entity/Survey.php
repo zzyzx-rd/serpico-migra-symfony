@@ -34,9 +34,10 @@ class Survey extends DbObject
     public $name;
 
     /**
-     * @ORM\Column(name="sur_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="surveyInitiatives")
+     * @JoinColumn(name="sur_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="sur_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
@@ -83,7 +84,6 @@ class Survey extends DbObject
      * Survey constructor.
      * @param ?int$id
      * @param $sur_name
-     * @param $sur_createdBy
      * @param $sur_state
      * @param $stage
      * @param $organization
@@ -95,14 +95,13 @@ class Survey extends DbObject
       ?int $id = 0,
         $sur_state = null,
         $sur_name = '',
-        $sur_createdBy = null,
         Stage $stage = null,
         Organization $organization = null,
         ArrayCollection $participations = null,
         ArrayCollection $fields = null,
         $answers = null)
     {
-        parent::__construct($id, $sur_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->name = $sur_name;
         $this->state = $sur_state;
         $this->stage = $stage;

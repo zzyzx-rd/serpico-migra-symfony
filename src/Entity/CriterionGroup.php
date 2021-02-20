@@ -25,9 +25,10 @@ class CriterionGroup extends DbObject
     public ?int $id;
 
     /**
-     * @ORM\Column(name="cgp_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="criterionGroupInitiatives")
+     * @JoinColumn(name="cgp_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="cgp_inserted", type="datetime", nullable=false , options={"default": "CURRENT_TIMESTAMP"})
@@ -64,7 +65,6 @@ class CriterionGroup extends DbObject
      * @param string $cgp_name
      * @param Organization $organization
      * @param Department $department
-     * @param $cgp_createdBy
      * @param $id
      * @param CriterionName[] $criteria
      */
@@ -72,11 +72,10 @@ class CriterionGroup extends DbObject
         string $cgp_name = null,
         Organization $organization = null,
         Department $department = null,
-        $cgp_createdBy = null,
         $id = null,
         array $criteria = [])
     {
-        parent::__construct($id, $cgp_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->name = $cgp_name;
         $this->criteria = $criteria;
         $this->organization = $organization;
@@ -178,7 +177,7 @@ class CriterionGroup extends DbObject
 
         return [
             'id' => $this->id,
-            'createdBy' => $this->createdBy,
+            'initiator' => $this->initiator,
             'inserted' => $this->inserted,
             'name' => $this->name,
             'criteria' => $criteria,

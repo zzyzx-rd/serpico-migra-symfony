@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\CriterionRepository;
+use DateInterval;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -45,9 +46,10 @@ class Event extends DbObject
     public $name;
 
     /**
-     * @ORM\Column(name="eve_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="eventInitiatives")
+     * @JoinColumn(name="eve_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ManyToOne(targetEntity="Activity", inversedBy="events")
@@ -131,7 +133,6 @@ class Event extends DbObject
      * @param $priority
      * @param $name
      * @param $comment
-     * @param $createdBy
      * @param $deleted
      * @param $stage
      * @param $activity
@@ -145,7 +146,6 @@ class Event extends DbObject
         $priority = null,
         $type = 1,
         $name = null,
-        $createdBy = null,
         $onsetDate = null,
         $resDate = null,
         $expResDate = null,
@@ -157,7 +157,7 @@ class Event extends DbObject
         ArrayCollection $comments = null,
         $deleted = null)
     {
-        parent::__construct($id, $createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->priority = $priority;
         $this->type = $type;
         $this->name = $name;
@@ -434,6 +434,10 @@ class Event extends DbObject
                 $sd = new DateTime("+$intCurrWeekOffset weeks january $intYear");
                 $ed = new DateTime("+$intNextWeekOffset weeks january $intYear");
                 break;
+            case 'd' :
+                $sd = new DateTime(str_replace("-","/",$_COOKIE['ci']));
+                $ed = clone $sd->add(new DateInterval('P1D'));
+                break;
         }
 
         $period = $ed->getTimestamp() - $sd->getTimestamp();
@@ -564,9 +568,9 @@ class Event extends DbObject
         // If multi-organization event, we look whether current org is initatiator, otherwise if initiator is current logged user
         $organization = $this->currentUser->getOrganization();
         if($this->stage->getParticipants()->map(fn(Participation $p) => $p->getUser())->exists(fn($i, User $u) => $u->getOrganization() !== $organization)){
-            return $this->em->getRepository(User::class)->find($lastUpdatedElmt->getCreatedBy())->getOrganization() == $organization;
+            return $lastUpdatedElmt->getInitiator()->getOrganization() == $organization;
         } else {
-            return $lastUpdatedElmt->createdBy == $this->currentUser->getId();
+            return $lastUpdatedElmt->initiator == $this->currentUser;
         }
     }
 

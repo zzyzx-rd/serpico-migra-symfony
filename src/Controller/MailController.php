@@ -134,7 +134,7 @@ class MailController extends MasterController {
                 $email->embedFromPath('lib/img/people-working-logo.png', 'people_working_logo');
             }
 
-            if ($actionType == 'activityParticipation') {
+            if ($actionType == 'activityParticipationFollowing') {
 
             } else if (isset($settings['tokens']) && ($actionType == 'registration' || $actionType == 'externalInvitation')) {
                 $data['token'] = $settings['tokens'][$key];

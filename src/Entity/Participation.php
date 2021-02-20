@@ -22,7 +22,7 @@ class Participation extends DbObject
 {
     public const PARTICIPATION_ACTIVE      = 1;
     public const PARTICIPATION_THIRD_PARTY = 0;
-    public const PARTICIPATION_PASSIVE     = -1;
+    public const PARTICIPATION_FOLLOWING     = -1;
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
@@ -81,9 +81,10 @@ class Participation extends DbObject
     public $mailed;
 
     /**
-     * @ORM\Column(name="par_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="participationInitiatives")
+     * @JoinColumn(name="par_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="par_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
@@ -110,6 +111,11 @@ class Participation extends DbObject
      * @JoinColumn(name="team_tea_id", referencedColumnName="tea_id",nullable=true)
      */
     protected $team;
+    /**
+     * @ManyToOne(targetEntity="Organization", inversedBy="participations")
+     * @JoinColumn(name="organization_org_id", referencedColumnName="org_id",nullable=false)
+     */
+    protected $organization;
     /**
      * @ManyToOne(targetEntity="Activity", inversedBy="participations")
      * @JoinColumn(name="activity_act_id", referencedColumnName="act_id",nullable=false)
@@ -154,6 +160,12 @@ class Participation extends DbObject
      */
     public $externalUser;
 
+    /**
+     * @ORM\OneToMany(targetEntity=UserMaster::class, mappedBy="participation", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|UserMaster[]
+     */
+    private $userMasters;
+
     public $workerFirm;
 
 
@@ -170,7 +182,6 @@ class Participation extends DbObject
      * @param float|null $of_bonus
      * @param float|null $of_penalty
      * @param bool|null $mailed
-     * @param int|null $createdBy
      * @param DateTime|null $confirmed
      * @param DateTime|null $deleted
      * @param ArrayCollection $grades
@@ -195,7 +206,6 @@ class Participation extends DbObject
         float $of_bonus = null,
         float $of_penalty = null,
         bool $mailed = null,
-        int $createdBy = null,
         DateTime $confirmed = null,
         DateTime $deleted = null,
         ArrayCollection $grades = null,
@@ -208,7 +218,7 @@ class Participation extends DbObject
         User $user = null,
         ExternalUser $externalUser = null)
     {
-        parent::__construct($id, $createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->status = $status;
         $this->leader = $leader;
         $this->type = $type;
@@ -407,7 +417,24 @@ class Participation extends DbObject
     }
 
     /**
-     * @return mixed
+     * @return Organization
+     */
+    public function getOrganization(): Organization
+    {
+        return $this->organization;
+    }
+
+    /**
+     * @param Organization $organizaton
+     */
+    public function setOrganization(Organization $organization): self
+    {
+        $this->organization = $organization;
+        return $this;
+    }
+    
+    /**
+     * @return Activity
      */
     public function getActivity()
     {
@@ -415,16 +442,16 @@ class Participation extends DbObject
     }
 
     /**
-     * @param mixed $activity
+     * @param Activity $activity
      */
-    public function setActivity($activity): self
+    public function setActivity(Activity $activity): self
     {
         $this->activity = $activity;
         return $this;
     }
 
     /**
-     * @return mixed
+     * @return Stage
      */
     public function getStage()
     {
@@ -432,9 +459,9 @@ class Participation extends DbObject
     }
 
     /**
-     * @param mixed $stage
+     * @param Stage $stage
      */
-    public function setStage($stage): self
+    public function setStage(Stage $stage): self
     {
         $this->stage = $stage;
         return $this;
@@ -601,6 +628,27 @@ class Participation extends DbObject
     public function removeUpdate(ElementUpdate $update): Participation
     {
         $this->updates->removeElement($update);
+        return $this;
+    }
+
+    /**
+    * @return ArrayCollection|UserMaster[]
+    */
+    public function getUserMasters()
+    {
+        return $this->userMasters;
+    }
+
+    public function addUserMaster(UserMaster $userMaster): self
+    {
+        $this->userMasters->add($userMaster);
+        $userMaster->setParticipation($this);
+        return $this;
+    }
+
+    public function removeUserMaster(UserMaster $userMaster): self
+    {
+        $this->userMasters->removeElement($userMaster);
         return $this;
     }
 

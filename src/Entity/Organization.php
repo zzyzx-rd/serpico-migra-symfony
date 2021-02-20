@@ -15,6 +15,7 @@ use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\OneToOne;
 use Doctrine\ORM\Mapping\OrderBy;
+use Doctrine\ORM\Mapping\ManyToOne;
 use Symfony\Component\Validator\Constraints as Assert;
 use Stripe;
 
@@ -63,9 +64,10 @@ class Organization extends DbObject
     public $weight_type;
 
     /**
-     * @ORM\Column(name="org_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="organizationInitiatives")
+     * @JoinColumn(name="org_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
 
     /**
@@ -102,7 +104,10 @@ class Organization extends DbObject
      * @ORM\Column(name="org_routine_greminders", type="datetime", nullable=true)
      */
     public $routineGreminders;
-
+    /**
+     * @OneToMany(targetEntity="Participation", mappedBy="organization", cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    public $participations;
     /**
      * @OneToMany(targetEntity="Stage", mappedBy="organization", cascade={"persist", "remove"}, orphanRemoval=true)
      */
@@ -220,6 +225,10 @@ class Organization extends DbObject
      */
     public $users;
     /**
+     * @OneToMany(targetEntity="ElementUpdate", mappedBy="organization",cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    public $updates;
+    /**
      * @OneToMany(targetEntity="OrganizationPaymentMethod", mappedBy="organization", cascade={"persist","remove"}, orphanRemoval=true)
      */
     public $paymentMethods;
@@ -275,7 +284,6 @@ class Organization extends DbObject
      * @param $isClient
      * @param $oth_language
      * @param $weight_type
-     * @param $createdBy
      * @param $lastCheckedPlan
      * @param $expired
      * @param $testing_reminder_sent
@@ -317,7 +325,6 @@ class Organization extends DbObject
         ?string $logo = null,
         $weight_type = "",
         $usersCSV = '',
-        $createdBy = null,
         $lastCheckedPlan = null,
         $expired = null,
         $testing_reminder_sent = null,
@@ -346,7 +353,7 @@ class Organization extends DbObject
         array $criterionGroups = null
         )
     {
-        parent::__construct($id, $createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->legalname = $legalname;
         $this->commname = $commname;
         $this->type = $type;
@@ -388,6 +395,7 @@ class Organization extends DbObject
         $this->comments = new ArrayCollection();
         $this->documents = new ArrayCollection();
         $this->userMasters = new ArrayCollection();
+        $this->participations = new ArrayCollection();
     }
 
     /**
@@ -634,13 +642,6 @@ class Organization extends DbObject
         return $this->stages;
     }
 
-    /**
-     * @param mixed $stages
-     */
-    public function setStages($stages): void
-    {
-        $this->stages = $stages;
-    }
 
     /**
      * @return mixed
@@ -664,14 +665,6 @@ class Organization extends DbObject
     public function getTitles()
     {
         return $this->titles;
-    }
-
-    /**
-     * @param mixed $titles
-     */
-    public function setTitles($titles): void
-    {
-        $this->titles = $titles;
     }
 
     /**
@@ -763,14 +756,6 @@ class Organization extends DbObject
     }
 
     /**
-     * @param mixed $teams
-     */
-    public function setTeams($teams): void
-    {
-        $this->teams = $teams;
-    }
-
-    /**
      * @return mixed
      */
     public function getMails()
@@ -779,27 +764,11 @@ class Organization extends DbObject
     }
 
     /**
-     * @param mixed $mails
-     */
-    public function setMails($mails): void
-    {
-        $this->mails = $mails;
-    }
-
-    /**
      * @return mixed
      */
     public function getTargets()
     {
         return $this->targets;
-    }
-
-    /**
-     * @param mixed $targets
-     */
-    public function setTargets($targets): void
-    {
-        $this->targets = $targets;
     }
 
     /**
@@ -1437,13 +1406,13 @@ class Organization extends DbObject
     public function getOrganizationLogo()
     {
         if($this->logo){
-            return 'lib/img/org/'. $this->logo;
+            return '/lib/img/org/'. $this->logo;
         } else if ($this->workerFirm && $this->workerFirm->getLogo()){
-            return 'lib/img/wf/' . $this->workerFirm->getLogo();
+            return '/lib/img/wf/' . $this->workerFirm->getLogo();
         } else {
             return $this->type == 'C' ? 
-                "lib/img/user/no-picture-i.png" : 
-                "lib/img/org/no-picture.png";
+                "/lib/img/user/no-picture-i.png" : 
+                "/lib/img/org/no-picture.png";
         }
     }
 
@@ -1456,6 +1425,50 @@ class Organization extends DbObject
         ->exists(function(int $i, User $u){
             return $u->getRole() == USER::ROLE_ADMIN && $u->getLastConnected() != null;
         });
+    }
+
+    /**
+    * @return ArrayCollection|Participation[]
+    */
+    public function getParticipations()
+    {
+        return $this->participations;
+    }
+
+    public function addParticipation(Participation $participation): Organization
+    {
+
+        $this->participations->add($participation);
+        //- $participation->setActivity($this);
+        return $this;
+    }
+
+    public function removeParticipation(Participation $participation): Organization
+    {
+        $this->participations->removeElement($participation);
+        //$participation->setActivity(null);
+        return $this;
+    }
+
+    /**
+    * @return ArrayCollection|ElementUpdate[]
+    */
+    public function getUpdates()
+    {
+        return $this->updates;
+    }
+
+    public function addUpdate(ElementUpdate $update): self
+    {
+        $this->updates->add($update);
+        $update->setOrganization($this);
+        return $this;
+    }
+
+    public function removeUpdate(ElementUpdate $update): self
+    {
+        $this->updates->removeElement($update);
+        return $this;
     }
 
 

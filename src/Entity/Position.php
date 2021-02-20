@@ -33,9 +33,10 @@ class Position extends DbObject
     public $name;
 
     /**
-     * @ORM\Column(name="pos_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="positionInitiatives")
+     * @JoinColumn(name="pos_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="pos_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
@@ -96,7 +97,6 @@ class Position extends DbObject
      * Position constructor.
      * @param ?int$id
      * @param $name
-     * @param $createdBy
      * @param $deleted
      * @param $organization
      * @param $department
@@ -109,11 +109,10 @@ class Position extends DbObject
         $name = '',
         $organization = null,
         $department = null,
-        $createdBy = null,
         $deleted = null,
         $users=null)
     {
-        parent::__construct($id, $createdBy, new DateTime());
+        parent::__construct($id, new DateTime());
         $this->name = $name;
         $this->deleted = $deleted;
         $this->organization = $organization;

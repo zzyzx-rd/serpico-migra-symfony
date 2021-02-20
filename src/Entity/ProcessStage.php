@@ -137,9 +137,10 @@ class ProcessStage extends DbObject
     public $stgDeadlineMailSent;
 
     /**
-     * @ORM\Column(name="stg_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="processStageInitiatives")
+     * @JoinColumn(name="stg_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="stg_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
@@ -259,7 +260,6 @@ class ProcessStage extends DbObject
      * @param $stg_enddated
      * @param $stg_dealine_nbDays
      * @param $stg_deadline_mailSent
-     * @param $stg_createdBy
      * @param $stg_isFinalized
      * @param $stg_deleted
      * @param $stg_dcompleted
@@ -299,7 +299,6 @@ class ProcessStage extends DbObject
         $stg_enddated = null,
         $stg_dealine_nbDays = 3,
         $stg_deadline_mailSent = null,
-        $stg_createdBy = null,
         $stg_isFinalized = false,
         $stg_deleted = null,
         $process = null,
@@ -316,7 +315,7 @@ class ProcessStage extends DbObject
         $historicalRankings = null,
         $historicalRankingTeams = null)
     {
-        parent::__construct($id, $stg_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->complete = $stg_complete;
         $this->name = $stg_name;
         $this->mode = $stg_mode;

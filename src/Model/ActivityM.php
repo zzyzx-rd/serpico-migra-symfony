@@ -73,9 +73,7 @@ class ActivityM extends ModelEntity {
 
     public function getInitiator(Activity $activity): ?object
     {
-        return $activity->getCreatedBy()
-            ?$this->em->getRepository(User::class)->find($activity->getCreatedBy())
-            : null;
+        return $activity->getInitiator();
     }
 
     public function userCanEdit(Activity $activity, ?User $u): bool
@@ -97,7 +95,7 @@ class ActivityM extends ModelEntity {
         if (! $this->getInitiator($activity)){
             return false;
         }
-        if ( ($role === 1 || $this->getActiveModifiableStages($activity)) && ($this->getInitiator($activity)->getOrganization() == $u->getOrganization())) {
+        if (($role === 1 || $this->getActiveModifiableStages($activity)) && ($this->getInitiator($activity)->getOrganization() == $u->getOrganization())) {
             return true;
         }
         return false;

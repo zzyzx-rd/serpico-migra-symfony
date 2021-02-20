@@ -130,9 +130,10 @@ class IProcessStage extends DbObject
     public $deadline_mailSent;
 
     /**
-     * @ORM\Column(name="stg_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="iProcessStageInitiatives")
+     * @JoinColumn(name="stg_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="stg_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
@@ -251,7 +252,6 @@ class IProcessStage extends DbObject
      * @param $stg_enddate
      * @param $stg_deadline_nbDays
      * @param $stg_deadline_mailSent
-     * @param $stg_createdBy
      * @param $stg_isFinalized
      * @param $stg_finalized
      * @param $stg_deleted
@@ -288,7 +288,6 @@ class IProcessStage extends DbObject
         $stg_enddate = null,
         $stg_deadline_nbDays = 3,
         $stg_deadline_mailSent = null,
-        $stg_createdBy = null,
         $stg_isFinalized = False,
         $stg_finalized = null,
         $stg_deleted = null,
@@ -310,7 +309,7 @@ class IProcessStage extends DbObject
         $historicalRankingTeams = null
         )
     {
-        parent::__construct($id, $stg_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->complete = $stg_complete;
         $this->name = $stg_name;
         $this->mod = $stg_mod;
@@ -329,7 +328,6 @@ class IProcessStage extends DbObject
         $this->enddate = $stg_enddate;
         $this->deadline_nbDays = $stg_deadline_nbDays;
         $this->deadline_mailSent = $stg_deadline_mailSent;
-        $this->createdBy = $stg_createdBy;
         $this->isFinalized = $stg_isFinalized;
         $this->finalized = $stg_finalized;
         $this->deleted = $stg_deleted;

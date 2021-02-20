@@ -43,9 +43,10 @@ class Team extends DbObject
     public $picture;
 
     /**
-     * @ORM\Column(name="tea_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="teamInitiatives")
+     * @JoinColumn(name="tea_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="tea_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
@@ -91,7 +92,6 @@ class Team extends DbObject
      * @param $name
      * @param $weight_ini
      * @param $picture
-     * @param $createdBy
      * @param $deleted
      * @param $organization
      * @param $members
@@ -105,14 +105,13 @@ class Team extends DbObject
         $picture = null,
         $weight_ini = null,
         $organization = null,
-        $createdBy = null,
         $deleted = null,
         $members = null,
         $participations = null,
         $grades = null,
         $targets = null)
     {
-        parent::__construct($id, $createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->name = $name;
         $this->weightIni = $weight_ini;
         $this->picture = $picture;
@@ -375,7 +374,7 @@ class Team extends DbObject
             $teamOrganization = $this->getOrganization();
             $grantedRights = 
                 $teamLeader && $teamLeader->getUser() == $connectedUser || 
-                !$teamLeader && $this->getCreatedBy() == $connectedUser->getId() ||
+                !$teamLeader && $this->getInitiator() == $connectedUser ||
                 $teamOrganization == $connectedUser->getOrganization() && $connectedUser->getRole() == USER::ROLE_ADMIN;
                 // Or if there is an option giving you such right (currently unexisting)
         }

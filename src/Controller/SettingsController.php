@@ -61,6 +61,7 @@ use App\Entity\Activity;
 use App\Entity\CriterionGroup;
 use App\Entity\CriterionName;
 use App\Entity\DynamicTranslation;
+use App\Entity\ElementUpdate;
 use App\Entity\EventDocument;
 use App\Entity\EventGroup;
 use App\Entity\EventGroupName;
@@ -75,12 +76,14 @@ use App\Entity\UserMaster;
 use App\Form\Type\EventDocumentType;
 use App\Repository\EventGroupRepository;
 use App\Repository\EventTypeRepository;
+use App\Service\NotificationManager;
 use DateTime;
 use Proxies\__CG__\App\Entity\Icon;
 use Symfony\Component\Form\FormFactory;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
 
@@ -2946,7 +2949,7 @@ class SettingsController extends MasterController
                 $state = $repoS->findOneByName($updateWorkerFirmForm->get('HQState')->getData());
                 if($state == null){
                     $state = new State;
-                    $state->setCountry($country)->setName($updateWorkerFirmForm->get('HQState')->getData())->setCreatedBy($currentUser->getId());
+                    $state->setCountry($country)->setName($updateWorkerFirmForm->get('HQState')->getData())->setInitiator($currentUser);
                     $em->persist($state);
                 }
             }
@@ -2955,7 +2958,7 @@ class SettingsController extends MasterController
             $city = $repoCI->findOneByName($updateWorkerFirmForm->get('HQCity')->getData());
             if($city == null){
                 $city = new City;
-                $city->setCountry($country)->setState($state)->setName($updateWorkerFirmForm->get('HQCity')->getData())->setCreatedBy($currentUser->getId());
+                $city->setCountry($country)->setState($state)->setName($updateWorkerFirmForm->get('HQCity')->getData())->setInitiator($currentUser);
                 $em->persist($city);
             }
 
@@ -2982,349 +2985,6 @@ class SettingsController extends MasterController
 
     }
 
-
-    /**
-     * 
-     * Function which queries on our database, depending of query type.
-     * Could be either : participants, organizations (clients, non-clients or both), workerfirms, clients, external users or internal users
-     * Query paramater defines this
-     * 
-     * @param Request $request
-     * @return JsonResponse
-     * @Route("/old/search/dynamic/elements", name="oldDynamicSearch")
-     */
-    public function dynamicSearchElements(Request $request){
-
-        $em = $this->em;
-        $qb = $em->createQueryBuilder();
-        $elmtUserIds = [];
-        $elmtExtUserIds = [];
-        $elmtFirmIds = [];
-        $elmtTeamIds = [];
-        $elmtClientIds = [];
-        $qType = $request->get('qt');
-        $name = $request->get('name');
-        $qEntityId = $request->get('qid');
-
-        // Already existing element ids for current organization
-   
-        if($qType == 'p'){
-            $organization = $this->org;
-            if($qEntityId){
-                $existingElements = $em->getRepository(Stage::class)->find($qEntityId)->getParticipants();
-                $elmtUserIds = $existingElements->filter(fn(Participation $p) => $p->getUser() != null && $p->getTeam() == null)->map(fn(Participation $p) => $p->getUser()->getId())->getValues();
-                $elmtFirmIds = $existingElements->filter(fn(Participation $p) => $p->getUser()->isSynthetic())->map(fn(Participation $p) => $p->getUser()->getOrganization()->getId())->getValues();
-                $elmtTeamIds = $existingElements->filter(fn(Participation $p) => $p->getTeam() != null)->map(fn(Participation $p) => $p->getTeam()->getId())->getValues();
-            }
-        } else if($qType == 'c' || $qType == 'nc' || $qType == 'i'){
-            $elmtClientIds = $this->org->getClients()->map(fn(Client $c) => $c->getId())->getValues();
-        } else if($qType == 'eu'){
-            //$existingElements = $em->getRepository(Client::class)->find($qEntityId)->getAliveExternalUsers()); 
-            $elmtExtUserIds = $em->getRepository(Client::class)->find($qEntityId)->getAliveExternalUsers()->map(fn(ExternalUser $eu) => $eu->getId())->getValues();
-        } else if($qType == 'u'){
-            $elmtUserIds = $this->org->getUsers()->map(fn(User $u) => $u->getId())->getValues();
-        }
-
-
-        //return new JsonResponse($elmtClientIds);
-        
-        $user = $this->user;
-        $organization = $user ? $this->org : null;
-        $orgId = $organization ? $organization->getId() : null;
-        $clients = $organization ? $organization->getClients() : new ArrayCollection();
-        $repoP = $em->getRepository(Participation::class);
-        
-        /*
-        $clientIds = '';
-        foreach ($clients as $client) {
-            $clientIds .= "'". $client->getId() . "', ";
-        }
-        $clientIds = substr($clientIds,0,-2);*/
-    
-        // PAS TRES MALIN COMME QUERY, ON POURRAIT LA CHANGER POUR PRENDRE L'ELEMENT RACINE (STAGE) ET VERIFIER LES EXISTANTS
-        /*
-        $existingElementsInSelection = $request->get('p') ?: [];
-        $partUsers = [0];
-        $partTeams = [0];
-        $partFirms = [0];
-        $partExtUsers = [0];
-
-        foreach ($existingElementsInSelection as $existingElementInSelection) {
-            if(isset($existingElementInSelection['el'])){
-                switch($existingElementInSelection['el']){
-                    case 'u':
-                        $elementUsers[] = $existingElementInSelection['id'];
-                        break;
-                    case 't':
-                        $elementTeams[] = $existingElementInSelection['id'];
-                        break;
-                    case 'f':
-                        $elementFirms[] = $existingElementInSelection['id'];
-                        break;
-                    case 'eu':
-                        $elementExtUsers[] = $existingElementInSelection['id'];
-                        break;
-                }
-            } else {
-                $participant = $repoP->find($existingElementInSelection['id']);
-                $externalUser = $participant->getExternalUser();
-                if($participant->getTeam()){
-                    $partTeams[] = $participant->getTeam()->getId();
-                } else if ($externalUser) {
-                    $partExtUsers[] = $externalUser->getId();
-                    if($externalUser->isSynthetic()){
-                        $partFirms[] = $externalUser->getClient()->getWorkerFirm()->getId();
-                    }
-                } else {
-                    $partUsers[] = $participant->getUser()->getId();
-                }
-            }
-        }
-
-        //return new JsonResponse($partExtUsers,200);
-        */
-
-        if($qType == 'p' || $qType == 'eu' || $qType == 'u' || $qType == 'i'){
-
-            $userElmts = $qb->select('ug.username', 'ug.id', 'u.picture AS usrPicture', 'u.id AS usrId', 'u.email AS usrEmail', 'u.synthetic AS synth', 'o.commname AS orgName', 'o.type AS orgType','wf.logo AS wfiLogo', 'wf.id AS wfiId', 'o.logo AS orgLogo', 'o.id AS orgId')
-                ->from('App\Entity\User', 'u')
-                ->leftJoin('App\Entity\UserGlobal', 'ug', 'WITH', 'ug.id = u.userGlobal')
-                ->leftJoin('App\Entity\Organization', 'o', 'WITH', 'o.id = u.organization')
-                ->leftJoin('App\Entity\WorkerFirm', 'wf', 'WITH', 'wf.id = o.workerFirm')
-                ->where('u.username LIKE :startOpt1 OR u.username LIKE :startOpt2');
-            
-            if($qType == 'p' && sizeof($elmtUserIds)){
-                $qb->andWhere('u.id NOT IN (:elmtUserIds)')
-                ->setParameter('elmtUserIds', $elmtUserIds);
-            }
-            $qb->setParameter('startOpt1', '% '. $name .'%')
-                ->setParameter('startOpt2', $name .'%')
-                //->groupBy('o.id')
-                ->orderBy('ug.id','ASC');
-
-            $userElmts = $qb->getQuery()->getResult();
-
-            $arrangedUserElmts = [];
-            $arrangedUserElmt = null;
-            $currentUserGlobalValue = null;
-            $existing = false;
-            foreach($userElmts as $userElmt){
-
-                /*if($qType == 'u' && in_array($userElmt['usrId'], $elmtUserIds) !== false || $qType == 'eu' && in_array($userElmt['extUsrId'], $elmtExtUserIds) !== false){
-                    continue;
-                }*/
-                
-                $client = $this->org->getClients()->filter(fn(Client $c) => $c->getClientOrganization()->getId() == $userElmt['orgId'])->first();
-                $externalUser = $client ? $client->getExternalUsers()->filter(fn(ExternalUser $eu) => $eu->getUser()->getId() == $userElmt['usrId'])->first() : null;
-                
-                if($userElmt['id'] != $currentUserGlobalValue){
-                    if($currentUserGlobalValue){
-                        $arrangedUserElmts[] = $arrangedUserElmt;
-                    }
-                    $currentUserGlobalValue = $userElmt['id'];
-                    $arrangedUserElmt = $userElmt;
-                    unset($arrangedUserElmt['synth']);
-                    unset($arrangedUserElmt['usrId']);
-                    unset($arrangedUserElmt['orgId']);
-                    unset($arrangedUserElmt['wfiId']);
-                    unset($arrangedUserElmt['orgName']);
-                    unset($arrangedUserElmt['orgType']);
-                    unset($arrangedUserElmt['wfiLogo']);
-                    unset($arrangedUserElmt['usrEmail']);
-                    $existing = false;
-                }
-                
-                $externalUserExists = $client && $externalUser;
-                $arrangedUserElmt['usrId'][] = $userElmt['usrId'];
-                $arrangedUserElmt['extUsrId'][] = $externalUserExists ? $externalUser->getId() : null;
-                $arrangedUserElmt['wfiId'][] = $userElmt['wfiId'];
-                $arrangedUserElmt['synth'][] = $userElmt['synth'] ? 1 : 0;
-                $arrangedUserElmt['orgId'][] = $userElmt['orgId'];
-                $arrangedUserElmt['cliId'][] = $externalUserExists ? $externalUser->getClient()->getId() : null;
-                $arrangedUserElmt['orgName'][] = $userElmt['orgType'] == 'C' ? '' : $userElmt['orgName'];
-                $arrangedUserElmt['orgLogo'][] = $userElmt['orgLogo'];
-                $arrangedUserElmt['wfiLogo'][] = $userElmt['wfiLogo'];
-                $arrangedUserElmt['hasEm'][] = $userElmt['usrEmail'] ? 1 : 0;
-                if(!array_key_exists('usrPicture', $arrangedUserElmt))  {
-                    $arrangedUserElmt['usrPicture'] = $userElmt['usrPicture'];
-                }
-
-                $externalUserExistsCondition = !$existing && $qType == 'eu' && $externalUser && sizeof($elmtExtUserIds) > 0 && in_array($externalUser->getId(),$elmtExtUserIds) !== false;
-                // For independant we check client and not external
-                $clientExistsCondition = !$existing && $qType == 'i' && $client && sizeof($elmtClientIds) > 0 && in_array($client->getId(),$elmtClientIds) !== false;
-
-                if($externalUserExistsCondition || $clientExistsCondition){
-                    $existing = true;
-                    $arrangedUserElmt['ex'] = 1;
-                }
-                   
-            }
-
-            if(sizeof($userElmts)){
-                $arrangedUserElmts[] = $arrangedUserElmt;
-            } 
-
-        }
-
-        
-
-        if($qType == 'p'){
-
-            $qb2 = $em->createQueryBuilder();
-            $teamElmts = $qb2->select('t.name', 't.id AS teaId')
-                ->from('App\Entity\Team', 't')
-                ->leftJoin('App\Entity\Participation', 'p', 'WITH', 'p.team = t.id')
-                ->where('t.name LIKE :startOpt1 OR t.name LIKE :startOpt2')
-                ->andWhere('p.team NOT IN (:elmtTeamIds)')
-                ->setParameter('elmtTeamIds', $elmtTeamIds)
-                ->setParameter('startOpt1', '% '. $name .'%')
-                ->setParameter('startOpt2', $name .'%')
-                ->getQuery()
-                ->getResult();
-
-            $qb3 = $em->createQueryBuilder();
-            $firmElmts = $qb3->select('wf.name AS orgName','wf.id AS wfiId', 'wf.logo AS wfiLogo', 'o.logo AS orgLogo', 'o.id AS orgId', 'c.id AS cliId', 'u.id AS usrId', 'eu.id AS extUsrId')
-                ->from('App\Entity\WorkerFirm', 'wf')
-                // Join is made to prevent selection of clients
-                ->leftJoin('App\Entity\Organization', 'o', 'WITH', 'o.workerFirm = wf.id')
-                ->leftJoin('App\Entity\User', 'u', 'WITH', 'u.organization = o.id')
-                ->leftJoin('App\Entity\Client', 'c', 'WITH', 'c.clientOrganization = o.id')
-                ->leftJoin('App\Entity\ExternalUser', 'eu', 'WITH', 'eu.client = c.id')
-                ->where('wf.name LIKE :startOpt1 OR wf.name LIKE :startOpt2')
-                //->where('(o.id IS NULL AND wf.name LIKE :startOpt1 OR wf.name LIKE :startOpt2) OR (u.lastname LIKE :startOpt1 OR wf.name LIKE :startOpt2 AND u.synthetic IS TRUE o.id IS NULL)')
-                ->andWhere('o.id NOT IN (:elmtFirmIds)')
-                ->andWhere('u.synthetic = TRUE')
-                ->andWhere('eu.synthetic = TRUE')
-                // Line below prevents selection of firm which is already client (existing as synth ext user), and user self firm mirrored as client for its clients
-                //->andWhere('c.organization IS NULL OR (c.organization != :oid AND c.clientOrganization != :oid)')
-                ->setParameter('startOpt1', '% '. $name .'%')
-                ->setParameter('startOpt2', $name .'%')
-                //->setParameter('oid', $organization)
-                ->setParameter('elmtFirmIds', $elmtFirmIds)
-                ->getQuery()
-                ->getResult();
-
-            //$elements = new ArrayCollection(array_merge($internalNonFirmElmts, $externalNonFirmElmts, $firmElmts));
-            $elements = new ArrayCollection(array_filter(array_merge($arrangedUserElmts, $teamElmts, $firmElmts)));
-
-
-        } else if($qType == 'u' || $qType == 'eu' || $qType == 'i'){
-            
-            $elements = new ArrayCollection($arrangedUserElmts);
-
-
-        } else if ($qType == 'wf' || $qType == 'f' || $qType == 'nc' || $qType == 'c') {
-
-            if($qType == 'c'){
-                $qb->select('wf.name AS orgName', 'wf.id AS wfiId', 'wf.logo as wfiLogo', 'o.id AS orgId', 'o.logo as orgLogo', 'c.id AS cliId', 'IDENTITY(c.organization) AS cOrg')
-                    ->from('App\Entity\WorkerFirm', 'wf')
-                    ->leftJoin('App\Entity\Organization', 'o', 'WITH', 'o.workerFirm = wf.id')
-                    ->leftJoin('App\Entity\Client', 'c', 'WITH', 'c.clientOrganization = o.id');
-            } else {
-                $qb->select('wf.name AS orgName','wf.id AS wfiId','wf.logo as wfiLogo','o.id AS orgId', 'o.logo as orgLogo')
-                    ->from('App\Entity\WorkerFirm', 'wf')
-                    ->leftJoin('App\Entity\Organization', 'o', 'WITH', 'o.workerFirm = wf.id');
-            }
-
-            $qb->where('wf.name LIKE :startOpt1 OR wf.name LIKE :startOpt2')
-                ->groupBy('o.id')
-                ->setParameter('startOpt1', '% '. $name .'%')
-                ->setParameter('startOpt2', $name .'%')
-                ->orderBy('wf.commonName','ASC')
-                ->getQuery()->getResult();
-            
-            if($qType == 'c'){
-                $qb->andWhere('c.id IN (:elmtClientIds)')
-                    ->setParameter('elmtClientIds', $elmtClientIds);
-            }
-
-            $firmElements = $qb->getQuery()->getResult();
-            
-            if($qType == 'nc' || $qType == 'f'){
-                $arrangedFirmElements = [];
-                foreach($firmElements as $firmElement){
-
-                    $arrangedFirmElement = $firmElement;
-                    $client = $this->org->getClients()->filter(fn(Client $c) => $c->getClientOrganization()->getId() == $firmElement['orgId'])->first();
-                    if($client){
-                            $arrangedFirmElement['cliId'] = $client->getId();
-                            if($qType == 'nc'){
-                                $arrangedFirmElement['ex'] = 1;
-                            }
-                            $arrangedFirmElements[] = $arrangedFirmElement;
-                    } else {
-                        $arrangedFirmElements[] = $arrangedFirmElement;
-                    }
-                }
-            } else {
-                $arrangedFirmElements = $firmElements;
-            }
-            /*
-            $elements = $elements->map(function($e) use ($qType){
-                $output = [];
-                $output['orgName'] = $e['orgName'];
-                $output['wfiId'] = $e['wfiId'];
-                $output['logo'] = $e['logo'];
-                $output['orgId'] = $e['orgId'];
-
-                if($qType == 'f'){
-                    $client = $this->org->getClients()->filter(fn(Client $c) => $c->getClientOrganization()->getId() == $e['orgId'])->first();
-                    if($client){
-                        $output['cliId'] = $client->getId();
-                    }
-                }
-                //}
-                return $output;
-            });
-            */
-            $elements = new ArrayCollection($arrangedFirmElements);
-
-            
-        }/* else if($qType == 'i'){
-
-            $qb->select('o.id AS orgId', 'o.commname AS orgName', 'o.logo', 'c.id AS cliId', 'IDENTITY(c.organization) AS cOrg')
-                ->from('App\Entity\Organization', 'o')
-                ->leftJoin('App\Entity\Client', 'c', 'WITH', 'c.clientOrganization = o.id')
-                ->where('o.commname LIKE :startOpt1 OR o.commname LIKE :startOpt2')
-                ->andWhere('o.type != :type')
-                ->andWhere('c.id NOT IN (:elmtClientIds)')
-                ->groupBy('o.id')
-                ->setParameter('startOpt1', '% '. $name .'%')
-                ->setParameter('startOpt2', $name .'%')
-                ->setParameter('type', 'F')
-                ->setParameter('elmtClientIds', $elmtClientIds);
-        
-            $elements = new ArrayCollection($qb->getQuery()->getResult());
-
-            $elements = $elements->map(fn($e) => [
-                'orgName' => $e['orgName'],
-                'logo' => $e['logo'],
-                'orgId' => $e['orgId'],
-                'cliId' => $e['cOrg'] == $orgId ? $e['cliId'] : ""
-            ]);
-
-        }*/
-
-        $qParts = [];
-        foreach($elements as $element){
-            if(isset($element['extUsrId'])){
-                $element['e'] = 'eu';
-            } else if(isset($element['usrId'])){
-                $element['e'] = 'u';
-            } else if(isset($element['teaId'])){
-                $element['e'] = 't';
-            } else {
-                $element['e'] = 'f';
-            }
-            //if(!$element['username']){$element['usrId'] = "";}
-            $qParts[] = $element;
-        }
-
-        //$workerFirms = array_combine($values,$keys);
-        return new JsonResponse(['qParts' => $qParts],200);
-
-    }
-    
     /**
      * @param Request $request
      * @param Application $app
@@ -3794,7 +3454,7 @@ class SettingsController extends MasterController
                     $state = $repoS->findOneByName($workerFirmFormData->getHQState());
                     if($state == null){
                         $state = new State;
-                        $state->setCountry($country)->setName($workerFirmFormData->getHQState())->setCreatedBy($currentUser->getId());
+                        $state->setCountry($country)->setName($workerFirmFormData->getHQState())->setInitiator($currentUser);
                         $em->persist($state);
                     }
                     //$workerFirm->setHQState($workerFirmFormData->getHQState());
@@ -3804,7 +3464,7 @@ class SettingsController extends MasterController
                     $city = $repoCI->findOneByName($workerFirmFormData->getHQCity());
                     if($city == null){
                         $city = new City;
-                        $city->setCountry($country)->setState($state)->setName($workerFirmFormData->getHQCity())->setCreatedBy($currentUser->getId());
+                        $city->setCountry($country)->setState($state)->setName($workerFirmFormData->getHQCity())->setInitiator($currentUser);
                         $em->persist($city);
                     }
                     //$workerFirm->setHQCity($workerFirmFormData->getHQCity());
@@ -4346,11 +4006,127 @@ class SettingsController extends MasterController
         if($previousSuperAdmin){
             $previousSuperAdmin->setRole(USER::ROLE_AM);
             $em->persist($previousSuperAdmin);
-            $em->refresh($previousSuperAdmin);        
         }
         $newSuperAdmin = $usrId = $_POST['uid'] != "" ? $em->getRepository(User::class)->find($_POST['uid']) : $this->user; 
         $newSuperAdmin->setRole(USER::ROLE_SUPER_ADMIN);
         $em->persist($newSuperAdmin);
+        
+        $selfAppointment = $this->user == $newSuperAdmin;
+        
+        if(!$selfAppointment){
+            $response = $this->forward('App\Controller\MailController::sendMail', [
+                'recipients' => [$newSuperAdmin], 
+                'settings' => [
+                    'initiator' => $this->user,
+                ], 
+                'actionType' => 'superAdminAppointment']
+            );
+            if($response->getStatusCode() == 500){ return $response; };
+        }
+        
+        $em->flush();
+
+        if($previousSuperAdmin){
+            $em->refresh($previousSuperAdmin);  
+            $this->guardHandler->authenticateUserAndHandleSuccess(
+                $previousSuperAdmin,
+                $request,
+                $this->authenticator,
+                'main' // firewall name in security.yaml
+            );      
+        }
+
+        if($selfAppointment){
+            $em->refresh($newSuperAdmin);  
+            $this->guardHandler->authenticateUserAndHandleSuccess(
+                $newSuperAdmin,
+                $request,
+                $this->authenticator,
+                'main' // firewall name in security.yaml
+            );   
+        }
+ 
+        $arrayResponse['self'] = (int) $selfAppointment;
+        if($selfAppointment){
+            $arrayResponse['path'] = $this->generateUrl('firmSettings',[], UrlGeneratorInterface::ABSOLUTE_URL);
+        }
+        return new JsonResponse($arrayResponse);
+    }
+
+    /**
+    * @param Request $request
+    * @Route("/settings/user/role/update", name="updateUserRole")
+    */
+    public function updateUserRole(Request $request, NotificationManager $notificationManager){
+        $usrId = $request->get('id');
+        $role = $request->get('r');
+        $arrayResponse = [];
+        $em = $this->em;
+        $user = $em->getRepository(User::class)->find($usrId);
+        $userRole = $user->getRole();
+        $user->setRole($role);
+        $em->persist($user);
+        $em->flush();
+        
+        if($user->getRole() == User::ROLE_SUPER_ADMIN){
+            
+            // We notify and send mail to user as it is an important update to him
+            $notificationManager->registerUpdates($user, [$user], ElementUpdate::CREATION, 'role', User::ROLE_SUPER_ADMIN);
+            $response = $this->forward('App\Controller\MailController::sendMail', [
+                'recipients' => [$user], 
+                'settings' => [
+                    'initiator' => $this->user,
+                ], 
+                'actionType' => 'superAdminAppointment']
+            );
+
+            if($response->getStatusCode() == 500){ return $response;};
+            
+            $formerSuperAdmin = $user->getOrganization()->getUsers()->filter(fn(User $u) => $u->getRole() == User::ROLE_SUPER_ADMIN)->first();
+
+            $formerSuperAdmin->setRole(User::ROLE_ADMIN);
+            $em->flush();
+
+            if($formerSuperAdmin == $this->user){
+                $em->refresh($formerSuperAdmin);
+                $this->guardHandler->authenticateUserAndHandleSuccess(
+                    $formerSuperAdmin,
+                    $request,
+                    $this->authenticator,
+                    'main'
+                ); 
+            }
+        }
+
+        if($user == $this->user){
+            $em->refresh($user);
+            $this->guardHandler->authenticateUserAndHandleSuccess(
+                $user,
+                $request,
+                $this->authenticator,
+                'main'
+            ); 
+        }
+
+
+        if(isset($formerSuperAdmin) && $this->user == $formerSuperAdmin){
+            $arrayResponse['cp'] = 1;
+        }
+        
+        return new JsonResponse($arrayResponse);
+    }
+
+    /**
+    * @param Request $request
+    * @Route("/settings/administrators/add", name="addAdministrator")
+    */
+    public function addAministratorAction(Request $request, NotificationManager $notificationManager){
+        $usrId = $request->get('id');
+        $em = $this->em;
+        $newAdmin = $em->getRepository(User::class)->find($usrId);
+        $newAdmin->setRole(User::ROLE_ADMIN);
+        $em->persist($newAdmin);
+        $notificationManager->registerUpdates($newAdmin, [$newAdmin], ElementUpdate::CREATION, 'role', User::ROLE_ADMIN);
         $em->flush();
         return new JsonResponse();
     }

@@ -29,7 +29,7 @@ class DepartmentM extends ModelEntity {
         $orgFullViewOption = $user->getOrganization()->getOptions()->filter(function(OrganizationUserOption $o){
             return $o->getOName()->getName() == 'enabledUserSeeAllUsers' && $o->isOptionTrue();
         });
-        $departmentUsers = $department->getUsers();
+        $departmentUsers = $department->getActiveUsers();
         $viewableUsers = new ArrayCollection;
 
         if($user->getRole() <= USER::ROLE_ADMIN || $department->getUserMasters()->exists(fn(int $i, UserMaster $um) => $um->getUser() == $user) || $orgFullViewOption){
@@ -62,7 +62,7 @@ class DepartmentM extends ModelEntity {
             } else {
 
                 foreach($departmentUsers as $departmentUser){
-                    if($departmentUser->getCreatedBy() == $user->getId()){
+                    if($departmentUser->getInitiator() == $user){
                         $viewableUsers->add($departmentUser);
                     }
                 }

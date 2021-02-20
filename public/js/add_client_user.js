@@ -6,6 +6,7 @@ $(function(){
     onClientPage = window.location.href.indexOf('client') > -1;
     onAllUsersPage = window.location.href.indexOf('users-and-partners') > -1 || window.location.href.indexOf('colleagues-teams') > -1;
     onPwdPage = window.location.href.indexOf('password') > -1;
+    onFirmSettingsPage = window.location.href.indexOf('organization/settings') > -1;
     const $addUserElmtModal = $('#addUserClient');
     const $updateModal = $('#updateUser');
 
@@ -25,8 +26,11 @@ $(function(){
             $('.error-email').hide();
         }
 
+        if(onFirmSettingsPage){
+            addAdministrator();
+        }
         if(onActivityPage){
-            addParticipant();
+            addParticipantFollower();
         } else if (onClientPage){
             addClientUser();
         } else if(onAllUsersPage){
@@ -66,7 +70,7 @@ $(function(){
 
             $('.user-choices').css('visibility','hidden');
             $('input[name="user-type"]').prop({
-                'checked':false,
+                'checked': false,
                 'disabled': true,
             });
 
@@ -75,10 +79,9 @@ $(function(){
                     .removeClass('go-to-username')
                     .addClass($this.val() == "f" ? 'go-to-firmname' : 'go-to-username');
             } else {
-                if($this.val() == "f"){
-                    removableClassMatch = $('.go-next:visible').attr("class").match(/go-to[\w-]*\b/);
-                    if(removableClassMatch){$('.go-next:visible').removeClass(removableClassMatch[0]);}
-                } else {
+                removableClassMatch = $('.go-next:visible').attr("class").match(/go-to[\w-]*\b/);
+                if(removableClassMatch){$('.go-next:visible').removeClass(removableClassMatch[0]);}
+                if($this.val() == "i"){
                     $('.go-next:visible').addClass('go-to-email');
                 }
             }
@@ -379,10 +382,28 @@ $(function(){
         $('#updateUser .username-input').show();
     })
 
+    function addAdministrator(){
+        
+        const id = $('.username-part').find('input[name="uid"]').val();
+        const params = {id: id}
+        $.post(aaurl,params)
+        .done(function(){
+            $administratorElmt = $($('.firm-users').data('prototype'));
+            $selectedOption = $('[name*="userSelector"] option:selected');
+            $MSelectedOption = $('[name*="userSelector"]').prev().find('li').eq($('[name*="userSelector"] option').index($selectedOption));
+            $administratorElmt.find('.user-profile-l-picture').attr('src', $MSelectedOption.find('.s-user-option-logo').attr('src'));
+            $administratorElmt.find('.user-name').append($selectedOption.text());
+            $administratorElmt.find('[href="#updateUserRole"]').attr('data-id',id);
+            var nbAdmins = +$('.admin-section-title').find('.nb-users').text();
+            $('.admin-section-title').find('.nb-users').empty().append(nbAdmins + 1);
+            $('.firm-users').append($administratorElmt);
+        })
+        $addUserElmtModal.modal('close');
+    }
+
     function addUser(){
         $.post(auurl,$('#userClientForm').serialize())
         .done(function(data){
-            console.log('coucou');
         })
     }
 
@@ -495,38 +516,65 @@ $(function(){
             })
     }
 
-    function addParticipant(){
+    function addParticipantFollower(){
 
-        proto = $partHolder.data('prototype');
+        isParticipant = $addUserElmtModal.data('qt') == 'p';
+        elType = isParticipant ? 'participant' : 'follower';
+        proto = isParticipant ? $partHolder.data('prototype') : $followerHolder.data('prototype');
         wid = $('.firmname-part input[name="wid"]').val();
         uid = $('.username-part input[name="uid"]').val();
         euid = $('.username-part input[name="euid"]').val();
-        tid = $('.username-part input[name="tid"]').val();
-        
-        isNew = !uid && !uid && !euid && !tid;
+        //tid = $('.username-part input[name="tid"]').val();
 
         if($stageModal.attr('data-id')){
-            $partElmt = $(proto);
+            $partFollowerElmt = $(proto);
             urlToPieces = apurl.split('/');
             urlToPieces[urlToPieces.length - 3] = $("#createStage").attr('data-id');
+            urlToPieces[urlToPieces.length - 2] = `${elType}s`;
             url = urlToPieces.join('/');
             $.post(url,$addUserElmtModal.find('form').serialize())
             .done(function(data){
-                $partElmt.find('.p-delete-overlay').addClass('modal-trigger').removeClass('participant-delete').attr({
-                    'data-pid' :data.pid,
-                    'href' : '#deleteParticipant',
-                });
+                isParticipant ?
+                    $partFollowerElmt.find('.pf-delete-overlay').addClass('modal-trigger').removeClass('participant-delete').attr({
+                        'data-pid': data.pid,
+                        'href': '#deleteParticipant',
+                    }) :
+                    $partFollowerElmt.find('.pf-delete-overlay').addClass('modal-trigger').removeClass('follower-delete').attr({
+                        'data-fid': data.fid,
+                        'href': '#deleteFollower',
+                    });
                 sanitizeAddUserElmtModal();
             })
         } else {
-            proto = proto.replace(/__name__/g, $partHolder.children().length - 1);
-            $partElmt = $(proto);
-            $partElmt.find('.u').val(iud);
-            $partElmt.find('.eu').val(euid);
-            $partElmt.find('.t').val(tid);
+            
+            updatedValues = false;
+            isPotentiallyNew = !euid;
+            proto = proto.replace(/__name__/g, isParticipant ? $partHolder.children().length - 1 : $followerHolder.children().length - 1);
+            $partFollowerElmt = $(proto);
+
+            if(isPotentiallyNew){
+                $.post(aguurl,$addUserElmtModal.find('form').serialize())
+                    .done(function(data){
+                        uid = data.id;
+                        euid = data.eid;
+                        updatedValues = true;
+                    })
+            } else {
+                updatedValues = true;
+            } 
+
+            var interval = setInterval(function(){
+                if(updatedValues){
+                    $partFollowerElmt.find('.u').val(uid);
+                    $partFollowerElmt.find('.eu').val(euid);
+                    clearInterval(interval);
+                }
+            },50);
+            
             if($('.email-part input[name="email"]').val()){
-                $partElmt.find('.em').val($('.email-part input[name="email"]').val());
+                $partFollowerElmt.find('.em').val($('.email-part input[name="email"]').val());
             }
+            //$partFollowerElmt.find('.t').val(tid);
 
         }
         
@@ -535,7 +583,7 @@ $(function(){
         if($selectedOption.length){
             
             $MSelectedOption = $('[name*="userSelector"]').prev().find('li').eq($('[name*="userSelector"] option').index($selectedOption));
-            $partElmt.find('.selected-participant-logo').attr('src', $MSelectedOption.find('.s-user-option-logo').attr('src'));
+            $partFollowerElmt.find('.pf-picture').attr('src', $MSelectedOption.find('.s-user-option-logo').attr('src'));
             isAccountChosen = $('[name="partAccountSelector"] option:selected').length;
             
             if(isAccountChosen){
@@ -565,12 +613,15 @@ $(function(){
             username = $('[name="firmname"]').val() ? `${$('[name="username"]').val()} (${$('[name="firmname"]').val()})` : $('[name="username"]').val();
         }
         
-        $partElmt.attr('data-tooltip',username).tooltip();
-        if(firmImgPath){
-            $partElmt.find('.p-firm-logo').attr('src',firmImgPath)
-            $partElmt.find('.p-firm-logo').show();
+        $partFollowerElmt.attr('data-tooltip',username).tooltip();
+        if(typeof firmImgPath !== "undefined"){
+            $partFollowerElmt.find('.pf-firm-logo').attr('src', firmImgPath)
+            $partFollowerElmt.find('.pf-firm-logo').show();
         }
-        $partHolder.find('.btn-participant-add').before($partElmt);      
+
+        isParticipant ? $partHolder.find('.btn-participant-add').before($partFollowerElmt) : $followerHolder.append($partFollowerElmt);      
+        $(`.nb-${elType}s`).empty().append(`(${$(`.${elType}-btn`).length})`);
+        
         sanitizeAddUserElmtModal();
         
     }
@@ -585,7 +636,7 @@ $(function(){
             } else if(onAllUsersPage) {
                 qt = $('input[name*="gen-type"][value="f"]').is(':checked') ? 'nc' : 'c';
             }else{
-                qt = 'f';
+                qt = 'o';
             }
         } else {
             qt = $addUserElmtModal.attr('data-qt');
@@ -632,7 +683,7 @@ $(function(){
             $inputZone.find('input').not($inputElmt).each(function(i,e){
                 $(e).removeAttr('value');
             })
-            $inputZone.find('.input-f-img, .input-u-img').remove();
+            $inputZone.find('.s-firm-option-logo, .s-user-option-logo').remove();
             $inputElmt.removeClass('part-feeded');
         }
     
@@ -647,7 +698,7 @@ $(function(){
                             $inputElmt.removeAttr('value').attr('data-nf',$inputElmt.val());
                             $selector.empty();
                             $selector.material_select();
-                            if(qt != 'c' && qt != 'iu'){
+                            if(qt != 'c' && qt != 'iu' && qt != 'iua'){
                                 $(`.new-${element}`).show();
                                 $(`.${element}name-part .go-next`).removeClass('disabled-btn');
                             } else {
@@ -882,7 +933,7 @@ $(function(){
         ) 
         $updateModal.find('input').val("");
         $updateModal.find('.save-user-updates').removeAttr('data-id data-eid');
-        $updateModal.find('.save-user-updates').attr(`data-${onClientPage || !isAllUsersPageInternal ? 'e' : ''}id`, $userElmt.data('eid') ? $userElmt.data('eid') : $userElmt.data('id'));
+        $updateModal.find('.save-user-updates').attr(`data-${onClientPage ? 'e' : ''}id`, $userElmt.data('cid') ? $userElmt.data('cid') : ($userElmt.data('eid') ? $userElmt.data('eid') : $userElmt.data('id')));
         $updateModal.find('.user-name').empty().append($userElmt.find('.user-name').text());
         $updateModal.find('.user-picture').attr('src',$userElmt.find('.user-picture').attr('src'));
         $updateModal.find('input[name="email"]').val($userElmt.data('email'));
@@ -1049,7 +1100,7 @@ $(function(){
 
     $(document).on('click','[href="#deleteClient"]',function(){
         const $this = $(this);
-        $('.remove-client').attr('data-id',$('.save-user-updates').data('id'));
+        $('.remove-client').attr('data-id', $('.save-user-updates').data('cid') ? $('.save-user-updates').data('cid') : $('.save-user-updates').data('id'));
     });
 
     
@@ -1057,8 +1108,8 @@ $(function(){
         urlToPieces = dcurl.split('/');
         id = onClientPage ? window.location.href.split('/')[window.location.href.split('/').length - 1] : $(this).data('id');
         urlToPieces[urlToPieces.length - 2] = id;
-        dcurl = urlToPieces.join('/');
-        $.delete(dcurl,null)
+        url = urlToPieces.join('/');
+        $.delete(url,null)
         .done(function(){
             if(onClientPage){
                 location.href = $('.back-btn').attr('href');
@@ -1073,11 +1124,11 @@ $(function(){
     
     
     $(document).on('click','.remove-user',function(){
-        urlToPieces = dcurl.split('/');
+        urlToPieces = duurl.split('/');
         id = $(this).data('id');
         urlToPieces[urlToPieces.length - 2] = id;
-        duurl = urlToPieces.join('/');
-        $.delete(duurl,null)
+        url = urlToPieces.join('/');
+        $.delete(url,null)
         .done(function(){
             $userElmt = $(`#users .users-list--item[data-id="${id}"]`);
             $nbDptUsersElmt = $userElmt.closest('.department-list--item').find('.nb-department-users');
@@ -1100,8 +1151,8 @@ $(function(){
         id = $(this).data('id');
         urlToPieces = diurl.split('/');
         urlToPieces[urlToPieces.length - 2] = id;
-        diurl = urlToPieces.join('/');
-        $.delete(diurl,null)
+        url = urlToPieces.join('/');
+        $.delete(url,null)
             .done(function(){
                 $(`.individual[data-id="${id}"]`).remove();
                 if(!$('.individual').length){

@@ -45,6 +45,12 @@ $('.event').tooltip({
   }
 })
 
+$('#pendingFJDecision').modal({
+  complete: function(){
+    location.reload();
+  }
+})
+
 $('#createStage').modal({
   complete: function(){
     $modal = $(this)[0].$el;
@@ -67,10 +73,13 @@ $('#createStage').modal({
     $modal.find('.s-dates-row .dp-end').pickadate('picker').clear();
     $modal.find('.nb-participants').empty().append('(1)');
     $modal.find('.s-dates-row').show();
+    $modal.find('.s-visibility').empty().append($modal.find('.s-visibility').data('default').toUpperCase());
+    $modal.find('.visibility-zone .input-field').hide();
+    $modal.find('.visibility-zone .s-visibility').show();
   }
 })
 
-$('#createParticipant, #legalPerson, #deleteParticipant, #addUserClient').modal();
+$('#createParticipant, #legalPerson, #deleteParticipant, #deleteFollower, #addUserClient, #declineParticipation, #manageStageInvit, #privatizeStage').modal();
 
 function initPickates(){
   switch(lg){
@@ -136,11 +145,8 @@ function initPickates(){
 
 initPickates();
 
-var $linkAccessElmt = $(`
-<div class="link-access-element">
-  <span class="black-text">${linkAccessMsg}</span>
-  <i class="fa fa-cog sm-left dd-orange-text manage-invit-btn tooltipped" data-tooltip="{{'stage_invitation_modal.save_stage_before_config'|trans}}"></i>
-</div>
+var $visibilityConfigElmt = $(`
+<i class="fa fa-cog sm-left dd-orange-text visibility-btn"></i>
 `);
 
 
@@ -152,6 +158,7 @@ var ts = getCookie("ts");
 var ci = getCookie("ci");
 var mr = $('#activities-container').hasClass('mr') ? 1 : 0;
 const $partHolder = $('ul.participants-list');
+const $followerHolder = $('ul.followers-list');
 const $stageModal = $('#createStage');
 const $eventModal = $('#updateEvent');
 const regExp = /~(.+)~/;
@@ -225,31 +232,12 @@ $.each($('#createStage, #updateEvent'),function(i,e){
   var endDate = new Date(endDateTS);
   y = parseInt(ci.split('-').slice(-1)[0]);
   cInt = parseInt(ci.split('-')[1]); 
-         
-    if (ts == "y"){
-        $('.scale option[value=years]').attr('selected','selected');
-  
-        $('.value-scale')
-            .append('<option value="'+annee+'">'+annee+'</option>')
-            .append('<option value="'+anneeSuiv+'">'+anneeSuiv+'</option>');
-        $('.value-scale option[value='+ci+']').attr('selected','selected');
-  
-    } else {
-        $('.scale option[value=trimester]').attr('selected','selected');
-        for (var u=0; u<2;u++) {
-            var Y = annee + u;
-            for (var i = 1; i < 5; i++) {
-                $('.value-scale')
-                    .append('<option value="q-' + i + '-' + Y + '">q-' + i + '-' + Y + '</option>')
-  
-            }
-        }
-        $('.value-scale option[value='+ci+']').attr('selected','selected');
-    }
+  /*
   startCal.pickadate('picker').set('select',startDate);
   if(!endCal.closest('.event').length){
     endCal.pickadate('picker').set('select',endDate).set('min',startDate);
   }
+  */
 
 });
 
@@ -379,7 +367,13 @@ function updateEvents($evgnId = null, $evnId = null) {
   var annee = now.getFullYear();
   //var c = now;
   
-  if(ts == 't' || ts == 'w'){
+  if(ts == 'd'){
+    ci = getCookie("ci");
+    var si = new Date(ci);
+    wDate = moment(si);
+    var ei = wDate.add(1,'d')._d;
+    var nbSubInt = 12;
+  } else if(ts == 't' || ts == 'w'){
     ci = getCookie("ci");
     cy = parseInt(ci.split('-').slice(-1)[0]);
     nbInt = parseInt(ci.split('-')[1]);  
@@ -452,7 +446,9 @@ function updateEvents($evgnId = null, $evnId = null) {
     }
     
     $activities.find('.activity-content-stage').each(function(_i,e){
-      $(e).css({'background' : `repeating-linear-gradient(${mr ? 0 : 90}deg, #f3ccff2b, #63009445 ${centralElSize / $nbSubInt}px, #ffffff ${centralElSize / $nbSubInt}px, #ffffff ${centralElSize / ($nbSubInt/2) }px)`})
+      color1 = !$(e).hasClass('following') ? '#f3ccff2b' : '#ffe7422b';
+      color2 = !$(e).hasClass('following') ? '#63009445' : '#d88e2059';
+      $(e).css({'background' : `repeating-linear-gradient(${mr ? 0 : 90}deg, ${color1}, ${color2} ${centralElSize / $nbSubInt}px, #ffffff ${centralElSize / $nbSubInt}px, #ffffff ${centralElSize / ($nbSubInt/2) }px)`})
     });
 
     if($nonEmptySet){
@@ -538,8 +534,11 @@ function updateEvents($evgnId = null, $evnId = null) {
       actCurDate.each(function(i,e){
         $(e).css({'left': Math.round(10000 * (c - si) / (ei - si)) / 100 + '%' });
       });
-      $('.activity-content-stage').css({
+      $('.activity-content-stage:not(.following)').css({
         'background' : 'repeating-linear-gradient(90deg, #f3ccff2b, #63009445 '+ centralElSize / nbIntSubElmts +'px, #ffffff '+ centralElSize / nbIntSubElmts +'px, #ffffff '+ centralElSize / (nbIntSubElmts/2) +'px)'
+      });
+      $('.activity-content-stage.following').css({
+        'background' : 'repeating-linear-gradient(90deg, #ffe7422b, #d88e2059 '+ centralElSize / nbIntSubElmts +'px, #ffffff '+ centralElSize / nbIntSubElmts +'px, #ffffff '+ centralElSize / (nbIntSubElmts/2) +'px)'
       });
     //}, 200);
   });
@@ -561,10 +560,14 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
     if (ts == "y") {
       si = new Date(+new Date(ci, 0, 1) + TZOffset);
       ei = new Date(+new Date((parseInt(ci) + 1), 0, 1) + TZOffset);
-    } else {
+    } else if(ts != "d") {
       var datesInt = datesInterval(ts, y, cInt);
       var si = datesInt[0];
       var ei = datesInt[1];
+    } else {
+      var si = new Date(ci);
+      wDate = moment(si);
+      var ei = wDate.add(1,'d')._d;
     }
 
     if(updateTimeScale){
@@ -584,82 +587,122 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
           $('.next-interval-val').empty().append((parseInt(ci) + 1));  
       } else {
           $('.ts-scale').removeClass('row').addClass('flex-center-sa'); 
-          var cDivider = ts == 't' ? 5 : (ts == 'w' && moment(`${y+1}-01-01`).day() > 3 ? 54 : 53);
-          var pDivider = ts == 't' ? 5 : (ts == 'w' && moment(`${y}-01-01`).day() > 3 ? 54 : 53);
-          pInt = (pDivider + cInt - 1) % pDivider;
-          if(pInt == 0){
-            pInt = pDivider - 1;
-            py = y - 1;
-          } else {
-            py = '';
-          }
-  
-          nInt = Math.max(1,(cDivider + cInt + 1) % cDivider);
-          ny = nInt == 1 ? y + 1 : '';
-  
-          prefix = (ts == 't') ? (lg == 'fr' ? 'T' : 'Q') : (lg == 'fr' ? 'S' : 'W');
-  
-          var tDays = parseInt(dayDiff(si, ei)) + 1;
-          //var c = moment.duration(moment().diff(moment(si),'days')).milliseconds();
-          /*if(ts == 't'){*/
-            $('.prev-interval-val').empty().append(`${prefix}${pInt} ${py}`);
-            $('.next-interval-val').empty().append(`${prefix}${nInt} ${ny}`);
-            $('.curr-int-value').empty().append(`${prefix}${cInt} <span class="int-precision">${y}</span>`);
-          /*} else {
-            $('.prev-interval-val').empty().append(`${lg == 'fr' ? 'S' : 'W'}${pInt == 0 ? 52 : pInt} ${pInt == 0 ? py : ''}`);
-            $('.next-interval-val').empty().append(`${lg == 'fr' ? 'S' : 'W'}${nInt == 0 ? 52 : nInt} ${nInt == 1 ? ny : ''}`);
-            $('.curr-int-value').empty().append(`${lg == 'fr' ? 'S' : 'W'}${cInt} <span class="int-precision">${cy}</span>`);
-          }*/
-          $('.start-int-value').empty().append(`${si.getDate()}/${si.getMonth() + 1}`);
-          $('.end-int-value').empty().append(`${ei.getDate()}/${ei.getMonth() + 1}`);
-          //width = 100 / 13;
-          //week = moment(si).week();
-          wDate = moment(si);
           
-          currDiffWDaysUSEU = moment.duration(moment(datesInterval(ts,y,1)[0]).diff(moment(`${y}-01-01`))).days();
-          nextDiffWDaysUSEU = moment.duration(moment(datesInterval(ts,y+1,1)[0]).diff(moment(`${y+1}-01-01`))).days();
-          
-          if(ts == 't'){
-            nct = new Date(wDate);
-            nct = moment(nct).add(Math.max(-currDiffWDaysUSEU,0),'d');
-            ct = nct.quarter(); // Just to be sure to be in according quarter 
-            offset = /* currDiffWDaysUSEU < 3 &&*/ moment(moment(datesInterval(ts,y,1)[0])).week() == 2 ? -1 : 0;
-  
-            while (nct.quarter() == ct){
-              week = wDate.week();  
-              
-              if(week == 1){
-                if (nextDiffWDaysUSEU >= 3 && ct == 4){
-                  week = 53;
-                }
-              }
-              $timescale.append('<div><sub>s</sub>' + (week + offset == 0 ? 52 : week + offset) + '</div>');
-              wDate = wDate.add(1,'w')/*.add(Math.max(-currDiffWDaysUSEU,0),'d')*/;
-              nct = nct.add(1,'w')/*.add(Math.max(-currDiffWDaysUSEU,0),'d')*/;
-            }
-          } else if(ts == 'w'){
-            weekdays_short = [];
-            weekdays_short['en'] = ['M','T','W','T','F','S','S'];
-            weekdays_short['fr'] = ['L','M','M','J','V','S','D'];
-            for(i=0;i<7;i++){
-              $timescale.append(`<div><sub>${weekdays_short[lg][i]}</sub>${i != 0 ? wDate.add(1,'d').date() : wDate.date()}</div>`)
-            }
-  
-          }
+          if(ts != "d"){
 
-          
-        }
+            var cDivider = ts == 't' ? 5 : (ts == 'w' && moment(`${y+1}-01-01`).day() > 3 ? 54 : 53);
+            var pDivider = ts == 't' ? 5 : (ts == 'w' && moment(`${y}-01-01`).day() > 3 ? 54 : 53);
+            pInt = (pDivider + cInt - 1) % pDivider;
+            if(pInt == 0){
+              pInt = pDivider - 1;
+              py = y - 1;
+            } else {
+              py = '';
+            }
+    
+            nInt = Math.max(1,(cDivider + cInt + 1) % cDivider);
+            ny = nInt == 1 ? y + 1 : '';
+    
+            prefix = (ts == 't') ? (lg == 'fr' ? 'T' : 'Q') : (lg == 'fr' ? 'S' : 'W');
+    
+            var tDays = parseInt(dayDiff(si, ei)) + 1;
+            //var c = moment.duration(moment().diff(moment(si),'days')).milliseconds();
+            /*if(ts == 't'){*/
+              $('.prev-interval-val').empty().append(`${prefix}${pInt} ${py}`);
+              $('.next-interval-val').empty().append(`${prefix}${nInt} ${ny}`);
+              $('.curr-int-value').empty().append(`${prefix}${cInt} <span class="int-precision">${y}</span>`);
+            /*} else {
+              $('.prev-interval-val').empty().append(`${lg == 'fr' ? 'S' : 'W'}${pInt == 0 ? 52 : pInt} ${pInt == 0 ? py : ''}`);
+              $('.next-interval-val').empty().append(`${lg == 'fr' ? 'S' : 'W'}${nInt == 0 ? 52 : nInt} ${nInt == 1 ? ny : ''}`);
+              $('.curr-int-value').empty().append(`${lg == 'fr' ? 'S' : 'W'}${cInt} <span class="int-precision">${cy}</span>`);
+            }*/
+            $('.start-int-value').empty().append(`${si.getDate()}/${si.getMonth() + 1}`);
+            $('.end-int-value').empty().append(`${ei.getDate()}/${ei.getMonth() + 1}`);
+            //width = 100 / 13;
+            //week = moment(si).week();
+            wDate = moment(si);
+            
+            currDiffWDaysUSEU = moment.duration(moment(datesInterval(ts,y,1)[0]).diff(moment(`${y}-01-01`))).days();
+            nextDiffWDaysUSEU = moment.duration(moment(datesInterval(ts,y+1,1)[0]).diff(moment(`${y+1}-01-01`))).days();
+            
+            if(ts == 't'){
+              nct = new Date(wDate);
+              nct = moment(nct).add(Math.max(-currDiffWDaysUSEU,0),'d');
+              ct = nct.quarter(); // Just to be sure to be in according quarter 
+              offset = /* currDiffWDaysUSEU < 3 &&*/ moment(moment(datesInterval(ts,y,1)[0])).week() == 2 ? -1 : 0;
+    
+              while (nct.quarter() == ct){
+                week = wDate.week();  
+                
+                if(week == 1){
+                  if (nextDiffWDaysUSEU >= 3 && ct == 4){
+                    week = 53;
+                  }
+                }
+                $timescale.append('<div><sub>s</sub>' + (week + offset == 0 ? 52 : week + offset) + '</div>');
+                wDate = wDate.add(1,'w')/*.add(Math.max(-currDiffWDaysUSEU,0),'d')*/;
+                nct = nct.add(1,'w')/*.add(Math.max(-currDiffWDaysUSEU,0),'d')*/;
+              }
+            } else if(ts == 'w'){
+              weekdays_short = [];
+              weekdays_short['en'] = ['M','T','W','T','F','S','S'];
+              weekdays_short['fr'] = ['L','M','M','J','V','S','D'];
+              for(i=0;i<7;i++){
+                $timescale.append(`<div><sub>${weekdays_short[lg][i]}</sub>${i != 0 ? wDate.add(1,'d').date() : wDate.date()}</div>`)
+              }
+    
+            }
+          } else {
+
+            $('.ts-scale').removeClass('row').addClass('flex-center-sa'); 
+            $si = new Date(ci);
+            $dayDate = moment($si);
+      
+            currDateDayStr = $dayDate._d.toLocaleDateString(lg+'-'+lg.toUpperCase(),{day: 'numeric'});
+            currDateMonthStr = $dayDate._d.toLocaleDateString(lg+'-'+lg.toUpperCase(),{month: 'short'});
+            currDateYearStr = $dayDate._d.toLocaleDateString(lg+'-'+lg.toUpperCase(),{year: 'numeric'});
+
+            $prevDayMDate = $dayDate.add(-1,'d');
+            prevDateDayStr = $prevDayMDate._d.toLocaleDateString(lg+'-'+lg.toUpperCase(),{day: 'numeric'});
+            prevDateMonthStr = $prevDayMDate._d.toLocaleDateString(lg+'-'+lg.toUpperCase(),{month: 'short'});
+            prevDateYearStr = $prevDayMDate._d.toLocaleDateString(lg+'-'+lg.toUpperCase(),{year: 'numeric'});
+
+            $nextDayMDate = $prevDayMDate.add(2,'d');
+            nextDateDayStr = $nextDayMDate._d.toLocaleDateString(lg+'-'+lg.toUpperCase(),{day: 'numeric'});
+            nextDateMonthStr = $nextDayMDate._d.toLocaleDateString(lg+'-'+lg.toUpperCase(),{month: 'short'});
+            nextDateYearStr = $nextDayMDate._d.toLocaleDateString(lg+'-'+lg.toUpperCase(),{year: 'numeric'});
+
+            $('.prev-interval-val').empty().append(`<span class="strong">${prevDateDayStr}</span> <span class="int-precision">${prevDateMonthStr} ${prevDateYearStr}</span>`);
+            $('.next-interval-val').empty().append(`<span class="strong">${nextDateDayStr}</span> <span class="int-precision">${nextDateMonthStr} ${nextDateYearStr}</span>`);
+            $('.curr-int-value').empty().append(`<span class="strong">${currDateDayStr}</span> <span style="font-size:16px">${currDateMonthStr} ${currDateYearStr}</span>`);
+            for(i=0;i<12;i++){
+              $timescale.append(`<div><sub>${2 * i}</sub></div>`)
+            }
+
+          }
+      }
       
       if(mr){
         $timescale.find('> *').not('.chevron').addClass('flex-center').css('min-height', Math.round(900 / $timescale.children().not('.chevron').length).toString() + 'px');
       } else {
-        $timescale.find('> *').css('text-align','center');
+        
+        nbSubInt = $('.ts-scale').children().not('.chevron').length;
+        $timescale.find('> *').not('.chevron').css('width',`calc(${100/nbSubInt}%`);
+        if(ts != 'd'){
+          $timescale.find('> *').css('text-align','center');
+        } else {
+          $timescale.find('> *').children().css({'margin-left': '-7px'});
+        }
       }
         
       div = $('.ts-scale').children().length - 1;
   
-      $('.activity-content-stage').css({
+      $('.activity-content-stage:not(.following)').css({
           'background': 'repeating-linear-gradient('+ (mr ? 0 : 90).toString() +'deg, #f3ccff2b, #63009445 ' + (((centralElSize) / div)) + 'px, #ffffff ' + (((centralElSize) / div)) + 'px, #ffffff ' + ((centralElSize) / (div / 2)) + 'px)'
+      });
+       
+      $('.activity-content-stage.following').css({
+          'background': 'repeating-linear-gradient('+ (mr ? 0 : 90).toString() +'deg, #ffe7422b, #d88e2059 ' + (((centralElSize) / div)) + 'px, #ffffff ' + (((centralElSize) / div)) + 'px, #ffffff ' + ((centralElSize) / (div / 2)) + 'px)'
       });
   
       var dateChevron = $('.chevron');
@@ -947,7 +990,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
       if($(this).hasClass('prev-int-btn')){
             if (ts == "y") {
                 ci--;
-            } else {
+            } else if (ts != "d") {
                if(ts == 't' || ts == 'w'){
                  prevValue = $('.prev-interval-val').text().trim();
                  if(prevValue.split(' ').length > 1){
@@ -960,11 +1003,15 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
                  intVal = prevValue.slice(1);
                  ci = `${tsVal}-${intVal}-${yVal}`;
                }
+            } else {
+                currDate = new Date(ci);
+                wDate = moment(currDate);
+                ci = wDate.add(-1,'d')._d.toLocaleString('en-US',{year: 'numeric', month: 'numeric', day: 'numeric'});
             }
       } else {
             if (ts == "y") {
                 ci++;
-            } else {
+            } else if(ts != "d") {
               if(ts == 't' || ts == 'w'){
                 nextValue = $('.next-interval-val').text().trim();
                 if(nextValue.split(' ').length > 1){
@@ -977,6 +1024,10 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
                 intVal = nextValue.slice(1);
                 ci = `${ts}-${intVal}-${yVal}`;
               }
+            } else {
+              currDate = new Date(ci);
+              wDate = moment(currDate);
+              ci = wDate.add(1,'d')._d.toLocaleString('en-US',{year: 'numeric', month: 'numeric', day: 'numeric'});
             }
         }
         setCookie('ci', ci, 365);
@@ -1147,7 +1198,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
   /*$('[href="#createStage"]').on('click', function () {
     $('#processSelect').empty();
     oid = $(this).data('oid');
-    urlToPieces = ipurl.split('/');
+    urlToPieces = gipurl.split('/');
     urlToPieces[urlToPieces.length - 1] = oid;
     url = urlToPieces.join('/');
     $.post(url)
@@ -1319,15 +1370,14 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
 
   $('[href="#createStage"]').on('click',function(){
     const $modal = $('#createStage');
-    
-      $modal.find('.manage-invit-btn').addClass('s-unsaved tooltipped').tooltip();
       $modal.find('.s-dates-row .dp-end').pickadate('picker').clear();
-      $modal.find('.participants-title').append($linkAccessElmt);
+      $modal.find('.visibility-zone').append($visibilityConfigElmt);
+      $modal.find('.s-visibility').empty().append($modal.find('.s-visibility').data('default').toUpperCase());
       if(!$('.participants-btn').length){
         proto = $partHolder.data('prototype');
         proto = proto.replace(/__name__/g, $partHolder.children().length - 1);
         $partElmt = $(proto);
-        $partElmt.find('.selected-participant-logo').attr('src', userPic);
+        $partElmt.find('.pf-picture').attr('src', userPic);
         $partElmt.attr('data-tooltip',myself).tooltip();
         $partElmt.find('.u').val(uid);
         $partHolder.prepend($partElmt);
@@ -1336,22 +1386,21 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
       if(!$('.setup-activity').find('.fa-cog').length){
         $('.setup-activity').prepend('<i class="fa fa-cog sm-right"></i>')/*.append('<i class="fa fa-question-circle sm-left"></i>')*/;
       }
-    $('#addParticipant').removeAttr('id');
   });
 
   $(document).on('mouseover','.activity-holder',function(){
-      $(this).find('.act-info .fixed-action-btn').css('visibility','');
+      $(this).find('.act-info .fixed-action-btn:not(.request-fixed-btn)').css('visibility','');
   }).on('mouseout','.activity-holder',function(e){
       var $relatedTarget = $(e.relatedTarget);
       if($relatedTarget != $(this)){
-        $(this).find('.act-info .fixed-action-btn').css('visibility','hidden');
+        $(this).find('.act-info .fixed-action-btn:not(.request-fixed-btn)').css('visibility','hidden');
       }
   });
 
-  $(document).on('mouseenter','.participant-btn',function(){
-    $(this).find('.p-delete-overlay').show();
-  }).on('mouseleave','.participant-btn',function(){
-    $(this).find('.p-delete-overlay').hide();
+  $(document).on('mouseenter','.participant-btn, .follower-btn',function(){
+    $(this).find('.pf-delete-overlay').show();
+  }).on('mouseleave','.participant-btn, .follower-btn',function(){
+    $(this).find('.pf-delete-overlay').hide();
   }),
 
   $(document).on('click','.stage-element, .m-act-update',function(){
@@ -1372,13 +1421,25 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         $modal.find('.s-name').empty().append(data.name);
         $modal.find('input[name*="name"]').closest('.input-field').hide();
         if(data.ap){
-          $modal.find('.participants-title').append($linkAccessElmt);
-          $partHolder.find('.btn-participant-add').attr('id','addParticipant');
+
+          $modal.find('.visibility-zone').attr({
+            'data-v' : data.v,
+            'data-js' : data.js,
+            'data-fs' : data.fs,
+          }).find('.s-visibility').empty().append(data.vm.toUpperCase());
+          $('#manageStageInvit').find('input[name="link"]').val(data.link);
+          $modal.find('.visibility-zone').append($visibilityConfigElmt);
           $modifyTitleElmt = $(`<span class="s-name-update btn-s-update" style="display:none"><i class="m-left fa fa-pen dd-orange-text"></i></span>`);
           $modal.find('.s-title-zone').append($modifyTitleElmt);
         } else {
           $modal.find('.link-access-element').remove();
           $partHolder.find('.btn-participant-add').remove();
+          $followerHolder.find('.btn-follower-add').remove();
+          if(data.if){
+            $modal.find('.btn-add-event').hide();
+          } else {
+            $modal.find('.btn-add-event').show();
+          }
         }
         
         $datesElmt = $(`
@@ -1389,7 +1450,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         `);
 
         if(data.ap){
-          $datesElmt.add(` <div class="s-modify-dates m-left"><i class="btn-s-update btn-s-dates fa fa-pen dd-orange-text" style="display:none"></i></div>`);
+          $datesElmt = $datesElmt.add(` <div class="s-modify-dates m-left"><i class="btn-s-update btn-s-dates fa fa-pen dd-orange-text" style="display:none"></i></div>`);
         }
         
         $modal.find('.s-elmt-dates').empty().append($datesElmt);
@@ -1408,7 +1469,6 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         $modal.find('.dp-start').closest('.row').hide();
         if(!$modal.find('.s-dates-row .dates-validate').length){$modal.find('.s-dates-row').append('<div class="btn dates-validate s-dates-validate"><i class="mi check"></i></div>');}
         $modal.find('.s-dates-row').addClass('flex-center-sb').find('.col').removeClass('s6 m6');
-        $modal.find('.manage-invit-btn').removeClass('s-unsaved tooltipped').tooltip();
         if(data.link){
           $('input[name="link"]').val(`${window.location.origin}/s/${data.link}`);
           if(data.istatus != -1){
@@ -1417,15 +1477,17 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         }
         $modal.find('.events').show();
         $partHolder.find('.participant-btn').remove();
-        $modal.find('.nb-participants').empty().append(`(${data.participants ? data.participants.length : 0})`);
+        $followerHolder.find('.follower-btn').remove();
+        $modal.find('.nb-participants').empty().append(`(${data.nbParticipants})`);
+        $modal.find('.nb-followers').empty().append(`(${data.nbFollowers})`);
         $(data.participants).each(function(i,p){
           $partElmt = $($partHolder.data('prototype'));
           /*
           $partElmt.find('.participant-field-zone').remove();
           $partElmt.find('');
           */
-          $partElmt.find('.selected-participant-logo').attr('src', p.picture)
-          p.firmLogo ? $partElmt.find('.p-firm-logo').attr('src',p.firmLogo).show() : $partElmt.find('.p-firm-logo').hide();
+          $partElmt.find('.pf-picture').attr('src', p.picture)
+          p.firmLogo ? $partElmt.find('.pf-firm-logo').attr('src',p.firmLogo).show() : $partElmt.find('.pf-firm-logo').hide();
           $partElmt
             .attr({
               'data-tooltip' : p.fullname + (p.synth ? ' (' + synthSuffix + ')' : ''),
@@ -1433,9 +1495,9 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
             .addClass('existing deletable')
             .tooltip();
           if(!data.ap){
-            $partElmt.find('.p-delete-overlay').remove();
+            $partElmt.find('.pf-delete-overlay').remove();
           } else {
-            $partElmt.find('.p-delete-overlay').removeClass('participant-delete').addClass('modal-trigger').attr({
+            $partElmt.find('.pf-delete-overlay').removeClass('participant-delete').addClass('modal-trigger').attr({
               'href' : '#deleteParticipant',
               'data-pid' : p.id
             })
@@ -1444,6 +1506,54 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
           $partHolder.prepend($partElmt);
           
         })
+
+        if(data.ap && data.followers && !data.if){
+          $(data.followers).each(function(i,f){
+            $followerElmt = $($followerHolder.data('prototype'));
+            /*
+            $partElmt.find('.participant-field-zone').remove();
+            $partElmt.find('');
+            */
+            $followerElmt.find('.pf-picture').attr('src', f.picture)
+            f.firmLogo ? $followerElmt.find('.pf-firm-logo').attr('src',f.firmLogo).show() : $followerElmt.find('.pf-firm-logo').hide();
+            $followerElmt
+              .attr({
+                'data-tooltip' : f.fullname + (f.synth ? ' (' + synthSuffix + ')' : ''),
+              })
+              .tooltip();
+            
+            
+            if(!data.ap){
+              $followerElmt.find('.pf-delete-overlay').remove();
+            } else {
+              $followerElmt.find('.pf-delete-overlay').removeClass('follower-delete').addClass('modal-trigger').attr({
+                'href' : '#deleteFollower',
+                'data-fid' : f.id
+              })
+            }
+            $followerElmt.show();
+            $followerHolder.append($followerElmt);
+            $followerHolder.parent().show();
+          })
+        }
+
+        if(data.if){
+          if(!$('.following-mention').length){
+            $followingMentionElmt = $(`
+            <div class="flex-center dd-orange-text following-mention">
+              <i class="fa fa-check-circle sm-right"></i>
+              <span>Vous suivez cette phase</span>
+            </div>
+            `)
+            $('.s-title-zone').append($followingMentionElmt);
+          }
+          $('.visibility-zone').hide();
+        } else {
+          $('.visibility-zone').show();
+          $('.following-mention').remove();
+        }
+
+
         $evtHolder = $modal.find('ul.events-list');
         $evtHolder.empty();
         $modal.find('.nb-events').empty().append(`(${data.events ? data.events.length : 0})`);
@@ -1752,8 +1862,8 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
       processData: false,
       contentType: $this.closest('.modal').find('.e-documents').length == 0 ? 'application/x-www-form-urlencoded' : false,
     })
-    .done(function(e){
-      prepareEvent(e);
+    .done(function(data){
+      prepareEvent(data);
       $('#updateEvent').modal('close');
     });
     
@@ -1871,6 +1981,12 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
             $comHolder.append($comAndReplies);
 
         });
+
+        if(data.if){
+          $modal.find('.add-e-comment,.add-e-document').hide();
+        } else {
+          $modal.find('.add-e-comment,.add-e-document').show().css('visibility','hidden');
+        }
 
         $modal.find('.ev-info').remove();
         //updateEvents(data.group, data.type);
@@ -2023,10 +2139,10 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
       if(!isEvtExisting){
         form.append("sid",$evtElmt.find('.fa-external-link-alt').data('id'));
         form.append("evtid",$evtElmt.find('[name*="eventType"]').val());
-        const sdStr = $modal.find('.dp-start').val() ? $modal.find('.dp-start').val().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : "";
-        const edStr = $modal.find('.dp-end').val() ? $modal.find('.dp-end').val().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : sdStr;
-        form.append("oDateStr",(sdStr != "" ? new Date(sdStr) : new Date()).toLocaleString('en-EN',$sentDatesOptions));
-        form.append("expResDateStr",(edStr != "" ? new Date(edStr) : new Date()).toLocaleString('en-EN', $sentDatesOptions));
+        const sd = $modal.find('.dp-start').val() ? $modal.find('.dp-start').pickadate('picker').get('select').obj : new Date();
+        const ed = $modal.find('.dp-end').val() ? $modal.find('.dp-end').pickadate('picker').get('select').obj : new Date();
+        form.append("oDateStr",sd.toLocaleString('en-EN',$sentDatesOptions));
+        form.append("expResDateStr",ed.toLocaleString('en-EN', $sentDatesOptions));
       }
 
       form.append("eid",$evtElmt.data('id') ? $evtElmt.data('id') : 0);
@@ -2057,7 +2173,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
               $evtElmt.find('[type="submit"]').hide().parent();
               $evtElmt.find('.modal-close').show();
               $evtElmt.find('[href="#deleteEvent"]').show();
-              prepareEvent(c);
+              prepareEvent(d);
             }
             $hiddenDocElmt.find('.e-doc-size').empty().append(`${Math.round(d.size/1000)} Ko`);
             $hiddenDocElmt.find('.doc-actions').show();
@@ -2084,33 +2200,33 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
       $docElmt.hide();
   });
 
-  $(document).on('mouseover','.s-elmt-dates, .events-title, .s-title-zone',function(){
+  $(document).on('mouseover','.s-elmt-dates, .events-title, .s-title-zone', function(){
     if(!$(this).closest('.modal').find('input:visible').length){
       $(this).find('.btn-s-update').show();
     }
-  }).on('mouseleave','.s-elmt-dates, .events-title, .s-title-zone',function(){  
+  }).on('mouseleave','.s-elmt-dates, .events-title, .s-title-zone', function(){  
     if(!$(this).find('input').length){
       $(this).find('.btn-s-update').hide();
     }
   })
 
-  $(document).on('mouseover','ul.participants-list',function(){
-    if($stageModal.data('id')){
-      $(this).find('.btn-s-update').show();
-    }
-  }).on('mouseleave','ul.participants-list',function(){  
-    if($stageModal.data('id')){
-      $(this).find('.btn-s-update').hide();
-    }
+  $(document).on('mouseover','.participants-list, .followers-list',function(){
+    //if($stageModal.data('id')){
+      $(this).find('.btn-s-update-v').css('visibility','');
+    //}
+  }).on('mouseleave','.participants-list, .followers-list',function(){  
+    //if($stageModal.data('id')){
+      $(this).find('.btn-s-update-v').css('visibility','hidden');
+    //}
   })
 
   $(document).on('mouseover','.e-dates-header, .e-documents-header, .e-comments-header, .e-comment',function(){
     var $modal = $(this).closest('.modal');
     if(!$modal.find('input:not(.select-dropdown):visible,textarea:visible').length){
-      $(this).find('.btn-e-update').show();
+      $(this).find('.btn-e-update').css('visibility','');
     }
   }).on('mouseleave','.e-dates-header, .e-documents-header, .e-comments-header, .e-comment',function(){  
-    $(this).find('.btn-e-update').hide();
+    $(this).find('.btn-e-update').css('visibility','hidden');
   })
 
   $(document).on('click','.s-name-update',function(){
@@ -2230,17 +2346,19 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
       })
   });
 
-  $(document).on('click','.participant-delete, .btn-participant-validate',function(){
+  $(document).on('click','.pf-delete, .btn-participant-validate',function(){
     var $this = $(this);
     $this.closest('.modal').find('.modal-footer .red-text').remove();
     $('.red-text').remove();
   })
 
   
-  $('.btn-participant-add').on('click',function(){
-    $('#addUserClient').attr('data-qt','p');
+  $('.btn-participant-add, .btn-follower-add').on('click',function(){
+    $('#addUserClient').attr('data-qt',$(this).hasClass('btn-participant-add') ? 'p' : 'f');
+    $('.username-part .fj-type').empty().append($(this).hasClass('btn-participant-add') ? 'participant' : 'follower');
     setTimeout(function(){
       $('#addUserClient').find('[class*="-part"]:visible').addClass('initial-part');
+
     },200);
   });
 
@@ -2257,7 +2375,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
   $('.btn-s-modify:not(.modal-close').on('click',function(){
     var $modal = $(this).closest('.modal');
     $modal.find('.participant-btn').each(function(i,e){
-      $(e).addClass('deletable modal-trigger').attr('href','#deleteParticipant').append('<div class="p-delete-overlay flex-center" style="display:none;"><i class="fa fa-trash"></i></div>');
+      $(e).addClass('deletable modal-trigger').attr('href','#deleteParticipant').append('<div class="pf-delete-overlay flex-center" style="display:none;"><i class="fa fa-trash"></i></div>');
     });
     $modal.find('.btn-s-modify').hide();
     $modal.find('.btn-s-update').show();
@@ -2384,30 +2502,38 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
       })
   })
 
-  $(document).on('click','.participant-delete',function(e){
+  $(document).on('click','.participant-delete, .follower-delete',function(e){
     var $this = $(this);
-    pid = $this.data('pid');
-    if(!pid){
-      $(this).closest('.participant-btn').remove();
+    isParticipant = typeof $this.data('pid') !== "undefined";
+    elType = isParticipant ? 'participant' : 'follower';
+    elTypeAbbr = isParticipant ? 'p' : 'f';
+    elmtId = $this.attr(`data-${elTypeAbbr}id`);
+    $pfElmt = $(`[href="#delete${capitalizeFirstLetter(elType)}"][data-${elTypeAbbr}id="${elmtId}"]`);
+    if(!elmtId){
+      $(this).closest(`.${elType}-btn`).remove();
     } else {
-      urlToPieces = dpurl.split('/');
+      consideredRoute = isParticipant ? dpurl : dfurl;
+      urlToPieces = consideredRoute.split('/');
       urlToPieces[urlToPieces.length - 4] = $this.data('id');
-      urlToPieces[urlToPieces.length - 1] = pid;
+      urlToPieces[urlToPieces.length - 2] = elmtId;
       url = urlToPieces.join('/');
       $.delete(url,null)
         .done(function(){
-          $('#deleteParticipant').modal('close');
-          $(document).find(`[href="#deleteParticipant"][data-pid="${pid}"]`).closest('.participant-btn').remove();
-          $('.nb-participants').empty().append(`(${$('.participant-btn').length})`);
+          $(`#delete${capitalizeFirstLetter(elType)}`).modal('close');
+          $pfElmt.closest(`.${elType}-btn`).remove();
+          $(`.nb-${elType}s`).empty().append(`(${$(`.${elType}-btn`).length})`);
         })
-
     }
   });
 
-  $(document).on('click','[href="#deleteParticipant"]',function(){
+  $(document).on('click','[href="#deleteParticipant"], [href="#deleteFollower"]',function(){
     var $this = $(this);
     var $modal = $(this).closest('.modal');
-    $('.participant-delete').attr({'data-id':$modal.data('id'),'data-pid':$this.data('pid')});
+    if($this.is('[href="#deleteParticipant"]')){
+      $('#deleteParticipant').find('.participant-delete').attr({'data-id': $modal.data('id'), 'data-pid' : $this.data('pid')});
+    } else {
+      $('#deleteFollower').find('.follower-delete').attr({'data-id': $modal.data('id'), 'data-fid' : $this.data('fid')});
+    }
   })
 
   $('#choice-indpt').on('change',function(){
@@ -2578,6 +2704,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
     e.preventDefault();
     setTimeout(function(){
       $('.tap-target').tapTarget('open');
+      setCookie('fc',1,365);
     },1000)
   })
 
@@ -2591,7 +2718,13 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
       const now = new Date();
       eraseCookie('ts');
       eraseCookie('ci');
-      setCookie('ci',`${val == 'y' ? now.getFullYear() : (val == 't' ? 'q-' + moment().quarter() + '-' + now.getFullYear() : 'w-'+ moment().week() + '-' + now.getFullYear() )}`,365);
+      setCookie('ci',`${
+          val == 'y' ? now.getFullYear() : (
+            val == 't' ? 'q-' + moment().quarter() + '-' + now.getFullYear() : (
+              val == 'w' ? 'w-'+ moment().week() + '-' + now.getFullYear() : moment().format('M') + '-' + moment().format('D') + '-' + moment().format('Y') 
+            )
+          )
+        }`,365);
       setCookie('ts',$(this).val(),365);
       location.reload();
   });
@@ -2628,20 +2761,26 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
   })
 
   if($('#invitationStage').length){
-    $('#invitationStage select').material_select();
-    $('#invitationStage').modal('open');
+    setTimeout(function(){
+      $('#invitationStage select').material_select();
+      $('#invitationStage').modal('open');
+    },700)
   }
 
-  $('.link-accept-stage-btn').on('click',function(){
-    const $params = {id: $(this).data('id'), aid: $('[name="stageAccountSelector"]').val()}
-    $.post(lsurl,$params)
+  $('.invit-join-btn, .invit-decline-btn, .invit-follow-btn').on('click',function(){
+    const $this = $(this);
+    const $modal = $this.closest('.modal');
+    const id = $modal.data('id');
+    const v = $this.hasClass('invit-join-btn') ? 1 : ($this.hasClass('invit-follow-btn') ? 0 : -1);
+    const $params = {id: id, uid: +$('[name="stageAccountSelector"]').val(), v: v}
+    $.post(ipurl,$params)
       .done(function(data){
-        location.reload();
+        eraseMCookie('is',id);
+        if(data.waitingApproval){
+          $modal.modal('close');
+          $('#pendingFJDecision').modal('open');
+        }
       })
-  })
-
-  $('.link-decline-stage-btn').on('click',function(){
-    eraseCookie('is');
   })
 
   $('.add-enddate-zone, .add-on').on('click',function(){
@@ -2679,23 +2818,37 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
       }
   })
 
-  $(document).on('click','.manage-invit-btn:not(.s-unsaved)',function(){
+  $(document).on('click','.visibility-btn',function(){
     var $modal = $('#manageStageInvit');
-    var $this = $(this);
-    $modal.find('.s-name').empty().append($stageModal.find('.s-name').text());
-    
-    if($modal.find('input[name="link"]').val() == ""){
-      
-      urlToPieces = cslurl.split('/');
-      urlToPieces[urlToPieces.length - 2] = $stageModal.data('id') ? $stageModal.data('id') : 0;
-      url = urlToPieces.join('/');
-      $.post(url,null)
-        .done(function(data){
-          $('input[name="link"]').val(`${window.location.origin}/s/${data.link}`);
-        })
-    }
-    $modal.css('z-index',+$stageModal.css('z-index') + 2).modal('open');
-    $('.modal-overlay.velocity-animating').css('z-index', +$stageModal.css('z-index') + 1);
+    if($('#createStage').attr('data-id')){
+        
+        var $this = $(this);
+        $modal.find('.s-name').empty().append($stageModal.find('.s-name').text());  
+        +$stageModal.find('.visibility-zone').data('v') == -1 ? $('.non-private-params').hide() : $('.non-private-params').show();
+        $('.acs').prop('checked',false);
+        +$stageModal.find('.visibility-zone').data('js') != -1 ? (+$stageModal.find('.visibility-zone').data('js') ? $('[name="js_direct"]').prop('checked',true) : $('[name="js_check"]').prop('checked',true)) : '';
+        +$stageModal.find('.visibility-zone').data('fs') != -1 ? (+$stageModal.find('.visibility-zone').data('fs') ? $('[name="fs_direct"]').prop('checked',true) : $('[name="fs_check"]').prop('checked',true)) : '';
+        $(`[name="visibilityTypeSelector"] option[value="${$stageModal.find('.visibility-zone').attr('data-v')}"]`).prop('selected',true);
+        
+      } else {
+        
+
+        $modal.find('.s-name').empty().append($stageModal.find('input[name*="name"]').val() != "" ? $stageModal.find('input[name*="name"]').val() : unnamedStageActivity);
+
+        if(!$('[name*="accessLink"]').val()){
+          token = md5(rand().toString());
+          sLink = `${location.origin}/s/${token}`;
+          $('[name*="accessLink"]').val(token);
+          $('[name="link"]').val(sLink);
+        }
+        
+        
+
+      }
+
+      $modal.find('.visibility-status').empty().append(capitalizeFirstLetter($stageModal.find('.s-visibility').text()));
+      $modal.css('z-index',+$stageModal.css('z-index') + 2).modal('open');
+      $('.modal-overlay.velocity-animating').css('z-index', +$stageModal.css('z-index') + 1);
   })
   
   $('.s-link').on('click',function(){
@@ -2704,14 +2857,27 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
       Materialize.toast($toast,1500);
   });
 
-  $('.save-i-pref-btn').on('click',function(){
-    urlToPieces = uisurl.split('/');
+  $('.save-broadcast-pref-btn').on('click',function(){
+
+    if(!$stageModal.attr('data-id')){
+      $('#manageStageInvit').modal('close');
+      return false;
+    }
+
+    if($stageModal.attr('data-id') && $stageModal.find('.visibility-zone').data('v') == 0 && +$('[name="visibilityTypeSelector"]').val() == -1){
+      $('.privatize-stage-btn').attr('data-id',+$stageModal.data('id'));
+      $('#privatizeStage').modal('open');
+      return false;
+    }
+
+    const $this = $(this);
+    urlToPieces = usvurl.split('/');
     urlToPieces[urlToPieces.length - 3] = $stageModal.data('id') ? $stageModal.data('id') : 0;
     url = urlToPieces.join('/');
-    istatus = $('#istatus').is(':checked') ? 0 : 1;
-    const params = {istatus: istatus};
-    $.post(url,params)
+    $.post(url,$this.closest('form').serialize())
       .done(function(data){
+        $stageModal.find('.s-visibility').empty().append($('[name="visibilityTypeSelector"] option:selected').text().toUpperCase());
+        $stageModal.find('.visibility-zone').data('v',$('[name="visibilityTypeSelector"]').val()); 
         $('#manageStageInvit').modal('close');
       })
   });
@@ -2723,6 +2889,216 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
       $('#addUserClient').attr('data-qt', 'p'); 
     } 
   });
+
+  if($('.s-invit-tap-target').length){
+    setTimeout(() => $('.s-invit-tap-target').tapTarget('open'), 500);
+  }
+
+  $('[href="#unfollowStage"]').on('click',function(){
+    $('.unfollow-stage-btn').attr('data-id', $(this).data('sid'));
+  })
+
+  $('.unfollow-stage-btn').on('click',function(){
+    urlToPieces = unfsurl.split('/');
+    urlToPieces[urlToPieces.length - 2] = $(this).data('id');
+    url = urlToPieces.join('/');
+    $.post(url,null)
+      .done(function(){
+        location.reload();
+      })
+  })
+
+  $('input[name*="fs_"]').on('change',function(){
+    const $this = $(this);
+    if($this.is(':checked')){
+      if($(this).is('input[name*="fs_direct"]')){
+        $('input[name*="fs_check"]').prop('checked',false);
+      } else {
+        $('input[name*="fs_direct"]').prop('checked',false);
+      }
+    }
+    if(!$stageModal.attr('data-id')){
+      $stageModal.find('input[name*="followableStatus"]').val(+($(this).is('input[name*="fs_direct"]') && $(this).is(':checked')))  
+    } 
+  });
+
+  $('input[name*="js_"]').on('change',function(){
+    const $this = $(this);
+    if($this.is(':checked')){
+      if($(this).is('input[name*="js_direct"]')){
+        $('input[name*="js_check"]').prop('checked',false);
+       
+      } else {
+        $('input[name*="js_direct"]').prop('checked',false);
+        
+      }
+    }
+    if(!$stageModal.attr('data-id')){
+      $stageModal.find('input[name*="joinableStatus"]').val(+($(this).is('input[name*="js_direct"]') && $(this).is(':checked')))  
+    } 
+  });
+
+  $('.acs').on('change',function(){
+    if(!$('.acs').is(':checked')){
+      $('#manageStageInvit').find('.no-option-msg').show();
+      $('.save-broadcast-pref-btn').addClass('disabled-btn');
+    } else {
+      $('#manageStageInvit').find('.no-option-msg').hide();
+      $('.save-broadcast-pref-btn').removeClass('disabled-btn')
+    }
+  })
+
+  $('.visibility-type .btn-s-update').on('click',function(){
+    $('.visibility-type-input').find('select').material_select();
+    $('.visibility-type-input').show();
+    $('.visibility-type-data').hide();
+  })
+
+  $(document).on('mouseover','.visibility-type', function(){
+    if($('.visibility-type-data').is(':visible')){
+      $(this).find('.btn-s-update').show();
+    }
+  }).on('mouseleave','.visibility-type', function(){  
+    if($('.visibility-type-data').is(':visible')){
+      $(this).find('.btn-s-update').hide();
+    }
+  })
+
+  $('[name="visibilityTypeSelector"]').on('change',function(){
+    if($(this).val() == -1){
+      $('.non-private-params').hide();
+      $('.save-broadcast-pref-btn').removeClass('disabled-btn');
+    } else {
+      if(!$('.acs').is(':checked')){
+        $('.save-broadcast-pref-btn').addClass('disabled-btn');
+      }
+      $('.non-private-params').show()
+    }
+  })
+
+  $(document).on('click','.request-activity-btn', function(){
+    const $this = $(this);
+    const $actHolder = $this.closest('.activity-holder');
+    const actId = $actHolder.data('id');
+    const $modal = $('#manageStageRequest');
+
+    urlToPieces = rarurl.split('/');
+    urlToPieces[urlToPieces.length - 2] = actId;
+    url = urlToPieces.join('/');
+    $.post(url,null)
+      .done(function(data){
+        $modal.find('tbody').empty();
+        $modal.find('.s-name').empty().append($actHolder.find('.act-info-name').text());
+        $.each(data,function(i,p){
+          $.each(p.requests, function(j,r){
+            $requesterElmt = $($modal.find('table').data('prototype'));
+            $requesterElmt.find('.fj-stage').append(r.sname);
+            $requesterElmt.find('.fj-user').append(p.fullname);
+            $requesterElmt.find('.user-profile-l-picture').attr('src',p.picture);
+            $requesterElmt.find('.fj-type').append(r.type);
+            $requesterElmt.find('.fj-choice input').prop('checked',true).attr({
+              'name' : `fj_${r.id}`, 
+              'value' : 1,
+            });
+          })
+          $modal.find('.save-request-pref-btn').attr('data-id',actId);
+          $modal.find('tbody').append($requesterElmt);
+          $modal.modal('open');
+        })
+      })
+  })
+
+  $(document).on('change','input[name*="fj_"]',function(){
+    $(this).attr('value',+$(this).is(':checked'));
+  })
+
+  $('.save-request-pref-btn').on('click',function(){
+    const $this = $(this);
+    const $modal = $('#manageStageRequest');
+
+    urlToPieces = marurl.split('/');
+    urlToPieces[urlToPieces.length - 3] = $this.data('id');
+    url = urlToPieces.join('/');
+    $.post(url,$this.closest('form').serialize())
+      .done(function(data){
+        
+        $('.request-activity-btn').find('i').removeClass('fa fa-user-plus').addClass('mi create');
+        $('.request-activity-btn').removeClass('request-activity-btn').css('visibility','hidden');
+        $modal.modal('close');
+
+      })
+  })
+
+  $('[href="#requestParticipation"]').on('click',function(){
+    const $this = $(this);
+    const $actHolder = $this.closest('.activity-holder');
+    $('.join-request-btn').attr('data-id',$this.data('sid'));
+    $('#requestParticipation').find('.s-name').empty().append($actHolder.find('.act-info-name').text());
+  })
+
+  $('.join-request-btn').on('click',function(){
+    const $this = $(this);
+    const $modal = $('#requestParticipation');
+    urlToPieces = jsurl.split('/');
+    urlToPieces[urlToPieces.length - 2] = $this.data('id');
+    url = urlToPieces.join('/');
+    $.post(url,$this.closest('form').serialize())
+      .done(function(data){
+        proto = $partHolder.data('prototype');      
+        $partElmt = $(proto);
+        $partElmt.find('.pf-delete-overlay').addClass('modal-trigger').removeClass('participant-delete').attr({
+            'data-pid' :data.pid,
+            'href' : '#deleteParticipant',
+        });
+
+        nbParticipants = +$stageModal.find('.nb-participants').text();
+        $stageModal.find('.nb-participants').empty().append(nbParticipants + 1);
+
+        $partHolder.find('.btn-participant-add').before($partElmt);
+        $modal.modal('close');
+
+      })
+  })
+
+  $('[href="#deleteFollower"]').on('click',function(){
+    $('.follower-delete').attr('data-id',$(this).data('fid'));
+  })
+
+  /*
+  $('.follower-delete').on('click',function(){
+    const $this = $(this);
+    urlToPieces = unfsurl.split('/');
+    const id = $this.data('id');
+    urlToPieces[urlToPieces.length - 2] = id;
+    url = urlToPieces.join('/');
+    $.delete(url,null)
+    .done(function(){
+      $('#deleteFollower').modal('close');
+      $(`[href="#deleteFollower"][data-fid="${id}"]`).remove();
+      nbFollowers = +$stageModal.find('.nb-followers').text();
+      $stageModal.find('.nb-followers').empty().append(nbFollowers - 1);
+    })
+  })
+  */
+
+  $('.privatize-stage-btn').on('click',function(){
+    const $this = $(this);
+    const id = $this.data('id');
+    urlToPieces = psurl.split('/');
+    urlToPieces[urlToPieces.length - 3] = id;
+    url = urlToPieces.join('/');
+    const params = {rf: +$('#rf').is(':checked')}
+    $.post(url,params)
+      .done(function(){
+        $('#privatizeStage').modal('close');
+        $stageModal.find('.s-visibility').empty().append($('[name="visibilityTypeSelector"]').find('option:selected').text().toUpperCase());
+        $stageModal.find('.visibility-zone').data('v',$('[name="visibilityTypeSelector"]').val()); 
+        $('#manageStageInvit').modal('close');
+      })
+  })
+
+
+
 
 
 

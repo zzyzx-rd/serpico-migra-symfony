@@ -6,6 +6,8 @@ use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\OptionNameRepository;
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\JoinColumn;
 
 /**
  * @ApiResource()
@@ -36,9 +38,10 @@ class OptionName extends DbObject
     public $description;
 
     /**
-     * @ORM\Column(name="ona_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="optionNameInitiatives")
+     * @JoinColumn(name="ona_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="ona_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
@@ -51,17 +54,14 @@ class OptionName extends DbObject
      * @param $type
      * @param $name
      * @param $description
-     * @param $createdBy
      */
     public function __construct(
         $id = 0,
         $type = null,
         $description = null,
-        $name = null,
-        $createdBy = null)
+        $name = null)
     {
-        parent::__construct($id, $createdBy, new DateTime());
-
+        parent::__construct($id, null, new DateTime());
         $this->type = $type;
         $this->name = $name;
         $this->description = $description;

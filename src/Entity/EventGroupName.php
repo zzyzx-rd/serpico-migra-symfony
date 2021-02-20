@@ -43,9 +43,10 @@ class EventGroupName extends DbObject
     protected $eventGroups;
 
     /**
-     * @ORM\Column(name="egn_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="eventGroupNameInitiatives")
+     * @JoinColumn(name="egn_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="egn_inserted", type="datetime", nullable=false, options={"default": "CURRENT_TIMESTAMP"})
@@ -57,7 +58,6 @@ class EventGroupName extends DbObject
      * @param string $name
      * @param Organization $organization
      * @param Department $department
-     * @param $createdBy
      * @param $id
      * @param ArrayCollection $eventNames
      */
@@ -65,13 +65,12 @@ class EventGroupName extends DbObject
         string $name = null,
         Organization $organization = null,
         Department $department = null,
-        $createdBy = null,
         $enabled = true,
         $id = null,
         ArrayCollection $eventNames = null,
         ArrayCollection $eventGroups = null)
     {
-        parent::__construct($id, $createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->name = $name;
         $this->organization = $organization;
         $this->department = $department;
@@ -156,7 +155,7 @@ class EventGroupName extends DbObject
 
         return [
             'id' => $this->id,
-            'createdBy' => $this->createdBy,
+            'initiator' => $this->initiator,
             'inserted' => $this->inserted,
             'name' => $this->name,
             'events' => $events,

@@ -43,6 +43,12 @@ class UserGlobal extends DbObject
     public $email;
 
     /**
+     * @ManyToOne(targetEntity="User", inversedBy="userGlobalInitiatives")
+     * @JoinColumn(name="usg_initiator", referencedColumnName="usr_id", nullable=true)
+     */
+    public ?User $initiator;
+
+    /**
      * @ORM\OneToMany(targetEntity=User::class, mappedBy="userGlobal", cascade={"persist", "remove"}, orphanRemoval=true)
      * @ORM\OrderBy({"lastConnected" = "DESC"})
      * @var ArrayCollection|User[]

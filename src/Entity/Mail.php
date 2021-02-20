@@ -38,9 +38,10 @@ class Mail extends DbObject
     public $read;
 
     /**
-     * @ORM\Column(name="mail_createdBy", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="mailInitiatives")
+     * @JoinColumn(name="mail_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="mail_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
@@ -96,7 +97,6 @@ class Mail extends DbObject
      * @param $token
      * @param $read
      * @param $language
-     * @param null $createdBy
      * @param User $user
      * @param WorkerIndividual $workerIndividual
      * @param Organization $organization
@@ -111,7 +111,6 @@ class Mail extends DbObject
         $token = null,
         $read = null,
         $language = null,
-        $createdBy = null,
         User $user = null,
         WorkerIndividual $workerIndividual = null,
         Organization $organization = null,
@@ -119,7 +118,7 @@ class Mail extends DbObject
         Activity $activity = null,
         Stage $stage = null)
     {
-        parent::__construct($id, $createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->type = $type;
         $this->persona = $persona;
         $this->token = $token;

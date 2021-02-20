@@ -30,9 +30,10 @@ class Member extends DbObject
     public $leader;
 
     /**
-     * @ORM\Column(name="mem_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="memberInitiatives")
+     * @JoinColumn(name="mem_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="mem_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
@@ -71,7 +72,6 @@ class Member extends DbObject
      * TeamUser constructor.
      * @param ?int$id
      * @param $leader
-     * @param $createdBy
      * @param $deleted
      * @param $isDeleted
      * @param $team
@@ -82,13 +82,12 @@ class Member extends DbObject
       ?int $id = 0,
         $user = null,
         $externalUser = null,
-        $createdBy = null,
         $leader = false,
         $deleted = null,
         $isDeleted = false,
         $team = null)
     {
-        parent::__construct($id,$createdBy , new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->leader = $leader;
         $this->deleted = $deleted;
         $this->isDeleted = $isDeleted;

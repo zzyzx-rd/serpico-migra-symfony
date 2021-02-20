@@ -32,7 +32,7 @@ class SettingsOrganizationForm extends AbstractType
         if ($options['standalone']) {
             $builder->add('submit', SubmitType::class,
                 [
-                    'label_format' => 'firm_settings.%name%',
+                    'label_format' => 'firm_settings_old.%name%',
                     'attr' => [
                         'class' => 'btn waves-effect waves-light teal lighten-1 firm-settings-submit',
                         'style' => 'position:absolute; display:inline-block;right:2%',

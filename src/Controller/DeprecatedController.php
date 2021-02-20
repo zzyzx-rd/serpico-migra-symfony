@@ -129,7 +129,7 @@ class DeprecatedController extends MasterController
                 $em->flush();
 
                 $weight = new Weight;
-                $weight->setUsrId($user->getId())->setInterval(0)->setTimeframe('D')->setValue(100)->setCreatedBy($this->user->getId());
+                $weight->setUsrId($user->getId())->setInterval(0)->setTimeframe('D')->setValue(100)->setInitiator($this->user);
                 $position->addWeight($weight);
                 $em->persist($position);
 
@@ -253,7 +253,7 @@ class DeprecatedController extends MasterController
 
             $workerIndividual
                 ->setEmail($user->getEmail())
-                ->setCreatedBy($user->getId());
+                ->setInitiator($user);
 
             $entityManager->persist($workerIndividual);
             $user->setWorkerIndividual($workerIndividual);
@@ -2148,7 +2148,7 @@ class DeprecatedController extends MasterController
                     ->setEmail($clientUser['email']->getData())
                     ->setPositionName($clientUser['positionName']->getData())
                     ->setRole(3)
-                    ->setCreatedBy($currentUser->getId())
+                    ->setInitiator($currentUser)
                     ->setWeightIni($clientUser['weightValue']->getData());
                 /*if ($clientUserData['type'] != 'I') {
                 $clientUser->setExtOrgId($clientUserData['extOrgGroup']);
@@ -2162,7 +2162,7 @@ class DeprecatedController extends MasterController
                     ->setPositionName($clientUser['positionName']->getData())
                     ->setWeightValue($clientUser['weightValue']->getData())
                     ->setUser($newClientUser)
-                    ->setCreatedBy($currentUser->getId())
+                    ->setInitiator($currentUser)
                     ->setOrganization($organization);
 
                 if ($clientUser['type']->getData() != 'I') {
@@ -2177,7 +2177,7 @@ class DeprecatedController extends MasterController
                         ->setIsClient(false)
                         ->setCommname($clientUser['firstname']->getData() . ' ' . $clientUser['lastname']->getData())
                         ->setWeight_type('role')
-                        ->setCreatedBy($currentUser->getId())
+                        ->setInitiator($currentUser)
                         ->setExpired($now->add(new DateInterval('P21D')));
                     $client = new Client;
                     $client->setOrganization($organization)->setClientOrganization($clientOrganization);
@@ -2376,7 +2376,7 @@ class DeprecatedController extends MasterController
                     ->setOrgId($orgId)
                     ->setToken($token)
                     ->setWgtId($userData['weightIni']->getData())
-                    ->setCreatedBy($currentUser->getId());
+                    ->setInitiator($currentUser);
                 $em->persist($user);
                 $em->flush();
 
@@ -2470,7 +2470,7 @@ class DeprecatedController extends MasterController
 
                     $user = new User;
                     $user
-                        ->setCreatedBy($currentUser->getId())
+                        ->setInitiator($currentUser)
                         ->setFirstname($firstName)
                         ->setLastname($lastName)
                         ->setEmail($record[$emailPos])
@@ -2585,7 +2585,7 @@ class DeprecatedController extends MasterController
                         $weightValue = 100;
                     }
 
-                    $weight->setValue($weightValue)->setInterval(0)->setTimeframe('D')->setCreatedBy($this->user->getId());
+                    $weight->setValue($weightValue)->setInterval(0)->setTimeframe('D')->setInitiator($this->user);
                     if ($position != null) {
                         $position->addWeight($weight);
                     }
@@ -2610,13 +2610,13 @@ class DeprecatedController extends MasterController
                             $weight = new Weight();
                             $weight->setOrganization($organization);
                             $weightValue = 100;
-                            $weight->setValue($weightValue)->setCreatedBy($this->user->getId());
+                            $weight->setValue($weightValue)->setInitiator($this->user);
                         }
                     } else {
                         $weight = new Weight;
                         $weight->setOrganization($organization);
                         $weightValue = 100;
-                        $weight->setUsrId($user->getId())->setValue($weightValue)->setCreatedBy($this->user->getId());
+                        $weight->setUsrId($user->getId())->setValue($weightValue)->setInitiator($this->user);
                     }
                     $em->persist($weight);
                     $em->flush();
@@ -2953,7 +2953,7 @@ class DeprecatedController extends MasterController
         $user = new User;
         if($addFirstAdminForm->isValid()){
             $defaultOrgWeight = $this->user->getOrganization()->getWeights()->filter(function(Weight $w){
-                return $w->getPosition() == null && $w->getCreatedBy() == null && $w->getInterval() == null && $w->getTimeframe() == null;
+                return $w->getPosition() == null && $w->getInitiator() == null && $w->getInterval() == null && $w->getTimeframe() == null;
             })->first();
             $user->setOrgId($this->user->getOrgId())
                 ->setRole(USER::ROLE_ADMIN)
@@ -3440,7 +3440,7 @@ class DeprecatedController extends MasterController
                     ->setLastname($externalUser->getLastname())
                     ->setEmail($externalUser->getEmail())
                     ->setOrganization($client->getClientOrganization())
-                    ->setCreatedBy($currentUser->getId())
+                    ->setInitiator($currentUser)
                     ->setRole(3)
                     ->setToken($token);
                 $userGlobal = new UserGlobal();
@@ -3544,7 +3544,7 @@ class DeprecatedController extends MasterController
                         ->setRole(2)
                         ->setWgtId($defaultOrgWeight->getId())
                         ->setWeightIni($defaultOrgWeight->getValue())
-                        ->setCreatedBy($currentUser->getId())
+                        ->setInitiator($currentUser)
                         ->setOrgId($organization->getId());
                         $em->persist($user);
                         $userGlobal = new UserGlobal();
@@ -3558,7 +3558,7 @@ class DeprecatedController extends MasterController
 
                     $individual
                         ->setUser($user)
-                        ->setCreatedBy($currentUser->getId())
+                        ->setInitiator($currentUser)
                         ->setClient($client);
 
                     $em->persist($individual);
@@ -3639,7 +3639,7 @@ class DeprecatedController extends MasterController
                         ->setRole(!$clientOrganization->hasActiveAdmin() ? 2 : 3)
                         ->setWeightIni($externalUser->getWeightValue() ?: 100)
                         ->setOrganization($clientOrganization)
-                        ->setCreatedBy($currentUser->getId());
+                        ->setInitiator($currentUser);
                     
                     $userGlobal->setUsername($externalUser->getFirstname().' '.$externalUser->getLastname());
                     $userGlobal->addUser($user);
@@ -3651,7 +3651,7 @@ class DeprecatedController extends MasterController
 
                 $externalUser
                     ->setUser($user)
-                    ->setCreatedBy($currentUser->getId())
+                    ->setInitiator($currentUser)
                     ->setClient($client);
 
                 $em->persist($externalUser);
@@ -3849,13 +3849,13 @@ class DeprecatedController extends MasterController
                 foreach ($firstFutureActivity->getStages() as $firstFutureActivityStage) {
                     $stage = clone $firstFutureActivityStage;
                     $stage->setActivity($activity);
-                    $stage->setCreatedBy($currentUser->getId());
+                    $stage->setInitiator($currentUser);
                     $activity->addStage($stage);
 
                     foreach ($firstFutureActivityStage->getCriteria() as $firstFutureActivityStageCriterion) {
                         $criterion = clone $firstFutureActivityStageCriterion;
                         $criterion->setStage($stage)->setType($type);
-                        $criterion->setCreatedBy($currentUser->getId());
+                        $criterion->setInitiator($currentUser);
                         $stage->addCriterion($criterion);
                         $em->persist($criterion);
 
@@ -3864,7 +3864,7 @@ class DeprecatedController extends MasterController
                     foreach ($firstFutureActivityStage->getParticipants() as $firstFutureActivityStageParticipant) {
                         $participant = clone $firstFutureActivityStageParticipant;
                         $participant->setStage($stage);
-                        $participant->setCreatedBy($currentUser->getId());
+                        $participant->setInitiator($currentUser);
                         $stage->addParticipant($participant);
                         $em->persist($participant);
                     }
@@ -3910,12 +3910,12 @@ class DeprecatedController extends MasterController
 
                 $stage = new Stage;
                 $stage->setActivity($activity);
-                $stage->setCreatedBy($currentUser->getId());
+                $stage->setInitiator($currentUser);
                 $activity->addStage($stage);
 
                 $criterion = new Criterion;
                 $criterion->setStage($stage)->setType($type)->setName('General');
-                $criterion->setCreatedBy($currentUser->getId());
+                $criterion->setInitiator($currentUser);
                 $stage->addCriterion($criterion);
 
                 $em->persist($recurring);
@@ -3956,6 +3956,643 @@ class DeprecatedController extends MasterController
         $recurring->getOngoingFutCurrActivities()->last()->getStages()->first()->setEndDate($lastActEndDate)->setGStartDate($lastActGStartDate)->setGEndDate($lastActGEndDate);
         $em->persist($recurring);
         $em->flush();
+    }
+
+    /**
+     * @param Request $request
+     * @param int $stgId
+     * @param string $entity
+     * @param int $elmtId
+     * @return JsonResponse|void
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/{entity}/stage/{stgId}/participant/validate/{elmtId}", name="validateParticipant")
+     */
+    public function validateParticipantAction(
+        Request $request,
+        int $stgId,
+        string $entity,
+        int $elmtId
+    ) {
+
+        $currentUser = $this->user;
+
+        if (!$currentUser) {
+            throw new Exception('current user is null');
+        }
+
+        /** @var int */
+        $type = $request->get('type');
+        /** @var string */
+        $precomment = $request->get('precomment');
+        /** @var bool */
+        $leader = $request->get('leader');
+        /** @var string */
+        $pEntity = $request->get('pEntity');
+        /** @var int */
+        $pId = $request->get('pId');
+
+        $em = $this->em;
+        switch($entity){
+            case 'iprocess' :
+                $repoS = $em->getRepository(IProcessStage::class);
+                $repoP = $em->getRepository(IProcessParticipation::class);
+                break;
+            case 'activity' :
+                $repoS = $em->getRepository(Stage::class);
+                $repoP = $em->getRepository(Participation::class);
+                break;
+        }
+        $repoU = $em->getRepository(User::class);
+        $repoPEntity = $pEntity == 'user' ? $repoU : $em->getRepository(Team::class);
+        /** @var User|Team */
+        $pElement = $repoPEntity->find($pId);
+
+        $repoG = $em->getRepository(Grade::class);
+
+        /** @var Stage|TemplateStage|IProcessStage */
+        $stage = $repoS->find($stgId);
+        var_dump($stage->getId());
+        /** @var Activity|TemplateActivity|InstitutionProcess */
+        $element = $entity != 'iprocess' ? $stage->getActivity() : $stage->getInstitutionProcess();
+        $activityOrganization = $element->getOrganization();
+
+        $stage->currentUser = $currentUser;
+        $element->currentUser = $currentUser;
+
+        if (!$stage->isModifiable()) {
+            throw new Exception('unauthorized');
+        }
+
+        /** @var Participation|IProcessParticipation|TemplateParticipation|null */
+        $participation = $repoP->find($elmtId);
+
+
+        if (!$participation) {
+
+            // Checking if there is compatibility user/team, otherwise return exception
+            if($pEntity == 'user'){
+
+                $doublonParticipant = $stage->getParticipants()->filter(function($p) use ($pId){
+                    return $p->getUser()->getId() == $pId;
+                })->first();
+
+                if($doublonParticipant){
+                    return new JsonResponse(['msg' => 'duplicateWithTeam', 'name' => $doublonParticipant->getTeam()->getName()],500);
+                }
+
+            } else {
+
+                $doublonParticipant = $stage->getParticipants()->filter(function($p) use ($pElement){
+                        return $pElement->getMembers()->exists(function(int $i, Member $tu) use ($p){
+                            return $tu->getUser() == $p->getUsrId();
+                        });
+                    })->first();
+
+                if($doublonParticipant){
+                    return new JsonResponse(['msg' => 'duplicateWithUser', 'name' => $doublonParticipant->getDirectUser()->getFullname()],500);
+                }
+            }
+
+            $iterableElements = sizeof($stage->getCriteria()) > 0 ? $stage->getCriteria() : new ArrayCollection([$stage]);
+
+        } else {
+
+            // Checking whether participant has already been subject to grades (by himself or others), and adapting grade type if necessary
+            // If we do not change related type, it will alter results computation !!!
+            $gradedPElementGrades = $repoG->findBy([
+                'stage' => $stage,
+                'gradedUsrId' => $participation->getUser()->getId(),
+                'gradedTeaId' => $participation->getTeam() ? $participation->getTeam()->getId() : null
+            ]);
+
+            foreach ($gradedPElementGrades as $gradedPElementGrade) {
+                if ($gradedPElementGrade->getType() == $type) {
+                    break;
+                } else {
+                    $gradedPElementGrade->setType($type);
+                    $em->persist($gradedPElementGrade);
+                }
+            }
+
+
+            // Getting participations depending of part elmt type
+            if($pEntity == 'user'){
+                /** @var Participation[]|IProcessParticipation[]|TemplateParticipation[] */
+                $participations = $repoP->findBy([
+                    'stage' => $stage,
+                    'user' => $participation->getUser(),
+                    'team' => null,
+                ]);
+            } else {
+                 /** @var Participation[]|IProcessParticipation[]|TemplateParticipation[] */
+                 $participations = $repoP->findBy([
+                    'stage' => $stage,
+                    'team' => $participation->getTeam(),
+                ]);
+            }
+            $iterableElements = $participations;
+        }
+
+        if($entity == 'activity' && ($participation == null || $participation->getType() == 0 && $type != 0)){
+
+            // Checking if we need to unvalidate participations (we decide to unlock all stage participations and not only the modified one)
+            $completedStageParticipations = $stage->getParticipants()->filter(function(Participation $p){
+                return $p->getStatus() == 3;
+            });
+
+            if($completedStageParticipations->count() > 0){
+
+                $mailRecipients = [];
+                $mailRecipientIds = [];
+                foreach($completedStageParticipations as $completedParticipation){
+                    if(in_array($completedParticipation->getUsrId(),$mailRecipientIds) === false){
+                        $mailRecipients[] = $completedParticipation->getDirectUser();
+                        $mailRecipientIds[] = $completedParticipation->getUsrId();
+                    }
+                    $completedParticipation->setStatus(2);
+                    $em->persist($completedParticipation);
+                }
+                $em->flush();
+
+                self::sendMail(
+                    $app,
+                    $mailRecipients,
+                    'unvalidateOutputDueToChange',
+                    ['stage' => $stage, 'actElmt' => 'participant']
+                );
+            }
+        }
+
+        $participation = null;
+
+        foreach ($iterableElements as $iterableElement) {
+
+            // If participations are existing for submitted participant
+            if ($iterableElement instanceof Participation || $iterableElement instanceof IProcessParticipation || $iterableElement instanceof TemplateParticipation) {
+                $participation = $iterableElement;
+                $criterion = $participation->getCriterion();
+                $consideredParticipations[] = $participation;
+
+            } else {
+
+                $consideredParticipations = [];
+
+                switch($entity){
+                    case 'activity' :
+                        if($pEntity == 'user'){
+                            $participation = new Participation;
+                            $consideredParticipations[] = $participation;
+                        } else {
+                            foreach($pElement->getCurrentMembers() as $currentMember){
+//                                var_dump($currentMember->getUsrId());
+                                $participation = new Participation;
+                                $participation->setUser($currentMember)
+                                    ->setExternalUser($currentMember->getExternalUser());
+                                $consideredParticipations[] = $participation;
+                            }
+                        }
+                        break;
+                    case 'iprocess' :
+                        if($pEntity == 'user'){
+                            $participation = new IProcessParticipation;
+                            $consideredParticipations[] = $participation;
+                        } else {
+                            foreach($pElement->getCurrentMembers() as $currentMember){
+                                $participation = new IProcessParticipation;
+                                $participation->setUser($currentMember)
+                                    ->setExternalUser($currentMember->getExternalUser());
+                                $consideredParticipations[] = $participation;
+                            }
+                        }
+                        break;
+                    case 'template' :
+                        if($pEntity == 'user'){
+                            $participation = new TemplateParticipation;
+                            $consideredParticipations[] = $participation;
+                        } else {
+                            foreach($pElement->getCurrentMembers() as $currentMember){
+                                $participation = new TemplateParticipation;
+                                $participation->setUsrId($currentMember->getUsrId())
+                                    ->setExtUsrId($currentMember->getExtUsrId());
+                                $consideredParticipations[] = $participation;
+                            }
+                        }
+                        break;
+                }
+                $criterion = sizeof($stage->getCriteria()) > 0 ? $iterableElement : null;
+            }
+            foreach($consideredParticipations as $consideredParticipation){
+
+                if (!$consideredParticipation) {
+                    continue; return;
+                }
+
+                $consideredParticipation
+                    ->setType($type)
+                    ->setStage($stage)
+                    ->setInitiator($currentUser);
+
+                if($pEntity == 'team'){
+                    $consideredParticipation->setTeam($pElement);
+                } else {
+                    $consideredParticipation->setUser($pElement);
+                }
+
+
+                $userOrganization = $pElement->getOrganization();
+                $currentUserOrganization = $currentUser->getOrganization();
+
+                if($userOrganization != $currentUserOrganization){
+                    /** @var Client */
+                    $client = $currentUserOrganization->getClients()->filter(function(Client $c) use ($userOrganization){
+                        return $c->getClientOrganization() == $userOrganization;
+                    })->first();
+                    $externalUser = $client->getExternalUsers()->filter(function(ExternalUser $e) use ($pElement){
+                        return $e->getUser() == $pElement;
+                    })->first();
+
+                    $consideredParticipation->setExternalUser($externalUser);
+                }
+
+
+                if($leader){$consideredParticipation->setLeader($leader);}
+
+                if ($consideredParticipation instanceof IProcessParticipation) {
+                    $consideredParticipation->setInstitutionProcess($element);
+                } else {
+                    $consideredParticipation->setActivity($element);
+                }
+
+                if ($precomment) {
+                    $consideredParticipation->setPrecomment($precomment);
+                } else if ($consideredParticipation->getPrecomment() !== null) {
+                    $consideredParticipation->setPrecomment(null);
+                }
+
+                if ($consideredParticipation instanceof Participation) {
+                    //$consideredParticipation->setIsMailed(false);
+
+                    if ($leader) {
+                        // Removing leadership to all old previous (criterion) leading participations
+
+                        /** @var Criterion|Stage */
+                        $queryableElmt = $criterion ?: $stage;
+
+                        $previousOwningParticipants = $queryableElmt->getParticipations()->filter(function(Participation $p) use ($consideredParticipation){
+                            return ($consideredParticipation->getTeam() ?
+                                $p->getTeam() != $consideredParticipation->getTeam() :
+                                $p->getUser() != $consideredParticipation->getUser())
+                                && $p->isLeader();
+                        });
+
+                        foreach ($previousOwningParticipants as $previousOwningParticipant) {
+                            $previousOwningParticipant->setLeader(false);
+                            $queryableElmt->addParticipant($previousOwningParticipant);
+                        }
+                        //$consideredParticipation->setLeader(true);
+                    } else {
+                        //$consideredParticipation->setLeader(false);
+                    }
+                }
+
+                $criterion ? $criterion->addParticipation($consideredParticipation) : $stage->addParticipation($consideredParticipation);
+
+            }
+
+            if($iterableElement instanceof Criterion){
+                $stage->addCriterion($criterion);
+            }
+
+        }
+
+        /*
+        $mailed = null;
+        $finalizable = (
+            $entity == 'activity'
+            && $participation && $participation->getType() != 0
+            && (count($stage->getCriteria()) > 0 || count($stage->getCriteria()) > 0)
+        );
+        */
+
+        if ($entity == 'activity' and $element->getStatus() === 1) {
+            $mailedUsrIds = [];
+            $recipients = [];
+
+            foreach($consideredParticipations as $consideredParticipation){
+
+
+                if(!$consideredParticipation->getisMailed()){
+
+                    $participationUsrId = $consideredParticipation->getUser()->getId();
+
+                    if(in_array($participationUsrId,$mailedUsrIds) === false){
+                        $mailedUsrIds[] = $participationUsrId;
+                        $user = $repoU->find($participationUsrId);
+                        if(!($user->getLastname() == 'ZZ' && $user->getEmail() == null)){
+                            $repicients[] = $user;
+                        }
+                    }
+                    $consideredParticipation->setIsMailed(true);
+                    $em->persist($consideredParticipation);
+                }
+            }
+
+            if(sizeof($recipients) > 0){
+                $sendMail = self::sendMail(
+                    $app,
+                    $recipients,
+                    'activityParticipation',
+                    [
+                        'activity' => $element,
+                        'stage' => $stage,
+                    ]
+                );
+            }
+        }
+
+        $em->persist($stage);
+        $em->flush();
+
+        /*$user = $participation->getDirectUser();
+        if ( !($user instanceof User) ) {
+            throw new \Exception;
+        }*/
+
+        return new JsonResponse([
+            'eid' => $consideredParticipations[0]->getId(),
+            //'finalizable' => $finalizable,
+            'pElement' => [
+                'picture' => $pEntity == 'user' ?
+                    ($pElement->getPicture() ?? 'no-picture.png') :
+                    ($pElement->getPicture() ? 'team/'.$pElement->getPicture() : 'team/no-picture.png')
+            ],
+            'canSetup' => !$element->getActiveModifiableStages()->isEmpty(),
+        ], 200);
+    }
+
+
+    /**
+     * @param Request $request
+     * @param $inpId
+     * @return JsonResponse|RedirectResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws \Exception
+     * @Route("/institution/activity/process/{inpId}", name="createUserProcessActivity")
+     */
+    public function createUserProcessActivity(Request $request, $inpId){
+        $repoIP = $this->em->getRepository(InstitutionProcess::class);
+        $repoU = $this->em->getRepository(User::class);
+        $currentUser = $this->user;
+        // If not fresh new internal activity, institution is null. If activity request by citizen/external, then is necessarily linked to an (i)process
+        $institutionProcess = $inpId !== 0 ? $repoIP->findOneById($inpId) : 0;
+        var_dump($institutionProcess);
+        $institution = ((int)$_POST['fi'] === 1) ? $currentUser->getOrganization() : $institutionProcess->getOrganization();
+        $activity = new Activity;
+        $startdate = new DateTime;
+        $fromInternal = ((int)$_POST['fi']) === 1;
+        $actName = $_POST['an'];
+        $isUnlinkedToAnyProcess = isset($_POST['up']) &&  (int)$_POST['up'] === 1;
+        $informingMail = isset($_POST['im']) && (int)$_POST['im'] === 1;
+
+        if($actName !== ''){
+            $duplicateActivity = $this->em->getRepository(Activity::class)->findOneBy(['name' => $actName, 'organization' => $institution]);
+            if($duplicateActivity){
+                return new JsonResponse(['errorMsg' => 'There is already an activity created with such name. Please give another one'], 500);
+            }
+        }
+
+        // Does IProcess has defined stages ? If it is the case, activity will inheritate from IProcess stages and so on
+        // Otherwise, activity will inheritate from Process stages and so on
+        if($institutionProcess != null) {
+            if ($institutionProcess && !$institutionProcess->isApprovable()) {
+                $IProcessStages = $institutionProcess->getStages();
+
+                if (count($IProcessStages) !== 0) {
+                    $baseElement = $institutionProcess;
+                } else if (count($institutionProcess->getProcess()->getStages()) !== 0) {
+                    $baseElement = $institutionProcess->getProcess();
+                } else {
+                    return new JsonResponse('No possibility to create activity', 500);
+                }
+            }
+
+            if ($isUnlinkedToAnyProcess || $institutionProcess->isApprovable()) {
+                return $this->redirectToRoute("activityInitialisation", ['entity' => 'activity', 'inpId' => $inpId, 'actName' => $actName]);
+                //$activityController = new ActivityController($this->em, $this->security, $this->stack);
+                //return $activityController->addActivityId('activity', $inpId, $actName);
+            }
+
+            // We duplicate activity process/iprocess
+            $activity
+                ->setName($actName !== '' ? $actName : $institutionProcess->getName())
+                ->setOrganization($institution)
+                ->setInitiator($currentUser)
+                ->setStatus($institutionProcess->isApprovable() ? -3 : 1);
+
+            foreach($institutionProcess->getUserMasters() as $userMaster){
+                $activity->addUserMaster($userMaster);
+            }
+
+            if ($institutionProcess->isApprovable() & !$fromInternal) {
+                $recipients = [];
+                /*** We need the person in charge of approval : it is, by order of importance,
+                 * 1/ The person in charge of the process, or
+                 * 2/ Parent process responsible (up to order 2), or
+                 * 3/ One administrator (the first alive in the DB)
+                 ***/
+                $IProcessResponsible = $institutionProcess->getMasterUser();
+                $parentIProcess = $institutionProcess->getParent();
+                $grandParentIProcess = $parentIProcess !== null ? $parentIProcess->getParent() : null;
+
+                if ($IProcessResponsible !== null) {
+                    $recipients[] = $IProcessResponsible;
+                } else if ($parentIProcess) {
+                    $parentIProcessResponsible = $parentIProcess->getMasterUser();
+                    if ($parentIProcessResponsible !== null) {
+                        $recipients[] = $parentIProcessResponsible;
+                    } else if ($grandParentIProcess) {
+                        $grandParentIProcessResponsible = $grandParentIProcess->getMasterUser();
+                        if ($grandParentIProcessResponsible !== null) {
+                            $recipients[] = $grandParentIProcessResponsible;
+                        }
+                    }
+                }
+
+                if (!$recipients) {
+                    $firstAliveAdministrator = $repoU->findOneBy(['role' => 2, 'deleted' => null, 'orgId' => $institution->getId()]);
+                    $recipients[] = $firstAliveAdministrator;
+                }
+
+                $settings = [];
+                $settings['activity'] = $activity;
+                $settings['requester'] = $currentUser;
+
+                //2 - Send mail to recipients, set them as deciders
+                foreach ($recipients as $recipient) {
+
+                    $decision = new Decision;
+                    $decision
+                        ->setType(1)
+                        ->setRequester($currentUser->getId())
+                        ->setAnonymousRequest(false)
+                        ->setAnonymousDecision(false)
+                        ->setDecider($recipient->getId())
+                        ->setOrganization($institution)
+                        ->setActivity($activity);
+                    $decision->setInitiator($currentUser);
+                    $this->em->persist($decision);
+                }
+
+                $this->em->persist($activity);
+
+                $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'request']);
+
+            }
+
+
+            (count($IProcessStages) !== 0) ?
+                $activity->setInstitutionProcess($baseElement)->setProcess($baseElement->getProcess()) :
+                $activity->setProcess($baseElement);
+
+            $pStages = $baseElement->getStages();
+            $accessLinks = [];
+
+            foreach ($pStages as $pStage) {
+                $stage = new Stage;
+
+                if (!$pStage->isDefiniteDates()) {
+
+                    $clonedSD = clone $startdate;
+                    $pStageFreq = $pStage->getDFrequency();
+                    if ($pStageFreq !== 'BD') {
+                        $dateIntervalPrefix = ($pStageFreq === 'm' || $pStageFreq === 'H') ? 'PT' : 'P';
+                        $enddate = $clonedSD->add(new DateInterval($dateIntervalPrefix . $pStage->getDPeriod() . $pStageFreq));
+                    } else {
+                        $enddate = $clonedSD->modify("+{$pStage->getPeriod()}weekdays");
+                    }
+                    $gStartdate = $clonedSD;
+                    $gEnddate = $clonedSD->add(new DateInterval('P15D'));
+
+                } else {
+                    $startdate = $pStage->getStartdate();
+                    $enddate = $pStage->getEnddate();
+                    $gStartdate = $pStage->getGStartdate();
+                    $gEnddate = $pStage->getGEnddate();
+                }
+
+                $accessLink = mt_rand(100000, 999999);
+
+                $stage
+                    ->setName($pStage->getName())
+                    ->setVisibility($pStage->getVisibility())
+                    ->setAccessLink($accessLink)
+                    ->setWeight(1)
+                    ->setStartdate($startdate)
+                    ->setEnddate($enddate)
+                    ->setMode(1)
+                    ->setInitiator($currentUser);
+                
+                foreach($pStage->getUserMasters() as $userMaster){
+                    $stage->addUserMaster($userMaster);
+                }
+
+
+                if ($pStage->getVisibility() === 2) {
+                    $accessLinks[] = $accessLink;
+                }
+                $pCriteria = $pStage->getCriteria();
+
+                if (count($pCriteria) !== 0) {
+                    foreach ($pCriteria as $pCriterion) {
+                        $criterion = new Criterion;
+
+                        $criterion->setCName($pCriterion->getCName())
+                            ->setType($pCriterion->getType())
+                            ->setWeight($pCriterion->getWeight())
+                            ->setLowerbound($pCriterion->getLowerbound())
+                            ->setUpperbound($pCriterion->getUpperbound())
+                            ->setStep($pCriterion->getStep())
+                            ->setForceCommentCompare($pCriterion->isForceCommentCompare())
+                            ->setForceCommentSign($pCriterion->getForceCommentSign())
+                            ->setForceCommentValue($pCriterion->getForceCommentValue());
+
+                        $stage->addCriterion($criterion);
+
+                        $pParticipations = count($IProcessStages) != 0 ? $pCriterion->getParticipants() : null;
+                        if (count($IProcessStages) != 0 && count($pParticipations) != 0) {
+                            foreach ($pParticipations as $pParticipation) {
+                                $participation = new Participation;
+                                $participation->setLeader($pParticipation->isLeader())
+                                    ->setMWeight($pParticipation->getMWeight())
+                                    ->setPrecomment($pParticipation->getPrecomment())
+                                    ->setTeam($pParticipation->getTeam())
+                                    ->setUsrId($pParticipation->getUsrId())
+                                    ->setType($pParticipation->getType());
+                                $stage->addParticipant($participation);
+                                $criterion->addParticipant($participation);
+                            }
+
+                        } else {
+                            $synthParticipation = new Participation;
+                            $institutionSynthUser = $repoU->findOneBy(['firstname' => 'ZZ', 'lastname' => 'ZZ', 'orgId' => $institution->getId()]);
+
+                            $synthParticipation->setLeader(true)
+                                ->setTeam(null)
+                                ->setUsrId($institutionSynthUser->getId())
+                                ->setType(-1);
+                            $stage->addParticipant($synthParticipation);
+                            $criterion->addParticipant($synthParticipation);
+                        }
+
+                        // If comes from an external request, we create external participation
+                        if (!$fromInternal) {
+                            $userParticipation = new Participation;
+                            $userParticipation->setLeader(false)
+                                ->setUsrId($currentUser->getId())
+                                ->setType(0);
+                            $stage->addParticipant($userParticipation);
+                            $criterion->addParticipant($userParticipation);
+                        }
+                    }
+                    $stage->addCriterion($criterion);
+                }
+                $activity->addStage($stage);
+                $this->em->persist($activity);
+
+                // Sending participants mails if necessary
+                if ($informingMail) {
+                    if (count($stage->getCriteria()) > 0) {
+
+                        // Parameter for subject mail title
+                        if (count($institutionProcess->getStages()) > 1) {
+                            $mailSettings['stage'] = $stage;
+                        } else {
+                            $mailSettings['activity'] = $activity;
+                        }
+
+                        /** @var Participation[] */
+                        $uniqueParticipations = $stage->getUniqueParticipations();
+                        if (count($uniqueParticipations) > 0) {
+                            foreach ($uniqueParticipations as $uniqueParticipation) {
+                                if (count($pParticipations) !== 0 || (count($pParticipations) === 0 && $uniqueParticipation->getUsrId() != $synthParticipation->getUsrId())) {
+                                    $recipients[] = $uniqueParticipation->getDirectUser();
+                                    $uniqueParticipation->setIsMailed(true);
+                                    $this->em->persist($uniqueParticipation);
+                                }
+                            }
+
+                            $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $mailSettings, 'actionType' => 'activityParticipationFollowing']);
+                        }
+                    }
+                }
+            }
+
+        $this->em->flush();
+        return new JsonResponse(['message' => 'success', 'aid' => $activity->getId(), 'ali' => $accessLinks],200);
+        }
+        return $this->redirectToRoute("activityInitialisation", ['entity' => 'activity', 'inpId' => $inpId, 'actName' => $actName]);
     }
 
 }

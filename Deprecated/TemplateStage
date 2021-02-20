@@ -76,7 +76,7 @@
 //    public $deadlineNbDays;
 //
 //    /**
-//     * @ORM\Column(name="stg_created_by", type="string", length=255, nullable=true)
+//     * @ORM\Column(name="stg_initiator", type="string", length=255, nullable=true)
 //     */
 //    public $createdBy;
 //
@@ -275,7 +275,7 @@
 //        return $this;
 //    }
 //
-//    public function getCreatedBy(): ?string
+//    public function getInitiator(): ?string
 //    {
 //        return $this->createdBy;
 //    }

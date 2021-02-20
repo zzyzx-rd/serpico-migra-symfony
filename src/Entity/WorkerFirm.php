@@ -143,9 +143,10 @@ class WorkerFirm extends DbObject
     public $creationDate;
 
     /**
-     * @ORM\Column(name="wfi_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="workerFirmInitiatives")
+     * @JoinColumn(name="wfi_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="wfi_inserted", type="datetime",  options={"default": "CURRENT_TIMESTAMP"})
@@ -221,7 +222,6 @@ class WorkerFirm extends DbObject
      * @param $wfi_suffix
      * @param $wfi_nb_active_exp
      * @param $wfi_created
-     * @param $wfi_createdBy
      * @param $mainSector
      * @param $city
      * @param $state
@@ -248,7 +248,6 @@ class WorkerFirm extends DbObject
         $wfi_suffix = null,
         $wfi_nb_active_exp = null,
         $wfi_created = null,
-        $wfi_createdBy = null,
         $wfi_hq_location = null,
         $wfi_website = null,
         $wfi_creation = null,
@@ -259,7 +258,7 @@ class WorkerFirm extends DbObject
         $parent = null
         )
     {
-        parent::__construct($id, $wfi_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->parent = $parent;
         $this->creationDate = $creationDate;
         $this->HQLocation = $wfi_hq_location;

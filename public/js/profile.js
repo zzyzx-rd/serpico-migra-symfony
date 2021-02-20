@@ -167,4 +167,21 @@ $(function() {
 
     })
 
+    $('.fj-requests-btn').on('click',function(e){
+        e.preventDefault();
+        $.get(gfjurl)
+            .done(function(data){
+                $('#pendingFJRequests tbody').empty();
+                $.each(data,function(_i,e){
+                    $row = $('<tr></tr>');
+                    $row
+                        .append(`<td>${e.name}</td>`)
+                        .append(`<td>${e.type}</td>`)
+                        .append(`<td>${ new Date(e.rdate.date).toLocaleString('fr-FR',{month: 'long', day: 'numeric', year: 'numeric'}) }</td>`)
+                    $('#pendingFJRequests tbody').append($row);
+                })
+                $('#pendingFJRequests').modal('open');
+            })
+    })
+
 });

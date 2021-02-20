@@ -46,13 +46,17 @@ class Stage extends DbObject
     public const PROGRESS_COMPLETED = 2;
     public const PROGRESS_FINALIZED = 3;
 
-    public const VISIBILITY_PUBLIC = 0;
-    public const VISIBILITY_UNLISTED = 1;
-    public const VISIBILITY_PRIVATE = 2;
+    public const VISIBILITY_PRIVATE = -1;
+    public const VISIBILITY_UNLISTED = 0;
+    public const VISIBILITY_PUBLIC = 1;
 
-    public const INVIT_STATUS_CLOSED = -1;
-    public const INVIT_STATUS_CHECK = 0;
-    public const INVIT_STATUS_OPEN = 1;
+    public const FOLLOWABLE_FORBIDDEN = -1;
+    public const FOLLOWABLE_REQUEST = 0;
+    public const FOLLOWABLE_DIRECT = 1;
+
+    public const JOINABLE_FORBIDDEN = -1;
+    public const JOINABLE_REQUEST = 0;
+    public const JOINABLE_DIRECT = 1;
 
     public const GRADED_STAGE = 0;
     public const GRADED_PARTICIPANTS = 1;
@@ -91,9 +95,14 @@ class Stage extends DbObject
     public ?string $accessLink;
 
     /**
-     * @ORM\Column(name="stg_invit_status", type="integer", nullable=true)
+     * @ORM\Column(name="stg_joinable_status", type="integer", nullable=true)
      */
-    public ?int $invitStatus;
+    public ?int $joinableStatus;
+
+    /**
+     * @ORM\Column(name="stg_followable_status", type="integer", nullable=true)
+     */
+    public ?int $followableStatus;
 
     /**
      * @ORM\Column(name="stg_invit_closed", type="datetime", nullable=true)
@@ -177,9 +186,10 @@ class Stage extends DbObject
     public ?bool $deadlineMailSent;
 
     /**
-     * @ORM\Column(name="stg_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="stageInitiatives")
+     * @JoinColumn(name="stg_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="stg_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
@@ -241,7 +251,7 @@ class Stage extends DbObject
 
     /**
      * @ManyToOne(targetEntity=Activity::class, inversedBy="stages")
-     * @JoinColumn(name="activity_act_id", referencedColumnName="act_id",nullable=false)
+     * @JoinColumn(name="activity_act_id", referencedColumnName="act_id", nullable=false)
      */
     protected $activity;
 
@@ -350,13 +360,14 @@ class Stage extends DbObject
      * @param int $visibility
      * @param string $name
      * @param string $accessLink
+     * @param int $joinableStatus
+     * @param int $followableStatus
      * @param int $status
      * @param string $description
      * @param int $progress
      * @param float $weight
      * @param int $deadlineNbDays
      * @param bool $deadlineMailSent
-     * @param int $createdBy
      * @param DateTime $finalized
      * @param DateTime $lastReopened
      * @param DateTime $deleted
@@ -366,17 +377,17 @@ class Stage extends DbObject
         $id = 0,
         $complete = false,
         $activity = null,
-        $visibility = 3,
+        $visibility = 0,
         ?string $name = null,
         $accessLink = null,
-        $invitStatus = null,
+        $followableStatus = null,
+        $joinableStatus = null,
         $status = 0,
         $description = null,
         $progress = -1,
         $weight = 0.0,
         $deadlineNbDays = 3,
         $deadlineMailSent = null,
-        $createdBy = null,
         $finalized = null,
         $lastReopened = null,
         $deleted = null,
@@ -384,7 +395,7 @@ class Stage extends DbObject
         $gcompleted = null
         )
     {
-        parent::__construct($id, $createdBy, new DateTime);
+        parent::__construct($id, null, new DateTime);
         $this->complete = $complete;
         $this->activity = $activity;
         $this->name = $name;
@@ -398,7 +409,8 @@ class Stage extends DbObject
         $this->fFrequency = 'D';
         $this->fOrigin = 2;
         $this->accessLink = $accessLink;
-        $this->invitStatus = $invitStatus;
+        $this->joinableStatus = $joinableStatus;
+        $this->followableStatus = $followableStatus;
         $this->status = $status;
         $this->description = $description;
         $this->progress = $progress;
@@ -486,14 +498,25 @@ class Stage extends DbObject
         return $this;
     }
 
-    public function getInvitStatus(): ?int
+    public function getJoinableStatus(): ?int
     {
-        return $this->invitStatus;
+        return $this->joinableStatus;
     }
 
-    public function setInvitStatus(int $invitStatus): self
+    public function setJoinableStatus(?int $joinableStatus): self
     {
-        $this->invitStatus = $invitStatus;
+        $this->joinableStatus = $joinableStatus;
+        return $this;
+    }
+
+    public function getFollowableStatus(): ?int
+    {
+        return $this->followableStatus;
+    }
+
+    public function setFollowableStatus(?int $followableStatus): self
+    {
+        $this->followableStatus = $followableStatus;
         return $this;
     }
 
@@ -689,9 +712,9 @@ class Stage extends DbObject
     }
 
     /**
-     * @param mixed $activity
+     * @param Activity $activity
      */
-    public function setActivity($activity): self
+    public function setActivity(Activity $activity): self
     {
         $this->activity = $activity;
         return $this;
@@ -1373,7 +1396,7 @@ class Stage extends DbObject
             return true;
         }
 
-        if ($this->getMasterUser() == $connectedUser && ($this->getGraderParticipants() === null || !$this->getGraderParticipants()->exists(static function(int $i, Participation $p){return $p->isLeader();}))) {
+        if ($this->getUserMasters()->exists(fn(int $i, UserMaster $m) => $m->getUser() == $connectedUser && $m->getType() == USERMASTER::PARTICIPATION_LEADER) && ($this->getGraderParticipants() === null || !$this->getGraderParticipants()->exists(static function(int $i, Participation $p){return $p->isLeader();}))) {
             return true;
         }
 
@@ -1503,6 +1526,10 @@ class Stage extends DbObject
                 $intNextWeekOffset = $intCurrWeekOffset + 1;
                 $sd = new DateTime("+$intCurrWeekOffset weeks january $intYear");
                 $ed = new DateTime("+$intNextWeekOffset weeks january $intYear");
+                break;
+            case 'd' :
+                $sd = new DateTime(str_replace("-","/",$_COOKIE['ci']));
+                $ed = clone $sd->add(new DateInterval('P1D'));
                 break;
         }
 
@@ -1832,6 +1859,52 @@ class Stage extends DbObject
     {
         $this->userMasters->removeElement($userMaster);
         return $this;
+    }
+
+    /**
+    * @return ArrayCollection
+    */
+    public function getLeaderMasters()
+    {
+        return $this->userMasters->filter(fn(UserMaster $m) => $m->getProperty() == 'leader' && $m->getType() >= UserMaster::ADDED);
+    }
+    /**
+    * @return ArrayCollection
+    */
+    public function getLeaders()
+    {
+        return $this->getLeaderMasters()->map(fn(UserMaster $m) => $m->getUser());
+    }
+
+    /**
+    * @return ArrayCollection|UserMaster[]
+    */
+    public function getFollowerMasters()
+    {
+        return $this->userMasters->filter(fn(UserMaster $m) => $m->getProperty() == 'followableStatus' && $m->getType() >= UserMaster::ADDED);
+    }
+
+    /**
+    * @return ArrayCollection|User[]
+    */
+    public function getFollowers()
+    {
+        return $this->getFollowerMasters()->map(fn(UserMaster $m) => $m->getUser());
+    }
+
+    /**
+    * @return ArrayCollection|User[]
+    */
+    public function getRequesterMasters()
+    {
+        return $this->userMasters->filter(fn(UserMaster $m) => ($m->getProperty() == 'followableStatus' || $m->getProperty() == 'joinableStatus') && $m->getType() == UserMaster::PENDING);
+    }
+    /**
+    * @return ArrayCollection|User[]
+    */
+    public function getRequesters()
+    {
+        return $this->getRequesterMasters()->map(fn(UserMaster $m) => $m->getUser());
     }
 
 }

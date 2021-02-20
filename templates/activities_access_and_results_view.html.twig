@@ -2,17 +2,17 @@
   1: {
     badge_class: 'admin-badge',
     letter: 'A',
-    label: 'firm_settings.users.privileges.activities_access_and_results_view.administrators'|trans
+    label: 'firm_settings_old.users.privileges.activities_access_and_results_view.administrators'|trans
   },
   2: {
     badge_class: 'am-badge',
     letter: 'M',
-    label: 'firm_settings.users.privileges.activities_access_and_results_view.managers'|trans
+    label: 'firm_settings_old.users.privileges.activities_access_and_results_view.managers'|trans
   },
   3: {
     badge_class: 'collaborator-badge',
     letter: 'C',
-    label: 'firm_settings.users.privileges.activities_access_and_results_view.collaborators'|trans
+    label: 'firm_settings_old.users.privileges.activities_access_and_results_view.collaborators'|trans
   }
 } %}
 {%
@@ -23,7 +23,7 @@
 <section id="activities-access-and-results-view">
   <header>
     <i class="fa fa-user"></i>
-    {{ 'firm_settings.users.privileges.activities_access_and_results_view.title'|trans }}
+    {{ 'firm_settings_old.users.privileges.activities_access_and_results_view.title'|trans }}
   </header>
   <ul>
     {% for option in activitiesAccessAndResultsViewOptions %}
@@ -36,25 +36,25 @@
           </div><span>{{ rolesRow.label }}</span>
         </div>
         <div>
-          {{ 'firm_settings.users.privileges.activities_access_and_results_view.activity_access_msg'|trans }}
+          {{ 'firm_settings_old.users.privileges.activities_access_and_results_view.activity_access_msg'|trans }}
         </div>
         <div>
           {{ form_widget(option.optionIValue) }}
         </div>
         <div>
-          {{ 'firm_settings.users.privileges.activities_access_and_results_view.scope_msg'|trans }}
+          {{ 'firm_settings_old.users.privileges.activities_access_and_results_view.scope_msg'|trans }}
         </div>
         <div>
           {{ form_widget(option.optionTrue) }}
         </div>
         <div>
-          {{ 'firm_settings.users.privileges.activities_access_and_results_view.results_access_msg'|trans }}
+          {{ 'firm_settings_old.users.privileges.activities_access_and_results_view.results_access_msg'|trans }}
         </div>
         <div>
           {{ form_widget(option.optionSecondaryIValue) }}
         </div>
         <div>
-          {{ 'firm_settings.users.privileges.activities_access_and_results_view.detail_msg'|trans }}
+          {{ 'firm_settings_old.users.privileges.activities_access_and_results_view.detail_msg'|trans }}
         </div>
         <div>
           {{ form_widget(option.optionFValue) }}

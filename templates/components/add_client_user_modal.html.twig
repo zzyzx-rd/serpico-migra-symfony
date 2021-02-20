@@ -3,7 +3,7 @@
 <div id="addUserClient" class="modal">
     <form id="userClientForm">
         <div class="modal-content">
-            {% if route != 'manageClient' %}
+            {% if route not in ['manageClient','firmSettings'] %}
                 <div class="type-part" {% if route == 'myActivities' %}style="display:none"{% endif %}>
                     <div class="flex-center"> 
                         <h5 class="m-left">{{ route == 'myActivities' ? 'user_list.add_user_modal.type_act_title'|trans : 'user_list.add_user_modal.type_title'|trans }}</h5>
@@ -16,7 +16,7 @@
                                     <div class="icon-holder flex-center">
                                         <span class="independent-letter white-text">I</span>
                                     </div>
-                                    <span class="sm-left">{{ 'independant'|trans|capitalize }}</span>
+                                    <span class="sm-left">{{ 'user_list.add_user_modal.independant_person'|trans|capitalize }}</span>
                                     <i class="sm-left fa fa-question-circle tooltipped" data-tooltip="{{ 'user_list.add_user_modal.independant_creation_info'|trans }}" data-position="top"></i>
                                 </label>
                             </div>
@@ -38,7 +38,7 @@
                                 <input type="radio" id="user" name="gen-type" value="u" checked>
                                 <label for="user">
                                     <img class="user-profile-xl-picture" src="{{ asset('lib/img/user/no-picture.png')}}" alt="">
-                                    <span class="sm-left">{{ 'member'|trans|capitalize }}</span>
+                                    <span class="sm-left">{{ 'user_list.add_user_modal.on_behalf_person'|trans|capitalize }}</span>
                                 </label>
                             </div>
                             <div class="col s12 m6">
@@ -91,26 +91,46 @@
                     </div> 
                 </div>
             {% endif %}
-            <div class="username-part" {% if route not in ['myActivities','manageClient'] %}style="display:none"{% endif %}>
+            <div class="username-part" {% if route not in ['myActivities','manageClient','firmSettings'] %}style="display:none"{% endif %}>
                 <div class="title">
                     
                     {#{% if route != 'myActivities' %}#}
-                        
-                        <div class="flex-center int-org" style="display:none"> 
-                            <i class="fa fa-user-circle dd-text"></i>
-                            <h5 class="m-left">{{'user_list.add_user_modal.int_user_title'|trans}}</h5>
-                        </div>
-                        <div class="flex-center independent-org" style="display:none"> 
-                            <div class="independant-xl-icon-holder icon-holder flex-center">
-                                <span class="independent-letter white-text">I</span>
+                        {% if currentuser and not currentuser.organization.hasSuperAdmin %}
+                        <div class="flex-center super-admin" style="display:none"> 
+                            <div class="badge-container">
+                                <div class="super-admin-badge">S</div>
                             </div>
-                            <h5 class="m-left">{{'user_list.add_user_modal.independant_user_title'|trans}}</h5>
+                            <h5 class="m-left">{{'user_list.add_user_modal.super_admin_title'|trans}}</h5>
                         </div>
-                        <div class="flex-center ext-org"> 
-                            <i class="fa fa-user-circle dd-orange-text"></i>
-                            <h5 class="m-left m-right">{{ route != 'myActivities' ? 'user_list.add_user_modal.ext_user_title'|trans : 'user_list.add_user_modal.participant_title'|trans }}</h5>
-                            <img class="icon-holder" data-wo="{{ asset('lib/img/org/no-picture.png') }}" src="{{ asset('lib/img/org/no-picture.png') }}" alt="">
-                        </div>
+                        {% endif %}
+                        {% if route == 'firmSettings' %}
+                        
+                            <div class="flex-center admin"> 
+                            <div class="badge-container">
+                                <div class="admin-badge">A</div>
+                            </div>
+                            <h5 class="m-left">{{'user_list.add_user_modal.admin_title'|trans}}</h5>
+                            </div>
+                        
+                        {% else %}
+
+                            <div class="flex-center int-org" style="display:none"> 
+                                <i class="fa fa-user-circle dd-text"></i>
+                                <h5 class="m-left">{{'user_list.add_user_modal.int_user_title'|trans}}</h5>
+                            </div>
+                            <div class="flex-center independent-org" style="display:none"> 
+                                <div class="independant-xl-icon-holder icon-holder flex-center">
+                                    <span class="independent-letter white-text">I</span>
+                                </div>
+                                <h5 class="m-left">{{'user_list.add_user_modal.independant_user_title'|trans}}</h5>
+                            </div>
+                            <div class="flex-center ext-org"> 
+                                <i class="fa fa-user-circle dd-orange-text"></i>
+                                <h5 class="m-left m-right" >{{ route != 'myActivities' ? 'user_list.add_user_modal.ext_user_title'|trans : 'user_list.add_user_modal.follower_participant_title'|trans|raw }}</h5>
+                                <img class="icon-holder" data-wo="{{ asset('lib/img/org/no-picture.png') }}" src="{{ asset('lib/img/org/no-picture.png') }}" alt="">
+                            </div>
+
+                        {% endif %}
                     {#{% else %}
                         <div class="flex-center ext-org"> 
                             <i class="fa fa-user-circle dd-text"></i>

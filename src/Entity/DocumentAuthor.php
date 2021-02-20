@@ -30,9 +30,10 @@ class DocumentAuthor extends DbObject
     public $leader;
 
     /**
-     * @ORM\Column(name="dau_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="documentAuthorInitiatives")
+     * @JoinColumn(name="dau_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="dau_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
@@ -55,7 +56,6 @@ class DocumentAuthor extends DbObject
      * DocumentAuthor constructor.
      * @param ?int$id
      * @param $leader
-     * @param $createdBy
      * @param $document
      * @param $author
      * @param $externalUser
@@ -63,10 +63,9 @@ class DocumentAuthor extends DbObject
 
     public function __construct(
       ?int $id = 0,
-        $createdBy = null,
         $leader = false)
     {
-        parent::__construct($id, $createdBy , new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->leader = $leader;
     }
 

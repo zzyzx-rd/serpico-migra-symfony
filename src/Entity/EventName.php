@@ -35,9 +35,10 @@ class EventName extends DbObject
     public $description;
 
     /**
-     * @ORM\Column(name="evn_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="eventNameInitiatives")
+     * @JoinColumn(name="evn_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="evn_inserted", type="datetime", nullable=false, options={"default": "CURRENT_TIMESTAMP"})
@@ -68,16 +69,14 @@ class EventName extends DbObject
      * @param $type
      * @param $name
      * @param $description
-     * @param $createdBy
      * @param $inserted
      */
     public function __construct(
         $id = 0,
         $description = null,
-        $name = null,
-        $createdBy = null)
+        $name = null)
     {
-        parent::__construct($id, $createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->name = $name;
         $this->description = $description;
     }

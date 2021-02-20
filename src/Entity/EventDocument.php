@@ -76,9 +76,10 @@ class EventDocument extends DbObject
     protected $organization;
 
     /**
-     * @ORM\Column(name="evd_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="eventDocumentInitiatives")
+     * @JoinColumn(name="evd_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="evd_modified", type="datetime", nullable=true)
@@ -99,7 +100,6 @@ class EventDocument extends DbObject
      * @param $path
      * @param $size
      * @param $event
-     * @param $createdBy
      */
     public function __construct(
         $id = 0,
@@ -111,10 +111,9 @@ class EventDocument extends DbObject
         Event $event = null,
         Organization $organization = null,
         User $author = null,
-        $createdBy = null,
         DateTime $modified = null)
     {
-        parent::__construct($id, $createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->title = $title;
         $this->path = $path;
         $this->size = $size;

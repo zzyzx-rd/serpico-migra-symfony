@@ -39,9 +39,10 @@ class City extends DbObject
     public $name;
 
     /**
-     * @ORM\Column(name="cit_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="cityInitiatives")
+     * @JoinColumn(name="cit_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="cit_inserted", type="datetime", nullable=false, options={"default": "CURRENT_TIMESTAMP"})
@@ -71,7 +72,6 @@ class City extends DbObject
      * @param $abbr
      * @param $fullname
      * @param $name
-     * @param $createdBy
      * @param $state
      * @param $country
      * @param $firms
@@ -80,13 +80,12 @@ class City extends DbObject
       ?int $id = 0,
         $abbr = null,
         $fullname = null,
-        $name = null ,
-        $createdBy = null,
+        $name = null,
         $state = null,
         $country = null,
         $firms = null)
     {
-        parent::__construct($id, $createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->abbr = $abbr;
         $this->fullname = $fullname;
         $this->name = $name;

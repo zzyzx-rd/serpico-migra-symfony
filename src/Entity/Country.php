@@ -8,6 +8,8 @@ use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\OneToMany;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\JoinColumn;
 
 /**
  * @ORM\Entity(repositoryClass=CountryRepository::class)
@@ -37,9 +39,10 @@ class Country extends DbObject
     public $name;
 
     /**
-     * @ORM\Column(name="cou_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="countryInitiatives")
+     * @JoinColumn(name="cou_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="cou_inserted", type="datetime", nullable=false, options={"default": "CURRENT_TIMESTAMP"})
@@ -62,7 +65,6 @@ class Country extends DbObject
      * @param $cou_abbr
      * @param $cou_fullname
      * @param $cou_name
-     * @param $cou_createdBy
      * @param $states
      * @param $firms
      */
@@ -71,11 +73,10 @@ class Country extends DbObject
         $cou_abbr = null,
         $cou_fullname = null,
         $cou_name = null,
-        $cou_createdBy= null,
         $states = null,
         $firms = null)
     {
-        parent::__construct($id, $cou_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->abbr = $cou_abbr;
         $this->fullname = $cou_fullname;
         $this->name = $cou_name;

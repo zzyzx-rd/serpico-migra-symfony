@@ -45,9 +45,10 @@ class OTPUser extends DbObject
     public $email;
 
     /**
-     * @ORM\Column(name="otp_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="OTPUserInitiatives")
+     * @JoinColumn(name="otp_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="otp_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
@@ -67,7 +68,6 @@ class OTPUser extends DbObject
      * @param $otp_fullname
      * @param $otp_tipe
      * @param $otp_email
-     * @param $otp_createdBy
      * @param $organization
      */
     public function __construct(
@@ -76,10 +76,9 @@ class OTPUser extends DbObject
         $otp_fullname = null,
         $otp_tipe = null,
         Organization $organization = null,
-        $otp_email = null,
-        $otp_createdBy = null)
+        $otp_email = null)
     {
-        parent::__construct($id,$otp_createdBy , new DateTime());
+        parent::__construct($id, null , new DateTime());
         $this->type = $otp_type;
         $this->fullname = $otp_fullname;
         $this->tipe = $otp_tipe;

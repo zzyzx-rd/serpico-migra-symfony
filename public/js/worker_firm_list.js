@@ -75,9 +75,10 @@ $(function(){
 
     $('.delete-btn').on('click',function(e){
         e.preventDefault();
-        $.post(durl,{id: $(this).attr('data-id')})
+        id = $(this).attr('data-id');
+        $.post(durl,{id: id})
             .done(function(data){
-                $(`[href="#deleteWorkerFirm"][data-id=${wid}]`).closest('.firms-list--item').remove();
+                $(`[href="#deleteWorkerFirm"][data-id=${id}]`).closest('.firms-list--item').remove();
             })
     })
 

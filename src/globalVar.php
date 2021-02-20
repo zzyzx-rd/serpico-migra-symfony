@@ -8,6 +8,7 @@ use App\Entity\EventComment;
 use App\Entity\Organization;
 use App\Entity\Stage;
 use App\Entity\User;
+use App\Entity\UserMaster;
 use App\Entity\WorkerFirm;
 use DateTime;
 use DateTimeZone;
@@ -158,6 +159,7 @@ class globalVar {
         /** @var User */
         $currentUser = $this->CurrentUser();
         $org = $currentUser->getOrganization();
+        /** @var ArrayCollection|ElementUpdate[] */
         $updates = $currentUser->getUpdates()->filter(fn(ElementUpdate $u) => $u->getUser() == $currentUser)->matching(Criteria::create()->orderBy(['viewed' => Criteria::DESC, 'stage' => Criteria::ASC]));
         $em = $this->em;
         $dataUpdates = [];
@@ -204,49 +206,64 @@ class globalVar {
                         "$theStage <span class=\"strong\">$stageName</span> $of $theActivity <span class=\"strong\">$activityName</span>" :
                         "$theActivity <span class=\"strong\">$activityName</span>");
 
+                    $joinableFollowableUpdateTypes = ['join_request','join_direct','join_accept','follow_request','follow_direct','follow_accept'];
+                    $joinableFollowableStageUpdate = array_search($update->getProperty(), $joinableFollowableUpdateTypes);
+
                     if($document != null || $comment != null){
-                        $creator = $repoU->find($document ? $document->getCreatedBy() : $comment->getCreatedBy());
+                        $creator = $document ? $document->getInitiator() : $comment->getInitiator();
                         $transParameters['author'] = $creator->getOrganization() != $currentUser->getOrganization() ? $creator->getFullName(). ' ('.$creator->getOrganization()->getCommname().')' : $creator->getFullName();
                         //$dataUpdate['type'] = $document ? 'd' : 'c';
                         if($document){
                             $transParameters['docName'] = $document->getTitle();
-                            $transParameters['update_type'] = $update->getType() == ElementUpdate::CREATION ? 'document_creation' : 'document_change';
+                            $transParameters['update_type'] = $update->getStatus() == ElementUpdate::CREATION ? 'document_creation' : 'document_change';
                         } else {
                             $transParameters['commentLevel'] = $comment->getParent() ? $translator->trans('updates.comment_level.withParent') : $translator->trans('updates.comment_level.withoutParent');
-                            $transParameters['update_type'] = $update->getType() == ElementUpdate::CREATION ? 'comment_creation' : 'comment_change';
+                            $transParameters['update_type'] = $update->getStatus() == ElementUpdate::CREATION ? 'comment_creation' : 'comment_change';
                         }
                       
                     } else if ($event != null && $document == null && $comment == null) {
-                        $creator = $repoU->find($event->getCreatedBy());
-                        $transParameters['update_type'] = $update->getType() == ElementUpdate::CREATION ? 'event_creation' : 'event_change';
+                        $creator = $event->getInitiator();
+                        $transParameters['update_type'] = $update->getStatus() == ElementUpdate::CREATION ? 'event_creation' : 'event_change';
                         $eventType = $event->getEventType();
                         $transParameters['type'] = strtolower(implode("_",explode(" ",$eventType->getEName()->getName())));
                         $transParameters['group'] = strtolower($eventType->getEventGroup()->getEventGroupName()->getName());
                     } else if ($participation != null) {
-                        $creator = $repoU->find($participation->getCreatedBy());
+                        $creator = $participation->getInitiator();
                         $dataUpdate['type'] = 'p';
+                    } else if ($joinableFollowableStageUpdate !== false){
+                        $transParameters['update_type'] = $joinableFollowableUpdateTypes[$joinableFollowableStageUpdate];
+                        $creator = $update->getInitiator();
                     } else {
-                        $creator = $repoU->find($stage->getCreatedBy());
+                        $creator = $stage->getInitiator();
                         $dataUpdate['type'] = 's';
                         $transParameters['update_type'] = 'act_elmt_creation';
                     }
                     
-                    $dataUpdate['id'] = $update->getId();
-                    $dataUpdate['picture'] = $creator->getPicture() ?: 'no-picture.png';
-                    $dataUpdate['inserted'] = $this->nicetime($update->getInserted()->setTimezone($tz), $locale);
-                    $transParameters['author'] = $creator->getOrganization() != $currentUser->getOrganization() ? $creator->getFullName(). ' ('.$creator->getOrganization()->getCommname().')' : $creator->getFullName();
-                    $transParameters['updateLevel'] = $update->getType() == ElementUpdate::CREATION ? $translator->trans($document ? 'updates.document_update_level.creation' : 'updates.common_level.creation') : (ElementUpdate::CHANGE ? $translator->trans($document ? 'updates.document_update_level.update' : 'updates.common_level.update') : $translator->trans('updates.common_level.delete'));
-                    $dataUpdate['msg'] = $translator->trans('updates.update_msg', $transParameters);
-                    $dataUpdate['viewed'] = $update->getViewed() != null;
-                    $dataUpdate['id'] = $update->getId();
+                } else if ($update->getUser()) {
+                    
+                    $concernedUser = $update->getUser();
+                    
+                    if($update->getProperty() == 'role'){
+                        $transParameters['update_type'] = 'user_role';
+                        $transParameters['role'] = $update->getValue() == User::ROLE_SUPER_ADMIN ? $translator->trans('profile.super_administrator') : (
+                            $update->getValue() == User::ROLE_ADMIN ? $translator->trans('profile.administrator') : $translator->trans('create_user.collaborator')
+                        );       
+                    }
                 }
+                    
+                $dataUpdate['id'] = $update->getId();
+                $dataUpdate['picture'] = $creator->getPicture() ?: 'no-picture.png';
+                $dataUpdate['inserted'] = $this->nicetime($update->getInserted()->setTimezone($tz), $locale);
+                $transParameters['author'] = $creator->getOrganization() != $currentUser->getOrganization() ? $creator->getFullName(). ' ('.$creator->getOrganization()->getCommname().')' : $creator->getFullName();
+                $transParameters['updateLevel'] = $update->getStatus() == ElementUpdate::CREATION ? $translator->trans($document ? 'updates.document_update_level.creation' : 'updates.common_level.creation') : (ElementUpdate::CHANGE ? $translator->trans($document ? 'updates.document_update_level.update' : 'updates.common_level.update') : $translator->trans('updates.common_level.delete'));
+                $dataUpdate['msg'] = $translator->trans('updates.update_msg', $transParameters);
+                $dataUpdate['viewed'] = $update->getViewed() != null;
+                $dataUpdate['id'] = $update->getId();
 
                 $dataUpdates['notifs'][] = $dataUpdate;
                 $nbRetrieved++;
             }
-
         } 
-
         return $dataUpdates;
     }
 

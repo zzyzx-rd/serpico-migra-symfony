@@ -5,7 +5,7 @@
     <header class="{{ isOwnDepartment ? 'my-dpt' }}">
         {{ '<span class="department-name">dpt_name</span> (<span class="nb-department-users">nbDptUsers</span>)'|replace({
             'dpt_name' :  department ? department.name : '',
-            'nbDptUsers' : department ? department.users|length : 0,
+            'nbDptUsers' : department ? department.activeUsers|length : 0,
         })|raw }}
     
         {% if isOwnDepartment %}
@@ -16,7 +16,7 @@
     <ul class="users-list">
         {% if department %}
             {% for user in departmentM.viewableUsers(department) %}
-                {% include "components/user_list__item.html.twig" with { user: user, settings: currentuser.role == 1, stats:false } %}
+                {% include "components/user_list__item.html.twig" with { user: user, settings: currentuser.role < 2, stats:false } %}
             {% endfor %}
         {% endif %}
     </ul>

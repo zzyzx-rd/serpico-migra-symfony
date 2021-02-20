@@ -55,7 +55,7 @@
   <script>
     var oid = "{{ currentuser ? currentuser.organization.id : 0 }}";
     var uid = "{{ currentuser ? currentuser.id : 0 }}";
-    var ipurl = "{{ url('getIProcesses') }}";
+    var gipurl = "{{ url('getIProcesses') }}";
     var gcurl = "{{ url('getElementConfig', {entity:'activity', elmtId : 0}) }}";
     var gsurl = "{{ url('getGradableStages', {actId : 0}) }}";
     var surl = "{{ path('dynamicSearch') }}";
@@ -82,13 +82,15 @@
     var dcomurl = "{{ url('deleteComment', {id: 0}) }}";
     var ddocurl = "{{ url('deleteDocument', {id: 0}) }}";
     var dpurl = "{{ url('deleteParticipant',{entity: 'activity', stgId: 0, elmtId: 0}) }}";
+    var dfurl = "{{ url('deleteFollower',{stgId: 0, elmtId: 0}) }}";
     var usdurl = "{{ url('updateStageDates') }}";
     var uedurl = "{{ url('updateEventDates') }}";
     var udturl = "{{ url('updateDocumentTitle') }}";
     var udcurl = "{{ url('updateDocumentContent') }}";
     var usnurl = "{{ url('updateStageName') }}";
     var uccurl = "{{ url('updateCommentContent') }}";
-    var apurl = "{{ url('addParticipantStage',{stgId: 0}) }}";
+    var apurl = "{{ url('addStageParticipantFollower',{stgId: 0, fjType: 'participant'}) }}";
+    var rarurl = "{{ url('getActivityRequests',{actId: 0}) }}";
     var msgDocInsert = "{{ 'activity_elements.events.documents.dropify_insert_msg'|trans }}";
     var msgDocReplace = "{{ 'remove'|trans }}";
     var msgDocRemove = "{{ 'replace'|trans }}";
@@ -104,12 +106,21 @@
     var privateMsg = "{{ 'private'|trans }}";
     var independentMsg = "{{ 'independant'|trans|capitalize }}";
     var alreadyExistingMsg = "{{ 'already_existing'|trans }}";
-    var copiedLinkMsg = "{{ 'stage_invitation_modal.copied_link_msg'|trans }}";
+    var copiedLinkMsg = "{{ 'stage_visibility_modal.copied_link_msg'|trans }}";
     var cslurl = "{{ url('createStageInvitationLink', {stgId: 0}) }}";
-    var uisurl = "{{ url('updateStageInvitationStatus', {stgId: 0}) }}";
+    var usvurl = "{{ url('updateStageVisibilityParams', {stgId: 0}) }}";
+    var ipurl = "{{ url('invitationPositioning') }}";
+    var marurl = "{{ url('manageActivityRequests',{actId: 0}) }}";
+    var aguurl = "{{ url('addGenericUser') }}";
+    var jsurl = "{{ url('joinStage',{stgId: 0}) }}";
+    var rsfurl = "{{ url('removeStageFollower',{usmId: 0}) }}";
+    var psurl = "{{ url('privatizeStage',{stgId: 0}) }}";
     var linkAccessMsg = "{{'activities_dashboard.create_stage_modal.participants_add_second_choice'|trans|upper }}";
+    var unfsurl = "{{ url('unfollowStage',{stgId: 0}) }}";
+    var visibConfigMsg = "{{'stage_visibility_modal.save_stage_before_config'|trans|raw}}";
+    var unnamedStageActivity = "{{ 'unnamed_stage_activity'|trans }}";
     {% if invitationStage|default %}
-      var lsurl = "{{ url('linkStageInvitationToAccount') }}";
+      var ipurl = "{{ url('linkStageInvitationToAccount') }}";
     {% endif %}
 
 
@@ -359,7 +370,7 @@
         text-align: center;
       }
 
-      .activity-component, .past-period, .ongoing-period, .months-ref, .act-info, .stage, .elmts>.activity {
+      .activity-component, .past-period, .ongoing-period, .months-ref, .act-info, .stage, .elmts>.activity, .link-value-zone {
         position: relative;
       }
 
@@ -578,7 +589,7 @@
         z-index:1
       }
 
-      .p-delete-overlay{
+      .pf-delete-overlay{
         position:absolute;
         height: 50%;
         bottom: -7px;
@@ -589,7 +600,7 @@
         border-radius:50%;
       }
 
-      .p-firm-logo{
+      .pf-firm-logo{
         position:absolute;
         height: 50%;
         bottom: -7px;
@@ -600,18 +611,18 @@
         border:1px solid #55318e;
       }
 
-      .p-firm-logo img{
+      .pf-firm-logo img{
         height:inherit;
         width:inherit;
       }
 
-      .p-delete-overlay i{
+      .pf-delete-overlay i{
         font-size:80%;
         margin: auto;
         line-height:10px;
       }
 
-      .participant-btn {
+      .participant-btn, .follower-btn {
         position: relative;
         margin: 0 0.2rem;
       }
@@ -637,11 +648,11 @@
         font-size:18px;
       }
 
-      .ip-value, .setup-activity, .participants-title, .events-title{
+      .ip-value, .setup-activity, .participants-title, .followers-title, .visibility-title, .events-title{
         color: #55318e;
       }
 
-      .participants-title, .events-title{
+      .participants-title, .followers-title, .visibility-title, .events-title{
         text-transform: uppercase;
       }
 
@@ -673,7 +684,7 @@
         display:none!important;
       }
 
-      .participants{
+      .participants, .followers{
         margin: 1rem 0;
       }
 
@@ -698,9 +709,7 @@
         position:relative;
       }
 
-      .participants-list > li:not(.edit){
-        height:36px;
-      }
+ 
 
       .participants-list--item.edit{
         position:absolute;
@@ -708,24 +717,26 @@
         bottom: min(-50%,-60px);
       }
 
-      .participant-btn, .btn-participant-add{
+      .participant-btn, .follower-btn, .btn-participant-add, .btn-follower-add{
         border-radius:100%;
         padding: 0 0.4rem;
         width: 36px;
         justify-content:center;
       }
 
-      .btn-participant-add{
+      .btn-participant-add, .btn-follower-add{
         display: inline-flex;
         align-items: center;
         height:1.8rem;
+        height:36px;
+        background-color: #FF9300!important;
       }
 
-      .btn-participant-add > i{
+      .btn-participant-add > i, .btn-follower-add > i{
         font-size: 1rem;
       }
 
-      .selected-participant-logo{
+      .pf-picture{
         height: 100%;
         border-radius:100%;
       }
@@ -1060,10 +1071,6 @@
         margin: 0 0 0 10px!important;
         min-width: 300px;
       }
-    
-      .events{
-        padding-top: 30px;
-      }
 
       .s-modify-dates, .s-name-update{
         display:inline-block;
@@ -1093,10 +1100,6 @@
 
       .s-title-zone{
         min-height: 3.22rem;
-      }
-
-      #addParticipant {
-        background-color: #FF9300!important;
       }
 
       .btn-add-event{
@@ -1231,7 +1234,7 @@
         font-size: 13px;
       }
 
-      .manage-invit-btn{
+      .visibility-btn{
         cursor: pointer;
       }
 
@@ -1302,6 +1305,90 @@
 
       #toast-container{
         right:20%;
+      }
+
+      .visibility-zone .input-field{
+        width:120px;
+        padding: 0 5px;
+      }
+
+      .link-value-zone a{
+        position: absolute;
+        right: 0;
+        top: 0%;
+      }
+
+      .link-value-zone input {
+        height:2.2rem!important;
+      }
+
+      .access-stage-options-zone{
+        margin-top: 1em;
+      }
+
+      .access-stage-options-title{
+        font-size:small;
+      }
+
+      .access-stage-options-title{
+        font-size:16px;
+      }
+
+      #manageStageInvit .modal-subtitle{
+        font-weight: 500;
+      }
+
+      #manageStageInvit .btn-s-update{
+        line-height:24px;
+      }
+
+      .s-invit-tap-target.fj{
+        background: radial-gradient(circle at center, orange 0% ,purple 70%)
+      }
+
+      .s-invit-tap-target.j{
+        background-color: #55318e;
+      }
+      .s-invit-tap-target.f{
+        background-color: #ff9300;
+      }
+
+      .request-activity-btn {
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          background-color: #55318e;
+        }
+        50% {
+          background-color: #ff9300;
+        }
+        100% {
+          background-color: #55318e;
+        }
+      }
+
+      .request-activity-btn i{
+        font-size:1.3rem;
+      }
+
+      .visibility-info{
+        font-size: 13px;
+      }
+
+      .visibility-info-tooltip{
+        display: flex;
+        align-items: flex-start;
+        flex-direction: column;
+        flex-wrap: wrap;
+      }
+
+      .pf-zone{
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        flex-wrap: wrap;
       }
 
       {% if route == 'accessStageThroughInvit' %}
@@ -1970,7 +2057,14 @@
                 <span class="sm-left">{{ 'scale'|trans|upper ~ ' :'}}</span>
                 <div class="timescale-zone">
                   <a class="btn-flat no-padding timescale-change-btn flex-center">
-                    <span class="ts-value dd-text sm-left sm-right">{{timescaleCookie == 'y' ? 'year'|trans : (timescaleCookie == 't' ? 'trimester'|trans : 'week'|trans) }}</span>
+                    <span class="ts-value dd-text sm-left sm-right">
+                      {{timescaleCookie == 'y' ? 'year'|trans : (
+                          timescaleCookie == 't' ? 'trimester'|trans : (
+                            timescaleCookie == 'w' ? 'week'|trans : 'day'|trans
+                          )
+                        ) 
+                      }}
+                    </span>
                     <ul class="change-timescale-type change-selector" data-type="{{ timescaleCookie }}">
                       <i class="fa fa-caret-up"></i>
                       <i class="fa fa-caret-down"></i>
@@ -1980,6 +2074,7 @@
                     <option value="y" {{timescaleCookie == 'y' ? 'selected'}}>{{'year'|trans|capitalize}}</option>
                     <option value="t" {{timescaleCookie == 't' ? 'selected'}}>{{'trimester'|trans|capitalize}}</option>
                     <option value="w" {{timescaleCookie == 'w' ? 'selected'}}>{{'week'|trans|capitalize}}</option>
+                    <option value="d" {{timescaleCookie == 'd' ? 'selected'}}>{{'day'|trans|capitalize}}</option>
                   </select>
                 
                 </div>
@@ -2029,14 +2124,17 @@
 
     {% if route == 'accessStageThroughInvit' %}
 
-      {% set organization = orphanActivities[0].organization %}
+      {% set organization = invitationActivities[0].organization %}
 
         <div class="c-flex-center invited-header-logo">
           <img class="dd-logo" src="{{ asset('lib/img/logo_dd_p_l.png') }}">
-          <span>{{'landing.motto'|trans}}</span>
+          <span>{{'stage_invitation_page.title'|trans}}</span>
         </div>
 
-      <div class="flex-center invited-content">
+        
+
+        {#
+        <div class="flex-center invited-content">
           <div class="center">
             <p>
               <div class="flex-center inviting-org-logo-container no-padding">
@@ -2046,33 +2144,37 @@
               </div>
             </p>
           </div>
+          #}
+
+        {% if not isMobileView %}
+        
+          <div class="fixed-action-btn">
+            <a id="fixedButton" class="btn-floating login-btn btn-large" href="{{ path('login') }}">
+              <i class="mi add_to_queue"></i>
+            </a>
+          </div>
+          <div class="tap-target s-invit-tap-target {{fjStatus}}" data-activates="fixedButton">
+              
+              <div class="tap-target-content white-text">
+                <div class="flex-center no-wrap m-bottom">
+                  <img class="inviting-org-logo" src="{{ asset(global.organizationLogo(organization)) }}" alt="">  
+                  <span class="sm-left {{ fjStatus == 'f' ? 'black-text' : '' }}">
+                    <span class="strong">{{organization.commname}}</span>
+                    {{ fjMessage }}
+                  </span>
+                </div>
+                <span {{ fjStatus == 'f' ? 'class="black-text"' }}>{{ 'stage_invitation_page.connection_msg' ~ (fjStatus == 'f' ? '_f' : '')|trans|raw}}</span>
+              </div>
+
+          </div>
+        
+        {% endif %} 
 
     {% endif %}
 
 
   <main class="card-panel purple lighten-5">
 
-      {#
-      <div style="padding: 0 3em;
-    justify-content: flex-end;">
-      <div class="input-field select-scale col s12" style=" width:30%">
-          <select class="scale">
-              <option value="years">Année</option>
-              <option value="trimester">Trimestre</option>
-          </select>
-          <label>Echelle de temps</label>
-      </div>
-      </div>
-      <div style="padding: 0 3em;
-    justify-content: flex-end;">
-      <div class="input-field col s12 select-value-scale" style="width: 30% ; display :none">
-          <select class="value-scale" >
-
-          </select>
-          <label>Valeur</label>
-      </div>
-      </div>
-      #}
     <div id="activities-container">
       {% if viewTypeCookie == 'd' %} 
         <ul class="tabs tabs-fixed-width" {% if noActivities %} style="display:none" {% endif %}>
@@ -2266,7 +2368,7 @@
         <ul class="process-list process-list-t no-margin" data-prototype="{% apply escape %}{% include "components/activity2_list__item.html.twig" with {em: em, mobile_rendering: false} %}{% endapply %}" data-prototype-no-int-act="{% apply escape %}{% include "components/activity_no_int_act_overlay.html.twig" %}{% endapply %}" data-prototype-evt="{% apply escape %}{% include "components/event_temporal__item.html.twig" %}{% endapply %}">
           
           {# We first display activities unlinked to any process #}
-          {% if orphanActivities is not empty %}
+          {% if orphanActivities is not empty or followingActivities is not empty %}
 
             <li class="process-list--item hierarchized-item">
               <div class="row flex-center {{ displayProcesses ? 'no-margin' : 'no-processes' }}">
@@ -2298,14 +2400,32 @@
                         {% endfor %}
                       {% endfor %}
                     {% else %}
+
+                      {% for activity in followingActivities %}
+                          {% set actStatus = sortingTypeCookie == 'o' ? activity.status : activity.progress %}
+                          {% set actStatusName = actStatuses[sortingTypeCookie][actStatus] %}
+                          {% set showable = global.request.cookies.get('r_s_' ~ sortingTypeCookie ~ '_' ~ actStatusName) is null %}
+                          
+                        {% include "components/activity2_list__item.html.twig" with { activity: activity, showable: showable, sortingType: sortingTypeCookie, actStatus: actStatusName, em:em, mobile_rendering: false, following: true } %}
+                      {% endfor %}
+
+                      {% for activity in invitationActivities %}
+                          
+                          {% set actStatus = sortingTypeCookie == 'o' ? activity.status : activity.progress %}
+                          {% set actStatusName = actStatuses[sortingTypeCookie][actStatus] %}
+                          {% set showable = global.request.cookies.get('r_s_' ~ sortingTypeCookie ~ '_' ~ actStatusName) is null %}
+                          
+                        {% include "components/activity2_list__item.html.twig" with { activity: activity, showable: showable, sortingType: sortingTypeCookie, actStatus: actStatusName, em:em, mobile_rendering: false, invit: true } %}
+                      {% endfor %}
+
                       {% for activity in orphanActivities %}
                           
-                            {% set actStatus = sortingTypeCookie == 'o' ? activity.status : activity.progress %}
-                            {% set actStatusName = actStatuses[sortingTypeCookie][actStatus] %}
-                            {% set showable = global.request.cookies.get('r_s_' ~ sortingTypeCookie ~ '_' ~ actStatusName) is null %}
-                        
-                          {% include "components/activity2_list__item.html.twig" with { activity: activity, showable: showable, sortingType: sortingTypeCookie, actStatus: actStatusName, em:em, mobile_rendering: false } %}
-                        {% endfor %}
+                          {% set actStatus = sortingTypeCookie == 'o' ? activity.status : activity.progress %}
+                          {% set actStatusName = actStatuses[sortingTypeCookie][actStatus] %}
+                          {% set showable = global.request.cookies.get('r_s_' ~ sortingTypeCookie ~ '_' ~ actStatusName) is null %}
+                      
+                        {% include "components/activity2_list__item.html.twig" with { activity: activity, showable: showable, sortingType: sortingTypeCookie, actStatus: actStatusName, em:em, mobile_rendering: false } %}
+                      {% endfor %}
                     {% endif %}
                     </ul>
                   </div>
@@ -2471,7 +2591,7 @@
 
     {% if currentuser and currentuser.role < 4 %}
       <div class="fixed-action-btn">
-          <a id="fixedButton" class="btn-floating create-act-btn btn-large modal-trigger" href="#createStage" onclick="onAddProcessClick('{{ currentuser.organization.id }}')" data-oid="{{currentuser.organization.id}}"><i class="mi add"></i></a>
+          <a id="fixedButton" class="btn-floating create-act-btn btn-large modal-trigger" href="#createStage" {#onclick="onAddProcessClick('{{ currentuser.organization.id }}')"#} data-oid="{{currentuser.organization.id}}"><i class="mi add"></i></a>
           {#
           <ul>
               <li><a class="btn-floating orange lighten-2 tooltipped modal-trigger" data-position="left" data-delay="50" data-tooltip="{% trans %}tooltip.template.create_from_scratch{% endtrans %}" href="{{ path('activityInitialisation',{'elmt' : 'template'}) }}">
@@ -2488,15 +2608,15 @@
       </div>
       <div class="tap-target dd-bg" data-activates="fixedButton">
           <div class="tap-target-content white-text">
-            <h5>{{'activity_elements.first_connection_title'|trans}}</h5>
-            <p>{{'activity_elements.first_connection_helper'|trans}}</p>
+            <h5>{{'first_connection_elements.activities_dashboard.tap_target_title'|trans}}</h5>
+            <p>{{'first_connection_elements.activities_dashboard.tap_target_info'|trans}}</p>
           </div>
       </div>
     {% endif %}
 
   </main>
 
-  {% if route == 'accessStageThroughInvit' %}
+  {% if route == 'accessStageThroughInvit' and isMobileView %}
 
   </div>
 
@@ -2515,7 +2635,7 @@
         {{ form_start(newActivityForm) }}
           <div class="modal-content">
             <div class="flex-center-sb modal-title">
-              <div class="s-title-zone flex-center">
+              <div class="s-title-zone c-flex-center">
                 <h5 class="s-name" data-create="{{'activities.create.modal_title'|trans}}">{{'activities.create.modal_title'|trans}}</h5>
               </div>
               {% if is_granted('ROLE_ENTREPRISE') %}
@@ -2545,12 +2665,12 @@
                   <div class="enddate-input input-field" style="display:none">
                     {{ form_label(newActivityForm.enddate) }}
                     {{ form_widget(newActivityForm.enddate) }}
-                    <small class="dd-text set-open-enddate">Laisser la date de fin ouverte</small>
+                    <small class="dd-text set-open-enddate">{{'activity_elements.stages.keep_open_enddate'|trans}}</small>
                   </div>
 
                   <div class="c-flex-center">
                     <div class="input-field open-zone">  
-                      <label class="active">Date de fin</label>
+                      <label class="active">{{'stages.stage.enddate'|trans}}</label>
                       <span class="open-text flex-center">{{'activity_elements.stages.open_enddate'|trans}} <i class="sm-left fa fa-question-circle tooltipped" data-tooltip="{{ 'activity_elements.stages.open_enddate_info'|trans }}" data-position="top"></i></span>
                     </div>
                     <div class="flex-center add-enddate-zone">
@@ -2561,25 +2681,58 @@
 
                 </div>
             </div>
-            <div class="participants">
-                <div class="participants-title flex-center-sb">
-                  <div>
-                    <i class="fa fa-users m-right"></i>
-                    <span class="bold-1">{{ 'activities.participants'|trans }}</span>
-                    <span class="nb-participants bold-1"></span>
-                  </div>        
+            <div class="flex-center-fe">
+              <div class="visibility-zone flex-center">
+                <div class="flex-center">
+                  <i class="fa fa-question-circle visibility-info dd-text tooltipped sm-right" data-html="true" data-tooltip="{% apply escape %}{{'activity_elements.visibility.info'|trans|raw }}{% endapply %}"></i>
+                  <span class="bold-1 visibility-title">{{'visibility'|trans ~ ' :'}}</span>
                 </div>
-
-                <ul class="participants-list flex-center" data-prototype="{% apply escape %}{% include "components/participant_list__item.html.twig" with {participant: newActivityForm.participants.vars.prototype} %}{% endapply %}">
-                  {% for participant in newActivityForm.participants.vars.data %}
-                      {{ participant.user }}
-                  {% endfor %}  
-                    <li class="sm-left btn btn-s-update btn-participant-add flex-center tooltipped modal-trigger" href="#addUserClient" data-tooltip="{{'activities.create.add_participant'|trans}}" data-position="top">
-                      <i class="fa fa-plus"></i>
-                    </li>
-                </ul>
-                
+                <span class="sm-left black-text s-visibility" data-default="{{ 'activity_elements.visibility.unlisted'|trans}}"></span>
+                <div class="input-field no-margin" style="display:none;">
+                </div>
+                {{ form_widget(newActivityForm.visibility) }}
+                {{ form_widget(newActivityForm.accessLink) }}
+                {{ form_widget(newActivityForm.followableStatus) }}
+                {{ form_widget(newActivityForm.joinableStatus) }}
+              </div> 
             </div>
+            <div class="pf-zone">
+            
+              <div class="participants">
+                  <div class="participants-title">
+                    <div>
+                      <i class="fa fa-users m-right"></i>
+                      <span class="bold-1">{{ 'activities.participants'|trans }}</span>
+                      <span class="nb-participants bold-1">(1)</span>
+                    </div>
+                          
+                  </div>
+
+                  <ul class="participants-list flex-center" data-prototype="{% apply escape %}{% include "components/participant_list__item.html.twig" with {participant: newActivityForm.participants.vars.prototype} %}{% endapply %}">
+                    {% for participant in newActivityForm.participants.vars.data %}
+                        {{ participant.user }}
+                    {% endfor %}  
+                      <a class="sm-left btn btn-s-update-v btn-has-size btn-participant-add flex-center tooltipped modal-trigger" href="#addUserClient" data-tooltip="{{'activities.create.add_participant'|trans}}" data-position="top" style="visibility:hidden">
+                        <i class="fa fa-plus"></i>
+                      </a>
+                  </ul>
+              </div>
+              <div class="followers">
+                  <div class="followers-title">
+                    <div>
+                      <i class="fa fa-users m-right dd-orange-text"></i>
+                      <span class="bold-1 dd-orange-text">{{ 'activities.followers'|trans }}</span>
+                      <span class="nb-followers dd-orange-text bold-1">(0)</span>
+                    </div>      
+                  </div>
+                  <ul class="followers-list flex-center-fe" data-prototype="{% apply escape %}{% include "components/follower_list__item.html.twig" with {follower: newActivityForm.userMasters.vars.prototype} %}{% endapply %}">
+                    <a class="sm-right btn btn-s-update-v btn-follower-add flex-center tooltipped modal-trigger" href="#addUserClient" data-tooltip="{{'activities.create.add_follower'|trans}}" data-position="top" style="visibility:hidden">
+                      <i class="fa fa-plus"></i>
+                    </a>
+                  </ul>
+              </div>
+            </div>
+
 
             <div class="events" style="display:none">
                 <div class="events-title flex-center-sb">
@@ -3140,13 +3293,22 @@
       </div>
       <div id="deleteParticipant" class="modal">
         <div class="modal-content">
-            <p>{% trans %}activities.delete_participant_msg{% endtrans %}</p>
+            <p>{{'activities.delete_participant_msg'|trans}}</p>
             {#{% else %}
                 <p>{% trans %}activities.delete_activity_msg{% endtrans %}Are you sure you want to delete this activity ?</p>
             {% endif %}#}
         </div>
         <div class="modal-footer">
             <a class=" modal-action modal-close waves-effect waves-green btn participant-delete">{% trans %}user_update.delete_modal.confirm{% endtrans %}</a>
+            <a class=" modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+        </div>
+      </div>
+      <div id="deleteFollower" class="modal">
+        <div class="modal-content">
+            <p>{{'activities.delete_follower_msg'|trans}}</p>
+        </div>
+        <div class="modal-footer">
+            <a class=" modal-action modal-close waves-effect waves-green btn follower-delete">{% trans %}user_update.delete_modal.confirm{% endtrans %}</a>
             <a class=" modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
         </div>
       </div>
@@ -3281,63 +3443,234 @@
       </div>
     </div>
 
-    {% if invitationStage|default %}
+    {% if currentuser and invitationActivities|length %}
+
+      {% set invitationStage = invitationActivities.first.stages|filter(s => s.accessLink and s.followableStatus != -1)|first %}
     
-      <div id="invitationStage" class="modal">
+      <div id="invitationStage" class="modal" data-id="{{invitationStage.id}}">
         <div class="modal-content">
         
-          <h5>{{ 'stage_invitation_modal.modal_title'|trans ~ ' - ' ~ invitationStage.activity.name }}</h5>
+          <h5>{{ 'stage_invitation_modal.title'|trans }}</h5>
           <p>
             <div class="flex-center no-padding">
               <img class="inviting-org-logo" src="{{ asset(global.organizationLogo(organization)) }}" alt="">
               <span class="strong dd-text m-left sm-right">{{invitationStage.organization.commname}}</span>
               <span>{{'stage_invitation_modal.invitation_msg'|trans}}</span>
+              <span class="strong dd-text sm-left">{{ invitationStage.activity.name }}</span>
             </div>
+            {% if currentuser.userGlobal.userAccounts|length > 1 %}
             <div class="input-field">
               <span>{{'stage_invitation_modal.link_msg'|trans ~ ':'}}</span>
-              <select name="stageAccountSelector">
-                {% for account in currentuser.userGlobal.userAccounts %}
-                    <option value="{{account.id}}">{{ account.organization.type == 'C' ? 'profile.my_individual_account'|trans : account.organization.commname }}</option>
-                {% endfor %}
-              </select>
-              <small><i class="fa fa-plus dd-text sm-right"></i><a href="{{ url('manageProfile',{aa: 1}) }}" class="dd-text strong no-padding">{{'profile.add_firm_account'|trans}}</a></small>
+                <select name="stageAccountSelector">
+                  {% for account in currentuser.userGlobal.userAccounts %}
+                      <option value="{{account.id}}">{{ account.organization.type == 'C' ? 'profile.my_individual_account'|trans : account.organization.commname }}</option>
+                  {% endfor %}
+                </select>
+              {#<small><i class="fa fa-plus dd-text sm-right"></i><a href="{{ url('manageProfile',{aa: 1}) }}" class="dd-text strong no-padding">{{'profile.add_firm_account'|trans}}</a></small>#}
             </div>
+            {% endif %}
+
+            {#
+            <div class="m-top">
+              {% if invitationStage.invitStatus == 0 %}
+                {{ 'stage_invitation_modal.request_join_msg'|trans|raw }}
+              {% else %}
+                {{ 'stage_invitation_modal.direct_join_msg'|trans|raw }}
+              {% endif %}
+            </div>
+            #}
           </p>
 
           <div class="flex-center-fe">
-              <a class="waves-effect waves-light modal-close btn-flat red-text link-decline-stage-btn">{{'stage_invitation_modal.decline'|trans}}</a>
-              <a class="btn waves-effect waves-light modal-close link-accept-stage-btn" data-id="{{invitationStage.id}}">Confirmer</a>
+              <a class="waves-effect waves-light btn-flat modal-trigger sm-right" href="#declineParticipation">
+                {{'decline'|trans}}
+              </a>
+              <a class="btn dd-orange-bg waves-effect waves-light modal-close invit-follow-btn sm-right">{{'follow'|trans}}</a>
+              <a class="btn waves-effect waves-light modal-close invit-join-btn">{{'participate'|trans}}</a>
           </div>
         </div>
 
       </div>
+
+       <div id="pendingFJDecision" class="modal">
+            <div class="modal-content">
+                <p>{{ 'pending_joinable_followable_modal.msg'|trans}}</p>
+                <div class="flex-center" style="justify-content:flex-end;">
+                    <div class="button-field">
+                        <a class="waves-effect waves-green btn modal-close">Ok</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+      <div id="declineParticipation" class="modal">
+        <div class="modal-content">
+          <h5>{{'decline_invitation_modal.title'|trans}}</h5>
+          <p>{{'decline_invitation_modal.msg'|trans}}</p>
+          <div class="flex-center-fe">
+            <a class="waves-effect waves-light btn-flat modal-close">
+                  {{'back'|trans}}
+            </a>
+            <a class="btn waves-effect waves-light modal-close invite-decline-btn" data-id="{{invitationStage.id}}">Ok</a>
+          </div>
+        </div>
+      </div>
+
+
+    {% endif %}
+
+    {% if followingActivities|length %}
+      <div id="unfollowStage" class="modal">
+        <div class="modal-content">
+          <p>{{'unfollow_stage_modal.msg'|trans}}</p>
+          <div class="flex-center-fe">
+            <a class="waves-effect waves-light btn-flat modal-close">
+                  {{'back'|trans}}
+            </a>
+            <a class="btn waves-effect waves-light modal-close unfollow-stage-btn">Ok</a>
+          </div>
+        </div>
+      </div>
     {% endif %}
 
     <div id="manageStageInvit" class="modal">
-        
+      <form method="post">
         <div class="modal-content">
           <h5>{{ '<span class="s-name"></span> - invit_mgt_title'|replace({
-                    'invit_mgt_title' : 'stage_invitation_modal.modal_title'|trans,
+                    'invit_mgt_title' : 'stage_visibility_modal.title'|trans,
                 })|raw }}
           </h5>
-          <p>
-            <div class="flex-center">
-              <span>{{'stage_invitation_modal.msg_link'|trans }}</span>
-              <a href="#" class="btn s-link s-unsaved small-control-btn sm-left dd-orange-bg"><i class="fa fa-link"></i></a>
-              <input type="hidden" name="link" value="">
-            </div>
-            <div class="invit-status-zone">
-              <input type="checkbox" class="filled-in" id="istatus" name="istatus" checked/>
-              <label class="black-text" for="istatus">{{'stage_invitation_modal.manage_every_invit'|trans}}</label>
-            </div>
-          </p>
 
-          <div class="flex-center-fe">
+            <p class="modal-subtitle">{{'stage_visibility_modal.broadcast_type'|trans|upper }}</p>
+
+
+            <div class="visibility-type">
+              <div class="flex-center-sb visibility-type-data"> 
+                <span class="dd-text strong visibility-status"></span>
+                <i class="mi create dd-orange-text btn-s-update" style="display:none"></i>
+              </div>
+              <div class="input-field no-margin visibility-type-input" style="display:none;">
+                  <select name="visibilityTypeSelector">
+                    <option value="-1">{{'activity_elements.visibility.private'|trans}}</option>
+                    <option value="0" selected>{{'activity_elements.visibility.unlisted'|trans}}</option>
+                  </select>
+              </div>
+            </div>
+
+            <div class="non-private-params">
+            
+              <p class="modal-subtitle">{{ 'stage_visibility_modal.msg_link'|trans|upper }}</p>
+              <div class="input-field no-margin link-value-zone">
+                <input type="text" name="link" value="">
+                <a href="#" class="btn s-link s-unsaved small-control-btn sm-left dd-orange-bg"><i class="fa fa-link"></i></a>
+              </div>
+
+              <p class="access-stage-options-title modal-subtitle">{{'stage_visibility_modal.subtitle'|trans|upper}}</p>
+              
+              <div class="access-stage-options-zone">
+
+                <div class="row">
+                  <div class="col m6 s12 no-padding">
+                    <div class="c-flex">
+                        <span class="access-stage-options-subtitle strong dd-orange-text">{{'stage_visibility_modal.followable_title'|trans|upper}}</span>
+                        <input type="checkbox" class="filled-in acs" id="fs_direct" name="fs_direct" checked/>
+                        <label class="black-text" for="fs_direct">{{'stage_visibility_modal.followable_option_direct'|trans}}</label>
+
+                        <input type="checkbox" class="filled-in acs" id="fs_check" name="fs_check"/>
+                        <label class="black-text" for="fs_check">{{'stage_visibility_modal.followable_option_request'|trans}}</label>
+                    </div>
+                  </div>
+                  <div class="col m6 s12 no-padding">
+                  
+                    <div class="c-flex">
+                      <span class="access-stage-options-subtitle strong dd-text">{{'stage_visibility_modal.joinable_title'|trans|upper}}</span>
+                      <input type="checkbox" class="filled-in acs" id="js_direct" name="js_direct"/>
+                      <label class="black-text" for="js_direct">{{'stage_visibility_modal.joinable_option_direct'|trans}}</label>
+
+                      <input type="checkbox" class="filled-in acs" id="js_check" name="js_check" checked/>
+                      <label class="black-text" for="js_check">{{'stage_visibility_modal.joinable_option_request'|trans}}</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <small class="dd-orange-text no-option-msg" style="display:none">{{'stage_visibility_modal.no_option_msg'|trans}}</small>
+            
+            </div>
+            
+          
+
+          <div class="flex-center-fe m-top">
               <a class="waves-effect waves-light modal-close btn-flat">{{'back'|trans}}</a>
-              <a class="btn waves-effect waves-light save-i-pref-btn">{{'save'|trans}}</a>
+              <a class="btn waves-effect waves-light save-broadcast-pref-btn">{{'save'|trans}}</a>
           </div>
         </div>
+      </form>
+    </div>
 
+    <div id="manageStageRequest" class="modal">
+      <form method="post">
+        <div class="modal-content">
+          <h5>{{ '<span class="s-name"></span> - invit_mgt_title'|replace({
+                    'invit_mgt_title' : 'stage_manage_requests_modal.title'|trans,
+                })|raw }}
+          </h5>
+
+          <table data-prototype="{% apply escape %}{% include "components/joinable_followable_user__item.html.twig" %}{% endapply %} ">
+            <thead>
+              <tr>
+                <th>{{'stage_manage_requests_modal.first_row_title_stage'|trans}}</th>
+                <th>{{'stage_manage_requests_modal.first_row_title_user'|trans}}</th>
+                <th>{{'stage_manage_requests_modal.first_row_title_type'|trans}}</th>
+                <th>{{'stage_manage_requests_modal.first_row_title_choice'|trans}}</th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+        
+          <div class="flex-center-fe m-top">
+              <a class="waves-effect waves-light modal-close btn-flat">{{'back'|trans}}</a>
+              <a class="btn waves-effect waves-light save-request-pref-btn">{{'save'|trans}}</a>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div id="requestParticipation" class="modal">
+        <div class="modal-content">
+          <p class="join-msg">{{ 'beginning_msg <span class="s-name dd-text strong"></span> ? ending_msg'|replace({
+                    'beginning_msg' : 'stage_joining_modal.start_msg'|trans,
+                    'ending_msg' : 'stage_joining_modal.end_msg'|trans,
+                })|raw }}
+          </p>             
+          <div class="flex-center-fe m-top">
+              <a class="waves-effect waves-light modal-close btn-flat">{{'back'|trans}}</a>
+              <a class="btn waves-effect waves-light join-request-btn">{{'confirm'|trans}}</a>
+          </div>
+        </div>
+    </div>
+
+    <div id="requestParticipationSuccess" class="modal">
+        <div class="modal-content">
+          <p>{{ 'stage_joining_modal.start_msg'|trans }}</p>             
+          <div class="flex-center-fe m-top">
+              <a class="btn waves-effect waves-light join-request-btn">Ok</a>
+          </div>
+        </div>
+    </div>
+
+    <div id="privatizeStage" class="modal">
+        <div class="modal-content">       
+          <p>{{'privatizing_stage_modal.msg'|trans}}</p>
+          <div class="flex-center">
+            <input type="checkbox" class="filled-in" id="rf" name="rf" />
+            <label class="black-text" for="rf">{{'privatizing_stage_modal.remove_existing_followers'|trans}}</label>
+          </div>        
+          <div class="flex-center-fe m-top">
+              <a class="waves-effect waves-light modal-close btn-flat">{{'back'|trans}}</a>
+              <a class="btn waves-effect waves-light privatize-stage-btn">{{'save'|trans}}</a>
+          </div>
+        </div>
     </div>
 
 {% endblock content %}

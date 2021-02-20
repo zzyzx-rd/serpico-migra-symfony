@@ -10,13 +10,21 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\OneToMany;
 
 /**
  * @ApiResource()
- * @ORM\Entity(repositoryClass=UserMasterRepository::class)
+ * @ORM\Entity(repositoryClass="App\Repository\UserMasterRepository")
  */
 class UserMaster extends DbObject
 {
+
+    public const ARCHIVED = -3;
+    public const DECLINED = -2;
+    public const REMOVAL = -1;
+    public const PENDING = 0;
+    public const ADDED = 1;
+    public const ACCEPTED = 2;
 
     /**
      * @ORM\Id()
@@ -24,6 +32,11 @@ class UserMaster extends DbObject
      * @ORM\Column(name="usm_id", type="integer", nullable=false)
      */
     public ?int $id;
+
+    /**
+     * @ORM\Column(name="usm_property", type="string", nullable=true)
+     */
+    public $property;
 
     /**
      * @ORM\Column(name="usm_type", type="integer", nullable=true)
@@ -73,6 +86,13 @@ class UserMaster extends DbObject
     public $stage;
 
     /**
+     * @ManyToOne(targetEntity="Participation", inversedBy="userMasters")
+     * @JoinColumn(name="participation_par_id", referencedColumnName="par_id", nullable=true)
+     * @var Participation
+     */
+    public $participation;
+
+    /**
      * @ManyToOne(targetEntity="Event", inversedBy="userMasters")
      * @JoinColumn(name="event_eve_id", referencedColumnName="eve_id", nullable=true)
      * @var Event
@@ -87,16 +107,21 @@ class UserMaster extends DbObject
     public $output;
 
     /**
+     * @OneToMany(targetEntity="ElementUpdate", mappedBy="mastering", cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    public $updates;
+
+    /**
      * @ManyToOne(targetEntity="User", inversedBy="masterings")
      * @JoinColumn(name="user_usr_id", referencedColumnName="usr_id", nullable=true)
-     * @var User
      */
     public $user;
 
     /**
-     * @ORM\Column(name="usm_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="userMasterInitiatives")
+     * @JoinColumn(name="usm_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="usm_inserted", type="datetime", nullable=false, options={"default": "CURRENT_TIMESTAMP"})
@@ -107,10 +132,12 @@ class UserMaster extends DbObject
      * EventType constructor.
      * @param $id
      * @param $type
+     * @param $property
      */
     public function __construct(
         $id = null,
-        $type = null)
+        $type = null,
+        $property = null)
     {
         parent::__construct($id, null, new DateTime);
         $this->type = $type;
@@ -124,6 +151,17 @@ class UserMaster extends DbObject
     public function setType(int $type): self
     {
         $this->type = $type;
+        return $this;
+    }
+
+    public function getProperty(): ?string
+    {
+        return $this->property;
+    }
+
+    public function setProperty(?string $property): self
+    {
+        $this->property = $property;
         return $this;
     }
 
@@ -226,6 +264,22 @@ class UserMaster extends DbObject
         return $this;
     }
     /**
+     * @return Participation|null
+     */
+    public function getParticipation(): ?Participation
+    {
+        return $this->participation;
+    }
+
+    /**
+     * @param Participation $participation
+     */
+    public function setParticipation(?Participation $participation): self
+    {
+        $this->participation = $participation;    
+        return $this;
+    }
+    /**
      * @return Event|null
      */
     public function getEvent(): ?Event
@@ -259,18 +313,12 @@ class UserMaster extends DbObject
         return $this;
     }
     
-    /**
-     * @return User|null
-     */
-    public function getUser(): ?User
+    public function getUser()
     {
         return $this->user;
     }
 
-    /**
-     * @param User $user
-     */
-    public function setUser(?User $user): self
+    public function setUser($user): self
     {
         $this->user = $user;    
         return $this;
@@ -279,6 +327,27 @@ class UserMaster extends DbObject
     public function setInserted(DateTimeInterface $inserted): self
     {
         $this->inserted = $inserted;
+        return $this;
+    }
+
+    /**
+    * @return ArrayCollection|ElementUpdate[]
+    */
+    public function getUpdates()
+    {
+        return $this->updates;
+    }
+
+    public function addUpdate(ElementUpdate $update): self
+    {
+        $this->updates->add($update);
+        $update->setMastering($this);
+        return $this;
+    }
+
+    public function removeUpdate(ElementUpdate $update): self
+    {
+        $this->updates->removeElement($update);
         return $this;
     }
 

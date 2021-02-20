@@ -37,10 +37,11 @@ class Title extends DbObject
      */
     public $weightIni;
 
-    /**
-     * @ORM\Column(name="tit_created_by", type="integer", nullable=true)
+   /**
+     * @ManyToOne(targetEntity="User", inversedBy="titleInitiatives")
+     * @JoinColumn(name="tit_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="tit_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
@@ -80,7 +81,6 @@ class Title extends DbObject
      * @param ?int$id
      * @param $name
      * @param $weightIni
-     * @param $createdBy
      * @param $deleted
      * @param $organization
      * @param $weight
@@ -91,14 +91,13 @@ class Title extends DbObject
       ?int $id = 0,
         $name = '',
         $weightIni = 0.0,
-        $createdBy = null,
         $deleted = null,
         $organization = null,
         $weight = null,
         $options = null,
         $targets = null)
     {
-        parent::__construct($id, $createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->name = $name;
         $this->weightIni = $weightIni;
         $this->deleted = $deleted;

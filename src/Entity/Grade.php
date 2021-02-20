@@ -51,9 +51,10 @@ class Grade extends DbObject
     public $comment;
 
     /**
-     * @ORM\Column(name="grd_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="gradeInitiatives")
+     * @JoinColumn(name="grd_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="grd_inserted", type="datetime",  options={"default": "CURRENT_TIMESTAMP"})
@@ -95,7 +96,6 @@ class Grade extends DbObject
      * @param $gradedTeaId
      * @param $value
      * @param $comment
-     * @param $createdBy
      * @param $team
      * @param Participation $participation
      * @param $activity
@@ -110,14 +110,13 @@ class Grade extends DbObject
         $gradedTeaId = null,
         $value = null,
         $comment = null,
-        $createdBy = null,
         Team $team = null,
         Participation $participation = null,
         Activity$activity = null,
         Criterion $criterion = null,
         Stage $stage = null)
     {
-        parent::__construct($id, $createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->type = $type;
         $this->gradedUsrId = $gradedUsrId;
         $this->gradedTeaId = $gradedTeaId;

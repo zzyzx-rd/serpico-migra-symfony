@@ -56,7 +56,7 @@
 //    public $objectives;
 //
 //    /**
-//     * @ORM\Column(name="act_created_by", type="integer", nullable=true)
+//     * @ORM\Column(name="act_initiator", type="integer", nullable=true)
 //     */
 //    public $createdBy;
 //

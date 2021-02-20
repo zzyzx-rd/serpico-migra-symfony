@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\OneToOne;
+use Doctrine\ORM\Mapping\ManyToOne;
 
 /**
  * @ApiResource()
@@ -71,9 +72,10 @@ class GeneratedImage extends DbObject
     public $role;
 
     /**
-     * @ORM\Column(name="gim_createdBy", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="generatedImageInitiatives")
+     * @JoinColumn(name="gim_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="gim_val", type="string", length=255, nullable=true)
@@ -102,7 +104,6 @@ class GeneratedImage extends DbObject
      * @param $gim_sid
      * @param null $crtId
      * @param $gim_role
-     * @param $gim_createdBy
      * @param $gim_val
      * @param $gim_all
      * @param $cName
@@ -117,12 +118,11 @@ class GeneratedImage extends DbObject
         $gim_sid = null,
         $crtId = null,
         $gim_role = null,
-        $gim_createdBy = null,
         $gim_val = null,
         $gim_all = null,
         $cName = null)
     {
-        parent::__construct($id, $gim_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->all = $gim_all;
         $this->type = $gim_type;
         $this->tid = $gim_tid;

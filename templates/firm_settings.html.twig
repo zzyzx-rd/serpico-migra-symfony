@@ -1,274 +1,269 @@
 {% extends "layout.html.twig" %}
 
+{% import "macros/user_list__macros.html.twig" as macros %}
+
 {% block title %}
-    {% trans %}firm_settings.page_title{% endtrans %}
-{% endblock %}
-
-{% block css %}
-
-    <link rel="stylesheet" href="{{ asset('css/activities_access_and_results_view.css') }}">
-
-    <script>
-        var updateFirmUrl = "{{ url('updateFirmSettings') }}";
-    </script>
-    <style>
-        html {
-            overflow-y: scroll;
-        }
-    </style>
+  {{'firm_settings.page_title'|trans}}
 {% endblock %}
 
 {% block pagename %}
-    {% trans %}firm_settings.mobile_header_title {% endtrans %}
+  {{'firm_settings.page_title'|trans}}
+{% endblock %}
+
+{% block mobile_title %}
+  {{'firm_settings.page_title'|trans}}
 {% endblock %}
 
 {% block username %}
-    {{ currentuser.firstname }} {{ currentuser.lastname }}
+  {{ currentuser.firstname }}
+  {{ currentuser.lastname }}
 {% endblock %}
 
+{% block css %}
+  <link rel="stylesheet" href="{{ asset('css/add_client_user_modal.css') }}">
+  <style>
+
+    main {
+        width:90%;
+        margin:auto!important;
+    }
+
+    section:not(:last-of-type){
+      border-bottom: 1px solid grey;
+    }
+
+    section .btn-large {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      max-width: 500px;
+      margin-bottom: 1em;
+      line-height: inherit;
+      margin-right: auto;
+      margin-left:auto;
+
+    }
+
+    section .btn-large i {
+      font-size: 1.2em;
+      padding-bottom: .1em;
+      padding-right: .3em;
+    }
+
+    .collapsible{
+      border:none;
+      box-shadow: none;
+    }
+    .collapsible-header{
+      background-color:inherit;
+    }
+
+    section:not(.collapsible) .section-title{
+      margin-left:30px;
+    }
+
+    section > * {
+      width: 100%;
+    }
+
+    .collapsible-header{
+      padding-top: 0;
+      padding-bottom: 0;
+      border: none;
+    }
+
+    .collapsible-body{
+      border:none;
+      padding-right:0;
+    }
+
+    .nb-users-zone{
+      font-size: 15px;
+      line-height: 15px;
+    }
+
+    .admin-section-title{
+      width:100%;
+    }
+
+    .admin-section-title i{
+      margin-right:0;
+    }
+
+    .add-admin-btn{
+      border: 1px dashed orange;
+      padding: 0 2rem;
+    }
+
+    .add-admin-btn > i{
+      width:20px;
+      font-size:1.3rem;
+      margin-right:0;
+    }
+
+    .badge-container > div {
+      font-size: 1em;
+      width: 1.2em;
+      height: 1.2em;
+    }
+
+    .user-master-btn {
+      min-width:250px;
+      padding-right:0;
+    }
+
+    .user-section-act-btns{
+      flex-wrap:nowrap;
+      min-width:250px;
+    }
+
+    .admin-section-title > a {
+      width: inherit;
+    }
+
+    #updateUserRole{
+      overflow-y:inherit;
+    }
+
+
+    @media screen and (max-width: 993px) {
+
+      .page-title{
+        display: none;
+      }
+
+    }
+
+  </style>
+  <script>
+    var alreadyExistingMsg = "{{ 'already_existing'|trans }}";
+    var aaurl = "{{ url('addAdministrator') }}";
+    var uururl = "{{ url('updateUserRole') }}";
+    var surl = "{{ path('dynamicSearch') }}";
+  </script>
+{% endblock css %}
+
+
 {% block content %}
-    {{ form_start(form) }}
-    <section>
-        <div class="center">
-            <h5 style="display:inline-block">{% trans %}firm_settings.page_title{% endtrans %}</h5>
-            <div style="display:inline-block;position:absolute; display:inline-block;right:2%">
-                {{ form_row(form.submit) }}
-            </div>
-        </div>
-        <ul class="tabs tabs-fixed-width">
-            <li class="tab">
-                <a href="#users">
-                    <i class="fa fa-users"></i>
-                    <span class="activity-status">{% trans %}firm_settings.users.title{% endtrans %}</span>
-                </a>
-            </li>
-            <li class="tab">
-                <a href="#activities">
-                    <i class="fa fa-cubes"></i>
-                    <span class="activity-status">{% trans %}firm_settings.activities.title{% endtrans %}</span>
-                </a>
-            </li>
-        </ul>
 
-        <div id="users">
-            <section>
-                <span style="font-size:1.8rem"><i class="fa fa-network-wired" style="margin-right:10px"></i>{% trans %}firm_settings.users.structure.title{% endtrans %}</span>
-                <div style="margin-left:30px">
+  {% include "components/background_grid.html.twig" %}
 
-                    <div class="row no-margin">
-                        <div class="col s12 m12">
-                            <h5>{% trans %}firm_settings.other.departments.section_title{% endtrans %}</h5>
-                            <a class="waves-effect waves-light btn modify-button" href="{{ url('updateOrganizationElements', {entity: 'department' }) }}">{% trans %}firm_settings.other.departments.manage_btn{% endtrans %}</a>
-                        </div>
-                    </div>
 
-                    <div class="row no-margin">
-                        <div class="col s12 m12">
-                            <h5>{% trans %}firm_settings.other.positions.section_title{% endtrans %}</h5>
-                            <a class="waves-effect waves-light btn modify-button" href="{{ url('updateOrganizationElements', {entity: 'position' }) }}">{% trans %}firm_settings.other.positions.manage_btn{% endtrans %}</a>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col s12 m12">
-                            <h5>{% trans %}firm_settings.other.titles.section_title{% endtrans %}</h5>
-                            <a class="waves-effect waves-light btn modify-button" href="{{ url('updateOrganizationElements', {entity: 'title' }) }}">{% trans %}firm_settings.other.positions.manage_btn{% endtrans %}</a>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section>
-                <span style="font-size:1.8rem"><i class="fa fa-chart-line" style="margin-right:10px"></i>{% trans %}firm_settings.users.criterion.title{% endtrans %}</span>
-
-                <div style="margin-left:30px">
-                    <div class="row">
-
-                        <div class="col s12 m12">
-                            <a class="waves-effect waves-light btn modify-button" href="{{ url('updateElementTargets', {entity: 'organization', 'elmtId' : currentuser.organization.id }) }}" style="margin-top:15px">{% trans %}firm_settings.users.criterion.organization_targets{% endtrans %}</a>
-                        </div>
-
-                        <div class="col s12 m12">
-                            <a class="waves-effect waves-light cyan darken-1 btn modify-button" href="{{ url('elementAvgResultPerCriterion',{entity: 'user'}) }}" style="margin-top:15px">{% trans %}firm_settings.users.criterion.avg_results{% endtrans %}</a>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section>
-                <span style="font-size:1.8rem"><i class="fa fa-key" style="margin-right:10px"></i>{% trans %}firm_settings.users.privileges.title{% endtrans %}</span>
-
-                <div style="margin-left:30px">
-                    <div class="row">
-                        {% set existingAccessResultsOptions = false %}
-                        {% for key, option in form.aliveOptions %}
-                            {% if option.vars.data.oName.name == 'activitiesAccessAndResultsView' and not existingAccessResultsOptions%}
-                                {% set existingAccessResultsOptions = true %}
-                            {% endif %}
-                        {% endfor %}
-                        {% if existingAccessResultsOptions %}
-                            <div class="col s12 m12">
-                                {% include 'activities_access_and_results_view.html.twig' with { form: form } %}
-                            </div>
-                        {% endif %}
-                        <div class="col s12 m12">
-                            <div style="margin-top: 10px">
-                                <span><i class="fa fa-user-circle" style="font-size:1.6rem"></i></span><h5 style="display:inline-block; margin-left: 10px">{% trans %}firm_settings.users.privileges.line_managers{% endtrans %}</h5>
-                            </div>
-                            {% for key, option in form.aliveOptions %}
-                                {% if option.vars.data.oName.name in [
-                                    'enabledSuperiorSubRights',
-                                    'enabledSuperiorSettingTargets',
-                                    'enabledSuperiorModifySubordinate',
-                                    'enabledSuperiorOverviewSubResults'
-                                ] %}
-                                    <div class="col s12 m12 {% if option.vars.data.oName.name in ['enabledSuperiorSettingTargets' ,'enabledSuperiorModifySubordinate','enabledSuperiorOverviewSubResults'] %}suboption" style="margin-left:30px{% else %}supoption{% endif %}">
-                                        {{ form_widget(option.optionTrue) }}
-                                        {{ form_label(option.optionTrue) }}
-                                    </div>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                        <div class="col s12 m12">
-                            <div style="margin-top: 10px">
-                                <span><i class="fa fa-user" style="font-size:1.6rem"></i></span><h5 style="display:inline-block; margin-left: 10px">{% trans %}firm_settings.users.privileges.internal_users{% endtrans %}</h5>
-                            </div>
-                            {% for key, option in form.aliveOptions %}
-                                {% if option.vars.data.oName.name in [
-                                    'enabledUserSeeAllUsers',
-                                    'enabledUserCreatingUser',
-                                    'enabledUserSeeSnapshotPeersResults',
-                                    'enabledUserSeeSnapshotSupResults',
-                                    'enabledUserSeeRanking',
-                                ] %}
-                                    <div class="col s12 m12">
-                                        {{ form_widget(option.optionTrue) }}
-                                        {{ form_label(option.optionTrue) }}
-                                    </div>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                        <div class="col s12 m12" style="display: none;">
-                            <div style="margin-top: 10px">
-                                <span><i class="far fa-user"></i></span><h5 style="display:inline-block; margin-left: 10px">{% trans %}firm_settings.users.privileges.external_users{% endtrans %}</h5>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
-        <div id="activities" class="row">
-            <section>
-                <span style="font-size:1.8rem"><i class="fa fa-layer-group" style="margin-right:10px"></i>{% trans %}firm_settings.other.processes.section_title{% endtrans %}</span>
-                <div style="margin-left:30px">
-                    <div class="row">
-                        <div class="col s12">
-                                <a class="waves-effect waves-light btn modify-button" href="{{ url('manageIProcesses') }}">{% trans %}firm_settings.other.departments.manage_btn{% endtrans %}</a>
-                        </div>
-                    </div>
-            </section>
-            <section>
-                <span style="font-size:1.8rem"><i class="fa fa-hammer" style="margin-right:10px"></i>{% trans %}firm_settings.other.criterion_names.section_title{% endtrans %}</span>
-                <div style="margin-left:30px">
-                    <div class="row">
-                        <div class="col s12">
-                                <a class="waves-effect waves-light btn modify-button" href="{{ url('manageCriterionGroups') }}">{% trans %}firm_settings.other.departments.manage_btn{% endtrans %}</a>
-                        </div>
-                    </div>
-            </section>
-            <section>
-                <span style="font-size:1.8rem"><i class="fa fa-file" style="margin-right:10px"></i>{% trans %}firm_settings.activities.templates.section_title{% endtrans %}</span>
-                <div style="margin-left:30px">
-                    <div class="row">
-                        <div class="col s12">
-                            <a class="waves-effect waves-light btn modify-button" href="{{ url('manageTemplates') }}">{% trans %}firm_settings.activities.templates.manage_btn{% endtrans %}</a>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            <section>
-                <span style="font-size:1.8rem">
-                    <i class="fa fa-cog" style="margin-right:10px"></i>
-                    {% trans %}firm_settings.activities.parameters.section_title{% endtrans %}
-                </span>
-                <div style="margin-left:30px">
-                    <div class="row">
-                        <div class="col s12">
-                            <ul class="flex-center" style="width:100%">
-                                <span>{% trans %}firm_settings.other.mails.mail_deadline_nb_days{% endtrans %}</span>
-                                {% for key, option in form.aliveOptions %}
-                                    {% if option.vars.data.oName.name == 'mailDeadlineNbDays' %}
-                                        {{ form_widget(option.optionFValue) }}
-                                    {% endif %}
-                                {% endfor %}
-                            </ul>
-                        </div>
-                        {% for key, option in form.aliveOptions %}
-                            {% if option.vars.data.oName.name in [
-                                'enabledLeaderSeeAllGrades',
-                                'enabledCNamesOutsideCGroups',
-                            ] %}
-                                <div class="col s12 m12">
-                                    {{ form_widget(option.optionTrue) }}
-                                    {{ form_label(option.optionTrue) }}
-                                </div>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-                </div>
-            </section>
-        </div>
+  <main class="card-panel purple lighten-5">
+    <h5 class="center strong dd-text page-title">{{'firm_settings.page_title'|trans}}</h5>
+    
+    <section class="flex">
+      <div class="flex-center-sb">
+        <h5 class="section-title">{{ 'firm_settings.profile.title'|trans }}</h5>
+        <a class="btn-flat waves-effect waves-light" href="{{ path('manageOrgProfile') }}">
+          <i class="fa fa-cog"></i>
+        </a>
+      </div>
     </section>
-        {{ form_rest(form) }}
-        {{ form_end(form)}}
 
+    <section class="flex">
+      <div class="flex-center-sb">
+        <h5 class="section-title">{{'firm_settings.manage_updates'|trans}}</h5>
+        <a class="btn-flat waves-effect waves-light" href="{{ path('manageUpdates') }}">
+          <i class="fa fa-cog"></i>
+        </a>
+      </div>
+    </section>
+
+    <section class="flex collapsible no-margin admin-rights">
+
+        {% set totalAliveAdminUsers = currentuser.organization.users|filter(u => not u.synthetic and not u.deleted and u.role <= 2) %}
+
+        <ul class="collapsible no-margin" data-collapsible="accordion">
+          <li>
+            <div class="collapsible-header no-padding">
+              <h5 class="section-title admin-section-title flex-center">
+                <a class="flex-center black-text not-collapse">
+                  <i class="fa fa-chevron-right"></i>
+                  <i class="fa fa-chevron-down"></i>
+                  <span>{{'firm_settings.manage_admin'|trans }}</span>
+                  <span class="sm-left nb-users-zone">(<span class="nb-users">{{ totalAliveAdminUsers|length }}</span>)</span>
+                </a>
+              </h5> 
+              
+                <ul class="flex-center user-section-act-btns" style="visibility:hidden;">
+                  <a href="#" class="btn-flat">{{ 'see_details'|trans }}</a>
+                  <a href="#addUserClient" class="btn-flat not-collapse add-admin-btn modal-trigger tooltipped" data-position="top" data-tooltip="{{'firm_settings.add_new_administrator'|trans}}"><i class="fa fa-plus dd-text"></i></a>
+                </ul>
+             
+            </div>
+            <div class="collapsible-body">
+              <ul class="firm-users" data-prototype="{% apply escape %}{% include "components/administrator_list__item.html.twig" %}{% endapply %}" >
+                {% for user in totalAliveAdminUsers %}
+                  {% set isYourself = user.fullname == currentuser.fullname %}
+                  <li class="account flex-center-sb" data-r="{{user.role}}">
+                    <div class="flex-center">  
+                        <img class="user-profile-l-picture sm-right" src="{{ asset(global.userPicture(user)) }}" alt="">
+                        <span class="user-name {{isYourself ? 'strong'}}">{{ isYourself ? 'yourself'|trans : user.fullname }}</span>
+                    </div>
+                    <div class="account-action-zone flex-center">
+                        <div class="btn-flat user-master-btn flex-center-sb">
+                              {{ macros.user_role_badge(user) }}
+                              <span class="user-master-name">{{ user.role == 1 ? 'profile.super_administrator'|trans : 'profile.administrator'|trans }}</span>
+                        </div> 
+                        <div class="btn-flat tooltipped modal-trigger" href="#updateUserRole" data-id="{{user.id}}" data-tooltip="{{'profile.manage.update_role'|trans}}" data-position="top" style="visibility:hidden;">
+                            <i class="dd-orange-text mi create"></i>
+                        </div>
+                    </div>
+                  </li>
+                {% endfor %}
+              
+              </ul>
+            </div>
+          </li>
+        </ul>
+    </section>
+
+    <section class="flex">
+      <div class="flex-center-sb">
+        <h5 class="section-title">{{'firm_settings.manage_activity'|trans}}</h5>
+        {#
+        <a class="btn-flat waves-effect waves-light" href="{{ path('manageUpdates') }}">
+          <i class="fa fa-cog"></i>
+        </a>
+        #}
+      </div>
+    </section>
+
+  </main>
+
+
+    <div id="updateUserRole" class="modal">
+      <div class="modal-content">
+        <p>{{'firm_settings.update_user_role_modal.msg'|trans}} <span class="user-fullname-value"></span></p>
+        <div class="input-field">
+          <select id="roleSelector">
+            <option value="1">{{'firm_settings.update_user_role_modal.super_admin_choice'|trans}}</option>
+            <option value="2">{{'firm_settings.update_user_role_modal.admin_choice'|trans}}</option>
+            <option value="3">{{'firm_settings.update_user_role_modal.collaborator_choice'|trans}}</option>
+          </select>
+        </div>
+        <div class="flex-center-fe">
+          <div class="btn-flat waves-effect waves-light modal-close m-right">{{'back'|trans}}</div>
+          <div class="btn waves-effect waves-light update-user-role-btn">{{'ok'|trans}}</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="newSuperAdminWarning" class="modal">
+      <div class="modal-content">
+        <h5>{{'firm_settings.new_super_admin_modal.title'|trans}}</h5>
+        <p>{{'firm_settings.new_super_admin_modal.msg'|trans}}</p>
+        <div class="flex-center-fe">
+          <div class="btn-flat waves-effect waves-light modal-close m-right">{{'back'|trans}}</div>
+          <div class="btn waves-effect waves-light new-super-admin-btn">{{'ok'|trans}}</div>
+        </div>
+      </div>
+    </div>
+    
 {% endblock %}
 
 {% block javascripts %}
-<script>
-    $(function() {
-        const originalSerializeArray = $.fn.serializeArray;
-        $.fn.extend({
-            serializeArray: function () {
-                const brokenSerialization = originalSerializeArray.apply(this);
-                const checkboxValues = $(this).find('input[type=checkbox]').map(function () {
-                    return { name: this.name, value: +this.checked };
-                }).get();
-                const checkboxKeys = $.map(checkboxValues, function (element) { return element.name; });
-                const withoutCheckboxes = $.grep(brokenSerialization, function (element) {
-                    return $.inArray(element.name, checkboxKeys) == -1;
-                });
-
-                return $.merge(withoutCheckboxes, checkboxValues);
-            }
-        });
-
-        $('.supoption').on('change', e => {
-            const $this = $(e.target);
-            const $checkbox = $this.find('input[type="checkbox"]');
-            const $subCheckboxes = $this.nextAll().find('input[type="checkbox"]');
-
-            if (!$checkbox.prop('checked')) {
-                $subCheckboxes.prop('checked', false).prop('disabled', true);
-            } else {
-                $subCheckboxes.prop('disabled', false);
-            }
-        });
-
-
-        $('.firm-settings-submit').on('click', e => {
-            e.preventDefault();
-
-            const $this = $(e.target);
-            const formData = $this.closest('form').serialize();
-
-            $.post(updateFirmUrl, formData)
-            .done(e => {
-                $this
-                .removeClass('btn').addClass('btn-flat grey')
-                .text('{{ "firm_settings.submit_saved"|trans }}');
-            });
-        });
-    });
-</script>
+  <script src="{{ asset('js/firm_settings.js') }}"></script>
 {% endblock %}

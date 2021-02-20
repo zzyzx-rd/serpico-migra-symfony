@@ -34,9 +34,10 @@ class Department extends DbObject
     public $name;
 
     /**
-     * @ORM\Column(name="dpt_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="departmentInitiatives")
+     * @JoinColumn(name="dpt_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="dpt_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
@@ -103,7 +104,6 @@ class Department extends DbObject
      * Department constructor.
      * @param $id
      * @param $name
-     * @param $createdBy
      * @param $deleted
      * @param $masterUser
      * @param $positions
@@ -118,7 +118,6 @@ class Department extends DbObject
     public function __construct(
         $id = 0,
         $name = '',
-        $createdBy = null,
         $deleted = null,
         $masterUser = null,
         $positions = null,
@@ -130,7 +129,7 @@ class Department extends DbObject
         ArrayCollection $targets = null,
         ArrayCollection $users = null)
     {
-        parent::__construct($id, $createdBy, new DateTime);
+        parent::__construct($id, null, new DateTime);
         $this->name = $name;
         $this->deleted = $deleted;
         $this->masterUser = $masterUser;
@@ -331,6 +330,14 @@ class Department extends DbObject
     {
         $this->users->removeElement($user);
         return $this;
+    }
+
+    /**
+     * @return ArrayCollection|User[]
+     */
+    public function getActiveUsers()
+    {
+        return $this->users->filter(fn(User $u) => !$u->getDeleted());
     }
 
     /**

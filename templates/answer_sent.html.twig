@@ -283,7 +283,7 @@
       {% set userprec =0 %}
       {% set surveyanswer = 0 %}
       {% for key,item in answer %}
-      {% set user =item.createdby %}
+      {% set user =item.initiator %}
       {% if user != userprec %}
     </div>
 
@@ -411,7 +411,7 @@
           </div>
         </div>
         </div>
-        {% set userprec =item.createdby %}
+        {% set userprec = item.initiator %}
         {% endfor %}
       </div>
 

@@ -48,9 +48,10 @@ class Client extends DbObject
     public $email;
 
     /**
-     * @ORM\Column(name="cli_createdBy", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="clientInitiatives")
+     * @JoinColumn(name="cli_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="cli_inserted", type="datetime", nullable=true, options={"default": "CURRENT_TIMESTAMP"})
@@ -90,7 +91,6 @@ class Client extends DbObject
      * @param $type
      * @param $logo
      * @param $email
-     * @param $createdBy
      * @param $organization
      * @param $clientOrganization
      * @param $workerFirm
@@ -98,7 +98,7 @@ class Client extends DbObject
      */
     public function __construct(
       ?int $id = null,
-        $createdBy = null,
+        $initiator = null,
         $type = 'F',
         $name = null,
         $logo = null,
@@ -106,7 +106,7 @@ class Client extends DbObject
         $workerFirm = null,
         $externalUsers = null)
     {
-        parent::__construct($id, $createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->name = $name;
         $this->type = $type;
         $this->logo = $logo;

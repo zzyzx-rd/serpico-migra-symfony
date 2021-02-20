@@ -106,9 +106,10 @@ class Recurring extends DbObject
     public $replicatePart;
 
     /**
-     * @ORM\Column(name="rct_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="recurringInitiatives")
+     * @JoinColumn(name="rct_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="rct_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
@@ -125,12 +126,6 @@ class Recurring extends DbObject
      * @JoinColumn(name="organization_org_id", referencedColumnName="org_id",nullable=false)
      */
     protected $organization;
-
-    /**
-     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="Reccuring")
-     * @JoinColumn(name="rec_master_user_id", referencedColumnName="usr_id")
-     */
-    public $rec_master_user;
     /**
      * @var ArrayCollection
      */
@@ -157,7 +152,7 @@ class Recurring extends DbObject
         $masterUser = null,
         $deleted = null)
     {
-        parent::__construct($id,null ,new DateTime);
+        parent::__construct($id, null, new DateTime);
         $this->name = $name;
         $this->status = $status;
         $this->timeFrame = $timeFrame;

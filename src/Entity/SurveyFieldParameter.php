@@ -45,9 +45,10 @@ class SurveyFieldParameter extends DbObject
     public $step;
 
     /**
-     * @ORM\Column(name="sfp_createdBy", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="surveyFieldParameterInitiatives")
+     * @JoinColumn(name="sfp_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="sfp_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
@@ -67,7 +68,6 @@ class SurveyFieldParameter extends DbObject
      * @param $sfp_lowerbound
      * @param $sfp_upperbound
      * @param $sfp_step
-     * @param $sfp_createdBy
      * @param $field
      */
     public function __construct(
@@ -76,10 +76,9 @@ class SurveyFieldParameter extends DbObject
         $sfp_lowerbound = true,
         $sfp_upperbound = null,
         $sfp_step = null,
-        $sfp_createdBy = null,
         $field = null)
     {
-        parent::__construct($id, $sfp_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->value = $sfp_value;
         $this->lowerbound = $sfp_lowerbound;
         $this->upperbound = $sfp_upperbound;

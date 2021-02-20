@@ -56,9 +56,10 @@ class Output extends DbObject
     public $criteria;
 
     /**
-     * @ORM\Column(name="otp_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="outputInitiatives")
+     * @JoinColumn(name="otp_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="otp_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
@@ -88,19 +89,16 @@ class Output extends DbObject
      * Stage constructor.
      * @param ?int$id
      * @param null $masterUser
-     * @param int $createdBy
+     * @param User $initiator
      * @param DateTime $startdate
      * @param DateTime $enddate
      * @param DateTime $inserted
      * @param String $name
      */
 
-    public function __construct($id = 0,
-                                $createdBy = null
-
-    )
+    public function __construct($id = 0)
     {
-        parent::__construct($id, $createdBy, new DateTime);
+        parent::__construct($id, null, new DateTime);
         $this->criteria = new ArrayCollection;
         $this->updates = new ArrayCollection;
         $this->userMasters = new ArrayCollection();

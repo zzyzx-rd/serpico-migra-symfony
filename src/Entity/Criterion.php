@@ -90,9 +90,10 @@ class Criterion extends DbObject
     public $comment;
 
     /**
-     * @ORM\Column(name="cri_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="criterionInitiatives")
+     * @JoinColumn(name="cri_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="cri_inserted", type="datetime", nullable=false, options={"default": "CURRENT_TIMESTAMP"})
@@ -185,7 +186,6 @@ class Criterion extends DbObject
      * @param $step
      * @param $gradeType
      * @param $comment
-     * @param $createdBy
      * @param $deleted
      * @param $stage
      * @param $output
@@ -216,7 +216,7 @@ class Criterion extends DbObject
         $forceCommentSign = null,
         $gradeType = 1,
         $comment = '',
-        $createdBy = null,
+        $initiator = null,
         $deleted = null,
         //TODO Gérer la création dans les controlleurs
         Stage $stage = null,
@@ -234,7 +234,7 @@ class Criterion extends DbObject
         Output $output = null,
         $template = null)
     {
-        parent::__construct($id, $createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->complete = $complete;
         $this->type = $type;
         $this->name = $name;
@@ -247,7 +247,7 @@ class Criterion extends DbObject
         $this->step = $step;
         $this->gradeType = $gradeType;
         $this->comment = $comment;
-        $this->createdBy = $createdBy;
+        $this->initiator = $initiator;
         $this->deleted = $deleted;
         $this->stage = $stage;
         $this->organization = $organization;

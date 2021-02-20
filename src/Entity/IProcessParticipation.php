@@ -18,7 +18,7 @@ class IProcessParticipation extends DbObject
 {
     public const PARTICIPATION_ACTIVE       = 1;
     public const PARTICIPATION_THIRD_PARTY  = 0;
-    public const PARTICIPATION_PASSIVE      = -1;
+    public const PARTICIPATION_FOLLOWING      = -1;
 
     /**
      * @ORM\Id()
@@ -53,9 +53,10 @@ class IProcessParticipation extends DbObject
     public $precomment;
 
     /**
-     * @ORM\Column(name="par_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="iProcessParticipationInitiatives")
+     * @JoinColumn(name="par_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="par_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
@@ -111,7 +112,6 @@ class IProcessParticipation extends DbObject
      * @param $par_type
      * @param $par_mWeight
      * @param $par_precomment
-     * @param $par_createdBy
      * @param $par_deleted
      * @param $team
      * @param $institutionProcess
@@ -129,7 +129,6 @@ class IProcessParticipation extends DbObject
         int $par_status = 0,
         float $par_mWeight = 0.0,
         $par_precomment = '',
-        $par_createdBy = null,
         DateTime $par_deleted = null,
         Team $team = null,
         InstitutionProcess $institutionProcess = null,
@@ -137,7 +136,7 @@ class IProcessParticipation extends DbObject
         Criterion $criterion = null
      )
     {
-        parent::__construct($id, $par_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->status = $par_status;
         $this->leader = $par_leader;
         $this->type = $par_type;

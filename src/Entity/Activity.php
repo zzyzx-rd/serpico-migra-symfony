@@ -176,10 +176,10 @@ class Activity extends DbObject
      */
     protected int $res_benefit_eff;
     /**
-     * @Column(name="act_created_by", type="integer", nullable=true)
-     * @var int
+     * @ManyToOne(targetEntity="User", inversedBy="activityInitiatives")
+     * @JoinColumn(name="act_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    protected ?int $createdBy;
+    protected ?User $initiator;
     /**
      * @Column(name="act_inserted", type="datetime", nullable=false, options={"default": "CURRENT_TIMESTAMP"})
      * @var DateTime
@@ -271,7 +271,6 @@ class Activity extends DbObject
      * @param float $distrAmount
      * @param int $res_inertia
      * @param int $res_benefit_eff
-     * @param int|null $createdBy
      * @param DateTime|null $deleted
      * @param DateTime|null $completed
      * @param DateTime|null $saved
@@ -297,7 +296,6 @@ class Activity extends DbObject
         float $distrAmount = 0.0,
         int $res_inertia = 0,
         int $res_benefit_eff = 0,
-        int $createdBy = null,
         DateTime $deleted = null,
         DateTime $completed = null,
         DateTime $saved = null,
@@ -306,7 +304,7 @@ class Activity extends DbObject
         DateTime $released = null,
         DateTime $archived = null
     ) {
-        parent::__construct($id, $createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->magnitude = $magnitude;
         $this->complete = $complete;
         $this->simplified = $simplified;
@@ -342,7 +340,6 @@ class Activity extends DbObject
         $this->historicalRankingTeams = new ArrayCollection;
         $this->mails = new ArrayCollection;
         $this->updates = new ArrayCollection;
-        $this->createdBy = $createdBy;
         $this->userMasters = new ArrayCollection();
     }
 
@@ -1552,6 +1549,22 @@ class Activity extends DbObject
             }
         }       
         return $clientOrganizations;
+    }
+
+    /**
+    * @return ArrayCollection|User[]
+    */
+    public function getRequesters()
+    {   
+        $requesters = new ArrayCollection();
+        foreach($this->getActiveStages() as $activeStage){
+            foreach($activeStage->getRequesters() as $requester){
+                if(!$requesters->contains($requester)){
+                    $requesters->add($requester);
+                }
+            }
+        }
+        return $requesters;
     }
 
 }

@@ -7,5 +7,6 @@ vendor/
 node_modules/
 public/lib/img/
 public/lib/evt/
+public/lib/videos/
 composer.lock
 symfony.lock

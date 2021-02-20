@@ -139,9 +139,10 @@ class User extends DbObject implements  UserInterface, \Serializable
     public $enabledCreatingUser;
 
     /**
-     * @ORM\Column(name="usr_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="userInitiatives")
+     * @JoinColumn(name="usr_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    protected ?User $initiator;
 
     /**
      * @ORM\Column(name="usr_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
@@ -219,11 +220,6 @@ class User extends DbObject implements  UserInterface, \Serializable
     public $participations;
 
     /**
-     * @ORM\OneToMany(targetEntity=Recurring::class, mappedBy="rec_master_user")
-     */
-    public $Reccuring;
-
-    /**
      * @ORM\OneToMany(targetEntity=Result::class, mappedBy="user")
      */
     public $results;
@@ -288,6 +284,361 @@ class User extends DbObject implements  UserInterface, \Serializable
     private $masterings;
 
     /**
+     * @ORM\OneToMany(targetEntity=User::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|User[]
+     */
+    private $userInitiatives;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Activity::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|Activity[]
+     */
+    private $activityInitiatives;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Answer::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|Answer[]
+     */
+    private $answerInitiatives;
+
+    /**
+     * @ORM\OneToMany(targetEntity=City::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|City[]
+     */
+    private $cityInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=Client::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|Client[]
+     */
+    private $clientInitiatives;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Contact::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|Contact[]
+     */
+    private $contactInitiatives;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Country::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|Country[]
+     */
+    private $countryInitiatives;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Criterion::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|Criterion[]
+     */
+    private $criterionInitiatives;
+
+    /**
+     * @ORM\OneToMany(targetEntity=CriterionGroup::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|CriterionGroup[]
+     */
+    private $criterionGroupInitiatives;
+
+    /**
+     * @ORM\OneToMany(targetEntity=CriterionName::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|CriterionName[]
+     */
+    private $criterionNameInitiatives;
+    
+    /**
+     * @ORM\OneToMany(targetEntity=Decision::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|Decision[]
+     */
+    private $decisionInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=Department::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|Department[]
+     */
+    private $departmentInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=DocumentAuthor::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|DocumentAuthor[]
+     */
+    private $documentAuthorInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=DynamicTranslation::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|DynamicTranslation[]
+     */
+    private $dynamicTranslationInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=ElementUpdate::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|ElementUpdate[]
+     */
+    private $elementUpdateInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=Event::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|Event[]
+     */
+    private $eventInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=EventComment::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|EventComment[]
+     */
+    private $eventCommentInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=EventDocument::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|EventDocument[]
+     */
+    private $eventDocumentInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=EventGroup::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|EventGroup[]
+     */
+    private $eventGroupInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=EventGroupName::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|EventGroupName[]
+     */
+    private $eventGroupNameInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=EventName::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|EventName[]
+     */
+    private $eventNameInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=EventType::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|EventType[]
+     */
+    private $eventTypeInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=ExternalUser::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|ExternalUser[]
+     */
+    private $externalUserInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=GeneratedError::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|GeneratedError[]
+     */
+    private $generatedErrorInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=GeneratedImage::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|GeneratedImage[]
+     */
+    private $generatedImageInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=Grade::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|Grade[]
+     */
+    private $gradeInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=Icon::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|Icon[]
+     */
+    private $iconInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=InstitutionProcess::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|InstitutionProcess[]
+     */
+    private $institutionProcessInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=IProcessCriterion::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|IProcessCriterion[]
+     */
+    private $iProcessCriterionInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=IProcessParticipation::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|IProcessParticipation[]
+     */
+    private $iProcessParticipationInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=IProcessStage::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|IProcessStage[]
+     */
+    private $iProcessStageInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=Mail::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|Mail[]
+     */
+    private $mailInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=Member::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|Member[]
+     */
+    private $memberInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=OptionName::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|OptionName[]
+     */
+    private $optionNameInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=Organization::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|Organization[]
+     */
+    private $organizationInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=OrganizationPaymentMethod::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|OrganizationPaymentMethod[]
+     */
+    private $organizationPaymentMethodInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=OrganizationUserOption::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|OrganizationUserOption[]
+     */
+    private $organizationUserOptionInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=OTPUser::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|OTPUser[]
+     */
+    private $OTPUserInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=Output::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|Output[]
+     */
+    private $outputInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=Participation::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|Participation[]
+     */
+    private $participationInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=Position::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|Position[]
+     */
+    private $positionInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=Process::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|Process[]
+     */
+    private $processInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=ProcessCriterion::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|ProcessCriterion[]
+     */
+    private $processCriterionInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=ProcessStage::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|ProcessStage[]
+     */
+    private $processStageInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=Ranking::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|Ranking[]
+     */
+    private $rankingInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=RankingHistory::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|RankingHistory[]
+     */
+    private $rankingHistoryInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=RankingTeam::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|RankingTeam[]
+     */
+    private $rankingTeamInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=RankingTeamHistory::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|RankingTeamHistory[]
+     */
+    private $rankingTeamHistoryInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=Recurring::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|Recurring[]
+     */
+    private $recurringInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=Result::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|Result[]
+     */
+    private $resultInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=ResultProject::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|ResultProject[]
+     */
+    private $resultProjectInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=ResultTeam::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|ResultTeam[]
+     */
+    private $resultTeamInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=Stage::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|Stage[]
+     */
+    private $stageInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=State::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|State[]
+     */
+    private $stateInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=Survey::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|Survey[]
+     */
+    private $surveyInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=SurveyField::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|SurveyField[]
+     */
+    private $surveyFieldInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=SurveyFieldParameter::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|SurveyFieldParameter[]
+     */
+    private $surveyFieldParameterInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=Target::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|Target[]
+     */
+    private $targetInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=Team::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|Team[]
+     */
+    private $teamInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=Title::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|Title[]
+     */
+    private $titleInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=UserGlobal::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|UserGlobal[]
+     */
+    private $userGlobalInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=UserMaster::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|UserMaster[]
+     */
+    private $userMasterInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=Weight::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|Weight[]
+     */
+    private $weightInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=WorkerExperience::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|WorkerExperience[]
+     */
+    private $workerExperienceInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=WorkerFirm::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|WorkerFirm[]
+     */
+    private $workerFirmInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=WorkerFirmCompetency::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|WorkerFirmCompetency[]
+     */
+    private $workerFirmCompetencyInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=WorkerFirmLocation::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|WorkerFirmLocation[]
+     */
+    private $workerFirmLocationInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=WorkerFirmSector::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|WorkerFirmSector[]
+     */
+    private $workerFirmSectorInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=WorkerIndividual::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|WorkerIndividual[]
+     */
+    private $workerIndividualInitiatives;
+
+    /**
      * @var UploadedFile
      */
     protected $pictureFile;
@@ -318,7 +669,6 @@ class User extends DbObject implements  UserInterface, \Serializable
      * @param $rememberMeToken
      * @param $validated
      * @param $enabledCreatingUser
-     * @param $createdBy
      * @param $lastConnected
      * @param $deleted
      * @param int $role
@@ -360,7 +710,6 @@ class User extends DbObject implements  UserInterface, \Serializable
         $activitiesArchivingNbDays = 7,
         $rememberMeToken = null,
         $superior = null,
-        $createdBy = null,
         $validated = null,
         $lastConnected = null,
         $deleted = null,
@@ -377,7 +726,7 @@ class User extends DbObject implements  UserInterface, \Serializable
         $title = null,
         $subscriptionId = null)
     {
-        parent::__construct($id, $createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->pictureFile = $pictureFile;
         $this->internal = $internal;
         $this->synthetic = $synthetic;
@@ -419,8 +768,74 @@ class User extends DbObject implements  UserInterface, \Serializable
         $this->roles = new ArrayCollection();
         $this->updates = new ArrayCollection();
         $this->masterings = new ArrayCollection();
+        $this->userInitiatives = new ArrayCollection();
+        $this->activityInitiatives = new ArrayCollection();
+        $this->answerInitiatives = new ArrayCollection();
+        $this->cityInitiatives = new ArrayCollection();
+        $this->clientInitiatives = new ArrayCollection();
+        $this->contactInitiatives = new ArrayCollection();
+        $this->countryInitiatives = new ArrayCollection();
+        $this->criterionInitiatives = new ArrayCollection();
+        $this->criterionGroupInitiatives = new ArrayCollection();
+        $this->criterionNameInitiatives = new ArrayCollection();
+        $this->decisionInitiatives = new ArrayCollection();
+        $this->departmentInitiatives = new ArrayCollection();
+        $this->documentAuthorInitiatives = new ArrayCollection();
+        $this->dynamicTranslationInitiatives = new ArrayCollection();
+        $this->elementUpdateInitiatives = new ArrayCollection();
+        $this->eventInitiatives = new ArrayCollection();
+        $this->eventCommentInitiatives = new ArrayCollection();
+        $this->eventDocumentInitiatives = new ArrayCollection();
+        $this->eventGroupInitiatives = new ArrayCollection();
+        $this->eventGroupNameInitiatives = new ArrayCollection();
+        $this->eventNameInitiatives = new ArrayCollection();
+        $this->eventTypeInitiatives = new ArrayCollection();
+        $this->externalUserInitiatives = new ArrayCollection();
+        $this->generatedErrorInitiatives = new ArrayCollection();
+        $this->generatedImageInitiatives = new ArrayCollection();
+        $this->gradeInitiatives = new ArrayCollection();
+        $this->iconInitiatives = new ArrayCollection();
+        $this->institutionProcessInitiatives = new ArrayCollection();
+        $this->iProcessCriterionInitiatives = new ArrayCollection();
+        $this->iProcessParticipationInitiatives = new ArrayCollection();
+        $this->iProcessStageInitiatives = new ArrayCollection();
+        $this->memberInitiatives = new ArrayCollection();
+        $this->optionNameInitiatives = new ArrayCollection();
+        $this->organizationInitiatives = new ArrayCollection();
+        $this->organizationPaymentMethodInitiatives = new ArrayCollection();
+        $this->organizationUserOptionInitiatives = new ArrayCollection();
+        $this->OTPUserInitiatives = new ArrayCollection();
+        $this->participationInitiatives = new ArrayCollection();
+        $this->positionInitiatives = new ArrayCollection();
+        $this->processInitiatives = new ArrayCollection();
+        $this->processCriterionInitiatives = new ArrayCollection();
+        $this->processStageInitiatives = new ArrayCollection();
+        $this->rankingInitiatives = new ArrayCollection();
+        $this->rankingHistoryInitiatives = new ArrayCollection();
+        $this->rankingTeamInitiatives = new ArrayCollection();
+        $this->rankingTeamHistoryInitiatives = new ArrayCollection();
+        $this->recurringInitiatives = new ArrayCollection();
+        $this->resultInitiatives = new ArrayCollection();
+        $this->resultProjectInitiatives = new ArrayCollection();
+        $this->resultTeamInitiatives = new ArrayCollection();
+        $this->stageInitiatives = new ArrayCollection();
+        $this->stateInitiatives = new ArrayCollection();
+        $this->surveyInitiatives = new ArrayCollection();
+        $this->surveyFieldInitiatives = new ArrayCollection();
+        $this->surveyFieldParameterInitiatives = new ArrayCollection();
+        $this->targetInitiatives = new ArrayCollection();
+        $this->teamInitiatives = new ArrayCollection();
+        $this->titleInitiatives = new ArrayCollection();
+        $this->userGlobalInitiatives = new ArrayCollection();
+        $this->userMasterInitiatives = new ArrayCollection();
+        $this->weightInitiatives = new ArrayCollection();
+        $this->workerExperienceInitiatives = new ArrayCollection();
+        $this->workerFirmCompetencyInitiatives = new ArrayCollection();
+        $this->workerFirmLocationInitiatives = new ArrayCollection();
+        $this->workerFirmSectorInitiatives = new ArrayCollection();
+        $this->workerIndividualInitiatives = new ArrayCollection();
     }
-
+    
     /**
      * @return string
      */
@@ -863,37 +1278,6 @@ class User extends DbObject implements  UserInterface, \Serializable
     }
 
     /**
-     * @return ArrayCollection|Recurring[]
-     */
-    public function getReccuring()
-    {
-        return $this->Reccuring;
-    }
-
-    public function addReccuring(Recurring $reccuring): self
-    {
-        if (!$this->Reccuring->contains($reccuring)) {
-            $this->Reccuring[] = $reccuring;
-            $reccuring->setRecMasterUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeReccuring(Recurring $reccuring): self
-    {
-        if ($this->Reccuring->contains($reccuring)) {
-            $this->Reccuring->removeElement($reccuring);
-            // set the owning side to null (unless already changed)
-            if ($reccuring->getRecMasterUser() === $this) {
-                $reccuring->setRecMasterUser(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
      * @return ArrayCollection|Result[]
      */
     public function getResults()
@@ -905,7 +1289,7 @@ class User extends DbObject implements  UserInterface, \Serializable
     {
         if (!$this->results->contains($result)) {
             $this->results[] = $result;
-            $result->setUserUsr($this);
+            $result->setUser($this);
         }
 
         return $this;
@@ -916,8 +1300,8 @@ class User extends DbObject implements  UserInterface, \Serializable
         if ($this->results->contains($result)) {
             $this->results->removeElement($result);
             // set the owning side to null (unless already changed)
-            if ($result->getUserUsr() === $this) {
-                $result->setUserUsr(null);
+            if ($result->getUser() === $this) {
+                $result->setUser(null);
             }
         }
 
@@ -1304,28 +1688,59 @@ class User extends DbObject implements  UserInterface, \Serializable
         return $this;
     }
 
+    /**
+    * @return ArrayCollection|Activity[]
+    */
     public function getExternalActivities()
     {
-        return new ArrayCollection(array_unique($this->participations->filter(fn(Participation $p) => $p->getStage()->getActivity()->getOrganization() != $this->organization)
-            ->map(fn(Participation $p) => $p->getStage()->getActivity())->getValues()));       
+        return new ArrayCollection(array_unique($this->getExternalStages()->map(fn(Stage $s) => $s->getActivity())->getValues(), SORT_REGULAR));       
     }
 
+    /**
+    * @return ArrayCollection|Stage[]
+    */
     public function getExternalStages()
     {
-        return new ArrayCollection(array_unique($this->participations->filter(fn(Participation $p) => $p->getStage()->getOrganization() != $this->organization)
-            ->map(fn(Participation $p) => $p->getStage())->getValues()));       
+        $externalStages = new ArrayCollection(array_unique($this->participations->filter(fn(Participation $p) => $p->getStage()->getOrganization() != $this->organization)
+        ->map(fn(Participation $p) => $p->getStage())->getValues(), SORT_REGULAR));
+        if($this->role <= USER::ROLE_ADMIN){
+            // If user is admin, we also retrieve stages with legal person involved
+            $legalPersonStages = array_unique($this->organization->getParticipations()->filter(fn(Participation $p) => $p->getUser()->isSynthetic() && $p->getStage()->getOrganization() != $this->organization)
+            ->map(fn(Participation $p) => $p->getStage())->getValues(), SORT_REGULAR);  
+            
+            foreach($legalPersonStages as $legalPersonStage){
+                $externalStages->add($legalPersonStage);
+            }
+        }
+        return $externalStages;   
     }
 
+    /**
+    * @return ArrayCollection|Activity[]
+    */
     public function getInternalActivities()
     {
-        return new ArrayCollection(array_unique($this->participations->filter(fn(Participation $p) => $p->getStage()->getActivity()->getOrganization() == $this->organization)
-            ->map(fn(Participation $p) => $p->getStage()->getActivity())->getValues()));       
+        return new ArrayCollection(array_unique($this->getInternalStages()->map(fn(Stage $s) => $s->getActivity())->getValues(), SORT_REGULAR));
     }
 
+    /**
+    * @return ArrayCollection|Stage[]
+    */
     public function getInternalStages()
     {
-        return new ArrayCollection(array_unique($this->participations->filter(fn(Participation $p) => $p->getStage()->getOrganization() == $this->organization)
-            ->map(fn(Participation $p) => $p->getStage())->getValues()));       
+        $internalStages = new ArrayCollection(array_unique($this->participations->filter(fn(Participation $p) => $p->getStage()->getOrganization() == $this->organization)
+            ->map(fn(Participation $p) => $p->getStage())->getValues(), SORT_REGULAR));
+        if($this->role <= USER::ROLE_ADMIN){
+            // We also retrieve stage with organization legal person involved
+            $legalPersonStages = array_unique($this->organization->getParticipations()->filter(fn(Participation $p) => $p->getUser()->isSynthetic() && $p->getStage()->getOrganization() == $this->organization)
+            ->map(fn(Participation $p) => $p->getStage())->getValues(), SORT_REGULAR);  
+            
+            foreach($legalPersonStages as $legalPersonStage){
+                $internalStages->add($legalPersonStage);
+            }
+        }
+        return $internalStages;   
+        
     }
 
     /**
@@ -1370,4 +1785,1402 @@ class User extends DbObject implements  UserInterface, \Serializable
         return $this;
     }
 
+    public function getPicturePath(): string
+    {
+        if(!$this->picture){
+            return "lib/img/user/no-picture.png";
+        } else {
+
+        
+            $folder = $this->isSynthetic() && $this->getFirstname() == 'ZZ' ? 'org' : 'user';
+            $suffix = $this->picture ?: (
+                $this->getOrganization()->getType() == 'C' || $this->getOrganization()->getType() == 'I' || $isIndivIndep ? 'no-picture-i.png' : (
+                    !$this->getLastConnected() ? 'virtual-user.png' : 'no-picture.png'
+                )
+            );
+            return "lib/img/$folder/$suffix";
+        }
+    }
+
+    /**
+    * @return ArrayCollection|User[]
+    */
+    public function getUserInitiatives()
+    {
+        return $this->userInitiatives;
+    }
+
+    public function addUserInitiative(User $user): self
+    {
+        $this->userInitiatives->add($user);
+        $user->setInitiator($this);
+        return $this;
+    }
+
+    public function removeUserInitiative(User $user): self
+    {
+        $this->userInitiatives->removeElement($user);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|Activity[]
+    */
+    public function getActivityInitiatives()
+    {
+        return $this->activityInitiatives;
+    }
+
+    public function addActivityInitiative(Activity $activity): self
+    {
+        $this->activityInitiatives->add($activity);
+        $activity->setInitiator($this);
+        return $this;
+    }
+
+    public function removeActivityInitiative(Activity $activity): self
+    {
+        $this->activityInitiatives->removeElement($activity);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|Answer[]
+    */
+    public function getAnswerInitiatives()
+    {
+        return $this->answerInitiatives;
+    }
+
+    public function addAnswerInitiative(Answer $answer): self
+    {
+        $this->answerInitiatives->add($answer);
+        $answer->setInitiator($this);
+        return $this;
+    }
+
+    public function removeAnswerInitiative(Answer $answer): self
+    {
+        $this->answerInitiatives->removeElement($answer);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|City[]
+    */
+    public function getCityInitiatives()
+    {
+        return $this->cityInitiatives;
+    }
+
+    public function addCityInitiative(City $city): self
+    {
+        $this->cityInitiatives->add($city);
+        $city->setInitiator($this);
+        return $this;
+    }
+
+    public function removeCityInitiative(City $city): self
+    {
+        $this->cityInitiatives->removeElement($city);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|Client[]
+    */
+    public function getClientInitiatives()
+    {
+        return $this->clientInitiatives;
+    }
+
+    public function addClientInitiative(Client $client): self
+    {
+        $this->clientInitiatives->add($client);
+        $client->setInitiator($this);
+        return $this;
+    }
+
+    public function removeClientInitiative(Client $client): self
+    {
+        $this->clientInitiatives->removeElement($client);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|Contact[]
+    */
+    public function getContactInitiatives()
+    {
+        return $this->contactInitiatives;
+    }
+
+    public function addContactInitiative(Contact $contact): self
+    {
+        $this->contactInitiatives->add($contact);
+        $contact->setInitiator($this);
+        return $this;
+    }
+
+    public function removeContactInitiative(Contact $contact): self
+    {
+        $this->contactInitiatives->removeElement($contact);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|Country[]
+    */
+    public function getCountryInitiatives()
+    {
+        return $this->countryInitiatives;
+    }
+
+    public function addCountryInitiative(Country $country): self
+    {
+        $this->countryInitiatives->add($country);
+        $country->setInitiator($this);
+        return $this;
+    }
+
+    public function removeCountryInitiative(Country $country): self
+    {
+        $this->countryInitiatives->removeElement($country);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|Criterion[]
+    */
+    public function getCriterionInitiatives()
+    {
+        return $this->criterionInitiatives;
+    }
+
+    public function addCriterionInitiative(Criterion $criterion): self
+    {
+        $this->criterionInitiatives->add($criterion);
+        $criterion->setInitiator($this);
+        return $this;
+    }
+
+    public function removeCriterionInitiative(Criterion $criterion): self
+    {
+        $this->criterionInitiatives->removeElement($criterion);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|CriterionGroup[]
+    */
+    public function getCriterionGroupInitiatives()
+    {
+        return $this->criterionGroupInitiatives;
+    }
+
+    public function addCriterionGroupInitiative(CriterionGroup $criterionGroup): self
+    {
+        $this->criterionGroupInitiatives->add($criterionGroup);
+        $criterionGroup->setInitiator($this);
+        return $this;
+    }
+
+    public function removeCriterionGroupInitiative(CriterionGroup $criterionGroup): self
+    {
+        $this->criterionGroupInitiatives->removeElement($criterionGroup);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|CriterionName[]
+    */
+    public function getCriterionNameInitiatives()
+    {
+        return $this->criterionNameInitiatives;
+    }
+
+    public function addCriterionNameInitiative(CriterionName $criterionName): self
+    {
+        $this->criterionNameInitiatives->add($criterionName);
+        $criterionName->setInitiator($this);
+        return $this;
+    }
+
+    public function removeCriterionNameInitiative(CriterionName $criterionName): self
+    {
+        $this->criterionNameInitiatives->removeElement($criterionName);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|Decision[]
+    */
+    public function getDecisionInitiatives()
+    {
+        return $this->decisionInitiatives;
+    }
+
+    public function addDecisionInitiative(Decision $decision): self
+    {
+        $this->decisionInitiatives->add($decision);
+        $decision->setInitiator($this);
+        return $this;
+    }
+
+    public function removeDecisionInitiative(Decision $decision): self
+    {
+        $this->decisionInitiatives->removeElement($decision);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|Department[]
+    */
+    public function getDepartmentInitiatives()
+    {
+        return $this->departmentInitiatives;
+    }
+
+    public function addDepartmentInitiative(Department $department): self
+    {
+        $this->departmentInitiatives->add($department);
+        $department->setInitiator($this);
+        return $this;
+    }
+
+    public function removeDepartmentInitiative(Department $department): self
+    {
+        $this->departmentInitiatives->removeElement($department);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|DocumentAuthor[]
+    */
+    public function getDocumentAuthorInitiatives()
+    {
+        return $this->documentAuthorInitiatives;
+    }
+
+    public function addDocumentAuthorInitiative(DocumentAuthor $documentAuthor): self
+    {
+        $this->documentAuthorInitiatives->add($documentAuthor);
+        $documentAuthor->setInitiator($this);
+        return $this;
+    }
+
+    public function removeDocumentAuthorInitiative(DocumentAuthor $documentAuthor): self
+    {
+        $this->documentAuthorInitiatives->removeElement($documentAuthor);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|DynamicTranslation[]
+    */
+    public function getDynamicTranslationInitiatives()
+    {
+        return $this->dynamicTranslationInitiatives;
+    }
+
+    public function addDynamicTranslationInitiative(DynamicTranslation $dynamicTranslation): self
+    {
+        $this->dynamicTranslationInitiatives->add($dynamicTranslation);
+        $dynamicTranslation->setInitiator($this);
+        return $this;
+    }
+
+    public function removeDynamicTranslationInitiative(DynamicTranslation $dynamicTranslation): self
+    {
+        $this->dynamicTranslationInitiatives->removeElement($dynamicTranslation);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|ElementUpdate[]
+    */
+    public function getElementUpdateInitiatives()
+    {
+        return $this->elementUpdateInitiatives;
+    }
+
+    public function addElementUpdateInitiative(ElementUpdate $elementUpdate): self
+    {
+        $this->elementUpdateInitiatives->add($elementUpdate);
+        $elementUpdate->setInitiator($this);
+        return $this;
+    }
+
+    public function removeElementUpdateInitiative(ElementUpdate $elementUpdate): self
+    {
+        $this->elementUpdateInitiatives->removeElement($elementUpdate);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|Event[]
+    */
+    public function getEventInitiatives()
+    {
+        return $this->eventInitiatives;
+    }
+
+    public function addEventInitiative(Event $event): self
+    {
+        $this->eventInitiatives->add($event);
+        $event->setInitiator($this);
+        return $this;
+    }
+
+    public function removeEventInitiative(Event $event): self
+    {
+        $this->eventInitiatives->removeElement($event);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|EventComment[]
+    */
+    public function getEventCommentInitiatives()
+    {
+        return $this->eventCommentInitiatives;
+    }
+
+    public function addEventCommentInitiative(EventComment $eventComment): self
+    {
+        $this->eventCommentInitiatives->add($eventComment);
+        $eventComment->setInitiator($this);
+        return $this;
+    }
+
+    public function removeEventCommentInitiative(EventComment $eventComment): self
+    {
+        $this->eventCommentInitiatives->removeElement($eventComment);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|EventDocument[]
+    */
+    public function getEventDocumentInitiatives()
+    {
+        return $this->eventDocumentInitiatives;
+    }
+
+    public function addEventDocumentInitiative(EventDocument $eventDocument): self
+    {
+        $this->eventDocumentInitiatives->add($eventDocument);
+        $eventDocument->setInitiator($this);
+        return $this;
+    }
+
+    public function removeEventDocumentInitiative(EventDocument $eventDocument): self
+    {
+        $this->eventDocumentInitiatives->removeElement($eventDocument);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|EventGroup[]
+    */
+    public function getEventGroupInitiatives()
+    {
+        return $this->eventGroupInitiatives;
+    }
+
+    public function addEventGroupInitiative(EventGroup $eventGroup): self
+    {
+        $this->eventGroupInitiatives->add($eventGroup);
+        $eventGroup->setInitiator($this);
+        return $this;
+    }
+
+    public function removeEventGroupInitiative(EventGroup $eventGroup): self
+    {
+        $this->eventGroupInitiatives->removeElement($eventGroup);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|EventGroupName[]
+    */
+    public function getEventGroupNameInitiatives()
+    {
+        return $this->eventGroupNameInitiatives;
+    }
+
+    public function addEventGroupNameInitiative(EventGroupName $eventGroupName): self
+    {
+        $this->eventGroupNameInitiatives->add($eventGroupName);
+        $eventGroupName->setInitiator($this);
+        return $this;
+    }
+
+    public function removeEventGroupNameInitiative(EventGroupName $eventGroupName): self
+    {
+        $this->eventGroupNameInitiatives->removeElement($eventGroupName);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|EventName[]
+    */
+    public function getEventNameInitiatives()
+    {
+        return $this->eventNameInitiatives;
+    }
+
+    public function addEventNameInitiative(EventName $eventName): self
+    {
+        $this->eventNameInitiatives->add($eventName);
+        $eventName->setInitiator($this);
+        return $this;
+    }
+
+    public function removeEventNameInitiative(EventName $eventName): self
+    {
+        $this->eventNameInitiatives->removeElement($eventName);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|EventType[]
+    */
+    public function getEventTypeInitiatives()
+    {
+        return $this->eventTypeInitiatives;
+    }
+
+    public function addEventTypeInitiative(EventType $eventType): self
+    {
+        $this->eventTypeInitiatives->add($eventType);
+        $eventType->setInitiator($this);
+        return $this;
+    }
+
+    public function removeEventTypeInitiative(EventType $eventType): self
+    {
+        $this->eventTypeInitiatives->removeElement($eventType);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|ExternalUser[]
+    */
+    public function getExternalUserInitiatives()
+    {
+        return $this->externalUserInitiatives;
+    }
+
+    public function addExternalUserInitiative(ExternalUser $externalUser): self
+    {
+        $this->externalUserInitiatives->add($externalUser);
+        $externalUser->setInitiator($this);
+        return $this;
+    }
+
+    public function removeExternalUserInitiative(ExternalUser $externalUser): self
+    {
+        $this->externalUserInitiatives->removeElement($externalUser);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|GeneratedError[]
+    */
+    public function getGeneratedErrorInitiatives()
+    {
+        return $this->generatedErrorInitiatives;
+    }
+
+    public function addGeneratedErrorInitiative(GeneratedError $generatedError): self
+    {
+        $this->generatedErrorInitiatives->add($generatedError);
+        $generatedError->setInitiator($this);
+        return $this;
+    }
+
+    public function removeGeneratedErrorInitiative(GeneratedError $generatedError): self
+    {
+        $this->generatedErrorInitiatives->removeElement($generatedError);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|GeneratedImage[]
+    */
+    public function getGeneratedImageInitiatives()
+    {
+        return $this->generatedImageInitiatives;
+    }
+
+    public function addGeneratedImageInitiative(GeneratedImage $generatedImage): self
+    {
+        $this->generatedImageInitiatives->add($generatedImage);
+        $generatedImage->setInitiator($this);
+        return $this;
+    }
+
+    public function removeGeneratedImageInitiative(GeneratedImage $generatedImage): self
+    {
+        $this->generatedImageInitiatives->removeElement($generatedImage);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|Grade[]
+    */
+    public function getGradeInitiatives()
+    {
+        return $this->gradeInitiatives;
+    }
+
+    public function addGradeInitiative(Grade $grade): self
+    {
+        $this->gradeInitiatives->add($grade);
+        $grade->setInitiator($this);
+        return $this;
+    }
+
+    public function removeGradeInitiative(Grade $grade): self
+    {
+        $this->gradeInitiatives->removeElement($grade);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|Icon[]
+    */
+    public function getIconInitiatives()
+    {
+        return $this->iconInitiatives;
+    }
+
+    public function addIconInitiative(Icon $icon): self
+    {
+        $this->iconInitiatives->add($icon);
+        $icon->setInitiator($this);
+        return $this;
+    }
+
+    public function removeIconInitiative(Icon $icon): self
+    {
+        $this->iconInitiatives->removeElement($icon);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|InstitutionProcess[]
+    */
+    public function getInstitutionProcessInitiatives()
+    {
+        return $this->institutionProcessInitiatives;
+    }
+
+    public function addInstitutionProcessInitiative(InstitutionProcess $institutionProcess): self
+    {
+        $this->institutionProcessInitiatives->add($institutionProcess);
+        $institutionProcess->setInitiator($this);
+        return $this;
+    }
+
+    public function removeInstitutionProcessInitiative(InstitutionProcess $institutionProcess): self
+    {
+        $this->institutionProcessInitiatives->removeElement($institutionProcess);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|IProcessCriterion[]
+    */
+    public function getIProcessCriterionInitiatives()
+    {
+        return $this->IProcessCriterionInitiatives;
+    }
+
+    public function addIProcessCriterionInitiative(IProcessCriterion $IProcessCriterion): self
+    {
+        $this->iProcessCriterionInitiatives->add($IProcessCriterion);
+        $IProcessCriterion->setInitiator($this);
+        return $this;
+    }
+
+    public function removeIProcessCriterionInitiative(IProcessCriterion $IProcessCriterion): self
+    {
+        $this->iProcessCriterionInitiatives->removeElement($IProcessCriterion);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|IProcessParticipation[]
+    */
+    public function getIProcessParticipationInitiatives()
+    {
+        return $this->iProcessParticipationInitiatives;
+    }
+
+    public function addIProcessParticipationInitiative(IProcessParticipation $iProcessParticipation): self
+    {
+        $this->iProcessParticipationInitiatives->add($iProcessParticipation);
+        $iProcessParticipation->setInitiator($this);
+        return $this;
+    }
+
+    public function removeIProcessParticipationInitiative(IProcessParticipation $iProcessParticipation): self
+    {
+        $this->iProcessParticipationInitiatives->removeElement($iProcessParticipation);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|IProcessStage[]
+    */
+    public function getIProcessStageInitiatives()
+    {
+        return $this->iProcessStageInitiatives;
+    }
+
+    public function addIProcessStageInitiative(IProcessStage $iProcessStage): self
+    {
+        $this->iProcessStageInitiatives->add($iProcessStage);
+        $iProcessStage->setInitiator($this);
+        return $this;
+    }
+
+    public function removeIProcessStageInitiative(IProcessStage $iProcessStage): self
+    {
+        $this->iProcessStageInitiatives->removeElement($iProcessStage);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|Mail[]
+    */
+    public function getMailInitiatives()
+    {
+        return $this->mailInitiatives;
+    }
+
+    public function addMailInitiative(Mail $mail): self
+    {
+        $this->mailInitiatives->add($mail);
+        $mail->setInitiator($this);
+        return $this;
+    }
+
+    public function removeMailInitiative(Mail $mail): self
+    {
+        $this->mailInitiatives->removeElement($mail);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|Member[]
+    */
+    public function getMemberInitiatives()
+    {
+        return $this->memberInitiatives;
+    }
+
+    public function addMemberInitiative(Member $member): self
+    {
+        $this->memberInitiatives->add($member);
+        $member->setInitiator($this);
+        return $this;
+    }
+
+    public function removeMemberInitiative(Member $member): self
+    {
+        $this->memberInitiatives->removeElement($member);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|OptionName[]
+    */
+    public function getOptionNameInitiatives()
+    {
+        return $this->optionNameInitiatives;
+    }
+
+    public function addOptionNameInitiative(OptionName $optionName): self
+    {
+        $this->optionNameInitiatives->add($optionName);
+        $optionName->setInitiator($this);
+        return $this;
+    }
+
+    public function removeOptionNameInitiative(OptionName $optionName): self
+    {
+        $this->optionNameInitiatives->removeElement($optionName);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|Organization[]
+    */
+    public function getOrganizationInitiatives()
+    {
+        return $this->organizationInitiatives;
+    }
+
+    public function addOrganizationInitiative(Organization $organization): self
+    {
+        $this->organizationInitiatives->add($organization);
+        $organization->setInitiator($this);
+        return $this;
+    }
+
+    public function removeOrganizationInitiative(Organization $organization): self
+    {
+        $this->organizationInitiatives->removeElement($organization);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|OrganizationPaymentMethod[]
+    */
+    public function getOrganizationPaymentMethodInitiatives()
+    {
+        return $this->organizationPaymentMethodInitiatives;
+    }
+
+    public function addOrganizationPaymentMethodInitiative(OrganizationPaymentMethod $organizationPaymentMethod): self
+    {
+        $this->organizationPaymentMethodInitiatives->add($organizationPaymentMethod);
+        $organizationPaymentMethod->setInitiator($this);
+        return $this;
+    }
+
+    public function removeOrganizationPaymentMethodInitiative(OrganizationPaymentMethod $organizationPaymentMethod): self
+    {
+        $this->organizationPaymentMethodInitiatives->removeElement($organizationPaymentMethod);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|OrganizationUserOption[]
+    */
+    public function getOrganizationUserOptionInitiatives()
+    {
+        return $this->organizationUserOptionInitiatives;
+    }
+
+    public function addOrganizationUserOptionInitiative(OrganizationUserOption $organizationUserOption): self
+    {
+        $this->organizationUserOptionInitiatives->add($organizationUserOption);
+        $organizationUserOption->setInitiator($this);
+        return $this;
+    }
+
+    public function removeOrganizationUserOptionInitiative(OrganizationUserOption $organizationUserOption): self
+    {
+        $this->organizationUserOptionInitiatives->removeElement($organizationUserOption);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|OTPUser[]
+    */
+    public function getOTPUserInitiatives()
+    {
+        return $this->OTPUserInitiatives;
+    }
+
+    public function addOTPUserInitiative(OTPUser $OTPUser): self
+    {
+        $this->OTPUserInitiatives->add($OTPUser);
+        $OTPUser->setInitiator($this);
+        return $this;
+    }
+
+    public function removeOTPUserInitiative(OTPUser $OTPUser): self
+    {
+        $this->OTPUserInitiatives->removeElement($OTPUser);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|Output[]
+    */
+    public function getOutputInitiatives()
+    {
+        return $this->outputInitiatives;
+    }
+
+    public function addOutputInitiative(Output $output): self
+    {
+        $this->outputInitiatives->add($output);
+        $output->setInitiator($this);
+        return $this;
+    }
+
+    public function removeOutputInitiative(Output $output): self
+    {
+        $this->outputInitiatives->removeElement($output);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|Participation[]
+    */
+    public function getParticipationInitiatives()
+    {
+        return $this->participationInitiatives;
+    }
+
+    public function addParticipationInitiative(Participation $participation): self
+    {
+        $this->participationInitiatives->add($participation);
+        $participation->setInitiator($this);
+        return $this;
+    }
+
+    public function removeParticipationInitiative(Participation $participation): self
+    {
+        $this->participationInitiatives->removeElement($participation);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|Position[]
+    */
+    public function getPositionInitiatives()
+    {
+        return $this->positionInitiatives;
+    }
+
+    public function addPositionInitiative(Position $position): self
+    {
+        $this->positionInitiatives->add($position);
+        $position->setInitiator($this);
+        return $this;
+    }
+
+    public function removePositionInitiative(Position $position): self
+    {
+        $this->positionInitiatives->removeElement($position);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|Process[]
+    */
+    public function getProcessInitiatives()
+    {
+        return $this->processInitiatives;
+    }
+
+    public function addProcessInitiative(Process $process): self
+    {
+        $this->processInitiatives->add($process);
+        $process->setInitiator($this);
+        return $this;
+    }
+
+    public function removeProcessInitiative(Process $process): self
+    {
+        $this->processInitiatives->removeElement($process);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|ProcessCriterion[]
+    */
+    public function getProcessCriterionInitiatives()
+    {
+        return $this->processCriterionInitiatives;
+    }
+
+    public function addProcessCriterionInitiative(ProcessCriterion $processCriterion): self
+    {
+        $this->processCriterionInitiatives->add($processCriterion);
+        $processCriterion->setInitiator($this);
+        return $this;
+    }
+
+    public function removeProcessCriterionInitiative(ProcessCriterion $processCriterion): self
+    {
+        $this->processCriterionInitiatives->removeElement($processCriterion);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|ProcessStage[]
+    */
+    public function getProcessStageInitiatives()
+    {
+        return $this->processStageInitiatives;
+    }
+
+    public function addProcessStageInitiative(ProcessStage $processStage): self
+    {
+        $this->processStageInitiatives->add($processStage);
+        $processStage->setInitiator($this);
+        return $this;
+    }
+
+    public function removeProcessStageInitiative(ProcessStage $processStage): self
+    {
+        $this->processStageInitiatives->removeElement($processStage);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|Ranking[]
+    */
+    public function getRankingInitiatives()
+    {
+        return $this->rankingInitiatives;
+    }
+
+    public function addRankingInitiative(Ranking $ranking): self
+    {
+        $this->rankingInitiatives->add($ranking);
+        $ranking->setInitiator($this);
+        return $this;
+    }
+
+    public function removeRankingInitiative(Ranking $ranking): self
+    {
+        $this->rankingInitiatives->removeElement($ranking);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|RankingHistory[]
+    */
+    public function getRankingHistoryInitiatives()
+    {
+        return $this->rankingHistoryInitiatives;
+    }
+
+    public function addRankingHistoryInitiative(RankingHistory $rankingHistory): self
+    {
+        $this->rankingHistoryInitiatives->add($rankingHistory);
+        $rankingHistory->setInitiator($this);
+        return $this;
+    }
+
+    public function removeRankingHistoryInitiative(RankingHistory $rankingHistory): self
+    {
+        $this->rankingHistoryInitiatives->removeElement($rankingHistory);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|RankingTeam[]
+    */
+    public function getRankingTeamInitiatives()
+    {
+        return $this->rankingTeamInitiatives;
+    }
+
+    public function addRankingTeamInitiative(RankingTeam $rankingTeam): self
+    {
+        $this->rankingTeamInitiatives->add($rankingTeam);
+        $rankingTeam->setInitiator($this);
+        return $this;
+    }
+
+    public function removeRankingTeamInitiative(RankingTeam $rankingTeam): self
+    {
+        $this->rankingTeamInitiatives->removeElement($rankingTeam);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|RankingTeamHistory[]
+    */
+    public function getRankingTeamHistoryInitiatives()
+    {
+        return $this->rankingTeamHistoryInitiatives;
+    }
+
+    public function addRankingTeamHistoryInitiative(RankingTeamHistory $rankingTeamHistory): self
+    {
+        $this->rankingTeamHistoryInitiatives->add($rankingTeamHistory);
+        $rankingTeamHistory->setInitiator($this);
+        return $this;
+    }
+
+    public function removeRankingTeamHistoryInitiative(RankingTeamHistory $rankingTeamHistory): self
+    {
+        $this->rankingTeamHistoryInitiatives->removeElement($rankingTeamHistory);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|Recurring[]
+    */
+    public function getRecurringInitiatives()
+    {
+        return $this->recurringInitiatives;
+    }
+
+    public function addRecurringInitiative(Recurring $recurring): self
+    {
+        $this->recurringInitiatives->add($recurring);
+        $recurring->setInitiator($this);
+        return $this;
+    }
+
+    public function removeRecurringInitiative(Recurring $recurring): self
+    {
+        $this->recurringInitiatives->removeElement($recurring);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|Result[]
+    */
+    public function getResultInitiatives()
+    {
+        return $this->resultInitiatives;
+    }
+
+    public function addResultInitiative(Result $result): self
+    {
+        $this->resultInitiatives->add($result);
+        $result->setInitiator($this);
+        return $this;
+    }
+
+    public function removeResultInitiative(Result $result): self
+    {
+        $this->resultInitiatives->removeElement($result);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|ResultProject[]
+    */
+    public function getResultProjectInitiatives()
+    {
+        return $this->resultProjectInitiatives;
+    }
+
+    public function addResultProjectInitiative(ResultProject $resultProject): self
+    {
+        $this->resultProjectInitiatives->add($resultProject);
+        $resultProject->setInitiator($this);
+        return $this;
+    }
+
+    public function removeResultProjectInitiative(ResultProject $resultProject): self
+    {
+        $this->resultProjectInitiatives->removeElement($resultProject);
+        return $this;
+    }
+    
+    /**
+    * @return ArrayCollection|ResultTeam[]
+    */
+    public function getResultTeamInitiatives()
+    {
+        return $this->resultTeamInitiatives;
+    }
+
+    public function addResultTeamInitiative(ResultTeam $resultTeam): self
+    {
+        $this->resultTeamInitiatives->add($resultTeam);
+        $resultTeam->setInitiator($this);
+        return $this;
+    }
+
+    public function removeResultTeamInitiative(ResultTeam $resultTeam): self
+    {
+        $this->resultTeamInitiatives->removeElement($resultTeam);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|Stage[]
+    */
+    public function getStageInitiatives()
+    {
+        return $this->stageInitiatives;
+    }
+
+    public function addStageInitiative(Stage $stage): self
+    {
+        $this->stageInitiatives->add($stage);
+        $stage->setInitiator($this);
+        return $this;
+    }
+
+    public function removeStageInitiative(Stage $stage): self
+    {
+        $this->stageInitiatives->removeElement($stage);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|State[]
+    */
+    public function getStateInitiatives()
+    {
+        return $this->stateInitiatives;
+    }
+
+    public function addStateInitiative(State $state): self
+    {
+        $this->stateInitiatives->add($state);
+        $state->setInitiator($this);
+        return $this;
+    }
+
+    public function removeStateInitiative(State $state): self
+    {
+        $this->stateInitiatives->removeElement($state);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|Survey[]
+    */
+    public function getSurveyInitiatives()
+    {
+        return $this->surveyInitiatives;
+    }
+
+    public function addSurveyInitiative(Survey $survey): self
+    {
+        $this->surveyInitiatives->add($survey);
+        $survey->setInitiator($this);
+        return $this;
+    }
+
+    public function removeSurveyInitiative(Survey $survey): self
+    {
+        $this->surveyInitiatives->removeElement($survey);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|SurveyField[]
+    */
+    public function getSurveyFieldInitiatives()
+    {
+        return $this->surveyFieldInitiatives;
+    }
+
+    public function addSurveyFieldInitiative(SurveyField $surveyField): self
+    {
+        $this->surveyFieldInitiatives->add($surveyField);
+        $surveyField->setInitiator($this);
+        return $this;
+    }
+
+    public function removeSurveyFieldInitiative(SurveyField $surveyField): self
+    {
+        $this->surveyFieldInitiatives->removeElement($surveyField);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|SurveyFieldParameter[]
+    */
+    public function getSurveyFieldParameterInitiatives()
+    {
+        return $this->surveyFieldParameterInitiatives;
+    }
+
+    public function addSurveyFieldParameterInitiative(SurveyFieldParameter $surveyFieldParameter): self
+    {
+        $this->surveyFieldParameterInitiatives->add($surveyFieldParameter);
+        $surveyFieldParameter->setInitiator($this);
+        return $this;
+    }
+
+    public function removeSurveyFieldParameterInitiative(SurveyFieldParameter $surveyFieldParameter): self
+    {
+        $this->surveyFieldParameterInitiatives->removeElement($surveyFieldParameter);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|Target[]
+    */
+    public function getTargetInitiatives()
+    {
+        return $this->targetInitiatives;
+    }
+
+    public function addTargetInitiative(Target $target): self
+    {
+        $this->targetInitiatives->add($target);
+        $target->setInitiator($this);
+        return $this;
+    }
+
+    public function removeTargetInitiative(Target $target): self
+    {
+        $this->targetInitiatives->removeElement($target);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|Team[]
+    */
+    public function getTeamInitiatives()
+    {
+        return $this->teamInitiatives;
+    }
+
+    public function addTeamInitiative(Team $team): self
+    {
+        $this->teamInitiatives->add($team);
+        $team->setInitiator($this);
+        return $this;
+    }
+
+    public function removeTeamInitiative(Team $team): self
+    {
+        $this->teamInitiatives->removeElement($team);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|Title[]
+    */
+    public function getTitleInitiatives()
+    {
+        return $this->titleInitiatives;
+    }
+
+    public function addTitleInitiative(Title $title): self
+    {
+        $this->titleInitiatives->add($title);
+        $title->setInitiator($this);
+        return $this;
+    }
+
+    public function removeTitleInitiative(Title $title): self
+    {
+        $this->titleInitiatives->removeElement($title);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|UserGlobal[]
+    */
+    public function getUserGlobalInitiatives()
+    {
+        return $this->userGlobalInitiatives;
+    }
+
+    public function addUserGlobalInitiative(UserGlobal $userGlobal): self
+    {
+        $this->userGlobalInitiatives->add($userGlobal);
+        $userGlobal->setInitiator($this);
+        return $this;
+    }
+
+    public function removeUserGlobalInitiative(UserGlobal $userGlobal): self
+    {
+        $this->userGlobalInitiatives->removeElement($userGlobal);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|UserMaster[]
+    */
+    public function getUserMasterInitiatives()
+    {
+        return $this->userMasterInitiatives;
+    }
+
+    public function addUserMasterInitiative(UserMaster $userMaster): self
+    {
+        $this->userMasterInitiatives->add($userMaster);
+        $userMaster->setInitiator($this);
+        return $this;
+    }
+
+    public function removeUserMasterInitiative(UserMaster $userMaster): self
+    {
+        $this->userMasterInitiatives->removeElement($userMaster);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|Weight[]
+    */
+    public function getWeightInitiatives()
+    {
+        return $this->weightInitiatives;
+    }
+
+    public function addWeightInitiative(Weight $weight): self
+    {
+        $this->weightInitiatives->add($weight);
+        $weight->setInitiator($this);
+        return $this;
+    }
+
+    public function removeWeightInitiative(Weight $weight): self
+    {
+        $this->weightInitiatives->removeElement($weight);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|WorkerExperience[]
+    */
+    public function getWorkerExperienceInitiatives()
+    {
+        return $this->workerExperienceInitiatives;
+    }
+
+    public function addWorkerExperienceInitiative(WorkerExperience $workerExperience): self
+    {
+        $this->workerExperienceInitiatives->add($workerExperience);
+        $workerExperience->setInitiator($this);
+        return $this;
+    }
+
+    public function removeWorkerExperienceInitiative(WorkerExperience $workerExperience): self
+    {
+        $this->workerExperienceInitiatives->removeElement($workerExperience);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|WorkerFirm[]
+    */
+    public function getWorkerFirmInitiatives()
+    {
+        return $this->workerFirmInitiatives;
+    }
+
+    public function addWorkerFirmInitiative(WorkerFirm $workerFirm): self
+    {
+        $this->workerFirmInitiatives->add($workerFirm);
+        $workerFirm->setInitiator($this);
+        return $this;
+    }
+
+    public function removeWorkerFirmInitiative(WorkerFirm $workerFirm): self
+    {
+        $this->workerFirmInitiatives->removeElement($workerFirm);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|WorkerFirmCompetency[]
+    */
+    public function getWorkerFirmCompetencyInitiatives()
+    {
+        return $this->workerFirmCompetencyInitiatives;
+    }
+
+    public function addWorkerFirmCompetencyInitiative(WorkerFirmCompetency $workerFirmCompetency): self
+    {
+        $this->workerFirmCompetencyInitiatives->add($workerFirmCompetency);
+        $workerFirmCompetency->setInitiator($this);
+        return $this;
+    }
+
+    public function removeWorkerFirmCompetencyInitiative(WorkerFirmCompetency $workerFirmCompetency): self
+    {
+        $this->workerFirmCompetencyInitiatives->removeElement($workerFirmCompetency);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|WorkerFirmLocation[]
+    */
+    public function getWorkerFirmLocationInitiatives()
+    {
+        return $this->workerFirmLocationInitiatives;
+    }
+
+    public function addWorkerFirmLocationInitiative(WorkerFirmLocation $workerFirmLocation): self
+    {
+        $this->workerFirmLocationInitiatives->add($workerFirmLocation);
+        $workerFirmLocation->setInitiator($this);
+        return $this;
+    }
+
+    public function removeWorkerFirmLocationInitiative(WorkerFirmLocation $workerFirmLocation): self
+    {
+        $this->workerFirmLocationInitiatives->removeElement($workerFirmLocation);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|WorkerFirmSector[]
+    */
+    public function getWorkerFirmSectorInitiatives()
+    {
+        return $this->workerFirmSectorInitiatives;
+    }
+
+    public function addWorkerFirmSectorInitiative(WorkerFirmSector $workerFirmSector): self
+    {
+        $this->workerFirmSectorInitiatives->add($workerFirmSector);
+        $workerFirmSector->setInitiator($this);
+        return $this;
+    }
+
+    public function removeWorkerFirmSectorInitiative(WorkerFirmSector $workerFirmSector): self
+    {
+        $this->workerFirmSectorInitiatives->removeElement($workerFirmSector);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|WorkerIndividual[]
+    */
+    public function getWorkerIndividualInitiatives()
+    {
+        return $this->workerIndividualInitiatives;
+    }
+
+    public function addWorkerIndividualInitiative(WorkerIndividual $workerIndividual): self
+    {
+        $this->workerIndividualInitiatives->add($workerIndividual);
+        $workerIndividual->setInitiator($this);
+        return $this;
+    }
+
+    public function removeWorkerIndividualInitiative(WorkerIndividual $workerIndividual): self
+    {
+        $this->workerIndividualInitiatives->removeElement($workerIndividual);
+        return $this;
+    }
 }

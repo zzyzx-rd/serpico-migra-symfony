@@ -85,7 +85,7 @@
     var udcurl = "{{ url('updateDocumentContent') }}";
     var usnurl = "{{ url('updateStageName') }}";
     var uccurl = "{{ url('updateCommentContent') }}";
-    var apurl = "{{ url('addParticipantStage') }}";
+    var apurl = "{{ url('addStageParticipantFollower',{stgId: 0, fjType: 'participant'}) }}";
     var msgDocInsert = "{{ 'activity_elements.events.documents.dropify_insert_msg'|trans }}";
     var msgDocReplace = "{{ 'remove'|trans }}";
     var msgDocRemove = "{{ 'replace'|trans }}";
@@ -559,7 +559,7 @@
         z-index:1
       }
 
-      .p-delete-overlay{
+      .pf-delete-overlay{
         position:absolute;
         height: 50%;
         bottom: -7px;
@@ -570,7 +570,7 @@
         border-radius:50%;
       }
 
-      .p-firm-logo{
+      .pf-firm-logo{
         position:absolute;
         height: 50%;
         bottom: -7px;
@@ -580,12 +580,12 @@
         border-radius:50%;
       }
 
-      .p-firm-logo img{
+      .pf-firm-logo img{
         height:inherit;
         width:inherit;
       }
 
-      .p-delete-overlay i{
+      .pf-delete-overlay i{
         font-size:80%;
         margin: auto;
         line-height:10px;
@@ -616,11 +616,11 @@
         font-size:18px;
       }
 
-      .ip-value, .setup-activity, .participants-title, .events-title{
+      .ip-value, .setup-activity, .participants-title, .visibility-title, .followers-title, .events-title{
         color: #55318e;
       }
 
-      .participants-title, .events-title{
+      .participants-title, .followers-title, .visibility-title, .events-title{
         text-transform: uppercase;
       }
 
@@ -714,7 +714,7 @@
         font-size: 1rem;
       }
 
-      .selected-participant-logo{
+      .pf-picture{
         height: 100%;
         border-radius:100%;
       }

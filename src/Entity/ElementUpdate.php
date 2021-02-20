@@ -37,14 +37,26 @@ class ElementUpdate extends DbObject
     public ?int $id;
 
     /**
-     * @ORM\Column(name="upd_type", type="integer", nullable=true)
+     * @ORM\Column(name="upd_status", type="integer", nullable=true)
      */
-    public $type;
+    public $status;
 
     /**
      * @ORM\Column(name="upd_prop", type="string", length=255, nullable=true)
      */
-    public $property;  
+    public $property; 
+
+    /**
+     * @ORM\Column(name="upd_value", type="string", length=255, nullable=true)
+     */
+    public $value;  
+
+    /**
+     * @ManyToOne(targetEntity="Organization", inversedBy="updates")
+     * @JoinColumn(name="organization_org_id", referencedColumnName="org_id", nullable=true)
+     * @var Organization
+     */
+    public $organization;
 
     /**
      * @ManyToOne(targetEntity="Department", inversedBy="updates")
@@ -124,6 +136,13 @@ class ElementUpdate extends DbObject
     public $participation;
 
     /**
+     * @ManyToOne(targetEntity="UserMaster", inversedBy="updates")
+     * @JoinColumn(name="user_master_usm_id", referencedColumnName="usm_id", nullable=true)
+     * @var MasterUser
+     */
+    public $mastering;
+
+    /**
      * @ManyToOne(targetEntity="Result", inversedBy="updates")
      * @JoinColumn(name="result_res_id", referencedColumnName="res_id", nullable=true)
      * @var Result
@@ -138,9 +157,10 @@ class ElementUpdate extends DbObject
     public $user;
 
     /**
-     * @ORM\Column(name="upd_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="elementUpdateInitiatives")
+     * @JoinColumn(name="upd_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="upd_viewed", type="datetime", nullable=true)
@@ -164,24 +184,28 @@ class ElementUpdate extends DbObject
      */
     public function __construct(
         $id = null,
-        $type = null,
+        $status = null,
+        $property = null,
+        $value = null,
         DateTime $mailed = null,
         DateTime $viewed = null)
     {
         parent::__construct($id, null, new DateTime);
-        $this->type = $type;
+        $this->status = $status;
+        $this->property = $property;
+        $this->value = $value;
         $this->mailed = $mailed;
         $this->viewed = $viewed;
     }
     
-    public function getType(): ?int
+    public function getStatus(): ?int
     {
-        return $this->type;
+        return $this->status;
     }
 
-    public function setType(int $type): self
+    public function setStatus(int $status): self
     {
-        $this->type = $type;
+        $this->status = $status;
         return $this;
     }
 
@@ -193,6 +217,34 @@ class ElementUpdate extends DbObject
     public function setProperty(?string $property): self
     {
         $this->property = $property;
+        return $this;
+    }
+
+    public function getValue(): ?string
+    {
+        return $this->value;
+    }
+
+    public function setValue(?string $value): self
+    {
+        $this->value = $value;
+        return $this;
+    }
+
+    /**
+     * @return Organization|null
+     */
+    public function getOrganization(): ?Organization
+    {
+        return $this->organization;
+    }
+
+    /**
+     * @param Organization $organization
+     */
+    public function setOrganization(?Organization $organization): self
+    {
+        $this->organization = $organization;    
         return $this;
     }
     /**
@@ -369,6 +421,22 @@ class ElementUpdate extends DbObject
     public function setParticipation(?Participation $participation): self
     {
         $this->participation = $participation;    
+        return $this;
+    }
+    /**
+     * @return UserMaster|null
+     */
+    public function getMastering(): ?UserMaster
+    {
+        return $this->mastering;
+    }
+
+    /**
+     * @param UserMaster $mastering
+     */
+    public function setMastering(?UserMaster $mastering): self
+    {
+        $this->mastering = $mastering;    
         return $this;
     }
     /**

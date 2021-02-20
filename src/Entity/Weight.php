@@ -46,9 +46,10 @@ class Weight extends DbObject
     public $modified;
 
     /**
-     * @ORM\Column(name="wgt_createdBy", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="weightInitiatives")
+     * @JoinColumn(name="wgt_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="wgt_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
@@ -83,7 +84,6 @@ class Weight extends DbObject
      * @param string $titleframe
      * @param int $value
      * @param DateTime $modified
-     * @param $createdBy
      * @param DateTime $deleted
      * @param $organization
      */
@@ -93,12 +93,11 @@ class Weight extends DbObject
         $titleframe = '',
         $value = 100,
         DateTime $modified = null,
-        $createdBy = null,
         DateTime $deleted = null,
         $organization = null
     )
     {
-        parent::__construct($id, $createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->interval = $interval;
         $this->titleframe = $titleframe;
         $this->value = $value;

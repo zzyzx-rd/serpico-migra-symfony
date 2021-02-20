@@ -25,7 +25,16 @@ class NotificationManager
 
     }
 
-    public function registerUpdates($element, $status, $property = null, $toBeFlushed = false)
+
+    /**
+     * @param mixed $element
+     * @param ArrayCollection|User[] $notifiedUsers
+     * @param int $status
+     * @param string|null $property
+     * @param string|null $value
+     * @param bool|null $toBeFlushed
+     */
+    public function registerUpdates($element, $notifiedUsers, $status, $property = null, $value = null, $toBeFlushed = false)
     {
         $em = $this->em;
         $currentUser = $this->user;
@@ -61,29 +70,62 @@ class NotificationManager
                 $activity = $stage->getActivity();
                 break;
 
+            case 'UserMaster' :
+                $stage = $element->getStage();
+                $activity = $stage ? $stage->getActivity() : $element->getActivity();
+                break;
+                
+            case 'User' :
+                $user = $element;
+                $organization = $element->getOrganization();
+                break;
+
         }
 
-        $users = $stage->getParticipants()->map(fn(Participation $p) => $p->getUser());
 
-        foreach($users as $user){
+
+        foreach($notifiedUsers as $user){
             if($user != $currentUser){
+
+                $update = $em->getRepository(ElementUpdate::class)->findOneBy([
+                    'user' => $user, 
+                    'department' => $user, 
+                    'position' => $user, 
+                    'institutionProcess' => $institutionProcess, 
+                    'activity' => $activity, 
+                    'stage' => $stage, 
+                    'event' => $event, 
+                    'eventComment' => $eventComment, 
+                    'eventDocument' => $eventDocument,
+                    'output' => $output,
+                    'criterion' => $criterion,
+                    'result' => $result, 
+                    'status' => $status,
+                    'property' => $property,
+                ]);
+
+                if(!$update){
+                    
+                    $update = new ElementUpdate();
+                    $update->setUser($user)
+                        ->setOrganization($organization)
+                        ->setDepartment($department)
+                        ->setPosition($position)
+                        ->setInstitutionProcess($institutionProcess)
+                        ->setActivity($activity)
+                        ->setStage($stage)
+                        ->setEvent($event)
+                        ->setEventDocument($eventDocument)
+                        ->setEventComment($eventComment)
+                        ->setOutput($output)
+                        ->setCriterion($criterion)
+                        ->setResult($result)
+                        ->setStatus($status)
+                        ->setProperty($property)
+                        ->setValue($value)
+                        ->setInitiator($currentUser);
+                }
                 
-                $update = new ElementUpdate();
-                $update->setUser($user)
-                    ->setDepartment($department)
-                    ->setPosition($position)
-                    ->setInstitutionProcess($institutionProcess)
-                    ->setActivity($activity)
-                    ->setStage($stage)
-                    ->setEvent($event)
-                    ->setEventDocument($eventDocument)
-                    ->setEventComment($eventComment)
-                    ->setOutput($output)
-                    ->setCriterion($criterion)
-                    ->setResult($result)
-                    ->setType($status)
-                    ->setProperty($property)
-                    ->setCreatedBy($currentUser->getId());
                 $element->addUpdate($update);
             }
         }
@@ -114,7 +156,7 @@ class NotificationManager
 
             $unseenUpdates = $mailableUser->getUpdates()
                 ->filter(fn(ElementUpdate $eu) => $eu->getViewed() == null && $eu->getMailed() == null)
-                ->matching(Criteria::create()->orderBy(['type' => Criteria::ASC, 'activity' => Criteria::DESC, 'stage' => Criteria::ASC, 'event' => Criteria::ASC, 'eventDocument' => Criteria::ASC, 'eventComment' => Criteria::ASC]));
+                ->matching(Criteria::create()->orderBy(['status' => Criteria::ASC, 'activity' => Criteria::DESC, 'stage' => Criteria::ASC, 'event' => Criteria::ASC, 'eventDocument' => Criteria::ASC, 'eventComment' => Criteria::ASC]));
 
             $creationUpdates = $unseenUpdates->filter(fn(ElementUpdate $eu) => $eu->getType() == ElementUpdate::CREATION);
             if($creationUpdates->count() > 0){

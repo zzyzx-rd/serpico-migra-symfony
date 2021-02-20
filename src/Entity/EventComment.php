@@ -52,9 +52,10 @@ class EventComment extends DbObject
     protected $organization;
 
     /**
-     * @ORM\Column(name="evc_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="eventCommentInitiatives")
+     * @JoinColumn(name="evc_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ManyToOne(targetEntity="EventComment", inversedBy="replies")
@@ -88,20 +89,18 @@ class EventComment extends DbObject
      * @param $type
      * @param $name
      * @param $description
-     * @param $createdBy
      */
     public function __construct(
         $id = 0,
         $type = null,
         $description = null,
         $content = null,
-        $createdBy = null,
         Event $event = null,
         Organization $organization = null,
         DateTime $modified = null
         )
     {
-        parent::__construct($id, $createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->type = $type;
         $this->content = $content;
         $this->description = $description;

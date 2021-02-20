@@ -57,9 +57,10 @@ class OrganizationUserOption extends DbObject
     public $enabled;
 
     /**
-     * @ORM\Column(name="opt_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="organizationUserOptionInitiatives")
+     * @JoinColumn(name="opt_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="opt_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
@@ -111,13 +112,11 @@ class OrganizationUserOption extends DbObject
      * OrganizationUserOption constructor.
      * @param ?int$id
      * @param bool $enabled
-     * @param $createdBy
      */
-    public function __construct($id = 0, $enabled = true, $createdBy = null)
+    public function __construct($id = 0, $enabled = true)
     {
-        parent::__construct($id,$createdBy , new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->enabled = $enabled;
-        $this->createdBy = $createdBy;
     }
 
 

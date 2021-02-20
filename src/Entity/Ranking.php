@@ -65,9 +65,10 @@ class Ranking extends DbObject
     public $seriesPopulation;
 
     /**
-     * @ORM\Column(name="rnk_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="rankingInitiatives")
+     * @JoinColumn(name="rnk_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="rnk_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
@@ -120,7 +121,6 @@ class Ranking extends DbObject
      * @param $rnk_freq
      * @param $rnk_value
      * @param $rnk_series_pop
-     * @param $rnk_createdBy
      * @param $rnk_updated
      * @param $activity
      * @param $stage
@@ -140,13 +140,12 @@ class Ranking extends DbObject
         $rnk_freq = null,
         $rnk_value = null,
         $rnk_series_pop = null,
-        $rnk_createdBy = null,
         $rnk_updated = null,
         $activity = null,
         $stage = null,
         $criterion = null)
     {
-        parent::__construct($id, $rnk_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->dType = $rnk_dtype;
         $this->wType = $rnk_wtype;
         $this->absResult = $rnk_abs_result;

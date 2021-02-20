@@ -37,9 +37,10 @@ class CriterionName extends DbObject
     public $unit;
 
     /**
-     * @ORM\Column(name="can_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="criterionNameInitiatives")
+     * @JoinColumn(name="can_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="can_inserted", type="datetime", nullable=false , options={"default": "CURRENT_TIMESTAMP"})
@@ -80,7 +81,6 @@ class CriterionName extends DbObject
      * @param $cna_type
      * @param $cna_name
      * @param $can_unit
-     * @param $can_createdBy
      * @param Icon $icon
      * @param Organization $organization
      * @param Department|null $department
@@ -91,13 +91,12 @@ class CriterionName extends DbObject
         $cna_type = null,
         $cna_name = '',
         $can_unit = '',
-        $can_createdBy = null,
         Icon $icon = null,
         Organization $organization = null,
         ?Department $department = null,
         CriterionGroup $criterionGroup = null)
     {
-        parent::__construct($id, $can_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->type = $cna_type;
         $this->name = $cna_name;
         $this->unit = $can_unit;

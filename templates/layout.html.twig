@@ -11,6 +11,7 @@
 {# A freemium user is one user, necessarily admin, who has not a customer Id and is not in free plan #}
 {% set orgInFreemiumMode = currentuser and currentuser.role == 1 and not organization.customerId and organization.plan != 3 %}
 {% set indivClass = currentuser and currentuser.organization.type == 'C' ? 'indiv-acct' : '' %}
+{% set isMobileView = 'Mobile' in global.request.headers.get('user_agent') %}
 
 
 <!DOCTYPE html>
@@ -494,8 +495,8 @@
         </div>
 
         {# below search component should not exist in public pages #}
-        {% if global.route not in ["signup", "pricing", "terms_conditions", "cookie_policy", "home_welcome"] %}
-        
+        {% if global.route not in ["signup", "pricing", "terms_conditions", "cookie_policy", "home_welcome", "login"] %}
+
           {% include "components/add_client_user_modal.html.twig" %}
 
           {% if is_super_admin_undefined %}
@@ -503,18 +504,18 @@
               <form>   
                 <div class="modal-content">
                   <h5>
-                    <span>{{ 'profile.defining_initial_super_user_modal.title'|trans}}</span>
+                    <span>{{ 'profile.super_admin_appointment_modal.title'|trans}}</span>
                     <i class="m-left fa fa-crown"></i>
                   </h5>
-                  <p>{{'profile.defining_initial_super_user_modal.msg'|trans|raw}}</p>
+                  <p>{{'profile.super_admin_appointment_modal.msg'|trans|raw}}</p>
                   <div class="su-choice-zone">
                       <div class="radio-holder">
                         <input type="radio" id="selfSU" name="super_admin_choice" required="required" value="self" checked="checked">
-                        <label for="selfSU" class="required black-text"> {{'profile.defining_initial_super_user_modal.choice_self'|trans|raw }}</label>
+                        <label for="selfSU" class="required black-text"> {{'profile.super_admin_appointment_modal.choice_self'|trans|raw }}</label>
                       </div>
                       <div class="radio-holder">
                         <input type="radio" id="otherSU" name="super_admin_choice" required="required" value="other">
-                        <label for="otherSU" class="required black-text">{{'profile.defining_initial_super_user_modal.choice_other'|trans|raw }}</label>
+                        <label for="otherSU" class="required black-text">{{'profile.super_admin_appointment_modal.choice_other'|trans|raw }}</label>
                       </div>
                       <input type="hidden" name="uid">
                   </div>
@@ -525,6 +526,16 @@
                 </div>
               </form>
             </div>
+
+            <div id="superAdminAppointmentSuccess" class="modal">
+              <div class="modal-content">
+                <p>{{'profile.super_admin_appointed_modal.msg'|trans}}</p>
+                <div class="flex-center-fe">
+                  <div class="btn waves-effect waves-light" onclick="history.go()">Ok</div>
+                </div>
+              </div>
+            </div>
+
           {% endif %}
         {% endif %}
     </div>

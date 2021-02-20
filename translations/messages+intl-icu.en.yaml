@@ -118,15 +118,22 @@ now: Now
 tbd: TBD
 open_end: Open end
 yourself: Yourself
-
+decline: Decline
+participate: Participate
+participate_to: participate to
+follow: Follow
+visibility: Visibility
+yes: Yes
+no: No
+confirm: Confirm
+unnamed_stage_activity: Unnamed activity
 
 head_meta:
   content: Business & client operations management through an online and interactive dashboard. DealDrive offers a solution connecting clients client through a calendar dashboard, where one can share documents and updates; in order to enhance client operations and reduce email workload. Use the client followup DealDrive solution improve interactions with your clients and colleagues. 
 
 signup:
-  title: Signup
-  do_not_associate_org: I prefer not to associate an organization account right now
-  personal_usage_tooltip: You can still associate an account linkedin to a firm thereafter, but your account as an individual will always be distinct from your account as being part of an organization
+  title: Subscription
+  waiting_msg: <span>Save the date - our solution is being finalized and will be launched on <span class="strong">February 28th</span></span>
 
 updates:
 
@@ -228,6 +235,13 @@ updates:
           other                     {Fallback problem}
         }
       }
+      join_direct {{author} has joined {actElmtMsg}}
+      join_request {{author} ask to join {actElmtMsg}}
+      join_accept {{author} accepts you to join {actElmtMsg}}
+      follow_direct {{author} follows {actElmtMsg}}
+      follow_request {{author} asks to follow {actElmtMsg}}
+      follow_request {{author} accepts you to follow {actElmtMsg}}
+      user_role {{author} granted you {role} rights}
       other {Problem here}
     }
 
@@ -1089,7 +1103,7 @@ institutions:
 iprocesses:
   title: Activities
 
-firm_settings:
+firm_settings_old:
   page_title: Firm settings
   activities:
     title: Activities
@@ -1572,9 +1586,9 @@ mails:
 
     button_text: Accédez à lactivité
 
-  activityParticipation:
-    activity_subject: Participation to the activity
-    stage_subject_message_1: Participation to the stage
+  activityParticipationFollowing:
+    activity_subject: invites you to {action} the activity
+    stage_subject_message_1: invites you to {action} the stage
     stage_subject_message_2: of activity
     subject_team_suffix: (as a team)
     message_act_begin: You have been added to the activity
@@ -2064,12 +2078,13 @@ profile:
   change_account_modal:
     title: Account change
     msg: Select which account you want to shift to
-  defining_initial_super_user_modal:
+  super_admin_appointment_modal:
     title: Initial choice of super administrator
     msg: You want to access <span class="strong">firm settings</span>, <span class="dd-text strong">restricted to a single super administrator</span> for security reasons, and who do not exist yet in your firm. Do you confirm you want to become such user ?
     choice_self: <span class="strong">Yes</span>, I have the required qualities to become this super administrator
     choice_other: <span class="strong">No</span>, I prefer to attribute this role to another user
-
+  super_admin_appointed_modal:
+    msg: Thank you for defining the new super administrator, who has been notified by email and will be able to configure your entity parameters
   page_title: My profile
   mobile_header_title: My profile
   my_results: My results
@@ -2081,7 +2096,7 @@ profile:
   perf: performence
   no_perf: No performance criterion
   manage:
-    modify_revoke: Modify / revoke permissions
+    update_role: Modify permissions
     email_confirmation_modal:
       title: Email address confirmation
       content: To finalize email address change, we have sent an email to the address <span class="strong email-confirm-address"></span>. You need to access the email and click to the related link to confirm the operation.
@@ -2157,6 +2172,10 @@ profile:
     success:
       modal_content: You have successfully uploaded your profile picture. You can change it anytime by clicking on your picture or modify tool
 
+  stage_fj_requests:
+    title: My ongoing requests
+    followable: To follow
+    joinable: To participate
 
   participations:
     no_participations: You have not participated to any activity yet. Create or request one if needed !
@@ -2304,6 +2323,7 @@ activities:
   grading_period: "Grading period :"
   progress: "Progress :"
   participants: Participants
+  followers: Followers
   events: Updates
   define: Define
   modify: Modify
@@ -2313,10 +2333,12 @@ activities:
   delete_activity_msg: Are you sure you want to delete this activity ? All eventual participant data will be erased
   delete_event_msg: Are you sure you want to delete this update ? All related comments and attached documents will be erased
   delete_participant_msg: Are you sure you want to delete this participant ?
+  delete_follower_msg: Are you sure you want to delete this follower ?
   delete_recurring_msg: This activity belongs to a series of recurring activity. Do you want to suppress all activities or this particular one ? All eventual participant data will be erased
   delete_rec_all_confirm: Delete the series
   delete_rec_single_confirm: Delete only this activity
   delete_cancel: Cancel
+  treat_followable_joinable_requests: Treat follow/participation requests
   reject_request_msg: Are you sure you want to reject the activity request ?
   reject_request_success_msg: The activity has been moved the rejected list
   reject_request_success_close_btn_msg: Ok
@@ -2378,6 +2400,8 @@ activities:
     submit: Ok
     next: Next
     complexify: Detailed configuration
+    add_participant: Add participant
+    add_follower: Add follower
 
   request:
     modal_btn_msg: Request activity creation
@@ -2426,9 +2450,21 @@ activities:
   reopen_activity: Reopen activity
   provide_my_feedbacks: Provide my feedbacks
   delete_activity: Delete activity
+  check_join_activity: Request to join activity
+  direct_join_activity: Join activity
+  undetermined_join_activity: (Request to) Join activity
+  unfollow_activity: Unfollow (archive)
   delete_activity_modal:
     title: Delete activity
     content: Do you confirm you want to delete this activity ? All associated data will be erased (stages, outputs & participants)
+
+first_connection_elements:
+  activities_dashboard:
+    tap_target_title: Activity dashboard
+    tap_target_info: Add there your first activities with your partners
+  user_list:
+    tap_target_title: Partners & users list 
+    tap_target_info: Add & find here all the partners and colleagues you're dealing with, and access to their info
 
 activity_elements:
   output: Scheduled Returns
@@ -2443,8 +2479,21 @@ activity_elements:
     multiple_stages_modal:
       add_event_title: To which stage do you want to attach thsis event ?
       title: Which stage do you want to look at/modify ?
+    open_enddate: Open
+    open_enddate_info: By letting the end date open, the stage will last until you decide to give it an end; helpful when you don't precisely when it ends.
+    keep_open_enddate: Keep end date open
+    define_enddate: Define an end date
+  visibility:
+    private: Private
+    unlisted: Unlisted
+    public: Public
+    info: '<div class="visibility-info-tooltip">
+            <div><span class="lime-text text-darken-2 strong">Private</span> - Users can access (join or follow) the stage only through being invited by organizer</div>
+            <div><span class="light-blue-text text-darken-2 strong">Unlisted</span> - <span class="lime-text text-darken-2 strong">Private rights +</span> users can access the activity through a shared link - organizer can decide to validate each accessing request</div>
+            <div><span class="green-text text-accent-4 strong">Public (in development)</span> - <span class="light-blue-text text-darken-2 strong">Unlisted rights +</span> users can access the activity through a search by name, category...</div>
+          </div>'
   criteria: Criteria
-  participant_adding_label: Name of participating user or firm
+  participant_adding_label: User or firm name
   participants: Participants
   iprocess: Process
   complexify: Add stages/criteria
@@ -3410,10 +3459,14 @@ user_list:
     legal_person: Legal person (firm...)
     firm_title: Partner/client name
     email_title: Last step
+    super_admin_title: Super administrator choice
+    admin_title: New administrator
     int_user_title: New internal member
     ext_user_title: New partner/client member
+    independant_person: Person acting on its own behalf, independant
+    on_behalf_person: Person member of a structure
     independant_user_title: New independant
-    participant_title: New participant
+    follower_participant_title: 'New <span class="fj-type">participant</span>'
     firm_creation_info: You will still be able to modify or add people representing this legal person thereafter
     independant_creation_info: The independant person and his/her organization are considered the same
     without_email_info: If you do not provide email address, this user will not be interact with you - you can still add it after
@@ -3495,7 +3548,7 @@ error_500:
   page_title: Server error
   title: An error happened on our side
   description: We experienced a small problem, this happens sometimes. The most important is that we have been notified of this <span class="dd-text strong">right now</span>, so that our developers team will be handling this issue - if they did not started already. Depending of its magnitude, our team will send you a mail confirming its resolution; meanwhile, continue browsing on Dealdrive or
-  link_text: get back to our homepage
+  link_text: get back to our homepageπ
 
 error_404:
   page_title: Page not found
@@ -3555,11 +3608,12 @@ activities_dashboard:
     participants_add_first_choice: Direct add via
     participants_add_second_choice: Invitation link
 
-firm_management:
+firm_settings:
   page_title: Firm settings
   manage_updates: Updates
   manage_admin: Administrators and permissions
   manage_activity: Activities
+  add_new_administrator: Add new administrator
   profile:
     title: General data
     identity_logo: 
@@ -3570,19 +3624,72 @@ firm_management:
       title: Other information
       member_since: Member since
       total_users: Total number of users (incl. active)
+  update_user_role_modal:
+    msg: Which role do you want to attribute to
+    super_admin_choice: Super administrator
+    admin_choice: Administrator
+    collaborator_choice: Collaborator 
+  new_super_admin_modal:
+    title: Important
+    msg: Are you sure to grant super administration rights to this user ? He/she will be the only one able to configure firm parameters for security reasons
 
-stage_invitation_modal:
-  modal_title: Invitations management
-  msg_link: Share the link to concerned people by clicking on icon
+stage_manage_requests_modal:
+  title: Activity requests
+  first_row_title_stage: Stage
+  first_row_title_user: Requester
+  first_row_title_type: Ask for...
+  first_row_title_choice: Enable
+
+stage_visibility_modal:
+  title: Visibility & accessibility
+  broadcast_type: Visibility
+  msg_link: Sharing link
   manage_every_invit: Make a prior validation for each request to join the activity
   copied_link_msg: Link copied !
   save_stage_before_config: Before configuring/getting invitation link, please create this activity stage by clicking on Ok button
+  subtitle: Access rights
+  followable_title: Following
+  followable_option_request: With prior validation
+  followable_option_direct: Without prior validation
+  joinable_title: Participating
+  joinable_option_request: With prior validation
+  joinable_option_direct: Without prior validation
+  visibility: Visibility
+  no_option_msg: You need to select at least one broadcast parameter. If you want to make this stage neither accessible nor joinable, rather change broadcast type to Private.
+
+stage_joining_modal:
+  start_msg: Confirmez-vous vouloir rejoindre cette activité ?
+  end_msg: En fonction des droits d'accès, soit les personnes en charge de l'activité examineront votre demande, soit vous serez rajouté directement. 
+
+stage_invitation_modal:
+  title: Join an activity
+  invitation_msg: enables you to join its activity
+  link_msg: Choose which of your account you want to deal with this activity
+  request_join_msg: Ask for organization to join the activity by clicking on <span class="dd-text strong">Ok</span>
+  direct_join_msg: Click on <span class="strong dd-text">Ok</span> in order to add it to your dashboard
+
+pending_joinable_followable_modal:
+  msg: Your request has been taken into account ! Meanwhile it is being processed by the person in charge of the activity/stage, you will find such request in your profile page.
 
 stage_invitation_page:
+  title: Manage operations with your clients
+  joinable_followable_msg: enables you to join or follow this activity
+  followable_msg: enables you to follow this activity
+  joinable_msg: enables you to join this activity
   invitation_msg: shares this activity with you
-  connection_btn_msg: Log in
-  signup_msg: create your account
-  end_msg: in order to follow it and collaborate 
+  connection_msg: <a class="strong dd-orange-text" href="/login"> Log in </a> or <a class="strong dd-orange-text" href="/login"> create your account </a> in order to follow it and collaborate
+  closed_invitation_message: This activity is no longer available to join
+
+decline_invitation_modal:
+  title: Before continuing...
+  msg: If you decline your participation, this activity will be cleared from your dashboard. You will still be able to follow/join it if the activity/organization enable to do so
+
+unfollow_stage_modal:
+  msg: Are you sure to unfollow such activity ? It will be removed from your dashboard and placed into your archived activities
+
+privatizing_stage_modal:
+  msg: Are you sure to make this stage private ? It will not able new followers
+  remove_existing_followers: Remove existing followers as well
 
 documents_management:
   title: Documents management
@@ -3590,3 +3697,14 @@ documents_management:
   no_docs_title: Start uploading documents here to share them after
   add_document_modal: 
     title: New document
+  
+client_update:
+  external_user:
+    active_badge_msg: Active user - can interact with you
+    inactive_unconnected_msg: User has never logged in
+    inactive_virtual_msg: Virtual user - fill out the email address to interact with him/her 
+    added_email_success_msg: The user received an invitation to participate to common activities
+
+stage_privatized:
+  title: Activity/stage inaccessible
+  msg: The activity/stage you want to join is not accessible any longer. Get access to your regular activities by logging in

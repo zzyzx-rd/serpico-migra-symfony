@@ -1190,7 +1190,7 @@ abstract class MasterController extends AbstractController
                 ->setWeightedDistanceRatio($calculatedValues[$criteriaId]["weightedUserDevRatio"])
                 ->setEqualDistanceRatio($calculatedValues[$criteriaId]["equalUserDevRatio"])
                 ->setType($resultType)
-                ->setCreatedBy($currentUser->getId());
+                ->setInitiator($currentUser);
             $em->persist($resultProject);
         }
         # set the global results about the users in the database
@@ -1214,7 +1214,7 @@ abstract class MasterController extends AbstractController
                 ->setWeightedDistanceRatio($calculatedValues[$criteriaId]["weightedUserDevRatio"])
                 ->setEqualDistanceRatio($calculatedValues[$criteriaId]["equalUserDevRatio"])
                 ->setType($resultType)
-                ->setCreatedBy($currentUser->getId());
+                ->setInitiator($currentUser);
 //            ob_flush();
 //            ob_start();
 //            var_dump( $em->getConnection()->getConfiguration()->getSQLLogger());
@@ -1248,7 +1248,7 @@ abstract class MasterController extends AbstractController
                 ->setWeightedDistanceRatio($calculatedValues[$criteriaId]["weightedTeamDevRatio"])
                 ->setEqualDistanceRatio($calculatedValues[$criteriaId]["equalTeamDevRatio"])
                 ->setType($resultType)
-                ->setCreatedBy($currentUser->getId());
+                ->setInitiator($currentUser);
             # confirm the db query
             $em->persist($resultTeams);
         }
@@ -1300,7 +1300,7 @@ abstract class MasterController extends AbstractController
         } else {
             $criteriaId = "step";
         }
-        $result->setCreatedBy($currentUser->getId());
+        $result->setInitiator($currentUser);
         # Add the results (weighted, equal, relative)
         if ($entityType != Participation::PARTICIPATION_THIRD_PARTY && $stageMode != MasterController::STAGE_ONLY) {
             $result->setCriterion($criteria)
@@ -1311,11 +1311,11 @@ abstract class MasterController extends AbstractController
                 ->setWeightedRelativeResult($calculatedValues[$criteriaId][$userType][$entityId]["weightedRelativeResult"])
                 ->setEqualRelativeResult($calculatedValues[$criteriaId][$userType][$entityId]["equalRelativeResult"])
                 ->setType($resultType)
-                ->setCreatedBy($currentUser->getId());
+                ->setInitiator($currentUser);
 
         }
         # add the deviation information
-        if ($entityType != Participation::PARTICIPATION_PASSIVE && $stageMode != MasterController::STAGE_ONLY) {
+        if ($entityType != Participation::PARTICIPATION_FOLLOWING && $stageMode != MasterController::STAGE_ONLY) {
             $result->setCriterion($criteria)
                 ->setStage($stage)
                 ->setActivity($activity)
@@ -1324,7 +1324,7 @@ abstract class MasterController extends AbstractController
                 ->setWeightedDevRatio($calculatedValues[$criteriaId][$userType][$entityId]["weightedDevRatio"])
                 ->setEqualDevRatio($calculatedValues[$criteriaId][$userType][$entityId]["equalDevRatio"])
                 ->setType($resultType)
-                ->setCreatedBy($currentUser->getId());
+                ->setInitiator($currentUser);
         }
         if ($userType == "user"){
             $result->setExternalUsrId($extId);

@@ -120,14 +120,23 @@ now: Maintenant
 tbd: A déterminer
 open_end: Fin ouverte
 yourself: Vous-même
+decline: Décliner 
+participate: Participer
+participate_to: participer à
+follow: Suivre
+visibility: Visibilité
+yes: Oui
+no: Non
+confirm: Confirmer
+unnamed_activity: Activité sans nom
+
 
 head_meta:  
   content: Traitement des opérations client et business en ligne sous la forme de tableaux interactifs. Dealdrive offre une solution de suivi client organisé sous d'un calendrier interactif, où l'on peut échanger documents et updates; dans un but d'un suivi plus fluide et d'une réduction des emails. Utilisez la solution de suivi clients Dealdrive afin d'améliorer vos intéractions clients et collobateurs. 
 
 signup:
   title: Inscription
-  do_not_associate_org: Je préfère ne pas associer mon compte à une entreprise pour l'instant
-  personal_usage_tooltip: Vous pourrez toujours associer un compte rattaché à une entreprise par la suite, sachant que votre compte en tant qu'individu sera toujours distinct de votre compte rattaché à une entreprise
+  waiting_msg: <span>Lancement officiel imminent - la solution est en train d'être finalisée et sera livrée le <span class="strong">28 février</span></span>
 
 updates:
 
@@ -229,6 +238,13 @@ updates:
           other                     {Fallback problem}
         }
       }
+      join_direct {{author} a rejoint {actElmtMsg}}
+      join_request {{author} demande à participer à {actElmtMsg}}
+      join_accept {{author} a accepté votre participation à {actElmtMsg}}
+      follow_direct {{author} suit {actElmtMsg}}
+      follow_request {{author} demande à suivre à {actElmtMsg}}
+      follow_accept {{author} a accepté votre suivi de {actElmtMsg}}
+      user_role {{author} vous a défini comme {role}}
       other {Fallback problem}
     }
 
@@ -427,7 +443,7 @@ help:
     title: Mes paramètres
     first_paragraph: A venir !
 
-  firm_settings:
+  firm_settings_old:
     title: Paramètres d'entreprise
     first_paragraph: A venir !
 
@@ -1144,7 +1160,7 @@ institutions:
 iprocesses:
   title: Activités
 
-firm_settings:
+firm_settings_old:
   page_title: Paramètres d'entreprise
   activities:
     title: Activités
@@ -1214,8 +1230,6 @@ firm_settings:
           none: sans condition
           owner: à condition qu'ils en soient owners
           participant: à condition qu'ils y participent
-
-
 
 
   other:
@@ -1693,9 +1707,9 @@ mails:
 
     button_text: Accédez à l'activité
 
-  activityParticipation:
-    activity_subject: Participation à l'activité
-    stage_subject_message_1: Participation à la phase
+  activityParticipationFollowing:
+    activity_subject: vous invite à {action} l'activité
+    stage_subject_message_1: vous invite à {action} la phase
     stage_subject_message_2: de l'activité
     subject_team_suffix: (en tant qu'équipe)
     message_act_begin: Vous venez d'être ajouté à l'activité
@@ -1704,8 +1718,6 @@ mails:
     message_end: Retrouvez cette activité sur votre dashboard personnel
     button_text: Accéder à mon dashboard
     message3_participant: Vous pouvez dès à présent effectuer des updates (commentaires, suggestions, documents) afin d'optimiser votre relation client !
-    #message3_teamParticipant: En tant que participant faisant partie d'une équipe, vous prendrez part à l'évaluation une fois la période de notation démarrée. Sachez que vous noterez chaque personne de votre équipe individuellement, alors que les participants extérieurs à l'équipe vous noteront en tant quéquipe
-    #message4: . Bonne activité et évaluation !
 
   eventNotification:
     msg_creation: Cet évé^nement a été créé par l'un des participants
@@ -1890,6 +1902,11 @@ mails:
     file: Fichier
     line: Ligne
     message: Message
+
+  superAdminAppointment:
+    subject: Vous avez été désigné super administrateur pour votre entité
+    message: vous a désigné super administrateur, ce qui vous permet d'avoir accès et configurer les paramètres propres à l'entité depuis votre compte.
+    button_text: Accéder aux paramètres entreprise
     
 
 
@@ -2175,12 +2192,13 @@ profile:
   change_account_modal:
     title: Changement de compte
     msg: Sélectionnez le compte sur lequel vous souhaitez passer
-  defining_initial_super_user_modal:
+  super_admin_appointment_modal:
     title: Choix du super administrateur initial
     msg: Vous souhaitez accéder aux <span class="strong">paramètres d'entreprise</span>, <span class="dd-text strong">uniquement réservés à un super administrateur</span> pour des questions de sécurité, et qui n'existe pas encore dans votre entreprise. Confirmez-vous vouloir devenir cet utilisateur ?
     choice_self: <span class="strong">Oui</span>, je confirme avoir les habilitations nécessaires à devenir ce super administrateur
     choice_other: <span class="strong">Non</span>, je préfère définir un utilisateur à qui sera conféré ce role
-
+  super_admin_appointed_modal:
+    msg: Merci d'avoir défini le nouveau super administrateur, qui a été notifié par mail et pourra configurer les paramètres de votre entité
   page_title: Mon profil
   mobile_header_title: Mon profil
   my_results: Mes résultats
@@ -2196,7 +2214,7 @@ profile:
   perf: Performance
   no_perf: Aucun critère de performance
   manage:
-    modify_revoke: Modifier / Révoquer les droits
+    update_role: Modifier les droits
     email_confirmation_modal:
       title: Confirmation de l'adresse email
       content: Pour finaliser la modification de votre adresse e-mail, nous avons envoyé un e-mail à l'adresse <span class="strong email-confirm-address"></span>. Il vous suffit de cliquer sur le lien figurant dans l'e-mail pour terminer l'opération.
@@ -2255,7 +2273,6 @@ profile:
       mean_dist_title: Distance moyenne
       results_title: Résultats
 
-
   file:
     unsupported_type:
       modal_title: Format non supporté
@@ -2267,6 +2284,13 @@ profile:
 
     success:
       modal_content: Votre photo a bien  été ajoutée dans votre librairie de photos de profil. Vous pouvez la changer via le bouton modifier à n'importe quel moment.
+
+  stage_fj_requests:
+    title: Mes demandes en cours
+    followable: De suivi
+    joinable: De participation
+    type_request: Type de demande
+    made_on: Faite le
 
 
   participations:
@@ -2417,6 +2441,7 @@ activities:
   grading_period: "Période de notation :"
   progress: "Avancement :"
   participants: Participants
+  followers: Followers
   events: Updates
   define: Définir
   modify: Modifier
@@ -2438,10 +2463,13 @@ activities:
   delete_activity_msg: Etes-vous sûr de vouloir supprimer cette activité ? Toutes les données éventuellement saisies par les participants seront effacées
   delete_event_msg: Etes-vous sûr de vouloir supprimer cet update ? Toutes les données liées (documents et commentaires) seront supprimées
   delete_participant_msg: Etes-vous sûr de vouloir supprimer ce participant de l'activité ?
+  delete_follower_msg: Etes-vous sûr de vouloir supprimer ce follower de l'activité ?
   delete_recurring_msg: Cette activité fait partie d'une série d'activités récurrentes. Voulez-vous supprimer toutes ces activités ou simplement celle-ci ? Les données liées aux participants seront effacées
   delete_rec_all_confirm: Supprimer la série
   delete_rec_single_confirm: Supprimer cette activité
   delete_cancel: Annuler
+  treat_followable_joinable_requests: Traiter les demandes de suivi/participation
+  requested_participation: Participation demandée
   reject_request_msg: Etes-vous sûr de rejeter cette demande d'activité ?
   reject_request_success_msg: l'activité a été placée dans la liste des activités rejetées
   reject_request_success_close_btn_msg: Ok
@@ -2491,6 +2519,7 @@ activities:
     next: Suivant
     complexify: Configuration détaillée
     add_participant: Ajouter participant
+    add_follower: Ajouter follower
 
   request:
     modal_btn_msg: Demander la création d'une activité
@@ -2540,14 +2569,23 @@ activities:
   reopen_activity: Rouvrir l'activité
   provide_my_feedbacks: Donner mes feedbacks
   delete_activity: Supprimer l'activité
+  check_join_activity: Demander à rejoindre l'activité
+  direct_join_activity: Rejoindre l'activité
+  undetermined_join_activity: (Demander à) Rejoindre l'activité
+  unfollow_activity: Ne plus suivre (archiver)
   delete_activity_modal:
     title: Suppression de l'activité
     content: Etes-vous sûr de vouloir supprimer cette activité ? Toutes ses données associées (phases, retours et participants) seront supprimées
 
+first_connection_elements:
+  activities_dashboard:
+    tap_target_title: Dashboard des activités
+    tap_target_info: Rajoutez ici vos premières activités avec vos partenaires
+  user_list:
+    tap_target_title: Liste de votre réseau 
+    tap_target_info: Ajoutez et retrouvez ici vos partenaires et collègues, et accédez à leurs infos
 
 activity_elements:
-  first_connection_title: Dashboard des activités
-  first_connection_helper: Rajoutez ici vos premières activités avec vos partenaires
 
   output: Retours programmés
   parameters: Paramètres
@@ -2563,9 +2601,20 @@ activity_elements:
       title: Quelle phase voulez-vous voir en détail/modifier ?
     open_enddate: Ouverte
     open_enddate_info: En laissant la date de fin ouverte, la phase se déroule jusqu'à ce que vous lui fixiez une date de fin; idéal quand vous ne savez pas exactement quand elle se termine.
+    keep_open_enddate: Laisser la date de fin ouverte
     define_enddate: Définir une date de fin
+  visibility:
+    private: Privée
+    unlisted: Non listée
+    public: Publique
+    info: '<div class="visibility-info-tooltip">
+            <div><span class="lime-text text-darken-2 strong">Privée</span> - Les utilisateurs accèdent (participent ou suivent) la phase par en étant ajouté par l''organisateur</div>
+            <div><span class="light-blue-text text-darken-2 strong">Non listée</span> - <span class="lime-text text-darken-2 strong">Droits d''accès privé +</span> les utilisateurs peuvent y accéder via un lien partagé - l''organisateur peut décider de valider chaque demande d''accès</div>
+            <div><span class="green-text text-accent-4 strong">Publique</span> (en développement) - <span class="light-blue-text text-darken-2 strong">Droits d''accès non listée +</span> les utilisateurs peuvent y accéder via une recherche par nom, catégorie...</div>
+          </div>'
+
   criteria: Critères
-  participant_adding_label: Nom de la personne ou de l'entreprise participante
+  participant_adding_label: Nom de la personne ou de l'entreprise
   participants: Participants
   iprocess: Process
   complexify: Ajouter phases/critères
@@ -3538,18 +3587,22 @@ user_list:
   add_user_btn_tooltip: Ajouter utilisateur/partenaire
   add_user_modal:
     type_title: Choisissez ce que vous voulez ajouter
-    type_act_title: Ce participant est un...
+    type_act_title: Ce participant est une...
     internal_user: Membre de mon entreprise
     partner_user: Membre d'un partenaire
     external_user: Membre d'une entreprise externe
     legal_person: Personne morale (entreprise...)
     firm_title: Nom du partenaire/client
     email_title: Dernière étape
+    super_admin_title: Choix du super administrateur
+    admin_title: Ajout d'un administrateur
     int_user_title: Ajout d'un membre interne
     ext_user_title: Ajout d'un membre du partenaire/client
+    independant_person: Personne agissant pour son compte, indépendant
+    on_behalf_person: Personne membre d'une structure
     independant_user_title: Ajout d'un indépendant
-    participant_title: Ajout d'un participant
-    firm_creation_info: Vous pourrez toujours changer/ajouter des personnes représentant pour cette personne morale par la suite
+    follower_participant_title: 'Ajout d''un <span class="fj-type">participant</span>'
+    firm_creation_info: Idéal quand vous ne savez pas exactement qui représente l'entreprise - vous pourrez toujours ajouter des représentants ensuite
     independant_creation_info: La personne indépendante et son entreprise représentent une seule et même entité
     without_email_info: Si vous ne renseignez pas d'adresse email, cet utilisateur ne pourra pas interagir avec vous - vous pouvez toujours la renseigner par la suite
     new_firm_database: Nouvelle entreprise en base
@@ -3689,11 +3742,12 @@ activities_dashboard:
     participants_add_first_choice: Ajout direct via
     participants_add_second_choice: Lien d'invitation
 
-firm_management:
+firm_settings:
   page_title: Paramètres d'entreprise
   manage_updates: Updates
   manage_admin: Administrateurs et droits associés
   manage_activity: Activités
+  add_new_administrator: Ajouter un nouvel administrateur
   profile:
     title: Données du compte
     identity_logo: 
@@ -3704,23 +3758,71 @@ firm_management:
       title: Autres informations
       member_since: Membre depuis
       total_users: Nombre total d'utilisateurs (dont actifs)
+  update_user_role_modal:
+    msg: Quel rôle souhaitez-vous attribuer à
+    super_admin_choice: Super administrateur
+    admin_choice: Administrateur
+    collaborator_choice: Collaborateur 
+  new_super_admin_modal:
+    title: Important
+    msg: Etes-vous sur de donner les droits de super administration à cet utilisateur ? Lui seul aura la possibilité de configurer les paramètres d'entreprises pour des raisons de sécurité
 
-stage_invitation_modal:
-  modal_title: Gestion des invitations
-  msg_link: Envoyez le lien aux personnes concernées en cliquant sur l'icone
+stage_manage_requests_modal:
+  title: Gestion des demandes d'accès
+  first_row_title_stage: Phase
+  first_row_title_user: Demandeur
+  first_row_title_type: Demande de...
+  first_row_title_choice: Permettre
+
+stage_visibility_modal:
+  title: Visibilité & accessibilité
+  broadcast_type: Visibilité
+  visibility_status_msg: Cette phase est 
+  msg_link: Lien de diffusion
   manage_every_invit: Valider au préalable chaque personne demandant à rejoindre l'activité
   copied_link_msg: Lien copié !
   save_stage_before_config: Avant de paramétrer les droits d'invitation, crééz d'abord cette phase d'activité en appuyant sur Ok
-  title: Gérez vos opérations avec vos clients
-  link_msg: Avec lesquels de vos comptes souhaitez-vous associer cette activité en commun
-  decline: Décliner 
+  subtitle: Droits d'accès
+  followable_title: Suivi
+  followable_option_request: Avec validation préalable
+  followable_option_direct: Sans validation de votre part
+  joinable_title: Participation
+  joinable_option_request: Avec validation préalable
+  joinable_option_direct: Sans validation de votre part
+  visibility: Visibilité
+  no_option_msg: Vous devez sélectionner au moins un critère de diffusion. Si vous ne souhaitez plus rendre cette phase accessible ou visible, changez le type de diffusion à Privé.
+
+stage_joining_modal:
+  start_msg: Are you sure you want to join the activity
+  end_msg: Depending on access rights, either users in charge of the activity will examine your request, or you will be directly added to the activity
+
+stage_invitation_modal:
+  title: Rejoindre une activité
+  invitation_msg: vous permet d'accéder à son activité
+  link_msg: Choissisez le compte avec lequel vous souhaitez rejoindre l'activité
+  request_join_msg: Demandez à l'organisateur à la rejoindre en cliquant sur <span class="dd-text strong">Ok</span>
+  direct_join_msg: Cliquez sur <span class="strong dd-text">Ok</span> afin de l'ajouter à votre dashboard
 
 stage_invitation_page:
+  title: Gérez les opérations avec vos clients
   invitation_msg: partage avec vous cette activité
-  connection_btn_msg: Connectez-vous
-  signup_msg: créez votre compte
-  end_msg: afin de la suivre et d'y collaborer
+  connection_msg: <a class="strong dd-orange-text" href="/login"> Connectez-vous </a> ou <a class="strong dd-orange-text" href="/login"> créez votre compte </a> afin de la suivre et d'y collaborer
+  connection_msg_f: <a class="strong white-text" href="/login"> Connectez-vous </a> ou <a class="strong white-text" href="/login"> créez votre compte </a> afin de la suivre et d'y collaborer
+  closed_invitation_message: Cette activité n'est pas ou n'est plus joignable
 
+pending_joinable_followable_modal:
+  msg: Votre demande a bien été prise en compte ! En attendant le traitement de votre demande par la personne en charge de la phase/activité, vous retrouverez votre demande dans votre profil.
+
+decline_invitation_modal:
+  title: Avant de poursuivre...
+  msg: Si vous déclinez votre participation, cette activité disparaitra de votre dashboard. Vous pourrez encore la suivre ou y participer via le lien d'invitation si l'activité/l'organisateur le permettent
+
+unfollow_stage_modal:
+  msg: Etes-vous sûr de ne plus suivre cette activité ? Elle disparaitra de votre dashboard et sera placée dans vos activités archivées
+
+privatizing_stage_modal:
+  msg: Etes-vous sûr de vouloir rendre la phase privée ? L'activité ne pourra plus être suivie par de nouveaux followers.
+  remove_existing_followers: Supprimer aussi les followers existants
 
 documents_management:
   title: Gestion des documents
@@ -3734,4 +3836,8 @@ client_update:
     active_badge_msg: Utilisateur actif - Peut interagir avec vous
     inactive_unconnected_msg: L'utilisateur ne s'est pas encore connecté
     inactive_virtual_msg: Utilisateur virtuel - renseignez son adresse email afin qu'il interagisse avec vous
-    added_email_success_msg: Email L'utilisateur a reçu une invitation à participer aux activités communes
+    added_email_success_msg: L'utilisateur a reçu une invitation à participer aux activités communes
+
+stage_privatized:
+  title: Activité non accessible
+  msg: L'activité/ la phase à laquelle vous souhaitez accéder n'est plus accessible. Retrouvez vos activités auxquelles vous avez accès en vous connectant

@@ -45,9 +45,10 @@ class InstitutionProcess extends DbObject
     public $gradable;
 
     /**
-     * @ORM\Column(name="inp_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="institutionProcessInitiatives")
+     * @JoinColumn(name="inp_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="inp_inserted", type="datetime",  options={"default": "CURRENT_TIMESTAMP"})
@@ -103,7 +104,6 @@ class InstitutionProcess extends DbObject
      * @param $inp_name
      * @param $inp_approvable
      * @param $inp_gradable
-     * @param $inp_createdBy
      * @param $inp_deleted
      * @param $organization
      * @param $process
@@ -116,7 +116,6 @@ class InstitutionProcess extends DbObject
     public function __construct(
       ?int $id = 0,
         $inp_name = '',
-        $inp_createdBy = null,
         $inp_approvable = false,
         $inp_gradable = true,
         $inp_deleted = null,
@@ -126,7 +125,7 @@ class InstitutionProcess extends DbObject
         $parent = null
         )
     {
-        parent::__construct($id, $inp_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->name = $inp_name;
         $this->approvable = $inp_approvable;
         $this->gradable = $inp_gradable;

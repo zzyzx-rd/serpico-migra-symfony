@@ -29,9 +29,10 @@ class Answer extends DbObject
     public $desc;
 
     /**
-     * @ORM\Column(name="asw_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="answerInitiatives")
+     * @JoinColumn(name="asw_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="asw_inserted", type="datetime", nullable=true, options={"default": "CURRENT_TIMESTAMP"})
@@ -58,7 +59,6 @@ class Answer extends DbObject
      * Answer constructor.
      * @param $id
      * @param string $desc
-     * @param int|null $createdBy
      * @param $field
      * @param Survey $survey
      * @param Participation $participation
@@ -66,12 +66,11 @@ class Answer extends DbObject
     public function __construct(
         $id = null,
         string $desc = null,
-        int $createdBy = null,
         $field = null,
         Survey $survey = null,
         Participation $participation = null)
     {
-        parent::__construct($id, $createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->desc = $desc;
         $this->field = $field;
         $this->survey = $survey;

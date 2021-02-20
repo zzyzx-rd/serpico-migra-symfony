@@ -10,6 +10,8 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\OneToMany;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\JoinColumn;
 use IntlChar;
 
 /**
@@ -41,9 +43,10 @@ class Icon extends DbObject
     public $unicode;
 
     /**
-     * @ORM\Column(name="ico_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="iconInitiatives")
+     * @JoinColumn(name="ico_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="ico_inserted", type="datetime",  options={"default": "CURRENT_TIMESTAMP"})
@@ -80,7 +83,6 @@ class Icon extends DbObject
      * @param $ico_type
      * @param $ico_name
      * @param $ico_unicode
-     * @param $ico_createdBy
      * @param Collection $criterionNames
      * @param Collection $workerFirmSectors
      */
@@ -89,11 +91,10 @@ class Icon extends DbObject
         $ico_type = null,
         $ico_name = null,
         $ico_unicode = null,
-        $ico_createdBy = null,
         Collection $criterionNames = null,
         Collection $workerFirmSectors = null)
     {
-        parent::__construct($id, $ico_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->type = $ico_type;
         $this->name = $ico_name;
         $this->unicode = $ico_unicode;

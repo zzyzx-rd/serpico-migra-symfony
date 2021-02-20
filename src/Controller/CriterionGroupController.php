@@ -36,7 +36,7 @@ class CriterionGroupController extends MasterController
         /**
          * @var User
          */
-        $currentUser = $this->user;;
+        $currentUser = $this->user;
         if (!$currentUser) {
             return self::unauthorized();
         }
@@ -63,7 +63,7 @@ class CriterionGroupController extends MasterController
         }
 
         $criterionGroup = new CriterionGroup($name, $ownerOrg);
-        $criterionGroup->setCreatedBy($currentUser->getId());
+        $criterionGroup->setInitiator($currentUser);
         $em = $this->getEntityManager();
 
         if ($linkedDptId) {
@@ -197,7 +197,7 @@ class CriterionGroupController extends MasterController
         $criterion = (new CriterionName)
             ->setName($name)
             ->setCriterionGroup($cgp)
-            ->setCreatedBy($currentUser->getId())
+            ->setInitiator($currentUser)
             ->setOrganization($currentUser->getOrganization())
             ->setDepartment($cgp->getDepartment());
 

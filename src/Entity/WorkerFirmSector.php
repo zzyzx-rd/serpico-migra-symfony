@@ -32,9 +32,10 @@ class WorkerFirmSector extends DbObject
     public $name;
 
     /**
-     * @ORM\Column(name="wfs_createdBy", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="workerFirmSectorInitiatives")
+     * @JoinColumn(name="wfs_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="wfs_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
@@ -56,17 +57,15 @@ class WorkerFirmSector extends DbObject
      * WorkerFirmSector constructor.
      * @param ?int$id
      * @param $wfs_name
-     * @param $wfs_createdBy
      * @param $icon
      * @param $firm
      */
     public function __construct(
       ?int $id = 0,
         $wfs_name = null,
-        $wfs_createdBy = null,
         $icon = null)
     {
-        parent::__construct($id, $wfs_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->name = $wfs_name;
         $this->icon = $icon;
         $this->firms = new ArrayCollection;

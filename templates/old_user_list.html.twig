@@ -333,7 +333,7 @@
                                     {{ user.weight ? user.weight.value : '-' }}
                                   </div>
                                   <div class="row action-buttons">
-                                    {% if currentuser.role == 1 or currentuser.role == 4 or user.createdBy == currentuser.id or enabledSuperiorModifySubordinate and user.superior == currentuser.id %}
+                                    {% if currentuser.role == 1 or currentuser.role == 4 or user.initiator == currentuser or enabledSuperiorModifySubordinate and user.superior == currentuser.id %}
                                       <div class="button-field">
                                         <a class="validate waves-effect waves-light btn-large modify-button" href="{% if global.request.attributes.get('orgId') != "" %}{{ url('rootUpdateUser',{'orgId' : global.request.attributes.get('orgId'), 'usrId' : user.id}) }}{% else %}{{ url('updateUser',{'usrId' : user.id}) }}{% endif %}">{% trans %}user_list.modify{% endtrans %}</a>
                                       </div>
@@ -575,7 +575,7 @@
                             {% endif %}
                           </div>
                           <div class="row action-buttons">
-                            {% if currentuser.role == 1 or currentuser.role == 4 or user.createdBy == currentuser.id %}
+                            {% if currentuser.role == 1 or currentuser.role == 4 or user.initiator == currentuser %}
                               <div class="button-field">
                                 <a class="validate waves-effect waves-light btn-large modify-button" href="{% if global.request.attributes.get('orgId') != "" %}{{ url('rootUpdateUser',{'orgId' : global.request.attributes.get('orgId'), 'usrId' : user.id}) }}{% else %}{{ url('updateUser',{'usrId' : user.id}) }}{% endif %}">{% trans %}user_list.modify{% endtrans %}</a>
                               </div>

@@ -11,6 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\OneToMany;
+use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToOne;
 use Doctrine\ORM\Mapping\OrderBy;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -36,9 +37,10 @@ class OrganizationPaymentMethod extends DbObject
     public $pmId;
 
     /**
-     * @ORM\Column(name="opm_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="organizationPaymentMethodInitiatives")
+     * @JoinColumn(name="opm_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="opm_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
@@ -53,16 +55,14 @@ class OrganizationPaymentMethod extends DbObject
      * Ranking constructor.
      * @param ?int$id
      * @param $pmId
-     * @param $createdBy
      * @param $organization
      */
     public function __construct(
         ?int $id = 0,
-        $pmId= null,
-        $createdBy = null
+        $pmId= null
        )
     {
-        parent::__construct($id,$createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
 
     }
 

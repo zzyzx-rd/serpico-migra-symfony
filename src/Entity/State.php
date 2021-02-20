@@ -40,9 +40,10 @@ class State extends DbObject
     public $name;
 
     /**
-     * @ORM\Column(name="sta_createdBy", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="stateInitiatives")
+     * @JoinColumn(name="sta_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="sta_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
@@ -71,7 +72,6 @@ class State extends DbObject
      * @param $sta_abbr
      * @param $sta_fullname
      * @param $sta_name
-     * @param $sta_createdBy
      * @param $country
      * @param $cities
      * @param $firms
@@ -81,12 +81,11 @@ class State extends DbObject
         $sta_abbr = null,
         $sta_fullname = null,
         $sta_name = null,
-        $sta_createdBy = null,
         $country = null,
         $cities = null,
         $firms = null)
     {
-        parent::__construct($id,$sta_createdBy , new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->abbr = $sta_abbr;
         $this->fullname = $sta_fullname;
         $this->name = $sta_name;

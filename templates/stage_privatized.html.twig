@@ -1,0 +1,84 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+    {% trans %}user_no_token.title{% endtrans %}
+{% endblock %}
+
+
+  {% block css %}
+      <style>
+
+          img{
+            width: inherit;
+          }
+
+          .email-field{
+            position: relative;
+          }
+
+          .email-field button{
+            position: absolute;
+            right: 0;
+            top: 0%;
+          }
+
+      </style>
+
+  {% endblock %}
+
+
+{% block pagename %}
+    {% trans %}user_no_token.mobile_header_title{% endtrans %}
+{% endblock %}
+
+{% block username %}
+  {{ currentuser.firstname }}
+  {{ currentuser.lastname }}
+{% endblock %}
+
+{% block content %}
+
+      {% include "components/background_grid.html.twig" %}
+
+      <div class="small-container">
+          <img src="{{ asset('lib/img/logo_dd_p_l.png') }}">
+          <div class="card-panel purple lighten-5">
+            <div class="row center no-margin">
+              <h5>{% trans %}stage_privatized.title{% endtrans %}</h5>
+              <p>{% trans %}stage_privatized.msg{% endtrans %}</p>
+            </div>
+            <div class="row col center">
+              <div class="button-field">
+                <a class="btn btn-large waves-effect waves-light" href="{{ url('login') }}">{% trans %}user_no_token.home_button_title{% endtrans %}</a>
+              </div>
+            </div>
+          </div>
+      </div>
+{% endblock %}
+
+{% block javascripts %}
+  <script>
+    
+    $(function(){
+      $('input[type="email"]').on('keyup',function(){
+          if(isEmail($(this).val())){
+            $('.email-field button').removeClass('disabled-btn');
+          }
+      })
+       $('#retrievePwdForm').on('submit',function(e){
+        e.preventDefault();
+        var formSerialize =  $(this).serialize();
+        $.post(rurl, formSerialize)
+        .done(function(data){
+            $('.modal').modal('close');
+            $('#retrievePwdForm').find("[type=email]").val("");
+            $('#retrievePwdSuccess').modal('open');
+        })
+        .fail(function(data){
+            console.log(data);
+        })
+      })
+    });
+  
+  </script>
+{% endblock %}

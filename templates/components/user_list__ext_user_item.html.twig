@@ -49,7 +49,7 @@
         
         {% if roles %}
 
-          {% if is_admin or user.createdBy == currentuser.id %}
+          {% if is_admin or user.initiator == currentuser %}
             {% set path = is_root ? 'rootUpdateUser' : 'updateUser' %}
             <a class="material-icons"
                 href="{{ url(path, { usrId: user ? user.id : 0, orgId: user ? user.orgId : 0 }) }}"

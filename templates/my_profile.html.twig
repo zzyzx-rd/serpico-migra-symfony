@@ -145,6 +145,10 @@
       border-radius: 50%;
     }
 
+    .title-logo{
+      margin-right:20px;
+    }
+
     @media screen and (min-width: 993px) {
     
         .my-profile-image{
@@ -223,6 +227,7 @@
   <script>
     var iaurl= "{{ url('addFirstAdmin') }}";
     var vaurl= "{{ url('validateAdmins') }}";
+    var gfjurl= "{{ url('getPendingFJRequests') }}";
   </script>
   {% endif %}
 
@@ -232,6 +237,7 @@
 {% block content %}
 
 {% set organization = currentuser.organization %}
+{% set ongoingRequests = currentuser.masterings|filter(m  => m.type == 0) %}
 {% include "components/background_grid.html.twig" %}
 
   <main class="card-panel purple lighten-5">
@@ -295,7 +301,7 @@
 
       <div class="row" style="margin-top: 30px">
         <div class="col {%if myHotStageParticipations|length == 0 %}m12 {%else%}m8{% endif%} s12">
-          <h5><i class="fa fa-thermometer-three-quarters" style="margin-right: 20px"></i>
+          <h5><i class="fa fa-thermometer-three-quarters title-logo"></i>
             {% if orgName != "Public" %}
               {{ 'profile.hotStages.title'|trans }}
             {% else %}
@@ -440,7 +446,7 @@
           {% endif %}
         </div>
         <div class="col {{ myHotStageParticipations|length == 0 ? 'm12' : 'm4' }} s12">
-          <h5><i class="fa fa-ticket-alt" style="margin-right: 20px"></i>{{ 'profile.participations.title'|trans }}</h5>
+          <h5><i class="fa fa-ticket-alt title-logo"></i>{{ 'profile.participations.title'|trans }}</h5>
 
           {% if nbActivities == 0 %}
             <span>{{ 'profile.participations.no_participations'|trans }}</span>
@@ -497,8 +503,70 @@
           {% endif %}
         </div>
       </div>
+
+      {% if ongoingRequests|length %}
+        <div class="row">
+          <div class="flex-center-sb">
+            <h5 class="flex-center">
+              <i class="fa fa-gavel title-logo"></i>
+              {{ 'request_section_title (nb_ongoing_requests)'|replace({
+                    'request_section_title' : 'profile.stage_fj_requests.title'|trans,
+                    'nb_ongoing_requests'   : ongoingRequests|length
+                  }) 
+              }}
+            </h5>
+           
+            <a href="" class="btn-flat fj-requests-btn">
+              <i class="fa fa-search dd-text"></i>
+            </a>
+          </div>
+          {#
+          <div>
+            {% set ongoingFollowingRequests = ongoingRequests|filter(m => m.property == 'followableStatus') %} 
+            {% set ongoingJoiningRequests = ongoingRequests|filter(m => m.property == 'joinableStatus') %} 
+            {% if ongoingFollowingRequests|length %}
+              <span>{{ 'profile.stage_fj_requests.followable'|trans ~ ' : ' ~ ongoingFollowingRequests|length }}</span>
+            {% endif %}
+            {% if ongoingFollowingRequests|length and ongoingJoiningRequests|length %}
+              <span> - </span>
+            {% endif %}
+            {% if ongoingJoiningRequests|length %}
+              <span>{{ 'profile.stage_fj_requests.joinable'|trans ~ ' : ' ~ ongoingJoiningRequests|length }}</span>
+            {% endif %}
+          </div>
+          #}
+          
+        </div>
+      {% endif %}
+
+
     </div>
   </div>
+
+{% if ongoingRequests|length %}
+
+  <div id="pendingFJRequests" class="modal">
+    <div class="modal-content">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ 'report.user.table.activity_title'|trans ~ ' - ' ~ 'report.user.table.stage_title'|trans }}</th>
+            <th>{{'profile.stage_fj_requests.type_request'|trans}}</th>
+            <th>{{'profile.stage_fj_requests.made_on'|trans}}</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+      <div class="flex-center-fe m-top">
+          <a class="btn waves-effect waves-light modal-close">Ok</a>
+      </div>
+
+    
+    </div>
+
+  </div>
+{% endif %}
 
 {% endblock %}
 

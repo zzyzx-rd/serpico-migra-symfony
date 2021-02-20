@@ -143,9 +143,38 @@ html {
   font-weight: 400;
 }
 
-
 body[style="overflow: hidden;"] {
   height: 100vh;
+}
+
+.btn,.btn-large,.btn-floating{
+  background-color: #55318e;
+}
+
+.btn:not(.dd-orange-bg):hover{
+  background-color: #55318e;
+  color: white;
+}
+
+.btn.dd-orange-bg:hover{
+  background-color: #ff9300;
+  color: white;
+}
+
+.dd-text{
+  color: #55318e;
+}
+
+.dd-orange-text{
+  color: #ff9300;
+}
+
+.dd-bg{
+  background-color: #55318e;
+}
+
+.dd-orange-bg{
+  background-color: #ff9300;
 }
 
 [tooltip] {
@@ -224,14 +253,6 @@ body[style="overflow: hidden;"] {
   font-weight: 500;
 }
 
-.dd-text{
-  color: #55318e;
-}
-
-.dd-bg{
-  background-color: #55318e;
-}
-
 nav .left-icon-zone{
   display: inline-block;
   height: inherit!important;
@@ -254,19 +275,6 @@ nav .left-icon-zone{
 
 .profile-link img{
   margin: 0 32px 0 0;
-}
-
-.dd-bg-color{
-  background-color: #341f56;
-}
-
-.btn,.btn-large,.btn-floating{
-  background-color: #55318e;
-}
-
-.btn:hover{
-  background-color: #55318e;
-  color: white;
 }
 
 .return-btn{
@@ -394,18 +402,6 @@ li + li.no-items-placeholder {
 
 .output-barred{
   left: -10%;
-}
-
-.dd-text{
-  color: #55318e;
-}
-
-.dd-orange-text{
-  color: #ff9300;
-}
-
-.dd-orange-bg{
-  background-color: #ff9300;
 }
 
 .mat-icon {

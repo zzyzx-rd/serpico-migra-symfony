@@ -109,10 +109,10 @@ class ResultTeam extends DbObject
      */
     protected $equalDistanceRatio;
     /**
-     * @Column(name="rst_createdBy", type="integer")
-     * @var int
+     * @ManyToOne(targetEntity="User", inversedBy="resultTeamInitiatives")
+     * @JoinColumn(name="rst_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    protected ?int $createdBy;
+    public ?User $initiator;
     /**
      * @Column(name="rst_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      * @var DateTime
@@ -162,7 +162,6 @@ class ResultTeam extends DbObject
      * @param $equalInertiaMax
      * @param $weightedDistanceRatio
      * @param $equalDistanceRatio
-     * @param $rst_createdBy
      * @param $activity
      * @param $stage
      * @param $criterion
@@ -186,13 +185,12 @@ class ResultTeam extends DbObject
         $equalInertiaMax = null,
         $weightedDistanceRatio = null,
         $equalDistanceRatio = null,
-        $rst_createdBy = null,
         $activity = null,
         $stage = null,
         $criterion = null,
         $team = null)
     {
-        parent::__construct($id, $rst_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->weightedAbsoluteResult = $weightedAbsoluteResult;
         $this->equalAbsoluteResult = $equalAbsoluteResult;
         $this->weightedRelativeResult = $weightedRelativeResult;

@@ -247,7 +247,7 @@ class StageM extends ModelEntity
             return true;
         }
 
-        if ($stage->getUserMasters()->exists(fn(int $i, UserMaster $m) => $m->getUser() == $connectedUser) && ($stage->getGraderParticipants() === null || !$stage->getGraderParticipants()->exists(static function(int $i, Participation $p){return $p->isLeader();}))) {
+        if ($stage->getLeaders()->contains($connectedUser) && ($stage->getGraderParticipants() === null || !$stage->getGraderParticipants()->exists(static function(int $i, Participation $p){return $p->isLeader();}))) {
             return true;
         }
 

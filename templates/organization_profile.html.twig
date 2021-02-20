@@ -250,7 +250,7 @@
                 <a href="{{ path('firmSettings') }}" class="return-btn btn">
                     Retour
                 </a>
-                <h4 class="page-title">{{'firm_management.profile.title'|trans}}</h4>
+                <h4 class="page-title">{{'firm_settings.profile.title'|trans}}</h4>
                 {#
                 <a class="btn-flat cancel-btn" style="visibility:hidden">{{'cancel'|trans}}</a>
                 <a class="m-left modify-btn btn-flat dd-text">
@@ -268,7 +268,7 @@
                     <section class="organization-credentials">
                         {{ form_start(form) }}
                         <div class="flex-center-sb">
-                            <h5>{{'firm_management.profile.identity_logo.title'|trans}}</h5>
+                            <h5>{{'firm_settings.profile.identity_logo.title'|trans}}</h5>
                             <div class="flex-center">
                                 <a class="btn-flat cancel-btn" style="visibility:hidden">{{'cancel'|trans}}</a>
                                 <a class="m-left modify-btn modify-credentials-btn btn-flat dd-text">
@@ -288,7 +288,7 @@
                             <div class="col s12 m9 c-flex user-fields" style="flex-grow: 1;">
                             
                                 <div class="flex-center">
-                                    <span class="field-name">{{'firm_management.profile.identity_logo.commname'|trans|capitalize}}</span>
+                                    <span class="field-name">{{'firm_settings.profile.identity_logo.commname'|trans|capitalize}}</span>
                                     <span class="element-data bold-1">{{ organization.commname }}</span>
                                     <div class="element-input input-field no-margin">
                                             {{ form_label(form.commname) }}
@@ -296,7 +296,7 @@
                                     </div>
                                 </div>
                                 <div class="flex-center">
-                                    <span class="field-name">{{'firm_management.profile.identity_logo.legalname'|trans|capitalize}}</span>
+                                    <span class="field-name">{{'firm_settings.profile.identity_logo.legalname'|trans|capitalize}}</span>
                                     <span class="element-data bold-1">{{ not organization.legalname|default ? ('(' ~ 'not_provided'|trans ~ ')') : organization.legalname }}</span>
                                     <div class="element-input input-field no-margin">
                                             {{ form_label(form.legalname) }}
@@ -334,15 +334,15 @@
                     
                     <section>
 
-                        <h5>{{'firm_management.profile.general_info.title'|trans}}</h5>
+                        <h5>{{'firm_settings.profile.general_info.title'|trans}}</h5>
                         <div class="user-fields">
                         
                             <div class="flex-center-sb">
-                                <span>{{ 'firm_management.profile.general_info.member_since'|trans }}</span>
+                                <span>{{ 'firm_settings.profile.general_info.member_since'|trans }}</span>
                                 <span>{{ organization.inserted|format_datetime('short', 'none', pattern='dd/MM/yy') }}</span>
                             </div>
                             <div class="flex-center-sb">
-                                <span>{{ 'firm_management.profile.general_info.total_users'|trans }}</span>
+                                <span>{{ 'firm_settings.profile.general_info.total_users'|trans }}</span>
                                 <span>{{ organization.users|filter(u => not u.synthetic)|length ~ ' (' ~ organization.users|filter(u => not u.deleted and not u.synthetic)|length ~ ')' }}</span>
                             </div>
                         </div>

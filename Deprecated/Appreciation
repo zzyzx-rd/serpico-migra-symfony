@@ -34,7 +34,7 @@
 //    public $comment;
 //
 //    /**
-//     * @ORM\Column(name="apt_created_by", type="integer", nullable=true)
+//     * @ORM\Column(name="apt_initiator", type="integer", nullable=true)
 //     */
 //    public $createdBy;
 //    /**
@@ -89,7 +89,7 @@
 //        return $this;
 //    }
 //
-//    public function setCreatedBy($apt_createdBy): self
+//    public function setInitiator($apt_createdBy): self
 //    {
 //        $this->createdBy = $apt_createdBy;
 //

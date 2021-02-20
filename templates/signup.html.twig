@@ -16,6 +16,32 @@
   <script type="text/javascript">
     var homeUrl = "{{ url('login') }}";
   </script>
+  <style>
+  
+  .waiting-video-container{
+        display: inline-block;
+        position: relative;
+        margin: 0 auto;
+        text-align: left;
+  }
+  video{
+    width: 100%;
+    height: auto;
+    object-fit:none;
+  }
+
+  .waiting-card{
+    background-color:#d7eae3;
+  }
+
+  .waiting-msg{
+    padding: 0 2em;
+    margin:auto;
+    text-align:center;
+    height:100px;
+  }
+  </style>
+
 {% endblock %}
 
 {% block content %}
@@ -27,35 +53,53 @@
             <div class="col s12"><img src="{{ absolute_url(asset('lib/img/logo_dd_p_l.png')) }}" width="250px"></div>
         </div>
 
+        {% if date('now') > date('2021-02-28') %}
+        
         <div class="card-panel purple lighten-5">
 
-          <h5>{{'header.register.description'|trans}}</h5>
-
-            {#
-            <div class="flex-center-sb user-fullname">
+          
+            <h5>{{'header.register.description'|trans}}</h5>
+              {#
+              <div class="flex-center-sb user-fullname">
+                <div class="input-field">
+                    {{ form_row(form.firstname) }}
+                </div>
+                <div class="input-field">
+                    {{ form_row(form.lastname) }}
+                </div>
+              </div>
+              #}
+              {{ form_start(form) }}
               <div class="input-field">
-                  {{ form_row(form.firstname) }}
+                {{ form_row(form.username) }}
               </div>
               <div class="input-field">
-                  {{ form_row(form.lastname) }}
+                  {{ form_row(form.email) }}
               </div>
-            </div>
-            #}
-            {{ form_start(form) }}
-            <div class="input-field">
-              {{ form_row(form.username) }}
-            </div>
-            <div class="input-field">
-                {{ form_row(form.email) }}
-            </div>
-            <div class="row action-buttons">
-              <div class="button-field">
-                  {{ form_row(form.submit) }}
+              <div class="row action-buttons">
+                <div class="button-field">
+                    {{ form_row(form.submit) }}
+                </div>
               </div>
-            </div>
-            {{ form_rest(form) }}
-            {{ form_end(form) }}
+              {{ form_rest(form) }}
+              {{ form_end(form) }}
         </div>
+          
+          {% else %}
+          <div class="card waiting-card">
+         
+            <div class="waiting-msg flex-center">{{'signup.waiting_msg'|trans|raw}}</div>
+            
+            <div class="waiting-video-container">
+              <video playsinline="" muted="" autoplay="" loop="" src="{{ asset('lib/videos/dial-face.mp4') }}" class="attachment-video" data-silent="true">
+              </video>
+            </div>
+
+          
+          </div>
+
+          {% endif %}
+
     </div>
 
 {% endblock %}

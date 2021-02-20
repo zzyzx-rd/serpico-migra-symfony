@@ -29,9 +29,10 @@ class EventType extends DbObject
     public $type;
 
     /**
-     * @ORM\Column(name="evt_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="eventTypeInitiatives")
+     * @JoinColumn(name="evt_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="evt_inserted", type="datetime", nullable=false, options={"default": "CURRENT_TIMESTAMP"})
@@ -76,7 +77,6 @@ class EventType extends DbObject
      * @param $id
      * @param $type
      * @param $unit
-     * @param $createdBy
      * @param $enabled
      * @param Icon $icon
      * @param Organization $organization
@@ -87,13 +87,12 @@ class EventType extends DbObject
         $id = null,
         $type = null,
         $enabled = true,
-        $createdBy = null,
         Icon $icon = null,
         Organization $organization = null,
         EventGroup $eventGroup = null,
         EventName $eName = null)
     {
-        parent::__construct($id, $createdBy, new DateTime);
+        parent::__construct($id, null, new DateTime);
         $this->type = $type;
         $this->eName = $eName;
         $this->enabled = $enabled;

@@ -7,6 +7,7 @@ use App\Entity\Activity;
 use App\Entity\InstitutionProcess;
 use App\Entity\Process;
 use App\Entity\Stage;
+use App\Form\Type\FollowerMasterMinType;
 use App\Form\Type\ParticipantMinType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -21,7 +22,9 @@ use App\Validator\AtLeastOneConfiguredStageHasAOwner;
 use App\Validator\AtLeastOneStageHasMinConfig;
 use App\Validator\SumWeightEqualToHundredPct;
 use App\Validator\UniquePerOrganization;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 
 class ActivityMinElementForm extends AbstractType
 {
@@ -86,6 +89,44 @@ class ActivityMinElementForm extends AbstractType
                     'allow_add' => true,
                 ]
             )
+
+            ->add('userMasters', CollectionType::class,
+                [
+                    'label' => false,
+                    'entry_type' => FollowerMasterMinType::class,
+                    'prototype' => true,
+                    //'prototype_name' => '__iPartIndex__',
+                    'by_reference' => false,
+                    'allow_delete' => true,
+                    'allow_add' => true,
+                ]
+            )
+
+            ->add('visibility', ChoiceType::class,
+                [
+                    'choices' => [
+                        'activity_elements.visibility.private' => -1,
+                        'activity_elements.visibility.unlisted' => 0,
+                        //'activity_elements.visibility.public' => 1,
+                    ],
+                    'empty_data' => 0,
+                    'expanded' => false,
+                    'multiple' => false,
+                ]
+            )
+
+            ->add('accessLink', HiddenType::class)
+            ->add('followableStatus', HiddenType::class, [
+                'attr' => [
+                    'value' => 1
+                ],
+            ])
+            ->add('joinableStatus', HiddenType::class, [
+                'attr' => [
+                    'value' => 0
+                ],
+            ])
+
 
             /*
             ->add('complexify', SubmitType::class,

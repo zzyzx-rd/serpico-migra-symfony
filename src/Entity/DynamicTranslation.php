@@ -69,9 +69,10 @@ class DynamicTranslation extends DbObject
     protected ?Organization $organization;
 
     /**
-     * @ORM\Column(name="dtr_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="dynamicTranslationInitiatives")
+     * @JoinColumn(name="dtr_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @Column(name="dtr_inserted", type="datetime", nullable=false, options={"default": "CURRENT_TIMESTAMP"})
@@ -84,7 +85,6 @@ class DynamicTranslation extends DbObject
         string $entity = null,
         int $entityId = null,
         int $entityProp = null,
-        int $createdBy = null,
         string $FR = null,
         string $EN = null,
         string $ES = null,
@@ -92,7 +92,7 @@ class DynamicTranslation extends DbObject
         string $DE = null
         )
     {
-        parent::__construct($id, $createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->entity = $entity;
         $this->entityId = $entityId;
         $this->entityProp = $entityProp;

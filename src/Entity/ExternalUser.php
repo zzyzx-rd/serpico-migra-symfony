@@ -62,9 +62,10 @@ class ExternalUser extends DbObject
     public $owner;
 
     /**
-     * @ORM\Column(name="ext_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="externalUserInitiatives")
+     * @JoinColumn(name="ext_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="ext_inserted", type="datetime", nullable=false, options={"default": "CURRENT_TIMESTAMP"})
@@ -113,7 +114,6 @@ class ExternalUser extends DbObject
      * @param $positionName
      * @param $owner
      * @param $synthetic
-     * @param $createdBy
      * @param $lastConnected
      * @param $deleted
      * @param User $user
@@ -130,14 +130,13 @@ class ExternalUser extends DbObject
         $positionName = null,
         $owner = null,
         $synthetic = null, 
-        $createdBy = null,
         $lastConnected = null,
         $deleted = null,
         User $user = null,
         Client $client = null
     )
     {
-        parent::__construct($id, $createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->firstname = $firstname;
         $this->lastname = $lastname;
         $this->email = $email;

@@ -139,7 +139,7 @@
               <ul class="users-list">
                 {% for user in usersWithoutDpt %}
                   {#{% include "components/user_list__item.html.twig" with { user: user, stats: currentuser.role == 1 or currentuser.role == 4, roles: currentuser.role == 1 or currentuser.role == 4 } %}#}
-                  {% include "components/user_list__item.html.twig" with { user: user, settings: currentuser.role == 1, stats: false } %}
+                  {% include "components/user_list__item.html.twig" with { user: user, settings: currentuser.role < 2, stats: false } %}
                 {% endfor %}
               </ul>
             </div>
@@ -175,7 +175,7 @@
     {% set user_create_route = is_root ? 'rootCreateUser' : 'createUser' %}
     
     <div class="fixed-action-btn">
-      <a class="btn-floating btn-large add-user-btn tooltipped modal-trigger" href="#addUserClient" data-tooltip="{{'user_list.add_user_btn_tooltip'|trans}}" data-position="top">
+      <a id="fixedButton" class="btn-floating btn-large add-user-btn tooltipped modal-trigger" href="#addUserClient" data-tooltip="{{'user_list.add_user_btn_tooltip'|trans}}" data-position="top">
         <i class="large mi add"></i>
       </a>
 
@@ -208,6 +208,14 @@
       </ul>
       #}
     </div>
+    {% if global.request.cookies.get('fc') is not null %}
+      <div class="tap-target dd-bg" data-activates="fixedButton">
+          <div class="tap-target-content white-text">
+            <h5>{{ 'first_connection_elements.user_list.tap_target_title'|trans }}</h5>
+            <p>{{ 'first_connection_elements.user_list.tap_target_info'|trans }}</p>
+          </div>
+      </div>
+    {% endif %}
 
     <a id="scrolltop" href="#serpicoapp" class="btn-floating btn-large blue">
       <i class="mi arrow_upward"></i>
@@ -223,30 +231,6 @@
     </div>
   </main>
 
-  <div id="deleteClient" class="modal">
-    <div class="modal-title"></div>
-    <div class="modal-content">
-      <h5>{% trans %}client.delete_external_user.modal_title{% endtrans %}</h5>
-      <p>{% trans %}client.delete_external_user.modal_content{% endtrans %}</p>
-      <div class="flex-center-fe">
-        <a class="btn waves-effect waves-light modal-close remove-client">{% trans %}stages.deleteStage.accept{% endtrans %}</a>
-        <a class="waves-effect waves-light modal-close btn-flat red-text">{% trans %}stages.deleteStage.cancel{% endtrans %}</a>
-      </div>
-    </div>
-  </div>
-  
-  <div id="deleteClient" class="modal">
-    <div class="modal-title"></div>
-    <div class="modal-content">
-      <h5>{% trans %}client.delete_external_user.modal_title{% endtrans %}</h5>
-      <p>{% trans %}client.delete_external_user.modal_content{% endtrans %}</p>
-      <div class="flex-center-fe">
-        <a class="btn waves-effect waves-light modal-close remove-client">{% trans %}stages.deleteStage.accept{% endtrans %}</a>
-        <a class="waves-effect waves-light modal-close btn-flat red-text">{% trans %}stages.deleteStage.cancel{% endtrans %}</a>
-      </div>
-    </div>
-  </div>
-
 {% endblock %}
 
 {% block javascripts %}
@@ -254,29 +238,11 @@
   <script>
       $(function(){
 
-        $(document).on('click','.remove-client',function(){
-          id = $(this).data('id');
-          urlToPieces = dcurl.split('/');
-          urlToPieces[urlToPieces.length - 2] = id;
-          url = urlToPieces.join('/');
-          $.delete(url,null)
-              .done(function(){
-                  $(`.client-individuals .users-list--item[data-id="${id}"]`).remove();
-                  nbIndivIndeps = parseInt($('.nb-individuals-indep').text());
-                  $('.nb-individuals-indep').empty().text(nbIndivIndeps - 1);
-                  if(nbIndivIndeps == 0){
-                    $('.client-individuals .no-items-placeholder').text($('.client-individuals .user-list').data('no-user-msg'));
-                  }
-              })
-              .fail(function(data){
-                  console.log(data);
-              })
-        })
-
-        $(document).on('click','[href="#deleteClient"]',function(){
-            $('.remove-client').data('id',$(this).closest('.users-list--item').data('id'));
-        });
-
+        if(getCookie('fc')){
+          $('.tap-target').tapTarget('open');
+          eraseCookie('fc');
+        }
+      
         $(document).on('mouseover','.firms-list--item header',function(){
             $(this).find('.user-actions .firm-modify-btn').css('visibility','');
         }).on('mouseleave','.firms-list--item header',function(){

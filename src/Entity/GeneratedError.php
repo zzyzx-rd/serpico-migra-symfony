@@ -8,6 +8,7 @@ use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
 
 /**
  * @ApiResource()
@@ -88,9 +89,10 @@ class GeneratedError extends DbObject
     public $feedback;
 
     /**
-     * @ORM\Column(name="err_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="generatedErrorInitiatives")
+     * @JoinColumn(name="err_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * Contact constructor.
@@ -104,7 +106,6 @@ class GeneratedError extends DbObject
      * @param $file
      * @param $line
      * @param $message
-     * @param $createdBy
      */
     public function __construct(
         $id = 0,
@@ -118,11 +119,10 @@ class GeneratedError extends DbObject
         $file = null,
         $line = null,
         $message = null,
-        $createdBy = null,
         $solved = null,
         $feedback = null)
     {
-        parent::__construct($id, $createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->usrId = $usrId;
         $this->locale = $locale;
         $this->method = $method;

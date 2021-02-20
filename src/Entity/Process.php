@@ -43,9 +43,10 @@ class Process extends DbObject
     public $gradable;
 
     /**
-     * @ORM\Column(name="pro_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="processInitiatives")
+     * @JoinColumn(name="pro_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * @ORM\Column(name="pro_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
@@ -106,7 +107,6 @@ class Process extends DbObject
      * @param $name
      * @param $approvable
      * @param $gradable
-     * @param $createdBy
      * @param $deleted
      * @param $children
      * @param $stages
@@ -114,14 +114,13 @@ class Process extends DbObject
     public function __construct(
       ?int $id = 0,
         $name = '',
-        $createdBy = null,
         $gradable = true,
         $deleted = null,
         $approvable = false,
         $children = null,
         $stages = null)
     {
-        parent::__construct($id, $createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->name = $name;
         $this->approvable = $approvable;
         $this->gradable = $gradable;
