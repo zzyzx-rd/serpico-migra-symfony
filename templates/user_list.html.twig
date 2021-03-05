@@ -76,6 +76,7 @@
     var uuurl = "{{ url('updateUser', {usrId: 0 }) }}";
     var privateMsg = "{{ 'private'|trans }}";
     var independentMsg = "{{ 'independant'|trans|capitalize }}";
+    var gsurl = "{{ path('getSubscriptions') }}";
   </script>
 {% endblock %}
 
@@ -117,7 +118,7 @@
       </ul>
 
       <section id="users">
-        <ul class="departments-list" data-prototype-department="{% apply escape %}{% include "components/department_list__item.html.twig" %}{% endapply %}" data-prototype-user="{% apply escape %}{% include "components/user_list__item.html.twig" %}{% endapply %}">
+        <ul class="departments-list" data-prototype-department="{% apply escape %}{% include "components/department_list__item.html.twig" %}{% endapply %}">
           {% for department in viewableDepartments %}
             {% set my_dpt = department == currentuser.department %}
 
@@ -126,7 +127,7 @@
 
           {% endfor %}
 
-          <li class="department-list--item hierarchized-item no-department-holder">
+          <li class="department-list--item hierarchized-item no-department-holder" data-prototype-user="{% apply escape %}{% include "components/user_list__item.html.twig" with {settings: true} %}{% endapply %}">
             <header class="{{ not currentuser.department ? 'my-dpt' }}">
               <em>          
                 {{'<span>no_attrib_dept</span> (<span class="nb-department-users">nbDptUsers</span>)'|replace({
@@ -229,6 +230,35 @@
         <button id="client-icon-upload-btn" type="button" class="btn">ok</button>
       </div>
     </div>
+
+    <div id="linkSubscriptionToUser" class="modal">
+
+        <div class="modal-content">
+
+          <h5>{{'firm_settings.subscription.associate_unsubscribed_accounts_modal.title'|trans}}</h5>
+
+          <table class="highlight striped centered subscription-table" data-prototype="{% apply escape %}{% include "components/subscriptor_list__item.html.twig" %}{% endapply %}">
+              <thead>
+                  <tr>
+                      <th>{{'firm_settings.subscription.associate_unsubscribed_accounts_modal.table.account'|trans}}</th>
+                      <th>
+                        <i class="fa fa-question-circle tooltipped" data-tooltip="{{'firm_settings.subscription.associate_unsubscribed_accounts_modal.table.action_msg'|trans}}" data-position="top"></i>
+                        <span>{{'firm_settings.subscription.associate_unsubscribed_accounts_modal.table.action'|trans}}</span>
+                      </th>
+                  </tr>
+              </thead>
+              <tbody>
+              </tbody>
+          </table>
+
+          <div class="flex-center-fe">
+            <div class="btn waves-effect waves-light modal-close">{{'ok'|trans}}</div>
+          </div>
+
+        </div>
+
+    </div>
+
   </main>
 
 {% endblock %}

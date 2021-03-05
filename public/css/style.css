@@ -786,6 +786,20 @@ td a {
   flex-wrap: wrap;
 }
 
+.c-flex-fs {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  flex-wrap: wrap;
+}
+
+.c-flex-fe {
+  display: flex;
+  align-items: flex-end;
+  flex-direction: column;
+  flex-wrap: wrap;
+}
+
 .flex-end {
   display: flex;
   align-items: flex-end;
@@ -815,6 +829,12 @@ td a {
   display: flex;
   align-items: center;
   justify-content: flex-end;
+}
+
+.flex-center-fs {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 /***header***/

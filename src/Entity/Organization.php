@@ -17,7 +17,8 @@ use Doctrine\ORM\Mapping\OneToOne;
 use Doctrine\ORM\Mapping\OrderBy;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Symfony\Component\Validator\Constraints as Assert;
-use Stripe;
+use Stripe\Stripe as Stripe;
+use Stripe\StripeClient;
 
 /**
  * @ApiResource()
@@ -52,6 +53,16 @@ class Organization extends DbObject
      * @ORM\Column(name="org_isClient", type="boolean", nullable=true)
      */
     public $isClient;
+
+    /**
+     * @ORM\Column(name="org_contact_name", type="string", length=255, nullable=true)
+     */
+    public $contactName;
+
+    /**
+     * @ORM\Column(name="org_contact_phone_number", type="string", length=255, nullable=true)
+     */
+    public $contactPhoneNumber;
 
     /**
      * @ORM\Column(name="org_oth_language", type="string", length=255, nullable=true)
@@ -108,6 +119,10 @@ class Organization extends DbObject
      * @OneToMany(targetEntity="Participation", mappedBy="organization", cascade={"persist", "remove"}, orphanRemoval=true)
      */
     public $participations;
+    /**
+     * @OneToMany(targetEntity="Subscription", mappedBy="organization", cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    public $subscriptions;
     /**
      * @OneToMany(targetEntity="Stage", mappedBy="organization", cascade={"persist", "remove"}, orphanRemoval=true)
      */
@@ -182,7 +197,7 @@ class Organization extends DbObject
      * @OneToOne(targetEntity="User", inversedBy="organization")
      * @JoinColumn(name="payment_usr_id", referencedColumnName="usr_id",nullable=true)
      */
-    private $paymentUser;
+    private $subscriptor;
     /**
      * @Column(name="org_logo", type="string", nullable=true)
      * @var string
@@ -198,7 +213,7 @@ class Organization extends DbObject
      * @Column(name="org_cus_id", type="string", nullable=true)
      * @var string
      */
-    protected $customerId;
+    protected $stripeCusId;
     /**
      * @OneToMany(targetEntity="Team", mappedBy="organization",cascade={"persist", "remove"})
      */
@@ -281,6 +296,8 @@ class Organization extends DbObject
      * @param $commname
      * @param $type
      * @param $plan
+     * @param $contactName
+     * @param $contactPhoneNumber
      * @param $isClient
      * @param $oth_language
      * @param $weight_type
@@ -307,17 +324,19 @@ class Organization extends DbObject
      * @param $targets
      * @param $options
      * @param $processes
-     * @param $customerId
+     * @param $stripeCusId
      * @param ArrayCollection|InstitutionProcess[] $institutionProcesses
      * @param CriterionGroup[] $criterionGroups
      * @param $workerFirm
      * @param $paymentMethods
-     * @param $paymentUser
+     * @param $subscriptor
      */
     public function __construct(
       ?int $id = 0,
         $isClient = null,
         $plan = 3,
+        $contactPhoneNumber = null,
+        $contactName = null,
         $legalname = null,
         $commname = '',
         $type = '',
@@ -347,8 +366,8 @@ class Organization extends DbObject
         $targets = null,
         $options = null,
         $processes = null,
-        $customerId = null,
-        $paymentUser = null ,
+        $stripeCusId = null,
+        $subscriptor = null,
         $institutionProcesses = null,
         array $criterionGroups = null
         )
@@ -358,6 +377,8 @@ class Organization extends DbObject
         $this->commname = $commname;
         $this->type = $type;
         $this->plan = $plan;
+        $this->contactName = $contactName;
+        $this->contactPhoneNumber = $contactPhoneNumber;
         $this->isClient = $isClient;
         $this->oth_language = $oth_language;
         $this->weight_type = $weight_type;
@@ -387,7 +408,8 @@ class Organization extends DbObject
         $this->institutionProcesses = $institutionProcesses?: new ArrayCollection();
         $this->criterionGroups = $criterionGroups?: new ArrayCollection();
         $this->users = $users?: new ArrayCollection();
-        $this->customerId = $customerId;
+        $this->subscriptor = $subscriptor;
+        $this->stripeCusId = $stripeCusId;
         $this->eventGroups = new ArrayCollection();
         $this->eventTypes = new ArrayCollection();
         $this->translations = new ArrayCollection();
@@ -396,22 +418,23 @@ class Organization extends DbObject
         $this->documents = new ArrayCollection();
         $this->userMasters = new ArrayCollection();
         $this->participations = new ArrayCollection();
+        $this->subscriptions = new ArrayCollection();
     }
 
     /**
      * @return string
      */
-    public function getCustomerId(): ?string
+    public function getStripeCusId(): ?string
     {
-        return $this->customerId;
+        return $this->stripeCusId;
     }
 
     /**
-     * @param string $customerId
+     * @param string $stripeCusId
      */
-    public function setCustomerId(string $customerId): self
+    public function setStripeCusId(string $stripeCusId): self
     {
-        $this->customerId = $customerId;
+        $this->stripeCusId = $stripeCusId;
         return $this;
     }
 
@@ -462,6 +485,29 @@ class Organization extends DbObject
     public function setType(string $type): self
     {
         $this->type = $type;
+
+        return $this;
+    }
+
+    public function getContactName(): ?string
+    {
+        return $this->contactName;
+    }
+
+    public function setContactName(string $contactName): self
+    {
+        $this->contactName = $contactName;
+
+        return $this;
+    }
+    public function getContactPhoneNumber(): ?string
+    {
+        return $this->contactPhoneNumber;
+    }
+
+    public function setContactPhoneNumber(string $contactPhoneNumber): self
+    {
+        $this->contactPhoneNumber = $contactPhoneNumber;
 
         return $this;
     }
@@ -533,19 +579,19 @@ class Organization extends DbObject
     }
 
     /**
-     * @return mixed
+     * @return User
      */
-    public function getPaymentUser()
+    public function getSubscriptor(): ?User
     {
-        return $this->paymentUser;
+        return $this->subscriptor;
     }
 
     /**
-     * @param mixed $paymentUser
+     * @param User $subscriptor
      */
-    public function setPaymentUser($paymentUser): void
+    public function setSubscriptor(?User $subscriptor): void
     {
-        $this->paymentUser = $paymentUser;
+        $this->subscriptor = $subscriptor;
     }
 
     public function setExpired(DateTimeInterface $expired): self
@@ -1416,8 +1462,12 @@ class Organization extends DbObject
         }
     }
 
+    public function getSuperAdmin(){
+        return $this->getActiveUsers()->filter(fn(User $u) => $u->getRole() <= USER::ROLE_SUPER_ADMIN)->first();
+    }
+
     public function hasSuperAdmin(){
-        return $this->getActiveUsers()->exists(fn(int $i,User $u) => $u->getRole() === USER::ROLE_SUPER_ADMIN);
+        return $this->getActiveUsers()->exists(fn(int $i,User $u) => $u->getRole() <= USER::ROLE_SUPER_ADMIN);
     }
 
     public function hasActiveAdmin(){
@@ -1468,6 +1518,27 @@ class Organization extends DbObject
     public function removeUpdate(ElementUpdate $update): self
     {
         $this->updates->removeElement($update);
+        return $this;
+    }
+
+    /**
+    * @return ArrayCollection|Subscription[]
+    */
+    public function getSubscriptions()
+    {
+        return $this->subscriptions;
+    }
+
+    public function addSubscription(Subscription $subscription): self
+    {
+        $this->subscriptions->add($subscription);
+        $subscription->setOrganization($this);
+        return $this;
+    }
+
+    public function removeSubscription(Subscription $subscription): self
+    {
+        $this->subscriptions->removeElement($subscription);
         return $this;
     }
 

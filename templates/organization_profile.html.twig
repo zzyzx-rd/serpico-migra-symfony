@@ -34,6 +34,8 @@
         var daurl = "{{ url('deleteAccount') }}";
         var csurl = "{{ url('manageSubscriptions') }}";
     </script>
+
+    <link rel="stylesheet" href="{{ asset('css/add_client_user_modal.css') }}">
     <style>
 
         .firm-option-logo{
@@ -120,7 +122,7 @@
             display:none;
         }
 
-        .user-fields > * {
+        .firm-fields > * {
             min-height:46px;
         }
 
@@ -197,6 +199,24 @@
             height: 120px;
         }
 
+        .full-width-row,  .full-width-row > *{
+            flex-wrap: nowrap;
+        }
+        .full-width-row .element-input{
+            width: -webkit-fill-available;
+        }
+
+        .location-elmts-zone{
+            width:100%;
+        }
+
+        .location-elmts-zone .col:first-of-type{
+            padding-left:0;
+        }
+        .location-elmts-zone .col:last-of-type{
+            padding-right:0;
+        }
+
         @media screen and (max-width: 660px) {
 
             .modify-credentials-btn span, .add-account-btn span, .page-title, .account-prefix, .user-master-name{
@@ -216,7 +236,7 @@
                 text-align: center;
             }
 
-            .user-fields{
+            .firm-fields{
                 margin-top:2rem;
             }
 
@@ -265,8 +285,8 @@
                 <div class="">
 
 
+                    {{ form_start(form) }}
                     <section class="organization-credentials">
-                        {{ form_start(form) }}
                         <div class="flex-center-sb">
                             <h5>{{'firm_settings.profile.identity_logo.title'|trans}}</h5>
                             <div class="flex-center">
@@ -285,13 +305,12 @@
                                 <a class="btn-floating add-photo-btn clickable-image"><i class="fa fa-camera"></i></a>
                             </div>
                 
-                            <div class="col s12 m9 c-flex user-fields" style="flex-grow: 1;">
+                            <div class="col s12 m9 c-flex firm-fields" style="flex-grow: 1;">
                             
                                 <div class="flex-center">
                                     <span class="field-name">{{'firm_settings.profile.identity_logo.commname'|trans|capitalize}}</span>
                                     <span class="element-data bold-1">{{ organization.commname }}</span>
                                     <div class="element-input input-field no-margin">
-                                            {{ form_label(form.commname) }}
                                             {{ form_widget(form.commname, {attr:{style: "margin:0"}}) }}
                                     </div>
                                 </div>
@@ -299,18 +318,7 @@
                                     <span class="field-name">{{'firm_settings.profile.identity_logo.legalname'|trans|capitalize}}</span>
                                     <span class="element-data bold-1">{{ not organization.legalname|default ? ('(' ~ 'not_provided'|trans ~ ')') : organization.legalname }}</span>
                                     <div class="element-input input-field no-margin">
-                                            {{ form_label(form.legalname) }}
-                                            {{ form_widget(form.legalname, {attr:{style: "margin:0"}}) }}
-                                        
-                                    </div>
-                                </div>
-
-                                
-                                <div class="flex-center">
-                                    <span class="field-name">{{'account_management.your_plan'|trans|capitalize}}</span>
-                                    <span class="element-data bold-1">{{ organization.plan == 3 ? 'subscription.free'|trans : 'subscription.premium'|trans }}</span>
-                                    <div class="element-input user-email">
-                                        {{ form_row(form.plan) }}
+                                        {{ form_widget(form.legalname, {attr:{style: "margin:0"}}) }}       
                                     </div>
                                 </div>
 
@@ -328,14 +336,97 @@
                             </div>
 
                         </div>
-                        {{ form_rest(form) }}
-                        {{ form_end(form) }}
+                      
                     </section>
-                    
+
+                    <section class="organization-billing-info">
+
+                        <h5>{{'firm_settings.profile.billing.title'|trans}}</h5>
+
+                        <div class="col s12 m9 c-flex firm-fields" style="flex-grow: 1;">
+                            
+                                <div class="row no-margin location-elmts-zone">
+                                    <div class="col s12 m10">   
+                                        <span class="element-data sm-right">{{'firm_settings.profile.billing.address'|trans|capitalize}}</span>
+                                        <span class="element-data bold-1">{{ not organization.billingAddress|default ? ('(' ~ 'not_provided'|trans ~ ')') : organization.billingAddress }}</span>
+                                        <div class="element-input input-field no-margin">
+                                                {{ form_label(form.location) }}
+                                                {{ form_widget(form.location, {attr:{style: "margin:0"}}) }}
+                                        </div>
+                                    </div>
+                                    <div class="col s12 m2">
+                                        {#<span class="element-data sm-right">{{'firm_settings.profile.billing.zip_code'|trans|capitalize}}</span>#}
+                                        <span class="element-data bold-1">{{ organization.billingAddress|default ? organization.workerFirm.ZIPCode.code : '' }}</span>
+                                        <div class="element-input input-field no-margin">
+                                            <label for="zipcode">{{'firm_settings.profile.billing.zip_code'|trans|capitalize}}</label>
+                                            <input type="text" class="no-margin" name="zipcode" id="zipcode">
+                                            {{ form_widget(form.ZIPCode, {attr:{style: "margin:0"}}) }}
+                                        </div>
+                                    </div>
+
+
+                                </div>
+
+                                <div class="row no-margin location-elmts-zone">
+                                    <div class="col s12 m5">
+                                        <span class="element-data sm-right">{{'firm_settings.profile.billing.city'|trans|capitalize}}</span>
+                                        <span class="element-data bold-1">{{ not organization.workerFirm.city|default ? ('(' ~ 'not_provided'|trans ~ ')') : organization.workerFirm.city.name }}</span>
+                                        <div class="element-input input-field no-margin location-element-field-zone">
+                                            <label for="cityname">{{'firm_settings.profile.billing.city'|trans|capitalize}}</label>
+                                            <input type="text" class="no-margin" name="cityname" id="cityname">
+                                            <select name="citySelector" style="display:none;"></select>
+                                            {{ form_widget(form.city, {attr:{style: "margin:0"}}) }}
+                                        </div>
+                                    </div>
+                                    <div class="col s12 m4">
+                                        <span class="element-data sm-right">{{'firm_settings.profile.billing.state'|trans|capitalize}}</span>
+                                        <span class="element-data bold-1">{{ not organization.workerFirm.state|default ? ('(' ~ 'not_provided'|trans ~ ')') : organization.workerFirm.state.name }}</span>
+                                       <div class="element-input input-field no-margin location-element-field-zone">
+                                            <label for="statename">{{'firm_settings.profile.billing.state'|trans|capitalize}}</label>
+                                            <input id="statename" type="text" class="no-margin" name="statename">
+                                            <select name="stateSelector" style="display:none;"></select>
+                                            {{ form_widget(form.state, {attr:{style: "margin:0"}}) }}
+                                        </div>
+                                    </div>
+                                    <div class="col s12 m3">
+                                        <span class="element-data sm-right">{{'firm_settings.profile.billing.country'|trans|capitalize}}</span>
+                                        <span class="element-data bold-1">{{ not organization.workerFirm.country|default ? ('(' ~ 'not_provided'|trans ~ ')') : organization.workerFirm.country.name }}</span>
+                                        <div class="element-input input-field no-margin location-element-field-zone">
+                                            <label for="countryname">{{'firm_settings.profile.billing.country'|trans|capitalize}}</label>
+                                            <input type="text" class="no-margin" name="countryname">
+                                            <select name="countrySelector" style="display:none;"></select>
+                                            {{ form_widget(form.country, {attr:{style: "margin:0"}}) }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                
+                                
+                                
+
+                                <div class="flex-center full-width-row">
+                                    <span class="field-name">{{'firm_settings.profile.billing.name'|trans|capitalize}}</span>
+                                    <span class="element-data bold-1">{{ not organization.contactName|default ? organization.superAdmin.fullname : organization.contactName }}</span>
+                                    <div class="element-input input-field no-margin">
+                                            {{ form_label(form.contactName) }}
+                                            {{ form_widget(form.contactName, {attr:{style: "margin:0"}}) }}
+                                    </div>
+                                </div>
+                                 <div class="flex-center">
+                                    <span class="field-name">{{'firm_settings.profile.billing.phoneNumber'|trans|capitalize}}</span>
+                                    <span class="element-data bold-1">{{ not organization.contactPhoneNumber|default ? ('(' ~ 'not_provided'|trans ~ ')') : organization.billingPhone }}</span>
+                                    <div class="element-input input-field no-margin">
+                                            {{ form_label(form.contactPhoneNumber) }}
+                                            {{ form_widget(form.contactPhoneNumber, {attr:{style: "margin:0"}}) }}
+                                    </div>
+                                </div>
+                            
+                            </div>
+                    </section>
                     <section>
 
                         <h5>{{'firm_settings.profile.general_info.title'|trans}}</h5>
-                        <div class="user-fields">
+                        <div class="firm-fields">
                         
                             <div class="flex-center-sb">
                                 <span>{{ 'firm_settings.profile.general_info.member_since'|trans }}</span>
@@ -348,6 +439,10 @@
                         </div>
                         
                     </section>
+
+                    {{ form_rest(form) }}
+                    {{ form_end(form) }}
+                    
                     
 
 

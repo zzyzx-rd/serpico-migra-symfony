@@ -43,7 +43,6 @@ use App\Entity\WorkerIndividual;
 use App\Entity\Country;
 use App\Entity\State;
 use App\Entity\City;
-use Stripe;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormError;
@@ -71,6 +70,7 @@ use App\Entity\GeneratedError;
 use App\Entity\InstitutionProcess;
 use App\Entity\Mail;
 use App\Entity\Stage;
+use App\Entity\Subscription;
 use App\Entity\UserGlobal;
 use App\Entity\UserMaster;
 use App\Form\Type\EventDocumentType;
@@ -79,9 +79,15 @@ use App\Repository\EventTypeRepository;
 use App\Service\NotificationManager;
 use DateTime;
 use Proxies\__CG__\App\Entity\Icon;
+use ProxyManager\Factory\RemoteObject\Adapter\JsonRpc;
 use Symfony\Component\Form\FormFactory;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Stripe\Customer;
+use Stripe\Stripe;
+use Stripe\StripeClient;
+use Stripe\Subscription as StripeSubscription;
+use Stripe\SubscriptionItem as StripeSubscriptionItem;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\Constraints\NotBlank;
@@ -192,22 +198,42 @@ class SettingsController extends MasterController
         $organization = $this->org;
         $em = $this->em;
 
-        $cId = $organization->getCustomerId();
+        $cId = $organization->getStripeCusId();
         
         if($cId == null){
             $mail = $this->user->getEmail();
-            $customer = Stripe\Customer::create([
+            $customer = \Stripe\Customer::create([
                 'email' => $mail
             ]);
             $cId = $customer->id;
-            $organization->setCustomerId($cId);
+            $organization->setStripeCusId($cId);
             $em->persist($organization);
             $em->flush();
         }
 
+        /*
+        $configuration = \Stripe\BillingPortal\Configuration::create([
+            'business_profile' => [
+                'privacy_policy_url' => 'https://example.com/privacy',
+                'terms_of_service_url' => 'https://example.com/privacy'
+            ],
+            
+            //'default_return_url' => $this->generateUrl('firmSettings'),
+            'features' => [
+                'subscription_update' => [
+                    'default_allowed_updates' => [
+                        'quantity'
+                    ],
+                    'enabled' 
+                ]
+            ],
+        ]);
+        */
+
         $session = \Stripe\BillingPortal\Session::create([
             'customer' => $cId,
-          ]);
+            //'configuration' => $configuration->id
+        ]);
           
         return new JsonResponse(['cpurl' => $session->url],200);
         
@@ -232,12 +258,12 @@ class SettingsController extends MasterController
         $pricePrenium = [7,10,14];
         $org = $this->org;
         
-        /*if(!$org->getCustomerId()){
+        /*if(!$org->getStripeCusId()){
             $mail = $org->getMasterUser() ? $org->getMasterUser()->getEmail() : "";
             $cust = Stripe\Customer::create([
                 'email' => $mail,
             ]);
-            $org->setCustomerId($cust->id);
+            $org->setStripeCusId($cust->id);
         }*/
 
         $payaccess  = false;
@@ -246,15 +272,15 @@ class SettingsController extends MasterController
             return $this->redirectToRoute('login');
         }
 
-        if($this->org->getPaymentUser() == $this->user || $this->org->getPaymentUser()== null){
+        if($this->org->getSubscriptor() == $this->user || $this->org->getSubscriptor()== null){
             $payaccess  = true;
         }
 
 
         $organization = $this->org;
-        if($this->org->getCustomerId() != null) {
+        if($this->org->getStripeCusId() != null) {
             $customer = $this->stripe->customers->retrieve(
-                $this->org->getCustomerId()
+                $this->org->getStripeCusId()
             );
             $users = $this->org->getUsers();
 
@@ -267,7 +293,7 @@ class SettingsController extends MasterController
                 $sub = $this->stripe->subscriptions->retrieve(
                     $customer->metadata->sub_id,
                     );
-                $invoice = $this->stripe->invoices->all(['customer' => $this->org->getCustomerId()])->data[0];
+                $invoice = $this->stripe->invoices->all(['customer' => $this->org->getStripeCusId()])->data[0];
                 $invoice = $this->stripe->invoices->sendInvoice($invoice->id,
                     []
                 );
@@ -428,7 +454,7 @@ class SettingsController extends MasterController
         $stripe = $this->stripe;
 
         $priceId = $body['priceId'];
-        $customer = $this->org->getCustomerId();
+        $customer = $this->org->getStripeCusId();
 
         $payment_method = Stripe\PaymentMethod::create([
             'type' => 'card',
@@ -444,15 +470,8 @@ class SettingsController extends MasterController
             'customer' => $customer,
         ]);
 
-
-
-
-
-
-
-
         // Set the default payment method on the customer
-        try { Stripe\Customer::update($body['customerId'], [
+        try { Stripe\Customer::update($body['stripeCusId'], [
             'invoice_settings' => [
                 'default_payment_method' => $payment_method->id
             ]
@@ -494,7 +513,7 @@ class SettingsController extends MasterController
                 'quantity' => $body['quantity']]]
         );
 
-        $org->setCustomerId($customer);
+        $org->setStripeCusId($customer);
 
         $em->flush();
 
@@ -503,40 +522,102 @@ class SettingsController extends MasterController
         return new JsonResponse($p, 200);
     }
 
-    public function createDefaultSubscription(Request $request, Organization $organization, string $email){
-        // Create Stripe Customer id and default plan
+    /**
+     * @param Request $request
+     * @param Application $usrId
+     * @return mixed
+     * @Route("settings/user/{usrId}/add-default-subscriptor", name="addDefaultSubscriptor")
+     * @throws Stripe\Exception\ApiErrorException
+     */
+    public function addDefaultSubscriptor(Request $request, int $usrId){
+        
+        // We create a 21-day premium monthly subscription for user account
         $em = $this->em;
-        $pId = strpos("dealdrive.app",$_SERVER["HTTP_HOST"]) === false ? 'price_1HvOxOLU0XoF52vKPrzatN2O' : $pId = '';
+        /** @var User */ 
+        $user = $em->getRepository(User::class)->find($usrId);
+        $organization = $user->getOrganization();
+        $pMonthlyId = strpos("dealdrive.app", $_SERVER["HTTP_HOST"]) === false ? 'price_1INPSqLU0XoF52vKRN5T8i9Y' : 'price_1HoAmcLU0XoF52vKHDggsDpq';
+        $pAnnualId = strpos("dealdrive.app", $_SERVER["HTTP_HOST"]) === false ? 'price_1IQWyuLU0XoF52vKrLx8Q5Pa' : 'price_1HoAmcLU0XoF52vKHDggsDpq';
         $stripe = $this->stripe;
 
-        // 1 - Create customer ID
-        $customer = Stripe\Customer::create([
-            'email' => $email
-        ]);
+        // 1 - Create customer ID in case organization hasn't
+        if(!$organization->getStripeCusId()){
+            $customer = Customer::create([
+                'email' => $user->getEmail()
+            ]);
+    
+            $cId = $customer->id;
+            $organization->setStripeCusId($cId);
+            $em->persist($organization);
+        } else {
+            $customer = Customer::retrieve($organization->getStripeCusId());
+        }
 
-        $cId = $customer->id;
-        $organization->setCustomerId($cId);
-        //$em->persist($organization);
-
-        // 2 - Create payment method and attach it to customer
-
-        // 3 - Create createSubscription
-        $subscription = $stripe->subscriptions->create([
-            'customer' => $cId,
-            'items' => [
-                ['price' => $pId],
-            ],
-            'trial_period_days' => 21,
-        ]);
+        /** @var Subscription */
+        $activeSubscription = $organization->getSubscriptions()->filter(fn(Subscription $s) => $s->getStatus() == Subscription::STATUS_ACTIVE)->first();
         
+        if($activeSubscription){
 
-        \Stripe\Subscription::update($subscription->id, [
-            'trial_end' => 'now',
-        ]);
+            $stripeSubscription = StripeSubscription::retrieve($activeSubscription->getStripeId());
+            
+            StripeSubscriptionItem::update($stripeSubscription->items->data[0]->id,
+                [   
+                    'quantity' => (int)$stripeSubscription->items->data[0]->quantity + 1,
+                    'tax_rates' => ['txr_1HvOrOLU0XoF52vKiirAF45T']
+                ]
 
-        return new JsonResponse();
-        
+            );
+
+        } else {
+
+            $stripeSubscription = $stripe->subscriptions->create([
+                'customer' => $cId,
+                'items' => [
+                    [   'price' => $pMonthlyId,
+                        'tax_rates' => ['txr_1HvOrOLU0XoF52vKiirAF45T']
+                    ],
+                ],
+                'trial_period_days' => 21,
+            ]);
+
+            $activeSubscription = new Subscription();
+            $activeSubscription
+                ->setPeriod(Subscription::PERIOD_MONTH)
+                ->setStripeId($stripeSubscription->id)
+                ->setInitiator($this->user);
+
+            $organization->addSubscription($activeSubscription);
+        }
+
+        $user->setSubscription($activeSubscription);
+        $em->persist($organization);
+        $em->persist($user);
+        return new JsonResponse();     
     }
+
+    /**
+     * @param Request $request
+     * @param Application $usrId
+     * @return JsonResponse
+     * @Route("settings/user/{usrId}/remove-default-subscriptor", name="removeDefaultSubscriptor")
+     * @throws Stripe\Exception\ApiErrorException
+     */
+    public function removeDefaultSubscriptor(Request $request, int $usrId){
+        $em = $this->em;
+        /** @var User */ 
+        $user = $em->getRepository(User::class)->find($usrId);
+        $organization = $user->getOrganization();
+        $userSubscription = $user->getSubscription();
+        $stripeSubscription =  StripeSubscription::retrieve($userSubscription->getStripeId());
+        StripeSubscriptionItem::update($stripeSubscription->items->data[0]->id,
+            ['quantity' => (int)$stripeSubscription->items->data[0]->quantity - 1]
+        );
+
+        $user->setSubscription(null);
+        $em->persist($user);
+        return new JsonResponse();     
+    }
+    
 
     /**
      * @param Request $request
@@ -549,19 +630,22 @@ class SettingsController extends MasterController
 
         $em = $this->em;
         $repoO = $em->getRepository(OrganizationPaymentMethod::class);
-        $paymentList = $this->org->getPaymentMethods();
+        $paymentMethods = $this->org->getPaymentMethods();
         $currentUser = $this->user;
         
+        // For the MVP, only one product with 2 prices - monthly or annual
+
         if(strpos("dealdrive.app",$_SERVER["HTTP_HOST"]) === false){
             $prices = [
                 'p' => [
-                    'm' => 'price_1HvOxOLU0XoF52vKPrzatN2O',
-                    'y' => 'price_1HvWV7LU0XoF52vKgOwLtq8B'
+                    'm' => 'price_1INPSqLU0XoF52vKRN5T8i9Y',
+                    'y' => 'price_1INPSqLU0XoF52vKJ29uboYA'
                 ],
+                /*
                 'e' => [
                     'm' => 'price_1HvWTLLU0XoF52vK6PRFqDgT',
                     'y' => 'price_1HvWSeLU0XoF52vKnewnk43W'
-                ]
+                ]*/
             ];
         } else {
             $prices = [
@@ -569,26 +653,30 @@ class SettingsController extends MasterController
                     'm' => 'price_1HoAmcLU0XoF52vKHDggsDpq',
                     'y' => 'price_1HoAnRLU0XoF52vKlyRASsYA'
                 ],
+                /*
                 'e' => [
                     'm' => 'price_1HoAdRLU0XoF52vKtxHCoxRw',
                     'y' => 'price_1HvVyiLU0XoF52vKbCuG7Xd5'
                 ]
+                */
             ];
         }
 
         $stripe = $this->stripe;
-        $body = json_decode(file_get_contents('php://input'), true);
-        $plan = $body['pl'];
-        $period = $body['p'];
-        $quantity =  (int) $body['q'];
-        $product = $body['product'] == "p" ? 'prod_IPHWR3lzuAWWsL' : 'prod_IPHWDsnMYL3UFB'; 
-        $paymentm = ($body['pmId'] == " ") ? $paymentList[(int)$body['pmId']]->getPmid() : $body['pmId'];
+        $data = json_decode(file_get_contents('php://input'), true);
+        $plan = $data['plan'];
+        $period = $data['period'];
+        $quantity = $data['quantity'];
+        //$product = $body['product'] == "p" ? 'prod_IPHWR3lzuAWWsL' : 'prod_IPHWDsnMYL3UFB'; 
+        $product = 'prod_IzOFdp7CAUlmp1';
+        $paymentMethodId = $data['pmId'];
         
-        if($this->org->getPaymentUser() == null){
-            $this->org->setPaymentUser($this->user);
+        if($this->org->getSubscriptor() == null){
+            $this->org->setSubscriptor($this->user);
         }
 
-        $cId = $this->org->getCustomerId();
+        // We retrieve, otherwise create a Customer account
+        $cId = $this->org->getStripeCusId();
         
         if($cId == null){
             $mail = ($this->org->getUserMasters() == null) ? "" : $this->org->getUserMasters()->first()->getUser()->getEmail();
@@ -596,58 +684,71 @@ class SettingsController extends MasterController
                 'email' => $mail
             ]);
             $cId = $customer->id;
-            $this->org->setCustomerId($cId);
+            $this->org->setStripeCusId($cId);
         } else {
             $customer = Stripe\Customer::retrieve($cId);
         }
 
         $priceId = $prices[$plan][$period];
-        $payment_method = $this->stripe->paymentMethods->retrieve($paymentm);
+
+        $payment_method = $this->stripe->paymentMethods->retrieve($paymentMethodId);
         $payment_method->attach(['customer' => $cId]);
 
         // Set the default payment method on the customer
         $pm = $customer->metadata->payment_method;
-        $found = false;
-        for($p = 1; $p < sizeof($paymentList); $p++) {
-            if($paymentList[$p]->getPmId() == $paymentm){
-                $found = true;
-                break;
-            }
-        }
-        if(!$found){
+
+        if(!$paymentMethods->exists(fn(int $i, OrganizationPaymentMethod $pm) => $pm->getPmId() == $paymentMethodId)) {
             $payment_object = new OrganizationPaymentMethod();
-            $payment_object->setPmId($paymentm);
+            $payment_object->setPmId($paymentMethodId);
             $this->org->addPaymentMethods($payment_object);
         }
         
         $stripe->customers->update($cId, 
             ['invoice_settings' => 
-                ['default_payment_method' => $paymentm],
+                ['default_payment_method' => $paymentMethodId],
             ]
         );
 
+
+       
+            
         $subscription = $this->stripe->subscriptions->create([
             'customer' => $customer,
-            "collection_method" => "send_invoice",
+            "collection_method" => "charge_automatically",
             'items' => [
-                ['price' => $priceId],
+                [
+                    'price' => $priceId,
+                    'quantity' => $quantity,
+                    'tax_rates' => ['txr_1HvOrOLU0XoF52vKiirAF45T']
+                ],
             ],
-            "days_until_due" => 1,
+            //"days_until_due" => 1,
             'expand' => ['latest_invoice.payment_intent'],
         ]);
 
+        $org = $this->org;
+
+        $plan == "p" ? $org->setPlan(Organization::PLAN_PREMIUM) : $org->setPlan(Organization::PLAN_ENTERPRISE);
+
+   
+
+        /*
         $invoice = $this->stripe->invoices->all(['subscription' => $subscription->id])->data[0];
         $invoice = $this->stripe->invoices->sendInvoice($invoice->id,[]);
         $pdf = $invoice->invoice_pdf;
+        
 
         $p = $this->stripe->products->retrieve(
             $subscription->items->data['0']->price->product
         );
+        
 
         $p = $p->name;
-        $org = $this->org;
-        $p == "p" ? $org->setPlan(2) : $org->setPlan(1);
+        */
 
+
+
+        /*
         $stripe->customers->update($cId,
             ['metadata' => [
                 'sub_id' => $subscription->id,
@@ -656,20 +757,29 @@ class SettingsController extends MasterController
             ]
         );
 
+
         $sub = Stripe\Subscription::update(
             $subscription->id,
             ['metadata' => 
                 [   
-                    'pdf' => $pdf,
+                    //'pdf' => $pdf,
                     'quantity' => $quantity
                 ]
             ]
         );
+        */
 
-        $org->setCustomerId($customer);
-        $em->refresh($currentUser);
+        //$org->setStripeCusId($cid);
         $em->flush();
-        return new JsonResponse((string)$pdf, 200);
+        $em->refresh($currentUser);
+        $this->guardHandler->authenticateUserAndHandleSuccess(
+            $currentUser,
+            $request,
+            $this->authenticator,
+            'main' // firewall name in security.yaml
+        );
+
+        return new JsonResponse();
     }
 
     /**
@@ -681,7 +791,7 @@ class SettingsController extends MasterController
     public function cancelSubscriptionManagementAction(Request $request){
         $organization = $this->org;
         $currentUser = $this->user;
-        $custId = $organization->getCustomerId();
+        $custId = $organization->getStripeCusId();
         $cust = Stripe\Customer::retrieve(
             $custId
         );
@@ -724,7 +834,7 @@ class SettingsController extends MasterController
      */
     public function minUserSubscriptionAction(Request $request){
         $em = $this->em;
-        $custid = $this->org->getCustomerId();
+        $custid = $this->org->getStripeCusId();
         $cust = Stripe\Customer::retrieve(
             $custid
         );
@@ -740,7 +850,8 @@ class SettingsController extends MasterController
            ['unit_amount' => ($price->unit_amount - ($cust->metadata->priceInit*100)),
             'currency' => 'eur',
             'recurring' => ['interval' => $price->recurring->interval],
-            'product' =>  $price->product,]
+            'product' =>  $price->product,
+            ]
            );
 
        $sub = Stripe\Subscription::update(
@@ -771,7 +882,7 @@ class SettingsController extends MasterController
      */
     public function plusUserSubscriptionAction(Request $request){
         $em = $this->em;
-        $custid = $this->org->getCustomerId();
+        $custid = $this->org->getStripeCusId();
         $cust = Stripe\Customer::retrieve(
             $custid
         );
@@ -4129,6 +4240,52 @@ class SettingsController extends MasterController
         $notificationManager->registerUpdates($newAdmin, [$newAdmin], ElementUpdate::CREATION, 'role', User::ROLE_ADMIN);
         $em->flush();
         return new JsonResponse();
+    }
+
+    /**
+    * @param Request $request
+    * @Route("/settings/subscriptions/get", name="getSubscriptions")
+    */
+    public function getSubscriptions(Request $request){
+        $customer = Customer::retrieve(
+            $this->org->getStripeCusId(),
+            ['expand' => ['subscriptions']]
+        );
+        $subscriptions = $this->stripe->subscriptions->all(['customer' => $this->org->getStripeCusId()])->data;
+
+        foreach($subscriptions as $subscription){
+            $subscription['invoices'] = $this->stripe->invoices->all(['subscription' => $subscription->id])->data;
+        }
+
+        return new JsonResponse($subscriptions);
+
+    }
+    
+    /**
+    * @param Request $request
+    * @Route("/settings/users/unsubscribed-accounts/get", name="getUnsubscribedAccounts")
+    */
+    public function getUnsubscribedAccounts(Request $request){
+        $unsubscribedAccounts = $this->org->getActiveUsers()->  filter(fn(User $u) => !$u->getSubscriptionId())->map(fn(User $u) => ['id' => $u->getId(), 'name' => $u->getFullname(), 'pic' => $u->getPicturePath()])->getValues();
+        return new JsonResponse($unsubscribedAccounts);
+    }
+
+    /**
+    * @param Request $request
+    * @Route("/settings/subscriptions/oversubscribed/get", name="getOversubscribedSubscriptions")
+    */
+    public function getOversubscribedSubscriptions(Request $request){
+        $customer = Customer::retrieve(
+            $this->org->getStripeCusId(),
+            ['expand' => ['subscriptions']]
+        );
+        $subscriptions = new ArrayCollection($this->stripe->subscriptions->all(['customer' => $this->org->getStripeCusId()])->data);
+        $oversubscribedSubscriptions = $subscriptions->filter(fn(Subscription $s) => $s->quantity - $this->org->getActiveUsers()->filter(fn(User $u) => $u->getSubscriptionId() == $s->id)->count() > 0)->getValues();
+        foreach($oversubscribedSubscriptions as $os){
+            $outstandingSubscribleAccounts = $os->quantity - $this->org->getActiveUsers()->filter(fn(User $u) => $u->getSubscriptionId() == $os->id)->count();
+            $os['outstanding'] = $outstandingSubscribleAccounts;
+        }
+        return new JsonResponse($oversubscribedSubscriptions);
     }
 
 }

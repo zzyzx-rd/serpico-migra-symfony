@@ -54,7 +54,7 @@
           -
           <em>
             <span class="position-name">
-              {{ user ? user.position.name }}
+              {{ user ? user.position.name : 'create_client.unknown_position'|trans }}
             </span>
           </em>
         </span>
@@ -134,7 +134,7 @@
         
 
           {% if currentuser.role <= 2 %}
-            <a class="update-user-btn btn-flat no-margin" style="visibility:hidden">
+            <a class="update-user-btn btn-flat no-margin {{user and user.role == 1 ? "is-ma"}}" style="visibility:hidden">
               <i class="dd-orange-text mi create"></i>
             </a>
           

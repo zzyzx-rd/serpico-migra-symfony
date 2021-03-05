@@ -591,8 +591,9 @@
         line-height:10px;
       }
 
-      .participant-btn {
+      .participant-btn, .follower-btn {
         position: relative;
+        margin: 0 0.2rem;
       }
 
       .no-activity-msg {
@@ -697,18 +698,20 @@
         bottom: min(-50%,-60px);
       }
 
-      .participant-btn, .btn-participant-add{
+      .participant-btn, .follower-btn /*.btn-participant-add, .btn-follower-add*/{
         border-radius:100%;
         padding: 0 0.4rem;
         width: 36px;
         justify-content:center;
       }
 
-      .btn-participant-add{
+      /*.btn-participant-add, .btn-follower-add{
         display: inline-flex;
         align-items: center;
         height:1.8rem;
-      }
+        height:36px;
+        background-color: #FF9300!important;
+      }*/
 
       .btn-participant-add > i{
         font-size: 1rem;
@@ -1019,16 +1022,10 @@
       .doc-input-name, .s-name-input-name{
         height: inherit!important;
         margin: 0 0 0 10px!important;
-        min-width: 300px;
-      }
-    
-      .events{
-        padding-top: 30px;
       }
 
       .s-modify-dates, .s-name-update{
         display:inline-block;
-        min-width:20px;
       }
 
       .s-dates-row > .input-field{
@@ -1284,8 +1281,18 @@
         text-align:center;
       }
 
+      .s-modify-dates, .btn-s-update, .visibility-btn, .btn-participant-add, .btn-followers-add{
+        margin-left: auto;
+      }
 
+      .s-title-zone, .s-elmt-dates, .visibility-zone, .participants-title, .followers-title{
+        width:100%;
+        min-height: 30px;
+      }
 
+      .s-name-input-zone{
+        width:inherit;
+      }
 
 
 
@@ -1296,8 +1303,6 @@
 {% block javascripts %}
   <script src="{{ asset('js/moment.min.js') }}"></script>
   <script>
-
-    $('select:not(#timescaleSelector)').material_select();
 
     var noActOverlay = $(`
       <div class="no-activity-overlay">
@@ -1496,7 +1501,7 @@
                 if($btn.hasClass('final-step-btn')){
                   actIPInfoHmtl = /*html*/`<div class="ip-info">
                       <a class="btn-flat no-padding">
-                        <i class="material-icons">layers</i>
+                        <i class="mi layers"></i>
                         <span>${data.name}</span>
                       </a>
                       ${data.canEdit ? '<a class="btn-flat tooltipped" href="{{ url("manageActivityElement",{entity:"iprocess", elmtId: "~" }) }}" data-position="top" data-tooltip="{% trans %}processes.modify_prior_launching_act{% endtrans %}"><i class="fa fa-cog"></i></a>' : ''}
@@ -1571,7 +1576,7 @@
                         {% trans %}stages.stage.progress.title{% endtrans %} : <span class="stage-progress-status-name">${msg}</span>
                       </div>
                       <div class="btn-flat no-padding modal-trigger" href="#updateStageProgressStatus" data-progress="${stage.progress}" data-sid="${stage.id}" data-r="${stage.r}">
-                        <i class="material-icons">create</i>
+                        <i class="mi create"></i>
                       </div>
                     </div>`);
 
@@ -1596,14 +1601,14 @@
 
                     $datesElmt = $(`<div class="stage-dates">
                           <span class="stage-duration">
-                            <i class="material-icons">access_time</i>
+                            <i class="mi access_time"></i>
                             <span>{% trans %}process_stages.dates_definition.defined_duration.timespan{% endtrans %} :</span>
                             ${stage.ddates ? new Date(stage.startdate.date).toLocaleDateString('{% trans %}long_locale{% endtrans %}',dateOptions) + ' - ' + new Date(stage.enddate.date).toLocaleDateString('{% trans %}long_locale{% endtrans %}',dateOptions) : stage.dperiod + stage.dfreq }
                           </span>
                       </div>`)
 
                       //<span class="grading-duration">
-                      //  <i class="material-icons">send</i>
+                      //  <i class="mi send"></i>
                       //  <span>{% trans %}process_stages.dates_definition.defined_duration.feedback{% endtrans %} :</span>
                       //  ${stage.ddates ? new Date(stage.gstartdate.date).toLocaleDateString('{% trans %}long_locale{% endtrans %}',dateOptions) + ' - ' + new Date(stage.genddate.date).toLocaleDateString('{% trans %}long_locale{% endtrans %}',dateOptions) : stage.fperiod + stage.ffreq }
                       //</span>
@@ -1614,7 +1619,7 @@
                       $crtElmts = $(`<section class="output">
                       <div class="title">
                         <i class="fa fa-cubes green-text"></i>{% trans %}stages.output_type.title{% endtrans %} : {% trans %}activity_elements.criteria{% endtrans %}
-                        ${stage.oReadiness ? '<i class="material-icons green-text readiness">check_circle</i>' : '<i class="material-icons orange-text readiness tooltipped" data-position="top" data-tooltip="{% trans %}activity_elements.to_configure{% endtrans %}">error</i>'}
+                        ${stage.oReadiness ? '<i class="mi green-text readiness">check_circle</i>' : '<i class="mi orange-text readiness tooltipped error" data-position="top" data-tooltip="{% trans %}activity_elements.to_configure{% endtrans %}"></i>'}
                       </div>
                       </section>`);
                       $crtElmts.find('.tooltipped').tooltip();
@@ -1630,7 +1635,7 @@
                       $crtElmts = $(`<section class="output">
                       <div class="title">
                         <i class="fa fa-cubes green-text"></i>{% trans %}stages.output_type.title{% endtrans %} : {% trans %}activity_elements.survey{% endtrans %}
-                        ${stage.oReadiness ? '<i class="material-icons green-text readiness">check_circle</i>' : '<i class="material-icons orange-text readiness tooltipped" data-position="top" data-tooltip="{% trans %}activity_elements.to_configure{% endtrans %}">error</i>'}
+                        ${stage.oReadiness ? '<i class="mi green-text readiness check_circle"></i>' : '<i class="mi orange-text readiness tooltipped error" data-position="top" data-tooltip="{% trans %}activity_elements.to_configure{% endtrans %}"></i>'}
                       </div>
                       </section>`);
                       $crtElmts.find('.tooltipped').tooltip();
@@ -1646,7 +1651,7 @@
                     const $partElmts = $(`<section class="participants">
                       <div class="title">
                         <i class="fa fa-users blue-text"></i>{% trans %}activity_elements.participants{% endtrans %}
-                        ${stage.pReadiness ? '<i class="material-icons green-text readiness">check_circle</i>' : '<i class="material-icons orange-text readiness tooltipped" data-position="top" data-tooltip="{% trans %}activity_elements.to_configure{% endtrans %}">error</i>'}
+                        ${stage.pReadiness ? '<i class="mi green-text readiness">check_circle</i>' : '<i class="mi orange-text readiness tooltipped" data-position="top" data-tooltip="{% trans %}activity_elements.to_configure{% endtrans %}">error</i>'}
                       </div>
                     </section>`);
                     $partElmts.find('.tooltipped').tooltip();
@@ -1661,7 +1666,7 @@
                           ${team.img ? '<img src="'+team.img+'"' : '<span class="no-picture tooltipped" data-position="top" data-html="true" data-tooltip="'+tooltipMsg+'"><i class="fa fa-users"></i></span>'}
 
                           ${team.name} ${team.type == 0 ? '(T)' : (team.type == -1 ? '(P)' : '')}
-                          ${team.status == 3 ? '<i class="material-icons green-text readiness">check_circle</i>' : ''}
+                          ${team.status == 3 ? '<i class="mi green-text readiness check_circle"></i>' : ''}
                           </div>`);
                         $partElmt.find('.tooltipped').tooltip();
                         $partElmts.append($partElmt);
@@ -1671,7 +1676,7 @@
                           ${individual.img ? '<img src="'+individual.img+'"' : '<span class="no-picture">'+individual.fnfl.toUpperCase()+'</span>'}
 
                           ${individual.name} ${individual.type == 0 ? '(T)' : (individual.type == -1 ? '(P)' : '')}
-                          ${individual.status == 3 ? '<i class="material-icons green-text readiness">check_circle</i>' : ''}
+                          ${individual.status == 3 ? '<i class="mi green-text readiness check_circle"></i>' : ''}
                           </div>`);
                         $partElmts.append($partElmt);
                     });
@@ -1685,7 +1690,7 @@
                 } else {
                   $stgElmt = $(`
                     <div class="unset-process flex-center">
-                      <i class="material-icons">crop_free</i>
+                      <i class="mi crop_free"></i>
                       <span>{% trans %}processes.unset_process{% endtrans %}</span>
                     </div>
                   `);
@@ -1754,8 +1759,8 @@
       }
     });
   </script>
-    <script src="{{ asset('js/moment.min.js') }}"></script>
-    <script src="{{ asset('js/activity_manage.js') }}"></script>
+  <script src="{{ asset('js/moment.min.js') }}"></script>
+  <script src="{{ asset('js/activity_manage.js') }}"></script>
   <script src="{{ asset('js/dropify.min.js') }}"></script>
 {% endblock %}
 
@@ -1803,10 +1808,10 @@
             <a class="btn-flat no-padding flex-center">
               <div class="view-type-value flex-center">
                 {% if viewTypeCookie == 'd' %}
-                  <i class="material-icons">fiber_smart_record</i>
+                  <i class="mi fiber_smart_record"></i>
                   <span class="sm-left sm-right">{{ 'activities.status_view_type'|trans }}</span>
                 {% else %}
-                  <i class="material-icons">linear_scale</i>
+                  <i class="mi linear_scale"></i>
                   <span class="sm-left sm-right">{{ 'activities.timeframe_view_type'|trans }}</span>
                 {% endif %}
               </div>
@@ -1828,10 +1833,10 @@
                 <a class="btn-flat no-padding flex-center">
                   <div class="sorting-type-value flex-center">
                     {% if sortingTypeCookie == 'o' %}
-                      <i class="material-icons">rate_review</i>
+                      <i class="mi rate_review"></i>
                       <span class="sm-left sm-right">{{ 'activities.output_sorting_type'|trans }}</span>
                     {% else %}
-                      <i class="material-icons">event_available</i>
+                      <i class="mi event_available"></i>
                       <span class="sm-left sm-right">{{ 'activities.progress_sorting_type'|trans }}</span>
                     {% endif %}
                   </div>
@@ -1848,9 +1853,9 @@
               <li class="flex-center">
                 <a class="btn-flat no-padding flex-center">
                   <div class="dates-type-value flex-center">
-                      <i class="material-icons" {% if dateTypeCookie != 's' %}style="display:none"{% endif %}>settings_ethernet</i>
+                      <i class="mi settings_ethernet" {% if dateTypeCookie != 's' %}style="display:none"{% endif %}></i>
                       <span class="sm-left sm-right" {% if dateTypeCookie != 's' %}style="display:none"{% endif %}>{{ 'activities.self_date_type'|trans }}</span>
-                      <i class="material-icons" {% if dateTypeCookie == 's' %}style="display:none"{% endif %}>send</i>
+                      <i class="mi send" {% if dateTypeCookie == 's' %}style="display:none"{% endif %}></i>
                       <span class="sm-left sm-right" {% if dateTypeCookie == 's' %}style="display:none"{% endif %}>{{ 'activities.output_date_type'|trans }}</span>
                   </div>
                   <ul class="change-dates-type change-selector" data-type="{{dateTypeCookie}}">
@@ -1869,11 +1874,18 @@
         <ul class="flex-center-fe scale-settings">
           <li class="flex-center">
               <div class="view-type-value flex-center">
-                <i class="material-icons">fiber_smart_record</i>
+                <i class="mi fiber_smart_record"></i>
                 <span class="sm-left">{{ 'scale'|trans|upper ~ ' :'}}</span>
                 <div class="timescale-zone">
                   <a class="btn-flat no-padding timescale-change-btn flex-center">
-                    <span class="ts-value dd-text sm-left sm-right">{{timescaleCookie == 'y' ? 'year'|trans : (timescaleCookie == 't' ? 'trimester'|trans : 'week'|trans) }}</span>
+                    <span class="ts-value dd-text sm-left sm-right">
+                      {{timescaleCookie == 'y' ? 'year'|trans : (
+                          timescaleCookie == 't' ? 'trimester'|trans : (
+                            timescaleCookie == 'w' ? 'week'|trans : 'day'|trans
+                          )
+                        )  
+                      }}
+                    </span>
                     <ul class="change-timescale-type change-selector" data-type="{{ timescaleCookie }}">
                       <i class="fa fa-caret-up"></i>
                       <i class="fa fa-caret-down"></i>
@@ -1883,6 +1895,7 @@
                     <option value="y" {{timescaleCookie == 'y' ? 'selected'}}>{{'year'|trans|capitalize}}</option>
                     <option value="t" {{timescaleCookie == 't' ? 'selected'}}>{{'trimester'|trans|capitalize}}</option>
                     <option value="w" {{timescaleCookie == 'w' ? 'selected'}}>{{'week'|trans|capitalize}}</option>
+                    <option value="d" {{timescaleCookie == 'd' ? 'selected'}}>{{'day'|trans|capitalize}}</option>
                   </select>
                 </div>
               </div>
@@ -1978,7 +1991,7 @@
 
           <div class="act-name-zone">
             <div class="stage-item-button"></div>
-            <span class="act-name strong dd-text">{{selectedActGroup.get(5).name|upper}}</span>
+            <span class="act-name strong dd-text">{{selectedActGroup.get(1).name|upper}}</span>
           </div>
 
           <div class="btn-flat next-act-btn dd-text c-flex">
@@ -2057,13 +2070,13 @@
             
               {% if activity.progress < 2 %}
                 <li class="">
-                  <a class="btn-floating act-btn modal-trigger add-direct-evt" href="#updateEvent" data-aid="{{ activity.id }}" data-sid="{{ activity.stages|length == 1 ? activity.stages.first.id }}"><i class="material-icons">offline_bolt</i></a>
+                  <a class="btn-floating act-btn modal-trigger add-direct-evt" href="#updateEvent" data-aid="{{ activity.id }}" data-sid="{{ activity.stages|length == 1 ? activity.stages.first.id }}"><i class="mi offline_bolt"></i></a>
                 </li>
               {% endif %} 
 
               {% if activityM.userCanEdit(activity,currentuser) %}  
                 <li class="xm-top">
-                  <a class="btn-floating act-btn modal-trigger" href="#updateStageProgressStatus" data-eid="{{ activity.id }}" data-sid="{{ activity.stages.first.id }}" data-progress="{{ activity.progress }}" data-r="{{ activity.stages.first.reopened }}"><i class="material-icons">update</i></a>
+                  <a class="btn-floating act-btn modal-trigger" href="#updateStageProgressStatus" data-eid="{{ activity.id }}" data-sid="{{ activity.stages.first.id }}" data-progress="{{ activity.progress }}" data-r="{{ activity.stages.first.reopened }}"><i class="mi update"></i></a>
                 </li>
                 
                 <li class="xm-top">
@@ -2093,7 +2106,7 @@
               {#
               {% if activityM.userCanViewResults(activity,currentuser) %}
                 <li>
-                  <a class="btn-floating act-btn tooltipped" data-tooltip="{{ 'result'|trans }}" data-position="top" href="{{ path('activityResults', { actId: activity.id }) }}"><i class="material-icons">show_chart</i></a>
+                  <a class="btn-floating act-btn tooltipped" data-tooltip="{{ 'result'|trans }}" data-position="top" href="{{ path('activityResults', { actId: activity.id }) }}"><i class="mi show_chart"></i></a>
                 </li>
               {% endif %}
               #}
@@ -2116,7 +2129,7 @@
               <div class="row no-margin flex-center">
                 <div class="col s2 center">
                   <div class="flex-center process-detail">
-                    <i class="material-icons">layers</i>
+                    <i class="mi layers"></i>
                     <span class="m-left">{{ process_name }}</span>
                   </div>
                 </div>
@@ -2189,7 +2202,7 @@
               </div>
               <div class="col s2 center">
                 <div class="flex-center process-detail">
-                  <i class="material-icons">layers</i>
+                  <i class="mi layers"></i>
                   <span class="m-left">{{ 'activities.orphans'|trans }}</span>
                 </div>
               </div>
@@ -2213,18 +2226,18 @@
                           <div class="col m2 act-info">
                               <div class="fixed-action-btn modified-fixed-btn" style="visibility: hidden;">
                                   <a class="btn-floating">
-                                      <i class="material-icons">create</i>
+                                      <i class="mi create"></i>
                                   </a>
                   
                                   <ul class="flex-center act-action-buttons">
                                       <li>
-                                          <a class="btn-floating act-btn tooltipped modal-trigger" href="#updateEvent" data-tooltip="{{ 'activities.instant_add'|trans }}" data-position="top" data-aid="{{k}}" data-sid="{{ 10+k }}"><i class="material-icons">offline_bolt</i></a>
+                                          <a class="btn-floating act-btn tooltipped modal-trigger" href="#updateEvent" data-tooltip="{{ 'activities.instant_add'|trans }}" data-position="top" data-aid="{{k}}" data-sid="{{ 10+k }}"><i class="mi offline_bolt"></i></a>
                                       </li>
                                       <li>
-                                          <a class="btn-floating act-btn tooltipped modal-trigger" href="#updateStageProgressStatus" data-position="top" data-html="true" data-tooltip="{{ 'activities.update_status'|trans}}" data-eid="{{ k }}"><i class="material-icons">update</i></a>
+                                          <a class="btn-floating act-btn tooltipped modal-trigger" href="#updateStageProgressStatus" data-position="top" data-html="true" data-tooltip="{{ 'activities.update_status'|trans}}" data-eid="{{ k }}"><i class="mi update"></i></a>
                                       </li>
                                       <li>
-                                          <a class="btn-floating act-btn tooltipped" href="#" data-position="top" data-html="true" data-tooltip="{{ 'activities.modify'|trans}}"><i class="material-icons">settings</i></a>
+                                          <a class="btn-floating act-btn tooltipped" href="#" data-position="top" data-html="true" data-tooltip="{{ 'activities.modify'|trans}}"><i class="mi settings"></i></a>
                                       </li>                           
                                       <li>
                                           <a class="btn-floating act-btn tooltipped" data-tooltip="{{ 'activities.provide_my_feedbacks'|trans }}" data-position="top" href="#"><i class="fa fa-pen-alt"></i></a>
@@ -2267,18 +2280,18 @@
 
     {% if organization and currentuser.role != 3 %}
       <div id="fixedButton create-act-btn" class="fixed-action-btn">
-          <a class="btn-floating btn-large modal-trigger" href="#createStage" onclick="onAddProcessClick('{{ currentuser.organization.id }}')" data-oid="{{currentuser.organization.id}}"><i class="material-icons">add</i></a>
+          <a class="btn-floating btn-large modal-trigger" href="#createStage" onclick="onAddProcessClick('{{ currentuser.organization.id }}')" data-oid="{{currentuser.organization.id}}"><i class="mi add"></i></a>
           {#
           <ul>
               <li><a class="btn-floating orange lighten-2 tooltipped modal-trigger" data-position="left" data-delay="50" data-tooltip="{% trans %}tooltip.template.create_from_scratch{% endtrans %}" href="{{ path('activityInitialisation',{'elmt' : 'template'}) }}">
                   <div style="position: relative;display:inline-block">
                       <i class="fa fa-file"></i>
-                      <i class="material-icons template-pencil" style="position: absolute; top:5%; left:14%;color:orange">create</i>
+                      <i class="mi template-pencil" style="position: absolute; top:5%; left:14%;color:orange">create</i>
                   </div>
                   </a>
               </li>
-              <li><a class="btn-floating tooltipped {% if currentuser.organization.templateActivities|length == 0 %}grey{% else %} cyan darken-2 modal-trigger" href="#selectTemplate{% endif %}" data-position="left" data-delay="50" data-tooltip="{% trans %}tooltip.activity.create_from_template{% endtrans %}"><i class="material-icons">view_headline</i></a></li>
-              <li><a class="btn-floating teal accent-4 tooltipped" data-position="left" data-delay="50" data-tooltip="{% trans %}tooltip.activity.create_from_scratch{% endtrans %}" href="#createStage" onclick="onAddProcessClick('{{ currentuser.orgId }}')" data-oid="{{currentuser.orgId}}"><i class="material-icons">create</i></a></li>
+              <li><a class="btn-floating tooltipped {% if currentuser.organization.templateActivities|length == 0 %}grey{% else %} cyan darken-2 modal-trigger" href="#selectTemplate{% endif %}" data-position="left" data-delay="50" data-tooltip="{% trans %}tooltip.activity.create_from_template{% endtrans %}"><i class="mi view_headline"></i></a></li>
+              <li><a class="btn-floating teal accent-4 tooltipped" data-position="left" data-delay="50" data-tooltip="{% trans %}tooltip.activity.create_from_scratch{% endtrans %}" href="#createStage" onclick="onAddProcessClick('{{ currentuser.orgId }}')" data-oid="{{currentuser.orgId}}"><i class="mi create"></i></a></li>
           </ul>
           #}
       </div>
@@ -2293,22 +2306,21 @@
       <div id="createStage" class="modal">
         {{ form_start(newActivityForm) }}
           <div class="modal-content">
-            <div class="flex-center-sb modal-title">
-              <div class="s-title-zone flex-center">
+            <div class="c-flex-fs modal-title">
+              <div class="s-title-zone flex-center-sb">
                 <h5 class="s-name" data-create="{{'activities.create.modal_title'|trans}}">{{'activities.create.modal_title'|trans}}</h5>
-                <span class="s-name-update btn-s-update" style="display:none"><i class="m-left fa fa-pen dd-orange-text"></i></span>
               </div>
               {% if is_granted('ROLE_ENTREPRISE') %}
                 <div class="flex-center ip-zone">
                   <span class="sm-right sm-left">{{'activities.create.linked_to'|trans}}</span>
                   <div class="ip-value flex-center">
-                    <i class="material-icons">layers</i>
+                    <i class="mi layers"></i>
                     <span class="sm-right sm-left">{{'activities.create.no_ip'|trans}}</span>
                   </div>
-                  <i class="material-icons">create</i>
+                  <i class="mi create"></i>
                 </div>
               {% endif %}
-              <div class="s-elmt-dates"></div>
+              <div class="s-elmt-dates flex-center-sb"></div>
             </div>
             
             <div class="s-name-input input-field">
@@ -2326,28 +2338,62 @@
                   {{ form_widget(newActivityForm.enddate) }}
                 </div>
             </div>
-            <div class="participants">
-                <div class="participants-title">
-                  <i class="fa fa-users m-right"></i>
-                  <span>{{'activities.participants'|trans}}</span><span class="nb-participants sm-left"></span>
-                
-                </div>
 
-                <ul class="participants-list flex-center" data-prototype="{% apply escape %}{% include "components/participant_list__item.html.twig" with { participant: newActivityForm.participants.vars.prototype } %}{% endapply %}">
-                  {% for participant in newActivityForm.participants.vars.data %}
-                      {{ participant.user }}
-                  {% endfor %}  
-                    <li class="sm-left btn btn-s-update btn-participant-add flex-center tooltipped" data-tooltip="{{'activities.create.add_participant'|trans}}" data-position="top">
-                      <i class="fa fa-plus"></i>
-                    </li>
-                </ul>
+            <div class="flex-center-fs">
+              <div class="visibility-zone flex-center">
+                <div class="flex-center">
+                  <i class="fa fa-question-circle visibility-info dd-text tooltipped sm-right" data-html="true" data-tooltip="{% apply escape %}{{'activity_elements.visibility.info'|trans|raw }}{% endapply %}"></i>
+                  <span class="bold-1 visibility-title">{{'visibility'|trans ~ ' :'}}</span>
+                </div>
+                <span class="sm-left black-text s-visibility" data-default="{{ 'activity_elements.visibility.unlisted'|trans}}"></span>
+                <div class="input-field no-margin" style="display:none;">
+                </div>
+                {{ form_widget(newActivityForm.visibility) }}
+                {{ form_widget(newActivityForm.accessLink) }}
+                {{ form_widget(newActivityForm.followableStatus) }}
+                {{ form_widget(newActivityForm.joinableStatus) }}
+              </div> 
+            </div>
+
+            <div class="pf-zone">
+              <div class="participants">
+                  <div class="participants-title flex-center-sb">
+                    <div>
+                      <i class="fa fa-users m-right"></i>
+                      <span class="bold-1">{{'activities.participants'|trans}}</span><span class="nb-participants sm-left"></span>
+                    </div>
+                    <a class="btn-s-update-v btn-participant-add flex-center" data-position="top">
+                        <i class="fa fa-plus dd-orange-text strong"></i>
+                    </a>
+
+                  </div>
+
+                  <ul class="participants-list flex-center" data-prototype="{% apply escape %}{% include "components/participant_list__item.html.twig" with { participant: newActivityForm.participants.vars.prototype } %}{% endapply %}">
+                    {% for participant in newActivityForm.participants.vars.data %}
+                        {{ participant.user }}
+                    {% endfor %}  
+                  </ul>
+              </div>
+              <div class="followers">
+                  <div class="followers-title flex-center-sb">
+                    <div>
+                      <i class="fa fa-users m-right dd-orange-text"></i>
+                      <span class="bold-1 dd-orange-text">{{ 'activities.followers'|trans }}</span>
+                      <span class="nb-followers dd-orange-text bold-1">(0)</span>
+                    </div> 
+                    <a class="btn-s-update-v btn-follower-add flex-center modal-trigger" href="#addUserClient" data-tooltip="{{'activities.create.add_follower'|trans}}" data-position="top">
+                      <i class="fa fa-plus dd-orange-text strong"></i>
+                    </a>     
+                  </div>
+                  <ul class="followers-list flex-center-fe no-margin" data-prototype="{% apply escape %}{% include "components/follower_list__item.html.twig" with {follower: newActivityForm.userMasters.vars.prototype} %}{% endapply %}"></ul>
+              </div>
             </div>
 
             <div class="events" style="display:none">
                 <div class="events-title flex-center-sb">
                   <div class="flex-center">
-                    <i class="material-icons m-right">offline_bolt</i>
-                    <span>{{'activities.events'|trans}}</span><span class="nb-events sm-left"></span>
+                    <i class="mi offline_bolt m-right"></i>
+                    <span class="bold-1">{{'activities.events'|trans}}</span><span class="nb-events sm-left"></span>
                   </div>
                   <div>
                     <i class="btn-s-update fa fa-plus dd-orange-text tooltipped btn-add-event" data-tooltip="{{ 'activity_elements.events.add_event.btn_msg'|trans }}"></i>
@@ -2439,7 +2485,7 @@
                     <select name="firmSelector" style="display:none;"></select>
                     {#<div class="flex-center validation-buttons">
                       <div class="btn firm-validate">
-                        <i class="material-icons">check</i>
+                        <i class="mi check"></i>
                       </div>
                     </div>
                     #}
@@ -2777,7 +2823,7 @@
                   </div>
                   <div class="col m1 s12">
                     <div class="btn e-dates-validate btn-reduced-padding">
-                      <i class="material-icons">check</i>
+                      <i class="mi check"></i>
                     </div>
                   </div>
                 </div>

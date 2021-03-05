@@ -66,9 +66,9 @@ $(function(){
         $('.cancel-btn').css('visibility','hidden');
     })
 
-    $('.organization-credentials input').on('keyup',function(){
+    $('form[name="organization_profile_form"] input').on('keyup',function(){
         var isDiff = false;
-        $('.organization-credentials input').each(function(i,e){
+        $('form[name="organization_profile_form"] input').each(function(i,e){
             if($(e).val() != $(e).attr('value')){
                 isDiff = true;
                 return false;
@@ -79,6 +79,28 @@ $(function(){
 
     $('.save-btn').on('click',function(e){
         e.preventDefault();
+        $('.location-error-msg').remove();
+        hasOneLocValue = false;
+        violation = false;
+        $('.location-elmts-zone input:not([type="hidden"])').each(function(i,e){
+            if($(e).val() != ""){
+                hasOneLocValue = true;
+            }
+            if(hasOneLocValue && $(e).val() == ""){
+                $('.location-elmts-zone input:not([type="hidden"])').each(function(i,f){
+                    if($(f).val() == ""){
+                        $(f).after(`<small class="location-error-msg dd-orange-text">Merci de remplir le champ</small>`);
+                    }
+                })
+                violation = true;
+                return false;
+            }
+        })
+        if(violation){
+            $('.save-btn').addClass('disabled-btn');
+            return false;
+        }
+
         $.post(sourl,$(this).closest('form').serialize())
             .done(function(data){
                 $('.organization-credentials .element-input').each(function(i,e){

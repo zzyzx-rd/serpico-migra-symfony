@@ -48,7 +48,7 @@ class SecurityController extends MasterController
         if($org->getLastCheckedPlan()->getTimestamp() >= 24 * 60 * 60){
             $response = ['updated' => 'y'];
             $org->setLastCheckedPlan($now);
-            if(!$org->getCustomerId() && $org->getPlan() != 3 && $now->getTimestamp() > $org->getExpired()->getTimestamp()){
+            if(!$org->getStripeCusId() && $org->getPlan() != 3 && $now->getTimestamp() > $org->getExpired()->getTimestamp()){
                 $response['la'] = 'y';
             }
             $em->flush();

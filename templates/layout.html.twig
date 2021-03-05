@@ -6,10 +6,10 @@
 {% set is_super_admin = (currentuser and currentuser.role <= 1)|default(false) %}
 {% set is_admin = (currentuser and currentuser.role <= 2)|default(false) %}
 {% set updates = currentuser ? global.updates : null %}
-{% set is_super_admin_undefined = organization and organization.type != 'C' and not organization.hasSuperAdmin %}
+{% set is_super_admin_undefined = organization and organization.type != 'C' and not organization.hasSuperAdmin and currentuser.role != 0 %}
 
 {# A freemium user is one user, necessarily admin, who has not a customer Id and is not in free plan #}
-{% set orgInFreemiumMode = currentuser and currentuser.role == 1 and not organization.customerId and organization.plan != 3 %}
+{% set orgInFreemiumMode = currentuser and currentuser.role == 1 and not organization.stripeCusId and organization.plan != 3 %}
 {% set indivClass = currentuser and currentuser.organization.type == 'C' ? 'indiv-acct' : '' %}
 {% set isMobileView = 'Mobile' in global.request.headers.get('user_agent') %}
 
@@ -66,6 +66,7 @@
       window.lg = '{{ global.request.locale }}';
       var ruurl ="{{ url('retrieveUpdates') }}";
       var vuurl ="{{ url('viewUpdates') }}";
+      var csurl = "{{ url('manageSubscriptions') }}";
       {% if orgInFreemiumMode %}
         var cpurl ="{{ url('checkPlans') }}";
       {% endif %}
@@ -118,7 +119,14 @@
                     <li class="plan hide-on-med-and-down">
                       <div class="c-flex-center sm-right">
                         <span class="{{global.route != "home_welcome" ? 'plan-info' : 'landing-plan-info'}}"> {{ organization.plan == 1 ? 'header.plan.enterprise'|trans|upper : (organization.plan == 2 ? 'header.plan.premium'|trans|upper : 'header.plan.free'|trans|upper) }} {{ date('now').diff(organization.inserted).days < 21 ? '(' ~ 'trial'|trans|upper ~ ')' }} </span>
-                        <a class="dd-orange-text" href="{{ path('priceManagement') }}">{{ 'header.plan.upgrade'|trans }}</a>
+                        {#<a class="dd-orange-text" href="{{ path('priceManagement') }}">{{ 'header.plan.upgrade'|trans }}</a>#}
+                        {% if is_super_admin_undefined %}
+                          <a class="dd-orange-text modal-trigger" href="#defineSuperAdmin">{{ 'header.plan.upgrade'|trans }}</a>
+                        {% else %}
+                          {% if is_super_admin %}
+                            <a class="dd-orange-text manage-subscriptions-btn">{{ 'header.plan.upgrade'|trans }}</a>
+                          {% endif %}
+                        {% endif %}
                       </div>
                     </li>
                   {% endif %}
@@ -397,7 +405,7 @@
                   </li>
                   {% if is_admin %}
                     <li class="plan">
-                      <a class="c-flex-center" href="{{ path('priceManagement') }}">
+                      <a class="c-flex-center {{is_super_admin_undefined ? 'modal-trigger'}}" href="{{is_super_admin_undefined ? '#defineSuperAdmin' : path('priceManagement')}}">
                         <span class="dd-orange-text"> {{ 'Plan'|trans|upper ~ ' : ' ~ (organization.plan == 1 ? 'header.plan.enterprise'|trans|upper : (organization.plan == 2 ? 'header.plan.premium'|trans|upper : 'header.plan.free'|trans|upper)) }} {{ date('now').diff(organization.inserted).days < 21 ? '(' ~ 'trial'|trans|upper ~ ')' }} </span>
                         {% if organization.plan != 1 %}
                           <span class="dd-orange-text">{{ 'header.plan.upgrade'|trans }}</span>
@@ -505,7 +513,6 @@
                 <div class="modal-content">
                   <h5>
                     <span>{{ 'profile.super_admin_appointment_modal.title'|trans}}</span>
-                    <i class="m-left fa fa-crown"></i>
                   </h5>
                   <p>{{'profile.super_admin_appointment_modal.msg'|trans|raw}}</p>
                   <div class="su-choice-zone">

@@ -535,10 +535,22 @@ function updateEvents($evgnId = null, $evnId = null) {
         $(e).css({'left': Math.round(10000 * (c - si) / (ei - si)) / 100 + '%' });
       });
       $('.activity-content-stage:not(.following)').css({
-        'background' : 'repeating-linear-gradient(90deg, #f3ccff2b, #63009445 '+ centralElSize / nbIntSubElmts +'px, #ffffff '+ centralElSize / nbIntSubElmts +'px, #ffffff '+ centralElSize / (nbIntSubElmts/2) +'px)'
+        'background' : `repeating-linear-gradient(
+          90deg, 
+          #f3ccff2b, 
+          #63009445 ${centralElSize / nbIntSubElmts}px, 
+          #ffffff ${centralElSize / nbIntSubElmts }px, 
+          #ffffff ${centralElSize / (nbIntSubElmts/2)}px
+        )`
       });
       $('.activity-content-stage.following').css({
-        'background' : 'repeating-linear-gradient(90deg, #ffe7422b, #d88e2059 '+ centralElSize / nbIntSubElmts +'px, #ffffff '+ centralElSize / nbIntSubElmts +'px, #ffffff '+ centralElSize / (nbIntSubElmts/2) +'px)'
+        'background' : `repeating-linear-gradient(
+          90deg, 
+          #ffe7422b, 
+          #d88e2059 ${centralElSize / nbIntSubElmts}px, 
+          #ffffff ${centralElSize / nbIntSubElmts }px, 
+          #ffffff ${centralElSize / (nbIntSubElmts/2)}px
+        )`
       });
     //}, 200);
   });
@@ -1412,12 +1424,19 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
     $.post(sdurl,{id: id})
       .done(function(data){
         console.log(data);
-        const options = { month: 'numeric', day: 'numeric' };
+        var options = isMobileView ? { month: 'numeric', day: 'numeric'} : { month: 'long', day: 'numeric'};
         $modal = $('#createStage');
         $modal.attr({'data-id':id, 'data-sid':data.aid});
-        if(data.ms){$modal.addClass('a-multiple-stages');}
-        $modal.find('.btn-s-update').hide();
+        if(data.ms){
+          $modal.addClass('a-multiple-stages');
+        }
+        if(!isMobileView){
+          $modal.find('.btn-s-update').hide();
+        }
+
+        $modal.find('.create-stage').hide();
         $modal.find('.btn-s-modify').show();
+
         $modal.find('.s-name').empty().append(data.name);
         $modal.find('input[name*="name"]').closest('.input-field').hide();
         if(data.ap){
@@ -1429,7 +1448,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
           }).find('.s-visibility').empty().append(data.vm.toUpperCase());
           $('#manageStageInvit').find('input[name="link"]').val(data.link);
           $modal.find('.visibility-zone').append($visibilityConfigElmt);
-          $modifyTitleElmt = $(`<span class="s-name-update btn-s-update" style="display:none"><i class="m-left fa fa-pen dd-orange-text"></i></span>`);
+          $modifyTitleElmt = $(`<span class="s-name-update btn-s-update" ${!isMobileView ? 'style="display:none"' : ''}><i class="m-left fa fa-pen dd-orange-text"></i></span>`);
           $modal.find('.s-title-zone').append($modifyTitleElmt);
         } else {
           $modal.find('.link-access-element').remove();
@@ -1443,14 +1462,16 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         }
         
         $datesElmt = $(`
-          <i class="fa fa-calendar"></i>
-          <span class="sm-left s-elmt-date">${new Date(data.sdate.date ).toLocaleDateString(lg+'-'+lg.toUpperCase(),options)}</span>
-          <span class="sm-right sm-left">-</span>
-          <span class="e-elmt-date">${data.edate ? new Date(data.edate.date).toLocaleDateString(lg+'-'+lg.toUpperCase(),options) : '...'}</span>
+          <div>
+            <i class="fa fa-calendar"></i>
+            <span class="sm-left s-elmt-date">${new Date(data.sdate.date).toLocaleDateString(lg+'-'+lg.toUpperCase(),options)}</span>
+            <span>-</span>
+            <span class="e-elmt-date">${data.edate ? new Date(data.edate.date).toLocaleDateString(lg+'-'+lg.toUpperCase(),options) : '...'}</span>
+          </div>
         `);
 
         if(data.ap){
-          $datesElmt = $datesElmt.add(` <div class="s-modify-dates m-left"><i class="btn-s-update btn-s-dates fa fa-pen dd-orange-text" style="display:none"></i></div>`);
+          $datesElmt = $datesElmt.add(`<div class="s-modify-dates m-left"><i class="btn-s-update btn-s-dates fa fa-pen dd-orange-text" ${!isMobileView ? 'style="display:none"' : ''}></i></div>`);
         }
         
         $modal.find('.s-elmt-dates').empty().append($datesElmt);
@@ -1585,6 +1606,13 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
   $(document).on('click','.btn-s-dates', function(){
     $('.s-elmt-dates').hide();
     $('.s-dates-row').show();
+    if(!isMobileView){
+      $('.s-title-zone').removeClass('m6').addClass('m12');
+      if($('#createStage').find('.dp-end').pickadate('picker').get('select')){
+        $('#createStage').find('.enddate-input').show();
+        $('#createStage').find('.open-zone').hide();
+      }
+    }
   })
 
   $(document).on('click','.s-dates-validate',function(){
@@ -1629,6 +1657,9 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
             $actElmt.attr('data-p',data.p);
           }
         
+        }
+        if(!isMobileView){
+          $('.s-title-zone').removeClass('m12').addClass('m6');
         }
         dateUpdate(false, [aid]);
       })
@@ -2236,7 +2267,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
       const $sName = $modal.find('.s-name');
       $sName.hide();
       $this.find('.fa-pen').hide();
-      $this.prepend(`<div class="s-name-input-zone"><input type="text" class="s-name-input-name" value="${$sName.text()}"><div class="btn btn-reduced-padding s-name-validate"><i class="mi check"></i></div><div>`);
+      $this.after(`<div class="s-name-input-zone"><input type="text" class="s-name-input-name" value="${$sName.text()}"><div class="btn btn-reduced-padding s-name-validate"><i class="mi check"></i></div><div>`);
     } 
   })
 

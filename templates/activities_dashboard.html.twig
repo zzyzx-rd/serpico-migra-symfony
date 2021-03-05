@@ -1257,7 +1257,7 @@
         margin: 0;
       }
 
-      .open-zone{
+      .open-field{
         width:100%;
       }
 
@@ -1389,6 +1389,10 @@
         align-items: flex-start;
         justify-content: space-between;
         flex-wrap: wrap;
+      }
+
+      .s-name{
+        display: inline-block;
       }
 
       {% if route == 'accessStageThroughInvit' %}
@@ -2634,8 +2638,8 @@
       <div id="createStage" class="modal">
         {{ form_start(newActivityForm) }}
           <div class="modal-content">
-            <div class="flex-center-sb modal-title">
-              <div class="s-title-zone c-flex-center">
+            <div class="row no-margin flex-center modal-title">
+              <div class="s-title-zone col m6 s12 flex-center">
                 <h5 class="s-name" data-create="{{'activities.create.modal_title'|trans}}">{{'activities.create.modal_title'|trans}}</h5>
               </div>
               {% if is_granted('ROLE_ENTREPRISE') %}
@@ -2648,7 +2652,7 @@
                   <i class="mi create"></i>
                 </div>
               {% endif %}
-              <div class="s-elmt-dates"></div>
+              <div class="s-elmt-dates col m6 s12 flex-center-fe no-padding"></div>
             </div>
             
             <div class="s-name-input input-field">
@@ -2668,8 +2672,8 @@
                     <small class="dd-text set-open-enddate">{{'activity_elements.stages.keep_open_enddate'|trans}}</small>
                   </div>
 
-                  <div class="c-flex-center">
-                    <div class="input-field open-zone">  
+                  <div class="c-flex-center open-zone">
+                    <div class="input-field open-field">  
                       <label class="active">{{'stages.stage.enddate'|trans}}</label>
                       <span class="open-text flex-center">{{'activity_elements.stages.open_enddate'|trans}} <i class="sm-left fa fa-question-circle tooltipped" data-tooltip="{{ 'activity_elements.stages.open_enddate_info'|trans }}" data-position="top"></i></span>
                     </div>

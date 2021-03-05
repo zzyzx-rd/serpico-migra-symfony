@@ -67,6 +67,11 @@ class City extends DbObject
     public $firms;
 
     /**
+     * @OneToMany(targetEntity="ZIPCode", mappedBy="city",cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    public $ZIPCodes;
+
+    /**
      * City constructor.
      * @param $id
      * @param $abbr
@@ -80,18 +85,15 @@ class City extends DbObject
       ?int $id = 0,
         $abbr = null,
         $fullname = null,
-        $name = null,
-        $state = null,
-        $country = null,
-        $firms = null)
+        $name = null
+    )
     {
         parent::__construct($id, null, new DateTime());
         $this->abbr = $abbr;
         $this->fullname = $fullname;
         $this->name = $name;
-        $this->state = $state;
-        $this->country = $country;
-        $this->firms = $firms?:new ArrayCollection();
+        $this->firms = new ArrayCollection();
+        $this->ZIPCodes = new ArrayCollection();
     }
 
 
@@ -174,6 +176,27 @@ class City extends DbObject
     public function removeFirm(WorkerFirm $firm): City
     {
         $this->firms->removeElement($firm);
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getZIPCodes()
+    {
+        return $this->ZIPCodes;
+    }
+
+    public function addZIPCode(ZIPCode $ZIPCode): City
+    {
+        $this->ZIPCodes->add($ZIPCode);
+        $ZIPCode->setCity($this);
+        return $this;
+    }
+
+    public function removeZIPCode(ZIPCode $ZIPCode): City
+    {
+        $this->ZIPCodes->removeElement($ZIPCode);
         return $this;
     }
 

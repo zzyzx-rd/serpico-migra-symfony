@@ -109,6 +109,7 @@ parameters: Parameters
 not_provided: Non provided
 over: over
 see_details: See details
+hide_details: Hide details
 member: Member
 partner_firm: Partner firm
 added_on: Added on
@@ -127,6 +128,8 @@ yes: Yes
 no: No
 confirm: Confirm
 unnamed_stage_activity: Unnamed activity
+role_collaborator: Collaborator
+role_administrator: Administrator
 
 head_meta:
   content: Business & client operations management through an online and interactive dashboard. DealDrive offers a solution connecting clients client through a calendar dashboard, where one can share documents and updates; in order to enhance client operations and reduce email workload. Use the client followup DealDrive solution improve interactions with your clients and colleagues. 
@@ -843,6 +846,36 @@ pricing:
   note_2: Limited to 3 collaborators
   trial_21_days_cta: 21 days premium for free
   start_now: Start now
+  update_modal:
+    title: Order details
+    subscription_type: Subscription type
+    premium_functionality_1: Operations management
+    premium_functionality_2: Client onboarding
+    premium_functionality_3: Shared files
+    premium_functionality_4: Firm settings
+    price:
+      title: Price
+      marginal_price: Price per user
+      total_users: Total user(s)
+      wo_vat_price: Prix HT
+      vat_price: VAT (17%) 
+      total_price: Total price
+      method_payment:
+        card:
+          option_title: By card
+          accepted_cards: We accept the following cards
+          info: Card information
+          add: Add card
+          type: Card type
+          expires_on: Expires on
+        wire_transfer:
+          option_title: By wire transfer
+          wiring_msg: Please wire the corresponding sum to our firm account with the reference
+          account_owner: Account owner
+          iban: IBAN
+          bic_code: BIC Code
+          activation_msg: Your subscription(s) will be active once payment is effective
+    validate: Validate payment
 
 account_management:
   title: Subscriptions
@@ -2079,8 +2112,8 @@ profile:
     title: Account change
     msg: Select which account you want to shift to
   super_admin_appointment_modal:
-    title: Initial choice of super administrator
-    msg: You want to access <span class="strong">firm settings</span>, <span class="dd-text strong">restricted to a single super administrator</span> for security reasons, and who do not exist yet in your firm. Do you confirm you want to become such user ?
+    title: Before continuing...
+    msg: You want to access <span class="strong restricted-settings" data-fs="firm settings" data-p="subscription settings">firm settings</span>, <span class="dd-text strong">restricted to a single super administrator</span> for security reasons, and who do not exist yet in your firm. Do you confirm you want to become such user ?
     choice_self: <span class="strong">Yes</span>, I have the required qualities to become this super administrator
     choice_other: <span class="strong">No</span>, I prefer to attribute this role to another user
   super_admin_appointed_modal:
@@ -3475,8 +3508,11 @@ user_list:
     new_participant_database: New participant in database
     unexisting_client: None of your partners seem to be named this way. You can create a new one by clicking on <span class="strong">Back</span>, to then insert the new user
     selecting_account_title_suffix: through one his/her accounts
-
-
+    user_rights: 
+      title: User rights
+      collab_info: Interacts and takes part in activities (s)he has been invited in
+      admin: Can create and manage activities and partners
+      
 user_update:
   page_title: User modification
   submit: Update
@@ -3613,13 +3649,67 @@ firm_settings:
   manage_updates: Updates
   manage_admin: Administrators and permissions
   manage_activity: Activities
+  add_new_subscription: Add new subscription(s)
   add_new_administrator: Add new administrator
+  subscription:
+    excess_user_begin_msg: >-  
+      {nb_subscriptions, plural,
+        one {
+          {nb_exceeding_users, plural,
+            one {You can add one additional user with your current subscription}
+            other {You can add # additional users with your current subscription}
+          }
+        }
+        other {
+          {nb_exceeding_users, plural,
+            one {You can add one additional user with your current subscriptions}
+            other {You can add # additional users with your current subscriptions}
+          }
+        }
+      }
+    payment_invoices_btn: Payments & Invoices
+    payment_methods_btn: Payment method(s)
+    accepted_cards_msg: We accept the following cards
+    table:
+      title_row_user: User
+      title_row_batch: Batch  
+      title_row_member_since: Subscriptor since
+      title_row_renewal_date: Renewal
+      update_subscription: Update subscription
+    list_modal:
+      title: Subscription details
+      table:
+        plan: Plan
+        occurence_date: Date
+        period: Period
+        quantity: quantity
+        total_price: Total (€)
+        status: Status
+        renewal: Renewal
+        invoice: Invoice
+    associate_unsubscribed_accounts_modal:
+      title: Accounts to link to the subscription
+      no_user_to_associate_msg: No account to associate to the subscription, you first need to create users through the Users tab and link them
+      table:
+        account: Account
+        action: Action
+        action_msg: You can still associate these existing or new users to the subscription in the future
+        link: Associate
   profile:
     title: General data
     identity_logo: 
       title: Identity, logo et membership
       commname: Commercial name
       legalname: Legal name
+    billing:
+      title: Address & contact person
+      address: Firm address
+      country: Country
+      state: State
+      city: City
+      name: Contact name
+      phoneNumber: Phone number
+      zip_code: ZIP Code
     general_info:
       title: Other information
       member_since: Member since

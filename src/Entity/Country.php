@@ -24,9 +24,14 @@ class Country extends DbObject
     public ?int $id;
 
     /**
-     * @ORM\Column(name="cou_abbr", type="string", length=255, nullable=true)
+     * @ORM\Column(name="abbr", type="string", length=255, nullable=true)
      */
     public $abbr;
+    
+    /**
+     * @ORM\Column(name="cou_zip_abbr", type="string", length=255, nullable=true)
+     */
+    public $ZIPAbbr;
 
     /**
      * @ORM\Column(name="cou_fullname", type="string", length=255, nullable=true)
@@ -62,23 +67,26 @@ class Country extends DbObject
     /**
      * Country constructor.
      * @param $id
-     * @param $cou_abbr
-     * @param $cou_fullname
-     * @param $cou_name
+     * @param $abbr
+     * @param $ZIPAbbr
+     * @param $fullname
+     * @param $name
      * @param $states
      * @param $firms
      */
     public function __construct(
         $id,
-        $cou_abbr = null,
-        $cou_fullname = null,
+        $abbr = null,
+        $ZIPAbbr = null,
+        $fullname = null,
         $cou_name = null,
         $states = null,
         $firms = null)
     {
         parent::__construct($id, null, new DateTime());
-        $this->abbr = $cou_abbr;
-        $this->fullname = $cou_fullname;
+        $this->abbr = $abbr;
+        $this->ZIPAbbr = $ZIPAbbr;
+        $this->fullname = $fullname;
         $this->name = $cou_name;
         $this->states = $states?$states:new ArrayCollection();
         $this->firms = $firms?$firms:new ArrayCollection();
@@ -90,10 +98,20 @@ class Country extends DbObject
         return $this->abbr;
     }
 
-    public function setAbbr(string $cou_abbr): self
+    public function setAbbr(string $abbr): self
     {
-        $this->abbr = $cou_abbr;
+        $this->abbr = $abbr;
+        return $this;
+    }
+    
+    public function getZIPAbbr(): ?string
+    {
+        return $this->ZIPAbbr;
+    }
 
+    public function setZIPAbbr(string $ZIPAbbr): self
+    {
+        $this->ZIPAbbr = $ZIPAbbr;
         return $this;
     }
 
@@ -129,40 +147,38 @@ class Country extends DbObject
     }
 
     /**
-     * @return mixed
+     * @return ArrayCollection|State[]
      */
     public function getStates()
     {
         return $this->states;
     }
 
-    /**
-     * @param mixed $states
-     */
-    public function setStates($states): void
+    public function addState(State $state): Country
     {
-        $this->states = $states;
+        $this->states->add($state);
+        $state->setCountry($this);
+        return $this;
+    }
+
+    public function removeState(State $state): Country
+    {
+        $this->states->removeElement($state);
+        return $this;
     }
 
     /**
-     * @return mixed
+     * @return ArrayCollection|WorkerFirm[]
      */
     public function getFirms()
     {
         return $this->firms;
     }
 
-    /**
-     * @param mixed $firms
-     */
-    public function setFirms($firms): void
-    {
-        $this->firms = $firms;
-    }
     public function addFirm(WorkerFirm $firm): Country
     {
         $this->firms->add($firm);
-        $firm->setState($this);
+        $firm->setCountry($this);
         return $this;
     }
 

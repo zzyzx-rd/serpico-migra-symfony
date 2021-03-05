@@ -1,5 +1,7 @@
 //$(function() {
     
+    const isMobileView = navigator.userAgent.indexOf('Mobile') > -1;
+
     function md5cycle(x, k) {
         var a = x[0], b = x[1], c = x[2], d = x[3];
         
@@ -830,6 +832,23 @@
     $(document).on('click','.change-su-user',function(){
         $('#addUserClient').find('.username-part').show();
         $('#addUserClient').modal('open');
+    });
+
+    $('[href="#defineSuperAdmin"]').on('click',function(e){
+        var $t = $(e.target);
+        if($t.closest('.firm-settings').length){
+            $('.restricted-settings').empty().append($('.restricted-settings').data('fs'));
+        } else {
+            $('.restricted-settings').empty().append($('.restricted-settings').data('p'));
+        }
+    })
+
+    $('.manage-subscriptions-btn').on('click',function(e){
+        e.preventDefault();
+        $.get(csurl)
+            .done(function(data){
+                window.open(data.cpurl);
+            })
     });
 
 

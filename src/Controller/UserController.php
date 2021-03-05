@@ -63,6 +63,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Stripe\Customer;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Translation\Translator;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -156,8 +157,8 @@ class UserController extends MasterController
     {
         $entityManager = $this->getEntityManager();
         $repository = $entityManager->getRepository(User::class);
+        /** @var User */
         $user = $repository->findOneByToken($token);
-        
         $pwdForm = $this->createForm(PasswordDefinitionForm::class, $user, ['standalone' => true]);
         $pwdForm->handleRequest($request);
 
@@ -226,7 +227,7 @@ class UserController extends MasterController
                 $individualName = strtolower(implode("-",explode(" ",$username)));
                 mkdir(dirname(dirname(__DIR__)) . "/public/lib/idocs/{$orgId}-{$individualName}");
              
-                $this->forward('App\Controller\SettingsController::createDefaultSubscription',['organization' => $organization, 'email' => $email]);
+                $this->forward('App\Controller\SettingsController::addDefaultSubscriptor',['organization' => $organization, 'email' => $email]);
                 $em->persist($organization);
                 $em->flush();
 
@@ -361,13 +362,14 @@ class UserController extends MasterController
         $em = $this->em;
         $repoU = $em->getRepository(User::class);
         $user = $repoU->findOneByToken($token);
+        $organization = $user->getOrganization();
         $settablePasswordUsers = $em->getRepository(User::class)->findByEmail($user->getEmail());
         $pwdForm = $this->createForm(PasswordDefinitionForm::class, $user, ['standalone' => true]);
         $pwdForm->handleRequest($request);
 
         if ($pwdForm->isValid()) 
         {   
-            $needToSetOrg = !$user->getLastConnected() && $user->getOrganization()->getType() == 'C';
+            $needToSetOrg = !$user->getLastConnected() && $organization->getType() == 'C';
             
             if($needToSetOrg && $priorValidationCheck){
                 return new JsonResponse(['id' => $user->getId(), 'needToSetOrg' => true]);
@@ -377,6 +379,36 @@ class UserController extends MasterController
                 $user->setPassword($password)
                     ->setToken(null);
                 $em->persist($user);
+
+                if(!$user->getSubscriptionId()){
+                    // We create a 21-day premium monthly subscription for user
+                    
+                    $this->forward('App\Controller\SettingsController::addDefaultSubscriptor', ['usrId' => $user->getId()]);
+                    /*
+                    // We create a 21-day premium monthly subscription for personal account
+                    $stripe = $this->stripe;
+                    // 1 - Create customer ID
+                    $customer = Customer::create([
+                        'email' => $user->getEmail()
+                    ]);
+                    $cId = $customer->id;
+                    $organization->setStripeCusId($cId);
+                    $em->persist($organization);
+                    
+                    $pId = strpos("dealdrive.app", $_SERVER["HTTP_HOST"]) === false ? 'price_1INPSqLU0XoF52vKRN5T8i9Y' : 'price_1HoAmcLU0XoF52vKHDggsDpq';
+                    // 2 - Create subscription
+                    $subscription = $stripe->subscriptions->create([
+                        'customer' => $cId,
+                        'items' => [
+                            ['price' => $pId],
+                        ],
+                        'trial_period_days' => 21,
+                    ]);
+                    $user->setSubscriptionId($subscription->id);
+                    $em->persist($user);
+                    $em->flush();
+                    */
+                }        
     
                 if(sizeof($settablePasswordUsers) > 1){
                     foreach($settablePasswordUsers as $settablePasswordUser){
@@ -387,10 +419,10 @@ class UserController extends MasterController
                         }
                     }
                 }
-    
+
                 $em->flush();
     
-                // In the case person has been added in an organization, and did not sign up
+                // In the case person has been added in an organization, and did not sign up, we create his/her individual and private account
                 if(!$needToSetOrg){
                     if(sizeof($settablePasswordUsers) == 1){
     
@@ -461,7 +493,9 @@ class UserController extends MasterController
             }
             $assoc = true;
         }
+
         if($assoc){
+
             $firmName = $_POST['firmname'];
             $currentOrgUser = clone $currentUser;
             $currentOrgUser->setToken(null)
@@ -512,11 +546,13 @@ class UserController extends MasterController
                 $orgName = strtolower(implode("-", explode(" ", $firmName)));
                 mkdir(dirname(dirname(__DIR__)) . "/public/lib/cdocs/{$wfiId}-{$orgName}");
             }
-            $this->forward('App\Controller\SettingsController::createDefaultSubscription',['organization' => $organization, 'email' => $currentUser->getEmail()]);
+            $this->forward('App\Controller\SettingsController::addDefaultSubscriptor',['organization' => $organization, 'email' => $currentUser->getEmail()]);
             $em->refresh($currentOrgUser);
             $em->persist($organization);
             $em->flush();
         }
+
+
 
         $this->guardHandler->authenticateUserAndHandleSuccess(
             $assoc ? $currentOrgUser : $currentUser,
@@ -1634,6 +1670,13 @@ class UserController extends MasterController
         if(sizeof($allUsersWithSameEmail) == 2){
             foreach($allUsersWithSameEmail as $user){
                 if($user != $currentUser){
+
+
+                    // Create subscription for private account, in case user was added by firm administrator (did not sign up)
+                    if(!$user->getSubscriptionId()){
+                        $this->forward('App\Controller\SettingsController::addDefaultSubscriptor', ['usrId' => $user->getId()]);
+                    }
+
                     $this->guardHandler->authenticateUserAndHandleSuccess(
                         $user,
                         $request,
@@ -1667,7 +1710,12 @@ class UserController extends MasterController
         $currentUser = $this->user;
         $em = $this->em;
         $organization = $em->getRepository(Organization::class)->find($request->get('id'));
+        /** @var User */
         $user = $em->getRepository(User::class)->findOneBy(['email' => $currentUser->getEmail(), 'organization' => $organization]);
+
+        if(!$user->getSubscriptionId()){
+            $this->forward('App\Controller\SettingsController::addDefaultSubscriptor', ['usrId' => $user->getId()]);
+        }
 
         $this->guardHandler->authenticateUserAndHandleSuccess(
             $user,

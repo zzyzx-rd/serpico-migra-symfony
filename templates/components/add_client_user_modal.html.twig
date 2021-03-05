@@ -144,13 +144,14 @@
                 </div>
                 <div class="input-field user-field-zone">
                     <label for="user-fullname">{{route == 'myActivities' ? 'activity_elements.participant_adding_label'|trans : 'create_user.modal.label_fullname'|trans}}</label>
-                    <input id="user-fullname" class="no-margin" name="username" type="text">
+                    <input id="user-fullname" class="no-margin user-name" name="username" type="text">
                     <div class="c-flex query-info-holder"> 
                         <small class="dd-orange-text new-user" style="display:none">{{ global.route == 'myActivities' ? 'user_list.add_user_modal.new_participant_database'|trans : 'user_list.add_user_modal.new_user_database'|trans}}</small>
                         <small class="dd-orange-text error-fullname" style="display:none">{{'create_user.modal.error_fullname'|trans}}</small>
                         <small class="dd-orange-text unexisting-element" style="display:none"></small>
                     </div>
                     <select name="userSelector" style="display:none;"></select>
+                    <input type="hidden" name="gid">
                     <input type="hidden" name="uid">
                     <input type="hidden" name="euid">
                     <input type="hidden" name="tid">
@@ -158,6 +159,26 @@
                     <input type="hidden" name="icid">
 
                 </div>
+                
+                {% if route == 'manageUsers' %}
+                    <div class="role-input-zone" style="display:none">
+                        <p class="dd-text rights-title bold-1">{{ 'user_list.add_user_modal.user_rights.title'|trans }}</p>
+                        <div>
+                            <input type="radio" id="role_admin" name="role" value="2" checked="checked">
+                            <label for="role_admin" class="black-text">
+                                <i class="fa fa-question-circle tooltipped" data-position="top" data-tooltip="{{'user_list.add_user_modal.user_rights.admin_info'|trans}}"></i>
+                                <span>{{'role_administrator'|trans}}</span>
+                            </label>
+                            <input type="radio" id="role_collab" name="role" value="3">
+                            <label for="role_collab" class="black-text">
+                                <i class="fa fa-question-circle tooltipped" data-position="top" data-tooltip="{{'user_list.add_user_modal.user_rights.collab_info'|trans}}"></i>
+                                <span>{{'role_collaborator'|trans}}</span>
+                            </label>
+                        </div>
+                    </div>
+                {% endif %}
+
+
                 <div class="flex-center-fe">
                     <div class="btn-flat waves-effect waves-light go-prev m-right">{{'back'|trans}}</div>
                     <div class="btn waves-effect waves-light go-next {{ route == 'myActivities' ? 'go-to-type' : 'go-to-email' }} disabled-btn">{{'next'|trans}}</div>

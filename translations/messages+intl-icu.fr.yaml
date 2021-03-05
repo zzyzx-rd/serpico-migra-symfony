@@ -111,6 +111,7 @@ parameters: Paramètres
 not_provided: Non renseigné
 over: sur
 see_details: Voir détails
+hide_details: Cacher détails
 member: Membre
 partner_firm: Entreprise partenaire
 added_on: Ajouté le
@@ -129,6 +130,8 @@ yes: Oui
 no: Non
 confirm: Confirmer
 unnamed_activity: Activité sans nom
+role_collaborator: Collaborateur
+role_administrator: Administrateur
 
 
 head_meta:  
@@ -818,6 +821,43 @@ pricing:
   note_2: Limité à 3 collaborateurs
   trial_21_days_cta: 21 jours premium gratuits
   start_now: Démarrez dès maintenant
+  update_modal:
+    title: Détails de l'offre
+    subscription_type: Type d'abonnement
+    subscription_basis: Souscription sur base
+    user_accounts: Nombre de comptes utilisateurs
+    premium: 
+      title: Premium
+      functionality_1: Gestion des opérations
+      functionality_2: Onboarding de clients
+      functionality_3: Fichiers partagés
+      functionality_4: Paramètrage d'entreprise
+    price:
+      title: Prix
+      discount_title: 2 mois gratuits
+      marginal_price: Prix par utilisateur
+      total_users: Nombre d'utilisateurs
+      wo_vat_price: Prix HT
+      vat_price: TVA (17%)
+      total_price: Prix total
+      method_payment:
+        card:
+          option_title: Par carte
+          accepted_cards: Nous acceptons les cartes suivantes
+          info: Informations sur la carte
+          add: Ajouter une carte
+          type: Type de carte
+          expires_on: Expire le
+        wire_transfer:
+          option_title: Par virement bancaire
+          wiring_msg: Merci de virer la somme correspondante sur notre compte entreprise ci-dessous avec la référence
+          account_owner: Titulaire du compte
+          iban: IBAN
+          bic_code: Code BIC
+          activation_msg: Le(s) abonnement(s) seront effectifs dès réception des fonds
+
+    validate: Valider le paiement
+
 
 account_management:
   title: Abonnements
@@ -2193,8 +2233,8 @@ profile:
     title: Changement de compte
     msg: Sélectionnez le compte sur lequel vous souhaitez passer
   super_admin_appointment_modal:
-    title: Choix du super administrateur initial
-    msg: Vous souhaitez accéder aux <span class="strong">paramètres d'entreprise</span>, <span class="dd-text strong">uniquement réservés à un super administrateur</span> pour des questions de sécurité, et qui n'existe pas encore dans votre entreprise. Confirmez-vous vouloir devenir cet utilisateur ?
+    title: Avant de continuer...
+    msg: Vous souhaitez accéder aux <span class="strong restricted-settings" data-fs="paramètres d'entreprise" data-p="paramètres d'abonnement'">paramètres d'entreprise</span>, <span class="dd-text strong">uniquement réservés à un super administrateur</span> pour des questions de sécurité, et qui n'existe pas encore dans votre entreprise. Souhaitez-vous devenir cet utilisateur ?
     choice_self: <span class="strong">Oui</span>, je confirme avoir les habilitations nécessaires à devenir ce super administrateur
     choice_other: <span class="strong">Non</span>, je préfère définir un utilisateur à qui sera conféré ce role
   super_admin_appointed_modal:
@@ -3599,7 +3639,7 @@ user_list:
     int_user_title: Ajout d'un membre interne
     ext_user_title: Ajout d'un membre du partenaire/client
     independant_person: Personne agissant pour son compte, indépendant
-    on_behalf_person: Personne membre d'une structure
+    on_behalf_person: Personne membre d'une entreprise
     independant_user_title: Ajout d'un indépendant
     follower_participant_title: 'Ajout d''un <span class="fj-type">participant</span>'
     firm_creation_info: Idéal quand vous ne savez pas exactement qui représente l'entreprise - vous pourrez toujours ajouter des représentants ensuite
@@ -3610,6 +3650,11 @@ user_list:
     new_participant_database: Nouveau participant en base
     unexisting_element: Aucun de vos {element}s ne semble avoir ce nom. Vous pouvez en créer un nouveau en cliquant sur <span class="strong">Retour</span>, afin de l'insérer
     selecting_account_title_suffix: via son compte
+    user_rights: 
+      title: Droits de l'utilisateur
+      collab_info: Interagit et participe aux activités auxquelles il a été convié
+      admin_info: Peut créer et gérer activités et clients
+
 
 
 user_update:
@@ -3710,8 +3755,8 @@ email_confirm:
 subscription:
   user: Nombre d'utilisateurs
   payment: Paiement
-  annually: Annuel
-  monthly: Mensuel
+  annually: Annuelle
+  monthly: Mensuelle
   per_year: / an
   per_month: / mois
   premium: Premium
@@ -3747,13 +3792,72 @@ firm_settings:
   manage_updates: Updates
   manage_admin: Administrateurs et droits associés
   manage_activity: Activités
+  add_new_subscription: Ajouter abonnement(s)
   add_new_administrator: Ajouter un nouvel administrateur
+  new_administrator: Nouvel administrateur
+  subscription:
+    excess_user_begin_msg: >-  
+      {nb_subscriptions, plural,
+        one {
+          {nb_exceeding_users, plural,
+            one {Votre abonnement vous permet d'ajouter un utilisateur supplémentaire}
+            other {Votre abonnement vous permet d'ajouter # utilisateurs supplémentaires}
+          }
+        }
+        other {
+          {nb_exceeding_users, plural,
+            one {Vos abonnements vous permet d'ajouter un utilisateur supplémentaire}
+            other {Vos abonnements vous permettent d'ajouter # utilisateurs supplémentaires}
+          }
+        }
+      }
+    
+    payment_invoices_btn: Détail des abonnements et factures
+    payment_methods_btn: Moyens de paiement
+    accepted_cards_msg: Nous acceptons les cartes suivantes
+    associate_unsubscribed_users: Associer utilisateurs
+    table:
+      title_row_user: Utilisateur
+      title_row_batch: Lot
+      title_row_member_since: Abonné depuis le
+      title_row_renewal_date: Renouvellement
+      update_subscription: Modifier l'abonnement
+    list_modal:
+      title: Détail des abonnements
+      table:
+        plan: Plan
+        occurence_date: Date
+        period: Période
+        quantity: Quantité
+        total_price: Total (€)
+        vat_price: dont TVA
+        status: Statut
+        renewal: Renouv.
+        invoice: Facture
+    associate_unsubscribed_accounts_modal:
+      title: Comptes à associer à l'abonnement
+      no_user_to_associate_msg: Pas de compte à lier à l'abonnement, créez d'abord de nouveaux utilisateurs via l'onglet <span class="dd-text strong">Utilisateurs</span> afin de les lier
+      table:
+        account: Compte
+        subscription: Abonnement
+        action: Action
+        action_msg: Vous pourrez toujours associer ces utilisateurs existants ou de nouveaux à cette souscription par la suite
+        link: Associer
   profile:
     title: Données du compte
     identity_logo: 
       title: Identité, logo et abonnement
       commname: Nom commercial
       legalname: Appellation légale
+    billing:
+      title: Contact et adresse
+      address: Adresse de l'entreprise
+      country: Pays
+      state: Région
+      city: Ville
+      name: Nom de contact
+      phoneNumber: Téléphone
+      zip_code: Code Postal
     general_info:
       title: Autres informations
       member_since: Membre depuis

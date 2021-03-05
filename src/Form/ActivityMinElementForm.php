@@ -143,7 +143,7 @@ class ActivityMinElementForm extends AbstractType
                 [
                     'label_format' => 'activities.create.%name%',
                     'attr' => [
-                        'class' => 'btn waves-effect waves-light btn-s-update create-stage',
+                        'class' => 'btn waves-effect waves-light create-stage',
                     ],
                 ]
             );

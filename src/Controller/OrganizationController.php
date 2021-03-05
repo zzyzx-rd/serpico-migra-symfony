@@ -83,6 +83,7 @@ use App\Entity\SurveyFieldParameter;
 use App\Entity\Target;
 use App\Entity\Team;
 use App\Entity\Member;
+use App\Entity\Subscription;
 use App\Entity\Template;
 use App\Entity\TemplateActivity;
 use App\Entity\TemplateCriterion;
@@ -126,6 +127,9 @@ use DateInterval;
 use DateTimeInterface;
 use phpDocumentor\Reflection\Types\Nullable;
 use Proxies\__CG__\App\Entity\Icon;
+use Stripe\Customer;
+use Stripe\Subscription as StripeSubscription;
+use Stripe\SubscriptionItem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -1750,17 +1754,27 @@ class OrganizationController extends MasterController
     public function addUserAction(Request $request){
         $username = $_POST['username'];
         $email = $_POST['email'];
-        $userGlobalId = isset($_POST['ugid']) && $_POST['ugid'] != "" ? $_POST['ugid'] : null;
+        $role = $_POST['role'];
+        if($role == 0){
+            return new JsonResponse(null, 404);
+        }
+        $userGlobalId = isset($_POST['gid']) && $_POST['gid'] != "" ? $_POST['gid'] : null;
         $em = $this->em;
         $user = $em->getRepository(User::class)->findOneBy(['username' => $username, 'organization' => $this->org]);
+        /** @var ArrayCollection|Subscription[] */
+        $subscriptions = $this->org->getSubscriptions();
+        $subscriptionId = $subscriptions ? (
+            isset($_POST['sid']) ? $_POST['sid'] : $subscriptions->first()->getStripeId() 
+        ) : null;
         if($user){
             if($user->getDeleted()){
                 $user->setDeleted(null);
                 $em->persist($user);
                 $email = $email ?: $user->getEmail();
-            }
-            if($user->getEmail()){
-               return new JsonResponse(['msg' => 'existingUser'], 500);
+            } else {
+                if($user->getEmail()){
+                   return new JsonResponse(['msg' => 'existingUser'], 500);
+                }
             }
         } else {
 
@@ -1775,6 +1789,7 @@ class OrganizationController extends MasterController
                 ->setLastname($lastname)
                 ->setEmail($email)
                 ->setToken($token)
+                ->setRole($role)
                 ->setOrganization($this->org)
                 ->setRole(USER::ROLE_ADMIN);
            
@@ -1785,8 +1800,11 @@ class OrganizationController extends MasterController
             }
             $userGlobal->addUserAccount($user);
             $em->persist($userGlobal);
+
         }
 
+        $em->flush();
+        $this->forward('App\Controller\SettingsController::addDefaultSubscriptor', ['usrId' => $user->getId()]);
         $em->flush();
         
         if($email){
@@ -1795,7 +1813,10 @@ class OrganizationController extends MasterController
             $settings['invitingUser'] = $this->user;
             $this->forward('App\Controller\MailController::sendMail', ['recipients' => [$user], 'settings' => $settings, 'actionType' => 'internalInvitation']);
         }
-        return new JsonResponse(['id' => $user->getId()]);
+        
+
+        $arrayResponse['id'] = $user->getId();
+        return new JsonResponse($arrayResponse);
     }
 
     /**
@@ -3052,13 +3073,20 @@ class OrganizationController extends MasterController
         if (!$currentUser) {
             return $this->redirectToRoute('login');
         } else {
-            if($currentUser->getRole() != USER::ROLE_SUPER_ADMIN){
+            if($currentUser->getRole() > USER::ROLE_SUPER_ADMIN){
                 return new Response(null, Response::HTTP_FORBIDDEN);
             }
         }
+
+        //$subscriptions = new ArrayCollection($this->stripe->subscriptions->all(['customer' => $this->org->getStripeCusId()])->data);
+
+        //$subscribedQuantities = array_sum($subscriptions->filter(fn(Subscription $s) => $s->status == 'active')->map(fn(Subscription $s) => $s->quantity)->getValues());
+
         return $this->render('firm_settings.html.twig',
             [
-                
+                //'existingPaymentMethods' => $this->org->getPaymentMethods(),
+                //'nbExceedingUsers' => $subscribedQuantities - $this->org->getActiveUsers()->filter(fn(User $u) => $u->getSubscriptionId())->count(),
+                //'nbSubscriptions' => $subscriptions->count(),
             ]);
     }
 
@@ -3217,7 +3245,12 @@ class OrganizationController extends MasterController
         $repoU       = $em->getRepository(User::class);
 
         /** @var User */
-        $user        = $repoU->find($usrId);
+        $user = $repoU->find($usrId);
+
+        if($user->getRole() == User::ROLE_SUPER_ADMIN){
+            return new JsonResponse(['msg' => 'Super admin cannot be deleted'], Response::HTTP_BAD_REQUEST);
+        }
+
         $currentUser = $this->user;
         if (!$currentUser instanceof User) {
             return $this->redirectToRoute('login');
@@ -3233,6 +3266,7 @@ class OrganizationController extends MasterController
         //    $em->remove($user);
         } else {*/
 
+        $this->forward('App\Controller\SettingsController::removeDefaultSubscriptor', ['usrId' => $user->getId()]);
         $user->setDeleted(new DateTime);
         $em->persist($user);
         $userGlobal = $user->getUserGlobal();
@@ -5364,6 +5398,7 @@ class OrganizationController extends MasterController
         $name = $request->get('name');
         $qEntityId = $request->get('qid');
         $isFirmQuery = $qType == 'wf' || $qType == 'o' || $qType == 'nc' || $qType == 'c';
+        $isLocationElmtQuery = $qType == 'cou' || $qType == 'cit' || $qType == 'sta';
         $openUserQueries = $qType == 'f' || $qType == 'p' || $qType == 'u' || $qType == 'iua';
         $excludingElementIds = [];
         // Already existing element ids within user organization - will be used to disable already existing choices
@@ -5388,6 +5423,8 @@ class OrganizationController extends MasterController
             $excludingElementIds = $this->org->getActiveUsers()->filter(fn(User $u) => $u->getRole() <= User::ROLE_ADMIN)->map(fn(User $u) => $u->getId())->getValues();
         } else if($qType == 'iu'){
             $excludingElementIds = [$qEntityId];
+        } else if($isLocationElmtQuery){
+            $excludingElementIds = [];
         }
 
         
@@ -5401,9 +5438,11 @@ class OrganizationController extends MasterController
         $clients = $organization ? $organization->getClients() : new ArrayCollection();
         $repoP = $em->getRepository(Participation::class);
 
-        if(!$isFirmQuery){
+        if(!$isFirmQuery && !$isLocationElmtQuery){
 
-            $qb->select('ug.username', 'ug.id', 'u.picture AS usrPicture', 'u.id AS usrId', 'u.email AS usrEmail', 'eu.id AS extUsrId', 'c.id as cliId', 'u.synthetic AS synth', 'o.commname AS orgName', 'o.type AS orgType','wf.logo AS wfiLogo', 'wf.id AS wfiId', 'o.logo AS orgLogo', 'o.id AS orgId')
+            // We find all users (and search for any external users also) beginning with typed name
+
+            $qb->select('ug.username', 'ug.id AS gid', 'u.picture AS usrPicture', 'u.id AS usrId', 'u.email AS usrEmail', 'eu.id AS extUsrId', 'c.id as cliId', 'u.synthetic AS synth', 'o.commname AS orgName', 'o.type AS orgType','wf.logo AS wfiLogo', 'wf.id AS wfiId', 'o.logo AS orgLogo', 'o.id AS orgId')
                 ->from('App\Entity\User', 'u')
                 ->leftJoin('App\Entity\UserGlobal', 'ug', 'WITH', 'ug.id = u.userGlobal')
                 ->leftJoin('App\Entity\Organization', 'o', 'WITH', 'o.id = u.organization')
@@ -5411,7 +5450,7 @@ class OrganizationController extends MasterController
                 ->leftJoin('App\Entity\Client', 'c', 'WITH', 'c.clientOrganization = u.organization')
                 ->leftJoin('App\Entity\ExternalUser','eu','WITH','eu.user = u.id');
 
-            $qb->where('u.username LIKE :startOpt1 OR u.username LIKE :startOpt2 AND u.deleted IS NULL');
+            $qb->where('(u.username LIKE :startOpt1 OR u.username LIKE :startOpt2) AND u.deleted IS NULL');
                 if($qType == 'iu' || $qType == 'iua'){
                     $qb->andWhere('u.organization = :org');
                     $qb->setParameter('org',$this->org);
@@ -5419,11 +5458,13 @@ class OrganizationController extends MasterController
 
             $qb->setParameter('startOpt1', '% '. $name .'%')
                 ->setParameter('startOpt2', $name .'%')
-                ->addOrderBy('ug.id','ASC')
+                ->addOrderBy('ug.username','ASC')
                 ->addOrderBy('u.id','ASC');
 
             $userElmts = $qb->getQuery()->getResult();
-           
+
+            //return new JsonResponse($userElmts);
+                
             if($openUserQueries && sizeof($userElmts)){
 
                 $currentUsrId = $userElmts[0]['usrId'];
@@ -5436,6 +5477,7 @@ class OrganizationController extends MasterController
                 // all users results having same user id, whether it is client or not, and we group the data.
 
                 foreach($userElmts as $key => $userElmt){
+
                     if($userElmt['usrId'] != $currentUsrId){
                         $currentUsrId = $userElmt['usrId'];
                         if($offset){
@@ -5506,9 +5548,7 @@ class OrganizationController extends MasterController
                 ->getResult();
 
             $elements = new ArrayCollection(array_filter(array_merge($userElmts, $teamElmts, $firmElmts)));
-
-        } else if($qType == 'u' || $qType == 'iua' || $qType == 'eu' || $qType == 'i' || $qType == 'iu' || $qType == 'f'){
-            
+        } else if ($qType == 'u' || $qType == 'iua' || $qType == 'eu' || $qType == 'i' || $qType == 'iu' || $qType == 'f'){
             $elements = new ArrayCollection($userElmts);
 
 
@@ -5560,6 +5600,42 @@ class OrganizationController extends MasterController
             //$elements = new ArrayCollection($arrangedFirmElements);
 
             
+        } else if ($qType == 'cit'){
+            
+            $qb->select('cit.name', 'cit.id', 's.name AS staName', 's.id AS staId', 'cou.name AS couName', 'cou.abbr as couAbbr', 'cou.id AS couId')
+                ->from('App\Entity\City', 'cit')
+                ->leftJoin('App\Entity\State', 's', 'WITH', 's.id = cit.state')
+                ->leftJoin('App\Entity\Country', 'cou', 'WITH', 'cou.id = s.country')
+                ->where('cit.name LIKE :name');
+
+            $qb->setParameter('name', '%'. $name .'%')
+                ->addOrderBy('cit.name','ASC');
+
+            $elements = $qb->getQuery()->getResult();
+
+        } else if ($qType == 'sta'){
+            
+            $qb->select('s.name', 's.id', 'cou.name AS couName', 'cou.abbr as couAbbr', 'cou.id AS couId')
+                ->from('App\Entity\State', 's')
+                ->leftJoin('App\Entity\Country', 'cou', 'WITH', 'cou.id = s.country')
+                ->where('s.name LIKE :name');
+
+            $qb->setParameter('name', '%'. $name .'%')
+                ->addOrderBy('s.name','ASC');
+
+            $elements = $qb->getQuery()->getResult();
+
+        } else if ($qType == 'cou'){
+            
+            $qb->select('cou.name', 'cou.abbr AS couAbbr', 'cou.id')
+            ->from('App\Entity\Country', 'cou')
+            ->where('cou.name LIKE :name');
+
+            $qb->setParameter('name', '%'. $name .'%')
+                ->addOrderBy('cou.name','ASC');
+
+            $elements = $qb->getQuery()->getResult();
+
         }
 
         $qParts = [];
@@ -5572,7 +5648,7 @@ class OrganizationController extends MasterController
         
             foreach($elements as $element){
 
-                $isWorkerFirmLike = !isset($element['id']);
+                $isWorkerFirmLike = !isset($element['gid']);
 
                 if(!$isWorkerFirmLike){
                     
@@ -5591,22 +5667,24 @@ class OrganizationController extends MasterController
                         case 'f':
                             $potentialExcludingElmtId = $element['usrId'];
                             break;
+                        default:
+                            break;
                     }
                     
-                    if(!$isFirmQuery){
+                    if(!$isFirmQuery && !$isLocationElmtQuery){
 
                         $differentGlobalUsers = false;
                         
                         // Aggregating by global user
     
-                        if(!isset($element['id']) || $element['id'] != $currentUserGlobalValue){
+                        if(!isset($element['gid']) || $element['gid'] != $currentUserGlobalValue){
                             if($currentUserGlobalValue){
                                 $arrangedElmts[] = $arrangedElmt;
                                 if(!$differentGlobalUsers){
                                     $differentGlobalUsers = true;
                                 }
                             }
-                            $currentUserGlobalValue = $element['id'];
+                            $currentUserGlobalValue = $element['gid'];
                             $arrangedElmt = $element;
                             unset($arrangedElmt['synth']);
                             unset($arrangedElmt['orgId']);
@@ -5693,8 +5771,10 @@ class OrganizationController extends MasterController
             
             }
         
+        //return new JsonResponse(['val' => (int) sizeof($elements) && !$isFirmQuery && !$isLocationElmtQuery && !$differentGlobalUsers]);
+
         // Adding last prepared element for user queries as we leave the loop before adding it
-        if(sizeof($elements) && !$isFirmQuery && !$differentGlobalUsers){
+        if(sizeof($elements) && !$isFirmQuery && !$isLocationElmtQuery /*&& !$differentGlobalUsers*/){
             $arrangedElmts[] = $arrangedElmt;
         } 
 
@@ -5714,6 +5794,7 @@ class OrganizationController extends MasterController
         }
 
         $msg = '';
+
         if(!sizeof($qParts) && ($qType == 'iu' || $qType == 'iua' || $qType == 'c')){
             switch($qType){
                 case 'iu':

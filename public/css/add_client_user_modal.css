@@ -93,11 +93,15 @@
 }
 
 
-.firm-field-zone .dropdown-content, .user-field-zone .dropdown-content{
+.firm-field-zone .dropdown-content, .user-field-zone .dropdown-content, .location-element-field-zone .dropdown-content{
     opacity: 1!important;
     display: block!important;
     width: 100%;
     margin-top: -40px;
+}
+
+.location-element-field-zone .dropdown-content{
+    margin-top: 0px;
 }
 
 .part-feeded{
@@ -133,4 +137,12 @@
     line-height: 24px;
     height: 24px;
     padding: 0 1rem;
+}
+
+.role-input-zone{
+    position:relative;
+}
+
+.rights-title{
+    text-transform: uppercase;
 }

@@ -166,10 +166,10 @@ class User extends DbObject implements  UserInterface, \Serializable
     protected $role;
     
     /**
-     * @Column(name="usr_sub_id", type="string", nullable=true)
-     * @var string
+     * @ManyToOne(targetEntity="Subscription", inversedBy="subscriptors")
+     * @JoinColumn(name="subscription_sub_id", referencedColumnName="sub_id", nullable=true)
      */
-    protected $subscriptionId;
+    protected $subscription;
 
     /**
      * @OneToMany(targetEntity="ExternalUser", mappedBy="user",cascade={"persist", "remove"}, orphanRemoval=true)
@@ -637,6 +637,11 @@ class User extends DbObject implements  UserInterface, \Serializable
      * @var ArrayCollection|WorkerIndividual[]
      */
     private $workerIndividualInitiatives;
+    /**
+     * @ORM\OneToMany(targetEntity=Subscription::class, mappedBy="initiator", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|Subscription[]
+     */
+    private $subscriptionInitiatives;
 
     /**
      * @var UploadedFile
@@ -723,8 +728,8 @@ class User extends DbObject implements  UserInterface, \Serializable
         $results = null,
         $members = null,
         $weight = null,
-        $title = null,
-        $subscriptionId = null)
+        $title = null
+    )
     {
         parent::__construct($id, null, new DateTime());
         $this->pictureFile = $pictureFile;
@@ -762,7 +767,6 @@ class User extends DbObject implements  UserInterface, \Serializable
         $this->position = $position;
         $this->department = $department;
         $this->title = $title;
-        $this->subscriptionId = $subscriptionId;
         $this->subordinates = new ArrayCollection();
         $this->participations = new ArrayCollection();
         $this->roles = new ArrayCollection();
@@ -834,22 +838,23 @@ class User extends DbObject implements  UserInterface, \Serializable
         $this->workerFirmLocationInitiatives = new ArrayCollection();
         $this->workerFirmSectorInitiatives = new ArrayCollection();
         $this->workerIndividualInitiatives = new ArrayCollection();
+        $this->subscriptionInitiatives = new ArrayCollection();
     }
     
     /**
      * @return string
      */
-    public function getSubscriptionId(): ?string
+    public function getSubscription(): ?Subscription
     {
-        return $this->subscriptionId;
+        return $this->subscription;
     }
 
     /**
-     * @param string $subscriptionId
+     * @param Subscription $subscription
      */
-    public function setSubscriptionId(string $subscriptionId): self
+    public function setSubscription(?Subscription $subscription): self
     {
-        $this->subscriptionId = $subscriptionId;
+        $this->subscription = $subscription;
         return $this;
     }
 
@@ -1788,7 +1793,7 @@ class User extends DbObject implements  UserInterface, \Serializable
     public function getPicturePath(): string
     {
         if(!$this->picture){
-            return "lib/img/user/no-picture.png";
+            return "/lib/img/user/no-picture.png";
         } else {
 
         
@@ -1798,7 +1803,7 @@ class User extends DbObject implements  UserInterface, \Serializable
                     !$this->getLastConnected() ? 'virtual-user.png' : 'no-picture.png'
                 )
             );
-            return "lib/img/$folder/$suffix";
+            return "/lib/img/$folder/$suffix";
         }
     }
 
@@ -3181,6 +3186,26 @@ class User extends DbObject implements  UserInterface, \Serializable
     public function removeWorkerIndividualInitiative(WorkerIndividual $workerIndividual): self
     {
         $this->workerIndividualInitiatives->removeElement($workerIndividual);
+        return $this;
+    }
+    /**
+    * @return ArrayCollection|Subscription[]
+    */
+    public function getSubscriptionInitiatives()
+    {
+        return $this->subscriptionInitiatives;
+    }
+
+    public function addSubscriptionInitiative(Subscription $subscription): self
+    {
+        $this->subscriptionInitiatives->add($subscription);
+        $subscription->setInitiator($this);
+        return $this;
+    }
+
+    public function removeSubscriptionInitiative(Subscription $subscription): self
+    {
+        $this->subscriptionInitiatives->removeElement($subscription);
         return $this;
     }
 }

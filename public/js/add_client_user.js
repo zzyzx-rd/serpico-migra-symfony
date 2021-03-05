@@ -235,6 +235,16 @@ $(function(){
     var typingTimer;
     var doneTypingInterval = 600;
     
+    $(document).on('keyup','input[name="cityname"], input[name="countryname"], input[name="statename"]',function(e){
+        if($(this).is('input[name="cityname"]')){
+            searchDyn('city'); 
+        } else if ($(this).is('input[name="countryname"]')) {
+            searchDyn('country'); 
+        } else {
+            searchDyn('state'); 
+        }
+    });
+
     $(document).on('keyup','input[name="firmname"], input[name="username"]',function(e){
         var $this = $(this);
         var element = $this.is('input[name="firmname"]') ? 'firm' : 'user';
@@ -250,6 +260,9 @@ $(function(){
         const $inputZone = $this.closest(`.${element}-field-zone`);
 
         if ($this.prev().is(':visible')){
+            if($addUserElmtModal.data('qt') == 'u'){
+                $('.role-input-zone').show();
+            }
             $this.prev().attr('style','display:none!important');
         }
 
@@ -307,16 +320,17 @@ $(function(){
 
             } else {
 
-                if(($selectedOpt.attr('data-uid') != "" || $selectedOpt.attr('data-euid') != "")){
+                if(($selectedOpt.attr('data-gid'))){
+                    $inputZone.find('input[name="gid"]').val($selectedOpt.attr('data-gid'));
+                    $inputZone.find('input[name="uid"]').val($selectedOpt.attr('data-uid'));
                     if(onActivityPage){
-                        $inputZone.find('input[name="uid"]').val($selectedOpt.attr('data-uid'));
                         $inputZone.find('input[name="euid"]').val($selectedOpt.attr('data-euid'));
                         $addUserElmtModal.find('input[name="cid"]').val($selectedOpt.attr('data-cid'));
                         $inputZone.find('input[name="tid"]').val($selectedOpt.attr('data-tid'));
-                    } else {
+                    } /*else {
                         $inputZone.find('input[name="uid"]').val($selectedOpt.attr('data-uid'));
-                    }
-                    parseInt($selectedOpt.attr('data-em')) ? $('.username-part .go-next').removeClass('go-to-email') : $('.username-part .go-next').addClass('go-to-email');
+                    }*/
+                    parseInt($selectedOpt.attr('data-em')) && $addUserElmtModal.data('qt') == 'p' ? $('.username-part .go-next').removeClass('go-to-email') : $('.username-part .go-next').addClass('go-to-email');
                 }
             }
         }
@@ -367,6 +381,26 @@ $(function(){
 
     });
 
+    $('[name*="citySelector"], [name*="countrySelector"], [name*="stateSelector"]').on('change',function(){    
+        var $this = $(this);
+        var $selectedOpt = $this.find(":selected");
+        const $inputZone = $this.closest(`.location-element-field-zone`);
+
+        if($selectedOpt.data('cou-id')){
+            $('[name*="countryname"]').parent().find('label').addClass('active');
+            $('[name*="countryname"]').val($selectedOpt.data('cou-name'));
+            $('[name*="countrySelector"]').append(`<option value="${$selectedOpt.data('cou-id')}">${$selectedOpt.data('cou-name')}</option>`);
+        }
+
+        if($selectedOpt.data('sta-id')){
+            $('[name*="statename"]').parent().find('label').addClass('active'); 
+            $('[name*="statename"]').val($selectedOpt.data('sta-name'));
+            $('[name*="stateSelector"]').append(`<option value="${$selectedOpt.data('sta-id')}">${$selectedOpt.data('sta-name')}</option>`);
+        }
+
+        $inputZone.find(`input[type="text"]`).val($selectedOpt.text().split(',')[0]);
+    });
+
     $('[name="partAccountSelector"]').on('change',function(){
         var $this = $(this);
         var $selectedOpt = $this.find(":selected");
@@ -404,6 +438,43 @@ $(function(){
     function addUser(){
         $.post(auurl,$('#userClientForm').serialize())
         .done(function(data){
+            const id = data.id;
+            $('.tab [href="#users"]').click();
+            $departmentContainer = $(`.no-department-holder`);
+            $userElmt = $($departmentContainer.data('prototype-user'));
+            $userElmt.attr({
+                'data-id' : id,
+                'data-email' : $('.email-part input[name="email"]').val(),
+                'data-position' : ''
+            })
+            $userElmt.find('.user-name').append($('.username-part input[name="username"]').val());
+            nbUsersWithoutDpt = parseInt($departmentContainer.find('.nb-department-users').text());
+            $departmentContainer.find('.nb-department-users').empty().text(nbUsersWithoutDpt + 1);
+            $departmentContainer.find('.users-list').append($userElmt);
+            sanitizeAddUserElmtModal();
+            /*
+            if(data.os){
+                
+                const $modal = $('#linkSubscriptionToUser');
+                const $subUnlinkedAccount = $($table.data('prototype')); 
+                const $table = $modal.find('table');
+
+                $.get(osurl,null)
+                .done(function(subscriptions){
+                    $selector = $(`<select name="sc_${id}"></select>`);
+                    $.each(subscriptions,function(_i,s){
+                        $selector.append(`<option value="${_i}">${'Premium Subscription ' + _i + ' - bought on ' + (new Date(s.created * 1000)).toLocaleString(lg+'-'+lg.toUpperCase(),occurenceOptions) + ' - ' + si.quantity }</option>`);
+                    });
+                    $selector.material_select();
+                    $subUnlinkedAccount.find('.sub-choice').append($selector);
+                })
+                                
+                $subUnlinkedAccount.find('.user-profile-l-picture').data('src',a.pic);
+                $subUnlinkedAccount.find('.user-name').append(a.name);
+                $subUnlinkedAccount.find('input[type="checkbox"]').attr('name',`assoc_${id}`);
+                $table.append($subUnlinkedAccount);
+                $modal.modal('open', {dismissible: false});
+            }*/
         })
     }
 
@@ -629,7 +700,8 @@ $(function(){
     function searchDyn(element){
         
         clearTimeout(typingTimer);
-        $inputElmt = element == 'firm' ? $('input[name="firmname"]') : $('input[name="username"]');
+        $inputElmt = $(`input[name="${element}name"]`);
+        $inputZone = $inputElmt.parent();
         if(element == 'firm'){
             if(onPwdPage){
                 qt = 'wf';
@@ -638,9 +710,17 @@ $(function(){
             }else{
                 qt = 'o';
             }
-        } else {
+        } else if (element == 'user') {
             qt = $addUserElmtModal.attr('data-qt');
-        };
+        } else if (element == 'city') {
+            qt = 'cit';
+        } else if (element == 'country') {
+            qt = 'cou';
+        } else if (element == 'state') {
+            qt = 'sta';
+        }
+
+        isLocElmtQuery = qt == 'cit' || qt == 'cou' || qt == 'sta';
 
         var qid = 
             $('#defineSuperAdmin').length && $('#defineSuperAdmin').is(':visible') ? $('#defineSuperAdmin').data('id') : (
@@ -661,6 +741,9 @@ $(function(){
 
             $selector.closest('.select-wrapper').hide();
             $(`.${element}name-part .go-next`).addClass('disabled-btn');
+            if(qt == 'u'){
+                $('.role-input-zone').hide();
+            }
 
         } else {
 
@@ -678,12 +761,14 @@ $(function(){
             $(`.${element}name-part .query-info-holder`).children().hide();
             //$(`.${element}name-part`).find('.unexisting-element').show();
         }
-        if($selector.find('option:selected').length && $inputElmt.val() != $selector.find('option:selected').text()){
-            $inputZone = $inputElmt.parent();
+
+        // In case user changes value of input and MSelect value does not match, we remove selected value
+        if($inputZone.find('li.selected').length && $inputElmt.val() != $inputZone.find('li.selected').text()){
+            
             $inputZone.find('input').not($inputElmt).each(function(i,e){
                 $(e).removeAttr('value');
             })
-            $inputZone.find('.s-firm-option-logo, .s-user-option-logo').remove();
+            $inputZone.not('.select-wrapper').find('.s-firm-option-logo, .s-user-option-logo').remove();
             $inputElmt.removeClass('part-feeded');
         }
     
@@ -693,8 +778,13 @@ $(function(){
                 const params = {name: $inputElmt.val(), qt: qt, qid: qid};
                 $.post(surl,params)
                     .done(function(data){
-    
+                        
                         if(!data.qParts.length){
+
+                            if($addUserElmtModal.data('qt') == 'u'){
+                                $('.role-input-zone').show();
+                            }
+
                             $inputElmt.removeAttr('value').attr('data-nf',$inputElmt.val());
                             $selector.empty();
                             $selector.material_select();
@@ -712,116 +802,169 @@ $(function(){
                             $(`.${element}name-part .go-next`).addClass('disabled-btn');
                         }
                         
-                        $selector.closest('.select-wrapper').find('img').remove();
-                        $selector.empty();
-                        $.each(data.qParts,function(key,el){
-                            let elName = el.username ? el.username : el.orgName;
-                            var isOrg = el.orgName && !el.username;
-                            let $option = $(`<option value="${isOrg ? 'wf' : 'gu'}-${isOrg ? el.wfiId : el.id}">${elName}</option>`);
-                            let isDataArray = Array.isArray(el.usrId);
-                            if(isDataArray && el.usrId.length > 1){
-                                $option.addClass('multiple');
-                            }
-                            if(el.ex){
-                                $option.prop('disabled',true);
-                            }
-                            if(el.synth){
-                                if(isDataArray){
-                                    if(!isArrayNull(el.synth)){
-                                        $option.attr('data-synth',el.synth.join());
-                                    } 
+                        //$selector.closest('.select-wrapper').find('img').remove();
+                        //$selector.empty();
+                        optionIds = $selector.find('option').map(function(i,e){return $(e).val()}).toArray();
+
+                        
+                        if(!isLocElmtQuery){
+
+                            $.each(data.qParts,function(key,el){
+
+                                optionVal = `${isOrg ? 'wf' : 'gu'}-${isOrg ? el.wfiId : el.gid}`;
+                                if(optionIds.length && optionIds.indexOf(optionVal) > -1){
+                                    optionIds.splice(optionIds.indexOf(optionVal),1);
+                                    return;
                                 } else {
-                                    $option.attr('data-synth',el.synth);
-                                }
-                            }
-                            if(el.usrId){
-                                if(isDataArray){
-                                    if(!isArrayNull(el.usrId)){
-                                        $option.attr('data-uid',el.usrId.join());
-                                    } 
-                                } else {
-                                    $option.attr('data-uid',el.usrId);
-                                }
-                            }
-                            if(el.extUsrId){
-                                if(isDataArray){
-                                    if(!isArrayNull(el.extUsrId)){
-                                        $option.attr('data-euid',el.extUsrId.join());
-                                    } 
-                                } else {
-                                    $option.attr('data-euid',el.extUsrId);
-                                }
-                            }
-                            if(el.wfiId){
-                                if(isDataArray){
-                                    if(!isArrayNull(el.wfiId)){
-                                        $option.attr('data-wid',el.wfiId.join());
-                                    } 
-                                } else {
-                                    $option.attr('data-wid',el.wfiId);
-                                }
-                            }
-                            if(el.orgId){
-                                if(isDataArray){
-                                    if(!isArrayNull(el.orgId)){
-                                        $option.attr('data-oid',el.orgId.join());
-                                    } 
-                                } else {
-                                    $option.attr('data-oid',el.orgId);
-                                }
-                            }
-                            if(el.cliId){
-                                if(isDataArray){
-                                    if(!isArrayNull(el.cliId)){
-                                        $option.attr('data-cid',el.cliId.join());
-                                    } 
-                                } else {
-                                    $option.attr('data-cid',el.cliId);
-                                }
-                            }
-                            if(el.orgName){
-                                if(isDataArray){
-                                    if(!isArrayNull(el.orgName)){
-                                        $option.attr('data-org-name',el.orgName.join());
-                                    } 
-                                } else {
-                                    $option.attr('data-org-name',el.orgName);
-                                }
-                            }
-                            if(el.orgLogo){
-                                if(isDataArray){
-                                    if(!isArrayNull(el.orgLogo)){
-                                        $option.attr('data-org-logo',el.orgLogo.join());
-                                    } 
-                                } else {
-                                    $option.attr('data-org-logo',el.orgLogo);
-                                }
-                            }
-                            if(el.hasEm){
-                                if(isDataArray){
-                                    if(!isArrayNull(el.hasEm)){
-                                        $option.attr('data-em',el.hasEm.join());
-                                    } 
-                                } else {
-                                    $option.attr('data-em',el.hasEm);
-                                }
-                            }  
-                            if(!$option.attr('data-org-logo') && el.wfiLogo){
-                                if(el.wfiLogo){
-                                    if(isDataArray){
-                                        if(!isArrayNull(el.wfiLogo)){
-                                            $option.attr('data-wf-logo',el.wfiLogo.join());
-                                        } 
-                                    } else {
-                                        $option.attr('data-wf-logo',el.wfiLogo);
+                                    let elName = el.username ? el.username : el.orgName;
+                                    var isOrg = el.orgName && !el.username;
+                                    let $option = $(`<option value="${optionVal}">${elName}</option>`);
+                                    let isDataArray = Array.isArray(el.usrId);
+                                    if(isDataArray && el.usrId.length > 1){
+                                        $option.addClass('multiple');
                                     }
+                                    if(el.ex){
+                                        $option.prop('disabled',true);
+                                    }
+                                    if(el.synth){
+                                        if(isDataArray){
+                                            if(!isArrayNull(el.synth)){
+                                                $option.attr('data-synth',el.synth.join());
+                                            } 
+                                        } else {
+                                            $option.attr('data-synth',el.synth);
+                                        }
+                                    }
+                                    if(el.gid){
+                                        $option.attr('data-gid',el.gid);
+                                    }
+                                    if(el.usrId){
+                                        if(isDataArray){
+                                            if(!isArrayNull(el.usrId)){
+                                                $option.attr('data-uid',el.usrId.join());
+                                            } 
+                                        } else {
+                                            $option.attr('data-uid',el.usrId);
+                                        }
+                                    }
+                                    if(el.extUsrId){
+                                        if(isDataArray){
+                                            if(!isArrayNull(el.extUsrId)){
+                                                $option.attr('data-euid',el.extUsrId.join());
+                                            } 
+                                        } else {
+                                            $option.attr('data-euid',el.extUsrId);
+                                        }
+                                    }
+                                    if(el.wfiId){
+                                        if(isDataArray){
+                                            if(!isArrayNull(el.wfiId)){
+                                                $option.attr('data-wid',el.wfiId.join());
+                                            } 
+                                        } else {
+                                            $option.attr('data-wid',el.wfiId);
+                                        }
+                                    }
+                                    if(el.orgId){
+                                        if(isDataArray){
+                                            if(!isArrayNull(el.orgId)){
+                                                $option.attr('data-oid',el.orgId.join());
+                                            } 
+                                        } else {
+                                            $option.attr('data-oid',el.orgId);
+                                        }
+                                    }
+                                    if(el.cliId){
+                                        if(isDataArray){
+                                            if(!isArrayNull(el.cliId)){
+                                                $option.attr('data-cid',el.cliId.join());
+                                            } 
+                                        } else {
+                                            $option.attr('data-cid',el.cliId);
+                                        }
+                                    }
+                                    if(el.orgName){
+                                        if(isDataArray){
+                                            if(!isArrayNull(el.orgName)){
+                                                $option.attr('data-org-name',el.orgName.join());
+                                            } 
+                                        } else {
+                                            $option.attr('data-org-name',el.orgName);
+                                        }
+                                    }
+                                    if(el.orgLogo){
+                                        if(isDataArray){
+                                            if(!isArrayNull(el.orgLogo)){
+                                                $option.attr('data-org-logo',el.orgLogo.join());
+                                            } 
+                                        } else {
+                                            $option.attr('data-org-logo',el.orgLogo);
+                                        }
+                                    }
+                                    if(el.hasEm){
+                                        if(isDataArray){
+                                            if(!isArrayNull(el.hasEm)){
+                                                $option.attr('data-em',el.hasEm.join());
+                                            } 
+                                        } else {
+                                            $option.attr('data-em',el.hasEm);
+                                        }
+                                    }  
+                                    if(!$option.attr('data-org-logo') && el.wfiLogo){
+                                        if(el.wfiLogo){
+                                            if(isDataArray){
+                                                if(!isArrayNull(el.wfiLogo)){
+                                                    $option.attr('data-wf-logo',el.wfiLogo.join());
+                                                } 
+                                            } else {
+                                                $option.attr('data-wf-logo',el.wfiLogo);
+                                            }
+                                        }
+                                    }
+                                    if(el.hasOwnProperty('usrPicture')){
+                                        $option.attr('data-usr-picture',el.usrPicture ? el.usrPicture : "");
+                                    }
+                                    $selector.append($option);
+                                
                                 }
-                            }
-                            if(el.hasOwnProperty('usrPicture')){
-                                $option.attr('data-usr-picture',el.usrPicture ? el.usrPicture : "");
-                            }
-                            $selector.append($option);
-                        })
+
+                                $.each(optionIds,function(i,e){
+                                    $selector.find(`option[value="${e}"]`).remove();
+                                })
+
+                            })
+
+                        } else {
+
+                            $.each(data.qParts,function(key,el){
+                                let $option = $(`<option value="${el.id}">${el.name}${qt == 'cit' && el.staName ? ', ' + el.staName : ''}${(qt == 'cit' || qt == 'sta') && el.couName ? ', ' + el.couName : ''}</option>`);
+                                if(el.couAbbr){
+                                    $option.attr('data-cou-abbr',el.couAbbr);
+                                } 
+                                if(el.couId){
+                                    $option.attr('data-cou-id',el.couId);
+                                } 
+                                if(el.couName){
+                                    $option.attr('data-cou-name',el.couName);
+                                } 
+                                if(el.staId){
+                                    $option.attr('data-sta-id',el.staId);
+                                } 
+                                if(el.couId){
+                                    $option.attr('data-sta-name',el.staName);
+                                } 
+                                if(el.citId){
+                                    $option.attr('data-cit-id',el.citId);
+                                } 
+                                if(el.citName){
+                                    $option.attr('data-cit-name',el.citName);
+                                } 
+                                $selector.append($option);
+                            })
+
+                        }
+
+                        
                         $selector.material_select();
                         //$selectorMElmts = $selector.closest('.select-wrapper')
                         $selector.prev().find('li').each(function(i,e){
@@ -833,18 +976,22 @@ $(function(){
 
                             var usrAttr = $relatedOpt.attr('data-uid');
                             
-                            if(element != 'firm'){
-                                uIds = $relatedOpt.attr('data-uid') ? $relatedOpt.attr('data-uid').split(',') : [];
-                                euIds = $relatedOpt.attr('data-euid') ? $relatedOpt.attr('data-euid').split(',') : [];
-                                hasEms = $relatedOpt.attr('data-em') ? $relatedOpt.attr('data-em').split(',') : [];
+                            if(!isLocElmtQuery){
+
+                                if(element != 'firm'){
+                                    uIds = $relatedOpt.attr('data-uid') ? $relatedOpt.attr('data-uid').split(',') : [];
+                                    euIds = $relatedOpt.attr('data-euid') ? $relatedOpt.attr('data-euid').split(',') : [];
+                                    hasEms = $relatedOpt.attr('data-em') ? $relatedOpt.attr('data-em').split(',') : [];
+                                }
+                                wIds = $relatedOpt.attr('data-wid') ? $relatedOpt.attr('data-wid').split(',') : null;
+                                oIds = $relatedOpt.attr('data-oid') ? $relatedOpt.attr('data-oid').split(',') : null;
+                                cIds = $relatedOpt.attr('data-cid') ? $relatedOpt.attr('data-cid').split(',') : null;
+                                oLogos = $relatedOpt.attr('data-org-logo') ? $relatedOpt.attr('data-org-logo').split(',') : null;
+                                oNames = $relatedOpt.attr('data-org-name') ? $relatedOpt.attr('data-org-name').split(',') : null;
+                                wLogos = $relatedOpt.attr('data-wf-logo') ? $relatedOpt.attr('data-wf-logo').split(',') : null;
+                                synth = $relatedOpt.attr('data-synth') ? $relatedOpt.attr('data-synth').split(',') : null;
+                            
                             }
-                            wIds = $relatedOpt.attr('data-wid') ? $relatedOpt.attr('data-wid').split(',') : null;
-                            oIds = $relatedOpt.attr('data-oid') ? $relatedOpt.attr('data-oid').split(',') : null;
-                            cIds = $relatedOpt.attr('data-cid') ? $relatedOpt.attr('data-cid').split(',') : null;
-                            oLogos = $relatedOpt.attr('data-org-logo') ? $relatedOpt.attr('data-org-logo').split(',') : null;
-                            oNames = $relatedOpt.attr('data-org-name') ? $relatedOpt.attr('data-org-name').split(',') : null;
-                            wLogos = $relatedOpt.attr('data-wf-logo') ? $relatedOpt.attr('data-wf-logo').split(',') : null;
-                            synth = $relatedOpt.attr('data-synth') ? $relatedOpt.attr('data-synth').split(',') : null;
                             
                             //if(qt == 'p' || qt == 'eu' || qt == 'u' || qt == 'i'|| qt == 'iu'){
                             if(typeof usrAttr !== typeof undefined && usrAttr !== false){
@@ -885,10 +1032,16 @@ $(function(){
                                     $(e).append($orgImagesHolder);
                                 }
                             } else {
-                                logo = oLogos != null ? oLogos[0] :
-                                    wLogos != null ? wLogos[0] : 'no-picture.png';
-                                folder = oIds ? 'org' : 'wf';
-                                $(e).prepend(`<img class="s-firm-option-logo" src="/lib/img/${folder}/${logo}">`);
+
+                                if(!isLocElmtQuery){
+                                    logo = oLogos != null ? oLogos[0] :
+                                        wLogos != null ? wLogos[0] : 'no-picture.png';
+                                    folder = oIds ? 'org' : 'wf';
+                                    $(e).prepend(`<img class="s-firm-option-logo" src="/lib/img/${folder}/${logo}">`);
+                                } else {
+                                    $(e).prepend(`<div class="m-left s-firm-option-logo flag ${$relatedOpt.attr('data-cou-abbr').toLowerCase()}">`);
+                                }
+
                             }                        
                             $(e).addClass('flex-center');
                         });
@@ -902,10 +1055,27 @@ $(function(){
 
         $(document).on('click',function(e){
             var $this = $(e.target);
-            var element = $('.firmname-part').is(':visible') ? 'firm' : 'user';
-            var $visibleSel = $(`.${element}name-part`).find('.dropdown-content:visible');    
-            if($visibleSel.closest(`.${element}-field-zone`).length || $this.hasClass(`${element}-name`)) {
-                if (!$this.hasClass(`${element}-name`) && !$this.is($visibleSel) && $visibleSel.length){
+            var element = $('.firmname-part').is(':visible') ? 'firm' : 
+                $('.username-part').is(':visible') ? 'user' : 'location-elmt';
+
+            if(element != 'location-elmt'){
+                
+                var $visibleSel = $(`.${element}name-part`).find('.dropdown-content:visible');    
+                if($visibleSel.closest(`.${element}-field-zone`).length || $this.hasClass(`${element}-name`)) {
+                    if (!$this.hasClass(`${element}-name`) && !$this.is($visibleSel) && $visibleSel.length){
+                        $visibleSel.attr('style','display:none!important');
+                    } else if($this.is(`input[name="${element}name"]`)){
+                        // Showing selection again in case user clicks on input again
+                        $sel = $(`.${element}name-part`).find('.dropdown-content');
+                        if($sel.find('li').length){
+                            $sel.removeAttr('style');
+                        }
+                    }
+                }
+            } else {
+                var $visibleSel = $('.location-elmts-zone').find('.dropdown-content:visible');    
+
+                if ($this.is($visibleSel) && $visibleSel.length){
                     $visibleSel.attr('style','display:none!important');
                 } else if($this.is(`input[name="${element}name"]`)){
                     $sel = $(`.${element}name-part`).find('.dropdown-content');
@@ -913,7 +1083,10 @@ $(function(){
                         $sel.removeAttr('style');
                     }
                 }
+                
+
             }
+
         })
     }
 
@@ -924,13 +1097,14 @@ $(function(){
     })
 
     $(document).on('click','.update-user-btn',function(){
-        
-        const $userElmt = onClientPage ? $(this).closest('.individual') : $(this).closest('.users-list--item');
+        const $this = $(this);
+        const $userElmt = onClientPage ? $this.closest('.individual') : $this.closest('.users-list--item');
         const isAllUsersPageInternal = onAllUsersPage && !$userElmt.closest('.client-individuals').length;
         $('.delete-user-btn').attr('href',
             onClientPage ? '#deleteExternalUser' : 
                 $userElmt.closest('.client-individuals').length ? '#deleteClient' : '#deleteUser'
-        ) 
+        )
+        $this.hasClass('is-ma') ? $('.delete-user-btn').addClass('is-ma') : $('.delete-user-btn').removeClass('is-ma')
         $updateModal.find('input').val("");
         $updateModal.find('.save-user-updates').removeAttr('data-id data-eid');
         $updateModal.find('.save-user-updates').attr(`data-${onClientPage ? 'e' : ''}id`, $userElmt.data('cid') ? $userElmt.data('cid') : ($userElmt.data('eid') ? $userElmt.data('eid') : $userElmt.data('id')));
@@ -1087,7 +1261,9 @@ $(function(){
     })
 
     $(document).on('mouseover','#updateUser .username-data',function(){
-        $(this).find('.delete-user-btn').css('visibility','');
+        if(!$(this).find('.delete-user-btn').hasClass('is-ma')){
+            $(this).find('.delete-user-btn').css('visibility','');
+        }
     }).on('mouseleave','#updateUser .username-data',function(){
         $(this).find('.delete-user-btn').css('visibility','hidden');
     })
@@ -1173,4 +1349,6 @@ $(function(){
         $addUserElmtModal.find('.initial-part').show().removeClass('initial-part');
         $addUserElmtModal.modal('close');
     }
+
+
 })

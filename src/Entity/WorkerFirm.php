@@ -160,6 +160,12 @@ class WorkerFirm extends DbObject
     public $mainSector;
 
     /**
+     * @ManyToOne(targetEntity="ZIPCode", inversedBy="firms")
+     * @JoinColumn(name="zip_code_zip_id", referencedColumnName="zip_id", nullable=true)
+     */
+    public $ZIPCode;
+
+    /**
      * @ManyToOne(targetEntity="City", inversedBy="firms")
      * @JoinColumn(name="city_cit_id", referencedColumnName="cit_id", nullable=true)
      */
@@ -226,6 +232,7 @@ class WorkerFirm extends DbObject
      * @param $city
      * @param $state
      * @param $country
+     * @param $ZIPCode
      * @param $experiences
      * @param $mails
      */
@@ -255,6 +262,7 @@ class WorkerFirm extends DbObject
         $city = null,
         $state = null,
         $country = null,
+        $ZIPCode = null,
         $parent = null
         )
     {
@@ -281,6 +289,7 @@ class WorkerFirm extends DbObject
         $this->nbActiveExp = $wfi_nb_active_exp;
         $this->created = $wfi_created;
         $this->mainSector = $mainSector;
+        $this->ZIPCode = $ZIPCode;
         $this->city = $city;
         $this->state = $state;
         $this->country = $country;
@@ -543,7 +552,7 @@ class WorkerFirm extends DbObject
     }
 
     /**
-     * @return mixed
+     * @return City
      */
     public function getCity()
     {
@@ -556,6 +565,23 @@ class WorkerFirm extends DbObject
     public function setCity(?City $city): self
     {
         $this->city = $city;
+        return $this;
+    }
+
+    /**
+     * @return ZIPCode
+     */
+    public function getZIPCode()
+    {
+        return $this->ZIPCode;
+    }
+
+    /**
+     * @param ZIPCode $ZIPCode
+     */
+    public function setZIPCode(?ZIPCode $ZIPCode): self
+    {
+        $this->ZIPCode = $ZIPCode;
         return $this;
     }
 

@@ -58,6 +58,7 @@ class NotificationManager
                 }
                 $stage = $event->getStage();
                 $activity = $stage->getActivity();
+                $organization = $activity->getOrganization();
                 break;
 
             case 'Activity' :
@@ -68,18 +69,19 @@ class NotificationManager
             case 'Stage' :
                 $stage = $element;
                 $activity = $stage->getActivity();
+                $organization = $activity->getOrganization();
                 break;
 
             case 'UserMaster' :
                 $stage = $element->getStage();
                 $activity = $stage ? $stage->getActivity() : $element->getActivity();
+                $organization = $activity->getOrganization();
                 break;
                 
             case 'User' :
                 $user = $element;
                 $organization = $element->getOrganization();
                 break;
-
         }
 
 
@@ -158,7 +160,7 @@ class NotificationManager
                 ->filter(fn(ElementUpdate $eu) => $eu->getViewed() == null && $eu->getMailed() == null)
                 ->matching(Criteria::create()->orderBy(['status' => Criteria::ASC, 'activity' => Criteria::DESC, 'stage' => Criteria::ASC, 'event' => Criteria::ASC, 'eventDocument' => Criteria::ASC, 'eventComment' => Criteria::ASC]));
 
-            $creationUpdates = $unseenUpdates->filter(fn(ElementUpdate $eu) => $eu->getType() == ElementUpdate::CREATION);
+            $creationUpdates = $unseenUpdates->filter(fn(ElementUpdate $eu) => $eu->getStatus() == ElementUpdate::CREATION);
             if($creationUpdates->count() > 0){
                 $dataCreationUpdate['stages'] = $creationUpdates->filter(fn(ElementUpdate $eu) => $eu->getStage() != null && $eu->getParticipation() == null && $eu->getEvent() == null)->map(fn(ElementUpdate $eu) => $eu->getStage())->getValues();
                 $dataCreationUpdate['events'] = $creationUpdates->filter(fn(ElementUpdate $eu) => $eu->getEvent() != null && $eu->getEventDocument() == null && $eu->getEventComment() == null)->map(fn(ElementUpdate $eu) => $eu->getEvent())->getValues();
@@ -167,7 +169,7 @@ class NotificationManager
                 $dataUpdate['creations'] = $dataCreationUpdate;
             }
 
-            $modificationUpdates = $unseenUpdates->filter(fn(ElementUpdate $eu) => $eu->getType() == ElementUpdate::CHANGE);
+            $modificationUpdates = $unseenUpdates->filter(fn(ElementUpdate $eu) => $eu->getStatus() == ElementUpdate::CHANGE);
             if($modificationUpdates->count() > 0){
                 $dataModificationUpdate['stages'] = $modificationUpdates->filter(fn(ElementUpdate $eu) => $eu->getStage() != null && $eu->getParticipation() == null && $eu->getEvent() == null)->map(fn(ElementUpdate $eu) => ['stage' => $eu->getStage(), 'property' => $eu->getProperty()])->getValues();
                 $dataModificationUpdate['events'] = $modificationUpdates->filter(fn(ElementUpdate $eu) => $eu->getEvent() != null && $eu->getEventDocument() == null && $eu->getEventComment() == null)->map(fn(ElementUpdate $eu) => ['event' => $eu->getEvent(), 'property' => $eu->getProperty()])->getValues();
@@ -176,7 +178,7 @@ class NotificationManager
                 $dataUpdate['modifications'] = $dataModificationUpdate;
             }
 
-            $deletionUpdates = $unseenUpdates->filter(fn(ElementUpdate $eu) => $eu->getType() == ElementUpdate::DELETION);
+            $deletionUpdates = $unseenUpdates->filter(fn(ElementUpdate $eu) => $eu->getStatus() == ElementUpdate::DELETION);
             if($deletionUpdates->count() > 0){
                 $dataDeletionUpdate['stages'] = $deletionUpdates->filter(fn(ElementUpdate $eu) => $eu->getStage() != null && $eu->getParticipation() == null && $eu->getEvent() == null)->map(fn(ElementUpdate $eu) => $eu->getStage())->getValues();
                 $dataDeletionUpdate['events'] = $deletionUpdates->filter(fn(ElementUpdate $eu) => $eu->getEvent() != null && $eu->getEventDocument() == null && $eu->getEventComment() == null)->map(fn(ElementUpdate $eu) => $eu->getEvent())->getValues();

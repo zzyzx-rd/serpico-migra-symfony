@@ -6,8 +6,10 @@ $(document).ready(function () {
     input = $('#freesubscription');
     console.log(input);
     val = $('.user').val();
-    priceTblStandard = [7,6,5];
-    priceTblPremium = [14,10,7] ;
+    //priceTblStandard = [7,6,5];
+    //priceTblPremium = [14,10,7];
+    priceTblStandard = [15,15,15];
+    priceTblPremium = [15,15,15];
     standard = $('.price-standard ');
     premium = $('.price-premium ');
     tblVal = [];
@@ -44,8 +46,10 @@ $(document).ready(function () {
     $('.number').on('change',function() {
 
         val = $(this).find('option:selected').val();
-        priceTblStandard = [7,6,5];
-        priceTblPremium = [14,10,7] ;
+        //priceTblStandard = [7,6,5];
+        //priceTblPremium = [14,10,7];
+        priceTblStandard = [15,15,15];
+        priceTblPremium = [15,15,15];
         standard = $('.standard h1');
         premium = $('.premium h1');
 
@@ -67,19 +71,21 @@ $(document).ready(function () {
     $('.user').on('input',function() {
         const nbUsers = $(this).val();
         const isYearly = $('.switch input').is(':checked');
-        var totalPrice = Math.min(100,nbUsers) * (isYearly ? 70 : 7) + Math.max(0, Math.min(250,nbUsers) - 100) * (isYearly ? 60 : 6) +  Math.max(0, nbUsers - 250) * (isYearly ? 50 : 5);
+        var totalPrice = Math.min(100,nbUsers) * (isYearly ? 150 : 15) + Math.max(0, Math.min(250,nbUsers) - 100) * (isYearly ? 150 : 15) +  Math.max(0, nbUsers - 250) * (isYearly ? 150 : 15);
         var VATPrice = (Math.round(totalPrice * 0.17 * 100) / 100);
         var chargedPrice = (Math.round((totalPrice + VATPrice) * 100) / 100);
+        $('.price.nb-user').empty().append(nbUsers);
         $('.total-price').empty().append(totalPrice.toString().replace('.',','));
         $('.vat-price').empty().append(VATPrice.toString().replace('.',','));
         $('.charged-price').empty().append(chargedPrice.toString().replace('.',','));
     })
 
     $('.switch input').on('change',function() {
-        
+       
         const nbUsers = $('.user').val();
         const isYearly = $(this).is(':checked');
         isYearly ? $('.reduction').css('visibility','visible') : $('.reduction').css('visibility','hidden');
+        isYearly ?  $('.price-per-user').empty().append(150) : $('.price-per-user').empty().append(15);
         var totalPrice = Math.min(100,nbUsers) * (isYearly ? 70 : 7) + Math.max(0, Math.min(250,nbUsers) - 100) * (isYearly ? 60 : 6) +  Math.max(0, nbUsers - 250) * (isYearly ? 50 : 5);
         var VATPrice = (Math.round(totalPrice * 0.17 * 100) / 100);
         var chargedPrice = (Math.round((totalPrice + VATPrice) * 100) / 100);
@@ -214,15 +220,14 @@ $(document).ready(function () {
         if($(this).closest('.flip-card').hasClass('premium')){
             $('.standard-choice').addClass('no-choice');
             $('.premium-choice').addClass('sub-choice')
-            $('.nb-user').text($('.user').val());
+            $('.ZIPCode').text($('.user').val());
             $('.account-price').text(premium.text());
             $('.price-user').text(pricePremium+ "€"+"/ per "+period);
-            }
-            else{
+            } else {
             $('.standard-choice').addClass('sub-choice');
             $('.premium-choice').addClass('no-choice');
             $('.account-price').text(standard.text());
-            $('.nb-user').text($('.user').val());
+            $('.ZIPCode').text($('.user').val());
             $('.price-user').text(priceStandard+ "€"+"/ per "+period);
             }
 
@@ -336,7 +341,7 @@ $(document).ready(function () {
     });
     $('.iban').on('click',function() {
 
-        if($('.iban-info').css("display")=="block"){
+        if($('.iban-info').css("display") == "block"){
             $('.iban-info').hide()
         }
         else {
@@ -345,11 +350,12 @@ $(document).ready(function () {
 
     });
 
+    /*
     $(this).find('.user-slider')[0].noUiSlider.on('slide', function (values, handle) {
         const $card = $($(this)[0].target.closest('.card'));
-        var price_1 = $card.find('.switch input').is(':checked') ? 70 : 7;
-        var price_2 = $card.find('.switch input').is(':checked') ? 60 : 6;
-        var price_3 = $card.find('.switch input').is(':checked') ? 50 : 5;
+        var price_1 = $card.find('.switch input').is(':checked') ? 150 : 15;
+        var price_2 = $card.find('.switch input').is(':checked') ? 150 : 15;
+        var price_3 = $card.find('.switch input').is(':checked') ? 150 : 15;
         $card.find('.user-slider')[0].nextElementSibling.innerHTML = Number(values[handle]);
         $card.find('.price-standard')[0].innerHTML = 
             Math.min(100,Number(values[handle])) * price_1 + Math.max(0, Math.min(150, Number(values[handle]) - 100)) * price_2 + Math.max(0,Math.min(1000,Number(values[handle]) - 250)) * price_3;
@@ -361,6 +367,7 @@ $(document).ready(function () {
             $userElmt.text($userElmt.text() + 's');
         }
     });
+    */
 
     $('.switch input').on('change',function(){
         const $card = $(this).closest('.card');
