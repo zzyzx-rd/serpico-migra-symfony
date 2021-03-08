@@ -371,14 +371,13 @@ function updateEvents($evgnId = null, $evnId = null) {
   //var c = now;
   
   if(ts == 'd'){
-      ci = getCookie("ci");
       var si = new Date(ci);
       wDate = moment(si);
       var ei = wDate.add(1,'d')._d;
       var nbSubInt = 12;
+
   } else if(ts == 't' || ts == 'w'){
 
-      ci = getCookie("ci");
       cy = parseInt(ci.split('-').slice(-1)[0]);
       nbInt = parseInt(ci.split('-')[1]);  
       var dateTri = datesInterval(ts, cy, nbInt);
@@ -401,6 +400,8 @@ function updateEvents($evgnId = null, $evnId = null) {
 
       var tDays = ndDayPerYears(annee);
       var nbSubInt = 12;
+      var si = new Date(`1-1-${+ci}`);
+      var ei = new Date(`12-31-${+ci} 23:59:59`);
   }
 
   $('#activities-container').attr({
@@ -533,7 +534,7 @@ function updateEvents($evgnId = null, $evnId = null) {
 
   $(window).on('resize',function(){
     //setTimeout(function(){
-      var centralElSize = $('.activity-content-stage:visible').eq(0).width();  
+      var centralElSize = mr ? $('.activity-content-stage:visible').eq(0).height() : $('.activity-content-stage:visible').eq(0).width();  
       var dateChevron = $('.chevron');
       var actCurDate = $('.curDate');
       var nbIntSubElmts = $('.ts-scale').children().not('.chevron').length;
@@ -570,7 +571,7 @@ function updateEvents($evgnId = null, $evnId = null) {
   dateUpdate();
 
 function dateUpdate(updateTimeScale = true, actSet = null) {
-    var centralElSize = $('.activity-content-stage:visible').eq(0).width();
+    var centralElSize = mr ? $('.activity-content-stage:visible').eq(0).height() : $('.activity-content-stage:visible').eq(0).width();
     var ts = getCookie("ts");
     var ci = getCookie("ci");
     y = parseInt(ci.split('-').slice(-1)[0]);
@@ -722,11 +723,11 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
       div = $('.ts-scale').children().length - 1;
   
       $('.activity-content-stage:not(.following)').css({
-          'background': 'repeating-linear-gradient('+ (mr ? 0 : 90).toString() +'deg, #f3ccff2b, #63009445 ' + (((centralElSize) / div)) + 'px, #ffffff ' + (((centralElSize) / div)) + 'px, #ffffff ' + ((centralElSize) / (div / 2)) + 'px)'
+          'background': 'repeating-linear-gradient('+ (mr ? 180 : 90).toString() +'deg, #f3ccff2b, #63009445 ' + (((centralElSize) / div)) + 'px, #ffffff ' + (((centralElSize) / div)) + 'px, #ffffff ' + ((centralElSize) / (div / 2)) + 'px)'
       });
        
       $('.activity-content-stage.following').css({
-          'background': 'repeating-linear-gradient('+ (mr ? 0 : 90).toString() +'deg, #ffe7422b, #d88e2059 ' + (((centralElSize) / div)) + 'px, #ffffff ' + (((centralElSize) / div)) + 'px, #ffffff ' + ((centralElSize) / (div / 2)) + 'px)'
+          'background': 'repeating-linear-gradient('+ (mr ? 180 : 90).toString() +'deg, #ffe7422b, #d88e2059 ' + (((centralElSize) / div)) + 'px, #ffffff ' + (((centralElSize) / div)) + 'px, #ffffff ' + ((centralElSize) / (div / 2)) + 'px)'
       });
   
       var dateChevron = $('.chevron');
@@ -735,7 +736,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
       var echelle = centralElSize / (ei - si);
       if (ei > c && c > si) {
           dateChevron.show();
-          dateChevron.css(mr ? {'top': 'calc(' + Math.round(10000 * (c - si) / (ei - si)) / 100 + '% - 2.5rem)'} :  {'left': 'calc(' + Math.round(10000 * (c - si) / (ei - si)) / 100 + '% - 10px)'});
+          dateChevron.css(mr ? {'top': 'calc(' + Math.round(10000 * (c - si) / (ei - si)) / 100 + '% - 10px)'} : {'left': 'calc(' + Math.round(10000 * (c - si) / (ei - si)) / 100 + '% - 10px)'});
           actCurDate.each(function (i, e) {
               $(e).css(mr ? {'top': Math.round(10000 * (c - si) / (ei - si)) / 100 + '%'} : {'left': Math.round(10000 * (c - si) / (ei - si)) / 100 + '%'});
               $(e).show();
@@ -888,65 +889,69 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
             $this.closest('.activity-holder').removeClass('tbd');
         })
     
-        if(!$('.stage-element:visible').length){
-          closestActData = closestIntervalActivities(si,ei);
-          if(!$('.no-int-act-overlay').length){
-            $noIntActOverlay = $($('.process-list').data('prototype-no-int-act'));
-            $('.process-list').append($noIntActOverlay);
-          } else {
-            $noIntActOverlay = $('.no-int-act-overlay');
-          }
-          bwdData = closestActData.b;
-          fwdData = closestActData.f;
-          if(bwdData.d){
-            $stgEl = $('.stage-element').eq(bwdData.e);
-            actName = $stgEl.closest('.activity-holder').find('.act-info .act-info-name').text();
-            shortSD = (new Date(+$stgEl.data('sd') * 1000)).toLocaleDateString(lg+'-'+lg.toUpperCase(), shortDateOptions);
-            shortED = (new Date($stgEl.data('p') ? (+$stgEl.data('sd') + +$stgEl.data('p')) * 1000 : new Date().getTime())).toLocaleDateString(lg+'-'+lg.toUpperCase(), shortDateOptions);
-            $noIntActOverlay.find('.bwd-act-data').empty().append(`<div class="bwd-act-name dd-orange-text bold-1">${actName}</div> <div class="bwd-act-dates">${shortSD} - ${shortED}</div>`);
-            $noIntActOverlay.find('.bwd-act-title').empty().append($noIntActOverlay.find('.bwd-act-title').data('default'));
-            $noIntActOverlay.find('.fa-caret-left').show();
-            $('.closest-bwd-act')
-              .css('cursor','pointer')
-              .attr('data-nb-int',bwdData.n)
-              .addClass('clickable');
-          } else {
-            $noIntActOverlay.find('.fa-caret-left').hide();
-            $noIntActOverlay.find('.bwd-act-title').empty().append($noIntActOverlay.find('.bwd-act-title').data('none'));
-            $('.closest-bwd-act')
-              .css('cursor','initial')
-              .removeAttr('data-nb-int')
-              .removeClass('clickable');
-          }
-          if(fwdData.d){
-            $stgEl = $('.stage-element').eq(fwdData.e);
-            actName = $stgEl.closest('.activity-holder').find('.act-info .act-info-name').text();
-            shortSD = (new Date(+$stgEl.data('sd') * 1000)).toLocaleDateString(lg+'-'+lg.toUpperCase(), shortDateOptions);
-            shortED = (new Date($stgEl.data('p') ? (+$stgEl.data('sd') + +$stgEl.data('p')) * 1000 : new Date().getTime())).toLocaleDateString(lg+'-'+lg.toUpperCase(), shortDateOptions);
-            $noIntActOverlay.find('.fwd-act-data').empty().append(`<div class="fwd-act-name dd-orange-text bold-1">${actName}</div> <div class="fwd-act-dates">${shortSD} - ${shortED}</div>`);
-            $noIntActOverlay.find('.fwd-act-title').empty().append($noIntActOverlay.find('.fwd-act-title').data('default'));
-            $noIntActOverlay.find('.fa-caret-right').show();
-            $('.closest-fwd-act')
-              .css('cursor','pointer')
-              .attr('data-nb-int',fwdData.n)
-              .addClass('clickable');
-          } else {
-            $noIntActOverlay.find('.fa-caret-right').hide();
-            $noIntActOverlay.find('.fwd-act-title').empty().append($noIntActOverlay.find('.fwd-act-title').data('none'));
-            $('.closest-fwd-act')
-              .css('cursor','initial')
-              .removeAttr('data-nb-int')
-              .removeClass('clickable');
-          }
+        if(!isMobileView){
 
-          // If process family seen into dashboard, we change css width property no-activity panels
-          if($('.process-detail').length){
-            $('.closest-bwd-act').css('width','16%');
-            $('.closest-fwd-act').css('width','20%');
+          if(!$('.stage-element:visible').length){
+            closestActData = closestIntervalActivities(si,ei);
+            if(!$('.no-int-act-overlay').length){
+              $noIntActOverlay = $($('.process-list').data('prototype-no-int-act'));
+              $('.process-list').append($noIntActOverlay);
+            } else {
+              $noIntActOverlay = $('.no-int-act-overlay');
+            }
+            bwdData = closestActData.b;
+            fwdData = closestActData.f;
+            if(bwdData.d){
+              $stgEl = $('.stage-element').eq(bwdData.e);
+              actName = $stgEl.closest('.activity-holder').find('.act-info .act-info-name').text();
+              shortSD = (new Date(+$stgEl.data('sd') * 1000)).toLocaleDateString(lg+'-'+lg.toUpperCase(), shortDateOptions);
+              shortED = (new Date($stgEl.data('p') ? (+$stgEl.data('sd') + +$stgEl.data('p')) * 1000 : new Date().getTime())).toLocaleDateString(lg+'-'+lg.toUpperCase(), shortDateOptions);
+              $noIntActOverlay.find('.bwd-act-data').empty().append(`<div class="bwd-act-name dd-orange-text bold-1">${actName}</div> <div class="bwd-act-dates">${shortSD} - ${shortED}</div>`);
+              $noIntActOverlay.find('.bwd-act-title').empty().append($noIntActOverlay.find('.bwd-act-title').data('default'));
+              $noIntActOverlay.find('.fa-caret-left').show();
+              $('.closest-bwd-act')
+                .css('cursor','pointer')
+                .attr('data-nb-int',bwdData.n)
+                .addClass('clickable');
+            } else {
+              $noIntActOverlay.find('.fa-caret-left').hide();
+              $noIntActOverlay.find('.bwd-act-title').empty().append($noIntActOverlay.find('.bwd-act-title').data('none'));
+              $('.closest-bwd-act')
+                .css('cursor','initial')
+                .removeAttr('data-nb-int')
+                .removeClass('clickable');
+            }
+            if(fwdData.d){
+              $stgEl = $('.stage-element').eq(fwdData.e);
+              actName = $stgEl.closest('.activity-holder').find('.act-info .act-info-name').text();
+              shortSD = (new Date(+$stgEl.data('sd') * 1000)).toLocaleDateString(lg+'-'+lg.toUpperCase(), shortDateOptions);
+              shortED = (new Date($stgEl.data('p') ? (+$stgEl.data('sd') + +$stgEl.data('p')) * 1000 : new Date().getTime())).toLocaleDateString(lg+'-'+lg.toUpperCase(), shortDateOptions);
+              $noIntActOverlay.find('.fwd-act-data').empty().append(`<div class="fwd-act-name dd-orange-text bold-1">${actName}</div> <div class="fwd-act-dates">${shortSD} - ${shortED}</div>`);
+              $noIntActOverlay.find('.fwd-act-title').empty().append($noIntActOverlay.find('.fwd-act-title').data('default'));
+              $noIntActOverlay.find('.fa-caret-right').show();
+              $('.closest-fwd-act')
+                .css('cursor','pointer')
+                .attr('data-nb-int',fwdData.n)
+                .addClass('clickable');
+            } else {
+              $noIntActOverlay.find('.fa-caret-right').hide();
+              $noIntActOverlay.find('.fwd-act-title').empty().append($noIntActOverlay.find('.fwd-act-title').data('none'));
+              $('.closest-fwd-act')
+                .css('cursor','initial')
+                .removeAttr('data-nb-int')
+                .removeClass('clickable');
+            }
+  
+            // If process family seen into dashboard, we change css width property no-activity panels
+            if($('.process-detail').length){
+              $('.closest-bwd-act').css('width','16%');
+              $('.closest-fwd-act').css('width','20%');
+            }
+            
+          } else { 
+             $('.no-int-act-overlay').remove();
           }
-          
-        } else { 
-           $('.no-int-act-overlay').remove();
+        
         }
     
           
@@ -1145,8 +1150,33 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
               ci = wDate.add(1,'d')._d.toLocaleString('en-US',{year: 'numeric', month: 'numeric', day: 'numeric'});
             }
         }
+
+        if(ts == 'd'){
+          var si = new Date(ci);
+          var ei = wDate.add(1,'d')._d;
+        } else if(ts == 't' || ts == 'w'){
+          cy = parseInt(ci.split('-').slice(-1)[0]);
+          nbInt = parseInt(ci.split('-')[1]);  
+          var dateTri = datesInterval(ts, cy, nbInt);
+          var si = dateTri[0];
+          var ei = dateTri[1];
+        } else {
+            var si = new Date(`1-1-${+ci}`);
+            var ei = new Date(`12-31-${+ci} 23:59:59`);
+        }
+    
+        $('#activities-container').attr({
+          'data-s': Math.round(+si/1000),
+          'data-e': Math.round(+ei/1000),
+        });
+
         setCookie('ci', ci, 365);
-        dateUpdate();
+        if(isMobileView){
+          $('.header-m-row .act-name').empty();
+          feedMobileDashboard();
+        } else {
+          dateUpdate();
+        }
     });
 
   $('.start-btn,.launch-btn,.modify-btn').on('click', function (e) {
@@ -3228,7 +3258,10 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
   })
 
   // Returns closest act back (stg element, and nb intervals to go there), and same for closest act ahead 
+  
   function closestIntervalActivities(si, ei){
+
+
     currBwdDist = null;  
     currFwdDist = null;
     bwdElNb = null;  
@@ -3276,23 +3309,7 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
 
   /**** Mobile part ****/
   if(isMobileView){
-      s = +$('#activities-container').data('s');
-      e = +$('#activities-container').data('e');
-      const params = {s: s, e: e};
-      $.get(swiurl, params)
-      .done(function(data){
-        if(!data){
-
-        } else {
-          currActId = null; 
-          $.each(data, function(i,s){
-            if(s.aid != currActId){
-              $actProto = $($('.act-rendering-zone').data('prototype'));
-            }
-          })
-
-        }
-      })
+    feedMobileDashboard();
   }
   
 
@@ -3303,13 +3320,146 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
     $showableAct = $('.activity-holder').eq($this.hasClass('prev-act-btn') ? index-1 : (index == $('.activity-holder').length - 1 ? 0 : index + 1));
     $showableAct.show();
     $('.activity-holder').eq(index).hide();
-    $('.header-m-row .act-name').empty().append($showableAct.find('.stages-holder').data('act-name'));
+    $('.header-m-row .act-name').empty().append($showableAct.data('name'));
     $('.m-act-update').attr('data-id',$('.stage-element:visible').data('id'));
     $('.add-direct-evt').attr({
       'data-sid' : $('.stage-element:visible').data('id'),
       'data-aid' : $('.activity-holder:visible').data('id')
     });
   })
+
+
+  function feedMobileDashboard(){
+      s = +$('#activities-container').attr('data-s');
+      e = +$('#activities-container').attr('data-e');
+      const params = {s: s, e: e};
+      const $actHolder = $('.act-rendering-zone');
+      var bwdStg = null;
+      var fwdStg = null;
+
+      $actHolder.empty();
+
+      $.get(swiurl, params)
+      .done(function(data){
+        if(!data.length){
+          
+        } else if(data[0].ct){
+          
+          $.each(data,function(i,s){
+            if(s.ct == 'b'){
+              bwdStg = s;
+            }
+            if(s.ct == 'f'){
+              fwdStg = s;
+            }
+          })
+
+          $noIntActOverlay = $($actHolder.data('prototype-no-int-act'));
+          
+          if(bwdStg){
+            shortSD = (new Date(bwdStg.startdate.date)).toLocaleDateString(lg+'-'+lg.toUpperCase(), shortDateOptions);
+            shortED = (bwdStg.enddate ? new Date(bwdStg.enddate.date) : new Date()).toLocaleDateString(lg+'-'+lg.toUpperCase(), shortDateOptions);
+            $noIntActOverlay.find('.bwd-act-data').empty().append(`<div class="bwd-act-name dd-orange-text bold-1">${bwdStg.aname}</div> <div class="bwd-act-dates">${shortSD} - ${shortED}</div>`);
+            $noIntActOverlay.find('.bwd-act-title').empty().append($noIntActOverlay.find('.bwd-act-title').data('default'));
+            $noIntActOverlay.find('.fa-caret-left').show();
+            $noIntActOverlay.find('.closest-bwd-act')
+              .attr('data-nb-int',bwdStg.n)
+              .addClass('clickable')
+              .css({
+                'cursor'   : 'pointer',
+              });
+          } else {
+            $noIntActOverlay.find('.fa-caret-left').hide();
+            $noIntActOverlay.find('.bwd-act-title').empty().append($noIntActOverlay.find('.bwd-act-title').data('none'));
+            $noIntActOverlay.find('.closest-bwd-act')
+              .removeAttr('data-nb-int')
+              .removeClass('clickable')
+              .css('cursor','initial');
+          }
+          
+          if(fwdStg){
+            shortSD = (new Date(fwdStg.startdate.date)).toLocaleDateString(lg+'-'+lg.toUpperCase(), shortDateOptions);
+            shortED = (fwdStg.enddate ? new Date(fwdStg.enddate.date) : new Date()).toLocaleDateString(lg+'-'+lg.toUpperCase(), shortDateOptions);
+            $noIntActOverlay.find('.fwd-act-data').empty().append(`<div class="fwd-act-name dd-orange-text bold-1">${fwdStg.aname}</div> <div class="fwd-act-dates">${shortSD} - ${shortED}</div>`);
+            $noIntActOverlay.find('.fwd-act-title').empty().append($noIntActOverlay.find('.fwd-act-title').data('default'));
+            $noIntActOverlay.find('.fa-caret-right').show();
+            $noIntActOverlay.find('.closest-fwd-act')
+            .attr('data-nb-int',fwdStg.n)
+            .addClass('clickable')
+            .css({
+              'cursor' : 'pointer',
+              
+            });
+          } else {
+            $noIntActOverlay.find('.fa-caret-right').hide();
+            $noIntActOverlay.find('.fwd-act-title').empty().append($noIntActOverlay.find('.fwd-act-title').data('none'));
+            $('.closest-fwd-act')
+            .css('cursor','initial')
+            .removeAttr('data-nb-int')
+            .removeClass('clickable');
+          }
+
+          
+          $actHolder.append($noIntActOverlay);
+          $('.closest-bwd-act').css('top',`${$('.closest-bwd-act').offset().top}px`);
+          $('.closest-fwd-act').css('top',`${(window.outerHeight - 100)}px`);
+          $('.no-int-act-title-zone').css({'position':'sticky', 'top' : `${$('.closest-bwd-act').offset().top + 150}px`});
+          
+          $('.activity-selection').css('visibility','hidden');
+          $('.act-action-btns').hide();
+          $('.act-rendering-zone').css('height', `${$('.ts-scale').height()}px`);
+
+
+
+        } else {
+          $('.act-action-btns').show();
+          $('.activity-selection').css('visibility','');
+          $('.act-rendering-zone').css('height','');
+          $actProto = null;
+          currActId = null; 
+          $.each(data, function(i,s){
+            if(s.aid != currActId){
+              if($actProto){
+                if($actHolder.children().length){
+                  $actProto.hide();
+                }
+                $actHolder.append($actProto);
+              }
+              $actProto = $($actHolder.data('act-prototype'));
+              $actProto.attr({
+                'data-id' : s.aid,
+                'data-name' : s.aname,
+              });
+              $actProto.find('.activity-component').attr({
+                'data-sd' : s.asd,
+                'data-p' : s.ap,
+              })
+              $actProto.removeClass('dummy-activity');
+            }
+
+            if(i == 0){
+              $('.act-name').append(s.aname);
+            }
+
+            $stgProto = $($actHolder.data('stg-prototype'));
+            $stgProto.attr({
+              'data-name' : s.name,
+              'data-id' : s.id,
+              'data-sd' : new Date(s.startdate.date).getTime() / 1000,
+              'data-p' : s.enddate ? new Date(s.enddate.date).getTime() / 1000 : ''
+            })
+
+            $actProto.find('.activity-component').append($stgProto);
+          })
+
+          if($actHolder.children().length){
+            $actProto.hide();
+          }
+          $actHolder.append($actProto);
+          dateUpdate();
+        }
+      })
+  }
 
 
 

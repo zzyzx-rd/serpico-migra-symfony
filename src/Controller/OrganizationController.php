@@ -5380,11 +5380,50 @@ class OrganizationController extends MasterController
         $startingTS = $request->get('s');
         $endingTS = $request->get('e');
         $em = $this->em;
+        $response = null;
         $stages = $em->getRepository(Stage::class)->getAccessibleStages($this->user, $startingTS, $endingTS);
-        foreach($stages as $stage){
-            $stage->aid = $stage->getActivity()->getId();
+        
+        if($stages->count()){
+            foreach($stages as $stage){
+                $stage->aname = $stage->getActivity()->getName();
+                $stage->aid = $stage->getActivity()->getId();
+                $stage->asd = $stage->getActivity()->getStartdateU();
+                $stage->ap = $stage->getActivity()->getPeriod();
+            }
+            $response = $stages->getValues();
+        } else {
+            if($startingTS || $endingTS){
+                $closestStages = new ArrayCollection();
+                $closestBwdStage = $em->getRepository(Stage::class)->getAccessibleStages($this->user, null, $startingTS)
+                    ->matching(Criteria::create()->orderBy(['enddate' => Criteria::DESC]))->first();
+                if($closestBwdStage){      
+                    // Setting closest type property to backward
+                    $closestBwdStage->ct = 'b';
+                    $bwdDist = $startingTS - ($closestBwdStage->getEnddate() ?: new DateTime())->getTimestamp();
+                    $closestBwdStage->d = $bwdDist;
+                    $closestBwdStage->n = ceil($bwdDist / ($endingTS - $startingTS));
+                    $closestBwdStage->aname = $closestBwdStage->getActivity()->getName();
+                }
+                $closestFwdStage = $em->getRepository(Stage::class)->getAccessibleStages($this->user, $endingTS, null)
+                    ->matching(Criteria::create()->orderBy(['startdate' => Criteria::ASC]))->first();
+                if($closestFwdStage){
+                    $closestFwdStage->ct = 'f';
+                    $fwdDist = $closestFwdStage->getStartdate()->getTimestamp() - $endingTS;
+                    $closestFwdStage->d = $fwdDist;
+                    $closestFwdStage->n = ceil($fwdDist / ($endingTS - $startingTS));
+                    $closestFwdStage->aname = $closestFwdStage->getActivity()->getName();
+                }
+                if($closestBwdStage){
+                    $closestStages->add($closestBwdStage);
+                }
+                if($closestFwdStage){
+                    $closestStages->add($closestFwdStage);
+                }
+                // Setting closest type property to forward
+                $response = $closestStages->getValues();
+            }
         }
-        return new JsonResponse($stages->getValues());
+        return new JsonResponse($response);
     }
 
     /**
@@ -5828,6 +5867,8 @@ class OrganizationController extends MasterController
         return new JsonResponse(['qParts' => $qParts, 'msg' => $msg],200);
 
     }
+
+
 
     // Second parameters is there to create Ext users, who are users of the connected user organization,
     // in order to enable inverse participation in activities

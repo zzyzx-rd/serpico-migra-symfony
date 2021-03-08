@@ -1115,19 +1115,72 @@
 
       .no-int-act-overlay{
         position: absolute;
+        height:inherit;
+        width: inherit;
+      }
+
+      .no-int-act-bg{
         background-color: grey;
-        top:0;
-        opacity:0.2;
-        height:100%;
-        width: 100%;
         z-index: 1;
+        opacity: 0.2;
+        height: 100%;
+        width: 100%;
+      }
+
+      .no-int-act-text{
+        position: absolute;
+        display: flex;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+        z-index: 2;
       }
 
       .no-int-act-title-zone{
-        margin-left: auto;
-        margin-right: auto;
+        color: grey;
+        opacity:0.5;
+      }
+
+      .fwd-act-name, .bwd-act-name{
+        text-align: center;
+      }
+
+      .closest-bwd-act, .closest-fwd-act{
+        background-color:#55318e;
+        color:white;
+        width:100%;
+        display:flex;
+        flex-direction:column;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .bwd-act-text, .fwd-act-text{
+        display:flex;
+        justify-content: center;
+      }
+
+      .bwd-act-data, .fwd-act-data{
+        padding-top: 1em;
+      }
+
+      .bwd-act-title, .fwd-act-title, .bwd-act-dates, .fwd-act-dates{
+        font-size: 17px;
         text-align:center;
-        max-width:50%;
+      }
+
+      .closest-bwd-act{
+        min-height: 100px;
+        position:sticky;
+      }
+      .closest-fwd-act{
+        min-height: 100px;
+        position:sticky;
+      }
+
+      .no-int-act-title-zone{
+        margin-top: 50px;
+        text-align:center;
       }
 
       .new-stage{
@@ -1185,13 +1238,9 @@
 
       .chevron{
         position: absolute;
-        left:46px;
+        left:30px;
         transform: rotateZ(-90deg);
-        /*
-        background-color: black;
-        width: 2px;
-        height: 45px;
-        */
+        z-index:1;
       }
 
       .activity-component{
@@ -1293,6 +1342,15 @@
 
       .s-name-input-zone{
         width:inherit;
+      }
+
+      .no-int-act-overlay .fa-caret-left, .no-int-act-overlay .fa-caret-right{
+        transform: rotateZ(90deg);
+      }
+
+      .add-stage-btn{
+        font-weight:700;
+        font-size:2rem;
       }
 
 
@@ -1982,7 +2040,7 @@
 
         </div>
 
-        <div class="header-m-row flex-center-sb">
+        <div class="header-m-row activity-selection flex-center-sb">
 
           <div class="btn-flat prev-act-btn dd-text c-flex">
             <i class="fa fa-caret-left moveP"></i>
@@ -1992,7 +2050,7 @@
 
           <div class="act-name-zone">
             <div class="stage-item-button"></div>
-            <span class="act-name strong dd-text">{{selectedActGroup.get(1).name|upper}}</span>
+            <span class="act-name strong dd-text"></span>
           </div>
 
           <div class="btn-flat next-act-btn dd-text c-flex">
@@ -2056,7 +2114,11 @@
               <i class="fa fa-location-arrow"></i>
             </div>
           </div>
-          <div class="col s9 act-rendering-zone" data-prototype="{% apply escape %}{% include "components/activity2_list__item.html.twig" with {sortingType: sortingTypeCookie, mobile_rendering: true} %}{% endapply %}">
+          <div class="col s9 act-rendering-zone" 
+            data-act-prototype="{% apply escape %}{% include "components/activity2_list__item.html.twig" with {sortingType: sortingTypeCookie, mobile_rendering: true} %}{% endapply %}"
+            data-stg-prototype="{% apply escape %}{% include "components/stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateU: 0, period: 0, embeddedStages: null, visibleEl: true, dummyParticipants: null } %}{% endapply %}"
+            data-prototype-no-int-act="{% apply escape %}{% include "components/activity_no_int_act_overlay.html.twig" %}{% endapply %}" data-prototype-evt="{% apply escape %}{% include "components/event_temporal__item.html.twig" %}{% endapply %}"
+          >
             {#{% endif %}#}
             {#
             {% for i,activity in selectedActGroup %}
@@ -2283,7 +2345,7 @@
 
     {% if organization and currentuser.role != 3 %}
       <div id="fixedButton create-act-btn" class="fixed-action-btn">
-          <a class="btn-floating btn-large modal-trigger" href="#createStage" onclick="onAddProcessClick('{{ currentuser.organization.id }}')" data-oid="{{currentuser.organization.id}}"><i class="mi add"></i></a>
+          <a class="btn-floating btn-large modal-trigger" href="#createStage" onclick="onAddProcessClick('{{ currentuser.organization.id }}')" data-oid="{{currentuser.organization.id}}"><i class="mi add dd-orange-bg add-stage-btn"></i></a>
           {#
           <ul>
               <li><a class="btn-floating orange lighten-2 tooltipped modal-trigger" data-position="left" data-delay="50" data-tooltip="{% trans %}tooltip.template.create_from_scratch{% endtrans %}" href="{{ path('activityInitialisation',{'elmt' : 'template'}) }}">

@@ -12,12 +12,17 @@
 {% set following = following|default(false) %}
 {% set hasRequesters = activity is defined and activity.requesters|length %}
 
-<div class="row no-margin flex-center activity-holder {{activity is defined ? actStatus : 'dummy-activity'}} {{mobile_rendering ? 'mr'}}" data-id="{{activity is defined ? activity.id}}" {% if activity is defined and not visible %}style="display:none"{% endif %}>
+<div class="row no-margin flex-center activity-holder {{activity is defined ? actStatus : 'dummy-activity'}} {{mobile_rendering ? 'mr'}}" data-id="{{activity is defined ? activity.id}}" data-name="{{activity is defined ? activity.name}}" {% if activity is defined and not visible %}style="display:none"{% endif %}>
   <div class="col s{{mobile_rendering ? 12 : 9}} center no-padding activity-content-stage {{ (following ? 'following ' : '') ~ (self ? 'self ' : '') ~ (mobile_rendering ? 'mr ' : '') ~ (activity is not defined ? 'dummy' : '') }}" style="background-color: #feffe9;">
     
     <div class="curDate"></div>
 
-    <ul class="stages-holder {{mobile_rendering ? 'mr'}}" data-dummy="{% apply escape %}{% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateU: 0, period: random(3,200), embeddedStages: null, visibleEl: true, participants: null, dummyActName: null} %}{% endapply %}" {% if mobile_rendering and activity|default %}data-act-name="{{ activity.name|upper }}"{% endif %}>
+    <ul class="stages-holder {{mobile_rendering ? 'mr'}}" 
+      data-dummy="{% apply escape %}{% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateU: 0, period: random(3,200), embeddedStages: null, visibleEl: true, participants: null, dummyActName: null} %}{% endapply %}"
+      {% if mobile_rendering and activity|default %}
+        data-act-name="{{ activity.name|upper }}"
+      {% endif %}
+    >
 
         <ol class="stages activity-component" data-sd="{{ activity is defined ? activity.startdateU : 0 }}" data-p="{{ activity is defined ? activity.period : 0 }}">
         
@@ -114,11 +119,15 @@
             {% endfor %}
             #}
         {% else %}
-
-          {# NOT TO REMOVE, MANIPULATED AFTERWARDS #}
-          {% set startdateU = random(7,320) %}
-          {% set period = random(3, 350 - startdateU) %}
-          {% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateU: startdateU, period: random(3,200), embeddedStages: null, visibleEl: true, participants: null, dummyActName: null} %}
+        
+          {% if not isMobileView %}
+          
+            {# NOT TO REMOVE, MANIPULATED AFTERWARDS #}
+            {% set startdateU = random(7,320) %}
+            {% set period = random(3, 350 - startdateU) %}
+            {% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateU: startdateU, period: random(3,200), embeddedStages: null, visibleEl: true, participants: null, dummyActName: null} %}
+          
+          {% endif %}
 
         {% endif %}
         </ol>

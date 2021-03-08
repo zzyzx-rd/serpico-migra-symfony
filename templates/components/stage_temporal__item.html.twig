@@ -1,9 +1,9 @@
-  <li class="stage-element {{dateType ~ '-dates' ~ (embeddedStages is not empty ? ' s-multiple-events' : ' s-selectable') ~ (isEmbedded ? ' embedded' : '')}} {{ not isMobileView ? 'tooltipped'}}" data-name="{{stage.name}}" data-id="{{ stage.id }}" data-sd="{{ startdateU }}" data-p="{{ period }}" {% if not isMobileView %} data-tooltip="{% apply escape %}{% include "components/stage_holder__item.html.twig" with { stage: stage, embeddedStages: embeddedStages } %}{% endapply %}" data-position="top" data-html="true" {% endif %}{% if not visibleEl %}style="display:none"{% endif %}>
+  <li class="stage-element {{dateType ~ '-dates' ~ (embeddedStages is not empty ? ' s-multiple-events' : ' s-selectable') ~ (isEmbedded ? ' embedded' : '')}} {{ not isMobileView ? 'tooltipped'}}" data-name="{{stage|default ? stage.name}}" data-id="{{ stage|default ? stage.id }}" data-sd="{{ startdateU }}" data-p="{{ period }}" {% if not isMobileView %} data-tooltip="{% apply escape %}{% include "components/stage_holder__item.html.twig" with { stage: stage, embeddedStages: embeddedStages } %}{% endapply %}" data-position="top" data-html="true" {% endif %}{% if not visibleEl %}style="display:none"{% endif %}>
 
     <section class="stage-container completed-stages-container"></section>
     
-      {% set startdate = dateType == 's' ? stage.startdate : stage.startdate %}
-      {% set enddate = dateType == 's' ? (stage.enddate ? stage.enddate : date('now')) : stage.enddate %}
+      {% set startdate = stage|default ? stage.startdate : date('now') %}
+      {% set enddate = stage|default ? (stage.enddate ? stage.enddate : date('now')) : date('now')|date_modify("+5 days") %}
   
       {% set diffDays = startdate.diff(enddate) %}
   

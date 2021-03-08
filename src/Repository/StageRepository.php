@@ -101,16 +101,14 @@ class StageRepository extends ServiceEntityRepository
                 )
             , SORT_REGULAR)
         );
-    
-        if($startingTS && $endingTS){
-            $accessibleStages = $potentiallyAccessibleStages->filter(fn(Stage $s) => 
-                $startingTS < $s->getStartdate()->getTimestamp() && ($s->getEnddate() ?: new DateTime())->getTimestamp() < $endingTS
-            );
-            
-        } else {
-            $accessibleStages = $potentiallyAccessibleStages;
-        }
-                
+
+        $infBoundTS = $startingTS ?: 0;
+        $supBoundTS = $endingTS ?: 999999999999;
+       
+        $accessibleStages = $potentiallyAccessibleStages->filter(fn(Stage $s) => 
+            $infBoundTS < $s->getStartdate()->getTimestamp() && ($s->getEnddate() ?: new DateTime())->getTimestamp() < $supBoundTS
+        );
+
         return $accessibleStages;
     }
 }
