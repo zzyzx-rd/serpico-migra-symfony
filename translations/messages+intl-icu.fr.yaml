@@ -2633,8 +2633,11 @@ activity_elements:
   no_defined_output: Pas encore de retours ou updates
   no_int_act:
     main_msg: Aucune activité sur cette plage
-    closer_activity_ahead: Plus proche activité à venir
-    closer_activity_passed: Plus proche activité passée
+    closest_activity: Plus proche activité
+    closest_forward_activity: Plus proche activité à venir
+    closest_backward_activity: Plus proche activité passée
+    no_backward_activity: Pas d'activité antérieure
+    no_forward_activity: Pas d'activité postérieure
   stages: 
     multiple_stages_modal:
       add_event_title: A quelle phase voulez-vous rattacher cet update ?

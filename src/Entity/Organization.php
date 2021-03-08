@@ -125,8 +125,8 @@ class Organization extends DbObject
     public $subscriptions;
     /**
      * @OneToMany(targetEntity="Stage", mappedBy="organization", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OrderBy({"activity" = "ASC"})
      */
-//     * @OrderBy({"startdate" = "ASC"})
     public $stages;
     /**
      * @OneToMany(targetEntity="Department", mappedBy="organization", cascade={"persist", "remove"},orphanRemoval=true)

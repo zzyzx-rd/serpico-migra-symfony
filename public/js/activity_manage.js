@@ -1,3 +1,4 @@
+
 function getRandomInt(min, max) {
   min = Math.ceil(min);
   max = Math.floor(max);
@@ -38,6 +39,8 @@ $('#beforeStarting').modal({
     }).tooltip();
   }
 });
+
+const shortDateOptions = {month: 'numeric', day: 'numeric'};
 
 $('.event').tooltip({
   complete: function(){
@@ -363,43 +366,47 @@ function updateEvents($evgnId = null, $evnId = null) {
     $('.start-int-value').empty().append('1/1');
     $('.end-int-value').empty().append('31/12');
   }
-  var centralElSize = mr ? 900 : $('.activity-content-stage:visible').eq(0).width();
+  //var centralElSize = mr ? 900 : $('.activity-content-stage:visible').eq(0).width();
   var annee = now.getFullYear();
   //var c = now;
   
   if(ts == 'd'){
-    ci = getCookie("ci");
-    var si = new Date(ci);
-    wDate = moment(si);
-    var ei = wDate.add(1,'d')._d;
-    var nbSubInt = 12;
-  } else if(ts == 't' || ts == 'w'){
-    ci = getCookie("ci");
-    cy = parseInt(ci.split('-').slice(-1)[0]);
-    nbInt = parseInt(ci.split('-')[1]);  
-    var dateTri = datesInterval(ts, cy, nbInt);
-    var si = dateTri[0];
-    var ei = dateTri[1];
-    var tDays = parseInt(dayDiff(si, ei));
-    
-    if(ts == 't'){
-      
+      ci = getCookie("ci");
+      var si = new Date(ci);
       wDate = moment(si);
-      ct = wDate.quarter();
-      var nbSubInt = 0;
-      while (wDate.quarter() == ct){
-        wDate = wDate.add(1,'w');
-        nbSubInt++;
-      }
-    
-    } else {
-      var nbSubInt = 7;
-    }
+      var ei = wDate.add(1,'d')._d;
+      var nbSubInt = 12;
+  } else if(ts == 't' || ts == 'w'){
 
+      ci = getCookie("ci");
+      cy = parseInt(ci.split('-').slice(-1)[0]);
+      nbInt = parseInt(ci.split('-')[1]);  
+      var dateTri = datesInterval(ts, cy, nbInt);
+      var si = dateTri[0];
+      var ei = dateTri[1];
+      var tDays = parseInt(dayDiff(si, ei));
+      if(ts == 't'){
+        
+          wDate = moment(si);
+          ct = wDate.quarter();
+          var nbSubInt = 0;
+          while (wDate.quarter() == ct){
+            wDate = wDate.add(1,'w');
+            nbSubInt++;
+          }
+      } else {
+        var nbSubInt = 7;
+      }
   } else {
-    var tDays = ndDayPerYears(annee);
-    var nbSubInt = 12;
+
+      var tDays = ndDayPerYears(annee);
+      var nbSubInt = 12;
   }
+
+  $('#activities-container').attr({
+    'data-s': Math.round(+si/1000),
+    'data-e': Math.round(+ei/1000),
+  });
 
   // Necessary to setup dashboard
   displayTemporalActivities($('.activity-holder'), nbSubInt, true, true);
@@ -563,7 +570,7 @@ function updateEvents($evgnId = null, $evnId = null) {
   dateUpdate();
 
 function dateUpdate(updateTimeScale = true, actSet = null) {
-    
+    var centralElSize = $('.activity-content-stage:visible').eq(0).width();
     var ts = getCookie("ts");
     var ci = getCookie("ci");
     y = parseInt(ci.split('-').slice(-1)[0]);
@@ -581,6 +588,11 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
       wDate = moment(si);
       var ei = wDate.add(1,'d')._d;
     }
+
+    $('timescale').attr({
+      'data-s': Math.round(+si/1000),
+      'data-e': Math.round(+ei/1000),
+    });
 
     if(updateTimeScale){
 
@@ -806,8 +818,13 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
                         'display': "block",
                     });
                 }
-                sOff = (Math.min(ea,Math.max(sa,ssd)) - sa) / (ea - sa);
-                sW = (Math.min(sed,ea) - Math.max(sa,ssd)) / (ea - sa);
+
+                minActStartVal = Math.max(si,sa);
+                maxActEndVal = Math.min(ea,ei);
+                absOffset = Math.min(ei,Math.max(ssd,si)) - minActStartVal; 
+
+                sOff = absOffset / (maxActEndVal - minActStartVal);
+                sW = (Math.min(sed,maxActEndVal) - Math.max(minActStartVal,ssd)) / (maxActEndVal - minActStartVal);
     
                 ssd > ei || sed < si ? $(this).css('display',"none") : $(this).css('display',"block");
     
@@ -872,10 +889,62 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         })
     
         if(!$('.stage-element:visible').length){
+          closestActData = closestIntervalActivities(si,ei);
           if(!$('.no-int-act-overlay').length){
-            proto = $('.process-list').data('prototype-no-int-act');
-            $('.process-list').append($(proto));
+            $noIntActOverlay = $($('.process-list').data('prototype-no-int-act'));
+            $('.process-list').append($noIntActOverlay);
+          } else {
+            $noIntActOverlay = $('.no-int-act-overlay');
           }
+          bwdData = closestActData.b;
+          fwdData = closestActData.f;
+          if(bwdData.d){
+            $stgEl = $('.stage-element').eq(bwdData.e);
+            actName = $stgEl.closest('.activity-holder').find('.act-info .act-info-name').text();
+            shortSD = (new Date(+$stgEl.data('sd') * 1000)).toLocaleDateString(lg+'-'+lg.toUpperCase(), shortDateOptions);
+            shortED = (new Date($stgEl.data('p') ? (+$stgEl.data('sd') + +$stgEl.data('p')) * 1000 : new Date().getTime())).toLocaleDateString(lg+'-'+lg.toUpperCase(), shortDateOptions);
+            $noIntActOverlay.find('.bwd-act-data').empty().append(`<div class="bwd-act-name dd-orange-text bold-1">${actName}</div> <div class="bwd-act-dates">${shortSD} - ${shortED}</div>`);
+            $noIntActOverlay.find('.bwd-act-title').empty().append($noIntActOverlay.find('.bwd-act-title').data('default'));
+            $noIntActOverlay.find('.fa-caret-left').show();
+            $('.closest-bwd-act')
+              .css('cursor','pointer')
+              .attr('data-nb-int',bwdData.n)
+              .addClass('clickable');
+          } else {
+            $noIntActOverlay.find('.fa-caret-left').hide();
+            $noIntActOverlay.find('.bwd-act-title').empty().append($noIntActOverlay.find('.bwd-act-title').data('none'));
+            $('.closest-bwd-act')
+              .css('cursor','initial')
+              .removeAttr('data-nb-int')
+              .removeClass('clickable');
+          }
+          if(fwdData.d){
+            $stgEl = $('.stage-element').eq(fwdData.e);
+            actName = $stgEl.closest('.activity-holder').find('.act-info .act-info-name').text();
+            shortSD = (new Date(+$stgEl.data('sd') * 1000)).toLocaleDateString(lg+'-'+lg.toUpperCase(), shortDateOptions);
+            shortED = (new Date($stgEl.data('p') ? (+$stgEl.data('sd') + +$stgEl.data('p')) * 1000 : new Date().getTime())).toLocaleDateString(lg+'-'+lg.toUpperCase(), shortDateOptions);
+            $noIntActOverlay.find('.fwd-act-data').empty().append(`<div class="fwd-act-name dd-orange-text bold-1">${actName}</div> <div class="fwd-act-dates">${shortSD} - ${shortED}</div>`);
+            $noIntActOverlay.find('.fwd-act-title').empty().append($noIntActOverlay.find('.fwd-act-title').data('default'));
+            $noIntActOverlay.find('.fa-caret-right').show();
+            $('.closest-fwd-act')
+              .css('cursor','pointer')
+              .attr('data-nb-int',fwdData.n)
+              .addClass('clickable');
+          } else {
+            $noIntActOverlay.find('.fa-caret-right').hide();
+            $noIntActOverlay.find('.fwd-act-title').empty().append($noIntActOverlay.find('.fwd-act-title').data('none'));
+            $('.closest-fwd-act')
+              .css('cursor','initial')
+              .removeAttr('data-nb-int')
+              .removeClass('clickable');
+          }
+
+          // If process family seen into dashboard, we change css width property no-activity panels
+          if($('.process-detail').length){
+            $('.closest-bwd-act').css('width','16%');
+            $('.closest-fwd-act').css('width','20%');
+          }
+          
         } else { 
            $('.no-int-act-overlay').remove();
         }
@@ -884,9 +953,9 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         //});
         
         feedDashboardScreen();
-        if($('.activity-list>.activity-holder:visible').length && $('.virtual-activities-holder>.activity-holder:visible').length){
+        /*if($('.activity-list>.activity-holder:visible').length && $('.virtual-activities-holder>.activity-holder:visible').length){
           $('.virtual-activities-holder').remove();
-        } 
+        } */
     //}
 
 };
@@ -996,6 +1065,40 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
     if(oid != 0){
       updateEvents();
     }
+
+    $(document).on('click','.closest-bwd-act.clickable, .closest-fwd-act.clickable', function(){
+      const $this = $(this); 
+      calSpread = $this.hasClass('closest-fwd-act') ? +$(this).data('nb-int') : -(+$(this).data('nb-int'));
+      
+      if(ts == 'y'){
+        ci = +ci + calSpread;
+      } else if (ts != "d") {
+        if(ts == 't' || ts == 'w'){
+          ciElmts = ci.split('-');
+          currVal = +ciElmts[1];
+          yearVal = +ciElmts[2];
+
+          nbIntsInPeriod = ts == 't' ? 4 : (new Date(`12-31-${yearVal}`)).getWeekNumber();
+
+         
+          newIntVal = (currVal + calSpread) % nbIntsInPeriod;
+          if(newIntVal < 0){
+            newIntVal += nbIntsInPeriod;
+          }
+          yearSpread = Math.floor((currVal + calSpread) / nbIntsInPeriod);
+          newYearVal = yearVal + yearSpread;
+
+          tsVal = ts == 't' ? 'q' : ts;
+          ci = `${tsVal}-${newIntVal}-${newYearVal}`;
+        }
+      } else {
+          currDate = new Date(ci);
+          mDate = moment(currDate);
+          ci = mDate.add(calSpread,'d')._d.toLocaleString('en-US',{year: 'numeric', month: 'numeric', day: 'numeric'});
+      }
+      setCookie('ci', ci, 365);
+      dateUpdate();
+    })
 
     $('.prev-int-btn, .next-int-btn').on('click', function (e) {
         
@@ -2612,12 +2715,14 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
     $actList = $();
     totalPotentialAct = Math.floor(($mainHeight - $mainHeaderElmtsHeight) / $actHeight);
     nbVisibleAct = $('.activity-content-stage:visible:not(.dummy)').length;
-    if(nbVisibleAct){
-      $('.activity-list').attr('data-pNb',$('.activity-content-stage:visible:not(.dummy)').length);
-    }
+    minFeedingNb = 4;
+    /*if(nbVisibleAct){
+      $('.activity-list').attr('data-pNb', nbVisibleAct);
+    }*/
     nbAct = $('.stages-holder').length;
-    if (nbVisibleAct == 0 /* && !$('.virtual-activities-holder').length*/){
-        for(k = 0; k < parseInt($('.activity-list').attr('data-pNb') ?  $('.activity-list').attr('data-pNb') : totalPotentialAct); k++){
+    
+    if (nbVisibleAct < minFeedingNb){
+        for(k = 0; k < /*parseInt($('.activity-list').attr('data-pNb') ?  $('.activity-list').attr('data-pNb') : totalPotentialAct)*/ minFeedingNb - nbVisibleAct; k++){
           actProto = $('.process-list-t').data('prototype');
           $actProto = $(actProto);
   
@@ -2678,28 +2783,37 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
             .fail(function(data){
               console.log(data);
             })
-          }
+        }
 
+        var $actHolder = !$('.virtual-activities-holder').length ? $('<div class="virtual-activities-holder"></div>') : $('.virtual-activities-holder');
+
+        if(!$actHolder.parent().hasClass('dummy-activities-container')){
+          
+          $actHolder.empty();
+              
+          if(nbVisibleAct < minFeedingNb){
+            $actList.each(function(i,e){
+              $actHolder.append($(e));
+            })
+          }
+              
           if(!$('.virtual-activities-holder').length){
-
-              var $actHolder = $('<div class="virtual-activities-holder"></div>');
-              
-              if(!nbVisibleAct){
-                $actList.each(function(i,e){
-                  $actHolder.append($(e));
-                })
-              }
-              
-            
-              $appenedElmt = $('.activity-list:visible').length ? $('.activity-list:visible').last().parent() : $('.dummy-activities-container');
-              $appenedElmt.append($actHolder);
+            $appenedElmt = $('.activity-list:visible').length ? $('.activity-list:visible').last().parent() : $('.dummy-activities-container');
+            $appenedElmt.append($actHolder);
           }
-
+        
+  
           if(!nbAct){
             $actHolder.append(noActOverlay);
           }
+
+        }
           
-      }
+    } else {
+
+      $('.virtual-activities-holder').empty();
+
+    }
   
   }
 
@@ -2775,21 +2889,6 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         }
     },15000);
   },1500)
-
-  $('.prev-act-btn, .next-act-btn').on('click',function(){
-      const $this = $(this);
-      index = $('.activity-holder').index($('.activity-holder:visible'));
-      $showableAct = $('.activity-holder').eq($this.hasClass('prev-act-btn') ? index-1 : (index == $('.activity-holder').length - 1 ? 0 : index + 1));
-      $showableAct.show();
-      $('.activity-holder').eq(index).hide();
-      $('.header-m-row .act-name').empty().append($showableAct.find('.stages-holder').data('act-name'));
-      $('.m-act-update').attr('data-id',$('.stage-element:visible').data('id'));
-      $('.add-direct-evt').attr({
-        'data-sid' : $('.stage-element:visible').data('id'),
-        'data-aid' : $('.activity-holder:visible').data('id')
-      });
-
-  })
 
   if($('#invitationStage').length){
     setTimeout(function(){
@@ -3127,6 +3226,92 @@ function dateUpdate(updateTimeScale = true, actSet = null) {
         $('#manageStageInvit').modal('close');
       })
   })
+
+  // Returns closest act back (stg element, and nb intervals to go there), and same for closest act ahead 
+  function closestIntervalActivities(si, ei){
+    currBwdDist = null;  
+    currFwdDist = null;
+    bwdElNb = null;  
+    fwdElNb = null;
+    nbBwdInt = null;
+    nbFwdInt = null;
+
+    $('.stage-element').each(function(i,e){
+        sed = $(e).data('p') ? (+$(e).data('sd') + +$(e).data('p')) * 1000 : new Date().getTime()
+        ssd = +$(e).data('sd') * 1000;
+        bwdDist = si - sed;
+        if(bwdDist > 0){
+          if(!currBwdDist || bwdDist < currBwdDist){
+            currBwdDist = bwdDist;
+            bwdElNb = i;
+          }
+        }
+      
+        fwdDist = ssd - ei;
+        if(fwdDist > 0){
+          if(!currFwdDist || fwdDist < currFwdDist){
+            currFwdDist = fwdDist;
+            fwdElNb = i;
+          }
+        }
+    })
+
+    if(currBwdDist){
+      nbBwdInt = Math.ceil(currBwdDist/(ei - si));
+    }
+    if(currFwdDist){
+      nbFwdInt = Math.ceil(currFwdDist/(ei - si));
+    }
+
+    
+
+    var bwdValues = {d: currBwdDist, e: bwdElNb, n: nbBwdInt};
+    var fwdValues = {d: currFwdDist, e: fwdElNb, n: nbFwdInt};
+    output = {};
+    output['b'] = bwdValues;
+    output['f'] = fwdValues;
+    return output;
+  }
+
+
+  /**** Mobile part ****/
+  if(isMobileView){
+      s = +$('#activities-container').data('s');
+      e = +$('#activities-container').data('e');
+      const params = {s: s, e: e};
+      $.get(swiurl, params)
+      .done(function(data){
+        if(!data){
+
+        } else {
+          currActId = null; 
+          $.each(data, function(i,s){
+            if(s.aid != currActId){
+              $actProto = $($('.act-rendering-zone').data('prototype'));
+            }
+          })
+
+        }
+      })
+  }
+  
+
+
+  $('.prev-act-btn, .next-act-btn').on('click',function(){  
+    const $this = $(this);
+    index = $('.activity-holder').index($('.activity-holder:visible'));
+    $showableAct = $('.activity-holder').eq($this.hasClass('prev-act-btn') ? index-1 : (index == $('.activity-holder').length - 1 ? 0 : index + 1));
+    $showableAct.show();
+    $('.activity-holder').eq(index).hide();
+    $('.header-m-row .act-name').empty().append($showableAct.find('.stages-holder').data('act-name'));
+    $('.m-act-update').attr('data-id',$('.stage-element:visible').data('id'));
+    $('.add-direct-evt').attr({
+      'data-sid' : $('.stage-element:visible').data('id'),
+      'data-aid' : $('.activity-holder:visible').data('id')
+    });
+  })
+
+
 
 
 

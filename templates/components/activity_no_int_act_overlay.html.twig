@@ -1,10 +1,12 @@
 <div class="no-int-act-overlay flex-center">
-
-    
-    <div class="no-int-act-act-behind">
-      <div>
+  <div class="no-int-act-bg"></div>
+  <div class="no-int-act-text flex-center">
+    <div class="closest-bwd-act"> 
+      {#<div class="bwd-act-text">#}
         <i class="fa fa-caret-left"></i>
-      </div>
+        <div class="bwd-act-title" data-none="{{'activity_elements.no_int_act.no_backward_activity'|trans}}" data-default="{{'activity_elements.no_int_act.closest_activity'|trans}}"></div>
+        <div class="bwd-act-data"></div>
+      {#</div>#}
     </div>
     <div class="no-int-act-title-zone">
       <h4 class="c-flex-center">
@@ -12,8 +14,12 @@
         <span>{{'activity_elements.no_int_act.main_msg'|trans}}</span>
       </h4>
     </div>
-    <div class="no-int-act-act-ahead">
-      <i class="fa fa-caret-right"></i>
+    <div class="closest-fwd-act">
+      {#<div class="fwd-act-text">#}
+        <i class="fa fa-caret-right"></i>
+        <div class="fwd-act-title" data-none="{{'activity_elements.no_int_act.no_forward_activity'|trans}}" data-default="{{'activity_elements.no_int_act.closest_activity'|trans}}"></div>
+        <div class="fwd-act-data"></div>
+      {#</div>#}
     </div>
-
+  </div>
 </div>

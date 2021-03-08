@@ -2506,11 +2506,14 @@ activity_elements:
   no_defined_output: No given feedbacks or updates yet
   no_int_act:
     main_msg: No activity in this timeframe
-    closer_activity_ahead: Closer activity ahead
-    closer_activity_passed: Closer activity passed
+    closest_activity: Closest activity
+    closest_forward_activity: Closest forward activity
+    closest_backward_activity: Closest backward activity
+    no_backward_activity: No past activity
+    no_forward_activity: No future activiy
   stages: 
     multiple_stages_modal:
-      add_event_title: To which stage do you want to attach thsis event ?
+      add_event_title: To which stage do you want to attach this event ?
       title: Which stage do you want to look at/modify ?
     open_enddate: Open
     open_enddate_info: By letting the end date open, the stage will last until you decide to give it an end; helpful when you don't precisely when it ends.

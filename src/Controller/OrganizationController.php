@@ -5370,6 +5370,23 @@ class OrganizationController extends MasterController
         return $dt && $dt->format($format) === $date;
     }
 
+
+    /**
+     * 
+     * @param Request $request
+     * @Route("/stages/within-interval/retrieve", name="retrieveStagesWithinInterval")
+     */
+    public function retrieveWithinIntervalStages(Request $request){
+        $startingTS = $request->get('s');
+        $endingTS = $request->get('e');
+        $em = $this->em;
+        $stages = $em->getRepository(Stage::class)->getAccessibleStages($this->user, $startingTS, $endingTS);
+        foreach($stages as $stage){
+            $stage->aid = $stage->getActivity()->getId();
+        }
+        return new JsonResponse($stages->getValues());
+    }
+
     /**
      * 
      * Function which queries on our database, depending of query type.

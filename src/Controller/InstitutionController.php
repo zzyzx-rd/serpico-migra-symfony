@@ -492,9 +492,7 @@ final class InstitutionController extends MasterController
                 'comesFromLogin' => $comesFromLogin,
                 //'invitationStages' => $invitationStages
             ]
-        );
-
-        
+        );        
     }
 
 

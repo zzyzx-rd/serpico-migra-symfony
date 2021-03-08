@@ -97,6 +97,7 @@
     var lkEvtToStgMsg = "{{ 'activity_elements.stages.multiple_stages_modal.add_event_title'|trans }}";
     var modifiedMsg = "{{ 'modified'|trans }}";
     var selfAcctIds = "{{ currentuser.userGlobal.userAccounts|map(u => u.id)|join(', ') }}";
+    var swiurl = "{{ url('retrieveStagesWithinInterval') }}";
   </script>
   <style>
       .elmts{
@@ -2055,14 +2056,16 @@
               <i class="fa fa-location-arrow"></i>
             </div>
           </div>
-          <div class="col s9">
+          <div class="col s9 act-rendering-zone" data-prototype="{% apply escape %}{% include "components/activity2_list__item.html.twig" with {sortingType: sortingTypeCookie, mobile_rendering: true} %}{% endapply %}">
             {#{% endif %}#}
+            {#
             {% for i,activity in selectedActGroup %}
               {% set actStatus = sortingTypeCookie == 'o' ? activity.status : activity.progress %}
               {% set actStatusName = actStatuses[sortingTypeCookie][actStatus] %}
               {% set showable = global.request.cookies.get('r_s_' ~ sortingTypeCookie ~ '_' ~ actStatusName) is null %}
-              {% include "components/activity2_list__item.html.twig" with { activity: activity, showable: showable, sortingType: sortingTypeCookie, actStatus: actStatusName, em:em, mobile_rendering: true, showable: activity == selectedActGroup.first } %}
+              {% include "components/activity2_list__item.html.twig" with { activity: activity, sortingType: sortingTypeCookie, actStatus: actStatusName, em:em, mobile_rendering: true, showable: activity == selectedActGroup.first } %}
             {% endfor %}
+            #}
           </div>
           <div class="col s2 act-action-btns">
             {% set activity = selectedActGroup.first %}

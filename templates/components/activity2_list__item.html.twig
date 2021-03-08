@@ -17,7 +17,7 @@
     
     <div class="curDate"></div>
 
-    <ul class="stages-holder {{mobile_rendering ? 'mr'}}" data-dummy="{% apply escape %}{% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateU: 0, period: random(3,200), embeddedStages: null, visibleEl: true, participants: null, dummyActName: null} %}{% endapply %}" {% if mobile_rendering %}data-act-name="{{ activity.name|upper }}"{% endif %}>
+    <ul class="stages-holder {{mobile_rendering ? 'mr'}}" data-dummy="{% apply escape %}{% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateU: 0, period: random(3,200), embeddedStages: null, visibleEl: true, participants: null, dummyActName: null} %}{% endapply %}" {% if mobile_rendering and activity|default %}data-act-name="{{ activity.name|upper }}"{% endif %}>
 
         <ol class="stages activity-component" data-sd="{{ activity is defined ? activity.startdateU : 0 }}" data-p="{{ activity is defined ? activity.period : 0 }}">
         
