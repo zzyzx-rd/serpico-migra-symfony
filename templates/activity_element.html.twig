@@ -31,7 +31,7 @@
   {% endif %}
 {% endblock %}
 
-{% set elmtType = app.request_stack.currentrequest.get('elmtType') %}
+{% set elmtType = global.request.get('elmtType') %}
 {% set colors = ["purple", "green", "orange", "blue-grey", "light-blue", "pink", "teal", "deep-purple", "lime", "grey", "light-green","red"] %}
 
 
@@ -165,9 +165,9 @@
     var precommentUpdateMsg = '{% trans %}participants.guidelines.modify{% endtrans %}';
     var precommentNoneMsg = '{% trans %}participants.guidelines.no_guidelines{% endtrans %}';
     var mp = 1;
-    var dcurl = "{{ url('ajaxCriterionDelete',{'elmtType' : elmtType, 'criId' : 0}) }}";
-    var dsurl = "{{ url('ajaxStageDelete',{'elmtType' : elmtType, 'stgId' : 0}) }}";
-    var courl = "{{ url('clearStageOutput', {'elmtType' : elmtType, 'stgId' : 0}) }}"
+    var dcurl = "{{ url('ajaxCriterionDelete',{entity: elmtType, 'criId' : 0}) }}";
+    var dsurl = "{{ url('ajaxStageDelete',{entity: elmtType, 'stgId' : 0}) }}";
+    var courl = "{{ url('clearStageOutput', {entity: elmtType, 'stgId' : 0}) }}"
 
   </script>
 {% endblock %}
@@ -218,7 +218,7 @@
     {% endif %}
 
     <ul class="stages"
-        data-prototype="{% filter escape %}{% include 'prototype_process_stage.twig' with {elmtType : elmtType, 'item': form.stages.vars.prototype ,activity : form.vars.data.id  } %}{% endfilter %}">
+        data-prototype="{% filter escape %}{% include 'prototype_process_stage.twig' with {entity : elmtType, 'item': form.stages.vars.prototype ,activity : form.vars.data.id  } %}{% endfilter %}">
       {% for s, stage in form.stages %}
       {% set isFeedbackTypeSettled = stage.vars.data.isFeedbackTypeSettled %}
         <li class="stage">
@@ -382,14 +382,6 @@
                                 <div class="input-field">
                                   {{ form_label(stage.enddate) }}
                                   {{ form_widget(stage.enddate) }}
-                                </div>
-                                <div class="input-field">
-                                  {{ form_label(stage.gstartdate) }}
-                                  {{ form_widget(stage.gstartdate) }}
-                                </div>
-                                <div class="input-field">
-                                  {{ form_label(stage.genddate) }}
-                                  {{ form_widget(stage.genddate) }}
                                 </div>
                               </li>
                             </ul>
@@ -840,8 +832,8 @@
                               <li class="element-input" style="display: none;">
                                 <ul class="flex-center-sb">
                                   <li class="input-field participant-name">
-                                    {{ form_widget(participant.directUser) }}
-                                    {{ form_label(participant.directUser) }}
+                                    {{ form_widget(participant.user) }}
+                                    {{ form_label(participant.user) }}
                                   </li>
                                   {% if participant not in stage.uniqueExtParticipations %}
                                     <li>
@@ -1119,7 +1111,6 @@
 {% block javascripts %}
   {#<div id="user-pics" hidden>{{ userPics }}</div>#}
   <script src="{{ asset('js/nouislider.js') }}"></script>
-  <script src="{{ asset('js/login.js') }}"></script>
   <script src="{{ asset('js/process_stages.js') }}"></script>
   <script src="{{ asset('js/activity_participants.js') }}"></script>
 {% endblock %}

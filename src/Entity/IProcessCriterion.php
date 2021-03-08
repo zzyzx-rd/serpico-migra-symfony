@@ -77,14 +77,15 @@ class IProcessCriterion extends DbObject
     public $comment;
 
     /**
-     * @ORM\Column(name="crt_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="iProcessCriterionInitiatives")
+     * @JoinColumn(name="crt_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
-     * @ORM\Column(name="crt_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="crt_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="IProcessStage", inversedBy="criteria")
@@ -99,7 +100,7 @@ class IProcessCriterion extends DbObject
     protected $institutionProcess;
 
     /**
-     * @OneToMany(targetEntity="IProcessActivityUser", mappedBy="criterion", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="IProcessParticipation", mappedBy="criterion", cascade={"persist", "remove"}, orphanRemoval=true)
      * @var Collection
      */
 //     * @OrderBy({"leader" = "DESC"})
@@ -124,11 +125,9 @@ class IProcessCriterion extends DbObject
      * @param $crt_upperbound
      * @param $crt_step
      * @param $crt_comment
-     * @param $crt_createdBy
-     * @param $crt_inserted
      * @param $stage
      * @param $institutionProcess
-     * @param Collection $participants
+     * @param $participants
      * @param $cName
      */
     public function __construct(
@@ -143,14 +142,12 @@ class IProcessCriterion extends DbObject
         $crt_forceComment_value = null,
         $crt_forceComment_sign = null,
         $crt_comment = null,
-        $crt_createdBy = null,
-        $crt_inserted= null,
         Stage $stage = null,
         InstitutionProcess $institutionProcess = null,
         Collection $participants = null,
         $cName = null)
     {
-        parent::__construct($id, $crt_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->type = $crt_type;
         $this->name = $crt_name;
         $this->weight = $crt_weight;
@@ -161,7 +158,6 @@ class IProcessCriterion extends DbObject
         $this->upperbound = $crt_upperbound;
         $this->step = $crt_step;
         $this->comment = $crt_comment;
-        $this->inserted = $crt_inserted;
         $this->stage = $stage;
         $this->institutionProcess = $institutionProcess;
         $this->participants = $participants;
@@ -328,16 +324,13 @@ class IProcessCriterion extends DbObject
         $this->institutionProcess = $institutionProcess;
     }
 
-    /**
-     * @return Collection
-     */
-    public function getParticipants(): Collection
+    public function getParticipants()
     {
         return $this->participants;
     }
 
     /**
-     * @param Collection $participants
+     * @param $participants
      */
     public function setParticipants(Collection $participants): void
     {
@@ -365,7 +358,7 @@ class IProcessCriterion extends DbObject
         return (string) $this->id;
     }
 
-    public function addParticipant(IProcessActivityUser $participant): IProcessCriterion
+    public function addParticipant(IProcessParticipation $participant): IProcessCriterion
     {
         $this->participants->add($participant);
         $participant->setCriterion($this);
@@ -373,7 +366,7 @@ class IProcessCriterion extends DbObject
     }
 
 
-    public function removeParticipant(IProcessActivityUser $participant): IProcessCriterion
+    public function removeParticipant(IProcessParticipation $participant): IProcessCriterion
     {
         // Remove this participant
         $this->participants->removeElement($participant);

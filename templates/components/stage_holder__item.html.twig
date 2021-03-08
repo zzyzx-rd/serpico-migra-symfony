@@ -1,0 +1,11 @@
+{% if stage|default %}
+  {% include "components/stage_tooltip__item.html.twig" with { stage: stage, hasTopBorder: false } %}
+{% else %}
+  {% include "components/stage_tooltip__item.html.twig" with { dummyParticipants: dummyParticipants, dummyActName: dummyActName, dummySD: dummySD, dummyED: dummyED, hasTopBorder: false } %}
+{% endif %}
+
+{% if embeddedStages|default %}
+  {% for embeddedStage in embeddedStages %}
+    {% include "components/stage_tooltip__item.html.twig" with { stage: embeddedStage, hasTopBorder: true, dummyParticipants: dummyParticipants } %}
+  {% endfor %}
+{% endif %}

@@ -4,10 +4,10 @@ namespace App\Form\Type;
 
 use Controller\MasterController;
 use Doctrine\ORM\EntityRepository;
-use App\Entity\ActivityUser;
-use App\Entity\IProcessActivityUser;
+use App\Entity\Participation;
+use App\Entity\IProcessParticipation;
 use App\Entity\Team;
-use App\Entity\TemplateActivityUser;
+use App\Entity\TemplateParticipation;
 use App\Entity\User;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -36,7 +36,7 @@ class ParticipantManageType extends AbstractType
 
             if ($query === 'internal') {
                 $form->add(
-                    'directUser', EntityType::class,
+                    'user', EntityType::class,
                     [
                         'label_format' => 'participants.%name%',
                         'class' => User::class,
@@ -56,19 +56,19 @@ class ParticipantManageType extends AbstractType
                     ]
                 );
             } else if ($query === 'external') {
-                $form->add('directUser', EntityType::class,
+                $form->add('user', EntityType::class,
                     [
                         'label_format' => 'participants.%name%',
                         'class' => User::class,
                         'choice_label' => static function (User $u) {
-                            if ($u->getLastname() === 'ZZ') {
+                            if ($u->isSynthetic()) {
                                 return $u->getOrganization()->getCommname();
                             }
 
                             return $u->getInvertedFullName();
                         },
                         'choice_attr' => static function(User $u) {
-                            return $u->getLastname() === 'ZZ' ? ['class' => 'synth'] : [];
+                            return $u->isSynthetic() ? ['class' => 'synth'] : [];
                         },
                         'query_builder' => static function (EntityRepository $er) use ($organization, $currentUser) {
                             $organization = $organization ?: $currentUser->getOrganization();
@@ -145,14 +145,14 @@ class ParticipantManageType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefault('elmt', 'activity');
+        $resolver->setDefault('entity', 'activity');
         $resolver->setDefault('data_class', function (Options $options) {
-            if ($options['elmt'] === 'iprocess') {
-                return IProcessActivityUser::class;
-            } else if ($options['elmt'] === 'template') {
-                return TemplateActivityUser::class;
+            if ($options['entity'] === 'iprocess') {
+                return IProcessParticipation::class;
+            } else if ($options['entity'] === 'template') {
+                return TemplateParticipation::class;
             }
-            return ActivityUser::class;
+            return Participation::class;
         });
         $resolver->setRequired("currentUser");
         $resolver->setDefault('organization', null);

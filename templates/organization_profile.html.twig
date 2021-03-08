@@ -1,0 +1,694 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+    {{'parameters'|trans}}
+{% endblock %}
+
+{% block pagename %}
+    {{'parameters'|trans}}
+{% endblock %}
+
+{% block mobile_title %}
+    {{'parameters'|trans}}
+{% endblock %}
+
+{% block css %}
+    <script>
+
+        {#
+        var surl = "{{ path('dynamicSearchParentFirm')}}";
+        var gurl = "{{ path('getFirmFromId',{'wfiId' : 0})}}";
+        var smurl = "{{ path('sendProspectMail',{'winId' : 0})}}";
+        {% if workerIndividual is defined %}
+            var murl = "{{ url('validateWorkerEmailFromSelfPage', {'wiId' : workerIndividual.id, 'firstname': 'a', 'lastname': 'b', 'male' : 1, 'wiEmail' : 'a'}) }}";
+        {% else %}
+            var murl = "{{ url('validateWorkerEmailFromSelfPage', {'wiId' : 0, 'firstname': 'a', 'lastname': 'b', 'male' : 1, 'wiEmail' : 'a'}) }}";
+        {% endif %}
+        #}
+
+        var sourl = "{{ path('saveOrganizationSelfModifications') }}";
+        var upurl = "{{ path('updatePicture',{element: 'organization'}) }}";
+        var pmurl = "{{ path('passwordSelfModification') }}"
+        var surl = "{{path('dynamicSearch')}}";
+        var suourl = "{{ url('addAccount') }}";
+        var daurl = "{{ url('deleteAccount') }}";
+        var csurl = "{{ url('manageSubscriptions') }}";
+    </script>
+
+    <link rel="stylesheet" href="{{ asset('css/add_client_user_modal.css') }}">
+    <style>
+
+        .firm-option-logo{
+            float: left!important;
+        }
+        .firm-input-logo{
+            position: absolute;
+            height: 20px;
+            margin: auto 0;
+            top: 0;
+            left: 0;
+            bottom: 0;
+        }
+
+        /*.w-firm .select-dropdown{
+            width: 90%!important;
+            padding-left: 25px!important; 
+        }*/
+
+        .dropdown-content{
+            opacity: 1!important;
+            display: block!important;
+        }
+
+        .select-wrapper input, .select-wrapper .caret{
+            display: none!important;
+        }
+
+        .title-header{
+            padding: 20px 0;
+            width: 85%;
+            margin-left:auto;
+            margin-right:auto;
+        }
+
+        .page-title{
+            display: inline-block;
+            margin: auto;
+        }
+
+        .field-name{
+            flex: 0 0 25%;
+        }
+
+        .modify-btn, .add-account-btn{
+            border: 1px solid #55318e;
+        }
+
+        .cancel-btn{
+            border: 1px solid orange;
+        }
+
+        .delete-account-btn{
+            border: 1px dashed orange;
+        }
+
+        .account-action-zone > .btn-flat{
+            line-height: 24px;
+            height: 24px;
+            padding: 0 1rem;
+        }
+
+        .return-btn{
+            color:black;
+            position:absolute;
+        }
+
+        .modify-btn i, .account-action-zone i{
+            font-size: 15px;
+        }
+
+        .modify-btn:hover{
+            background-color: #55318e;
+            color: #ff9300;
+            transition: 0.3s ease-out;
+            border: 1px solid #55318e;
+        }
+
+        .save-btn:hover{
+            color: #ff9300;
+        }
+
+        .element-input{
+            display:none;
+        }
+
+        .firm-fields > * {
+            min-height:46px;
+        }
+
+        .user-email{
+            min-width: 300px;
+        }
+
+        .m-pwd-btn{
+            background-color: aliceblue;
+            height: 30px;
+            line-height: 30px;
+            color: black;
+        }
+
+        .save-btn, .modify-btn{
+            text-align: center;
+        }
+
+        .add-photo-btn{
+            position: absolute; 
+            top: 84%; 
+            left: 3.5rem;
+        }
+
+        .user-picture{
+            border-radius: 100%;
+            border:1px solid purple;
+        }
+
+        #addAccount{
+            overflow-y: inherit;
+        }
+
+        .firm-field-zone .select-dropdown{
+            min-width:75%;
+        }
+
+        .part-feeded{
+            text-indent: 4rem;
+        }
+
+        .firm-accounts{
+            padding-top:1rem;
+        }
+
+        .firm-accounts li{
+            padding:0.5rem 0;
+        }
+
+        .nb-activites-info{
+            background-color: aliceblue;
+            cursor: initial;
+        }
+
+        .user-master-btn{
+            background-color: #f5eeff;
+        }
+
+        section:not(:first-of-type){
+            border-top: 1px solid purple;
+        }
+
+        main{
+            display:flex;
+            flex-direction:column;
+            width:90%;
+            margin-left:auto!important;
+            margin-right:auto!important;
+            margin-top: 2rem!important;
+        }
+
+        .user-picture{
+            width: 120px;
+            height: 120px;
+        }
+
+        .full-width-row,  .full-width-row > *{
+            flex-wrap: nowrap;
+        }
+        .full-width-row .element-input{
+            width: -webkit-fill-available;
+        }
+
+        .location-elmts-zone{
+            width:100%;
+        }
+
+        .location-elmts-zone .col:first-of-type{
+            padding-left:0;
+        }
+        .location-elmts-zone .col:last-of-type{
+            padding-right:0;
+        }
+
+        @media screen and (max-width: 660px) {
+
+            .modify-credentials-btn span, .add-account-btn span, .page-title, .account-prefix, .user-master-name{
+                display:none;
+            }
+
+            .title-header{
+                padding:35px 0;
+                justify-content:center;
+            }
+
+            .cancel-btn{
+                display:none;
+            }
+
+            .user-picture-zone{
+                text-align: center;
+            }
+
+            .firm-fields{
+                margin-top:2rem;
+            }
+
+            .add-photo-btn{
+
+                left:45%;
+            }
+
+
+        }
+
+        @media screen and (min-width: 660px) {
+
+            .save-btn, .modify-btn{
+                width:160px;
+            }
+
+        }
+
+
+    
+    </style>
+{% endblock %}
+
+{% block content %}
+{% include "components/background_grid.html.twig" %}
+
+    {% set now = "now"|date("Y/m/d") %}
+        <main class="card-panel purple lighten-5">
+            <div class="flex-center title-header">
+                <a href="{{ path('firmSettings') }}" class="return-btn btn">
+                    Retour
+                </a>
+                <h4 class="page-title">{{'firm_settings.profile.title'|trans}}</h4>
+                {#
+                <a class="btn-flat cancel-btn" style="visibility:hidden">{{'cancel'|trans}}</a>
+                <a class="m-left modify-btn btn-flat dd-text">
+                    <span class="m-right">{{'modify'|trans}}</span>
+                    <i class="fa fa-pen"></i>
+                </a>
+                #}
+            </div>
+
+            <div class="" style="width: 85%;margin:auto">
+                
+                <div class="">
+
+
+                    {{ form_start(form) }}
+                    <section class="organization-credentials">
+                        <div class="flex-center-sb">
+                            <h5>{{'firm_settings.profile.identity_logo.title'|trans}}</h5>
+                            <div class="flex-center">
+                                <a class="btn-flat cancel-btn" style="visibility:hidden">{{'cancel'|trans}}</a>
+                                <a class="m-left modify-btn modify-credentials-btn btn-flat dd-text">
+                                    <span class="m-right">{{'modify'|trans}}</span>
+                                    <i class="fa fa-pen"></i>
+                                </a>
+                                {{ form_row(form.submit) }}
+                            </div>
+                        </div> 
+                        <div class="row flex-center">
+                        
+                            <div class="col s12 m3 user-picture-zone" style="position: relative">
+                                <img class="clickable-image user-picture" src="{{ asset(global.organizationLogo(organization)) }}">
+                                <a class="btn-floating add-photo-btn clickable-image"><i class="fa fa-camera"></i></a>
+                            </div>
+                
+                            <div class="col s12 m9 c-flex firm-fields" style="flex-grow: 1;">
+                            
+                                <div class="flex-center">
+                                    <span class="field-name">{{'firm_settings.profile.identity_logo.commname'|trans|capitalize}}</span>
+                                    <span class="element-data bold-1">{{ organization.commname }}</span>
+                                    <div class="element-input input-field no-margin">
+                                            {{ form_widget(form.commname, {attr:{style: "margin:0"}}) }}
+                                    </div>
+                                </div>
+                                <div class="flex-center">
+                                    <span class="field-name">{{'firm_settings.profile.identity_logo.legalname'|trans|capitalize}}</span>
+                                    <span class="element-data bold-1">{{ not organization.legalname|default ? ('(' ~ 'not_provided'|trans ~ ')') : organization.legalname }}</span>
+                                    <div class="element-input input-field no-margin">
+                                        {{ form_widget(form.legalname, {attr:{style: "margin:0"}}) }}       
+                                    </div>
+                                </div>
+
+                                {#
+                                <div class="flex-center">
+                                    <span class="field-name">{{'password'|trans|capitalize}}</span>
+                                    <span class="element-data">••••••••</span>
+                                    <div class="element-input">
+                                        <a class="btn m-pwd-btn modal-trigger" href="#modifyPassword">{{'mails.passwordModify.button_text'|trans ~ '...'}}</a>
+                                    </div>
+
+                                </div>
+                                #}
+                            
+                            </div>
+
+                        </div>
+                      
+                    </section>
+
+                    <section class="organization-billing-info">
+
+                        <h5>{{'firm_settings.profile.billing.title'|trans}}</h5>
+
+                        <div class="col s12 m9 c-flex firm-fields" style="flex-grow: 1;">
+                            
+                                <div class="row no-margin location-elmts-zone">
+                                    <div class="col s12 m10">   
+                                        <span class="element-data sm-right">{{'firm_settings.profile.billing.address'|trans|capitalize}}</span>
+                                        <span class="element-data bold-1">{{ not organization.billingAddress|default ? ('(' ~ 'not_provided'|trans ~ ')') : organization.billingAddress }}</span>
+                                        <div class="element-input input-field no-margin">
+                                                {{ form_label(form.location) }}
+                                                {{ form_widget(form.location, {attr:{style: "margin:0"}}) }}
+                                        </div>
+                                    </div>
+                                    <div class="col s12 m2">
+                                        {#<span class="element-data sm-right">{{'firm_settings.profile.billing.zip_code'|trans|capitalize}}</span>#}
+                                        <span class="element-data bold-1">{{ organization.billingAddress|default ? organization.workerFirm.ZIPCode.code : '' }}</span>
+                                        <div class="element-input input-field no-margin">
+                                            <label for="zipcode">{{'firm_settings.profile.billing.zip_code'|trans|capitalize}}</label>
+                                            <input type="text" class="no-margin" name="zipcode" id="zipcode">
+                                            {{ form_widget(form.ZIPCode, {attr:{style: "margin:0"}}) }}
+                                        </div>
+                                    </div>
+
+
+                                </div>
+
+                                <div class="row no-margin location-elmts-zone">
+                                    <div class="col s12 m5">
+                                        <span class="element-data sm-right">{{'firm_settings.profile.billing.city'|trans|capitalize}}</span>
+                                        <span class="element-data bold-1">{{ not organization.workerFirm.city|default ? ('(' ~ 'not_provided'|trans ~ ')') : organization.workerFirm.city.name }}</span>
+                                        <div class="element-input input-field no-margin location-element-field-zone">
+                                            <label for="cityname">{{'firm_settings.profile.billing.city'|trans|capitalize}}</label>
+                                            <input type="text" class="no-margin" name="cityname" id="cityname">
+                                            <select name="citySelector" style="display:none;"></select>
+                                            {{ form_widget(form.city, {attr:{style: "margin:0"}}) }}
+                                        </div>
+                                    </div>
+                                    <div class="col s12 m4">
+                                        <span class="element-data sm-right">{{'firm_settings.profile.billing.state'|trans|capitalize}}</span>
+                                        <span class="element-data bold-1">{{ not organization.workerFirm.state|default ? ('(' ~ 'not_provided'|trans ~ ')') : organization.workerFirm.state.name }}</span>
+                                       <div class="element-input input-field no-margin location-element-field-zone">
+                                            <label for="statename">{{'firm_settings.profile.billing.state'|trans|capitalize}}</label>
+                                            <input id="statename" type="text" class="no-margin" name="statename">
+                                            <select name="stateSelector" style="display:none;"></select>
+                                            {{ form_widget(form.state, {attr:{style: "margin:0"}}) }}
+                                        </div>
+                                    </div>
+                                    <div class="col s12 m3">
+                                        <span class="element-data sm-right">{{'firm_settings.profile.billing.country'|trans|capitalize}}</span>
+                                        <span class="element-data bold-1">{{ not organization.workerFirm.country|default ? ('(' ~ 'not_provided'|trans ~ ')') : organization.workerFirm.country.name }}</span>
+                                        <div class="element-input input-field no-margin location-element-field-zone">
+                                            <label for="countryname">{{'firm_settings.profile.billing.country'|trans|capitalize}}</label>
+                                            <input type="text" class="no-margin" name="countryname">
+                                            <select name="countrySelector" style="display:none;"></select>
+                                            {{ form_widget(form.country, {attr:{style: "margin:0"}}) }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                
+                                
+                                
+
+                                <div class="flex-center full-width-row">
+                                    <span class="field-name">{{'firm_settings.profile.billing.name'|trans|capitalize}}</span>
+                                    <span class="element-data bold-1">{{ not organization.contactName|default ? organization.superAdmin.fullname : organization.contactName }}</span>
+                                    <div class="element-input input-field no-margin">
+                                            {{ form_label(form.contactName) }}
+                                            {{ form_widget(form.contactName, {attr:{style: "margin:0"}}) }}
+                                    </div>
+                                </div>
+                                 <div class="flex-center">
+                                    <span class="field-name">{{'firm_settings.profile.billing.phoneNumber'|trans|capitalize}}</span>
+                                    <span class="element-data bold-1">{{ not organization.contactPhoneNumber|default ? ('(' ~ 'not_provided'|trans ~ ')') : organization.billingPhone }}</span>
+                                    <div class="element-input input-field no-margin">
+                                            {{ form_label(form.contactPhoneNumber) }}
+                                            {{ form_widget(form.contactPhoneNumber, {attr:{style: "margin:0"}}) }}
+                                    </div>
+                                </div>
+                            
+                            </div>
+                    </section>
+                    <section>
+
+                        <h5>{{'firm_settings.profile.general_info.title'|trans}}</h5>
+                        <div class="firm-fields">
+                        
+                            <div class="flex-center-sb">
+                                <span>{{ 'firm_settings.profile.general_info.member_since'|trans }}</span>
+                                <span>{{ organization.inserted|format_datetime('short', 'none', pattern='dd/MM/yy') }}</span>
+                            </div>
+                            <div class="flex-center-sb">
+                                <span>{{ 'firm_settings.profile.general_info.total_users'|trans }}</span>
+                                <span>{{ organization.users|filter(u => not u.synthetic)|length ~ ' (' ~ organization.users|filter(u => not u.deleted and not u.synthetic)|length ~ ')' }}</span>
+                            </div>
+                        </div>
+                        
+                    </section>
+
+                    {{ form_rest(form) }}
+                    {{ form_end(form) }}
+                    
+                    
+
+
+                    {#
+                    <section>
+                        <div class="flex-center-sb">
+                            <h5>{{'profile.my_accounts'|trans}}</h5>
+                            <a href="#addAccount" class="btn-flat add-account-btn modify-btn modal-trigger dd-text">
+                                <span class="sm-right">{{'add'|trans}}</span>
+                                <i class="fa fa-plus"></i>
+                            </a>
+                        </div>
+                        <ul class="accounts-zone">
+                            <li class="firm-accounts">
+                                <ul>
+                                    {% if organization.|length > 1 %}
+                                        {% for userAccount in organization.users|filter(u => !u.synthetic) %}
+                                            <li class="account flex-center-sb">
+                                                <div>  
+                                                    <img class="user-profile-l-picture" src="{{ asset(global.organizationLogo(userAccount.organization)) }}" alt="">
+                                                    <span class="account-prefix">{{'my_account'|trans}}</span>
+                                                    <span class="account-name">{{userAccount.organization.commname}}</span>
+                                                </div>
+                                                <div class="account-action-zone">
+                                                    
+                                                    {% if userAccount.organization.userMasters|filter(m => m.user == userAccount) is not empty %}
+                                                    <div class="btn-flat user-master-btn">
+                                                            <i class="fa fa-user-cog"></i>
+                                                            <span class="user-master-name">{{ 'profile.administrator'|trans }}</span>
+                                                    </div> 
+                                                    {% endif %}
+                                                    <div class="btn-flat nb-activites-info tooltipped" data-tooltip="{{ 'profile.total_nb_activities'|trans }}" data-position="top">
+                                                        <i class="fa fa-briefcase"></i>
+                                                        <span>{{userAccount.internalActivities|length + userAccount.externalActivities|length }}</span>
+                                                    </div> 
+                                                    <div class="btn-flat delete-account-btn tooltipped modal-trigger" href="#deleteAccount" data-id="{{userAccount.id}}" data-oid="{{userAccount.organization.id}}" data-tooltip="{{'delete'|trans}}" data-position="top" style="visibility:hidden;">
+                                                        <i class="dd-orange-text fa fa-times"></i>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        {% endfor %}
+                                    {% else %}
+                                        <li>
+                                            <span>{{'profile.no_firm_account'|trans}}</span>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </li>
+                        </ul>
+                    </section>
+                    #}
+
+                    {#
+                    <ul class="element-input flex-center" style="display: none;justify-content:space-between;flex-grow:1">
+                        <li>
+                            <ul class="flex" style="flex-direction: column;">
+                                <li>
+                                    <div class="" style="display: inline-block;">
+                                        {{ form_row(form.male) }}
+                                    </div>
+                                    <div class="input-field" style="display: inline-block;">
+                                        {{ form_label(form.firstname) }}
+                                        {{ form_widget(form.firstname, {attr:{style: "margin:0"}}) }}
+                                    </div>
+                                    <div class="input-field" style="display: inline-block;">
+                                        {{ form_label(form.lastname) }}
+                                        {{ form_widget(form.lastname, {attr:{style: "margin:0"}}) }}
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="">
+                                        {{ form_row(form.email) }}
+                                    </div>
+                                </li>
+                            </ul>
+                        </li>
+                        <li style=""><a class="validate-profile-info-btn waves-effect waves-light btn blue darken-2 tooltip"><i class="fa fa-check"></i></a></li>
+                    </ul>
+                    #}
+                </div>
+                
+                {#
+                <ul class="experiences" style="margin-top:3em" data-prototype="{% apply escape %}{% include 'prototype_experience.twig' with { 'item': form.experiences.vars.prototype } %}{% endapply %}">
+                    {% set k = 0 %}
+                    {% for key, experience in form.experiences %}
+                        {% set k = k + 1 %}
+                        
+
+                        <li class="row element-data" style="width:95%;">
+                            <ul class="flex-center" style="justify-content:space-between">
+                                <li>
+                                    <div style="font-size:17px">{{experience.vars.data.position}}</div>
+                                    <div>{{experience.vars.data.firm.name}}</div>
+                                </li>
+                                <li style="margin-left: auto;">
+                                    {% set startdate = experience.vars.data.startdate %}
+                                    {% set enddate = experience.vars.data.enddate %}
+
+                                    {% if startdate is not null and enddate is not null %}
+                                        <span>
+                                            {{ experience.vars.data.startdate|format_date('short', 'none', null, null, 'MM/yy') }} -
+                                            {{ experience.vars.data.enddate|format_date('short', 'none', null, null, 'MM/yy') }}
+                                        </span>
+                                    {% elseif enddate is null %}
+                                        <span>
+                                            {{ experience.vars.data.startdate|format_date('short', 'none', null, null, 'MM/yy') }} -
+                                            Present
+                                        </span>
+                                    {% elseif startdate is null and enddate is null %}
+                                        <span> Dates non précisées </span>
+                                    {% endif %}
+                                </li>
+                                <li>
+                                    <a class="modify-experience-btn btn-flat" style="margin-left: auto;">
+                                        <i class="fa fa-pencil-alt"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                                        
+                        <li class="experience element-input" style="width:95%;display:none">
+                            <ul class="flex-center row" style="justify-content: space-between;">
+                                <li class="stage-title">
+                                    <h4> {% trans %} worker_individual_data.experience.title {% endtrans %} {{ k }}</h4>
+                                </li>
+                                <li style="margin-left:auto;margin-right:10px"><a class="validate-experience-btn waves-effect waves-light btn blue darken-2 tooltip"><i class="fa fa-check"></i></a></li>
+                            </ul>
+                            <div class="row">
+                                <div class="input-field col s12 m4">
+                                    {{ form_row(experience.position) }}
+                                </div>
+                                <div class="input-field w-firm col s12 m4">
+                                    {{ form_row(experience.firm,{attr:{class:"no-margin"}}) }}
+                                    <select name="firmSelector" style="margin-top:45px"></select>
+                                </div>
+                                <div class="col s12 m4">
+                                    {{ form_widget(experience.active) }}
+                                    {{ form_label(experience.active) }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="input-field col s12 m4">
+                                    {{ form_row(experience.location) }}
+                                </div>
+                                <div class="col s12 m4">
+                                    {{ form_row(experience.startdate) }}
+                                </div>
+                                <div class="col s12 m4">
+                                    {{ form_row(experience.enddate) }}
+                                </div>
+                            </div>
+                        </li>
+                    {% endfor %}
+                    <a href="#" class="waves-effect waves-light btn insert-experience-btn"><i class="fa fa-plus" style="margin-right: 10px;"></i><span>Ajouter une expérience</span></a>
+                </ul>
+                #}
+
+                <div id="successUploadedPicture" class="modal">
+                    <div class="modal-content">
+                    <p>{{ 'profile.file.success.modal_content'|trans }}</p>
+                    </div>
+                    <div class="modal-footer action-buttons">
+                    <div class="button-field">
+                        <a class="waves-effect waves-green btn modal-close">Ok</a>
+                    </div>
+                    </div>
+                </div>
+                
+                <div id="errorFileType" class="modal">
+                    <div class="modal-title">
+                    <h4>{{ 'profile.file.unsupported_type.modal_title'|trans }}</h4>
+                    </div>
+                    <div class="modal-content">
+                    <p>{{ 'profile.file.unsupported_type.modal_content'|trans }}</p>
+                    </div>
+                    <div class="modal-footer action-buttons">
+                    <div class="button-field">
+                        <a class="waves-effect waves-green btn modal-close">Ok</a>
+                    </div>
+                    </div>
+                </div>
+                <div id="errorFileSize" class="modal">
+                    <div class="modal-title">
+                    <h4>{{ 'profile.file.unsupported_size.modal_title'|trans }}</h4>
+                    </div>
+                    <div class="modal-content">
+                    <p>{{ 'profile.file.unsupported_size.modal_content'|trans }}</p>
+                    </div>
+                    <div class="modal-footer action-buttons">
+                    <div class="button-field">
+                        <a class="waves-effect waves-green btn modal-close">Ok</a>
+                    </div>
+                    </div>
+                </div>
+                <div id="emailConfirmation" class="modal">
+                    <div class="modal-content">
+                        <h5>{{ 'profile.manage.email_confirmation_modal.title'|trans }}</h5>
+                        <p>{{ 'profile.manage.email_confirmation_modal.content'|trans|raw }}</p>
+                    </div>
+                    <div class="modal-footer">
+                        <a class="modal-action waves-effect btn">Ok</a>
+                    </div>
+                </div>
+                <div id="addAccount" class="modal">
+                    <div class="modal-content user-inputs">
+                        <form class="user-inputs">
+                            <h5>{{ 'profile.manage.add_account_modal.title'|trans }}</h5>
+                            <p>{{ 'profile.manage.add_account_modal.content'|trans ~ ' :' }}</p>
+                            <div class="input-field firm-field-zone">
+                                <input class="firm-name" type="text" name="firm">
+                                <select name="firmSelector" id=""></select>
+                                <input type="hidden" name="wid">
+                            </div>
+                            <div class="action-buttons">
+                                <div class="button-field">
+                                <a class="btn waves-light waves-effect set-usr-org-btn">Ok</a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div id="deleteAccount" class="modal">
+                    <div class="modal-content">
+                       <h5>{{ 'profile.manage.delete_account_modal.title'|trans }}</h5>
+                       <p>{{ 'profile.manage.delete_account_modal.content'|trans }}<span class="sm-left sm-right account-delete-name strong"></span>{{ '? ' ~ 'profile.manage.delete_account_modal.end'|trans }}</p>
+                        <div class="flex-center-fe">
+                            <a class="modal-close waves-effect btn-flat dd-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+                            <a class="modal-action waves-effect btn delete-btn">Ok</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+    <div style="display: none">
+        {{ form_start(pictureForm) }}
+        {{ form_label(pictureForm.pictureFile) }}
+        {{ form_widget(pictureForm.pictureFile) }}
+        {{ form_errors(pictureForm.pictureFile) }}
+        {{ form_rest(pictureForm) }}
+        {{ form_end(pictureForm) }}
+    </div>
+   
+
+{% endblock %}
+
+{% block javascripts %}
+        <script src="{{ absolute_url(asset('js/organization_profile.js')) }}"></script>
+{% endblock %}

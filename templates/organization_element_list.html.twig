@@ -13,7 +13,7 @@
   {% set elmtNameConj = "organization_elements.title_conj"|trans  %}
   {% set nbFields = 1 %}
 {% endif %}
-{% set orgId = app.request_stack.currentrequest.get('orgId') %}
+{% set orgId = global.request.get('orgId') %}
 
 
 
@@ -27,7 +27,8 @@
     <!-- Dropify -->
     <link href="{{ asset('css/dropify.min.css') }}" rel="stylesheet" type="text/css">
     <script>
-        //var vurl = "{{ url('validateOrganizationElement',{'orgId': orgId,'elmtType': elmtType,'elmtId': 0}) }}"
+        alert(orgId);
+        var vurl = "{{ url('validateOrganizationElement',{'orgId': orgid ,'entity': elmtType,'elmtId': 0}) }}";
     </script>
   {% endblock %}
 
@@ -50,21 +51,26 @@
     {% set elements = form.departments %}
     {% elseif form.positions is defined %}
     {% set elements = form.positions %}
-    {% else %}
-    {% set elements = form.titles %}  
+    {% elseif form.titles is defined %}
+    {% set elements = form.titles %}
+    {% else%}
+        {% set elements = form.processes %}
     {% endif %}
 
     <div style="position:relative;padding-top:20px">
       <a href="{{ path('firmSettings') }}" class="btn" style="position:absolute;top: 50%;">
         Retour
       </a>
+
       <h4 style="text-align:center;font-size: 1.8rem">{% trans with {'%element%' : elmtName} %} organization_elements.page_title {% endtrans %}</h4>
     </div>
 
 
-    <ul class="elements" data-prototype="{% filter escape %}{% include 'prototype_organization_element.twig' with { 'item': elements.vars.prototype, 'elmtType' : elmtType, 'nbFields' : nbFields } %}{% endfilter %}" style="margin-top:50px">
 
-        {% if currentuser.organization.usersWithoutOrgElement(elmtType) %}
+
+    <ul class="elements" style="margin-top:50px" data-prototype="{% apply escape %}{% include 'prototype_organization_element.twig' with { 'item': elements.vars.prototype, 'elmtType': elmtType, 'nbFields' : nbFields } %}{% endapply %}">
+
+        {% if UsersWithoutOrgElement %}
         <li class="element">
           <div class="row">
               <div class="col element-data element-name s12 m{{ 12/(nbFields + 1) }}" style="font-size: 17px;font-style:italic">
@@ -82,7 +88,7 @@
                   <li style="margin-left:auto;margin-right:10px"><a class="waves-effect waves-light btn-flat white-text" style="cursor: initial;"><i class="fa fa-pencil-alt"></i></a></li>
 
                   <li style="margin-right:10px">
-                    {% set nbUsers = currentuser.organization.usersWithoutOrgElement(elmtType)|length %}
+                    {% set nbUsers = UsersWithoutOrgElement|length %}
                     {% if nbUsers == 0 %}
                       <a class="waves-effect waves-light btn-flat tooltipped" data-position="top" data-tooltip="{% trans with {'%conj_element%' : elmtNameConj} %}organization_elements.no_users{% endtrans %}" style="width:75px">
                         {#<i class="fa fa-users"></i>#}
@@ -118,7 +124,7 @@
                   <h5>{{elmtName|capitalize}} {{ key + 1}}</h5>
               </li>
               <li style="margin-left:auto;margin-right:10px"><a class="validate waves-effect waves-light btn-flat"><i class="fa fa-pencil-alt"></i></a></li>
-              <li style="margin-right:10px"><a class="validate waves-effect waves-light btn" href="{{ url('updateElementTargets',{'elmtType' : elmtType, 'elmtId' : element.vars.value.id}) }}" data-tooltip="{% trans %}organization_elements.targets{% endtrans %}"><i class="fa fa-bullseye"></i></a></li>
+              <li style="margin-right:10px"><a class="validate waves-effect waves-light btn" href="{{ url('updateElementTargets',{entity: elmtType, 'elmtId' : element.vars.value.id}) }}" data-tooltip="{% trans %}organization_elements.targets{% endtrans %}"><i class="fa fa-bullseye"></i></a></li>
               <li><a href="#deleteDepartment" class="waves-effect waves-light accent-4 btn-flat red-text modal-trigger tooltip" data-did="{{ element.vars.id }}" data-tooltip="{% trans %}organization_elements.delete_btn{% endtrans %}"><i class="fa fa-trash"></i></a></li>
           </ul>
           #}
@@ -168,7 +174,7 @@
                       </a>
                     {% endif %}
                   </li>
-                  <li style="margin-right:10px"><a class="validate waves-effect waves-light btn tooltipped" href="{{ url('updateElementTargets',{'elmtType' : elmtType, 'elmtId' : element.vars.data.id}) }}" data-position="top" data-tooltip="{% trans %}organization_elements.targets{% endtrans %}" style="padding:0px 14px;display:flex;justify-content:center;width:75px"><i class="fa fa-bullseye"></i>{% if element.vars.data.targets|length > 0 %}<span style="margin-left:3px">{{ element.vars.data.targets|length }}</span>{% endif %}</a></li>
+                  <li style="margin-right:10px"><a class="validate waves-effect waves-light btn tooltipped" href="{{ url('updateElementTargets',{entity: elmtType, 'elmtId' : element.vars.data.id}) }}" data-position="top" data-tooltip="{% trans %}organization_elements.targets{% endtrans %}" style="padding:0px 14px;display:flex;justify-content:center;width:75px"><i class="fa fa-bullseye"></i>{% if element.vars.data.targets|length > 0 %}<span style="margin-left:3px">{{ element.vars.data.targets|length }}</span>{% endif %}</a></li>
                   <li><a href="#deleteElement" class="waves-effect waves-light accent-4 btn-flat modal-trigger tooltipped" data-eid="{{ element.vars.data.id }}" data-position="top" data-tooltip="{% trans %}organization_elements.delete_btn{% endtrans %} {{elmtName}}"><i class="fa fa-trash"></i></a></li>
                 </ul>
               </div>
@@ -226,6 +232,5 @@
   {% endblock %}
 
 {% block javascripts %}
-  <script src="{{ asset('js/login.js') }}"></script>
   <script src="{{ asset('js/organization_elements.js') }}"></script>
 {% endblock %}

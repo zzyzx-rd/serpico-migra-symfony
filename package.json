@@ -1,0 +1,32 @@
+{
+  "name": "serpico-migra-symfony",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "dependencies": {
+    "countdown": "^2.6.0",
+    "moment": "^2.29.0",
+    "dropzone": "^5.7.2",
+    "jquery": "^3.5.1"
+  },
+  "devDependencies": {
+    "webpack": "^4.44.2",
+    "webpack-cli": "^3.3.12"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zzyzx-rd/serpico-migra-symfony.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zzyzx-rd/serpico-migra-symfony/issues"
+  },
+  "homepage": "https://github.com/zzyzx-rd/serpico-migra-symfony#readme"
+}

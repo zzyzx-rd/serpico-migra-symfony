@@ -47,6 +47,23 @@ setTimeout(function (){
   }
 },200)
 
+$.delete = function(url, data, callback, type){
+ 
+  if ( $.isFunction(data) ){
+    type = type || callback,
+        callback = data,
+        data = {}
+  }
+ 
+  return $.ajax({
+    url: url,
+    type: 'DELETE',
+    success: callback,
+    data: data,
+    contentType: type
+  });
+}
+
 if(location.pathname.split('/').includes('iprocess')){
   $('.stage-container').css('background-color','#ffffd4');
   setTimeout(function(){
@@ -127,33 +144,76 @@ function sliders($btn = null) {
 
 sliders();
 
-function parseDdmmyyyy(str)
-{
-  var parts = str.split('/');
-  return new Date(parts[2], parts[1] - 1, parts[0]);
+function initPickates(){
+  switch(lg){
+    case 'fr':
+        $.extend($.fn.pickadate.defaults, {
+            monthsFull: ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'],
+            monthsShort: [ 'Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aou', 'Sep', 'Oct', 'Nov', 'Dec' ],
+            weekdaysFull: [ 'Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi' ],
+            weekdaysShort: [ 'Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam' ],
+            today: 'Aujourd\'hui',
+            clear: 'Effacer',
+            close: 'Fermer',
+            firstDay: 1,
+            //format: 'dd mmmm yyyy',
+        });
+        break;
+    case 'es':
+        $.extend($.fn.pickadate.defaults, {
+            monthsFull: [ 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre' ],
+            monthsShort: [ 'ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic' ],
+            weekdaysFull: [ 'domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado' ],
+            weekdaysShort: [ 'dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb' ],
+            today: 'hoy',
+            clear: 'borrar',
+            close: 'cerrar',
+            firstDay: 1,
+            //format: 'dddd d !de mmmm !de yyyy',
+        });
+        break;
+    case 'pt':
+        $.extend($.fn.pickadate.defaults, {
+            monthsFull: [ 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro' ],
+            monthsShort: [ 'jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez' ],
+            weekdaysFull: [ 'Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado' ],
+            weekdaysShort: [ 'dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab' ],
+            today: 'Hoje',
+            clear: 'Limpar',
+            close: 'Fechar',
+            firstDay: 1,
+            //format: 'd !de mmmm !de yyyy',
+        });
+        break;
+    default:
+        break;
+  
+  }
+  
+  
+  $.extend($.fn.pickadate.defaults, {
+    selectMonths: true,
+    selectYears: 5,
+    yearend: '31/12/2020',
+    closeOnSelect: true,
+    clear: false,
+    //format : 'dd MMMM, yyyy',
+    //formatSubmit: 'yyyy/mm/dd'
+  });
+  
+  $('.dp-start, .dp-end, .dp-gstart, .dp-gend').each(function() {
+    $(this).pickadate();
+  });
 }
+
+initPickates();
+
 
 // Updates calendar datepickers
 
 function updateDatepickers(k, index){
 
   var nbStages =  $('.stage').length;
-
-  var replaceVars = {
-      "janvier":"January","enero":"January","janeiro":"January",
-      "février":"February","febrero":"February","fevereiro":"February",
-      "mars":"March","marzo":"March","março":"March",
-      "avril":"April","abril":"April","abril":"April",
-      "mai":"May","mayo":"May","maio":"May",
-      "juin":"June","junio":"June","junho":"June",
-      "juillet":"July","julio":"July","julho":"July",
-      "août":"August","agosto":"August","agosto":"August",
-      "septembre":"September","septiembre":"September","setembro":"September",
-      "octobre":"October","octubre":"October","outubro":"October",
-      "novembre":"November","noviembre":"November","novembro":"November",
-      "décembre":"December","diciembre":"December","dezembro":"December",
-  };
-  var regex = /janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre|enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre|janeiro|fevereiro|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro/g ;
 
   //Three possible cases : loading(0), addition of one stage(1), update(2) or removal (-1)
 
@@ -169,19 +229,13 @@ function updateDatepickers(k, index){
           var endCal = $(this).find('.dp-end');
           var gStartCal = $(this).find('.dp-gstart');
           var gEndCal = $(this).find('.dp-gend');
-          var startDateTS = (startCal.val() == "") ? Date.now() : parseDdmmyyyy(startCal.val().replace(regex,function(match){return replaceVars[match];}));
-          var endDateTS = (endCal.val() == "") ? startDateTS : parseDdmmyyyy(endCal.val().replace(regex,function(match){return replaceVars[match];}));
-          var gStartDateTS = (gStartCal.val() == "") ? startDateTS : parseDdmmyyyy(gStartCal.val().replace(regex,function(match){return replaceVars[match];}));
-          var gEndDateTS = (gEndCal.val() == "") ? startDateTS : parseDdmmyyyy(gEndCal.val().replace(regex,function(match){return replaceVars[match];}));
+          var startDateTS = (startCal.val() == "") ? Date.now() : new Date(startCal.val());
+          var endDateTS = (endCal.val() == "") ? startDateTS : new Date(endCal.val());
           var startDate = new Date(startDateTS);
           var endDate = new Date(endDateTS);
-          var gStartDate = new Date(gStartDateTS);
-          var gEndDate = new Date(gEndDateTS);
-
           startCal.pickadate('picker').set('select',startDate);
           endCal.pickadate('picker').set('select',endDate).set('min',startDate);
-          gStartCal.pickadate('picker').set('select',gStartDate).set('min',startDate);
-          gEndCal.pickadate('picker').set('select',gEndDate).set('min',gStartDate);
+
       });
 
   } else if(k==1) {
@@ -215,65 +269,6 @@ function updateDatepickers(k, index){
 
 }
 
-switch(lg){
-
-  case 'fr':
-      $.extend($.fn.pickadate.defaults, {
-          monthsFull: ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'],
-          monthsShort: [ 'Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aou', 'Sep', 'Oct', 'Nov', 'Dec' ],
-          weekdaysFull: [ 'Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi' ],
-          weekdaysShort: [ 'Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam' ],
-          today: 'Aujourd\'hui',
-          clear: 'Effacer',
-          close: 'Fermer',
-          firstDay: 1,
-          //format: 'dd mmmm yyyy',
-      });
-      break;
-  case 'es':
-      $.extend($.fn.pickadate.defaults, {
-          monthsFull: [ 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre' ],
-          monthsShort: [ 'ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic' ],
-          weekdaysFull: [ 'domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado' ],
-          weekdaysShort: [ 'dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb' ],
-          today: 'hoy',
-          clear: 'borrar',
-          close: 'cerrar',
-          firstDay: 1,
-          //format: 'dddd d !de mmmm !de yyyy',
-      });
-      break;
-  case 'pt':
-      $.extend($.fn.pickadate.defaults, {
-          monthsFull: [ 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro' ],
-          monthsShort: [ 'jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez' ],
-          weekdaysFull: [ 'Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado' ],
-          weekdaysShort: [ 'dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab' ],
-          today: 'Hoje',
-          clear: 'Limpar',
-          close: 'Fechar',
-          firstDay: 1,
-          //format: 'd !de mmmm !de yyyy',
-      });
-      break;
-  default:
-      break;
-
-}
-
-$.extend($.fn.pickadate.defaults, {
-  selectMonths: true,
-  selectYears: 5,
-  yearend: '31/12/2020',
-  closeOnSelect: true,
-  clear: false,
-  //format : 'dd MMMM, yyyy',
-  //formatSubmit: 'yyyy/mm/dd'
-});
-
-$('.dp-start, .dp-end, .dp-gstart, .dp-gend').each(function() {
-  $(this).pickadate();
-});
 
 var endDates = $('.dp-end');
 endDates.data('previous', endDates.val());
@@ -359,11 +354,74 @@ $(document).on(
     $participantItem.addClass('edit-mode');
   }
 ).on(
+    'click', '.btn-add-output',
+    function() {
+
+        const $this = $(this);
+        const $section = $this.closest('.output');
+
+        const $outputList = $section.find('.output-criteria');
+
+        if ($criteriaList.children('.new').length) {
+            return;
+        }
+
+        //const $proto =  $section.find('template.criteria-list--item__proto');
+        /** @type {HTMLTemplateElement} */
+        const outputs = $section.find('.output-list--item');
+
+        const nbOutput = outputs.length;
+        const proto = $section.find('template.output-list--item__proto')[0];
+        const $output = $section.closest('.output');
+        const outputList = $output.find('ul.output-list');
+        const protoHtml = proto.innerHTML.trim();
+        const newProtoHtml = protoHtml
+            .replace(/__otpIndex__/g, outputList.children().length - 1)
+
+
+
+        const $crtElmt = $(newProtoHtml);
+        //$crtElmt.append(newProtoHtml);
+        $crtElmt.find('.modal').modal();
+        $crtElmt.find('.tooltipped').tooltip();
+
+        // Setting default values, and putting label upside by adding them "active" class
+        $crtElmt.find('input[name*="lowerbound"]').val(0).prev().addClass("active");
+        $crtElmt.find('input[name*="upperbound"]').val(5).prev().addClass("active");
+        $crtElmt.find('input[name*="step"]').val(0.5).prev().addClass("active");
+
+
+
+        $criteriaList.children().last().before($crtElmt);
+
+
+
+
+
+
+        slider.next().next().hide();
+
+
+        handleCNSelectElems($crtElmt);
+
+        $crtElmt.find('.modal-output').modal({
+            complete: function(){
+
+
+            }
+        });
+        $crtElmt.find('.modal-output').modal('open');
+
+
+    }
+).on(
   'click', '.btn-add-criterion',
   function() {
-    const $this = $(this);
-    const $section = $this.closest('section');
-    const $criteriaList = $section.find('ul.criteria-list');
+
+      const $this = $(this);
+      const $section = $this.closest('.output-item');
+
+      const $criteriaList = $section.find('.criteria-list');
 
     if ($criteriaList.children('.new').length) {
       return;
@@ -372,29 +430,35 @@ $(document).on(
     //const $proto =  $section.find('template.criteria-list--item__proto');
     /** @type {HTMLTemplateElement} */
     const $criteria = $section.find('.criteria-list--item');
+
     const nbCriteria = $criteria.length;
-    const proto = $section.find('template.criteria-list--item__proto')[0];
+    const proto = $section.find('template.criteria-modal--item__proto')[0];
+    const $output = $section.closest('.output');
+    const $outputList = $output.find('ul.output-list');
+    console.log(proto);
     const protoHtml = proto.innerHTML.trim();
     const newProtoHtml = protoHtml
-    .replace(/__stgIndex__/g,$('.stage-element').not('.completed-stage-element').length - 1)
-    .replace(/__crtIndex__/g, $criteriaList.children().length - 2)
-    .replace(/__crtNb__/g, $criteriaList.children().length - 1)
-    .replace(/__lowerbound__/g, 0)
-    .replace(/__upperbound__/g, 5)
-    .replace(/__step__/g, 0.5)
-    //.replace(/__weight__/g, Math.round(100/(nbCriteria + 1)))
-    .replace(/__stgNb__/g, $('.stage').index($section.closest('.stage')));
+        .replace(/__otpIndex__/g, $criteriaList.children().length - 1)
+        .replace(/__crtIndex__/g, $criteriaList.children().length - 1)
+        .replace(/__crtNb__/g, $criteriaList.children().length - 1)
+        .replace(/__lowerbound__/g, 0)
+        .replace(/__upperbound__/g, 5)
+        .replace(/__step__/g, 0.5)
+        //.replace(/__weight__/g, Math.round(100/(nbCriteria + 1)))
+        .replace(/__stgNb__/g, $('.stage').index($section.closest('.stage')));
 
     const $crtElmt = $(newProtoHtml);
-    //$crtElmt.append(newProtoHtml);
-    $crtElmt.find('.modal').modal();
-    $crtElmt.find('.tooltipped').tooltip();
+    $criteriaList.append($crtElmt);
+      $('.modal').modal();
+      $criteriaList.find('.modal').modal();
+      $criteriaList.find('.tooltipped').tooltip();
 
     // Setting default values, and putting label upside by adding them "active" class
     $crtElmt.find('input[name*="lowerbound"]').val(0).prev().addClass("active");
     $crtElmt.find('input[name*="upperbound"]').val(5).prev().addClass("active");
     $crtElmt.find('input[name*="step"]').val(0.5).prev().addClass("active");
     // Select new criterion as being an evaluation one (by default)
+
     $crtElmt.find('[id*="_type"]').eq(1)[0].checked = true;
 
     /*
@@ -420,12 +484,12 @@ $(document).on(
     var weight = $crtElmt.find('.weight');
 
     //Removing '%' text added by PercentType
-    weight[0].removeChild(weight[0].lastChild);
+    //weight[0].removeChild(weight[0].lastChild);
 
     //Get new criteria objects after insertion
     //var relatedCriteria = $crtElmt.closest('.stage').find('.criterion');
     $relatedCriteria = $criteriaList.find('.criteria-list--item');
-
+    console.log($criteriaList);
 
     var creationVal = Math.round(100 / $relatedCriteria.length);
     var sumVal = 0;
@@ -467,6 +531,7 @@ $(document).on(
         let btnV = $crtElmt.find('.c-validate');
         var slider = $crtElmt.find('.weight-criterion-slider');
         if(!btnV.hasClass('clicked')){
+
             if($crtElmt.hasClass('new')){
 
               $crtElmt.remove();
@@ -484,7 +549,7 @@ $(document).on(
               $crtElmt.find('.lowerbound').val(prevLB);
               $crtElmt.find('.c-weighting').empty().append(`(${prevWeight} %)`);
               $crtElmt.find('select[name*="cName"]').val($crtElmt.find('select[name*="cName"] option[selected="selected"]').val());
-
+              console.log($crtElmt.find('select[name*="cName"]'));
             }
         } else {
             btnV.removeClass('clicked');
@@ -532,7 +597,8 @@ $(document).on(
         }*/
       }
     })
-    $crtElmt.find('.criterion-modal').modal('open');
+
+    $crtElmt.find('.modal').modal('open');
 
 
   }
@@ -553,11 +619,11 @@ $(document).on(
       $modalDeletionBtn.data('id',$participantItem.data('id'));
       $modalDeletionBtn.on('click',async function(){
         await $.post(dpurl);
-        $userVal = $participantItem.find('select[name*="directUser"]').val();
+        $userVal = $participantItem.find('select[name*="user"]').val();
         $participantList = $participantItem.closest('.participants-list');
         $participantItem.remove();
         $participantList.find('.participants-list--item').each(function(i,e){
-          $select = $(e).find('select[name*="directUser"]');
+          $select = $(e).find('select[name*="user"]');
           $select.find(`option[value="${$userVal}"]`).prop('disabled',false);
           $select.material_select();
         });
@@ -576,7 +642,7 @@ $(document).on(
       return;
     }
 
-    if($participantsList.find(`.participants-list--item[mode="${pType}"]`).length && $participantsList.find(`.participants-list--item[mode="${pType}"]`).find('select[name*="directUser"] option:not(:disabled)').length == $participantsList.children().length){
+    if($participantsList.find(`.participants-list--item[mode="${pType}"]`).length && $participantsList.find(`.participants-list--item[mode="${pType}"]`).find('select[name*="user"] option:not(:disabled)').length == $participantsList.children().length){
       $('#noRemainingParticipant').modal('open');
       return false;
     };
@@ -646,7 +712,7 @@ $(document).on(
     const $stageItem = $this.closest(STAGE_ITEM);
     const trigger = e.target;
     /** @type {JQuery<HTMLSelectElement>} */
-    const $elmtSelect = $participantItem.find('select[name*="directUser"],select[name*="team"]');
+    const $elmtSelect = $participantItem.find('select[name*="user"],select[name*="team"]');
     const $elmtName = $participantItem.find('.elmt-name');
     /** @type {JQuery<HTMLInputElement>} */
     const $elmtIsLeader = $participantItem.find('.elmt-is-leader');
@@ -663,12 +729,12 @@ $(document).on(
 
         if($.inArray(+usrRole,[2,3]) !== -1
         && !$potentialDifferentLeader.length && $elmtSelect.val() != usrId
-        || $potentialDifferentLeader.length && $potentialDifferentLeader.closest('.participants-list--item').find('select[name*="directUser"]').val() == usrId){
+        || $potentialDifferentLeader.length && $potentialDifferentLeader.closest('.participants-list--item').find('select[name*="user"]').val() == usrId){
           $('#setOwnershipLoseSetup').modal('open').data('id',$this.closest('.stage').data('id'));
           return false;
         } else if($potentialDifferentLeader.length){
           $('#changeOwner').find('.sName').empty().append($this.closest('.stage').find('.stage-name-field').text())
-          $('#changeOwner').find('#oldLeader').empty().append($potentialDifferentLeader.closest('.participants-list--item').find('select[name*="directUser"] option:selected').text())
+          $('#changeOwner').find('#oldLeader').empty().append($potentialDifferentLeader.closest('.participants-list--item').find('select[name*="user"] option:selected').text())
           $('#changeOwner').find('#newLeader').empty().append($elmtName.text());
           $('#changeOwner').modal('open').data('id',$this.closest('.stage').data('id'));
           return false;
@@ -686,8 +752,8 @@ $(document).on(
     );
 
     const params = {
-      pElmtType: $elmtSelect.filter((_i, e) => /directUser/gi.test(e.name)).length ? 'user' : 'team',
-      pElmtId: $elmtSelect[0].value,
+      pEntity: $elmtSelect.filter((_i, e) => /user/gi.test(e.name)).length ? 'user' : 'team',
+      pId: $elmtSelect[0].value,
       type: userParticipantType,
       precomment: null,
     };
@@ -891,9 +957,12 @@ function handleCNSelectElems (target) {
       potentialDuplicate = inUse.reduce((acc, v, i, arr) => arr.indexOf(v) !== i && acc.indexOf(v) === -1 ? acc.concat(v) : acc, [])
       if(potentialDuplicate.length){
         $targetPartSelect.find(`option[value="${potentialDuplicate[0]}"]`).prop('disabled',true);
+        console.log(`option[value="${potentialDuplicate[0]}"]`);
         $targetPartSelect.find('option').each(function(i,e){
           if(!inUse.includes($(e).val())){
             $targetPartSelect.val($(e).val());
+            console.log($(e).val());
+
             return false;
           }
         })
@@ -924,14 +993,14 @@ function handleCNSelectElems (target) {
  * @param {JQuery|HTMLElement} [target]
  */
 function handleParticipantsSelectElems (target) {
-  const isParticipant = (_i, e) => /_\d+_(directuser|team)/gi.test(e.id);
+  const isParticipant = (_i, e) => /_\d+_(user|team)/gi.test(e.id);
   //const isExtParticipant = (_i, e) => /_\d+_ext/gi.test(e.id);
 
   const $partElems = target
     ? target.closest('.participants-list')
     : $('.participants-list');
   const $selects = $partElems.find('select').filter(isParticipant);
-  const $extSelects = [$partElems.find('select[name*="ExtPart"][name*="directUser"]')];
+  const $extSelects = [$partElems.find('select[name*="ExtPart"][name*="user"]')];
 
   $selects.find('option').prop('disabled', false);
 
@@ -1053,6 +1122,7 @@ $(document).on('click','[href="#deleteStage"]', function () {
 });
 
 $(document).on('click','[href="#deleteCriterion"]', function () {
+
   $('.remove-criterion').data('cid', $(this).data('cid'));
   $('#deleteCriterion').css('z-index',9999);
 });
@@ -1272,7 +1342,7 @@ $('.stage-modal').modal({
 
 $('.criterion-modal').modal({
   complete: function(){
-
+      alert('yes');
     let modC = $(this)[0].$el;
     let $crtElmt = modC.closest('.criteria-list--item');
     let btnV = $crtElmt.find('.c-validate');
@@ -1304,6 +1374,8 @@ $('.criterion-modal').modal({
         $crtElmt.find('input[name*="type"]:checked').attr('checked',"checked");
         $crtElmt.find('.cname').text($crtElmt.find('select[name*="cName"] option:selected').text().split(' ').slice(1).join(' '));
         $crtElmt.find('.cname').attr('data-icon',$crtElmt.find('select[name*="cName"] option:selected').attr('data-icon'));
+        console.log($crtElmt.find('select[name*="cName"] option:selected').text().split(' ').slice(1).join(' '));
+        console.log($crtElmt.find('select[name*="cName"] option:selected').attr('data-icon'));
         $crtElmt.find('.c-weighting').empty().append(`(${newValue} %)`);
 
 
@@ -1522,8 +1594,6 @@ $(document).on('click','.s-validate', function(e) {
   isDefiniteDates = $curRow.find('[name*="definiteDates"]').is(':checked');
   startdate = $curRow.find('[name*="startdate"]').val();
   enddate = $curRow.find('[name*="enddate"]').val();
-  gstartdate = $curRow.find('[name*="gstardate"]').val();
-  genddate = $curRow.find('[name*="genddate"]').val();
   dPeriod = $curRow.find('[name*="dPeriod"]').val();
   dFrequency = $curRow.find('select[name*="dFrequency"] option:selected').val();
   dOrigin = $curRow.find('select[name*="dOrigin"] option:selected').val();
@@ -1540,8 +1610,6 @@ $(document).on('click','.s-validate', function(e) {
   $form.find('[name*="activeWeight"]').val(weightVal);
   $form.find('[name*="name"]').val(inputName);
   $form.find('[name*="definiteDates"]').prop('checked', isDefiniteDates);
-  $form.find('[name*="[gstartdate]"]').val(gstartdate);
-  $form.find('[name*="[genddate]"]').val(genddate);
   $form.find('[name*="[startdate]"]').val(startdate);
   $form.find('[name*="[enddate]"]').val(enddate);
   $form.find('[name*="dPeriod"]').val(dPeriod);
@@ -1568,12 +1636,8 @@ $(document).on('click','.s-validate', function(e) {
           tmp[i+3] = tmp[i+3].split('=');
           startdateDDMMYYYY = $($("#" + $('.dp-start')[j].id)).pickadate('picker').get('select', 'dd/mm/yyyy');
           enddateDDMMYYYY = $($("#" + $('.dp-end')[j].id)).pickadate('picker').get('select', 'dd/mm/yyyy');
-          gstartdateDDMMYYYY = $($("#" + $('.dp-gstart')[j].id)).pickadate('picker').get('select', 'dd/mm/yyyy');
-          genddateDDMMYYYY = $($("#" + $('.dp-gend')[j].id)).pickadate('picker').get('select', 'dd/mm/yyyy');
           tmp[i][1] = startdateDDMMYYYY;
           tmp[i+1][1] = enddateDDMMYYYY;
-          tmp[i+2][1] = gstartdateDDMMYYYY;
-          tmp[i+3][1] = genddateDDMMYYYY;
           tmp[i] = tmp[i].join('=');
           tmp[i+1] = tmp[i+1].join('=');
           tmp[i+2] = tmp[i+2].join('=');
@@ -1588,7 +1652,7 @@ $(document).on('click','.s-validate', function(e) {
   }
 
   mSerializedForm = tmp.join('&');
-  $li = $(this).closest('li.stage').find('a.insert-survey-btn')
+  //$li = $(this).closest('li.stage').find('a.insert-survey-btn')
   $.post(url, mSerializedForm)
     .done(function(data) {
       var startCal =  $curRow.find('.dp-start');
@@ -1597,18 +1661,13 @@ $(document).on('click','.s-validate', function(e) {
       var gEndCal =  $curRow.find('.dp-gend');
       startCal.attr('value',startdateDDMMYYYY);
       endCal.attr('value',enddateDDMMYYYY);
-      gStartCal.attr('value',gstartdateDDMMYYYY);
-      gEndCal.attr('value',genddateDDMMYYYY);
       startdateDDMM = startdateDDMMYYYY.split('/').slice(0,2).join('/');
       enddateDDMM = enddateDDMMYYYY.split('/').slice(0,2).join('/');
-      gstartdateDDMM = gstartdateDDMMYYYY.split('/').slice(0,2).join('/');
-      genddateDDMM = genddateDDMMYYYY.split('/').slice(0,2).join('/');
       stageDatesText = startdateDDMM == enddateDDMM ? startdateDDMM : startdateDDMM + ' - ' + enddateDDMM;
-      gradingDatesText = gstartdateDDMM == genddateDDMM ? gstartdateDDMM : gstartdateDDMM + ' - ' + genddateDDMM;
       $curRow.closest('.stage').find('.stage-dates').contents().last().replaceWith(stageDatesText);
       $curRow.closest('.stage').find('.grading-dates').contents().last().replaceWith(gradingDatesText);
-      const href=$li.attr('href').replace('0', data['sid']);
-      $li.attr('href',href);
+      //const href=$li.attr('href').replace('0', data['sid']);
+      //$li.attr('href',href);
       $removeBtn = $curRow.find('[href="#deleteStage"]');
       $removeBtn.attr('data-sid',data.sid);
       $curRow.closest('.stage').attr('data-id',data.sid);
@@ -1631,8 +1690,10 @@ $(document).on('click','.c-validate', function(e) {
   $crtElmt = $curRow.closest('.criteria-list--item');
   //$crtElmt = $(this).closest('.criterion');
   $curRow.find('.red-text').remove();
-  sid = $btn.hasClass('unvalidate-btn') ? $btn.data('sid') : $(this).closest('.stage').data('id');
-  cid = $(this).data('cid');
+  oid = $(this).closest(".output-item").data('oid');
+  console.log($btn.attr('data-cid'));
+  cid = $btn.attr('data-cid');
+
   crtVal = $curRow.find('select[name*="cName"] option:selected').val();
   typeVal = $curRow.find('[name*="type"]:checked').val();
   isRequiredComment = $curRow.find('[name*="forceCommentCompare"]:checked').val();
@@ -1641,16 +1702,17 @@ $(document).on('click','.c-validate', function(e) {
   lowerbound = $curRow.find('[name*="lowerbound"]').val();
   upperbound = $curRow.find('[name*="upperbound"]').val();
   step = $curRow.find('[name*="step"]').val();
-  weight = +$curRow.find('.weight input').val();
+  weight = $curRow.find('.weight input').val();
+  console.log(weight);
 
 
   const $form = $('.c-form form');
 
   const urlToPieces = vcurl.split('/');
-  urlToPieces[urlToPieces.length - 4] = sid;
+  urlToPieces[urlToPieces.length - 4] = oid;
   urlToPieces[urlToPieces.length - 1] = cid;
   const url = urlToPieces.join('/');
-
+    alert(cid);
   $form.find('[name*="cName"]').val(crtVal);
   $form.find('[name*="type"]').eq(typeVal - 1).prop('checked',true);
   $form.find('[name*="forceCommentCompare"]').prop('checked', isRequiredComment);
@@ -1661,11 +1723,17 @@ $(document).on('click','.c-validate', function(e) {
   $form.find('[name*="step"]').val(step);
   $form.find('[name*="weight"]').val(weight);
 
+
   $.post(url, $form.serialize())
   .done(function(data) {
+      console.log($btn);
       $btn.attr('data-cid',data.cid);
+
+      $crtElmt .attr('data-cid',data.cid);
       $deleteBtn.attr('data-cid',data.cid);
+      handleCNSelectElems($crtElmt);
       $curRow.modal('close');
+      console.log($curRow);
       if(typeVal == 1){
         $crtElmt.find('.bounds').show().empty().append(`[${ Math.round(parseFloat(lowerbound.replace(",",".")))}-${ Math.round(parseFloat(upperbound.replace(",","."))) }]`);
         $crtElmt.find('.stepping').show().empty().append(Math.round(parseFloat(step.replace(",",".")) * 100) / 100);
@@ -1688,7 +1756,87 @@ $(document).on('click','.c-validate', function(e) {
 
 
 });
+$(document).on('click','.o-validate', function(e) {
 
+    e.preventDefault();
+    $btn = $(this);
+    $deleteBtn = $btn.closest('.modal').find('[href="#deleteOutput"]');
+    var $crtElmt = $(this).closest('.modal');
+
+    //$crtElmt = $(this).closest('.criterion');
+    sid =  $(this).closest('.stage').data('id');
+    oid = $(this).data('oid');
+    //crtVal = $crtElmt.find('select option:selected').val();
+    typeVal = $crtElmt.find('input:checked').val();
+    startdate = $crtElmt.find('.dp-start').val();
+    enddate = $crtElmt.find('.dp-end').val();
+    startdate = new Date(startdate);
+
+    enddate = new Date(enddate);
+
+
+    const $this = $(this);
+    const $section = $this.closest('.output');
+    const $outputList = $section.find('ul.output-list');
+    const $output = $section.find('.output-list--item');
+    const nbCriteria = $output.length;
+    const proto = $section.find('template.output-list--item__proto')[0];
+    const protoHtml = proto.innerHTML.trim();
+
+    const newProtoHtml = protoHtml
+        .replace(/__stgIndex__/g,$('.stage-element').not('.completed-stage-element').length - 1)
+        .replace(/__otpIndex__/g, $outputList.children().length - 2)
+        .replace(/__otpNb__/g, $outputList.children().length - 1)
+        .replace(/__type__/g, typeVal)
+        .replace(/__startdate__/g, startdate.getFullYear()+'-'+(startdate.getMonth()+1)+'-'+startdate.getDate() )
+        .replace(/__enddate__/g, enddate.getFullYear()+'-'+(enddate.getMonth()+1)+'-'+enddate.getDate() )
+        //.replace(/__weight__/g, Math.round(100/(nbCriteria + 1)))
+        .replace(/__stgNb__/g, $('.stage').index($section.closest('.stage')));
+
+    let $crtProto = $(newProtoHtml);
+    console.log($crtProto);
+    //$crtElmt.append(newProtoHtml);
+    $crtProto.find('.modal').modal();
+    $crtProto.find('.tooltipped').tooltip();
+    var date = startdate.getFullYear()+'-'+(startdate.getMonth()+1)+'-'+startdate.getDate();
+    console.log(date);
+    var time = startdate.getHours() + ":" + startdate.getMinutes() + ":" + startdate.getSeconds();
+    startdate = date+' '+time;
+    var date = enddate.getFullYear()+'-'+(enddate.getMonth()+1)+'-'+enddate.getDate();
+    var time = enddate.getHours() + ":" + enddate.getMinutes() + ":" + enddate.getSeconds();
+    enddate = date+' '+time;
+
+    $outputList.children().last().before($crtProto);
+
+    const $form = $('.o-form form');
+
+    const urlToPieces = vourl.split('/');
+    urlToPieces[urlToPieces.length - 4] = sid;
+    urlToPieces[urlToPieces.length - 1] = oid;
+    const url = urlToPieces.join('/');
+
+
+    $form.find('[name*="type"]').eq(typeVal - 1).prop('checked',true);
+    $form.find('[name*="[startdate]"]').val(startdate);
+    $form.find('[name*="[enddate]"]').val(enddate);
+
+
+    console.log(enddate);
+    $.post(url, $form.serialize())
+        .done(function(data) {
+            $crtProto.attr('data-oid',data.oid);
+            $deleteBtn.attr('data-oid',data.oid);
+            $btn.closest('.modal').modal('close');
+
+        })
+        .fail(function(data) {
+            Object.keys(data.responseJSON).forEach(function(key){
+                $btn.closest('.modal').find(`input[name*="${key}"]`).after(`<strong class="red-text">${data.responseJSON[key]}</strong>`);
+            })
+        });
+
+
+});
 $(document).on('click','.criteria-tab, .survey-tab',function(){
 
   if($(this).hasClass('survey-tab') && $(this).find('a').hasClass('active') && $(this).closest('section').find('.criteria-list .criteria-list--item').length > 0){
@@ -1740,14 +1888,12 @@ $('.stage-add .stage-fresh-new-btn').on('click',function(){
   var initGStartDate = new Date(Date.now());
   var initGEndDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
-  $stgElmt.find('.dp-start, .dp-end, .dp-gstart, .dp-gend').each(function() {
+  $stgElmt.find('.dp-start,.dp-end, .dp-gstart, .dp-gend').each(function() {
       $(this).pickadate();
   });
 
   $stgElmt.find('.dp-start').pickadate('picker').set('select',initStartDate);
   $stgElmt.find('.dp-end').pickadate('picker').set('select',initEndDate).set('min',initStartDate);
-  $stgElmt.find('.dp-gstart').pickadate('picker').set('select',initGStartDate).set('min',initStartDate);
-  $stgElmt.find('.dp-gend').pickadate('picker').set('select',initGEndDate).set('min',initGStartDate);
 
   $stgElmt.find('input[name*="period"]').val(15);
   $stgElmt.find('select[name*="frequency"]').val('D');
@@ -1929,6 +2075,17 @@ $('.activity-element-update, .activity-element-save').on('click',function(e){
       $(e).click();
     })
   }
+})
+
+$('.remove-activity').on('click',function(e){
+  e.preventDefault();
+  $.delete(daurl,{r: 'json'})
+    .done(function(data){
+      $('.back-btn').click();
+    })
+    .fail(function(data){
+      console.log(data);
+    })
 })
 
 

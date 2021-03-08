@@ -70,7 +70,7 @@ class UpdateOrganizationForm extends AbstractType
                 'placeholder' => false,
             ])
 
-            ->add('masterUserId', ChoiceType::class,
+            ->add('masterUser', EntityType::class,
                 [
                     'label_format' => 'massive_update_organization.%name%',
                     'choices' => array_combine($values,$keys),
@@ -98,7 +98,7 @@ class UpdateOrganizationForm extends AbstractType
                     ]
                 ])
 
-                ->add('orgUsers', CollectionType::class,
+                ->add('users', CollectionType::class,
             [
                 'entry_type' => UserMType::class,
                 'entry_options' => [

@@ -42,8 +42,9 @@
         </div>
         <div class="criteriongroup-buttons">
           <button type="button" tabindex="-1"
-                  class="btn material-icons create-criteriongroup-btn"
-                  data-class-aftercreate="confirm-edit-criteriongroupname-btn">check</button>
+                  class="btn mi check create-criteriongroup-btn"
+                  data-class-aftercreate="confirm-edit-criteriongroupname-btn">
+          </button>
         </div>
       </div>
       <div class="view">
@@ -53,17 +54,18 @@
             class="btn link-to-department-btn modal-trigger"
             data-target="{{ departmentModalId }}">
             <div class="no-link">
-              <i class="material-icons">link_off</i>
+              <i class="mi link_off"></i>
             </div>
             <div class="link">
-              <i class="material-icons">link</i>
+              <i class="mi link"></i>
               <span class="department-name"></span>
             </div>
           </button>
           <button type="button" tabindex="-1"
-            class="btn edit-criteriongroupname-btn material-icons tooltipped"
+            class="btn edit-criteriongroupname-btn mi edit tooltipped"
             data-tooltip="{{ 'organization_criteriongroups.tooltips.edit_cgp_name'|trans }}"
-            data-position="top">edit</button>
+            data-position="top">
+          </button>
         </div>
       </div>
     </div>
@@ -76,10 +78,11 @@
         </h4>
         <button
           type="button" tabindex="-1"
-          class="btn red delete-criteriongroup-btn material-icons tooltipped new-tooltip new-cgp"
+          class="btn red delete-criteriongroup-btn mi delete tooltipped new-tooltip new-cgp"
           data-target="delete-criteriongroup-modal"
           data-tooltip="{{ 'organization_criteriongroups.buttons.delete_criteriongroup'|trans }}"
-          data-position="left">delete</button>
+          data-position="left">
+        </button>
       </li>
       <li class="collection-item no-criteria-item">
         {{ 'organization_criteriongroups.no_criteria'|trans }}
@@ -88,7 +91,7 @@
       <template class="proto">__criterialist_item__</template>
       <li class="collection-item criterialist-actions">
         <button type="button" class="btn add-criterion-btn" tabindex="-1" disabled>
-          <i class="material-icons left">add</i>
+          <i class="mi add left"></i>
           {% trans %}organization_criteriongroups.buttons.add_criterion{% endtrans %}
         </button>
       </li>

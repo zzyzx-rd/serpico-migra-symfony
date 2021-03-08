@@ -6,16 +6,16 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
-use Model\Activity;
-use Model\ActivityUser;
-use Model\Criterion;
-use Model\DbObject;
-use Model\Grade;
-use Model\OrganizationUserOption;
-use Model\Result;
-use Model\ResultProject;
-use Model\Stage;
-use Model\User;
+use App\Entity\Activity;
+use App\Entity\Participation;
+use App\Entity\Criterion;
+use App\Entity\DbObject;
+use App\Entity\Grade;
+use App\Entity\OrganizationUserOption;
+use App\Entity\Result;
+use App\Entity\ResultProject;
+use App\Entity\Stage;
+use App\Entity\User;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -91,9 +91,9 @@ final class ActivityResultsController extends MasterController
         }
 
         return $actOrStage->getParticipants()->filter(
-            fn(ActivityUser $e) => $e->getDirectUser() == $user
+            fn(Participation $e) => $e->getDirectUser() == $user
         )->exists(
-            fn(int $i, ActivityUser $e) => $e->isLeader()
+            fn(int $i, Participation $e) => $e->isLeader()
         );
     }
 
@@ -394,7 +394,7 @@ final class ActivityResultsController extends MasterController
      */
     private static function getPerfResults(int $actId, int $stgId = null, int $crtId = null, bool $aggregated = false): array
     {
-        $currentUser = self::getAuthorizedUser();
+
         if (!$currentUser) {
             throw new Exception('unauthorized');
         }
@@ -448,7 +448,7 @@ final class ActivityResultsController extends MasterController
         $upperbound = $scale->upperbound;
 
         /** @var User[] */
-        $participants = $activity->getParticipants()->map(function (ActivityUser $p) {
+        $participants = $activity->getParticipants()->map(function (Participation $p) {
             return $p->getUser();
         })->getValues();
 
@@ -721,7 +721,7 @@ final class ActivityResultsController extends MasterController
 
     private static function getActivitiesAccessAndResultsView(): array
     {
-        $currentUser = self::getAuthorizedUser();
+
         if (!$currentUser) {
             throw new Exception('unauthorized');
         }
@@ -747,7 +747,7 @@ final class ActivityResultsController extends MasterController
 
     public function getActivityPerfResultsPerStage(int $actId)
     {
-        $currentUser = self::getAuthorizedUser();
+
         $activity = self::$activityRepo->find($actId);
 
         if (!($activity instanceof Activity)) {
@@ -817,7 +817,7 @@ final class ActivityResultsController extends MasterController
      */
     public function getCriterionPerfResultsChart(int $crtId)
     {
-        $currentUser = self::getAuthorizedUser();
+
         if (!$currentUser) {
             throw new Exception;
         }
@@ -906,7 +906,7 @@ final class ActivityResultsController extends MasterController
 
     public function getStagePerfResultsChart(int $stgId, bool $aggregate = true)
     {
-        $currentUser = self::getAuthorizedUser();
+
         if (!$currentUser) {
             throw new Exception;
         }

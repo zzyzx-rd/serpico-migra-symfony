@@ -8,8 +8,8 @@
 
 namespace App\Validator;
 
-use Model\ActivityUser;
-use Model\Stage;
+use App\Entity\Participation;
+use App\Entity\Stage;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Constraint;
 
@@ -29,7 +29,7 @@ class AtLeastOneConfiguredStageHasAOwnerValidator extends ConstraintValidator
                 $participants = $s->getUniqueIntParticipations();
 
                 if($participants != null){
-                    return $participants->exists(function(int $i, ActivityUser $p){
+                    return $participants->exists(function(int $i, Participation $p){
                         return $p->isLeader() == true;
                     });
                 } else {

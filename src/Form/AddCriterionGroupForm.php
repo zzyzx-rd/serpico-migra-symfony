@@ -4,7 +4,7 @@ namespace App\Form;
 
 use App\Entity\Criterion;
 use App\Entity\Department;
-use Model\Organization;
+use App\Entity\Organization;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;

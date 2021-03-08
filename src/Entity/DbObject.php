@@ -7,6 +7,7 @@
 
 namespace App\Entity;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\Column;
@@ -29,22 +30,23 @@ abstract class DbObject
     protected ?int $id;
 
     /**
-     * @Column(name="created_by", type="integer", nullable=true)
-     * @var int
+     * @Column(name="initiator", type="integer", nullable=true)
+     * @var User
      */
-    protected ?int $createdBy;
+    protected ?User $initiator;
 
     /**
-     * @Column(name="inserted", type="datetime", nullable=true)
+     * @Column(name="inserted", type="datetime" , options={"default": "CURRENT_TIMESTAMP"})
      * @var DateTime
      */
-    protected ?DateTime $inserted;
+    protected DateTime $inserted;
 
-    public function __construct($id = 0, $createdBy = null, $inserted = null)
+    public function __construct($id = 0, $initiator = null, $inserted = null)
     {
+        //parent::__construct($requestStack, $security, $currentUser, $em);
         $this->id = $id;
-        $this->createdBy = $createdBy;
-        $this->inserted = $inserted;
+        $this->initiator = $initiator;
+        $this->inserted = $inserted ?: new DateTime();
     }
 
     /**
@@ -56,20 +58,20 @@ abstract class DbObject
     }
 
     /**
-     * @return int
+     * @return User
      */
-    public function getCreatedBy()
+    public function getInitiator()
     {
-        return $this->createdBy;
+        return $this->initiator;
     }
 
     /**
-     * @param int $createdBy
+     * @param User $initiator
      * @return DbObject
      */
-    public function setCreatedBy($createdBy)
+    public function setInitiator(?User $initiator)
     {
-        $this->createdBy = $createdBy;
+        $this->initiator = $initiator;
         return $this;
     }
 

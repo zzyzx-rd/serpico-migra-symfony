@@ -29,14 +29,15 @@ class Answer extends DbObject
     public $desc;
 
     /**
-     * @ORM\Column(name="asw_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="answerInitiatives")
+     * @JoinColumn(name="asw_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
-     * @ORM\Column(name="asw_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="asw_inserted", type="datetime", nullable=true, options={"default": "CURRENT_TIMESTAMP"})
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
     /**
      * @ManyToOne(targetEntity="SurveyField", inversedBy="answers")
      * @JoinColumn(name="survey_field_sfi_id", referencedColumnName="sfi_id", nullable=true)
@@ -49,36 +50,31 @@ class Answer extends DbObject
      */
     protected $survey;
     /**
-     * @ManyToOne(targetEntity="ActivityUser", inversedBy="answers")
-     * @JoinColumn(name="activity_user_a_u_id", referencedColumnName="a_u_id", nullable=true)
+     * @ManyToOne(targetEntity="Participation", inversedBy="answers")
+     * @JoinColumn(name="activity_user_par_id", referencedColumnName="par_id", nullable=true)
      */
-    protected $participant;
+    protected $participation;
 
     /**
      * Answer constructor.
      * @param $id
      * @param string $desc
-     * @param int|null $createdBy
      * @param $field
      * @param Survey $survey
-     * @param $asw_inserted
-     * @param ActivityUser $participant
+     * @param Participation $participation
      */
     public function __construct(
         $id = null,
         string $desc = null,
-        int $createdBy = null,
         $field = null,
         Survey $survey = null,
-        $asw_inserted = null,
-        ActivityUser $participant = null)
+        Participation $participation = null)
     {
-        parent::__construct($id, $createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->desc = $desc;
-        $this->inserted = $asw_inserted;
         $this->field = $field;
         $this->survey = $survey;
-        $this->participant = $participant;
+        $this->participation = $participation;
     }
 
     public function setDesc(string $desc): self
@@ -87,10 +83,9 @@ class Answer extends DbObject
         return $this;
     }
 
-    public function setInserted(DateTimeInterface $inserted): self
+    public function setInserted(?DateTimeInterface $inserted): self
     {
         $this->inserted = $inserted;
-
         return $this;
     }
 
@@ -105,9 +100,10 @@ class Answer extends DbObject
     /**
      * @param mixed $field
      */
-    public function setField($field): void
+    public function setField($field): self
     {
         $this->field = $field;
+        return $this;
     }
 
     /**
@@ -121,26 +117,27 @@ class Answer extends DbObject
     /**
      * @param mixed $survey
      */
-    public function setSurvey($survey): void
+    public function setSurvey($survey): self
     {
         $this->survey = $survey;
+        return $this;
     }
 
     /**
      * @return mixed
      */
-    public function getParticipant()
+    public function getParticipation()
     {
-        return $this->participant;
+        return $this->participation;
     }
 
     /**
-     * @param mixed $participant
-     * @return Answer
+     * @param mixed $participation
+     * @return self
      */
-    public function setParticipant(ActivityUser $participant): Answer
+    public function setParticipation(Participation $participation): self
     {
-        $this->participant = $participant;
+        $this->participation = $participation;
         return $this;
     }
 

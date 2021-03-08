@@ -37,15 +37,16 @@ class Title extends DbObject
      */
     public $weightIni;
 
-    /**
-     * @ORM\Column(name="tit_created_by", type="integer", nullable=true)
+   /**
+     * @ManyToOne(targetEntity="User", inversedBy="titleInitiatives")
+     * @JoinColumn(name="tit_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
-     * @ORM\Column(name="tit_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="tit_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="tit_deleted", type="datetime", nullable=true)
@@ -78,11 +79,9 @@ class Title extends DbObject
     /**
      * Title constructor.
      * @param ?int$id
-     * @param $tit_name
-     * @param $tit_weight_ini
-     * @param $tit_createdBy
-     * @param $tit_inserted
-     * @param $tit_deleted
+     * @param $name
+     * @param $weightIni
+     * @param $deleted
      * @param $organization
      * @param $weight
      * @param $options
@@ -90,21 +89,18 @@ class Title extends DbObject
      */
     public function __construct(
       ?int $id = 0,
-        $tit_name = '',
-        $tit_weight_ini = 0.0,
-        $tit_createdBy = null,
-        $tit_inserted = null,
-        $tit_deleted = null,
+        $name = '',
+        $weightIni = 0.0,
+        $deleted = null,
         $organization = null,
         $weight = null,
         $options = null,
         $targets = null)
     {
-        parent::__construct($id, $tit_createdBy, new DateTime());
-        $this->name = $tit_name;
-        $this->weightIni = $tit_weight_ini;
-        $this->inserted = $tit_inserted;
-        $this->deleted = $tit_deleted;
+        parent::__construct($id, null, new DateTime());
+        $this->name = $name;
+        $this->weightIni = $weightIni;
+        $this->deleted = $deleted;
         $this->organization = $organization;
         $this->weight = $weight;
         $this->options = $options?:new ArrayCollection();
@@ -117,10 +113,9 @@ class Title extends DbObject
         return $this->name;
     }
 
-    public function setName(string $tit_name): self
+    public function setName(string $name): self
     {
-        $this->name = $tit_name;
-
+        $this->name = $name;
         return $this;
     }
 
@@ -129,17 +124,15 @@ class Title extends DbObject
         return $this->weightIni;
     }
 
-    public function setWeightIni(float $tit_weight_ini): self
+    public function setWeightIni(float $weightIni): self
     {
-        $this->weightIni = $tit_weight_ini;
-
+        $this->weightIni = $weightIni;
         return $this;
     }
 
-    public function setInserted(DateTimeInterface $tit_inserted): self
+    public function setInserted(DateTimeInterface $inserted): self
     {
-        $this->inserted = $tit_inserted;
-
+        $this->inserted = $inserted;
         return $this;
     }
 
@@ -148,10 +141,9 @@ class Title extends DbObject
         return $this->deleted;
     }
 
-    public function setDeleted(?DateTimeInterface $tit_deleted): self
+    public function setDeleted(?DateTimeInterface $deleted): self
     {
-        $this->deleted = $tit_deleted;
-
+        $this->deleted = $deleted;
         return $this;
     }
 
@@ -166,9 +158,10 @@ class Title extends DbObject
     /**
      * @param mixed $organization
      */
-    public function setOrganization($organization): void
+    public function setOrganization($organization)
     {
         $this->organization = $organization;
+        return $this;
     }
 
     /**
@@ -182,9 +175,10 @@ class Title extends DbObject
     /**
      * @param mixed $weight
      */
-    public function setWeight($weight): void
+    public function setWeight($weight)
     {
         $this->weight = $weight;
+        return $this;
     }
 
     /**
@@ -196,27 +190,11 @@ class Title extends DbObject
     }
 
     /**
-     * @param mixed $options
-     */
-    public function setOptions($options): void
-    {
-        $this->options = $options;
-    }
-
-    /**
      * @return mixed
      */
     public function getTargets()
     {
         return $this->targets;
-    }
-
-    /**
-     * @param mixed $targets
-     */
-    public function setTargets($targets): void
-    {
-        $this->targets = $targets;
     }
 
     public function addUser(User $user): Title

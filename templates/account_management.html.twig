@@ -1,0 +1,1174 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+    {{'account_management.title'|trans}}
+{% endblock %}
+
+{% block mobile_title %}
+    {{'account_management.title'|trans}}
+{% endblock %}
+
+{% block pagename %}
+    {{'account_management.title'|trans}}
+{% endblock %}
+
+{% block username %}
+    {{ currentuser.firstname }}
+    {{ currentuser.lastname }}
+{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="{{ asset('css/pricing_table.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/nouislider.css') }}">
+    <script>
+        var lurl = "{{ url('login') }}";
+        var urlcardremove = "{{ url('cancelCard') }}"
+        var custcard = "{{ custcard }}" ;
+        var urlminuser = "{{ url('minUser') }}" ;
+        var urlplususer = "{{ url('plusUser') }}" ;
+    </script>
+    <style>
+        .circle-icon {
+            margin-top: 3%;
+            background: #55318e;
+            padding: 15%;
+            height: 20%;
+            border-radius: 180%;
+            color : white;
+        }
+        section {
+            align-items: center;
+        }
+
+        section > .btn-large {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 1em;
+            line-height: inherit;
+        }
+
+        section > .btn-large i {
+            font-size: 1.2em;
+            padding-bottom: .1em;
+            padding-right: .3em;
+        }
+
+        .creditcard {
+            font: 16px/1.5 'Helvetica Neue', Helvetica, sans-serif;
+            position: relative;
+            width: 60%!important;;
+            max-width: 400px;
+            height: 10%;
+            text-align: left;
+            padding: 5%!important;;
+            color: #fff;
+            border-radius: 20px;
+            box-sizing: border-box;
+            background: url(data:image/jpg;base64,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) no-repeat ;
+        }
+        .numbercard {
+             font-size: 150%;
+             padding: 10% 0 2%;
+             text-align: center;
+         }
+
+        .expiry-date {
+             font-size: 14px;
+             text-align: center;
+         }
+
+        .owner {
+             text-align: left;
+         }
+
+        .card-logo {
+            position: absolute;
+            right: 20px;
+            bottom: 20px;
+            width: 20%;
+        }
+        .free-plan-icon{
+            color: green;
+            font-size: 200%;
+            margin-top: 1rem;
+        }
+
+        .plan-name-zone{
+            margin-top: 1rem;
+            justify-content:center;
+        }
+
+        .premium-plan-icon{
+            color: darkblue;
+            font-size: 200%;
+        }
+
+        .premium-plan-icon + span {
+            color: darkblue;
+            text-transform: uppercase;
+        }
+
+
+        .free-plan-icon-back{
+            color: white;
+            font-size: 200%;
+            margin-top: 10%;
+        }
+
+        .premium-plan-icon-back{
+            color: white;
+            font-size: 200%;
+            margin-top: 10%;
+        }
+        .enterprise-plan-icon{
+            color: darkgoldenrod;
+            font-size: 200%;
+            margin-top: 10%;
+        }
+        .enterprise-plan-icon-back{
+            color: white;
+            font-size: 200%;
+            margin-top: 10%;
+        }
+        .panel-active{
+            border: solid 3px greenyellow ;
+        }
+        .flip-card  {
+            background-color: transparent;
+            width: 300px;
+            height: 300px;
+            perspective: 1000px;
+        }
+
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+        }
+
+        .flip-card:hover .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+        }
+
+
+
+        .flip-card-back-free {
+            background-color: green;
+            color: white;
+            transform: rotateY(180deg);
+        }
+        .flip-card-back-premium {
+            background-color: darkblue;
+            color: white;
+            transform: rotateY(180deg);
+        }
+        .flip-card-back-enterprise {
+            background-color: darkgoldenrod;
+            color: white;
+            transform: rotateY(180deg);
+        }
+        .active-card{
+            display: block!important;
+        }
+        .subs{
+            width: 100%;
+            height: 100%;
+            max-height: 100%;
+            top:0%!important;
+            background-color:snow;
+        }
+        .offre{
+            box-shadow: 0 0 8px 0 rgba(0,0,0,.14);
+            margin-left:10%;
+            margin-right:10%;
+            margin-top:5%;
+            width: 80%;
+
+            padding: 2%;
+        }
+        .check{
+            color:green;
+        }
+        .close-modal{
+            margin-left: 97%;
+            color: gray!important;
+        }
+        .sub-choice{
+            border: solid 1px green;
+        }
+        .no-choice{
+            border: solid 1px dimgray
+        }
+
+        .card{
+            min-width: 30vw;
+            min-height: 550px;
+            justify-content: space-between;
+        }
+
+        .pricing-elmts{
+            display:flex;
+            align-items:flex-end;
+            justify-content:center;
+        }
+
+        .pricing-elmts h1{
+            margin-bottom:0;
+        }
+
+        .price-period{
+            margin-bottom: 0.5rem;
+        }
+
+        .user-slider-range-value{
+            display:inline-block;
+        }
+
+        .pricing-f-choice{
+            position:absolute;
+            top:0.3rem;
+            right:1rem;
+            font-size:0.8rem;
+        }
+
+        .switch label input[type=checkbox]:checked + .lever:after {
+            background-color: #55318e;
+        }
+
+        .switch label input[type=checkbox]:checked + .lever {
+            background-color: #8c67c7;
+        }
+
+        .switch label .lever{
+            margin: 0 8px;
+        }
+
+        .noUi-connect{
+            background:#55318e;
+        }
+
+        .reduction{
+            visibility:hidden;
+            background-color:#55318e;
+        }
+
+        .card footer{
+            padding: 1em 0;
+        }
+
+        .card table{
+            width:90%;
+            margin:auto;
+        }
+
+        .account-btn {
+            width: fit-content;
+        }
+
+        .account-zone, .subscription-price-zone{
+            justify-content:center;
+        }
+
+        .existing-plans{
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .existing-plans tr:last-of-type{
+            height: 40px;
+        }
+
+        .account-btn, .premium-plan-card{
+            border: 1px solid #55318e
+        }
+
+        .premium-plan-card{
+            width:70%;
+            display:inline-block;
+        }
+
+        .account-btn i{
+            font-size: 1rem;
+        }
+
+        .premium-plan, .free-plan{
+            text-align: center;
+        }
+        .modal-upgrade-btn{
+            background-color: #ff9300;
+        }
+
+        .table-header-title{
+            padding-left: 2rem;
+        }
+
+        .subscription-price-titles{
+            display:inline-flex;
+            align-items: space-between;
+        }
+
+        .price-details > * {
+            padding: 0 6px;
+            border-top: 1px solid #55318e;
+            width: inherit;
+        }
+
+        .functionalities-card-zone{
+            padding: 5%!important;
+        }
+
+        .cards-zone img{
+            width:50px;
+        }
+
+        .iban-info .row:first-of-type{
+            margin-bottom:0;
+            margin-top:20px;
+        }
+
+        .charged-price-zone{
+                background-color: #55318e;
+        }
+
+        .plan-inputs-zone{
+            background-color: #f1e7ff;
+            padding: 10px;
+        }
+
+        .switch{
+            height: 80px;
+        }
+
+        
+
+    </style>
+{% endblock css %}
+
+
+{% block content %}
+    
+    {% set userNeedToSubscribe = date('now').timestamp - currentuser.organization.expired.timestamp < 0 and currentuser.organization.plan != 3 %}
+    {% set userShouldSubscribe = userNeedToSubscribe or date('now').timestamp - currentuser.organization.expired.timestamp > 0 and currentuser.organization.plan == 3 %}
+    {% set monthly_fee = 15 %}
+    {% set vat_rate = 0.19 %}
+    <div>
+        <table class="existing-plans">
+            <tbody>
+                <tr>
+                    <td>
+                        <span class="strong dd-text table-header-title">{{'account_management.header_title'|trans}}</span>
+                    </td>
+                    <td></td>
+                    <td class="free-plan {{ currentuser.organization.plan == 3 ? 's-plan'}}">
+                        {% if currentuser.organization.plan == 3 %}
+                            <a href="#accountDetails" class="account-btn btn-flat modal-trigger">
+                                <span>{{'account_management.your_plan'|trans }}</span>
+                                <i class="fa fa-question-circle m-left tooltipped" data-tooltip="{{'account_management.see_account_details'|trans }}" data-position="top"></i>
+                            </a>
+                        {% endif %}
+                    </td>
+
+                    <td class="dd-text strong account-zone c-flex-center premium-plan {{ currentuser.organization.plan < 3 ? 's-plan' }}">
+                        
+
+                        
+                        {% if userNeedToSubscribe %}
+                            <div> {{ 'account_management.left_days'|trans({days: ((currentuser.organization.expired.timestamp - date('now').timestamp) / (24 * 60 * 60))|round(0) }) }}</div>
+                        {% endif %}
+                        {% if userShouldSubscribe %}
+                            <a href="#subscription" class="account-btn btn modal-trigger">{{ 'account_management.subscribe'|trans }}</a>
+                        {% else %}
+                            <a href="#accountDetails" class="account-btn btn-flat modal-trigger">
+                                <span>{{'account_management.your_plan'|trans }}</span>
+                                <i class="fa fa-question-circle m-left tooltipped" data-tooltip="{{'account_management.see_account_details'|trans }}" data-position="top"></i>
+                            </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% if currentuser.organization != 'C' %}
+                    <tr>
+                        <td><span class="table-header-title">{{'account_management.nb_accounts'|trans}}</span><i class="fa fa-question-circle tooltipped m-left" data-tooltip="{{'account_management.nb_accounts_info'|trans}}"></i></td>
+                        <td></td>
+                        <td class="center">{{ currentuser.organization.plan == 3 ? currentuser.organization.activeUsers|length }}</td>
+                        <td class="center">{{ currentuser.organization.plan < 3 ? currentuser.organization.activeUsers|length }}</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+
+        {% include "components/pricing_table.html.twig" with {isDiscountMsgSagByDove: false, planDetailsHidden: true, subscribedPlan: currentuser.organization.plan} %}
+
+
+                {#
+                <div class="flex-center" style="justify-content:center">
+                    <div class="no-padding center free card xm-right c-flex" style="{% if currentPlan == 3 %}border: 3px solid green;{% else %}border: 1px solid #DFE1E5;{% endif %}">
+                        <div class="">
+                            <div>
+                                <div style="border-bottom: 1px solid #DFE1E5;">
+                                    <div class="reduction white-text"> 2 months free </div>
+                                    <i class="fa fa-seedling free-plan-icon"></i>
+                                    <p class="dd-text strong">{{'subscription.free'|trans|upper}}</p>
+                                </div>
+                                <h1>0&euro; </h1>
+                            </div>
+                        </div>
+                        <div class="">
+                            
+
+
+                            <div style="padding: 5%">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                        <th>
+                                        <span class="dd-orange-text strong">{{'features'|trans|upper}}</span>
+                                        </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <th>
+                                                <span>{{'account_management.free_plan.functionality_1'|trans}}</span>
+                                                <i class="fa fa-question-circle tooltipped" data-tooltip="{{'account_management.pricing_table.functionality_1_details'|trans}}" data-tooltip="top"></i>
+                                            </th>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <span>{{'account_management.pricing_table.functionality_2'|trans}}</span>
+                                                <i class="fa fa-question-circle tooltipped" data-tooltip="{{'account_management.pricing_table.functionality_2_details'|trans}}" data-tooltip="top"></i>
+                                            </th>
+                                        </tr>
+                                    </tbody>
+
+                                </table>
+                                {% if payaccess  %}
+                                <footer>
+                                    
+                                    {% if currentPlan != 1 %}
+                                        <button class="btn-flat waves-light modal-trigger subscribe free" style="border: solid 1px #55318e;overflow:hidden;" href="#subscription">Go to free</button>
+                                    {% else %}
+                                        <button class="btn  waves-light modal-trigger unsubscribe " style="" href="#unsubscribe">Unsubscribe</button>
+                                    {% endif %}
+                                </footer>
+                                {%  endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="no-padding center standard card xm-left c-flex" style="{% if currentPlan == 2 %}border: 3px solid darkblue;{% else %}border: 1px solid #DFE1E5;{% endif %}">
+                    
+                        
+                        <div style="border-bottom: 1px solid #DFE1E5;">
+                            <div class="reduction white-text">{{'subscription.2_months_free'|trans}}</div>
+                            <i class="fa fa-dove premium-plan-icon"></i>
+                            <p class="dd-text strong">{{'subscription.premium'|trans|upper}}</p>
+                        </div>
+                        <div class="c-flex-center" style="position:relative">  
+                            <div class="pricing-elmts" data-m="{{'subscription.per_month'|trans}}" data-y="{{'subscription.per_year'|trans}}">
+                                <div class="pricing-f-choice flex-center">
+                                    <span class="strong m-right">{{'subscription.payment'|trans ~ ':'}}</span>
+                                    <div class="switch">
+                                        <label class="black-text">
+                                        {{'subscription.monthly'|trans}}
+                                        <input type="checkbox">
+                                        <span class="lever"></span>
+                                        {{'subscription.annually'|trans}}
+                                        </label >
+                                    </div>
+                                </div>
+                                <h1 class="price-standard">7</h1>
+                                <h1 class="pricing-ccy">&euro;</h1>
+                                <p class="price-period m-left"> </p>
+                            </div>
+                            <div>
+                                <div class="user-slider" style="margin-top:10px;min-width:200px"></div>
+                                <div class="user-slider-range-value center" style="font-size:1.2rem;padding-top: 5px">1</div>
+                                <span class="user-nb">{{'user'|trans}}</span>
+                            </div>
+                        </div>
+                        
+                        
+                            
+                        
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th> <span class="dd-orange-text strong">{{'features'|trans|upper}}</span></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th>
+                                        <span>{{'account_management.pricing_table.functionality_3'|trans}}</span>
+                                        <i class="fa fa-question-circle tooltipped" data-tooltip="{{'account_management.pricing_table.functionality_3_details'|trans}}" data-tooltip="top"></i>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <span>{{'account_management.pricing_table.functionality_4'|trans}}</span>
+                                        <i class="fa fa-question-circle tooltipped" data-tooltip="{{'account_management.pricing_table.functionality_4_details'|trans}}" data-tooltip="top"></i>
+                                    </th>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <footer>
+                        {% if payaccess %}
+                            {% if currentPlan != 2 %}
+                                <button class="btn  waves-light modal-trigger subscribe free" style="overflow:hidden;background-color: transparent!important;" href="#subscription">  Getting started</button>
+                            {% else %}
+                                <button class="btn-flat waves-light modal-trigger unsubscribe" style="border: solid 1px orange" href="#unsubscribe">{{ date('now').timestamp - organization.expired.timestamp > 0 ? 'unsubscribe'|trans : 'upgrade'|trans }}</button>
+                            {%  endif %}
+                        {% endif %}
+                        </footer>
+                            
+                        
+                       
+                    </div>
+                </div>
+                #}
+            
+                
+                {#
+                <td class="col s2  no-padding center premium flip-card" style="margin-left: 5%;">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front" style="{% if currentPlan == 1 %}border: 3px solid darkgoldenrod;{% else %}border: 1px solid #DFE1E5;{% endif %}">
+                    <div style="border-bottom: 1px solid #DFE1E5;">
+                        <div class="reduction" style="display: none;background-color:darkgoldenrod;color:white "> 2 months free </div>
+                        <i class="fa fa-building enterprise-plan-icon"></i>
+
+                        <p>Premium</p> </div>
+                    <h1 class="price-premium">14&euro; </h1>
+                    <p class="price-period"> </p>
+
+
+                        </div>
+                        <div class=" flip-card-back flip-card-back-enterprise">
+                            <i class="fa fa-building enterprise-plan-icon-back"></i>
+                            <div style="padding: 5%">
+                                <table >
+                                    <thead>
+                                    <tr>
+                                        <th>{{'account_management.pricing_table.functionality_1'|trans}}</th>
+                                    </tr>
+                                    </thead>
+                                    <tr>
+                                        <th>{{'account_management.pricing_table.functionality_2'|trans}}
+                                        </th>
+                                    </tr>
+
+                                </table>
+                                {%  if payaccess  %}
+                                {% if currentPlan != 1 %}
+                                    <button class="btn  waves-light modal-trigger subscribe free" style="width: 100%;border: solid 1px white!important;overflow:hidden;background-color: transparent!important;" href="#subscription">  Getting started</button>
+                                {% else %}
+                                    <button class="btn  waves-light modal-trigger unsubscribe " style="width: 100%;border-color: white!important;" href="#unsubscribe">  Unsubscribe</button>
+
+                                {%  endif %}
+
+                                {%  endif %}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                #}
+    </div>
+
+    {% if payaccess %}
+        <div class=" center" style="width: 70%; margin-left: auto;margin-right:auto; margin-top: 5% ">
+            <h5> Subscription info </h5>
+            {% for o,subscription in sub %}
+                <div class="card-panel row" style="width: 80% ; margin-right: auto;margin-left: auto">
+                    <div class="col s5">
+                        <img src="/lib/img/logo_dd_p_l.png" style="width:100%">
+                    </div>
+                    <div class="col s7">
+                        {% if currentPlan != 3   %}
+                            <a href="{{ subscription.metadata.pdf }}"> Télecharger votre facture<i class="fas fa-file-pdf"></i></a>
+                        {%  endif %}
+                    </div>
+                    <div class="col s12">
+                        <p> Date de souscription : {{ subscription.current_period_start|date("m/d/Y") }}  </p>
+                        <p> Offre adhérer :
+                            {% if currentPlan == 3 %}
+                                Free
+                            {% elseif currentPlan == 2 %}
+                                Standard
+                            {% else %}
+                                Premium
+                            {% endif %}
+                        </p>
+                        {% if currentPlan != 3 %}
+                            <div class="row"> Nombre d'utilisateurs : <p class="quantity">{{ subscription.metadata.quantity}}</p> </div>
+                        {%  endif %}
+                    </div>
+                    {% if currentPlan != 3 %}
+                        <button class="btn  waves-light modal-trigger unsubscribe " style="width: auto;border-color: white!important;" href="#unsubscribe">  Unsubscribe</button>
+                    {%  endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if payaccess %}
+        <div id="subscription" class="modal div-sub subs" style="background-color: whitesmoke" >
+            <a class="close-modal" style="margin-top: 1%;"> <i class="fas fa-times  fa-2x" ></i></a>
+            <div class="offre row">
+                <div class="col s12" style="border-right:solid 1px lightgrey">
+                    <div class="row">
+                        <div class="col m6 s12">
+                            <h3>Order Summary</h3>
+                        </div>
+                        <div class="col m6 s12  plan-inputs-zone">
+
+                            <div class="row no-margin flex-center-sb">
+                                <div class="col s6">
+                                    <div class="input-field">
+                                        <input type="number" value="{{ val }}" class="user" min="1"></input>
+                                        <label class="black-text">Abonnements utilisateurs</label>
+                                    </div>
+                                </div>
+                                <div class="col s6">
+                                    <div class="switch">
+                                        <span>Fréquence de paiement</span>
+                                        <label class="black-text">
+                                            {{'subscription.monthly'|trans}}
+                                            <input type="checkbox">
+                                            <span class="lever"></span>
+                                            {{'subscription.annually'|trans}}
+                                        </label>
+                                    </div>
+                                    {#
+                                    <div class="input-field">
+                                        <select class="period">
+                                            <option value="month">month</option>
+                                            <option value="year">year</option>
+                                        </select>
+                                        <label style="margin-left: 50%">Payment frequency</label>
+                                    </div>
+                                    #}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                        
+                        <div class="row">
+                            
+
+                                <div class="col s6 center choice standard-choice">
+                                    <h5>{{'pricing.update_modal.title'|trans}}</h5>
+                                    <div class="premium-plan-card">
+                                        <div class="reduction white-text">{{'pricing.update_modal.price.discount_title'|trans}}</div>
+                                        <div class="plan-name-zone flex-center">
+                                            <i class="fa fa-dove premium-plan-icon m-right"></i>
+                                            <span class="strong">{{'pricing.update_modal.premium.title'|trans}}</span>
+                                        </div>
+                                        <div class="c-flex" style="padding: 5%">
+                                            <div class="flex">
+                                                <div><i class="fas fa-check sm-right"></i></div>
+                                                <div>{{'pricing.update_modal.premium.functionality_1'|trans}}</div>
+                                            </div>
+                                            <div class="flex">
+                                                <div><i class="fas fa-check sm-right"></i></div>
+                                                <div>{{'pricing.update_modal.premium.functionality_2'|trans}}</div>
+                                            </div>
+                                            <div class="flex">
+                                                <div><i class="fas fa-check sm-right"></i></div>
+                                                <div>{{'pricing.update_modal.premium.functionality_3'|trans}}</div>
+                                            </div>
+                                            <div class="flex">
+                                                <div><i class="fas fa-check sm-right"></i></div>
+                                                <div>{{'pricing.update_modal.premium.functionality_4'|trans}}</div>
+                                            </div>
+                                            <p class="center">
+                                                <div class="pricing-elmts"></div>
+                                                <label class="flex-center subscription-price-zone">
+                                                    <h3 class="price-standard">{{ monthly_fee }}</h3>
+                                                    <h3 class="pricing-ccy">&euro;</h3>
+                                                </label>
+                                            </p>
+                                            <p class="price-period m-left">{{'subscription.per_month'|trans}}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                {#
+                                <div class="col s5 center choice no-choice premium-choice" >
+                                    <div>
+                                        <div class="reduction white-text"> 2 months free </div>
+                                        <i class="fa fa-building enterprise-plan-icon"></i>
+                                        <div style="padding: 5%">
+                                            <div class="row">
+                                                <div class="col s2"><i class="fas fa-check"></i></div>
+                                                <div class="col s10">Operations management</div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col s2"><i class="fas fa-check"></i></div>
+                                                <div class="col s10">Client onboarding</div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col s2"><i class="fas fa-check"></i></div>
+                                                <div class="col s10">Shared files</div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col s2"><i class="fas fa-check"></i></div>
+                                                <div class="col s10">Firm settings</div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col s2"><i class="fas fa-check"></i></div>
+                                                <div class="col s10">Analytics & followup</div>
+                                            </div>
+                                            <p class="center">
+                                                <h1 class="price-premium">14</h1>
+                                                <p class="price-period m-left">{{'subscription.per_month'|trans}}</p>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                #}
+                            
+                            <div class="col s6">
+                                <div class="price">
+                                    <h5 class="title">{{'pricing.update_modal.price.title'|trans}}</h5>
+                                    <div class="price-container price-details">
+                                        <div class="flex-center-sb"><span>{{'pricing.update_modal.price.marginal_price'|trans}}</span><span class="price price-user">1</span></div>
+                                        <div class="flex-center-sb"><span>{{'pricing.update_modal.price.total_users'|trans}}</span> <span class="price nb-user">1</span></div>
+                                        <div class="flex-center-sb">
+                                            <span>{{'pricing.update_modal.price.wo_vat_price'|trans}}</span> 
+                                            <div>
+                                                <span class="price account-price total-price">{{ monthly_fee }}</span>
+                                                <span>€</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex-center-sb">
+                                            <span>{{'pricing.update_modal.price.vat_price'|trans}}</span>
+                                            <div>
+                                                <span class="price account-price vat-price">{{ (monthly_fee * vat_rate)|round(2) }}</span>
+                                                <span>€</span> 
+                                            </div>
+                                        </div>
+                                        <div class="flex-center-sb charged-price-zone">
+                                            <span class="strong white-text">{{'pricing.update_modal.price.total_price'|trans}}</span> 
+                                            <div>
+                                                <span class="price account-price charged-price strong white-text">{{ (monthly_fee * (1 + vat_rate))|round(2) }}</span>
+                                                <span class="strong white-text">€</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {#
+                                 <div class="functionalities-card-zone">
+                                    <div>
+                                        <h5>............</h5>
+                                        <div class="row">
+                                            <div class="col s2 check"><i class="fas fa-check"></i></div>
+                                            <div class="col s10">...... ...... ....... . . .</div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col s2 check"><i class="fas fa-check"></i></div>
+                                            <div class="col s10">...... ...... ....... . . .</div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col s2 check"><i class="fas fa-check"></i></div>
+                                            <div class="col s10">...... ...... ....... . . .</div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col s2 check"><i class="fas fa-check"></i></div>
+                                            <div class="col s10">...... ...... ....... . . .</div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col s2 check"><i class="fas fa-check"></i></div>
+                                            <div class="col s10">...... ...... ....... . . .</div>
+                                        </div>
+                                    </div>
+                                #}
+                                    <form id="subscription-form" class="sub">
+                                        <ul class="flex-center-sb">
+                                            <li>
+                                                <input id="card_choice" name="payment_choice" type="radio" checked />
+                                                <label for="card_choice">By card</label>
+                                            </li>
+                                            <li>
+                                                <input id="wire_choice" name="payment_choice" type="radio"/>
+                                                <label for="wire_choice">By wire transfer</label>
+                                            </li>
+                                        </ul>
+                                        <div class="by-card">
+                                            <div class="cards-zone">
+                                                <div>
+                                                    <h5>We accept the following cards</h5>
+                                                    <ul class="flex-center">
+                                                        <img src="/lib/img/visa.png">
+                                                        <img src="/lib/img/mc.png">
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            <div class="c-flex card-input-zone">   
+                                                <h5 class="title"> Credit card info </h5>                                                
+                                            </div>
+                                          
+                                       
+                                                
+                                                 {% if custcard == 0 %}
+                                                    <div id="card-element" class="MyCardElement active-card" >
+                                                        <!-- Elements will create input elements here -->
+                                                    </div>
+                                                    <!-- We'll put the error messages in this element -->
+                                                    <div id="card-errors" role="alert"></div>
+                                                {% else %}
+
+                                                    {% for s,card in cards %}
+                                                        <div class="panel row cardpay" style="margin-top: 5%">
+                                                            <div class=" col s8 {%  if s == 0 %} panel-active {%  endif %}creditcard card--front" id="{{ s }}">
+                                                                <div class=" numbercard">**** **** **** {{ card.getLast4 }}</div>
+                                                                <div class=" expiry-date">{{ card.getDateend }}</div>
+                                                                <div class=" owner">{{card.getName}}</div>
+                                                                {%  if card.getBrand == "visa" %}
+                                                                    <img class="card-logo"  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAAoCAYAAAA16j4lAAAKQWlDQ1BJQ0MgUHJvZmlsZQAASA2dlndUU9kWh8+9N73QEiIgJfQaegkg0jtIFQRRiUmAUAKGhCZ2RAVGFBEpVmRUwAFHhyJjRRQLg4Ji1wnyEFDGwVFEReXdjGsJ7601896a/cdZ39nnt9fZZ+9917oAUPyCBMJ0WAGANKFYFO7rwVwSE8vE9wIYEAEOWAHA4WZmBEf4RALU/L09mZmoSMaz9u4ugGS72yy/UCZz1v9/kSI3QyQGAApF1TY8fiYX5QKUU7PFGTL/BMr0lSkyhjEyFqEJoqwi48SvbPan5iu7yZiXJuShGlnOGbw0noy7UN6aJeGjjAShXJgl4GejfAdlvVRJmgDl9yjT0/icTAAwFJlfzOcmoWyJMkUUGe6J8gIACJTEObxyDov5OWieAHimZ+SKBIlJYqYR15hp5ejIZvrxs1P5YjErlMNN4Yh4TM/0tAyOMBeAr2+WRQElWW2ZaJHtrRzt7VnW5mj5v9nfHn5T/T3IevtV8Sbsz55BjJ5Z32zsrC+9FgD2JFqbHbO+lVUAtG0GQOXhrE/vIADyBQC03pzzHoZsXpLE4gwnC4vs7GxzAZ9rLivoN/ufgm/Kv4Y595nL7vtWO6YXP4EjSRUzZUXlpqemS0TMzAwOl89k/fcQ/+PAOWnNycMsnJ/AF/GF6FVR6JQJhIlou4U8gViQLmQKhH/V4X8YNicHGX6daxRodV8AfYU5ULhJB8hvPQBDIwMkbj96An3rWxAxCsi+vGitka9zjzJ6/uf6Hwtcim7hTEEiU+b2DI9kciWiLBmj34RswQISkAd0oAo0gS4wAixgDRyAM3AD3iAAhIBIEAOWAy5IAmlABLJBPtgACkEx2AF2g2pwANSBetAEToI2cAZcBFfADXALDIBHQAqGwUswAd6BaQiC8BAVokGqkBakD5lC1hAbWgh5Q0FQOBQDxUOJkBCSQPnQJqgYKoOqoUNQPfQjdBq6CF2D+qAH0CA0Bv0BfYQRmALTYQ3YALaA2bA7HAhHwsvgRHgVnAcXwNvhSrgWPg63whfhG/AALIVfwpMIQMgIA9FGWAgb8URCkFgkAREha5EipAKpRZqQDqQbuY1IkXHkAwaHoWGYGBbGGeOHWYzhYlZh1mJKMNWYY5hWTBfmNmYQM4H5gqVi1bGmWCesP3YJNhGbjS3EVmCPYFuwl7ED2GHsOxwOx8AZ4hxwfrgYXDJuNa4Etw/XjLuA68MN4SbxeLwq3hTvgg/Bc/BifCG+Cn8cfx7fjx/GvyeQCVoEa4IPIZYgJGwkVBAaCOcI/YQRwjRRgahPdCKGEHnEXGIpsY7YQbxJHCZOkxRJhiQXUiQpmbSBVElqIl0mPSa9IZPJOmRHchhZQF5PriSfIF8lD5I/UJQoJhRPShxFQtlOOUq5QHlAeUOlUg2obtRYqpi6nVpPvUR9Sn0vR5Mzl/OX48mtk6uRa5Xrl3slT5TXl3eXXy6fJ18hf0r+pvy4AlHBQMFTgaOwVqFG4bTCPYVJRZqilWKIYppiiWKD4jXFUSW8koGStxJPqUDpsNIlpSEaQtOledK4tE20Otpl2jAdRzek+9OT6cX0H+i99AllJWVb5SjlHOUa5bPKUgbCMGD4M1IZpYyTjLuMj/M05rnP48/bNq9pXv+8KZX5Km4qfJUilWaVAZWPqkxVb9UU1Z2qbapP1DBqJmphatlq+9Uuq43Pp893ns+dXzT/5PyH6rC6iXq4+mr1w+o96pMamhq+GhkaVRqXNMY1GZpumsma5ZrnNMe0aFoLtQRa5VrntV4wlZnuzFRmJbOLOaGtru2nLdE+pN2rPa1jqLNYZ6NOs84TXZIuWzdBt1y3U3dCT0svWC9fr1HvoT5Rn62fpL9Hv1t/ysDQINpgi0GbwaihiqG/YZ5ho+FjI6qRq9Eqo1qjO8Y4Y7ZxivE+41smsImdSZJJjclNU9jU3lRgus+0zwxr5mgmNKs1u8eisNxZWaxG1qA5wzzIfKN5m/krCz2LWIudFt0WXyztLFMt6ywfWSlZBVhttOqw+sPaxJprXWN9x4Zq42Ozzqbd5rWtqS3fdr/tfTuaXbDdFrtOu8/2DvYi+yb7MQc9h3iHvQ732HR2KLuEfdUR6+jhuM7xjOMHJ3snsdNJp9+dWc4pzg3OowsMF/AX1C0YctFx4bgccpEuZC6MX3hwodRV25XjWuv6zE3Xjed2xG3E3dg92f24+ysPSw+RR4vHlKeT5xrPC16Il69XkVevt5L3Yu9q76c+Oj6JPo0+E752vqt9L/hh/QL9dvrd89fw5/rX+08EOASsCegKpARGBFYHPgsyCRIFdQTDwQHBu4IfL9JfJFzUFgJC/EN2hTwJNQxdFfpzGC4sNKwm7Hm4VXh+eHcELWJFREPEu0iPyNLIR4uNFksWd0bJR8VF1UdNRXtFl0VLl1gsWbPkRoxajCCmPRYfGxV7JHZyqffS3UuH4+ziCuPuLjNclrPs2nK15anLz66QX8FZcSoeGx8d3xD/iRPCqeVMrvRfuXflBNeTu4f7kufGK+eN8V34ZfyRBJeEsoTRRJfEXYljSa5JFUnjAk9BteB1sl/ygeSplJCUoykzqdGpzWmEtPi000IlYYqwK10zPSe9L8M0ozBDuspp1e5VE6JA0ZFMKHNZZruYjv5M9UiMJJslg1kLs2qy3mdHZZ/KUcwR5vTkmuRuyx3J88n7fjVmNXd1Z752/ob8wTXuaw6thdauXNu5Tnddwbrh9b7rj20gbUjZ8MtGy41lG99uit7UUaBRsL5gaLPv5sZCuUJR4b0tzlsObMVsFWzt3WazrWrblyJe0fViy+KK4k8l3JLr31l9V/ndzPaE7b2l9qX7d+B2CHfc3em681iZYlle2dCu4F2t5czyovK3u1fsvlZhW3FgD2mPZI+0MqiyvUqvakfVp+qk6oEaj5rmvep7t+2d2sfb17/fbX/TAY0DxQc+HhQcvH/I91BrrUFtxWHc4azDz+ui6rq/Z39ff0TtSPGRz0eFR6XHwo911TvU1zeoN5Q2wo2SxrHjccdv/eD1Q3sTq+lQM6O5+AQ4ITnx4sf4H++eDDzZeYp9qukn/Z/2ttBailqh1tzWibakNml7THvf6YDTnR3OHS0/m/989Iz2mZqzymdLz5HOFZybOZ93fvJCxoXxi4kXhzpXdD66tOTSna6wrt7LgZevXvG5cqnbvfv8VZerZ645XTt9nX297Yb9jdYeu56WX+x+aem172296XCz/ZbjrY6+BX3n+l37L972un3ljv+dGwOLBvruLr57/17cPel93v3RB6kPXj/Mejj9aP1j7OOiJwpPKp6qP6391fjXZqm99Oyg12DPs4hnj4a4Qy//lfmvT8MFz6nPK0a0RupHrUfPjPmM3Xqx9MXwy4yX0+OFvyn+tveV0auffnf7vWdiycTwa9HrmT9K3qi+OfrW9m3nZOjk03dp76anit6rvj/2gf2h+2P0x5Hp7E/4T5WfjT93fAn88ngmbWbm3/eE8/syOll+AAAACXBIWXMAAAsTAAALEwEAmpwYAAADqWlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNS40LjAiPgogICA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPgogICAgICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgICAgICAgICB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iCiAgICAgICAgICAgIHhtbG5zOnRpZmY9Imh0dHA6Ly9ucy5hZG9iZS5jb20vdGlmZi8xLjAvIgogICAgICAgICAgICB4bWxuczpleGlmPSJodHRwOi8vbnMuYWRvYmUuY29tL2V4aWYvMS4wLyI+CiAgICAgICAgIDx4bXA6TW9kaWZ5RGF0ZT4yMDE1LTAxLTEyVDE5OjAxOjgxPC94bXA6TW9kaWZ5RGF0ZT4KICAgICAgICAgPHhtcDpDcmVhdG9yVG9vbD5QaXhlbG1hdG9yIDMuMi4xPC94bXA6Q3JlYXRvclRvb2w+CiAgICAgICAgIDx0aWZmOk9yaWVudGF0aW9uPjE8L3RpZmY6T3JpZW50YXRpb24+CiAgICAgICAgIDx0aWZmOkNvbXByZXNzaW9uPjU8L3RpZmY6Q29tcHJlc3Npb24+CiAgICAgICAgIDx0aWZmOlJlc29sdXRpb25Vbml0PjE8L3RpZmY6UmVzb2x1dGlvblVuaXQ+CiAgICAgICAgIDx0aWZmOllSZXNvbHV0aW9uPjcyPC90aWZmOllSZXNvbHV0aW9uPgogICAgICAgICA8dGlmZjpYUmVzb2x1dGlvbj43MjwvdGlmZjpYUmVzb2x1dGlvbj4KICAgICAgICAgPGV4aWY6UGl4ZWxYRGltZW5zaW9uPjEyMDwvZXhpZjpQaXhlbFhEaW1lbnNpb24+CiAgICAgICAgIDxleGlmOkNvbG9yU3BhY2U+MTwvZXhpZjpDb2xvclNwYWNlPgogICAgICAgICA8ZXhpZjpQaXhlbFlEaW1lbnNpb24+NDA8L2V4aWY6UGl4ZWxZRGltZW5zaW9uPgogICAgICA8L3JkZjpEZXNj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"/>
+                                                                {% elseif card.getBrand == "mastercard" %}
+
+                                                                {%  endif %}
+                                                            </div>
+                                                            <div class="col s2">
+                                                                <a class="cancelcard" id="{{ s }}"> <i class="fas fa-times"></i></a>
+                                                            </div>
+                                                        </div>
+                                                    {% endfor %}
+
+                                                    <button type="button" class="btn waves-effect waves-light newpayment" style="margin-top: 3%"> New payment method</button>
+
+                                                    <div class="newpaymentmethod row" style="display:none ;margin-top: 5%">
+                                                        <div class="col s9">
+                                                            <div id="card-element" class="MyCardElement active-card"  >
+                                                                <!-- Elements will create input elements here -->
+                                                            </div>
+                                                            <div id="card-errors" role="alert"></div>
+                                                        </div>
+                                                        <div class="col s3">
+                                                            <a class="cancelnewpayment"><i class="fas fa-times"></i></a>
+                                                        </div>
+                                                        <!-- We'll put the error messages in this element -->
+                                                    </div>
+                                                {% endif %}
+                                                <div class="center" style="margin-top: 2%">
+                                                    <button class="btn waves-effect waves-light" type="submit">{{'pricing.update_modal.price.validate'|trans}}</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                        <div class="by-wire-transfer" style="display: none">
+                                            <div class="iban-info">
+                                                
+                                                <span>Merci de virer la somme correspondante sur notre compte entreprise ci-dessous avec la référence :</span>
+
+                                                <div class="row">
+                                                    <p class="col s4 no-margin strong">Titulaire du compte</p>
+                                                    <p class="col s8 no-margin">DEALDRIVE - ZZYZX ROAD SARL-S</p>
+                                                </div>
+                                                <div class="row no-margin">
+                                                    <p class="col s4 no-margin strong">Adresse</p>
+                                                    <p class="col s8 no-margin">46, RUE DES TREVIRES 2628 LUXEMBOURG  LUXEMBOURG</p>
+                                                </div>
+                                                <div class="row no-margin">
+                                                    <p class="col s4 no-margin strong"> IBAN</p>
+                                                    <p class="col s8 no-margin"> LU911111706685400000 </p>
+                                                </div>
+                                                <div class="row">
+                                                    <p class="col s4 no-margin strong">Code BIC</p>
+                                                    <p class="col s8 no-margin">CCPLLULL</p>
+                                                </div>
+
+                                                <span>Le ou les abonnements seront effectifs dès réception des fonds</span>
+                                            </div>
+                                        </div>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {#}
+                    <div class="col s4 c-flex">
+                       
+                    </div>
+                    #}
+                </div>
+            </div>
+        </div> 
+        
+        <div id="freesubscription" class="modal subs" style="width: 50%;height: 50%;padding:10%"></div>
+
+        <div id="accountDetails" class="modal" style="width: 50%;height: 50%;padding:10%">
+            <div class="modal-content">
+            <h5>{{ 'account_management.my_account_details'|trans }}</h5>
+                <p>{{ 'account_management.account_created_on'|trans ~ ' ' ~ currentuser.inserted|format_datetime('long', 'none') }} </p>
+                <div class="flex-center-fe">
+                    {% if currentuser.organization.plan != 3 %}
+                        <a class="waves-effect waves-light modal-close btn-flat red-text">{{'account_management.unsubscribe'|trans}}</a>
+                    {% else %}
+                        <a class="waves-effect waves-light modal-trigger btn strong modal-subscribe-btn m-right" href="#subscription">{{'account_management.upgrade'|trans}}</a>
+                    {% endif %}
+                    <a class="btn waves-effect waves-light modal-close">Ok</a>
+                </div>
+            </div>     
+        </div>
+    {% endif %}
+
+{% endblock %}
+
+
+{% block javascripts %}
+    <script src="{{ asset('js/nouislider.js') }}"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+    <script src="{{ asset('js/price_manage.js') }}"></script>
+    <script type="text/javascript">
+
+        noUiSlider.create($('.user-slider')[0], {
+            start: [1],
+            connect: [true, false],
+            range: {
+                'min': [1,1],
+                '30%': [10,1],
+                '50%': [50,10],
+                '75%': [250,50],
+                'max': [1000]
+            }
+        });
+        console.log($('.user-slider')[0]);
+
+        var errors = document.getElementById('card-errors');
+        var stripe = Stripe('pk_test_51Hn5ftLU0XoF52vK8M36bvbf4dBV2ZDnSZnGCW9MDcEHUuznmIcSuDkU748TNbNfj9bGWbrvpfLu6qgkpMwNoylS00QptGVFj4');
+        var elements = stripe.elements();
+        var card = elements.create('card');
+        card.on('change', showCardError);
+        var form = document.getElementById('subscription-form');
+
+        function createCustomer() {
+            let billingEmail = document.querySelector('#email').value;
+            return fetch('/create-customer', {
+                method: 'post',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: billingEmail,
+                }),
+            })
+                .then((response) => {
+                    return response.json();
+                })
+                .then((result) => {
+                    return result;
+                });
+        }
+
+        let signupForm = document.getElementById('signup-form');
+
+        function showCardError(event) {
+            let displayError = document.getElementById('card-errors');
+            if (event.error) {
+                displayError.textContent = event.error.message;
+            } else {
+                displayError.textContent = '';
+            }
+        }
+
+        card.mount('#card-element');
+        card.addEventListener('change', function(event) {
+            if (event.error) {
+                errors.textContent = event.error.message;
+                form.classList.add('has-error');
+            } else {
+                errors.textContent = '';
+                form.classList.remove('has-error');
+            }
+        });
+
+        form.addEventListener('submit', function (ev) {
+            ev.preventDefault();
+            var modal = $('.modal')[0];
+            modal.close;
+            const latestInvoicePaymentIntentStatus = localStorage.getItem(
+                'latestInvoicePaymentIntentStatus'
+            );
+
+            if (latestInvoicePaymentIntentStatus === 'requires_payment_method') {
+
+                const invoiceId = localStorage.getItem('latestInvoiceId');
+                const isPaymentRetry = true;
+
+                createPaymentMethod({
+                    card,
+                    isPaymentRetry,
+                    invoiceId,
+                });
+
+            } else {
+                createPaymentMethod({card});
+            }
+        });
+
+        var formcancel = document.getElementById('unsubscribe');
+        formcancel.addEventListener('submit', function (ev) {
+            $('.currentsub').remove();
+            ev.preventDefault();
+                fetch('/cancel-subscription', {
+                    method: 'post',
+                    headers: {
+                        'Content-type': 'application/json',
+                    },
+                    body : JSON.stringify({
+                        customerId: 'customerId',
+
+                    }),
+
+                })
+                    .then((response) => {
+                        modal.close;
+                        return response.json();
+                    })
+
+                    .then((result) => {
+                        if (result.error) {
+
+                            throw result;
+
+                        } else {
+
+                        }
+                        return result;
+                    })
+                    .catch((error) => {
+
+                        showCardError(error);
+                    })
+            modal = $('.modal').modal('close');
+
+        });
+        function removeExtraSpace(str)
+        {
+            str = str.replace(/[\s]{2,}/g," ");
+            str = str.replace(/^[\s]/, "");
+            str = str.replace(/[\s]$/,"");
+            return str;
+        }
+
+
+        function createPaymentMethod({card, isPaymentRetry, invoiceId ,elmt}) {
+            
+            label = $('.sub-choice');
+            price = parseFloat($('.charged-price-zone .account-price'));
+            //price = removeExtraSpace(price);
+            product = "p";
+            
+
+            var pm = $('.newpaymentmethod');
+            console.log(pm.hasClass('activecard'));
+            if(custcard == 0 || pm.hasClass('activecard') ) {
+                let billingName = 'tes';
+                stripe.createPaymentMethod({
+                    type: 'card',
+                    card: card,
+                    billing_details: {
+                        name: billingName,
+                    },
+                })
+                    .then((result) => {
+
+                        if (result.error) {
+
+                        } else {
+
+                            if (isPaymentRetry) {
+                                retryInvoiceWithNewPaymentMethod({
+                                    customerId: customerId,
+                                    paymentMethodId: result.paymentMethod.id,
+                                    invoiceId: invoiceId,
+                                    priceId: parseInt(price),
+                                });
+                            } else {
+                                test = createSubscription({
+                                    paymentMethodId: result.paymentMethod.id,
+                                    priceId: price,
+                                    product: product,
+                                    elmt: elmt,
+                                });
+
+                                modal = $('.modal').modal('close');
+                            }
+                        }
+                    });
+            } else {
+
+                test = createSubscription({
+                    paymentMethodId: " ",
+                    priceId: price,
+                    product: product,
+                    elmt: elmt,
+                });
+                modal = $('.modal').modal('close');
+            }
+        }
+        
+        function createSubscription({paymentMethodId, priceId, product}) {
+            
+            var isYearly = $('.switch input').is(":checked");
+            val = $('.user').val();
+            return (
+                fetch('/create-subscription', {
+                    method: 'post',
+                    headers: {
+                        'Content-type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        pmId: paymentMethodId,
+                        priceId: priceId,
+                        pl: product,
+                        q : $('.user').val(),
+                        p: isYearly ? "y" : "m",
+                        num : $('.panel-active').attr('id')
+                    }),
+                })
+                    .then((response) => {
+                        console.log(result);
+                        return response.json();
+                    })
+
+                    .then((result) => {
+                        if (result.error) {
+                            throw result;
+                        } else {
+                            console.log(result);
+                        }
+                        return result;
+                    })
+
+                    .then((result) => {
+
+                        return {
+                            paymentMethodId: paymentMethodId,
+                            priceId: priceId,
+                            subscription: result,
+                        };
+
+                    })
+
+                    .catch((error) => {
+                        showCardError(error);
+                    })
+            );
+        }
+
+    </script>
+{% endblock %}

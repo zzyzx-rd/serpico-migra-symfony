@@ -43,14 +43,15 @@ class Process extends DbObject
     public $gradable;
 
     /**
-     * @ORM\Column(name="pro_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="processInitiatives")
+     * @JoinColumn(name="pro_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
-     * @ORM\Column(name="pro_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="pro_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="pro_deleted", type="datetime", nullable=true)
@@ -81,7 +82,7 @@ class Process extends DbObject
 
     /**
      * @ManyToOne(targetEntity="Icon")
-     * @JoinColumn(name="icon_ico_id", referencedColumnName="ico_id", nullable=false)
+     * @JoinColumn(name="icon_ico_id", referencedColumnName="ico_id", nullable=true)
      */
     protected $icon;
 
@@ -103,32 +104,27 @@ class Process extends DbObject
     /**
      * Process constructor.
      * @param ?int$id
-     * @param $pro_name
-     * @param $pro_approvable
-     * @param $pro_gradable
-     * @param $pro_createdBy
-     * @param $pro_inserted
-     * @param $pro_deleted
+     * @param $name
+     * @param $approvable
+     * @param $gradable
+     * @param $deleted
      * @param $children
      * @param $stages
      */
     public function __construct(
       ?int $id = 0,
-        $pro_name = '',
-        $pro_createdBy = null,
-        $pro_gradable = true,
-        $pro_inserted = null,
-        $pro_deleted = null,
-        $pro_approvable = false,
+        $name = '',
+        $gradable = true,
+        $deleted = null,
+        $approvable = false,
         $children = null,
         $stages = null)
     {
-        parent::__construct($id, $pro_createdBy, new DateTime());
-        $this->name = $pro_name;
-        $this->approvable = $pro_approvable;
-        $this->gradable = $pro_gradable;
-        $this->inserted = $pro_inserted;
-        $this->deleted = $pro_deleted;
+        parent::__construct($id, null, new DateTime());
+        $this->name = $name;
+        $this->approvable = $approvable;
+        $this->gradable = $gradable;
+        $this->deleted = $deleted;
         $this->children = $children?:new ArrayCollection();
         $this->stages = $stages?:new ArrayCollection();
         $this->criteria = new ArrayCollection();
@@ -140,40 +136,37 @@ class Process extends DbObject
         return $this->name;
     }
 
-    public function setName(string $pro_name): self
+    public function setName(string $name): self
     {
-        $this->name = $pro_name;
-
+        $this->name = $name;
         return $this;
     }
 
-    public function gidApprovable(): ?bool
+    public function isApprovable(): ?bool
     {
         return $this->approvable;
     }
 
-    public function setApprovable(bool $pro_approvable): self
+    public function setApprovable(bool $approvable): self
     {
-        $this->approvable = $pro_approvable;
-
+        $this->approvable = $approvable;
         return $this;
     }
 
-    public function getGradable(): ?bool
+    public function isGradable(): ?bool
     {
         return $this->gradable;
     }
 
-    public function setGradable(bool $pro_gradable): self
+    public function setGradable(bool $gradable): self
     {
-        $this->gradable = $pro_gradable;
-
+        $this->gradable = $gradable;
         return $this;
     }
 
-    public function setInserted(DateTimeInterface $pro_inserted): self
+    public function setInserted(DateTimeInterface $inserted): self
     {
-        $this->inserted = $pro_inserted;
+        $this->inserted = $inserted;
 
         return $this;
     }
@@ -183,17 +176,16 @@ class Process extends DbObject
         return $this->deleted;
     }
 
-    public function setDeleted(?DateTimeInterface $pro_deleted): self
+    public function setDeleted(?DateTimeInterface $deleted): self
     {
-        $this->deleted = $pro_deleted;
-
+        $this->deleted = $deleted;
         return $this;
     }
 
     /**
-     * @return Collection|Activity[]
+     * @return ArrayCollection|Activity[]
      */
-    public function getActivities(): Collection
+    public function getActivities()
     {
         return $this->activities;
     }
@@ -202,7 +194,7 @@ class Process extends DbObject
     {
         if (!$this->activities->contains($activity)) {
             $this->activities[] = $activity;
-            $activity->setcess($this);
+            $activity->setProcess($this);
         }
 
         return $this;
@@ -213,8 +205,8 @@ class Process extends DbObject
         if ($this->activities->contains($activity)) {
             $this->activities->removeElement($activity);
             // set the owning side to null (unless already changed)
-            if ($activity->getcess() === $this) {
-                $activity->setcess(null);
+            if ($activity->getProcess() === $this) {
+                $activity->setProcess(null);
             }
         }
 
@@ -232,9 +224,10 @@ class Process extends DbObject
     /**
      * @param mixed $organization
      */
-    public function setOrganization($organization): void
+    public function setOrganization($organization): self
     {
         $this->organization = $organization;
+        return $this;
     }
 
     /**
@@ -248,9 +241,10 @@ class Process extends DbObject
     /**
      * @param mixed $parent
      */
-    public function setParent($parent): void
+    public function setParent($parent): self
     {
         $this->parent = $parent;
+        return $this;
     }
 
     /**
@@ -259,14 +253,6 @@ class Process extends DbObject
     public function getChildren()
     {
         return $this->children;
-    }
-
-    /**
-     * @param mixed $children
-     */
-    public function setChildren($children): void
-    {
-        $this->children = $children;
     }
 
     /**
@@ -280,9 +266,10 @@ class Process extends DbObject
     /**
      * @param mixed $icon
      */
-    public function setIcon($icon): void
+    public function setIcon(?Icon $icon): self
     {
         $this->icon = $icon;
+        return $this;
     }
 
     /**
@@ -294,14 +281,6 @@ class Process extends DbObject
     }
 
     /**
-     * @param mixed $institutionProcesses
-     */
-    public function setInstitutionProcesses($institutionProcesses): void
-    {
-        $this->institutionProcesses = $institutionProcesses;
-    }
-
-    /**
      * @return mixed
      */
     public function getStages()
@@ -309,13 +288,6 @@ class Process extends DbObject
         return $this->stages;
     }
 
-    /**
-     * @param mixed $stages
-     */
-    public function setStages($stages): void
-    {
-        $this->stages = $stages;
-    }
     public function addInstitutionProcess(InstitutionProcess $institutionProcess): Process
     {
         $this->institutionProcesses->add($institutionProcess);
@@ -340,6 +312,16 @@ class Process extends DbObject
         $this->children->removeElement($child);
         return $this;
     }
+
+    /**
+     * @return Collection|Process[]
+    */
+    function getValidatedChildren() {
+        return $this->children->filter(function(Process $p){
+            return !$p->isApprovable();
+        });
+    }
+
     public function addValidatedChildren(Process $child): Process
     {
         return $this->addChildren($child);
@@ -372,10 +354,12 @@ class Process extends DbObject
         return $u->getRole() === 4;
     }
 
+
+
     /**
-     * @return Collection|ProcessCriterion[]
+     * @return ArrayCollection|ProcessCriterion[]
      */
-    public function getCriteria(): Collection
+    public function getCriteria()
     {
         return $this->criteria;
     }

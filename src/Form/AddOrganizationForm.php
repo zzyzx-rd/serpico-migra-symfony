@@ -1,7 +1,6 @@
 <?php
 namespace App\Form;
 
-use App\Controller\MasterController;
 use App\Entity\Organization;
 use App\Entity\Position;
 use App\Entity\User;
@@ -9,17 +8,15 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\App\FormExtension\Core\Type\ChoiceType;
-use Symfony\Component\App\FormExtension\Core\Type\TextType;
-use Symfony\Component\App\FormExtension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use App\Validator\UniquePerOrganization;
 
 class AddOrganizationForm extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        global $app;
-
         /** @var int */
         $orgId = $options['orgId'];
         /** @var bool */
@@ -29,48 +26,27 @@ class AddOrganizationForm extends AbstractType
         /** @var bool */
         $isFromClient = isset($options['isFromClient']);
 
-        $em = MasterController::getEntityManager();
-        $repoO = $em->getRepository(Organization::class);
+        $em = $options['em'];
         $repoU = $em->getRepository(User::class);
         $repoP = $em->getRepository(Position::class);
-
+        $repoO = $em->getRepository(Organization::class);
         /** @var Organization|null */
         $organization = $repoO->find($orgId);
+        
+        if(!$options['isFromClient']){
 
-        $builder->add('workerFirm', TextType::class,
-            [
-                'label_format' => 'create_organization.%name%',
-                'constraints' => [
-                    new Assert\NotBlank
-                ],
-                'data' => $organization ? $organization->getCommname() : null,
-                'attr' => [
-                    'disabled' => $toValidate
+            $builder->add('commname', TextType::class,
+                [
+                    'label_format' => $options['isFromClient'] ? 'create_organization.your_firm' : 'create_organization.%name%',
+                    'constraints' => [
+                        new Assert\NotBlank
+                    ],
+                    'data' => $organization ? $organization->getCommname() : null,
+                    'attr' => [
+                        'disabled' => $toValidate
+                    ]
                 ]
-            ]
-        );
-        if(!isset($options['isFromClient'])){
-            $builder->add('type', ChoiceType::class, [
-
-                'choices' => [
-                    'create_organization.type.institution' => 'P',
-                    'create_organization.type.client' => 'F',
-                    'create_organization.type.team_project' => 'T',
-                    'create_organization.type.individual' => 'I',
-                ],
-                'expanded' => false,
-                'multiple' => false,
-                'attr' => [
-                    'class' => 'browser-default'
-                ],
-                'constraints' => [
-                    new Assert\NotBlank
-                ],
-                'label' => 'create_organization.type.label',
-                'data' => $toValidate ? $organization->getType() : 'P',
-                'required' => true,
-                'placeholder' => false
-            ]);
+            );
         }
 
         // If organization is being created, we let root define the new master user; otherwise, has to be part of the organization
@@ -148,33 +124,57 @@ class AddOrganizationForm extends AbstractType
                         'disabled' => $toValidate
                     ]
                 ]
-            )
-            ->add('position', TextType::class,
-                [
-                    'label_format' => 'create_organization.%name%',
-                    'constraints' => $isFromClient ? [
-                        new Assert\NotBlank
-                    ] : null,
-                    'required' => false,
-                    'data' => $orgMasterUserPositionName,
-                    'attr' => [
-                        'disabled' => $toValidate
-                    ]
-                ]
-            )
-            ->add('department', TextType::class,
-                [
-                    'label_format' => 'create_organization.%name%',
-                    'constraints' => $isFromClient ? [
-                        new Assert\NotBlank
-                    ] : null,
-                    'required' => false,
-                    'data' => $orgMasterUserDepartmentName,
-                    'attr' => [
-                        'disabled' => $toValidate
-                    ]
-                ]
             );
+            if(!$options['isFromClient']){
+
+                $builder->add('position', TextType::class,
+                    [
+                        'label_format' => 'create_organization.%name%',
+                        'constraints' => $isFromClient ? [
+                            new Assert\NotBlank
+                        ] : null,
+                        'required' => false,
+                        'data' => $orgMasterUserPositionName,
+                        'attr' => [
+                            'disabled' => $toValidate
+                        ]
+                    ]
+                )
+                ->add('department', TextType::class,
+                    [
+                        'label_format' => 'create_organization.%name%',
+                        'constraints' => $isFromClient ? [
+                            new Assert\NotBlank
+                        ] : null,
+                        'required' => false,
+                        'data' => $orgMasterUserDepartmentName,
+                        'attr' => [
+                            'disabled' => $toValidate
+                        ]
+                    ]
+                )
+                ->add('type', ChoiceType::class, [
+
+                    'choices' => [
+                        'create_organization.type.institution' => 'P',
+                        'create_organization.type.client' => 'F',
+                        'create_organization.type.team_project' => 'T',
+                        'create_organization.type.individual' => 'I',
+                    ],
+                    'expanded' => false,
+                    'multiple' => false,
+                    'attr' => [
+                        'class' => 'browser-default'
+                    ],
+                    'constraints' => [
+                        new Assert\NotBlank
+                    ],
+                    'label' => 'create_organization.type.label',
+                    'data' => $toValidate ? $organization->getType() : 'P',
+                    'required' => true,
+                    'placeholder' => false
+                ]);
+            }
         } else {
             // Get users, build choices array
             /** @var User[] */
@@ -204,7 +204,7 @@ class AddOrganizationForm extends AbstractType
             if ($standalone) {
                 $builder->add('submit', SubmitType::class,
                     [
-                        'label' => $organization ? 'create_organization.update_btn' : 'create_organization.add_btn',
+                        'label' => $options['isFromClient'] ? 'create_organization.letz_go' : ($organization ? 'create_organization.update_btn' : 'create_organization.create'),
                         'attr' => [
                             'class'=> 'btn btn-large'
                         ]
@@ -241,6 +241,8 @@ class AddOrganizationForm extends AbstractType
             'standalone' => false,
             'toValidate' => false,
             'request' => false,
+            'em' => null,
+            'isFromClient' => false,
         ])
         ->setRequired([
             'orgId'

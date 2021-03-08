@@ -26,17 +26,21 @@
 {% macro user_role_badge(user) %}
   {% if user.role == 1 %}
     {% set role = 'admin' %}
+    {% set badge_class = 'super-admin-badge' %}
+    {% set badge_letter = 'S' %}
+  {% elseif user.role == 2 %}
+    {% set role = 'admin' %}
     {% set badge_class = 'admin-badge' %}
     {% set badge_letter = 'A' %}
-  {% elseif user.role == 2 %}
+  {% elseif user.role == 3 %}
     {% set role = 'activity_manager' %}
     {% set badge_class = 'am-badge' %}
     {% set badge_letter = 'M' %}
-  {% elseif user.role == 3 %}
+  {% elseif user.role == 4 %}
     {% set role = 'collaborator' %}
     {% set badge_class = 'collaborator-badge' %}
     {% set badge_letter = 'C' %}
-  {% else %}
+  {% elseif user.role == 0 %}
     {% set role = 'root' %}
     {% set badge_class = 'am-badge' %}
     {% set badge_letter = 'R' %}

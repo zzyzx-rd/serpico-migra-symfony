@@ -6,8 +6,10 @@
 
 {% block css %}
     <script type="text/javascript">
+        var d="test";
         var iurl = "{{ url('insertLKJSONData') }}";
         var dupliUrl = "{{ url('duplicateOrganization',{'orgId' : 0}) }}";
+        var durl = "{{ url('deleteOrganization',{'orgId' : 0}) }}";
     </script>
 {% endblock %}
 
@@ -25,9 +27,9 @@
     <h4 style="text-align: center;">{% trans %}organizations.page_title{% endtrans %}</h4>
 
     {% for organization in organizations %}
-      <ul id="activityList" class="collapsible expandMore expandLess" data-collapsible="accordion">
+      <ul class="organization collapsible expandMore expandLess" data-collapsible="accordion" data-id="{{ organization.id }}">
         <li>
-          <div class="collapsible-header{% if organizations|length == 1 %} active{% endif %}{% if organization.validated is null %} blue lighten-2{% endif %}">
+          <div class="collapsible-header{% if organizations|length == 1 %} active{% endif %}">
               <i id="activity-expand" class="fa fa-fw fa-chevron-down"></i>
               <i id="activity-expanded" class="fa fa-fw fa-chevron-right"></i>
             <!-- just giving the name an absolute position because it was interfering ith the button position -->
@@ -46,44 +48,52 @@
 
           <div class="collapsible-body">
               <div class="row">
-                  <div class="col s12 m12 details-title">
-                      {% trans %}organizations.details{% endtrans %}
+                  <div class="col s12 m12 details-title flex-center-sb">
+                    <span>{% trans %}organizations.details{% endtrans %}</span>
+                    <a href="#deleteOrganization" class="btn-flat modal-trigger"><i class="fa fa-trash"></i></a>
+                      
                   </div>
               </div>
             <div class="row">
                 <div class="col s6 m4">
                     <i class="fa fa-briefcase" aria-hidden="true"></i> {% trans %}organizations.nb_activities{% endtrans %}
                 </div>
-                <div class="col s6 m4">{{ organization.nbCompletedActivities }} ({{ organization.nbScheduledActivities }})</div>
+                <div class="col s6 m4">{{ organization.activeActivities|length }} ({{ organization.activities|length }})</div>
             </div>
             <div class="row">
                   <div class="col s6 m4">
                       <i class="fa fa-users" aria-hidden="true"></i> {% trans %}organizations.nb_users{% endtrans %}
                   </div>
-                  <div class="col s6 m4">{{ organization.nbActiveUsers }} ({{ organization.nbTotalUsers }})</div>
+                  <div class="col s6 m4">{{ organization.activeUsers|length }} ({{ organization.users|length }})</div>
               </div>
               <div class="row">
                   <div class="col s6 m4">
                       <i class="far fa-clock" aria-hidden="true"></i> {% trans %}organizations.member_since{% endtrans %}
                   </div>
-                  <div class="col s6 m4">{{ organization.inserted|localizeddate('long', 'none') }}</div>
+                  <div class="col s6 m4">{{ organization.inserted|format_datetime('long', 'none') }}</div>
               </div>
-            <div class="row center-sb">
+            <div class="row">
                 <div class="col s6 m4">
                     <i class="fas fa-crown" aria-hidden="true"></i> {% trans %}organizations.master_user{% endtrans %}
                 </div>
-                {% if organization.masterUser is not null %}
-                <div class="col s1 m1"><img class="mini-user-picture"  src="{{ (organization.masterUser.picture != "") ? asset('lib/img/' ~ organization.masterUser.picture) : asset('lib/img/no-picture.png') }}" alt=""></div>
-                <div class="col s5 m7">{{ organization.masterUser.firstname }} {{ organization.masterUser.lastname }}</div>
-                {% else %}
-                    {{ organization.id }}
-                {% endif %}
+                <div class="col s6 m8">
+                    {% if organization.userMasters is not null %}
+                        <div class="flex-center">
+                            {% for userMaster in organization.userMasters  %} 
+                                <img class="user-profile-xl-picture tooltipped" src="{{ (userMaster.user.picture != "") ? asset('lib/img/user/' ~ organization.userMaster.user.picture) : asset('lib/img/user/no-picture.png') }}" alt="" data-tooltip="{{userMaster.user.username}}" data-position="top">
+                            {% endfor %}
+                            {#<span>{{ organization.masterUser.firstname }} {{ organization.masterUser.lastname }}</span>#}
+                        </div>
+                    {% else %}
+                        <span> {{ 'organization_elements.no_master_user'|trans }} </span>
+                    {% endif %}
+                </div>
             </div>
             <div class="row">
                   <div class="col s6 m4">
                       <i class="far fa-clock" aria-hidden="true"></i> {% trans %}organizations.last_connection{% endtrans %}
                   </div>
-                  <div class="col s6 m4">{% if organization.lastConnectedDateTime is not null %}{{ organization.lastConnectedDateTime|localizeddate('long', 'short') }} ({{ organization.lastConnectedUsername }}){% else %}No connection{% endif %}</div>
+                  <div class="col s6 m4">{% if organization.lastConnectedUser is not null %}{{ organization.lastConnectedUser.fullname }} ({{ organization.lastConnectedUser.lastConnected|format_datetime('long', 'short') }}){% else %}No connection{% endif %}</div>
             </div>
             <br>
 
@@ -94,7 +104,11 @@
               #}
 
             <div class="row action-buttons">
-                {% if organization.validated is not null %}
+
+                <div class="button-field">
+                    <a class="btn-large waves-effect waves-light teal lighten-1" href="{{ url('manageUpdates',{orgId: organization.id}) }}"> {% trans %}updates{% endtrans %}</a>   
+                </div>
+
                 <div class="button-field">
                     <a class="btn-large waves-effect waves-light teal lighten-1" href="{{ url('rootManageUsers',{'orgId' : organization.id}) }}"> {% trans %}organizations.see_users{% endtrans %} </a>
                  </div>
@@ -107,16 +121,12 @@
                 <div class="button-field">
                     <a class="btn-large waves-effect waves-light teal lighten-1" href="{{ url('massiveUpdateOrganization',{'orgId' : organization.id}) }}"> {% trans %}organizations.update{% endtrans %} </a>
                 </div>
-                    {% if organization.nbStages == 0 %}
+                    {% if organization.stages|length == 0 %}
                         <div class="button-field">
                             <a class="btn-large waves-effect waves-light teal lighten-1" href="{{ url('setOrganizationToCriteriaAndStages',{'orgId' : organization.id}) }}">Set org to crit</a>
                         </div>
                     {% endif %}
-                {% else %}
-                <div class="button-field">
-                    <a class="btn-large waves-effect waves-light teal lighten-1" href="{{ url('validateOrganization',{'orgId' : organization.id}) }}"> {% trans %}organizations.decide{% endtrans %} </a>
-                </div>
-                {% endif %}
+               
             </div>
           </div>
         </li>
@@ -154,6 +164,17 @@
             <div class="button-field">
                 <a class="modal-close waves-effect waves-green btn-large organization-select">{% trans %}Ok{% endtrans %}</a>
             </div>
+        </div>
+    </div>
+
+    <div id="deleteOrganization" class="modal">
+        <div class="modal-content">
+            <h4>{% trans %}create_organization.delete_modal.title{% endtrans %}</h4>
+            <p>{% trans %}create_organization.delete_modal.content{% endtrans %}</p>
+        </div>
+        <div class="modal-footer">
+            <a class="modal-action modal-close waves-effect waves-green btn-large delete-btn">{% trans %}create_organization.delete_modal.confirm{% endtrans %}</a>
+            <a class="modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}create_organization.delete_modal.cancel{% endtrans %}</a>
         </div>
     </div>
 
@@ -245,6 +266,23 @@
 
 
             })
+
+            $('[href="#deleteOrganization"]').on('click',function(){
+                $('.delete-btn').attr('data-id',$(this).closest('.organization').attr('data-id'));
+            });
+
+            $('.delete-btn').on('click',function(){
+                urlToPieces = durl.split('/');
+                const oid = $(this).attr('data-id');
+                urlToPieces[urlToPieces.length-2] = oid;
+                durl = urlToPieces.join('/');
+                $.post(durl,null)
+                    .done(function(data){
+                        $(`.organization[data-id=${oid}]`).remove();
+                    })
+            })
+
+
         });
 
 

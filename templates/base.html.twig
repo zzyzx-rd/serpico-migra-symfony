@@ -3,8 +3,9 @@
 <html>
 <head>
     <title>
+        Dealdrive -
         {% block title '' %}
-        - Serpico</title>
+    </title>
     <meta name="google-site-verification" content="aGUecHqyNfDi5JeZ8kCBvwTqJYGsirNidG2Gz5xhBQw"/>
     <link rel='shortcut icon' type='image/x-icon' href="lib/img/favicon/favicon.ico"/>
     <link rel="apple-touch-icon" sizes="180x180" href="lib/img/favicon/apple-touch-icon.ico">
@@ -19,126 +20,135 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta content="Serpico Application. Evaluation Tool for businesses. Home." name="description"/>
 
-    <script>
-        (function (i, s, o, g, r, a, m) {
-            i['GoogleAnalyticsObject'] = r;
-            i[r] = i[r] || function () {
-                (i[r].q = i[r].q || []).push(arguments)
-            },
-                i[r].l = 1 * new Date();
-            a = s.createElement(o),
-                m = s.getElementsByTagName(o)[0];
-            a.async = 1;
-            a.src = g;
-            m.parentNode.insertBefore(a, m)
-        })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
-
-        ga('create', 'UA-116384660-1', 'auto');
-        ga('send', 'pageview');
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+      new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+      j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+      'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+      })(window,document,'script','dataLayer','GTM-5P5957V');
     </script>
-    {% block css %}{% endblock %}
+    
+    {% block css %}
+    {% endblock %}
 
 
 </head>
 
 <body>
-{% set current_path = app.request.pathinfo %}
-{% include "./header.html.twig" %}
-{% block content %}{% endblock %}
+    <noscript>
+        <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5P5957V" height="0" width="0" style="display:none;visibility:hidden"></iframe>
+    </noscript>
+    {% set current_path = app.request.pathinfo %}
+    {% include "./header.html.twig" %}
+    {% block content %}{% endblock %}
 
-<div id="waitingSpinner" class="modal">
-    <div class="modal-content" style="text-align: center">
-        <div class="spinninAround"></div>
-        <p>{% trans %}please_wait{% endtrans %}</p>
+    <div id="waitingSpinner" class="modal">
+        <div class="modal-content" style="text-align: center">
+            <div class="spinninAround"></div>
+            <p>{% trans %}please_wait{% endtrans %}</p>
+        </div>
     </div>
-</div>
 
-<div id="languageModal" class="modal">
-    <h5 style="color:white;">{{ "language.choose"|trans }}</h5>
-    <ul>
-        <li><a class="btn" href="{{ path('change_locale', {'locale': 'en'}) }}" style="margin-top:15px; width:70%;margin-left:15%"><img style="height: 30px;" src="{{ asset('lib/img/FlagEngland.png') }}" alt="english"> English</a></li>
-        <li><a class="btn" href="{{ path('change_locale', {'locale': 'fr'}) }}" style="margin-top:10px; width:70%;margin-left:15%"><img style="height: 30px;" src="{{ asset('lib/img/FlagFrance.png') }}" alt="français"> Français</a></li>
-    </ul>
-</div>
-{% block footer %}
-    <footer>
-        {% if not is_granted('IS_AUTHENTICATED_REMEMBERED') and not noFooter is defined %}
+    <div id="languageModal" class="modal">
+        <div class="modal-content">
+            <h5>{{ "language.choose"|trans }}</h5>
+            <ul>
+                <li>
+                    <a class="btn" href="{{ path('change_locale', {'locale': 'en'}) }}">
+                        <img style="height:50%;" src="{{ asset('lib/img/FlagEngland.png') }}" alt="english">
+                        <span>English</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="btn" href="{{ path('change_locale', {'locale': 'fr'}) }}">
+                        <img style="height:50%;" src="{{ asset('lib/img/FlagFrance.png') }}" alt="français">
+                        <span>Français</span>    
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    {% block footer %}
+        <footer>
+            {#{% if not is_granted('IS_AUTHENTICATED_REMEMBERED') and not noFooter is defined %}#}
 
-            <div id="linkFooter">
-                <div style="width:85%;margin:auto;">
-                    <div class="row align" style="margin-bottom:0">
-                        <div class="col s12 m3 no-margin">
-                            <ul class="flex-center " style="justify-content: space-around;flex-direction:column">
-                                <li>
-                                    <img src="{{ asset('lib/img/txt_logo_l_white.png') }}" alt="" style="width:100px">
-                                </li>
+                <div id="linkFooter">
+                    <div style="width:85%;margin:auto;">
+                        <div class="footer-row row align" style="margin-bottom:0">
+                            <div class="col s12 m3 no-margin">
+                                <ul class="flex-center " style="justify-content: space-around;flex-direction:column">
+                                    <li>
+                                        <img src="{{ asset('lib/img/logo_dd_l.png') }}" alt="" style="width:140px">
+                                    </li>
 
-                                {#<p class="grey-text text-lighten-4">ZZYZX Road</p>#}
-                                <li class="grey-text text-lighten-4">59, boulevard Royal</li>
-                                <li class="grey-text text-lighten-4">L-2449 Luxembourg</li>
-                                <li class="grey-text text-lighten-4"><a href="mailto:contact@serpicoapp.com" style="color:white;">contact@serpicoapp.com</a></li>
-                            </ul>
+                                    {#<p class="grey-text text-lighten-4">ZZYZX Road</p>#}
+                                    <li class="grey-text text-lighten-4">38, route d'Esch</li>
+                                    <li class="grey-text text-lighten-4">L-1470 Luxembourg</li>
+                                    
+                                </ul>
+                            </div>
+                            <div class="col s12 m6">
+                                <ul class="align" style="justify-content: space-around;">
+                                    <li class="linkedin">
+                                        <a href="https://www.linkedin.com/company/dealdrive-connect-to-clients-crm/" target="_blank">
+                                            <img src="{{ asset('lib/img/linkedin-icon-white.png') }}">
+                                        </a>
+                                    </li>
+                                    {#
+                                    <li>
+                                        <a href="https://www.youtube.com/channel/UCMVASckl068rgTEsHC4dKsw" target="_blank">
+                                            <img src="{{ asset('lib/img/youtube-white.png') }}">
+                                        </a>
+                                    </li>
+                                    #}
+                                    <li>
+                                        <a href="http://www.made-in-luxembourg.lu/" target="_blank">
+                                            <img src="{{ asset('lib/img/made_in_white.png') }}" style="width:67px">
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col s12 m3 white-text">
+                                <ul style="display:flex; justify-content: space-around;flex-direction:column; align-items: flex-end;">
+                                    <li style="margin-bottom:5px">
+                                        <span>{{ 'powered_by'|trans }}</span>
+                                        <i class="fa fa-road"></i>
+                                        <span>ZZYZX Rd</span>
+                                        {#}
+                                        <script type="text/javascript">
+                                            document.write(new Date().getFullYear());
+                                        </script>
+                                        #}
+                                    </li>
+                                    {#<li class="grey-text text-lighten-4"><a href="mailto:contact@dealdrive.lu" style="color:white;">contact@dealdrive.lu</a></li>#}
+                                    {#
+                                    <li style="text-align:right">
+                                        <a href="{{ path('terms_conditions') }}" class="white-text">{% trans %}footer.tc{% endtrans %}</a>
+                                    </li>
+                                    #}
+                                </ul>
+                            </div>
                         </div>
-                        <div class="col s12 m6">
-                            <ul class="align" style="justify-content: space-around;">
-                                <li class="linkedin">
-                                    <a href="https://www.linkedin.com/company/serpicoapp/" target="_blank">
-                                        <img src="{{ asset('lib/img/linkedin-icon-white.png') }}">
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="https://www.youtube.com/channel/UCMVASckl068rgTEsHC4dKsw" target="_blank">
-                                        <img src="{{ asset('lib/img/youtube-white.png') }}">
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="http://www.made-in-luxembourg.lu/" target="_blank">
-                                        <img src="{{ asset('lib/img/made_in_white.png') }}" style="width:67px">
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="http://www.luxfuturelab.lu/" target="_blank">
-                                        <img src="{{ asset('lib/img/logo_futurelabw2.png') }}" style="width:110px">
-                                    </a>
-                                </li>
 
-                            </ul>
-                        </div>
-                        <div class="col s12 m3 white-text">
-                            <ul style="display:flex; justify-content: space-around;flex-direction:column; align-items: flex-end;">
-                                <li style="margin-bottom:5px">
-                                    © ZZYZX Rd
-                                    <script type="text/javascript">
-                                        document.write(new Date().getFullYear());
-                                    </script>
-                                </li>
-                                <li style="text-align:right">
-                                    <a href="{{ path('terms_conditions') }}" class="white-text">{% trans %}footer.tc{% endtrans %}</a>
-                                </li>
-                            </ul>
-                        </div>
+
                     </div>
 
-
                 </div>
-
-            </div>
-        {% endif %}
-    </footer>
+            {#{% endif %}#}
+        </footer>
 
 
-{% endblock %}
+    {% endblock %}
 
-
-<!-- SCRIPTS -->
-<!-- CDN : jquery -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<!-- CDN : JQuery UI -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.js"></script>
-<!-- CDN : script Materialize -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.js"></script>
-<!-- header custom js -->
-<script src="{{ asset('js/header.js') }}"></script>
-{% block javascripts %}{% endblock %}
+    <!-- SCRIPTS -->
+    <!-- CDN : jquery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <!-- CDN : JQuery UI -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.js"></script>
+    <!-- CDN : script Materialize -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.js"></script>
+    <!-- header custom js -->
+    <script src="{{ asset('js/base.js') }}"></script>
+    {% block javascripts %}{% endblock %}
+    
 </body>
 </html>

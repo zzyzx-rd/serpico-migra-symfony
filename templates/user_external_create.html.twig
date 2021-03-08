@@ -10,13 +10,13 @@
     <link href="{{ asset('css/dropify.min.css') }}" rel="stylesheet" type="text/css">
     <script>
         var url = "{{ url('ajaxClientUserAdd') }}";
-        var dcurl = "{{ url('clientDelete', {cliId : app.request_stack.currentrequest.get('cliId') ?: 0 }) }}";
+        var dcurl = "{{ url('clientDelete', {cliId : global.request.get('cliId') ?: 0 }) }}";
         var diurl = "{{ url('clientUserDelete', {extId : 0}) }}";
-        var vcurl = "{{ url('validateClient', {cliId : app.request_stack.currentrequest.get('cliId') ?: 0 }) }}";
-        var viurl = "{{ url('validateClientUser', {cliId : app.request_stack.currentrequest.get('cliId') ?: 0, extId : 0}) }}";
+        var vcurl = "{{ url('validateClient', {cliId : global.request.get('cliId') ?: 0 }) }}";
+        var viurl = "{{ url('validateClientUser', {cliId : global.request.get('cliId') ?: 0, extId : 0}) }}";
         var surl = "{{ path('dynamicSearchParentFirm')}}";
         var noFirm = "{{ 'create_client.partner.unexisting_worker_firm'|trans }}";
-        var multCreation = "{{ app.request_stack.currentrequest.get('cliId') ? 0 : 1 }}";
+        var multCreation = "{{ global.request.get('cliId') ? 0 : 1 }}";
     </script>
     <style>
 
@@ -169,7 +169,8 @@
     
           {% if multipleClientCreation %}
     
-              <ul class="clients collection" data-prototype="{% filter escape %}{% include 'prototype_client.twig' with { 'item': form.clients.vars.prototype } %}{% endfilter %}">
+              {#<ul class="clients collection" data-prototype="{% filter escape %}{% include 'prototype_client.twig' with { 'item': form.clients.vars.prototype } %}{% endfilter %}">#}
+              <ul class="clients collection" data-prototype="{{ form_widget(form.clients.vars.prototype)|e('html_attr') }}">
                 
                 {% for ckey, client in form.clients %}
     
@@ -183,7 +184,7 @@
                         <div class="element-data">
                           <ul class="flex-center">
                             <li style="margin-right: 20px;position:relative">
-                              <img class="client-logo-zone" src="{{ asset(client_logo_url(client.vars.data)) }}">
+                              <img class="client-logo-zone" src="{{ asset(global.clientlogo(client.vars.data)) }}">
                             </li>
                             <li style="width: 100%;">
                               <ul class="flex-center-sb">
@@ -227,7 +228,7 @@
                           </ul>
                           <div class="row">
                             <div class="col s12 m2" style="position:relative;">
-                              <img class="client-logo-zone" src="{{ asset(client_logo_url(client.vars.data)) }}">
+                              <img class="client-logo-zone" src="{{ asset(global.clientlogo(client.vars.data)) }}">
                               <a class="btn-floating add-photo-btn" style="position: absolute; top: 84%; left: 22%;"><i class="fa fa-pencil-alt"></i></a>
                             </div>
                             <div class="col s12 m9">
@@ -249,10 +250,11 @@
                             </div>
                           </div>
                         </div>
-    
+
                       </div>
-              
-                      <ul class="individuals" data-prototype="{% filter escape %}{% include 'prototype_client_individual.twig' with { 'item': client.aliveExternalUsers.vars.prototype, 'client': client.vars.data } %}{% endfilter %}">
+
+                    {#<ul class="individuals" data-prototype="{% filter escape %}{% include 'prototype_client_individual.twig' with { 'item': client.aliveExternalUsers.vars.prototype, 'client': client.vars.data } %}{% endfilter %}">#}
+                      <ul class="individuals" data-prototype="{{ form_widget(client.aliveExternalUsers.vars.prototype)|e('html_attr') }}">
                           {% for ikey, individual in client.aliveExternalUsers %}
     
                               <li class="individual">
@@ -341,7 +343,7 @@
               <div class="element-data" {% if not form.vars.valid %}style="display: none;"{% endif %}>
                 <ul class="flex-center">
                   <li style="margin-right: 20px;position:relative">
-                    <img class="user-profile-picture" src="{{ asset(client_logo_url(client.vars.data)) }}" width="100px" height="100px" style="border-radius: 100%">
+                    <img class="user-profile-picture" src="{{ asset(global.clientlogo(client.vars.data)) }}" width="100px" height="100px" style="border-radius: 100%">
                   </li>
                   <li style="width: 100%;">
                     <ul class="flex-center-sb">
@@ -381,7 +383,7 @@
               
                 <div class="row">
                   <div class="col s12 m2" style="position:relative;">
-                    <img class="user-profile-picture" src="{{ asset(client_logo_url(client.vars.data)) }}" width="100px" height="100px" style="border-radius: 100%">
+                    <img class="user-profile-picture" src="{{ asset(global.clientlogo(client.vars.data)) }}" width="100px" height="100px" style="border-radius: 100%">
                     <a class="btn-floating add-photo-btn" style="position: absolute; top: 84%; left: 22%;"><i class="fa fa-pencil-alt"></i></a>
                   </div>
                   <div class="col s12 m9">
@@ -408,7 +410,8 @@
             
             <div class="client">
     
-              <ul class="individuals" style="margin-left: 30px;" data-prototype="{% filter escape %}{% include 'prototype_client_individual.twig' with { 'item': client.aliveExternalUsers.vars.prototype, 'client': client.vars.data } %}{% endfilter %}">
+              {#<ul class="individuals" style="margin-left: 30px;" data-prototype="{% filter escape %}{% include 'prototype_client_individual.twig' with { 'item': client.aliveExternalUsers.vars.prototype, 'client': client.vars.data } %}{% endfilter %}">#}
+              <ul class="individuals" data-prototype="{{ form_widget(client.aliveExternalUsers.vars.prototype)|e('html_attr') }}">
                 {% for ikey, individual in client.aliveExternalUsers %}
     
                   <li class="row element-data" {% if not form.vars.valid %} style="display: none;" {% endif %}>
@@ -663,9 +666,8 @@
     {% endblock %}
 
 {% block javascripts %}
-  <script src="{{ asset('js/login.js') }}"></script>
   <script src="{{ asset('js/dropify.min.js') }}"></script>
-  <script src="{{ asset('js/client_user_create.js') }}"></script>
+  <script src="{{ asset('js/client_update.js') }}"></script>
 
 
 {% endblock %}

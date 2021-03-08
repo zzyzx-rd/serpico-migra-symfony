@@ -6,15 +6,15 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-class TestController extends AbstractController
+class TestController extends MasterController
 {
 
     /**
-     * @Route("/test",name="test" )
+     * @Route("/test",name="test")
      * @return Response
      */
     public function test(){
-        return $this->render('test/test.html.twig');
+        return $this->redirectToRoute('home');
     }
     /**
      * @Route("/about", name="about")
@@ -35,12 +35,20 @@ class TestController extends AbstractController
         ]);
     }
     /**
-     * @Route("/terms", name="terms_conditions")
+     * @Route("/terms-and-conditions", name="terms_conditions")
      */
     public function terms_index()
     {
+
+        if(!isset($_COOKIE['cb'])){ 
+            setcookie('cb', 0); 
+            $validatedCookieBanner = 0;
+        } else {
+            $validatedCookieBanner = $_COOKIE['cb'];
+        }
+
         return $this->render('terms_conditions.html.twig', [
-            'controller_name' => 'TestController',
+            'validatedCookieBanner' => $validatedCookieBanner,
         ]);
     }
 }

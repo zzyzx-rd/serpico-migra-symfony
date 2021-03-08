@@ -1,0 +1,25 @@
+<div class="no-int-act-overlay {{isMobileView ? 'mr'}} flex-center">
+  <div class="no-int-act-bg"></div>
+  <div class="no-int-act-text {{isMobileView ? 'c-'}}flex-center">
+    <div class="closest-bwd-act"> 
+      {#<div class="bwd-act-text">#}
+        <i class="fa fa-caret-left"></i>
+        <div class="bwd-act-title" data-none="{{'activity_elements.no_int_act.no_backward_activity'|trans}}" data-default="{{'activity_elements.no_int_act.closest_activity'|trans}}"></div>
+        <div class="bwd-act-data"></div>
+      {#</div>#}
+    </div>
+    <div class="no-int-act-title-zone">
+      <h4 class="c-flex-center">
+        <i class="fa fa-chalkboard"></i>
+        <span>{{'activity_elements.no_int_act.main_msg'|trans}}</span>
+      </h4>
+    </div>
+    <div class="closest-fwd-act">
+      {#<div class="fwd-act-text">#}
+        <i class="fa fa-caret-right"></i>
+        <div class="fwd-act-title" data-none="{{'activity_elements.no_int_act.no_forward_activity'|trans}}" data-default="{{'activity_elements.no_int_act.closest_activity'|trans}}"></div>
+        <div class="fwd-act-data"></div>
+      {#</div>#}
+    </div>
+  </div>
+</div>

@@ -60,14 +60,15 @@ class RankingHistory extends DbObject
     public $seriesPopulation;
 
     /**
-     * @ORM\Column(name="rkh_createdBy", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="rankingHistoryInitiatives")
+     * @JoinColumn(name="rkh_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
-     * @ORM\Column(name="rkh_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="rkh_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="Activity", inversedBy="historicalRankings")
@@ -103,8 +104,6 @@ class RankingHistory extends DbObject
      * @param $rkh_freq
      * @param $rkh_value
      * @param $rkh_series_pop
-     * @param $rkh_createdBy
-     * @param $rkh_inserted
      * @param $activity
      * @param $stage
      * @param $criterion
@@ -119,14 +118,12 @@ class RankingHistory extends DbObject
         $rkh_freq = null,
         $rkh_value = null,
         $rkh_series_pop = null,
-        $rkh_createdBy = null,
-        $rkh_inserted = null,
         $activity = null,
         $stage = null,
         $criterion = null,
         $rhk_user_usr = null)
     {
-        parent::__construct($id, $rkh_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->wtype = $rkh_wtype;
         $this->absResult = $rkh_abs_result;
         $this->relResult = $rkh_rel_result;
@@ -134,7 +131,6 @@ class RankingHistory extends DbObject
         $this->rkh_freq = $rkh_freq;
         $this->value = $rkh_value;
         $this->seriesPopulation = $rkh_series_pop;
-        $this->inserted = $rkh_inserted;
         $this->activity = $activity;
         $this->stage = $stage;
         $this->criterion = $criterion;

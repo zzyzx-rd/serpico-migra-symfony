@@ -51,14 +51,15 @@ class Decision extends DbObject
     public $result;
 
     /**
-     * @ORM\Column(name="dec_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="decisionInitiatives")
+     * @JoinColumn(name="dec_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
-     * @ORM\Column(name="dec_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="dec_inserted", type="datetime", nullable=false, options={"default": "CURRENT_TIMESTAMP"})
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="dec_decided", type="datetime", nullable=true)
@@ -111,8 +112,6 @@ class Decision extends DbObject
      * @param $dec_anon
      * @param $validator
      * @param $dec_result
-     * @param $dec_createdBy
-     * @param $dec_inserted
      * @param $dec_decided
      * @param $dec_validated
      * @param $organization
@@ -129,8 +128,6 @@ class Decision extends DbObject
         int $decider = 0,
         $validator = 0,
         $dec_result = null,
-        $dec_createdBy = null,
-        $dec_inserted = null,
         $dec_decided = null,
         $dec_validated = null,
         Organization $organization = null,
@@ -140,13 +137,12 @@ class Decision extends DbObject
         $dec_anon = null
        )
     {
-        parent::__construct($id, $dec_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->type = $dec_type;
         $this->anonymousRequest = $req_anon;
         $this->anonymousDecision = $dec_anon;
         $this->validator = $validator;
         $this->result = $dec_result;
-        $this->inserted = $dec_inserted;
         $this->decided = $dec_decided;
         $this->validated = $dec_validated;
         $this->organization = $organization;

@@ -50,14 +50,15 @@ class WorkerExperience extends DbObject
     public $enddate;
 
     /**
-     * @ORM\Column(name="wex_createdBy", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="workerExperienceInitiatives")
+     * @JoinColumn(name="wex_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
-     * @ORM\Column(name="wex_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="wex_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="WorkerIndividual", inversedBy="experiences")
@@ -79,8 +80,6 @@ class WorkerExperience extends DbObject
      * @param $wex_location
      * @param $wex_startdate
      * @param $wex_enddate
-     * @param $wex_createdBy
-     * @param $wex_inserted
      * @param $individual
      * @param $firm
      */
@@ -91,18 +90,15 @@ class WorkerExperience extends DbObject
         $wex_location = null,
         $wex_startdate = null,
         $wex_enddate = null,
-        $wex_createdBy = null,
-        $wex_inserted = null,
         $individual = null,
         $firm = null)
     {
-        parent::__construct($id, $wex_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->active = $wex_active;
         $this->position = $wex_position;
         $this->location = $wex_location;
         $this->startdate = $wex_startdate;
         $this->enddate = $wex_enddate;
-        $this->inserted = $wex_inserted;
         $this->individual = $individual;
         $this->firm = $firm;
     }

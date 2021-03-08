@@ -1,0 +1,49 @@
+{% set mailTruncVal = 30 %}
+{% set hasNoEmail = not(externalUser and externalUser.user.email) %}
+<li class="individual" data-id="{{ externalUser ? externalUser.id : 0 }}">
+    <ul>
+        <li class="row element-data collection-item">
+            <ul class="flex-center-sb">
+                <li>
+                    <ul class="flex-center">
+                        <li class="picture-zone">
+                            <img class="user-picture" src="{{ hasNoEmail ? asset('lib/img/user/virtual-user.png') : asset(global.userpicture(externalUser.user)) }}">
+                        </li>
+                        <li>
+                            <div class="flex-center">
+                                <div style="font-size:17px" class="user-ext-fullname {{ hasNoEmail ? 'grey-text text-lighten-1' }}">
+                                    {{externalUser ? externalUser.fullname : ''}}
+                                </div>
+                                <div style="font-size:17px" class="m-left user-ext-email">
+                                    
+                                    {% if externalUser %}
+                                        {% if externalUser.user.email and externalUser.user.lastConnected is not null %}
+                                            <i class="fa fa-check-circle dd-text is-active tooltipped" data-tooltip="{{'client_update.external_user.active_badge_msg'|trans}}"></i>
+                                        {% else %}
+                                            {% if not externalUser.user.email %}
+                                                <div class="inactive-user-badge flex white-text tooltipped" data-tooltip="{{'client_update.external_user.inactive_virtual_msg'|trans}}">
+                                                    <span>V</span>
+                                                </div>
+                                            {% else %}
+                                                <div class="inactive-user-badge flex white-text tooltipped" data-tooltip="{{'client_update.external_user.inactive_unconnected_msg'|trans}}">
+                                                    <i class="fa fa-plug"></i>
+                                                </div>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <small class="user-ext-position-name {{ externalUser and externalUser.positionName ? 'has-position' : 'grey-text text-lighten-1' }}" data-wo="{{'create_client.unknown_position'|trans}}">{{externalUser and externalUser.positionName ? externalUser.positionName : 'create_client.unknown_position'|trans }}</small>
+                        </li>
+                    </ul>
+                </li>
+                <li class="user-action-btns" style="visibility:hidden">
+                    {#<a href="#deleteExternalUser" class="waves-effect waves-light accent-4 btn-flat modal-trigger" data-eid="{{ individual.vars.data.id }}" style="margin-left: auto;"><i class="fa fa-times"></i></a>#}            
+                    <a class="update-user-btn btn-flat">
+                        <i class="mi create"></i>
+                    </a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</li>

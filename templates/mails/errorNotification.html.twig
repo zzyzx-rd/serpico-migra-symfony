@@ -1,0 +1,81 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title> 
+        {% block subject %}
+            {{'error - user err_msg'|replace({
+                'error'     : 'mails.errorNotification.server_error'|trans,
+                'user'      :  user ? user.fullname ~ ' - ' : '',
+                'err_msg'   :  message|length > 100 ? message|slice(0,100) ~ '...' : message
+            })}}
+        {% endblock %}
+        </title>
+        <style type="text/css">
+            body {margin: 0; padding: 0; min-width: 100%!important;}
+            .content {width: 100%; max-width: 800px;}
+            .strong {font-weight:700}
+            .dd-text {color: #55318e}
+        </style>
+    </head>
+
+    {% block body %}
+    <body bgcolor="white">
+        <table width="100%" bgcolor="white" border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td>
+                    <table class="content" align="left" cellpadding="0" cellspacing="0" border="0">
+                        <td>
+                            <p>
+                                <span class="strong dd-text">{{'mails.errorNotification.method'|trans}}</span>
+                                <span>{{' : ' ~ method }}</span>
+                            </p>
+                            <p>
+                                <span class="strong dd-text">{{'mails.errorNotification.requestURI'|trans}}</span>
+                                <span>{{' : ' ~ requestURI }}</span>
+                            </p>
+                            <p>
+                                <span class="strong dd-text">{{'mails.errorNotification.route'|trans}}</span>
+                                <span>{{' : ' ~ route ? 'none'|trans }}</span>
+                            </p>
+                            <p>
+                                <span class="strong dd-text">{{'mails.errorNotification.referer'|trans}}</span>
+                                <span>{{' : ' ~ referer ? 'none'|trans }}</span>
+                            </p>
+                            <p>
+                                <span class="strong dd-text">{{'mails.errorNotification.locale'|trans}}</span>
+                                <span>{{' : ' ~ locale }}</span>
+                            </p>
+                            <p>
+                                <span class="strong dd-text">{{'mails.errorNotification.agent'|trans}}</span>
+                                <span>{{' : ' ~ user_agent }}</span>
+                            </p>
+                            <p>
+                                <span class="strong dd-text">{{'mails.errorNotification.file'|trans}}</span>
+                                <span>{{' : ' ~ file }}</span>
+                            </p>
+                            <p>
+                                <span class="strong dd-text">{{'mails.errorNotification.line'|trans}}</span>
+                                <span>{{' : ' ~ line }}</span>
+                            </p>
+                            <p>
+                                <span class="strong dd-text">{{'mails.errorNotification.message'|trans}}</span>
+                                <span>{{' : ' ~ message }}</span>
+                            </p>
+                        </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <p>{% trans %}mails.signature_team{% endtrans %}</p>
+                                <img src="cid:logo_img" alt="logo {{ company_name }}" style="width: {{ logo_width_px }}px">
+                                <p style="margin:0;"><strong>{{ 'mails.dealdrive_motto'|trans }}</strong><br>{{ address }} | {{ zipcode_city }}</p>
+                                {% if company_name == 'Serpico' %}<p>{{ phone }}</p>{% endif %}
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
+    {% endblock %}
+</html>

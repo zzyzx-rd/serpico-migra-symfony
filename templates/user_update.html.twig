@@ -10,209 +10,211 @@
     {% trans %}user_update.mobile_header_title{% endtrans %}
 {% endblock %}
 
+{% form_theme form _self %}
+
+{% block form_label %}
+    {{ label|raw }}
+{% endblock %}
+
+{% set user = form %}
+{% set userData = form.vars.data %}
+
+{% set canModify = true %}
+
 {% block css %}
     <script type="text/javascript">
-    {% if app.request_stack.currentrequest.attributes.get('orgId') != "" %}
-        {% set orgId = app.request_stack.currentrequest.attributes.get('orgId') %}
-        {% if orgId == user.orgId %}
-            var deleteUrl="{{ url('rootAjaxUserDelete',{'orgId' : orgId, 'usrId' : user.id}) }}";
-        {% else %}
-            var deleteUrl="{{ url('rootAjaxClientUserDelete',{'orgId' : orgId, 'usrId' : user.id}) }}";
-        {% endif %}
-    {% else %}
-        {% if currentuser.orgId == user.orgId %}
-            var deleteUrl="{{ url('ajaxUserDelete',{'usrId' : user.id}) }}";
-        {% else %}
-            var deleteUrl="{{ url('ajaxClientUserDelete',{'usrId' : user.id}) }}";
-        {% endif %}
-    {% endif %}
-        var durl = "{{ url('addDepartment',{'orgId': orgId}) }}";
-        var rpurl = "{{ url('retrievePosFromDpt',{'dptId': 0}) }}";
-        var purl = "{{ url('addPosition',{'dptId' : 0, 'orgId': orgId}) }}";
-        var wurl = "{{ url('addWeight',{'posId': 0,'usrId':0, 'orgId' : orgId}) }}";
-        var rwurl = "{{ url('retrieveWgtFromPos',{'posId': 0}) }}";
+        var creationPage = "{{ creationPage }}";
+        var posTitleMsg = "{% trans %}create_position.title_msg{% endtrans %}";
+        var dptTitleMsg = "{% trans %}create_department.title_msg{% endtrans %}";
+        var titTitleMsg = "{% trans %}create_title.title_msg{% endtrans %}";
+        var wgtTitleMsg = "{% trans %}create_weight.title_msg{% endtrans %}";
+        var posContentMsg = "{% trans %}create_position.content_msg{% endtrans %}";
+        var dptContentMsg = "{% trans %}create_department.content_msg{% endtrans %}";
+        var titContentMsg = "{% trans %}create_title.content_msg{% endtrans %}";
+        var wgtContentMsg = "{% trans %}create_weight.content_msg{% endtrans %}";
+        var posSuccessMsg = "{% trans %}create_position.success_msg{% endtrans %}";
+        var dptSuccessMsg = "{% trans %}create_department.success_msg{% endtrans %}";
+        var titSuccessMsg = "{% trans %}create_title.success_msg{% endtrans %}";
+        var wgtSuccessMsg = "{% trans %}create_weight.success_msg{% endtrans %}";
+        var wgtLabel = "{% trans %}create_user.weight_label{% endtrans %}";
+        var nonWgtLabel = "{% trans %}create_user.non_weight_label{% endtrans %}";
+        var eurl = "{{ url('validateOrganizationElement',{orgId: orgId, entity: 'department', elmtId : 0 }) }}";
+        const usersUrl = "{{ url('manageUsers') }}";
     </script>
+
+    <style>
+    
+        #main-header{
+            --actions-width: 200px;
+            --padding: 16px;
+            display: flex;
+            justify-content: center;
+            padding: 1em;
+            margin-bottom: 2em;
+            position: relative;
+        }
+
+        header .page-title{
+            display: inline-block;
+            text-align: center;
+        }
+
+        footer{
+            padding-bottom: 40px;
+        }
+
+        .user-title {
+            padding: 0 0.75rem;
+        }
+
+        .page-title{
+            font-size: 30px;
+        }
+
+        .back-btn{
+            position: absolute;
+            left: 40px;
+        }
+
+        .profile{
+            width: 90%;
+            margin: 0 auto;
+        }
+
+        .user-btn {
+            background-color: aliceblue;
+            color: black;
+        }
+        
+        .user-credentials{
+          display: flex;
+          position: relative;
+        }
+
+        .user-modify{
+          position: absolute;
+          right: 0;
+          top: 10%;
+        }
+
+        .user-info{
+            margin-left: 3em;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .user-dpt{
+            display: flex;
+            margin-left: auto;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .firm-logo{
+            height: 15px;
+        }
+
+        .user-s-info{
+            padding: 100px 0;
+        }
+
+        .user-submit{
+          display: inline-block;
+        }
+
+        .user-action-buttons{
+          margin-left: auto;
+          padding: 0 0.75rem;
+        }
+
+    </style>
 {% endblock %}
 
 {% block content %}
 
+    <main>
 
-    {% if modifyIntern == true %}
+        <header id="main-header" class="no-margin">
+            <a class="waves-effect waves-green btn back-btn" href="{{ url('manageUsers')}}">{{ 'team.go_back_users'|trans }}</a>
+            <span class="page-title">{{ creationPage ? 'create_user.page_title'|trans : (canModify and currentuser != form.vars.data ? 'user_update.page_title'|trans : 'Mon profil'|trans) }}</span>
+        </header>
 
-        <div class="container user-update">
-            {{ form_start(form) }}
-            <div class="row">
-                <div class="input-field col s12 m6">
-                    {{ form_row(form.firstname) }}
-                </div>
-                <div class="input-field col s12 m6">
-                    {{ form_row(form.lastname) }}
-                </div>
-            </div>
-            <div class="row">
-                <div class="col s12 m4">
-                    {{ form_row(form.email) }}
-                </div>
-                <div class="col s12 m4">
-                    {{ form_row(form.dptId) }}
-                    <a href="#addElement" class="modal-trigger" {#data-did="{{form.vars.data.dptId.id}}"#}><i class="fa fa-plus"></i> {% trans %}create_department.open_modal_msg{% endtrans %}</a>
-                </div>
-                <div class="col s12 m4">
-                    {{ form_row(form.posId) }}
-                    <a href="#addElement" class="modal-trigger" {#data-pid="{{form.vars.data.posId.id}}"#}><i class="fa fa-plus"></i> {% trans %}create_position.open_modal_msg{% endtrans %}</a>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col s12 m8">
-                    <div>
-                        {{ form_label(form.role) }}
-                        <i class="far fa-question-circle tooltipped" data-position="top" data-delay="50" data-tooltip="{% trans %}tooltip.user.userRole{% endtrans %}" onload="this.tooltip()"></i>
-                    </div>
-                    {{ form_widget(form.role) }}
-                </div>
-                <div class="col s12 m4">
-                  {{ form_row(form.titId) }}
-                  <a href="#addElement" class="modal-trigger" {#data-tid="{{form.vars.data.titId.id}}"#}><i class="fa fa-plus"></i> {% trans %}create_title.open_modal_msg{% endtrans %}</a>
-                </div>
-            </div>
-            <div class="row internal">
-                <div class="col s12 m6">
-                    {{ form_row(form.wgtId) }}
-                    <a href="#addElement" class="modal-trigger"><i class="fa fa-plus"></i> {% trans %}create_weight.open_modal_msg{% endtrans %}</a>
+        <div class="profile">
+            {% include "prototype/user_item.html.twig" with { item: form, enabledCreatingUser : false, key: 0 } %}        
+      </div>
+    </main>
 
-                </div>
-                <div class="col s12 m6">
-                    {{ form_widget(form.internal) }}
-                    {{ form_label(form.internal) }}
-                </div>
-            </div>
-            <div class="row">
-                <div class="col s12 m12">
-                    {{ form_row(form.superior) }}
-                </div>
-            </div>
-
-            {% if enabledCreatingUser is defined and enabledCreatingUser == true %}
-                <div class="row">
-                    <div class="col s12 m12">
-                        {{ form_widget(form.enabledCreatingUser) }}
-                        {{ form_label(form.enabledCreatingUser) }}
-                    </div>
-                </div>
-            {% endif %}
-            <div class="row action-buttons">
-                <div class="button-field">
-                    {{ form_row(form.submit) }}
-                </div>
-                <div class="button-field">
-                    <button class="waves-effect waves-light btn-large red accent-4 modal-trigger" href="#deleteModal">{% trans %}user_update.delete_button{% endtrans %}</button>
-                </div>
-            </div>
-            {{ form_rest(form) }}
-            {{ form_end(form) }}
-        </div>
-
-    {% else %}
-
-        <div class="container user-update">
-            {{ form_start(form) }}
-            <div class="row">
-                <div class="input-field col s12 m6">
-                    {{ form_row(form.firstname) }}
-                </div>
-                <div class="input-field col s12 m6">
-                    {{ form_row(form.lastname) }}
-                </div>
-            </div>
-            <div class="row">
-                <div class="col s12 m6">
-                    {{ form_row(form.type) }}
-                </div>
-                <div class="col s12 m6">
-                    {{ form_row(form.orgId) }}
-                    <a href="#addClient" class="add-external-org-group modal-trigger"><i class="fa fa-plus"></i> {% trans %}create_client.create_organization.open_modal_msg{% endtrans %}</a>
-                </div>
-            </div>
-            <div class="row">
-                <div class="input-field col s12 m12">
-                    {{ form_row(form.email) }}
-                </div>
-            </div>
-            <div class="row">
-                <div class="input-field col s12 m6">
-                    {{ form_row(form.positionName) }}
-                </div>
-                <div class="input-field col s12 m6">
-                    {{ form_row(form.weightValue) }}
-                </div>
-            </div>
-            <div class="row action-buttons">
-                <div class="button-field">
-                    {{ form_row(form.submit) }}
-                </div>
-                <div class="button-field">
-                    <button class="waves-effect waves-light btn-large red accent-4 modal-trigger" href="#deleteModal">{% trans %}user_update.delete_button{% endtrans %}</button>
-                </div>
-            </div>
-            {{ form_rest(form) }}
-            {{ form_end(form) }}
-        </div>
-
-        <div id="addClient" class="modal">
-            {{ form_start(clientForm) }}
-            <div class="modal-content">
-                <h5>{% trans %}create_client.create_organization.modal_title_msg{% endtrans %}</h5>
-                <p>{% trans %}create_client.create_organization.modal_main_msg{% endtrans %}</p>
-                {{ form_label(clientForm.commname) }}
-                {{ form_widget(clientForm.commname) }}
-                {{ form_errors(clientForm.commname) }}
-            </div>
-
-            <div class="modal-footer action-buttons">
-                <div class="button-field">
-                    <a class=" modal-action modal-close submit-button waves-effect waves-red red btn-large">{% trans %}activities.create.delegate_back_btn_msg{% endtrans %}</a>
-                </div>
-                <div class="button-field">
-                    {{ form_row(clientForm.submit) }}
-                </div>
-            </div>
-            {{ form_rest(clientForm) }}
-            {{ form_end(clientForm) }}
-        </div>
-
-        <div id="addClientSuccess" class="modal">
-            <div class="modal-content">
-                <p>{% trans %}create_client.create_organization.success_msg{% endtrans %}</p>
-            </div>
-            <div class="modal-footer">
-                <div class="button-field">
-                    <a class=" modal-action modal-close waves-effect btn btn-large">Ok</a>
-                </div>
-            </div>
-        </div>
-
-    {% endif %}
-
-    <div id="deleteModal" class="modal">
+    <div id="addElement" class="modal">
+        {{ form_start(organizationElementForm) }}
         <div class="modal-content">
-            <h4>{% trans %}user_update.delete_modal.title{% endtrans %}</h4>
-            <p>{% trans %}user_update.delete_modal.content_1{% endtrans %} {{ user.firstname }} {{ user.lastname }}{% if currentuser.orgId == user.orgId or currentuser.role == 4 %} {% trans %}user_update.delete_modal.content_2{% endtrans %}{% else %} {% trans %}user_update.delete_modal.content_ext_user{% endtrans %}{% endif %}</p>
+            <h5></h5>
+            <p></p>
+            {{ form_label(organizationElementForm.name) }}
+            {{ form_widget(organizationElementForm.name) }}
+            {{ form_errors(organizationElementForm.name) }}
         </div>
-        <div class="modal-footer">
-            <a class=" modal-action modal-close submit-button waves-effect waves-green btn-large delete-button">{% trans %}user_update.delete_modal.confirm{% endtrans %}</a>
-            <a class=" modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+
+        <div class="modal-footer action-buttons">
+            <div class="button-field">
+              <a class=" modal-action modal-close submit-button waves-effect waves-red red btn">{% trans %}activities.create.delegate_back_btn_msg{% endtrans %}</a>
+            </div>
+            <div class="button-field">
+                {{ form_row(organizationElementForm.submit) }}
+            </div>
+            {{ form_rest(organizationElementForm) }}
+            {{ form_end(organizationElementForm) }}
         </div>
     </div>
+
+    <div id="addElementSuccess" class="modal">
+      <div class="modal-content">
+          <p></p>
+      </div>
+      <div class="modal-footer">
+          <div class="button-field">
+          <a class=" modal-action modal-close waves-effect btn btn-large">Ok</a>
+          </div>
+      </div>
+    </div>
+
+    <div id="deleteModal" class="modal">
+      <div class="modal-content">
+          <h4>{% trans %}user_update.delete_modal.title{% endtrans %}</h4>
+          <p>{% trans %}user_update.delete_modal.content_1{% endtrans %} {{ userData.firstname }} {{ userData.lastname }}{% if currentuser.organization == userData.organization or currentuser.role == 4 %} {% trans %}user_update.delete_modal.content_2{% endtrans %}{% else %} {% trans %}user_update.delete_modal.content_ext_user{% endtrans %}{% endif %}</p>
+      </div>
+      <div class="modal-footer">
+          <a class=" modal-action modal-close submit-button waves-effect waves-green btn-large delete-button">{% trans %}user_update.delete_modal.confirm{% endtrans %}</a>
+          <a class=" modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+      </div>
+    </div>
+
+    {% if not form.vars.valid %}
+        <div id="errors" class="modal">
+            <div class="modal-content">
+                <h5>{{ 'activities.modal_error_creation_title'|trans }}</h5>
+                {% for child in form.children %}
+                    {% if child.vars.valid is defined and not child.vars.valid %}
+                    <div style="margin-left: 20px;">{{ form_label(child) }}<span style="display:inline-block;width: 30%;"></span> {{ form_errors(child) }}</div>
+                    {% endif %}
+                {% endfor %}
+
+            </div>
+
+            <div class="modal-footer">
+                <a class=" modal-action modal-close waves-effect waves-green btn-large notifyModalClose">Ok</a>
+            </div>
+        </div>
+	{% endif %}
+    
 {% endblock %}
 
 {% block javascripts %}
-    <script src="{{ asset('js/user_modify.js') }}"></script>
+    <script src="{{ asset('js/user_create.js') }}"></script>
     <script>
         $(function(){
-            $('select[name*="posId"]').val("{{ user.posId }}");
-            $('select[name*="dptId"]').val("{{ user.dptId }}");
-            $('select[name*="titId"]').val("{{ user.titId }}");
-            $('select[name*="wgtId"]').val("{{ user.wgtId }}");
+            $('select').material_select();
         })
     </script>
 {% endblock %}

@@ -38,7 +38,7 @@
         <input hidden id="{{ targetsId.id }}" value="{{ targetsId.cName }}" class="targetsId">
         {% endfor %}
         {{ form_start(form) }}
-        <ul class="targets" data-prototype="{% filter escape %}{% include 'prototype_element_target.twig' with { 'item': form.targets.vars.prototype } %}{% endfilter %}">
+        <ul class="targets" data-prototype="{% include 'prototype_element_target.twig' with { 'item': form.targets.vars.prototype } %}">
             {% for key, target in form.targets %}
                 <li class="target">
                     <ul class="flex-center row" style="justify-content: space-between;">
@@ -98,6 +98,5 @@
 {% endblock %}
 
 {% block javascripts %}
-    <script src="{{ asset('js/login.js') }}"></script>
     <script src="{{ asset('js/element_targets.js') }}"></script>
 {% endblock %}

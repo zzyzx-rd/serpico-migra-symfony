@@ -1,0 +1,84 @@
+{% if event is defined %}
+
+  {% set eventType = event.eventType %}
+  {% set eventGroup = eventType.eventGroup %}
+
+  <div style="width:350px;">
+    <ul class="flex-center t-event-info">
+      <li>
+        {% set eventIcon = eventType.icon %}
+        <span class="evg evg-{{eventGroup.eventGroupName.id}} evg-text-shadow">{{ currentuser ? eventGroupRepo.dTrans(eventGroup,global.request.locale,currentuser.organization) }}</span>
+        <span class="sm-left sm-right">:</span>
+        <i class="{{ eventIcon.type == 'fa' ? 'fa fa-' ~ eventIcon.name : 'material-icons' }}">{{ eventIcon.type == 'm' ? eventIcon.name }}</i>
+        <span class="evt">{{ currentuser ? eventTypeRepo.dTrans(eventType,global.request.locale,currentuser.organization) }}</span>
+      </li>
+      <li class="t-event-dates">
+        <ul class="flex-center">
+          <ul class="flex-center m-right">
+            <i class="fa fa-calendar sm-right"></i>
+            <span class="t-od">{{ event.onsetDate|format_datetime('short', 'none', pattern='dd/MM') }}</span>
+            {% if event.expResDate %}
+              <i class="fa fa-calendar-check"></i>
+              <span class="t-rd">{{ event.expResDate|format_datetime('short', 'none', pattern='dd/MM') }}</span>
+            {% endif %}
+          </ul>
+          {#
+          <ul class="flex-center">
+            <i class="material-icons">send</i>
+            <span>{{ stage.gstartdate|format_datetime('short', 'none', pattern='dd/MM') }} - {{ stage.genddate|format_datetime('short', 'none', pattern='dd/MM') }}</span>
+          </ul>
+          #}
+        </ul>
+      </li>
+    </ul>
+
+    {% if event.documents|length %}
+      <div class="event-documents"  style="text-align: left;">
+          <i class="fa fa-file-alt"></i>
+          <span>{{ event.documents|length ~ ' ' ~ 'activity_elements.events.tooltip.shared_document'|trans ~ (event.documents|length > 1 ? 's' : '')}}</span>
+      </div>
+    {% endif %}
+  
+    {% if event.comments|length %}
+    <div class="event-comments" style="text-align: left">
+        <i class="fa fa-comment"></i>
+        <span>{{ event.comments|length ~ ' ' ~ 'activity_elements.events.tooltip.comment'|trans ~ (event.comments|length > 1 ? 's' : '')}}</span>
+    </div>
+    {% endif %}
+
+  </div>
+
+{% else %}
+
+  <div style="width:350px;" data-comment="{{ 'activity_elements.events.tooltip.comment'|trans }}" data-document="{{ 'activity_elements.events.tooltip.shared_document'|trans}}">
+    <ul class="flex-center t-event-info">
+      <li>
+        <span class="evg evg-text-shadow"></span>
+        <span class="sm-left sm-right">:</span>
+        <i class=""></i>
+        <span class="evt"></span>
+      </li>
+      <li class="t-event-dates">
+        <ul class="flex-center">
+          <ul class="flex-center m-right">
+            <i class="fa fa-calendar sm-right"></i>
+            <span class="t-od"></span>
+            <i class="fa fa-calendar-check"></i>
+            <span class="t-rd"></span>
+          </ul>
+        </ul>
+      </li>
+    </ul>
+
+    <div class="event-documents" style="text-align: left;">
+        <i class="fa fa-file-alt"></i>
+        <span></span>
+    </div>
+  
+    <div class="event-comments" style="text-align: left">      
+        <i class="fa fa-comment"></i>
+        <span></span>
+    </div>
+  </div>
+
+{% endif %}

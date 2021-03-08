@@ -1,135 +1,105 @@
 {% extends "layout.html.twig" %}
 
 {% block title %}
-Signup
+  {{'signup.title'|trans}}
 {% endblock %}
 
 {% block pagename %}
-Signup
+  {{'signup.title'|trans}}
+{% endblock %}
+
+{% block mobile_title %}
+  {{'signup.title'|trans}}
 {% endblock %}
 
 {% block css %}
-
-  <style>
-      .old-times:before {
-          content: "";
-          background-image: url(/lib/img/place_paris.png);
-          position: absolute;
-          width: 100%;
-          height: 100%;
-          opacity: 0.25;
-          background-repeat: no-repeat;
-          background-size: cover;
-          z-index: -1;
-      }
-
-      .old-times {
-          position: relative;
-      }
-
-      .content {
-        text-align: center;
-        margin-bottom: auto;
-        margin-top: auto;
-      }
-
-      #signup {
-        width: 40%;
-        margin:50px auto;
-      }
-
-
-      #signup input {
-          background-color: #ffffffbd;
-      }
-
-      #signup label{
-          color: black;
-      }
-
-  </style>
-
   <script type="text/javascript">
     var homeUrl = "{{ url('login') }}";
   </script>
+  <style>
+  
+  .waiting-video-container{
+        display: inline-block;
+        position: relative;
+        margin: 0 auto;
+        text-align: left;
+  }
+  video{
+    width: 100%;
+    height: auto;
+    object-fit:none;
+  }
+
+  .waiting-card{
+    background-color:#d7eae3;
+  }
+
+  .waiting-msg{
+    padding: 0 2em;
+    margin:auto;
+    text-align:center;
+    height:100px;
+  }
+  </style>
+
 {% endblock %}
 
 {% block content %}
 
-    <div class="old-times">
-      <div class="content">
-        <p>{% trans %}signup.description{% endtrans %}</p>
-        {{ form_start(form, {'attr': {'id': 'signup'}}) }}
-        <div class="row">
+    {% include "components/background_grid.html.twig" %}
+    
+    <div class="small-container">
+        <div class="row" style="text-align: center; align-items: center">
+            <div class="col s12"><img src="{{ absolute_url(asset('lib/img/logo_dd_p_l.png')) }}" width="250px"></div>
+        </div>
 
-            <div class="input-field">
-                {{ form_label(form.email) }}
-                {{ form_widget(form.email, {'attr': {'class': 'no-margin'}}) }}
-                <small>
-                  {{ form_errors(form.email) }}
-                </small>
-            </div>
-            <div class="input-field">
-              {{ form_label(form.username) }}
-              {{ form_widget(form.username, {'attr': {'class': 'no-margin'}}) }}
-              <small>
-                {{ form_errors(form.username) }}
-              </small>
-            </div>
-            <div class="input-field">
-              {{ form_label(form.nickname) }}
-              {{ form_widget(form.nickname, {'attr': {'class': 'no-margin'}}) }}
-              <small>
-                {{ form_errors(form.nickname) }}
-              </small>
-            </div>
-                 <div class="input-field">
-              {{ form_label(form.firstname) }}
-              {{ form_widget(form.firstname, {'attr': {'class': 'no-margin'}}) }}
-              <small>
-                {{ form_errors(form.firstname) }}
-              </small>
-            </div>
-                 <div class="input-field">
-              {{ form_label(form.lastname) }}
-              {{ form_widget(form.lastname, {'attr': {'class': 'no-margin'}}) }}
-              <small>
-                {{ form_errors(form.lastname) }}
-              </small>
-            </div>
-            <ul class="input-field" style="position: relative;">
-                <li style="position: absolute;left: -10%; top:20%">
-                  <div class="eye">
-                    <i class="fa fa-2x fa-eye"></i>
-                  </div>
-                </li>
-                <li>
-                  <div class="input-field">
-                      {{ form_label(form.password) }}
-                      {{ form_widget(form.password, {'attr': {'class': 'no-margin'}}) }}
-                      <small>
-                        {{ form_errors(form.password) }}
-                      </small>
-                  </div>
-                </li>
-            </ul>
+        {% if date('now') > date('2021-02-28') %}
+        
+        <div class="card-panel purple lighten-5">
+
+          
+            <h5>{{'header.register.description'|trans}}</h5>
+              {#
+              <div class="flex-center-sb user-fullname">
+                <div class="input-field">
+                    {{ form_row(form.firstname) }}
+                </div>
+                <div class="input-field">
+                    {{ form_row(form.lastname) }}
+                </div>
+              </div>
+              #}
+              {{ form_start(form) }}
+              <div class="input-field">
+                {{ form_row(form.username) }}
+              </div>
+              <div class="input-field">
+                  {{ form_row(form.email) }}
+              </div>
+              <div class="row action-buttons">
+                <div class="button-field">
+                    {{ form_row(form.submit) }}
+                </div>
+              </div>
+              {{ form_rest(form) }}
+              {{ form_end(form) }}
         </div>
-        <div class="row">
-          <div class="button-field col s10" style="margin-bottom: 50px;">
-            {{ form_row(form.submit) }}
+          
+          {% else %}
+          <div class="card waiting-card">
+         
+            <div class="waiting-msg flex-center">{{'signup.waiting_msg'|trans|raw}}</div>
+            
+            <div class="waiting-video-container">
+              <video playsinline="" muted="" autoplay="" loop="" src="{{ asset('lib/videos/dial-face.mp4') }}" class="attachment-video" data-silent="true">
+              </video>
+            </div>
+
+          
           </div>
-        </div>
-        {{ form_rest(form) }}
-        {{ form_end(form) }}
-      </div>
-    </div>
-    <div id="definePwdSuccess" class="modal">
-      <div class="modal-content">
-        <p>{% trans %}signup.success_modal.msg{% endtrans %}</p>
-      </div>
-      <div class="modal-footer">
-        <button class="btn waves-effect waves-light modal-close">{% trans %}signup.success_modal.button_msg{% endtrans %}</button>
-      </div>
+
+          {% endif %}
+
     </div>
 
 {% endblock %}

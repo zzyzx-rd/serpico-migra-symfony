@@ -1,28 +1,41 @@
-
-
 {% extends "layout.html.twig" %}
 
 {% block title %}
-    {% trans %}worker_search.page_title{% endtrans %}
+    {{'parameters'|trans}}
 {% endblock %}
 
 {% block pagename %}
-    {% trans %}worker_search.mobile_header_title{% endtrans %}
+    {{'parameters'|trans}}
+{% endblock %}
+
+{% block mobile_title %}
+    {{'parameters'|trans}}
 {% endblock %}
 
 {% block css %}
     <script>
-            var surl = "{{ path('dynamicSearchParentFirm')}}";
-            var gurl = "{{ path('getFirmFromId',{'wfiId' : 0})}}";
-            var smurl = "{{ path('sendProspectMail',{'winId' : 0})}}";
+
+        {#
+        var surl = "{{ path('dynamicSearchParentFirm')}}";
+        var gurl = "{{ path('getFirmFromId',{'wfiId' : 0})}}";
+        var smurl = "{{ path('sendProspectMail',{'winId' : 0})}}";
         {% if workerIndividual is defined %}
             var murl = "{{ url('validateWorkerEmailFromSelfPage', {'wiId' : workerIndividual.id, 'firstname': 'a', 'lastname': 'b', 'male' : 1, 'wiEmail' : 'a'}) }}";
         {% else %}
             var murl = "{{ url('validateWorkerEmailFromSelfPage', {'wiId' : 0, 'firstname': 'a', 'lastname': 'b', 'male' : 1, 'wiEmail' : 'a'}) }}";
         {% endif %}
+        #}
 
+        var suurl = "{{ path('saveUserSelfModifications') }}";
+        var upurl = "{{ path('updatePicture',{element:'user'}) }}";
+        var pmurl = "{{ path('passwordSelfModification') }}"
+        var surl = "{{path('dynamicSearch')}}";
+        var suourl = "{{ url('addAccount') }}";
+        var daurl = "{{ url('deleteAccount') }}";
+        var csurl = "{{ url('manageSubscriptions') }}";
     </script>
     <style>
+
         .firm-option-logo{
             float: left!important;
         }
@@ -48,60 +61,342 @@
         .select-wrapper input, .select-wrapper .caret{
             display: none!important;
         }
+
+        .title-header{
+            padding: 20px 0;
+            width: 85%;
+            margin-left:auto;
+            margin-right:auto;
+        }
+
+        .page-title{
+            display: inline-block;
+            margin: auto;
+        }
+
+        .field-name{
+            flex: 0 0 25%;
+        }
+
+        .modify-btn, .add-account-btn{
+            border: 1px solid #55318e;
+        }
+
+        .cancel-btn{
+            border: 1px solid orange;
+        }
+
+        .delete-account-btn{
+            border: 1px dashed orange;
+        }
+
+        .account-action-zone > .btn-flat{
+            line-height: 24px;
+            height: 24px;
+            padding: 0 1rem;
+        }
+
+        .return-btn{
+            color:black;
+            position:absolute;
+        }
+
+        .modify-btn i, .account-action-zone i{
+            font-size: 15px;
+        }
+
+        .modify-btn:hover{
+            background-color: #55318e;
+            color: #ff9300;
+            transition: 0.3s ease-out;
+            border: 1px solid #55318e;
+        }
+
+        .save-btn:hover{
+            color: #ff9300;
+        }
+
+        .element-input{
+            display:none;
+        }
+
+        .user-fields > * {
+            min-height:46px;
+        }
+
+        .user-email{
+            min-width: 300px;
+        }
+
+        .m-pwd-btn{
+            background-color: aliceblue;
+            height: 30px;
+            line-height: 30px;
+            color: black;
+        }
+
+        .save-btn, .modify-btn{
+            text-align: center;
+        }
+
+        .add-photo-btn{
+            position: absolute; 
+            top: 84%; 
+            left: 3.5rem;
+        }
+
+        .user-picture{
+            border-radius: 100%;
+            border:1px solid purple;
+        }
+
+        #addAccount{
+            overflow-y: inherit;
+        }
+
+        .firm-field-zone .select-dropdown{
+            min-width:75%;
+        }
+
+        .part-feeded{
+            text-indent: 4rem;
+        }
+
+        .firm-accounts{
+            padding-top:1rem;
+        }
+
+        .firm-accounts li{
+            padding:0.5rem 0;
+        }
+
+        .nb-activites-info{
+            background-color: aliceblue;
+            cursor: initial;
+        }
+
+        .user-master-btn{
+            background-color: #f5eeff;
+        }
+
+        section:not(:first-of-type){
+            border-top: 1px solid purple;
+        }
+
+        main{
+            display:flex;
+            flex-direction:column;
+            width:90%;
+            margin-left:auto!important;
+            margin-right:auto!important;
+            margin-top: 2rem!important;
+        }
+
+        .user-picture{
+            width: 120px;
+            height: 120px;
+        }
+
+        @media screen and (max-width: 660px) {
+
+            .modify-credentials-btn span, .add-account-btn span, .page-title, .account-prefix, .user-master-name{
+                display:none;
+            }
+
+            .title-header{
+                padding:35px 0;
+                justify-content:center;
+            }
+
+            .cancel-btn{
+                display:none;
+            }
+
+            .user-picture-zone{
+                text-align: center;
+            }
+
+            .user-fields{
+                margin-top:2rem;
+            }
+
+            .add-photo-btn{
+
+                left:45%;
+            }
+
+
+        }
+
+        @media screen and (min-width: 660px) {
+
+            .save-btn, .modify-btn{
+                width:160px;
+            }
+
+        }
+
+
     
     </style>
 {% endblock %}
 
 {% block content %}
+
+{% set indivAccount = currentuser.userGlobal.userAccounts|filter(a => a.organization.type == 'C')|first %}
+{% include "components/background_grid.html.twig" %}
+
     {% set now = "now"|date("Y/m/d") %}
-        <div class="" style="width: 85%;margin:auto">
-            
+        <main class="card-panel purple lighten-5">
+            <div class="flex-center title-header">
+                <a href="{{ path('home') }}" class="return-btn btn">
+                    Retour
+                </a>
+                <h4 class="page-title">{{'parameters'|trans}}</h4>
+                {#
+                <a class="btn-flat cancel-btn" style="visibility:hidden">{{'cancel'|trans}}</a>
+                <a class="m-left modify-btn btn-flat dd-text">
+                    <span class="m-right">{{'modify'|trans}}</span>
+                    <i class="fa fa-pen"></i>
+                </a>
+                #}
+            </div>
+
+            <div class="" style="width: 85%;margin:auto">
+                
+                <div class="">
 
 
-
-            {{ form_start(form) }}
-            
-
-            <div class="">
-                <ul class="flex-center">
-                    <div>
-                        <a href="{{ path('home') }}" class="btn">
-                            Retour
-                        </a>
-                    </div>
-                    <div class="col s12 m3" style="margin-left: 60px; margin-right: 30px;position: relative">
-                        {% if currentuser.picture is null %}
-                        <img class="user-profile-picture clickable-image" src="{{ asset('lib/img/no-picture.png') }}" width="150px" height="150px" style="border-radius: 100%">
-                        <a class="btn-floating add-photo-btn clickable-image" style="position: absolute; top: 84%; left: 35%;"><i class="fa fa-camera"></i></a>
-                        {% else %}
-                        <img class="user-profile-picture" src="{{ asset('lib/img/' ~ currentuser.picture) }}" width="150px" height="150px" style="border-radius: 100%">
-                        <a class="btn-floating add-photo-btn" style="position: absolute; top: 84%; left: 35%;"><i class="fa fa-pencil-alt"></i></a>
-                        {% endif %}
-                    </div>
-        
-                    <div class="col s12 m5 element-data flex-center" style="flex-grow: 1;">
-                        <ul>
-                            <h3 class="header flex-center" style="margin: 0;">
-                                <span>
-                                {#
-                                {% if currentuser.nickname != null %}
-                                      {{ currentuser.nickname }}
-                                {% else %}
-                                #}
-                                    {{ currentuser.fullname }}
-                                {#{% endif %}#}
-                                </span>
-                            </h3>
-                            <div>
-                                {{ currentuser.email }}
+                    <section class="user-credentials">
+                        {{ form_start(form) }}
+                        <div class="flex-center-sb">
+                            <h5>{{'profile.my_credentials'|trans}}</h5>
+                            <div class="flex-center">
+                                <a class="btn-flat cancel-btn" style="visibility:hidden">{{'cancel'|trans}}</a>
+                                <a class="m-left modify-btn modify-credentials-btn btn-flat dd-text">
+                                    <span class="m-right">{{'modify'|trans}}</span>
+                                    <i class="fa fa-pen"></i>
+                                </a>
+                                {{ form_row(form.submit) }}
                             </div>
-                        </ul>
-                        <li style="margin-left: auto;margin-right:2.5%">
-                            <a class="modify-profile-info-btn btn-flat">
-                                <i class="fa fa-pencil-alt"></i>
+                        </div> 
+                        <div class="row flex-center">
+                        
+                            <div class="col s12 m3 user-picture-zone" style="position: relative">
+                                <img class="clickable-image user-picture" src="{{ asset(global.userpicture(currentuser)) }}">
+                                <a class="btn-floating add-photo-btn clickable-image"><i class="fa fa-camera"></i></a>
+                            </div>
+                
+                            <div class="col s12 m9 c-flex user-fields" style="flex-grow: 1;">
+                            
+                                <div class="flex-center">
+                                    <span class="field-name">{{'name'|trans|capitalize}}</span>
+                                    <span class="element-data">{{ currentuser.fullname }}</span>
+                                    <div class="element-input">
+                                        {#
+                                        <div class="" style="display: inline-block;">
+                                            {{ form_row(form.male) }}
+                                        </div>
+                                        #}
+                                        <div class="input-field no-margin" style="display: inline-block;">
+                                            {{ form_label(form.firstname) }}
+                                            {{ form_widget(form.firstname, {attr:{style: "margin:0"}}) }}
+                                        </div>
+                                        <div class="input-field no-margin" style="display: inline-block;">
+                                            {{ form_label(form.lastname) }}
+                                            {{ form_widget(form.lastname, {attr:{style: "margin:0"}}) }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex-center">
+                                    <span class="field-name">{{'email'|trans|capitalize}}</span>
+                                    <span class="element-data">{{ currentuser.email }}</span>
+                                    <div class="element-input user-email">
+                                        {{ form_row(form.email) }}
+                                    </div>
+                                </div>
+
+                                <div class="flex-center">
+                                    <span class="field-name">{{'password'|trans|capitalize}}</span>
+                                    <span class="element-data">••••••••</span>
+                                    <div class="element-input">
+                                        <a class="btn m-pwd-btn modal-trigger" href="#modifyPassword">{{'mails.passwordModify.button_text'|trans ~ '...'}}</a>
+                                    </div>
+
+                                </div>
+                            
+                            </div>
+
+                        </div>
+                        {{ form_rest(form) }}
+                        {{ form_end(form) }}
+                    </section>
+
+                    <section>
+                        <div class="flex-center-sb">
+                            <h5>Mes abonnements</h5>
+                            <a class="btn-flat add-account-btn dd-text modify-btn check-subscriptions" href="">
+                                <span class="sm-right">{{'manage'|trans}}</span>
+                                <i class="fa fa-cog"></i>
                             </a>
-                        </li>
-                    </div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <div class="flex-center-sb">
+                            <h5>{{'profile.my_accounts'|trans}}</h5>
+                            <a href="#addAccount" class="btn-flat add-account-btn modify-btn modal-trigger dd-text">
+                                <span class="sm-right">{{'add'|trans}}</span>
+                                <i class="fa fa-plus"></i>
+                            </a>
+                        </div>
+                        <ul class="accounts-zone">
+                            {% if indivAccount %}
+                                <li class="flex-center">
+                                    <img class="user-profile-l-picture" src="{{ asset(global.userpicture(indivAccount)) }}" alt="">
+                                    {#<i class="material-icons dd-text">person_pin</i>#}
+                                    <span class="m-left">{{'profile.my_individual_account'|trans}}</span>
+                                </li>
+                            {% endif %}
+                            <li class="firm-accounts">
+                                <ul>
+                                    {% if currentuser.userGlobal.userAccounts|length > 1 %}
+                                        {% for userAccount in currentuser.userGlobal.userAccounts|filter(a => a.organization.type != 'C') %}
+                                            <li class="account flex-center-sb">
+                                                <div class="flex-center">  
+                                                    <img class="user-profile-l-picture" src="{{ asset(global.organizationLogo(userAccount.organization)) }}" alt="">
+                                                    <span class="account-prefix m-left">{{'my_account'|trans}}</span>
+                                                    <span class="account-name sm-left">{{userAccount.organization.commname}}</span>
+                                                </div>
+                                                <div class="account-action-zone">
+                                                    
+                                                    {% if userAccount.organization.userMasters|filter(m => m.user == userAccount) is not empty %}
+                                                    <div class="btn-flat user-master-btn">
+                                                            <i class="fa fa-user-cog"></i>
+                                                            <span class="user-master-name">{{ 'profile.administrator'|trans }}</span>
+                                                    </div> 
+                                                    {% endif %}
+                                                    <div class="btn-flat nb-activites-info tooltipped" data-tooltip="{{ 'profile.total_nb_activities'|trans }}" data-position="top">
+                                                        <i class="fa fa-briefcase"></i>
+                                                        <span>{{userAccount.internalActivities|length + userAccount.externalActivities|length }}</span>
+                                                    </div> 
+                                                    <div class="btn-flat delete-account-btn tooltipped modal-trigger" href="#deleteAccount" data-id="{{userAccount.id}}" data-oid="{{userAccount.organization.id}}" data-tooltip="{{'delete'|trans}}" data-position="top" style="visibility:hidden;">
+                                                        <i class="dd-orange-text fa fa-times"></i>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        {% endfor %}
+                                    {% else %}
+                                        <li>
+                                            <span>{{'profile.no_firm_account'|trans}}</span>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </li>
+                        </ul>
+                    </section>
+                    {#
                     <ul class="element-input flex-center" style="display: none;justify-content:space-between;flex-grow:1">
                         <li>
                             <ul class="flex" style="flex-direction: column;">
@@ -127,91 +422,196 @@
                         </li>
                         <li style=""><a class="validate-profile-info-btn waves-effect waves-light btn blue darken-2 tooltip"><i class="fa fa-check"></i></a></li>
                     </ul>
+                    #}
+                </div>
+                
+                {#
+                <ul class="experiences" style="margin-top:3em" data-prototype="{% apply escape %}{% include 'prototype_experience.twig' with { 'item': form.experiences.vars.prototype } %}{% endapply %}">
+                    {% set k = 0 %}
+                    {% for key, experience in form.experiences %}
+                        {% set k = k + 1 %}
+                        
+
+                        <li class="row element-data" style="width:95%;">
+                            <ul class="flex-center" style="justify-content:space-between">
+                                <li>
+                                    <div style="font-size:17px">{{experience.vars.data.position}}</div>
+                                    <div>{{experience.vars.data.firm.name}}</div>
+                                </li>
+                                <li style="margin-left: auto;">
+                                    {% set startdate = experience.vars.data.startdate %}
+                                    {% set enddate = experience.vars.data.enddate %}
+
+                                    {% if startdate is not null and enddate is not null %}
+                                        <span>
+                                            {{ experience.vars.data.startdate|format_date('short', 'none', null, null, 'MM/yy') }} -
+                                            {{ experience.vars.data.enddate|format_date('short', 'none', null, null, 'MM/yy') }}
+                                        </span>
+                                    {% elseif enddate is null %}
+                                        <span>
+                                            {{ experience.vars.data.startdate|format_date('short', 'none', null, null, 'MM/yy') }} -
+                                            Present
+                                        </span>
+                                    {% elseif startdate is null and enddate is null %}
+                                        <span> Dates non précisées </span>
+                                    {% endif %}
+                                </li>
+                                <li>
+                                    <a class="modify-experience-btn btn-flat" style="margin-left: auto;">
+                                        <i class="fa fa-pencil-alt"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                                        
+                        <li class="experience element-input" style="width:95%;display:none">
+                            <ul class="flex-center row" style="justify-content: space-between;">
+                                <li class="stage-title">
+                                    <h4> {% trans %} worker_individual_data.experience.title {% endtrans %} {{ k }}</h4>
+                                </li>
+                                <li style="margin-left:auto;margin-right:10px"><a class="validate-experience-btn waves-effect waves-light btn blue darken-2 tooltip"><i class="fa fa-check"></i></a></li>
+                            </ul>
+                            <div class="row">
+                                <div class="input-field col s12 m4">
+                                    {{ form_row(experience.position) }}
+                                </div>
+                                <div class="input-field w-firm col s12 m4">
+                                    {{ form_row(experience.firm,{attr:{class:"no-margin"}}) }}
+                                    <select name="firmSelector" style="margin-top:45px"></select>
+                                </div>
+                                <div class="col s12 m4">
+                                    {{ form_widget(experience.active) }}
+                                    {{ form_label(experience.active) }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="input-field col s12 m4">
+                                    {{ form_row(experience.location) }}
+                                </div>
+                                <div class="col s12 m4">
+                                    {{ form_row(experience.startdate) }}
+                                </div>
+                                <div class="col s12 m4">
+                                    {{ form_row(experience.enddate) }}
+                                </div>
+                            </div>
+                        </li>
+                    {% endfor %}
+                    <a href="#" class="waves-effect waves-light btn insert-experience-btn"><i class="fa fa-plus" style="margin-right: 10px;"></i><span>Ajouter une expérience</span></a>
                 </ul>
-            </div>
+                #}
 
-            <ul class="experiences" style="margin-top:3em" data-prototype="{% filter escape %}{% include 'prototype_experience.twig' with { 'item': form.experiences.vars.prototype } %}{% endfilter %}">
-                {% set k = 0 %}
-                {% for key, experience in form.experiences %}
-                    {% set k = k + 1 %}
-                    
-
-                    <li class="row element-data" style="width:95%;">
-                        <ul class="flex-center" style="justify-content:space-between">
-                            <li>
-                                <div style="font-size:17px">{{experience.vars.data.position}}</div>
-                                <div>{{experience.vars.data.firm.name}}</div>
-                            </li>
-                            <li style="margin-left: auto;">
-                                {% set startdate = experience.vars.data.startdate %}
-                                {% set enddate = experience.vars.data.enddate %}
-
-                                {% if startdate is not null and enddate is not null %}
-                                    <span>
-                                        {{ experience.vars.data.startdate|localizeddate('short', 'none', null, null, 'MM/yy') }} -
-                                        {{ experience.vars.data.enddate|localizeddate('short', 'none', null, null, 'MM/yy') }}
-                                    </span>
-                                {% elseif enddate is null %}
-                                    <span>
-                                        {{ experience.vars.data.startdate|localizeddate('short', 'none', null, null, 'MM/yy') }} -
-                                        Present
-                                    </span>
-                                {% elseif startdate is null and enddate is null %}
-                                    <span> Dates non précisées </span>
-                                {% endif %}
-                            </li>
-                            <li>
-                                <a class="modify-experience-btn btn-flat" style="margin-left: auto;">
-                                    <i class="fa fa-pencil-alt"></i>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                                    
-                    <li class="experience element-input" style="width:95%;display:none">
-                        <ul class="flex-center row" style="justify-content: space-between;">
-                            <li class="stage-title">
-                                <h4> {% trans %} worker_individual_data.experience.title {% endtrans %} {{ k }}</h4>
-                            </li>
-                            <li style="margin-left:auto;margin-right:10px"><a class="validate-experience-btn waves-effect waves-light btn blue darken-2 tooltip"><i class="fa fa-check"></i></a></li>
-                        </ul>
-                        <div class="row">
-                            <div class="input-field col s12 m4">
-                                {{ form_row(experience.position) }}
-                            </div>
-                             <div class="input-field w-firm col s12 m4">
-                                {{ form_row(experience.firm,{attr:{class:"no-margin"}}) }}
-                                <select name="firmSelector" style="margin-top:45px"></select>
-                            </div>
-                            <div class="col s12 m4">
-                                {{ form_widget(experience.active) }}
-                                {{ form_label(experience.active) }}
-                            </div>
+                <div id="modifyPassword" class="modal">
+                    {{form_start(passwordModificationForm)}}
+                    <div class="modal-content">
+                        <p>{{ 'profile.manage.password_modification_modal.title'|trans }}</p>
+                        
+                        <div class="input-field">
+                            {{form_row(passwordModificationForm.password)}}
                         </div>
-                        <div class="row">
-                            <div class="input-field col s12 m4">
-                                {{ form_row(experience.location) }}
-                            </div>
-                            <div class="col s12 m4">
-                                {{ form_row(experience.startdate) }}
-                            </div>
-                            <div class="col s12 m4">
-                                {{ form_row(experience.enddate) }}
-                            </div>
+                        <div class="input-field">
+                            {{form_row(passwordModificationForm.newPassword)}}
                         </div>
-                    </li>
-                {% endfor %}
-                <a href="#" class="waves-effect waves-light btn insert-experience-btn"><i class="fa fa-plus" style="margin-right: 10px;"></i><span>Ajouter une expérience</span></a>
-            </ul>
+                    </div>
+                    <div class="modal-footer action-buttons">
+                    <div class="button-field">
+                        {{form_row(passwordModificationForm.submit)}}
+                    </div>
+                    </div>
+                    {{form_rest(passwordModificationForm)}}
+                    {{form_end(passwordModificationForm)}}
+                </div>
 
-            <div class="row action-buttons">
-                <div class="button-field">
-                    {{ form_row(form.submit) }}
+                <div id="successUploadedPicture" class="modal">
+                    <div class="modal-content">
+                    <p>{{ 'profile.file.success.modal_content'|trans }}</p>
+                    </div>
+                    <div class="modal-footer action-buttons">
+                    <div class="button-field">
+                        <a class="waves-effect waves-green btn modal-close">Ok</a>
+                    </div>
+                    </div>
+                </div>
+                <div id="successPasswordChange" class="modal">
+                    <div class="modal-content">
+                        <p>{{ 'profile.manage.s_password_modification_modal.content'|trans }}</p>
+                    </div>
+                    <div class="modal-footer action-buttons">
+                    <div class="button-field">
+                        <a class="waves-effect waves-green btn modal-close">Ok</a>
+                    </div>
+                    </div>
+                </div>
+                <div id="errorFileType" class="modal">
+                    <div class="modal-title">
+                    <h4>{{ 'profile.file.unsupported_type.modal_title'|trans }}</h4>
+                    </div>
+                    <div class="modal-content">
+                    <p>{{ 'profile.file.unsupported_type.modal_content'|trans }}</p>
+                    </div>
+                    <div class="modal-footer action-buttons">
+                    <div class="button-field">
+                        <a class="waves-effect waves-green btn modal-close">Ok</a>
+                    </div>
+                    </div>
+                </div>
+                <div id="errorFileSize" class="modal">
+                    <div class="modal-title">
+                    <h4>{{ 'profile.file.unsupported_size.modal_title'|trans }}</h4>
+                    </div>
+                    <div class="modal-content">
+                    <p>{{ 'profile.file.unsupported_size.modal_content'|trans }}</p>
+                    </div>
+                    <div class="modal-footer action-buttons">
+                    <div class="button-field">
+                        <a class="waves-effect waves-green btn modal-close">Ok</a>
+                    </div>
+                    </div>
+                </div>
+                <div id="emailConfirmation" class="modal">
+                    <div class="modal-content">
+                        <h5>{{ 'profile.manage.email_confirmation_modal.title'|trans }}</h5>
+                        <p>{{ 'profile.manage.email_confirmation_modal.content'|trans|raw }}</p>
+                    </div>
+                    <div class="modal-footer">
+                        <a class="modal-action waves-effect btn">Ok</a>
+                    </div>
+                </div>
+                <div id="addAccount" class="modal">
+                    <div class="modal-content user-inputs">
+                        <form class="user-inputs">
+                            <h5>{{ 'profile.manage.add_account_modal.title'|trans }}</h5>
+                            <p>{{ 'profile.manage.add_account_modal.content'|trans ~ ' :' }}</p>
+                            <div class="input-field firm-field-zone">
+                            <input class="firm-name no-margin" type="text" name="firmname">
+                            <div class="c-flex m-bottom"> 
+                                <small class="dd-orange-text new-firm" style="visibility:hidden">{{'user_list.add_user_modal.new_firm_database'|trans}}</small>
+                                <small class="dd-orange-text error-fullname" style="display:none">{{'create_user.modal.error_fullname'|trans}}</small>
+                            </div>
+                            <select name="firmSelector" id=""></select>
+                            <input type="hidden" name="wid">
+                            <input type="hidden" name="oid">
+                            </div>
+                            <div class="action-buttons">
+                                <div class="button-field">
+                                <a class="btn waves-light waves-effect set-usr-org-btn">Ok</a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div id="deleteAccount" class="modal">
+                    <div class="modal-content">
+                       <h5>{{ 'profile.manage.delete_account_modal.title'|trans }}</h5>
+                       <p>{{ 'profile.manage.delete_account_modal.content'|trans }}<span class="sm-left sm-right account-delete-name strong"></span>{{ '? ' ~ 'profile.manage.delete_account_modal.end'|trans }}</p>
+                        <div class="flex-center-fe">
+                            <a class="modal-close waves-effect btn-flat dd-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+                            <a class="modal-action waves-effect btn delete-btn">Ok</a>
+                        </div>
+                    </div>
                 </div>
             </div>
-            {{ form_rest(form) }}
-            {{ form_end(form) }}
-    </div>
+        </main>
 
     <div style="display: none">
         {{ form_start(pictureForm) }}
@@ -283,7 +683,17 @@
                     }
                 })
 
-            })
+
+                $('.check-subscriptions').on('click',function(e){
+                    e.preventDefault();
+                    $.get(csurl)
+                        .done(function(data){
+                            window.location = data.cpurl;
+                        })
+                });
+
+            });
         </script>
+        <script src="{{ absolute_url(asset('js/add_client_user.js')) }}"></script>
         <script src="{{ absolute_url(asset('js/worker_individual_update.js')) }}"></script>
 {% endblock %}

@@ -26,12 +26,12 @@ class PasswordDefinitionForm extends AbstractType {
                     'type' => PasswordType::class,
                     'required' => true,
                     'first_options' => [
-                        'label_format' => 'password_definition.password',
+                        'label_format' => 'password_update.password',
                     ],
                     'second_options' => [
-                        'label_format' => 'password_definition.password_repeat'
+                        'label_format' => 'password_update.password_repeat'
                     ],
-                    'invalid_message' => 'password_definition.unmatching_msg',
+                    'invalid_message' => 'password_update.unmatching_msg',
                     /*'options' => [
                         'attr' => [
                             'class' => 'password-field'
@@ -41,7 +41,7 @@ class PasswordDefinitionForm extends AbstractType {
                         new Assert\NotBlank,
                         new Assert\Regex([
                                 'value' => '/^(?=.*\d+)(?=.*[A-Z]+)(.{8,})$/',
-                                'message' => 'password_definition.password',
+                                'message' => 'password.definition_rule',
                         ])
                     ]
                 ]
@@ -49,9 +49,9 @@ class PasswordDefinitionForm extends AbstractType {
 
         if ($options['standalone']) {
             $builder->add('submit', SubmitType::class,[
-                'label_format' => 'password_definition.%name%',
+                'label_format' => 'password_update.%name%',
                 'attr' => [
-                    'class' => 'waves-effect waves-light btn-large',
+                    'class' => 'waves-effect waves-light btn update-pwd-btn',
                     /*'disabled' => 'disabled'*/
                 ]
             ]);

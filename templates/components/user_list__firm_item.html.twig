@@ -1,0 +1,26 @@
+
+        
+  {% set client = client|default(null) %}
+  
+  {% set logo_url = client ? asset(global.clientLogo(client)) : asset('lib/img/org/no-picture.png') %}
+  <li class="firms-list--item hierarchized-item" data-id="{{ client ? client.id : 0 }}">
+    <header class="flex-center">
+      <img src="{{ logo_url }}" alt="" class="account-logo">
+      <span class="firm-name">{{ client ? client.clientOrganization.commname : "" }}</span>
+      <div class="user-actions">
+        {#<a class="material-icons" href="{{ url('createClientUser', { cliId: client.id }) }}" tooltip="{{ 'user_list.modify'|trans }}">settings</a>#}
+        <a class="btn-flat firm-modify-btn" href="{{ url('manageClient', { cliId: client ? client.id : 0 }) }}" style="visibility:hidden;">
+            <i class="dd-orange-text fa fa-cog"></i>
+        </a>
+      </div>
+    </header>
+    <div class="item-body">
+      <ul class="user-list">
+        {% if client %}
+          {% for externalUser in client.externalUsers %}
+            {% include "components/user_list__ext_user_item.html.twig" with { externalUser: externalUser, stats: false, roles: false, settings: false } %}
+          {% endfor %}
+        {% endif %}
+      </ul>
+    </div>
+  </li>

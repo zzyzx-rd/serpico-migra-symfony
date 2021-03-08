@@ -1,87 +1,122 @@
 <?php
 namespace App\Controller;
 
+use App\Entity\OrganizationPaymentMethod;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Exception;
-use Form\AddOrganizationForm;
-use Form\AddClientForm;
-use Form\DelegateActivityForm;
-use Form\RequestActivityForm;
-use Form\UpdateWorkerFirmForm;
-use Form\UpdateWorkerIndividualForm;
-use Form\SendMailProspectForm;
-use Form\AddUserForm;
-use Form\AddDepartmentForm;
-use Form\AddProcessForm;
-use Form\AddWeightForm;
-use Form\SendMailForm;
-use Form\SearchWorkerForm;
-use Form\UpdateOrganizationForm;
-use Form\ValidateFirmForm;
-use Form\ManageProcessForm;
-use Form\ValidateMassFirmForm;
-use Form\ValidateMailForm;
-use Form\ValidateMassMailForm;
-use Form\Type\UserType;
-use Form\Type\ClientUserType;
-use Form\Type\OrganizationElementType;
-use Model\ActivityUser;
-use Model\Criterion;
-use Model\OrganizationUserOption;
-use Model\Process;
-use Model\Team;
-use Model\Weight;
-use Model\WorkerExperience;
-use Model\WorkerFirm;
-use Model\WorkerFirmCompetency;
-use Model\WorkerFirmSector;
-use Model\WorkerIndividual;
-use Model\Country;
-use Model\State;
-use Model\City;
+use App\Form\AddOrganizationForm;
+use App\Form\AddClientForm;
+use App\Form\DelegateActivityForm;
+use App\Form\RequestActivityForm;
+use App\Form\UpdateWorkerFirmForm;
+use App\Form\UpdateWorkerIndividualForm;
+use App\Form\SendMailProspectForm;
+use App\Form\AddUserForm;
+use App\Form\AddDepartmentForm;
+use App\Form\AddProcessForm;
+use App\Form\AddWeightForm;
+use App\Form\SendMailForm;
+use App\Form\SearchWorkerForm;
+use App\Form\UpdateOrganizationForm;
+use App\Form\ValidateFirmForm;
+use App\Form\ManageProcessForm;
+use App\Form\ValidateMassFirmForm;
+use App\Form\ValidateMailForm;
+use App\Form\ValidateMassMailForm;
+use App\Form\Type\UserType;
+use App\Form\Type\ClientUserType;
+use App\Form\Type\OrganizationElementType;
+use App\Entity\Participation;
+use App\Entity\Criterion;
+use App\Entity\OrganizationUserOption;
+use App\Entity\Process;
+use App\Entity\Team;
+use App\Entity\Weight;
+use App\Entity\WorkerExperience;
+use App\Entity\WorkerFirm;
+use App\Entity\WorkerFirmCompetency;
+use App\Entity\WorkerFirmSector;
+use App\Entity\WorkerIndividual;
+use App\Entity\Country;
+use App\Entity\State;
+use App\Entity\City;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Model\User;
-use Model\ExternalUser;
-use Model\Organization;
-use Model\Client;
-use Model\OptionName;
-use Model\Department;
-use Model\Position;
-use Model\Activity;
-use Model\CriterionGroup;
-use Model\CriterionName;
-use Model\InstitutionProcess;
-use Model\Mail;
+use App\Entity\User;
+use App\Entity\ExternalUser;
+use App\Entity\Organization;
+use App\Entity\Client;
+use App\Entity\OptionName;
+use App\Entity\Department;
+use App\Entity\Position;
+use App\Entity\Activity;
+use App\Entity\CriterionGroup;
+use App\Entity\CriterionName;
+use App\Entity\DynamicTranslation;
+use App\Entity\ElementUpdate;
+use App\Entity\EventDocument;
+use App\Entity\EventGroup;
+use App\Entity\EventGroupName;
+use App\Entity\EventName;
+use App\Entity\EventType;
+use App\Entity\GeneratedError;
+use App\Entity\InstitutionProcess;
+use App\Entity\Mail;
+use App\Entity\Stage;
+use App\Entity\Subscription;
+use App\Entity\UserGlobal;
+use App\Entity\UserMaster;
+use App\Form\Type\EventDocumentType;
+use App\Repository\EventGroupRepository;
+use App\Repository\EventTypeRepository;
+use App\Service\NotificationManager;
+use DateTime;
+use Proxies\__CG__\App\Entity\Icon;
+use ProxyManager\Factory\RemoteObject\Adapter\JsonRpc;
 use Symfony\Component\Form\FormFactory;
 use Symfony\Component\Routing\Annotation\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Stripe\Customer;
+use Stripe\Stripe;
+use Stripe\StripeClient;
+use Stripe\Subscription as StripeSubscription;
+use Stripe\SubscriptionItem as StripeSubscriptionItem;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Validator\Constraints\NotBlank;
+
+
 
 class SettingsController extends MasterController
 {
+
+
     public static function getClientLangague(){
         $langs = explode(',', $_SERVER['HTTP_ACCEPT_LANGUAGE']);
         return substr($langs[0], 0, 2);
     }
-
+ 
     /**
      * @param Request $request
      * @param Application $app
      * @return mixed
      * @Route("/settings/testingmails", name="displayTestingMails")
      */
-    public function displayTestingMails(Request $request, Application $app)
+    public function displayTestingMails(Request $request)
     {
 
 
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoU = $em->getRepository(User::class);
-        $formFactory = $app['form.factory'];
-        $sendMailForm = $formFactory->create(SendMailForm::class, null, ['standalone' => true]);
+        
+        $sendMailForm = $this->createForm(SendMailForm::class, null, ['standalone' => true]);
         $sendMailForm->handleRequest($request);
         //$user = $em->getRepository(User::class)->findOneById(9);
         $actionType = $sendMailForm->get('emailType')->getData();
@@ -89,7 +124,7 @@ class SettingsController extends MasterController
         $settings = [];
         $settings['locale'] = $sendMailForm->get('lang')->getData();
 
-        return $app['twig']->render('mail_testing.html.twig',
+        return $this->render('mail_testing.html.twig',
             [
                 'form' => $sendMailForm->createView(),
             ]);
@@ -102,14 +137,14 @@ class SettingsController extends MasterController
      * @return string|JsonResponse
      * @Route("/settings/testingmails", name="sendTestingMails")
      */
-    public function sendTestingMails(Request $request, Application $app)
+    public function sendTestingMails(Request $request)
     {
 
 
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoU = $em->getRepository(User::class);
-        $formFactory = $app['form.factory'];
-        $sendMailForm = $formFactory->create(SendMailForm::class, null, ['standalone' => true]);
+        
+        $sendMailForm = $this->createForm(SendMailForm::class, null, ['standalone' => true]);
         $sendMailForm->handleRequest($request);
         //$user = $em->getRepository(User::class)->findOneById(9);
 
@@ -131,7 +166,7 @@ class SettingsController extends MasterController
                     $recipients[] = $recipient;
                     $request->setLocale($sendMailForm->get('lang')->getData());
 
-                    MasterController::sendMail($app, $recipients, $actionType, $settings);
+                    $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => $actionType]);
                     return new JsonResponse(['message' => "Success"],200);
                 }
                 catch (Exception $e){
@@ -144,38 +179,744 @@ class SettingsController extends MasterController
 
     /**
      * @param Request $request
+     * @return mixed
+     * @Route("/settings/root/management", name="rootManagement")
+     * @IsGranted("ROLE_ROOT", statusCode=404, message="Page not found")
+     */
+    public function rootManagementAction(Request $request){
+        return $this->render('root_management.html.twig');
+    }
+
+
+    /**
+     * @param Request $request
+     * @return mixed
+     * @Route("/settings/manage/subscriptions", name="manageSubscriptions")
+     */
+    public function manageSubscriptionsAction(Request $request){
+
+        $organization = $this->org;
+        $em = $this->em;
+
+        $cId = $organization->getStripeCusId();
+        
+        if($cId == null){
+            $mail = $this->user->getEmail();
+            $customer = \Stripe\Customer::create([
+                'email' => $mail
+            ]);
+            $cId = $customer->id;
+            $organization->setStripeCusId($cId);
+            $em->persist($organization);
+            $em->flush();
+        }
+
+        /*
+        $configuration = \Stripe\BillingPortal\Configuration::create([
+            'business_profile' => [
+                'privacy_policy_url' => 'https://example.com/privacy',
+                'terms_of_service_url' => 'https://example.com/privacy'
+            ],
+            
+            //'default_return_url' => $this->generateUrl('firmSettings'),
+            'features' => [
+                'subscription_update' => [
+                    'default_allowed_updates' => [
+                        'quantity'
+                    ],
+                    'enabled' 
+                ]
+            ],
+        ]);
+        */
+
+        $session = \Stripe\BillingPortal\Session::create([
+            'customer' => $cId,
+            //'configuration' => $configuration->id
+        ]);
+          
+        return new JsonResponse(['cpurl' => $session->url],200);
+        
+        // Redirect to the customer portal.
+        //header("Location: " . $session->url); exit();
+
+    }
+
+
+   /**
+     * @param Request $request
+     * @return mixed
+     * @Route("/organization/plan/manage", name="priceManagement")
+     */
+    public function PriceManagementAction(Request $request){
+        $em = $this->em;
+        $currentUser = $this->user;
+        if (!$currentUser instanceof User) {
+            return $this->redirectToRoute('login');
+        }
+        $priceStandard = [5,6,7];
+        $pricePrenium = [7,10,14];
+        $org = $this->org;
+        
+        /*if(!$org->getStripeCusId()){
+            $mail = $org->getMasterUser() ? $org->getMasterUser()->getEmail() : "";
+            $cust = Stripe\Customer::create([
+                'email' => $mail,
+            ]);
+            $org->setStripeCusId($cust->id);
+        }*/
+
+        $payaccess  = false;
+
+        if (!$currentUser instanceof User) {
+            return $this->redirectToRoute('login');
+        }
+
+        if($this->org->getSubscriptor() == $this->user || $this->org->getSubscriptor()== null){
+            $payaccess  = true;
+        }
+
+
+        $organization = $this->org;
+        if($this->org->getStripeCusId() != null) {
+            $customer = $this->stripe->customers->retrieve(
+                $this->org->getStripeCusId()
+            );
+            $users = $this->org->getUsers();
+
+
+            if ($customer->metadata->sub_id == null) {
+                $val = 1;
+                $start = " ";
+                $pdf = " ";
+            } else {
+                $sub = $this->stripe->subscriptions->retrieve(
+                    $customer->metadata->sub_id,
+                    );
+                $invoice = $this->stripe->invoices->all(['customer' => $this->org->getStripeCusId()])->data[0];
+                $invoice = $this->stripe->invoices->sendInvoice($invoice->id,
+                    []
+                );
+                $pdf = $invoice->invoice_pdf;
+
+                $start = date('m/d/Y', $sub->current_period_start);
+
+                $val = $customer->metadata->quantity;
+            }
+            $pm = ($customer->invoice_settings->default_payment_method != null) ? true : false;
+            if ($pm) {
+                $payment_method = $this->stripe->paymentMethods->retrieve(
+                    $customer->invoice_settings->default_payment_method
+                );
+
+                $month = $payment_method->card->exp_month;
+                if ($month < 10) {
+                    $montheend = "0" . (string)$month;
+                } else {
+                    $montheend = $month;
+                }
+                $dateend = (string)$payment_method->card->exp_year;
+                $dateend = $montheend . "/" . $dateend[2] . $dateend[3];
+                $last4 = $payment_method->card->last4;
+                $name = $payment_method->billing_details->name;
+                $brand = $payment_method->card->brand;
+            } else {
+                $dateend = "";
+                $last4 = "";
+                $name = "";
+                $brand = "";
+            }
+            $subscription =$this->stripe->subscriptions->all(['customer' => $customer]);
+            $sub=  $subscription->data ;
+        } else {
+            $val = 1;
+            $start = " ";
+            $pdf = " ";
+            $dateend = "";
+            $last4 = "";
+            $name = "";
+            $brand = "";
+            $users = $this->org->getUsers();
+            $sub= " ";
+        }
+
+        return $this->render('account_management.html.twig' , [
+
+            'currentPlan' => $organization->getPlan(),
+            'val' => $val,
+            'custcard' => sizeof($this->org->getPaymentMethods()),
+            'dateend'  => $dateend,
+            'last4'  => $last4,
+            'name' => $name,
+            'brand' => $brand,
+            'start' => $start,
+            'payaccess' => $payaccess,
+            'cards' => $this->org->getPaymentMethods(),
+            'pdf'=>$pdf,
+            'user'=>$users,
+            'sub' => $sub
+        ]);
+
+
+
+    }
+    /**
+     * @param Request $request
      * @param Application $app
      * @return mixed
-     * @Route("/settings/root-management", name="rootManagement")
+     * @Route("/stripe/listen/webhooks", name="listenStripeWebhooks")
      */
-    public function rootManagementAction(Request $request, Application $app){
+    public function stripWebookManagementAction(Request $request){
 
-        return $app['twig']->render('root_management.html.twig',[]);
+        $payload = @file_get_contents('php://input');
+        $event = null;
+        try {
+            $event = \Stripe\Event::constructFrom(
+                json_decode($payload, true)
+            );
+        } catch(\UnexpectedValueException $e) {
+            // Invalid payload
+            http_response_code(400);
+            exit();
+        }
 
+        // Handle the event
+        switch ($event->type) {
+            case 'payment_intent.succeeded':
+                $paymentIntent = $event->data->object; // contains a \Stripe\PaymentIntent
+                // Then define and call a method to handle the successful payment intent.
+                // handlePaymentIntentSucceeded($paymentIntent);
+                break;
+            case 'payment_method.attached':
+                $paymentMethod = $event->data->object; // contains a \Stripe\PaymentMethod
+                // Then define and call a method to handle the successful attachment of a PaymentMethod.
+                // handlePaymentMethodAttached($paymentMethod);
+                break;
+            // ... handle other event types
+            default:
+                echo 'Received unknown event type ' . $event->type;
+        }
+
+        dd('good');
+        http_response_code(200);
+
+
+    }
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return mixed
+     * @Route("/create-customer", name="stripWebook")
+     */
+    public function createCustomerManagementAction(Request $request){
+
+        $body =  json_decode(file_get_contents('php://input'), true);
+        $stripe = $this->stripe;
+        $customer = \Stripe\Customer::create([
+            'email' => $body['email'],
+        ]);
+
+        return new JsonResponse(['customer' => $customer], 200);
     }
 
     /**
      * @param Request $request
      * @param Application $app
      * @return mixed
-     * @Route("/settings/organizations", name="manageOrganizations")
+     * @Route("/create-checkout-session", name="createSession")
+     * @throws Stripe\Exception\ApiErrorException
      */
-    public function manageOrganizationsAction(Request $request, Application $app){
-        $entityManager = $this->getEntityManager($app) ;
-        $repoO = $entityManager->getRepository(Organization::class);
-        $organizations = [];
+    public function createSessionManagementAction(Request $request){
+        $session = \Stripe\Checkout\Session::create([
+            'payment_method_types' => ['card'],
+            'line_items' => [[
+                'price' => 'price_1HZI0THmuPtR98gq67btxwid',
+                'quantity' => 1 ,
+            ]],
+            'mode' => 'subscription',
+            'success_url' => 'https://example.com/success',
+            'cancel_url' => 'https://example.com/cancel'
+        ]);
 
+        return new JsonResponse([ 'id' => $session->id ], 200);
+    }
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return mixed
+     * @Route("/create-freesubscription", name="createFreeSubscription")
+     */
+    public function createFreeSubscriptionManagementAction(Request $request){
 
-        foreach ($repoO->findAll() as $organization) {
+        $em = $this->em;
+        $currentUser = $this->user;
+        $body =  json_decode(file_get_contents('php://input'), true);
+        $stripe = $this->stripe;
 
-            $organizations[] = $organization->toArray($app);
+        $priceId = $body['priceId'];
+        $customer = $this->org->getStripeCusId();
+
+        $payment_method = Stripe\PaymentMethod::create([
+            'type' => 'card',
+            'card' => [
+                'number' => '4242424242424242',
+                'exp_month' => 10,
+                'exp_year' => 2021,
+                'cvc' => '314',
+            ],
+        ]);
+
+        $payment_method->attach([
+            'customer' => $customer,
+        ]);
+
+        // Set the default payment method on the customer
+        try { Stripe\Customer::update($body['stripeCusId'], [
+            'invoice_settings' => [
+                'default_payment_method' => $payment_method->id
+            ]
+        ]);
+        }
+        catch (Exception $e) {
 
         }
 
+
+
+        $subscription = Stripe\Subscription::create([
+            'customer' => $customer,
+            'items' => [
+                [
+                    'price' => $priceId,
+                    'quantity' => $body['quantiy'],
+                ],
+            ],
+            'expand' => ['latest_invoice.payment_intent'],
+        ]);
+
+        $p = Stripe\Product::retrieve(
+            $subscription->items->data['0']->price->product
+        );
+
+        $p = $p->name;
+        $org = $this->org;
+        if ( $p == "abonnement standard" ) {
+            $org->setPlan(2);
+
+        } else {
+            $org->setPlan(1);
+
+        }
+        $cust = Stripe\Customer::update(
+            $customer,
+            ['metadata' => ['sub_id' => $subscription->id,
+                'quantity' => $body['quantity']]]
+        );
+
+        $org->setStripeCusId($customer);
+
+        $em->flush();
+
+
+
+        return new JsonResponse($p, 200);
+    }
+
+    /**
+     * @param Request $request
+     * @param Application $usrId
+     * @return mixed
+     * @Route("settings/user/{usrId}/add-default-subscriptor", name="addDefaultSubscriptor")
+     * @throws Stripe\Exception\ApiErrorException
+     */
+    public function addDefaultSubscriptor(Request $request, int $usrId){
+        
+        // We create a 21-day premium monthly subscription for user account
+        $em = $this->em;
+        /** @var User */ 
+        $user = $em->getRepository(User::class)->find($usrId);
+        $organization = $user->getOrganization();
+        $pMonthlyId = strpos("dealdrive.app", $_SERVER["HTTP_HOST"]) === false ? 'price_1INPSqLU0XoF52vKRN5T8i9Y' : 'price_1HoAmcLU0XoF52vKHDggsDpq';
+        $pAnnualId = strpos("dealdrive.app", $_SERVER["HTTP_HOST"]) === false ? 'price_1IQWyuLU0XoF52vKrLx8Q5Pa' : 'price_1HoAmcLU0XoF52vKHDggsDpq';
+        $stripe = $this->stripe;
+
+        // 1 - Create customer ID in case organization hasn't
+        if(!$organization->getStripeCusId()){
+            $customer = Customer::create([
+                'email' => $user->getEmail()
+            ]);
+    
+            $cId = $customer->id;
+            $organization->setStripeCusId($cId);
+            $em->persist($organization);
+        } else {
+            $customer = Customer::retrieve($organization->getStripeCusId());
+        }
+
+        /** @var Subscription */
+        $activeSubscription = $organization->getSubscriptions()->filter(fn(Subscription $s) => $s->getStatus() == Subscription::STATUS_ACTIVE)->first();
+        
+        if($activeSubscription){
+
+            $stripeSubscription = StripeSubscription::retrieve($activeSubscription->getStripeId());
+            
+            StripeSubscriptionItem::update($stripeSubscription->items->data[0]->id,
+                [   
+                    'quantity' => (int)$stripeSubscription->items->data[0]->quantity + 1,
+                    'tax_rates' => ['txr_1HvOrOLU0XoF52vKiirAF45T']
+                ]
+
+            );
+
+        } else {
+
+            $stripeSubscription = $stripe->subscriptions->create([
+                'customer' => $cId,
+                'items' => [
+                    [   'price' => $pMonthlyId,
+                        'tax_rates' => ['txr_1HvOrOLU0XoF52vKiirAF45T']
+                    ],
+                ],
+                'trial_period_days' => 21,
+            ]);
+
+            $activeSubscription = new Subscription();
+            $activeSubscription
+                ->setPeriod(Subscription::PERIOD_MONTH)
+                ->setStripeId($stripeSubscription->id)
+                ->setInitiator($this->user);
+
+            $organization->addSubscription($activeSubscription);
+        }
+
+        $user->setSubscription($activeSubscription);
+        $em->persist($organization);
+        $em->persist($user);
+        return new JsonResponse();     
+    }
+
+    /**
+     * @param Request $request
+     * @param Application $usrId
+     * @return JsonResponse
+     * @Route("settings/user/{usrId}/remove-default-subscriptor", name="removeDefaultSubscriptor")
+     * @throws Stripe\Exception\ApiErrorException
+     */
+    public function removeDefaultSubscriptor(Request $request, int $usrId){
+        $em = $this->em;
+        /** @var User */ 
+        $user = $em->getRepository(User::class)->find($usrId);
+        $organization = $user->getOrganization();
+        $userSubscription = $user->getSubscription();
+        $stripeSubscription =  StripeSubscription::retrieve($userSubscription->getStripeId());
+        StripeSubscriptionItem::update($stripeSubscription->items->data[0]->id,
+            ['quantity' => (int)$stripeSubscription->items->data[0]->quantity - 1]
+        );
+
+        $user->setSubscription(null);
+        $em->persist($user);
+        return new JsonResponse();     
+    }
+    
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return mixed
+     * @Route("/create-subscription", name="createSubscription")
+     * @throws Stripe\Exception\ApiErrorException
+     */
+    public function createSubscriptionManagementAction(Request $request){
+
+        $em = $this->em;
+        $repoO = $em->getRepository(OrganizationPaymentMethod::class);
+        $paymentMethods = $this->org->getPaymentMethods();
+        $currentUser = $this->user;
+        
+        // For the MVP, only one product with 2 prices - monthly or annual
+
+        if(strpos("dealdrive.app",$_SERVER["HTTP_HOST"]) === false){
+            $prices = [
+                'p' => [
+                    'm' => 'price_1INPSqLU0XoF52vKRN5T8i9Y',
+                    'y' => 'price_1INPSqLU0XoF52vKJ29uboYA'
+                ],
+                /*
+                'e' => [
+                    'm' => 'price_1HvWTLLU0XoF52vK6PRFqDgT',
+                    'y' => 'price_1HvWSeLU0XoF52vKnewnk43W'
+                ]*/
+            ];
+        } else {
+            $prices = [
+                'p' => [
+                    'm' => 'price_1HoAmcLU0XoF52vKHDggsDpq',
+                    'y' => 'price_1HoAnRLU0XoF52vKlyRASsYA'
+                ],
+                /*
+                'e' => [
+                    'm' => 'price_1HoAdRLU0XoF52vKtxHCoxRw',
+                    'y' => 'price_1HvVyiLU0XoF52vKbCuG7Xd5'
+                ]
+                */
+            ];
+        }
+
+        $stripe = $this->stripe;
+        $data = json_decode(file_get_contents('php://input'), true);
+        $plan = $data['plan'];
+        $period = $data['period'];
+        $quantity = $data['quantity'];
+        //$product = $body['product'] == "p" ? 'prod_IPHWR3lzuAWWsL' : 'prod_IPHWDsnMYL3UFB'; 
+        $product = 'prod_IzOFdp7CAUlmp1';
+        $paymentMethodId = $data['pmId'];
+        
+        if($this->org->getSubscriptor() == null){
+            $this->org->setSubscriptor($this->user);
+        }
+
+        // We retrieve, otherwise create a Customer account
+        $cId = $this->org->getStripeCusId();
+        
+        if($cId == null){
+            $mail = ($this->org->getUserMasters() == null) ? "" : $this->org->getUserMasters()->first()->getUser()->getEmail();
+            $customer = Stripe\Customer::create([
+                'email' => $mail
+            ]);
+            $cId = $customer->id;
+            $this->org->setStripeCusId($cId);
+        } else {
+            $customer = Stripe\Customer::retrieve($cId);
+        }
+
+        $priceId = $prices[$plan][$period];
+
+        $payment_method = $this->stripe->paymentMethods->retrieve($paymentMethodId);
+        $payment_method->attach(['customer' => $cId]);
+
+        // Set the default payment method on the customer
+        $pm = $customer->metadata->payment_method;
+
+        if(!$paymentMethods->exists(fn(int $i, OrganizationPaymentMethod $pm) => $pm->getPmId() == $paymentMethodId)) {
+            $payment_object = new OrganizationPaymentMethod();
+            $payment_object->setPmId($paymentMethodId);
+            $this->org->addPaymentMethods($payment_object);
+        }
+        
+        $stripe->customers->update($cId, 
+            ['invoice_settings' => 
+                ['default_payment_method' => $paymentMethodId],
+            ]
+        );
+
+
+       
+            
+        $subscription = $this->stripe->subscriptions->create([
+            'customer' => $customer,
+            "collection_method" => "charge_automatically",
+            'items' => [
+                [
+                    'price' => $priceId,
+                    'quantity' => $quantity,
+                    'tax_rates' => ['txr_1HvOrOLU0XoF52vKiirAF45T']
+                ],
+            ],
+            //"days_until_due" => 1,
+            'expand' => ['latest_invoice.payment_intent'],
+        ]);
+
+        $org = $this->org;
+
+        $plan == "p" ? $org->setPlan(Organization::PLAN_PREMIUM) : $org->setPlan(Organization::PLAN_ENTERPRISE);
+
+   
+
+        /*
+        $invoice = $this->stripe->invoices->all(['subscription' => $subscription->id])->data[0];
+        $invoice = $this->stripe->invoices->sendInvoice($invoice->id,[]);
+        $pdf = $invoice->invoice_pdf;
+        
+
+        $p = $this->stripe->products->retrieve(
+            $subscription->items->data['0']->price->product
+        );
+        
+
+        $p = $p->name;
+        */
+
+
+
+        /*
+        $stripe->customers->update($cId,
+            ['metadata' => [
+                'sub_id' => $subscription->id,
+                'quantity' => $quantity
+                ]
+            ]
+        );
+
+
+        $sub = Stripe\Subscription::update(
+            $subscription->id,
+            ['metadata' => 
+                [   
+                    //'pdf' => $pdf,
+                    'quantity' => $quantity
+                ]
+            ]
+        );
+        */
+
+        //$org->setStripeCusId($cid);
+        $em->flush();
+        $em->refresh($currentUser);
+        $this->guardHandler->authenticateUserAndHandleSuccess(
+            $currentUser,
+            $request,
+            $this->authenticator,
+            'main' // firewall name in security.yaml
+        );
+
+        return new JsonResponse();
+    }
+
+    /**
+     * @param Request $request
+     * @return mixed
+     * @Route("/cancel-subscription", name="cancelSubscription")
+     * @throws Stripe\Exception\ApiErrorException
+     */
+    public function cancelSubscriptionManagementAction(Request $request){
+        $organization = $this->org;
+        $currentUser = $this->user;
+        $custId = $organization->getStripeCusId();
+        $cust = Stripe\Customer::retrieve(
+            $custId
+        );
+        $id = $cust->metadata->sub_id;
+
+        $sub = $this->stripe->subscriptions->cancel(
+            $id,
+        );
+
+        $em = $this->em;
+        $sub =$this->stripe->subscriptions->all(['customer' => $custId]);
+        if(sizeof($sub->data)==0) {
+            $organization->setPlan(3);
+        }
+        $em->refresh($currentUser);
+        $em->flush();
+        return new JsonResponse($cust->metadata->sub_id, 200);
+    }
+    /**
+     * @param Request $request
+     * @return mixed
+     * @Route("/cancel-card", name="cancelCard")
+     * @throws Stripe\Exception\ApiErrorException
+     */
+    public function cancelCardManagementAction(Request $request){
+        $em = $this->em;
+        $cards = $this->org->getPaymentMethods();
+        $id = $request->get('data');
+        $this->org->removePaymentMethods($cards[(int) $id ]);
+        $em->remove($cards[(int) $id ]);
+        $em->flush();
+        return new JsonResponse(sizeof($cards), 200);
+    }
+
+    /**
+     * @param Request $request
+     * @return mixed
+     * @Route("/min-user-subscription", name="minUser")
+     * @throws Stripe\Exception\ApiErrorException
+     */
+    public function minUserSubscriptionAction(Request $request){
+        $em = $this->em;
+        $custid = $this->org->getStripeCusId();
+        $cust = Stripe\Customer::retrieve(
+            $custid
+        );
+
+       $sub = Stripe\Subscription::retrieve(
+            $cust->metadata->sub_id,
+        );
+        $price = Stripe\Price::retrieve(
+            $sub->plan->id,
+            );
+
+       $price =  Stripe\Price::create(
+           ['unit_amount' => ($price->unit_amount - ($cust->metadata->priceInit*100)),
+            'currency' => 'eur',
+            'recurring' => ['interval' => $price->recurring->interval],
+            'product' =>  $price->product,
+            ]
+           );
+
+       $sub = Stripe\Subscription::update(
+           $cust->metadata->sub_id,
+           ['cancel_at' => $sub->current_period_end ]
+
+       );
+
+       $newSub = Stripe\Subscription::create(
+           $cust->metadata->sub_id,
+           ['cancel_at' => $sub->current_period_end ]
+
+       );
+
+        $cust = Stripe\Customer::update(
+            $custid,
+            ['metadata' => ['quantity' => (((int)$cust->metadata->quantity)-1)]]
+        );
+        $id = $cust->metadata->sub_id;
+
+        return new JsonResponse((((int)$cust->metadata->quantity)-1), 200);
+    }
+    /**
+     * @param Request $request
+     * @return mixed
+     * @Route("/plus-user-subscription", name="plusUser")
+     * @throws Stripe\Exception\ApiErrorException
+     */
+    public function plusUserSubscriptionAction(Request $request){
+        $em = $this->em;
+        $custid = $this->org->getStripeCusId();
+        $cust = Stripe\Customer::retrieve(
+            $custid
+        );
+
+        $cust = Stripe\Customer::update(
+            $custid,
+            ['metadata' => ['quantity' => (((int)$cust->metadata->quantity)+1)]]
+        );
+        $id = $cust->metadata->sub_id;
+
+        return new JsonResponse((((int)$cust->metadata->quantity)+1), 200);
+    }
+        /**
+     * @param Request $request
+     * @param Application $app
+     * @return mixed
+     * @Route("/settings/root/organizations", name="manageOrganizations")
+         * @IsGranted("ROLE_ROOT", statusCode=404, message="Page not found")
+     */
+    public function manageOrganizationsAction(Request $request){
+        $entityManager = $this->em;
+        $repoO = $entityManager->getRepository(Organization::class);
+        $organizations = [];
+
+        /*
+        foreach ($repoO->findAll() as $organization) {
+            $organizations[] = $organization->toArray();
+        }
+        */
+
         //MasterController::sksort($organizations, 'lastConnectedDateTime');
+        $organizations = $repoO->findAll();
 
-
-        return $app['twig']->render('organization_list.html.twig',
+        return $this->render('organization_list.html.twig',
             [
                 'organizations' => $organizations,
                 'lkPath' => null,
@@ -187,52 +928,289 @@ class SettingsController extends MasterController
      * @param Request $request
      * @param Application $app
      * @return mixed
+     * @Route("/settings/root/workerFirms", name="manageWorkerFirms")
+     * @IsGranted("ROLE_ROOT", statusCode=404, message="Page not found")
+     */
+    public function manageWorkerFirmsAction(Request $request){
+        $em = $this->em;
+        $qb = $em->createQueryBuilder();
+        $qb2 = $em->createQueryBuilder();
+        if (!$this->user) {
+            return $this->redirectToRoute('login');
+        }
+        if(isset($_COOKIE['wf_s_p'])){
+            $sortingProp = $_COOKIE['wf_s_p'];
+        } else {
+            setcookie('wf_s_p', 'a');
+            $sortingProp = 'a';
+        }
+
+        if(isset($_COOKIE['wf_s_o'])){
+            $sortingOrder = $_COOKIE['wf_s_o'];
+        } else {
+            setcookie('wf_s_o', 'a');
+            $sortingOrder = 'a';
+        }
+
+        if(isset($_COOKIE['wf_nb'])){
+            $maxResults = $_COOKIE['wf_nb'];
+        } else {
+            setcookie('wf_nb', 20);
+            $maxResults = 20;
+        }
+
+        if(isset($_COOKIE['wf_cp'])){
+            $page = $_COOKIE['wf_cp'];
+        } else {
+            setcookie('wf_cp', 1);
+            $page = 1;
+        }
+
+        switch($sortingProp){
+            case 'a' :
+                $prop = 'name'; break;
+            case 'i' :
+                $prop = 'inserted';break;
+            case 's' :
+                $prop = 'nbLkEmployees';break;
+        }
+        $sortingOrder = $_COOKIE['wf_s_o'] == 'a' ? 'ASC' : 'DESC';
+        
+        $countryIds = [];
+
+        $countryQueryResults = $qb->select('identity(wf.country) AS couId')
+        ->from('App\Entity\WorkerFirm','wf')
+        ->groupBy('wf.country')
+        ->getQuery()
+        ->getResult();
+
+        foreach($countryQueryResults as $countryQueryResult){
+            $countryIds[] = $countryQueryResult['couId'];
+        }
+
+        $countries = $em->getRepository(Country::class)->findById($countryIds);
+        
+        $qb2->select('wf')
+            ->from('App\Entity\WorkerFirm','wf')
+            ->orderBy('wf.' . $prop, $sortingOrder);
+
+        if(isset($_COOKIE['wf_c'])){
+            if($_COOKIE['wf_c'] != 0){
+                $qb2->where('wf.country = :couId')
+                    ->setParameter('couId', $_COOKIE['wf_c']);
+            } else {
+                $qb2->where('wf.country IS NULL');
+            }
+        }
+
+        if(isset($_COOKIE['wf_s'])){
+            if($_COOKIE['wf_s'] != 0){
+                $qb2->andWhere('wf.state = :staId')
+                    ->setParameter('staId', $_COOKIE['wf_s']);
+            } else {
+                $qb2->andWhere('wf.state IS NULL');
+            }
+        }
+
+        if(isset($_COOKIE['wf_cit'])){
+            if($_COOKIE['wf_cit'] != 0){
+                $qb2->andWhere('wf.city = :citId')
+                    ->setParameter('citId', $_COOKIE['wf_cit']);
+            } else {
+                $qb2->andWhere('wf.city IS NULL');
+            }
+        }
+
+        $nbWorkerFirms = $qb2->getQuery()->getResult();
+        $nbWorkerFirms = sizeof($nbWorkerFirms);
+
+        $workerFirms = $qb2->setFirstResult(($page - 1) * $maxResults)
+            ->setMaxResults((int) $maxResults);
+
+        $workerFirms = $qb2->getQuery()->getResult();
+
+        return $this->render('worker_firm_list.html.twig',
+            [
+                'workerFirms' => $workerFirms,
+                'nbWorkerFirms' => $nbWorkerFirms,
+                'maxResults' => $maxResults,
+                'countries' => $countries,
+            ]) ;
+
+    }
+
+    /**
+     * @param Request $request
+     * @Route("/settings/root/processes", name="manageProdErrors")
+     * @IsGranted("ROLE_ROOT", statusCode=404)
+     */
+    public function manageProdErrors(Request $request){
+
+        $em = $this->em;
+        $repoGE = $em->getRepository(GeneratedError::class);
+        $errors = $repoGE->findAll();
+        usort($errors, fn($first,$second) => $second->getInserted() <=> $first->getInserted());
+
+        return $this->render('prod_errors_management.html.twig',
+        [
+            'errors' => $errors,
+        ]) ;
+
+
+    }
+
+    /**
+     * @param Request $request
+     * @Route("/settings/updates/manage", name="manageUpdates")
+    * @IsGranted("ROLE_ADMIN", statusCode=404)
+     */
+    public function manageUpdates(Request $request){
+
+        $em = $this->em;
+        $currentUser = $this->user;
+
+        if($request->get('orgId') && $currentUser->getRole() != 4){
+            throw new NotFoundHttpException();
+        }
+
+        $organization = $request->get('orgId') ? $em->getRepository(Organization::class)->find($request->get('orgId')): $currentUser->getOrganization();
+        /** @var EventGroupName[] */
+        $allEventGroupNames = $em->getRepository(EventGroupName::class)->findAll();
+        $allEventNames = [];
+        foreach($allEventGroupNames as $eventGroupName){
+            foreach($eventGroupName->getEventNames() as $eventName){
+                $allEventNames[] = $eventName;
+            }
+        }
+
+        return $this->render('updates_management.html.twig',
+        [
+            'allEventGroupNames' => $allEventGroupNames,
+            'allEventNames' => $allEventNames,
+            'organization' => $organization, 
+            'allIcons' => $em->getRepository(Icon::class)->findAll()
+        ]);
+
+    }
+
+    /**
+     * 
+     * @param Request $request
+     * @Route("/settings/element/retrieve-trans", name="retrieveTrans")
+     * @IsGranted("ROLE_ADMIN", statusCode=404)
+     */
+    public function retrieveTrans(Request $request){
+        $entityType = $request->get('e');
+        $em = $this->em;
+        $id = $request->get('id');
+        $prop = $request->get('p');
+        $locale = $request->getLocale();
+        $organization = $request->get('oid') ? $em->getRepository(Organization::class)->find($request->get('oid')) : $this->org;
+        switch($entityType){
+            case 'g' :
+                $eventGroup = $em->getRepository(EventGroup::class)->getDTrans($em->getRepository(EventGroup::class)->find($id),$locale,$organization);
+                $dynTrans = new ArrayCollection($em->getRepository(DynamicTranslation::class)->findBy(['entity' => 'EventGroupName', 'entityId' => [$eventGroup->getId(), $eventGroup->getEventGroupName()->getId()], 'entityProp' => 'name', 'organization' => [null, $organization]], ['organization' => 'ASC']));
+                break;
+            case 't' :
+                $eventType = $em->getRepository(EventType::class)->find($id);
+                $dynTrans = new ArrayCollection($em->getRepository(DynamicTranslation::class)->findBy(['entity' => ['EventType', 'EventName'], 'entityId' => [$eventType->getId(), $eventType->getEName()->getId()], 'entityProp' => 'name', 'organization' => [null, $organization]], ['organization' => 'ASC']));
+                break;
+            case 'n' :
+                $entity = 'EventName';
+                break;
+            case 'gn' :
+                $entity = 'EventGroupName';
+                break;
+        }
+        
+        /* $dynTrans = $repository->getDTrans($em->getRepository($entity->getCla)->find($id), $request->getLocale(), $organization);
+        if($dynTrans->count() > 0){
+            $element = $em->getRepository($entityType == 'g' ? EventGroup::class : EventType::class)->find($id);
+            $motherElmtId = $entityType == 'g' ? $element->getEventGroupName()->getId() : $element->getEName()->getId();
+            $dynTrans = new ArrayCollection([$em->getRepository(DynamicTranslation::class)->findOneBy(['entity' => $motherEntity, 'entityId' => $motherElmtId, 'entityProp' => $request->get('p')])]);
+        }*/
+        return new JsonResponse($dynTrans->map(fn(DynamicTranslation $dt) => ['fr' => $dt->getFR(), 'en' => $dt->getEN()])->getValues(), 200);
+    }
+
+    /**
+     * @param Request $request
+     * @param int $cnId
+     * @return JsonResponse|Response
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/settings/organization/{orgId}/processes", name="manageProcesses")
+     * @Route("/settings/element/icon/set", name="setCriterionIcon")
+     * @IsGranted("ROLE_ADMIN", statusCode=404)
      */
-    public function manageProcessesAction(Request $request, Application $app){
-        $em = $this->getEntityManager($app);
+    public function setEventTypeIcon(Request $request) {
+        $evtId = $request->get('id');
+        $icoId = $request->get('icoId');
+        $em = $this->em;
+        /** @var Icon|null */
+        $icon = $icoId === -1 ? null : $em->getRepository(Icon::class)->find($icoId);
+        /** @var EventType */
+        $eventType = $em->getRepository(EventType::class)->find($evtId);
+
+        $eventType->setIcon($icon);
+        $em->persist($eventType);
+        $em->flush();
+
+        return new JsonResponse([
+            'icon' => $icon ? $icon->getChar() : null,
+            'type' => $icon ? $icon->getType() : null
+        ], 200);
+    }
+
+    
+
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @return mixed
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/root/processes", name="manageProcesses")
+     * @IsGranted("ROLE_ROOT", statusCode=404)
+     */
+    public function manageProcessesAction(Request $request){
+        $em = $this->em;
         $repoP = $em->getRepository(Process::class);
         $repoO = $em->getRepository(Organization::class);
-        $currentUser = MasterController::getAuthorizedUser($app);
-        $isRoot = $currentUser->getRole() == 4;
+        $currentUser = $this->user;
         $organization = $currentUser->getOrganization();
-        $process = $isRoot ?  new Process : new InstitutionProcess();
-        $elmtType = $isRoot ? 'process' :'iprocess';
-        $formFactory = $app['form.factory'];
-        $manageForm = $formFactory->create(ManageProcessForm::class, $organization, ['standalone' => true, 'isRoot' => $isRoot]);
+        $process = new Process();
+
+        
+        $manageForm = $this->createForm(ManageProcessForm::class, $organization, ['standalone' => true, 'isRoot' => true]);
         $manageForm->handleRequest($request);
-        $createForm = $formFactory->create(AddProcessForm::class, $process, ['standalone' => true, 'organization' => $organization,'elmt' => $elmtType]);
+        $createForm = $this->createForm(AddProcessForm::class, $process, ['standalone' => true, 'organization' => $organization,'entity' => 'process']);
         $createForm->handleRequest($request);
 
-        $validatingProcesses = $isRoot ? $organization->getProcesses()->filter(function(Process $p){return $p->isApprovable();}) :
-            $organization->getInstitutionProcesses()->filter(function(InstitutionProcess $p){return $p->isApprovable();});
-        
+        $allProcesses = new ArrayCollection($repoP->findAll());
+        $validatingProcesses = $allProcesses->filter(function(Process $p){return $p->isApprovable();});
 
         if($validatingProcesses->count() > 0){
             $validatingProcess = $validatingProcesses->first();
-            $validateForm = $formFactory->create(AddProcessForm::class, $validatingProcess, ['standalone' => true, 'organization' => $organization,'elmt' => $elmtType]);
+            $validateForm = $this->createForm(AddProcessForm::class, $validatingProcess, ['standalone' => true, 'organization' => $organization, 'entity' => 'process']);
             $validateForm->handleRequest($request);
         } else {
             $validateForm = null;
         }
      
 
-        if ($manageForm->isValid()) {
+        if ($manageForm->isSubmitted() && $manageForm->isValid()) {
             $em->flush();
-            return $app->redirect($app['url_generator']->generate('firmSettings'));
+            return $this->redirectToRoute('firmSettings');
         }
 
-        return $app['twig']->render('process_list.html.twig',
+        return $this->render('process_list.html.twig',
             [
-                'isRoot' => $isRoot,
+                'isRoot' => true,
                 'form' => $manageForm->createView(),
                 'requestForm' => $createForm->createView(),
                 'validateForm' => $validateForm ? $validateForm->createView() : null,
+                'entity' => 'process',
             ]);
-
-
     }
 
     /**
@@ -244,64 +1222,89 @@ class SettingsController extends MasterController
      * @return JsonResponse
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/settings/organization/{orgId}/{elmtType}/pvalidate/{elmtId}", name="validateProcess")
+     * @Route("/settings/root/process/validate/{elmtId}", name="validateProcess")
+     * @IsGranted("ROLE_ROOT", statusCode=404, message="Page not found")
      */
-    public function validateProcessAction(Request $request, Application $app, $elmtId, $elmtType, $orgId) {
-        $em = $this->getEntityManager($app);
-        $repoO = $em->getRepository(Organization::class);
-        
-        $currentUser = MasterController::getAuthorizedUser($app);
+    public function validateProcessAction(Request $request, $elmtId) {
+        $em = $this->em;        
+        $currentUser = $this->user;
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
-        }
-        $currentUserOrganization = $repoO->find($currentUser->getOrgId());
-        $organization = $repoO->find($orgId);
-        $repoE = ($currentUser->getRole() == 4) ? $em->getRepository(Process::class) : $em->getRepository(InstitutionProcess::class);
-
-        $elements = $repoE->findBy(['organization' => $orgId]);
-
-        $hasPageAccess = true;
-
-        if ($currentUser->getRole() != 4 && ($organization != $currentUserOrganization || $currentUser->getRole() != 1 && $currentUser->getId() != $elmtId)) {
-            $hasPageAccess = false;
+            return $this->redirectToRoute('login');
         }
 
-        if (!$hasPageAccess) {
-            return $app['twig']->render('errors/403.html.twig');
+        $organization = $currentUser->getOrganization();
+        $repoP = $em->getRepository(Process::class);
+        $process = $elmtId == 0 ? new Process : $repoP->find($elmtId);
+
+        if ($_POST['name'] == "") {
+            return new JsonResponse(['errorMsg' => 'The process must have a name'], 500);
+        }
+
+        $process->setOrganization($organization);
+        $doublonProcess = $repoP->findOneByName($_POST['name']);
+
+        if (($doublonProcess == null) || ($doublonProcess == $process)) {
+            $process->setName($_POST['name'])
+                ->setParent($repoP->findOneById($_POST['parent']))
+                ->setGradable($_POST['gradable']);
+
+            $em->persist($process);
+            $em->flush();
+            return new JsonResponse(['message' => 'Success!','eid' => $process->getId()], 200);
         } else {
-
-            if ($_POST['name'] == "") {
-                return new JsonResponse(['errorMsg' => 'The process must have a name'], 500);
-            }
-
-            if ($elmtId != 0) {
-                /** @var InstitutionProcess|Process */
-                $element = $repoE->find($elmtId);
-            } else {
-                /** @var InstitutionProcess|Process */
-                $element = ($currentUser->getRole() == 4) ? new Process : new InstitutionProcess;
-                $element->setOrganization($organization);
-            }
-
-            $doublonElmt = $repoE->findOneBy(['organization' => $organization, 'name' => $_POST['name']]);
-
-            if (($doublonElmt == null) || ($doublonElmt == $element)) {
-                $element->setName($_POST['name'])
-                    ->setParent($repoE->findOneById($_POST['parent']))
-                    ->setGradable($_POST['gradable']);
-                if ($elmtType == 'iprocess') {
-                    $repoU = $em->getRepository(User::class);
-                    $selectedProcess = $em->getRepository(Process::class)->find($_POST['process']);
-                    $selectedMasterUser = $repoU->find($_POST['masterUser']);
-                    $element->setMasterUser($selectedMasterUser)->setProcess($selectedProcess);
-                }
-                $em->persist($element);
-                $em->flush();
-                return new JsonResponse(['message' => 'Success!','eid' => $element->getId()], 200);
-            } else {
-                return new JsonResponse(['errorMsg' => 'There is already a process having the same name !'], 500);
-            }
+            return new JsonResponse(['errorMsg' => 'There is already a process having the same name !'], 500);
         }
+    }
+
+    /**
+     * @param Request $request
+     * @param Application $app
+     * @param $elmtId
+     * @param $elmtType
+     * @param $orgId
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @Route("/settings/organization/process/validate/{elmtId}", name="validateIProcess")
+     * @IsGranted("ROLE_ADMIN", statusCode=404, message="Page not found")
+     */
+    public function validateIProcessAction(Request $request, $elmtId) {
+        
+        $em = $this->em;        
+        $currentUser = $this->user;
+        if (!$currentUser instanceof User) {
+            return $this->redirectToRoute('login');
+        }
+        
+        $organization = $currentUser->getOrganization();
+        $repoP = $em->getRepository(InstitutionProcess::class);
+
+        if ($_POST['name'] == "") {
+            return new JsonResponse(['errorMsg' => 'The process must have a name'], 500);
+        }
+
+        $process = $elmtId != 0 ? $repoP->find($elmtId) : new InstitutionProcess;
+        $process->setOrganization($organization);
+        
+        $doublonProcess = $repoP->findOneBy(['organization' => $organization, 'name' => $_POST['name']]);
+
+        if (($doublonProcess == null) || ($doublonProcess == $process)) {
+            $process->setName($_POST['name'])
+                ->setParent($repoP->findOneById($_POST['parent']))
+                ->setGradable($_POST['gradable']);
+          
+            $repoU = $em->getRepository(User::class);
+            $selectedProcess = $em->getRepository(Process::class)->find($_POST['process']);
+            $selectedMasterUser = $repoU->find($_POST['masterUser']);
+            $process->setMasterUser($selectedMasterUser)->setProcess($selectedProcess);
+            
+            $em->persist($process);
+            $em->flush();
+            return new JsonResponse(['message' => 'Success!','eid' => $process->getId()], 200);
+        } else {
+            return new JsonResponse(['errorMsg' => 'There is already a process having the same name !'], 500);
+        }
+        
     }
 
     /**
@@ -312,17 +1315,17 @@ class SettingsController extends MasterController
      * @return JsonResponse
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/settings/organization/{orgId}/{elmtType}/delete", name="deleteProcess")
+     * @Route("/settings/organization/{orgId}/{entity}/delete", name="deleteProcess")
      */
-    public function deleteProcessAction(Request $request, Application $app, $orgId, $elmtType) {
+    public function deleteProcessAction(Request $request, $orgId, $elmtType) {
 
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoO = $em->getRepository(Organization::class);
         $elmtId = $request->get('id');
         $repoU = $em->getRepository(User::class);
         $organization = $repoO->find($orgId);
-        $currentUser = MasterController::getAuthorizedUser($app);
-        $currentUserOrganization = $repoO->find($currentUser->getOrgId());
+        $currentUser = $this->user;;
+        $currentUserOrganization = $currentUser->getOrganization();
         $hasPageAccess = true;
 
         if ($currentUser->getRole() != 4 && ($organization != $currentUserOrganization || $currentUser->getRole() != 1)) {
@@ -330,7 +1333,7 @@ class SettingsController extends MasterController
         }
 
         if (!$hasPageAccess) {
-            return $app['twig']->render('errors/403.html.twig');
+            return $this->render('errors/403.html.twig');
         } else {
         // $organization = $target->getOrganization();
             
@@ -371,23 +1374,23 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/settings/organization/users/{orgId}/create", name="rootCreateUser")
      */
-    public function rootAddUserAction(Request $request, Application $app, $orgId) {
+    public function rootAddUserAction(Request $request, $orgId) {
 
-        $currentUser = MasterController::getAuthorizedUser($app);
+        $currentUser = $this->user;;
         if (!$currentUser instanceof User) {
-            return $app->redirect($app['url_generator']->generate('login'));
+            return $this->redirectToRoute('login');
         }
 
         if ($currentUser->getRole() != 4) {
-            return $app['twig']->render('errors/403.html.twig');
+            return $this->render('errors/403.html.twig');
         }
 
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoO = $em->getRepository(Organization::class);
         $organization = $repoO->find($orgId);
-        $formFactory = $app['form.factory'] ;
-        $createUserForm = $formFactory->create(AddUserForm::class, null, ['standalone'=>true,'organization' => $organization, 'enabledCreatingUser' => true]);
-        $organizationElementForm = $formFactory->create(OrganizationElementType::class, null, ['usedForUserCreation' => true, 'standalone' => true ]);
+        
+        $createUserForm = $this->createForm(AddUserForm::class, null, ['standalone'=>true,'organization' => $organization, 'enabledCreatingUser' => true]);
+        $organizationElementForm = $this->createForm(OrganizationElementType::class, null, ['usedForUserCreation' => true, 'standalone' => true ]);
         $createUserForm->handleRequest($request);
         $organizationElementForm->handleRequest($request);
 
@@ -421,11 +1424,12 @@ class SettingsController extends MasterController
 
             $settings['rootCreation'] = true;
             $em->flush();
-            MasterController::sendMail($app, $recipients,'registration', $settings);
-            return $app->redirect($app['url_generator']->generate('rootManageUsers', ['orgId' => $orgId]));
+            $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'registration']);
+
+            return $this->redirectToRoute('rootManageUsers', ['orgId' => $orgId]);
         }
 
-        return $app['twig']->render('user_create.html.twig',
+        return $this->render('user_create.html.twig',
             [
                 'form' => $createUserForm->createView(),
                 'organizationElementForm' => $organizationElementForm->createView(),
@@ -435,10 +1439,8 @@ class SettingsController extends MasterController
             ]);
     }
 
-
-
     //Modifies organization (limited to root master)
-    public function modifyOrganizationAction(Request $request, Application $app){
+    public function modifyOrganizationAction(Request $request){
 
     }
 
@@ -446,22 +1448,21 @@ class SettingsController extends MasterController
 
     /**
      * @param Request $request
-     * @param Application $app
      * @param $orgId
      * @return mixed
      * @Route("/settings/organization/activities/{orgId}", name="organizationActivities")
      */
-    public function getAllOrganizationActivitiesAction(Request $request, Application $app, $orgId)
+    public function getAllOrganizationActivitiesAction(Request $request, $orgId)
     {
         try{
             $entityManager = $this->getEntityManager($app) ;
             $repoO = $entityManager->getRepository(Organization::class);
-            $currentUser = MasterController::getAuthorizedUser($app);
+            $currentUser = $this->user;
             $organization = $repoO->findOneById($orgId);
-            $formFactory = $app['form.factory'] ;
-            $delegateActivityForm = $formFactory->create(DelegateActivityForm::class, null,  ['app' => $app, 'standalone' => true]);
+            
+            $delegateActivityForm = $this->createForm(DelegateActivityForm::class, null,  ['app' => $app, 'standalone' => true]);
             $delegateActivityForm->handleRequest($request);
-            $requestActivityForm = $formFactory->create(RequestActivityForm::class, null, ['app' => $app, 'standalone' => true]);
+            $requestActivityForm = $this->createForm(RequestActivityForm::class, null, ['app' => $app, 'standalone' => true]);
             $requestActivityForm->handleRequest($request);
             $userActivities = $organization->getActivities();
 
@@ -505,7 +1506,7 @@ class SettingsController extends MasterController
         }
 
 
-        return $app['twig']->render('activity_list.html.twig',
+        return $this->render('activity_list.html.twig',
             [
                 'user_activities' => $userActivities,
                 'organization' => $organization,
@@ -540,7 +1541,7 @@ class SettingsController extends MasterController
      * @return mixed
      * @Route("/settings/organization/users/{orgId}", name="rootManageUsers")
      */
-    public function getAllOrganizationUsersAction(Request $request, Application $app, $orgId){
+    public function getAllOrganizationUsersAction(Request $request, $orgId){
 
 
         $entityManager = $this->getEntityManager($app);
@@ -594,7 +1595,7 @@ class SettingsController extends MasterController
         $usersWithDpt = $users->matching(Criteria::create()->where(Criteria::expr()->neq("dptId", null)));
         $usersWithoutDpt = $users->matching(Criteria::create()->where(Criteria::expr()->eq("dptId", null))->andWhere(Criteria::expr()->neq("lastname", "ZZ")));
 
-        return $app['twig']->render('user_list.html.twig',
+        return $this->render('user_list.html.twig',
             [
                 'rootDisplay' => true,
                 'app' => $app,
@@ -629,333 +1630,47 @@ class SettingsController extends MasterController
      * @return mixed
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/settings/organization/{orgId}/delete", name="deleteOrganization")
+     * @Route("/settings/root/organization/{orgId}/delete", name="deleteOrganization")
      */
-    public function deleteOrganizationAction(Application $app, $orgId) {
-        $em = self::getEntityManager();
+    public function deleteOrganizationAction($orgId) {
+        $em = $this->em;
         $repoO = $em->getRepository(Organization::class);
-        $repoU = $em->getRepository(User::class);
 
         /** @var Organization */
         $organization = $repoO->find($orgId);
+        // Problem of constraint key, deleting each weight elmy although cascading removals
+        /*foreach($organization->getWeights() as $weight){
+            $organization->removeWeight($weight);
+        }*/
         $em->remove($organization);
-
-        /** @var User[] */
-        $orgUsers = $repoU->findByOrgId($orgId);
-        foreach ($orgUsers as $orgUser) {
-            $em->remove($orgUser);
-        }
         $em->flush();
 
-        return $app->redirect($app['url_generator']->generate('manageOrganizations'));
+        return $this->redirectToRoute('manageOrganizations');
     }
 
-
-    //Adds organization (limited to root master)
-
-    /**
-     * @param Request $request
-     * @param Application $app
-     * @return mixed
-     * @throws ORMException
-     * @throws OptimisticLockException
-     * @Route("/settings/organization/create", name="createOrganization")
-     */
-    public function addOrganizationAction(Request $request, Application $app)
-    {
-        $em = self::getEntityManager();
-        /** @var FormFactory */
-        $formFactory = $app['form.factory'];
-        $organizationForm = $formFactory->create(AddOrganizationForm::class, null,['standalone' => true, 'orgId' => 0, 'app' => $app]);
-        $organizationForm->handleRequest($request);
-        $errorMessage = '';
-        $organization = new Organization;
-        $options = [];
-        $repoO = $em->getRepository(Organization::class);
-        $repoWF = $em->getRepository(WorkerFirm::class);
-        $repoU = $em->getRepository(User::class);
-        $repoON = $em->getRepository(OptionName::class);
-        /** @var OptionName[] */
-        $options = $repoON->findAll();
-
-        if ($organizationForm->isSubmitted()) {
-            /*
-            if($repoO->findOneByLegalname($organizationForm->get('workerFirm')->getData())){
-                $organizationForm->get('commercialName')->addError(new FormError('You already have created an organization with such legalname. Make sure you correctly provided the data'));
-            }
-            */
-            /*
-            if($repoU->findOneByEmail($organizationForm->get('email')->getData())){
-                $organizationForm->get('email')->addError(new FormError('Ooopsss ! There is already a user registered with this email address. Please make sure you have not already created an organization with such an address'));
-            }*/
-
-            if ($organizationForm->isValid()) {
-
-                /** @var string */
-                $email = $organizationForm->get('email')->getData();
-                /** @var string */
-                $firstname = $organizationForm->get('firstname')->getData();
-                /** @var string */
-                $lastname = $organizationForm->get('lastname')->getData();
-                /** @var WorkerFirm */
-                $workerFirm = $repoWF->find((int) $organizationForm->get('workerFirm')->getData());
-                /** @var string */
-                $positionName = $organizationForm->get('position')->getData();
-                /** @var string */
-                $departmentName = $organizationForm->get('department')->getData();
-                /** @var string */
-                $orgType = $organizationForm->get('type')->getData();
-                $user = null;
-
-                $token = md5(rand());
-
-                if(!($email == "" && $firstname == "" && $lastname == "")){
-                    $user = new User;
-                    $user
-                        ->setFirstname($firstname)
-                        ->setLastname($lastname)
-                        ->setEmail($email)
-                        ->setRole(USER::ROLE_AM)
-                        ->setToken($token)
-                        ->setWeightIni(100)
-                        ->setOrgId($organization->getId());
-                    $em->persist($user);
-                    $em->flush();
-                }
-                
-                $defaultOrgWeight = new Weight;
-                $defaultOrgWeight->setOrganization($organization)
-                    ->setValue(100);
-                $organization->addWeight($defaultOrgWeight);
-
-                $organization
-                    ->setValidated(new \DateTime)
-                    ->setCommname($workerFirm->getName())
-                    ->setLegalname($workerFirm->getName())
-                    ->setIsClient(true)
-                    ->setType($orgType)
-                    ->setWeight_type('role')
-                    ->setExpired(new \DateTime('2100-01-01 00:00:00'))
-                    ->setWorkerFirm($workerFirm);
-
-                if($user){$organization->setMasterUserId($user->getId());}
-
-                $em->persist($organization);
-                $em->flush();
-
-                if($user){
-
-                    if($departmentName != "") {
-                        $department = new Department;
-                        $department
-                            ->setName($departmentName)
-                            ->setOrganization($organization);
-                        $em->persist($department);
-                        $em->flush();
-                    }
-
-                    if($positionName != "") {
-                        $position = new Position;
-                        $position
-                            ->setName($positionName)
-                            ->setOrganization($organization);
-                        $em->persist($position);
-                        $em->flush();
-                    }
-
-                    /*$weight = (new Weight)
-                        ->setInterval(0)
-                        ->setTimeframe('D')
-                        ->setOrganization($organization)
-                        ->setValue(100);
-
-                    if($positionName != ""){$weight->setPosition($position);}
-
-                    $em->persist($weight);
-                    $em->flush();*/
-
-                    $user
-                        ->setOrgId($organization->getId())
-                        ->setDptId($department->getId())
-                        ->setPosId($position->getId())
-                        ->setWgtId($defaultOrgWeight->getId());
-                    $em->persist($user);
-                    $em->flush();
-
-                }
-
-
-                foreach ($options as $option) {
-
-                    $optionValid = (new OrganizationUserOption)
-                    ->setOName($option)
-                    ->setOrganization($organization);
-
-                    // We set nb of days for reminding emails, very important otherwise if unset, if people create activities, can make system bug.
-                    //  => Whenever someone logs in, this person triggers reminder mails to every person in every organization, organization thus should have this parameter date set.
-                    if($option->getName() == 'mailDeadlineNbDays'){
-                        $optionValid->setOptionFValue(2);
-                    }
-                    $em->persist($optionValid);
-
-                    // At least 3 options should exist for a new firm for activity & access results
-                    if($option->getName() == 'activitiesAccessAndResultsView'){
-
-                        // Visibility and access options has many options :
-                        // * Scope (opt_bool_value in DB, optionTrue property) : defines whether user sees his own results (0), or all participant results (1)
-                        // * Activities access (opt_int_value, optionIValue property) : defines whether user can access all organisation acts (1), his department activities (2) or his own activities (3)
-                        // * Status access (opt_int_value_2, optionSecondaryIValue property) : defines whether user can access computed results (2), or released results (3)
-                        // * Detail (opt_float_value, optionFValue property) : defines whether user accesses averaged/consolidated results (0), or detailed results (1)
-                        // * Results Participation Condition (opt_string_value, optionSValue property) : defines whether user accesses activity results without condition ('none'), if he is activity owner ('owner'), or if he is participating ('participant')
-
-                        $optionAdmin = $optionValid;
-                        $optionAdmin->setRole(1)->setOptionTrue(true)->setOptionIValue(1)->setOptionSecondaryIValue(2)->setOptionFValue(1)->setOptionSValue('none');
-                        $em->persist($optionAdmin);
-
-                        $optionAM = (new OrganizationUserOption)
-                        ->setOName($option)
-                        ->setOrganization($organization);
-                        $optionAM->setRole(2)->setOptionTrue(true)->setOptionIValue(2)->setOptionSecondaryIValue(2)->setOptionFValue(0)->setOptionSValue('owner');
-                        $em->persist($optionAM);
-
-                        $optionC = (new OrganizationUserOption)
-                        ->setOName($option)
-                        ->setOrganization($organization);
-                        $optionC->setRole(3)->setOptionTrue(false)->setOptionIValue(3)->setOptionSecondaryIValue(3)->setOptionFValue(0)->setOptionSValue('participant');
-                        $em->persist($optionC);
-                    }
-                }
-
-                $em->flush();
-
-                $repoCN = $em->getRepository(CriterionName::class);
-                $criterionGroups = [
-                    1 => new CriterionGroup('Hard skills', $organization),
-                    2 => new CriterionGroup('Soft skills', $organization)
-                ];
-                foreach ($criterionGroups as $cg) {
-                    $em->persist($cg);
-                }
-                $em->flush();
-
-                /**
-                 * @var CriterionName[]
-                 */
-                $defaultCriteria = $repoCN->findBy(['organization' => null]);
-                foreach ($defaultCriteria as $defaultCriterion) {
-                    $criterion = clone $defaultCriterion;
-                    // 1: hard skill
-                    // 2: soft skill
-                    $type = $criterion->getType();
-                    $cg = $criterionGroups[$type];
-                    $criterion
-                        ->setOrganization($organization)
-                        ->setCriterionGroup($cg);
-
-                    $cg->addCriterion($criterion);
-                    $em->persist($criterion);
-                }
-
-                //Synthetic User Creation (for external, in case no consituted team has been created to grade a physical person for an activity)
-                $syntheticUser = new User;
-                $syntheticUser
-                    ->setFirstname('ZZ')
-                    ->setLastname('ZZ')
-                    ->setRole(3)
-                    ->setOrgId($organization->getId());
-                $em->persist($syntheticUser);
-
-                $em->flush();
-
-                // Sending mail to created firm master user, if such user exists
-                if($user){
-                    $settings['tokens'][] = $token;
-                    $recipients = [];
-                    $recipients[] = $user;
-                    $settings['rootCreation'] = true;
-
-                    MasterController::sendMail($app,$recipients,'registration',$settings);
-                }
-
-                return $app->redirect($app['url_generator']->generate('manageOrganizations'));
-            }
-
-        }
-
-        return $app['twig']->render('organization_add.html.twig',
-            [
-                'form' => $organizationForm->createView(),
-                'message' => $errorMessage,
-                //'nbweights'=> $nbWeights,
-                //'totalweights' => $totalWeights
-            ]);
-    }
+    // Delete worker firm (limited to root master)
 
     /**
-     * @param Request $request
      * @param Application $app
      * @param $orgId
      * @return mixed
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/organizations/{orgId}/validate", name="validateOrganization")
+     * @Route("/settings/root/workerFirm/delete", name="deleteWorkerFirm")
      */
-    public function validateOrganizationAction(Request $request, Application $app, $orgId){
-
-        $currentUser = self::getAuthorizedUser($app);
-        if($currentUser->getRole() != 4){
-            return $app['twig']->render('errors/404.html.twig');
-        }
-
-        $em = $this->getEntityManager($app);
-        $repoO = $em->getRepository(Organization::class);
-        $repoU = $em->getRepository(User::class);
-        $organization = $repoO->findOneById($orgId);
-        $formFactory = $app['form.factory'];
-        $organizationForm = $formFactory->create(AddOrganizationForm::class, null,['standalone' => true, 'orgId' => $orgId, 'app' => $app, 'toValidate' => true]);
-        $organizationForm->handleRequest($request);
-
-        if($organizationForm->isSubmitted()){
-
-            $masterUser = $repoU->findOneById($organization->getMasterUserId());
-
-            if($organizationForm->get('validate')->isClicked()){
-
-                $organization
-                    ->setIsClient(true)
-                    ->setValidated(new \DateTime)
-                    ->setType($organizationForm->get('type')->getData());
-
-                $masterUser->setValidated(new \DateTime);
-                $em->persist($organization);
-                $em->persist($masterUser);
-
-                $recipients = [];
-                $recipients[] = $masterUser;
-                $settings = [];
-                $settings['token'] = $masterUser->getToken();
-
-                MasterController::sendMail($app, $recipients,'subscriptionConfirmation', $settings);
-
-            } else {
-
-                $em->remove($masterUser);
-                $em->remove($organization);
-            }
-
-            $em->flush();
-            return $app->redirect($app['url_generator']->generate('manageOrgazations'));
-        }
-
-        return $app['twig']->render('organization_add.html.twig',
-            [
-                'form' => $organizationForm->createView(),
-                'toValidate' => true,
-            ]);
+    public function deleteWorkerFirmAction(Request $request) {
+        $em = $this->em;
+        $wfiId = $request->get('id');
+        $repoWF = $em->getRepository(WorkerFirm::class);
+        /** @var WorkerFirm */
+        $workerFirm = $repoWF->find($wfiId);
+        $em->remove($workerFirm);
+        $em->flush();
+        return $this->redirectToRoute('manageWorkerFirms');
     }
 
-    public function deleteOrganizationActivityAction(Request $request, Application $app, $orgId, $actId){
-        $em = $this->getEntityManager($app);
+    public function deleteOrganizationActivityAction(Request $request, $orgId, $actId){
+        $em = $this->em;
         $activity = $em->getRepository(Activity::class)->findOneById($actId);
         $user = self::getAuthorizedUser($app);
         $organization = $em->getRepository(Organization::class)->findOneById($orgId);
@@ -966,86 +1681,19 @@ class SettingsController extends MasterController
     }
 
     /**
-     * @param Request $request
-     * @param Application $app
-     * @param $orgId
      * @return mixed
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/settings/organization/{orgId}/update", name="updateOrganization")
+     * @Route("/launching/mail/send", name="sendLaunchingMail")
      */
-    public function updateOrganizationAction(Request $request, Application $app, $orgId){
+    public function sendLaunchingMail(){
 
-        $em = $this->getEntityManager($app);
-        $repoO = $em->getRepository(Organization::class);
-        $formFactory = $app['form.factory'];
-        $organizationForm = $formFactory->create(AddOrganizationForm::class, null,['standalone' => true, 'orgId' => $orgId, 'app' => $app]);
-        $organizationForm->handleRequest($request);
-        $errorMessage = '';
-        $organization = $repoO->findOneById($orgId);
-        $user = new User;
-        $department = new Department;
-        $position = new Position;
-
-        if ($organizationForm->isSubmitted()) {
-            if ($organizationForm->isValid()) {
-                $email = $organizationForm->get('email')->getData();
-                $token = md5(rand());
-
-                $organization->setCommname($organizationForm->get('commname')->getData());
-                $organization->setLegalname($organizationForm->get('legalname')->getData());
-                $organization->setMasterUserId(0);
-                $em->persist($organization);
-
-                $department->setOrganization($organization);
-                $department->setName($organizationForm->get('department')->getData());
-                $em->persist($department);
-                //$em->flush();
-
-                //$position->setDepartment($department->getId());
-                $position->setDepartment($department);
-                $position->setName($organizationForm->get('position')->getData());
-
-                $em->persist($position);
-                $em->flush();
-
-                $user->setFirstname($organizationForm->get('firstname')->getData());
-                $user->setLastname($organizationForm->get('lastname')->getData());
-                $user->setEmail($email);
-
-                $user->setRole(1);
-                $user->setToken($token);
-
-                $user->setPosId($position->getId());
-
-                $user->setOrgId($organization->getId());
-                $em->persist($user);
-                $em->flush();
-
-                $organization->setMasterUserId($user->getId());
-                $em->persist($organization);
-                $em->flush();
-
-                $recipients = [];
-                $recipients[] = $user;
-                $recipients[] = $user;
-                $settings = [];
-
-                MasterController::sendMail($app,$recipients,'orgMasterUserChange',$settings);
-
-                return $app->redirect($app['url_generator']->generate('manageOrganizations'));
-            }
-
-        }
-
-        return $app['twig']->render('organization_add.html.twig',
-            [
-                'form' => $organizationForm->createView(),
-                'message' => $errorMessage,
-                'update' => true,
-                'orgId' => $organization->getId()
-            ]);
-
+        $followerMail = $_POST['follower'];
+        $this->forward('App\Controller\MailController::sendMail', ['recipients' => [$followerMail], 'settings' => ['recipientUsers' => false], 'actionType' => 'launchingFollowupConfirmation']);
+        $em = $this->em;
+        $ddAdmins = $em->getRepository(User::class)->findByRole(4);
+        $this->forward('App\Controller\MailController::sendMail', ['recipients' => $ddAdmins, 'settings' => ['follower' => $followerMail], 'actionType' => 'launchingFollowupSubscription']);
+        return new JsonResponse(['msg' => 'success'],200);
     }
 
     // Display user info, enables modification. Note : root user can modify users from other organizations
@@ -1058,17 +1706,17 @@ class SettingsController extends MasterController
      * @return mixed
      * @Route("/settings/organization/{orgId}/user/{usrId}", name="rootUpdateUser")
      */
-    public function updateUserAction(Request $request, Application $app, $orgId, $usrId)
+    public function updateUserAction(Request $request, $orgId, $usrId)
     {
 
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoO = $em->getRepository(Organization::class);
         $repoOC = $em->getRepository(Client::class);
         $searchedUser = $em->getRepository(User::class)->findOneById($usrId);
         $connectedUser = MasterController::getAuthorizedUser($app);
         $searchedUserOrganization = $repoO->findOneById($searchedUser->getOrgId());
         $orgOptions = $searchedUserOrganization->getOptions();
-        $formFactory = $app['form.factory'];
+        
         $departments = ($searchedUser->getOrgId() == $connectedUser->getOrgId() || $connectedUser->getRole() == 4) ? $searchedUserOrganization->getDepartments() : null;
         $enabledCreatingUserOption = false;
         foreach($orgOptions as $orgOption){
@@ -1087,44 +1735,44 @@ class SettingsController extends MasterController
             }
 
             if(!in_array($searchedUserOrganization,$connectedUserClients) && $connectedUser->getRole() != 4){
-                return $app['twig']->render('errors/403.html.twig');
+                return $this->render('errors/403.html.twig');
             }
 
             if(in_array($searchedUserOrganization,$connectedUserClients)){
                 $modifyIntern = false;
-                $userForm = $formFactory->create(ClientUserType::class, null, ['standalone' => true, 'user' => $searchedUser, 'app' => $app, 'clients' => $connectedUserClients]);
+                $userForm = $this->createForm(ClientUserType::class, null, ['standalone' => true, 'user' => $searchedUser, 'app' => $app, 'clients' => $connectedUserClients]);
             } else {
                 // This case only applies to root users
                 $modifyIntern = true;
-                $userForm = $formFactory->create(UserType::class, null, ['standalone' => true, 'app' => $app, 'organization' => $searchedUserOrganization, 'user' => $searchedUser]);
+                $userForm = $this->createForm(UserType::class, null, ['standalone' => true, 'app' => $app, 'organization' => $searchedUserOrganization, 'user' => $searchedUser]);
             }
 
         } else {
             if($connectedUser->getRole() == 2 || $connectedUser->getRole() == 3){
-                return $app['twig']->render('errors/403.html.twig');
+                return $this->render('errors/403.html.twig');
             }
 
             $modifyIntern = true;
-            $userForm = $formFactory->create(UserType::class, $searchedUser, ['standalone' => true, 'organization' => $searchedUserOrganization]);
+            $userForm = $this->createForm(UserType::class, $searchedUser, ['standalone' => true, 'organization' => $searchedUserOrganization]);
         }
 
 
 
         $userForm->handleRequest($request);
-        $organizationElementForm = $formFactory->create(OrganizationElementType::class, null, ['usedForUserCreation' => false, 'standalone' => true, 'organization' => $searchedUserOrganization]);
+        $organizationElementForm = $this->createForm(OrganizationElementType::class, null, ['usedForUserCreation' => false, 'standalone' => true, 'organization' => $searchedUserOrganization]);
         $organizationElementForm->handleRequest($request);
         /*} catch (\Exception $e){
             print_r($e->getMessage());
             die;
         }*/
 
-        return $app['twig']->render('user_create.html.twig',
+        return $this->render('user_create.html.twig',
             [
                 'modifyIntern' => $modifyIntern,
                 'form' => $userForm->createView(),
                 'orgId' => $searchedUserOrganization->getId(),
                 'organizationElementForm' => $organizationElementForm->createView(),
-                'clientForm' => ($modifyIntern) ? null : $formFactory->create(AddClientForm::class, null, ['standalone'=>true])->createView(),
+                'clientForm' => ($modifyIntern) ? null : $this->createForm(AddClientForm::class, null, ['standalone'=>true])->createView(),
                 'enabledCreatingUser' => false,
                 'creationPage' => false,
 
@@ -1140,16 +1788,16 @@ class SettingsController extends MasterController
      * @return JsonResponse
      * @Route("/settings/organization/{orgId}/user/{usrId}", name="rootUpdateUserAJAX")
      */
-    public function updateUserActionAJAX(Request $request, Application $app, $orgId, $usrId)
+    public function updateUserActionAJAX(Request $request, $orgId, $usrId)
     {
 
         try{
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoO = $em->getRepository(Organization::class);
         $repoOC = $em->getRepository(Client::class);
         $searchedUser = $em->getRepository(User::class)->findOneById($usrId);
         $connectedUser = MasterController::getAuthorizedUser($app);
-        $formFactory = $app['form.factory'];
+        
 
         $searchedUserOrganization = $repoO->findOneById($searchedUser->getOrgId());
 
@@ -1166,19 +1814,19 @@ class SettingsController extends MasterController
             }
 
             if(!in_array($searchedUserOrganization,$connectedUserClients) && $connectedUser->getRole() != 4){
-                return $app['twig']->render('errors/403.html.twig');
+                return $this->render('errors/403.html.twig');
             }
 
             $userForm = (!in_array($searchedUserOrganization,$connectedUserClients)) ?
-            $formFactory->create(UserType::class, null, ['standalone' => true, 'app' => $app, 'departments' => $departments, 'user' => $searchedUser]) :
-            $formFactory->create(ClientUserType::class, null, ['standalone' => true, 'user' => $searchedUser, 'app' => $app, 'clients' => $connectedUserOrgClients]);
+            $this->createForm(UserType::class, null, ['standalone' => true, 'app' => $app, 'departments' => $departments, 'user' => $searchedUser]) :
+            $this->createForm(ClientUserType::class, null, ['standalone' => true, 'user' => $searchedUser, 'app' => $app, 'clients' => $connectedUserOrgClients]);
 
         } else {
             if($connectedUser->getRole() == 2 || $connectedUser->getRole() == 3){
-                return $app['twig']->render('errors/403.html.twig');
+                return $this->render('errors/403.html.twig');
             }
 
-            $userForm = $formFactory->create(UserType::class, null, ['standalone' => true, 'app' => $app, 'departments' => $departments, 'user' => $searchedUser]);
+            $userForm = $this->createForm(UserType::class, null, ['standalone' => true, 'app' => $app, 'departments' => $departments, 'user' => $searchedUser]);
         }
 
 
@@ -1205,7 +1853,7 @@ class SettingsController extends MasterController
                     $token = md5(rand());
                     $settings['token'] = $token;
                     $searchedUser->setPassword(null)->setToken($token)->setEmail($userForm->get('email')->getData());
-                    MasterController::sendMail($app,$recipients,'emailChangeNotif',$settings);
+                    $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'emailChangeNotif']);
                 }
 
                 $existingWeight = $repoW->findOneById($userForm->get('weightIni')->getData());
@@ -1224,7 +1872,7 @@ class SettingsController extends MasterController
                     $token = md5(rand());
                     $settings['token'] = $token;
                     $externalUser->setPassword(null)->setToken($token)->setEmail($userForm->get('email')->getData());
-                    MasterController::sendMail($app,$recipients,'emailChangeNotif',$settings);
+                    $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'emailChangeNotif']);
                 }
 
                 $externalUser
@@ -1277,9 +1925,9 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/ajax/settings/organization/{orgId}/user/{usrId}", name="rootAjaxUserDelete")
      */
-    public function deleteUserAction(Request $request, Application $app, $orgId, $usrId){
-        $em = $this->getEntityManager($app);
-        $repoAU = $em->getRepository(ActivityUser::class);
+    public function deleteUserAction(Request $request, $orgId, $usrId){
+        $em = $this->em;
+        $repoP = $em->getRepository(Participation::class);
         $repoU = $em->getRepository(User::class);
         $repoO = $em->getRepository(Organization::class);
         $repoD = $em->getRepository(Department::class);
@@ -1292,7 +1940,7 @@ class SettingsController extends MasterController
         $posId = $user->getPosId();
         $dptId = $user->getDptId();
         $wgtId = $user->getWgtId();
-        $nbUserParticipations = count($repoAU->findByUsrId($usrId));
+        $nbUserParticipations = count($repoP->findByUsrId($usrId));
 
         if($posId != null){
             $position = $repoP->findOneById($posId);
@@ -1361,15 +2009,15 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/ajax/settings/organization/{orgId}/client/user/{usrId}", name="rootAjaxClientUserDelete")
      */
-    public function deleteClientUserAction(Request $request, Application $app, $orgId, $usrId){
-        $em = $this->getEntityManager($app);
-        $repoAU = $em->getRepository(ActivityUser::class);
+    public function deleteClientUserAction(Request $request, $orgId, $usrId){
+        $em = $this->em;
+        $repoP = $em->getRepository(Participation::class);
         $repoEU = $em->getRepository(ExternalUser::class);
         $repoU = $em->getRepository(User::class);
         $repoO = $em->getRepository(Organization::class);
         $em->flush();
         $organization = $repoO->findOneById($orgId);
-        $nbUserParticipations = count($repoAU->findByUsrId($usrId));
+        $nbUserParticipations = count($repoP->findByUsrId($usrId));
         $internalUser = $repoU->findOneById($usrId);
         $externalUser = $repoEU->findOneBy(['user' => $internalUser, 'organization' => $organization]);
         if($nbUserParticipations == 0){
@@ -1452,13 +2100,13 @@ class SettingsController extends MasterController
         $em->flush();
     }
 
-    /*public function searchWorkerElmts(Request $request, Application $app){
+    /*public function searchWorkerElmts(Request $request){
 
-        $formFactory = $app['form.factory'];
-        $searchWorkerForm = $formFactory->create(SearchWorkerForm::class, null);
+        
+        $searchWorkerForm = $this->createForm(SearchWorkerForm::class, null);
         $searchWorkerForm->handleRequest($request);
 
-        return $app['twig']->render('worker_search.html.twig',
+        return $this->render('worker_search.html.twig',
         [
             'form' => $searchWorkerForm->createView(),
         ]);
@@ -1474,10 +2122,10 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/settings/organization/{orgId}/duplicate", name="duplicateOrganization")
      */
-    public function duplicateOrganizationAction(Request $request, Application $app,$orgId){
+    public function duplicateOrganizationAction(Request $request,$orgId){
         set_time_limit(240);
         ini_set('memory_limit', '500M');
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoO = $em->getRepository(Organization::class);
         $repoA = $em->getRepository(Activity::class);
         $repoU = $em->getRepository(User::class);
@@ -1633,12 +2281,12 @@ class SettingsController extends MasterController
             $clonedFirm->addTeam($clonedTeam);
             $clonedTeams[] = $clonedTeam;
             $originalTeams[] = $team;
-            foreach($team->getTeamUsers() as $teamUser){
-                $clonedTeamUser = clone $teamUser;
-                $clonedTeamUser->setUsrId($clonedUsers[array_search($repoU->findOneById($teamUser->getUsrId()),$originalUsers)]->getId());
-                $clonedTeam->addTeamUser($clonedTeamUser);
+            foreach($team->getMembers() as $member){
+                $clonedTeamUser = clone $member;
+                $clonedTeamUser->setUsrId($clonedUsers[array_search($repoU->findOneById($member->getUsrId()),$originalUsers)]->getId());
+                $clonedTeam->addMember($clonedTeamUser);
                 $clonedTeamUsers[] = $clonedTeamUser;
-                $originalTeamUsers[] = $teamUser;
+                $originalTeamUsers[] = $member;
             }
         }
 
@@ -1663,7 +2311,7 @@ class SettingsController extends MasterController
                 foreach($stage->getCriteria() as $criterion){
                     $clonedCriterion = clone $criterion;
                     $clonedStage->addCriterion($clonedCriterion)
-                        ->setMasterUserId($clonedUsers[array_search($repoU->findOneById($stage->getMasterUserId()),$originalUsers)]->getId());
+                        ->setMasterUserId($clonedUsers[array_search($stage->getMasterUser(),$originalUsers)]->getId());
                     $clonedCriteria[] = $clonedCriterion;
                     $originalCriteria[] = $criterion;
 
@@ -1671,7 +2319,7 @@ class SettingsController extends MasterController
                         $clonedParticipant = clone $participant;
                         $clonedParticipant->setActivity($clonedActivity)
                             ->setStage($clonedStage)
-                            ->setUsrId($clonedUsers[array_search($repoU->findOneById($participant->getUsrId()),$originalUsers)]->getId());
+                            ->setUsrId($clonedUsers[array_search($participant->getUserId(),$originalUsers)]->getId());
                         if($participant->getTeam() != null){
                             $clonedParticipant->setTeam($clonedTeams[array_search($participant->getTeam(),$originalTeams)]);
                         }
@@ -1802,7 +2450,7 @@ class SettingsController extends MasterController
         $em->persist($clonedFirm);
         $em->flush();
 
-        return $app->redirect($app['url_generator']->generate('massiveUpdateOrganization', ['orgId' => $clonedFirm->getId()]));
+        return $this->redirectToRoute('massiveUpdateOrganization', ['orgId' => $clonedFirm->getId()]);
 
     }
 
@@ -1815,13 +2463,13 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/settings/organization/{orgId}/mupdate", name="massiveUpdateOrganization")
      */
-    public function massiveUpdateOrganizationAction(Request $request, Application $app, $orgId){
+    public function massiveUpdateOrganizationAction(Request $request, $orgId){
 
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoO = $em->getRepository(Organization::class);
         $organization = $repoO->findOneById($orgId);
-        $formFactory = $app['form.factory'];
-        $organizationUsersForm = $formFactory->create(UpdateOrganizationForm::class, $organization, ['standalone' =>true,'organization' => $organization,'app'=> $app]);
+        
+        $organizationUsersForm = $this->createForm(UpdateOrganizationForm::class, $organization, ['standalone' =>true,'organization' => $organization,'app'=> $app]);
         $organizationUsersForm->handleRequest($request);
 
         if($organizationUsersForm->isValid()){
@@ -1851,12 +2499,12 @@ class SettingsController extends MasterController
             foreach ($repoO->findAll() as $organization) {
                 $organizations[] = $organization->toArray($app);
             }
-            return $app['twig']->render('organization_list.html.twig',['organizations' => $organizations]);
-            //return $app->redirect($app['url_generator']->generate('manageOrganizations'));
+            return $this->render('organization_list.html.twig',['organizations' => $organizations]);
+            //return $this->redirectToRoute('manageOrganizations');
 
         }
 
-        return $app['twig']->render('organization_massive_update.html.twig',
+        return $this->render('organization_massive_update.html.twig',
         [
             'form' => $organizationUsersForm->createView(),
             'organization' => $organization,
@@ -1864,21 +2512,21 @@ class SettingsController extends MasterController
 
     }
 
-    public function displayWorkerElmts(Request $request, Application $app, $currentPage = 1, $limit = 100){
+    public function displayWorkerElmts(Request $request, $currentPage = 1, $limit = 100){
 
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoWE = $em->getRepository(WorkerExperience::class);
-        $formFactory = $app['form.factory'];
-        $searchWorkerForm = $formFactory->create(SearchWorkerForm::class, null,['app' => $app]);
-        $validateFirmForm = $formFactory->create(ValidateFirmForm::class, null, ['standalone' => true]);
-        $validateMailForm = $formFactory->create(ValidateMailForm::class, null, ['standalone' => true]);
-        $sendMailProspectForm = $formFactory->create(SendMailProspectForm::class, null, ['standalone' => true]);
+        
+        $searchWorkerForm = $this->createForm(SearchWorkerForm::class, null,['app' => $app]);
+        $validateFirmForm = $this->createForm(ValidateFirmForm::class, null, ['standalone' => true]);
+        $validateMailForm = $this->createForm(ValidateMailForm::class, null, ['standalone' => true]);
+        $sendMailProspectForm = $this->createForm(SendMailProspectForm::class, null, ['standalone' => true]);
         $searchWorkerForm->handleRequest($request);
 
-        $validateMassFirmForm = $formFactory->create(ValidateMassFirmForm::class, null, ['standalone' => true, 'firms' => $searchedWorkerFirms]);
+        $validateMassFirmForm = $this->createForm(ValidateMassFirmForm::class, null, ['standalone' => true, 'firms' => $searchedWorkerFirms]);
             $validateMassFirmForm->handleRequest($request);
 
-        return $app['twig']->render('worker_search.html.twig',
+        return $this->render('worker_search.html.twig',
         [
             'form' => $searchWorkerForm->createView(),
             'validateFirmForm' => $validateFirmForm->createView(),
@@ -1902,15 +2550,15 @@ class SettingsController extends MasterController
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @Route("/workers/search", name="findWorkerElmts")
      */
-    public function findWorkerElmts(Request $request, Application $app, $currentPage = 1, $limit = 500){
+    public function findWorkerElmts(Request $request, $currentPage = 1, $limit = 500){
 
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoWE = $em->getRepository(WorkerExperience::class);
-        $formFactory = $app['form.factory'];
-        $searchWorkerForm = $formFactory->create(SearchWorkerForm::class, null,['app' => $app]);
-        $validateFirmForm = $formFactory->create(ValidateFirmForm::class, null, ['standalone' => true]);
-        $validateMailForm = $formFactory->create(ValidateMailForm::class, null, ['standalone' => true]);
-        $sendMailProspectForm = $formFactory->create(SendMailProspectForm::class, null, ['standalone' => true]);
+        
+        $searchWorkerForm = $this->createForm(SearchWorkerForm::class, null,['app' => $app]);
+        $validateFirmForm = $this->createForm(ValidateFirmForm::class, null, ['standalone' => true]);
+        $validateMailForm = $this->createForm(ValidateMailForm::class, null, ['standalone' => true]);
+        $sendMailProspectForm = $this->createForm(SendMailProspectForm::class, null, ['standalone' => true]);
         $searchWorkerForm->handleRequest($request);
         $searchedWorkerFirms = null;
         $searchedWorkerIndividuals = null;
@@ -1929,9 +2577,9 @@ class SettingsController extends MasterController
 
 
                 $qb->select('we')
-                ->from('Model\WorkerExperience','we')
-                ->innerJoin('Model\WorkerFirm', 'wf', 'WITH', 'we.firm = wf.id')
-                ->innerJoin('Model\WorkerIndividual', 'wi', 'WITH', 'we.individual = wi.id')
+                ->from('App\Entity\WorkerExperience','we')
+                ->innerJoin('App\Entity\WorkerFirm', 'wf', 'WITH', 'we.firm = wf.id')
+                ->innerJoin('App\Entity\WorkerIndividual', 'wi', 'WITH', 'we.individual = wi.id')
                 //->where('au.status = 4')
                 ->where('we.position LIKE :position')
                 ->andWhere('wf.name LIKE :firm')
@@ -1977,9 +2625,9 @@ class SettingsController extends MasterController
 
                 $qb2 = $em->createQueryBuilder();
                 $qb2->select('count(we.id)')
-                ->from('Model\WorkerExperience','we')
-                ->innerJoin('Model\WorkerFirm', 'wf', 'WITH', 'we.firm = wf.id')
-                ->innerJoin('Model\WorkerIndividual', 'wi', 'WITH', 'we.individual = wi.id')
+                ->from('App\Entity\WorkerExperience','we')
+                ->innerJoin('App\Entity\WorkerFirm', 'wf', 'WITH', 'we.firm = wf.id')
+                ->innerJoin('App\Entity\WorkerIndividual', 'wi', 'WITH', 'we.individual = wi.id')
                 //->where('au.status = 4')
                 ->where('we.position LIKE :position')
                 ->andWhere('wf.name LIKE :firm')
@@ -2051,7 +2699,7 @@ class SettingsController extends MasterController
             /*if($searchWorkerForm->get('fullName')->getData() == '' && $searchWorkerForm->get('position')->getData() == '' && $searchWorkerForm->get('firmName')->getData() != ''){
 
                 $searchedWorkerFirms = new ArrayCollection($qb->select('wf')
-                ->from('Model\WorkerFirm', 'wf')
+                ->from('App\Entity\WorkerFirm', 'wf')
                 ->where('wf.name LIKE :firmName')
                 ->setParameter('firmName', '%'.$searchWorkerForm->get('firmName')->getData().'%')
                 ->getQuery()
@@ -2072,7 +2720,7 @@ class SettingsController extends MasterController
             if($searchWorkerForm->get('fullName')->getData() != '' && $searchWorkerForm->get('position')->getData() == '' && $searchWorkerForm->get('firmName')->getData() == ''){
 
                 $searchedWorkerIndividuals = new ArrayCollection($qb->select('wi')
-                ->from('Model\WorkerIndividual', 'wi')
+                ->from('App\Entity\WorkerIndividual', 'wi')
                 ->where('wi.fullName LIKE :fullName')
                 ->setParameter('fullName', '%'.$searchWorkerForm->get('fullName')->getData().'%')
                 ->getQuery()
@@ -2095,7 +2743,7 @@ class SettingsController extends MasterController
             if($searchWorkerForm->get('fullName')->getData() == '' && $searchWorkerForm->get('position')->getData() == ''){
 
                 $qb->select('wf')
-                ->from('Model\WorkerFirm', 'wf')
+                ->from('App\Entity\WorkerFirm', 'wf')
                 ->where('wf.name LIKE :firmName');
 
 
@@ -2203,10 +2851,10 @@ class SettingsController extends MasterController
 
         }
 
-        $validateMassFirmForm = $formFactory->create(ValidateMassFirmForm::class, null, ['standalone' => true, 'searchByLocation' => $isSearchByLocation, 'firms' => $searchedWorkerFirms]);
+        $validateMassFirmForm = $this->createForm(ValidateMassFirmForm::class, null, ['standalone' => true, 'searchByLocation' => $isSearchByLocation, 'firms' => $searchedWorkerFirms]);
             $validateMassFirmForm->handleRequest($request);
 
-        return $app['twig']->render('worker_search.html.twig',
+        return $this->render('worker_search.html.twig',
         [
             'form' => $searchWorkerForm->createView(),
             'searchedWorkerIndividuals' => $searchedWorkerIndividuals,
@@ -2231,8 +2879,8 @@ class SettingsController extends MasterController
      * @return JsonResponse
      * @Route("/workers/states/{couId}", name="getStatesFromCountry")
      */
-    public function getStatesFromCountry(Request $request, Application $app, $couId){
-        $em = $this->getEntityManager($app);
+    public function getStatesFromCountry(Request $request, $couId){
+        $em = $this->em;
         $repoC = $em->getRepository(Country::class);
         $repoS = $em->getRepository(State::class);
         $repoCI = $em->getRepository(City::class);
@@ -2270,8 +2918,8 @@ class SettingsController extends MasterController
      * @return JsonResponse
      * @Route("/workers/cities/{staId}", name="getCitiesFromState")
      */
-    public function getCitiesFromState(Request $request, Application $app, $staId){
-        $em = $this->getEntityManager($app);
+    public function getCitiesFromState(Request $request, $staId){
+        $em = $this->em;
         $repoS = $em->getRepository(State::class);
         $repoC = $em->getRepository(City::class);
         if($staId != 0){
@@ -2299,8 +2947,8 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/validate-mail/{mid}", name="validateMailSent")
      */
-    public function validateMailSent(Request $request, Application $app, $mid){
-        $em = $this->getEntityManager($app);
+    public function validateMailSent(Request $request, $mid){
+        $em = $this->em;
         $repoM = $em->getRepository(Mail::class);
         $mail = $repoM->findOneById($mid);
         $mail->setRead(new \DateTime);
@@ -2318,8 +2966,8 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/deactivate-mail/{mid}", name="deactivateMail")
      */
-    public function deactivateMail(Request $request, Application $app, $mid){
-        $em = $this->getEntityManager($app);
+    public function deactivateMail(Request $request, $mid){
+        $em = $this->em;
         $repoM = $em->getRepository(Mail::class);
         $mail = $repoM->findOneById($mid);
         $workerIndividual = $mail->getWorkerIndividual();
@@ -2338,8 +2986,8 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/delete-mail/{mid}", name="deleteMailSent")
      */
-    public function deleteMailSent(Request $request, Application $app, $mid){
-        $em = $this->getEntityManager($app);
+    public function deleteMailSent(Request $request, $mid){
+        $em = $this->em;
         $repoM = $em->getRepository(Mail::class);
         $mail = $repoM->findOneById($mid);
         $em->remove($mail);
@@ -2355,8 +3003,8 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/workers/firm/create", name="createWorkerFirm")
      */
-    public function createWorkerFirm(Request $request, Application $app){
-        $em = $this->getEntityManager($app);
+    public function createWorkerFirm(Request $request){
+        $em = $this->em;
         $name = $request->get('name');
         $workerFirm = new WorkerFirm;
         $workerFirm->setName($name)->setActive(true);
@@ -2374,43 +3022,45 @@ class SettingsController extends MasterController
      * @return RedirectResponse
      * @throws ORMException
      * @throws OptimisticLockException
-     * @Route("/workers/firms/update/{wfId}", name="updateWorkerFirm")
+     * @Route("/workers/firms/update/{wfiId}", name="updateWorkerFirm")
      */
-    public function updateWorkerFirm(Request $request, Application $app, $wfId)
+    public function updateWorkerFirm(Request $request, $wfiId)
     {
-        $currentUser = MasterController::getAuthorizedUser($app);
+        $currentUser = $this->user;
         if (!$currentUser instanceof User) {
             return $this->redirectToRoute('login');
         }
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoWF = $em->getRepository(WorkerFirm::class);
 
-        $workerFirm = $repoWF->findOneById($wfId);
+        $workerFirm = $repoWF->findOneById($wfiId);
         if($workerFirm == null){
             $workerFirm = new WorkerFirm;
         }
-        $formFactory = $app['form.factory'];
-        $updateWorkerFirmForm = $formFactory->create(UpdateWorkerFirmForm::class, $workerFirm, ['standalone' => true, 'app' => $app, 'workerFirm' => $workerFirm]);
+        
+        $updateWorkerFirmForm = $this->createForm(UpdateWorkerFirmForm::class, $workerFirm, ['standalone' => true]);
         $updateWorkerFirmForm->handleRequest($request);
 
-        if($updateWorkerFirmForm->isValid()){
+        if($updateWorkerFirmForm->isSubmitted() && $updateWorkerFirmForm->isValid()){
 
             $repoWFS = $em->getRepository(WorkerFirmSector::class);
             $repoCO = $em->getRepository(Country::class);
             $repoCI = $em->getRepository(City::class);
             $repoS = $em->getRepository(State::class);
-            $country = null;
+            /** @var Country */
+            $country = $workerFirm->getCountry();
             $state = null;
             $city = null;
 
-            $repoWFS = $em->getRepository(WorkerFirmSector::class);
-            $country = $repoCO->findOneByAbbr($updateWorkerFirmForm->get('HQCountry')->getData());
+            if($country != null){
+                $workerFirm->setHQCountry($country->getAbbr());
+            }
 
             if($updateWorkerFirmForm->get('HQState')->getData() != null){
                 $state = $repoS->findOneByName($updateWorkerFirmForm->get('HQState')->getData());
                 if($state == null){
                     $state = new State;
-                    $state->setCountry($country)->setName($updateWorkerFirmForm->get('HQState')->getData())->setCreatedBy($currentUser->getId());
+                    $state->setCountry($country)->setName($updateWorkerFirmForm->get('HQState')->getData())->setInitiator($currentUser);
                     $em->persist($state);
                 }
             }
@@ -2419,27 +3069,26 @@ class SettingsController extends MasterController
             $city = $repoCI->findOneByName($updateWorkerFirmForm->get('HQCity')->getData());
             if($city == null){
                 $city = new City;
-                $city->setCountry($country)->setState($state)->setName($updateWorkerFirmForm->get('HQCity')->getData())->setCreatedBy($currentUser->getId());
+                $city->setCountry($country)->setState($state)->setName($updateWorkerFirmForm->get('HQCity')->getData())->setInitiator($currentUser);
                 $em->persist($city);
             }
 
             $workerFirm
-                ->setMainSector($repoWFS->findOneById($updateWorkerFirmForm->get('mainSector')->getData()))
                 ->setCountry($country)
                 ->setState($state)
                 ->setCity($city);
 
-            if($wfId == 0){
+            if($wfiId == 0){
                 $workerFirm->setCreated(1)->setName($updateWorkerFirmForm->get('commonName')->getData());
             }
 
             $em->persist($workerFirm);
             $em->flush();
 
-            return $app->redirect($app['url_generator']->generate('displayWorkerFirm',['wfId' => $workerFirm->getId()]));
+            return $this->redirectToRoute('manageWorkerFirms');
         }
 
-        return $app['twig']->render('worker_firm_data.html.twig',
+        return $this->render('worker_firm_data.html.twig',
         [
             'form' => $updateWorkerFirmForm->createView(),
             'wFirm' => $workerFirm,
@@ -2453,30 +3102,30 @@ class SettingsController extends MasterController
      * @return JsonResponse
      * @Route("/workers/firm/search", name="dynamicSearchParentFirm")
      */
-    public function dynamicSearchParentFirm(Request $request, Application $app){
+    public function dynamicSearchParentFirm(Request $request){
 
 
         $firmName = $request->get('name');
 
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoWF = $em->getRepository(WorkerFirm::class);
         $qb = $em->createQueryBuilder();
         $firms = new ArrayCollection($qb->select('wf')
-        ->from('Model\WorkerFirm', 'wf')
+        ->from('App\Entity\WorkerFirm', 'wf')
         ->where('wf.name LIKE :firmName')
-        ->andWhere('wf.active = true AND wf.nbActiveExperiences > 0')
+        ->andWhere('wf.active = true AND wf.nbActiveExp > 0 OR wf.organization IS NOT NULL')
         ->setParameter('firmName', '%'.$firmName.'%')
-        ->orderBy('wf.nbActiveExperiences','DESC')
+        ->orderBy('wf.nbActiveExp','DESC')
         ->getQuery()
         ->getResult());
 
         if(sizeof($firms) == 0){
             $firms = new ArrayCollection($qb/*->select('wf')
-            ->from('Model\WorkerFirm','wf')*/
+            ->from('App\Entity\WorkerFirm','wf')*/
             ->where('wf.name LIKE :firmName')
             ->andWhere('wf.active = true')
             ->setParameter('firmName', '%'.$firmName.'%')
-            ->orderBy('wf.nbActiveExperiences','DESC')
+            ->orderBy('wf.nbActiveExp','DESC')
             ->getQuery()
             ->getResult());
         }
@@ -2499,8 +3148,8 @@ class SettingsController extends MasterController
      * @return JsonResponse
      * @Route("/workers/get-firm-from-id/{wfiId}", name="getFirmFromId")
      */
-    public function getFirmFromId(Request $request, Application $app, $wfiId){
-        $em = $this->getEntityManager($app);
+    public function getFirmFromId(Request $request, $wfiId){
+        $em = $this->em;
         $repoWF = $em->getRepository(WorkerFirm::class);
         $firm = $repoWF->findOneById($wfiId);
         return new JsonResponse(['firmName' => $firm->getName()],200);
@@ -2515,13 +3164,13 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/workers/individual/update/{wiId}", name="updateWorkerIndividual")
      */
-    public function updateWorkerIndividual(Request $request, Application $app, $wiId){
+    public function updateWorkerIndividual(Request $request, $wiId){
 
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoWI = $em->getRepository(WorkerIndividual::class);
         $repoWF = $em->getRepository(WorkerFirm::class);
         $workerIndividual = $repoWI->findOneById($wiId);
-        $formFactory = $app['form.factory'];
+        
         $expFirm = null;
         $mailPrefix = null;
         $mailSuffix = null;
@@ -2530,8 +3179,8 @@ class SettingsController extends MasterController
             $mailPrefix = $expFirm->getMailPrefix();
             $mailSuffix = $expFirm->getMailSuffix();
         }
-        $updateWorkerIndividualForm = $formFactory->create(UpdateWorkerIndividualForm::class, $workerIndividual, ['workerIndividual' => $workerIndividual, 'mailPrefix' => $mailPrefix, 'mailSuffix' => $mailSuffix, 'standalone' => true]);
-        $sendMailProspectForm = $formFactory->create(SendMailProspectForm::class, null, ['standalone' => true]);
+        $updateWorkerIndividualForm = $this->createForm(UpdateWorkerIndividualForm::class, $workerIndividual, ['workerIndividual' => $workerIndividual, 'mailPrefix' => $mailPrefix, 'mailSuffix' => $mailSuffix, 'standalone' => true]);
+        $sendMailProspectForm = $this->createForm(SendMailProspectForm::class, null, ['standalone' => true]);
         $updateWorkerIndividualForm->handleRequest($request);
         if($updateWorkerIndividualForm->isSubmitted()){
             if($updateWorkerIndividualForm->isValid()){
@@ -2546,9 +3195,9 @@ class SettingsController extends MasterController
                 $em->persist($workerIndividual);
                 $em->flush();
                 if($expFirm != null){
-                    return $app->redirect($app['url_generator']->generate('displayWorkerFirm',['wfId' => $expFirm->getId()]));
+                    return $this->redirectToRoute('displayWorkerFirm',['wfId' => $expFirm->getId()]);
                 } else {
-                    return $app->redirect($app['url_generator']->generate('findWorkerElmts'));
+                    return $this->redirectToRoute('findWorkerElmts');
                 }
             } else {
                 $errors = $this->buildErrorArray($updateWorkerIndividualForm);
@@ -2556,7 +3205,7 @@ class SettingsController extends MasterController
             }
         }
 
-        return $app['twig']->render('worker_individual_data.html.twig',
+        return $this->render('worker_individual_data.html.twig',
         [
             'workerIndividual' => $workerIndividual,
             'form' => $updateWorkerIndividualForm->createView(),
@@ -2573,8 +3222,8 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/lib/img/void1x1.png/{mailId}", name="setReadEmail")
      */
-    public function setReadEmail(Request $request, Application $app, $mailId){
-        $em = $this->getEntityManager($app);
+    public function setReadEmail(Request $request, $mailId){
+        $em = $this->em;
         $repoM = $em->getRepository(Mail::class);
         $mail = $repoM->findOneBy($mailId);
         $mail->setRead(new \DateTime);
@@ -2590,13 +3239,13 @@ class SettingsController extends MasterController
      * @return JsonResponse
      * @Route("/workers/individual/send-prospect-mail/{winId}", name="sendProspectMail")
      */
-    public function sendProspectMail(Request $request, Application $app, $winId){
-        $em = $this->getEntityManager($app);
+    public function sendProspectMail(Request $request, $winId){
+        $em = $this->em;
         $repoWI = $em->getRepository(WorkerIndividual::class);
         $workerIndividual = $repoWI->findOneById($winId);
         $firmLocation = $workerIndividual->getExperiences()->first()->getFirm()->getCountry()->getAbbr();
-        $formFactory = $app['form.factory'];
-        $sendMailProspectForm = $formFactory->create(SendMailProspectForm::class, null, ['standalone' => true]);
+        
+        $sendMailProspectForm = $this->createForm(SendMailProspectForm::class, null, ['standalone' => true]);
         $sendMailProspectForm->handleRequest($request);
         if($sendMailProspectForm->isValid()){
             $settings = [];
@@ -2608,7 +3257,8 @@ class SettingsController extends MasterController
             $settings['addPresFR'] = $sendMailProspectForm->get('addPresentationFR')->getData();
             $settings['addPresEN'] = $sendMailProspectForm->get('addPresentationEN')->getData();
 
-            MasterController::sendMail($app, $recipients, 'prospecting_1', $settings);
+            $this->forward('App\Controller\MailController::sendMail', ['recipients' => $recipients, 'settings' => $settings, 'actionType' => 'prospecting_1']);
+
             return new JsonResponse(['message' => 'success'],200);
         } else {
             $errors = $this->buildErrorArray($sendMailProspectForm);
@@ -2623,11 +3273,11 @@ class SettingsController extends MasterController
      * @return mixed
      * @Route("/settings/mails", name="checkMails")
      */
-    public function checkMails(Request $request, Application $app){
-        $em = $this->getEntityManager($app);
+    public function checkMails(Request $request){
+        $em = $this->em;
         $repoM = $em->getRepository(Mail::class);
         $mails = $repoM->findBy([],['inserted' => 'DESC']);
-        return $app['twig']->render('check_mails.html.twig',
+        return $this->render('check_mails.html.twig',
         [
             'mails' => $mails,
             'app' => $app,
@@ -2643,8 +3293,8 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/workers/individual/add/{wfId}", name="addWorkerFirmIndividual")
      */
-    public function addWorkerFirmIndividual(Request $request, Application $app, $wfId){
-        $em = $this->getEntityManager($app);
+    public function addWorkerFirmIndividual(Request $request, $wfId){
+        $em = $this->em;
         $workerIndividual = new WorkerIndividual;
         $workerExperience = new WorkerExperience;
         $workerExperience->setActive(true);
@@ -2661,9 +3311,9 @@ class SettingsController extends MasterController
 
         //$em->persist($workerExperience)
         //$em->flush()
-        $formFactory = $app['form.factory'];
-        $workerIndividualForm = $formFactory->create(UpdateWorkerIndividualForm::class, $workerIndividual, ['standalone' => true]);
-        $sendMailProspectForm = $formFactory->create(SendMailProspectForm::class, null, ['standalone' => true]);
+        
+        $workerIndividualForm = $this->createForm(UpdateWorkerIndividualForm::class, $workerIndividual, ['standalone' => true]);
+        $sendMailProspectForm = $this->createForm(SendMailProspectForm::class, null, ['standalone' => true]);
         $sendMailProspectForm->handleRequest($request);
         $workerIndividualForm->handleRequest($request);
         if($workerIndividualForm->isSubmitted()){
@@ -2682,11 +3332,11 @@ class SettingsController extends MasterController
                 $em->persist($workerIndividual);
                 $em->persist($workerFirm);
                 $em->flush();
-                return $app->redirect($app['url_generator']->generate('displayWorkerFirm',['wfId' => $wfId]));
+                return $this->redirectToRoute('displayWorkerFirm',['wfId' => $wfId]);
             }
         }
 
-        return $app['twig']->render('worker_individual_data.html.twig',
+        return $this->render('worker_individual_data.html.twig',
         [
             'form' => $workerIndividualForm->createView(),
             'sendMailForm' => $sendMailProspectForm->createView(),
@@ -2701,18 +3351,18 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/workers/individual/add", name="addWorkerIndividual")
      */
-    public function addWorkerIndividual(Request $request, Application $app){
+    public function addWorkerIndividual(Request $request){
 
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $workerIndividual = new WorkerIndividual;
         $repoWF = $em->getRepository(WorkerFirm::class);
         $workerExperience = new WorkerExperience;
         $workerExperience->setActive(true);
         $workerIndividual->setCreated(1)->addExperience($workerExperience);
 
-        $formFactory = $app['form.factory'];
-        $workerIndividualForm = $formFactory->create(UpdateWorkerIndividualForm::class, $workerIndividual, ['standalone' => true]);
-        $sendMailProspectForm = $formFactory->create(SendMailProspectForm::class, null, ['standalone' => true]);
+        
+        $workerIndividualForm = $this->createForm(UpdateWorkerIndividualForm::class, $workerIndividual, ['standalone' => true]);
+        $sendMailProspectForm = $this->createForm(SendMailProspectForm::class, null, ['standalone' => true]);
         $sendMailProspectForm->handleRequest($request);
         $workerIndividualForm->handleRequest($request);
         if($workerIndividualForm->isSubmitted()){
@@ -2725,11 +3375,11 @@ class SettingsController extends MasterController
                 }
                 $em->persist($workerIndividual);
                 $em->flush();
-                return $app->redirect($app['url_generator']->generate('displayWorkerFirm',['wfId' => $wfId]));
+                return $this->redirectToRoute('displayWorkerFirm',['wfId' => $wfId]);
             }
         }
 
-        return $app['twig']->render('worker_individual_data.html.twig',
+        return $this->render('worker_individual_data.html.twig',
         [
             'form' => $workerIndividualForm->createView(),
             'sendMailForm' => $sendMailProspectForm->createView(),
@@ -2746,39 +3396,16 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/workers/individual/delete/{wiId}", name="deleteWorkerIndividual")
      */
-    public function deleteWorkerIndividual(Request $request, Application $app, $wiId){
+    public function deleteWorkerIndividual(Request $request, $wiId){
 
         $connectedUser = MasterController::getAuthorizedUser($app);
         if($connectedUser->getRole() != 4){
-            return $app['twig']->render('errors/403.html.twig');
+            return $this->render('errors/403.html.twig');
         }
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoWI = $em->getRepository(WorkerIndividual::class);
         $workerIndividual = $repoWI->findOneById($wiId);
         $em->remove($workerIndividual);
-        $em->flush();
-        return new JsonResponse(['message' => "Success"],200);
-    }
-
-    /**
-     * @param Request $request
-     * @param Application $app
-     * @param $wfId
-     * @return JsonResponse
-     * @throws ORMException
-     * @throws OptimisticLockException
-     * @Route("/workers/firm/delete/{wfId}", name="deleteWorkerFirm")
-     */
-    public function deleteWorkerFirm(Request $request, Application $app, $wfId){
-
-        $connectedUser = MasterController::getAuthorizedUser($app);
-        if($connectedUser->getRole() != 4){
-            return $app['twig']->render('errors/403.html.twig');
-        }
-        $em = $this->getEntityManager($app);
-        $repoWF = $em->getRepository(WorkerFirm::class);
-        $workerFirm = $repoWF->findOneById($wfId);
-        $em->remove($workerFirm);
         $em->flush();
         return new JsonResponse(['message' => "Success"],200);
     }
@@ -2792,12 +3419,12 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/workers/individual/validate-mail/{wiId}", name="validateWorkerEmail")
      */
-    public function validateWorkerEmail(Request $request, Application $app, $wiId){
-        $em = $this->getEntityManager($app);
+    public function validateWorkerEmail(Request $request, $wiId){
+        $em = $this->em;
         $repoWI = $em->getRepository(WorkerIndividual::class);
         $workerIndividual = $repoWI->findOneById($wiId);
-        $formFactory = $app['form.factory'];
-        $validateMailForm = $formFactory->create(ValidateMailForm::class, $workerIndividual, ['standalone' => true]);
+        
+        $validateMailForm = $this->createForm(ValidateMailForm::class, $workerIndividual, ['standalone' => true]);
         $validateMailForm->handleRequest($request);
 
         if($validateMailForm->isValid()){
@@ -2820,11 +3447,11 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/workers/firm/validate-mails/{wfId}", name="validateMassWorkerEmails")
      */
-    public function validateMassWorkerEmails(Request $request, Application $app, $wfId){
-        $em = $this->getEntityManager($app);
+    public function validateMassWorkerEmails(Request $request, $wfId){
+        $em = $this->em;
 
-        $formFactory = $app['form.factory'];
-        $validateMassMailForm = $formFactory->create(ValidateMassMailForm::class, null, ['standalone' => true]);
+        
+        $validateMassMailForm = $this->createForm(ValidateMassMailForm::class, null, ['standalone' => true]);
         $validateMassMailForm->handleRequest($request);
 
         if($validateMassMailForm->isValid()){
@@ -2861,9 +3488,9 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/organization/{orgId}/set-organization-to-criteria", name="setOrganizationToCriteriaAndStages")
      */
-    public function setOrganizationToCriteriaAndStages(Request $request, Application $app, $orgId){
+    public function setOrganizationToCriteriaAndStages(Request $request, $orgId){
 
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoC = $em->getRepository(Criterion::class);
         $repoO = $em->getRepository(Organization::class);
         $organization = $repoO->findOneById($orgId);
@@ -2879,7 +3506,7 @@ class SettingsController extends MasterController
             }
         }
         $em->flush();
-        return $app->redirect($app['url_generator']->generate('manageOrganizations'));
+        return $this->redirectToRoute('manageOrganizations');
     }
 
     /**
@@ -2892,23 +3519,23 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/workers/firm/validate-firms/{isSearchByLocation}/{wfIdsSeq}", name="validateMassFirm")
      */
-    public function validateMassFirm(Request $request, Application $app, $isSearchByLocation, $wfIdsSeq)
+    public function validateMassFirm(Request $request, $isSearchByLocation, $wfIdsSeq)
     {
-        $currentUser = MasterController::getAuthorizedUser($app);
+        $currentUser = $this->user;
         if (!$currentUser instanceof User) {
             return $this->redirectToRoute('login');
         }
 
-        $formFactory = $app['form.factory'];
+        
 
         $workerFirmIds = explode("-",$wfIdsSeq);
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoWF = $em->getRepository(WorkerFirm::class);
         $workerFirms = [];
         foreach($workerFirmIds as $workerFirmId){
             $workerFirms[] = $repoWF->findOneById($workerFirmId);
         }
-        $validateMassFirmForm = $formFactory->create(ValidateMassFirmForm::class, null, ['standalone' => true, 'searchByLocation' => $isSearchByLocation, 'firms' => $workerFirms]);
+        $validateMassFirmForm = $this->createForm(ValidateMassFirmForm::class, null, ['standalone' => true, 'searchByLocation' => $isSearchByLocation, 'firms' => $workerFirms]);
         $validateMassFirmForm->handleRequest($request);
 
         if($validateMassFirmForm->isValid()){
@@ -2938,7 +3565,7 @@ class SettingsController extends MasterController
                     $state = $repoS->findOneByName($workerFirmFormData->getHQState());
                     if($state == null){
                         $state = new State;
-                        $state->setCountry($country)->setName($workerFirmFormData->getHQState())->setCreatedBy($currentUser->getId());
+                        $state->setCountry($country)->setName($workerFirmFormData->getHQState())->setInitiator($currentUser);
                         $em->persist($state);
                     }
                     //$workerFirm->setHQState($workerFirmFormData->getHQState());
@@ -2948,7 +3575,7 @@ class SettingsController extends MasterController
                     $city = $repoCI->findOneByName($workerFirmFormData->getHQCity());
                     if($city == null){
                         $city = new City;
-                        $city->setCountry($country)->setState($state)->setName($workerFirmFormData->getHQCity())->setCreatedBy($currentUser->getId());
+                        $city->setCountry($country)->setState($state)->setName($workerFirmFormData->getHQCity())->setInitiator($currentUser);
                         $em->persist($city);
                     }
                     //$workerFirm->setHQCity($workerFirmFormData->getHQCity());
@@ -2961,7 +3588,7 @@ class SettingsController extends MasterController
 
                     $qb = $em->createQueryBuilder();
                     $qb->select('wf')
-                        ->from('Model\WorkerFirm', 'wf')
+                        ->from('App\Entity\WorkerFirm', 'wf')
                         ->where('wf.HQLocation LIKE :HQLocation');
 
                     $qb->setParameter('HQLocation', '%'.$workerFirm->getHQCity().'%');
@@ -3000,8 +3627,8 @@ class SettingsController extends MasterController
      * @return JsonResponse
      * @Route("/workers/firm/get-mailable-individuals/{wfId}", name="getMailableIndividualsFromFirm")
      */
-    public function getMailableIndividualsFromFirm(Request $request, Application $app, $wfId){
-        $em = $this->getEntityManager($app);
+    public function getMailableIndividualsFromFirm(Request $request, $wfId){
+        $em = $this->em;
         $repoWF = $em->getRepository(WorkerFirm::class);
         $workerFirm = $repoWF->findOneById($wfId);
         $activeExperiences = $workerFirm->getActiveExperiences();
@@ -3029,12 +3656,12 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/workers/firm/validate/{wfId}", name="validateFirm")
      */
-    public function validateFirm(Request $request, Application $app, $wfId){
-        $em = $this->getEntityManager($app);
+    public function validateFirm(Request $request, $wfId){
+        $em = $this->em;
         $repoWF = $em->getRepository(WorkerFirm::class);
         $workerFirm = $repoWF->findOneById($wfId);
-        $formFactory = $app['form.factory'];
-        $validateFirmForm = $formFactory->create(ValidateFirmForm::class, $workerFirm, ['standalone' => true]);
+        
+        $validateFirmForm = $this->createForm(ValidateFirmForm::class, $workerFirm, ['standalone' => true]);
         $validateFirmForm->handleRequest($request);
 
         if($validateFirmForm->isValid()){
@@ -3063,8 +3690,8 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/workers/individual/validate-mail/{wiId}/{firstname}/{lastname}/{male}/{wiEmail}", name="validateWorkerEmailFromSelfPage")
      */
-    public function validateWorkerEmailFromSelfPage(Request $request, Application $app, $wiId, $firstname, $lastname, $male, $wiEmail){
-        $em = $this->getEntityManager($app);
+    public function validateWorkerEmailFromSelfPage(Request $request, $wiId, $firstname, $lastname, $male, $wiEmail){
+        $em = $this->em;
         $repoWI = $em->getRepository(WorkerIndividual::class);
         if(!preg_match("/^(?:[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*|\"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])*$/",$wiEmail)){
             $message = "Email is not correctly formatted, reconsider email address";
@@ -3091,17 +3718,17 @@ class SettingsController extends MasterController
      * @throws Exception
      * @Route("/workers/firm/{wfId}", name="displayWorkerFirm")
      */
-    public function displayWorkerFirm(Request $request, Application $app, $wfId){
+    public function displayWorkerFirm(Request $request, $wfId){
 
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoWF = $em->getRepository(WorkerFirm::class);
         $repoWE = $em->getRepository(WorkerExperience::class);
         $wFirm = $repoWF->findOneById($wfId);
         $searchedIndividuals = [];
         $searchedFirmExperiences = $repoWE->findByFirm($wFirm);
-        $formFactory = $app['form.factory'];
-        $validateMailForm = $formFactory->create(ValidateMailForm::class, null, ['standalone' => true]);
-        $sendMailProspectForm = $formFactory->create(SendMailProspectForm::class, null, ['standalone' => true]);
+        
+        $validateMailForm = $this->createForm(ValidateMailForm::class, null, ['standalone' => true]);
+        $sendMailProspectForm = $this->createForm(SendMailProspectForm::class, null, ['standalone' => true]);
 
         foreach($searchedFirmExperiences as $searchedFirmExperience){
             $searchedIndividuals[] = $searchedFirmExperience->getIndividual();
@@ -3124,7 +3751,7 @@ class SettingsController extends MasterController
         });
 
         $firmActiveIndividuals = new ArrayCollection(iterator_to_array($iterator));
-        $validateMassMailForm = $formFactory->create(ValidateMassMailForm::class, $wFirm, ['standalone' => true]);
+        $validateMassMailForm = $this->createForm(ValidateMassMailForm::class, $wFirm, ['standalone' => true]);
         $validateMassMailForm->handleRequest($request);
 
         $iterator = $firmInactiveIndividuals->getIterator();
@@ -3135,7 +3762,7 @@ class SettingsController extends MasterController
 
         $firmInactiveIndividuals = new ArrayCollection(iterator_to_array($iterator));
 
-        return $app['twig']->render('worker_firm_elements.html.twig',
+        return $this->render('worker_firm_elements.html.twig',
         [
             'wFirm' => $wFirm,
             'firmActiveIndividuals' => $firmActiveIndividuals,
@@ -3156,9 +3783,9 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/workers/firms/{from}/{to}/experiences/update", name="updateNbExpsInAllFirms")
      */
-    public function updateNbExpsInAllFirms(Request $request, Application $app,$from,$to){
+    public function updateNbExpsInAllFirms(Request $request,$from,$to){
 
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoWF = $em->getRepository(WorkerFirm::class);
         $repoWE = $em->getRepository(WorkerExperience::class);
         $firmsIdsToSearch = [];
@@ -3192,9 +3819,9 @@ class SettingsController extends MasterController
      * @throws OptimisticLockException
      * @Route("/workers/firms/{from}/{to}/mails/create", name="createMostPossibleMails")
      */
-    public function createMostPossibleMails(Request $request, Application $app, $from, $to){
+    public function createMostPossibleMails(Request $request, $from, $to){
 
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoWF = $em->getRepository(WorkerFirm::class);
         $firmsIdsToSearch = [];
         for($i = $from; $i < $to; $i++){
@@ -3244,10 +3871,10 @@ class SettingsController extends MasterController
      * @return bool
      * @Route("/insert/json", name="insertLKJSONData")
      */
-    public function insertLKJSONData(Request $request, Application $app){
+    public function insertLKJSONData(Request $request){
 
         try {
-        $em = $this->getEntityManager($app);
+        $em = $this->em;
         $repoWF = $em->getRepository(WorkerFirm::class);
 
         if(isset($_POST['individuals'])){
@@ -3429,8 +4056,8 @@ class SettingsController extends MasterController
      * @return JsonResponse
      * @Route("/workers/firms/{from}/{to}/json-encode", name="transformFirmsIntoJSONVector")
      */
-    public function transformFirmsIntoJSONVector(Request $request, Application $app, $from, $to){
-        $em = $this->getEntityManager($app);
+    public function transformFirmsIntoJSONVector(Request $request, $from, $to){
+        $em = $this->em;
         $repoWF = $em->getRepository(WorkerFirm::class);
         $firmsIdsToSearch = [];
         for($i = $from; $i < $to; $i++){
@@ -3448,4 +4075,217 @@ class SettingsController extends MasterController
 
         return new JsonResponse(['firms' => json_encode($firmsData)], 200);
     }
+
+    /**
+    * @param Request $request
+    * @Route("/settings/documents/manage", name="manageDocuments")
+    */
+    public function manageDocuments(Request $request){
+
+        $em = $this->em;
+        $currentUser = $this->user;
+        $orgDocuments = $em->getRepository(EventDocument::class)->findByOrganization($this->org);
+        $addDocumentForm = $this->createForm(EventDocumentType::class, null,['standalone' => true, 'currentUser' => $this->user]);
+
+        //Following 6 lines are here to create eventual account cloud folder in there were none, is managed on subscription, to remove in the short term
+        $orgId = $this->org->getId();
+        $fullName = $this->org->getType() == 'C' ? $currentUser->getUsername() :  $this->org->getCommname();
+        $fullNameWithoutAccentString = $this->forward('App\Controller\InstitutionController::skipAccents', ['str' => $fullName])->getContent();
+        $name = strtolower(implode("-",explode(" ", $fullNameWithoutAccentString)));
+        $parentFolderPrefix = $this->org->getType() == 'C' ? 'i' : 'c';
+        $dirPath = dirname(dirname(__DIR__)) . "/public/lib/{$parentFolderPrefix}docs/{$orgId}-{$name}";
+
+        if(!is_dir($dirPath)){
+            mkdir($dirPath);
+        }
+        
+        return $this->render('documents_management.html.twig',
+        [
+            'documents' => $orgDocuments,
+            'addDocumentForm' => $addDocumentForm->createView(),
+        ]);
+
+    }
+
+    /**
+    * @param Request $request
+    * @Route("/settings/super-admin/update", name="updateSuperAdmin")
+    */
+    public function updateSuperAdminAction(Request $request){
+        $em = $this->em;
+        $previousSuperAdmin = $this->org->getUsers()->filter(fn(User $u) => $u->getRole() == USER::ROLE_SUPER_ADMIN)->first();
+        if($previousSuperAdmin){
+            $previousSuperAdmin->setRole(USER::ROLE_AM);
+            $em->persist($previousSuperAdmin);
+        }
+        $newSuperAdmin = $usrId = $_POST['uid'] != "" ? $em->getRepository(User::class)->find($_POST['uid']) : $this->user; 
+        $newSuperAdmin->setRole(USER::ROLE_SUPER_ADMIN);
+        $em->persist($newSuperAdmin);
+        
+        $selfAppointment = $this->user == $newSuperAdmin;
+        
+        if(!$selfAppointment){
+            $response = $this->forward('App\Controller\MailController::sendMail', [
+                'recipients' => [$newSuperAdmin], 
+                'settings' => [
+                    'initiator' => $this->user,
+                ], 
+                'actionType' => 'superAdminAppointment']
+            );
+            if($response->getStatusCode() == 500){ return $response; };
+        }
+        
+        $em->flush();
+
+        if($previousSuperAdmin){
+            $em->refresh($previousSuperAdmin);  
+            $this->guardHandler->authenticateUserAndHandleSuccess(
+                $previousSuperAdmin,
+                $request,
+                $this->authenticator,
+                'main' // firewall name in security.yaml
+            );      
+        }
+
+        if($selfAppointment){
+            $em->refresh($newSuperAdmin);  
+            $this->guardHandler->authenticateUserAndHandleSuccess(
+                $newSuperAdmin,
+                $request,
+                $this->authenticator,
+                'main' // firewall name in security.yaml
+            );   
+        }
+ 
+        $arrayResponse['self'] = (int) $selfAppointment;
+        if($selfAppointment){
+            $arrayResponse['path'] = $this->generateUrl('firmSettings',[], UrlGeneratorInterface::ABSOLUTE_URL);
+        }
+        return new JsonResponse($arrayResponse);
+    }
+
+    /**
+    * @param Request $request
+    * @Route("/settings/user/role/update", name="updateUserRole")
+    */
+    public function updateUserRole(Request $request, NotificationManager $notificationManager){
+        $usrId = $request->get('id');
+        $role = $request->get('r');
+        $arrayResponse = [];
+        $em = $this->em;
+        $user = $em->getRepository(User::class)->find($usrId);
+        $userRole = $user->getRole();
+        $user->setRole($role);
+        $em->persist($user);
+        $em->flush();
+        
+        if($user->getRole() == User::ROLE_SUPER_ADMIN){
+            
+            // We notify and send mail to user as it is an important update to him
+            $notificationManager->registerUpdates($user, [$user], ElementUpdate::CREATION, 'role', User::ROLE_SUPER_ADMIN);
+            $response = $this->forward('App\Controller\MailController::sendMail', [
+                'recipients' => [$user], 
+                'settings' => [
+                    'initiator' => $this->user,
+                ], 
+                'actionType' => 'superAdminAppointment']
+            );
+
+            if($response->getStatusCode() == 500){ return $response;};
+            
+            $formerSuperAdmin = $user->getOrganization()->getUsers()->filter(fn(User $u) => $u->getRole() == User::ROLE_SUPER_ADMIN)->first();
+
+            $formerSuperAdmin->setRole(User::ROLE_ADMIN);
+            $em->flush();
+
+            if($formerSuperAdmin == $this->user){
+                $em->refresh($formerSuperAdmin);
+                $this->guardHandler->authenticateUserAndHandleSuccess(
+                    $formerSuperAdmin,
+                    $request,
+                    $this->authenticator,
+                    'main'
+                ); 
+            }
+        }
+
+        if($user == $this->user){
+            $em->refresh($user);
+            $this->guardHandler->authenticateUserAndHandleSuccess(
+                $user,
+                $request,
+                $this->authenticator,
+                'main'
+            ); 
+        }
+
+
+        if(isset($formerSuperAdmin) && $this->user == $formerSuperAdmin){
+            $arrayResponse['cp'] = 1;
+        }
+        
+        return new JsonResponse($arrayResponse);
+    }
+
+    /**
+    * @param Request $request
+    * @Route("/settings/administrators/add", name="addAdministrator")
+    */
+    public function addAministratorAction(Request $request, NotificationManager $notificationManager){
+        $usrId = $request->get('id');
+        $em = $this->em;
+        $newAdmin = $em->getRepository(User::class)->find($usrId);
+        $newAdmin->setRole(User::ROLE_ADMIN);
+        $em->persist($newAdmin);
+        $notificationManager->registerUpdates($newAdmin, [$newAdmin], ElementUpdate::CREATION, 'role', User::ROLE_ADMIN);
+        $em->flush();
+        return new JsonResponse();
+    }
+
+    /**
+    * @param Request $request
+    * @Route("/settings/subscriptions/get", name="getSubscriptions")
+    */
+    public function getSubscriptions(Request $request){
+        $customer = Customer::retrieve(
+            $this->org->getStripeCusId(),
+            ['expand' => ['subscriptions']]
+        );
+        $subscriptions = $this->stripe->subscriptions->all(['customer' => $this->org->getStripeCusId()])->data;
+
+        foreach($subscriptions as $subscription){
+            $subscription['invoices'] = $this->stripe->invoices->all(['subscription' => $subscription->id])->data;
+        }
+
+        return new JsonResponse($subscriptions);
+
+    }
+    
+    /**
+    * @param Request $request
+    * @Route("/settings/users/unsubscribed-accounts/get", name="getUnsubscribedAccounts")
+    */
+    public function getUnsubscribedAccounts(Request $request){
+        $unsubscribedAccounts = $this->org->getActiveUsers()->  filter(fn(User $u) => !$u->getSubscriptionId())->map(fn(User $u) => ['id' => $u->getId(), 'name' => $u->getFullname(), 'pic' => $u->getPicturePath()])->getValues();
+        return new JsonResponse($unsubscribedAccounts);
+    }
+
+    /**
+    * @param Request $request
+    * @Route("/settings/subscriptions/oversubscribed/get", name="getOversubscribedSubscriptions")
+    */
+    public function getOversubscribedSubscriptions(Request $request){
+        $customer = Customer::retrieve(
+            $this->org->getStripeCusId(),
+            ['expand' => ['subscriptions']]
+        );
+        $subscriptions = new ArrayCollection($this->stripe->subscriptions->all(['customer' => $this->org->getStripeCusId()])->data);
+        $oversubscribedSubscriptions = $subscriptions->filter(fn(Subscription $s) => $s->quantity - $this->org->getActiveUsers()->filter(fn(User $u) => $u->getSubscriptionId() == $s->id)->count() > 0)->getValues();
+        foreach($oversubscribedSubscriptions as $os){
+            $outstandingSubscribleAccounts = $os->quantity - $this->org->getActiveUsers()->filter(fn(User $u) => $u->getSubscriptionId() == $os->id)->count();
+            $os['outstanding'] = $outstandingSubscribleAccounts;
+        }
+        return new JsonResponse($oversubscribedSubscriptions);
+    }
+
 }

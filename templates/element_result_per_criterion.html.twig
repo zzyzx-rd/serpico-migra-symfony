@@ -1,6 +1,6 @@
 {% extends "layout.html.twig" %}
 
-{% set elmtType = app.request_stack.currentrequest.get('elmtType') %}
+{% set elmtType = global.request.get('elmtType') %}
 
 {% block title %}
     {{ ('results_per_criterion.title_' ~ elmtType)|trans }}
@@ -20,7 +20,7 @@
 
 {% block content %}
     <input type="hidden" id="elmt-type" value="{{ elmtType }}">
-    <input type="hidden" id="graph-url" value="{{ url('getElementResPerCrtGraph', { elmtType: elmtType, participationType: '-1', cName: '000' }) }}">
+    <input type="hidden" id="graph-url" value="{{ url('getElementResPerCrtGraph', { entity: elmtType, participationType: '-1', cName: '000' }) }}">
 
     <div class="container">
         <h3>Results per criterion</h3>

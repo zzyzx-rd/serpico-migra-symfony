@@ -1,0 +1,245 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>
+            {% block subject %}
+                {{ 'mails.updateNotification.subject'|trans }}
+            {% endblock %}
+        </title>
+        <style type="text/css">
+            body {margin: 0; padding: 0; min-width: 100%!important;}
+            .content {width: 100%; max-width: 800px;}
+            .dd-text {color: #55318e}
+            .title {font-size:15px}
+            .strong {font-weight:700}
+        </style>
+    </head>
+
+    {% macro actElmtName(stage) %}
+        {{stage.activity.stages.count > 1 ? 
+            'the_stage <span class="strong">stage_name</span> of the_activity <span class="strong">activity_name</span>'|replace({
+                    'the_stage'     :   'the_stage'|trans,
+                    'stage_name'    :   stage.name,
+                    'of'            :   'of'|trans,
+                    'the_activity'  :   'the_activity'|trans,
+                    'activity_name' :   stage.activity.name
+            })|raw : 'the_activity <span class="strong">activity_name</span>'|replace({
+                    'the_activity'  :   'the_activity'|trans,
+                    'activity_name' :   stage.activity.name
+            })|raw
+        }}
+    {% endmacro %}
+    
+
+    {% block body %}
+
+        {% set creations = updates.creations %}
+        {% set modifications = updates.modifications is defined ? updates.modifications : null  %}
+        {% set deletions = updates.deletions is defined ? updates.deletions : null %}
+
+    <body bgcolor="white">
+        <table width="100%" bgcolor="white" border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td>
+                    <table class="content" align="left" cellpadding="0" cellspacing="0" border="0">
+                        <td>
+                            <p>{% trans %}mails.hello{% endtrans %} {{ recipient.firstname }},</p>
+                            <p>{{ 'mails.updateNotification.msg'|trans ~  ' :' }}</p>
+
+                            {% if creations %}
+                                <h5 class="dd-text strong title">{{ 'mails.updateNotification.creations.title'|trans }}</h5>
+                                {% set stages = creations.stages is defined ? creations.stages : null %}
+                                {% set events = creations.events is defined ? creations.events : null %}
+                                {% set documents = creations.documents is defined ? creations.documents : null %}
+                                {% set comments = creations.comments is defined ? creations.comments : null %}
+                                    
+                                    {% for stage in stages %}
+                                        <p>{{  'you_ve_been_added_to actElmtName'|replace({
+                                                        'you_ve_been_added_to' :    'mails.updateNotification.creations.added_to'|trans,
+                                                        'actElmtName'          :    _self.actElmtName(stage)
+                                                })|raw
+                                        }}</p>
+                                    {% endfor %}
+
+                                    {% for event in events %}
+                                        {% set stage = event.stage %}
+                                        <p>{{   'new_event <span class="strong">event_type</span> action_msg for actElmtName'|replace({
+                                                    'new_event'    :    'mails.updateNotification.creations.a_new_event'|trans,
+                                                    'event_type'   :    eventTypeRepo.dTrans(event.eventType, locale, stage.organization),
+                                                    'action_msg'   :    'mails.updateNotification.creations.action_msg_m'|trans,
+                                                    'for'          :    'for'|trans,
+                                                    'actElmtName'  :    _self.actElmtName(stage)
+                                                })|raw
+                                        }}</p>
+                                    {% endfor %}
+
+                                    {% for document in documents %}
+                                        {% set event = document.event %}
+                                        {% set stage = event.stage %}
+                                        <p>{{   'new_doc <span class="strong">doc_title</span> action_msg for the_event <span class="strong">event_type</span> of actElmtName'|replace({
+                                                    'new_doc'      :    'mails.updateNotification.creations.a_new_document'|trans,
+                                                    'doc_title'    :    document.title,
+                                                    'action_msg'   :    'mails.updateNotification.creations.action_msg_m'|trans,
+                                                    'for'          :    'for'|trans,
+                                                    'the_event'    :    'the_event'|trans,
+                                                    'event_type'   :    eventTypeRepo.dTrans(event.eventType, locale, stage.organization),
+                                                    'of'           :    'of'|trans,
+                                                    'actElmtName'  :    _self.actElmtName(stage)
+                                                })|raw 
+                                        }}</p>
+                                    {% endfor %}
+
+                                    {% for comment in comments %}
+                                        {% set event = comment.event %}
+                                        {% set stage = event.stage %}
+                                        <p>{{   'new_com action_msg for the_event <span class="strong">event_type</span> of actElmtName'|replace({
+                                                    'new_com'      : 'mails.updateNotification.creations.a_new_comment'|trans,
+                                                    'action_msg'   : 'mails.updateNotification.creations.action_msg_m'|trans,
+                                                    'for'          : 'for'|trans,
+                                                    'the_event'    : 'the_event'|trans,
+                                                    'event_type'   :  eventTypeRepo.dTrans(event.eventType, locale, stage.organization),
+                                                    'of'           :  'of'|trans,
+                                                    'actElmtName'  :    _self.actElmtName(stage)
+                                                })|raw
+                                        }}</p>
+                                    {% endfor %}
+
+                            {% endif %}
+
+                            {% if modifications %}
+                                <h5 class="dd-text strong title">{{ 'mails.updateNotification.modifications.title'|trans }}</h5>
+                                {% set stages = modifications.stages is defined ? modifications.stages : null %}
+                                {% set events = modifications.events is defined ? modifications.events : null %}
+                                {% set documents = modifications.documents is defined ? modifications.documents : null %}
+                                {% set comments = modifications.comments is defined ? modifications.comments : null %}
+                                    
+                                    {% for modifElmts in stages %}
+
+                                        {% set stage = modifElmts.stage %}
+                                        {% set property = modifElmts.property %}
+
+                                        <p>{{   'prop_name of actElmtName action_msg'|replace({
+                                                    'prop_name'     :   property|capitalize,
+                                                    'of'            :   'of'|trans, 
+                                                    'actElmtName'   :    _self.actElmtName(stage),
+                                                    'action_msg'    :   'mails.updateNotification.modifications.action_msg'|trans
+                                                })|raw
+                                        }}</p>
+                                    {% endfor %}
+
+                                    {% for modifElmts in events %}
+
+                                        {% set event = modifElmts.event %}
+                                        {% set property = modifElmts.property %}
+                                        {% set stage = event.stage %}
+
+                                        <p>{{  'prop_name of <span class="strong">event_type</span> of actElmtName action_msg'|replace({
+                                                        'prop_name'     :   property|capitalize,
+                                                        'of'            :   'of'|trans,
+                                                        'event_type'    :   eventTypeRepo.dTrans(event.eventType, locale, stage.organization),
+                                                        'actElmtName'   :   _self.actElmtName(stage),
+                                                        'action_msg'    :   'mails.updateNotification.modifications.action_msg'|trans 
+                                                })|raw
+                                        }}</p>
+                                    {% endfor %}
+                                    {% for modifElmts in documents %}
+
+                                        {% set document = modifElmts.event %}
+                                        {% set property = modifElmts.property %}
+                                        {% set event = document.event %}
+                                        {% set stage = event.stage %}
+
+                                        <p>{{   (
+                                                    property == 'content' ? (
+                                                            'a_new_version of_document <span class="strong">doc_title</strong> of <span class="strong">event_type</strong> of actElmtName action_msg'|replace({
+                                                                'a_new_version' :   'mails.updateNotification.modifications.a_new_version'|trans|capitalize,
+                                                                'of_document'   :   'mails.updateNotification.modifications.of_document'|trans,
+                                                                'doc_title'     :   document.title,   
+                                                                'of'            :   'of'|trans,
+                                                                'event_type'    :   eventTypeRepo.dTrans(event.eventType, locale, stage.organization),
+                                                                'actElmtName'   :   _self.actElmtName(stage),
+                                                                'action_msg'    :   'mails.updateNotification.creations.action_msg_f'|trans  
+                                                            })
+
+                                                    ) : (property == 'title' ? (
+                                                            'a_document of <span class="strong">event_type</strong> of actElmtName has_been_renamed <span class"strong">doc_title</span>'|replace({
+                                                                'a_document'        :   'mails.updateNotification.modifications.a_document'|trans,
+                                                                'of'                :   'of'|trans,
+                                                                'event_type'        :   eventTypeRepo.dTrans(event.eventType, locale, stage.organization),
+                                                                'actElmtName'       :   _self.actElmtName(stage),
+                                                                'has_been_renamed'  :   'mails.updateNotification.modifications.a_document'|trans,
+                                                                'doc_title'         :   'of'|trans, 
+                                                            }) 
+                                                        ) : ''
+                                                    )
+                                                )|raw
+                                        }}</p>
+
+                                    {% endfor %}
+
+                                    {% for modifElmts in comments %}
+                                        {% set comment = modifElmts.comment %}
+                                        {% set property = modifElmts.property %}
+                                        {% set event = comment.event %}
+                                        {% set stage = event.stage %}
+                                        
+                                        <p>{{  'a_comment of <span class="strong">event_type</span> of actElmtName action_msg'|replace({
+                                                    'a_comment'     :   'mails.updateNotification.modifications.a_comment'|trans,
+                                                    'of'            :   'of'|trans,
+                                                    'event_type'    :   eventTypeRepo.dTrans(event.eventType, locale, stage.organization),
+                                                    'actElmtName'   :   _self.actElmtName(stage),
+                                                    'action_msg'    :   'mails.updateNotification.modifications.action_msg'|trans,
+                                                })|raw
+                                        }}</p>
+
+                                    {% endfor %}
+                            {% endif %}
+
+                            {% if deletions %}
+                                <h5 class="dd-text strong title">{{ 'mails.updateNotification.deletions.title'|trans }}</h5>
+                                {% set stages = deletions.stages is defined ? deletions.stages : null %}
+                                {% set events = deletions.events is defined ? deletions.events : null %}
+                                {% set documents = deletions.documents is defined ? deletions.documents : null %}
+                                {% set comments = deletions.comments is defined ? deletions.comments : null %}
+                                    {% for stage in stages %}
+                                        <p>{{(stage.activity.stages.count > 1 ? 'the_stage'|trans ~ ' ' ~ stage.name ~ ' ' ~ 'of'|trans ~ ' ' ~ 'the_activity'|trans ~ stage.activity.name : 'the_activity'|trans ~ stage.activity.name) ~ ' ' ~ 'mails.updateNotification.deletions.action_msg'|trans }} </p>
+                                    {% endfor %}
+                                    {% for event in events %}
+                                        {% set stage = event.stage %}
+                                        <p>{{'the_event'|trans ~ ' ' ~ eventTypeRepo.dTrans(event.eventType, locale, stage.organization) ~ ' ' ~ 'for'|trans ~ ' ' ~ (stage.activity.stages.count > 1 ? 'the_stage'|trans ~ ' ' ~ stage.name ~ 'of'|trans ~ ' ' ~ 'the_activity'|trans ~ stage.activity.name : 'the_activity'|trans ~ stage.activity.name) ~ ' ' ~ 'mails.updateNotification.deletions.action_msg'|trans }} </p>
+                                    {% endfor %}
+                                    {% for document in documents %}
+                                        {% set event = document.event %}
+                                        {% set stage = event.stage %}
+                                        <p>{{'the_document'|trans ~ document.title ~ ' ' ~ 'for'|trans ~ ' ' ~  eventTypeRepo.dTrans(event.eventType, locale, stage.organization) ~ ' of ' ~ (stage.activity.stages.count > 1 ? 'the_stage'|trans ~ ' ' ~ stage.name ~ 'of'|trans ~ ' ' ~ 'the_activity'|trans ~ stage.activity.name : 'the_activity'|trans ~ stage.activity.name) ~ ' ' ~ 'mails.updateNotification.deletions.action_msg'|trans }} </p>
+                                    {% endfor %}
+                                    {% for comment in comments %}
+                                        {% set event = comment.event %}
+                                        {% set stage = event.stage %}
+                                        <p>{{'the_comment'|trans ~ eventTypeRepo.dTrans(event.eventType, locale, stage.organization) ~ ' ' ~ 'of'|trans ~ ' ' ~ (stage.activity.stages.count > 1 ? 'the_stage'|trans ~ ' ' ~ stage.name ~ 'of'|trans ~ ' ' ~ 'the_activity'|trans ~ stage.activity.name : 'the_activity'|trans ~ stage.activity.name) ~ ' ' ~ 'mails.updateNotification.deletions.action_msg'|trans}} </p>
+                                    {% endfor %}
+                            {% endif %}
+                            <br>
+                            <p>{{'mails.updateNotification.go_to_dashboard_msg'|trans ~ ':'}}</p>
+
+                            <p style="text-align: center"><a href="{{ url('myActivities') }}" target="_blank"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;font-weight:600;text-transform:uppercase;">{% trans %}mails.eventNotification.button_text{% endtrans %}</button></a></p>
+                            <p>{% trans %}mails.see_you_soon{% endtrans %}</p>
+                        </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <p>{% trans %}mails.signature_team{% endtrans %}</p>
+                                <img src="cid:logo_img" alt="logo {{ company_name }}" style="width: {{ logo_width_px }}px">
+                                <p style="margin:0;"><strong>{{ 'mails.dealdrive_motto'|trans }}</strong><br>{{ address }} | {{ zipcode_city }}</p>
+                                {% if company_name == 'Serpico' %}<p>{{ phone }}</p>{% endif %}
+                                
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
+    {% endblock %}
+</html>

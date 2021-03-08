@@ -26,9 +26,7 @@ class UniquePerOrganization extends Constraint
     public $property;
 
     public function __construct($options){
-
         parent::__construct($options);
-            
     }
 
     public function getOrganization(){
@@ -46,6 +44,10 @@ class UniquePerOrganization extends Constraint
 
     public function getMessage(){
         return $this->message;
+    }
+
+    public function getEntityManager(){
+        return $this->em;
     }
 
     /**

@@ -1,12 +1,36 @@
 {% set locale = app.request.getLocale() in ['fr','en'] ? app.request.getLocale() : en %}
+{% set currentuser = global.currentuser %}
+{% set organization = currentuser ? currentuser.organization : null %}
+
+{% set is_root = (currentuser and currentuser.role == 0)|default(false) %}
+{% set is_super_admin = (currentuser and currentuser.role <= 1)|default(false) %}
+{% set is_admin = (currentuser and currentuser.role <= 2)|default(false) %}
+{% set updates = currentuser ? global.updates : null %}
+{% set is_super_admin_undefined = organization and organization.type != 'C' and not organization.hasSuperAdmin and currentuser.role != 0 %}
+
+{# A freemium user is one user, necessarily admin, who has not a customer Id and is not in free plan #}
+{% set orgInFreemiumMode = currentuser and currentuser.role == 1 and not organization.stripeCusId and organization.plan != 3 %}
+{% set indivClass = currentuser and currentuser.organization.type == 'C' ? 'indiv-acct' : '' %}
+{% set isMobileView = 'Mobile' in global.request.headers.get('user_agent') %}
+
+
 <!DOCTYPE html>
 <html id="serpicoapp" {% block data_params %}{% endblock %}>
   <head>
     <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
     <title>
+      DealDrive -
       {% block title '' %}
-      - Serpico Public
     </title>
+    {% if global.route in ["pricing", "terms_conditions", "cookie_policy"] %}
+
+      <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+      new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+      j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+      'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+      })(window,document,'script','dataLayer','GTM-5P5957V');</script>
+
+    {% endif %}
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('lib/img/favicon/favicon.ico') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('lib/img/favicon/favicon-32x32.png') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('lib/img/favicon/favicon-16x16.png') }}">
@@ -14,227 +38,520 @@
     <link rel="mask-icon" href="{{ asset('lib/img/favicon/safari-pinned-tab.svg') }}" color="#5bbad5">
     <meta name="theme-color" content="#000000">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta content="Serpico Application. Evaluation Tool for businesses. Home." name="description">
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css">
+    <meta charset="utf-8" content="{{'head_meta.content'|trans}}">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="keywords" content="client, relationship management, interactive calendar, dashboard, client experience, ux, deal, sharing, project management">
+    <meta name="description" content="{{'head_meta.content'|trans}}">
+    <meta property="og:description" content="{{'head_meta.content'|trans}}">
+    <meta property="og:image" content="https://dealdrive.app/lib/img/logo_dd_p_l.png">
+    <meta property="og:url" content="https://dealdrive.app">
+    <meta property="twitter:site" content="@deal_drive">
+    <meta property="twitter:image" content="{{'head_meta.content'|trans}}">
+    <meta property="twitter:card" content="{{'head_meta.content'|trans}}">
+    <meta property="twitter:description" content="{{'head_meta.content'|trans}}">
+    <link rel="stylesheet" href="{{ asset('css/font-awesome/5.15/css/all.min.css') }}">
     <link rel="stylesheet" href="{{ asset('lib/materialize/css/materialize.css') }}">
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    {% block css %}{##}{% endblock %}
+    <link rel="stylesheet" href="{{ asset('css/material-icons-css-selectors-master/material-icons.css') }}">
+    {#<link rel="stylesheet" href="{{ asset('css/material-icons/css/material-icons.css') }}">#}
+    {#<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet">#}
+    <style>
+
+    </style>
+
+    {% block css %}    
+    {% endblock %}
 
     <script>
-      window.lg = '{% trans %}curr_language   {% endtrans %}';
+      window.lg = '{{ global.request.locale }}';
+      var ruurl ="{{ url('retrieveUpdates') }}";
+      var vuurl ="{{ url('viewUpdates') }}";
+      var csurl = "{{ url('manageSubscriptions') }}";
+      {% if orgInFreemiumMode %}
+        var cpurl ="{{ url('checkPlans') }}";
+      {% endif %}
+      var cnurl ="{{ url('checkNotificationMails') }}";
+      var gaurl ="{{ url('getUserAccounts') }}";
+      var caurl ="{{ url('changeUserAccount') }}";
+      {% if is_super_admin_undefined %}
+        var usuurl = "{{ url('updateSuperAdmin') }}";
+      {% endif %}
     </script>
   </head>
 
-  {% if global.currentuser != null %}
-    {% set orgName = global.currentuser.organization.commname %}
-  {% else %}
-    {% set orgName = '' %}
-  {% endif %}
+
+  {% set orgName = organization is not null ? organization.commname : '' %}
 
   <body>
+    {% if global.route in ["pricing", "terms_conditions, cookie_policy"] %}
+      <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5P5957V"
+      height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    {% endif %}
     <div class="page-container">
-      <nav id="nav" class="black">
-        <div class="nav-wrapper">
-          <ul>
-            {% if is_granted('IS_AUTHENTICATED_REMEMBERED') and global.currentuser is not null %}
-              <li class="logo">
-                <a href="/"><img src="{{ asset('lib/img/logo_l.svg') }}"></a>
-              </li>
-              <li>
-                <a href="{{ path('help') }}">
-                  <i class="fa fa-question-circle" aria-hidden="true"></i>
-                  <span>{% trans %}header.help{% endtrans %}</span>
-                </a>
-              </li>
-              {% if global.currentuser.is_root %}
-                <li class="firm">
-                  <a href="{{ path('rootManagement') }}">
-                    <i class="fa fa-cogs" aria-hidden="true"></i>
-                    <span>{% trans %}header.root_mgt{% endtrans %}</span>
-                  </a>
-                </li>
-              {% endif %}
-              {% if global.currentuser.is_admin %}
-                <li class="firm">
-                  <a href="{{ path('firmSettings') }}">
-                    <i class="fa fa-cog" aria-hidden="true"></i>
-                    <span>{% trans %}header.settings{% endtrans %}</span>
-                  </a>
-                </li>
-              {% endif %}
-              {# admins (1) can see processes for their institution, everyone else will see all institutions instead #}
-              {#
-              {% set sees_processes = userrole == 1 %}
-              {% if not sees_processes %}
-                <li>
-                  <a href="{{ path('displayAllInstitutions') }}">
-                    <i class="fa fa-hotel" aria-hidden="true"></i>
-                    {% set str = 'header.institutions' %}
-                    {{ str|trans }}
-                  </a>
-                </li>
-              {% endif %}
-              #}
-              {% if orgName != "Public" %}
-                <li>
-                  <a href="{{ path(global.currentuser.is_admin ? 'manageUsers' : 'seeColleaguesTeams') }}">
-                    <i class="fa fa-users" aria-hidden="true"></i>
-                    {% set str = 'header.' ~ (global.currentuser.is_admin ? 'users' : 'community') %}
-                    {{ str|trans }}
-                  </a>
-                </li>
-              {% endif %}
-              <li class="firm">
-                <a href="{{ path('myActivities') }}">
-                  <i class="fa fa-briefcase" aria-hidden="true"></i>
-                  <span>
-                    {% if orgName != "Public" %}
-                      {% trans %}header.firmActivities{% endtrans %}
-                    {% else %}
-                      {% trans %}header.my_actions{% endtrans %}
-                    {% endif %}
-                  </span>
-                </a>
-              </li>
-              <li>
-                <a href="{{ path('home') }}">
-                  <img class="user-profile-picture" src="{{ asset(global.userpicture) }}">
-                  {# username is only defined for user being citizen (public), otherwise fullname #}
-                  {{ global.currentuser.username != "" ? global.currentuser.username : global.currentuser.fullname }}
-                </a>
-              </li>
-              <li class="logout">
-                <a href="{{ path('logout') }}">
-                  <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
-                  {% trans %}header.logout{% endtrans %}
-                </a>
-              </li>
-            {% else %}
-              {% if global.routeParams|length == 1 and path(global.route) in freeAccessRoutes %}
-                <li class="logo">
-                  <a href="https://www.serpicoapp.com">
-                    <img src="{{ asset('lib/img/logo_s.png') }}">
-                  </a>
-                  {% trans %}landing.serpico_alt_motto{% endtrans %}
-                </li>
-              {% endif %}
-              {% if global.route == "about" %}
-                <li>
-                  <a href="https://www.serpicoapp.com">
-                    <i class="fa fa-home"></i>
-                    {% trans %}header.home{% endtrans %}
-                  </a>
-                </li>
-              {% endif %}
-              <li>
-                {% if global.route == "solution" %}
-                  <a href="https://www.serpicoapp.com">
-                    <i class="fa fa-home"></i>
-                    {% trans %}header.home{% endtrans %}
-                  </a>
+      <header {% if global.route == "home_welcome" %}class="home-header"{% endif %}>
+
+        {% if global.route != 'confirmEmailModif' %}
+          <nav id="nav" class="{{global.route != "home_welcome" ? 'white' : 'transparent'}}">
+            <div class="nav-wrapper flex-center-sb">
+              <a class="left-icon-zone hide-on-med-and-down" href="/">
+              <div class="xm-left left-icon-container desktop-left-icon-container sm-right">
+                <img class="dd-logo" src="{{ asset('lib/img/logo_dd_p_l.png') }}">
+              </div>
+              </a>
+              <a href="#" data-activates="mobile-menu" class="button-collapse left-icon-zone">
+                <div class="left-icon-container">
+                  <i class="material-icons dd-text">menu</i>
+                </div>
+              </a>
+              <div class="mobile-center-element flex-center">
+                {% if is_granted('IS_AUTHENTICATED_REMEMBERED') and global.currentuser is not null and global.route != "home_welcome" %}
+                  <img class="dd-logo" src="{{ asset('lib/img/logo_dd_s_centered.png') }}">
+                  <span class="dd-text m-left strong">{% block mobile_title '' %}</span>
                 {% else %}
-                  <a class="product" href="https://www.serpicoapp.com/solution">{% trans %}header.product{% endtrans %}</a>
+                  <img class="dd-public-logo" src="{{ asset(global.route != "home_welcome" ? 'lib/img/logo_dd_p_l.png' : 'lib/img/logo_dd_l.png') }}">
                 {% endif %}
-              </li>
-              {% if global.route != "about" %}
-                <li>
-                  <a href="https://www.serpicoapp.com/about">{% trans %}header.about{% endtrans %}</a>
-                </li>
-              {% endif %}
-              <li>
-                <a class="modal-trigger" href="#login">{% trans %}header.login{% endtrans %}</a>
-              </li>
-            {% endif %}
-            <li class="lg-icon">
-{#              <div class="collapsible" data-collapsible="accordion">#}
-{#                <div class="collapsible-header">#}
-{#                  {% set currentlocale = global.request.get('_locale') %}#}
-{#                  {% set locales = ["en", "fr"] %}#}
-{#                  <div class="flag locale-flag {{ currentlocale }}"></div>#}
-{#                  <span class="country">{{ global.request.get('_locale')|upper }}</span>#}
-{#                </div>#}
-{#                <ul class="collapsible-body lang-menu">#}
-{#                  {% for locale in locales %}#}
-{#                    {% if locale != currentlocale %}#}
-{#                      <li>#}
-{#                        <a href="{{ path(global.route, global.routeParams|merge({ _locale: locale })) }}">#}
-{#                          <div class="flag {{ locale }}"></div>#}
-{#                          <span class="country">{{ locale|upper }}</span>#}
-{#                        </a>#}
-{#                      </li>#}
-{#                    {% endif %}#}
-{#                  {% endfor %}#}
-{#                </ul>#}
-{#              </div>#}
-              <ul class="collapsible flags" data-collapsible="accordion">
-                <li>
-                  <div class="collapsible-header">
-                    <ul class="flex-center">
+              </div>
+              <ul class="flex-center nav-desktop-btns {{global.route != "home_welcome" ? 'desktop-btns' : 'landing-desktop-btns'}}" style="height:100%">
+                {% if is_granted('IS_AUTHENTICATED_REMEMBERED') and global.currentuser is not null %}
+                  {#<li class="logo">
+                  </li>#}
+                  {% if is_admin %}
+                    <li class="plan hide-on-med-and-down">
+                      <div class="c-flex-center sm-right">
+                        <span class="{{global.route != "home_welcome" ? 'plan-info' : 'landing-plan-info'}}"> {{ organization.plan == 1 ? 'header.plan.enterprise'|trans|upper : (organization.plan == 2 ? 'header.plan.premium'|trans|upper : 'header.plan.free'|trans|upper) }} {{ date('now').diff(organization.inserted).days < 21 ? '(' ~ 'trial'|trans|upper ~ ')' }} </span>
+                        {#<a class="dd-orange-text" href="{{ path('priceManagement') }}">{{ 'header.plan.upgrade'|trans }}</a>#}
+                        {% if is_super_admin_undefined %}
+                          <a class="dd-orange-text modal-trigger" href="#defineSuperAdmin">{{ 'header.plan.upgrade'|trans }}</a>
+                        {% else %}
+                          {% if is_super_admin %}
+                            <a class="dd-orange-text manage-subscriptions-btn">{{ 'header.plan.upgrade'|trans }}</a>
+                          {% endif %}
+                        {% endif %}
+                      </div>
+                    </li>
+                  {% endif %}
+                  {#
+                  <li>
+                    <a href="{{ path('help') }}">
+                      <i class="fa fa-question-circle" aria-hidden="true"></i>
+                      <span>{% trans %}header.help{% endtrans %}</span>
+                    </a>
+                  </li>
+                  #}
+                  {% if is_root %}
+                    <li class="hide-on-med-and-down">
+                      <a href="{{ path('rootManagement') }}">
+                        <i class="fa fa-cogs sm-right" aria-hidden="true"></i>
+                        <span>{% trans %}header.root_mgt{% endtrans %}</span>
+                      </a>
+                    </li>
+                  {% endif %}
+
+                  {% if is_super_admin or is_super_admin_undefined %}
+                    <li class="firm-settings hide-on-med-and-down">
+                      <a href="{{ is_super_admin_undefined ? '#defineSuperAdmin' : path('firmSettings') }}" {{ is_super_admin_undefined ? 'class="modal-trigger"' }}>
+                        <i class="fa fa-cog sm-right" aria-hidden="true"></i>
+                        <div class="c-flex-center">
+                          <span>{% trans %}header.settings{% endtrans %}</span>
+                          {% if is_super_admin_undefined %}
+                            <span class="dd-orange-text tbd-msg">{{'tbd'|trans}}</span>
+                          {% endif %}
+                        </div>
+                      </a>
+                    </li>
+                  {% endif %}
+
+                  <li class="hide-on-med-and-down">
+                    <a href="{{ path(is_admin ? 'manageUsers' : 'seeColleaguesTeams') }}">
+                      <i class="fa fa-users sm-right" aria-hidden="true"></i>
+                      {% set str = 'header.users' %}
+                      {{ str|trans }}
+                    </a>
+                  </li>
+
+                  <li class="hide-on-med-and-down">
+                    <a href="{{ path('manageDocuments') }}">
+                      <i class="fa fa-file-excel sm-right" aria-hidden="true"></i>
+                      <span>{% trans %}header.my_documents{% endtrans %}</span>
+                    </a>
+                  </li>
+     
+                  <li class="hide-on-med-and-down">
+                    <a href="{{ path('myActivities') }}">
+                      <i class="fa fa-briefcase sm-right" aria-hidden="true"></i>
+                      <span>
+                          {{ 'header.activities'|trans }}   
+                      </span>
+                    </a>
+                  </li>
+
+                  <li class="profile-notif-zone">
+                    <a href="{#{{ path('home') }}#}#" class="user-notif-link">
+                      <img class="user-nav-picture {{indivClass}} tooltipped" src="{{ asset(global.userpicture) }}" data-tooltip="{{ 'notif_and_profile'|trans }}" data-position="down">
+                      {% if updates|length > 0 and updates.nbNew > 0 %}
+                        <span class="nb-updates-new" data-nb-visited="{{ updates|length - updates.nbNew|number_format }}">{{ updates.nbNew }}</span>
+                      {% endif %}
+                    </a>
+
+
                       <li>
-                        <div class="flag {{ locale }}"></div>
+                        <ul class="profile-notif-elmts flex-center" style="display:none">
+
+                          <li class="profile-zone">
+                            <ul class="flex-center">
+                              <li class="m-right">
+                                <img class="user-profile-xl-picture {{indivClass}}" src="{{ asset(global.userpicture) }}" alt="">
+                              </li>
+                              <ul class="c-flex">
+
+                                <li>{{currentuser.fullname}}</li>
+                                <li class="profile-link">
+                                  <a class="dd-orange-text no-padding" href="{{ url('home') }}">{{'profile.access_profile'|trans}}</a>
+                                </li>
+                                {% if currentuser.userGlobal.userAccounts|length > 1 %}
+                                  <li class="ma-content">
+                                    <div class="flex-center">
+                                      <span>
+                                        {{ 'my_account'|trans ~ ' :' }}
+                                      </span>
+                                      <span class="sm-left strong">{{ (organization.type != 'C' ? (organization.commname|length > 10 ? organization.commname|slice(0,10) ~ '...' : organization.commname) : 'individual'|trans) }}</span>
+                                      <a class="dd-orange-text change-account">{{'shift'|trans|upper}}</a>
+                                    </div>
+                                  </li>
+                                {% else %}
+                                  <li class="add-account">
+                                      <a href="{{ url('manageProfile',{aa: 1}) }}" class="dd-text strong no-padding">{{'profile.add_firm_account'|trans}}</a>
+                                  </li>
+                                {% endif %}
+                              </ul>
+                            </ul>
+                          </li>
+
+                          <li class="notifications-title">
+                            <span>{{'updates.last_notifications_title'|trans}}</span>
+                          </li>
+
+                          <ul class="notif-list" data-prototype="{% apply escape %}{% include "components/update_element__item.html.twig" %}{% endapply %}">
+                            {% if updates|length > 0 %}
+                              {% for update in updates.notifs %}
+                                {% include "components/update_element__item.html.twig" with { element: update, seen: update.viewed } %}
+                              {% endfor %}
+                            {% else %}
+                              <li class="no-update-msg">{{'updates.no_update_yet'|trans}}</li>
+                            {% endif %}
+                          </ul>
+
+                        </ul>
                       </li>
-                      <li>
-                        <span class="country">{{ locale|upper }}</span>
-                      </li>
-                    </ul>
-                  </div>
-                  <div class="collapsible-body language-collapsible-body">
-                    <ul class="lang-menu">
+
+
+                  </li>
+
+                  <li class="logout hide-on-med-and-down">
+                    <a href="{{ path('logout') }}">
+                      <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+
+                    </a>
+                  </li>
+                {% else %}
+                  {#{% if global.routeParams|length == 1 and path(global.route) in freeAccessRoutes %}#}
+                    {#
+                    <li class="logo hide-on-med-and-down">
+                      <a href="{{ path('home_welcome') }}">
+                        <img src="{{ asset('lib/img/DD_logo_squared_t.png') }}">
+                      </a>
+                      {% trans %}landing.page_name{% endtrans %}
+                    </li>
+                    #}
+                  {#{% endif %}#}
+
+
+                    <li class="hide-on-med-and-down">
+                      <a class="product {{ global.route == 'pricing' ? 'strong'}}" href="{#{{ path('solution') }}#}{{ path('pricing') }}">
+                        {% trans %}header.features_pricing{% endtrans %}
+                      </a>
+                    </li>
+
+                    <li class="hide-on-med-and-down">
+                      <a class="product" href="{{ path('home_welcome') }}">
+                        {% trans %}header.product{% endtrans %}
+                      </a>
+                    </li>
+                      {% if '/' ~ global.route != path('login') and '/' ~ global.route != path('signup') and not is_granted('IS_AUTHENTICATED_REMEMBERED') %}
+
+                        <li class="hide-on-med-and-down">
+                            <a class="" href="{{ is_granted('IS_AUTHENTICATED_REMEMBERED') ? path('processesList') : path('login') }}">
+                              {% trans %}header.login{% endtrans %}
+                            </a>
+                          </li>
+
+                          <li>
+                            <a class="btn waves-effect waves-light signup-btn" href="{{ path('signup') }}">
+                              {% trans %}header.register.start{% endtrans %}
+                            </a>
+                          </li>
+
+                      {% endif %}
+
+                {% endif %}
+                <li class="lg-icon hide-on-med-and-down">
+                  <div class="collapsible" data-collapsible="accordion">
+                    <div class="collapsible-header">
+                      <ul class="flex-center">
+                        <li>
+                          <div class="flag sm-right {{ locale }}"></div>
+                        </li>
+                        <li>
+                          <span class="{{global.route != "home_welcome" ? 'country' : 'landing-country'}}">{{ locale|upper }}</span>
+                        </li>
+                      </ul>
+                    </div>
+                    <ul class="collapsible-body lang-menu">
                       {% if locale != 'en' %}
                         <li>
-                          <ul class="flex-center">
-                            <a href="{{ path('change_locale', {'locale': 'en'}) }}" class="flex-center">
-                              <li>
-                                <div class="flag en"></div>
-                              </li>
-                              <li>
-                                <span class="country">EN</span>
-                              </li>
-                            </a>
-                          </ul>
+                          <a href="{{ path('change_locale', {'locale': 'en'}) }}" class="flex-center">
+                              <div class="flag en"></div>
+                              <span class="country">EN</span>
+                          </a>
                         </li>
                       {% endif %}
                       {% if locale != 'fr' %}
                         <li>
-                          <ul class="flex-center">
-                            <a href="{{ path('change_locale', {'locale': 'fr'}) }}" class="flex-center">
-                              <li>
-                                <div class="flag fr"></div>
-                              </li>
-                              <li>
-                                <span class="country">FR</span>
-                              </li>
-                            </a>
-                          </ul>
+                          <a href="{{ path('change_locale', {'locale': 'fr'}) }}" class="flex-center">
+                              <div class="flag fr"></div>
+                              <span class="country">FR</span>
+                          </a>
                         </li>
                       {% endif %}
                     </ul>
                   </div>
                 </li>
               </ul>
-            </li>
-          </ul>
-        </div>
-      </nav>
+              <ul class="side-nav" id="mobile-menu">
+                <li class="side-logo-holder flex-center">
+                  <img class="dd-logo" src="{{ asset('lib/img/logo_dd_p_l.png') }}">
+                </li>
+                {% if is_granted('IS_AUTHENTICATED_REMEMBERED') and global.currentuser is not null %}
+
+                  <li>
+                    <a href="{{ url('home') }}" class="profile-link">
+                      <div class="flex-center">
+                        <img class="user-profile-xl-picture" src="{{ asset(global.userpicture) }}">
+                        <span class="dd-text">{{'profile.access_profile'|trans}}</span>
+                      </div>
+                    </a>
+                  </li>
+
+                  <li class="">
+                    <a href="{{ path('myActivities') }}">
+                      <i class="fa fa-briefcase sm-right" aria-hidden="true"></i>
+                      <span class="dd-text strong">
+                        {{'header.activities'|trans}}
+                      </span>
+                    </a>
+                  </li>
+
+                  {% if is_super_admin or is_super_admin_undefined %}
+                    <li class="">
+                      <a href="{{ is_super_admin_undefined ? '#defineSuperAdmin' : path('firmSettings') }}" {{ is_super_admin_undefined ? 'class="modal-trigger"' }}>
+                        <i class="fa fa-cog sm-right" aria-hidden="true"></i>
+                        <span>{% trans %}header.settings{% endtrans %}</span>
+                        {% if is_super_admin_undefined %}
+                          <span class="dd-orange-text tbd-msg">{{'tbd'|trans}}</span>
+                        {% endif %}
+                      </a>
+                    </li>
+                  {% endif %}
+
+                  
+                  <li class="">
+                    <a href="{{ path('manageDocuments') }}">
+                      <i class="fa fa-file-excel sm-right" aria-hidden="true"></i>
+                      <span>{% trans %}header.my_documents{% endtrans %}</span>
+                    </a>
+                  </li>
+                 
+                  
+                  <li>
+                    <a href="{{ path(is_admin ? 'manageUsers' : 'seeColleaguesTeams') }}">
+                      <i class="fa fa-users sm-right" aria-hidden="true"></i>
+                      <span class="dd-text">{{ 'header.users'|trans }}</span>
+                    </a>
+                  </li>
+
+                  {% if is_root %}
+                    <li class="">
+                      <a href="{{ path('rootManagement') }}">
+                        <i class="fa fa-cogs sm-right" aria-hidden="true"></i>
+                        <span class="dd-text">{% trans %}header.root_mgt{% endtrans %}</span>
+                      </a>
+                    </li>
+                  {% endif %}
+                  {#
+                  {% if global.currentuser.is_admin %}
+                    <li class="">
+                      <a href="{{ path('firmSettings') }}">
+                        <i class="fa fa-cog" aria-hidden="true"></i>
+                        <span>{% trans %}header.settings{% endtrans %}</span>
+                      </a>
+                    </li>
+                  {% endif %}
+                  #}            
+                  <li class="logout">
+                    <a href="{{ path('logout') }}">
+                      <i class="fas fa-sign-out-alt " aria-hidden="true"></i>
+                      <span class="dd-text">{{'logout'|trans}}</span>
+                    </a>
+                  </li>
+                  {% if is_admin %}
+                    <li class="plan">
+                      <a class="c-flex-center {{is_super_admin_undefined ? 'modal-trigger'}}" href="{{is_super_admin_undefined ? '#defineSuperAdmin' : path('priceManagement')}}">
+                        <span class="dd-orange-text"> {{ 'Plan'|trans|upper ~ ' : ' ~ (organization.plan == 1 ? 'header.plan.enterprise'|trans|upper : (organization.plan == 2 ? 'header.plan.premium'|trans|upper : 'header.plan.free'|trans|upper)) }} {{ date('now').diff(organization.inserted).days < 21 ? '(' ~ 'trial'|trans|upper ~ ')' }} </span>
+                        {% if organization.plan != 1 %}
+                          <span class="dd-orange-text">{{ 'header.plan.upgrade'|trans }}</span>
+                        {% endif %}
+                      </a>
+                    </li>
+                  {% endif %}
+
+                {% else %}
+
+                  <li>
+                    <a class="product" href="{{ path('home_welcome') }}">
+                      {% trans %}header.product{% endtrans %}
+                    </a>
+                  </li>
+
+                  <li>
+                    <a class="product" href="{#{{ path('solution') }}#}{{ path('pricing') }}">
+                      {% trans %}header.features_pricing{% endtrans %}
+                    </a>
+                  </li>
+
+                  <li>
+                    <a id="loginLink" href="{{ is_granted('IS_AUTHENTICATED_REMEMBERED') ? path('processesList') : path('login') }}">
+                      {% trans %}header.login{% endtrans %}
+                    </a>
+                  </li>
+
+                  <li>
+                    <a class="btn waves-effect waves-light signup-btn" href="{{ path('signup') }}">
+                      {% trans %}header.register.start{% endtrans %}
+                    </a>
+                  </li>
+                {% endif %}
+
+                  <li>
+                    <a class="waves-effect waves-light modal-trigger btn-small" id="language" href='#languageModal'>
+                      <span class="dd-text">{{'language.selection'|trans}}</span>
+                    </a>
+                  </li>
+
+
+              </ul>
+            </div>
+          </nav>
+        {% endif %}
+      </header>
       {% block content %}{% endblock %}
+
       <div id="waitingSpinner" class="modal">
         <div class="modal-content">
           <div class="spinninAround"></div>
           <p>{% trans %}please_wait{% endtrans %}</p>
         </div>
       </div>
+      {% if orgInFreemiumMode %}
+        <div id="upgradeAccount" class="modal {{ date('now').timestamp - organization.expired.timestamp > 0 ? 'tbo' : ''}}">
+          <div class="modal-content">
+            <img class="upgrade-img" src="{{asset('/lib/img/upgrade.png')}}" alt="Upgrade Account" style="width:60%">
+            <p>{{ 'layout.upgrade_modal.msg'|trans|raw }}</p>
+            <a href="{{ url('priceManagement') }}" class="btn update-plan-btn">{{'layout.upgrade_modal.upgrade_btn_msg'|trans}}</a>
+          </div>
+        </div>
+      {% endif %}
+        <div id="changeAccount" class="modal">
+          <div class="modal-content">
+            <h5>{{'profile.change_account_modal.title'|trans}}</h5>
+            <p>{{'profile.change_account_modal.msg'|trans}}</p>
+            <div class="input-field">
+              <select name="accountSelector"></select>
+            </div>
+             <a class="btn waves-light waves-effect select-account-btn">Ok</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="languageModal" class="modal">
+          <div class="modal-content">
+            <h5>{{ "language.choose"|trans }}</h5>
+            <ul class="c-flex-center">
+                <li>
+                    <a class="btn flex-center" href="{{ path('change_locale', {'locale': 'en'}) }}">
+                        <img style="height:50%;" src="{{ asset('lib/img/FlagEngland.png') }}" alt="english">
+                        <span class="m-left">English</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="btn flex-center" href="{{ path('change_locale', {'locale': 'fr'}) }}">
+                        <img style="height:50%;" src="{{ asset('lib/img/FlagFrance.png') }}" alt="français">
+                        <span class="m-left">Français</span>    
+                    </a>
+                </li>
+            </ul>
+          </div>
+        </div>
+
+        {# below search component should not exist in public pages #}
+        {% if global.route not in ["signup", "pricing", "terms_conditions", "cookie_policy", "home_welcome", "login"] %}
+
+          {% include "components/add_client_user_modal.html.twig" %}
+
+          {% if is_super_admin_undefined %}
+            <div id="defineSuperAdmin" class="modal" data-id="{{currentuser.id}}">
+              <form>   
+                <div class="modal-content">
+                  <h5>
+                    <span>{{ 'profile.super_admin_appointment_modal.title'|trans}}</span>
+                  </h5>
+                  <p>{{'profile.super_admin_appointment_modal.msg'|trans|raw}}</p>
+                  <div class="su-choice-zone">
+                      <div class="radio-holder">
+                        <input type="radio" id="selfSU" name="super_admin_choice" required="required" value="self" checked="checked">
+                        <label for="selfSU" class="required black-text"> {{'profile.super_admin_appointment_modal.choice_self'|trans|raw }}</label>
+                      </div>
+                      <div class="radio-holder">
+                        <input type="radio" id="otherSU" name="super_admin_choice" required="required" value="other">
+                        <label for="otherSU" class="required black-text">{{'profile.super_admin_appointment_modal.choice_other'|trans|raw }}</label>
+                      </div>
+                      <input type="hidden" name="uid">
+                  </div>
+                  <div class="flex-center-fe">
+                    <div class="btn-flat waves-effect waves-light go-prev m-right">{{'back'|trans}}</div>
+                    <div class="btn waves-effect waves-light add-su-btn">Ok</div>
+                  </div> 
+                </div>
+              </form>
+            </div>
+
+            <div id="superAdminAppointmentSuccess" class="modal">
+              <div class="modal-content">
+                <p>{{'profile.super_admin_appointed_modal.msg'|trans}}</p>
+                <div class="flex-center-fe">
+                  <div class="btn waves-effect waves-light" onclick="history.go()">Ok</div>
+                </div>
+              </div>
+            </div>
+
+          {% endif %}
+        {% endif %}
     </div>
-{#    <footer id="master-footer">#}
-{#      {% if null is null %}#}
-{#        {% include "not_authenticated_footer.html.twig" %}#}
-{#      {% endif %}#}
-{#    </footer>#}
+
     <script src="{{ asset('build/runtime.js') }}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.js"></script>
-    <script src="{{ asset('js/header.js') }}"></script>
+    <script src="{{ asset('js/jquery.min.js') }}"></script>
+    <script src="{{ asset('js/materialize.js') }}"></script>
+    <script src="{{ asset('js/base.js') }}"></script>
+    <script src="{{ asset('js/add_client_user.js') }}"></script>
     {% block javascripts %}{% endblock %}
   </body>
 </html>

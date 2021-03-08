@@ -34,14 +34,15 @@ class Survey extends DbObject
     public $name;
 
     /**
-     * @ORM\Column(name="sur_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="surveyInitiatives")
+     * @JoinColumn(name="sur_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
-     * @ORM\Column(name="sur_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="sur_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="sur_state", type="integer", nullable=true)
@@ -61,15 +62,14 @@ class Survey extends DbObject
     protected $organization;
 
     /**
-     * @OneToMany(targetEntity="ActivityUser", mappedBy="survey", cascade={"persist"})
-     * @var ArrayCollection<ActivityUser>
+     * @OneToMany(targetEntity="Participation", mappedBy="survey", cascade={"persist"})
+     * @var ArrayCollection<Participation>
      */
-//     * @OrderBy({"leader" = "DESC"})
-    public $participants;
+    public $participations;
 
     /**
      * @OneToMany(targetEntity="SurveyField", mappedBy="survey", cascade={"persist", "remove"}, orphanRemoval=true)
-     *  @var SurveyField[] $fields
+     *  @var ArrayCollection|SurveyField[] $fields
      */
 //     * @ORM\OrderBy({"sfi_position" = "ASC"})
     protected $fields;
@@ -84,12 +84,10 @@ class Survey extends DbObject
      * Survey constructor.
      * @param ?int$id
      * @param $sur_name
-     * @param $sur_createdBy
-     * @param $sur_inserted
      * @param $sur_state
      * @param $stage
      * @param $organization
-     * @param ArrayCollection $participants
+     * @param ArrayCollection $participations
      * @param SurveyField[] $fields
      * @param Answer[]|ArrayCollection $answers
      */
@@ -97,21 +95,18 @@ class Survey extends DbObject
       ?int $id = 0,
         $sur_state = null,
         $sur_name = '',
-        $sur_createdBy = null,
-        $sur_inserted = null,
         Stage $stage = null,
         Organization $organization = null,
-        ArrayCollection $participants = null,
-        array $fields = [],
+        ArrayCollection $participations = null,
+        ArrayCollection $fields = null,
         $answers = null)
     {
-        parent::__construct($id, $sur_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->name = $sur_name;
-        $this->inserted = $sur_inserted;
         $this->state = $sur_state;
         $this->stage = $stage;
         $this->organization = $organization;
-        $this->participants = $participants?: new ArrayCollection();
+        $this->participations = $participations?: new ArrayCollection();
         $this->fields = $fields?: new ArrayCollection();
         $this->answers = $answers?$fields: new ArrayCollection();
     }
@@ -181,35 +176,19 @@ class Survey extends DbObject
     }
 
     /**
-     * @return ArrayCollection
+     * @return ArrayCollection|Participation[]
      */
-    public function getParticipants(): ArrayCollection
+    public function getParticipations(): ArrayCollection
     {
-        return $this->participants;
+        return $this->participations;
     }
 
     /**
-     * @param ArrayCollection $participants
+     * @return ArrayCollection|SurveyField[]
      */
-    public function setParticipants(ArrayCollection $participants): void
-    {
-        $this->participants = $participants;
-    }
-
-    /**
-     * @return SurveyField[]
-     */
-    public function getFields(): array
+    public function getFields(): ArrayCollection
     {
         return $this->fields;
-    }
-
-    /**
-     * @param SurveyField[] $fields
-     */
-    public function setFields(array $fields): void
-    {
-        $this->fields = $fields;
     }
 
     /**
@@ -220,24 +199,17 @@ class Survey extends DbObject
         return $this->answers;
     }
 
-    /**
-     * @param Answer[]|ArrayCollection $answers
-     */
-    public function setAnswers($answers): void
+    public function addParticipation(Participation $participation)
     {
-        $this->answers = $answers;
-    }
-    public function addParticipant(ActivityUser $participant)
-    {
-        $this->participants->add($participant);
-        $participant->setSurvey($this);
+        $this->participations->add($participation);
+        $participation->setSurvey($this);
         return $this;
     }
 
-    public function removeParticipant(ActivityUser $participant)
+    public function removeParticipation(Participation $participant)
     {
         // Remove this participant
-        $this->participants->removeElement($participant);
+        $this->participations->removeElement($participant);
         return $this;
     }
     public function addField(SurveyField $field): Survey

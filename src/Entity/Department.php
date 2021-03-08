@@ -29,19 +29,20 @@ class Department extends DbObject
 
 
     /**
-     * @ORM\Column(type="string", length=45)
+     * @ORM\Column(name="dpt_name", type="string", length=45)
      */
-    public $dpt_name;
+    public $name;
 
     /**
-     * @ORM\Column(name="dpt_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="departmentInitiatives")
+     * @JoinColumn(name="dpt_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
-     * @ORM\Column(name="dpt_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="dpt_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="dpt_deleted", type="datetime", nullable=true)
@@ -49,10 +50,10 @@ class Department extends DbObject
     public $deleted;
 
     /**
-     * @ManyToOne(targetEntity="User", inversedBy="leadingDepartments")
-     * @JoinColumn(name="masterUser_usr_id", referencedColumnName="usr_id", nullable=false)
+     * @ORM\OneToMany(targetEntity=UserMaster::class, mappedBy="department", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|UserMaster[]
      */
-    protected $masterUser;
+    private $userMasters;
 
     /**
      * @OneToMany(targetEntity="Position", mappedBy="department", cascade={"persist", "remove"})
@@ -78,51 +79,70 @@ class Department extends DbObject
     protected $criterionGroups;
 
     /**
+     * @OneToMany(targetEntity="EventGroup", mappedBy="department")
+     * @var ArrayCollection
+     */
+    protected $eventGroups;
+
+    /**
      * @OneToMany(targetEntity="Target", mappedBy="department",cascade={"persist", "remove"}, orphanRemoval=true)
      */
     public $targets;
 
     /**
+     * @OneToMany(targetEntity="User", mappedBy="department",cascade={"persist","remove"})
+     * @OrderBy({"lastname" = "ASC"})
+     */
+    public $users;
+
+    /**
+     * @OneToMany(targetEntity="ElementUpdate", mappedBy="department",cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    public $updates;
+
+    /**
      * Department constructor.
      * @param $id
-     * @param $dpt_name
-     * @param $dpt_createdBy
-     * @param $dpt_inserted
-     * @param $dpt_deleted
+     * @param $name
+     * @param $deleted
      * @param $masterUser
      * @param $positions
      * @param $templateActivities
      * @param $options
      * @param $organization
      * @param ArrayCollection $criterionGroups
+     * @param ArrayCollection $eventGroups
      * @param $targets
      */
     //TODO Set correctement dans les controlleurs
     public function __construct(
         $id = 0,
-        $dpt_name = '',
-        $dpt_createdBy = null,
-        $dpt_inserted = null,
-        $dpt_deleted = null,
+        $name = '',
+        $deleted = null,
         $masterUser = null,
         $positions = null,
         $templateActivities = null,
         ArrayCollection $options = null,
         $organization = null,
         ArrayCollection $criterionGroups = null,
-        ArrayCollection $targets = null)
+        ArrayCollection $eventGroups = null,
+        ArrayCollection $targets = null,
+        ArrayCollection $users = null)
     {
-        parent::__construct($id, $dpt_createdBy, new DateTime());
-        $this->dpt_name = $dpt_name;
-        $this->inserted = $dpt_inserted;
-        $this->deleted = $dpt_deleted;
+        parent::__construct($id, null, new DateTime);
+        $this->name = $name;
+        $this->deleted = $deleted;
         $this->masterUser = $masterUser;
-        $this->positions = $positions?:new ArrayCollection();
-        $this->templateActivities = $templateActivities;
-        $this->options = $options?:new ArrayCollection();
         $this->organization = $organization;
-        $this->criterionGroups = $criterionGroups;
+        $this->positions = $positions?:new ArrayCollection();
+        $this->options = $options?:new ArrayCollection();
+        $this->criterionGroups = $criterionGroups?:new ArrayCollection();
+        $this->eventGroups = $eventGroups?:new ArrayCollection();
         $this->targets = $targets?:new ArrayCollection();
+        $this->users = $users?:new ArrayCollection();
+        $this->updates = new ArrayCollection();
+        $this->userMasters = new ArrayCollection();
+
     }
 
 
@@ -133,20 +153,19 @@ class Department extends DbObject
 
     public function getName(): ?string
     {
-        return $this->dpt_name;
+        return $this->name;
     }
 
-    public function setName(string $dpt_name): self
+    public function setName(string $name): self
     {
-        $this->dpt_name = $dpt_name;
+        $this->name = $name;
 
         return $this;
     }
 
-    public function setInserted(DateTimeInterface $dpt_inserted): self
+    public function setInserted(DateTime $inserted): self
     {
-        $this->inserted = $dpt_inserted;
-
+        $this->inserted = $inserted;
         return $this;
     }
 
@@ -155,30 +174,13 @@ class Department extends DbObject
         return $this->deleted;
     }
 
-    public function setDeleted(?DateTimeInterface $dpt_deleted): self
+    public function setDeleted(?DateTimeInterface $deleted): self
     {
-        $this->deleted = $dpt_deleted;
+        $this->deleted = $deleted;
 
         return $this;
     }
-
-    /**
-     * @return mixed
-     */
-    public function getMasterUser()
-    {
-        return $this->masterUser;
-    }
-
-    /**
-     * @param mixed $masterUser
-     */
-    public function setMasterUser($masterUser): Department
-    {
-        $this->masterUser = $masterUser;
-        return $this;
-    }
-
+    
     /**
      * @return mixed
      */
@@ -253,27 +255,11 @@ class Department extends DbObject
     }
 
     /**
-     * @param ArrayCollection $criterionGroups
-     */
-    public function setCriterionGroups(ArrayCollection $criterionGroups): void
-    {
-        $this->criterionGroups = $criterionGroups;
-    }
-
-    /**
      * @return mixed
      */
     public function getTargets()
     {
         return $this->targets;
-    }
-
-    /**
-     * @param mixed $targets
-     */
-    public function setTargets($targets): void
-    {
-        $this->targets = $targets;
     }
 
     public function addPosition(Position $position): Department
@@ -290,13 +276,27 @@ class Department extends DbObject
         return $this;
     }
 
+    public function addCriterionGroup(CriterionGroup $criterionGroup): Department
+    {
+
+        $this->criterionGroups->add($criterionGroup);
+        $criterionGroup->setDepartment($this);
+        return $this;
+    }
+
+    public function removeCriterionGroup(CriterionGroup $criterionGroup): Department
+    {
+        $this->criterionGroups->removeElement($criterionGroup);
+        return $this;
+    }
+
     //TODO l'histoire du getUSers et viewable users
 
     public function toArray(): array
     {
         return [
             'id' => $this->id,
-            'name' => $this->dpt_name
+            'name' => $this->name
         ];
     }
     public function addOption(OrganizationUserOption $option): Department
@@ -312,8 +312,78 @@ class Department extends DbObject
         return $this;
     }
 
+    /**
+     * @return ArrayCollection|User[]
+     */
+    public function getUsers()
+    {
+        return $this->users;
+    }
+
+    public function addUser(User $user): Department
+    {
+        $this->users->add($user);
+        $user->setDepartment($this);
+        return $this;
+    }
+    public function removeUser(User $user): Department
+    {
+        $this->users->removeElement($user);
+        return $this;
+    }
+
+    /**
+     * @return ArrayCollection|User[]
+     */
+    public function getActiveUsers()
+    {
+        return $this->users->filter(fn(User $u) => !$u->getDeleted());
+    }
+
+    /**
+    * @return ArrayCollection|ElementUpdate[]
+    */
+    public function getUpdates()
+    {
+        return $this->updates;
+    }
+
+    public function addUpdate(ElementUpdate $update): self
+    {
+        $this->updates->add($update);
+        $update->setDepartment($this);
+        return $this;
+    }
+
+    public function removeUpdate(ElementUpdate $update): self
+    {
+        $this->updates->removeElement($update);
+        return $this;
+    }
+
     public function __toString()
     {
-        return $this->dpt_name;
+        return $this->name;
+    }
+
+    /**
+    * @return ArrayCollection|UserMaster[]
+    */
+    public function getUserMasters()
+    {
+        return $this->userMasters;
+    }
+
+    public function addUserMaster(UserMaster $userMaster): self
+    {
+        $this->userMasters->add($userMaster);
+        $userMaster->setDepartment($this);
+        return $this;
+    }
+
+    public function removeUserMaster(UserMaster $userMaster): self
+    {
+        $this->userMasters->removeElement($userMaster);
+        return $this;
     }
 }

@@ -1,0 +1,76 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>
+        {% block subject %}
+            {% set stageEl = stage is defined and stage is not null ? stage : activity.stages.first %}
+            {% set formattedSD = stageEl.startdate|format_datetime('short', 'none', pattern='dd/MM') %}
+            {% set formattedED = stageEl.enddate|format_datetime('short', 'none', pattern='dd/MM') %}
+            {% set moreThanADay = not stageEl.enddate or stageEl.enddate.diff(stageEl.startdate).days > 0 %}
+
+            {{ 'initiator action_msg act_elmt_msg act_elmt_info'|replace({
+                    'initiator' : initiator.fullname,
+                    'action_msg' : stage is defined and stage is not null ? 'mails.activityParticipationFollowing.stage_subject_message_1'|trans({action : action|lower }) : 'mails.activityParticipationFollowing.activity_subject'|trans({action : action|lower }),
+                    'act_elmt_msg' : stage is defined and stage is not null ? (stage.name|raw ~ 'mails.activityParticipationFollowing.stage_subject_message_2'|trans ~ stage.activity.name|raw) : activity.name|raw,
+                    'act_elmt_info' : (teamParticipation is defined ? 'mails.activityParticipationFollowing.subject_team_suffix'|trans : '') ~ '(' ~ (moreThanADay ? 'from_date'|trans ~ ' ' ~ formattedSD ~ 'to_date'|trans ~ ' ' ~ formattedED : formattedSD) ~ ')'
+                }) 
+            }}
+
+        {% endblock %}
+        </title>
+        <style type="text/css">
+            body {margin: 0; padding: 0; min-width: 100%!important;}
+            .content {width: 100%; max-width: 800px;}
+        </style>
+    </head>
+
+    {% block body %}
+        {% set stageEl = stage is defined and stage is not null ? stage : activity.stages.first %}
+        {% set formattedSD = stageEl.startdate|format_datetime('short', 'none', pattern='dd/MM') %}
+        {% set formattedED = stageEl.enddate|format_datetime('short', 'none', pattern='dd/MM') %}
+        {% set moreThanADay = not stageEl.enddate or stageEl.enddate.diff(stageEl.startdate).days > 0 %}
+    <body bgcolor="white">
+        <table width="100%" bgcolor="white" border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td>
+                    <table class="content" align="left" cellpadding="0" cellspacing="0" border="0">
+                        <td>
+                            <p>{% trans %}mails.hello{% endtrans %} {{ recipient.firstname }},</p>
+                        
+                            <p>
+
+
+
+                                {{'mails.activityParticipationFollowing.message_act_begin'|trans ~ ' "' ~ 
+                                        (activity is defined and activity is not null ? activity.name|raw : stage.name|raw) ~ 
+                                    '" ' ~ 'by'|trans ~ ' ' ~ currentuser.fullname ~ 
+                                        (currentuser.organization.id != recipient.organization.id ? 'from'|trans ~ currentuser.organization.commname : '') ~ 
+                                    ' (' ~ 'initial_dates'|trans ~ ' : ' ~ 
+                                        (moreThanADay ? formattedSD ~ ' - ' ~ formattedED : formattedSD) ~  
+                                '). ' ~ 'mails.activityParticipationFollowing.message_end'|trans ~ ':'
+                                }}
+                            </p>
+                          
+                            <p style="text-align: center"><a href="{{ url('trackMLinkClick',{'trkToken' : trkToken}) }}" target="_blank"><button style="background-color: #55318e; height: 40px; line-height: 40px; text-decoration: none; color: #ff9300; text-align: center; border: none;padding: 0 20px; border-radius:3px;font-weight:600;text-transform:uppercase;">{% trans %}mails.activityParticipationFollowing.button_text{% endtrans %}</button></a></p>
+                            <p>
+                                {% trans %}mails.activityParticipationFollowing.message3_participant{% endtrans %}
+                            </p>
+                            <p>{% trans %}mails.see_you_soon{% endtrans %}</p>
+                        </td>
+                        </tr>
+                        <tr>
+                            <td>
+                               <p>{% trans %}mails.signature_team{% endtrans %}</p>
+                                <img src="cid:logo_img" alt="logo {{ company_name }}" style="width: {{ logo_width_px }}px">
+                                <p style="margin:0;"><strong>{{ 'mails.dealdrive_motto'|trans }}</strong><br>{{ address }} | {{ zipcode_city }}</p>
+                                {% if company_name == 'Serpico' %}<p>{{ phone }}</p>{% endif %}    
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
+    {% endblock %}
+</html>

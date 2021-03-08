@@ -1,12 +1,5 @@
 $(function() {
-    var clickedOnce = false;
-    $('.clickable-image, .add-photo-btn').on('click', e => {
-        clickedOnce = false;
-        if (!clickedOnce) {
-            $('input').click();
-        }
-    });
-
+    
   $('.modal').modal();
 
   if($('#tutoModal')) {
@@ -53,30 +46,6 @@ $(function() {
     console.log(id);
   })
 
-    $('.dropify').dropify({
-        messages:
-            (lg == 'fr') ? {
-            'default': 'Insérer une photo de profil (max. 2 Mo)',
-            'replace': 'Glissez un document ou cliquez pour changer la photo',
-            'remove': 'Supprimer',
-            'error': 'Ooops, une erreur est survenue'
-            } : {
-            'default': 'Click or drag and drop an image file (max. 2 Mo)',
-            'replace': 'Drag and drop or click to replace',
-            'remove': 'Remove',
-            'error': 'Ooops, something wrong happened'
-                }
-    });
-
-    $('.dropify').on('change',function(e) {
-        if ($('.dropify-clear').length > 0) {
-            $('form button').attr('disabled',false);
-            $('.dropify-preview').css('display','flex');
-        } else {
-            $('.dropify-preview').css('display','none');
-        }
-    });
-
     if ($(window).width() < 800) {
         $('.participant-column').empty().append($('<i class="fa fa-users"></i>'));
         var resElmt = $('.background-container a');
@@ -91,11 +60,10 @@ $(function() {
         $('.container > ul').removeClass('flex-center').addClass('row').removeAttr('justify-content').css('top','70px');
         $('.container > ul > div').removeAttr('style').css('text-align','center');
         $('.stats-elmts').css('justify-content','center');
-        $('.col').css('margin-top','5px').css('margin-bottom','5px');
-        $('.menu').css('padding','250px 0px');
+    
         $('.container .row').css('margin-left','0px').css('margin-right','0px');
         $('.action-buttons').removeAttr('style');
-        $('h5').css({'font-size':'1.28rem','text-align':'center'});
+        $('h5').css({'font-size':'1.28rem'});
         $('table').css('font-size','0.85rem');
         $('.fa-paper-plane').css('margin-right','5px');
         $('.fa-paper-plane').closest('a').css({'font-size':'0.9rem','padding-left':'1rem','padding-right':'1rem'})
@@ -116,45 +84,6 @@ $(function() {
         })
         $('.btn-floating').css({'top':'30%','left':'44%'});
     }
-
-
-    document.getElementById('add_user_picture_form_pictureFile').addEventListener('change', e => {
-        /** @type {HTMLInputElement} */
-        const fileInput = e.target;
-        const files = fileInput.files;
-        const file = files[0];
-        const types = [ 'image/png', 'image/bmp', 'image/jpeg' ];
-
-        if (!file) {
-            return;
-        }
-        if (!types.includes(file.type)) {
-            $('#errorFileType').modal('open');
-            return;
-        }
-        if (file.size > 1024000) {
-            $('#errorFileSize').modal('open');
-            return;
-        }
-
-        const data = new FormData();
-        data.append('profile-pic', file);
-
-        $.ajax({
-            url: document.location.href,
-            method: 'post',
-            contentType: false,
-            cache: false,
-            processData: false,
-            data
-        })
-        .done(data => {
-            $('#successUploadedPicture').modal('open');
-            $('.user-profile-picture').attr('src', `/lib/img/${data.filename}`);
-            $('.add-photo-btn').html('<i class="fa fa-pencil-alt"></i>');
-        })
-        .fail(err => console.log(err));
-    });
 
     $('#tutoModal').modal({
         dismissible: false,
@@ -236,6 +165,23 @@ $(function() {
                 
             })
 
+    })
+
+    $('.fj-requests-btn').on('click',function(e){
+        e.preventDefault();
+        $.get(gfjurl)
+            .done(function(data){
+                $('#pendingFJRequests tbody').empty();
+                $.each(data,function(_i,e){
+                    $row = $('<tr></tr>');
+                    $row
+                        .append(`<td>${e.name}</td>`)
+                        .append(`<td>${e.type}</td>`)
+                        .append(`<td>${ new Date(e.rdate.date).toLocaleString('fr-FR',{month: 'long', day: 'numeric', year: 'numeric'}) }</td>`)
+                    $('#pendingFJRequests tbody').append($row);
+                })
+                $('#pendingFJRequests').modal('open');
+            })
     })
 
 });

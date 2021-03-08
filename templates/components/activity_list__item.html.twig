@@ -27,11 +27,11 @@
             {% if k < 2 %}
               {% if currentuser.role == 1 %}
                 <a class="activity-client-name" href="{{ path('createClientUser',{cliId: client.id}) }}">
-                  {{ k != activityClients|length - 1 ? client.commname ~', ' : client.commname }}
+                  {{ k != activityClients|length - 1 ? client.name ~', ' : client.name }}
                 </a>
               {% else %}
                 <span class="activity-client-name">
-                {{ k != activityClients|length - 1 ? client.commname ~' ,' : client.commname }}
+                {{ k != activityClients|length - 1 ? client.name ~' ,' : client.name }}
               </span>
               {% endif %}
             {% endif %}
@@ -60,15 +60,10 @@
 
 
     {% if activity.status == -1 %}
-      {% set hasFeedbackExpired = activityM.hasFeedbackExpired(activity) %}
+
       {% set hasMinParticipants = activityM.hasMinimumParticipationConfig(activity) %}
       {% set hasOutput = activityM.hasMinimumOutputConfig(activity) %}
-      {% if hasFeedbackExpired %}
-        <ul class="has-barred tooltipped" data-tooltip="{{'activities.feedback_has_expired'|trans}}">
-          <i class="material-icons {% if not hasMinParticipants or not hasOutput %}m-right{% endif %}" style="font-size:20px!important">edit</i>
-          <i class="fa fa-minus barred fb-barred"></i>
-        </ul>
-      {% endif %}
+
       {% if not hasMinParticipants %}
         <ul class="has-barred tooltipped" data-tooltip="{{'activities.no_min_participation_config'|trans}}">
           <i class="fa fa-users {% if not hasOutput %}m-right{% endif %}"></i>
@@ -111,12 +106,14 @@
     {% endif %}
 
     {# if finalized or published #}
+    {#
     {% if activity.userCanViewResults(global.currentuser) %}
       <a class="material-icons tooltipped" data-tooltip={{ "result"|trans}} data-position="bottom" href="{{ path('activityResults', { actId: activity.id  }) }}">show_chart</a>
     {% endif %}
+    #}  
 
     {% if activityM.userCanEdit(activity, global.currentuser) %}
-      <a class="material-icons tooltipped modal-trigger" data-tooltip={{ "activities.modify" |trans}} href="#activityInfo" data-eid="{{activity.id}}" data-position="bottom">settings</a>
+      <a class="material-icons tooltipped modal-trigger" data-tooltip={{ "activities.modify"|trans }} href="#activityInfo" data-eid="{{activity.id}}" data-position="bottom">settings</a>
     {% else %}
       {% if activity.userCanAccessInfo(global.currentuser) %}
         <a class="material-icons tooltipped modal-trigger" href="#activityInfo" data-eid="{{activity.id}}" data-tooltip="{% trans %}activity_elements.access_activity_details{% endtrans %}" data-position="bottom">info_outline</a>

@@ -37,14 +37,15 @@ class CriterionName extends DbObject
     public $unit;
 
     /**
-     * @ORM\Column(name="can_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="criterionNameInitiatives")
+     * @JoinColumn(name="can_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
-     * @ORM\Column(name="can_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="can_inserted", type="datetime", nullable=false , options={"default": "CURRENT_TIMESTAMP"})
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="Icon", inversedBy="criterionNames")
@@ -80,8 +81,6 @@ class CriterionName extends DbObject
      * @param $cna_type
      * @param $cna_name
      * @param $can_unit
-     * @param $can_createdBy
-     * @param $can_inserted
      * @param Icon $icon
      * @param Organization $organization
      * @param Department|null $department
@@ -92,18 +91,15 @@ class CriterionName extends DbObject
         $cna_type = null,
         $cna_name = '',
         $can_unit = '',
-        $can_createdBy = null,
-        $can_inserted = null,
         Icon $icon = null,
         Organization $organization = null,
         ?Department $department = null,
         CriterionGroup $criterionGroup = null)
     {
-        parent::__construct($id, $can_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->type = $cna_type;
         $this->name = $cna_name;
         $this->unit = $can_unit;
-        $this->inserted = $can_inserted;
         $this->icon = $icon;
         $this->organization = $organization;
         $this->department = $department;
@@ -118,7 +114,6 @@ class CriterionName extends DbObject
     public function setType(int $cna_type): self
     {
         $this->type = $cna_type;
-
         return $this;
     }
 
@@ -130,7 +125,6 @@ class CriterionName extends DbObject
     public function setName(string $cna_name): self
     {
         $this->name = $cna_name;
-
         return $this;
     }
 
@@ -142,14 +136,12 @@ class CriterionName extends DbObject
     public function setUnit(string $unit): self
     {
         $this->unit = $unit;
-
         return $this;
     }
 
     public function setInserted(DateTimeInterface $inserted): self
     {
         $this->inserted = $inserted;
-
         return $this;
     }
 
@@ -164,9 +156,10 @@ class CriterionName extends DbObject
     /**
      * @param Icon $icon
      */
-    public function setIcon(Icon $icon): void
+    public function setIcon(Icon $icon): self
     {
-        $this->icon = $icon;
+        $this->icon = $icon;    
+        return $this;
     }
 
     /**
@@ -180,9 +173,10 @@ class CriterionName extends DbObject
     /**
      * @param Organization $organization
      */
-    public function setOrganization(Organization $organization): void
+    public function setOrganization(Organization $organization)
     {
         $this->organization = $organization;
+        return $this;
     }
 
     /**
@@ -193,12 +187,10 @@ class CriterionName extends DbObject
         return $this->department;
     }
 
-    /**
-     * @param Department|null $department
-     */
-    public function setDepartment(?Department $department): void
+    public function setDepartment(?Department $department): CriterionName
     {
         $this->department = $department;
+        return $this;
     }
 
     /**
@@ -209,12 +201,10 @@ class CriterionName extends DbObject
         return $this->criterionGroup;
     }
 
-    /**
-     * @param CriterionGroup $criterionGroup
-     */
-    public function setCriterionGroup(CriterionGroup $criterionGroup): void
+    public function setCriterionGroup(CriterionGroup $criterionGroup)
     {
         $this->criterionGroup = $criterionGroup;
+        return $this;
     }
     public function __toString()
     {

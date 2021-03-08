@@ -1,0 +1,138 @@
+{% extends "layout.html.twig" %}
+
+
+{% set page = global.request.get('page') %}
+
+{% block data_params %}
+  {{ global.html_data_params({
+    'set-client-icon': url('setWorkerFirmIcon', { wfiId: 0 })
+  }) }}
+{% endblock %}
+
+{% block title %}
+  {{ 'user_list.page_title'|trans }}
+{% endblock %}
+
+{% block css %}
+  <link rel="stylesheet" href="{{ asset('build/user_list.css') }}">
+{% endblock %}
+
+{% set user_icon %}
+  <i class="fa fa-user"></i>
+{% endset %}
+
+{% block content %}
+  <main>
+    <div class="user-search-container">
+      <input type="text" id="user-search" class="browser-default"
+        spellcheck="false" placeholder="Recherche rapide" autocomplete="off">
+      <i class="mi search"></i>
+    </div>
+    <section id="main-tabs-container">
+
+      <ul class="flex-center-sa">
+        <li>
+        
+          <div class="input-field">
+            <select name="nbResultsSelector" id="">
+              <option value="20" {{ global.request.cookies.get('wf_nb') == 20 ? "selected" }}>20</option>
+              <option value="50" {{ global.request.cookies.get('wf_nb') == 50 ? "selected" }}>50</option>
+              <option value="100" {{ global.request.cookies.get('wf_nb') == 100 ? "selected" }}>100</option>
+            </select>
+            <label for="nbResultsSelector">Results per page :</label>
+          </div>
+        </li>
+        <li class="flex-center">
+          <div class="input-field">
+            <select name="sortingProp" id="sortingProp">
+              <option value="a" {{ global.request.cookies.get('wf_s_p') == 'a' ? "selected" }}>{{'worker_firm_list.alphabetical_order'|trans}}</option>
+              <option value="i" {{ global.request.cookies.get('wf_s_p') == 'i' ? "selected" }}>{{'worker_firm_list.creation_date_order'|trans}}</option>
+              <option value="s" {{ global.request.cookies.get('wf_s_p') == 's' ? "selected" }}>{{'worker_firm_list.size_order'|trans}}</option>
+            </select>
+            <label for="sortingProp">{{ 'sort'|trans }}</label>
+          </div>
+        </li>
+        <li class="flex-center">
+          <div class="input-field">
+            <select name="sortingOrder" id="sortingOrder">
+              <option value="a" {{ global.request.cookies.get('wf_s_o') == 'a' ? "selected" }}>{{'ascending'|trans}}</option>
+              <option value="d" {{ global.request.cookies.get('wf_s_o') == 'd' ? "selected" }}>{{'descending'|trans}}</option>
+            </select>
+            <label for="sortingOrder">{{ 'order'|trans }}</label>
+          </div>
+        </li>
+        <li>
+          <div class="input-field">
+            <select name="countrySelector" id="">
+                <option value="">(All)</option>
+                <option value="0">(No country)</option>
+              {% for country in countries %}
+                <option value="{{ country.id }}" {{ global.request.cookies.get('wf_c') == country.id ? "selected" }}>{{ country.name }}</option>
+              {% endfor %}
+            </select>
+            <label for="countrySelector">{{ 'country'|trans|capitalize }}</label>
+          </div>
+        </li>
+        <li>
+          <div class="input-field">
+            <select name="stateSelector" id="">
+            </select>
+            <label for="stateSelector">{{ 'state'|trans|capitalize }}</label>
+          </div>
+        </li>
+        <li>
+          <div class="input-field">
+            <select name="citySelector" id="">
+            </select>
+            <label for="citySelector">{{ 'city'|trans|capitalize }}</label>
+          </div>
+        </li>
+      </ul>
+
+
+      <section id="clients">
+        <ul class="client-type-list">
+          {% include "components/worker_firm_list__item.html.twig" with { workerFirm: workerFirms, nbWorkerFirms: nbWorkerFirms } %}
+        </ul>
+      </section>
+    </section>
+
+    <div class="fixed-action-btn">
+      <a class="btn-floating btn-large teal" href="{{ path('updateWorkerFirm',{wfiId : 0}) }}">
+        <i class="large mi add"></i>
+      </a>
+    </div>
+
+    <a id="scrolltop" href="#serpicoapp" class="btn-floating btn-large blue">
+      <i class="mi arrow_upward"></i>
+    </a>
+
+
+    <div id="client-icon-modal" class="modal">
+      <div class="modal-content">
+        <div id="client-icon-dropzone" class="dropzone"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="client-icon-upload-btn" type="button" class="btn">ok</button>
+      </div>
+    </div>
+
+    <div id="deleteWorkerFirm" class="modal">
+        <div class="modal-content">
+            <h4>{% trans %}create_organization.delete_modal.title{% endtrans %}</h4>
+            <p>{% trans %}create_organization.delete_modal.content{% endtrans %}</p>
+        </div>
+        <div class="modal-footer">
+            <a class="modal-action modal-close waves-effect waves-green btn-large delete-btn">{% trans %}create_organization.delete_modal.confirm{% endtrans %}</a>
+            <a class="modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}create_organization.delete_modal.cancel{% endtrans %}</a>
+        </div>
+    </div>
+
+  </main>
+{% endblock %}
+
+{% block javascripts %}
+  <script>$('select').material_select();var durl="{{ url('deleteWorkerFirm',{wfiId: 0}) }}";</script>
+  <script defer src="{{ asset('js/worker_firm_list.js') }}"></script>
+  <script src="{{ asset('build/user_list.js') }}"></script>
+{% endblock %}

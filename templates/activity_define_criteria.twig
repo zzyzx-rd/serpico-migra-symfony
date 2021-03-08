@@ -29,7 +29,7 @@
     {% endif %}
 {% endblock %}
 
-{% set elmt = app.request_stack.currentrequest.get('elmt') %}
+{% set elmt = global.request.get('elmt') %}
 
 {% set colors = ["purple", "green", "orange", "blue-grey", "light-blue", "pink", "teal", "deep-purple", "lime", "grey", "light-green","red"] %}
 
@@ -581,7 +581,6 @@
 
 {% block javascripts %}
     <script src="{{ asset('js/nouislider.js') }}"></script>
-    <script src="{{ asset('js/login.js') }}"></script>
     <script src="{{ asset('js/activity_criterion.js') }}"></script>
 
     {% if elmt == 'activity' and activity.template is null %}

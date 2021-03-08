@@ -43,14 +43,15 @@ class Team extends DbObject
     public $picture;
 
     /**
-     * @ORM\Column(name="tea_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="teamInitiatives")
+     * @JoinColumn(name="tea_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
-     * @ORM\Column(name="tea_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="tea_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="tea_deleted", type="datetime", nullable=true)
@@ -64,12 +65,12 @@ class Team extends DbObject
     protected $organization;
 
     /**
-     * @OneToMany(targetEntity="TeamUser", mappedBy="team", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="Member", mappedBy="team", cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    protected $teamUsers;
+    protected $members;
 
     /**
-     * @OneToMany(targetEntity="ActivityUser", mappedBy="team", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="Participation", mappedBy="team", cascade={"persist", "remove"}, orphanRemoval=true)
      */
     protected $participations;
 
@@ -83,43 +84,40 @@ class Team extends DbObject
      */
     public $targets;
 
+    public ?User $currentUser = null;
+
     /**
      * Team constructor.
      * @param $id
-     * @param $tea_name
-     * @param $tea_weight_ini
-     * @param $tea_picture
-     * @param $tea_createdBy
-     * @param $tea_inserted
-     * @param $tea_deleted
+     * @param $name
+     * @param $weight_ini
+     * @param $picture
+     * @param $deleted
      * @param $organization
-     * @param $teamUsers
+     * @param $members
      * @param $participations
      * @param $grades
      * @param $targets
      */
     public function __construct(
         $id = 0,
-        $tea_name = null,
-        $tea_picture = null,
-        $tea_weight_ini = null,
+        $name = null,
+        $picture = null,
+        $weight_ini = null,
         $organization = null,
-        $tea_createdBy = null,
-        $tea_inserted = null,
-        $tea_deleted = null,
-        $teamUsers = null,
+        $deleted = null,
+        $members = null,
         $participations = null,
         $grades = null,
         $targets = null)
     {
-        parent::__construct($id, $tea_createdBy, new DateTime());
-        $this->name = $tea_name;
-        $this->weightIni = $tea_weight_ini;
-        $this->picture = $tea_picture;
-        $this->inserted = $tea_inserted;
-        $this->deleted = $tea_deleted;
+        parent::__construct($id, null, new DateTime());
+        $this->name = $name;
+        $this->weightIni = $weight_ini;
+        $this->picture = $picture;
+        $this->deleted = $deleted;
         $this->organization = $organization;
-        $this->teamUsers = $teamUsers?:new ArrayCollection();
+        $this->members = $members?:new ArrayCollection();
         $this->participations = $participations?: new ArrayCollection();
         $this->grades = $grades?:new ArrayCollection();
         $this->targets = $targets?: new ArrayCollection();
@@ -130,9 +128,9 @@ class Team extends DbObject
         return $this->name;
     }
 
-    public function setName(string $tea_name): self
+    public function setName(string $name): self
     {
-        $this->name = $tea_name;
+        $this->name = $name;
 
         return $this;
     }
@@ -142,9 +140,9 @@ class Team extends DbObject
         return $this->weightIni;
     }
 
-    public function setWeightIni(float $tea_weight_ini): self
+    public function setWeightIni(float $weight_ini): self
     {
-        $this->weightIni = $tea_weight_ini;
+        $this->weightIni = $weight_ini;
 
         return $this;
     }
@@ -154,17 +152,16 @@ class Team extends DbObject
         return $this->picture;
     }
 
-    public function setPicture(?string $tea_picture): self
+    public function setPicture(?string $picture): self
     {
-        $this->picture = $tea_picture;
+        $this->picture = $picture;
 
         return $this;
     }
 
-    public function setInserted(DateTimeInterface $tea_inserted): self
+    public function setInserted(DateTimeInterface $inserted): self
     {
-        $this->inserted = $tea_inserted;
-
+        $this->inserted = $inserted;
         return $this;
     }
 
@@ -173,9 +170,9 @@ class Team extends DbObject
         return $this->deleted;
     }
 
-    public function setDeleted(DateTimeInterface $tea_deleted): self
+    public function setDeleted(DateTimeInterface $deleted): self
     {
-        $this->deleted = $tea_deleted;
+        $this->deleted = $deleted;
 
         return $this;
     }
@@ -191,29 +188,14 @@ class Team extends DbObject
     /**
      * @param mixed $organization
      */
-    public function setOrganization($organization): void
+    public function setOrganization($organization): self
     {
         $this->organization = $organization;
+        return $this;
     }
 
     /**
-     * @return mixed
-     */
-    public function getmUsers()
-    {
-        return $this->teamUsers;
-    }
-
-    /**
-     * @param mixed $teamUsers
-     */
-    public function setmUsers($teamUsers): void
-    {
-        $this->teamUsers = $teamUsers;
-    }
-
-    /**
-     * @return mixed
+     * @return ArrayCollection|Participation[]
      */
     public function getParticipations()
     {
@@ -221,15 +203,7 @@ class Team extends DbObject
     }
 
     /**
-     * @param mixed $participations
-     */
-    public function setParticipations($participations): void
-    {
-        $this->participations = $participations;
-    }
-
-    /**
-     * @return mixed
+     * @return ArrayCollection|Grade[]
      */
     public function getGrades()
     {
@@ -237,15 +211,7 @@ class Team extends DbObject
     }
 
     /**
-     * @param mixed $grades
-     */
-    public function setGrades($grades): void
-    {
-        $this->grades = $grades;
-    }
-
-    /**
-     * @return mixed
+     * @return ArrayCollection|Target[]
      */
     public function getTargets()
     {
@@ -253,100 +219,118 @@ class Team extends DbObject
     }
 
     /**
-     * @param mixed $targets
+     * @return ArrayCollection|Member[]
      */
-    public function setTargets($targets): void
+    public function getMembers()
     {
-        $this->targets = $targets;
+    return $this->members;
     }
-    function addTeamUser(TeamUser $teamUser){
 
-        $this->teamUsers->add($teamUser);
-        $teamUser->setTeam($this);
+    function addMember(Member $member){
+
+        $this->members->add($member);
+        $member->setTeam($this);
         return $this;
     }
 
-    public function removeTeamUser(TeamUser $teamUser): Team
+    public function removeMember(Member $member): Team
     {
 
-        $this->teamUsers->removeElement($teamUser);
+        $this->members->removeElement($member);
         return $this;
     }
-    public function getCurrentTeamUsers(): ArrayCollection
+
+    public function getCurrentMembers(): ArrayCollection
     {
-        return $this->teamUsers->filter(static function(TeamUser $tu){
-            return !$tu->isDeleted();
+        return $this->members->filter(static function(Member $m){
+            return !$m->isDeleted();
         });
     }
 
-    public function getCurrentTeamExtUsers()
+    public function getIntMembers()
     {
-        return $this->getTeamExtUsers()->filter(static function(TeamUser $tu){
-            return !$tu->isDeleted();
+        $teamIntUsers = new ArrayCollection(array_values(array_filter($this->members->toArray(),function(Member $m){
+            return $m->getUser()->getOrganization() == $this->currentUser->getOrganization();
+        })));
+        return $teamIntUsers;
+    }
+
+    public function getExtMembers()
+    {
+        $teamIntUsers = new ArrayCollection(array_values(array_filter($this->members->toArray(),function(Member $m){
+            return $m->getUser()->getOrganization() != $this->currentUser->getOrganization();
+        })));
+        return $teamIntUsers;
+    }
+
+    public function getCurrentExtMembers()
+    {
+        return $this->getExtMembers()->filter(static function(Member $m){
+            return !$m->isDeleted();
         });
     }
 
-    public function getPastTeamExtUsers()
+    public function getPastExtMembers()
     {
-        return $this->getTeamExtUsers()->filter(static function(TeamUser $tu){
-            return $tu->isDeleted();
+        return $this->getExtMembers()->filter(static function(Member $m){
+            return $m->isDeleted();
         });
     }
 
-    public function getCurrentTeamIntUsers()
+    public function getCurrentIntMembers()
     {
-        return $this->getTeamIntUsers()->filter(static function(TeamUser $tu){
-            return !$tu->isDeleted();
+        return $this->getIntMembers()->filter(static function(Member $m){
+            return !$m->isDeleted();
         });
     }
 
-    public function getPastTeamIntUsers()
+    public function getPastIntMembers()
     {
-        return $this->getTeamIntUsers()->filter(static function(TeamUser $tu){
-            return $tu->isDeleted();
+        return $this->getIntMembers()->filter(static function(Member $m){
+            return $m->isDeleted();
         });
     }
 
-    public function addTeamIntUser(TeamUser $teamUser): Team
+    public function addIntMember(Member $member): Team
     {
-        $this->teamUsers->add($teamUser);
-        $teamUser->setTeam($this);
+        $this->members->add($member);
+        $member->setTeam($this);
         return $this;
     }
 
-    public function removeTeamIntUser(TeamUser $teamUser): Team
+    public function removeIntMember(Member $member): Team
     {
-        $this->teamUsers->removeElement($teamUser);
+        $this->members->removeElement($member);
         return $this;
     }
 
-    public function addTeamExtUser(TeamUser $teamUser): Team
+    public function addExtMember(Member $member): Team
     {
-        $this->teamUsers->add($teamUser);
-        $teamUser->setTeam($this);
+        $this->members->add($member);
+        $member->setTeam($this);
         return $this;
     }
 
-    public function removeTeamExtUser(TeamUser $teamUser): Team
+    public function removeExtMember(Member $member): Team
     {
-        $this->teamUsers->removeElement($teamUser);
+        $this->members->removeElement($member);
         return $this;
     }
-    public function getActiveTeamUsers(): ArrayCollection
+
+    public function getActiveMembers(): ArrayCollection
     {
-        $activeTeamUsers = new ArrayCollection;
-        foreach ($this->teamUsers as $teamUser) {
-            if ($teamUser->isDeleted() === false){
-                $activeTeamUsers->add($teamUser);
+        $activeMembers = new ArrayCollection;
+        foreach ($this->members as $member) {
+            if ($member->isDeleted() === false){
+                $activeMembers->add($member);
             }
         }
-        return $activeTeamUsers;
+        return $activeMembers;
     }
     public function addGrade(Grade $grade): Team
     {
-
         $this->grades->add($grade);
-        $grade->setParticipant($this);
+        $grade->setTeam($this);
         return $this;
     }
 
@@ -376,6 +360,28 @@ class Team extends DbObject
         $this->targets->removeElement($target);
         return $this;
     }
+
+    public function isModifiable()
+    {
+        $connectedUser = $this->currentUser;
+        $connectedUserRole = $connectedUser->getRole();
+        $connectedUserId = $connectedUser->getId();
+
+        if($connectedUserRole == USER::ROLE_ROOT){
+            return true;
+        } else {
+            $teamLeader = $this->getMembers()->filter(function(Member $m){return $m->isLeader();})->first();
+            $teamOrganization = $this->getOrganization();
+            $grantedRights = 
+                $teamLeader && $teamLeader->getUser() == $connectedUser || 
+                !$teamLeader && $this->getInitiator() == $connectedUser ||
+                $teamOrganization == $connectedUser->getOrganization() && $connectedUser->getRole() == USER::ROLE_ADMIN;
+                // Or if there is an option giving you such right (currently unexisting)
+        }
+
+        return $grantedRights;
+    }
+
     public function isOverviewable()
     {
         return $this->isModifiable();
@@ -386,5 +392,5 @@ class Team extends DbObject
         return (string)$this->id;
     }
 
-    //TODO getIntTeamUser et le get Average et les trucs qui suivent
+    //TODO getIntMember et le get Average et les trucs qui suivent
 }

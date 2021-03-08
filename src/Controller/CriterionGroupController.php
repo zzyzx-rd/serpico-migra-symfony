@@ -2,26 +2,25 @@
 
 namespace App\Controller;
 
+use App\Form\ManageCriteriaForm;
+use App\Form\Type\CriterionNameType;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
-use Form\ManageCriteriaForm;
-use Form\Type\CriterionNameType;
-use Model\CriterionGroup;
-use Model\CriterionName;
-use Model\Department;
-use Model\Icon;
-use Model\Organization;
-use Model\Target;
-use Model\User;
-use Repository\CriterionNameRepository;
-use Repository\OrganizationRepository;
+use App\Entity\CriterionGroup;
+use App\Entity\CriterionName;
+use App\Entity\Department;
+use App\Entity\Icon;
+use App\Entity\Organization;
+use App\Entity\Target;
+use App\Entity\User;
+use App\Repository\CriterionNameRepository;
+use App\Repository\OrganizationRepository;
 use Symfony\Component\Form\FormFactory;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Twig_Environment;
 
 class CriterionGroupController extends MasterController
 {
@@ -37,7 +36,7 @@ class CriterionGroupController extends MasterController
         /**
          * @var User
          */
-        $currentUser = MasterController::getAuthorizedUser();
+        $currentUser = $this->user;
         if (!$currentUser) {
             return self::unauthorized();
         }
@@ -64,7 +63,7 @@ class CriterionGroupController extends MasterController
         }
 
         $criterionGroup = new CriterionGroup($name, $ownerOrg);
-        $criterionGroup->setCreatedBy($currentUser->getId());
+        $criterionGroup->setInitiator($currentUser);
         $em = $this->getEntityManager();
 
         if ($linkedDptId) {
@@ -90,6 +89,7 @@ class CriterionGroupController extends MasterController
      * @return Response
      * @throws ORMException
      * @throws OptimisticLockException
+     * @Route(name="setCgpDepartment", path="/settings/criteriongroup/department/{cgpId}")
      */
     public function setCgpDepartment(Request $request, int $cgpId)
     {
@@ -197,7 +197,7 @@ class CriterionGroupController extends MasterController
         $criterion = (new CriterionName)
             ->setName($name)
             ->setCriterionGroup($cgp)
-            ->setCreatedBy($currentUser->getId())
+            ->setInitiator($currentUser)
             ->setOrganization($currentUser->getOrganization())
             ->setDepartment($cgp->getDepartment());
 
@@ -272,7 +272,7 @@ class CriterionGroupController extends MasterController
 
     /**
      * @param Request $request
-     * @param ?int$id
+     * @param int|null $id
      * @return Response
      * @throws ORMException
      * @throws OptimisticLockException
@@ -280,11 +280,9 @@ class CriterionGroupController extends MasterController
      */
     public function updateCriterionGroupName(
         Request $request,
-      ?int $id
+        ?int $id
     ) {
-        if (!self::isAuthenticated()) {
-            return self::unauthorized();
-        }
+
 
         /**
          * @var string
@@ -372,7 +370,7 @@ class CriterionGroupController extends MasterController
             return self::badRequest();
         }
 
-        $currentUser = self::getAuthorizedUser();
+
         if (!$currentUser) {
             return self::unauthorized();
         }
@@ -454,50 +452,39 @@ class CriterionGroupController extends MasterController
 
 
     /**
-     * @param Application $app
      * @return RedirectResponse
      * @Route("/organization/settings/criteriongroups/", name="manageCriterionGroups")
      */
-    public function criterionGroupsListAction(Application $app)
+    public function criterionGroupsListAction()
     {
         $currentUser = $this->getAuthorizedUser();
         if (!$currentUser) {
             return $this->redirectToRoute('login');
         }
 
-        /**
-         * @var Twig_Environment
-         */
-        $twig = $app['twig'];
         $userOrg = $currentUser->getOrganization();
         $criterionGroups = $userOrg->getCriterionGroups();
 
 
-        /** @var OrganizationRepository */
         $repoO = $this->getEntityManager()->getRepository(Organization::class);
         $repoI = $this->getEntityManager()->getRepository(Icon::class);
-        /** @var Icon[] */
         $icons = $repoI->findAll();
         $usedCriterionNames = $repoO->findUsedCriterionNames($userOrg);
 
-        /**
-         * @var FormFactory
-         */
-        $formFactory = $app['form.factory'];
-
-        $form = $formFactory->create(
+        $form = $this->createForm(
             ManageCriteriaForm::class,
-            $userOrg
+            $userOrg,
+            ["currentUser" => $currentUser]
         );
 
-        $criterionNameType = $formFactory->create(
+        $criterionNameType = $this->createForm(
             CriterionNameType::class,
             null,
-            [ 'organization' => $userOrg ]
+            [ 'organization' => $userOrg]
         );
 
 
-        return $twig->render('criteriongroups_list.html.twig', [
+        return $this->render('criteriongroups_list.html.twig', [
             'criterionGroups' => $criterionGroups,
             'form' => $form->createView(),
             'criterionNameType' => $criterionNameType->createView(),
@@ -526,9 +513,4 @@ class CriterionGroupController extends MasterController
         );
     }
 
-    private static function isAuthenticated()
-    {
-        $currentUser = self::getAuthorizedUser();
-        return $currentUser instanceof User;
-    }
 }

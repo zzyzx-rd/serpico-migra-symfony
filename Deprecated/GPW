@@ -263,7 +263,7 @@
 //    public $survey_res_7;
 //
 //    /**
-//     * @ORM\Column(name="gpw_created_by", type="integer", nullable=true)
+//     * @ORM\Column(name="gpw_initiator", type="integer", nullable=true)
 //     */
 //    public $createdBy;
 //

@@ -1,7 +1,7 @@
 {% if stage.vars.data is not null %}
-  {% if elmtType == 'process' %}
+  {% if entity == 'process' %}
     {% set element = stage.vars.data.process %}
-  {% elseif elmtType == 'iprocess' %}
+  {% elseif entity == 'iprocess' %}
     {% set element = stage.vars.data.institutionProcess %}
   {% else %}
     {% set element = stage.vars.data.activity %}
@@ -56,7 +56,7 @@
     </div>
     <div class="row">
       <ul class="flex-center">
-        {% if elmtType != 'activity' %}
+        {% if entity != 'activity' %}
           <li class="switch date-switch">
             {{ form_label(stage.definiteDates) }}
             <label style="display: flex;">
@@ -98,28 +98,22 @@
           </li>
         {% endif %}
         <li class="flex-center dates-input" 
-          {% if elmtType != 'activity' and (stage.vars.data is empty or stage.vars.data is not empty and not stage.vars.data.definiteDates) %}style="display:none"{% endif %}
-          {% if elmtType == 'activity' %}style="justify-content:space-between;width:100%"{% endif %}
+          {% if entity != 'activity' and (stage.vars.data is empty or stage.vars.data is not empty and not stage.vars.data.definiteDates) %}style="display:none"{% endif %}
+          {% if entity == 'activity' %}style="justify-content:space-between;width:100%"{% endif %}
         >
           <div>
             <div class="input-field">
               {{ form_label(stage.startdate) }}
               {{ form_widget(stage.startdate) }}
             </div>
-            <div class="input-field">
-              {{ form_label(stage.gstartdate) }}
-              {{ form_widget(stage.gstartdate) }}
-            </div>
+
           </div>
           <div>
             <div class="input-field">
               {{ form_label(stage.enddate) }}
               {{ form_widget(stage.enddate) }}
             </div>
-            <div class="input-field">
-              {{ form_label(stage.genddate) }}
-              {{ form_widget(stage.genddate) }}
-            </div>
+
           </div>
         </li>
       </ul>

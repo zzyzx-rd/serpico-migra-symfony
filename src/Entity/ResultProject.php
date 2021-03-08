@@ -108,14 +108,15 @@ class ResultProject extends DbObject
      */
     protected $equalDistanceRatio;
     /**
-     * @ORM\Column(name="rsp_createdBy", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="resultProjectInitiatives")
+     * @JoinColumn(name="rsp_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
-     * @ORM\Column(name="rsp_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="rsp_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="Activity", inversedBy="projectResults")
@@ -153,8 +154,6 @@ class ResultProject extends DbObject
      * @param null $equalInertiaMax
      * @param null $weightedDistanceRatio
      * @param null $equalDistanceRatio
-     * @param $rsp_createdBy
-     * @param $rsp_inserted
      * @param $activity
      * @param $stage
      * @param $criterion
@@ -178,13 +177,11 @@ class ResultProject extends DbObject
         $equalInertiaMax = null,
         $weightedDistanceRatio = null,
         $equalDistanceRatio = null,
-        $rsp_createdBy = null,
-        $rsp_inserted = null,
         $activity = null,
         $stage = null,
         $criterion = null)
     {
-        parent::__construct($id, $rsp_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->type = $rsp_type;
         $this->weightedAbsoluteResult = $weightedAbsoluteResult;
         $this->equalAbsoluteResult = $equalAbsoluteResult;
@@ -202,7 +199,6 @@ class ResultProject extends DbObject
         $this->equalInertiaMax = $equalInertiaMax;
         $this->weightedDistanceRatio = $weightedDistanceRatio;
         $this->equalDistanceRatio = $equalDistanceRatio;
-        $this->inserted = $rsp_inserted;
         $this->activity = $activity;
         $this->stage = $stage;
         $this->criterion = $criterion;

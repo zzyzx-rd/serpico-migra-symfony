@@ -1,0 +1,73 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+    {% trans %}about.page_name{% endtrans %}
+{% endblock %}
+
+{% block css %}
+  <style>
+  
+    img{
+      width:inherit;
+    }
+
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+  <script>
+        var rurl = "{{ path('resetPassword') }}";
+  </script>
+{% endblock %}
+
+{% block username %}
+    {% if currentuser is not null %}
+    {{ currentuser.firstname }} {{ currentuser.lastname }}
+    {% endif %}
+{% endblock %}
+
+
+{% block pagename %}
+     {% trans %}about.mobile_header_title{% endtrans %}
+{% endblock %}
+
+{% block content %}
+  <main>
+
+      {% include "components/background_grid.html.twig" %}
+
+      <div class="small-container">
+          <img src="{{ asset('lib/img/logo_dd_p_l.png') }}">
+          <div class="card-panel purple lighten-5">
+
+            {% if not isValidToken %}
+              <span>{{'email_confirm.no_valid_token_msg'|trans}}</span>
+            {% else %}
+
+              {% if not linkHasExpired %}
+                <h5>{{'email_confirm.main_title'|trans}}</h5>
+                <span>{{'email_confirm.main_msg'|trans}}</span>
+                {{form_start(passwordForm)}}
+                <div class="input-field">
+                  {{form_row(passwordForm.password)}}
+                </div>
+                {{form_rest(passwordForm)}}
+                {{form_end(passwordForm)}}
+              
+              {% else %}
+                <h5>{{'email_confirm.expired_link_title'|trans}}</h5>
+                <span>{{'email_confirm.expired_link_msg'|trans}}</span>
+                <a class="btn">{{'email_confirm.button_resend_link_msg'|trans}}</a>
+              {% endif %}
+
+            {% endif %}
+          </div>
+      </div>
+
+  </main>
+
+{% endblock %}
+
+{% block javascripts %}
+  <script src="{{ absolute_url(asset('js/home.js')) }}"></script>
+  <script src="{{ absolute_url(asset('js/landing.js')) }}"></script>
+{% endblock %}

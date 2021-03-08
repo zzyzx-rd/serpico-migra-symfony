@@ -1,0 +1,274 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+    {% trans %}firm_settings_old.page_title{% endtrans %}
+{% endblock %}
+
+{% block css %}
+
+    <link rel="stylesheet" href="{{ asset('css/activities_access_and_results_view.css') }}">
+
+    <script>
+        var updateFirmUrl = "{{ url('updateFirmSettings') }}";
+    </script>
+    <style>
+        html {
+            overflow-y: scroll;
+        }
+    </style>
+{% endblock %}
+
+{% block pagename %}
+    {% trans %}firm_settings_old.mobile_header_title {% endtrans %}
+{% endblock %}
+
+{% block username %}
+    {{ currentuser.firstname }} {{ currentuser.lastname }}
+{% endblock %}
+
+{% block content %}
+    {{ form_start(form) }}
+    <section>
+        <div class="center">
+            <h5 style="display:inline-block">{% trans %}firm_settings_old.page_title{% endtrans %}</h5>
+            <div style="display:inline-block;position:absolute; display:inline-block;right:2%">
+                {{ form_row(form.submit) }}
+            </div>
+        </div>
+        <ul class="tabs tabs-fixed-width">
+            <li class="tab">
+                <a href="#users">
+                    <i class="fa fa-users"></i>
+                    <span class="activity-status">{% trans %}firm_settings_old.users.title{% endtrans %}</span>
+                </a>
+            </li>
+            <li class="tab">
+                <a href="#activities">
+                    <i class="fa fa-cubes"></i>
+                    <span class="activity-status">{% trans %}firm_settings_old.activities.title{% endtrans %}</span>
+                </a>
+            </li>
+        </ul>
+
+        <div id="users">
+            <section>
+                <span style="font-size:1.8rem"><i class="fa fa-network-wired" style="margin-right:10px"></i>{% trans %}firm_settings_old.users.structure.title{% endtrans %}</span>
+                <div style="margin-left:30px">
+
+                    <div class="row no-margin">
+                        <div class="col s12 m12">
+                            <h5>{% trans %}firm_settings_old.other.departments.section_title{% endtrans %}</h5>
+                            <a class="waves-effect waves-light btn modify-button" href="{{ url('updateOrganizationElements', {entity: 'department' }) }}">{% trans %}firm_settings_old.other.departments.manage_btn{% endtrans %}</a>
+                        </div>
+                    </div>
+
+                    <div class="row no-margin">
+                        <div class="col s12 m12">
+                            <h5>{% trans %}firm_settings_old.other.positions.section_title{% endtrans %}</h5>
+                            <a class="waves-effect waves-light btn modify-button" href="{{ url('updateOrganizationElements', {entity: 'position' }) }}">{% trans %}firm_settings_old.other.positions.manage_btn{% endtrans %}</a>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col s12 m12">
+                            <h5>{% trans %}firm_settings_old.other.titles.section_title{% endtrans %}</h5>
+                            <a class="waves-effect waves-light btn modify-button" href="{{ url('updateOrganizationElements', {entity: 'title' }) }}">{% trans %}firm_settings_old.other.positions.manage_btn{% endtrans %}</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <span style="font-size:1.8rem"><i class="fa fa-chart-line" style="margin-right:10px"></i>{% trans %}firm_settings_old.users.criterion.title{% endtrans %}</span>
+
+                <div style="margin-left:30px">
+                    <div class="row">
+
+                        <div class="col s12 m12">
+                            <a class="waves-effect waves-light btn modify-button" href="{{ url('updateElementTargets', {entity: 'organization', 'elmtId' : currentuser.organization.id }) }}" style="margin-top:15px">{% trans %}firm_settings_old.users.criterion.organization_targets{% endtrans %}</a>
+                        </div>
+
+                        <div class="col s12 m12">
+                            <a class="waves-effect waves-light cyan darken-1 btn modify-button" href="{{ url('elementAvgResultPerCriterion',{entity: 'user'}) }}" style="margin-top:15px">{% trans %}firm_settings_old.users.criterion.avg_results{% endtrans %}</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <span style="font-size:1.8rem"><i class="fa fa-key" style="margin-right:10px"></i>{% trans %}firm_settings_old.users.privileges.title{% endtrans %}</span>
+
+                <div style="margin-left:30px">
+                    <div class="row">
+                        {% set existingAccessResultsOptions = false %}
+                        {% for key, option in form.aliveOptions %}
+                            {% if option.vars.data.oName.name == 'activitiesAccessAndResultsView' and not existingAccessResultsOptions%}
+                                {% set existingAccessResultsOptions = true %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if existingAccessResultsOptions %}
+                            <div class="col s12 m12">
+                                {% include 'activities_access_and_results_view.html.twig' with { form: form } %}
+                            </div>
+                        {% endif %}
+                        <div class="col s12 m12">
+                            <div style="margin-top: 10px">
+                                <span><i class="fa fa-user-circle" style="font-size:1.6rem"></i></span><h5 style="display:inline-block; margin-left: 10px">{% trans %}firm_settings_old.users.privileges.line_managers{% endtrans %}</h5>
+                            </div>
+                            {% for key, option in form.aliveOptions %}
+                                {% if option.vars.data.oName.name in [
+                                    'enabledSuperiorSubRights',
+                                    'enabledSuperiorSettingTargets',
+                                    'enabledSuperiorModifySubordinate',
+                                    'enabledSuperiorOverviewSubResults'
+                                ] %}
+                                    <div class="col s12 m12 {% if option.vars.data.oName.name in ['enabledSuperiorSettingTargets' ,'enabledSuperiorModifySubordinate','enabledSuperiorOverviewSubResults'] %}suboption" style="margin-left:30px{% else %}supoption{% endif %}">
+                                        {{ form_widget(option.optionTrue) }}
+                                        {{ form_label(option.optionTrue) }}
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <div class="col s12 m12">
+                            <div style="margin-top: 10px">
+                                <span><i class="fa fa-user" style="font-size:1.6rem"></i></span><h5 style="display:inline-block; margin-left: 10px">{% trans %}firm_settings_old.users.privileges.internal_users{% endtrans %}</h5>
+                            </div>
+                            {% for key, option in form.aliveOptions %}
+                                {% if option.vars.data.oName.name in [
+                                    'enabledUserSeeAllUsers',
+                                    'enabledUserCreatingUser',
+                                    'enabledUserSeeSnapshotPeersResults',
+                                    'enabledUserSeeSnapshotSupResults',
+                                    'enabledUserSeeRanking',
+                                ] %}
+                                    <div class="col s12 m12">
+                                        {{ form_widget(option.optionTrue) }}
+                                        {{ form_label(option.optionTrue) }}
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <div class="col s12 m12" style="display: none;">
+                            <div style="margin-top: 10px">
+                                <span><i class="far fa-user"></i></span><h5 style="display:inline-block; margin-left: 10px">{% trans %}firm_settings_old.users.privileges.external_users{% endtrans %}</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <div id="activities" class="row">
+            <section>
+                <span style="font-size:1.8rem"><i class="fa fa-layer-group" style="margin-right:10px"></i>{% trans %}firm_settings_old.other.processes.section_title{% endtrans %}</span>
+                <div style="margin-left:30px">
+                    <div class="row">
+                        <div class="col s12">
+                                <a class="waves-effect waves-light btn modify-button" href="{{ url('manageIProcesses') }}">{% trans %}firm_settings_old.other.departments.manage_btn{% endtrans %}</a>
+                        </div>
+                    </div>
+            </section>
+            <section>
+                <span style="font-size:1.8rem"><i class="fa fa-hammer" style="margin-right:10px"></i>{% trans %}firm_settings_old.other.criterion_names.section_title{% endtrans %}</span>
+                <div style="margin-left:30px">
+                    <div class="row">
+                        <div class="col s12">
+                                <a class="waves-effect waves-light btn modify-button" href="{{ url('manageCriterionGroups') }}">{% trans %}firm_settings_old.other.departments.manage_btn{% endtrans %}</a>
+                        </div>
+                    </div>
+            </section>
+            <section>
+                <span style="font-size:1.8rem"><i class="fa fa-file" style="margin-right:10px"></i>{% trans %}firm_settings_old.activities.templates.section_title{% endtrans %}</span>
+                <div style="margin-left:30px">
+                    <div class="row">
+                        <div class="col s12">
+                            <a class="waves-effect waves-light btn modify-button" href="{{ url('manageTemplates') }}">{% trans %}firm_settings_old.activities.templates.manage_btn{% endtrans %}</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section>
+                <span style="font-size:1.8rem">
+                    <i class="fa fa-cog" style="margin-right:10px"></i>
+                    {% trans %}firm_settings_old.activities.parameters.section_title{% endtrans %}
+                </span>
+                <div style="margin-left:30px">
+                    <div class="row">
+                        <div class="col s12">
+                            <ul class="flex-center" style="width:100%">
+                                <span>{% trans %}firm_settings_old.other.mails.mail_deadline_nb_days{% endtrans %}</span>
+                                {% for key, option in form.aliveOptions %}
+                                    {% if option.vars.data.oName.name == 'mailDeadlineNbDays' %}
+                                        {{ form_widget(option.optionFValue) }}
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% for key, option in form.aliveOptions %}
+                            {% if option.vars.data.oName.name in [
+                                'enabledLeaderSeeAllGrades',
+                                'enabledCNamesOutsideCGroups',
+                            ] %}
+                                <div class="col s12 m12">
+                                    {{ form_widget(option.optionTrue) }}
+                                    {{ form_label(option.optionTrue) }}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+        {{ form_rest(form) }}
+        {{ form_end(form)}}
+
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    $(function() {
+        const originalSerializeArray = $.fn.serializeArray;
+        $.fn.extend({
+            serializeArray: function () {
+                const brokenSerialization = originalSerializeArray.apply(this);
+                const checkboxValues = $(this).find('input[type=checkbox]').map(function () {
+                    return { name: this.name, value: +this.checked };
+                }).get();
+                const checkboxKeys = $.map(checkboxValues, function (element) { return element.name; });
+                const withoutCheckboxes = $.grep(brokenSerialization, function (element) {
+                    return $.inArray(element.name, checkboxKeys) == -1;
+                });
+
+                return $.merge(withoutCheckboxes, checkboxValues);
+            }
+        });
+
+        $('.supoption').on('change', e => {
+            const $this = $(e.target);
+            const $checkbox = $this.find('input[type="checkbox"]');
+            const $subCheckboxes = $this.nextAll().find('input[type="checkbox"]');
+
+            if (!$checkbox.prop('checked')) {
+                $subCheckboxes.prop('checked', false).prop('disabled', true);
+            } else {
+                $subCheckboxes.prop('disabled', false);
+            }
+        });
+
+
+        $('.firm-settings-submit').on('click', e => {
+            e.preventDefault();
+
+            const $this = $(e.target);
+            const formData = $this.closest('form').serialize();
+
+            $.post(updateFirmUrl, formData)
+            .done(e => {
+                $this
+                .removeClass('btn').addClass('btn-flat grey')
+                .text('{{ "firm_settings_old.submit_saved"|trans }}');
+            });
+        });
+    });
+</script>
+{% endblock %}

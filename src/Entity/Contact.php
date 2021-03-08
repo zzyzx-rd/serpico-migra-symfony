@@ -7,6 +7,8 @@ use App\Repository\ContactRepository;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\JoinColumn;
 
 /**
  * @ApiResource()
@@ -102,9 +104,9 @@ class Contact extends DbObject
     public $mtime;
 
     /**
-     * @ORM\Column(name="con_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="con_inserted", type="datetime", nullable=false, options={"default": "CURRENT_TIMESTAMP"})
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="con_confirmed", type="datetime", nullable=true)
@@ -112,9 +114,10 @@ class Contact extends DbObject
     public $confirmed;
 
     /**
-     * @ORM\Column(name="con_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="contactInitiatives")
+     * @JoinColumn(name="con_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
      * Contact constructor.
@@ -135,9 +138,7 @@ class Contact extends DbObject
      * @param $con_doc
      * @param $con_mdate
      * @param $con_mtime
-     * @param $con_inserted
      * @param $con_confirmed
-     * @param $con_createdBy
      */
     public function __construct(
         $id = 0,
@@ -157,11 +158,9 @@ class Contact extends DbObject
         $con_doc = false,
         $con_mdate = null,
         $con_mtime = null,
-        $con_inserted = null,
-        $con_confirmed = null,
-        $con_createdBy = null)
+        $con_confirmed = null)
     {
-        parent::__construct($id, $con_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->locale = $con_locale;
         $this->type = $con_type;
         $this->sent = $con_sent;
@@ -178,7 +177,6 @@ class Contact extends DbObject
         $this->doc = $con_doc;
         $this->mdate = $con_mdate;
         $this->mtime = $con_mtime;
-        $this->inserted = $con_inserted;
         $this->confirmed = $con_confirmed;
     }
 
@@ -374,7 +372,7 @@ class Contact extends DbObject
         return $this;
     }
 
-    public function setInserted(DateTimeInterface $con_inserted): self
+    public function setInserted(?DateTimeInterface $con_inserted): self
     {
         $this->inserted = $con_inserted;
 

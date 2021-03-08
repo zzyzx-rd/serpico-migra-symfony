@@ -16,10 +16,11 @@
 {% block css %}
   <style>
     section {
-      align-items: center;
+      justify-content: space-around;
+      flex-grow:1;
     }
 
-    section > .btn-large {
+    section .btn-large {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -27,29 +28,48 @@
       max-width: 500px;
       margin-bottom: 1em;
       line-height: inherit;
+      margin-right: auto;
+      margin-left:auto;
+
     }
 
-    section > .btn-large i {
+    section .btn-large i {
       font-size: 1.2em;
       padding-bottom: .1em;
       padding-right: .3em;
     }
+
   </style>
 {% endblock css %}
 
-{% set manage_procs = path('manageProcesses', { orgId: currentuser.orgId }) %}
-{% set manage_orgs = path('manageOrganizations') %}
 
 {% block content %}
-  <section>
-    <a class="btn-large waves-effect waves-light teal" href="{{ manage_procs }}">
-      <i class="fa fa-bookmark"></i>
-      {% trans %}root_management.manage_processes{% endtrans %}
-    </a>
-    <a class="btn-large waves-effect waves-light teal" href="{{ manage_orgs }}">
-      <i class="fa fa-hotel"></i>
-      <span>{% trans %}root_management.manage_organizations{% endtrans %}</span>
-    </a>
+  {% set manage_procs = path('manageProcesses') %}
+  {% set manage_orgs = path('manageOrganizations') %}
+  {% set manage_wfs = path('manageWorkerFirms') %}
+  {% set manage_errors = path('manageProdErrors') %}
+  <section class="c-flex-center">
+    <div class="c-flex-center">
+      <a class="btn-large waves-effect waves-light disabled-btn" href="{{ manage_procs }}">
+        <i class="fa fa-bookmark"></i>
+        {% trans %}root_management.manage_processes{% endtrans %}
+      </a>
+      <a class="btn-large waves-effect waves-light" href="{{ manage_wfs }}">
+        <i class="fa fa-hotel"></i>
+        <span>{% trans %}root_management.manage_organizations{% endtrans %}</span>
+      </a>
+      <a class="btn-large waves-effect waves-light" href="{{ manage_errors }}">
+        <i class="fa fa-bahai"></i>
+        <span>{% trans %}root_management.error_management{% endtrans %}</span>
+      </a>
+    
+    </div>
+    <div>
+      <a class="btn-large waves-effect waves-light" href="{{ manage_orgs }}">
+        <img class="dd-logo sm-right" src="{{ asset('lib/img/logo_dd_s_centered.png') }}">
+        <span class="orange-text">{% trans %}root_management.our_clients{% endtrans %}</span>
+      </a>
+    </div>
   </section>
 {% endblock %}
 

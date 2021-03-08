@@ -2,3 +2,11 @@ var
 .env.env.test
 .idea/
 vendor/
+.env
+.DS_Store
+node_modules/
+public/lib/img/
+public/lib/evt/
+public/lib/videos/
+composer.lock
+symfony.lock

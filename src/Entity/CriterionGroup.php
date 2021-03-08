@@ -25,14 +25,15 @@ class CriterionGroup extends DbObject
     public ?int $id;
 
     /**
-     * @ORM\Column(name="cgp_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="criterionGroupInitiatives")
+     * @JoinColumn(name="cgp_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
-     * @ORM\Column(name="cgp_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="cgp_inserted", type="datetime", nullable=false , options={"default": "CURRENT_TIMESTAMP"})
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="cgp_name", type="string", length=255, nullable=true)
@@ -64,7 +65,6 @@ class CriterionGroup extends DbObject
      * @param string $cgp_name
      * @param Organization $organization
      * @param Department $department
-     * @param $cgp_createdBy
      * @param $id
      * @param CriterionName[] $criteria
      */
@@ -72,11 +72,10 @@ class CriterionGroup extends DbObject
         string $cgp_name = null,
         Organization $organization = null,
         Department $department = null,
-        $cgp_createdBy = null,
         $id = null,
         array $criteria = [])
     {
-        parent::__construct($id, $cgp_createdBy, null);
+        parent::__construct($id, null, new DateTime());
         $this->name = $cgp_name;
         $this->criteria = $criteria;
         $this->organization = $organization;
@@ -103,10 +102,7 @@ class CriterionGroup extends DbObject
         return $this;
     }
 
-    /**
-     * @return CriterionName[]
-     */
-    public function getCriteria(): array
+    public function getCriteria()
     {
         return $this->criteria;
     }
@@ -138,7 +134,7 @@ class CriterionGroup extends DbObject
     /**
      * @return Department
      */
-    public function getDepartment(): Department
+    public function getDepartment(): ?Department
     {
         return $this->department;
     }
@@ -151,7 +147,7 @@ class CriterionGroup extends DbObject
         $this->department = $department;
     }
 
-    public function addCriterion(CriterionName $criterion): CriterionGroup
+    public function addCriterion(CriterionName $criterion): ?CriterionGroup
     {
         if (!$criterion->getCriterionGroup()) {
             $this->criteria[] = $criterion;
@@ -160,7 +156,7 @@ class CriterionGroup extends DbObject
         return $this;
     }
 
-    public function removeCriterion(CriterionName $criterion): CriterionGroup
+    public function removeCriterion(CriterionName $criterion): ?CriterionGroup
     {
         $this->criteria->removeElement($criterion);
         return $this;
@@ -169,7 +165,8 @@ class CriterionGroup extends DbObject
         return $this->criteria->isEmpty();
     }
 
-    public function toArray() {
+    public function toArray()
+    {
         $criteria = $this->criteria->map(static function(CriterionName $e) {
             return [
                 'id' => $e->getId(),
@@ -180,7 +177,7 @@ class CriterionGroup extends DbObject
 
         return [
             'id' => $this->id,
-            'createdBy' => $this->createdBy,
+            'initiator' => $this->initiator,
             'inserted' => $this->inserted,
             'name' => $this->name,
             'criteria' => $criteria,
@@ -189,9 +186,9 @@ class CriterionGroup extends DbObject
         ];
     }
 
-//    public function __toString()
-//    {
-//        return $this->name;
-//    }
+    public function __toString()
+    {
+        return (string) $this->name;
+    }
     
 }

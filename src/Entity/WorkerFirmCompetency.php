@@ -30,14 +30,15 @@ class WorkerFirmCompetency extends DbObject
     public $name;
 
     /**
-     * @ORM\Column(name="wfc_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="workerFirmCompetencyInitiatives")
+     * @JoinColumn(name="wfc_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
-     * @ORM\Column(name="wfc_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="wfc_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="WorkerFirm")
@@ -49,20 +50,15 @@ class WorkerFirmCompetency extends DbObject
      * WorkerFirmCompetency constructor.
      * @param ?int$id
      * @param $wfc_name
-     * @param $wfc_createdBy
-     * @param $wfc_inserted
      * @param $firm
      */
     public function __construct(
       ?int $id = 0,
         $wfc_name = null,
-        $wfc_createdBy = null,
-        $wfc_inserted = null,
         $firm = null)
     {
-        parent::__construct($id, $wfc_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->name = $wfc_name;
-        $this->inserted = $wfc_inserted;
         $this->firm = $firm;
     }
 

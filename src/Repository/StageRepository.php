@@ -2,8 +2,13 @@
 
 namespace App\Repository;
 
+use App\Entity\Participation;
 use App\Entity\Stage;
+use App\Entity\User;
+use App\Entity\UserMaster;
+use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -47,4 +52,63 @@ class StageRepository extends ServiceEntityRepository
         ;
     }
     */
+
+    /**
+      * @return Stage[] Returns an array of Stage objects
+      */
+    public function findExternalStages(User $u)
+    {
+        return $this->createQueryBuilder('s')
+            ->innerJoin('App\Entity\Participation','p','WITH','p.stage = s.id')
+            ->where('p.user = :user')
+            ->andWhere('s.organization != :org')
+            ->setParameter('user', $u)
+            ->setParameter('org', $u->getOrganization())
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
+    /**
+    * @return ArrayCollection|Stage[]
+    */
+    public function getAccessibleStages(User $u, int $startingTS = null, int $endingTS = null)
+    {
+        switch($u->getRole()){
+            case User::ROLE_ROOT:
+            case User::ROLE_SUPER_ADMIN:
+            case User::ROLE_ADMIN:
+                $otherThanFollowingStages = array_merge(
+                    $u->getOrganization()->getStages()->getValues(),
+                    $this->findExternalStages($u)
+                );  
+                break;
+            case User::ROLE_COLLAB:
+                $otherThanFollowingStages = array_merge(
+                    $u->getOrganization()->getStages()->filter(fn(Stage $s) => $s->getParticipations()->exists(fn(int $i, Participation $p) => $p->getUser() == $u))->getValues(),
+                    $this->findExternalStages($u)
+                );
+                break;
+            default:
+                break;
+        }
+
+        $potentiallyAccessibleStages = new ArrayCollection(
+            array_unique(
+                array_merge(
+                    $otherThanFollowingStages, 
+                    $u->getMasterings()->filter(fn(UserMaster $m) => $m->getStage() != null && $m->getProperty() == 'followableStatus' && $m->getType() >= UserMaster::ADDED)->map(fn(UserMaster $m) => $m->getStage())->getValues()
+                )
+            , SORT_REGULAR)
+        );
+
+        $infBoundTS = $startingTS ?: 0;
+        $supBoundTS = $endingTS ?: 999999999999;
+       
+        $accessibleStages = $potentiallyAccessibleStages->filter(fn(Stage $s) => 
+            $infBoundTS < $s->getStartdate()->getTimestamp() && ($s->getEnddate() ?: new DateTime())->getTimestamp() < $supBoundTS
+        );
+
+        return $accessibleStages;
+    }
 }

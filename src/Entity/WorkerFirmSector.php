@@ -6,10 +6,11 @@ use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\WorkerFirmSectorRepository;
 use DateTime;
 use DateTimeInterface;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
-use Doctrine\ORM\Mapping\OneToOne;
+use Doctrine\ORM\Mapping\OneToMany;
 
 /**
  * @ApiResource()
@@ -31,48 +32,43 @@ class WorkerFirmSector extends DbObject
     public $name;
 
     /**
-     * @ORM\Column(name="wfs_createdBy", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="workerFirmSectorInitiatives")
+     * @JoinColumn(name="wfs_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
-     * @ORM\Column(name="wfs_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="wfs_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="Icon", inversedBy="workerFirmSectors")
-     * @JoinColumn(name="icon_ico_id", referencedColumnName="ico_id",nullable=true)
+     * @JoinColumn(name="icon_ico_id", referencedColumnName="ico_id", nullable=true)
      */
     protected $icon;
 
     /**
-     * @OneToOne(targetEntity="WorkerFirm", mappedBy="mainSector")
+     * @OneToMany(targetEntity="WorkerFirm", mappedBy="mainSector")
      */
-    public $firm;
+    public $firms;
 
     /**
      * WorkerFirmSector constructor.
      * @param ?int$id
      * @param $wfs_name
-     * @param $wfs_createdBy
-     * @param $wfs_inserted
      * @param $icon
      * @param $firm
      */
     public function __construct(
       ?int $id = 0,
         $wfs_name = null,
-        $wfs_createdBy = null,
-        $wfs_inserted = null,
-        $icon = null,
-        $firm = null)
+        $icon = null)
     {
-        parent::__construct($id, $wfs_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->name = $wfs_name;
-        $this->inserted = $wfs_inserted;
         $this->icon = $icon;
-        $this->firm = $firm;
+        $this->firms = new ArrayCollection;
     }
 
     public function getId(): ?int
@@ -99,36 +95,37 @@ class WorkerFirmSector extends DbObject
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getIcon()
+    
+    public function getIcon(): ?Icon
     {
         return $this->icon;
     }
 
-    /**
-     * @param mixed $icon
-     */
-    public function setIcon($icon): void
+    public function setIcon(?Icon $icon): self
     {
         $this->icon = $icon;
+        return $this;
     }
 
     /**
-     * @return mixed
-     */
-    public function getFirm()
+     * @return ArrayCollection|WorkerFirm[]
+    */
+    public function getFirms()
     {
-        return $this->firm;
+        return $this->firms;
     }
 
-    /**
-     * @param mixed $firm
-     */
-    public function setFirm($firm): void
+    public function addFirm(WorkerFirm $firm): self
     {
-        $this->firm = $firm;
+        $this->firms->add($firm);
+        $firm->setMainSector($this);
+        return $this;
+    }
+
+    public function removeFirm(WorkerFirm $firm): self
+    {
+        $this->firms->removeElement($firm);
+        return $this;
     }
 
 }

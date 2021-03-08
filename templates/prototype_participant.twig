@@ -26,8 +26,8 @@
         <li class="element-input">
             <ul class="flex-center-sb">
                 <li class="input-field participant-name" {% if not leadingOption %} style="width: 250px"{% endif %}>
-                    {{ form_widget(item.directUser) }}
-                    {{ form_label(item.directUser) }}
+                    {{ form_widget(item.user) }}
+                    {{ form_label(item.user) }}
                 </li>
                 {% if leadingOption %}
                 <li>

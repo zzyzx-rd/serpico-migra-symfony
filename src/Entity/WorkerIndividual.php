@@ -10,6 +10,8 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\OrderBy;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\JoinColumn;
 
 /**
  * @ApiResource()
@@ -81,14 +83,15 @@ class WorkerIndividual extends DbObject
     public $contacted;
 
     /**
-     * @ORM\Column(name="win_createdBy", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="workerIndividualInitiatives")
+     * @JoinColumn(name="win_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
-     * @ORM\Column(name="win_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="win_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @OneToMany(targetEntity="WorkerExperience", mappedBy="individual", cascade={"persist", "remove"}, orphanRemoval=true)
@@ -115,8 +118,6 @@ class WorkerIndividual extends DbObject
      * @param $win_gdpr
      * @param $win_lk_nbConnections
      * @param $win_lk_contacted
-     * @param $win_createdBy
-     * @param $win_inserted
      * @param $experiences
      * @param $mails
      */
@@ -131,14 +132,12 @@ class WorkerIndividual extends DbObject
         $win_email = null,
         $win_gdpr = null,
         $win_lk_contacted = null,
-        $win_createdBy = null,
         $win_created = null,
         $win_lk_nbConnections = null,
-        $win_inserted = null,
         $experiences = null,
         $mails = null)
     {
-        parent::__construct($id, $win_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->country = $win_lk_country;
         $this->url = $win_lk_url;
         $this->fullName = $win_lk_fullName;
@@ -150,7 +149,6 @@ class WorkerIndividual extends DbObject
         $this->gdpr = $win_gdpr;
         $this->nbConnections = $win_lk_nbConnections;
         $this->contacted = $win_lk_contacted;
-        $this->inserted = $win_inserted;
         $this->experiences = $experiences?$experiences: new ArrayCollection();
         $this->mails = $mails?$mails: new ArrayCollection();
     }

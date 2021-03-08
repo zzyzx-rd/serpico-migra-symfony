@@ -52,14 +52,15 @@ class SurveyField extends DbObject
     public $description;
 
     /**
-     * @ORM\Column(name="sfi_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="surveyFieldInitiatives")
+     * @JoinColumn(name="sfi_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
-     * @ORM\Column(name="sfi_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="sfi_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="sfi_upperbound", type="integer", nullable=true)
@@ -101,8 +102,6 @@ class SurveyField extends DbObject
      * @param $sfi_title
      * @param $sfi_position
      * @param $sfi_description
-     * @param $sfi_createdBy
-     * @param $sfi_inserted
      * @param $sfi_upperbound
      * @param $sfi_lowerbound
      * @param $criterion
@@ -119,20 +118,17 @@ class SurveyField extends DbObject
         $sfi_position = null,
         $sfi_upperbound = null,
         $sfi_lowerbound = null,
-        $sfi_createdBy = null,
         $criterion = null,
-        $sfi_inserted = null,
         Survey $survey = null,
         $parameters = null,
         Answer $answers = null)
     {
-        parent::__construct($id, $sfi_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->type = $sfi_type;
         $this->isMandatory = $sfi_isMandatory;
         $this->title = $sfi_title;
         $this->position = $sfi_position;
         $this->description = $sfi_description;
-        $this->inserted = $sfi_inserted;
         $this->upperbound = $sfi_upperbound;
         $this->lowerbound = $sfi_lowerbound;
         $this->criterion = $criterion;

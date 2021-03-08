@@ -1,0 +1,16 @@
+.user .element-input{
+  display: flex;
+  flex-direction: column;
+}
+
+.user .element-input .row{
+  width: 100%;
+}
+
+.user-elmt{
+  width: 100%;
+}
+
+.user-action-buttons{
+  margin-left: auto;
+}

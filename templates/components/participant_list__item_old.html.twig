@@ -1,0 +1,24 @@
+
+<li class="participants-list--item sm-right">
+  {#<div class="row">#}
+    <a class="participant-btn btn no-padding participant-fullname-zone tooltipped" data-position="top" data-tooltip="" style="display:none">
+      <img class="pf-picture" src="{{ asset('lib/img/org/no-picture.png') }}" alt="">
+    </a>
+    <div class="input-field participant-field-zone">
+      <label for="participant-fullname">{{'activity_elements.participant_adding_label'|trans}}</label>
+      <input class="participant-fullname no-margin" name="participant-fullname" type="text">
+      <div class="flex-center validation-buttons">
+        <div class="btn-flat reduced-margin participant-delete">
+          <i class="material-icons">clear</i>
+        </div>
+        <div class="btn participant-validate">
+          <i class="material-icons">check</i>
+        </div>
+      </div>
+      {{form_widget(participant.userPart)}}
+      {{form_widget(participant.teamPart)}}
+      {{form_widget(participant.externalUserPart)}}
+      {{form_widget(participant.workerFirm)}}
+    </div>
+  {#</div>#}
+</li>

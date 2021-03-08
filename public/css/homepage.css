@@ -5,7 +5,151 @@
   justify-content: flex-end;
 }
 
+.first-section-container{
+  width: 90%;
+  margin:auto;
+}
 
+.calendar-element{
+  margin-left: auto;
+  width:400px;
+  height: 200px;
+  position:relative;
+}
+
+.arrow-hand-elmt{
+  position:absolute;
+  width: 20%;
+  left: -10%;
+}
+
+.stages-holder{
+  height: 33%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-bottom: 1px dashed lightgray
+}
+
+.stages-holder ol{
+  padding:0;
+}
+
+.motto{
+  font-weight: 700;
+}
+
+.motto-elmt{
+  margin-left: 5vw;
+}
+
+.section-detailed-func{
+  min-height:200px;
+  display:flex;
+  justify-content:space-between;
+  flex-direction:column;
+  margin-left: 50px
+}
+
+.section-detailed-func > li:not(:last-of-type){
+  margin-bottom:5px;
+}
+
+.calendar-element .row{
+  height: 100%;
+}
+
+.activity-holder{
+  height: 100%;
+  background: repeating-linear-gradient(90deg, #f3ccff2b, #63009445 14.28%, rgb(255, 255, 255) 14.28%, rgb(255, 255, 255) 28.56%);
+  position: relative;
+}
+
+.months-holder{
+  position: absolute;
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  margin-top: -2rem;
+}
+
+.curDate{
+  position: absolute;
+  border-left: 1px dashed black;
+  height: 100%;
+}
+
+.activity-component{
+  list-style:none;
+}
+
+.stage-container{
+  visibility: hidden;
+}
+
+.stage-element{
+  position: relative;
+}
+
+.stage-element.simult .s-day {
+  position: absolute;
+  left: -1rem;
+  top: -0.3rem;
+  font-size: 10px;
+}
+
+.stage-element .s-day {
+  position: absolute;
+  left: -1.5rem;
+  bottom: -0.5rem;
+  font-size: 14px;
+}
+
+.stage-element .e-day {
+  position: absolute;
+  right: -1.5rem;
+  bottom: -0.5rem;
+  font-size: 14px;
+}
+
+.stage-element .single-date{
+  right: calc(var(--button-size) * -1/5);
+  top: calc(var(--button-size) * -1);
+}
+
+.stage-element .m-days{
+  width: 50px;
+  right: -1.5rem;
+}
+
+.act-elmt-info{
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+
+.act-elmt-info > .fixed-action-btn{
+  position: absolute;
+  right: calc(100% + 0.7rem); 
+  top:0%;
+  height:100%;
+}
+
+.modified-fixed-btn .act-action-buttons{
+  text-align: right;
+  -webkit-transform: translateY(-50%);
+  transform: translateY(-50%);
+  right: 2.5rem;
+  top: 2.5rem;
+  left: auto;
+  min-width: 50px;
+  height: 3rem;
+}
+
+.act-action-buttons li{
+  margin: 0px 15px 0 0;
+  display: inline-block;
+}
 
 .landing-section-steps-elements {
   --size: 40px;
@@ -24,7 +168,7 @@
   top: 0;
   bottom: 0;
   left: calc(var(--size) / 2);
-  box-shadow: 0 0 0 4px #58ce8c;
+  box-shadow: 0 0 0 4px #55318e;
 }
 
 .landing-section-steps-elements li {
@@ -40,7 +184,7 @@
   height: var(--size);
   width: var(--size);
   margin-right: var(--size);
-  border: 7px solid #2ba9b3;
+  border: 7px solid #ffab40;
   border-radius: 9999px;
   background-color: #fff;
 }

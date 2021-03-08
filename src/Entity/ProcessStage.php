@@ -22,10 +22,10 @@ use Doctrine\ORM\Mapping\OrderBy;
  */
 class ProcessStage extends DbObject
 {
-    public const STAGE_UNSTARTED    = 0;
-    public const STAGE_ONGOING      = 1;
-    public const STAGE_COMPLETED  = 2;
-    public const STAGE_PUBLISHED    = 3;
+    public const STATUS_UNSTARTED    = 0;
+    public const STATUS_ONGOING      = 1;
+    public const STATUS_COMPLETED  = 2;
+    public const STATUS_PUBLISHED    = 3;
 
     public const VISIBILITY_PUBLIC  = 1;
     public const VISIBILITY_UNLISTED = 2;
@@ -124,15 +124,7 @@ class ProcessStage extends DbObject
      */
     public $enddated;
 
-    /**
-     * @ORM\Column(name="stg_gstartdate", type="datetime", nullable=true)
-     */
-    public $gstartdate;
 
-    /**
-     * @ORM\Column(name="stg_genddate", type="datetime", nullable=true)
-     */
-    public $genddate;
 
     /**
      * @ORM\Column(name="stg_dealine_nbDays", type="integer", nullable=true)
@@ -145,14 +137,15 @@ class ProcessStage extends DbObject
     public $stgDeadlineMailSent;
 
     /**
-     * @ORM\Column(name="stg_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="processStageInitiatives")
+     * @JoinColumn(name="stg_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
-     * @ORM\Column(name="stg_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="stg_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="stg_isFinalized", type="datetime", nullable=true)
@@ -189,13 +182,12 @@ class ProcessStage extends DbObject
 
     /**
      * @OneToMany(targetEntity="ProcessCriterion", mappedBy="stage", cascade={"persist", "remove"}, orphanRemoval=true)
-     * @var Collection
      */
 //     * @OrderBy({"weight" = "DESC"})
     public $criteria;
 
     /**
-     * @OneToMany(targetEntity="IProcessActivityUser", mappedBy="stage",cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="IProcessParticipation", mappedBy="stage",cascade={"persist", "remove"}, orphanRemoval=true)
      * @OrderBy({"team" = "ASC"})
      */
     public $participants;
@@ -266,18 +258,14 @@ class ProcessStage extends DbObject
      * @param $stg_forigin
      * @param $stg_startdate
      * @param $stg_enddated
-     * @param $stg_gstartdate
-     * @param $stg_genddate
      * @param $stg_dealine_nbDays
      * @param $stg_deadline_mailSent
-     * @param $stg_createdBy
-     * @param $stg_inserted
      * @param $stg_isFinalized
      * @param $stg_deleted
      * @param $stg_dcompleted
      * @param $process
      * @param Organization $organization
-     * @param Collection $criteria
+     * @param $criteria
      * @param $participants
      * @param $decisions
      * @param $grades
@@ -309,12 +297,8 @@ class ProcessStage extends DbObject
         $stg_forigin = null,
         $stg_startdate = null,
         $stg_enddated = null,
-        $stg_gstartdate = null,
-        $stg_genddate = null,
         $stg_dealine_nbDays = 3,
         $stg_deadline_mailSent = null,
-        $stg_createdBy = null,
-        $stg_inserted = null,
         $stg_isFinalized = false,
         $stg_deleted = null,
         $process = null,
@@ -331,7 +315,7 @@ class ProcessStage extends DbObject
         $historicalRankings = null,
         $historicalRankingTeams = null)
     {
-        parent::__construct($id, $stg_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->complete = $stg_complete;
         $this->name = $stg_name;
         $this->mode = $stg_mode;
@@ -349,11 +333,8 @@ class ProcessStage extends DbObject
         $this->forigin = $stg_forigin;
         $this->startdate = $stg_startdate;
         $this->enddated = $stg_enddated;
-        $this->gstartdate = $stg_gstartdate;
-        $this->genddate = $stg_genddate;
         $this->dealineNbDays = $stg_dealine_nbDays;
         $this->stgDeadlineMailSent = $stg_deadline_mailSent;
-        $this->inserted = $stg_inserted;
         $this->isFinalized = $stg_isFinalized;
         $this->deleted = $stg_deleted;
         $this->dcompleted = $stg_dcompleted;
@@ -577,29 +558,6 @@ class ProcessStage extends DbObject
         return $this;
     }
 
-    public function getGstartdate(): ?DateTimeInterface
-    {
-        return $this->gstartdate;
-    }
-
-    public function setGstartdate(DateTimeInterface $stg_gstartdate): self
-    {
-        $this->gstartdate = $stg_gstartdate;
-
-        return $this;
-    }
-
-    public function getGenddate(): ?DateTimeInterface
-    {
-        return $this->genddate;
-    }
-
-    public function setGenddate(DateTimeInterface $stg_genddate): self
-    {
-        $this->genddate = $stg_genddate;
-
-        return $this;
-    }
 
     public function getDealineNbDays(): ?int
     {
@@ -728,7 +686,7 @@ class ProcessStage extends DbObject
     /**
      * @return Collection
      */
-    public function getCriteria(): Collection
+    public function getCriteria()
     {
         return $this->criteria;
     }
@@ -932,7 +890,7 @@ class ProcessStage extends DbObject
         return $this;
     }
 
-    public function addParticipant(IProcessActivityUser $participant): ProcessStage
+    public function addParticipant(IProcessParticipation $participant): ProcessStage
     {
 
         $this->participants->add($participant);
@@ -940,13 +898,13 @@ class ProcessStage extends DbObject
         return $this;
     }
 
-    public function removeParticipant(IProcessActivityUser $participant): ProcessStage
+    public function removeParticipant(IProcessParticipation $participant): ProcessStage
     {
         $this->participants->removeElement($participant);
         return $this;
     }
 
-    public function addUniqueParticipation(IProcessActivityUser $participant): ProcessStage
+    public function addUniqueParticipation(IProcessParticipation $participant): ProcessStage
     {
         foreach($this->criteria as $criterion){
             $criterion->addParticipant($participant);
@@ -955,7 +913,7 @@ class ProcessStage extends DbObject
         return $this;
     }
 
-    public function removeUniqueParticipation(IProcessActivityUser $participant): ProcessStage
+    public function removeUniqueParticipation(IProcessParticipation $participant): ProcessStage
     {
         foreach($this->criteria as $criterion){
             $criterion->getParticipants()->removeElement($participant);
@@ -967,7 +925,7 @@ class ProcessStage extends DbObject
         return (string) $this->id;
     }
     /**
-     * @return Collection|User[]
+     * @return ArrayCollection|User[]
      */
     public function getGraderUsers(){
         $graderUsers = new ArrayCollection;

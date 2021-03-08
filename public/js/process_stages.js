@@ -440,8 +440,6 @@ $(function () {
         isDefiniteDates = $curRow.find('[name*="definiteDates"]').is(':checked');
         startdate = $curRow.find('[name*="startdate"]').val();
         enddate = $curRow.find('[name*="enddate"]').val();
-        gstartdate = $curRow.find('[name*="gstardate"]').val();
-        genddate = $curRow.find('[name*="genddate"]').val();
         dPeriod = $curRow.find('[name*="dPeriod"]').val();
         dFrequency = $curRow.find('select[name*="dFrequency"] option:selected').val();
         dOrigin = $curRow.find('select[name*="dOrigin"] option:selected').val();
@@ -457,8 +455,6 @@ $(function () {
         $form.find('[name*="weight"]').val(weightVal);
         $form.find('[name*="name"]').val(inputName);
         $form.find('[name*="definiteDates"]').prop('checked', isDefiniteDates);
-        $form.find('[name*="[gstartdate]"]').val(gstartdate);
-        $form.find('[name*="[genddate]"]').val(genddate);
         $form.find('[name*="[startdate]"]').val(startdate);
         $form.find('[name*="[enddate]"]').val(enddate);
         $form.find('[name*="dPeriod"]').val(dPeriod);
@@ -1550,8 +1546,6 @@ $(function () {
                 isDefiniteDates = $newFormLi.find('[name*="definiteDates"]').is(':checked');
                 startdate = $newFormLi.find('[name*="startdate"]').val();
                 enddate = $newFormLi.find('[name*="enddate"]').val();
-                gstartdate = $newFormLi.find('[name*="gstardate"]').val();
-                genddate = $newFormLi.find('[name*="genddate"]').val();
                 period = $newFormLi.find('[name*="period"]').val();
                 frequency = $newFormLi.find('select[name*="frequency"] option:selected').val();
                 visibility = $newFormLi.find('select[name*="visibility"] option:selected').val();

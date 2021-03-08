@@ -65,7 +65,7 @@ class StageType extends AbstractType
                 'attr' => ['class' => 'weight-input']
             ]);
 
-            if($options['elmtType'] !== 'activity'){
+            if($options['entity'] !== 'activity'){
 
                 $builder->add('definiteDates', CheckboxType::class,
                 [
@@ -182,34 +182,6 @@ class StageType extends AbstractType
                     //new EDGreaterThanSD
                 ]
             ])
-            ->add('gstartdate', DateTimeType::class,
-            [
-                'format' => 'dd/MM/yyyy',
-                'widget' => 'single_text',
-                'label_format' => 'stages.stage.%name%',
-                'html5' => false,
-                'attr' => ['class' => 'dp-gstart'],
-                //'data' => $options['startdate'],
-                'constraints' => [
-                    new Assert\NotBlank([
-                        'message' => 'A recurring activity must have a startdate'
-                    ]),
-                ]
-            ])
-
-            ->add('genddate', DateTimeType::class,
-            [
-                'format' => 'dd/MM/yyyy',
-                'widget' => 'single_text',
-                'label_format' => 'stages.stage.%name%',
-                'html5' => false,
-                'attr' => ['class' => 'dp-gend'],
-                //'data' => $options['enddate'],
-                'constraints' => [
-                    new Assert\NotBlank,
-                    //new EDGreaterThanSD
-                ]
-            ])
             ->add('mode', ChoiceType::class,
                 [
                     'label_format' => 'stages.stage.%name%',
@@ -239,13 +211,13 @@ class StageType extends AbstractType
     {
         $resolver
         ->setDefaults([
-            'elmtType' => 'activity',
+            'entity' => 'activity',
             'data_class' => static function(Options $options) {
-                if ($options['elmtType'] === 'iprocess') {
+                if ($options['entity'] === 'iprocess') {
                     return IProcessStage::class;
                 }
 
-                if ($options['elmtType'] === 'process') {
+                if ($options['entity'] === 'process') {
                     return ProcessStage::class;
                 }
 

@@ -1,6 +1,7 @@
 <?php
 namespace App\Model;
 use App\Entity\Activity;
+use App\Entity\Participation;
 use App\Entity\Stage;
 use App\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -44,7 +45,7 @@ class ActivityM extends ModelEntity {
 
     /**
      * @param Activity $activity
-     * @return Collection|Stage[]
+     * @return ArrayCollection|Stage[]
      */
     public function getActiveModifiableStages(Activity $activity)
     {
@@ -62,35 +63,116 @@ class ActivityM extends ModelEntity {
         return $activeStages;
     }
 
+    public function hasParticipant(Activity $activity, User $u)
+    {
+        return $activity->getParticipations()->exists(
+            function (int $i, Participation $p) use ($u) { return $p->getUser() == $u; }
+        );
+    }
+
 
     public function getInitiator(Activity $activity): ?object
     {
-        return $activity->getCreatedBy()
-            ?$this->em->getRepository(User::class)->find($activity->getCreatedBy())
-            : null;
+        return $activity->getInitiator();
     }
 
-    public function userCanEdit(Activity $activity, User $u): bool
+    public function userCanEdit(Activity $activity, ?User $u): bool
     {
+        if(!$u){return false;}
         $role = $u->getRole();
 
-        if (
+        /*if (
             $activity->status !== Activity::STATUS_ONGOING &&
             $activity->status !== Activity::STATUS_FUTURE &&
             $activity->status !== Activity::STATUS_INCOMPLETE &&
             $activity->status !== Activity::STATUS_AWAITING_CREATION
         ) {
             return false;
-        }
+        }*/
         if ($role === 4) {
             return true;
         }
         if (! $this->getInitiator($activity)){
             return false;
         }
-        if ( ($role === 1 || $this->getActiveModifiableStages($activity)) && ($this->getInitiator($activity)->getOrganization() == $u->getOrganization())) {
+        if (($role === 1 || $this->getActiveModifiableStages($activity)) && ($this->getInitiator($activity)->getOrganization() == $u->getOrganization())) {
             return true;
         }
+        return false;
+    }
+
+    public function userCanGiveOutput(Activity $activity,User $u): bool
+    {
+        return $activity->getStages()->exists(function(int $i,Stage $s) use ($u) {
+            return $s->userCanGiveOutput($u);
+        });
+    }
+
+    public function userCanViewResults(Activity $activity, User $u)
+    {
+        return $this->userCanSeeResults($activity, $u);
+    }
+
+    public function userCanSeeResults(Activity $activity, User $u)
+    {
+
+        if ($activity->getStatus() < ACTIVITY::STATUS_FINALIZED) {
+
+            return false;
+        }
+
+        $role = $u->getRole();
+
+        if ($role == 4) {
+            return true;
+        }
+
+        if (!$activity->getStages()->exists(function (int $i,Stage $s) { return $s->getCriteria()->count(); })) {
+            // no stage with criteria. if none of them got replies (as they are surveys)
+            // results are not available
+
+
+            if (
+
+                $activity->getStages()->forAll(function (int $i,Stage $s) {
+                    $survey = $s->getSurvey();
+                    if (!$survey) {
+
+                        return false;
+                    }
+
+                    return $survey->getAnswers()->isEmpty();
+                })
+            ) {
+
+
+                return false;
+            }
+        }
+
+        if ($role == 1) {
+            if ($u->getOrganization() != $activity->getOrganization()) {
+                return false;
+            }
+        }
+
+        if ($this->hasParticipant($activity,$u)) {
+            return true;
+        }
+        $subordinates = $u->getSubordinates()->toArray();
+        $department = $u->getDepartment();
+        $departmentUsers = $department ? $department->getUsers() : [];
+
+        foreach ($this->participants as $p) {
+            if ($p->getType() != ACTIVITY::STATUS_FUTURE) {
+                if (in_array($p->getDirectUser(), $subordinates)) {
+                    return true;
+                } elseif (in_array($p->getDirectUser(), $departmentUsers) and $this->status == self::STATUS_PUBLISHED) {
+                    return true;
+                }
+            }
+        }
+
         return false;
     }
 

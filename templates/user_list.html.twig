@@ -2,9 +2,8 @@
 
 {% import "macros/user_list__macros.html.twig" as macros %}
 
-
 {% block data_params %}
-  {{ html_data_params({
+  {{ global.html_data_params({
     'set-client-icon': url('setClientIcon', { clientId: 0 })|raw
   }) }}
 {% endblock %}
@@ -13,68 +12,135 @@
   {{ 'user_list.page_title'|trans }}
 {% endblock %}
 
+{% block mobile_title %}
+  {{ 'user_list.page_title'|trans }}
+{% endblock %}
+
 {% block css %}
   <link rel="stylesheet" href="{{ asset('build/user_list.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/add_client_user_modal.css') }}">
+  <style>
+    .nb-activities{
+      margin-left: auto;
+      background-color: #e6d9f1;
+      border-radius: 10px;
+      padding: 0 0.4rem;
+      font-size: 1rem;
+      width:77px;
+      justify-content:center;
+    }
+
+    .client-individuals .user-picture{
+      font-size:2.5rem;
+    }
+
+    .client-individuals .nb-activities{
+      height: 23px;
+    }
+
+    .add-user-btn:hover {
+      background-color: #ff9300;
+    }
+
+    #updateUser .user-picture{
+      border-radius: 50%;
+      width: 2em;
+      height:2em;
+    }
+
+    #updateUser .username-data{
+      padding-left: 0.75rem;
+      min-height:66px;
+    }
+
+    .change-username{
+      pointer-events:all!important;
+      font-size:20px;
+      cursor: pointer;
+    }
+
+    .account-mention{
+      padding-left: 3em;
+    }
+
+  </style>
+  <script>
+    var surl = "{{ path('dynamicSearch') }}";
+    var acurl = "{{ path('addClient') }}";
+    var auurl = "{{ path('addUser') }}";
+    var aeuurl = "{{ path('addClientUser', {cliId:0}) }}";
+    var alreadyExistingMsg = "{{ 'already_existing'|trans }}";
+    var dcurl = "{{ path('clientDelete', {cliId: 0}) }}"
+    var duurl = "{{ path('deleteUser', {usrId: 0}) }}"
+    var ucuurl = "{{ url('updateClientUser', {cliId: 0, extUsrId: 0 }) }}";
+    var uuurl = "{{ url('updateUser', {usrId: 0 }) }}";
+    var privateMsg = "{{ 'private'|trans }}";
+    var independentMsg = "{{ 'independant'|trans|capitalize }}";
+    var gsurl = "{{ path('getSubscriptions') }}";
+  </script>
 {% endblock %}
 
 {% set user_icon %}
   <i class="fa fa-user"></i>
 {% endset %}
 
+
 {% block content %}
+  {% set organization = currentuser.organization %}
   <main>
-    <div class="user-search-container">
+    <ul class="flex-center-fs">
+      <a class="btn-flat no-margin flex-center my-account account-mention dd-text">
+        <span >{{ 'my_account'|trans}}</span>
+        <img class="account-logo sm-left sm-right" src="{{ asset(global.organizationLogo(organization)) }}">
+        <span class="strong {{organization.type == 'C' or organization.type == 'I' ? 'dd-orange-text' : ''}}">{{ organization.type == 'C' ? 'profile.private_suffix'|trans : (organization.type == 'I' ? 'profile.independant_suffix'|trans : organization.commname) }}</span>
+      </a>
+    </ul>
+    <div class="user-search-container" style="display:none">
+      {#}
       <input type="text" id="user-search" class="browser-default"
         spellcheck="false" placeholder="Recherche rapide" autocomplete="off">
       <i class="material-icons">search</i>
+      #}
     </div>
     <section id="main-tabs-container">
       <ul class="tabs tabs-fixed-width">
         <li class="tab">
           <a href="#clients">{{ 'user_list.external_users_tab'|trans }}</a>
         </li>
+        {#
         <li class="tab">
           <a href="#teams">{{ 'user_list.teams_tab'|trans }}</a>
         </li>
+        #}
         <li class="tab">
           <a href="#users">{{ 'user_list.internal_users_tab'|trans }}</a>
         </li>
       </ul>
 
       <section id="users">
-        <ul class="departments-list">
-          {% for dpt in viewableDepartments %}
-            {% set my_dpt = dpt == currentuser.department %}
+        <ul class="departments-list" data-prototype-department="{% apply escape %}{% include "components/department_list__item.html.twig" %}{% endapply %}">
+          {% for department in viewableDepartments %}
+            {% set my_dpt = department == currentuser.department %}
 
-            <li class="department-list--item hierarchized-item">
-              <header class="{{ my_dpt ? 'my-dpt' }}">
-                {{ dpt.name }}
-                {% if my_dpt %}
-                  ({{ 'user_list.my_department'|trans }})
-                {% endif %}
-              </header>
-              <div class="item-body">
-                <ul class="users-list">
-                  {% for user in dpt.viewableUsers(orgEnabledUserSeeAllUsers) %}
-                    {% include "components/user_list__item.html.twig" with { user: user } %}
-                  {% endfor %}
-                  {# placeholder for no user in list #}
-                  <li class="no-items-placeholder">
-                    (aucun utilisateur)
-                  </li>
-                </ul>
-              </div>
-            </li>
+
+            {% include "components/department_list__item.html.twig" with {department: department} %}
+
           {% endfor %}
 
-          <li class="department-list--item hierarchized-item">
+          <li class="department-list--item hierarchized-item no-department-holder" data-prototype-user="{% apply escape %}{% include "components/user_list__item.html.twig" with {settings: true} %}{% endapply %}">
             <header class="{{ not currentuser.department ? 'my-dpt' }}">
-              <em>({{ 'user_list.no_attributed_department_title'|trans }})</em>
+              <em>          
+                {{'<span>no_attrib_dept</span> (<span class="nb-department-users">nbDptUsers</span>)'|replace({
+                    'no_attrib_dept' :  'user_list.no_attributed_department_title'|trans,
+                    'nbDptUsers' : usersWithoutDpt|length,
+                })|raw }}
+              </em>
             </header>
             <div class="item-body">
               <ul class="users-list">
                 {% for user in usersWithoutDpt %}
-                  {% include "components/user_list__item.html.twig" with { user: user, stats: currentuser.role == 1 or currentuser.role == 4, roles: currentuser.role == 1 or currentuser.role == 4 } %}
+                  {#{% include "components/user_list__item.html.twig" with { user: user, stats: currentuser.role == 1 or currentuser.role == 4, roles: currentuser.role == 1 or currentuser.role == 4 } %}#}
+                  {% include "components/user_list__item.html.twig" with { user: user, settings: currentuser.role < 2, stats: false } %}
                 {% endfor %}
               </ul>
             </div>
@@ -82,6 +148,7 @@
         </ul>
       </section>
 
+      {#
       <section id="teams">
         <ul class="teams-list">
           {% for team in viewableTeams|merge(dealingTeams) %}
@@ -89,26 +156,31 @@
           {% endfor %}
         </ul>
       </section>
+      #}
 
       <section id="clients">
-        <ul class="client-type-list">
-          {% include "components/user_list__firms_item.html.twig" with { firms: clientFirms|merge(dealingFirms) } %}
+        <ul class="client-type-list client-employees" data-prototype-client="{% apply escape %}{% include "components/user_list__firm_item.html.twig" %}{% endapply %}" data-prototype-user="{% apply escape %}{% include "components/user_list__ext_user_item.html.twig" %}{% endapply %}">
+          {% include "components/user_list__firms_item.html.twig" with { clients: clientFirms } %}
         </ul>
+        {#
         <ul class="client-type-list">
           {% include "components/user_list__ext_team_item.html.twig" with { firms: clientTeams } %}
         </ul>
-        <ul class="client-type-list">
-          {% include "components/user_list__individuals_item.html.twig" with { firms: clientIndividuals } %}
+        #}
+        <ul class="client-type-list client-individuals" data-prototype-client="{% apply escape %}{% include "components/user_list__item.html.twig" with {isIndivIndep: true, settings:true, roles: false} %}{% endapply %}">
+          {% include "components/user_list__individuals_item.html.twig" with { clients: clientIndividuals } %}
         </ul>
       </section>
     </section>
-
+    
     {% set user_create_route = is_root ? 'rootCreateUser' : 'createUser' %}
-
+    
     <div class="fixed-action-btn">
-      <a class="btn-floating btn-large teal">
-        <i class="large material-icons">add</i>
+      <a id="fixedButton" class="btn-floating btn-large add-user-btn tooltipped modal-trigger" href="#addUserClient" data-tooltip="{{'user_list.add_user_btn_tooltip'|trans}}" data-position="top">
+        <i class="large mi add"></i>
       </a>
+
+      {#
       <ul>
         <li>
           <a href="{{ url(user_create_route, { orgId: currentuser.organization }) }}"
@@ -135,12 +207,20 @@
           </a>
         </li>
       </ul>
+      #}
     </div>
+    {% if global.request.cookies.get('fc') is not null %}
+      <div class="tap-target dd-bg" data-activates="fixedButton">
+          <div class="tap-target-content white-text">
+            <h5>{{ 'first_connection_elements.user_list.tap_target_title'|trans }}</h5>
+            <p>{{ 'first_connection_elements.user_list.tap_target_info'|trans }}</p>
+          </div>
+      </div>
+    {% endif %}
 
     <a id="scrolltop" href="#serpicoapp" class="btn-floating btn-large blue">
-      <i class="material-icons">arrow_upward</i>
+      <i class="mi arrow_upward"></i>
     </a>
-
 
     <div id="client-icon-modal" class="modal">
       <div class="modal-content">
@@ -150,9 +230,86 @@
         <button id="client-icon-upload-btn" type="button" class="btn">ok</button>
       </div>
     </div>
+
+    <div id="linkSubscriptionToUser" class="modal">
+
+        <div class="modal-content">
+
+          <h5>{{'firm_settings.subscription.associate_unsubscribed_accounts_modal.title'|trans}}</h5>
+
+          <table class="highlight striped centered subscription-table" data-prototype="{% apply escape %}{% include "components/subscriptor_list__item.html.twig" %}{% endapply %}">
+              <thead>
+                  <tr>
+                      <th>{{'firm_settings.subscription.associate_unsubscribed_accounts_modal.table.account'|trans}}</th>
+                      <th>
+                        <i class="fa fa-question-circle tooltipped" data-tooltip="{{'firm_settings.subscription.associate_unsubscribed_accounts_modal.table.action_msg'|trans}}" data-position="top"></i>
+                        <span>{{'firm_settings.subscription.associate_unsubscribed_accounts_modal.table.action'|trans}}</span>
+                      </th>
+                  </tr>
+              </thead>
+              <tbody>
+              </tbody>
+          </table>
+
+          <div class="flex-center-fe">
+            <div class="btn waves-effect waves-light modal-close">{{'ok'|trans}}</div>
+          </div>
+
+        </div>
+
+    </div>
+
   </main>
+
 {% endblock %}
 
 {% block javascripts %}
   <script defer src="{{ asset('build/user_list.js') }}"></script>
+  <script>
+      $(function(){
+
+        if(getCookie('fc')){
+          $('.tap-target').tapTarget('open');
+          eraseCookie('fc');
+        }
+      
+        $(document).on('mouseover','.firms-list--item header',function(){
+            $(this).find('.user-actions .firm-modify-btn').css('visibility','');
+        }).on('mouseleave','.firms-list--item header',function(){
+            $(this).find('.user-actions .firm-modify-btn').css('visibility','hidden');
+        })
+
+        $(document).on('mouseover','.departments-list .users-list--item header, .client-individuals .users-list--item header',function(){
+            $(this).find('.user-actions a').css('visibility','');
+        }).on('mouseleave','.departments-list .users-list--item header, .client-individuals .users-list--item header',function(){
+            $(this).find('.user-actions a').css('visibility','hidden');
+        })
+
+        $('.add-user-btn').on('click',function(){
+          if(typeof $('#addUserClient').attr('data-qt') === typeof undefined || $('#addUserClient').attr('data-qt') === false){
+            $('#addUserClient').attr('data-qt','eu');
+          }
+          setTimeout(function(){
+            $('#addUserClient').find('[class*="-part"]:visible').addClass('initial-part');
+          },200);
+        });
+
+        $('input[name*="user-type"]').on('change',function(){
+          $('#addUserClient').attr('data-qt',$('input[name*="user-type"][value="ext"]').is(':checked') ? 'c' : 'u');
+        })
+
+        $('input[name*="gen-type"]').on('change',function(){
+          if($('input[name*="gen-type"][value="f"]').is(':checked')){
+            qt = 'nc';
+          } else if($('input[name*="gen-type"][value="i"]').is(':checked')){
+            qt = 'i';
+          } else {
+            qt = $('input[name*="user-type"][value="ext"]').is(':checked') ? 'c' : 'u';
+          }
+          $('#addUserClient').attr('data-qt',qt);
+        })
+
+      })  
+  </script>
+
 {% endblock %}

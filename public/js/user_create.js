@@ -4,6 +4,59 @@ $(function(){
 
     $('select').material_select();
 
+    $('select').on('change',function(){
+        const $userElmt = $(this).closest('.user-elmt');
+        const $this = $(this);
+        const $input = $userElmt;
+        const inputVal = $this.find('option:selected').text();
+        //$userElmt.find('.user-input').hide();
+        $userElmt.find('a>span').empty().append($this.val() ? $userElmt.data('prefix-w')+''+ inputVal : $userElmt.data('prefix-wo'));
+        //$userElmt.find('a').show();
+        //$(this).val()
+    });
+
+    $(document).on('click',function(e){
+        var $this = $(e.target);
+        if(
+            $this.is('.btn:not(.user-btn,.client-btn)') ||
+            $this.parent().is('.btn:not(.user-btn,.client-btn)') ||
+            $this.hasClass('insert-individual-btn') || 
+            $this.parent().hasClass('insert-individual-btn')
+        ) {return ;}
+        var $targetedUserEl = $this.closest('.user-elmt');
+        var $targetedUserInput = $targetedUserEl ? $targetedUserEl.find('.user-input') : null;
+
+        $('.user-input:visible').not($targetedUserInput).each(function(i,e){
+            if($(e).hasClass('user-select-fullname') && (!$(e).find('[name*="firstname"]').val().length || !$(e).find('[name*="lastname"]').val().length )
+            || $(e).hasClass('user-select-email') && !$(e).find('[name*="email"]').val().length){
+                return;
+            }
+            var $userEl = $(e).closest('.user-elmt');    
+            const $input = $userEl.find('input.select-dropdown').length ? $userEl.find('select') : $userEl.find('input');
+            
+            if($userEl.find('input.select-dropdown').length){
+                    inputVal = $userEl.find('select option:selected').text();
+            } else {
+                if($(e).hasClass('user-select-fullname')){
+                    inputVal = $userEl.find('[name*="firstname"]').val() + ' ' + $userEl.find('[name*="lastname"]').val();
+                } else {
+                    inputVal = $userEl.find('input').val();
+                }
+            }
+
+            //const inputVal = $userEl.find('input.select-dropdown').length ? $userEl.find('select option:selected').text() : $userEl.find('input').val();
+            $userEl.find('.user-input').hide();
+            $userEl.find('a>span').empty().append($input.val().length ? $userEl.data('prefix-w')+''+ inputVal : $userEl.data('prefix-wo'));
+            $userEl.find('a').show();
+        })
+        
+    });
+
+    $(document).on('click','.user-modify',function(e){
+        $(this).closest('.element-data').hide();
+        $(this).closest('.element-data').next().show();
+    });
+
     $('.modal').modal();
 
     setTimeout(function (){
@@ -86,25 +139,22 @@ $(function(){
 
     $('.element-submit').on('click',function(e){
         e.preventDefault();
-        urlToPieces = eurl.split('/');
         if($(this).data('did') != null){
-            elmtName = "department";
+            e = "department";
             trig = $('[data-did="'+$(this).data("did")+'"]');
         } else if ($(this).data('pid') != null) {
-            elmtName = "position";
+            e = "position";
             trig = $('[data-pid="'+$(this).data("pid")+'"]');
         } else if ($(this).data('tid') != null) {
-            elmtName = "title";
+            e = "title";
             trig = $('[data-tid="'+$(this).data("tid")+'"]');
         } else if ($(this).data('wid') != null) {
-            elmtName = "weight";
+            e = "weight";
             trig = $('[data-wid="'+$(this).data("wid")+'"]');
-
         }
         s = trig.closest('.col').find('select');
-        urlToPieces[urlToPieces.length-3] =  elmtName;
-        url = urlToPieces.join('/');
-        $.post(url,$(this).closest('form').serialize())
+        const params = {e: e, id: 0};
+        $.post(eurl,$(this).closest('form').serialize() + '&' + $.param(params))
             .done(function(data) {
                 $.each($('.red-text'),function(){
                     $(this).remove();
@@ -159,7 +209,6 @@ $(function(){
         });
     
         // Get the ul that holds the collection of users
-    
         //Setup rules when modifying existing stages
     
         $(document).on('click', '.remove-user, .insert-btn', function(e) {
@@ -169,24 +218,17 @@ $(function(){
             var selectedIndex = ($(this).hasClass('insert-btn')) ? $collectionHolder.children().length : $collectionHolder.children().index($(this).closest('li'))+1;
     
             if($(this).hasClass('remove-user')){
-    
-                //$collectionHolder.data('total', $collectionHolder.data('total') - 1);
-    
+        
                 if(selectedIndex < $collectionHolder.children().length){
                     for(i = selectedIndex+1;i <= $collectionHolder.children().length;i++){
-    
-                        $collectionHolder.find('h4:eq('+ (i-1) +')').text("User "+ (i-1));
+                        $collectionHolder.find('.user-number').eq(i-1).empty().append(i-1);
                     }
                 }
                 $(this).closest('li').remove();
-                $collectionHolder.data('total',total-1);
-    
+                $collectionHolder.data('total',total-1); 
     
             } else if ($(this).hasClass('insert-btn')){
                 addUserForm($collectionHolder, $(this), selectedIndex);
-                /*if($collectionHolder.data('total') == 1){
-                    $('.create-users').attr('disabled',false);
-                }*/
             }
         });
     
@@ -227,13 +269,7 @@ $(function(){
             }
     
             //Remove temporarily
-            $('.fixed-action-btn').addClass('floating-add').removeClass('fixed-action-btn');
-            
-            if($('.user').length % 2 == 1){
-                $newFormLi.find('.user-btn').css('background-color','#ebfffd');
-            }
-
-        
+            $('.fixed-action-btn').addClass('floating-add').removeClass('fixed-action-btn');        
 
             $collectionHolder.append($newFormLi);
             $newFormLi.find('select[name*="role"]').val(2);

@@ -1,0 +1,380 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+  {{'create_client.page_title'|trans ~ client.name }}
+{% endblock %}
+
+{% block pagename %}
+  {{'create_client.page_title'|trans}}
+{% endblock %}
+
+{% block mobile_title %}
+  {{'create_client.mobile_header_title'|trans}}
+{% endblock %}
+
+{% set clientHasUsers = client.aliveExternalUsers|length %}
+
+
+  {% block css %}
+    <!-- Dropify -->
+    <link rel="stylesheet" href="{{ asset('css/dropify.min.css') }}" type="text/css">
+    <link rel="stylesheet" href="{{ asset('css/add_client_user_modal.css') }}">
+    <script>
+        var url = "{{ url('ajaxClientUserAdd') }}";
+        var dcurl = "{{ url('clientDelete', {cliId : client.id }) }}";
+        var diurl = "{{ url('clientUserDelete', {extId : 0}) }}";
+        var vcurl = "{{ url('validateClient', {cliId : client.id}) }}";
+        var ucuurl = "{{ url('updateClientUser', {cliId: client.id, extUsrId: 0 }) }}"
+        var surl = "{{ path('dynamicSearch')}}";
+        var noFirm = "{{ 'create_client.partner.unexisting_worker_firm'|trans }}";
+        var multCreation = "{{ global.request.get('cliId') ? 0 : 1 }}";
+        var aeuurl = "{{ path('addClientUser', {cliId: client.id}) }}";
+        var alreadyExistingMsg = "{{ 'already_existing'|trans }}";
+        var independentMsg = "{{ 'independant'|trans|capitalize }}";
+    </script>
+    <style>
+
+
+      #main-header{
+        --actions-width: 200px;
+        --padding: 16px;
+        display: flex;
+        justify-content: center;
+        padding: 1em;
+        margin-bottom: 2em;
+        position: relative;
+      }
+
+      header .page-title{
+          display: inline-block;
+          text-align: center;
+      }
+
+      footer{
+      padding-bottom: 40px;
+      }
+
+      /*.collection{
+        overflow: unset;
+      } */
+
+      .collection {
+        padding: 20px!important;
+        border: none!important;
+      }
+      .collection-item{
+        padding: 20px!important;
+        border: 1px solid #e0e0e0!important;
+        margin: 10px 0px!important;
+      }
+
+      .client-type{
+        display: inline-block;
+        min-width: 250px;
+      }
+
+      .client-select-type{
+        padding: 0 2rem;
+      }
+
+      .fa-slash{
+        transform: rotate(87deg);
+      }
+
+      .add-individual-btn-row{
+        display: flex;
+        justify-content:flex-end;
+        margin-top: 1em;
+      }
+
+      .firm-option-logo{
+          float: left!important;
+      }
+      .firm-input-logo{
+          position: absolute;
+          height: 20px;
+          margin: auto 0;
+          top: 0;
+          left: 0;
+          bottom: 0;
+      }
+
+      .w-firm .dropdown-content{
+        opacity: 1!important;
+        display: block!important;
+      }
+
+      .w-firm .select-wrapper input, .w-firm .select-wrapper .caret{
+          display: none!important;
+      }
+
+      .add-members{
+        display: flex;
+        justify-content: flex-end;
+        padding: 1em;
+      }
+
+      .add-partner-zone{
+        margin-top: 20px;
+      }
+
+      .client-logo-zone{
+        width: 75px;
+        height: 75px;
+        border-radius: 9999px;
+      }
+
+      .back-btn{
+        position: absolute;
+        left: 40px;
+        background-color: aliceblue;
+      }
+
+      .client-zone{
+        margin: 0 auto;
+        width: 90%;
+      }
+
+      .page-title{
+        font-size: 30px;
+      }
+
+      .client{
+        overflow-y: unset;
+      }
+
+      .selected-client-logo{
+        height: 15px;
+      }
+
+      .client-btn {
+        background-color: #55318e4a!important;
+        margin: 1.4em auto;
+        display: inline-block;
+      }
+
+      .user-btn {
+          background-color: aliceblue;
+          color: black;
+      }
+
+      /*.client-info-commname, .client-info-type{
+        color: white;
+        justify-content: center;
+      }*/
+      
+      .user-select-fullname, .user-email{
+        width: 100%;
+      }
+
+      .user-email .input-field{
+        margin-top: 0;
+      }
+
+      .user-fullname .input-field, .user-position .input-field{
+        width: 100%;
+        margin: 0 1em;
+      }
+
+      .other-user-elmts{
+        padding: 0 1em;
+        width: 50%;
+      }
+
+      .user-position, .user-weight{
+        display: inline-block;
+      }
+
+      .user-ext-email{
+        position:relative;
+      }
+
+      .client-user-barred{
+        left:5%;
+        bottom:12%;
+      }
+
+      .client-input{
+        min-width:250px;
+      }
+
+      .client-input .select-dropdown{
+        width: 100%;
+      }
+
+      .client-data-zone li:last-of-type{
+        margin-left: auto;
+      }
+
+      main {
+          width:90%;
+          margin-left:auto!important;
+          margin-right:auto!important;
+          margin-top:2rem!important;
+      }
+
+      .client-name h5{
+        margin-bottom:0;
+      }
+
+      .no-user-holder, .no-user-holder p{
+        text-align:center;
+      }
+
+      .picture-zone{
+        margin-right: 20px;
+      }
+
+      .user-picture{
+        border-radius: 50%;
+        width: 2em;
+        height:2em;
+      }
+
+      #updateUser .username-data{
+        padding-left: 0.75rem;
+        min-height:66px;
+      }
+
+      .change-username{
+        font-size:20px;
+        cursor: pointer;
+      }
+
+      @media screen and (max-width: 930px) {
+        .no-user-holder img  {
+          width: 80%;
+        }
+      }
+      @media screen and (min-width: 931px) {
+        .no-user-holder img  {
+          width: 55%;
+        }
+      }
+
+      .inactive-user-badge{
+        height:17px;
+        width:17px;
+        background-color:#707172;
+        border-radius:50%;
+        justify-content:center;
+        
+      }
+
+      .inactive-user-badge > *{
+        font-size:12px;
+        font-weight:700;
+        line-height:18px;
+        pointer-events:none;
+      }
+
+
+
+    </style>
+  {% endblock %}
+
+{% block username %}
+  {{ currentuser.firstname }}
+  {{ currentuser.lastname }}
+{% endblock %}
+
+{% block content %}
+
+    {% include "components/background_grid.html.twig" %}
+
+    <main class="card-panel purple lighten-5">
+      <header id="main-header">
+        <a class="waves-effect waves-green btn back-btn black-text" href="{{ url('manageUsers')}}">{{ 'back'|trans }}</a>
+      </header>
+      <div class="client-zone">
+        <div class="client">
+            <div class="client-data-zone">
+                <ul class="flex-center" style="width:100%">
+                    <li style="margin-right: 20px;position:relative">
+                        <img class="client-logo-zone" src="{{ asset(global.clientlogo(client)) }}">
+                    </li>
+                    <li>
+                        <div class="client-name c-flex">
+                            <h5>{{ client.name }}</h5>
+                            <small>{{ (clientHasUsers ? (clientHasUsers ~ ' ' ~ 'user'|trans ~ (clientHasUsers > 1 ? 's' : '')) ~ ' - ' : '') ~ ('create_client.partner.' ~ (client.clientOrganization.type == 'F' ? 'firm' : 'independant') ~ '_added_on')|trans ~ ' ' ~ client.inserted|format_datetime('long','none') }}</small>
+                        </div>
+                    </li>
+                    <li class="client-action-btns flex-center" style="visibility:hidden;">
+                        <div class="btn-flat delete-client-btn tooltipped modal-trigger" href="#deleteClient" data-id="{{client.id}}" data-tooltip="{{'delete'|trans}}" data-position="top">
+                            <i class="dd-orange-text fa fa-times"></i>
+                        </div>
+                    </li>
+                </ul>   
+            </div>
+
+            <div class="client-input-zone" style="display:none">
+                <ul class="flex-center-sb">
+                {#<h4 style="display:inline-block">{{'create_client.partner.prototype_title'|trans}} __clientNb__</h4>#}
+                <div class="client-commname client-elmt">
+                    <a class="btn client-btn client-info-commname dd-orange-text flex-center">
+                        <img class="selected-client-logo sm-right" src="{{ asset(global.clientlogo(client)) }}" alt="">
+                        <span class="m-right commname-value">
+                            {{ 'partner'|trans ~ ' : ' ~ client.name|trans }}
+                        </span>
+                    </a>
+                </div>
+                <div class="partner-action-buttons">
+                    <a class="validate-client-btn waves-effect waves-light btn tooltip" data-cid="{{client and client.id ? client.id : 0}}"><i class="fa fa-check"></i></a>
+                    <a href="#deleteClient" class="waves-effect waves-light accent-4 btn-flat modal-trigger" data-cid="{{client and client.id ? client.id : 0}}"><i class="fa fa-trash"></i></a>
+                </div>
+                </ul> 
+            </div>
+            <ul class="individuals collection no-padding" data-prototype="{% apply escape %}{% include 'components/client_external_user__item.html.twig' with { externalUser: null } %}{% endapply %}"
+            {#{% if not client or client.aliveExternalUsers|length == 0 %}style="display:none"{% endif %}#}
+            >
+                
+                {% for externalUser in client.aliveExternalUsers %}
+                    {% include "components/client_external_user__item.html.twig" with { item: externalUser } %}
+                {% endfor %}
+
+                {% if not clientHasUsers %}
+                    <div class="no-user-holder">
+                        <img src="{{asset('lib/img/legal-person-l.png')}}" alt="legal-person">
+                        <h5>{{'create_client.partner.no_added_users.title'|trans}}</h5>
+                        <p>{{'create_client.partner.no_added_users.content'|trans}}</p>
+                    </div>
+                {% endif %}
+            
+            </ul>
+                {#
+                <div class="button-field add-user-zone" style="{% if client is null %}display:none ;{% endif %}position: absolute">
+                    <a class="btn waves-effect waves-light  insert-individual-btn data-cid="{{ client ? client.id : 0 }}"">
+                        <span>Ajouter utilisateur</span>
+                    </a>
+                </div>
+                #}
+            </div>
+
+            <div class="fixed-action-btn">
+              <a class="btn-floating btn-large add-user-btn tooltipped modal-trigger" href="#addUserClient" data-tooltip="{{'user_list.add_user_btn_tooltip'|trans}}" data-position="top">
+                <i class="large mi add"></i>
+              </a>
+            </div>
+        </div>
+      </div>
+    </main>
+  
+  <div id="addEmailSuccess" class="modal">
+    <div class="modal-content">
+      <p>{{''|trans}}</p>
+    </div>
+
+    <div class="modal-footer">
+      <div class="button-field">
+        <a class=" modal-action modal-close waves-effect btn btn-large">Ok</a>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block javascripts %}
+<script>$('select').material_select();</script>
+<script src="{{ asset('js/dropify.min.js') }}"></script>
+<script src="{{ asset('js/client_update.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,105 @@
+{% set client = item.vars.data ? item.vars.data : null %}
+{% set clientHasUsers = client ? client.aliveExternalUsers|length : 0 %}
+
+    <div class="client {% if item.parent is not null %}collection-item{% endif %}">
+    <div class="client-data-zone" {% if not client %}style="display:none"{% endif %}>
+        <ul class="flex-center" style="width:100%">
+            <li style="margin-right: 20px;position:relative">
+                <img class="client-logo-zone" src="{{ client ? asset(global.clientlogo(client)) : asset('lib/img/org/no-picture.png') }}">
+            </li>
+            <li>
+
+                <div class="client-name c-flex">
+                    {% if client and client.name is not empty %}
+                    <h5>{{ client.name }}</h5>
+                    <small>{{ (clientHasUsers ? (clientHasUsers ~ ' ' ~ 'user'|trans ~ (clientHasUsers > 1 ? 's' : '')) ~ ' - ' : '') ~ ('create_client.partner.' ~ (client.clientOrganization.type == 'F' ? 'firm' : 'independant') ~ '_added_on')|trans ~ ' ' ~ client.inserted|format_datetime('long','none') }}</small>
+                    {% endif %}
+                </div>
+                {#<a href="#deleteClient" class="waves-effect waves-light accent-4 btn-flat modal-trigger" style="margin-left: auto;"><i class="fa fa-times"></i></a>#}
+            
+                {#
+                <div>
+                Adresse générique : <span class="client-email"> {{ client.vars.data.email }} </span>
+                </div>
+                #}
+            </li>
+            <li class="client-action-btns flex-center" style="visibility:hidden;">
+
+                <div class="btn-flat delete-user-btn tooltipped modal-trigger" href="#deleteClient" data-id="{{clientData.id}}" data-tooltip="{{'delete'|trans}}" data-position="top">
+                    <i class="dd-orange-text fa fa-times"></i>
+                </div>
+                <div>
+                    <a class="modify-client-btn btn-flat"><i class="mi create"></i></a>
+                </div>
+            </li>
+        </ul>   
+    </div>
+
+    <div class="client-input-zone" {% if client %}style="display:none"{% endif %}>
+        <ul class="flex-center-sb">
+        {#<h4 style="display:inline-block">{{'create_client.partner.prototype_title'|trans}} __clientNb__</h4>#}
+        <div class="client-commname client-elmt" data-prefix-wo="{{ 'create_client.provide_name'|trans }}" data-prefix-w="{{ 'partner'|trans ~ ' : ' }}">
+            <a class="btn client-btn client-info-commname dd-orange-text flex-center">
+                <img class="selected-client-logo sm-right" src="{{ client ? asset(global.clientlogo(client)) : asset('lib/img/org/no-picture.png')}}" alt="">
+                <span class="m-right commname-value">
+                    {{ client ? 'partner'|trans ~ ' : ' ~ client.name|trans : 'create_client.provide_name'|trans }}
+                </span>
+                {#<span class="commname-value">{{ client ? item.vars.data.commname : '' }}</span>#}
+            </a>
+            <div class="w-firm client-input" style="display:none">
+                <div class="input-field">
+                    {{ form_label(item.name) }}
+                    {{ form_widget(item.name) }}
+                </div>
+                <select name="firmSelector" style="margin-top:45px"></select>
+                {{ form_widget(item.workerFirm) }}
+            </div>
+        </div>
+        <div class="partner-action-buttons">
+            <div class="client-type client-elmt" data-prefix-wo="" data-prefix-w="{{'type'|trans ~ ' : '}}">
+            <a class="btn client-btn client-info-type white-text flex-center">
+                <i class="fa fa-industry m-right"></i>
+                <span class="">{{'type'|trans ~ ' : ' ~ 'create_client.type.firm'|trans}}</span>
+            </a>
+            <div class="client-select-type input-field client-input" style="display: none;">
+                {{ form_label(item.type) }}
+                {{ form_widget(item.type) }}
+            </div>
+            </div>
+            <a class="validate-client-btn waves-effect waves-light btn tooltip" data-cid="{{client and client.id ? client.id : 0}}"><i class="fa fa-check"></i></a>
+            <a href="#deleteClient" class="waves-effect waves-light accent-4 btn-flat modal-trigger" data-cid="{{client and client.id ? client.id : 0}}"><i class="fa fa-trash"></i></a>
+        </div>
+        {{ form_widget(item.id) }}
+        </ul> 
+    </div>
+    <ul class="individuals collection no-padding" data-prototype="{% apply escape %}{% include 'components/client_external_user__item.html.twig' with { item: item.aliveExternalUsers.vars.prototype, client: item } %}{% endapply %}"
+    {#{% if not client or client.aliveExternalUsers|length == 0 %}style="display:none"{% endif %}#}
+    >
+        
+        {% for ikey, individual in item.aliveExternalUsers %}
+            {% include "components/client_external_user__item_old.html.twig" with { item: individual, client: item } %}
+        {% endfor %}
+
+        {% if not clientHasUsers %}
+            <div class="no-user-holder">
+                <img src="{{asset('lib/img/legal-person-l.png')}}" alt="legal-person">
+                <h5>{{'create_client.partner.no_added_users.title'|trans}}</h5>
+                <p>{{'create_client.partner.no_added_users.content'|trans}}</p>
+            </div>
+        {% endif %}
+    
+    </ul>
+        {#
+        <div class="button-field add-user-zone" style="{% if client is null %}display:none ;{% endif %}position: absolute">
+            <a class="btn waves-effect waves-light  insert-individual-btn data-cid="{{ client ? client.id : 0 }}"">
+                <span>Ajouter utilisateur</span>
+            </a>
+        </div>
+        #}
+    </div>
+
+    <div class="fixed-action-btn">
+      <a class="btn-floating btn-large add-user-btn tooltipped modal-trigger" href="#addUserClient" data-tooltip="{{'user_list.add_user_btn_tooltip'|trans}}" data-position="top">
+        <i class="large mi add"></i>
+      </a>
+    </div>

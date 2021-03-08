@@ -6,9 +6,12 @@ use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\IconRepository;
 use DateTime;
 use DateTimeInterface;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\OneToMany;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\JoinColumn;
 use IntlChar;
 
 /**
@@ -23,7 +26,6 @@ class Icon extends DbObject
      * @ORM\Column(name="ico_id", type="integer", nullable=false)
      */
     protected ?int $id;
-
 
     /**
      * @ORM\Column(name="ico_type", type="string", length=255, nullable=true)
@@ -41,24 +43,36 @@ class Icon extends DbObject
     public $unicode;
 
     /**
-     * @ORM\Column(name="ico_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="iconInitiatives")
+     * @JoinColumn(name="ico_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
-     * @ORM\Column(name="ico_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="ico_inserted", type="datetime",  options={"default": "CURRENT_TIMESTAMP"})
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
-     * @OneToMany(targetEntity="CriterionName", mappedBy="icon", cascade={"persist", "remove"}, orphanRemoval=true)
-     * @var Collec
-     * tion<CriterionName>
+     * @OneToMany(targetEntity="CriterionName", mappedBy="icon", cascade={"persist", "remove"})
+     * @var ArrayCollection
      */
     public $criterionNames;
 
     /**
-     * @OneToMany(targetEntity="WorkerFirmSector", mappedBy="icon", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="EventName", mappedBy="icon", cascade={"persist", "remove"})
+     * @var ArrayCollection
+     */
+    public $eventNames;
+
+    /**
+     * @OneToMany(targetEntity="EventType", mappedBy="icon", cascade={"persist", "remove"})
+     * @var ArrayCollection
+     */
+    public $eventTypes;
+
+    /**
+     * @OneToMany(targetEntity="WorkerFirmSector", mappedBy="icon")
      * @var Collection<WorkerFirmSector>
      */
     public $workerFirmSectors;
@@ -69,8 +83,6 @@ class Icon extends DbObject
      * @param $ico_type
      * @param $ico_name
      * @param $ico_unicode
-     * @param $ico_createdBy
-     * @param $ico_inserted
      * @param Collection $criterionNames
      * @param Collection $workerFirmSectors
      */
@@ -79,22 +91,22 @@ class Icon extends DbObject
         $ico_type = null,
         $ico_name = null,
         $ico_unicode = null,
-        $ico_createdBy = null,
-        $ico_inserted = null,
         Collection $criterionNames = null,
         Collection $workerFirmSectors = null)
     {
-        parent::__construct($id, $ico_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->type = $ico_type;
         $this->name = $ico_name;
         $this->unicode = $ico_unicode;
-        $this->inserted = $ico_inserted;
         $this->criterionNames = $criterionNames;
         $this->workerFirmSectors = $workerFirmSectors;
+        $this->eventNames = new ArrayCollection;
+        $this->eventTypes = new ArrayCollection;
+
     }
 
 
-    public function etType(): ?string
+    public function getType(): ?string
     {
         return $this->type;
     }
@@ -106,7 +118,7 @@ class Icon extends DbObject
         return $this;
     }
 
-    public function etName(): ?string
+    public function getName(): ?string
     {
         return $this->name;
     }
@@ -118,7 +130,7 @@ class Icon extends DbObject
         return $this;
     }
 
-    public function etUnicode(): ?string
+    public function getUnicode(): ?string
     {
         return $this->unicode;
     }
@@ -130,7 +142,7 @@ class Icon extends DbObject
         return $this;
     }
 
-    public function etInserted(): ?DateTimeInterface
+    public function getInserted(): ?DateTimeInterface
     {
         return $this->inserted;
     }
@@ -143,35 +155,53 @@ class Icon extends DbObject
     }
 
     /**
-     * @return Collection
+     * @return ArrayCollection|EventType[]
      */
-    public function getCriterionNames(): Collection
+    public function getEventTypes()
+    {
+        return $this->eventTypes;
+    }
+
+    public function addEventType(EventType $eventType): Icon
+    {
+        $eventType->setIcon($this);
+        $this->eventTypes->add($eventType);
+        return $this;
+    }
+
+    public function removeEventType(EventType $eventType): Icon
+    {
+        $this->eventTypes->removeElement($eventType);
+        return $this;
+    }
+
+    /**
+     * @return ArrayCollection|EventName[]
+     */
+    public function getEventNames()
+    {
+        return $this->eventNames;
+    }
+
+    public function addEventName(EventName $eventName): Icon
+    {
+        $eventName->setIcon($this);
+        $this->eventNames->add($eventName);
+        return $this;
+    }
+
+    public function removeEventName(EventName $eventName): Icon
+    {
+        $this->eventNames->removeElement($eventName);
+        return $this;
+    }
+    
+    /**
+     * @return ArrayCollection|CriterionName[]
+     */
+    public function getCriterionNames()
     {
         return $this->criterionNames;
-    }
-
-    /**
-     * @param Collection $criterionNames
-     */
-    public function setCriterionNames(Collection $criterionNames): void
-    {
-        $this->criterionNames = $criterionNames;
-    }
-
-    /**
-     * @return Collection
-     */
-    public function getWorkerFirmSectors(): Collection
-    {
-        return $this->workerFirmSectors;
-    }
-
-    /**
-     * @param Collection $workerFirmSectors
-     */
-    public function setWorkerFirmSectors(Collection $workerFirmSectors): void
-    {
-        $this->workerFirmSectors = $workerFirmSectors;
     }
 
     public function addCriterionName(CriterionName $criterionName): Icon
@@ -187,6 +217,16 @@ class Icon extends DbObject
         return $this;
     }
 
+
+    /**
+     * @return ArrayCollection|WorkerFirmSector[]
+     */
+    public function getWorkerFirmSectors()
+    {
+        return $this->workerFirmSectors;
+    }
+
+
     public function addWorkerFirmSector(WorkerFirmSector $workerFirmSector): Icon
     {
         $workerFirmSector->setIcon($this);
@@ -201,16 +241,11 @@ class Icon extends DbObject
     }
 
     public function getChar() {
-        $i = $this->type;
-        if ($i === 'm') {
-            return $this->name;
-        }
-
         return IntlChar::chr(hexdec($this->unicode));
     }
 
-//    public function __toString()
-//    {
-//        return $this->getChar();
-//    }
+    public function __toString()
+    {
+        return $this->getChar();
+    }
 }

@@ -71,7 +71,7 @@ class ProcessType extends AbstractType
                             // Data is null when a new form is added, so we needed to find a way to add correct users
                             if($data != null){
                                 return $er->createQueryBuilder('u')
-                                ->where('u.orgId ='. $data->getOrganization()->getId())
+                                ->where('u.organization ='. $data->getOrganization())
                                 ->andWhere('u.deleted is NULL')
                                 ->andWhere("u.lastname != 'ZZ'")
                                 ->orderBy('u.lastname', 'ASC');
@@ -79,7 +79,7 @@ class ProcessType extends AbstractType
                             } else {
                                 $qb = $er->createQueryBuilder('u');
                                 return $qb
-                                ->where('u.orgId ='. $organization->getId())
+                                ->where('u.organization ='. $organization)
                                 ->andWhere('u.deleted is NULL')
                                 ->andWhere("u.lastname != 'ZZ'")
                                 ->orderBy('u.lastname', 'ASC');

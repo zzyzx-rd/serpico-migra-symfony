@@ -519,7 +519,7 @@ $(document).on('click', "".concat(STAGE_ITEM, " > .stage-item-button"), function
     return;
   }
 
-  if (!$participantsList.find(".participants-list--item[mode=\"".concat(pType, "\"]")).find('select[name*="directUser"] option:visible').length) {
+  if (!$participantsList.find(".participants-list--item[mode=\"".concat(pType, "\"]")).find('select[name*="user"] option:visible').length) {
     $('#noRemainingParticipant').modal('open');
     return false;
   }
@@ -531,8 +531,8 @@ $(document).on('click', "".concat(STAGE_ITEM, " > .stage-item-button"), function
   var protoHtml = proto.innerHTML.trim();
   $newProtoHtml = $(protoHtml.replace(/__name__/g, $participantsList.children().length));
   /*
-  $existingParticipantSelects = $participantsList.find('select[name*="directUser"]');
-  $participantHiddenSelect = $newProtoHtml.find('select[name*="directUser"]');
+  $existingParticipantSelects = $participantsList.find('select[name*="user"]');
+  $participantHiddenSelect = $newProtoHtml.find('select[name*="user"]');
   hiddenElmts = [];
   // Retrieving all previous values of selected participants
   $.each($existingParticipantSelects, function() {hiddenElmts.push($(this).val())});
@@ -606,12 +606,12 @@ async function () {
     $potentialDifferentLeader = $participantItem.closest('.participants-list').find('.badge-participation-l:visible');
 
     if (userIsLeader == true) {
-      if ($.inArray(+usrRole, [2, 3]) !== -1 && !$potentialDifferentLeader.length && $userSelect.val() != usrId || $potentialDifferentLeader.length && $potentialDifferentLeader.closest('.participants-list--item').find('select[name*="directUser"]').val() == usrId) {
+      if ($.inArray(+usrRole, [2, 3]) !== -1 && !$potentialDifferentLeader.length && $userSelect.val() != usrId || $potentialDifferentLeader.length && $potentialDifferentLeader.closest('.participants-list--item').find('select[name*="user"]').val() == usrId) {
         $('#setOwnershipLoseSetup').modal('open').data('id', $this.closest('.stage').data('id'));
         return false;
       } else if ($potentialDifferentLeader.length) {
         $('#changeOwner').find('.sName').empty().append($this.closest('.stage').find('.stage-name-field').text());
-        $('#changeOwner').find('#oldLeader').empty().append($potentialDifferentLeader.closest('.participants-list--item').find('select[name*="directUser"] option:selected').text());
+        $('#changeOwner').find('#oldLeader').empty().append($potentialDifferentLeader.closest('.participants-list--item').find('select[name*="user"] option:selected').text());
         $('#changeOwner').find('#newLeader').empty().append($userName.text());
         $('#changeOwner').modal('open').data('id', $this.closest('.stage').data('id'));
         return false;
@@ -1334,8 +1334,6 @@ $(document).on('click', '.s-validate', function (e) {
   isDefiniteDates = $curRow.find('[name*="definiteDates"]').is(':checked');
   startdate = $curRow.find('[name*="startdate"]').val();
   enddate = $curRow.find('[name*="enddate"]').val();
-  gstartdate = $curRow.find('[name*="gstardate"]').val();
-  genddate = $curRow.find('[name*="genddate"]').val();
   dPeriod = $curRow.find('[name*="dPeriod"]').val();
   dFrequency = $curRow.find('select[name*="dFrequency"] option:selected').val();
   dOrigin = $curRow.find('select[name*="dOrigin"] option:selected').val();
@@ -1349,8 +1347,6 @@ $(document).on('click', '.s-validate', function (e) {
   $form.find('[name*="activeWeight"]').val(weightVal);
   $form.find('[name*="name"]').val(inputName);
   $form.find('[name*="definiteDates"]').prop('checked', isDefiniteDates);
-  $form.find('[name*="[gstartdate]"]').val(gstartdate);
-  $form.find('[name*="[genddate]"]').val(genddate);
   $form.find('[name*="[startdate]"]').val(startdate);
   $form.find('[name*="[enddate]"]').val(enddate);
   $form.find('[name*="dPeriod"]').val(dPeriod);
@@ -1404,14 +1400,9 @@ $(document).on('click', '.s-validate', function (e) {
     var gEndCal = $curRow.find('.dp-gend');
     startCal.attr('value', startdateDDMMYYYY);
     endCal.attr('value', enddateDDMMYYYY);
-    gStartCal.attr('value', gstartdateDDMMYYYY);
-    gEndCal.attr('value', genddateDDMMYYYY);
     startdateDDMM = startdateDDMMYYYY.split('/').slice(0, 2).join('/');
     enddateDDMM = enddateDDMMYYYY.split('/').slice(0, 2).join('/');
-    gstartdateDDMM = gstartdateDDMMYYYY.split('/').slice(0, 2).join('/');
-    genddateDDMM = genddateDDMMYYYY.split('/').slice(0, 2).join('/');
     stageDatesText = startdateDDMM == enddateDDMM ? startdateDDMM : startdateDDMM + ' - ' + enddateDDMM;
-    gradingDatesText = gstartdateDDMM == genddateDDMM ? gstartdateDDMM : gstartdateDDMM + ' - ' + genddateDDMM;
     $curRow.closest('.stage').find('.stage-dates').contents().last().replaceWith(stageDatesText);
     $curRow.closest('.stage').find('.grading-dates').contents().last().replaceWith(gradingDatesText);
     var href = $li.attr('href').replace('0', data['sid']);

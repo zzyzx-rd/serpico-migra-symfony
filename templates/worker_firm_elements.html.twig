@@ -13,7 +13,7 @@
 {% block css %}
     <script>
         var firmMailPrefix = "{{ wFirm.mailPrefix }}";
-        var firmMailSuffix = "{{ wFirm.mailSuffix }}";
+        var firmMailSuffix = "{{ wFirm.suffix }}";
         var vmurl = "{{ url('validateWorkerEmail',{'wiId' : 0}) }}";
         var mvmurl = "{{ url('validateMassWorkerEmails',{'wfId' : wFirm.id }) }}";
         var smurl = "{{ url('sendProspectMail',{'winId' : 0})}}";
@@ -26,13 +26,13 @@
     <div class="">
             <ul class="flex-center" style="margin: 0px 10px">
                 <li>
-                    <h4>{{wFirm.name}} ({{wFirm.nbActiveExperiences}})</h4>
+                    <h4>{{wFirm.name}} {#({{wFirm.nbActiveExperiences}})#}</h4>
                 </li>
                 <li style="margin-left:auto; margin-right:10px">
                     <a class="waves-effect waves-light btn" href="{{ url('addWorkerFirmIndividual',{'wfId' : wFirm.id}) }}">Add user</a>
                 </li>
                 <li style="margin-right:10px">
-                    <a class="waves-effect waves-light btn" href="{{ url('updateWorkerFirm',{'wfId' : wFirm.id}) }}">Modify</a>
+                    <a class="waves-effect waves-light btn" href="{{ url('updateWorkerFirm',{'wfiId' : wFirm.id}) }}">Modify</a>
                 </li>
                 <li>
                     <a class="waves-effect waves-light btn modal-trigger" href="#validateMassMail">Validate Mass Mail</a>
@@ -84,8 +84,8 @@
                                                             <div>
                                                             {{ actualUserExp.position}} {#- {{actualUserExp.firm.name}}#}
                                                             {% if actualUserExp.active == false %}
-                                                                ({{ actualUserExp.startdate|localizeddate('short', 'none', null, null, 'MM/yy') }} -
-                                                                {{ actualUserExp.enddate|localizeddate('short', 'none', null, null, 'MM/yy') }})
+                                                                ({{ actualUserExp.startdate|format_datetime('short', 'none', pattern='MM/yy') }} -
+                                                                {{ actualUserExp.enddate|format_datetime('short', 'none', pattern='MM/yy') }})
                                                             {% endif %}
                                                             </div>
                                                         </li>
@@ -102,7 +102,7 @@
                                             <a class="waves-effect waves-light btn not-collapse" href="{{ url('updateWorkerIndividual',{'wiId' : searchedFirmIndividual.id}) }}">Modify</a>
                                         </li>
                                         <li>
-                                            <span class="user-activities">{{ actualUserExp.startdate|localizeddate('short', 'none', null, null, 'MM/yy') }}</span>
+                                            <span class="user-activities">{{ actualUserExp.startdate|format_datetime('short', 'none', pattern='MM/yy') }}</span>
                                         </li>
                                         <li style="margin:0px 5px">
                                             <ul style="display:flex;flex-direction: column";>
@@ -153,8 +153,8 @@
                                                 </li>
                                                 <li>
                                                     <span>
-                                                    {{ indivExp.startdate|localizeddate('short', 'none', null, null, 'MM/yy') }} -
-                                                    {{ indivExp.enddate|localizeddate('short', 'none', null, null, 'MM/yy') }}
+                                                    {{ indivExp.startdate|format_datetime('short', 'none', pattern='MM/yy') }} -
+                                                    {{ indivExp.enddate|format_datetime('short', 'none', pattern='MM/yy') }}
                                                     </span>
                                                 </li>
                                             </ul>
@@ -216,8 +216,8 @@
                                                                         <div>
                                                                         {{ actualUserExp.position}} - {{actualUserExp.firm.name}}
                                                                         {% if actualUserExp.active == false %}
-                                                                            ({{ actualUserExp.startdate|localizeddate('short', 'none', null, null, 'MM/yy') }} -
-                                                                            {{ actualUserExp.enddate|localizeddate('short', 'none', null, null, 'MM/yy') }})
+                                                                            ({{ actualUserExp.startdate|format_datetime('short', 'none', pattern='MM/yy') }} -
+                                                                            {{ actualUserExp.enddate|format_datetime('short', 'none', pattern='MM/yy') }})
                                                                         {% endif %}
                                                                         </div>
                                                                     </li>
@@ -226,7 +226,7 @@
                                                         </ul>
                                                     </li>
                                                     <li>
-                                                        <span class="user-activities">{{ actualUserExp.startdate|localizeddate('short', 'none', null, null, 'MM/yy') }}</span>
+                                                        <span class="user-activities">{{ actualUserExp.startdate|format_datetime('short', 'none', pattern='MM/yy') }}</span>
                                                     </li>
                                                     <li style="margin:0px 5px">
                                                         <ul style="display:flex;flex-direction: column";>
@@ -277,8 +277,8 @@
                                                             </li>
                                                             <li>
                                                                 <span>
-                                                                {{ indivExp.startdate|localizeddate('short', 'none', null, null, 'MM/yy') }} -
-                                                                {{ indivExp.enddate|localizeddate('short', 'none', null, null, 'MM/yy') }}
+                                                                {{ indivExp.startdate|format_datetime('short', 'none', pattern='MM/yy') }} -
+                                                                {{ indivExp.enddate|format_datetime('short', 'none', pattern='MM/yy') }}
                                                                 </span>
                                                             </li>
                                                         </ul>
@@ -429,7 +429,6 @@
 {% endblock %}
 
 {% block javascripts %}
-    <script src="{{ asset('js/login.js') }}"></script>
     <script>
         $(function(){
 

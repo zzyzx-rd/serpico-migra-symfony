@@ -29,7 +29,7 @@
 {% endif %}
 {% endblock %}
 
-{% set elmt = app.request_stack.currentrequest.get('elmt') %}
+{% set elmt = global.request.get('elmt') %}
 {% set activity = form.vars.data %}
 
 {% block title %}
@@ -43,7 +43,7 @@
         var precommentCreationMsg = '{% trans %}participants.guidelines.create{% endtrans %}';
         var precommentUpdateMsg = '{% trans %}participants.guidelines.modify{% endtrans %}';
         var precommentNoneMsg = '{% trans %}participants.guidelines.no_guidelines{% endtrans %}';
-        var elmt = '{{app.request_stack.currentrequest.get("elmt")}}';
+        var elmt = '{{global.request.get("elmt")}}';
         var mp = 0;
     </script>
 {% endblock %}
@@ -170,8 +170,8 @@
                                 <li class="stage-participant">
                                     <div class="row flex-center" style="display:flex; justify-content: space-around;">
                                         <div class="input-field element-input participant-name" style="display: none; min-width:250px">
-                                            {{ form_widget(participant.directUser) }}
-                                            {{ form_label(participant.directUser) }}
+                                            {{ form_widget(participant.user) }}
+                                            {{ form_label(participant.user) }}
                                         </div>
                                             {#}
                                         <div class="input-field element-input team-name" style="display: none; min-width:250px">
@@ -365,7 +365,6 @@
 
 {% block javascripts %}
   <div id="user-pics" hidden>{{ userPics }}</div>
-  <script src="{{ asset('js/login.js') }}"></script>
   <script src="{{ asset('js/activity_participants.js') }}"></script>
 
 {% if elmt == 'activity' and activity.template is null %}

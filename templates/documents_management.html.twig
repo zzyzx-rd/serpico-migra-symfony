@@ -1,0 +1,450 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+  {{ 'documents_management.title'|trans }}
+{% endblock title %}
+
+{% block mobile_title %}
+  {{ 'documents_management.title'|trans }}
+{% endblock mobile_title %}
+
+{% block css %}
+
+<link rel="stylesheet" href="{{ asset('css/dropify.min.css') }}">
+
+<style>
+    .evg-b-1{
+        background-color: purple;
+    }
+    .evg-b-2{
+        background-color: blue;
+    }
+    .evg-b-3{
+        background-color: red; 
+    }
+    .evg-b-4{
+        background-color: green;
+    }
+    .evg-b-5{
+        background-color: orange;
+    }
+    .evg-b-6{
+        background-color: brown;
+    }
+
+    main {
+        width:90%;
+        margin-left:auto!important;
+        margin-right:auto!important;
+        margin-top: -350px!important;
+    }
+
+    .logo-zone{
+        width:25px;
+    }
+
+    .event-type-zone{
+        height:36px;
+    }
+
+    .db-LoginBackground-gridContainer{
+        position:sticky;
+    }
+
+    .event-type-act-btns .btn-flat{
+        text-transform: capitalize;
+    }
+
+    @media screen and (max-width: 993px) {
+
+        .page-title{
+            display:none;
+        }
+    }
+
+    .flag{
+        position: absolute;
+        bottom: 2.6rem;
+    }
+
+    #manageTrans input{
+        text-indent: 1.5rem;
+    }
+
+    .btn-i-select:not(.dd-bg):hover, .btn-i-select.selected{
+        background-color: #ff9300;
+        color: white;
+    }
+
+    #addEventType, #addEventGroup{
+        overflow-y: visible;
+    }
+
+    .evg-circle{
+        height: 15px;
+        width: 15px;
+        border-radius:100%;
+        display: inline-block;
+    }
+
+    .self-evt-zone{
+        flex-wrap:inherit;
+    }
+
+    .btn-flat.evt-icon{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+        font: inherit;
+        font-size: 25px;
+        text-transform: inherit;
+        padding: 0;
+        width: 36px;
+        margin-right: 1em;
+        bottom:20px;
+    }
+
+    .btn-flat.existing-icon{
+        position: relative;
+        border-radius: 2px;
+        width:40px!important;
+        padding:0;
+        font-size:1.2rem;
+    }
+
+    .btn-flat.evt-icon:not([data-icon]), .btn-flat.evt-icon[data-icon=""], .btn-flat.evt-icon:hover, .btn-flat.existing-icon:hover {
+        box-shadow: inset 0 0 0 0.9999px rgba(0, 0, 0, .2);
+    }
+
+    .e-doc-logo{
+        font-size:150%;
+        position:relative;
+        color: #55318e;
+    }
+
+    .e-doc-ext{
+        text-transform: uppercase;
+        font-family: 'Poppins';
+        position: absolute;
+        color: orange;
+        font-size: 8px;
+        left: 5%;
+        bottom: 14%;
+    }
+
+      .e-doc-size{
+        font-size:12px;
+    }
+
+    .event-type-select input{
+        font-family: Poppins, "Font Awesome 5 Free", "Font Awesome 5 Brands", "Material Icons";
+        font-weight: 501;
+    }
+
+    .opt-icon-elmt{
+        width:30px;
+        display:inline-block;
+    }
+
+    .existing-icon{
+        position: relative;
+    }
+
+    .dropify-wrapper{
+        min-height: 60px;
+    }
+
+    .dropify-message :not(.icon-element){
+        font-family: 'Poppins';
+        max-width: 85%;
+    }
+
+    .dropify-message .file-icon{
+        min-width: 15%;
+        display:none;
+    }
+
+    .dropify-message{
+        justify-content:center;
+    }
+
+    .dropify-message p{
+        text-align:center;
+    }
+
+    #updateEvent .btn-flat, .doc-name-validate, .doc-upload-validate, .s-name-validate, .com-validate, .dates-validate{
+        height: 25px;
+        line-height: 25px;
+    }
+
+    .dropify-wrapper .dropify-message span.file-icon{
+        font-size: 29px;
+    }
+
+    .title-zone{
+        width: 100%;
+        align-items: flex-end;
+    }
+
+    .dropify-message p{
+        margin: auto!important;
+        justify-content: center;
+    }
+
+    .e-document{
+        height: 36px;
+    }
+
+    .badge-container {
+        display: flex;
+        align-items: center;
+        margin-right: .5em;
+        padding: 2px;
+        background-color: #eee;
+        border-radius: 999px;
+        line-height: 1;
+        overflow: hidden;
+    }
+
+    .badge-container > div {
+        font-size: 1.2em;
+        width: 1.5em;
+        height: 1.5em;
+    }
+    .badge-container > .badge-text {
+        font-size: .8em;
+        padding-left: .5em;
+        padding-right: 1em;
+        text-transform: uppercase;
+    }
+
+    .page-title{
+        position: relative;
+    }
+
+    .hosting-size{
+        position: absolute;
+        right:0;
+        width: 200px;
+        top:0;
+    }
+
+    .progress{
+        width: 60%;
+    }
+
+    .no-docs-zone{
+        padding: 50px 0;
+    }
+
+    .badge-container.no-share,.virtual-badge{
+        background-color: transparent;
+    }
+
+    .fa-external-link-alt{
+        font-size:14px;
+    }
+
+}
+
+</style>
+<script>
+    var rturl = "{{ path('retrieveTrans') }}";
+    var uturl = "{{ path('updateTrans',{entity: 'event-type'}) }}";
+    var uiurl = "{{ path('updateIcon',{entity: 'event-type'}) }}";
+    var udcurl = "{{ url('updateDocumentContent') }}";
+    var ddocurl = "{{ url('deleteDocument', {id: 0}) }}";
+    var msgDocInsert = "{{ 'activity_elements.events.documents.dropify_insert_msg'|trans }}";
+    var msgDocReplace = "{{ 'remove'|trans }}";
+    var msgDocRemove = "{{ 'replace'|trans }}";
+    var msgDocError = "{{ 'activity_elements.events.documents.dropify_error_msg'|trans }}";
+</script>
+{% endblock %}
+
+{% block pagename %}
+    Contact
+{% endblock %}
+
+{% block content %}
+
+    {% include "components/background_grid.html.twig" %}
+
+    <main class="card-panel purple lighten-5">
+        <div class="center page-title">
+        
+            <h4>{{ 'documents_management.title'|trans }}</h4>
+            <div class="flex-center-sb hosting-size">
+                <div class="progress">
+                    <div class="determinate" style="width: {{ (currentuser.organization.hostingSize / (organization.plan != 3 ? 20000000 : 200000))|round(1,'ceil') }}%"></div>
+                </div>
+                <span>{{(currentuser.organization.hostingSize / 200000)|round(1,'ceil') ~ '% ' ~ 'over'|trans ~ (organization.plan != 3 ? ' 20 Go' : ' 200 Mo')  }}</span>
+            </div>
+        </div>
+
+        {#{% for documentGroup in documentGroups %}#}
+
+            <section>
+                {#
+                <h5 class="flex-center-sb event-group-zone">
+                    <div>  
+                        <div class="m-right evg-circle evg-b-{{eventGroup.eventGroupName.id}}" style=""></div>
+                        <span class="event-group-name">{{ eventGroupRepo.dTrans(eventGroup,locale,organization) }}</span>
+                    </div>
+                    <a href="#addEventType" class="btn-flat modal-trigger" data-id="{{eventGroup.id}}" tooltip="{{ 'documents_management.add_type'|trans }}">
+                        <i class="fa fa-plus"></i>
+                    </a>
+                </h5>
+                #}
+                    <ul class="e-documents" data-prototype-existing="{% apply escape %}{% include "components/document_existing_list__item.html.twig" %}{% endapply %}">
+                    {% if documents|default %}
+                        <h5>
+                            <span>{{'Total documents'|trans ~ ' : '}}</span>
+                            <span class="documents-number" data-none="{{ 'none_m'|trans }}">{{documents|length}}</span>
+                        </h5>
+                        {% for document in documents %} {# in documentGroup.documents #}
+                            <div class="e-document flex-center-sb" data-id={{ document.id }}>
+                                <div>  
+                                    <i class="fa fa-file e-doc-logo">
+                                        <span class="e-doc-ext">{{document.type}}</span>
+                                    </i>
+                                    <span class="m-left e-doc-title">{{ document.title }}</span>
+                                    <span class="dd-text sm-left e-doc-size"> {{ (document.size / 1000)|round(1) ~ ' Ko' }}</span>
+                                </div>
+
+                                <div class="flex-center">
+                                    <ul class="doc-actions flex-center e-doc-download-zone" style="visibility:hidden">
+                                        <li class="flex-center">
+                                            <i class="dd-orange-text fa fa-file-download tooltipped btn-flat" data-tooltip="{{'download'|trans|capitalize}}"></i>
+                                        </li>
+                                        <li class="flex-center e-doc-rename-zone">
+                                            <i class="dd-orange-text fa fa-pen tooltipped btn-flat" data-tooltip="{{'rename'|trans|capitalize}}"></i>
+                                        </li>
+                                        <li class="flex-center e-doc-upload-zone">
+                                            <i class="dd-orange-text fa fa-arrow-alt-circle-up e-doc-upload tooltipped btn-flat" data-tooltip="{{'activity_elements.events.documents.document.upload_new_version'|trans|capitalize}}"></i>
+                                        </li>
+                                        <li class="flex-center e-doc-delete-zone">
+                                            <i class="dd-orange-text fa fa-times tooltipped modal-trigger btn-flat" href="#deleteDocument" data-tooltip="{{'delete'|trans|capitalize}}"></i>
+                                        </li>
+                                    </ul>
+                                    
+                                        <div class="badge-container {% if not document.event %}no-share{% endif %}">
+                                            <div class="virtual-badge">
+                                                {% if document.event %}
+                                                <i class="fa fa-cubes black-text"></i>
+                                                {% else %}
+                                                <i class="fa fa-external-link-alt dd-text"></i>
+                                                {% endif %}
+                                            </div>
+                                            <span class="badge-text">
+                                                {% if document.event %}
+                                                {{ document.event.stage.name }}
+                                                <i class="fa fa-long-arrow-alt-right dd-text sm-left"></i>
+                                                {% else %}
+                                                Non partagé
+                                                {% endif %}
+                                            </span>
+                                        </div>                            
+                                    
+                                </div>
+
+
+                            </div>
+                            
+                        {% endfor %}
+                    {% else %}
+                        <div class="c-flex-center no-docs-zone">
+                            <img src="{{asset('lib/img/no-document.png')}}" alt="No document" width="150px">
+                            <h5 style="width:40%" class="center">{{'documents_management.no_docs_title'|trans}}</h5>
+                        </div>
+
+                    {% endif %}
+                    </ul>
+                    
+                    {#
+                    <div class="flex-center-sb event-type-zone" data-id="{{eventType.id}}">
+                        <div class="xm-left">
+                            {% set icon = eventType.icon %}
+                            
+                            <button type="button" tabindex="-1" class="btn-flat modal-trigger existing-icon logo-zone"
+                                data-target="selectIcons"
+                                data-id="{{icon.id}}" data-icon="{{icon}}" data-placeholder="Sélectionner icône">
+                            </button>
+
+                            <span>{{ eventTypeRepo.dTrans(eventType,locale,organization) }}</span>
+                        </div>
+                        <div class="event-type-act-btns flex-center" style="display:none">
+                            {% if eventType not in organization.events|map(e => e.eventType) %}
+                                <div class="btn-flat">
+                                    <i class="fa fa-times dd-orange-text" tooltip="{{ 'delete'|trans }}"></i>
+                                </div>
+                            {% endif %}
+                            <div class="btn-flat">
+                                <i class="material-icons dd-orange-text modal-trigger" href="#manageTrans" tooltip="{{ 'documents_management.edit_trans'|trans }}">translate</i>
+                            </div>
+                        </div>
+                    </div>
+                    #}
+            </section>
+            
+        {#{% endfor %}#}
+        {% if documents|length <= 5 %}
+        <div class="input-field">
+            <a href="#addDocument" class="btn-large modal-trigger xm-left">{{'documents_management.add_document_btn'|trans}}</a>
+        </div>
+        {% endif %}
+    </main>
+
+    {% if documents|length > 5 %}
+    
+        <div id="fixedButton create-doc-btn" class="fixed-action-btn">
+            <a class="btn-floating btn-large modal-trigger" href="#addDocument"><i class="material-icons">add</i></a>
+        </div>
+    
+    {% endif %}
+
+
+    <div id="addDocument" class="modal">
+        <div class="modal-content">
+            <h5>{{'documents_management.add_document_modal.title'|trans}}</h5>
+            {{ form_start(addDocumentForm)}}
+            <div class="row c-flex-center">
+                
+                <div class="row flex-center title-zone">
+                    <div class="col s12 m2">Titre</div>
+                    <div class="col s12 m10 input-field">
+                        {{ form_row(addDocumentForm.title)}}
+                    </div>
+                </div>
+                
+                <div>
+                    {{ form_row(addDocumentForm.file)}}
+                </div>
+            </div>
+           
+            <div class="flex-center-fe">
+                <a class="modal-close waves-effect waves-green btn-flat red-text">{{'cancel'|trans}}</a>
+                {{ form_row(addDocumentForm.submit)}}
+            </div>
+        </div>
+        {{ form_rest(addDocumentForm)}}
+        {{ form_end(addDocumentForm)}}
+    </div>
+
+    <div id="deleteDocument" class="modal">
+        <div class="modal-content">
+            <p>{{ 'activity_elements.events.documents.document.delete_msg'|trans }}</p>
+        </div>
+        <div class="modal-footer">
+            <a class="modal-action modal-close waves-effect waves-green btn e-doc-delete">{% trans %}user_update.delete_modal.confirm{% endtrans %}</a>
+            <a class="modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+        </div>
+    </div>
+
+{% endblock %}
+
+
+{% block javascripts %}
+    <script src="{{ asset('js/dropify.min.js') }}"></script>
+    <script src="{{ asset('js/document_manage.js') }}"></script>
+{% endblock %}

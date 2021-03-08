@@ -1,7 +1,7 @@
 {% extends "layout.html.twig" %}
 
 {% if rootDisplay %}
-  {% set orgId = app.request_stack.currentrequest.get('orgId') %}
+  {% set orgId = global.request.get('orgId') %}
 {% endif %}
 
 {% block title %}
@@ -333,9 +333,9 @@
                                     {{ user.weight ? user.weight.value : '-' }}
                                   </div>
                                   <div class="row action-buttons">
-                                    {% if currentuser.role == 1 or currentuser.role == 4 or user.createdBy == currentuser.id or enabledSuperiorModifySubordinate and user.superior == currentuser.id %}
+                                    {% if currentuser.role == 1 or currentuser.role == 4 or user.initiator == currentuser or enabledSuperiorModifySubordinate and user.superior == currentuser.id %}
                                       <div class="button-field">
-                                        <a class="validate waves-effect waves-light btn-large modify-button" href="{% if app.request_stack.currentrequest.attributes.get('orgId') != "" %}{{ url('rootUpdateUser',{'orgId' : app.request_stack.currentrequest.attributes.get('orgId'), 'usrId' : user.id}) }}{% else %}{{ url('updateUser',{'usrId' : user.id}) }}{% endif %}">{% trans %}user_list.modify{% endtrans %}</a>
+                                        <a class="validate waves-effect waves-light btn-large modify-button" href="{% if global.request.attributes.get('orgId') != "" %}{{ url('rootUpdateUser',{'orgId' : global.request.attributes.get('orgId'), 'usrId' : user.id}) }}{% else %}{{ url('updateUser',{'usrId' : user.id}) }}{% endif %}">{% trans %}user_list.modify{% endtrans %}</a>
                                       </div>
                                     {% endif %}
                                     {% if currentuser.role == 1 or currentuser.role == 4 or enabledSuperiorOverviewSubResults and user.superior == currentuser.id %}
@@ -362,7 +362,7 @@
                                       {% endif %}
                                       {% if canUpdateIndivTarget == true %}
                                         <div class="button-field">
-                                          <a class="validate waves-effect waves-light btn-large" href="{{ url('updateElementTargets',{'elmtType' : 'user', 'elmtId' : user.id}) }}">{% trans %}user_list.targets{% endtrans %}</a>
+                                          <a class="validate waves-effect waves-light btn-large" href="{{ url('updateElementTargets',{entity: 'user', 'elmtId' : user.id}) }}">{% trans %}user_list.targets{% endtrans %}</a>
                                         </div>
                                       {% endif %}
                                     {% endif %}
@@ -575,9 +575,9 @@
                             {% endif %}
                           </div>
                           <div class="row action-buttons">
-                            {% if currentuser.role == 1 or currentuser.role == 4 or user.createdBy == currentuser.id %}
+                            {% if currentuser.role == 1 or currentuser.role == 4 or user.initiator == currentuser %}
                               <div class="button-field">
-                                <a class="validate waves-effect waves-light btn-large modify-button" href="{% if app.request_stack.currentrequest.attributes.get('orgId') != "" %}{{ url('rootUpdateUser',{'orgId' : app.request_stack.currentrequest.attributes.get('orgId'), 'usrId' : user.id}) }}{% else %}{{ url('updateUser',{'usrId' : user.id}) }}{% endif %}">{% trans %}user_list.modify{% endtrans %}</a>
+                                <a class="validate waves-effect waves-light btn-large modify-button" href="{% if global.request.attributes.get('orgId') != "" %}{{ url('rootUpdateUser',{'orgId' : global.request.attributes.get('orgId'), 'usrId' : user.id}) }}{% else %}{{ url('updateUser',{'usrId' : user.id}) }}{% endif %}">{% trans %}user_list.modify{% endtrans %}</a>
                               </div>
                             {% endif %}
                             {% if user.nbCompletedActivities(app) > 0 %}
@@ -586,7 +586,7 @@
                               </div>
                             {% endif %}
                             <div class="button-field">
-                              <a class="validate waves-effect waves-light btn-large" href="{{ url('updateElementTargets',{'elmtType' : 'user', 'elmtId' : user.id}) }}">{% trans %}user_list.targets{% endtrans %}</a>
+                              <a class="validate waves-effect waves-light btn-large" href="{{ url('updateElementTargets',{entity: 'user', 'elmtId' : user.id}) }}">{% trans %}user_list.targets{% endtrans %}</a>
                             </div>
                           </div>
                         </div>
@@ -659,7 +659,7 @@
                                   <li style="margin-left: 10px;">
                                     <div class="user-title">{{ team.name }}</div>
                                     <ul class="user-position flex-center">
-                                      {% for teamUser in team.teamUsers %}
+                                      {% for teamUser in team.members %}
 
                                         {% if teamUser.isDeleted == 0 %}
 
@@ -897,11 +897,11 @@
                                 <div class="row action-buttons">
                                   {#
                                   <div class="button-field">
-                                      <a class="validate waves-effect waves-light btn-large modify-button" href="{% if app.request_stack.currentrequest.attributes.get('orgId') != "" %}{{ url('rootUpdateUser',{'orgId' : app.request_stack.currentrequest.attributes.get('orgId'), 'usrId' : user.id}) }}{% else %}{{ url('updateExternalUser',{'extId' : externalUser.id}) }}{% endif %}">{% trans %}user_list.modify{% endtrans %}</a>
+                                      <a class="validate waves-effect waves-light btn-large modify-button" href="{% if global.request.attributes.get('orgId') != "" %}{{ url('rootUpdateUser',{'orgId' : global.request.attributes.get('orgId'), 'usrId' : user.id}) }}{% else %}{{ url('updateExternalUser',{'extId' : externalUser.id}) }}{% endif %}">{% trans %}user_list.modify{% endtrans %}</a>
                                   </div>
                                   {% if externalUser.user.nbCompletedActivities(app) > 0 %}
                                     <div class="button-field">
-                                      <a class="validate waves-effect waves-light btn-large" href="{{ url('elementOverview',{'elmtType' : 'user', 'elmtId' : user.id }) }}">{% trans %}user_list.overview{% endtrans %}</a>
+                                      <a class="validate waves-effect waves-light btn-large" href="{{ url('elementOverview',{entity: 'user', 'elmtId' : user.id }) }}">{% trans %}user_list.overview{% endtrans %}</a>
                                     </div>
                                   {% endif %}
                                   #}

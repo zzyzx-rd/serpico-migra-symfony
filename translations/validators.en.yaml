@@ -1,0 +1,49 @@
+ 
+password_update:
+  unmatching_msg: Passwords do not match each other
+
+activity_elements:
+  stages:
+      sum_weight_equal_to_hundred_pct: Sum of stage weights should be equal to 100%
+      unique_stage_name: There is already a stage having the same name
+      missing_owners: Beware that at least one configured stage needs an participating owner, who has config rights
+      min_config: Beware that at least one stage should have at least one participant giving, and one participant receiving feedback based on a defined output (survey or evaluation criterion)
+  criteria:
+      sum_weight_equal_to_hundred_pct: Sum of criteria weights should be equal to 100%
+  
+create_client:
+  missing_owner: As you provided one or more email addresses for client users, make sure that one of them is defined as the owner in order to set up the firm account at the beginning (it will handle the process thereafter)
+  doublon_client: Check out if this partner is already existing for your firm, as we think it is a duplicate !
+  owner_without_email: Defined owner should have a non-empty email address
+
+create_parameters:
+  step: Step should be a divider of grading range
+  ub_greater_than_lb: Upperbound should be higher than lowerbound
+  sum_weight_equal_to_hundred_pct: The sum of stage weights should be equal to 100%
+  doublon_activity_name: There is already an existing activity with sich name, please choose another
+
+stages:
+  missing_name: The stage must have a name
+
+stage:
+  period_positive: You should enter a positive period value
+
+password:
+  definition_rule: Password should contain at least 8 characters with a capital letter and a number
+  incorrect_current_password: Incorrect password 
+  
+signup:
+  email: "Please provide a valid email adress in this field (example : some@thing.com)."
+
+create_user:
+  email: It seems you already have an account ! Don't hesitate to reset your password if needed to access it again
+
+create_users:
+  email: It seems this user already has an account in your organization ! Update it if necessary
+
+worker_search:
+  ub_greater_than_lb: Max nb of employees should be superior to min nb of employees
+
+grades:
+  force_comment: You are required to comment this criterion
+  

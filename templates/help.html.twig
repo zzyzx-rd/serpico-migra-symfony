@@ -371,8 +371,8 @@
                     </div>
 
                     <div id="firmSettings" class="section scrollspy">
-                        <h5>{% trans %}help.firm_settings.title{% endtrans %}</h5>
-                        <p>{% trans %}help.firm_settings.first_paragraph{% endtrans %}</p>
+                        <h5>{% trans %}help.firm_settings_old.title{% endtrans %}</h5>
+                        <p>{% trans %}help.firm_settings_old.first_paragraph{% endtrans %}</p>
                     </div>
                     #}
                     <div id="activityDashboard" class="scrollspy">
@@ -398,7 +398,7 @@
                         <li><a href="#users">{% trans %}help.users.title{% endtrans %}</a></li>
                         {% if currentuser.role == 1 or currentuser.role == 4 %}
                         <li><a href="#mySettings">{% trans %}help.user_settings.title{% endtrans %}</a></li>
-                        <li><a href="#firmSettings">{% trans %}help.firm_settings.title{% endtrans %}</a></li>
+                        <li><a href="#firmSettings">{% trans %}help.firm_settings_old.title{% endtrans %}</a></li>
                         {% endif %}
                         #}
                     </ul>

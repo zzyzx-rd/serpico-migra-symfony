@@ -76,7 +76,7 @@
 //    public $deadlineNbDays;
 //
 //    /**
-//     * @ORM\Column(name="stg_created_by", type="string", length=255, nullable=true)
+//     * @ORM\Column(name="stg_initiator", type="string", length=255, nullable=true)
 //     */
 //    public $createdBy;
 //
@@ -103,7 +103,7 @@
 //    public $criteria;
 //
 //    /**
-//     * @OneToMany(targetEntity="TemplateActivityUser", mappedBy="stage",cascade={"persist", "remove"}, orphanRemoval=true)
+//     * @OneToMany(targetEntity="TemplateParticipation", mappedBy="stage",cascade={"persist", "remove"}, orphanRemoval=true)
 //     * @OrderBy({"team" = "ASC"})
 //     */
 //    public $participants;
@@ -275,7 +275,7 @@
 //        return $this;
 //    }
 //
-//    public function getCreatedBy(): ?string
+//    public function getInitiator(): ?string
 //    {
 //        return $this->createdBy;
 //    }
@@ -389,7 +389,7 @@
 //        return $this;
 //    }
 //
-//    public function addParticipant(TemplateActivityUser $participant): TemplateStage
+//    public function addParticipant(TemplateParticipation $participant): TemplateStage
 //    {
 //
 //        $this->participants->add($participant);
@@ -397,7 +397,7 @@
 //        return $this;
 //    }
 //
-//    public function removeParticipant(TemplateActivityUser $participant): TemplateStage
+//    public function removeParticipant(TemplateParticipation $participant): TemplateStage
 //    {
 //        $this->participants->removeElement($participant);
 //        return $this;
@@ -426,14 +426,14 @@
 //        return 0;
 //    }
 //    /**
-//     * @return Collection|TemplateActivityUser[]
+//     * @return ArrayCollection|TemplateParticipation[]
 //     */
 //    public function getUniqueParticipations()
 //    {
 //        return $this->criteria->first()->getParticipants();
 //    }
 //
-//    public function addUniqueParticipation(TemplateActivityUser $participant): TemplateStage
+//    public function addUniqueParticipation(TemplateParticipation $participant): TemplateStage
 //    {
 //        foreach($this->criteria as $criterion){
 //            $criterion->addParticipant($participant);
@@ -442,7 +442,7 @@
 //        return $this;
 //    }
 //
-//    public function removeUniqueParticipation(TemplateActivityUser $participant): TemplateStage
+//    public function removeUniqueParticipation(TemplateParticipation $participant): TemplateStage
 //    {
 //        foreach($this->criteria as $criterion){
 //            $criterion->getParticipants()->removeElement($participant);

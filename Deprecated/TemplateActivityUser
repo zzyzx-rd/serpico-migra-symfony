@@ -3,7 +3,7 @@
 //namespace App\Entity;
 //
 //use ApiPlatform\Core\Annotation\ApiResource;
-//use App\Repository\TemplateActivityUserRepository;
+//use App\Repository\TemplateParticipationRepository;
 //use DateTime;
 //use DateTimeInterface;
 //use Doctrine\ORM\Mapping as ORM;
@@ -12,44 +12,44 @@
 //
 ///**
 // * @ApiResource()
-// * @ORM\Entity(repositoryClass=TemplateActivityUserRepository::class)
+// * @ORM\Entity(repositoryClass=TemplateParticipationRepository::class)
 // */
-//class TemplateActivityUser extends DbObject
+//class TemplateParticipation extends DbObject
 //{
 //    /**
 //     * @ORM\Id()
 //     * @ORM\GeneratedValue()
-//     * @ORM\Column(name="a_u_id", type="integer", nullable=false)
+//     * @ORM\Column(name="par_id", type="integer", nullable=false)
 //     */
 //    public $id;
 //
 //    /**
-//     * @ORM\Column(name="a_u_leader", type="boolean", nullable=true)
+//     * @ORM\Column(name="par_leader", type="boolean", nullable=true)
 //     */
 //    public $leader;
 //
 //    /**
-//     * @ORM\Column(name="a_u_type", type="integer", nullable=true)
+//     * @ORM\Column(name="par_type", type="integer", nullable=true)
 //     */
 //    public $type;
 //
 //    /**
-//     * @ORM\Column(name="a_u_mWeight", type="float", nullable=true)
+//     * @ORM\Column(name="par_mWeight", type="float", nullable=true)
 //     */
 //    public $mWeight;
 //
 //    /**
-//     * @ORM\Column(name="a_u_precomment", type="string", length=10, nullable=true)
+//     * @ORM\Column(name="par_precomment", type="string", length=10, nullable=true)
 //     */
 //    public $precomment;
 //
 //    /**
-//     * @ORM\Column(name="a_u_createdBy", type="integer", nullable=true)
+//     * @ORM\Column(name="par_createdBy", type="integer", nullable=true)
 //     */
 //    public $createdBy;
 //
 //    /**
-//     * @ORM\Column(name="a_u_inserted", type="datetime", nullable=true)
+//     * @ORM\Column(name="par_inserted", type="datetime", nullable=true)
 //     */
 //    public $inserted;
 //
@@ -90,14 +90,14 @@
 //    public $ext_user;
 //
 //    /**
-//     * TemplateActivityUser constructor.
+//     * TemplateParticipation constructor.
 //     * @param $id
-//     * @param $a_u_leader
-//     * @param $a_u_type
-//     * @param $a_u_mWeight
-//     * @param $a_u_precomment
-//     * @param $a_u_createdBy
-//     * @param $a_u_inserted
+//     * @param $par_leader
+//     * @param $par_type
+//     * @param $par_mWeight
+//     * @param $par_precomment
+//     * @param $par_createdBy
+//     * @param $par_inserted
 //     * @param $team
 //     * @param $activity
 //     * @param $stage
@@ -109,23 +109,23 @@
 //        $id = 0,
 //        $user_usr = null,
 //        $external_user_ext_usr = null,
-//        $a_u_leader = false,
-//        $a_u_type = 1,
-//        $a_u_mWeight = 0.0,
-//        $a_u_precomment = null,
-//        $a_u_createdBy = null,
-//        $a_u_inserted = null,
+//        $par_leader = false,
+//        $par_type = 1,
+//        $par_mWeight = 0.0,
+//        $par_precomment = null,
+//        $par_createdBy = null,
+//        $par_inserted = null,
 //        Team $team = null,
 //        Activity $activity = null,
 //        Stage $stage = null,
 //        Criterion $criterion = null)
 //    {
-//        parent::__construct($id, $a_u_createdBy, new DateTime());
-//        $this->leader = $a_u_leader;
-//        $this->type = $a_u_type;
-//        $this->mWeight = $a_u_mWeight;
-//        $this->precomment = $a_u_precomment;
-//        $this->inserted = $a_u_inserted;
+//        parent::__construct($id, $par_createdBy, new DateTime());
+//        $this->leader = $par_leader;
+//        $this->type = $par_type;
+//        $this->mWeight = $par_mWeight;
+//        $this->precomment = $par_precomment;
+//        $this->inserted = $par_inserted;
 //        $this->team = $team;
 //        $this->activity = $activity;
 //        $this->stage = $stage;
@@ -139,9 +139,9 @@
 //        return $this->leader;
 //    }
 //
-//    public function setLeader(bool $a_u_leader): self
+//    public function setLeader(bool $par_leader): self
 //    {
-//        $this->leader = $a_u_leader;
+//        $this->leader = $par_leader;
 //
 //        return $this;
 //    }
@@ -151,9 +151,9 @@
 //        return $this->type;
 //    }
 //
-//    public function setType(int $a_u_type): self
+//    public function setType(int $par_type): self
 //    {
-//        $this->type = $a_u_type;
+//        $this->type = $par_type;
 //
 //        return $this;
 //    }
@@ -163,9 +163,9 @@
 //        return $this->mWeight;
 //    }
 //
-//    public function setMWeight(float $a_u_mWeight): self
+//    public function setMWeight(float $par_mWeight): self
 //    {
-//        $this->mWeight = $a_u_mWeight;
+//        $this->mWeight = $par_mWeight;
 //
 //        return $this;
 //    }
@@ -175,9 +175,9 @@
 //        return $this->precomment;
 //    }
 //
-//    public function setPrecomment(string $a_u_precomment): self
+//    public function setPrecomment(string $par_precomment): self
 //    {
-//        $this->precomment = $a_u_precomment;
+//        $this->precomment = $par_precomment;
 //
 //        return $this;
 //    }
@@ -187,9 +187,9 @@
 //        return $this->inserted;
 //    }
 //
-//    public function setInserted(?DateTimeInterface $a_u_inserted): self
+//    public function setInserted(?DateTimeInterface $par_inserted): self
 //    {
-//        $this->inserted = $a_u_inserted;
+//        $this->inserted = $par_inserted;
 //
 //        return $this;
 //    }

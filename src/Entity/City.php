@@ -34,19 +34,20 @@ class City extends DbObject
     public $fullname;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="cit_name", type="string", length=255, nullable=true)
      */
-    public $cit_name;
+    public $name;
 
     /**
-     * @ORM\Column(name="cit_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="cityInitiatives")
+     * @JoinColumn(name="cit_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
-     * @ORM\Column(name="cit_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="cit_inserted", type="datetime", nullable=false, options={"default": "CURRENT_TIMESTAMP"})
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="State", inversedBy="cities")
@@ -66,36 +67,33 @@ class City extends DbObject
     public $firms;
 
     /**
+     * @OneToMany(targetEntity="ZIPCode", mappedBy="city",cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    public $ZIPCodes;
+
+    /**
      * City constructor.
      * @param $id
-     * @param $cit_abbr
-     * @param $cit_fullname
-     * @param $cit_name
-     * @param $cit_createdBy
-     * @param $cit_inserted
+     * @param $abbr
+     * @param $fullname
+     * @param $name
      * @param $state
      * @param $country
      * @param $firms
      */
     public function __construct(
       ?int $id = 0,
-        $cit_abbr = null,
-        $cit_fullname = null,
-        $cit_name = null ,
-        $cit_createdBy = null,
-        $cit_inserted = null,
-        $state = null,
-        $country = null,
-        $firms = null)
+        $abbr = null,
+        $fullname = null,
+        $name = null
+    )
     {
-        parent::__construct($id, $cit_createdBy, new DateTime());
-        $this->abbr = $cit_abbr;
-        $this->fullname = $cit_fullname;
-        $this->cit_name = $cit_name;
-        $this->inserted = $cit_inserted;
-        $this->state = $state;
-        $this->country = $country;
-        $this->firms = $firms?:new ArrayCollection();
+        parent::__construct($id, null, new DateTime());
+        $this->abbr = $abbr;
+        $this->fullname = $fullname;
+        $this->name = $name;
+        $this->firms = new ArrayCollection();
+        $this->ZIPCodes = new ArrayCollection();
     }
 
 
@@ -104,10 +102,9 @@ class City extends DbObject
         return $this->abbr;
     }
 
-    public function setAbbr(string $cit_abbr): self
+    public function setAbbr(string $abbr): self
     {
-        $this->abbr = $cit_abbr;
-
+        $this->abbr = $abbr;
         return $this;
     }
 
@@ -116,62 +113,49 @@ class City extends DbObject
         return $this->fullname;
     }
 
-    public function setFullname(string $cit_fullname): self
+    public function setFullname(string $fullname): self
     {
-        $this->fullname = $cit_fullname;
-
+        $this->fullname = $fullname;
         return $this;
     }
 
     public function getName(): ?string
     {
-        return $this->cit_name;
+        return $this->name;
     }
 
-    public function setName(string $cit_name): self
+    public function setName(string $name): self
     {
-        $this->cit_name = $cit_name;
-
+        $this->name = $name;
         return $this;
     }
 
-    public function setInserted(DateTimeInterface $cit_inserted): self
+    public function setInserted(?DateTimeInterface $inserted): self
     {
-        $this->inserted = $cit_inserted;
-
+        $this->inserted = $inserted;
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
     public function getState()
     {
         return $this->state;
     }
 
-    /**
-     * @param mixed $state
-     */
-    public function setState($state): void
+    public function setState(State $state): self
     {
         $this->state = $state;
+        return $this;
     }
 
-    /**
-     * @return mixed
-     */
     public function getCountry()
     {
         return $this->country;
     }
 
-    /**
-     * @param mixed $country
-     */
-    public function setCountry($country): void
+    public function setCountry(Country $country): self
     {
         $this->country = $country;
+        return $this;
     }
 
     /**
@@ -182,23 +166,37 @@ class City extends DbObject
         return $this->firms;
     }
 
-    /**
-     * @param mixed $firms
-     */
-    public function setFirms($firms): void
-    {
-        $this->firms = $firms;
-    }
     public function addFirm(WorkerFirm $firm): City
     {
         $this->firms->add($firm);
-        $firm->setState($this);
+        $firm->setCity($this);
         return $this;
     }
 
     public function removeFirm(WorkerFirm $firm): City
     {
         $this->firms->removeElement($firm);
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getZIPCodes()
+    {
+        return $this->ZIPCodes;
+    }
+
+    public function addZIPCode(ZIPCode $ZIPCode): City
+    {
+        $this->ZIPCodes->add($ZIPCode);
+        $ZIPCode->setCity($this);
+        return $this;
+    }
+
+    public function removeZIPCode(ZIPCode $ZIPCode): City
+    {
+        $this->ZIPCodes->removeElement($ZIPCode);
         return $this;
     }
 

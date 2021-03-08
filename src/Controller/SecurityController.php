@@ -4,7 +4,12 @@
 namespace App\Controller;
 
 
+use App\Entity\Organization;
+use DateTime;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Criteria;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -27,37 +32,29 @@ class SecurityController extends MasterController
         ]);
     }
 
-    //Logs current user
-//    public function loginAction(Request $request, Application $app)
-//    {
-//        $currentUser = self::getAuthorizedUser();
-//        if ($currentUser) {
-//            return $this->redirectToRoute('home');
-//        }
-//
-//        $formFactory = $app['form.factory'];
-//        $csrf_token = $app['csrf.token_manager']->getToken('token_id');
-//        $contact = new Contact;
-//        $contactForm = $formFactory->create(
-//            ContactForm::class,
-//            $contact,
-//            [ 'standalone' => true ]
-//        )->handleRequest($request);
-//
-//        return $app['twig']->render('landing.html.twig',
-//            [
-//                'csrf_token' => $csrf_token,
-//                'error' => $app['security.last_error']($request),
-//                'last_username' => $app['session']->get('security.last_username'),
-//                'contactForm' => $contactForm->createView(),
-//                'request' => $request
-//            ]
-//        );
-//    }
-    /**
-     * @Route("/signup", name="signup")
+     /**
+     * @Route("/organizations/plan/check", name="checkPlans")
+     * @param AuthenticationUtils $authenticationUtils
+     * @return Response
      */
-    public function signup(){
-        //TOdO
+    public function checkOrganizationPlan(): Response
+    {
+        if(!$this->user){
+            return new JsonResponse(['msg'=>'error'],500);
+        }
+        $em = $this->em;
+        $now = new DateTime();
+        $org = $this->org;
+        if($org->getLastCheckedPlan()->getTimestamp() >= 24 * 60 * 60){
+            $response = ['updated' => 'y'];
+            $org->setLastCheckedPlan($now);
+            if(!$org->getStripeCusId() && $org->getPlan() != 3 && $now->getTimestamp() > $org->getExpired()->getTimestamp()){
+                $response['la'] = 'y';
+            }
+            $em->flush();
+            return new JsonResponse($response);
+        } else {
+            return new JsonResponse(['updated' => 'ntu']);
+        }
     }
 }

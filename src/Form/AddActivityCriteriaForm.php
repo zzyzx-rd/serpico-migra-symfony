@@ -5,7 +5,7 @@ use Doctrine\ORM\EntityRepository;
 use App\Entity\Activity;
 use App\Entity\CriterionName;
 use App\Entity\OrganizationUserOption;
-use Model\TemplateActivity;
+use App\Entity\TemplateActivity;
 use Symfony\Bridge\Doctrine\App\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -228,41 +228,7 @@ class AddActivityCriteriaForm extends AbstractType
                     ]
                 ]
             )
-            ->add('gstartdate', DateTimeType::class,
-                [
-                    //'format' => 'dd/MM/yyyy',
-                    //'placeholder' => 'dd/mm/yyyy',
-                    'widget' => 'single_text',
-                    'label_format' => 'create_parameters.%name%',
-                    'html5' => false,
-                    'attr' => ['class' => 'dp-gstart'],
-                    'format' => 'dd/MM/yyyy',
-                    'data' => ($firstStage) ? $firstStage->getGStartDate() : null,
-                    'constraints' => [
-                        new Assert\NotBlank,
-                        new GSDGreaterThanSD
-                        //new Assert\DateTime(['format' => 'd/m/Y'])
-                    ]
-                ]
-            )
-            ->add('genddate', DateTimeType::class,
-                [
-                    //'format' => 'dd/MM/yyyy',
-                    //'placeholder' => 'dd/mm/yyyy',
-                    'widget' => 'single_text',
-                    'label_format' => 'create_parameters.%name%',
-                    'html5' => false,
-                    'attr' => ['class' => 'dp-gend'],
-                    'format' => 'dd/MM/yyyy',
-                    'data' => ($firstStage) ? $firstStage->getGEndDate() : null,
-                    'constraints' => [
-                        new Assert\NotBlank,
-                        new GEDGreaterThanED,
-                        new GEDGreaterThanGSD
-                        //new Assert\DateTime(['format' => 'd/m/Y'])
-                    ]
-                ]
-            )
+           
             ->add('lowerbound', NumberType::class,
                 [
                     'constraints' => [

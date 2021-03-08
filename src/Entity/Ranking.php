@@ -65,14 +65,15 @@ class Ranking extends DbObject
     public $seriesPopulation;
 
     /**
-     * @ORM\Column(name="rnk_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="rankingInitiatives")
+     * @JoinColumn(name="rnk_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
-     * @ORM\Column(name="rnk_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="rnk_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="rnk_updated", type="datetime", nullable=true)
@@ -107,7 +108,7 @@ class Ranking extends DbObject
      * @ORM\ManyToOne(targetEntity=User::class)
      * @JoinColumn(name="rnk_user_usr_id", referencedColumnName="usr_id")
      */
-    public $user_usr;
+    public $user;
 
     /**
      * Ranking constructor.
@@ -120,20 +121,18 @@ class Ranking extends DbObject
      * @param $rnk_freq
      * @param $rnk_value
      * @param $rnk_series_pop
-     * @param $rnk_createdBy
-     * @param $rnk_inserted
      * @param $rnk_updated
      * @param $activity
      * @param $stage
      * @param $criterion
      * @param $organization
-     * @param $rnk_user_usr
+     * @param $rnk_user
      */
     public function __construct(
       ?int $id = 0,
         $rnk_dtype = null,
         $rnk_wtype = null,
-        $rnk_user_usr = null,
+        $rnk_user = null,
         $organization = null,
         $rnk_abs_result = null,
         $rnk_rel_result = null,
@@ -141,14 +140,12 @@ class Ranking extends DbObject
         $rnk_freq = null,
         $rnk_value = null,
         $rnk_series_pop = null,
-        $rnk_createdBy = null,
-        $rnk_inserted = null,
         $rnk_updated = null,
         $activity = null,
         $stage = null,
         $criterion = null)
     {
-        parent::__construct($id, $rnk_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->dType = $rnk_dtype;
         $this->wType = $rnk_wtype;
         $this->absResult = $rnk_abs_result;
@@ -157,13 +154,12 @@ class Ranking extends DbObject
         $this->frequency = $rnk_freq;
         $this->value = $rnk_value;
         $this->seriesPopulation = $rnk_series_pop;
-        $this->inserted = $rnk_inserted;
         $this->updated = $rnk_updated;
         $this->activity = $activity;
         $this->stage = $stage;
         $this->criterion = $criterion;
         $this->organization = $organization;
-        $this->user_usr = $rnk_user_usr;
+        $this->user = $rnk_user;
     }
 
 
@@ -347,14 +343,14 @@ class Ranking extends DbObject
         $this->organization = $organization;
     }
 
-    public function getUserUsr(): ?User
+    public function getUser(): ?User
     {
-        return $this->user_usr;
+        return $this->user;
     }
 
-    public function setUserUsr(?User $user_usr): self
+    public function setUser(?User $user): self
     {
-        $this->user_usr = $user_usr;
+        $this->user = $user;
 
         return $this;
     }

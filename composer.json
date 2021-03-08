@@ -1,6 +1,8 @@
 {
     "type": "project",
     "license": "proprietary",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "require": {
         "php": "^7.4",
         "ext-ctype": "*",
@@ -14,7 +16,8 @@
         "doctrine/orm": "^2.4.5",
         "nelmio/cors-bundle": "^1.5 || ^2.0",
         "phpdocumentor/reflection-docblock": "^3.0 || ^4.0 || ^5.0",
-        "sensio/framework-extra-bundle": "^5.1",
+        "sensio/framework-extra-bundle": "^5.6",
+        "stripe/stripe-php": "v7.57.0",
         "symfony/asset": "5.1.*",
         "symfony/console": "5.1.*",
         "symfony/dotenv": "5.1.*",
@@ -31,6 +34,7 @@
         "symfony/process": "5.1.*",
         "symfony/property-access": "5.1.*",
         "symfony/property-info": "5.1.*",
+        "symfony/proxy-manager-bridge": "5.1.*",
         "symfony/security-bundle": "5.1.*",
         "symfony/serializer": "5.1.*",
         "symfony/string": "5.1.*",
@@ -40,6 +44,7 @@
         "symfony/web-link": "5.1.*",
         "symfony/yaml": "5.1.*",
         "twig/extra-bundle": "^2.12|^3.0",
+        "twig/intl-extra": "^3.0",
         "twig/twig": "^2.12|^3.0"
     },
     "require-dev": {

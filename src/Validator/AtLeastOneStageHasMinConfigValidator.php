@@ -8,8 +8,8 @@
 
 namespace App\Validator;
 
-use Model\ActivityUser;
-use Model\Stage;
+use App\Entity\Participation;
+use App\Entity\Stage;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Constraint;
 

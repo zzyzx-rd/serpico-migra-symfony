@@ -33,7 +33,7 @@
 //    public $name;
 //
 //    /**
-//     * @ORM\Column(name="tmp_created_by", type="integer", nullable=true)
+//     * @ORM\Column(name="tmp_initiator", type="integer", nullable=true)
 //     */
 //    public $createdBy;
 //

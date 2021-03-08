@@ -1,0 +1,148 @@
+.add-type-zone{
+    width:100%;
+    margin-top:0.5rem;
+    position:relative;
+}
+
+.add-type-zone label{
+    display:flex!important;
+    align-items:center;
+    color:black;
+}
+
+[for="internal"] i, [for="external"] i{
+    font-size:25px;
+}
+
+.type-part label{
+    display: flex!important;
+    align-items:center;
+    color: black;
+}
+
+#addUserClient {
+    overflow-y: visible;
+}
+
+#addUserClient .row{
+    position:relative;
+}
+#addUserClient .independant-row, #addUserClient .firm-row{
+    margin:0;
+    margin-top:10px;
+}
+
+#addUserClient .user-choices{
+    min-height:60px;
+}
+
+#addUserClient .user-section{
+    margin-left:0;
+    margin-right:0;
+}
+
+.icon-holder {
+    height: 25px;
+    width: 25px;
+    border-radius: 50%;
+    background-color: #ff9300;
+    justify-content:center;
+}
+
+.independent-letter{
+    font-weight: 700;
+}
+
+.firm-icon-holder{
+    background-color: #ff9300;
+}
+
+.independant-xl-icon-holder{
+    height: 30px;
+    width: 30px;
+    background-color: #ff9300;
+    position: relative;
+}
+
+.independant-icon-holder{
+    background-color: #ff9300;
+}
+
+.independant-icon-holder i{
+    position: absolute;
+    top: 14%;
+    font-size:16px;
+}
+
+.independant-xl-icon-holder i{
+    position: absolute;
+    top: -15%;
+    font-size:20px!important;
+}
+
+.username-part .title i{
+    font-size:25px;
+}
+
+[name*="firmSelector"], .firm-field-zone .select-wrapper input, .firm-field-zone .select-wrapper .caret{
+    display:none!important;
+}
+
+[name*="userelector"], .user-field-zone .select-wrapper input, .user-field-zone .select-wrapper .caret{
+    display:none!important;
+}
+
+
+.firm-field-zone .dropdown-content, .user-field-zone .dropdown-content, .location-element-field-zone .dropdown-content{
+    opacity: 1!important;
+    display: block!important;
+    width: 100%;
+    margin-top: -40px;
+}
+
+.location-element-field-zone .dropdown-content{
+    margin-top: 0px;
+}
+
+.part-feeded{
+    text-indent: 4rem;
+}
+
+.select-dropdown li img.s-user-firm-option-logo{
+    float: left;
+    margin: 5px 15px;
+}
+
+.select-dropdown li .org-img-holder{
+    margin-left: auto;
+}
+
+.select-dropdown li .org-img-holder > *{
+    margin: 5px 2px;
+    float:none;
+}
+
+.select-dropdown li .org-img-holder > :last-child{
+    margin-right: 15px;
+}
+
+.select-dropdown li img.s-user-firm-option-logo, .select-dropdown li img.s-firm-option-logo, .select-dropdown li img.s-user-option-logo, .org-img-holder > *{
+    height: 20px;
+    width: 20px;
+    border-radius:50%;
+}
+
+.delete-user-btn{
+    border: 1px dashed orange;
+    line-height: 24px;
+    height: 24px;
+    padding: 0 1rem;
+}
+
+.role-input-zone{
+    position:relative;
+}
+
+.rights-title{
+    text-transform: uppercase;
+}

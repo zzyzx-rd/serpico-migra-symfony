@@ -73,14 +73,15 @@ class ProcessCriterion extends DbObject
     public $comment;
 
     /**
-     * @ORM\Column(name="crt_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="processCriterionInitiatives")
+     * @JoinColumn(name="crt_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
-     * @ORM\Column(name="crt_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="crt_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="ProcessStage", inversedBy="criteria")
@@ -114,8 +115,6 @@ class ProcessCriterion extends DbObject
      * @param $crt_upperbound
      * @param $crt_step
      * @param $crt_comment
-     * @param $crt_createdBy
-     * @param $crt_inserted
      * @param $stage
      * @param $process
      * @param $cName
@@ -132,13 +131,11 @@ class ProcessCriterion extends DbObject
         $crt_forceComment_value = null,
         $crt_forceComment_sign = null,
         $crt_comment = null,
-        $crt_createdBy = null,
-        $crt_inserted = null,
         $stage = null,
         $process = null,
         $cName = null)
     {
-        parent::__construct($id, $crt_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->type = $crt_type;
         $this->name = $crt_name;
         $this->weight = $crt_weight;
@@ -149,7 +146,6 @@ class ProcessCriterion extends DbObject
         $this->upperbound = $crt_upperbound;
         $this->step = $crt_step;
         $this->comment = $crt_comment;
-        $this->inserted = $crt_inserted;
         $this->stage = $stage;
         $this->process = $process;
         $this->cName = $cName;

@@ -110,14 +110,15 @@ class Result extends DbObject
      */
     protected $equalDistanceRatio;
     /**
-     * @ORM\Column(name="res_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="resultInitiatives")
+     * @JoinColumn(name="res_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
-     * @ORM\Column(name="res_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="res_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="Activity", inversedBy="results")
@@ -139,15 +140,20 @@ class Result extends DbObject
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="results")
-     * @JoinColumn(name="user_usr_id", referencedColumnName="usr_id")
+     * @JoinColumn(name="user_id", referencedColumnName="usr_id")
      */
-    public $user_usr;
+    public $user;
 
     /**
      * @ORM\ManyToOne(targetEntity=ExternalUser::class)
-     * @JoinColumn(name="external_user_ext_usr_id", referencedColumnName="ext_id")
+     * @JoinColumn(name="externalUser_id", referencedColumnName="ext_id")
      */
-    private $external_user_ext_usr;
+    private $externalUser;
+
+    /**
+     * @ORM\OneToMany(targetEntity="ElementUpdate", mappedBy="result", cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    private $updates;
 
 
     /**
@@ -174,13 +180,11 @@ class Result extends DbObject
      * @param null $equalInertiaMax
      * @param null $weightedDistanceRatio
      * @param null $equalDistanceRatio
-     * @param $res_createdBy
-     * @param $res_inserted
      * @param Activity $activity
      * @param Stage $stage
      * @param Criterion $criterion
-     * @param User $user_usr
-     * @param null $external_user_ext_usr
+     * @param User $user
+     * @param null $externalUser
      */
     public function __construct(
         $id = 0,
@@ -205,15 +209,13 @@ class Result extends DbObject
         $equalInertiaMax = null,
         $weightedDistanceRatio = null,
         $equalDistanceRatio = null,
-        $res_createdBy= null,
-        $res_inserted= null,
         Activity $activity= null,
         Stage $stage= null,
         Criterion $criterion= null,
-        User $user_usr= null,
-        $external_user_ext_usr= null)
+        User $user= null,
+        ExternalUser $externalUser= null)
     {
-        parent::__construct($id, $res_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->type = $res_type;
         $this->weightedAbsoluteResult = $res_war;
         $this->equalAbsoluteResult = $res_ear;
@@ -235,12 +237,11 @@ class Result extends DbObject
         $this->equalInertiaMax = $equalInertiaMax;
         $this->weightedDistanceRatio = $weightedDistanceRatio;
         $this->equalDistanceRatio = $equalDistanceRatio;
-        $this->inserted = $res_inserted;
         $this->activity = $activity;
         $this->stage = $stage;
         $this->criterion = $criterion;
-        $this->user_usr = $user_usr;
-        $this->external_user_ext_usr = $external_user_ext_usr;
+        $this->user = $user;
+        $this->externalUser = $externalUser;
     }
 
     public function getType(): ?int
@@ -527,28 +528,47 @@ class Result extends DbObject
         return $this;
     }
 
-    public function getUserUsr(): ?User
+    public function getUser(): ?User
     {
-        return $this->user_usr;
+        return $this->user;
     }
 
-    public function setUserUsr(?User $user_usr): self
+    public function setUser(?User $user): self
     {
-        $this->user_usr = $user_usr;
-
+        $this->user = $user;
         return $this;
     }
 
 
-    public function getExternalUserExtUsr(): ?ExternalUser
+    public function getExternalUser(): ?ExternalUser
     {
-        return $this->external_user_ext_usr;
+        return $this->externalUser;
     }
 
-    public function setExternalUserExtUsr(?ExternalUser $external_user_ext_usr): self
+    public function setExternalUser(?ExternalUser $externalUser): self
     {
-        $this->external_user_ext_usr = $external_user_ext_usr;
+        $this->externalUser = $externalUser;
+        return $this;
+    }
 
+    /**
+    * @return ArrayCollection|ElementUpdate[]
+    */
+    public function getUpdates()
+    {
+        return $this->updates;
+    }
+
+    public function addUpdate(ElementUpdate $update): self
+    {
+        $this->updates->add($update);
+        $update->setResult($this);
+        return $this;
+    }
+
+    public function removeUpdate(ElementUpdate $update): self
+    {
+        $this->updates->removeElement($update);
         return $this;
     }
 }

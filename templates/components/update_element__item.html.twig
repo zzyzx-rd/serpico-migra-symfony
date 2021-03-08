@@ -1,0 +1,25 @@
+
+{% if element is defined %}
+
+  <li class="notif-elmt flex-center {{ seen ? 'seen' }}" data-id="{{element.id}}">
+      <div class="notif-user">
+        <span class="notif-user-picture">
+            <img class="user-profile-picture" src="/lib/img/user/{{element.picture}}">
+        </span>
+        <span class="notif-msg">{{element.msg|raw}}</span>
+        <span class="notif-time">{{element.inserted}}</span>
+      </div>
+  </li>
+
+{% else %}
+
+  <li class="notif-elmt flex-center">
+      <div class="notif-user">
+        <span class="notif-user-picture"></span>
+        <span class="notif-msg"></span>
+        <span class="notif-time"></span>
+      </div>
+  </li>
+
+{% endif %}
+

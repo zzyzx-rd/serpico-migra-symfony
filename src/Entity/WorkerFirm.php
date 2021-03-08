@@ -31,6 +31,17 @@ class WorkerFirm extends DbObject
     public ?int $id;
 
     /**
+     * @ManyToOne(targetEntity="WorkerFirm", inversedBy="children")
+     * @JoinColumn(name="parent_id", referencedColumnName="wfi_id", nullable=true)
+     */
+    public $parent;
+
+    /**
+     * @OneToMany(targetEntity="WorkerFirm", mappedBy="parent", cascade={"persist"}, orphanRemoval=false)
+     */
+    public $children;
+
+    /**
      * @ORM\Column(name="wfi_hq_location", type="string", length=255, nullable=true)
      */
     public $HQLocation;
@@ -126,42 +137,49 @@ class WorkerFirm extends DbObject
     public $created;
 
     /**
-     *@Column(name="wfi_creation_date", type="datetime", nullable=false)
+     *@Column(name="wfi_creation_date", type="datetime", nullable=true)
      * @var DateTime
      */
     public $creationDate;
 
     /**
-     * @ORM\Column(name="wfi_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="workerFirmInitiatives")
+     * @JoinColumn(name="wfi_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
-     * @ORM\Column(name="wfi_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="wfi_inserted", type="datetime",  options={"default": "CURRENT_TIMESTAMP"})
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
-     * @OneToOne(targetEntity="WorkerFirmSector", inversedBy="firm")
+     * @ManyToOne(targetEntity="WorkerFirmSector", inversedBy="firms")
      * @JoinColumn(name="worker_firm_sector_wfs_id", referencedColumnName="wfs_id",nullable=true)
      */
     public $mainSector;
 
     /**
+     * @ManyToOne(targetEntity="ZIPCode", inversedBy="firms")
+     * @JoinColumn(name="zip_code_zip_id", referencedColumnName="zip_id", nullable=true)
+     */
+    public $ZIPCode;
+
+    /**
      * @ManyToOne(targetEntity="City", inversedBy="firms")
-     * @JoinColumn(name="city_cit_id", referencedColumnName="cit_id",nullable=false)
+     * @JoinColumn(name="city_cit_id", referencedColumnName="cit_id", nullable=true)
      */
     public $city;
 
     /**
      * @ManyToOne(targetEntity="State", inversedBy="firms")
-     * @JoinColumn(name="state_sta_id", referencedColumnName="sta_id",nullable=false)
+     * @JoinColumn(name="state_sta_id", referencedColumnName="sta_id", nullable=true)
      */
     public $state;
 
     /**
      * @ManyToOne(targetEntity="Country", inversedBy="firms")
-     * @JoinColumn(name="country_cou_id", referencedColumnName="cou_id",nullable=false)
+     * @JoinColumn(name="country_cou_id", referencedColumnName="cou_id", nullable=true)
      */
     public $country;
 
@@ -177,14 +195,19 @@ class WorkerFirm extends DbObject
     public $mails;
 
     /**
-     * @ORM\OneToOne(targetEntity=Organization::class, mappedBy="worker_firm_wfi", cascade={"persist", "remove"})
-     * @JoinColumn(name="organization_org_id", referencedColumnName="org_id", nullable=true)
+     * @OneToMany(targetEntity="Client", mappedBy="workerFirm", cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $organization;
+    public $clients;
+
+    /**
+     * @ORM\OneToMany(targetEntity="Organization", mappedBy="workerFirm", cascade={"persist","remove"})
+     */
+    protected $organizations;
 
     /**
      * WorkerFirm constructor.
      * @param ?int$id
+     * @param $parent
      * @param $wfi_active
      * @param $wfi_hq_city
      * @param $wfi_hq_state
@@ -205,12 +228,11 @@ class WorkerFirm extends DbObject
      * @param $wfi_suffix
      * @param $wfi_nb_active_exp
      * @param $wfi_created
-     * @param $wfi_createdBy
-     * @param $wfi_inserted
      * @param $mainSector
      * @param $city
      * @param $state
      * @param $country
+     * @param $ZIPCode
      * @param $experiences
      * @param $mails
      */
@@ -233,8 +255,6 @@ class WorkerFirm extends DbObject
         $wfi_suffix = null,
         $wfi_nb_active_exp = null,
         $wfi_created = null,
-        $wfi_createdBy = null,
-        $wfi_inserted = null,
         $wfi_hq_location = null,
         $wfi_website = null,
         $wfi_creation = null,
@@ -242,10 +262,12 @@ class WorkerFirm extends DbObject
         $city = null,
         $state = null,
         $country = null,
-        $experiences = null,
-        $mails = null)
+        $ZIPCode = null,
+        $parent = null
+        )
     {
-        parent::__construct($id, $wfi_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
+        $this->parent = $parent;
         $this->creationDate = $creationDate;
         $this->HQLocation = $wfi_hq_location;
         $this->HQCity = $wfi_hq_city;
@@ -266,13 +288,16 @@ class WorkerFirm extends DbObject
         $this->suffix = $wfi_suffix;
         $this->nbActiveExp = $wfi_nb_active_exp;
         $this->created = $wfi_created;
-        $this->inserted = $wfi_inserted;
         $this->mainSector = $mainSector;
+        $this->ZIPCode = $ZIPCode;
         $this->city = $city;
         $this->state = $state;
         $this->country = $country;
-        $this->experiences = $experiences?:new ArrayCollection();
-        $this->mails = $mails?:new ArrayCollection();
+        $this->experiences = new ArrayCollection();
+        $this->mails = new ArrayCollection();
+        $this->clients = new ArrayCollection();
+        $this->children = new ArrayCollection();
+        $this->organizations = new ArrayCollection();
     }
 
     public function getHQLocation(): ?string
@@ -527,7 +552,7 @@ class WorkerFirm extends DbObject
     }
 
     /**
-     * @return mixed
+     * @return City
      */
     public function getCity()
     {
@@ -535,11 +560,29 @@ class WorkerFirm extends DbObject
     }
 
     /**
-     * @param mixed $city
+     * @param City $city
      */
-    public function setCity($city): void
+    public function setCity(?City $city): self
     {
         $this->city = $city;
+        return $this;
+    }
+
+    /**
+     * @return ZIPCode
+     */
+    public function getZIPCode()
+    {
+        return $this->ZIPCode;
+    }
+
+    /**
+     * @param ZIPCode $ZIPCode
+     */
+    public function setZIPCode(?ZIPCode $ZIPCode): self
+    {
+        $this->ZIPCode = $ZIPCode;
+        return $this;
     }
 
     /**
@@ -551,31 +594,33 @@ class WorkerFirm extends DbObject
     }
 
     /**
-     * @param mixed $state
+     * @param State $state
      */
-    public function setState($state): void
+    public function setState(?State $state): self
     {
         $this->state = $state;
+        return $this;
     }
 
     /**
      * @return mixed
      */
-    public function getCountry()
+    public function getCountry(): ?Country
     {
         return $this->country;
     }
 
     /**
-     * @param mixed $country
+     * @param Country $country
      */
-    public function setCountry($country): void
+    public function setCountry(?Country $country): self
     {
         $this->country = $country;
+        return $this;
     }
 
     /**
-     * @return mixed
+     * @return ArrayCollection|Experience[]
      */
     public function getExperiences()
     {
@@ -583,28 +628,13 @@ class WorkerFirm extends DbObject
     }
 
     /**
-     * @param mixed $experiences
-     */
-    public function setExperiences($experiences): void
-    {
-        $this->experiences = $experiences;
-    }
-
-    /**
-     * @return mixed
+     * @return ArrayCollection|Mail[]
      */
     public function getMails()
     {
         return $this->mails;
     }
 
-    /**
-     * @param mixed $mails
-     */
-    public function setMails($mails): void
-    {
-        $this->mails = $mails;
-    }
     public function getActiveExperiences(): array
     {
         $activeExperiences = [];
@@ -636,7 +666,7 @@ class WorkerFirm extends DbObject
     }
 
     /**
-     * @return Collection|WorkerIndividual[]
+     * @return ArrayCollection|WorkerIndividual[]
      * @throws Exception
      */
     public function getWorkingIndividuals(){
@@ -664,22 +694,77 @@ class WorkerFirm extends DbObject
         return (string) $this->id;
     }
 
-    public function getOrganization(): ?Organization
+    /**
+     * @return ArrayCollection|Organization[]
+     */
+    public function getOrganizations()
     {
-        return $this->organization;
+        return $this->organizations;
     }
 
-    public function setOrganization(?Organization $organization): self
+    public function addOrganization(Organization $organization): WorkerFirm
     {
-        $this->organization = $organization;
-
-        // set (or unset) the owning side of the relation if necessary
-        $newWorker_firm_wfi = null === $organization ? null : $this;
-        if ($organization->getWorkerFirmWfi() !== $newWorker_firm_wfi) {
-            $organization->setWorkerFirmWfi($newWorker_firm_wfi);
-        }
-
+        $this->organizations->add($organization);
+        $organization->setWorkerFirm($this);
         return $this;
+    }
+
+    public function removeOrganization(Organization $organization): WorkerFirm
+    {
+        $this->organizations->removeElement($organization);
+        return $this;
+    }
+
+    /**
+     * @return ArrayCollection|Client[]
+     */
+    public function getClients(){
+        return $this->clients;
+    }
+
+    public function addClient(Client $client): self
+    {
+        $this->clients->add($client);
+        $client->setWorkerFirm($this);
+        return $this;
+    }
+
+    public function removeClient(Client $client): self
+    {
+        $this->clients->removeElement($client);
+        return $this;
+    }
+
+    public function addChildren(WorkerFirm $child): self
+    {
+        $this->children->add($child);
+        $child->setParent($this);
+        return $this;
+    }
+
+    public function removeChildren(WorkerFirm $child): self
+    {
+        $this->children->removeElement($child);
+        return $this;
+    }
+
+    /**
+     * @return ArrayCollection|WorkerFirm[]
+     */
+    public function getChildren()
+    {
+        return $this->children;
+    }
+
+    public function setParent(?WorkerFirm $parent): self
+    {
+        $this->parent = $parent;
+        return $this;
+    }
+
+    public function getParent(): ?self
+    {
+        return $this->parent;
     }
 
 

@@ -65,14 +65,15 @@ class RankingTeamHistory extends DbObject
     public $seriesPopulation;
 
     /**
-     * @ORM\Column(name="rth_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="rankingTeamHistoryInitiatives")
+     * @JoinColumn(name="rth_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
-     * @ORM\Column(name="rth_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="rth_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      *@ManyToOne(targetEntity="Activity", inversedBy="historicalRankingTeams")
@@ -111,10 +112,9 @@ class RankingTeamHistory extends DbObject
         $relResult = null,
         $period = null,
         $frequency = null,
-        $seriesPopulation = null,
-        $createdBy = null)
+        $seriesPopulation = null)
     {
-        parent::__construct($id, $createdBy, new DateTime);
+        parent::__construct($id, null, new DateTime);
         $this->dType = $dType;
         $this->wType = $wType;
         $this->absResult = $absResult;

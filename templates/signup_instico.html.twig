@@ -1,0 +1,138 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+Signup
+{% endblock %}
+
+{% block pagename %}
+Signup
+{% endblock %}
+
+{% block css %}
+
+  <style>
+      .old-times:before {
+          content: "";
+          background-image: url(/lib/img/place_paris.png);
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          opacity: 0.25;
+          background-repeat: no-repeat;
+          background-size: cover;
+          z-index: -1;
+      }
+
+      .old-times {
+          position: relative;
+      }
+
+      .content {
+        text-align: center;
+        margin-bottom: auto;
+        margin-top: auto;
+      }
+
+      #signup {
+        width: 40%;
+        margin:50px auto;
+      }
+
+
+      #signup input {
+          background-color: #ffffffbd;
+      }
+
+      #signup label{
+          color: black;
+      }
+
+  </style>
+
+  <script type="text/javascript">
+    var homeUrl = "{{ url('login') }}";
+  </script>
+{% endblock %}
+
+{% block content %}
+
+    <div class="old-times">
+      <div class="content">
+        <p>{% trans %}signup.description{% endtrans %}</p>
+        {{ form_start(form, {'attr': {'id': 'signup'}}) }}
+        <div class="row">
+
+            <div class="input-field">
+                {{ form_label(form.email) }}
+                {{ form_widget(form.email, {'attr': {'class': 'no-margin'}}) }}
+                <small>
+                  {{ form_errors(form.email) }}
+                </small>
+            </div>
+            <div class="input-field">
+              {{ form_label(form.username) }}
+              {{ form_widget(form.username, {'attr': {'class': 'no-margin'}}) }}
+              <small>
+                {{ form_errors(form.username) }}
+              </small>
+            </div>
+            <div class="input-field">
+              {{ form_label(form.nickname) }}
+              {{ form_widget(form.nickname, {'attr': {'class': 'no-margin'}}) }}
+              <small>
+                {{ form_errors(form.nickname) }}
+              </small>
+            </div>
+                 <div class="input-field">
+              {{ form_label(form.firstname) }}
+              {{ form_widget(form.firstname, {'attr': {'class': 'no-margin'}}) }}
+              <small>
+                {{ form_errors(form.firstname) }}
+              </small>
+            </div>
+                 <div class="input-field">
+              {{ form_label(form.lastname) }}
+              {{ form_widget(form.lastname, {'attr': {'class': 'no-margin'}}) }}
+              <small>
+                {{ form_errors(form.lastname) }}
+              </small>
+            </div>
+            <ul class="input-field" style="position: relative;">
+                <li style="position: absolute;left: -10%; top:20%">
+                  <div class="eye">
+                    <i class="fa fa-2x fa-eye"></i>
+                  </div>
+                </li>
+                <li>
+                  <div class="input-field">
+                      {{ form_label(form.password) }}
+                      {{ form_widget(form.password, {'attr': {'class': 'no-margin'}}) }}
+                      <small>
+                        {{ form_errors(form.password) }}
+                      </small>
+                  </div>
+                </li>
+            </ul>
+        </div>
+        <div class="row">
+          <div class="button-field col s10" style="margin-bottom: 50px;">
+            {{ form_row(form.submit) }}
+          </div>
+        </div>
+        {{ form_rest(form) }}
+        {{ form_end(form) }}
+      </div>
+    </div>
+    <div id="definePwdSuccess" class="modal">
+      <div class="modal-content">
+        <p>{% trans %}signup.success_modal.msg{% endtrans %}</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn waves-effect waves-light modal-close">{% trans %}signup.success_modal.button_msg{% endtrans %}</button>
+      </div>
+    </div>
+
+{% endblock %}
+{% block javascripts %}
+  <script src="{{ asset('js/signup.js') }}"></script>
+{% endblock %}

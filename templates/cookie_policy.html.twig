@@ -1,0 +1,71 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+  {{'cookies_policy.title'|trans}}
+{% endblock %}
+
+{% block pagename %}
+  {{'cookies_policy.title'|trans}} 
+{% endblock %}
+
+{% block css %}
+  <link rel="stylesheet" href="{{ asset('css/pricing_table.css') }}">
+  <style>
+    .l-container{
+      width:90%;
+      margin:auto;
+    }
+    #linkFooter{
+      width: 100%;
+      background-color: #55318e;
+      margin-top: 20px;
+      font-size: 15px;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+    <main>
+      <div class="l-container">
+        <h4 class="center">{{'cookies_policy.title'|trans|raw}}</h4>
+        <section>
+          <p>{{'cookies_policy.intro_msg'|trans ~ ' :'}}</p>
+          <p>www.dealdrive.com</p>
+        </section>
+        <section>
+          <h5 class="strong">{{'cookies_policy.section_1.title'|trans}}</h5>
+          <p>{{'cookies_policy.section_1.paragraph_1'|trans}}</p>
+        </section>
+        <section>
+          <h5 class="strong">{{'cookies_policy.section_2.title'|trans}}</h5>
+          <p>{{'cookies_policy.section_2.paragraph_1'|trans}}</p>
+          <p>{{'cookies_policy.section_2.paragraph_2'|trans}}</p>
+          <p>{{'cookies_policy.section_2.paragraph_3'|trans}}</p>
+          <p>{{'cookies_policy.section_2.paragraph_4'|trans}}</p>
+        </section>
+        <section>
+          <h5 class="strong">{{'cookies_policy.section_2.title'|trans}}</h5>
+          <p>{{'cookies_policy.section_2.paragraph_1'|trans}}</p>
+          <p>{{'cookies_policy.section_2.paragraph_2'|trans}}</p>
+          <p>{{'cookies_policy.section_2.paragraph_3'|trans}}</p>
+          <p>{{'cookies_policy.section_2.paragraph_4'|trans}}</p>
+        </section> 
+        <section>
+          <h5 class="strong">{{'cookies_policy.section_3.title'|trans}}</h5>
+          <p>{{'cookies_policy.section_3.paragraph_1'|trans}}</p>
+          <p>{{'cookies_policy.section_3.paragraph_2'|trans}}</p>
+          <p>{{'cookies_policy.section_3.paragraph_3'|trans}}</p>
+        </section>
+        <section>
+          <h5 class="strong">{{'cookies_policy.section_4.title'|trans}}</h5>
+          <p>{{'cookies_policy.section_4.provider_1'|trans|raw}}</p>
+        </section>
+      </div>
+    </main>
+
+    {% include "components/footer.html.twig" with {validatedCookieBanner: validatedCookieBanner} %}
+{% endblock %}
+
+{% block javascripts %}
+  <script src="{{ asset('js/base.js') }}"></script>
+{% endblock %}

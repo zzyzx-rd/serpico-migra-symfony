@@ -35,16 +35,16 @@ class StageCriterionType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('criteria', CollectionType::class,
+        $builder->add('outputs', CollectionType::class,
             [
-                'entry_type' => CriterionType::class,
+                'entry_type' => OutputType::class,
                 'entry_options' => [
                     'currentUser' => $options["currentUser"],
                     'organization' => $options['organization'],
-                    'elmtType' => $options['elmtType'],
+                    'entity' => $options['entity'],
                 ],
                 'prototype' => true,
-                'prototype_name' => '__crtIndex__',
+                'prototype_name' => '__otpIndex__',
                 'by_reference' => false,
                 'allow_delete' => 'true',
                 'allow_add' => 'true',
@@ -54,8 +54,7 @@ class StageCriterionType extends AbstractType
                 ],
                 'label' => false,
                 'error_bubbling' => false,
-            ]
-        )->add('visibility', ChoiceType::class,
+            ])->add('visibility', ChoiceType::class,
         [
             'label' => 'stages.stage.visibility.label_title',
             'constraints' => [
@@ -73,7 +72,7 @@ class StageCriterionType extends AbstractType
             */
         ]);
 
-        //if($options['elmtType'] == 'process' || $options['elmtType'] == 'iprocess' ){
+        //if($options['entity'] == 'process' || $options['entity'] == 'iprocess' ){
             $builder->add('name', TextType::class,
             [
                 'constraints' => [
@@ -90,7 +89,7 @@ class StageCriterionType extends AbstractType
                 'attr' => ['class' => 'weight-input']
             ]);
 
-            if($options['elmtType'] !== "activity"){
+            if($options['entity'] !== "activity"){
 
                 $builder->add('definiteDates', CheckboxType::class,
                 [
@@ -187,7 +186,6 @@ class StageCriterionType extends AbstractType
                 'label_format' => 'stages.stage.%name%',
                 'html5' => false,
                 'attr' => ['class' => 'dp-start'],
-                //'data' => $options['startdate'],
                 'constraints' => [
                     new Assert\NotBlank([
                         'message' => 'A recurring activity must have a startdate'
@@ -208,34 +206,7 @@ class StageCriterionType extends AbstractType
                     //new EDGreaterThanSD
                 ]
             ])
-            ->add('gstartdate', DateTimeType::class,
-            [
-                'format' => 'dd/MM/yyyy',
-                'widget' => 'single_text',
-                'label_format' => 'stages.stage.%name%',
-                'html5' => false,
-                'attr' => ['class' => 'dp-gstart'],
-                //'data' => $options['startdate'],
-                'constraints' => [
-                    new Assert\NotBlank([
-                        'message' => 'A recurring activity must have a startdate'
-                    ]),
-                ]
-            ])
 
-            ->add('genddate', DateTimeType::class,
-            [
-                'format' => 'dd/MM/yyyy',
-                'widget' => 'single_text',
-                'label_format' => 'stages.stage.%name%',
-                'html5' => false,
-                'attr' => ['class' => 'dp-gend'],
-                //'data' => $options['enddate'],
-                'constraints' => [
-                    new Assert\NotBlank,
-                    //new EDGreaterThanSD
-                ]
-            ])
 
             ->add('mode', ChoiceType::class,
                 [
@@ -254,16 +225,16 @@ class StageCriterionType extends AbstractType
                 ]
             );
 
-            if($options['elmtType'] !== 'process'){
+            if($options['entity'] !== 'process'){
 
-                $builder->add('independantUniqueIntParticipations', CollectionType::class,
+                $builder->add('intParticipants', CollectionType::class,
                     [
                         'label' => false,
                         'entry_type' => ParticipantManageType::class,
                         'entry_options' => [
                             'organization' => $options['organization'],
                             'currentUser' => $options['currentUser'],
-                            'elmt' => $options['elmtType'],
+                            'entity' => $options['entity'],
                             'query' => 'internal',
                         ],
 
@@ -276,14 +247,14 @@ class StageCriterionType extends AbstractType
                     ]
                 )
 
-                ->add('independantUniqueExtParticipations', CollectionType::class,
+                ->add('extParticipants', CollectionType::class,
                     [
                         'label' => false,
                         'entry_type' => ParticipantManageType::class,
                         'entry_options' => [
                             'organization' => $options['organization'],
                             'currentUser' => $options['currentUser'],
-                            'elmt' => $options['elmtType'],
+                            'entity' => $options['entity'],
                             'query' => 'external',
                         ],
                         'prototype' => true,
@@ -294,14 +265,14 @@ class StageCriterionType extends AbstractType
                     ]
                 )
 
-                ->add('independantUniqueTeamParticipations', CollectionType::class,
+                ->add('independantTeamParticipants', CollectionType::class,
                     [
                         'label' => false,
                         'entry_type' => ParticipantManageType::class,
                         'entry_options' => [
                             'organization' => $options['organization'],
                             'currentUser' => $options['currentUser'],
-                            'elmt' => $options['elmtType'],
+                            'entity' => $options['entity'],
                             'query' => 'team',
                         ],
                         'prototype' => true,
@@ -331,13 +302,13 @@ class StageCriterionType extends AbstractType
     {
         $resolver
         ->setDefaults([
-            'elmtType' => 'activity',
+            'entity' => 'activity',
             'data_class' => function(Options $options) {
-                if($options['elmtType'] === 'template'){
+                if($options['entity'] === 'template'){
                     return TemplateStage::class;
-                } else if ($options['elmtType'] === 'iprocess') {
+                } else if ($options['entity'] === 'iprocess') {
                     return IProcessStage::class;
-                } else if ($options['elmtType'] === 'process') {
+                } else if ($options['entity'] === 'process') {
                     return ProcessStage::class;
                 } else {
                     return Stage::class;

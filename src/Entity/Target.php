@@ -35,14 +35,14 @@ class Target extends DbObject
     public $value;
 
     /**
-     * @ORM\Column(name="tgt_createdBy", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="targetInitiatives")
+     * @JoinColumn(name="tgt_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
-
+    public ?User $initiator;
     /**
-     * @ORM\Column(name="tgt_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="tgt_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ManyToOne(targetEntity="Organization", inversedBy="targets")
@@ -97,8 +97,6 @@ class Target extends DbObject
      * @param $id
      * @param $tgt_sign
      * @param $tgt_value
-     * @param $tgt_createdBy
-     * @param $tgt_inserted
      * @param $organization
      * @param $department
      * @param $position
@@ -112,8 +110,6 @@ class Target extends DbObject
         $id = 0,
         $tgt_sign = null,
         $tgt_value = null,
-        $tgt_createdBy = null,
-        $tgt_inserted = null,
         $organization = null,
         $department = null,
         $position = null,
@@ -123,10 +119,9 @@ class Target extends DbObject
         $cName = null,
         $criterion = null)
     {
-        parent::__construct($id, $tgt_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->sign = $tgt_sign;
         $this->value = $tgt_value;
-        $this->inserted = $tgt_inserted;
         $this->organization = $organization;
         $this->department = $department;
         $this->position = $position;

@@ -6,6 +6,8 @@ use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\OptionNameRepository;
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\JoinColumn;
 
 /**
  * @ApiResource()
@@ -36,38 +38,33 @@ class OptionName extends DbObject
     public $description;
 
     /**
-     * @ORM\Column(name="ona_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="optionNameInitiatives")
+     * @JoinColumn(name="ona_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
-     * @ORM\Column(name="ona_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="ona_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * OptionName constructor.
      * @param $id
-     * @param $ona_type
-     * @param $ona_name
-     * @param $ona_description
-     * @param $ona_createdBy
-     * @param $ona_inserted
+     * @param $type
+     * @param $name
+     * @param $description
      */
     public function __construct(
         $id = 0,
-        $ona_type = null,
-        $ona_description = null,
-        $ona_name = null,
-        $ona_createdBy = null,
-        $ona_inserted = null)
+        $type = null,
+        $description = null,
+        $name = null)
     {
-        parent::__construct($id, $ona_createdBy, new DateTime());
-
-        $this->type = $ona_type;
-        $this->name = $ona_name;
-        $this->description = $ona_description;
-        $this->inserted = $ona_inserted;
+        parent::__construct($id, null, new DateTime());
+        $this->type = $type;
+        $this->name = $name;
+        $this->description = $description;
     }
 
 
@@ -76,9 +73,9 @@ class OptionName extends DbObject
         return $this->type;
     }
 
-    public function setType(int $ona_type): self
+    public function setType(int $type): self
     {
-        $this->type = $ona_type;
+        $this->type = $type;
 
         return $this;
     }
@@ -88,10 +85,9 @@ class OptionName extends DbObject
         return $this->name;
     }
 
-    public function setName(string $ona_name): self
+    public function setName(string $name): self
     {
-        $this->name = $ona_name;
-
+        $this->name = $name;
         return $this;
     }
 
@@ -100,22 +96,30 @@ class OptionName extends DbObject
         return $this->description;
     }
 
-    public function setDescription(string $ona_description): self
+    public function setDescription(string $description): self
     {
-        $this->description = $ona_description;
-
-        return $this;
-    }
-
-    public function setInserted(string $ona_inserted): self
-    {
-        $this->inserted = $ona_inserted;
-
+        $this->description = $description;
         return $this;
     }
 
     public function __toString()
     {
         return (string) $this->id;
+    }
+
+    /**
+     * @return DateTime
+     */
+    public function getInserted(): DateTime
+    {
+        return $this->inserted;
+    }
+
+    /**
+     * @param DateTime $inserted
+     */
+    public function setInserted(DateTime $inserted): void
+    {
+        $this->inserted = $inserted;
     }
 }

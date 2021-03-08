@@ -6,6 +6,7 @@ use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\InstitutionProcessRepository;
 use DateTime;
 use DateTimeInterface;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
@@ -44,14 +45,15 @@ class InstitutionProcess extends DbObject
     public $gradable;
 
     /**
-     * @ORM\Column(name="inp_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="institutionProcessInitiatives")
+     * @JoinColumn(name="inp_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
-     * @ORM\Column(name="inp_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="inp_inserted", type="datetime",  options={"default": "CURRENT_TIMESTAMP"})
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="inp_deleted", type="datetime", nullable=true)
@@ -67,12 +69,12 @@ class InstitutionProcess extends DbObject
      * @ManyToOne(targetEntity="Process", inversedBy="institutionProcesses")
      * @JoinColumn(name="process_pro_id", referencedColumnName="pro_id", nullable=false)
      */
-    protected $process;
+    protected ?Process $process;
     /**
-     * @ManyToOne(targetEntity="User")
-     * @JoinColumn(name="masterUser_usr_id", referencedColumnName="usr_id", nullable=false)
+     * @ORM\OneToMany(targetEntity=UserMaster::class, mappedBy="institutionProcess", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|UserMaster[]
      */
-    protected $masterUser;
+    private $userMasters;
     /**
      * @ManyToOne(targetEntity="InstitutionProcess", inversedBy="children")
      * @JoinColumn(name="parent_id", referencedColumnName="inp_id", nullable=true)
@@ -91,6 +93,10 @@ class InstitutionProcess extends DbObject
      * @OrderBy({"status" = "ASC", "name" = "ASC"})
      */
     public $activities;
+    /**
+     * @OneToMany(targetEntity="ElementUpdate", mappedBy="institutionProcess", cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    public $updates;
 
     /**
      * InstitutionProcess constructor.
@@ -98,8 +104,6 @@ class InstitutionProcess extends DbObject
      * @param $inp_name
      * @param $inp_approvable
      * @param $inp_gradable
-     * @param $inp_createdBy
-     * @param $inp_isnerted
      * @param $inp_deleted
      * @param $organization
      * @param $process
@@ -112,32 +116,29 @@ class InstitutionProcess extends DbObject
     public function __construct(
       ?int $id = 0,
         $inp_name = '',
-        $inp_createdBy = null,
         $inp_approvable = false,
         $inp_gradable = true,
-        $inp_isnerted = null,
         $inp_deleted = null,
         Organization $organization = null,
         Process $process = null,
         User $masterUser = null,
-        $parent = null,
-        $children = null,
-        $stages = null,
-        $activities = null)
+        $parent = null
+        )
     {
-        parent::__construct($id, $inp_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->name = $inp_name;
         $this->approvable = $inp_approvable;
         $this->gradable = $inp_gradable;
-        $this->inserted = $inp_isnerted;
         $this->deleted = $inp_deleted;
         $this->organization = $organization;
         $this->process = $process;
         $this->masterUser = $masterUser;
         $this->parent = $parent;
-        $this->children = $children;
-        $this->stages = $stages;
-        $this->activities = $activities;
+        $this->children = new ArrayCollection();
+        $this->stages = new ArrayCollection();
+        $this->activities = new ArrayCollection();
+        $this->updates = new ArrayCollection();
+        $this->userMasters = new ArrayCollection();
     }
 
 
@@ -161,7 +162,6 @@ class InstitutionProcess extends DbObject
     public function setApprovable(bool $inp_approvable): self
     {
         $this->approvable = $inp_approvable;
-
         return $this;
     }
 
@@ -173,18 +173,17 @@ class InstitutionProcess extends DbObject
     public function setGradable(bool $inp_gradable): self
     {
         $this->gradable = $inp_gradable;
-
         return $this;
     }
 
-    public function getIsnerted(): ?DateTimeInterface
+    public function getInserted(): ?DateTimeInterface
     {
         return $this->inserted;
     }
 
-    public function setIsnerted(DateTimeInterface $inp_isnerted): self
+    public function setInserted(DateTimeInterface $inp_inserted): self
     {
-        $this->inserted = $inp_isnerted;
+        $this->inserted = $inp_inserted;
 
         return $this;
     }
@@ -202,9 +201,9 @@ class InstitutionProcess extends DbObject
     }
 
     /**
-     * @return Collection|Activity[]
+     * @return ArrayCollection|Activity[]
      */
-    public function getActivities(): Collection
+    public function getActivities()
     {
         return $this->activities;
     }
@@ -220,9 +219,10 @@ class InstitutionProcess extends DbObject
     /**
      * @param mixed $organization
      */
-    public function setOrganization($organization): void
+    public function setOrganization($organization): self
     {
         $this->organization = $organization;
+        return $this;
     }
 
     /**
@@ -236,27 +236,12 @@ class InstitutionProcess extends DbObject
     /**
      * @param mixed $process
      */
-    public function setProcess($process): void
+    public function setProcess($process): self
     {
         $this->process = $process;
+        return $this;
     }
-
-    /**
-     * @return mixed
-     */
-    public function getMasterUser()
-    {
-        return $this->masterUser;
-    }
-
-    /**
-     * @param mixed $masterUser
-     */
-    public function setMasterUser($masterUser): void
-    {
-        $this->masterUser = $masterUser;
-    }
-
+    
     /**
      * @return mixed
      */
@@ -268,9 +253,10 @@ class InstitutionProcess extends DbObject
     /**
      * @param mixed $parent
      */
-    public function setParent($parent): void
+    public function setParent($parent): self
     {
         $this->parent = $parent;
+        return $this;
     }
 
     /**
@@ -282,27 +268,11 @@ class InstitutionProcess extends DbObject
     }
 
     /**
-     * @param mixed $children
-     */
-    public function setChildren($children): void
-    {
-        $this->children = $children;
-    }
-
-    /**
      * @return mixed
      */
     public function getStages()
     {
         return $this->stages;
-    }
-
-    /**
-     * @param mixed $stages
-     */
-    public function setStages($stages): void
-    {
-        $this->stages = $stages;
     }
 
     public function addChildren(InstitutionProcess $child): InstitutionProcess
@@ -319,7 +289,7 @@ class InstitutionProcess extends DbObject
     }
 
     /**
-     * @return Collection|InstitutionProcess[]
+     * @return ArrayCollection|InstitutionProcess[]
      */
     public function getValidatedChildren() {
         return $this->children->filter(static function(InstitutionProcess $p){
@@ -364,7 +334,7 @@ class InstitutionProcess extends DbObject
         return $this;
     }
     /**
-     * @return Collection|IProcessStage[]
+     * @return ArrayCollection|IProcessStage[]
      */
     public function getActiveStages()
     {
@@ -400,4 +370,48 @@ class InstitutionProcess extends DbObject
     {
         return $u->getRole() == 1 || $u->getRole() == 4 || $this->masterUser == $u;
     }
+
+    /**
+    * @return ArrayCollection|ElementUpdate[]
+    */
+    public function getUpdates()
+    {
+        return $this->updates;
+    }
+
+    public function addUpdate(ElementUpdate $update): self
+    {
+        $this->updates->add($update);
+        $update->setInstitutionProcess($this);
+        return $this;
+    }
+
+    public function removeUpdate(ElementUpdate $update): self
+    {
+        $this->updates->removeElement($update);
+        return $this;
+    }
+
+    /**
+    * @return ArrayCollection|UserMaster[]
+    */
+    public function getUserMasters()
+    {
+        return $this->userMasters;
+    }
+
+    public function addUserMaster(UserMaster $userMaster): self
+    {
+        $this->userMasters->add($userMaster);
+        $userMaster->setInstitutionProcess($this);
+        return $this;
+    }
+
+    public function removeUserMaster(UserMaster $userMaster): self
+    {
+        $this->userMasters->removeElement($userMaster);
+        return $this;
+    }
+
+
 }

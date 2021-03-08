@@ -14,7 +14,7 @@ use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException as ORMExceptionAlias;
 use Exception;
 use App\Entity\Activity;
-use App\Entity\ActivityUser;
+use App\Entity\Participation;
 use App\Entity\Criterion;
 use App\Entity\Department;
 use App\Entity\Mail;
@@ -33,13 +33,18 @@ use App\Entity\ResultTeam;
 use App\Entity\Stage;
 use App\Entity\Team;
 use App\Entity\User;
-use App\Repository\ActivityUserRepository;
+use App\Repository\ParticipationRepository;
 use App\Repository\UserRepository;
+use App\Security\LoginFormAuthenticator;
+use Stripe\Stripe;
+use Stripe\StripeClient;
 use Swift_Image;
 use Swift_Mailer;
 use Swift_Message;
 use Swift_SpoolTransport;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\TwigBundle\DependencyInjection\Configurator\EnvironmentConfigurator;
 use Symfony\Bundle\TwigBundle\TwigEngine;
 use Symfony\Component\Form\FormFactory;
 use Symfony\Component\Form\FormInterface;
@@ -48,8 +53,13 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Generator\UrlGenerator;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
 use Symfony\Component\Translation\Translator;
 use Symfony\Component\Validator\Constraints\DateTime;
 use Twig\Environment;
@@ -77,6 +87,10 @@ abstract class MasterController extends AbstractController
      */
     protected $security;
     /**
+     * @var UserPasswordEncoderInterface
+     */
+    protected $encoder;
+    /**
      * @var RequestStack
      */
     public $stack;
@@ -84,32 +98,53 @@ abstract class MasterController extends AbstractController
      * @var LoaderInterface
      */
     private $loader;
+    /**
+     * @var Request
+     */
+    private $request;
 
     /**
      * @var User
      */
     protected $user;
     /**
+     * @var Stripe
+     */
+    protected $stripe;
+    /**
      * MasterController constructor.
      * @param EntityManagerInterface $em
      * @param Security $security
      * @param RequestStack $stack
+     * @param Stripe $stripe
      */
-    public function __construct(EntityManagerInterface $em, Security $security, RequestStack $stack)
+    public function __construct(EntityManagerInterface $em, Security $security, RequestStack $stack, UserPasswordEncoderInterface $encoder, GuardAuthenticatorHandler $guardHandler, LoginFormAuthenticator $authenticator, Environment $twig)
     {
+        //Stripe::setApiKey('sk_test_51Hn5ftLU0XoF52vKQ1r5r1cONYas5XjLLZu6rFg2P69nntllHxLs3G0wyCxoOQNUgjgD5LwCoaYTkGQp1qVK3g3A00LfW1k4Ep');
+        
         $this->em = $em;
         $this->security = $security;
         $this->stack = $stack;
+        $this->request = $stack->getCurrentRequest();
+
         $this->user = $security->getUser();
-//        if ($this->user === null) {
-//            $this->redirectToRoute('login');
-//        }
+        $this->encoder = $encoder;
+        $this->guardHandler = $guardHandler;
+        $this->authenticator = $authenticator;
+        $this->twig = $twig;
+        if($this->request->server->get('APP_ENV') == 'dev'){
+            $apiKey = $this->request->server->get('STRIPE_DEV_KEY');
+        } else {
+            $apiKey = $this->request->server->get('STRIPE_PROD_KEY');
+        }
+        Stripe::setApiKey($apiKey);
+        $this->stripe = new StripeClient($apiKey);
+
         if ($this->user){
             $this->org = $this->user->getOrganization();
         }
         $this->activityRepo = $this->em->getRepository(Activity::class);
-        $this->em = $em;
-        $this->security = $security;
+
         // Twig constants
 //        $loader = new FilesystemLoader('../templates');
 //        $twig = new Environment($loader);
@@ -176,7 +211,7 @@ abstract class MasterController extends AbstractController
 
     public static function hideResultsFromStages(Collection $stages): array
     {
-        $currentUser = self::getAuthorizedUser();
+
         if (!$currentUser) {
             throw new Exception('unauthorized');
         }
@@ -216,7 +251,7 @@ abstract class MasterController extends AbstractController
 
         if ($cond == 'participant') {
             return $stages->filter(function (Stage $s) use ($id) {
-                return $s->getParticipants()->forAll(function (int $i, ActivityUser $p) use ($id) {
+                return $s->getParticipants()->forAll(function (int $i, Participation $p) use ($id) {
                     return $p->getUsrId() != $id;
                 });
             })->map(function (Stage $s) {
@@ -308,7 +343,7 @@ abstract class MasterController extends AbstractController
                     $notifiedUsers = new ArrayCollection;
                     $settings['stages'] = [];
                     foreach($notifyingGroupStage as $notifyingStage){
-                        $owner = $notifyingStage->getUniqueParticipations()->filter(function(ActivityUser $p){
+                        $owner = $notifyingStage->getUniqueParticipations()->filter(function(Participation $p){
                             return $p->isLeader();
                         })->first();
 
@@ -372,7 +407,7 @@ abstract class MasterController extends AbstractController
 
 
     // Compute (user) rankings
-    public static function computeRankingAction(Request $request, Application $app, $entityType, $dType, $wType, $orgId, $elmtType, $maxLastResults = 1000000, $from = '2018-01-01 00:00', $to = null, $period = 0, $frequency = 'D')
+    public static function computeRankingAction(Request $request, $entityType, $dType, $wType, $orgId, $elmtType, $maxLastResults = 1000000, $from = '2018-01-01 00:00', $to = null, $period = 0, $frequency = 'D')
     {
         $em = self::getEntityManager();
         $repoO = $em->getRepository(Organization::class);
@@ -403,9 +438,9 @@ abstract class MasterController extends AbstractController
             $rType = 'C';
         }
 
-        $activity = ($rType == 'A') ? $elmtType : (($rType == 'S') ? $elmtType->getActivity() : $elmtType->getStage()->getActivity());
-        $stage = ($rType == 'A') ? null : (($rType == 'S') ? $elmtType : $elmtType->getStage());
-        $criterion = ($rType == 'C') ? $elmtType : null;
+        $activity = ($rType == 'A') ? $entity : (($rType == 'S') ? $elmtType->getActivity() : $elmtType->getStage()->getActivity());
+        $stage = ($rType == 'A') ? null : (($rType == 'S') ? $entity : $elmtType->getStage());
+        $criterion = ($rType == 'C') ? $entity : null;
 
         foreach ($population as $popElmt) {
             $popData = $popElmt->getAverage($app, true, $dType, $wType, $rType, $maxLastResults, $from, $to)[0];
@@ -597,7 +632,7 @@ abstract class MasterController extends AbstractController
     public function sendStageDeadlineMails($forAllFirms = true)
     {
         $repoS = $this->em->getRepository(Stage::class);
-        $repoAU = $this->em->getRepository(ActivityUser::class);
+        $repoP = $this->em->getRepository(Participation::class);
         $repoON = $this->em->getRepository(OptionName::class);
         $repoOP = $this->em->getRepository(OrganizationUserOption::class);
         $deadlineOption = $repoON->findOneByName('mailDeadlineNbDays');
@@ -642,7 +677,7 @@ abstract class MasterController extends AbstractController
 
             if ($deadlineDiff->invert == 1) {
                 // We find by first criterion in order to avoid doublon
-                $lateParticipants = $repoAU->findBy(['criterion' => $stage->getCriteria()->first(), 'status' => [0, 1, 2]]);
+                $lateParticipants = $repoP->findBy(['criterion' => $stage->getCriteria()->first(), 'status' => [0, 1, 2]]);
                 $recipients = [];
                 foreach ($lateParticipants as $lateParticipant) {
                     $recipientUser = $lateParticipant->getUser();
@@ -664,38 +699,6 @@ abstract class MasterController extends AbstractController
         } catch (OptimisticLockException $e) {
         } catch (ORMExceptionAlias $e) {
         }
-        return true;
-    }
-
-    public function sendOrganizationTestingReminders()
-    {
-        $allOrganizations = new ArrayCollection($this->em->getRepository(Organization::class)->findAll());
-        $expiringOrganizations =
-            $allOrganizations->matching(
-                Criteria::create()
-                    ->where(Criteria::expr()->neq('expired', new \DateTime('2100-01-01 00:00:00')))
-                    ->andWhere(Criteria::expr()->neq('expired', null))
-                    ->andWhere(Criteria::expr()->neq('reminderMailSent', true)
-                    )
-            );
-        $repoU = $this->em->getRepository(User::class);
-
-        foreach ($expiringOrganizations as $expiringOrganization) {
-            // Sending testing organization administration to motivate them onboard activities
-            if (date_diff(new \DateTime, $expiringOrganization->getExpired())->days < 15) {
-                $administrators = $repoU->findBy(['orgId' => $expiringOrganization->getId(), 'role' => [1, 4]]);
-                $nonAdministrators = $repoU->findBy(['orgId' => $expiringOrganization->getId(), 'role' => [2, 3]]);
-                $adminSettings['expiringDate'] = $expiringOrganization->getExpired();
-                $nonAdminSettings['expiringDate'] = $expiringOrganization->getExpired();
-                $adminSettings['forAdministrators'] = true;
-                $nonAdminSettings['forAdministrators'] = false;
-                self::sendMail(null, $administrators, 'firstMailReminderTPeriod', $adminSettings);
-                self::sendMail(null, $nonAdministrators, 'firstMailReminderTPeriod', $nonAdminSettings);
-                $expiringOrganization->setReminderMailSent(true);
-                $this->em->persist($expiringOrganization);
-            }
-        }
-        $this->em->flush();
         return true;
     }
 
@@ -814,322 +817,13 @@ abstract class MasterController extends AbstractController
 
     }
 
-    // Function to create and update activities of recurring activities
-    // TimeFrame can be either 'D', 'W', 'M', 'Y'
-    public static function createRecurringActivities($app, Organization $organization, Recurring $recurring, User $masterUser, $name, $frequency, \DateTime $definedStartDate, $timeFrame, $gStartDateInterval, $gStartDateTimeFrame, $gEndDateInterval, $gEndDateTimeFrame, $type, $lowerbound = 0, $upperbound = 5, $step = 0.5, $maxTimeFrame = '1Y', \DateTime $definedEndDate = null)
-    {
-        $currentUser = self::getAuthorizedUser();
-        if (!$currentUser instanceof User) {
-            return new Response(null, 401);
-        }
-
-        $em = $app['orm.em'];
-        $startDate = clone $definedStartDate;
-        $endDate = ($definedEndDate) ?: clone $definedStartDate->add(new DateInterval('P' . $maxTimeFrame));
-        $ongoingFutCurrActivities = $recurring->getOngoingFutCurrActivities();
-
-        //1 - Count the the number of activities to be created in the system
-        switch ($timeFrame) {
-            case 'D':
-                $nbActivitiesToCreate = floor(date_diff($endDate, $startDate)->days / $frequency);
-                break;
-            case 'W':
-                $nbActivitiesToCreate = floor(date_diff($endDate, $startDate)->days / (7 * $frequency));
-                break;
-            case 'M':
-                $nbActivitiesToCreate = floor(date_diff($endDate, $startDate)->m / $frequency);
-                break;
-            case 'Y':
-                $nbActivitiesToCreate = floor(date_diff($endDate, $startDate)->y / $frequency);
-                break;
-        }
-
-        if (count($ongoingFutCurrActivities) > 1) {
-            $k = 0;
-
-            while (count($ongoingFutCurrActivities) + $k < $nbActivitiesToCreate + 1) {
-
-                $firstFutureActivity = $recurring->getOngoingFutCurrActivities()->first();
-
-                $activity = new Activity;
-                $activity->setRecurring($recurring)->setMasterUserId($masterUser->getId())->setOrganization($organization);
-                $recurring->addActivity($activity);
-
-                foreach ($firstFutureActivity->getStages() as $firstFutureActivityStage) {
-                    $stage = clone $firstFutureActivityStage;
-                    $stage->setActivity($activity);
-                    $stage->setCreatedBy($currentUser->getId());
-                    $activity->addStage($stage);
-
-                    foreach ($firstFutureActivityStage->getCriteria() as $firstFutureActivityStageCriterion) {
-                        $criterion = clone $firstFutureActivityStageCriterion;
-                        $criterion->setStage($stage)->setType($type);
-                        $criterion->setCreatedBy($currentUser->getId());
-                        $stage->addCriterion($criterion);
-                        $em->persist($criterion);
-
-                    }
-
-                    foreach ($firstFutureActivityStage->getParticipants() as $firstFutureActivityStageParticipant) {
-                        $participant = clone $firstFutureActivityStageParticipant;
-                        $participant->setStage($stage);
-                        $participant->setCreatedBy($currentUser->getId());
-                        $stage->addParticipant($participant);
-                        $em->persist($participant);
-                    }
-
-                    $em->persist($stage);
-
-                }
-                /*
-                if ($type == 1) {
-                $criterion->setLowerbound($lowerbound)->setUpperbound($upperbound)->setStep($step);
-                }
-                 */
-                $k++;
-
-                $em->persist($activity);
-                $em->flush();
-            }
-            $k = 0;
-            while (count($ongoingFutCurrActivities) - $k > $nbActivitiesToCreate) {
-                $activity = $ongoingFutCurrActivities->last();
-                $recurring->removeActivity($activity);
-                $em->persist($recurring);
-                $k++;
-                /*
-            foreach ($recurring->getActivities() as $activity) {
-            while (count($ongoingFutCurrActivities) > $nbActivitiesToCreate +1) {
-            $recurring->removeActivity($activity);
-
-            }
-            }*/
-            }
-            $em->flush();
-
-        } else {
-
-            //$recurring->getActivities()->first()->setName(null)
-            //->getStages()->first()->setStartDate(null)->setEndDate(null)->setGStartDate(null)->setGEndDate(null);
-
-            for ($k = 1; $k <= $nbActivitiesToCreate; $k++) {
-                $activity = new Activity;
-                $activity->setRecurring($recurring)->setMasterUserId($masterUser->getId())->setOrganization($organization)->setStatus($recurring->getStatus());
-                $recurring->addActivity($activity);
-
-                $stage = new Stage;
-                $stage->setActivity($activity);
-                $stage->setCreatedBy($currentUser->getId());
-                $activity->addStage($stage);
-
-                $criterion = new Criterion;
-                $criterion->setStage($stage)->setType($type)->setName('General');
-                $criterion->setCreatedBy($currentUser->getId());
-                $stage->addCriterion($criterion);
-
-                $em->persist($recurring);
-                $em->persist($activity);
-                $em->persist($stage);
-                $em->persist($criterion);
-
-                if ($type == 1) {
-                    $criterion->setLowerbound($lowerbound)->setUpperbound($upperbound)->setStep($step);
-                }
-            }
-            $em->flush();
-        }
-
-        $ongoingFutCurrActivities = $recurring->getOngoingFutCurrActivities();
-
-        for ($k = 1; $k <= count($ongoingFutCurrActivities); $k++) {
-            $activity = ($k == 1) ? $ongoingFutCurrActivities->first() : $ongoingFutCurrActivities->next();
-
-            $activityStartDate = clone $startDate;
-            $activityStartDate2 = clone $startDate;
-            $activityEndDate = clone $startDate->add(new \DateInterval('P' . $frequency . $timeFrame)) /*->sub(new \DateInterval('P1D'))*/;
-            $activityGStartDate = clone $activityStartDate2->add(new \DateInterval('P' . $gStartDateInterval . $gStartDateTimeFrame));
-            //$cloneGStartDate = clone $activityGStartDate;
-            $cloneEndDate = clone $activityEndDate;
-            $activityGEndDate = clone $cloneEndDate->add(new DateInterval('P' . $gEndDateInterval . $gEndDateTimeFrame));
-            $activity->setName($name . /*' ('.$activityStartDate->format("j F y").' - '.$activityEndDate->format("j F y").')'*/ ' ' . $k)
-                ->getStages()->first()->setName($name . /*' ('.$activityStartDate->format("j F y").' - '.$activityEndDate->format("j F y").')'*/ ' ' . $k)->setStartDate($activityStartDate)->setEndDate($activityEndDate)->setGStartDate($activityGStartDate)->setGEndDate($activityGEndDate)->setMasterUserId($masterUser->getId())
-                ->getCriteria()->first()->setType($type)->setLowerbound(($type == 1) ? $lowerbound : null)->setUpperbound(($type == 1) ? $upperbound : null)->setStep(($type == 1) ? $step : null);
-            $em->persist($recurring);
-        }
-
-        //$em->flush();
-
-        $lastActEndDate = clone $definedEndDate;
-        $lastActGStartDate = clone $definedEndDate->add(new DateInterval('P1D'));
-        $lastActGEndDate = clone $definedEndDate->add(new DateInterval('P' . $gEndDateInterval . $gEndDateTimeFrame));
-        $recurring->getOngoingFutCurrActivities()->last()->getStages()->first()->setEndDate($lastActEndDate)->setGStartDate($lastActGStartDate)->setGEndDate($lastActGEndDate);
-        $em->persist($recurring);
-        $em->flush();
-    }
-
-    // Function which sends mail to user
-    // TestorNot parameter defines if the mail is sent is a testing mode (0) or live (1)
-    /**
-     * @param User[] $recipients
-     */
-    public static function sendMail($_, array $recipients, $actionType, $settings)
-    {
-        global $app;
-
-        $data = $settings;
-        $em = $app['orm.em'];
-        $data['actionType'] = $actionType;
-        $data['currentuser'] = self::getAuthorizedUser();
-        $recipientUsers = true;
-
-        if (isset($data['recipientUsers'])) {
-            $recipientUsers = false;
-        }
-
-        foreach ($recipients as $key => $recipient) {
-            $message = Swift_Message::newInstance();
-            $mail = new Mail;
-            $mail->setType($actionType);
-            $token = md5(rand());
-            $mail
-                ->setUser($recipient)
-                ->setOrganization($recipient->getOrganization());
-
-            if (isset($data['activity'])) {
-                $mail->setActivity($data['activity']);
-                if ($actionType == 'unvalidatedGradesStageJoiner') {
-                    $mail->setStage($data['activity']->getStages()->first());
-                }
-            }
-
-            if (isset($data['stage'])) {
-                $mail->setStage($data['stage'])->setActivity($data['stage']->getActivity());
-            }
-
-            if (isset($data['pType'])) {
-                switch ($data['pType']) {
-                    case 1:
-                        $mail->setPersona('C');
-                        break;
-                    case 2:
-                        $mail->setPersona('P');
-                        break;
-                    case 3:
-                        $mail->setPersona('M');
-                        break;
-                    case 4:
-                        $mail->setPersona('H');
-                        break;
-                    case 5:
-                        $mail->setPersona('U');
-                        break;
-                    default:
-                        break;
-                }
-            }
-            if (isset($data['language'])) {
-                switch ($data['language']) {
-                    case 1:
-                        $mail->setLanguage('Fr');
-                        break;
-                    case 2:
-                        $mail->setLanguage('En');
-                        break;
-                    default:
-                        $mail->setLanguage($data['language']);
-                        break;
-                }
-            }
-            if (isset($data['location'])) {
-                switch ($data['location']) {
-                    case "FR":
-                        $data['phone'] = '+33 6 60 62 94 08';
-                        break;
-                    default:
-                        $data['phone'] = '+352 621 207 642';
-                        break;
-                }
-            }
-
-            $organization = $recipient->getOrganization();
-
-            $mail->setToken($token);
-            $data['trkToken'] = $token;
-
-            $em->persist($mail);
-            $em->flush();
-
-            if ($organization->getId() == 86 || strpos($_SERVER['HTTP_HOST'], 'sg') !== false) {
-                $data['logo_img'] = $message->embed(\Swift_Image::frompath('lib/img/societe-generale-logo160.jpg'));
-                $data['logo_width_px'] = 160;
-                $data['company_name'] = 'SERPICO pour Société Générale Luxembourg';
-                $data['address'] = '28-32 Place de la Gare';
-                $data['zipcode_city'] = 'L-1616 Luxembourg';
-                $data['company_website'] = 'https://www.sgbt.lu/fr/';
-            } else {
-                $data['logo_img'] = $message->embed(Swift_Image::frompath('lib/img/logo_serpico_mail.png'));
-                $data['logo_width_px'] = 80;
-                $data['company_name'] = 'Serpico';
-                $data['address'] = '59, boulevard Royal';
-                $data['zipcode_city'] = 'L-2449 Luxembourg';
-                $data['phone'] = '+352 42 42 38 77';
-                $data['company_website'] = 'https://www.serpicoapp.com';
-                $data['incubator_logo'] = null;
-            }
-
-            $data['recipient'] = $recipient;
-            $data['mailId'] = $mail->getId();
-
-            if ($actionType == 'firstMailReminderTPeriod' || $actionType == 'prospecting_1') {
-                $data['people_working_logo'] = $message->embed(\Swift_Image::frompath('lib/img/people-working-logo.png'));
-            }
-
-            if ($actionType == 'activityParticipation') {
-
-            } else if ($actionType == 'registration' /*&& !$data['firstCreatedOrgUser']*/ || $actionType == 'externalInvitation') {
-                $data['token'] = $settings['tokens'][$key];
-            } else if ($actionType == 'updateProgressStatus'){
-                $data['stage'] = $settings['stages'][$key];
-            }
-
-            $mailTemplate = $app['twig']->loadTemplate('mails/' . $actionType . '.html.twig');
-
-            $mailingEmailAddress = $recipientUsers ? $recipient->getEmail() : $recipient;
-
-            $message->setTo($mailingEmailAddress)
-                ->setSubject($mailTemplate->renderBlock('subject', $data))
-                ->setFrom(array('no-reply@serpicoapp.com' => 'Serpico'))
-                ->setContentType("text/html")
-                ->setBody($mailTemplate->renderBlock('body', $data));
-            if (isset($data['addPresFR']) and $data['addPresFR'] == 1) {
-                $message->attach(\Swift_Attachment::frompath('lib/Data/Serpico_Presentation_FR.pdf'));
-            }
-            if (isset($data['addPresEN']) and $data['addPresEN'] == 1) {
-                $message->attach(\Swift_Attachment::frompath('lib/Data/Serpico_Presentation_EN.pdf'));
-            }
-
-            /** @var Swift_Mailer */
-            $mailer = $app['mailer'];
-            $mailer->send($message);
-        }
-
-        /** @var Swift_SpoolTransport */
-        $mailerSpoolTransport = $app['swiftmailer.spooltransport'];
-        $failures = null;
-        $return = $mailerSpoolTransport
-            ->getSpool()
-            ->flushQueue($app['swiftmailer.transport'], $failures);
-
-        return ['sentCount' => $return, 'failures' => $failures];
-    }
-
     // Function which checks if stage is computable, if it is the case sends mail to activity manager to access results
-    public function checkStageComputability(Request $request, Application $app, Stage $stage, bool $addInDb = true)
+    public function checkStageComputability(Request $request, Stage $stage, bool $addInDb = true)
     {
 
         $em = self::getEntityManager();
         $entityManager = $this->getEntityManager($app);
-        /** @var ActivityUser[] */
+        /** @var Participation[] */
 
         $uniqueNonPassiveParticipations = $stage->getUniqueGraderParticipations();
         $computable = (count($uniqueNonPassiveParticipations) > 0);
@@ -1145,19 +839,19 @@ abstract class MasterController extends AbstractController
                 }
             } else {
                 $nbValidated++;
-                $user = $uniqueNonPassiveParticipation->getDirectUser();
+                $user = $uniqueNonPassiveParticipation->getUser();
                 // Only receive mail about results being releasable, per order of importance :
                 // 1 - Administrators participants, or activity managers who are leaders
                 // 2 - Otherwise the department managers of collaborator leaders
-                if ($user->getRole() == 1 || $user->getRole() == 4) {
+                if ($user->getRole() <= USER::ROLE_ADMIN) {
                     $recipients[] = $user;
                 } else {
                     if ($uniqueNonPassiveParticipation->isLeader()) {
-                        if ($user->getRole() == 2) {
+                        if ($user->getRole() == USER::ROLE_AM) {
                             $recipients[] = $user;
                         } elseif ($user->getDepartment()) {
-                            $headOfDptUser = $user->getDepartment()->getMasterUser();
-                            if ($headOfDptUser) {
+                            $headOfDptUsers = $user->getDepartment()->getUserMasters();
+                            foreach($headOfDptUsers as $headOfDptUser){
                                 $recipients[] = $headOfDptUser;
                             }
                         }
@@ -1198,13 +892,13 @@ abstract class MasterController extends AbstractController
 
             if ($completedActivity) {
                 $activityStage = false;
-                $activityUser = false;
+                $Participation = false;
                 // Recalculate all the data (but not update the database)
                 if (count($stage->getCriteria()) > 0) {//
                     foreach ($activity->getStages() as $stage) {
                         if ($stage->getMode() != MasterController::STAGE_ONLY) {
-                            $dataActivityUser[$stage->getId()] = $this->computeStageResults($stage, MasterController::USERS_ONLY, false);
-                            $activityUser = true;
+                            $dataParticipation[$stage->getId()] = $this->computeStageResults($stage, MasterController::USERS_ONLY, false);
+                            $Participation = true;
                         }
                         if ($stage->getMode() != MasterController::USERS_ONLY) {
                             $dataActivityStage[$stage->getId()] = $this->computeStageResults($stage, MasterController::STAGE_ONLY, false);
@@ -1212,8 +906,8 @@ abstract class MasterController extends AbstractController
                         }
 
                     }
-                    if ($activityUser) {
-                        MasterController::computeActivityResult($activity, $dataActivityUser, MasterController::USERS_ONLY, $addInDb);
+                    if ($Participation) {
+                        MasterController::computeActivityResult($activity, $dataParticipation, MasterController::USERS_ONLY, $addInDb);
                     }
                     if ($activityStage) {
                         MasterController::computeActivityResult($activity, $dataActivityStage, MasterController::STAGE_ONLY, $addInDb);
@@ -1259,14 +953,14 @@ abstract class MasterController extends AbstractController
     {
         $em = self::getEntityManager();
         # The repos to access the data in the database
-        $repoAU = $em->getRepository(ActivityUser::class);
+        $repoP = $em->getRepository(Participation::class);
         # The user who created the activity
-        $currentUser = MasterController::getAuthorizedUser();
+        $currentUser = $this->user;
         $criteria = $stage->getCriteria();
 
 
         $activity = $stage->getActivity();
-        $activityUsers = new ArrayCollection($repoAU->findBy(['criterion' => $criteria->first()], ['type' => 'ASC', 'team' => 'ASC']));
+        $participations = new ArrayCollection($repoP->findBy(['criterion' => $criteria->first()], ['type' => 'ASC', 'team' => 'ASC']));
         # the data send to the framework for the criteria calculation
         $jsonData = [];
         $jsonData["userWeights"] = [];
@@ -1281,21 +975,21 @@ abstract class MasterController extends AbstractController
         # Build the users and teams lists
         $concernedTeam = null;
 
-        foreach ($activityUsers as $au) {
-            $jsonData["userWeights"][$au->getUsrId()] = $au->getDirectUser()->getWeight()->getValue();
-            $jsonGlobalDataStage["user"][] = $au->getUsrId();
+        foreach ($participations as $p) {
+            $jsonData["userWeights"][$p->getUsrId()] = $p->getDirectUser()->getWeight()->getValue();
+            $jsonGlobalDataStage["user"][] = $p->getUsrId();
             # if new team
-            if ($au->getTeam() !== null && $au->getTeam() != $concernedTeam && $stageMode != MasterController::STAGE_ONLY) {
-                $concernedTeam = $au->getTeam();
+            if ($p->getTeam() !== null && $p->getTeam() != $concernedTeam && $stageMode != MasterController::STAGE_ONLY) {
+                $concernedTeam = $p->getTeam();
                 $jsonData["teams"][$concernedTeam->getId()] = [];
                 $jsonData["teamWeights"][$concernedTeam->getId()] = 0;
                 $jsonGlobalDataStage["team"][] = $concernedTeam->getId();
             }
-            if ($au->getTeam() != null  && $stageMode != MasterController::STAGE_ONLY) {
+            if ($p->getTeam() != null  && $stageMode != MasterController::STAGE_ONLY) {
                 # add the team member id in the teams id
-                $jsonData["teams"][$concernedTeam->getId()][] = $au->getUsrId();
+                $jsonData["teams"][$concernedTeam->getId()][] = $p->getUsrId();
                 # add the weight of the member in the team weight
-                $jsonData["teamWeights"][$concernedTeam->getId()] += $au->getDirectUser()->getWeight()->getValue();
+                $jsonData["teamWeights"][$concernedTeam->getId()] += $p->getDirectUser()->getWeight()->getValue();
             }
         }
         # If the stage is graded
@@ -1304,7 +998,7 @@ abstract class MasterController extends AbstractController
             $jsonGlobalDataStage["user"][] = -1;
         }
         # build the criteria data
-        $jsonData = MasterController::prepareJsonDataCriteria($stageMode, $criteria, $repoAU, $jsonData);
+        $jsonData = MasterController::prepareJsonDataCriteria($stageMode, $criteria, $repoP, $jsonData);
         # call the microframework for the criteria results
         $jsonFile = json_encode($jsonData);
         $calculatedValues = MasterController::callFramework($jsonFile, MasterController::CRITERIA);
@@ -1320,7 +1014,7 @@ abstract class MasterController extends AbstractController
             $jsonGlobalDataStage[$criterion->getId()] = $calculatedValues[$criterion->getId()];
             $jsonGlobalDataStage[$criterion->getId()]["weight"] = $criterion->getWeight();
             if ($addInDB) {
-                MasterController::addDataInDataBase($em, $activity, $stage, $criterion, $activityUsers, $currentUser, $resultType, $calculatedValues, $stageMode);
+                MasterController::addDataInDataBase($em, $activity, $stage, $criterion, $participations, $currentUser, $resultType, $calculatedValues, $stageMode);
             }
         }
 
@@ -1334,7 +1028,7 @@ abstract class MasterController extends AbstractController
         # Add all the calculated data about the stage in the data base
 
         if ($addInDB) {
-            MasterController::addDataInDataBase($em, $activity, $stage, null, $activityUsers, $currentUser, 0, $calculatedValues, $stageMode);
+            MasterController::addDataInDataBase($em, $activity, $stage, null, $participations, $currentUser, 0, $calculatedValues, $stageMode);
         }
 
         return $calculatedValues;
@@ -1345,17 +1039,17 @@ abstract class MasterController extends AbstractController
     /**
      * @param int $stageMode value : USER_ONLY or STAGE_ONLY
      * @param $criteria criteria of a stage
-     * @param $repoAU
+     * @param $repoP
      * @param $jsonData jsondata in computeStageResult, in construction
      * @return mixed
      *
      * Add all information about the grades for all criterion in a stage, to be sent to the framework
      * Should be only called by computeStageResult
      */
-    public static function prepareJsonDataCriteria(int $stageMode, $criteria, $repoAU, $jsonData)
+    public static function prepareJsonDataCriteria(int $stageMode, $criteria, $repoP, $jsonData)
     {
         foreach ($criteria as $criterion) {
-            $activityUsers = new ArrayCollection($repoAU->findBy(['criterion' => $criterion], ['type' => 'ASC', 'team' => 'ASC']));
+            $participations = new ArrayCollection($repoP->findBy(['criterion' => $criterion], ['type' => 'ASC', 'team' => 'ASC']));
             $jsonData["criterias"][$criterion->getId()] = [];
             $jsonData["criterias"][$criterion->getId()]["userGrades"] = [];
             $jsonData["criterias"][$criterion->getId()]["teamGrades"] = [];
@@ -1365,7 +1059,7 @@ abstract class MasterController extends AbstractController
                 $jsonData["criterias"][$criterion->getId()]["upperBound"] = $criterion->getUpperbound();
             }
             # Loop on the graders
-            foreach ($activityUsers as $au) {
+            foreach ($participations as $p) {
                 #  Loop on the graded
                 $nbTeamMember = 0;
                 foreach ($au->getGrades() as $grade) {
@@ -1432,7 +1126,7 @@ abstract class MasterController extends AbstractController
      * @param Activity $activity : current activity
      * @param Stage|null $stage : current stage, is null if the function compute the global data for an activity
      * @param Criterion|null $criterion : can be null if the function compute the global data for an activity or a stage
-     * @param $activityUsers : liste of the activityUsers, used for individual data computation
+     * @param $participations : liste of the Participations, used for individual data computation
      * @param $currentUser : the one who created the activity
      * @param $resultType : ??
      * @param $calculatedValues : values send by the  framework of result calculation
@@ -1442,12 +1136,12 @@ abstract class MasterController extends AbstractController
      * add all the values in the database (set the global data, and the individual with setIndividualData
      */
     public static function addDataInDataBase(
-        EntityManager $em, Activity $activity, ?Stage $stage, ?Criterion $criterion, $activityUsers, $currentUser, $resultType, $calculatedValues, int $stageMode
+        EntityManager $em, Activity $activity, ?Stage $stage, ?Criterion $criterion, $participations, $currentUser, $resultType, $calculatedValues, int $stageMode
     )
     {
         if ($stageMode != MasterController::STAGE_ONLY) {
             # Compute the individual results for all users
-            foreach ($activityUsers as $user) {
+            foreach ($participations as $user) {
                 try {
                     MasterController::setIndividualData($em, $activity, $stage, $criterion, $currentUser, "users", $calculatedValues, $user->getUsrId(), $user->getType(),$user->getExtUsrId(), "user", $stageMode,);
                 } catch (ORMExceptionAlias $e) {
@@ -1455,7 +1149,7 @@ abstract class MasterController extends AbstractController
             }
             # Compute the teams results
             $concernedTeam = null;
-            foreach ($activityUsers as $au) {
+            foreach ($participations as $p) {
                 if ($au->getTeam() !== null && $au->getTeam() != $concernedTeam) {
                     $concernedTeam = $au->getTeam();
                     try {
@@ -1496,7 +1190,7 @@ abstract class MasterController extends AbstractController
                 ->setWeightedDistanceRatio($calculatedValues[$criteriaId]["weightedUserDevRatio"])
                 ->setEqualDistanceRatio($calculatedValues[$criteriaId]["equalUserDevRatio"])
                 ->setType($resultType)
-                ->setCreatedBy($currentUser->getId());
+                ->setInitiator($currentUser);
             $em->persist($resultProject);
         }
         # set the global results about the users in the database
@@ -1520,7 +1214,7 @@ abstract class MasterController extends AbstractController
                 ->setWeightedDistanceRatio($calculatedValues[$criteriaId]["weightedUserDevRatio"])
                 ->setEqualDistanceRatio($calculatedValues[$criteriaId]["equalUserDevRatio"])
                 ->setType($resultType)
-                ->setCreatedBy($currentUser->getId());
+                ->setInitiator($currentUser);
 //            ob_flush();
 //            ob_start();
 //            var_dump( $em->getConnection()->getConfiguration()->getSQLLogger());
@@ -1554,7 +1248,7 @@ abstract class MasterController extends AbstractController
                 ->setWeightedDistanceRatio($calculatedValues[$criteriaId]["weightedTeamDevRatio"])
                 ->setEqualDistanceRatio($calculatedValues[$criteriaId]["equalTeamDevRatio"])
                 ->setType($resultType)
-                ->setCreatedBy($currentUser->getId());
+                ->setInitiator($currentUser);
             # confirm the db query
             $em->persist($resultTeams);
         }
@@ -1606,9 +1300,9 @@ abstract class MasterController extends AbstractController
         } else {
             $criteriaId = "step";
         }
-        $result->setCreatedBy($currentUser->getId());
+        $result->setInitiator($currentUser);
         # Add the results (weighted, equal, relative)
-        if ($entityType != ActivityUser::PARTICIPATION_THIRD_PARTY && $stageMode != MasterController::STAGE_ONLY) {
+        if ($entityType != Participation::PARTICIPATION_THIRD_PARTY && $stageMode != MasterController::STAGE_ONLY) {
             $result->setCriterion($criteria)
                 ->setStage($stage)
                 ->setActivity($activity)
@@ -1617,11 +1311,11 @@ abstract class MasterController extends AbstractController
                 ->setWeightedRelativeResult($calculatedValues[$criteriaId][$userType][$entityId]["weightedRelativeResult"])
                 ->setEqualRelativeResult($calculatedValues[$criteriaId][$userType][$entityId]["equalRelativeResult"])
                 ->setType($resultType)
-                ->setCreatedBy($currentUser->getId());
+                ->setInitiator($currentUser);
 
         }
         # add the deviation information
-        if ($entityType != ActivityUser::PARTICIPATION_PASSIVE && $stageMode != MasterController::STAGE_ONLY) {
+        if ($entityType != Participation::PARTICIPATION_FOLLOWING && $stageMode != MasterController::STAGE_ONLY) {
             $result->setCriterion($criteria)
                 ->setStage($stage)
                 ->setActivity($activity)
@@ -1630,7 +1324,7 @@ abstract class MasterController extends AbstractController
                 ->setWeightedDevRatio($calculatedValues[$criteriaId][$userType][$entityId]["weightedDevRatio"])
                 ->setEqualDevRatio($calculatedValues[$criteriaId][$userType][$entityId]["equalDevRatio"])
                 ->setType($resultType)
-                ->setCreatedBy($currentUser->getId());
+                ->setInitiator($currentUser);
         }
         if ($userType == "user"){
             $result->setExternalUsrId($extId);
@@ -1697,9 +1391,9 @@ abstract class MasterController extends AbstractController
     public static function computeActivityResult(Activity $activity, $dataActivity, int $stageMode, bool $addInDb = true)
     {
         $em = self::getEntityManager();
-        $repoAU = $em->getRepository(ActivityUser::class);
+        $repoP = $em->getRepository(Participation::class);
         $repoRT = $em->getRepository(ResultTeam::class);
-        $activityUsers = new ArrayCollection($repoAU->findBy(['criterion' => $activity->getStages()->first()->getCriteria()->first()], ['type' => 'ASC', 'team' => 'ASC']));
+        $participations = new ArrayCollection($repoP->findBy(['criterion' => $activity->getStages()->first()->getCriteria()->first()], ['type' => 'ASC', 'team' => 'ASC']));
         # refactor the dataActivity, to correspond to the framework
         foreach ($dataActivity as $key => $step) {
             $dataActivity[$key] = $step["step"];
@@ -1708,7 +1402,7 @@ abstract class MasterController extends AbstractController
         $dataActivity["user"] = [];
         $dataActivity["team"] = [];
         $concernedTeam = null;
-        foreach ($activityUsers as $au) {
+        foreach ($participations as $p) {
             $dataActivity["user"][] = $au->getUsrId();
             # if new team
             if ($au->getTeam() !== null && $au->getTeam() != $concernedTeam && $stageMode != MasterController::STAGE_ONLY) {
@@ -1717,7 +1411,7 @@ abstract class MasterController extends AbstractController
             }
         }
         # the one who created the activity
-        $currentUser = MasterController::getAuthorizedUser();
+        $currentUser = $this->user;;
         $criteria = new ArrayCollection();
         # set the stages data correctly
         foreach ($activity->getStages() as $stage) {
@@ -1735,7 +1429,7 @@ abstract class MasterController extends AbstractController
         $calculatedValues = MasterController::callFramework($jsonFile, MasterController::ACTIVITY);
         # Add the data in the database
         if ($addInDb){
-            MasterController::addDataInDataBase($em, $activity, null, null, $activityUsers, $currentUser, 0, $calculatedValues, $stageMode);
+            MasterController::addDataInDataBase($em, $activity, null, null, $participations, $currentUser, 0, $calculatedValues, $stageMode);
         }
 
     }

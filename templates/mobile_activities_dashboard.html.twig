@@ -1,0 +1,3157 @@
+{% extends "layout.html.twig" %}
+
+{% block data_params %}
+  {{ global.html_data_params({
+    aurl: url('createUserProcessActivity', { inpId: 0 })|raw
+  }) }}
+{% endblock %}
+
+{% block title %}
+  {{ 'iprocesses.title'|trans }}
+{% endblock title %}
+
+{% block mobile_title %}
+  {{ 'iprocesses.title'|trans }}
+{% endblock mobile_title %}
+
+{% set actNameTruncVal = 22 %}
+
+{% set noActivities = orphanActivities is empty and processesActivities is empty %}
+
+{% set actStatuses = 
+  { 'o' : {
+        '-5' : 'cancelled',
+        '-4' : 'discarded', 
+        '-3' : 'requested',
+        '-2' : 'attributed',
+        '-1' : 'incomplete',
+        '0' : 'future',
+        '1' : 'current',
+        '2' : 'completed',
+        '3' : 'published',
+        },
+    'p' : {
+        '-5' : 'stopped',
+        '-4' : 'postponed', 
+        '-3' : 'suspended',
+        '-2' : 'reopened',
+        '-1' : 'unstarted',
+        '0' : 'upcoming',
+        '1' : 'ongoing',
+        '2' : 'completed',
+        '3' : 'finalized',
+    }
+  }
+  %}
+
+{% block css %}
+  <link rel="stylesheet" href="{{ asset('css/activity_list_item.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/iprocess_list.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/dropify.min.css') }}">
+  <script>
+    var oid = "{{ currentuser.organization.id }}";
+    var uid = "{{ currentuser.id }}";
+    var ipurl = "{{ url('getIProcesses') }}";
+    var gcurl = "{{ url('getElementConfig', {entity:'activity', elmtId : 0}) }}";
+    var gsurl = "{{ url('getGradableStages', {actId : 0}) }}";
+    var surl = "{{path('dynamicSearch')}}";
+    var aurl = "{{ url('createUserProcessActivity', { inpId: 0 }) }}";
+    var adurl = "{{ url('activityDelegate') }}";
+    var usurl= "{{ url('updateStageStatus', {stgId : 0}) }}";
+    var cpurl = "{{ currentuser.organization ? url('createProcessRequest', {orgId : currentuser.organization.id}): '' }}";
+    var fc = parseInt("{{ firstConnection }}");
+    var eurl = "{{ url('updateEvent', {eveId : 0}) }}";
+    var scurl = "{{ url('createStage') }}";
+    var currentWfiId = "{{ currentuser.organization.type != 'C' ? currentuser.organization.workerFirm.id : 0 }}";
+    var uid = "{{ currentuser.id }}";
+    var un = "{{ currentuser.fullname }}";
+    var userPic = "{{ asset(global.userpicture) }}";
+    var myself = "{{ 'myself'|trans|capitalize }}";
+    var pcurl = "{{ url('createParticipant') }}";
+    var dcurl = "{{ url('getDummyClients') }}";
+    var daurl = "{{ url('activityDelete') }}";
+    var dturl = "{{ url('getDynamicTranslations') }}";
+    var geurl = "{{ url('getEventTypesFromEventGroup') }}";
+    var notConfirmingPartError = "{{ 'getEventTypesFromEventGroup'|trans }}";
+    var edurl = "{{ url('getEventData') }}";
+    var sdurl = "{{ url('getStageData') }}";
+    var deurl = "{{ url('deleteEvent',{eveId: 0}) }}";
+    var dcomurl = "{{ url('deleteComment', {id: 0}) }}";
+    var ddocurl = "{{ url('deleteDocument', {id: 0}) }}";
+    var dpurl = "{{ url('deleteParticipant',{entity: 'activity', stgId: 0, elmtId: 0}) }}";
+    var usdurl = "{{ url('updateStageDates') }}";
+    var uedurl = "{{ url('updateEventDates') }}";
+    var udturl = "{{ url('updateDocumentTitle') }}";
+    var udcurl = "{{ url('updateDocumentContent') }}";
+    var usnurl = "{{ url('updateStageName') }}";
+    var uccurl = "{{ url('updateCommentContent') }}";
+    var apurl = "{{ url('addStageParticipantFollower',{stgId: 0, fjType: 'participant'}) }}";
+    var msgDocInsert = "{{ 'activity_elements.events.documents.dropify_insert_msg'|trans }}";
+    var msgDocReplace = "{{ 'remove'|trans }}";
+    var msgDocRemove = "{{ 'replace'|trans }}";
+    var msgDocError = "{{ 'activity_elements.events.documents.dropify_error_msg'|trans }}";
+    var msgComModify = "{{ 'modify'|trans|capitalize }}";
+    var evtAccStgMsg = "{{ 'activity_elements.events.access_stage_btn'|trans|raw }}";
+    var evtAccActMsg = "{{ 'activity_elements.events.access_activity_btn'|trans|raw }}";
+    var synthSuffix = "{{ 'activity_elements.synth_user_suffix'|trans }}";
+    var lkEvtToStgMsg = "{{ 'activity_elements.stages.multiple_stages_modal.add_event_title'|trans }}";
+    var modifiedMsg = "{{ 'modified'|trans }}";
+    var selfAcctIds = "{{ currentuser.userGlobal.userAccounts|map(u => u.id)|join(', ') }}";
+    var swiurl = "{{ url('retrieveStagesWithinInterval') }}";
+  </script>
+  <style>
+      .elmts{
+        background-color: #f1f1f1;
+        border-radius: 3px;
+      }
+      .stage-detail-container{
+        display: flex;
+        height: 100%;
+        padding: 0;
+      }
+
+      .stage{
+        margin: 0em 1em;
+      }
+
+      .stage:not(:last-of-type){
+        border-bottom: 1px solid #0002;
+      }
+
+      .stage:last-of-type>.stage-detail-container{
+        padding-bottom: 2rem;
+      }
+
+      .stage-container--main > section {
+        flex: 1;
+        overflow: auto;
+        padding: 0 2rem;
+      }
+      .stage-detail-container > section:not(:last-of-type) {
+        border-right: thin solid #0002;
+      }
+
+      .cn-icon {
+        width: 15px;
+      }
+
+      .cn-icon::before {
+        content: attr(data-icon);
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        margin-right: .25em;
+      }
+
+      .output>.title, .participants>.title {
+        font-size: 1.2em;
+      }
+
+      .output>.title>i, .participants>.title>i {
+        margin-right: 5px;
+        padding-bottom: 0.5em;
+      }
+
+      .readiness{
+        font-size:0.8em;
+      }
+
+      .no-picture{
+        background-color: grey;
+        width: 1.3em;
+        height: 1.3em;
+        display: inline-block;
+        text-align: center;
+        border-radius: 100%;
+        color: white;
+      }
+
+      .stage-duration{
+        width: 50%;
+      }
+
+      .stage-dates, .stage-duration, .grading-duration{
+        display: flex;
+      }
+
+      .grading-duration{
+        margin-left: 1rem;
+      }
+      .stage-duration i, .grading-duration i{
+        margin-right: 5px;
+      }
+
+      .stage-dates, .c-action-buttons > i{
+        padding: 0 1rem;
+      }
+
+      .stage-progress{
+        position: absolute;
+        right:0;
+        line-height: 30px;
+      }
+
+      .stage-progress>.btn-flat:first-of-type{
+        cursor: unset;
+      }
+
+      .stage-name{
+        margin : 10px 0px;
+        font-size: 1.2em;
+      }
+
+      .output{
+        width: 50%;
+      }
+
+      .elmts>.activity{
+        padding-top: 0.5em;
+        margin: 1em 0em;
+      }
+
+      .activity-name{
+        margin: 2rem 1rem 0 1rem;
+        font-size: 1.2em;
+      }
+
+      .activity-master-user{
+        font-size: 14px;
+        margin-left: auto;
+      }
+
+      .initialize-modal-title{
+        display: inline-block;
+        margin-left: 20px;
+      }
+
+      .ip-info{
+        position: absolute;
+        right: 0%;
+      }
+
+      .ip-info>a{
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+      }
+
+      .ip-info>a, .activity-name>i{
+        margin-right: 5px;
+      }
+
+      section{
+        padding: 0 1rem;
+        margin: 1rem 0;
+      }
+
+      #updateStageProgressStatus, #createStage, #requestNewProcess{
+        overflow-y: unset;
+      }
+
+      .nb-completed-stages{
+        margin: 1em;
+      }
+
+      .sorting-type{
+        padding: 0 3em;
+      }
+
+      .sorting-type .btn-flat, .sorting-type .btn-flat>i{     
+        font-size: 12px;
+      }
+
+      .view-type-value, .change-view-type, .change-timescale-type{
+        color: #55318e; 
+      }
+      .sorting-type-value, .change-status-type{
+        color: purple;
+      }
+      .dates-type-value, .change-dates-type{
+        color: #55318e;
+      }
+  
+      #sortingTypeSelector{
+        display: none;
+      }
+
+      .act-team-participant i{
+        font-size: 0.9rem;
+      }
+      .view-type{
+        padding: 0 3em;
+        justify-content: flex-end;
+      }
+
+      .view-type>.btn-flat, .view-type>.btn-flat>i{
+        color : #26a69a;
+        font-size: 12px;
+      }
+      .view-type>.btn-flat:last-of-type{
+        padding-left : 7px;
+      }
+      #viewTypeSelector{
+        display: none;
+      }
+      .change-view-type, .change-status-type, .change-dates-type, .change-timescale-type{
+        display: flex;
+        flex-direction: column;
+      }
+      .change-view-type>i, .change-status-type>i, .change-dates-type>i, .change-timescale-type>i{
+        line-height: 10px;
+      }
+
+      .account-logo {
+        --size: 1.2em;
+        font-size: var(--size);
+        height: 1em;
+        width: 1em;
+        border: 1.5px solid #e0e0e0;
+        margin-right: .25em;
+      }
+
+      ol.simult.stages{
+        --button-size:1em;
+      }
+
+      ol.stages:not(.simult){
+        --button-size:1.3em;
+      }
+
+      ol.stages::before{
+        z-index: 0;
+      }
+
+      ol.stages.past-period{
+        z-index: 1;
+      }
+
+      .simult{
+        flex-direction: column;
+      }
+
+      .simult > li{
+        margin-top: 0.25rem;
+        margin-bottom: 0.25rem;
+      }
+
+      .process-list--item{
+        border-bottom: 1px dashed black;
+        padding: 0.5rem 0;
+      }
+
+      .process-detail{
+        justify-content: center;
+      }
+
+      .ts-scale .col{
+        text-align: center;
+      }
+
+      .activity-component, .past-period, .ongoing-period, .ts-scale, .act-info, .stage, .elmts>.activity {
+        position: relative;
+      }
+
+      .stages.simult .s-day {
+        position: absolute;
+        left: -1rem;
+        top: -0.3rem;
+        font-size: 10px;
+      }
+
+      .stages.simult .e-day {
+        position: absolute;
+        right: -1rem;
+        top: -0.3rem;
+        font-size: 10px;
+      }
+      .stages:not(.simult) .s-day {
+        position: absolute;
+        left: -0.4rem;
+        top: -2rem;
+        font-size: 14px;
+      }
+
+      .stages:not(.simult) .e-day {
+        position: absolute;
+        right: -0.4rem;
+        bottom: -2rem;
+        font-size: 14px;
+      }
+
+      .stages:not(.simult) .single-date{
+        right: calc(var(--button-size) * -1/5);
+        top: calc(var(--button-size) * -1);
+      }
+
+      .stages.simult .single-date{
+        left: -2.5rem;
+        top: -0.4rem;
+      }
+
+      .stages:not(.simult) .m-days{
+        width: 50px;
+        right: -1.5rem;
+      }
+
+      .stages-holder{
+        display: flex;
+        flex-direction: column;
+        border-bottom: 1px dashed lightgray;
+      }
+
+      .fixed-action-btn ul{
+        bottom: calc(var(--button-size) * 0.7);
+        left: calc(var(--button-size) * -0.4);
+        min-width: 50px;
+      }
+
+      /*.fixed-action-btn ul > li > a{
+        background-color: #1976D2;
+      }*/
+
+      .fixed-action-btn ul > li > a:hover{
+        background-color: white;
+      }
+
+      .fixed-action-btn ul > li > a > i:hover{
+        color: #ff9300;
+      }
+      .insert-document-btn, .insert-comment-btn{
+        background-color: #00acc1;
+      }
+
+      .trigger-act-btn:hover {
+          background-color: #ff9300;
+      }
+
+
+      .tabs-t-view{
+        height: 48px;
+        justify-content: center;
+        text-align: center;
+      }
+
+      .tabs-t-view,.modified-fixed-btn{
+          --button-size:1.3em;
+          --strike-width: .2em;
+      }
+
+      .act-info{
+         --button-size: .7em;
+         --strike-width: .35em;
+      }
+
+      .tabs-t-view > li{
+        -webkit-box-flex: 1;
+        flex-grow: 1;
+        text-transform: uppercase;
+        font-size: 14px;
+        justify-content: center;
+      }
+
+      .tabs-t-view li.incomplete.showable .stage-item-button{
+        background-color: orange;
+      }
+
+      .tabs-t-view li.current.showable .stage-item-button{
+        background-color: #16AFB7;
+      }
+
+      .tabs-t-view li.completed.showable .stage-item-button{
+        background-color:#4CAF50;
+      }
+
+      .modified-fixed-btn{
+        display:inline-block;
+      }
+
+      .nb-stages{
+        font-size: 15px;
+      }
+
+      .timescale{
+        position: -webkit-sticky; /* Safari */
+        position: sticky;
+        top: 0;
+        background-color: white;
+      }
+
+      .act-info > .fixed-action-btn{
+        position: absolute;
+        right: calc(100% + 0.7rem);
+        top:17%;
+      }
+      
+      .modified-fixed-btn ul{
+        text-align: right;
+        margin-right: 2.5rem;
+        top: 37%;
+        -webkit-transform: translateY(-50%);
+        transform: translateY(-50%);
+        height: 3rem;
+        left: auto;
+      }
+
+      .modified-fixed-btn ul li{
+        margin: 0px 15px 0 0;
+        display: inline-block;
+      }
+
+      .multiple-stages{
+        background-color: white;
+        border: 1px solid black;
+        position: absolute;
+        top: -0.5rem;
+        left: calc(50% - 0.5rem);
+        padding: 2px;
+        line-height: 11px;
+        z-index: 1;
+        font-size: 15px;
+      }
+
+      .t-users-barred, .t-fb-barred{
+        left: 0.2rem;
+        top:0.1rem;
+        color: red;
+      }
+
+      .t-stage-info{
+        justify-content: space-between;
+      }
+
+      .t-stage-dates{
+        font-size: 13px;
+      }
+
+      .act-action-button{
+        border : calc(var(--button-size) / 2) solid 
+      }
+
+      .event-action-buttons{
+        margin-top: 20px
+      }
+
+      .activity-component{
+        list-style:none;
+      }
+
+      .stages-holder ol{
+        padding:0;
+      }
+
+      .stages.stage-element{
+        position:absolute;
+      }
+
+      .no-activity-holder{
+        position:relative;
+      }
+
+      .no-activity-overlay{
+        position: absolute;
+        background-color: #80808078;
+        height: 100%;
+        top: 0;
+        width: 100%;
+        color:white;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index:1
+      }
+
+      .pf-delete-overlay{
+        position:absolute;
+        height: 50%;
+        bottom: -7px;
+        left:25%;
+        width: 50%;
+        opacity:0.9;
+        background-color: #FF9300;
+        border-radius:50%;
+      }
+
+      .pf-firm-logo{
+        position:absolute;
+        height: 50%;
+        bottom: -7px;
+        left:25%;
+        width: 50%;
+        opacity:0.9;
+        border-radius:50%;
+      }
+
+      .pf-firm-logo img{
+        height:inherit;
+        width:inherit;
+      }
+
+      .pf-delete-overlay i{
+        font-size:80%;
+        margin: auto;
+        line-height:10px;
+      }
+
+      .participant-btn, .follower-btn {
+        position: relative;
+        margin: 0 0.2rem;
+      }
+
+      .no-activity-msg {
+        background: #55318e;
+        padding: 0.5rem 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .no-activity-msg span:nth-child(2){
+        font-size: 0.8rem;
+      }
+
+      .ip-zonpe{
+        font-size: 13px!important;
+        text-transform: uppercase;
+      }
+
+      .ip-zone i{
+        font-size:18px;
+      }
+
+      .ip-value, .setup-activity, .participants-title, .visibility-title, .followers-title, .events-title{
+        color: #55318e;
+      }
+
+      .participants-title, .followers-title, .visibility-title, .events-title{
+        text-transform: uppercase;
+      }
+
+      .setup-activity{
+        border: 1px solid #55318e;
+      }
+
+      .participant-field-zone, .firm-field-zone{
+        position:relative;
+      }
+
+      .validation-buttons{
+        position:absolute;
+        right: 0;
+        top: 15%;
+      }
+
+      .dates-validate, .validation-buttons > *{
+        padding: 0 1rem;
+        line-height: 28px;
+        height: 28px;
+      }
+
+      [name*="participantSelector"], .participant-field-zone .select-wrapper input, .participant-field-zone .select-wrapper .caret{
+        display:none!important;
+      }
+
+      [name*="firmSelector"], .firm-field-zone .select-wrapper input, .firm-field-zone .select-wrapper .caret{
+        display:none!important;
+      }
+
+      .participants{
+        margin-bottom: 1rem;
+      }
+
+      .participant-field-zone .dropdown-content, .firm-field-zone .dropdown-content{
+        opacity: 1!important;
+        display: block!important;
+        width: 100%
+      }
+
+      .f-prefix{
+        margin-top: auto;
+        margin-bottom: 7px;
+      }
+
+      .select-dropdown li img{
+        float: left;
+      }
+
+      .select-dropdown li img.s-firm-option-logo{
+        height: 20px;
+        width: 20px;
+        margin: 5px 10px;
+      }
+
+      .el-type{
+        margin-left: auto;
+        text-transform: uppercase;
+        color: #55318e!important;
+      }
+
+      .participants-list{
+        position:relative;
+      }
+
+      .participants-list > li:not(.edit){
+        height:36px;
+      }
+
+      .participants-list--item.edit{
+        position:absolute;
+        width: 100%;
+        bottom: min(-50%,-60px);
+      }
+
+      .participant-btn, .follower-btn /*.btn-participant-add, .btn-follower-add*/{
+        border-radius:100%;
+        padding: 0 0.4rem;
+        width: 36px;
+        justify-content:center;
+      }
+
+      /*.btn-participant-add, .btn-follower-add{
+        display: inline-flex;
+        align-items: center;
+        height:1.8rem;
+        height:36px;
+        background-color: #FF9300!important;
+      }*/
+
+      .btn-participant-add > i{
+        font-size: 1rem;
+      }
+
+      .pf-picture{
+        height: 100%;
+        border-radius:100%;
+      }
+
+      .part-feeded{
+        text-indent: 3rem;
+      }
+
+      .no-mail-img-holder{
+      text-align:center
+      }
+
+      .no-mail-img-holder img, .legal-img-holder img  {
+        width: 100%;
+      }
+
+      .virtual-activities-holder{
+        position:relative;
+      }
+
+      .no-activity-overlay{
+        position:absolute;
+        left:0;
+        height:100%;
+        width: 100%;
+        z-index: 1;
+      }
+
+      .no-processes{
+        width: 96%;
+        margin: auto;
+      }
+
+      .switch-org-self-btn{
+        margin-right:auto;
+      }
+
+      .dmin,.dmax{
+        position:relative;
+      }
+
+      .ts-value, #beforeStarting h6{
+        font-weight: 700;
+      }
+
+      #legalPerson, #interactPart{
+        width:33%;
+        min-width:300px;
+      }
+
+      .dashboard-btns{
+        align-items: flex-start;
+        font-size: 12px;
+      }
+
+      .curr-int-within-cal{
+        font-size:20px;
+        color:black;
+      }
+
+      #createStage .modal-footer{
+        padding: 24px;
+      }
+
+      .part-error{
+        font-size: 15px;
+      }
+
+      .et-icon::before {
+        content: attr(data-icon);
+        font-family: "Font Awesome 5 Free", "Font Awesome 5 Brands";
+        font-weight: 900;
+        margin-right: .25em;
+      }
+
+      .et-icon[data-icon-type="m"]::before {
+        font-family: "Material Icons";
+        font-weight: normal;
+      }
+      .et-icon[data-icon-type="fa"]::before, .et-icon[data-icon-type="fab"]::before{
+        font-family: "Font Awesome 5 Free";
+      }
+
+      .evg-b-1{
+        background-color: purple;
+      }
+      .evg-b-2{
+        background-color: blue;
+      }
+      .evg-b-3{
+        background-color: red; 
+      }
+      .evg-b-4{
+        background-color: green;
+      }
+      .evg-b-5{
+        background-color: orange;
+      }
+      .evg-b-6{
+        background-color: brown;
+      }
+
+
+      .evg-1{
+        color: purple;
+      }
+      .evg-2{
+        color: blue;
+      }
+      .evg-3{
+        color: red; 
+      }
+      .evg-4{
+        color: green;
+      }
+      .evg-5{
+        color: orange;
+      }
+      .evg-6{
+        color: brown;
+      }
+
+      .evg-circle{
+        height: 15px;
+        width: 15px;
+        border-radius:100%;
+        display: inline-block;
+      }
+
+      .evg-input-circle{
+        position: absolute;
+        top:30%;
+      }
+
+      .event .event-marker{
+        position:relative;
+        font-size:3.5rem;
+      }
+
+      .event.self-last-update .event-marker{
+        color: #55318e;
+      }
+
+      .event:not(.self-last-update) .event-marker{
+        color: #ff9300;
+      }
+
+      .event-logo-container > .unique-event{
+        position:absolute;
+        left:19%;
+        top:16%;
+        font-size: 36%;
+        transform: rotateZ(-90deg);
+      }
+
+       .event-logo-container > :not(.unique-event){
+        position:absolute;
+        left:26%;
+        top:5%;
+        font-family: 'Poppins';
+        font-size: 46%;
+        transform: rotateZ(-90deg);
+      }
+
+      :not(.multiple-events) .event-logo-container{
+        border-radius: 100%;
+        background-color: white;
+        position: absolute;
+        height: 2.1rem;
+        width: 2.1rem;
+        top: 7%;
+        left: 11%;
+      }
+
+      #updateEvent form > div {
+        min-height: 36px;
+      }
+
+      .e-doc-logo{
+        font-size:150%;
+        position:relative;
+        color: #55318e;
+      }
+
+      .e-doc-ext{
+        text-transform: uppercase;
+        font-family: 'Poppins';
+        position: absolute;
+        color: orange;
+        font-size: 8px;
+        left: 5%;
+        bottom: 14%;
+      }
+
+      .e-doc-size{
+        font-size:12px;
+      }
+
+      .e-comment.existing {
+        width: 90%;
+        padding: 15px 10px 10px 10px;
+        border-radius: 7px;
+        color: white;
+        position: relative;
+        margin-top:22px;
+      }
+
+      .e-com-author, .e-com-updated{
+        font-size:10px;
+      }
+ 
+      .e-com-author{
+        padding-left:1rem;
+      }
+
+
+      .e-document{
+        position:relative;
+        padding-left:2rem;
+      }
+
+      .e-document::before {
+        content: "";
+        position: absolute;
+        top: -1rem;
+        bottom: 1rem;
+        left: 0.5rem;
+        right: calc(100% - 2rem);
+        border-left: thin solid;
+        border-bottom: thin solid;
+        opacity: .2
+      }
+
+      .doc-action-buttons{
+        display: inline-block;
+        margin-left: auto;
+      }
+
+      .doc-action-buttons > .btn-flat {
+        padding: 0 1rem!important;
+      }
+
+      .dropify-wrapper{
+        min-height: 60px;
+      }
+
+      .dropify-message :not(.file-icon){
+        font-family: 'Poppins';
+        max-width: 85%;
+      }
+
+      .dropify-message .file-icon{
+        min-width: 15%;
+        display:none;
+      }
+
+      .dropify-message{
+        justify-content:center;
+      }
+
+      .dropify-message p{
+        text-align:center;
+      }
+
+      #updateEvent .btn-flat, .doc-name-validate, .doc-upload-validate, .s-name-validate, .com-validate, .dates-validate{
+        height: 25px;
+        line-height: 25px;
+      }
+
+      .dropify-wrapper .dropify-message span.file-icon{
+        font-size: 29px;
+      }
+
+      .evg-text-shadow{
+        text-shadow: 2px 0 0 #fff, -2px 0 0 #fff, 0 2px 0 #fff, 0 -2px 0 #fff, 1px 1px #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff;
+      }
+
+      .e-com-info{
+        position: absolute;
+        right: 1%;
+        top: 0%;
+        font-size: 13px;
+        width:100%
+      }
+
+      .e-com-modify, .e-com-right-elmts, .fa-external-link-alt, .s-modify-dates > i, .e-doc-update, .doc-actions > li, .btn-s-update, .e-com-reply, .stage-element, .event-marker{
+         cursor:pointer;
+      }
+
+      .doc-actions{
+        margin-left:auto;
+      }
+
+      .doc-actions > li{
+        padding: 0 1rem;
+      }
+
+      .doc-actions > li:last-of-type{
+        padding-right: 2rem;
+      }
+
+      .doc-input-name, .s-name-input-name{
+        height: inherit!important;
+        margin: 0 0 0 10px!important;
+      }
+
+      .s-modify-dates, .s-name-update{
+        display:inline-block;
+      }
+
+      .s-dates-row > .input-field{
+        min-width: 40%;
+      }
+
+      .doc-input-zone, .s-name-input-zone{
+        position:relative;
+        display:inline-block;
+      }
+
+      .doc-name-validate, .s-name-validate{
+        position: absolute;
+        left: calc(100% - 2.5rem);
+        top: -0.5rem;
+        right: -0.5rem;
+      }
+
+      .e-doc-remove.fa-times{
+        min-width: 3rem;
+        text-align:center;
+      }
+
+      .s-title-zone{
+        min-height: 3.22rem;
+      }
+
+      #addParticipant {
+        background-color: #FF9300!important;
+      }
+
+      .btn-add-event{
+        font-size:20px;
+      }
+
+      .e-dates-header, .e-documents-header, .e-comments-header{
+        height:25px;
+      }
+
+      .e-com-remove, .e-com-delete, [href="#deleteComment"]{
+        padding: 0 1rem!important;
+      }
+
+      .e-comment > .row {
+        width: 100%;
+      }
+
+      .com-reply-zone{
+        position: absolute;
+        bottom: -1.5rem;
+        right: 0rem;
+        font-size: 13px;
+        width: 100%;
+        height: 1.5rem;
+      }
+
+      .int-precision{
+        font-size:13px;
+      }
+
+      .e-comment:not(.self):not(.edit){
+        background: grey;
+      }
+      .e-comment.self{
+        margin-left:auto;
+        background: #55318e;
+      }
+
+      .timescale-change-btn + .select-wrapper{
+        width:100px;
+        margin-left:5px;
+      }
+
+      .timescale-change-btn + .select-wrapper .select-dropdown{
+        margin:0!important;
+      }
+
+      .timescale-change-btn + .select-wrapper input{
+        height:2rem;
+        line-height:2rem;
+      }
+
+      .process-list{
+        position: relative;
+      }
+
+      .no-int-act-overlay{
+        position: absolute;
+        height:inherit;
+        width: inherit;
+      }
+
+      .no-int-act-bg{
+        background-color: grey;
+        z-index: 1;
+        opacity: 0.2;
+        height: 100%;
+        width: 100%;
+      }
+
+      .no-int-act-text{
+        position: absolute;
+        display: flex;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+        z-index: 2;
+      }
+
+      .no-int-act-title-zone{
+        color: grey;
+        opacity:0.5;
+      }
+
+      .fwd-act-name, .bwd-act-name{
+        text-align: center;
+      }
+
+      .closest-bwd-act, .closest-fwd-act{
+        background-color:#55318e;
+        color:white;
+        width:100%;
+        display:flex;
+        flex-direction:column;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .bwd-act-text, .fwd-act-text{
+        display:flex;
+        justify-content: center;
+      }
+
+      .bwd-act-data, .fwd-act-data{
+        padding-top: 1em;
+      }
+
+      .bwd-act-title, .fwd-act-title, .bwd-act-dates, .fwd-act-dates{
+        font-size: 17px;
+        text-align:center;
+      }
+
+      .closest-bwd-act{
+        min-height: 100px;
+        position:sticky;
+      }
+      .closest-fwd-act{
+        min-height: 100px;
+        position:sticky;
+      }
+
+      .no-int-act-title-zone{
+        margin-top: 50px;
+        text-align:center;
+      }
+
+      .new-stage{
+        text-transform: uppercase;
+        font-size: 15px;
+        font-weight: 700;
+      }
+
+      .e-set-exp-res-date{
+        font-size:13px;
+        text-align: end;
+        margin-bottom:0.5rem;
+        cursor: pointer;
+      }
+      
+      .event-dates-content{
+        display:flex;
+        flex-wrap:wrap;
+        align-items:flex-end;
+      }
+
+      .e-dates-btn i{
+        font-size:1.2rem;
+      }
+
+      .replies{
+        display: flex;
+        justify-content: flex-end;
+        margin-top: -20px;
+      }
+
+      .header-elmts-padding{
+        padding: 0 2vw;
+        padding-top: 10px;
+      }
+
+      .activity-holder.mr{
+        height:900px;
+      }
+
+      .activity-content-stage.mr{
+        height:inherit;
+      }
+
+      .stages-holder.mr{
+        height:inherit;
+        margin:0;
+      }
+
+      .curDate{
+        position: absolute;
+        border-top: 1px dashed black;
+        width: 100%;
+      }
+
+      .chevron{
+        position: absolute;
+        left:30px;
+        transform: rotateZ(-90deg);
+        z-index:1;
+      }
+
+      .activity-component{
+        display:flex;
+        justify-content: center;
+      }
+
+      .stage-element{
+        position:absolute;
+      }
+
+      .ts-scale .col{
+        display: flex;
+        align-items: center;
+        margin:0!important;
+        padding:0!important;
+      }
+
+      .act-name{
+        font-size: 14px;
+      }
+
+      .header-m-row{
+        height: 40px;
+        background-color:white;
+        position:sticky;
+        z-index:2;
+      }
+
+      .header-m-row:first-of-type{
+        top:0;
+      }
+      .header-m-row:not(:first-of-type){
+        top:40px;
+      }
+
+      .period .fa-caret-left, .period .fa-caret-right{
+        transform: rotateZ(90deg);
+      }
+
+      .act-action-btns{
+        position: sticky;
+        top: 200px;
+      }
+
+      .event{
+        position: absolute;
+        transform: rotateZ(90deg)translateY(-3.5rem)translateX(-4px);
+      }
+
+      .prev-int-btn, .next-int-btn{
+        font-size:15px;
+        background-color: #91889e;
+      }
+
+      .prev-int-btn,.next-int-btn,.prev-act-btn,.next-act-btn{
+        width: 72px;
+        padding:0;
+        align-items:center;
+      }
+
+      
+
+      .prev-act-btn,.next-act-btn{
+        border: 1px dashed #91889e;
+      }
+
+      .next-int-btn{
+        justify-content: center;
+      }
+
+      .prev-int-btn i{
+        line-height:15px;
+        width: 5px;
+      }
+
+      .next-int-btn i{
+        line-height:5px;
+        width: 2px;
+      }
+
+      .prev-int-btn span, .next-int-btn span{
+        line-height:15px;
+      }
+
+      .prev-act-btn > *, .next-act-btn > *{
+        min-width:16px;
+        text-align:center;
+      }
+
+      .s-modify-dates, .btn-s-update, .visibility-btn, .btn-participant-add, .btn-followers-add{
+        margin-left: auto;
+      }
+
+      .s-title-zone, .s-elmt-dates, .visibility-zone, .participants-title, .followers-title{
+        width:100%;
+        min-height: 30px;
+      }
+
+      .s-name-input-zone{
+        width:inherit;
+      }
+
+      .no-int-act-overlay .fa-caret-left, .no-int-act-overlay .fa-caret-right{
+        transform: rotateZ(90deg);
+      }
+
+      .add-stage-btn{
+        font-weight:700;
+        font-size:2rem;
+      }
+
+
+
+
+  </style>
+{% endblock %}
+
+{% block javascripts %}
+  <script src="{{ asset('js/moment.min.js') }}"></script>
+  <script>
+
+    var noActOverlay = $(`
+      <div class="no-activity-overlay">
+        <div class="no-activity-msg">
+          <span>{{'activities.no_activities.main_msg'|trans}}</span>
+          <span>{{'activities.no_activities.secondary_msg'|trans}}</span>
+        </div>
+      </div>
+    `);
+    
+    const $processSelect = $('#processSelect');
+    const $createStageModal = $('#createStage');
+    const $requestProcessModal = $('#requestNewProcess');
+    const $sortingTypeSelector = $('#sortingTypeSelector');
+    const $viewTypeSelector = $('#viewTypeSelector');
+    async function onAddProcessClick(_institutionId) {
+      const url = ipurl.replace(0, _institutionId);
+      institutionId = _institutionId;
+      $concernedProcessSelects = $('#requestNewProcess select, #processSelect');
+      $('.red-text').remove();
+      const response = await fetch(url);
+      const json = await response.json();
+      newOptions = [];
+      $.each(json.processes, function(key, process){
+          newOptions.push(`<option value="${process.key}" ${process.disabled}>${process.value}</option>`);
+          $.each(process.children, function(key, child){
+              newOptions.push(`<option class="option-child" value="${child.key}" ${child.disabled}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${child.value}</option>`);
+              $.each(child.children, function(key, subchild){
+                  newOptions.push(`<option class="option-subchild" value="${subchild.key}" ${subchild.disabled}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${subchild.value}</option>`);
+              })
+          })
+      })
+
+      // /** @type {[]} */
+      // const options = json.processes.map(
+      //  process => /*html*/`<option value="${process.key}">${process.value}</option>`,
+      // );
+
+      newOptions.unshift('<option value="0">({% trans %}processes.unrelated{% endtrans %})</option>');  
+      $concernedProcessSelects.each(function(i,e){
+        $(e).empty().html(newOptions.join('')).material_select();
+      })  
+    }
+
+    $('#initializedActivity').find('select[name*="activityLeader"]').material_select();
+
+    $('.sorting-type .fas').on('click',function(){
+      $(this).hide();
+      $('.view-type-value>span').hide();
+      $viewTypeSelector.material_select();
+    });
+
+    $('#viewTypeSelector').on('change',function(){
+      if($(this).val() != $(this).find('option[selected]').val()){
+        document.cookie = "view_type="+$(this).val()+"";
+        window.location = window.location;
+      }
+    })
+    $('.delegate-button').on('click',function(e){
+      e.preventDefault();
+      $('.error-msg').empty();
+      $btn = $(this);
+      $('.del-act-name').find('input[name*="activityName"]').val($btn.closest('.modal').find('input[name="activity_name"]').val());
+      $('.del-act-name').show();
+      const serializedForm = $(this).closest('form').serialize();
+      $('.del-act-name').hide();
+      $.post(adurl, serializedForm)
+      .done(function(data){
+        $('#initializedActivity').modal('close');
+        $('#delegateSuccess').modal('open');
+      })
+      .fail(function(data){
+        errorHtmlMsg = '';
+        $(data.responseJSON).each((i,e) => errorHtmlMsg +='<strong>'+Object.values(e)[0]+'</strong>')
+        $('#errorModal').find('.error-msg').append($(errorHtmlMsg));
+        $('#errorModal').modal('open');
+      })
+
+    })
+
+    $('.update-status-btn').on('click',function(){
+        urlToPieces = usurl.split('/');
+        sid = $(this).data('sid');
+        urlToPieces[urlToPieces.length - 3] = sid;
+        url = urlToPieces.join('/');
+        const params = {status: $('#progressStatusSelect').val()};
+          $.post(url,params)
+            .done(function(data){
+                $triggerEl = $(`[href="#updateStageProgressStatus"][data-sid="${sid}"]`);
+                $triggerEl.data('progress',+$('#progressStatusSelect').val());
+                if($('#progressStatusSelect').val() == -2){
+                  $triggerEl.data('r', 1);
+                }
+                $(`[href="#updateStageProgressStatus"][data-sid="${sid}"]`).prev().find('.stage-progress-status-name').empty().append($('#progressStatusSelect option:selected').text());
+                $('#updateStageProgressStatus').modal('close');
+            })
+            .fail(function(data){
+
+            })
+    })
+
+    $(document).on('click','[href="#updateStageProgressStatus"]',function(e) {
+
+        $('.update-status-btn').attr('data-sid',$(this).data('sid'));
+        $select = $('#progressStatusSelect');
+        const status = $(this).data('progress');
+        const r = $(this).data('r');
+        $select.empty();
+        $option0 = $(`<option></option>`);
+        $option1 = $(`<option></option>`);
+        $option2 = $(`<option></option>`);
+        $option3 = $(`<option></option>`);
+        $option4 = $(`<option></option>`);
+
+        switch($(this).data('progress')){
+
+          case -4:
+            $select.append($option0.attr('value',-5).append('{{"stages.stage.progress.stopped"|trans}}'))
+              .append($option1.attr('value',-4).append('{{"stages.stage.progress.suspended"|trans}}').prop('disabled',true))
+              .append($option2.attr('value',0).append('{{"stages.stage.progress.upcoming"|trans}}'))
+              .append($option3.attr('value',1).append('{{"stages.stage.progress.ongoing"|trans}}'))
+              .append($option4.attr('value',2).append('{{"stages.stage.progress.completed"|trans}}').prop('selected',true));break;
+          case -3:
+            $select.append($option0.attr('value',-5).append('{{"stages.stage.progress.stopped"|trans}}'))
+              .append($option1.attr('value',2).append('{{"stages.stage.progress.completed"|trans}}').prop('disabled',true).prop('selected',true));break;
+          case -2:
+            $select.append($option0.attr('value',-2).append('{{"stages.stage.progress.reopened"|trans}}').prop('disabled',true).prop('selected',true))
+              .append($option1.attr('value',2).append('{{"stages.stage.progress.completed"|trans}}'));
+              if(r){
+                $select.append($option2.attr('value',3).append('{{"stages.stage.progress.finalized"|trans}}'));
+              }
+              break;
+          case 0:
+            $select.append($option0.attr('value',-5).append('{{"stages.stage.progress.stopped"|trans}}'))
+              .append($option1.attr('value',-3).append('{{"stages.stage.progress.suspended"|trans}}'))
+              .append($option2.attr('value',0).append('{{"stages.stage.progress.upcoming"|trans}}').prop('disabled',true))
+              .append($option3.attr('value',1).append('{{"stages.stage.progress.ongoing"|trans}}').prop('selected',true))
+              .append($option4.attr('value',2).append('{{"stages.stage.progress.completed"|trans}}'));break;
+          case 1:
+            $select.append($option0.attr('value',-5).append('{{"stages.stage.progress.stopped"|trans}}'))
+              .append($option1.attr('value',-3).append('{{"stages.stage.progress.suspended"|trans}}'))
+              .append($option2.attr('value',1).append('{{"stages.stage.progress.ongoing"|trans}}').prop('disabled',true))
+              .append($option3.attr('value',2).append('{{"stages.stage.progress.completed"|trans}}').prop('selected',true));break;
+          case 2:
+            $select.append($option0.attr('value',-2).append('{{"stages.stage.progress.reopened"|trans}}'))
+              .append($option1.attr('value',1).append('{{"stages.stage.progress.ongoing"|trans}}'))
+              .append($option2.attr('value',2).append('{{"stages.stage.progress.completed"|trans}}').prop('disabled',true).prop('selected',true));break;
+        };
+        $select.material_select();
+    })
+
+
+
+    $('.final-step-btn, [href="#activityInfo"]').on('click', function(e) {
+      $btn = $(this);
+
+      if($btn.hasClass('final-step-btn')){
+        $elmtContainer = $('#initializedActivity .elmts');
+        $idContainer = $('#activityInfo');
+        eid = $('#processSelect').val();
+
+        setTimeout(function(){
+          $("#initializedActivity").scrollTop(0);
+        },50);
+        $('.ip-info').empty();
+      } else {
+
+        $elmtContainer = $('#activityInfo .elmts');
+        $idContainer = $('#activityInfo');
+        setTimeout(function(){
+          $("#activityInfo").scrollTop(0);
+        },50);
+        eid = $btn.data('eid');
+      }
+    
+      if($idContainer.attr('data-eid') != eid){
+
+        $idContainer.attr('data-eid',eid);
+
+        $('.activity-name').remove();
+        $('#activityInfo .action-buttons').empty();
+        $elmtContainer.empty();
+        const $actElmt = $('<div class="activity"></div>');
+
+        if(eid != 0 && eid != null){
+          urlToPieces = gcurl.split('/');
+          if(eid )
+          urlToPieces[urlToPieces.length - 1] = eid;
+          urlToPieces[urlToPieces.length - 3] = $btn.hasClass('final-step-btn') ? 'iprocess' : 'activity';
+          url = urlToPieces.join('/');
+
+
+          $.post(url,null)
+            .done(function(data){
+
+                if($btn.hasClass('final-step-btn')){
+                  actIPInfoHmtl = /*html*/`<div class="ip-info">
+                      <a class="btn-flat no-padding">
+                        <i class="mi layers"></i>
+                        <span>${data.name}</span>
+                      </a>
+                      ${data.canEdit ? '<a class="btn-flat tooltipped" href="{{ url("manageActivityElement",{entity:"iprocess", elmtId: "~" }) }}" data-position="top" data-tooltip="{% trans %}processes.modify_prior_launching_act{% endtrans %}"><i class="fa fa-cog"></i></a>' : ''}
+                    </div>`;
+                  actIPInfoHmtl = actIPInfoHmtl.replace('~',eid);
+                  const $actIPInfo = $(actIPInfoHmtl);
+                  $actIPInfo.find('.tooltipped').tooltip();
+                  $actElmt.append($actIPInfo);
+                  $actName = $(`
+                    <div class="activity-name input-field">
+                      <input type="text" name="activity_name" required="required" value="${data.name}">
+                      <label for="activity_name" class="active">{{ 'activities.request.name_label'|trans }}</label>
+                    </div>
+                  `);
+                  $actElmt.append($actName);
+                } else {
+                  $actName =
+                    $(`
+                      <div class="activity-name flex-center">
+                        <i class="fa fa-cube red-text"></i>
+                        <span>${data.name}</span>
+                        <div class="activity-master-user">
+                          {%trans%} activity_elements.owner {% endtrans %} :
+                          ${data.masterUserPicture ? '<img src="'+data.masterUserPicture+'"' : '<span class="no-picture">'+data.masterFNFL.toUpperCase()+'</span>'}
+                          <span> ${data.masterUserFullname}</span>
+                        </div>
+                      </div>
+                    `)
+                }
+
+                const $stgElmts = $('<div class="active-stages"></div>');
+                const regExp = /~(.+)~/;
+                const dateOptions = { month: 'long', day: 'numeric' };
+
+                if(data.nbOCompletedStages > 0){
+                  $oCompletedStagesElmt = $(`<div class="nb-completed-stages flex-center">
+                      <ul style="display: inline-flex; color: grey; margin-right:3px" class="no-margin no-padding">
+                        <li>
+                          <i class="fa fa-cube" style="position: relative;top: -6%;left: 0%;font-size: 0.85rem;"></i>
+                        </li>
+                        <li>
+                          <i class="fa fa-cube" style="position: relative;top: 6%;left: -41%;font-size: 0.85rem;"></i>
+                        </li>
+                      </ul>
+                      <span>${data.nbOCompletedStages} ${data.nbOCompletedStages == 1 ? "{{'activities.nb_o_completed_stages_sing'|trans}}" : "{{'activities.nb_o_completed_stages_plur'|trans}}"}</span>
+                    </div>`);
+                  $actElmt.append($oCompletedStagesElmt);
+
+                }
+
+
+                if(data.activeStages){
+
+                  $.each(data.activeStages, function(key,stage){
+
+                    $stgElmt = $('<div class="stage"></div>');
+
+                    switch(stage.progress){
+                      case -5: msg='{{"stages.stage.progress.stopped"|trans}}';icon='';break;
+                      case -4: msg='{{"stages.stage.progress.postponed"|trans}}';icon='';break;
+                      case -3: msg='{{"stages.stage.progress.suspended"|trans}}';icon='';break;
+                      case -2: msg='{{"stages.stage.progress.reopened"|trans}}';icon='';break;
+                      case -1: msg='{{"stages.stage.progress.unstarted"|trans}}';icon='';break;
+                      case 0: msg='{{"stages.stage.progress.upcoming"|trans}}';icon='';break;
+                      case 1: msg='{{"stages.stage.progress.ongoing"|trans}}';icon='';break;
+                      case 2: msg='{{"stages.stage.progress.completed"|trans}}';icon='';break;
+                      case 3: msg='{{"stages.stage.progress.finalized"|trans}}';icon='';break;
+                    }
+
+                    $stageProgress = $(/**html*/`<div class="stage-progress">
+                      <div class="btn-flat no-padding">
+                        {% trans %}stages.stage.progress.title{% endtrans %} : <span class="stage-progress-status-name">${msg}</span>
+                      </div>
+                      <div class="btn-flat no-padding modal-trigger" href="#updateStageProgressStatus" data-progress="${stage.progress}" data-sid="${stage.id}" data-r="${stage.r}">
+                        <i class="mi create"></i>
+                      </div>
+                    </div>`);
+
+                    $stgElmt.append($stageProgress);
+
+                    $stgContainer = $('<div class="stage-detail-container"></div>');
+
+                    if(data.activeStages.length > 1 || stage.name != data.name){
+                      $stgName = $(`<div class="stage-name">
+                          <ul style="display: inline-flex; color: #2196F3; margin-right:3px" class="no-margin no-padding">
+                            <li>
+                              <i class="fa fa-cube" style="position: relative;top: -6%;left: 0%;font-size: 0.85rem;"></i>
+                            </li>
+                            <li>
+                              <i class="fa fa-cube" style="position: relative;top: 6%;left: -41%;font-size: 0.85rem;"></i>
+                            </li>
+                          </ul>
+                          <span>${stage.name} ${stage.activeWeight != 1 ? '(' + Math.round(100 * stage.activeWeight,2)+ ' %)' : ''}</span>
+                        </div>`);
+                      $stgElmt.append($stgName);
+                    }
+
+                    $datesElmt = $(`<div class="stage-dates">
+                          <span class="stage-duration">
+                            <i class="mi access_time"></i>
+                            <span>{% trans %}process_stages.dates_definition.defined_duration.timespan{% endtrans %} :</span>
+                            ${stage.ddates ? new Date(stage.startdate.date).toLocaleDateString('{% trans %}long_locale{% endtrans %}',dateOptions) + ' - ' + new Date(stage.enddate.date).toLocaleDateString('{% trans %}long_locale{% endtrans %}',dateOptions) : stage.dperiod + stage.dfreq }
+                          </span>
+                      </div>`)
+
+                      //<span class="grading-duration">
+                      //  <i class="mi send"></i>
+                      //  <span>{% trans %}process_stages.dates_definition.defined_duration.feedback{% endtrans %} :</span>
+                      //  ${stage.ddates ? new Date(stage.gstartdate.date).toLocaleDateString('{% trans %}long_locale{% endtrans %}',dateOptions) + ' - ' + new Date(stage.genddate.date).toLocaleDateString('{% trans %}long_locale{% endtrans %}',dateOptions) : stage.fperiod + stage.ffreq }
+                      //</span>
+
+                    $stgElmt.append($datesElmt);
+
+                    if(stage.survey == null) {
+                      $crtElmts = $(`<section class="output">
+                      <div class="title">
+                        <i class="fa fa-cubes green-text"></i>{% trans %}stages.output_type.title{% endtrans %} : {% trans %}activity_elements.criteria{% endtrans %}
+                        ${stage.oReadiness ? '<i class="mi green-text readiness">check_circle</i>' : '<i class="mi orange-text readiness tooltipped error" data-position="top" data-tooltip="{% trans %}activity_elements.to_configure{% endtrans %}"></i>'}
+                      </div>
+                      </section>`);
+                      $crtElmts.find('.tooltipped').tooltip();
+                      $.each(stage.criteria, function (key, criterion) {
+                        const match = criterion.icon.match(regExp);
+                        const icon = String.fromCodePoint && match && match[1] ? String.fromCodePoint('0x' + match[1]) : '';
+                        $crtElmt = $(/*html*/`<div class="criterion">
+                            <span class="cn-icon" data-icon="${icon}" style="width:15px"></span>
+                            <span>${criterion.name} (${Math.round(100 * criterion.weight, 2)} %)</span>`);
+                        $crtElmts.append($crtElmt);
+                      })
+                    } else {
+                      $crtElmts = $(`<section class="output">
+                      <div class="title">
+                        <i class="fa fa-cubes green-text"></i>{% trans %}stages.output_type.title{% endtrans %} : {% trans %}activity_elements.survey{% endtrans %}
+                        ${stage.oReadiness ? '<i class="mi green-text readiness check_circle"></i>' : '<i class="mi orange-text readiness tooltipped error" data-position="top" data-tooltip="{% trans %}activity_elements.to_configure{% endtrans %}"></i>'}
+                      </div>
+                      </section>`);
+                      $crtElmts.find('.tooltipped').tooltip();
+                      console.log(stage.survey.name);
+
+                        $crtElmt = $(/*html*/`<div class="survey">
+                            <span class="cn-icon" style="width:15px"> Titre : `+stage.survey.name+`</span>
+                        </div>`);
+                        $crtElmts.append($crtElmt);
+                    }
+
+                    var currentElmts = $crtElmts;
+                    const $partElmts = $(`<section class="participants">
+                      <div class="title">
+                        <i class="fa fa-users blue-text"></i>{% trans %}activity_elements.participants{% endtrans %}
+                        ${stage.pReadiness ? '<i class="mi green-text readiness">check_circle</i>' : '<i class="mi orange-text readiness tooltipped" data-position="top" data-tooltip="{% trans %}activity_elements.to_configure{% endtrans %}">error</i>'}
+                      </div>
+                    </section>`);
+                    $partElmts.find('.tooltipped').tooltip();
+                    $.each(stage.teams,function(key,team){
+
+                        let tooltipMsg = '';
+                        $.each(team.indivs,function(key, individual){
+                          tooltipMsg = tooltipMsg + individual.name + '<br>'
+                        })
+
+                        $partElmt = $(`<div class="act-team-participant">
+                          ${team.img ? '<img src="'+team.img+'"' : '<span class="no-picture tooltipped" data-position="top" data-html="true" data-tooltip="'+tooltipMsg+'"><i class="fa fa-users"></i></span>'}
+
+                          ${team.name} ${team.type == 0 ? '(T)' : (team.type == -1 ? '(P)' : '')}
+                          ${team.status == 3 ? '<i class="mi green-text readiness check_circle"></i>' : ''}
+                          </div>`);
+                        $partElmt.find('.tooltipped').tooltip();
+                        $partElmts.append($partElmt);
+                    });
+                    $.each(stage.indivs,function(key,individual){
+                        $partElmt = $(`<div class="act-indiv-participant">
+                          ${individual.img ? '<img src="'+individual.img+'"' : '<span class="no-picture">'+individual.fnfl.toUpperCase()+'</span>'}
+
+                          ${individual.name} ${individual.type == 0 ? '(T)' : (individual.type == -1 ? '(P)' : '')}
+                          ${individual.status == 3 ? '<i class="mi green-text readiness check_circle"></i>' : ''}
+                          </div>`);
+                        $partElmts.append($partElmt);
+                    });
+
+                    $stgContainer.append(currentElmts).append($partElmts);
+                    $stgElmt.append($stgContainer);
+                    $stgElmts.append($stgElmt);
+                    $actElmt.append($stgElmts);
+
+                  })
+                } else {
+                  $stgElmt = $(`
+                    <div class="unset-process flex-center">
+                      <i class="mi crop_free"></i>
+                      <span>{% trans %}processes.unset_process{% endtrans %}</span>
+                    </div>
+                  `);
+                  $actElmt.append($stgElmt);
+                }
+
+                //$('.elmts').before($IPName);
+                $elmtContainer.append($actElmt);
+
+                if(!$btn.hasClass('final-step-btn')){
+                    $elmtContainer.before($actName);
+
+                    if(data.canEdit){
+                      $btnElmt = $('<div class="button-field"></div>');
+                      editHtml = /*html*/`<a class="modal-close btn" href="{{ path('manageActivityElement', { entity: 'activity', elmtId: '~'}) }}">Modifier</a>`;
+                      editHtml = editHtml.replace('~',data.id);
+                      $btnElmt.append($(editHtml));
+                      $('#activityInfo .action-buttons').append($btnElmt);
+                    }
+
+                    if(data.isDeletable){
+                      $btnElmt = $('<div class="button-field"></div>');
+                      editHtml = /*html*/`<a class="modal-trigger red btn" href="#deleteActivity" data-eid="~">Supprimer</a>`;
+                      editHtml = editHtml.replace('~',data.id);
+                      $btnElmt.append($(editHtml));
+                      $('#activityInfo .action-buttons').append($btnElmt);
+                    }
+
+                }
+
+
+                console.log(data);
+            })
+            .fail(function(data){
+              console.log(data);
+            })
+        } else {
+
+          $actName = $(`
+            <div class="activity-name input-field">
+              <input type="text" name="activity_name" required="required" placeholder="{{ 'activities.request.name_label'|trans }}">
+              <label for="activity_name" class="active">{{ 'activities.create.activityName'|trans }}</label>
+            </div>
+          `);
+          $actElmt.append($actName);
+          $elmtContainer.append($actElmt);
+        }
+
+      }
+      if($btn.hasClass('final-step-btn')){
+        $('.launch-btn').data('pid',$('#processSelect').val());
+        $('#initializedActivity').modal('open');
+      }
+    })
+
+    $('#delegate').on('change',function(){
+
+      $creationModal = $(this).closest('.modal');
+      if($(this).is(':checked')){
+          $creationModal.find('.delegate').show();
+          $creationModal.find('.modal-footer').hide();
+          $creationModal.find('select[name*="activityLeader"]').hide();
+      } else {
+          $creationModal.find('.delegate').hide();
+          $creationModal.find('.modal-footer').show();
+      }
+    });
+  </script>
+  <script src="{{ asset('js/moment.min.js') }}"></script>
+  <script src="{{ asset('js/activity_manage.js') }}"></script>
+  <script src="{{ asset('js/dropify.min.js') }}"></script>
+{% endblock %}
+
+
+{% macro process_item(p) %}
+  {% set activities = p.activities %}
+  {% set children = p.children %}
+  <li class="process-list--item hierarchized-item"></li>
+{% endmacro %}
+
+{% block content %}
+
+  {% set organization = currentuser.organization %}
+  {% set displayProcesses = organization and organization.plan != 3 and organization.institutionProcesses|length > 0 %}
+
+  <main>
+
+    <div class="sorting-type dashboard-btns flex-center-sb header-elmts-padding">
+
+      {#{% if is_granted('ROLE_ADMIN') %}#}   
+      <ul class="no-margin">
+        <li>
+          <a class="btn-flat no-padding flex-center my-account dd-text">
+            <span>{{ 'my_account'|trans ~ ' :' }}</span>
+            <img class="account-logo sm-left sm-right" src="{{ asset(global.organizationLogo(currentuser.organization)) }}">
+            <span>{{ currentuser.organization.commname }}</span>
+          </a>
+        </li>
+        {% if is_granted('ROLE_ENTREPRISE') %}
+          <li>
+          {% if global.route == "myActivities" %}
+              <a href="{{ url('processesList') }}" class="btn-flat dd-text switch-org-self-btn waves-effect waves-light">{% trans %}activities.firm_activities{% endtrans %}</a>
+          {% else %}
+              <a href="{{ url('myActivities') }}" class="btn-flat dd-text switch-org-self-btn waves-effect waves-light">{% trans %}activities.my_activities{% endtrans %}</a>
+          {% endif %}
+          </li>    
+        {% endif %}
+      </ul>
+
+      <ul class="no-margin">
+        
+        <ul class="flex-center-fe view-settings no-margin">
+          {#
+          <li class="flex-center">
+            <a class="btn-flat no-padding flex-center">
+              <div class="view-type-value flex-center">
+                {% if viewTypeCookie == 'd' %}
+                  <i class="mi fiber_smart_record"></i>
+                  <span class="sm-left sm-right">{{ 'activities.status_view_type'|trans }}</span>
+                {% else %}
+                  <i class="mi linear_scale"></i>
+                  <span class="sm-left sm-right">{{ 'activities.timeframe_view_type'|trans }}</span>
+                {% endif %}
+              </div>
+
+              <ul class="change-view-type change-selector" data-type="{{viewTypeCookie}}">
+                <i class="fa fa-caret-up"></i>
+                <i class="fa fa-caret-down"></i>
+              </ul>
+            </a>
+          </li>
+          #}
+
+
+              {#
+
+              This is to sort activities per status (output), or progress
+
+              <li class="flex-center">
+                <a class="btn-flat no-padding flex-center">
+                  <div class="sorting-type-value flex-center">
+                    {% if sortingTypeCookie == 'o' %}
+                      <i class="mi rate_review"></i>
+                      <span class="sm-left sm-right">{{ 'activities.output_sorting_type'|trans }}</span>
+                    {% else %}
+                      <i class="mi event_available"></i>
+                      <span class="sm-left sm-right">{{ 'activities.progress_sorting_type'|trans }}</span>
+                    {% endif %}
+                  </div>
+                  <ul class="change-status-type change-selector" data-type="{{sortingTypeCookie}}">
+                    <i class="fa fa-caret-up"></i>
+                    <i class="fa fa-caret-down"></i>
+                  </ul>
+                </a>
+              </li>
+
+              This is to show either dates per stage duration, or output duration (still relevant ?)
+
+              {% if viewTypeCookie == 't' %}
+              <li class="flex-center">
+                <a class="btn-flat no-padding flex-center">
+                  <div class="dates-type-value flex-center">
+                      <i class="mi settings_ethernet" {% if dateTypeCookie != 's' %}style="display:none"{% endif %}></i>
+                      <span class="sm-left sm-right" {% if dateTypeCookie != 's' %}style="display:none"{% endif %}>{{ 'activities.self_date_type'|trans }}</span>
+                      <i class="mi send" {% if dateTypeCookie == 's' %}style="display:none"{% endif %}></i>
+                      <span class="sm-left sm-right" {% if dateTypeCookie == 's' %}style="display:none"{% endif %}>{{ 'activities.output_date_type'|trans }}</span>
+                  </div>
+                  <ul class="change-dates-type change-selector" data-type="{{dateTypeCookie}}">
+                    <i class="fa fa-caret-up"></i>
+                    <i class="fa fa-caret-down"></i>
+                  </ul>
+                </a>
+              </li>
+
+              
+              
+              
+              {% endif %}#}
+            
+        </ul>
+        <ul class="flex-center-fe scale-settings">
+          <li class="flex-center">
+              <div class="view-type-value flex-center">
+                <i class="mi fiber_smart_record"></i>
+                <span class="sm-left">{{ 'scale'|trans|upper ~ ' :'}}</span>
+                <div class="timescale-zone">
+                  <a class="btn-flat no-padding timescale-change-btn flex-center">
+                    <span class="ts-value dd-text sm-left sm-right">
+                      {{timescaleCookie == 'y' ? 'year'|trans : (
+                          timescaleCookie == 't' ? 'trimester'|trans : (
+                            timescaleCookie == 'w' ? 'week'|trans : 'day'|trans
+                          )
+                        )  
+                      }}
+                    </span>
+                    <ul class="change-timescale-type change-selector" data-type="{{ timescaleCookie }}">
+                      <i class="fa fa-caret-up"></i>
+                      <i class="fa fa-caret-down"></i>
+                    </ul>
+                  </a>
+                  <select name="timescaleSelector" id="timescaleSelector">
+                    <option value="y" {{timescaleCookie == 'y' ? 'selected'}}>{{'year'|trans|capitalize}}</option>
+                    <option value="t" {{timescaleCookie == 't' ? 'selected'}}>{{'trimester'|trans|capitalize}}</option>
+                    <option value="w" {{timescaleCookie == 'w' ? 'selected'}}>{{'week'|trans|capitalize}}</option>
+                    <option value="d" {{timescaleCookie == 'd' ? 'selected'}}>{{'day'|trans|capitalize}}</option>
+                  </select>
+                </div>
+              </div>
+          </li>
+        </ul>
+      </ul>
+
+
+    </div>
+      {#
+      <div style="padding: 0 3em;
+    justify-content: flex-end;">
+      <div class="input-field select-scale col s12" style=" width:30%">
+          <select class="scale">
+              <option value="years">Année</option>
+              <option value="trimester">Trimestre</option>
+          </select>
+          <label>Echelle de temps</label>
+      </div>
+      </div>
+      <div style="padding: 0 3em;
+    justify-content: flex-end;">
+      <div class="input-field col s12 select-value-scale" style="width: 30% ; display :none">
+          <select class="value-scale" >
+
+          </select>
+          <label>Valeur</label>
+      </div>
+      </div>
+      #}
+    <div id="activities-container" class="mr header-elmts-padding">
+
+      {% if viewTypeCookie == 'd' %}
+        {% for s, status in displayedStatuses %}
+          <div id="{{ status }}">
+            <ul class="process-list process-list-d">
+              {% if orphanActivities is not empty %}
+                <li class="process-list--item hierarchized-item">
+                  <header>({{ 'activities.orphans'|trans }})</header>
+                  <div class="item-body">
+                    <ul class="collection activity-list">
+                      {% for activity in orphanActivities[s] %}
+                        {% include "components/activity_list__item.html.twig" with { activity: activity } %}
+                      {% endfor %}
+                    </ul>
+                  </div>
+                </li>
+              {% endif %}
+              {% if processesActivities is not empty %}
+                {% for process_name, processActivities in processesActivities[s] %}
+                <li class="process-list--item hierarchized-item">
+                  <header>{{ process_name }}</header>
+                  <div class="item-body">
+                    <ul class="collection activity-list">
+                      {% for activity in processActivities %}
+                        {% include "components/activity_list__item.html.twig" with { activity: activity } %}
+                      {% endfor %}
+                    </ul>
+                  </div>
+                </li>
+                {% endfor %}
+              {% endif %}
+            </ul>
+          </div>
+        {% endfor %}
+
+      {% else %}
+
+        <div class="header-m-row period flex-center-sb">
+
+          <div class="prev-int-btn btn-flat white-text c-flex">
+            <i class="fa fa-caret-left moveP"></i>
+            <span class="prev-interval-val"></span>
+          </div>
+
+          <span class="curr-int-value curr-int-within-cal"></span>
+
+          <div class="next-int-btn btn-flat white-text c-flex">
+            <span class="next-interval-val"></span>
+            <i class="fa fa-caret-right moveP"></i>
+          </div>
+
+
+        </div>
+
+        <div class="header-m-row activity-selection flex-center-sb">
+
+          <div class="btn-flat prev-act-btn dd-text c-flex">
+            <i class="fa fa-caret-left moveP"></i>
+          </div>
+
+          {% set selectedActGroup = noActivities ? null : (orphanActivities is not null ? orphanActivities : processesActivities.first) %}
+
+          <div class="act-name-zone">
+            <div class="stage-item-button"></div>
+            <span class="act-name strong dd-text"></span>
+          </div>
+
+          <div class="btn-flat next-act-btn dd-text c-flex">
+            <i class="fa fa-caret-right moveP"></i>
+          </div>
+
+
+        </div>
+
+        {#
+        <ul class="flex-center-sb no-margin">
+        
+          {% if not noActivities %}
+          
+            <select name="progressSelector" id="progressSelector">
+              <option value="0">{{ 'activities.all_progresses'|trans }}</option>
+              {% for progress_id, progress_name in displayedStatuses %}
+                <option value="{{progress_id}}">{{progress_name}}</option>
+              {% endfor %}
+            </select>
+          
+          {% endif %}
+          
+          {% if orphanActivities is not empty and processesActivities is not empty %}
+          
+            <select name="processSelector" id="processSelector">
+              <option value="0">{{ 'activities.unlinked'|trans }}</option>
+              {% for process_name, processActivities in processesActivities %}
+                <option value="">{{process_name}}</option>
+              {% endfor %}
+            </select>
+
+          {% endif %}
+
+          {% set selectedActGroup = noActivities ? null : (orphanActivities is not null ? orphanActivities : processesActivities.first) %}
+
+          <select name="activitySelector" id="activitySelector">
+            {% for activity in selectedActGroup %}
+              <option value="{{activity.id}}">{{activity.name}}</option>
+            {% endfor %}
+          </select>
+
+        </ul>
+        #}
+        
+        <div class="row">
+          <div class="ts-scale col s1 c-flex-center no-padding">
+            <div class="col s1">J</div>
+            <div class="col s1">F</div>
+            <div class="col s1">M</div>
+            <div class="col s1">A</div>
+            <div class="col s1">M</div>
+            <div class="col s1">J</div>
+            <div class="col s1">J</div>
+            <div class="col s1">A</div>
+            <div class="col s1">S</div>
+            <div class="col s1">O</div>
+            <div class="col s1">N</div>
+            <div class="col s1">D</div>
+            <div class="chevron">
+              <i class="fa fa-location-arrow"></i>
+            </div>
+          </div>
+          <div class="col s9 act-rendering-zone" 
+            data-act-prototype="{% apply escape %}{% include "components/activity2_list__item.html.twig" with {sortingType: sortingTypeCookie, mobile_rendering: true} %}{% endapply %}"
+            data-stg-prototype="{% apply escape %}{% include "components/stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateU: 0, period: 0, embeddedStages: null, visibleEl: true, dummyParticipants: null } %}{% endapply %}"
+            data-prototype-no-int-act="{% apply escape %}{% include "components/activity_no_int_act_overlay.html.twig" %}{% endapply %}" data-prototype-evt="{% apply escape %}{% include "components/event_temporal__item.html.twig" %}{% endapply %}"
+          >
+            {#{% endif %}#}
+            {#
+            {% for i,activity in selectedActGroup %}
+              {% set actStatus = sortingTypeCookie == 'o' ? activity.status : activity.progress %}
+              {% set actStatusName = actStatuses[sortingTypeCookie][actStatus] %}
+              {% set showable = global.request.cookies.get('r_s_' ~ sortingTypeCookie ~ '_' ~ actStatusName) is null %}
+              {% include "components/activity2_list__item.html.twig" with { activity: activity, sortingType: sortingTypeCookie, actStatus: actStatusName, em:em, mobile_rendering: true, showable: activity == selectedActGroup.first } %}
+            {% endfor %}
+            #}
+          </div>
+          <div class="col s2 act-action-btns">
+            {% set activity = selectedActGroup.first %}
+            <ul class="flex-center">
+            
+              {% if activity.progress < 2 %}
+                <li class="">
+                  <a class="btn-floating act-btn modal-trigger add-direct-evt" href="#updateEvent" data-aid="{{ activity.id }}" data-sid="{{ activity.stages|length == 1 ? activity.stages.first.id }}"><i class="mi offline_bolt"></i></a>
+                </li>
+              {% endif %} 
+
+              {% if activityM.userCanEdit(activity,currentuser) %}  
+                <li class="xm-top">
+                  <a class="btn-floating act-btn modal-trigger" href="#updateStageProgressStatus" data-eid="{{ activity.id }}" data-sid="{{ activity.stages.first.id }}" data-progress="{{ activity.progress }}" data-r="{{ activity.stages.first.reopened }}"><i class="mi update"></i></a>
+                </li>
+                
+                <li class="xm-top">
+                  <a class="btn-floating act-btn modal-trigger m-act-update" href="#createStage" data-id="{{activity.stages.first.id}}"><i class="fa fa-pen"></i></a>
+                </li>
+                
+              {% endif %}
+
+              {% if activity.organization == currentuser.organization %}
+                <li class="xm-top">
+                  <a class="btn-floating act-btn modal-trigger" href="#deleteActivity" data-aid="{{ activity.id }}"><i class="fa fa-trash"></i></a>
+                </li>
+              {% endif %}
+
+              {#
+              {% if activityM.userCanGiveOutput(activity,currentuser) %}
+                <li>
+                  {% if activity.userActiveGradableStages(currentuser).first.survey is not null %}
+                    <a class="btn-floating act-btn tooltipped" data-tooltip="{{ 'activities.provide_my_feedbacks'|trans }}" data-position="top" href="{{ path('answerSurvey', { stgId: activity.userActiveGradableStages(currentuser).first.id }) }}"><i class="fa fa-pen-alt"></i></a>
+                  {% else %}
+                    <a class="btn-floating act-btn tooltipped" data-tooltip="{{ 'activities.provide_my_feedbacks'|trans }}" data-position="top" href="{{ path('newStageGrade', { stgId: activity.userActiveGradableStages(currentuser).first.id }) }}"><i class="fa fa-pen-alt"></i></a>
+                  {% endif %}
+                </li>
+              {% endif %}
+              #}
+
+              {#
+              {% if activityM.userCanViewResults(activity,currentuser) %}
+                <li>
+                  <a class="btn-floating act-btn tooltipped" data-tooltip="{{ 'result'|trans }}" data-position="top" href="{{ path('activityResults', { actId: activity.id }) }}"><i class="mi show_chart"></i></a>
+                </li>
+              {% endif %}
+              #}
+            </ul>
+
+          </div>
+        </div>
+
+
+
+
+
+        
+
+          {#}
+          {% for process_name, processActivities in processesActivities %}
+            {% set actStatus = -10 %}
+            {% set showable = false %}
+            <li class="process-list--item hierarchized-item">
+              <div class="row no-margin flex-center">
+                <div class="col s2 center">
+                  <div class="flex-center process-detail">
+                    <i class="mi layers"></i>
+                    <span class="m-left">{{ process_name }}</span>
+                  </div>
+                </div>
+                <div class="col s10 no-padding">
+                  <div class="item-body">
+                    <ul class="activity-list">
+          
+                      {% for status, processStatusActivities in processActivities %}
+                        
+                        {% if status != actStatus %}
+                          {% set actStatus = status %}
+                          {% set actStatusName = actStatuses[sortingTypeCookie][status] %}
+                          {% set showable = global.request.cookies.get('r_s_' ~ sortingTypeCookie ~ '_' ~ actStatusName) is null %}
+                          
+                        {% endif %}
+
+                        {% for activity in processStatusActivities %}
+
+                          {% include "components/activity2_list__item.html.twig" with { activity: activity, showable: showable, sortingType: sortingTypeCookie, dateType: dateTypeCookie, actStatus: actStatusName, em:em } %}
+                          
+                        {% endfor %}
+                      {% endfor %}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </li>
+          {% endfor %}
+          #}
+
+          {% if noActivities %}
+
+            <li class="process-list--item hierarchized-item">
+              <div class="row no-padding flex-center no-processes">
+                <div class="col s12 no-padding dummy-activities-container"></div>
+              </div>
+            </li>
+
+          {% endif %}
+
+        </ul>
+
+        
+
+
+              {#
+              {% for process_name, activities in processesActivities[s] %}
+                {% include "components/iprocess_list__item.html.twig" with { process_name: process_name, activities: activities } %}
+              {% endfor %}
+                
+        {% endfor %}
+
+        #}
+      {% endif %}
+    </div>
+
+    {#
+
+    {% if noActivities %}
+
+      <ul class="demo-activities">
+        
+          <li class="process-list--item hierarchized-item">
+            <div class="row no-margin flex-center no-activity-holder">
+              <div class="no-activity-overlay">
+                <div class="no-activity-msg">
+                  <span>{{'activities.no_activities.main_msg'|trans}}</span>
+                  <span>{{'activities.no_activities.secondary_msg'|trans}}</span>
+                </div>
+              </div>
+              <div class="col s2 center">
+                <div class="flex-center process-detail">
+                  <i class="mi layers"></i>
+                  <span class="m-left">{{ 'activities.orphans'|trans }}</span>
+                </div>
+              </div>
+              <div class="col s10 no-padding">
+                <div class="item-body">
+                  <ul class="activity-list">
+                    {% for k in 0..4 %}
+                      <div class="row no-margin flex-center activity-holder">
+                          <div class="col s9 center no-margin no-padding activity-content-stage">
+                              <div class="curDate"></div>
+                              <ul class="stages-holder" style="position:relative">
+                                <ol class="activity-component" data-sd="0" data-p="365" data-id="{{random(1,1000000)}}">
+                                    {% set startdateU = random(7,320) %}
+                                    {% set period = random(max(0,15 - startdateU), 350 - startdateU) %}
+
+                                    {% include "components/home_stage_temporal__item.html.twig" with { dateType: 's', isEmbedded: false, startdateU: startdateU, period: period, embeddedStages: null, visibleEl: true} %}
+                                </ol>
+                              </ul>
+                          </div>
+
+                          <div class="col m2 act-info">
+                              <div class="fixed-action-btn modified-fixed-btn" style="visibility: hidden;">
+                                  <a class="btn-floating">
+                                      <i class="mi create"></i>
+                                  </a>
+                  
+                                  <ul class="flex-center act-action-buttons">
+                                      <li>
+                                          <a class="btn-floating act-btn tooltipped modal-trigger" href="#updateEvent" data-tooltip="{{ 'activities.instant_add'|trans }}" data-position="top" data-aid="{{k}}" data-sid="{{ 10+k }}"><i class="mi offline_bolt"></i></a>
+                                      </li>
+                                      <li>
+                                          <a class="btn-floating act-btn tooltipped modal-trigger" href="#updateStageProgressStatus" data-position="top" data-html="true" data-tooltip="{{ 'activities.update_status'|trans}}" data-eid="{{ k }}"><i class="mi update"></i></a>
+                                      </li>
+                                      <li>
+                                          <a class="btn-floating act-btn tooltipped" href="#" data-position="top" data-html="true" data-tooltip="{{ 'activities.modify'|trans}}"><i class="mi settings"></i></a>
+                                      </li>                           
+                                      <li>
+                                          <a class="btn-floating act-btn tooltipped" data-tooltip="{{ 'activities.provide_my_feedbacks'|trans }}" data-position="top" href="#"><i class="fa fa-pen-alt"></i></a>
+                                      </li>
+                                  </ul>    
+                              </div>
+                          </div>
+                      </div>
+
+                    {% endfor %}
+
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </li>
+        
+
+      </ul>
+      #}
+
+
+
+      {#
+      <div class="container">
+        <div class="center" style="margin-top: 20px;">
+            <i class="fa fa-clipboard fa-3x"></i>
+            {% if currentuser.organization.commname != "Public" %}
+                <h4>{% trans %}activities.no_activities_title{% endtrans %}</h4>
+                <p>{% if currentuser.role == 3 %}{% trans %}activities.no_activities_msg_collaborator{% endtrans %}{% else %}{% trans %}activities.no_activities_msg_activity_manager{% endtrans %}{% endif %}</p>
+            {% else %}
+                <h4>{% trans %}activities.no_registered_activities_title{% endtrans %}</h4>
+                <p>{% trans %}activities.no_registered_activities_msg{% endtrans %}</p>
+                <a href="{{ url('displayAllInstitutions') }}" class="btn-large waves-effect waves-light teal lighten-1" style="margin:20px 0px 0px 0px">{% trans %}institutions.add_process.btn_modal{% endtrans %}</a>
+            {% endif %}
+        </div>
+      </div>
+     
+    {% endif %} #}
+
+    {% if organization and currentuser.role != 3 %}
+      <div id="fixedButton create-act-btn" class="fixed-action-btn">
+          <a class="btn-floating btn-large modal-trigger" href="#createStage" onclick="onAddProcessClick('{{ currentuser.organization.id }}')" data-oid="{{currentuser.organization.id}}"><i class="mi add dd-orange-bg add-stage-btn"></i></a>
+          {#
+          <ul>
+              <li><a class="btn-floating orange lighten-2 tooltipped modal-trigger" data-position="left" data-delay="50" data-tooltip="{% trans %}tooltip.template.create_from_scratch{% endtrans %}" href="{{ path('activityInitialisation',{'elmt' : 'template'}) }}">
+                  <div style="position: relative;display:inline-block">
+                      <i class="fa fa-file"></i>
+                      <i class="mi template-pencil" style="position: absolute; top:5%; left:14%;color:orange">create</i>
+                  </div>
+                  </a>
+              </li>
+              <li><a class="btn-floating tooltipped {% if currentuser.organization.templateActivities|length == 0 %}grey{% else %} cyan darken-2 modal-trigger" href="#selectTemplate{% endif %}" data-position="left" data-delay="50" data-tooltip="{% trans %}tooltip.activity.create_from_template{% endtrans %}"><i class="mi view_headline"></i></a></li>
+              <li><a class="btn-floating teal accent-4 tooltipped" data-position="left" data-delay="50" data-tooltip="{% trans %}tooltip.activity.create_from_scratch{% endtrans %}" href="#createStage" onclick="onAddProcessClick('{{ currentuser.orgId }}')" data-oid="{{currentuser.orgId}}"><i class="mi create"></i></a></li>
+          </ul>
+          #}
+      </div>
+    {% endif %}
+
+  </main>
+
+  {% if organization is not null %}
+  
+  
+  
+      <div id="createStage" class="modal">
+        {{ form_start(newActivityForm) }}
+          <div class="modal-content">
+            <div class="c-flex-fs modal-title">
+              <div class="s-title-zone flex-center-sb">
+                <h5 class="s-name" data-create="{{'activities.create.modal_title'|trans}}">{{'activities.create.modal_title'|trans}}</h5>
+              </div>
+              {% if is_granted('ROLE_ENTREPRISE') %}
+                <div class="flex-center ip-zone">
+                  <span class="sm-right sm-left">{{'activities.create.linked_to'|trans}}</span>
+                  <div class="ip-value flex-center">
+                    <i class="mi layers"></i>
+                    <span class="sm-right sm-left">{{'activities.create.no_ip'|trans}}</span>
+                  </div>
+                  <i class="mi create"></i>
+                </div>
+              {% endif %}
+              <div class="s-elmt-dates flex-center-sb"></div>
+            </div>
+            
+            <div class="s-name-input input-field">
+            {{form_label(newActivityForm.name)}}
+            {{form_widget(newActivityForm.name)}}
+            </div>
+
+            <div class="row no-margin s-dates-row">
+                <div class="col s6 m6 input-field">
+                  {{ form_label(newActivityForm.startdate) }}
+                  {{ form_widget(newActivityForm.startdate) }}
+                </div>
+                <div class="col s6 m6 input-field">
+                  {{ form_label(newActivityForm.enddate) }}
+                  {{ form_widget(newActivityForm.enddate) }}
+                </div>
+            </div>
+
+            <div class="flex-center-fs">
+              <div class="visibility-zone flex-center">
+                <div class="flex-center">
+                  <i class="fa fa-question-circle visibility-info dd-text tooltipped sm-right" data-html="true" data-tooltip="{% apply escape %}{{'activity_elements.visibility.info'|trans|raw }}{% endapply %}"></i>
+                  <span class="bold-1 visibility-title">{{'visibility'|trans ~ ' :'}}</span>
+                </div>
+                <span class="sm-left black-text s-visibility" data-default="{{ 'activity_elements.visibility.unlisted'|trans}}"></span>
+                <div class="input-field no-margin" style="display:none;">
+                </div>
+                {{ form_widget(newActivityForm.visibility) }}
+                {{ form_widget(newActivityForm.accessLink) }}
+                {{ form_widget(newActivityForm.followableStatus) }}
+                {{ form_widget(newActivityForm.joinableStatus) }}
+              </div> 
+            </div>
+
+            <div class="pf-zone">
+              <div class="participants">
+                  <div class="participants-title flex-center-sb">
+                    <div>
+                      <i class="fa fa-users m-right"></i>
+                      <span class="bold-1">{{'activities.participants'|trans}}</span><span class="nb-participants sm-left"></span>
+                    </div>
+                    <a class="btn-s-update-v btn-participant-add flex-center" data-position="top">
+                        <i class="fa fa-plus dd-orange-text strong"></i>
+                    </a>
+
+                  </div>
+
+                  <ul class="participants-list flex-center" data-prototype="{% apply escape %}{% include "components/participant_list__item.html.twig" with { participant: newActivityForm.participants.vars.prototype } %}{% endapply %}">
+                    {% for participant in newActivityForm.participants.vars.data %}
+                        {{ participant.user }}
+                    {% endfor %}  
+                  </ul>
+              </div>
+              <div class="followers">
+                  <div class="followers-title flex-center-sb">
+                    <div>
+                      <i class="fa fa-users m-right dd-orange-text"></i>
+                      <span class="bold-1 dd-orange-text">{{ 'activities.followers'|trans }}</span>
+                      <span class="nb-followers dd-orange-text bold-1">(0)</span>
+                    </div> 
+                    <a class="btn-s-update-v btn-follower-add flex-center modal-trigger" href="#addUserClient" data-tooltip="{{'activities.create.add_follower'|trans}}" data-position="top">
+                      <i class="fa fa-plus dd-orange-text strong"></i>
+                    </a>     
+                  </div>
+                  <ul class="followers-list flex-center-fe no-margin" data-prototype="{% apply escape %}{% include "components/follower_list__item.html.twig" with {follower: newActivityForm.userMasters.vars.prototype} %}{% endapply %}"></ul>
+              </div>
+            </div>
+
+            <div class="events" style="display:none">
+                <div class="events-title flex-center-sb">
+                  <div class="flex-center">
+                    <i class="mi offline_bolt m-right"></i>
+                    <span class="bold-1">{{'activities.events'|trans}}</span><span class="nb-events sm-left"></span>
+                  </div>
+                  <div>
+                    <i class="btn-s-update fa fa-plus dd-orange-text tooltipped btn-add-event" data-tooltip="{{ 'activity_elements.events.add_event.btn_msg'|trans }}"></i>
+                  </div>
+                </div>
+                <ul class="events-list" data-prototype="{% apply escape %}{% include "components/event_list__item.html.twig" %}{% endapply %}"></ul>
+            </div>
+            {#
+            <div style="margin-top: 2Opx;">
+              <div id="processSelector">
+                  <div style="margin-bottom: 20px">{% trans %}activities.available_processes{% endtrans %}</div>
+                  <div class="input-field">
+                    <select id="processSelect"></select>
+                  </div>
+              </div>
+              <div>
+                  {% if currentuser.role != 1 %}
+                    <a class="modal-trigger" href="#requestNewProcess" onclick="onAddProcessClick('{{currentuser.organization.id}}')">
+                  {% else %}
+                    <a href="{{url('manageProcesses',{orgId: currentuser.organization.id})}}">
+                  {% endif %}
+                      <i class="fas fa-plus modal-close"></i>
+                      {% trans %} activities.request_process{% endtrans %}
+                  </a>
+              </div>
+            </div>      
+            #}
+        </div>
+            
+
+        <div class="modal-footer flex-center-fe">
+            {#
+            <div class="button-field">
+            {{ form_widget(newActivityForm.complexify) }}
+            </div>
+            #}
+            {#}
+            <div class="btn-flat btn-s-modify modify-update dd-text flex-center" style="display:none">
+              <i class="fa fa-cog sm-right"></i>
+              <span>{{ 'update'|trans ~ ' / ' ~ 'modify'|trans }}</span>
+            </div>
+            #}
+            <div class="btn btn-s-modify waves-effect waves-light modal-close" style="display:none">
+              Ok
+            </div>
+
+            <div class="button-field">
+              {#<a class="waves-effect waves-green btn final-step-btn modal-close">{% trans %}activities.create.submit{% endtrans %}</a>#}
+              {{ form_widget(newActivityForm.submit) }}
+            </div>
+        </div>
+        {{ form_rest(newActivityForm) }}
+        {{ form_end(newActivityForm) }}
+      </div>
+
+      <div id="createParticipant" class="modal">
+        <form name="create-participant" method="post">
+        <div class="modal-content">
+            <h5>{{'activities.create_participant_modal.title'|trans ~ ' : '}}<span class="new-part-name"></span></h5>
+            <p>{{'activities.create_participant_modal.msg'|trans ~ ' : '}}</p>
+            <div class="sm-bottom">
+              <input type="checkbox" id="choice-firm" name="choice-firm" class="filled-in">
+              <label for="choice-firm">{{ 'firm'|trans|capitalize }}</label>
+            </div>
+            <div class="sm-bottom">
+              <input type="checkbox" id="choice-indpt" name="choice-inpdt" class="filled-in">
+              <label for="choice-indpt">{{ 'independant'|trans|capitalize }}</label>
+            </div>
+            <div>
+              <input type="checkbox" id="choice-user" name="choice-user" class="filled-in" checked="checked">
+              <label for="choice-user">{{ 'firm_member'|trans|capitalize }}</label>
+              <div class="user-inputs">
+              
+                <div class="row flex-center no-margin">
+                  <div class="input-field col m3 user-fn">
+                    <label for="firstname">{{ 'firstname'|trans|capitalize }}</label>
+                    <input type="text" name="firstname" class="no-margin">
+                  </div>
+                  <div class="input-field col m3 user-ln">
+                    <label for="lastname">{{ 'lastname'|trans|capitalize }}</label>
+                    <input type="text" name="lastname" class="no-margin">
+                  </div>
+                  <div class="col m1 f-prefix">
+                    <span>{{ 'from'|trans }}</span>
+                  </div>
+                  <div class="firm-field-zone input-field col m5">
+                    <label for="firm">{{ 'firm'|trans|capitalize ~ ', ' ~ 'organization'|trans|capitalize }}</label>
+                    <input type="text" class="firm-name no-margin" name="firm">
+                    <select name="firmSelector" style="display:none;"></select>
+                    {#<div class="flex-center validation-buttons">
+                      <div class="btn firm-validate">
+                        <i class="mi check"></i>
+                      </div>
+                    </div>
+                    #}
+                    <input type="hidden" name="wid">
+                    <input type="hidden" name="oid">
+                    <input type="hidden" name="cid">
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col s12 m12 input-field">
+                    <label for="email">{{ 'email'|trans|capitalize }}</label>
+                    <input type="text" name="email">
+                  </div>
+                </div>
+              </div>
+
+            </div>
+        </div>
+        <div class="modal-footer">
+            <a class="modal-close waves-effect btn-flat dd-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+            <a class="modal-action waves-effect waves-green btn create-part-button">{{'create'|trans}}</a>
+        </div>
+        </form>
+      </div>
+
+      <div id="interactPart" class="modal">
+        <div class="modal-content">
+          <h5>{{'activities.create_participant_wo_mail_modal.title'|trans}}</h5>
+          <div class="no-mail-img-holder">
+            <img src="{{asset('lib/img/no-mail-2-1.png')}}" alt="no-mail">
+          </div>
+          <p>{{'activities.create_participant_wo_mail_modal.msg'|trans}}</p>
+        </div>
+        <div class="modal-footer">
+            <a class="modal-close waves-effect btn-flat dd-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+            <a class="modal-action modal-close waves-effect waves-green btn create-part-button">{{ 'add_anyway'|trans }}</a>
+        </div>
+      </div>
+
+      <div id="legalPerson" class="modal">
+        <div class="modal-content">
+          <h5>{{'activities.create_participant_legal_person_modal.title'|trans}}</h5>
+          <div class="legal-img-holder">
+            <img src="{{asset('lib/img/legal-person-l.png')}}" alt="legal-person">
+          </div>
+          <p>{{'activities.create_participant_legal_person_modal.msg'|trans}}</p>
+          <div class="flex-center-fe">
+            <a class="modal-close waves-effect btn-flat dd-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+            <a class="modal-action modal-close waves-effect waves-green btn create-part-button">{{ 'add'|trans }}</a>
+          </div>
+        </div>
+      </div>
+
+      <div id="processSelect" class="modal">
+        <div class="input-field">
+          <select id="processSelect"></select>
+        </div>
+      </div>
+
+      <div id="initializedActivity" class="modal">
+
+        <div class="modal-content">
+          <div class="flex-center">
+            <a href="#createStage" class="btn waves-effect waves-green modal-trigger modal-close">{{ 'grades.back'|trans }}</a>
+            <h5 class="initialize-modal-title">{{ 'activities.create.initialize_title'|trans }}</h5>
+          </div>
+
+          <div class="elmts"></div>
+
+          {#<p>{{ 'activities.request.initialize_modify_content'|trans }}</p>#}
+          {#
+          <input type="checkbox" class="filled-in" id="warn_participants" name="warn_participants" checked>
+          <label for="warn_participants">{{ 'activities.request.informing_mail'|trans }}</label>
+          #}
+          <input type="checkbox" class="filled-in" id="delegate" name="delegate-checkbox">
+          <label for="delegate">{{ 'activities.create.delegate_btn_msg'|trans }}</label>
+          <div class="delegate" style="display: none;">
+            {{ form_start(delegateForm) }}
+                {#<p>{% trans %}activities.create.delegate_content_msg{% endtrans %}</p>#}
+                <div class="input-field del-act-name" style="display: none;">
+                  {{ form_row(delegateForm.activityName) }}
+                </div>
+                <div class="input-field">
+                  {{ form_widget(delegateForm.activityLeader) }}
+                  {{ form_label(delegateForm.activityLeader) }}
+                </div>
+
+                {{ form_row(delegateForm.activityDescription) }}
+
+
+                <div class="action-buttons">
+                    <div class="button-field">
+                        {{ form_row(delegateForm.submit,{attr: {style: "margin-top:15px;"}}) }}
+                    </div>
+                </div>
+            {{ form_rest(delegateForm) }}
+            {{ form_end(delegateForm) }}
+          </div>
+
+        </div>
+        <div class="modal-footer action-buttons">
+          {#}
+          <div class="button-field">
+            <button type="button" class="modal-action launch-btn btn">{{ 'activities.request.launch_btn_msg'|trans }}</button>
+          </div>
+          #}
+          <div class="button-field">
+            <button type="button" class="modal-action modify-btn button btn">{{ 'create_organization.create'|trans }}</button>
+          </div>
+          {#}
+          <div class="button-field">
+            <a class="waves-effect waves-green btn modal-trigger" href="#delegateActivity">{% trans %}activities.create.delegate_btn_msg{% endtrans %}</a>
+          </div>
+          #}
+        </div>
+      </div>
+      
+
+      <div id="uninitializedActivity" class="modal">
+        <div class="modal-content">
+          <h5>{{ 'activities.create.uninitialize_title'|trans }}</h5>
+          <p>{{ 'activities.create.delegate_choice_msg'|trans }}</p>
+          <div class="input-field">
+            <label for="activity_name">{{ 'activities.request.name_label'|trans }}</label>
+            <input type="text" id="activity_name" name="activity_name" required="required">
+          </div>
+
+        </div>
+        <div class="modal-footer action-buttons">
+          <div class="button-field">
+            <button type="button" class="modal-action start-btn btn">{{ 'activities.create.nodelegate_btn_msg'|trans }}</button>
+          </div>
+          {#<div class="button-field">
+            <button type="button" class="modal-action modal-close submit-button red btn">{{ 'activities.request.cancel_btn_msg'|trans }}</button>
+          </div>
+          #}
+          <div class="button-field">
+            <a class="waves-effect waves-green btn modal-trigger" href="#delegateActivity">{% trans %}activities.create.delegate_btn_msg{% endtrans %}</a>
+          </div>
+        </div>
+      </div>
+
+      <div id="activityInfo" class="modal" data-eid="0">
+        <div class="modal-content">
+          <h5>{{ 'activities.details'|trans }}</h5>
+          <div class="elmts">
+
+          </div>
+        </div>
+        <div class="modal-footer action-buttons">
+          {#<div class="button-field">
+            <button type="button" class="modal-close btn">Ok</button>
+          </div>
+          #}
+        </div>
+      </div>
+
+      <div id="activity-validate" class="modal">
+        <div class="modal-content">
+          <h5>{{ 'activities.request.initialize_title'|trans }}
+            -
+            <span class="process-name"></span>
+          </h5>
+          <p>{{ 'activities.request.ask_for_add'|trans }}</p>
+        </div>
+        <div class="modal-footer action-buttons">
+          <div class="button-field">
+            <button type="button" class="modal-action start-btn btn">{{ 'activities.request.confirm_btn_msg'|trans }}</button>
+          </div>
+          <div class="button-field">
+            <button type="button" class="modal-action modal-close submit-button red btn">{{ 'activities.request.cancel_btn_msg'|trans }}</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="errorModal" class="modal">
+        <div class="modal-content">
+          <h5>{{ 'activities.modal_error_creation_title'|trans }}</h5>
+          <p class="error-msg"></p>
+        </div>
+        <div class="modal-footer">
+          <div class="action-buttons">
+            <div class="button-field">
+              <button type="button" class="modal-action modal-close waves-effect btn">Ok</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="delegateSuccess" class="modal">
+        <div class="modal-content">
+            <p>{% trans %}activities.create.delegate_success_msg{% endtrans %}</p>
+        </div>
+        <div class="modal-footer">
+            <div class="button-field">
+                <a class="modal-close submit-button waves-effect waves-green btn-large">{% trans %}activities.create.delegate_success_close_btn_msg{% endtrans %}</a>
+            </div>
+        </div>
+      </div>
+
+      <div id="chooseGradableStage" class="modal">
+          <div class="modal-content">
+            <h5>{% trans %}activities.select_graded_stage.choice_title_msg{% endtrans %}</h5>
+            <div style="margin-top: 2Opx;">
+              <div id="stageSelector">
+                  <div style="margin-bottom: 20px">{% trans %}activities.select_graded_stage.available_grading_stages{% endtrans %}</div>
+                  <select id="stageSelect" style="display: block!important; font-family: Roboto, FontAwesome; width: 65%"></select>
+              </div>
+            </div>
+          </div>
+        <div class="modal-footer action-buttons">
+            <div class="button-field">
+              <a class="waves-effect waves-green btn" href="{{ path('newStageGrade', { stgId: 0 }) }}">{% trans %}activities.grade{% endtrans %}</a>
+            </div>
+        </div>
+      </div>
+
+      <div id="requestNewProcess" class="modal">
+        <div class="modal-content">
+          {{ form_start(addProcessForm, {attr: {autocomplete: "off"}}) }}
+              <h5>{{'institutions.add_modal_process.modal_add_title'|trans}}</h5>
+              <p>{{'institutions.add_modal_process.link_to_process'|trans}}</p>
+              <div>
+                  {{ form_row(addProcessForm.name) }}
+              </div>
+              <div class="input-field">
+                {{ form_widget(addProcessForm.parent) }}
+                {{ form_label(addProcessForm.parent) }}
+              </div>
+
+          </div>
+
+          <div class="modal-footer action-buttons">
+              <div class="button-field">
+                  {{ form_row(addProcessForm.submit) }}
+              </div>
+          </div>
+          {{ form_rest(addProcessForm)}}
+          {{ form_end(addProcessForm)}}
+      </div>
+
+      <div id="updateEvent" class="modal">
+        <div class="modal-content">
+          {{ form_start(eventForm, {attr: {autocomplete: "off"}}) }}
+              {% set event = eventForm.vars.data %}
+
+              <header class="flex-center-sb">
+                <h5 style="display:inline-block">
+                  <span class="e-create">{{'activity_elements.events.add_event.modal_new_title'|trans}}</span>
+                </h5>
+                <div>
+                <div class="flex-center">
+                  <span class="event-element-name"></span>
+                  <i class="m-left dd-text fa fa-external-link-alt tooltipped" data-tooltip=""></i>
+                </div>
+                </div>
+              </header>
+              <div class="event-selection">
+                <p>{{'activity_elements.events.add_event.modal_msg'|trans}}</p>
+                <div class="row">
+                    <div class="col s12 m4 input-field">
+                        <select name="eventGSelector" id="eventGSelector" class="select-evg">
+                          {% for eventGroup in eventGroups %}
+                              <option data-evgid="{{ eventGroup['evnId'] }}" value="{{ eventGroup['id'] }}">{{ eventGroup['name'] }}</option>
+                          {% endfor %}
+                        </select>
+                        <label for="eventGSelector">Catégorie</label>
+
+                    </div>
+                    <div class="col s12 m8 input-field">
+                    
+                      {{ form_widget(eventForm.eventType) }}
+                      {{ form_label(eventForm.eventType) }}
+                    </div>
+
+                </div>
+              </div>
+              {#
+              <div class="no-margin flex-center-sb">
+                <div class="event-notifications-header flex-center">
+                  <i class="dd-text fa fa-paper-plane sm-right"></i>
+                  <span class="dd-text">{{ 'notifications'|trans|capitalize }}</span><span class="sm-left sm-right">:</span><span class="notif-choice">{{'all'|trans ~ ' ' ~ 'participants_trans'|trans }} </span>
+                </div>
+
+                <div class="btn-flat btn-e-update">
+                  <i class="fa fa-cog"></i>
+                </div>
+                
+                <div class="event-notifications-content" style="display:none">
+                  <input id="partNotification" type="checkbox" class="filled-in">
+                  <label for="partNotification">
+                    {{'activity_elements.events.add_event.notify_all_participants'|trans}}
+                  </label>
+                </div>
+                         
+              </div>
+              #}
+
+              <div class="no-margin">
+                <div class="e-dates-header flex-center-sb">
+                  <div>
+                    <i class="fa fa-clock"></i>
+                    {% set occurenceDate = event is null ? date('now')|format_datetime('short', 'none', pattern='dd/MM') : event.onsetDate|format_datetime('short', 'none', pattern='dd/MM') %}
+                    {% set isExpResDate = event is not null and event.expResDate is not null %}
+                    <span class="dd-text">{{ 'activity_elements.events.dates.onset_date'|trans|capitalize }}</span><span class="sm-left sm-right">:</span><span class="date-choice e-odate">{{ occurenceDate }} </span>  
+                    
+                    {% if isExpResDate %}
+                      {% set resolutionDate = event.onsetDate|format_datetime('short', 'none', pattern='dd/MM') %}
+                      <span class="dd-text">{{ 'activity_elements.events.dates.resolution_date'|trans|capitalize }}</span><span class="sm-left sm-right">:</span><span class="date-choice e-rdate">{{ resolutionDate }} </span> 
+                    {% endif %}
+                  </div>
+                  <div class="btn-flat dd-orange-text btn-e-update e-dates-btn tooltipped" data-tooltip="{{ 'activity_elements.events.dates.manage_dates'|trans }}">
+                      <i class="fa fa-pen"></i>
+                  </div>
+                </div>
+                <div class="row flex-center event-dates-content" style="display:none">
+                  <div class="col m5 s12 onset-date-elmt">
+                      <div class="element-input">
+                        {{ form_label(eventForm.onsetDate) }}
+                        {{ form_widget(eventForm.onsetDate) }}
+                      </div>
+                  </div>
+                  <div class="col m6 s12 exp-res-date-elmt">
+                      <div class="element-input" {% if not isExpResDate %}style="display:none"{% endif %}>
+                        {{ form_label(eventForm.expResDate) }}
+                        {{ form_widget(eventForm.expResDate) }}
+                      </div>
+                      {% if not isExpResDate %}
+                        <div class="e-set-exp-res-date">
+                          <i class="dd-text fa fa-pen"></i>
+                          <span>{{'activity_elements.events.dates.provide_exp_res_date'|trans}}</span>
+                        </div>
+                      {% endif %}
+                  </div>
+                  <div class="col m1 s12">
+                    <div class="btn e-dates-validate btn-reduced-padding">
+                      <i class="mi check"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="no-margin">
+                <div class="e-documents-header flex-center-sb">
+                  <div>
+                    <i class="fa fa-file"></i>
+                    <span class="dd-text">{{ 'activity_elements.events.documents.title'|trans|capitalize }}</span><span class="sm-left sm-right">:</span><span class="documents-number" data-none="{{ 'none_m'|trans }}">{{ '(' ~ 'none_m'|trans ~ ')' }} </span>
+                  </div>
+
+                  <div class="btn-flat dd-orange-text btn-e-update add-e-document tooltipped" data-tooltip="{{ 'activity_elements.events.documents.add_document'|trans }}">
+                    <i class="fa fa-plus"></i>
+                  </div>  
+                </div>              
+                <div class="event-documents-content">
+                  <ul class="e-documents" data-prototype-creation="{% apply escape %}{% include "components/event_document_creation_list__item.html.twig" with {item: eventForm.documents.vars.prototype} %}{% endapply %}" data-prototype-existing="{% apply escape %}{% include "components/event_document_existing_list__item.html.twig" %}{% endapply %}">
+                  </ul>
+                </div>
+              </div>
+
+              <div class="no-margin flex-center-sb e-comments-header">
+                <div>
+                  <i class="fa fa-comments"></i>
+                  <span class="dd-text">{{ 'activity_elements.events.comments.title'|trans|capitalize }}</span><span class="sm-left sm-right">:</span><span class="comments-number" data-none="{{ 'none_m'|trans }}">{{ '(' ~ 'none_m'|trans ~ ')' }} </span>  
+                </div>
+                <div> 
+                  <div class="btn-flat dd-orange-text btn-e-update add-e-comment tooltipped" data-tooltip="{{ 'activity_elements.events.comments.add_comment'|trans }}" data-normal-msg="{{ 'activity_elements.events.comments.add_comment'|trans }}" data-upload-msg="{{ 'activity_elements.events.comments.upload_before_comment'|trans }}">
+                    <i class="fa fa-plus"></i>
+                  </div>
+                  {#
+                  <div class="btn-flat">
+                    <i class="fa fa-cog"></i>
+                  </div>
+                  #}
+                </div>
+              </div>
+              
+              <div class="event-comments-content">
+                <ul class="e-comments" data-prototype-creation="{% apply escape %}{% include "components/event_comment_creation_list__item.html.twig" with {item: eventForm.comments.vars.prototype} %}{% endapply %}" data-prototype-existing="{% apply escape %}{% include "components/event_comment_existing_list__item.html.twig" %}{% endapply %}">
+                </ul>
+              </div>
+  
+              <div class="flex-center-fe">
+                <div class="btn-flat btn-e-modify dd-text modal-trigger" href="#deleteEvent" style="display:none">
+                  <span>{{ 'delete'|trans }}</span>
+                </div>
+                <div class="btn btn-e-modify waves-effect waves-light modal-close" style="display:none">
+                  Ok
+                </div>
+                {{ form_row(eventForm.submit)|replace({'[link]' : '<i class="fa fa-check"></i>'})|raw }}
+              </div>
+
+              {#
+              <div class="event-action-buttons flex-center-sa">
+                
+                  <a class="btn waves-effect waves-light insert-comment-btn">
+                    <i class="fa fa-comment-medical sm-right"></i>
+                    <span>{{ 'activity_elements.events.add_event.insert_comment'|trans }}</span>
+                  </a>
+                
+                
+                  <a class="btn waves-effect waves-light insert-document-btn">
+                    <i class="fa fa-file-medical sm-right"></i>
+                    <span>{{ 'activity_elements.events.add_event.insert_document'|trans }}</span>
+                  </a>
+              </div>
+
+              <ul class="e-comments" data-prototype="{{ form_widget(eventForm.comments.vars.prototype)|e('html') }}">
+              {% for comment in eventForm.comments.vars.data %}
+              {% endfor %}
+              </ul>
+
+              <ul class="documents" data-prototype="{{ form_widget(eventForm.documents.vars.prototype)|e('html') }}">
+              {% for document in eventForm.documents.vars.data %}
+              {% endfor %}
+              </ul>
+              #}
+
+            </div>
+
+          {{ form_rest(eventForm)}}
+          {{ form_end(eventForm)}}
+      </div>
+
+      <div id="deleteActivity" class="modal">
+        <div class="modal-content">
+            <p>{% trans %}activities.delete_activity_msg{% endtrans %}</p>
+        </div>
+        <div class="modal-footer">
+            <a class=" modal-action modal-close waves-effect waves-green btn remove-activity">{% trans %}user_update.delete_modal.confirm{% endtrans %}</a>
+            <a class=" modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+        </div>
+      </div>
+
+      <div id="deleteEvent" class="modal">
+        <div class="modal-content">
+            <p>{% trans %}activities.delete_event_msg{% endtrans %}</p>
+        </div>
+        <div class="modal-footer">
+            <a class=" modal-action modal-close waves-effect waves-green btn remove-event">{% trans %}user_update.delete_modal.confirm{% endtrans %}</a>
+            <a class=" modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+        </div>
+      </div>
+      <div id="deleteDocument" class="modal">
+        <div class="modal-content">
+            <p>{{ 'activity_elements.events.documents.document.delete_msg'|trans }}</p>
+        </div>
+        <div class="modal-footer">
+            <a class="modal-action modal-close waves-effect waves-green btn e-doc-delete">{% trans %}user_update.delete_modal.confirm{% endtrans %}</a>
+            <a class="modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+        </div>
+      </div>
+      <div id="deleteComment" class="modal">
+        <div class="modal-content">
+            <p>{{ 'activity_elements.events.comments.comment.delete_msg'|trans }}</p>
+        </div>
+        <div class="modal-footer">
+            <a class="modal-action modal-close waves-effect waves-green btn e-com-delete">{% trans %}user_update.delete_modal.confirm{% endtrans %}</a>
+            <a class="modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+        </div>
+      </div>
+      <div id="deleteParticipant" class="modal">
+        <div class="modal-content">
+            <p>{% trans %}activities.delete_participant_msg{% endtrans %}</p>
+            {#{% else %}
+                <p>{% trans %}activities.delete_activity_msg{% endtrans %}Are you sure you want to delete this activity ?</p>
+            {% endif %}#}
+        </div>
+        <div class="modal-footer">
+            <a class=" modal-action modal-close waves-effect waves-green btn participant-delete">{% trans %}user_update.delete_modal.confirm{% endtrans %}</a>
+            <a class=" modal-action modal-close waves-effect waves-green btn-flat red-text">{% trans %}user_update.delete_modal.decline{% endtrans %}</a>
+        </div>
+      </div>
+
+      <div id="chooseGradableStage" class="modal">
+        <div class="modal-content">
+          <h5>{% trans %}activities.select_graded_stage.choice_title_msg{% endtrans %}</h5>
+          <div style="margin-top: 2Opx;">
+            <div id="stageSelector">
+              <div style="margin-bottom: 20px">{% trans %}activities.select_graded_stage.available_grading_stages{% endtrans %}</div>
+              <select id="stageSelect" style="display: block!important; font-family: Roboto, FontAwesome; width: 65%"></select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer action-buttons">
+          <div class="button-field">
+            <a class="waves-effect waves-green btn" href="{{ path('newStageGrade', { stgId: 0 }) }}">{% trans %}activities.grade{% endtrans %}</a>
+          </div>
+        </div>
+      </div>
+
+      <div id="updateStageProgressStatus" class="modal">
+        <div class="modal-content">
+          <h5>{% trans %}activities.select_stage_status.choice_title_msg{% endtrans %}</h5>
+          <div style="margin-top: 2Opx;">
+            <div id="statusSelector">
+              <div style="margin-bottom: 20px">{% trans %}activities.select_stage_status.available_grading_stages{% endtrans %}</div>
+              <select id="progressStatusSelect">
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer action-buttons">
+          <div class="button-field">
+            <a class="waves-effect waves-green update-status-btn btn">{% trans %}activity_elements.update{% endtrans %}</a>
+          </div>
+        </div>
+      </div>
+
+      <div id="sendDataModal" class="modal">
+        <div class="modal-title">
+          <h5>Finaliser les réponses</h5>
+        </div>
+        <div class="modal-content">
+          <p>Vous êtes sur le point d'envoyer vos réponses, vous ne pourrez plus les modifier après avoir confirmé.</p>
+        </div>
+        <div class="modal-footer">
+          <a value="Confirmer" class="btn waves-effect waves-light modal-close remove-criterion " >Confirmer</a>
+          <a class="waves-effect waves-light modal-close btn-flat red-text">Annuler</a>
+        </div>
+      </div>
+
+      <div id="addUserProcessActivitySuccess" class="modal">
+        <div class="modal-content">
+          {{ 'institutions.add_user_process_activity_success_msg'|trans }}
+        </div>
+        <div class="modal-footer">
+          <a class="modal-close btn">ok</a>
+        </div>
+      </div>
+
+      <div id="multipleEvent" class="modal">
+        <div class="modal-content">
+          {{ 'activity_elements.events.multiple_events_modal.title'|trans }}
+          <div class="input-field">
+            <select name="eventSelector" id="eventSelector"></select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a class="btn modal-close event-select-btn">ok</a>
+        </div>
+      </div>
+      
+      <div id="multipleStage" class="modal">
+        <div class="modal-content">
+          <div class="modal-s-title">
+            {{ 'activity_elements.stages.multiple_stages_modal.title'|trans }}
+          </div>
+          <div class="input-field">
+            <select name="stageSelector" id="stageSelector"></select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a class="btn modal-close stage-select-btn">ok</a>
+        </div>
+      </div>
+
+  {% else %}
+
+    <div id="firstConnectionModal" class="modal">
+      
+      <div class="modal-content user-inputs">
+          <form class="user-inputs">
+            <h5>{{ 'activities.first_connection_modal.title'|trans }}</h5>
+            <p>{{ 'activities.first_connection_modal.msg'|trans }}</p>
+            <div class="input-field firm-field-zone">
+              <input class="firm-name" type="text" name="firm">
+              <select name="firmSelector" id=""></select>
+              <input type="hidden" name="wid">
+            </div>
+            <div class="action-buttons">
+
+              <div class="button-field">
+            <a class="btn waves-light waves-effect set-usr-org-btn">Ok</a>
+              </div>
+            </div>
+          </form>
+      </div>
+    </div>
+
+  {% endif %}
+    <div id="beforeStarting" class="modal">
+      <div class="modal-content user-inputs">
+        <h5>{{ 'activities.before_starting_modal.title'|trans|raw }}</h5>
+          <p>{{ 'activities.before_starting_modal.msg_intro'|trans|raw }}</p>
+        <h6>{{ 'activities.before_starting_modal.creation_mode.title'|trans|raw }}</h6>
+          <p>
+            {{ 'activities.before_starting_modal.creation_mode.msg'|trans|raw }} 
+            {{ 'activities.before_starting_modal.creation_mode.msg_2'|trans|raw }}
+            <img class="account-logo tooltipped" src="" alt="">
+            {{'. ' ~ 'activities.before_starting_modal.creation_mode.msg_3'|trans|raw }}
+          </p>
+        <h6>{{ 'activities.before_starting_modal.event_sharing.title'|trans|raw }}</h6>
+          <p>{{ 'activities.before_starting_modal.event_sharing.msg'|trans|raw }}</p>
+        <h6>{{ 'activities.before_starting_modal.premium_info.title'|trans|raw }}</h6>
+          <p>{{ 'activities.before_starting_modal.premium_info.msg'|trans|raw }}</p>
+        <div class="action-buttons">
+          <div class="button-field">
+            <a class="btn waves-light waves-effect letz-start-btn modal-close">{{ 'ok_got_it'|trans }}</a>
+          </div>
+        </div>
+      </div>
+    </div>
+{% endblock content %}

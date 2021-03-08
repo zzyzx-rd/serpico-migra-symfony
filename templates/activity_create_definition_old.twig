@@ -2,7 +2,7 @@
 
 {% form_theme form 'form/errors.html.twig' %}
 
-{% set elmt = app.request_stack.currentrequest.get('elmt') %}
+{% set elmt = global.request.get('elmt') %}
 {% set elmtIsComplex = activity.stages|length > 1 or activity.stages.first.criteria|length > 1 %}
 
 {% block title %}
@@ -430,16 +430,7 @@
               </div>
           </div>
           <div class="row grading-calendar">
-              <div class="input-field col s6 m6">
-                  {{ form_label(form.gstartdate) }}
-                  {{ form_widget(form.gstartdate) }}
-                  {{ form_errors(form.gstartdate) }}
-              </div>
-                <div class="input-field col s6 m6">
-                    {{ form_label(form.genddate) }}
-                    {{ form_widget(form.genddate) }}
-                    {{ form_errors(form.genddate) }}
-                </div>
+            
           </div>
       {% endif %}
       {% if not activity.recurring %}
@@ -521,7 +512,6 @@
 
 {% block javascripts %}
   <script src="{{ asset('js/nouislider.js') }}"></script>
-  <script src="{{ asset('js/login.js') }}"></script>
   <script src="{{ asset('js/activity_parameters.js') }}"></script>
     {% if elmt == 'activity' and activity.template is null %}
         <script>

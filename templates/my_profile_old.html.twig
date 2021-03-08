@@ -1,0 +1,722 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+  {{ 'profile.page_title'|trans }}
+{% endblock %}
+
+{%  block pagename %}
+  {{ 'profile.mobile_header_title'|trans }}
+{% endblock %}
+
+{% block mobile_title %}
+  {{ 'profile.page_title'|trans }}
+{% endblock %}
+
+{% block username %}
+  {{ global.currentuser.firstname }} {{ global.currentuser.lastname }}
+{% endblock %}
+
+{% set orgName = global.currentuser.organization.commname %}
+
+{% macro user_badge(user) %}
+  <img class="user-profile-l-picture tooltipped user-table-part" src="{{global.userpicture(user)}}" data-tooltip="{{user.fullname}}">
+{% endmacro %}
+
+{% macro added_by_tooltip(organization) %}
+  <div class="flex-center">
+    <span class="sm-right">{{'activities.added_by'|trans|capitalize}}</span>
+    <img class="user-profile-l-picture" src="{{ global.organizationLogo(organization) }}" alt="">
+    <span>{{organization.commname}}</span>
+  </div>
+{% endmacro %}
+
+{% set actStatuses = 
+  { 'o' : {
+      'en': {
+        '-5' : 'cancelled',
+        '-4' : 'discarded', 
+        '-3' : 'requested',
+        '-2' : 'attributed',
+        '-1' : 'incomplete',
+        '0' : 'future',
+        '1' : 'current',
+        '2' : 'completed',
+        '3' : 'published',
+      },
+      'fr': {
+        '-5' : 'cancelled',
+        '-4' : 'discarded', 
+        '-3' : 'requested',
+        '-2' : 'attributed',
+        '-1' : 'incomplete',
+        '0' : 'future',
+        '1' : 'current',
+        '2' : 'completed',
+        '3' : 'published',
+      }
+
+    },
+    'p' : {
+        'en' : {
+          '-5' : 'stopped',
+          '-4' : 'postponed', 
+          '-3' : 'suspended',
+          '-2' : 'reopened',
+          '-1' : 'unstarted',
+          '0' : 'upcoming',
+          '1' : 'ongoing',
+          '2' : 'completed',
+          '3' : 'finalized',
+        },
+        'fr' : {
+          '-5' : 'stoppé',
+          '-4' : 'reporté', 
+          '-3' : 'suspendu',
+          '-2' : 'rouvert',
+          '-1' : 'non débuté',
+          '0' : 'à venir',
+          '1' : 'en cours',
+          '2' : 'réalisé',
+          '3' : 'finalisé',
+        }
+    }
+  }
+%}
+
+{% block css %}
+  <!-- Dropify -->
+  <link href="{{ asset('css/dropify.min.css') }}" rel="stylesheet" type="text/css">
+  <link href="{{ asset('css/home.css') }}" rel="stylesheet" type="text/css">
+
+  <style>
+
+    main {
+        width:90%;
+        margin-left:auto!important;
+        margin-right:auto!important;
+        margin-top: 2rem!important;
+    }
+
+    .modify-profile-btn {
+      background-color: #55318e;
+      color: #ff9300;
+      border:none;
+    }
+
+    .admin-choice-panel {
+      text-align: left;
+    }
+
+    .admin-choice {
+      color: black;
+      font-size: 16px;
+    }
+
+    #tutoModal .modal-content, #addAdmin .modal-content{
+      min-height: 550px;
+    }
+
+    /*.modify-profile-btn{
+      background-color: #ff9300;
+      width: fit-content;
+    }*/
+
+    .act-int-ext{
+      position: relative;
+    }
+
+    .act-int-ext-arrow{
+      position: absolute;
+      left:2px;
+      top:3px;
+      font-size:0.8rem;
+    }
+
+    .progress{
+      max-width:50px;
+    }
+
+   
+    tbody tr:nth-of-type(even){
+      background-color: #673ab73b;
+    }
+
+    .my-profile-image{
+      border-radius: 50%;
+    }
+
+    @media screen and (min-width: 993px) {
+    
+        .my-profile-image{
+            width:120px;
+            height:120px;
+        }
+        .user-header{
+          font-size: 2.9rem
+        }
+
+        .col.m8{
+          width:66.66%;
+        }
+        .col.m4{
+          width:33.33%;
+        }
+
+    }
+
+     @media screen and (max-width: 992px) {
+
+        .my-profile-image{
+            width:100px;
+            height:100px;
+        }
+
+         .user-header{
+          font-size: 2rem;
+        }
+
+         .data-container > ul{
+            justify-content:center;
+        }
+
+        .col.m8{
+          width:100%!important;
+        }
+        .col.m4{
+          width:100%!important;
+        }
+
+    }
+
+    @media screen and (max-width:600px) {
+        .user-header{
+          align-items: center;
+        }
+
+        .account-zone{
+          display:none;
+        }
+
+        .profile-zone, .profile-zone .col{
+          margin:0;
+        }
+
+        .my-profile-zone{
+          flex-direction:column;
+        }
+    }
+
+    @media screen and (min-width:450px) {
+        .profile-zone .col{
+          margin-right:30px;
+        }
+    }
+
+    @media screen and (min-width:601px) {
+      .my-profile-zone{
+          margin-left: 20px;
+        }
+    }
+
+  </style>
+  {% if not orgHasActiveAdmin %}
+  <script>
+    var iaurl= "{{ url('addFirstAdmin') }}";
+    var vaurl= "{{ url('validateAdmins') }}";
+  </script>
+  {% endif %}
+
+{% endblock %}
+
+  
+{% block content %}
+
+{% set organization = currentuser.organization %}
+{% include "components/background_grid.html.twig" %}
+
+  <main class="card-panel purple lighten-5">
+   
+    
+    <div class="image-container">
+      <div class="menu">
+
+        {#<img src="{{asset('lib/img/menu-bg.webp')}}" alt="">#}
+      
+        <ul class="flex-center-sb account-zone no-margin">
+          <div class="flex-center-fs">
+            <a class="btn-flat no-padding flex-center my-account account-mention white-text" style="margin-top:-10px">
+              <span >{{ 'my_account'|trans}}</span>
+              <img class="account-logo sm-left sm-right" src="{{ asset(global.organizationLogo(organization)) }}">
+              <span class="strong {{organization.type == 'C' or organization.type == 'I' ? 'dd-orange-text' : ''}}">{{ organization.type == 'C' ? 'profile.private_suffix'|trans : (organization.type == 'I' ? 'profile.independant_suffix'|trans : organization.commname) }}</span>
+            </a>
+          </div>
+          <a href="{{ url ('manageProfile') }}" class="btn waves-effect modify-profile-btn xm-right">
+            {{'parameters'|trans}}
+          </a>
+
+        </ul>
+        <div {#class="data-container"#}>
+          <ul class="flex-center my-profile-zone">
+            <div class="xm-right">
+              <img class="my-profile-image" src="{{ asset(global.userpicture) }}">
+            </div>
+
+            <div class="">
+              <ul>
+                <div class="user-header c-flex">
+                              <span>
+                              {% if global.currentuser.nickname != null %}
+                                {{ global.currentuser.nickname }}
+                              {% else %}
+                                {{ global.currentuser.fullname }}
+                              {% endif %}
+                              </span>
+                  {#{% if orgName == "Public" %}#}
+                  
+                  {#{% endif %}#}
+                </div>
+              
+              </ul>
+            </div>
+          </ul>
+        </div>
+      </div>
+    </div>
+    
+    {#
+    <div class="container background-container" style="position:relative">
+      {% if nbResultsStages > 0 and global.currentuser.role != 3 or nbPublishedStages > 0 and global.currentuser.role == 3 %}
+        <a href="{{ path('elementOverview', {entity: 'user', 'elmtId' : global.currentuser.id}) }}" class="btn btn-large white-text waves-effect waves-light teal lighten-1"><ul class="flex-center" style="margin: 0;justify-content:center;"><i class="fa fa-chart-bar" style="margin-right: 17px;"></i><span>{{ 'profile.my_results'|trans }}</span></ul></a>
+      {% endif %}
+    </div>
+    #}
+      
+    <div>
+
+      <div class="row" style="margin-top: 30px">
+        <div class="col {%if myHotStageParticipations|length == 0 %}m12 {%else%}m8{% endif%} s12">
+          <h5><i class="fa fa-thermometer-three-quarters" style="margin-right: 20px"></i>
+            {% if orgName != "Public" %}
+              {{ 'profile.hotStages.title'|trans }}
+            {% else %}
+              {{ 'profile.hotStages.public_title'|trans }}
+            {% endif %}
+          </h5>
+          {% if myHotStageParticipations|length > 0 %}
+            <table class="striped">
+              <thead>
+              <tr>
+                <th>#</th>
+                <th>{{ 'report.user.table.activity_title'|trans ~ ' - ' ~ 'report.user.table.stage_title'|trans }}</th>
+                <th>I/E</th>
+                <th class="criterion-column">{{ 'updates'|trans|capitalize }}</th>
+                <th class="participant-column">{{ 'profile.hotStages.participants'|trans }}</th>
+                <th>{{ 'profile.hotStages.status'|trans }}</th>
+                <th>{{ 'profile.hotStages.progress'|trans }}</th>
+              </tr>
+              </thead>
+              <tbody>
+              {% set now = "now"|date("Y/m/d") %}
+              {% set k = 1 %}
+              {% for participation in myHotStageParticipations %}
+
+                {% set stage = participation.stage %}
+                {% if stage.enddate %}
+                  {% set diffStageDateInterval = stage.enddate.diff(date(now)) %}
+                  {% set diffGradingDays = diffStageDateInterval.days %}
+                {% else %}
+                  {% set diffGradingDays = 0 %}
+                {% endif %}
+                {% if stage.enddate|date("Y/m/d") < now %}
+                  {% set diffGradingDays = -diffGradingDays %}
+                {% endif %}
+                {% set clickable = diffGradingDays >= 0 and participation.type != -1 and participation.status < 3 and stage.status > 0 %}
+                {% set clickable = false %}
+                {# Determination of stage type : pure FB, evaluation, contribution or mixed #}
+                {% set stageMixed = false %}
+
+
+                {% set stageType = stage.criteria|length > 0 ? stage.criteria[0].type : -1 %}
+
+                {% for criterion in stage.criteria %}
+                  {% if criterion.type != stageType and (not stageMixed) %}
+                    {% set stageMixed = true %}
+                  {% endif %}
+                {% endfor %}
+                <tr>
+                  <td>{% if clickable %}
+                    {% if stage.criteria|length > 0 %}
+                    <a href="{{ url('newStageGrade',{'stgId' : stage.id})}}" class="no-padding">
+                      {% else %}
+                      <a href="{{ url('answerSurvey',{'stgId' : stage.id})}}" class="no-padding">
+                        {% endif %}
+                        {% endif %}
+                        {{ k }}
+                        {% if clickable %}</a>{% endif %}
+                  </td>
+                  <td>{% if clickable %}
+                    {% if stage.criteria|length > 0 %}
+                    <a href="{{ url('newStageGrade',{'stgId' : stage.id})}}" class="no-padding">
+                      {% else %}
+                      <a href="{{ url('answerSurvey',{'stgId' : stage.id})}}" class="no-padding">
+                        {% endif %}
+                        {% endif %}
+                        {{ stage.activity.stages|length > 1 ? (stage.activity.name ~ ' - ' ~ '<span class="strong">' ~ stage.name ~ '</span>')|raw : stage.activity.name}}
+                        {% if clickable %}</a>{% endif %}
+                  </td>
+                  <td>
+                    {% if stage.organization != organization %}
+                      <i class="act-int-ext fa fa-square dd-text tooltipped" data-html="true" data-position="top" data-tooltip="{% apply escape %}{{ _self.added_by_tooltip(stage.organization) }}{% endapply %}">
+                        <i class="act-int-ext-arrow fa fa-long-arrow-alt-right dd-orange-text"></i>
+                      </i>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if clickable %}
+                      {% if stage.criteria|length > 0 %}
+                      <a href="{{ url('newStageGrade',{'stgId' : stage.id})}}" class="no-padding">
+                        {% else %}
+                        <a href="{{ url('answerSurvey',{'stgId' : stage.id})}}" class="no-padding">
+                        {% endif %}
+                    {% endif %}
+
+
+                      {{stage.updates|length ? 
+                        stage.updates|length ~ (stage.newUpdates(currentuser)|length > 0 ? ' (' ~ stage.newUpdates(currentuser)|length ~ ')' : '') :
+                        '-'
+                      }}
+
+                    {% if clickable %}</a>{% endif %}
+                  </td>
+                  <td>
+                    {% if clickable %}
+                      {% if stage.criteria|length > 0 %}
+                        <a href="{{ url('newStageGrade',{'stgId' : stage.id})}}" class="no-padding">
+                      {% else %}
+                        <a href="{{ url('answerSurvey',{'stgId' : stage.id})}}" class="no-padding">
+                      {% endif %}
+                    {% endif %}
+                    {% for participant in stage.participants %}
+                      {{ _self.user_badge(participant.user) }}
+                    {% endfor %}
+                    {% if clickable %}</a>{% endif %}
+                  </td>
+                  <td>
+                    {% if clickable %}
+                    {% if stage.criteria|length > 0 %}
+                    <a href="{{ url('newStageGrade',{'stgId' : stage.id})}}" class="no-padding">
+                      {% else %}
+                      <a href="{{ url('answerSurvey',{'stgId' : stage.id})}}" class="no-padding">
+                        {% endif %}
+                        {% endif %}
+
+                        {{ actStatuses['p'][global.request.locale][stage.progress]|capitalize }}
+
+                        {% if clickable %}</a>{% endif %}
+                  </td>
+                  <td>
+                    {% if stage.pctElapsed %}
+                      <div class="flex-center-sb">
+                        <div class="progress">
+                            <div class="determinate" style="width: {{stage.pctElapsed}}%"></div>
+                        </div>
+                        <span>{{stage.pctElapsed ~ '%' }}</span>
+                      </div>
+                    {% else %}
+                      <span>-</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% set k = k + 1 %}
+              {% endfor %}
+              </tbody>
+            </table>
+          {% else %}
+            <span>{{ 'profile.hotStages.no_stages'|trans }}</span>
+          {% endif %}
+        </div>
+        <div class="col {{ myHotStageParticipations|length == 0 ? 'm12' : 'm4' }} s12">
+          <h5><i class="fa fa-ticket-alt" style="margin-right: 20px"></i>{{ 'profile.participations.title'|trans }}</h5>
+
+          {% if nbActivities == 0 %}
+            <span>{{ 'profile.participations.no_participations'|trans }}</span>
+          {% else %}
+            <table class="striped">
+              <thead>
+              <tr>
+                <th></th>
+                <th>
+                  <i class="fa fa-cubes tooltipped" data-position="top" data-delay="50" data-tooltip="{{ 'profile.participations.activities_title'|trans }}" style="color: #ee6e73; margin-right:7px"></i>
+                </th>
+                <th>
+                  <ul style="display: inline-flex; color: #2196F3; margin-right:3px" class="tooltipped no-margin no-padding" data-position="top" data-delay="50" data-tooltip="{{ 'profile.participations.stages_title'|trans }}">
+                    <li>
+                      <i class="fa fa-cube" style="position: relative;top: -6%;left: 0%;font-size: 0.85rem;"></i>
+                    </li>
+                    <li>
+                      <i class="fa fa-cube" style="position: relative;top: 6%;left: -41%;font-size: 0.85rem;"></i>
+                    </li>
+                  </ul>
+                </th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td>{{ 'profile.participations.upcoming'|trans }}</td>
+                <td>{% if nbUpcomingActivities > 0 %} {{ nbUpcomingActivities }} {% else %} - {% endif %}</td>
+                <td>{% if nbUpcomingStages > 0 %} {{ nbUpcomingStages }} {% else %} - {% endif %}</td>
+              </tr>
+              <tr>
+                <td>{{ 'profile.participations.ongoing'|trans }}</td>
+                <td>{% if nbOngoingActivities > 0 %} {{ nbOngoingActivities }} {% else %} - {% endif %}</td>
+                <td>{% if nbOngoingStages > 0 %} {{ nbOngoingStages }} {% else %} - {% endif %}</td>
+              </tr>
+              <tr>
+                <td>{{ 'profile.participations.computed'|trans }}</td>
+                <td>{% if nbResultsActivities > 0 %} {{ nbResultsActivities }} {% else %} - {% endif %}</td>
+                <td>{% if nbResultsStages > 0 %} {{ nbResultsStages }} {% else %} - {% endif %}</td>
+              </tr>
+              <tr style="border-top: 1px solid black">
+                <td>{{ 'profile.participations.total_activities'|trans }}</td>
+                <td>{% if nbUpcomingActivities + nbOngoingActivities + nbResultsActivities > 0 %} {{ nbUpcomingActivities + nbOngoingActivities + nbResultsActivities }} {% else %} - {% endif %}</td>
+                <td>{% if nbUpcomingStages + nbOngoingStages + nbResultsStages > 0 %} {{ nbUpcomingStages + nbOngoingStages + nbResultsStages }} {% else %} - {% endif %}</td>
+              </tr>
+              {#
+              <tr style="font-style:italic;border-top: 1px solid black">
+                <td>{{ 'profile.participations.total_unreleased_msg'|trans }}</td>
+                <td>{% if nbResultsActivities - nbPublishedActivities > 0 %} {{ nbResultsActivities - nbPublishedActivities }} {% else %} - {% endif %}</td>
+                <td>{% if nbResultsStages - nbPublishedStages > 0 %} {{ nbResultsStages - nbPublishedStages }} {% else %} - {% endif %}</td>
+              </tr>
+              #}
+              </tbody>
+            </table>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if not global.currentuser.isInternal %}
+    <div id="finalizeUser" class="modal">
+      <div class="modal-title">
+        <h4>{{ 'profile.finalizeUserCreation.modal_title'|trans }}</h4>
+      </div>
+      <div class="modal-content">
+        {{ form_start(finalizeUserForm) }}
+        {{ form_row(finalizeUserForm.firstname) }}
+        {{ form_row(finalizeUserForm.lastname) }}
+        {{ form_row(finalizeUserForm.department) }}
+        {{ form_row(finalizeUserForm.position) }}
+      </div>
+      <div class="modal-footer action-buttons">
+        <div class="button-field">
+          {{ form_row(finalizeUserForm.submit) }}
+          {{ form_rest(finalizeUserForm) }}
+          {{ form_end(finalizeUserForm) }}
+        </div>
+      </div>
+    </div>
+    <div id="finalizeUserSucess" class="modal">
+      <div class="modal-content">
+        <p>{{ 'profile.finalizeUserCreation.modal_success_msg'|trans }}</p>
+      </div>
+      <div class="modal-footer action-buttons">
+        <div class="button-field">
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+  {% if firstConnection == 0 %}
+    <div id="tutoModal" class="modal" style="text-align: center">
+
+      <div class="modal-content" style="text-align: center" >
+        <br>
+        <h5>Nouveau sur Serpico ? Nous sommes là pour vous aider !</h5>
+        <br>
+        {% if global.currentuser.role== 1 %}
+          <div class="page-modal" id="0">
+            <img src="{{ asset('lib/gif/create-activity.gif') }}">
+            <p>En cliquant sur l'onglet Activités, vous pouvez dès à présent créer une activité .</p>
+          </div>
+
+          <div class="page-modal" id="1">
+            <img src="{{ asset('lib/gif/stage-result.gif') }}" style="height: 400%">
+
+            <p>Vous pouvez ensuite observer les résultats des notations dès que tous les participants ont noté  </p>
+          </div>
+          <div class="page-modal" id="2">
+            <img src="{{ asset('lib/gif/user-result.gif') }}" style="height: 400%">
+
+            <p> Il y a aussi possibilité de voir ces résultats personnel en cliquant sur le boutton  mes résultats </p>
+          </div>
+          <div class="page-modal" id="3">
+            <img src="{{ asset('lib/gif/see-users.gif') }}">
+
+            <p>En cliquant sur l'onglet Utilisateur,Vous pouvez voir la liste des utilisateurs de votre organisation</p>
+          </div>
+          <div class="page-modal" id="4">
+            <img src="{{ asset('lib/gif/parameter.gif') }}">
+
+            <p>En cliquant sur l'onglet Paramètres, vous avez la possibilité de changer les paramètres de l'entreprise.</p>
+          </div>
+        {% endif %}
+        {% if global.currentuser.role== 2 %}
+
+          <div class="page-modal" id="0">
+            <img src="{{ asset('lib/gif/create-activity.gif') }}">
+            <p>En cliquant sur l'onglet Activités, vous pouvez dès à présent créer une Activité .</p>
+          </div>
+
+          <div class="page-modal" id="1">
+            <img src="{{ asset('lib/gif/stage-result.gif') }}" style="height: 400%">
+
+            <p>Vous pouvez ensuite observer les résultats des notations dès que tout les participants on noté  </p>
+          </div>
+          <div class="page-modal" id="2">
+            <img src="{{ asset('lib/gif/user-result.gif') }}" style="height: 400%">
+
+            <p> Il y a aussi possibilité de voir ces résultats personnel en cliquant sur le boutton  mes résultats </p>
+          </div>
+          <div class="page-modal" id="3">
+            <img src="{{ asset('lib/gif/see-users.gif') }}">
+
+            <p>En cliquant sur l'onglet Utilisateur,Vous pouvez voir la liste des utilisateurs de votre organisation</p>
+          </div>
+
+        {% endif %}
+        {% if global.currentuser.role==3  %}
+
+          <div class="page-modal" id="0">
+            <img src="{{ asset('lib/gif/note-dashboard.gif') }}">
+            <p>En cliquant sur l'onglet Activités, vous pouvez dès à présent voir les activités vous concernant . Sur cette page vous allez pouvoir   noter des critères et répondre à des sondages </p>
+          </div>
+
+          <div class="page-modal" id="1">
+            <img src="{{ asset('lib/gif/critere-response.gif') }}">
+
+            <p>Vous pouvez noter le processus selon des critères  </p>
+          </div>
+
+          <div class="page-modal" id="2">
+            <img src="{{ asset('lib/gif/stage-result.gif') }}" style="height: 400%">
+
+            <p>Vous pouvez ensuite observer les résultats des notations dès que tous les participants ont noté  </p>
+          </div>
+          <div class="page-modal" id="3">
+            <img src="{{ asset('lib/gif/user-result.gif') }}" style="height: 400%">
+
+            <p> Il y a aussi possibilité de voir ces résultats personnel en cliquant sur le boutton  mes résultats </p>
+          </div>
+        {% endif %}
+        {% if not orgHasActiveAdmin %}
+
+          <div class="page-modal admin-choice-panel" id="{{ global.currentuser.role == 1 ? 5 : 4 }}">
+            <p>{{'profile.first_connection.add_first_admin.modal_msg'|trans}}</p>
+            <div>
+              <input type="checkbox" id="self_admin" name="self_admin" class="filled-in admin-choice" checked data-id="{{global.currentuser.id}}">
+              <label for="self_admin">{{'profile.first_connection.add_first_admin.self_keeping_option'|trans}}</label>
+            </div>
+            <div>
+              <input type="checkbox" id="other_admin" name="other_admin" class="filled-in admin-choice">
+              <label for="other_admin">{{'profile.first_connection.add_first_admin.give_ownership_option'|trans}}</label>
+              <div class="admin-select-zone" style="display: none;">
+                <select id="userSelector" multiple>
+                  {% for user in global.activeUsers %}
+                    {% if user != global.currentuser and user.lastname != "ZZ" %}
+                      <option value="{{ user.id }}">{{ user.fullname }}</option>
+                    {% endif %}
+                  {% endfor %}
+                </select>
+                <a class="modal-trigger" href="#addAdmin"><i class="fas fa-plus"></i>{{ 'profile.first_connection.add_first_admin.modal_trigger_btn'|trans }}</a>
+              </div>
+            </div>
+          </div>        
+        {% endif %}
+      </div>
+
+
+
+      <div style="text-align: center" class="modal-footer">
+        <a><i style="display: none" class="btn-previous-page btn waves-effect waves-light fas fa-arrow-left"></i></a>
+        <a value="Confirmer" style="display: none"
+           class="roger btn waves-effect waves-light">{{ 'profile.first_connection.finalize_btn'|trans }}</a>
+        <a><i class="btn-next-page btn waves-effect waves-light fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+
+    {% endif %}
+    
+    {% if not orgHasActiveAdmin %}
+      <div id="addAdmin" class="modal" style="z-index: 1050;">
+        {{ form_start(addFirstAdminForm, {attr: {autocomplete: "off" }}) }}
+        <div class="modal-content">
+          
+          <h4>{{ 'profile.first_connection.add_first_admin.modal_trigger_btn'|trans }}</h4>
+          <p>{{ 'profile.first_connection.add_first_admin.modal_title'|trans }}</p>
+          {{ form_row(addFirstAdminForm.firstname) }}
+          {{ form_row(addFirstAdminForm.lastname) }}
+          {{ form_row(addFirstAdminForm.email) }}
+        </div>
+        <div class="modal-footer action-buttons">
+          <div class="button-field">
+            <a class="modal-close btn-flat waves-effect waves-light">
+              <i class="fas fa-arrow-left sm-right"></i>
+              <span>{{ 'back'|trans }}</span>
+            </a>
+          </div>
+          <div class="button-field">
+            {{ form_row(addFirstAdminForm.submit) }}
+          </div>
+        </div>
+        {{ form_rest(addFirstAdminForm) }}
+        {{ form_end(addFirstAdminForm) }}
+      </div>
+    {% endif %}
+
+{% endblock %}
+
+
+
+
+{% block javascripts %}
+  <script src="{{ asset('js/profile.js') }}"></script>
+  <script src="{{ asset('js/dropify.min.js') }}"></script>
+  {% if global.currentuser.position is null %}
+    <script>
+      $(function() {
+        $('#finalizeUser').modal({
+          dismissible: false,
+        });
+        $('#finalizeUser').modal('open');
+        $('.user-submit').on('click', function(e) {
+          e.preventDefault();
+          $.post(
+            '{{ path("finalizeUser", { usrId: global.currentuser.id }) }}',
+            $('#finalizeUser').find('form').serialize()
+          )
+            .done(function(data){
+              try {
+                $.each(data, function (key, value) {
+                  $.each($('input'), function () {
+                    if ($(this).attr('name').indexOf(userKey) != -1 && $(this).attr('name').indexOf(key) != -1) {
+                      $(this).after('<div class="red-text"><strong>' + value + '</strong></div>');
+                      return false;
+                    }
+                  })
+                })
+              } catch(e) {
+                if ($('.red-text').length == 0) {
+                  $('#finalizeUser').modal('close');
+                  $('#finalizeUserSuccess').modal('open');
+                }
+              }
+            })
+            .fail(function (data) {
+              console.log(data)
+            });
+        });
+      });
+    </script>
+  {% endif %}
+{% endblock %}

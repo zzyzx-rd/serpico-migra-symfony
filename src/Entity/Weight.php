@@ -6,6 +6,7 @@ use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\WeightRepository;
 use DateTime;
 use DateTimeInterface;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -45,14 +46,15 @@ class Weight extends DbObject
     public $modified;
 
     /**
-     * @ORM\Column(name="wgt_createdBy", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="weightInitiatives")
+     * @JoinColumn(name="wgt_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
-     * @ORM\Column(name="wgt_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="wgt_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="wgt_deleted", type="datetime", nullable=true)
@@ -60,60 +62,50 @@ class Weight extends DbObject
     public $deleted;
 
     /**
-     * @ManyToOne(targetEntity="Organization", inversedBy="weights")
-     * @JoinColumn(name="org_id", referencedColumnName="org_id",nullable=false)
+     * @ORM\ManyToOne(targetEntity="Organization", inversedBy="weights")
+     * @JoinColumn(name="org_id", referencedColumnName="org_id", nullable=false, onDelete="CASCADE")
      */
     protected $organization;
 
     /**
-     * @ManyToOne(targetEntity="Position", inversedBy="weights")
-     * @JoinColumn(name="pos_id", referencedColumnName="pos_id",nullable=false)
+     * @ORM\OneToMany(targetEntity=Position::class, mappedBy="weight", cascade={"persist","remove"}, orphanRemoval=true)
      */
-    protected $position;
+    public $positions;
 
     /**
-     * @ORM\OneToOne(targetEntity=User::class, mappedBy="weight_wgt", cascade={"persist", "remove"})
-     * @JoinColumn(name="user_usr_id",referencedColumnName="usr_id", nullable=true)
+     * @ORM\OneToMany(targetEntity=User::class, mappedBy="weight", cascade={"persist","remove"}, orphanRemoval=true)
      */
-    public $user;
+    public $users;
 
     /**
      * Weight constructor.
-     * @param ?int$id
-     * @param $wgt_interval
-     * @param $wgt_titleframe
-     * @param $wgt_value
-     * @param $wgt_modified
-     * @param $wgt_createdBy
-     * @param $wgt_inserted
-     * @param $wgt_deleted
+     * @param int|null $id
+     * @param int $interval
+     * @param string $titleframe
+     * @param int $value
+     * @param DateTime $modified
+     * @param DateTime $deleted
      * @param $organization
-     * @param $position
-     * @param $user
      */
     public function __construct(
-      ?int $id = 0,
-        $user = null,
-        $wgt_interval = 0,
-        $wgt_titleframe = '',
-        $wgt_value = 100,
-        DateTime $wgt_modified = null,
-        $wgt_createdBy = null,
-        DateTime $wgt_inserted = null,
-        DateTime $wgt_deleted = null,
-        $organization = null,
-        $position = null)
+        ?int $id = 0,
+        $interval = 0,
+        $titleframe = '',
+        $value = 100,
+        DateTime $modified = null,
+        DateTime $deleted = null,
+        $organization = null
+    )
     {
-        parent::__construct($id, $wgt_createdBy, new DateTime());
-        $this->interval = $wgt_interval;
-        $this->titleframe = $wgt_titleframe;
-        $this->value = $wgt_value;
-        $this->modified = $wgt_modified;
-        $this->inserted = $wgt_inserted;
-        $this->deleted = $wgt_deleted;
+        parent::__construct($id, null, new DateTime());
+        $this->interval = $interval;
+        $this->titleframe = $titleframe;
+        $this->value = $value;
+        $this->modified = $modified;
+        $this->deleted = $deleted;
         $this->organization = $organization;
-        $this->position = $position;
-        $this->user = $user;
+        $this->positions = new ArrayCollection;
+        $this->users = new ArrayCollection;
     }
 
     public function getInterval(): ?int
@@ -121,9 +113,9 @@ class Weight extends DbObject
         return $this->interval;
     }
 
-    public function setInterval(int $wgt_interval): self
+    public function setInterval(int $interval): self
     {
-        $this->interval = $wgt_interval;
+        $this->interval = $interval;
 
         return $this;
     }
@@ -133,9 +125,9 @@ class Weight extends DbObject
         return $this->titleframe;
     }
 
-    public function setTitleframe(string $wgt_titleframe): self
+    public function setTitleframe(string $titleframe): self
     {
-        $this->titleframe = $wgt_titleframe;
+        $this->titleframe = $titleframe;
 
         return $this;
     }
@@ -145,9 +137,9 @@ class Weight extends DbObject
         return $this->value;
     }
 
-    public function setValue(?float $wgt_value): self
+    public function setValue(?float $value): self
     {
-        $this->value = $wgt_value;
+        $this->value = $value;
 
         return $this;
     }
@@ -157,9 +149,9 @@ class Weight extends DbObject
         return $this->modified;
     }
 
-    public function setModified(?DateTimeInterface $wgt_modified): self
+    public function setModified(?DateTimeInterface $modified): self
     {
-        $this->modified = $wgt_modified;
+        $this->modified = $modified;
 
         return $this;
     }
@@ -169,9 +161,9 @@ class Weight extends DbObject
         return $this->inserted;
     }
 
-    public function setInserted(DateTimeInterface $wgt_inserted): self
+    public function setInserted(DateTimeInterface $inserted): self
     {
-        $this->inserted = $wgt_inserted;
+        $this->inserted = $inserted;
 
         return $this;
     }
@@ -181,9 +173,9 @@ class Weight extends DbObject
         return $this->deleted;
     }
 
-    public function setDeleted(?DateTimeInterface $wgt_deleted): self
+    public function setDeleted(?DateTimeInterface $deleted): self
     {
-        $this->deleted = $wgt_deleted;
+        $this->deleted = $deleted;
 
         return $this;
     }
@@ -199,43 +191,53 @@ class Weight extends DbObject
     /**
      * @param mixed $organization
      */
-    public function setOrganization($organization): void
+    public function setOrganization(Organization $organization): self
     {
         $this->organization = $organization;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getPosition()
-    {
-        return $this->position;
-    }
-
-    /**
-     * @param mixed $position
-     */
-    public function setPosition($position): void
-    {
-        $this->position = $position;
-    }
-
-    public function getUser(): ?User
-    {
-        return $this->user;
-    }
-
-    public function setUser(User $user): self
-    {
-        $this->user = $user;
-
-        // set the owning side of the relation if necessary
-        if ($user->getWeightWgt() !== $this) {
-            $user->setWeightWgt($this);
-        }
-
         return $this;
     }
+
+    /**
+     * @return ArrayCollection|User[]
+     */
+    public function getUsers(){
+        return $this->users;
+    }
+
+    public function addUser(User $user): self
+    {
+        $this->users->add($user);
+        $user->setWeight($this);
+        return $this;
+    }
+
+    public function removeUser(User $user): self
+    {
+        $this->users->removeElement($user);
+        return $this;
+    }
+
+    /**
+     * @return ArrayCollection|Position[]
+     */
+    public function getPositions(){
+        return $this->positions;
+    }
+
+    public function addPosition(Position $position): self
+    {
+        $this->positions->add($position);
+        $position->setWeight($this);
+        return $this;
+    }
+
+    public function removePosition(Position $position): self
+    {
+        $this->positions->removeElement($position);
+        return $this;
+    }
+
+
     public function __toString()
     {
         return (string) $this->id;

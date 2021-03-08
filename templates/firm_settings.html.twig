@@ -1,274 +1,965 @@
 {% extends "layout.html.twig" %}
 
+{% import "macros/user_list__macros.html.twig" as macros %}
+
 {% block title %}
-    {% trans %}firm_settings.page_title{% endtrans %}
-{% endblock %}
-
-{% block css %}
-
-    <link rel="stylesheet" href="{{ asset('css/activities_access_and_results_view.css') }}">
-
-    <script>
-        var updateFirmUrl = "{{ url('updateFirmSettings') }}";
-    </script>
-    <style>
-        html {
-            overflow-y: scroll;
-        }
-    </style>
+  {{'firm_settings.page_title'|trans}}
 {% endblock %}
 
 {% block pagename %}
-    {% trans %}firm_settings.mobile_header_title {% endtrans %}
+  {{'firm_settings.page_title'|trans}}
+{% endblock %}
+
+{% block mobile_title %}
+  {{'firm_settings.page_title'|trans}}
 {% endblock %}
 
 {% block username %}
-    {{ currentuser.firstname }} {{ currentuser.lastname }}
+  {{ currentuser.firstname }}
+  {{ currentuser.lastname }}
 {% endblock %}
 
+{% block css %}
+  <link rel="stylesheet" href="{{ asset('css/add_client_user_modal.css') }}">
+  <style>
+
+    main {
+        width:90%;
+        margin:auto!important;
+    }
+
+    section:not(:last-of-type){
+      border-bottom: 1px solid grey;
+    }
+
+    section .btn-large {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      max-width: 500px;
+      margin-bottom: 1em;
+      line-height: inherit;
+      margin-right: auto;
+      margin-left:auto;
+
+    }
+
+    section .btn-large i {
+      font-size: 1.2em;
+      padding-bottom: .1em;
+      padding-right: .3em;
+    }
+
+    .collapsible{
+      border:none;
+      box-shadow: none;
+    }
+    .collapsible-header{
+      background-color:inherit;
+    }
+
+    section:not(.collapsible) .section-title{
+      margin-left:30px;
+    }
+
+    section > * {
+      width: 100%;
+    }
+
+    .collapsible-header{
+      padding-top: 0;
+      padding-bottom: 0;
+      border: none;
+    }
+
+    .collapsible-body{
+      border:none;
+      padding-right:0;
+    }
+
+    .nb-users-zone{
+      font-size: 15px;
+      line-height: 15px;
+    }
+
+    .admin-section-title i{
+      margin-right:0;
+    }
+
+    .add-elmt-btn:not(.dd-border-color){
+      border: 1px dashed orange;
+    }
+    .add-elmt-btn.dd-border-color{
+      border: 1px dashed #55318e;
+    }
+
+    .add-elmt-btn{
+      padding: 0 2rem;
+    }
+    .add-elmt-btn{
+      border: 1px dashed orange;
+      padding: 0 2rem;
+    }
+
+    .add-elmt-btn > i{
+      width:20px;
+      font-size:1.3rem;
+      margin-right:0;
+    }
+
+    .badge-container > div {
+      font-size: 1em;
+      width: 1.2em;
+      height: 1.2em;
+    }
+
+    .user-master-btn {
+      min-width:250px;
+      padding-right:0;
+    }
+
+    .section-act-btns{
+      flex-wrap:nowrap;
+      min-width:max-content;
+    }
+
+    .admin-section-title > a {
+      width: inherit;
+    }
+
+    #updateUserRole{
+      overflow-y:inherit;
+    }
+
+    .close-sub-modal-btn{
+      float:right;
+    }
+
+    .close-sub-modal-btn i.fa-2x{
+      font-size:2em!important;
+    }
+
+    .creditcard {
+      font: 16px/1.5 'Helvetica Neue', Helvetica, sans-serif;
+      position: relative;
+      width: 60%!important;;
+      max-width: 400px;
+      height: 10%;
+      text-align: left;
+      padding: 5%!important;;
+      color: #fff;
+      border-radius: 20px;
+      box-sizing: border-box;
+      background: url(data:image/jpg;base64,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) no-repeat ;
+    }
+
+     .numbercard {
+        font-size: 150%;
+        padding: 10% 0 2%;
+        text-align: center;
+    }
+
+    .expiry-date {
+        font-size: 14px;
+        text-align: center;
+    }
+
+    .owner {
+        text-align: left;
+    }
+
+    .free-plan-icon{
+        color: green;
+        font-size: 200%;
+        margin-top: 1rem;
+    }
+
+    .plan-name-zone{
+        margin-top: 1rem;
+        justify-content:center;
+    }
+
+    .premium-plan-icon{
+        color: darkblue;
+        font-size: 200%;
+    }
+
+    .premium-plan-icon + span {
+        color: darkblue;
+        text-transform: uppercase;
+    }
+
+
+    .free-plan-icon-back{
+        color: white;
+        font-size: 200%;
+        margin-top: 10%;
+    }
+
+    .premium-plan-icon-back{
+        color: white;
+        font-size: 200%;
+        margin-top: 10%;
+    }
+    .enterprise-plan-icon{
+        color: darkgoldenrod;
+        font-size: 200%;
+        margin-top: 10%;
+    }
+    .enterprise-plan-icon-back{
+        color: white;
+        font-size: 200%;
+        margin-top: 10%;
+    }
+    .panel-active{
+        border: solid 3px greenyellow ;
+    }
+    .flip-card  {
+        background-color: transparent;
+        width: 300px;
+        height: 300px;
+        perspective: 1000px;
+    }
+
+    .flip-card-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        transition: transform 0.6s;
+        transform-style: preserve-3d;
+        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    }
+
+    .flip-card:hover .flip-card-inner {
+        transform: rotateY(180deg);
+    }
+
+    .flip-card-front, .flip-card-back {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+    }
+
+    .flip-card-back-free {
+        background-color: green;
+        color: white;
+        transform: rotateY(180deg);
+    }
+    .flip-card-back-premium {
+        background-color: darkblue;
+        color: white;
+        transform: rotateY(180deg);
+    }
+    .flip-card-back-enterprise {
+        background-color: darkgoldenrod;
+        color: white;
+        transform: rotateY(180deg);
+    }
+    .active-card{
+        display: block!important;
+    }
+    .subs{
+        width: 100%;
+        height: 100%;
+        max-height: 100%;
+        top:0%!important;
+        background-color:snow;
+    }
+    .offre{
+        box-shadow: 0 0 8px 0 rgba(0,0,0,.14);
+        margin-left:10%;
+        margin-right:10%;
+        margin-top:5%;
+        width: 80%;
+
+        padding: 2%;
+    }
+    .check{
+        color:green;
+    }
+
+    .sub-choice{
+        border: solid 1px green;
+    }
+    .no-choice{
+        border: solid 1px dimgray
+    }
+
+    .card{
+        min-width: 30vw;
+        min-height: 550px;
+        justify-content: space-between;
+    }
+
+    .pricing-elmts{
+        display:flex;
+        align-items:flex-end;
+        justify-content:center;
+    }
+
+    .pricing-elmts h1{
+        margin-bottom:0;
+    }
+
+    .price-period{
+        margin-bottom: 0.5rem;
+    }
+
+    .user-slider-range-value{
+        display:inline-block;
+    }
+
+    .pricing-f-choice{
+        position:absolute;
+        top:0.3rem;
+        right:1rem;
+        font-size:0.8rem;
+    }
+
+    .switch label input[type=checkbox]:checked + .lever:after {
+        background-color: #55318e;
+    }
+
+    .switch label input[type=checkbox]:checked + .lever {
+        background-color: #8c67c7;
+    }
+
+    .switch label .lever{
+        margin: 0 8px;
+    }
+
+    .noUi-connect{
+        background:#55318e;
+    }
+
+    .reduction{
+        visibility:hidden;
+        background-color:#55318e;
+    }
+
+    .card footer{
+        padding: 1em 0;
+    }
+
+    .card table{
+        width:90%;
+        margin:auto;
+    }
+
+    .account-btn {
+        width: fit-content;
+    }
+
+    .account-zone, .subscription-price-zone{
+        justify-content:center;
+    }
+
+    .existing-plans{
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+
+    .existing-plans tr:last-of-type{
+        height: 40px;
+    }
+
+    .account-btn, .premium-plan-card{
+        border: 1px solid #55318e
+    }
+
+    .premium-plan-card{
+        width:70%;
+        display:inline-block;
+    }
+
+    .account-btn i{
+        font-size: 1rem;
+    }
+
+    .premium-plan, .free-plan{
+        text-align: center;
+    }
+    .modal-upgrade-btn{
+        background-color: #ff9300;
+    }
+
+    .table-header-title{
+        padding-left: 2rem;
+    }
+
+    .subscription-price-titles{
+        display:inline-flex;
+        align-items: space-between;
+    }
+
+    .price-details > * {
+        padding: 0 6px;
+        border-top: 1px solid #55318e;
+        width: inherit;
+    }
+
+    .functionalities-card-zone{
+        padding: 5%!important;
+    }
+
+    .card-logo{
+        width:50px;
+    }
+    .small-card-logo{
+        width:30px;
+    }
+
+    .iban-info .row:first-of-type{
+        margin-bottom:0;
+        margin-top:20px;
+    }
+
+    .charged-price-zone{
+            background-color: #55318e;
+    }
+
+    .plan-inputs-zone{
+        background-color: #f1e7ff;
+        padding: 10px;
+    }
+
+    .switch{
+        height:40px;
+        display:flex;
+    }
+
+    .card-input-zone{
+      position:relative;
+    }
+
+    .card-input-zone label{
+      display: flex!important;
+      align-items:center;
+      margin: 0.5em 0;
+    }
+
+    .admin-section .add-elmt-btn{
+      margin-right:4em;
+    }
+
+    .subscription-section .collapsible-body, .admin-section .collapsible-body{
+      padding-top:0;
+    }
+
+    .accepted-cards-msg{
+      font-weight:500;
+    }
+
+    .unused-accounts-zone{
+      padding:1em 0;
+    }
+
+
+    @media screen and (max-width: 993px) {
+
+      .page-title{
+        display: none;
+      }
+
+    }
+
+  </style>
+  <script>
+    var alreadyExistingMsg = "{{ 'already_existing'|trans }}";
+    var aaurl = "{{ url('addAdministrator') }}";
+    var uururl = "{{ url('updateUserRole') }}";
+    var surl = "{{ path('dynamicSearch') }}";
+    var gsurl = "{{ path('getSubscriptions') }}";
+    var uaurl = "{{ path('getUnsubscribedAccounts') }}";
+    var osurl = "{{ path('getOversubscribedSubscriptions') }}";
+    var urlminuser = "{{ url('minUser') }}" ;
+    var urlplususer = "{{ url('plusUser') }}" ;
+    var cId = "{{ currentuser.organization.stripeCusId }}" ;
+  </script>
+{% endblock css %}
+
+
 {% block content %}
-    {{ form_start(form) }}
-    <section>
-        <div class="center">
-            <h5 style="display:inline-block">{% trans %}firm_settings.page_title{% endtrans %}</h5>
-            <div style="display:inline-block;position:absolute; display:inline-block;right:2%">
-                {{ form_row(form.submit) }}
-            </div>
-        </div>
-        <ul class="tabs tabs-fixed-width">
-            <li class="tab">
-                <a href="#users">
-                    <i class="fa fa-users"></i>
-                    <span class="activity-status">{% trans %}firm_settings.users.title{% endtrans %}</span>
-                </a>
-            </li>
-            <li class="tab">
-                <a href="#activities">
-                    <i class="fa fa-cubes"></i>
-                    <span class="activity-status">{% trans %}firm_settings.activities.title{% endtrans %}</span>
-                </a>
-            </li>
-        </ul>
 
-        <div id="users">
-            <section>
-                <span style="font-size:1.8rem"><i class="fa fa-network-wired" style="margin-right:10px"></i>{% trans %}firm_settings.users.structure.title{% endtrans %}</span>
-                <div style="margin-left:30px">
+  {% set organization = currentuser.organization %}
+  {% set activeUsers = organization.activeUsers %}  
+  {% set monthly_fee = 15 %}
+  {% set vat_rate = 0.19 %}
 
-                    <div class="row no-margin">
-                        <div class="col s12 m12">
-                            <h5>{% trans %}firm_settings.other.departments.section_title{% endtrans %}</h5>
-                            <a class="waves-effect waves-light btn modify-button" href="{{ url('updateOrganizationElements', {'orgId' : currentuser.orgId, 'elmtType' : 'department' }) }}">{% trans %}firm_settings.other.departments.manage_btn{% endtrans %}</a>
-                        </div>
-                    </div>
+  {% include "components/background_grid.html.twig" %}
 
-                    <div class="row no-margin">
-                        <div class="col s12 m12">
-                            <h5>{% trans %}firm_settings.other.positions.section_title{% endtrans %}</h5>
-                            <a class="waves-effect waves-light btn modify-button" href="{{ url('updateOrganizationElements', {'orgId' : currentuser.orgId, 'elmtType' : 'position' }) }}">{% trans %}firm_settings.other.positions.manage_btn{% endtrans %}</a>
-                        </div>
-                    </div>
 
-                    <div class="row">
-                        <div class="col s12 m12">
-                            <h5>{% trans %}firm_settings.other.titles.section_title{% endtrans %}</h5>
-                            <a class="waves-effect waves-light btn modify-button" href="{{ url('updateOrganizationElements', {'orgId' : currentuser.orgId, 'elmtType' : 'title' }) }}">{% trans %}firm_settings.other.positions.manage_btn{% endtrans %}</a>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section>
-                <span style="font-size:1.8rem"><i class="fa fa-chart-line" style="margin-right:10px"></i>{% trans %}firm_settings.users.criterion.title{% endtrans %}</span>
-
-                <div style="margin-left:30px">
-                    <div class="row">
-
-                        <div class="col s12 m12">
-                            <a class="waves-effect waves-light btn modify-button" href="{{ url('updateElementTargets', {'elmtType' : 'organization', 'elmtId' : currentuser.orgId }) }}" style="margin-top:15px">{% trans %}firm_settings.users.criterion.organization_targets{% endtrans %}</a>
-                        </div>
-
-                        <div class="col s12 m12">
-                            <a class="waves-effect waves-light cyan darken-1 btn modify-button" href="{{ url('elementAvgResultPerCriterion',{'elmtType' : 'user'}) }}" style="margin-top:15px">{% trans %}firm_settings.users.criterion.avg_results{% endtrans %}</a>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section>
-                <span style="font-size:1.8rem"><i class="fa fa-key" style="margin-right:10px"></i>{% trans %}firm_settings.users.privileges.title{% endtrans %}</span>
-
-                <div style="margin-left:30px">
-                    <div class="row">
-                        {% set existingAccessResultsOptions = false %}
-                        {% for key, option in form.aliveOptions if not existingAccessResultsOptions %}
-                            {% if option.vars.data.oName.name == 'activitiesAccessAndResultsView' %}
-                                {% set existingAccessResultsOptions = true %}
-                            {% endif %}
-                        {% endfor %}
-                        {% if existingAccessResultsOptions %}
-                            <div class="col s12 m12">
-                                {% include 'activities_access_and_results_view.html.twig' with { form: form } %}
-                            </div>
-                        {% endif %}
-                        <div class="col s12 m12">
-                            <div style="margin-top: 10px">
-                                <span><i class="fa fa-user-circle" style="font-size:1.6rem"></i></span><h5 style="display:inline-block; margin-left: 10px">{% trans %}firm_settings.users.privileges.line_managers{% endtrans %}</h5>
-                            </div>
-                            {% for key, option in form.aliveOptions %}
-                                {% if option.vars.data.oName.name in [
-                                    'enabledSuperiorSubRights',
-                                    'enabledSuperiorSettingTargets',
-                                    'enabledSuperiorModifySubordinate',
-                                    'enabledSuperiorOverviewSubResults'
-                                ] %}
-                                    <div class="col s12 m12 {% if option.vars.data.oName.name in ['enabledSuperiorSettingTargets' ,'enabledSuperiorModifySubordinate','enabledSuperiorOverviewSubResults'] %}suboption" style="margin-left:30px{% else %}supoption{% endif %}">
-                                        {{ form_widget(option.optionTrue) }}
-                                        {{ form_label(option.optionTrue) }}
-                                    </div>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                        <div class="col s12 m12">
-                            <div style="margin-top: 10px">
-                                <span><i class="fa fa-user" style="font-size:1.6rem"></i></span><h5 style="display:inline-block; margin-left: 10px">{% trans %}firm_settings.users.privileges.internal_users{% endtrans %}</h5>
-                            </div>
-                            {% for key, option in form.aliveOptions %}
-                                {% if option.vars.data.oName.name in [
-                                    'enabledUserSeeAllUsers',
-                                    'enabledUserCreatingUser',
-                                    'enabledUserSeeSnapshotPeersResults',
-                                    'enabledUserSeeSnapshotSupResults',
-                                    'enabledUserSeeRanking',
-                                ] %}
-                                    <div class="col s12 m12">
-                                        {{ form_widget(option.optionTrue) }}
-                                        {{ form_label(option.optionTrue) }}
-                                    </div>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                        <div class="col s12 m12" style="display: none;">
-                            <div style="margin-top: 10px">
-                                <span><i class="far fa-user"></i></span><h5 style="display:inline-block; margin-left: 10px">{% trans %}firm_settings.users.privileges.external_users{% endtrans %}</h5>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
-        <div id="activities" class="row">
-            <section>
-                <span style="font-size:1.8rem"><i class="fa fa-layer-group" style="margin-right:10px"></i>{% trans %}firm_settings.other.processes.section_title{% endtrans %}</span>
-                <div style="margin-left:30px">
-                    <div class="row">
-                        <div class="col s12">
-                                <a class="waves-effect waves-light btn modify-button" href="{{ url('manageProcesses', {'orgId' : currentuser.orgId }) }}">{% trans %}firm_settings.other.departments.manage_btn{% endtrans %}</a>
-                        </div>
-                    </div>
-            </section>
-            <section>
-                <span style="font-size:1.8rem"><i class="fa fa-hammer" style="margin-right:10px"></i>{% trans %}firm_settings.other.criterion_names.section_title{% endtrans %}</span>
-                <div style="margin-left:30px">
-                    <div class="row">
-                        <div class="col s12">
-                                <a class="waves-effect waves-light btn modify-button" href="{{ url('manageCriterionGroups') }}">{% trans %}firm_settings.other.departments.manage_btn{% endtrans %}</a>
-                        </div>
-                    </div>
-            </section>
-            <section>
-                <span style="font-size:1.8rem"><i class="fa fa-file" style="margin-right:10px"></i>{% trans %}firm_settings.activities.templates.section_title{% endtrans %}</span>
-                <div style="margin-left:30px">
-                    <div class="row">
-                        <div class="col s12">
-                            <a class="waves-effect waves-light btn modify-button" href="{{ url('manageTemplates') }}">{% trans %}firm_settings.activities.templates.manage_btn{% endtrans %}</a>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            <section>
-                <span style="font-size:1.8rem">
-                    <i class="fa fa-cog" style="margin-right:10px"></i>
-                    {% trans %}firm_settings.activities.parameters.section_title{% endtrans %}
-                </span>
-                <div style="margin-left:30px">
-                    <div class="row">
-                        <div class="col s12">
-                            <ul class="flex-center" style="width:100%">
-                                <span>{% trans %}firm_settings.other.mails.mail_deadline_nb_days{% endtrans %}</span>
-                                {% for key, option in form.aliveOptions %}
-                                    {% if option.vars.data.oName.name == 'mailDeadlineNbDays' %}
-                                        {{ form_widget(option.optionFValue) }}
-                                    {% endif %}
-                                {% endfor %}
-                            </ul>
-                        </div>
-                        {% for key, option in form.aliveOptions %}
-                            {% if option.vars.data.oName.name in [
-                                'enabledLeaderSeeAllGrades',
-                                'enabledCNamesOutsideCGroups',
-                            ] %}
-                                <div class="col s12 m12">
-                                    {{ form_widget(option.optionTrue) }}
-                                    {{ form_label(option.optionTrue) }}
-                                </div>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-                </div>
-            </section>
-        </div>
+  <main class="card-panel purple lighten-5">
+    <h5 class="center strong dd-text page-title">{{'firm_settings.page_title'|trans}}</h5>
+    
+    <section class="flex">
+      <div class="flex-center-sb">
+        <h5 class="section-title">{{ 'firm_settings.profile.title'|trans }}</h5>
+        <a class="btn-flat waves-effect waves-light" href="{{ path('manageOrgProfile') }}">
+          <i class="fa fa-cog"></i>
+        </a>
+      </div>
     </section>
-        {{ form_rest(form) }}
-        {{ form_end(form)}}
 
+    <section class="subscription-section">
+      <div class="flex-center-sb">
+        <h5 class="section-title admin-section-title flex-center">
+          <span>{{'pricing.subscriptions'|trans }}</span>
+        </h5>
+        <ul class="flex-center-fe section-act-btns no-margin" style="visibility:hidden;">
+          <a class="btn-flat manage-subscriptions-btn" data-see-msg="{{ 'see_details'|trans }}" data-hide-msg="{{ 'hide_details'|trans }}">{{ 'manage'|trans }}</a>
+        </ul>
+      </div>
+    </section>
+    {#}
+    <section class="flex collapsible no-margin subscription-section">
+      <ul class="collapsible no-margin" data-collapsible="accordion">
+          <li>
+            <div class="collapsible-header no-padding">
+              <h5 class="section-title admin-section-title flex-center">
+                <a class="flex-center black-text not-collapse">
+                  <i class="fa fa-chevron-right"></i>
+                  <i class="fa fa-chevron-down"></i>
+                  <span>{{'pricing.subscriptions'|trans }}</span>
+                  <span class="sm-left nb-users-zone">(<span class="nb-users">{{ activeUsers|length }}</span>)</span>
+                </a>
+              </h5> 
+              
+                <ul class="flex-center-fe section-act-btns" style="visibility:hidden;">
+                  <a href="#" class="btn-flat collapsible-btn" data-see-msg="{{ 'see_details'|trans }}" data-hide-msg="{{ 'hide_details'|trans }}">{{ 'see_details'|trans }}</a>
+                </ul>
+             
+            </div>
+            <div class="collapsible-body">
+
+              <ul class="flex-center-sb">
+                <a class="add-elmt-btn btn-flat get-invoices-btn">
+                    <i class="fa fa-file-invoice sm-right"></i>
+                    <span>{{'firm_settings.subscription.payment_invoices_btn'|trans}}</span>
+                </a>  
+                <div href="#addSubscription" class="add-elmt-btn dd-border-color btn-flat not-collapse modal-trigger">
+                  <i class="fa fa-plus dd-text"></i>
+                  <span class="dd-text">{{'firm_settings.add_new_subscription'|trans}}</span>
+                </div>
+              </ul>
+
+              <ul class="firm-users">
+
+                {% if nbExceedingUsers > 0 %}
+                  <div class="flex-center-sb unused-accounts-zone">
+                    <span class="dd-text strong">{{ 'firm_settings.subscription.excess_user_begin_msg'|trans({nb_subscriptions: nbSubscriptions, nb_exceeding_users: nbExceedingUsers})}}</span>
+                    <div class="dd-orange-bg btn link-unsubscribed-accounts-btn">{{ 'firm_settings.subscription.associate_unsubscribed_users'|trans }}</div>
+                  </div>
+                {% endif %}
+
+                <table class="subscription-table">
+                  <thead>
+                    <tr>
+                      <th>{{'user'|trans|capitalize}}</th>
+                      <th>{{'firm_settings.subscription.table.title_row_batch'|trans}}</th>
+                      <th>{{'firm_settings.subscription.table.title_row_member_since'|trans}}</th>
+                      <th>{{'firm_settings.subscription.table.title_row_renewal_date'|trans}}</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for user in activeUsers %}
+                      {% set isYourself = user.fullname == currentuser.fullname %}
+                      <tr>
+                        <td>
+                          <div class="flex-center">  
+                              <img class="user-profile-l-picture sm-right" src="{{ asset(global.userPicture(user)) }}" alt="">
+                              <span class="user-name {{isYourself ? 'strong'}}">{{ isYourself ? 'yourself'|trans : user.fullname }}</span>
+                          </div>
+                        </td>
+                        <td>
+                            1
+                        </td>
+                        <td>
+                          <div class="flex-center">
+                            {{ user.inserted|format_datetime('long', 'none') }}
+                          </div>
+                        </td>
+                        <td>
+                          <div class="btn-flat tooltipped modal-trigger user-subscription-btn" href="#updateUserSubscription" data-id="{{user.id}}" data-tooltip="{{'profile.manage.update_role'|trans}}" data-position="top" style="visibility:hidden;">
+                              <i class="dd-orange-text mi create"></i>
+                          </div>
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </ul>
+            </div>
+          </li>
+        </ul>
+    </section>
+    #}
+
+    </section>
+
+    <section class="flex collapsible no-margin admin-section">
+
+        {% set activeAdmins = activeUsers|filter(u => u.role <= 2) %}
+
+        <ul class="collapsible no-margin" data-collapsible="accordion">
+          <li>
+            <div class="collapsible-header no-padding">
+              <h5 class="section-title admin-section-title flex-center">
+                <a class="flex-center black-text not-collapse">
+                  <i class="fa fa-chevron-right"></i>
+                  <i class="fa fa-chevron-down"></i>
+                  <span>{{'firm_settings.manage_admin'|trans }}</span>
+                  <span class="sm-left nb-users-zone">(<span class="nb-admins">{{ activeAdmins|length }}</span>)</span>
+                </a>
+              </h5> 
+              
+                <ul class="flex-center section-act-btns" style="visibility:hidden;">
+                  <a href="#" class="btn-flat collapsible-btn" data-see-msg="{{ 'see_details'|trans }}" data-hide-msg="{{ 'hide_details'|trans }}">{{ 'see_details'|trans }}</a>
+                </ul>
+             
+            </div>
+            <div class="collapsible-body">
+              <ul class="flex-center-fe m-bottom new-admin-zone">
+                <a href="#addUserClient" class="btn-flat not-collapse modal-trigger tooltipped add-elmt-btn dd-border-color" data-position="top" data-tooltip="{{ 'firm_settings.add_new_administrator'|trans }}">
+                  <i class="fa fa-plus dd-text"></i>
+                  <span class="dd-text">{{ 'firm_settings.new_administrator'|trans }}</span>
+                </a>
+              </ul>
+              <ul class="firm-users" data-prototype="{% apply escape %}{% include "components/administrator_list__item.html.twig" %}{% endapply %}" >
+                {% for user in activeAdmins %}
+                  {% set isYourself = user.fullname == currentuser.fullname %}
+                  <li class="account flex-center-sb" data-r="{{user.role}}">
+                    <div class="flex-center">  
+                        <img class="user-profile-l-picture sm-right" src="{{ asset(global.userPicture(user)) }}" alt="">
+                        <span class="user-name {{isYourself ? 'strong'}}">{{ isYourself ? 'yourself'|trans : user.fullname }}</span>
+                    </div>
+                    <div class="account-action-zone flex-center">
+                        <div class="btn-flat user-master-btn flex-center-sb">
+                              {{ macros.user_role_badge(user) }}
+                              <span class="user-master-name">{{ user.role == 1 ? 'profile.super_administrator'|trans : 'profile.administrator'|trans }}</span>
+                        </div> 
+                        <div class="btn-flat tooltipped modal-trigger" href="#updateUserRole" data-id="{{user.id}}" data-tooltip="{{'profile.manage.update_role'|trans}}" data-position="top" style="visibility:hidden;">
+                            <i class="dd-orange-text mi create"></i>
+                        </div>
+                    </div>
+                  </li>
+                {% endfor %}
+              
+              </ul>
+            </div>
+          </li>
+        </ul>
+    </section>
+
+    <section class="flex">
+      <div class="flex-center-sb">
+        <h5 class="section-title">{{'firm_settings.manage_updates'|trans}}</h5>
+        <a class="btn-flat waves-effect waves-light" href="{{ path('manageUpdates') }}">
+          <i class="fa fa-cog"></i>
+        </a>
+      </div>
+    </section>
+
+    <section class="flex">
+      <div class="flex-center-sb">
+        <h5 class="section-title">{{'firm_settings.manage_activity'|trans}}</h5>
+        {#
+        <a class="btn-flat waves-effect waves-light" href="{{ path('manageUpdates') }}">
+          <i class="fa fa-cog"></i>
+        </a>
+        #}
+      </div>
+    </section>
+
+  </main>
+
+
+    <div id="updateUserRole" class="modal">
+      <div class="modal-content">
+        <p>{{'firm_settings.update_user_role_modal.msg'|trans}} <span class="user-fullname-value"></span></p>
+        <div class="input-field">
+          <select id="roleSelector">
+            <option value="1">{{'firm_settings.update_user_role_modal.super_admin_choice'|trans}}</option>
+            <option value="2">{{'firm_settings.update_user_role_modal.admin_choice'|trans}}</option>
+            <option value="3">{{'firm_settings.update_user_role_modal.collaborator_choice'|trans}}</option>
+          </select>
+        </div>
+        <div class="flex-center-fe">
+          <div class="btn-flat waves-effect waves-light modal-close m-right">{{'back'|trans}}</div>
+          <div class="btn waves-effect waves-light update-user-role-btn">{{'ok'|trans}}</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="newSuperAdminWarning" class="modal">
+      <div class="modal-content">
+        <h5>{{'firm_settings.new_super_admin_modal.title'|trans}}</h5>
+        <p>{{'firm_settings.new_super_admin_modal.msg'|trans}}</p>
+        <div class="flex-center-fe">
+          <div class="btn-flat waves-effect waves-light modal-close m-right">{{'back'|trans}}</div>
+          <div class="btn waves-effect waves-light new-super-admin-btn">{{'ok'|trans}}</div>
+        </div>
+      </div>
+    </div>
+    {#
+    <div id="getPaymentInvoices" class="modal">
+      <div class="modal-content">
+        <h5>{{'firm_settings.subscription.modal.title'|trans}}</h5>
+        <div class="subscriptions-zone" data-prototype="{% apply escape %}{% include 'components/subscription_list_table.html.twig' %}{% endapply %}"></div>
+        <div class="flex-center-fe">
+          <div class="btn-flat waves-effect waves-light modal-close m-right">{{'back'|trans}}</div>
+          <div class="btn waves-effect waves-light new-super-admin-btn">{{'ok'|trans}}</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="addSubscription" class="modal div-sub subs" style="background-color: whitesmoke" >
+        <form id="subscriptionForm" class="sub">   
+            <a class="modal-close close-sub-modal-btn btn-flat"> <i class="fas fa-times fa-2x"></i></a>
+            <div class="offre row">
+                <div class="col s12" style="border-right:solid 1px lightgrey">
+                    <div class="row">
+                        <div class="col m6 s12">
+                            <h3>{{'pricing.update_modal.title'|trans}}</h3>
+                        </div>
+                        <div class="col m6 s12 plan-inputs-zone">
+
+                            <div class="flex-center-sb">
+                              <span class="black-text">{{'pricing.update_modal.user_accounts'|trans}}</span>
+                              <div class="input-field no-margin">
+                                  <input type="number" value="1" class="user no-margin" min="1"></input>
+                              </div>
+                                
+                            </div>
+                                
+                            <div class="switch flex-center-sb">
+                                <span>{{'pricing.update_modal.subscription'|trans}}</span>
+                                <label class="black-text">
+                                    <span>{{'subscription.monthly'|trans}}</span>
+                                    <input type="checkbox">
+                                    <span class="lever"></span>
+                                    <span class="strong dd-text">{{'subscription.annually'|trans}}</span>
+                                </label>
+                            </div>
+                                   
+                               
+                            
+                        </div>
+                    </div>
+                </div>
+                        
+                        <div class="row">
+                            
+                              <div class="col s6 center choice standard-choice">
+                                  <h5>{{'pricing.update_modal.title'|trans}}</h5>
+                                  <div class="premium-plan-card">
+                                      <div class="reduction white-text">{{'pricing.update_modal.price.discount_title'|trans}}</div>
+                                      <div class="plan-name-zone flex-center">
+                                          <i class="fa fa-dove premium-plan-icon m-right"></i>
+                                          <span class="strong">{{'pricing.update_modal.premium.title'|trans}}</span>
+                                      </div>
+                                      <div class="c-flex" style="padding: 5%">
+                                          <div class="flex">
+                                              <div><i class="fas fa-check sm-right"></i></div>
+                                              <div>{{'pricing.update_modal.premium.functionality_1'|trans}}</div>
+                                          </div>
+                                          <div class="flex">
+                                              <div><i class="fas fa-check sm-right"></i></div>
+                                              <div>{{'pricing.update_modal.premium.functionality_2'|trans}}</div>
+                                          </div>
+                                          <div class="flex">
+                                              <div><i class="fas fa-check sm-right"></i></div>
+                                              <div>{{'pricing.update_modal.premium.functionality_3'|trans}}</div>
+                                          </div>
+                                          <div class="flex">
+                                              <div><i class="fas fa-check sm-right"></i></div>
+                                              <div>{{'pricing.update_modal.premium.functionality_4'|trans}}</div>
+                                          </div>
+                                          <p class="center">
+                                              <div class="pricing-elmts"></div>
+                                              <label class="flex-center subscription-price-zone">
+                                                  <h3 class="price-standard">{{ monthly_fee }}</h3>
+                                                  <h3 class="pricing-ccy">&euro;</h3>
+                                              </label>
+                                          </p>
+                                          <p class="price-period m-left">{{'subscription.per_month'|trans}}</p>
+                                      </div>
+                                  </div>
+                              </div>
+
+                              <div class="col s6">
+                                <div class="price">
+                                    <h5 class="title">{{'pricing.update_modal.price.title'|trans}}</h5>
+                                    <div class="price-container price-details">
+                                        <div class="flex-center-sb"><span>{{'pricing.update_modal.price.marginal_price'|trans}}</span><span class="price price-per-user">{{ monthly_fee }}</span></div>
+                                        <div class="flex-center-sb"><span>{{'pricing.update_modal.price.total_users'|trans}}</span> <span class="price nb-user">1</span></div>
+                                        <div class="flex-center-sb">
+                                            <span>{{'pricing.update_modal.price.wo_vat_price'|trans}}</span> 
+                                            <div>
+                                                <span class="price account-price total-price">{{ monthly_fee }}</span>
+                                                <span>€</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex-center-sb">
+                                            <span>{{'pricing.update_modal.price.vat_price'|trans}}</span>
+                                            <div>
+                                                <span class="price account-price vat-price">{{ (monthly_fee * vat_rate)|round(2) }}</span>
+                                                <span>€</span> 
+                                            </div>
+                                        </div>
+                                        <div class="flex-center-sb charged-price-zone">
+                                            <span class="strong white-text">{{'pricing.update_modal.price.total_price'|trans}}</span> 
+                                            <div>
+                                                <span class="price account-price charged-price strong white-text">{{ (monthly_fee * (1 + vat_rate))|round(2) }}</span>
+                                                <span class="strong white-text">€</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <h5 class="title">{{'firm_settings.subscription.payment_methods_btn'|trans}}</h5>
+                               
+                                <ul class="flex-center-sb" style="position:relative">
+                                    <li>
+                                        <input id="card_choice" name="payment_choice" type="radio" checked />
+                                        <label for="card_choice" class="black-text">{{'pricing.update_modal.price.method_payment.card.option_title'|trans}}</label>
+                                    </li>
+                                    <li>
+                                        <input id="wire_choice" name="payment_choice" type="radio"/>
+                                        <label for="wire_choice" class="black-text">{{'pricing.update_modal.price.method_payment.wire_transfer.option_title'|trans}}</label>
+                                    </li>
+                                </ul>
+
+                                <div class="by-card">
+                                   
+                                    <div class="c-flex card-input-zone">
+
+                                      <h5>{{'pricing.update_modal.price.method_payment.card.type'|trans}}</h5>   
+                                        
+                                      {% for s, card in existingPaymentMethods %}
+                                          <div style="position:relative">
+                                            <input type="radio" id="card_{{s}}" name="card_sel" required="required" value="{{ card.pmId }}" checked="checked">
+                                            <label for="card_{{s}}" class="black-text">
+                                              <img src="{{card.getBrand == 'visa' ? '/lib/img/visa.png' : '/lib/img/mc.png' }}" class="card-logo sm-right" alt="card_logo">
+                                              <div>   
+                                                <span>**** **** **** {{ card.getLast4 }}</span>
+                                                <span>{{'pricing.update_modal.price.method_payment.card.expires_on'|trans}} {{ card.getDateend }}</span>
+                                              </div>
+                                            </label>
+                                          </div>                        
+                                      {% endfor %}
+
+                                      <div style="position:relative"> 
+                                        <input type="radio" id="card_new" name="card_sel" required="required" value="" {{ existingPaymentMethods is empty ? 'checked="checked"' }}>
+                                        <label for="card_new" class="black-text">{{'pricing.update_modal.price.method_payment.card.add'|trans}}</label>
+                                      </div>
+
+                                      <div class="new-payment-zone" {{existingPaymentMethods|length > 0 ? 'style="display:none"'}}>
+                                      
+                                        <div class="cards-zone">
+                                          <div class="flex-center-sb accepted-cards-msg">
+                                              <span class="dd-text sm-right">{{'pricing.update_modal.price.method_payment.card.accepted_cards'|trans}}</span>
+                                              <ul class="flex-center">
+                                                  <img src="/lib/img/visa.png" class="small-card-logo sm-right">
+                                                  <img src="/lib/img/mc.png" class="small-card-logo">
+                                              </ul>
+                                          </div>
+                                        </div>
+                                        <div id="card-element" class="MyCardElement active-card plan-inputs-zone">
+                                          <!-- Elements will create input elements here -->
+                                        </div>
+                                          <!-- We'll put the error messages in this element -->
+                                        <div id="card-errors" role="alert"></div>
+
+                                      </div>
+
+                                      <div class="center" style="margin-top: 2%">
+                                          <button class="btn waves-effect waves-light" type="submit">{{'pricing.update_modal.validate'|trans}}</button>
+                                      </div>
+                                </div>
+
+                                <div class="by-wire-transfer" style="display: none">
+                                    <div class="iban-info">
+                                        
+                                        <span>{{'pricing.update_modal.price.method_payment.wire_transfer.wiring_msg'|trans}}</span>
+
+                                        <div class="row">
+                                            <p class="col s4 no-margin strong">{{'pricing.update_modal.price.method_payment.wire_transfer.account_owner'|trans}}</p>
+                                            <p class="col s8 no-margin">DEALDRIVE - ZZYZX ROAD SARL-S</p>
+                                        </div>
+                                        <div class="row no-margin">
+                                            <p class="col s4 no-margin strong">{{'pricing.update_modal.price.method_payment.wire_transfer.address'|trans}}</p>
+                                            <p class="col s8 no-margin">46, RUE DES TREVIRES, L-2628 LUXEMBOURG, LUXEMBOURG</p>
+                                        </div>
+                                        <div class="row no-margin">
+                                            <p class="col s4 no-margin strong">{{'pricing.update_modal.price.method_payment.wire_transfer.iban'|trans}}</p>
+                                            <p class="col s8 no-margin">LU911111706685400000</p>
+                                        </div>
+                                        <div class="row">
+                                            <p class="col s4 no-margin strong">{{'pricing.update_modal.price.method_payment.wire_transfer.bic_code'|trans}}</p>
+                                            <p class="col s8 no-margin">CCPLLULL</p>
+                                        </div>
+
+                                        <span>{{'pricing.update_modal.price.method_payment.wire_transfer.activation_msg'|trans}}</span>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                          </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+          </form>
+        </div>
+
+
+
+        <div id="linkSubscriptionToUsers" class="modal">
+
+          <div class="modal-content">
+            <form method="post">
+              <h5>{{'firm_settings.subscription.associate_unsubscribed_accounts_modal.title'|trans}}</h5>
+
+              <table class="highlight striped centered subscription-table" data-prototype="{% apply escape %}{% include "components/subscriptor_list__item.html.twig" %}{% endapply %}">
+                  <thead>
+                      <tr>
+                          <th>{{'firm_settings.subscription.associate_unsubscribed_accounts_modal.table.account'|trans}}</th>
+                          <th>{{'firm_settings.subscription.associate_unsubscribed_accounts_modal.table.subscription'|trans}}</th>
+                          <th>
+                            <i class="fa fa-question-circle tooltipped" data-tooltip="{{'firm_settings.subscription.associate_unsubscribed_accounts_modal.table.action_msg'|trans}}" data-position="top"></i>
+                            <span>{{'firm_settings.subscription.associate_unsubscribed_accounts_modal.table.action'|trans}}</span>
+                          </th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                  </tbody>
+              </table>
+
+              <div class="no-users-to-associate center">
+                <img src="{{ asset('lib/img/add-user.png')}}" alt="Add user">
+                <p>{{'firm_settings.subscription.associate_unsubscribed_accounts_modal.no_user_to_associate_msg'|trans|raw}}</p>
+              </div>
+
+              <div class="flex-center-fe">
+                <div class="btn waves-effect waves-light link-account-btn">{{'ok'|trans}}</div>
+              </div>
+            </form>
+          </div>
+
+
+        </div>
+        #}
+    
 {% endblock %}
 
 {% block javascripts %}
-<script>
-    $(function() {
-        const originalSerializeArray = $.fn.serializeArray;
-        $.fn.extend({
-            serializeArray: function () {
-                const brokenSerialization = originalSerializeArray.apply(this);
-                const checkboxValues = $(this).find('input[type=checkbox]').map(function () {
-                    return { name: this.name, value: +this.checked };
-                }).get();
-                const checkboxKeys = $.map(checkboxValues, function (element) { return element.name; });
-                const withoutCheckboxes = $.grep(brokenSerialization, function (element) {
-                    return $.inArray(element.name, checkboxKeys) == -1;
-                });
-
-                return $.merge(withoutCheckboxes, checkboxValues);
-            }
-        });
-
-        $('.supoption').on('change', e => {
-            const $this = $(e.target);
-            const $checkbox = $this.find('input[type="checkbox"]');
-            const $subCheckboxes = $this.nextAll().find('input[type="checkbox"]');
-
-            if (!$checkbox.prop('checked')) {
-                $subCheckboxes.prop('checked', false).prop('disabled', true);
-            } else {
-                $subCheckboxes.prop('disabled', false);
-            }
-        });
-
-
-        $('.firm-settings-submit').on('click', e => {
-            e.preventDefault();
-
-            const $this = $(e.target);
-            const formData = $this.closest('form').serialize();
-
-            $.post(updateFirmUrl, formData)
-            .done(e => {
-                $this
-                .removeClass('btn').addClass('btn-flat grey')
-                .text('{{ "firm_settings.submit_saved"|trans }}');
-            });
-        });
-    });
-</script>
+  {#<script src="https://js.stripe.com/v3/"></script>#}
+  <script src="{{ asset('js/firm_settings.js') }}"></script>
+  <script src="{{ asset('js/price_manage.js') }}"></script>
 {% endblock %}

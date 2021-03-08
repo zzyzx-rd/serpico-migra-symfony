@@ -8,6 +8,7 @@
 namespace App\Form;
 
 use App\Entity\WorkerIndividual;
+use App\Entity\User;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -23,6 +24,7 @@ class UpdateWorkerIndividualForm extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        $currentUser = $options['currentUser'];
 
             /*
             $workerIndividual = $options['workerIndividual'];
@@ -73,7 +75,9 @@ class UpdateWorkerIndividualForm extends AbstractType
             }
             */
 
-            $builder->add('male', ChoiceType::class,
+            $builder
+            /*
+            ->add('male', ChoiceType::class,
             [
                 'choices' => [
                     'M.' => 1,
@@ -87,10 +91,12 @@ class UpdateWorkerIndividualForm extends AbstractType
                 'constraints' => [
                     new Assert\NotBlank,
                 ],
-                'label_format' => "worker_individual_data.%name%",
+                'label' => false,
+                //'label_format' => "worker_individual_data.%name%",
                 'required' => true,
                 'placeholder' => false,
             ])
+            */
 
             ->add('firstname', TextType::class,
             [
@@ -108,9 +114,14 @@ class UpdateWorkerIndividualForm extends AbstractType
 
             ->add('email', TextType::class,
             [
-                'label_format' => "worker_individual_data.%name%",
+                'label' => false,
+                //'label_format' => "worker_individual_data.%name%",
                 'required' => false,
-                //'data' => $email,
+                'attr' => [
+                    'class' => 'no-margin'
+                ],
+                'mapped' => false,
+                'data' => $currentUser->getEmail(),
             ])
 
             /*
@@ -123,6 +134,7 @@ class UpdateWorkerIndividualForm extends AbstractType
             */
             ;
 
+            /*
             $builder->add('experiences', CollectionType::class, [
                     'entry_type' => WorkerExperienceType::class,
                     'prototype'    => true,
@@ -131,14 +143,15 @@ class UpdateWorkerIndividualForm extends AbstractType
                     'allow_add' => true,
                     'label' => false,
                 ]);
+            */
 
         if ($options['standalone']){
             $builder->add('submit', SubmitType::class,[
-                'label' => "Sauvegarder les modifications",
-                //'label_format' => 'create_user.%name%',
+                'label_format' => 'save',
                 'attr' =>
                     [
-                        'class' => 'waves-effect waves-light btn-large blue darken-4 create-users',
+                        'class' => 'm-left waves-effect waves-light btn save-btn disabled-btn',
+                        'style' => 'display:none'
                     ]
             ]);
         }
@@ -146,8 +159,10 @@ class UpdateWorkerIndividualForm extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefault('data_class',WorkerIndividual::class);
+        //$resolver->setDefault('data_class',WorkerIndividual::class);
+        $resolver->setDefault('data_class',User::class);
         $resolver->setDefault('standalone', false);
+        $resolver->setDefault('currentUser', null);
         $resolver->addAllowedTypes('standalone', 'bool');
         $resolver->setDefault('workerIndividual', null);
         $resolver->setDefault('mailPrefix', null);

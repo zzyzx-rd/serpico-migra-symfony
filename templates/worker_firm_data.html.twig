@@ -10,7 +10,7 @@
     {% trans %}worker_firm_data.mobile_header_title{% endtrans %}
 {% endblock %}
 
-{% set request = app.request_stack.currentrequest %}
+{% set request = global.request %}
 {% set wfId = request.get('wfId') %}
 
 {% block css %}
@@ -32,8 +32,10 @@
                     {{ form_row(form.commonName) }}
                 </div>
                 <div class="input-field col s12 m6">
-                    {{ form_row(form.firmParent) }}
+                    <label for="parent">Enteprise mère</label>
+                    <input type="text" name="parent" id="parent">
                     <select name="firmSelector" style="display: none;margin-top:45px"></select>
+                    {{ form_row(form.parent) }}
                 </div>
             </div>
             <div class="row">
@@ -54,10 +56,11 @@
             </div>
             <div class="row">
                 <div class="col s12 m6">
-                    {{ form_row(form.mailPrefix) }}
+                    {{ form_label(form.mailPrefix) }}
+                    {{ form_widget(form.mailPrefix) }}
                 </div>
                 <div class="col s12 m6">
-                    {{ form_row(form.mailSuffix) }}
+                    {{ form_row(form.suffix) }}
                 </div>
             </div>
              <div class="row">
@@ -73,7 +76,7 @@
                     {{ form_row(form.HQState) }}
                 </div>
                 <div class="col s12 m6">
-                    {{ form_row(form.HQCountry) }}
+                    {{ form_row(form.country) }}
                 </div>
             </div>
             <div class="row action-buttons">
@@ -88,5 +91,6 @@
 {% endblock %}
 
 {% block javascripts %}
+        <script>$('select:not([name="firmSelector"])').material_select();</script>
         <script src="{{ absolute_url(asset('js/worker_firm_update.js')) }}"></script>
 {% endblock %}

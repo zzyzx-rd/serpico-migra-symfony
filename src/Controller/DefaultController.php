@@ -31,9 +31,10 @@ class DefaultController extends AbstractController
             $this->get('session')->set('_locale', $locale);
         }
         $url = $request->headers->get('referer');
+
         if(empty($url))
         {
-            $url = $this->container->get('router')->generate('index');
+            $url = $this->container->get('router')->generate('home_welcome');
         }
         return $this->redirect($url);
     }

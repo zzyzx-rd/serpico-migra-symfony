@@ -4,7 +4,7 @@
     {% trans %}stages.page_title{% endtrans %}
 {% endblock %}
 
-{% set elmt = app.request_stack.currentrequest.get('elmt') %}
+{% set elmt = global.request.get('elmt') %}
 
 {% block css %}
     <!-- CSS NoUISlider-->
@@ -174,16 +174,7 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="input-field col s6">
-                        {{ form_label(stage.gstartdate) }}
-                        {{ form_widget(stage.gstartdate) }}
-                        {{ form_errors(stage.gstartdate) }}
-                    </div>
-                    <div class="input-field col s6">
-                        {{ form_label(stage.genddate) }}
-                        {{ form_widget(stage.genddate) }}
-                        {{ form_errors(stage.genddate) }}
-                    </div>
+          
                 </div>
             </li>
         {% endfor %}
@@ -279,7 +270,6 @@
 
 {% block javascripts %}
   <script src="{{ asset('js/nouislider.js') }}"></script>
-  <script src="{{ asset('js/login.js') }}"></script>
   <script src="{{ asset('js/activity_stage.js') }}"></script>
     {% if elmt == 'activity' and activity.template is null %}
         <script>

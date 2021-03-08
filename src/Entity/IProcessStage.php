@@ -21,10 +21,10 @@ use Doctrine\ORM\Mapping\OrderBy;
  */
 class IProcessStage extends DbObject
 {
-    public const STAGE_UNSTARTED    = 0;
-    public const STAGE_ONGOING      = 1;
-    public const STAGE_COMPLETED  = 2;
-    public const STAGE_PUBLISHED    = 3;
+    public const STATUS_UNSTARTED    = 0;
+    public const STATUS_ONGOING      = 1;
+    public const STATUS_COMPLETED  = 2;
+    public const STATUS_PUBLISHED    = 3;
 
     public const VISIBILITY_public = 0;
     public const VISIBILITY_UNLISTED = 1;
@@ -117,15 +117,7 @@ class IProcessStage extends DbObject
      */
     public $enddate;
 
-    /**
-     * @ORM\Column(name="stg_gstartdate", type="datetime", nullable=true)
-     */
-    public $gstartdate;
-
-    /**
-     * @ORM\Column(name="stg_genddate", type="datetime", nullable=true)
-     */
-    public $genddate;
+   
 
     /**
      * @ORM\Column(name="stg_deadline_nbDays", type="integer", nullable=true)
@@ -138,14 +130,15 @@ class IProcessStage extends DbObject
     public $deadline_mailSent;
 
     /**
-     * @ORM\Column(name="stg_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="iProcessStageInitiatives")
+     * @JoinColumn(name="stg_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
-     * @ORM\Column(name="stg_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="stg_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="stg_isFinalized", type="boolean", nullable=true)
@@ -188,7 +181,7 @@ class IProcessStage extends DbObject
     public $criteria;
 
     /**
-     * @OneToMany(targetEntity="IProcessActivityUser", mappedBy="stage",cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="IProcessParticipation", mappedBy="stage",cascade={"persist", "remove"}, orphanRemoval=true)
      * @OrderBy({"team" = "ASC"})
      */
     public $participants;
@@ -257,12 +250,8 @@ class IProcessStage extends DbObject
      * @param $stg_definite_dates
      * @param $stg_startdate
      * @param $stg_enddate
-     * @param $stg_gstartdate
-     * @param $stg_genddate
      * @param $stg_deadline_nbDays
      * @param $stg_deadline_mailSent
-     * @param $stg_createdBy
-     * @param $stg_inserted
      * @param $stg_isFinalized
      * @param $stg_finalized
      * @param $stg_deleted
@@ -297,12 +286,8 @@ class IProcessStage extends DbObject
         $stg_definite_dates = false,
         $stg_startdate = null,
         $stg_enddate = null,
-        $stg_gstartdate = null,
-        $stg_genddate = null,
         $stg_deadline_nbDays = 3,
         $stg_deadline_mailSent = null,
-        $stg_createdBy = null,
-        $stg_inserted = null,
         $stg_isFinalized = False,
         $stg_finalized = null,
         $stg_deleted = null,
@@ -324,7 +309,7 @@ class IProcessStage extends DbObject
         $historicalRankingTeams = null
         )
     {
-        parent::__construct($id, $stg_createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->complete = $stg_complete;
         $this->name = $stg_name;
         $this->mod = $stg_mod;
@@ -341,12 +326,8 @@ class IProcessStage extends DbObject
         $this->definite_dates = $stg_definite_dates;
         $this->startdate = $stg_startdate;
         $this->enddate = $stg_enddate;
-        $this->gstartdate = $stg_gstartdate;
-        $this->genddate = $stg_genddate;
         $this->deadline_nbDays = $stg_deadline_nbDays;
         $this->deadline_mailSent = $stg_deadline_mailSent;
-        $this->createdBy = $stg_createdBy;
-        $this->inserted = $stg_inserted;
         $this->isFinalized = $stg_isFinalized;
         $this->finalized = $stg_finalized;
         $this->deleted = $stg_deleted;
@@ -559,29 +540,7 @@ class IProcessStage extends DbObject
         return $this;
     }
 
-    public function getGstartdate(): ?DateTimeInterface
-    {
-        return $this->gstartdate;
-    }
-
-    public function setGstartdate(DateTimeInterface $stg_gstartdate): self
-    {
-        $this->gstartdate = $stg_gstartdate;
-
-        return $this;
-    }
-
-    public function getGenddate(): ?DateTimeInterface
-    {
-        return $this->genddate;
-    }
-
-    public function setGenddate(DateTimeInterface $stg_genddate): self
-    {
-        $this->genddate = $stg_genddate;
-
-        return $this;
-    }
+    
 
     public function isDeadlineNbDays(): ?int
     {
@@ -875,7 +834,7 @@ class IProcessStage extends DbObject
 
 
     /**
-     * @return Collection|IProcessActivityUser[]
+     * @return ArrayCollection|IProcessParticipation[]
      */
     public function getUniqueIntParticipations()
     {
@@ -891,7 +850,7 @@ class IProcessStage extends DbObject
     }
 
     /**
-     * @return Collection|IProcessActivityUser[]
+     * @return ArrayCollection|IProcessParticipation[]
      */
     public function getUniqueExtParticipations()
     {
@@ -906,7 +865,7 @@ class IProcessStage extends DbObject
     }
 
     /**
-     * @return Collection|IProcessActivityUser[]
+     * @return ArrayCollection|IProcessParticipation[]
      */
     public function getUniqueTeamParticipations()
     {
@@ -980,7 +939,7 @@ class IProcessStage extends DbObject
         return $this;
     }
 
-    public function addParticipant(IProcessActivityUser $participant): IProcessStage
+    public function addParticipant(IProcessParticipation $participant): IProcessStage
     {
 
         $this->participants->add($participant);
@@ -988,13 +947,13 @@ class IProcessStage extends DbObject
         return $this;
     }
 
-    public function removeParticipant(IProcessActivityUser $participant): IProcessStage
+    public function removeParticipant(IProcessParticipation $participant): IProcessStage
     {
         $this->participants->removeElement($participant);
         return $this;
     }
 
-    public function addUniqueParticipation(IProcessActivityUser $participant): IProcessStage
+    public function addUniqueParticipation(IProcessParticipation $participant): IProcessStage
     {
         foreach($this->criteria as $criterion){
             $criterion->addParticipant($participant);
@@ -1003,7 +962,7 @@ class IProcessStage extends DbObject
         return $this;
     }
 
-    public function removeUniqueParticipation(IProcessActivityUser $participant): IProcessStage
+    public function removeUniqueParticipation(IProcessParticipation $participant): IProcessStage
     {
         $participantUsrId = $participant->getUsrId();
         foreach ($this->participants as $theParticipant) {
@@ -1019,7 +978,7 @@ class IProcessStage extends DbObject
     }
     // Defines which users can grade
     /**
-     * @return Collection|User[]
+     * @return ArrayCollection|User[]
      */
     public function getGraderUsers(){
         $graderUsers = new ArrayCollection;
@@ -1039,7 +998,7 @@ class IProcessStage extends DbObject
     }
 
     /**
-     * @return Collection|IProcessActivityUser[]
+     * @return ArrayCollection|IProcessParticipation[]
      */
     public function getIndependantUniqueParticipations()
     {
@@ -1061,37 +1020,37 @@ class IProcessStage extends DbObject
         }
         return $uniqueParticipants;
     }
-    public function addIndependantUniqueIntParticipation(IProcessActivityUser $participant): IProcessStage
+    public function addIndependantUniqueIntParticipation(IProcessParticipation $participant): IProcessStage
     {
         $this->addUniqueParticipation($participant);
         return $this;
     }
 
-    public function removeIndependantUniqueIntParticipation(IProcessActivityUser $participant): IProcessStage
+    public function removeIndependantUniqueIntParticipation(IProcessParticipation $participant): IProcessStage
     {
         $this->removeUniqueParticipation($participant);
         return $this;
     }
 
-    public function addIndependantUniqueExtParticipation(IProcessActivityUser $participant): IProcessStage
+    public function addIndependantUniqueExtParticipation(IProcessParticipation $participant): IProcessStage
     {
         $this->addUniqueParticipation($participant);
         return $this;
     }
 
-    public function removeIndependantUniqueExtParticipation(IProcessActivityUser $participant): IProcessStage
+    public function removeIndependantUniqueExtParticipation(IProcessParticipation $participant): IProcessStage
     {
         $this->removeUniqueParticipation($participant);
         return $this;
     }
 
-    public function addIndependantUniqueTeamParticipation(ActivityUser $participant): IProcessStage
+    public function addIndependantUniqueTeamParticipation(Participation $participant): IProcessStage
     {
         $this->addUniqueTeamParticipation($participant);
         return $this;
     }
 
-    public function removeIndependantUniqueTeamParticipation(ActivityUser $participant): IProcessStage
+    public function removeIndependantUniqueTeamParticipation(Participation $participant): IProcessStage
     {
         $this->removeUniqueTeamParticipation($participant);
         return $this;

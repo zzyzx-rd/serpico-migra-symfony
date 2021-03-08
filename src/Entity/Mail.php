@@ -19,12 +19,11 @@ class Mail extends DbObject
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(name="mail_id", type="integer", length=10, nullable=false)
-     * @var int
      */
     public ?int $id;
 
     /**
-     * @ORM\Column(name="mail_persona", type="string", length=1)
+     * @ORM\Column(name="mail_persona", type="string", length=1,  nullable=true)
      */
     public $persona;
 
@@ -39,18 +38,18 @@ class Mail extends DbObject
     public $read;
 
     /**
-     * @ORM\Column(name="mail_createdBy", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="mailInitiatives")
+     * @JoinColumn(name="mail_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
-     * @ORM\Column(name="mail_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="mail_inserted", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @Column(name="mail_type", length= 255, type="string", nullable=true)
-     * @var string
      */
     protected $type;
 
@@ -80,12 +79,12 @@ class Mail extends DbObject
      */
     protected $workerFirm;
     /**
-     * @ManyToOne(targetEntity="Activity")
+     * @ManyToOne(targetEntity="Activity", inversedBy="mails")
      * @JoinColumn(name="activity_act_id", referencedColumnName="act_id", nullable=true)
      */
     protected $activity;
     /**
-     * @ManyToOne(targetEntity="Stage")
+     * @ManyToOne(targetEntity="Stage", inversedBy="mails")
      * @JoinColumn(name="stage_stg_id", referencedColumnName="stg_id", nullable=true)
      */
     protected $stage;
@@ -94,12 +93,10 @@ class Mail extends DbObject
      * Mail constructor.
      * @param ?int$id
      * @param $type
-     * @param $mail_persona
-     * @param $mail_token
-     * @param $mail_read
-     * @param $mail_inserted
-     * @param $mail_language
-     * @param null $createdBy
+     * @param $persona
+     * @param $token
+     * @param $read
+     * @param $language
      * @param User $user
      * @param WorkerIndividual $workerIndividual
      * @param Organization $organization
@@ -108,14 +105,12 @@ class Mail extends DbObject
      * @param Stage $stage
      */
     public function __construct(
-      ?int $id,
+        ?int $id = null,
         $type = null,
-        $mail_persona = null,
-        $mail_token = null,
-        $mail_read = null,
-        $mail_inserted = null,
-        $mail_language = null,
-        $createdBy = null,
+        $persona = null,
+        $token = null,
+        $read = null,
+        $language = null,
         User $user = null,
         WorkerIndividual $workerIndividual = null,
         Organization $organization = null,
@@ -123,13 +118,12 @@ class Mail extends DbObject
         Activity $activity = null,
         Stage $stage = null)
     {
-        parent::__construct($id, $createdBy, new DateTime());
+        parent::__construct($id, null, new DateTime());
         $this->type = $type;
-        $this->persona = $mail_persona;
-        $this->token = $mail_token;
-        $this->read = $mail_read;
-        $this->inserted = $mail_inserted;
-        $this->language = $mail_language;
+        $this->persona = $persona;
+        $this->token = $token;
+        $this->read = $read;
+        $this->language = $language;
         $this->user = $user;
         $this->workerIndividual = $workerIndividual;
         $this->organization = $organization;
@@ -147,7 +141,6 @@ class Mail extends DbObject
     public function setPersona(string $persona): self
     {
         $this->persona = $persona;
-
         return $this;
     }
 
@@ -159,7 +152,6 @@ class Mail extends DbObject
     public function setToken(string $token): self
     {
         $this->token = $token;
-
         return $this;
     }
 
@@ -178,7 +170,6 @@ class Mail extends DbObject
     public function setInserted(DateTimeInterface $inserted): self
     {
         $this->inserted = $inserted;
-
         return $this;
     }
 
@@ -190,7 +181,6 @@ class Mail extends DbObject
     public function setLanguage(string $language): self
     {
         $this->language = $language;
-
         return $this;
     }
 
@@ -205,9 +195,10 @@ class Mail extends DbObject
     /**
      * @param mixed $user
      */
-    public function setUser($user): void
+    public function setUser($user): self
     {
         $this->user = $user;
+        return $this;
     }
 
     /**
@@ -237,9 +228,10 @@ class Mail extends DbObject
     /**
      * @param mixed $organization
      */
-    public function setOrganization($organization): void
+    public function setOrganization($organization): self
     {
         $this->organization = $organization;
+        return $this;
     }
 
     /**
@@ -253,9 +245,10 @@ class Mail extends DbObject
     /**
      * @param mixed $workerFirm
      */
-    public function setWorkerFirm($workerFirm): void
+    public function setWorkerFirm(?WorkerFirm $workerFirm): self
     {
         $this->workerFirm = $workerFirm;
+        return $this;
     }
 
     /**
@@ -269,9 +262,10 @@ class Mail extends DbObject
     /**
      * @param mixed $activity
      */
-    public function setActivity($activity): void
+    public function setActivity(?Activity $activity): self
     {
         $this->activity = $activity;
+        return $this;
     }
 
     /**
@@ -285,9 +279,21 @@ class Mail extends DbObject
     /**
      * @param mixed $stage
      */
-    public function setStage($stage): void
+    public function setStage(?Stage $stage): self
     {
         $this->stage = $stage;
+        return $this;
+    }
+
+    public function setType(string $type): self
+    {
+        $this->type = $type;
+        return $this;
+    }
+
+    public function getType()
+    {
+        return $this->type;
     }
 
 }

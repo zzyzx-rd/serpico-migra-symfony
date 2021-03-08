@@ -1,31 +1,65 @@
 {% import "macros/user_list__macros.html.twig" as macros %}
 
-{% set settings = settings is defined ? settings : true %}
-{% set stats = stats is defined ? stats : true %}
-{% set roles = roles is defined ? roles : true %}
+{% set isIndivIndep = isIndivIndep|default(false) %}
+{% set externalUser = externalUser|default(null) %}
+
+{% set user = externalUser ? externalUser.user : user|default(null) %}
+{% set isSynth = user ? user.synthetic == true : isIndivIndep %}
+{% set settings = settings|default(false) %}
+{% set stats = stats|default(false) %}
+{#{% set roles = roles|default(true) %}#}
 {% set tleader = tleader is defined ? tleader : false %}
 {% set displayOrg = displayOrg is defined ? orgName : false %}
-{% set myself = user == currentuser %}
-{% set perf = user.ranking('A','P','W', true) %}
-{% set dev = user.ranking('A','D','W', true) %}
-{% set weight = user.weight %}
-{% set picture_url = asset(user_picture_url(user)) %}
-{% set hasCompletedActivities = user.nbCompletedActivities > 0 %}
+{% set myself = user and user == currentuser %}
+{% set perf = user ? userM.ranking(user,'A','P','W', true) : null %}
+{% set dev = user ? userM.ranking(user,'A','D','W', true) : null %}
+{% set weight = user ? user.weight : null %}
+{% set picture_url = asset(global.userPicture(user, isSynth, isIndivIndep)) %}
+{% set hasCompletedActivities = user and userM.NbCompletedActivities(user) > 0 %}
 
 
-
-<li class="users-list--item hierarchized-item {{ not stats ? 'no-stats' }}">
+<li class="users-list--item hierarchized-item {{ not stats ? 'no-stats' }}" 
+  {% if currentuser.role <= 2 %}
+    {% if externalUser|default %}
+      data-cid="{{externalUser.client.id}}" 
+      data-eid="{{externalUser.id}}" 
+      data-email="{{externalUser.email}}" 
+      data-position="{{externalUser.positionName}}"
+    {% elseif user|default %}
+      data-id="{{user.id}}"
+      data-email="{{user.email}}" 
+      data-position="{{user.position.name|default('')}}" 
+    {% endif %}
+  {% endif %}
+>
   <header class="{{ myself ? 'myself' }}">
     <img src="{{ picture_url }}" alt="" class="user-picture">
 
-    <div class="user-name">
-      {{ user.fullname }}
-      {% if myself %}
-        ({{ 'user_list.myself'|trans }})
-      {% endif %}
-      {% if displayOrg and user.organization != currentuser.organization %}
+    <div>
+      <span class="user-name">
+      {{ user ? user.fullname }}
+      {% if user and displayOrg and user.organization != currentuser.organization %}
         ({{ user.organization.commname }})
       {% endif %}
+      </span>
+
+      {% if myself %}
+        <span>({{ 'user_list.myself'|trans }})</span>
+      {% endif %}
+    
+
+    {% if not user or user.position is not null %} 
+      
+        <span>
+          -
+          <em>
+            <span class="position-name">
+              {{ user ? user.position.name : 'create_client.unknown_position'|trans }}
+            </span>
+          </em>
+        </span>
+      
+    {% endif %}
     </div>
 
     {% if tleader %}
@@ -34,45 +68,104 @@
         </span>
     {% endif %}
 
-    {% if roles %}
-      {{ macros.user_role_badge(user) }}
-    {% else %}
+    
+      {{ not externalUser and user and user.role <= 2 ? macros.user_role_badge(user) }}
+   
+      {#
       {% if not stats %}
         {% if not user.lastConnected %}
           {{ macros.render_badge('virtual-badge', 'V') }}
         {% endif %}
       {% endif %}
+      #}
+   
+
+    {% if not isIndivIndep %}
+      {% if user is null or not user.lastConnected %}
+        {{ macros.render_badge(
+          'virtual-badge', 'V', 'tooltip.user.role.virtual'|trans
+        ) }}
+      {% endif %}
+    {% else %}
+      {% if user is null or (user and not user.email) %}
+        {{ macros.render_badge('virtual-badge', 'V', 'tooltip.user.external_user_virtual'|trans) }}
+      {% endif %}
     {% endif %}
+
+    {% if orgEnabledUserCreatingUser and user.enabledCreatingUser %}
+      {{ macros.render_badge(
+        'user-creator-badge', user_icon, 'tooltip.user.enabledCreatingUser'|trans
+      ) }}
+    {% endif %}
+
+    
+     
 
     {% if settings %}
     
-      <div class="user-actions">
+      <div class="user-actions flex-center">
         
+        
+        {#
         {% if roles %}
 
-          {% if is_admin or user.createdBy == currentuser.id %}
+          {% if is_admin or user.initiator == currentuser %}
             {% set path = is_root ? 'rootUpdateUser' : 'updateUser' %}
             <a class="material-icons"
-                href="{{ url(path, { usrId: user.id, orgId: user.orgId }) }}"
+                href="{{ url(path, { usrId: user.id, orgId: user.organization.id }) }}"
                 tooltip="{{ 'user_list.modify'|trans }}">settings</a>
           {% endif %}
         
           <a class="fa fa-bullseye"
-              href="{{ url('updateElementTargets', { elmtType: 'user', elmtId: user.id }) }}"
+              href="{{ url('updateElementTargets', { entity: 'user', elmtId: user.id }) }}"
               tooltip="{{ 'user_list.targets'|trans }}">
           </a>
           
         {% endif %}
+        #}
 
+        {#
         <a class="material-icons {{ not hasCompletedActivities ? 'disabled' }}"
-            href="{{ url('elementOverview', { elmtType: 'user', elmtId: user.id }) }}"
-            tooltip="{{ 'user_list.overview'|trans }}">show_chart</a>
+            href="{{ url('elementOverview', { entity: 'user', elmtId: user.id }) }}"
+            tooltip="{{ 'user_list.overview'|trans }}">show_chart
+        </a>
+        #}
+        
+        
+
+          {% if currentuser.role <= 2 %}
+            <a class="update-user-btn btn-flat no-margin {{user and user.role == 1 ? "is-ma"}}" style="visibility:hidden">
+              <i class="dd-orange-text mi create"></i>
+            </a>
+          
+            {#
+            <a class="delete-user-btn btn-flat no-margin modal-trigger" href="#deleteUser" style="visibility:hidden">
+                <i class="dd-orange-text fa fa-times"></i>
+            </a> 
+            #}
+          {% endif %}
+
+
+          <div class="nb-activities flex-center tooltipped" data-tooltip="{{'tooltip.user.activity_ongoing_futur'|trans}}" data-position="top">
+            <i class="fa fa-briefcase"></i>
+            <span class="sm-left black-text">
+                {{ user ? 'nb_completed_act + nb_scheduled_act'|replace({
+                            nb_completed_act: userM.nbCompletedActivities(user),
+                            nb_scheduled_act: (userM.nbScheduledActivities(user))
+                          }) 
+                        : '0 + 0' 
+                }}
+            </span>
+          </div>
+        
+        
       </div>
     
     {% endif %}
 
   </header>
 
+  {#
   {% if stats %}
     <div class="item-body">
       <div class="badges">
@@ -91,7 +184,7 @@
       <div class="user-info tiles-container">
         <div class="tile activity-count">
           {% set text %}
-            {{ user.nbCompletedActivities(app) }} + {{ user.nbScheduledActivities(app) }}
+            {{ userM.nbCompletedActivities(user) }} + {{ userM.nbScheduledActivities(user) }}
           {% endset %}
           {{ macros.render_tile(
             'tooltip.user.activity_ongoing_futur'|trans, 'fa fa-briefcase', text
@@ -157,4 +250,5 @@
       </div>
     </div>
   {% endif %}
+  #}
 </li>

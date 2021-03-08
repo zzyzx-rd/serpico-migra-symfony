@@ -260,4 +260,191 @@ $(function() {
         $('html, body').animate( { scrollTop: $(page).offset().top }, speed ); // Go
         return false;
     });
+
+
+    var l = Number($('.calendar-element').attr('data-l'));
+    var c = Number($('.calendar-element').attr('data-c'));
+
+    var calendarWidth = $('.calendar-holder').width();
+    var scale = calendarWidth / l;
+    function getPercentage(min,max){
+        var result = min / max;
+        return result * 100;
+    }
+
+    var sd = 0;
+
+
+    var actCurDate = $('.curDate');
+    actCurDate.each(function(i,e){
+      $(e).css({'left': Math.round(10000 * (c /l )) / 100 + '%' });
+    });
+
+    $.each($('.activity-component'), function (){
+        var $this = $(this);
+        pxWidthSD = 0;
+        pxWidthP = scale;
+        pctWidthSD = getPercentage(pxWidthSD, calendarWidth);
+        pctWidthP = getPercentage(pxWidthP, calendarWidth);
+
+        //$this.css({'margin-left': pctWidthSD + "%" });
+        //$this.css({'width': pctWidthP + "%" });
+
+        $this.find('.stage-element').each(function(){
+            var ssd = $(this).data("sd");
+            var p =  $(this).data("p");
+            sPctWidthSD = (ssd - sd) / l;
+            sPctWidthP = Math.max(3,(p + 1)) / (l + 1);
+    
+            $(this).css({'margin-left': Math.round(10000 * sPctWidthSD) / 100 + "%",
+            'width': Math.round(10000 * sPctWidthP) / 100 + "%",
+            'background' : ssd >= c ? '#5CD08F' : (ssd + p > c ? 'linear-gradient(to right, transparent, transparent ' + Math.round(10000 * (c - ssd) / p) / 100 + '%, #7942d0 '+ Math.round(10000 * (c - ssd) / p) / 100 +'%), repeating-linear-gradient(61deg, #7942d0, #7942d0 0.5rem, transparent 0.5px, transparent 1rem)' : 'gray'),
+            'height' : '7px',
+            'border-radius' : '0.3rem',  
+            });
+        });
+        
+        $this.find('.event').each(function(){
+            var sd = 0;
+            var p = l;
+            var ed = $(this).data("od");
+            var ep =  $(this).data("p");
+            
+            sPctWidthSD = (ed - sd) / p;
+            sPctWidthP = Math.max(3,(ep + 1)) / (p + 1);
+      
+            $(this).css({'margin-left': Math.round(10000 * sPctWidthSD) / 100 + "%",
+              'width': Math.max(1,Math.round(10000 * sPctWidthP) / 100) + "%",
+              'height' : '15px',
+              'border-radius' : '0.3rem',  
+            });
+
+        });
+    });
+
+    /*
+    $('.stages-holder').on('mouseenter',function(){
+        $(this).closest('.activity-holder').find('.act-info .fixed-action-btn').css('visibility','');
+    }).on('mouseleave',function(){
+      var $this = $(this);
+        var interval = setInterval(function(){
+          if(!$this.closest('.activity-holder').find('.act-info .fixed-action-btn').is(':hover')) {
+            $this.closest('.activity-holder').find('.act-info .fixed-action-btn').css('visibility','hidden');
+            clearInterval(interval);
+          }
+        },50);
+    })*/
+
+    $('.stages-holder').on('mouseover',function(){
+        var holderIndex = $('.stages-holder').index($(this));
+        const $fixedBtn = $('.act-elmt-info').find('.fixed-action-btn').eq(holderIndex);
+        $fixedBtn.css('visibility','');
+
+    }).on('mouseout',function(){
+        var holderIndex = $('.stages-holder').index($(this));
+        var interval = setInterval(function(){
+          if(!$('.act-elmt-info').find('.fixed-action-btn').eq(holderIndex).is(':hover')) {
+            $('.act-elmt-info').find('.fixed-action-btn').eq(holderIndex).css('visibility','hidden');
+            clearInterval(interval);
+          }
+        },50);
+    })
+
+    $('.act-info .fixed-action-btn').each(function(i,e){
+        const $fixedBtns = $('.act-info .fixed-action-btn');
+        $(e).css('top', Math.round(100 * ($fixedBtns.index($(this)) / $fixedBtns.length)) + '%');
+    });
+
+    
+    function CountDownTimer(dt, d, h, m, s)
+    {
+        var end = new Date(dt);
+
+        var _second = 1000;
+        var _minute = _second * 60;
+        var _hour = _minute * 60;
+        var _day = _hour * 24;
+        var timer;
+
+        function showRemaining() {
+            var now = new Date();
+            var distance = end - now;
+            if (distance < 0) {
+
+                clearInterval(timer);
+                document.getElementById(id).innerHTML = 'EXPIRED!';
+
+                return;
+            }
+            var days = Math.floor(distance / _day);
+            var hours = Math.floor((distance % _day) / _hour);
+            var minutes = Math.floor((distance % _hour) / _minute);
+            var seconds = Math.floor((distance % _minute) / _second);
+
+
+
+            document.getElementById(d).innerHTML = "";
+            document.getElementById(h).innerHTML = "";
+            document.getElementById(m).innerHTML = "";
+            document.getElementById(s).innerHTML = "";
+
+            document
+            .getElementById(d).innerHTML = days;
+            document.getElementById(h).innerHTML += hours;
+            document.getElementById(m).innerHTML += minutes;
+            document.getElementById(s).innerHTML += seconds;
+        }
+
+        timer = setInterval(showRemaining, 1000);
+    }
+    
+
+    function isEmail(email) {
+        var regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+        return regex.test(email);
+    }
+
+    $('.get-notified-launch-btn').on('click',function(){
+        var $this = $(this);
+        $('.error-email').remove();
+        if(isEmail($('[name="follower"]').val())){
+            $.post(sdurl,$this.closest('form').serialize())
+                .done(function(data){
+                    $('#subscribed').modal('open');
+                    $('[name="follower"]').empty();
+                })
+                .fail(function(data){
+                    console.log(data);
+                })
+        } else {
+            $('[name="follower"]').after('<div class="orange-text error-email">The email address is not correct, please type again</div>')
+        }
+    })
+
+   //CountDownTimer('10/11/2020 17:00:00','ct-d','ct-h','ct-m','ct-s');
+
+    if($(document).width() < 601){
+        $('#header .brand-logo img').attr('src','/lib/img/logo_dd_l.png');
+    }
+
+    var sg = getCookie("signup");
+    if (sg){
+        $('#sendMailPwdDef').modal('open');
+        eraseCookie('signup');
+    }
+
+    /*
+    if($('main').width() < 950){
+        $('.m-title > *').css('text-align','center').appendTo('.s-title');
+        $('.countdown-page > ul').css('flex-direction','column');
+        $('.macbook-with-dd img').css({
+            'margin-left' : 0,
+            'width' : '100%',
+        });
+        $('.cta-dd').css({
+            'max-width' : '100%',
+            'margin' : '0 5vw',
+            'text-align': 'center',
+        });
+    }*/
 });

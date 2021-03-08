@@ -2,6 +2,11 @@ twig:
     default_path: '%kernel.project_dir%/templates'
     globals:
         global: '@App\globalVar'
+        organizationM: '@App\Model\OrganizationM'
         activityM: '@App\Model\ActivityM'
-        freeAccessRoutes: '/fr'
+        userM: '@App\Model\UserM'
+        departmentM: '@App\Model\DepartmentM'
+        freeAccessRoutes: '/'
         userRepo: '@App\Repository\UserRepository'
+        eventTypeRepo: '@App\Repository\EventTypeRepository'
+        eventGroupRepo: '@App\Repository\EventGroupRepository'

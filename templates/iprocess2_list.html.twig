@@ -10,18 +10,18 @@
   {{ 'iprocesses.title'|trans }}
 {% endblock title %}
 
-{% set sortingType = app.request_stack.currentrequest.get('sortingType') %}
+{% set sortingType = global.request.get('sortingType') %}
 
 {% block css %}
   <link rel="stylesheet" href="{{ asset('css/iprocess_list.css') }}">
   <link rel="stylesheet" href="{{ asset('css/activity_list_item.css') }}">
   <script>
     var ipurl = "{{ url('getAllProcessesFromInstitution',{orgId : 0}) }}";
-    var gcurl = "{{ url('getElementConfig',{elmtType:'activity', elmtId : 0}) }}";
+    var gcurl = "{{ url('getElementConfig',{entity:'activity', elmtId : 0}) }}";
     var gsurl = "{{ url('getGradableStages',{actId : 0}) }}";
     var aurl = "{{ url('createUserProcessActivity', { inpId: 0 }) }}";
     var adurl = "{{ url('activityDelegate') }}";
-    var adeleteUrl="{{ url('ajaxActivityDelete',{'actId' : 0}) }}";
+    var adeleteUrl="{{ url('activityDelete',{'actId' : 0}) }}";
     var usurl= "{{ url('updateStageStatus',{stgId : 0}) }}";
   </script>
   <style>
@@ -428,7 +428,7 @@
                         <i class="material-icons">insert_link</i>
                         <span>${data.name}</span>
                       </a>
-                      ${data.canEdit ? '<a class="btn-flat tooltipped" href="{{ url("manageActivityElement",{elmtType:"iprocess", elmtId: "~" }) }}" data-position="top" data-tooltip="{% trans %}processes.modify_prior_launching_act{% endtrans %}"><i class="fa fa-cog"></i></a>' : ''}
+                      ${data.canEdit ? '<a class="btn-flat tooltipped" href="{{ url("manageActivityElement",{entity:"iprocess", elmtId: "~" }) }}" data-position="top" data-tooltip="{% trans %}processes.modify_prior_launching_act{% endtrans %}"><i class="fa fa-cog"></i></a>' : ''}
                     </div>`;
                   actIPInfoHmtl = actIPInfoHmtl.replace('~',eid);
                   const $actIPInfo = $(actIPInfoHmtl);
@@ -612,7 +612,7 @@
 
                     if(data.canEdit){
                       $btnElmt = $('<div class="button-field"></div>');
-                      editHtml = /*html*/`<a class="modal-close btn" href="{{ path('manageActivityElement', { elmtType: 'activity', elmtId: '~'}) }}">Modifier</a>`;
+                      editHtml = /*html*/`<a class="modal-close btn" href="{{ path('manageActivityElement', { entity: 'activity', elmtId: '~'}) }}">Modifier</a>`;
                       editHtml = editHtml.replace('~',data.id);
                       $btnElmt.append($(editHtml));
                       $('#activityInfo .action-buttons').append($btnElmt);
@@ -666,7 +666,8 @@
     });
 
   </script>
-  <script src="{{ asset('js/activity_manage.js') }}"></script>
+    <script src="{{ asset('js/moment.min.js') }}"></script>
+    <script src="{{ asset('js/activity_manage.js') }}"></script>
 {% endblock %}
 
 
@@ -757,8 +758,8 @@
         {% endfor %}
       </ul>
       <div class="row date" style="margin-right: 10%;margin-left: 10%">
-        <div class="col s6 dmin center">     </div>
-        <div class="col s6 dmax center">    </div>
+        <div class="col s6 dmin center">   <i class="fa fa-caret-left"></i>  </div>
+        <div class="col s6 dmax center">   <i class="fa fa-caret-right"></i> </div>
       </div>
       <div class="row">
       <div class="arrow ">
@@ -782,6 +783,7 @@
                 <div class="item-body">
                   <ul class=" activity-list">
                     {% for activity in orphanActivities[s] %}
+
                     {% if activity.getStartdate() <  date() %}
                     {% endif %}
 

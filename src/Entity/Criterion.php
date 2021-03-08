@@ -6,6 +6,7 @@ use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\CriterionRepository;
 use DateTime;
 use DateTimeInterface;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
@@ -51,7 +52,7 @@ class Criterion extends DbObject
     /**
      * @ORM\Column(name="cri_forceComment_compare", type="boolean", nullable=true)
      */
-    public $forceComment_compare;
+    public $forceCommentCompare;
 
     /**
      * @ORM\Column(name="cri_forceCommentValue", type="float", nullable=true)
@@ -61,7 +62,7 @@ class Criterion extends DbObject
     /**
      * @ORM\Column(name="cri_forceComment_sign", type="string", length=255, nullable=true)
      */
-    public $forceComment_sign;
+    public $forceCommentSign;
 
     /**
      * @ORM\Column(name="cri_lowerbound", type="float", nullable=true)
@@ -81,7 +82,7 @@ class Criterion extends DbObject
     /**
      * @ORM\Column(name="cri_grade_type", type="integer", nullable=true)
      */
-    public $grade_type;
+    public $gradeType;
 
     /**
      * @ORM\Column(name="cri_comment", type="string", length=255, nullable=true)
@@ -89,14 +90,15 @@ class Criterion extends DbObject
     public $comment;
 
     /**
-     * @ORM\Column(name="cri_created_by", type="integer", nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="criterionInitiatives")
+     * @JoinColumn(name="cri_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    public ?int $createdBy;
+    public ?User $initiator;
 
     /**
-     * @ORM\Column(name="cri_inserted", type="datetime", nullable=true)
+     * @ORM\Column(name="cri_inserted", type="datetime", nullable=false, options={"default": "CURRENT_TIMESTAMP"})
      */
-    public ?DateTime $inserted;
+    public DateTime $inserted;
 
     /**
      * @ORM\Column(name="cri_deleted", type="datetime", nullable=true)
@@ -108,6 +110,11 @@ class Criterion extends DbObject
      * @JoinColumn(name="stage_stg_id", referencedColumnName="stg_id",nullable=true)
      */
     protected $stage;
+    /**
+     * @ManyToOne(targetEntity="Output", inversedBy="criteria")
+     * @JoinColumn(name="output_out_id", referencedColumnName="otp_id",nullable=true)
+     */
+    protected $output;
 
     /**
      * @ManyToOne(targetEntity="Organization", inversedBy="criteria")
@@ -116,11 +123,10 @@ class Criterion extends DbObject
     protected $organization;
 
     /**
-     * @OneToMany(targetEntity="ActivityUser", mappedBy="criterion",cascade={"persist", "remove"}, orphanRemoval=true)
-     * @var Collection
+     * @OneToMany(targetEntity="Participation", mappedBy="criterion", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OrderBy({"leader" = "DESC"})
      */
-//     * @OrderBy({"leader" = "DESC"})
-    public $participants;
+    public $participations;
 
     /**
      * @ManyToOne(targetEntity="CriterionName")
@@ -159,31 +165,34 @@ class Criterion extends DbObject
      * @OneToMany(targetEntity="RankingTeamHistory", mappedBy="criterion",cascade={"persist", "remove"}, orphanRemoval=true)
      */
     public $historicalRankingTeams;
+    /**
+     * @OneToMany(targetEntity="ElementUpdate", mappedBy="criterion", cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    public $updates;
 
 
     /**
      * Criterion constructor.
      * @param $id
-     * @param $cri_complete
-     * @param $cri_type
-     * @param $cri_name
-     * @param $cri_weight
-     * @param $cri_forceComment_compare
-     * @param $cri_forceCommentValue
-     * @param $cri_forceComment_sign
-     * @param $cri_lowerbound
-     * @param $cri_upperbound
-     * @param $cri_step
-     * @param $cri_grade_type
-     * @param $cri_comment
-     * @param $cri_createdBy
-     * @param $cri_inserted
-     * @param $cri_deleted
+     * @param $complete
+     * @param $type
+     * @param $name
+     * @param $weight
+     * @param $forceCommentCompare
+     * @param $forceCommentValue
+     * @param $forceCommentSign
+     * @param $lowerbound
+     * @param $upperbound
+     * @param $step
+     * @param $gradeType
+     * @param $comment
+     * @param $deleted
      * @param $stage
+     * @param $output
      * @param $organization
-     * @param Collection $participants
      * @param $cName
      * @param $target
+     * @param $participations
      * @param $grades
      * @param $results
      * @param $resultTeams
@@ -195,64 +204,66 @@ class Criterion extends DbObject
      */
     public function __construct(
         $id = 0,
-        $cri_complete = false,
-        $cri_type = 1,
-        $cri_name = '',
-        $cri_weight = 1,
-        $cri_lowerbound = 0,
-        $cri_upperbound = 5,
-        $cri_step = 0.5,
-        $cri_forceComment_compare = null,
-        $cri_forceCommentValue = null,
-        $cri_forceComment_sign = null,
-        $cri_grade_type = 1,
-        $cri_comment = '',
-        $cri_createdBy = null,
-        $cri_inserted = null,
-        $cri_deleted = null,
+        $complete = false,
+        $type = 1,
+        $name = '',
+        $weight = 1,
+        $lowerbound = 0,
+        $upperbound = 5,
+        $step = 0.5,
+        $forceCommentCompare = null,
+        $forceCommentValue = null,
+        $forceCommentSign = null,
+        $gradeType = 1,
+        $comment = '',
+        $initiator = null,
+        $deleted = null,
         //TODO Gérer la création dans les controlleurs
         Stage $stage = null,
         Organization $organization = null,
-        Collection $participants = null,
-        $cName = null,
+        CriterionName $cName = null,
         $target = null,
+        $participations = null,
         $grades = null,
-        Result $results = null,
-        ResultTeam $resultTeams = null,
-        Ranking $rankings = null,
-        RankingTeam $rankingTeams = null,
-        RankingHistory $historicalRankings = null,
-        RankingTeamHistory $historicalRankingTeams = null,
+        $results = null,
+        $resultTeams = null,
+        $rankings = null,
+        $rankingTeams = null,
+        $historicalRankings = null,
+        $historicalRankingTeams = null,
+        Output $output = null,
         $template = null)
     {
-        parent::__construct($id, $cri_createdBy, $cri_inserted);
-        $this->complete = $cri_complete;
-        $this->type = $cri_type;
-        $this->name = $cri_name;
-        $this->weight = $cri_weight;
-        $this->forceComment_compare = $cri_forceComment_compare;
-        $this->forceCommentValue = $cri_forceCommentValue;
-        $this->forceComment_sign = $cri_forceComment_sign;
-        $this->lowerbound = $cri_lowerbound;
-        $this->upperbound = $cri_upperbound;
-        $this->step = $cri_step;
-        $this->grade_type = $cri_grade_type;
-        $this->comment = $cri_comment;
-        $this->createdBy = $cri_createdBy;
-        $this->inserted = $cri_inserted;
-        $this->deleted = $cri_deleted;
+        parent::__construct($id, null, new DateTime());
+        $this->complete = $complete;
+        $this->type = $type;
+        $this->name = $name;
+        $this->weight = $weight;
+        $this->forceCommentCompare = $forceCommentCompare;
+        $this->forceCommentValue = $forceCommentValue;
+        $this->forceCommentSign = $forceCommentSign;
+        $this->lowerbound = $lowerbound;
+        $this->upperbound = $upperbound;
+        $this->step = $step;
+        $this->gradeType = $gradeType;
+        $this->comment = $comment;
+        $this->initiator = $initiator;
+        $this->deleted = $deleted;
         $this->stage = $stage;
         $this->organization = $organization;
-        $this->participants = $participants;
+        $this->participations = $participations ?: new ArrayCollection;
+        $this->participants = $participations ?: new ArrayCollection;
         $this->cName = $cName;
         $this->target = $target;
-        $this->grades = $grades;
-        $this->results = $results;
-        $this->resultTeams = $resultTeams;
-        $this->rankings = $rankings;
-        $this->rankingTeams = $rankingTeams;
-        $this->historicalRankings = $historicalRankings;
-        $this->historicalRankingTeams = $historicalRankingTeams;
+        $this->grades = $grades ?: new ArrayCollection;
+        $this->results = $results ?: new ArrayCollection;
+        $this->resultTeams = $resultTeams ?: new ArrayCollection;
+        $this->rankings = $rankings ?: new ArrayCollection;
+        $this->rankingTeams = $rankingTeams ?: new ArrayCollection;
+        $this->historicalRankings = $historicalRankings ?: new ArrayCollection;
+        $this->historicalRankingTeams = $historicalRankingTeams ?: new ArrayCollection;
+        $this->updates = new ArrayCollection;
+        $this->output = $output;
         $this->template = $template;
     }
 
@@ -262,10 +273,9 @@ class Criterion extends DbObject
         return $this->complete;
     }
 
-    public function setComplete(bool $cri_complete): self
+    public function setComplete(bool $complete): self
     {
-        $this->complete = $cri_complete;
-
+        $this->complete = $complete;
         return $this;
     }
 
@@ -274,10 +284,9 @@ class Criterion extends DbObject
         return $this->type;
     }
 
-    public function setType(int $cri_type): self
+    public function setType(int $type): self
     {
-        $this->type = $cri_type;
-
+        $this->type = $type;
         return $this;
     }
 
@@ -286,10 +295,9 @@ class Criterion extends DbObject
         return $this->name;
     }
 
-    public function setName(string $cri_name): self
+    public function setName(string $name): self
     {
-        $this->name = $cri_name;
-
+        $this->name = $name;
         return $this;
     }
 
@@ -298,21 +306,20 @@ class Criterion extends DbObject
         return $this->weight;
     }
 
-    public function setWeight(float $cri_weight): self
+    public function setWeight(float $weight): self
     {
-        $this->weight = $cri_weight;
-
+        $this->weight = $weight;
         return $this;
     }
 
     public function getForceCommentCompare(): ?bool
     {
-        return $this->forceComment_compare;
+        return $this->forceCommentCompare;
     }
 
-    public function setForceCommentCompare(bool $cri_forceComment_compare): self
+    public function setForceCommentCompare(bool $forceCommentCompare): self
     {
-        $this->forceComment_compare = $cri_forceComment_compare;
+        $this->forceCommentCompare = $forceCommentCompare;
 
         return $this;
     }
@@ -322,22 +329,34 @@ class Criterion extends DbObject
         return $this->forceCommentValue;
     }
 
-    public function setForceCommentValue(?float $cri_forceCommentValue): self
+    public function setForceCommentValue(?float $forceCommentValue): self
     {
-        $this->forceCommentValue = $cri_forceCommentValue;
+        $this->forceCommentValue = $forceCommentValue;
 
         return $this;
     }
 
-    public function getForceCommentSign(): ?string
+
+
+    /**
+     * @param Output $output
+     */
+    public function setOutput(Output $output): void
     {
-        return $this->forceComment_sign;
+        $this->output = $output;
+
     }
 
-    public function setForceCommentSign(?string $cri_forceComment_sign): self
-    {
-        $this->forceComment_sign = $cri_forceComment_sign;
 
+
+    public function getForceCommentSign(): ?string
+    {
+        return $this->forceCommentSign;
+    }
+
+    public function setForceCommentSign(?string $forceCommentSign): self
+    {
+        $this->forceCommentSign = $forceCommentSign;
         return $this;
     }
 
@@ -346,10 +365,9 @@ class Criterion extends DbObject
         return $this->lowerbound;
     }
 
-    public function setLowerbound(?float $cri_lowerbound): self
+    public function setLowerbound(?float $lowerbound): self
     {
-        $this->lowerbound = $cri_lowerbound;
-
+        $this->lowerbound = $lowerbound;
         return $this;
     }
 
@@ -358,10 +376,9 @@ class Criterion extends DbObject
         return $this->upperbound;
     }
 
-    public function setUpperbound(?float $cri_upperbound): self
+    public function setUpperbound(?float $upperbound): self
     {
-        $this->upperbound = $cri_upperbound;
-
+        $this->upperbound = $upperbound;
         return $this;
     }
 
@@ -370,21 +387,20 @@ class Criterion extends DbObject
         return $this->step;
     }
 
-    public function setStep(?float $cri_step): self
+    public function setStep(?float $step): self
     {
-        $this->step = $cri_step;
-
+        $this->step = $step;
         return $this;
     }
 
     public function getGradeType(): ?int
     {
-        return $this->grade_type;
+        return $this->gradeType;
     }
 
-    public function setGradeType(int $cri_grade_type): self
+    public function setGradeType(int $gradeType): self
     {
-        $this->grade_type = $cri_grade_type;
+        $this->gradeType = $gradeType;
 
         return $this;
     }
@@ -394,17 +410,16 @@ class Criterion extends DbObject
         return $this->comment;
     }
 
-    public function setComment(string $cri_comment): self
+    public function setComment(?string $comment): self
     {
-        $this->comment = $cri_comment;
+        $this->comment = $comment;
 
         return $this;
     }
 
-    public function setInserted(?DateTimeInterface $cri_inserted): self
+    public function setInserted(?DateTimeInterface $inserted): self
     {
-        $this->inserted = $cri_inserted;
-
+        $this->inserted = $inserted;
         return $this;
     }
 
@@ -413,10 +428,9 @@ class Criterion extends DbObject
         return $this->deleted;
     }
 
-    public function setDeleted(?DateTimeInterface $cri_deleted): self
+    public function setDeleted(?DateTimeInterface $deleted): self
     {
-        $this->deleted = $cri_deleted;
-
+        $this->deleted = $deleted;
         return $this;
     }
 
@@ -431,9 +445,10 @@ class Criterion extends DbObject
     /**
      * @param mixed $stage
      */
-    public function setStage($stage): void
+    public function setStage($stage): self
     {
         $this->stage = $stage;
+        return $this;
     }
 
     /**
@@ -447,26 +462,20 @@ class Criterion extends DbObject
     /**
      * @param mixed $organization
      */
-    public function setOrganization($organization): void
+    public function setOrganization($organization): self
     {
         $this->organization = $organization;
+        return $this;
     }
 
     /**
-     * @return Collection
+     * @return ArrayCollection|Participation[]
      */
-    public function getParticipants(): Collection
+    public function getParticipations()
     {
-        return $this->participants;
+        return $this->participations;
     }
 
-    /**
-     * @param Collection $participants
-     */
-    public function setParticipants(Collection $participants): void
-    {
-        $this->participants = $participants;
-    }
 
     /**
      * @return mixed
@@ -501,7 +510,7 @@ class Criterion extends DbObject
     }
 
     /**
-     * @return mixed
+     * @return ArrayCollection|Grade[]
      */
     public function getGrades()
     {
@@ -509,15 +518,7 @@ class Criterion extends DbObject
     }
 
     /**
-     * @param mixed $grades
-     */
-    public function setGrades($grades): void
-    {
-        $this->grades = $grades;
-    }
-
-    /**
-     * @return mixed
+     * @return ArrayCollection|Result[]
      */
     public function getResults()
     {
@@ -525,15 +526,7 @@ class Criterion extends DbObject
     }
 
     /**
-     * @param mixed $results
-     */
-    public function setResults($results): void
-    {
-        $this->results = $results;
-    }
-
-    /**
-     * @return mixed
+     * @return ArrayCollection|ResultTeam[]
      */
     public function getResultTeams()
     {
@@ -541,27 +534,11 @@ class Criterion extends DbObject
     }
 
     /**
-     * @param mixed $resultTeams
-     */
-    public function setResultTeams($resultTeams): void
-    {
-        $this->resultTeams = $resultTeams;
-    }
-
-    /**
-     * @return mixed
+     * @return ArrayCollection|Ranking[]
      */
     public function getRankings()
     {
         return $this->rankings;
-    }
-
-    /**
-     * @param mixed $rankings
-     */
-    public function setRankings($rankings): void
-    {
-        $this->rankings = $rankings;
     }
 
     /**
@@ -573,14 +550,6 @@ class Criterion extends DbObject
     }
 
     /**
-     * @param mixed $rankingTeams
-     */
-    public function setRankingTeams($rankingTeams): void
-    {
-        $this->rankingTeams = $rankingTeams;
-    }
-
-    /**
      * @return mixed
      */
     public function getHistoricalRankings()
@@ -589,27 +558,11 @@ class Criterion extends DbObject
     }
 
     /**
-     * @param mixed $historicalRankings
-     */
-    public function setHistoricalRankings($historicalRankings): void
-    {
-        $this->historicalRankings = $historicalRankings;
-    }
-
-    /**
      * @return mixed
      */
     public function getHistoricalRankingTeams()
     {
         return $this->historicalRankingTeams;
-    }
-
-    /**
-     * @param mixed $historicalRankingTeams
-     */
-    public function setHistoricalRankingTeams($historicalRankingTeams): void
-    {
-        $this->historicalRankingTeams = $historicalRankingTeams;
     }
 
     /**
@@ -630,7 +583,6 @@ class Criterion extends DbObject
 
     public function addGrade(Grade $grade): Criterion
     {
-
         $this->grades->add($grade);
         $grade->setCriterion($this);
         return $this;
@@ -642,18 +594,18 @@ class Criterion extends DbObject
         return $this;
     }
 
-    public function addParticipant(ActivityUser $participant): Criterion
+    public function addParticipation(Participation $participation): Criterion
     {
-        $this->participants->add($participant);
-        $participant->setCriterion($this);
+        $this->participations->add($participation);
+        $participation->setCriterion($this);
         return $this;
     }
 
 
-    public function removeParticipant(ActivityUser $participant): Criterion
+    public function removeParticipation(Participation $participation): Criterion
     {
-        // Remove this participant
-        $this->participants->removeElement($participant);
+        // Remove this participation
+        $this->participations->removeElement($participation);
         return $this;
     }
 
@@ -670,7 +622,7 @@ class Criterion extends DbObject
         return $this;
     }
 
-    public function addRankings(Ranking $ranking): Criterion
+    public function addRanking(Ranking $ranking): Criterion
     {
         $this->rankings->add($ranking);
         $ranking->setActivity($this);
@@ -759,6 +711,43 @@ class Criterion extends DbObject
 
         return 0.7;
     }
+
+
+    public function setTargetValue($targetValue)
+    {
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getOutput()
+    {
+        return $this->output;
+    }
+
+    /**
+    * @return ArrayCollection|ElementUpdate[]
+    */
+    public function getUpdates()
+    {
+        return $this->updates;
+    }
+
+    public function addUpdate(ElementUpdate $update): Criterion
+    {
+        $this->updates->add($update);
+        $update->setCriterion($this);
+        return $this;
+    }
+
+    public function removeUpdate(ElementUpdate $update): Criterion
+    {
+        $this->updates->removeElement($update);
+        return $this;
+    }
+
+
 
     public function __toString()
     {

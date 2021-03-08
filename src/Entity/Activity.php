@@ -55,22 +55,12 @@ class Activity extends DbObject
     /**
      * @ORM\Column(name="act_name", type="string", length=255, nullable=true)
      */
-    public string $name;
+    public ?string $name;
 
     /**
      * @ORM\Column(name="act_visibility", type="string", length=255, nullable=true)
      */
     public string $visibility;
-
-    /**
-     * @ORM\Column(name="act_startDate", type="datetime", nullable=true)
-     */
-    public ?DateTime $startdate;
-
-    /**
-     * @ORM\Column(name="act_endDate", type="datetime", nullable=true)
-     */
-    public ?DateTime $enddate;
 
     /**
      * @ORM\Column(name="act_objectives", type="string", length=255, nullable=true)
@@ -134,24 +124,37 @@ class Activity extends DbObject
      */
     public $rankingTeams;
     /**
-     * @OneToMany(targetEntity="RankingHistory", mappedBy="activity",cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="RankingHistory", mappedBy="activity", cascade={"persist", "remove"}, orphanRemoval=true)
      */
     public $historicalRankings;
     /**
-     * @OneToMany(targetEntity="RankingTeamHistory", mappedBy="activity",cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="RankingTeamHistory", mappedBy="activity", cascade={"persist", "remove"}, orphanRemoval=true)
      */
     public $historicalRankingTeams;
+    /**
+     * @OneToMany(targetEntity="Mail", mappedBy="activity",cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    public $mails;
+    /**
+     * @OneToMany(targetEntity="ElementUpdate", mappedBy="activity",cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    public $updates;
 
     /**
-     * @OneToMany(targetEntity="ActivityUser", mappedBy="activity",cascade={"persist", "remove"}, orphanRemoval=true)
+     * @OneToMany(targetEntity="Participation", mappedBy="activity", cascade={"persist", "remove"}, orphanRemoval=true)
      * @OrderBy({"team" = "ASC"})
      */
-    public $participants;
+    public $participations;
+
     /**
-     * @Column(name="act_progress", type="float", nullable=false)
-     * @var float
+     * @OneToMany(targetEntity="Event", mappedBy="activity",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    protected float $progress;
+    public $events;
+
+    /**
+     * @Column(name="act_progress", type="integer", nullable=false)
+     */
+    protected ?int $progress;
     /**
      * @Column(name="act_isRewarding", type="boolean", nullable=true)
      * @var bool
@@ -173,15 +176,15 @@ class Activity extends DbObject
      */
     protected int $res_benefit_eff;
     /**
-     * @Column(name="act_created_by", type="integer", nullable=true)
-     * @var int
+     * @ManyToOne(targetEntity="User", inversedBy="activityInitiatives")
+     * @JoinColumn(name="act_initiator", referencedColumnName="usr_id", nullable=true)
      */
-    protected ?int $createdBy;
+    protected ?User $initiator;
     /**
-     * @Column(name="act_inserted", type="datetime", nullable=true)
+     * @Column(name="act_inserted", type="datetime", nullable=false, options={"default": "CURRENT_TIMESTAMP"})
      * @var DateTime
      */
-    protected ?DateTime $inserted;
+    protected DateTime $inserted;
     /**
      * @Column(name="act_saved", type="datetime", nullable=true)
      * @var DateTime
@@ -219,10 +222,10 @@ class Activity extends DbObject
     protected ?DateTime $archived;
 
     /**
-     * @ORM\ManyToOne(targetEntity=User::class)
-     * @ORM\JoinColumn(name="act_master_usr_id", referencedColumnName="usr_id", nullable=false)
+     * @ORM\OneToMany(targetEntity=UserMaster::class, mappedBy="activity", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ArrayCollection|UserMaster[]
      */
-    public ?User $masterUser;
+    private $userMasters;
 
     /**
      * @ORM\Column(type="boolean", nullable=true)
@@ -252,25 +255,22 @@ class Activity extends DbObject
 
     /**
      * Activity constructor.
-     * @param ?int$id
+     * @param int $id
      * @param int $magnitude
      * @param bool $complete
      * @param bool $simplified
      * @param string $name
      * @param string $visibility
-     * @param DateTime|null $startdate
-     * @param DateTime|null $enddate
      * @param bool $diffCriteria
      * @param bool $diffParticipants
      * @param int $nbParticipants
      * @param string $objectives
      * @param int|null $status
-     * @param float $progress
+     * @param int $progress
      * @param bool $isRewarding
      * @param float $distrAmount
      * @param int $res_inertia
      * @param int $res_benefit_eff
-     * @param int|null $createdBy
      * @param DateTime|null $deleted
      * @param DateTime|null $completed
      * @param DateTime|null $saved
@@ -280,25 +280,22 @@ class Activity extends DbObject
      * @param DateTime|null $archived
      */
     public function __construct(
-      ?int $id = 0,
+        int $id = 0,
         int $magnitude = 1,
         bool $complete = false,
         bool $simplified = true,
-        string $name = '',
+        ?string $name = null,
         string $visibility = 'public',
-        DateTime $startdate = null,
-        DateTime $enddate = null,
         bool $diffCriteria = false,
         bool $diffParticipants = false,
         int $nbParticipants = 0,
         string $objectives = '',
         int $status = null,
-        float $progress = 0.0,
+        int $progress = null,
         bool $isRewarding = false,
         float $distrAmount = 0.0,
         int $res_inertia = 0,
         int $res_benefit_eff = 0,
-        int $createdBy = null,
         DateTime $deleted = null,
         DateTime $completed = null,
         DateTime $saved = null,
@@ -307,14 +304,12 @@ class Activity extends DbObject
         DateTime $released = null,
         DateTime $archived = null
     ) {
-        parent::__construct($id, $createdBy, new DateTime);
+        parent::__construct($id, null, new DateTime());
         $this->magnitude = $magnitude;
         $this->complete = $complete;
         $this->simplified = $simplified;
         $this->name = $name;
         $this->visibility = $visibility;
-        $this->startdate = $startdate;
-        $this->enddate = $enddate;
         $this->diffCriteria = $diffCriteria;
         $this->diffParticipants = $diffParticipants;
         $this->nbParticipants = $nbParticipants;
@@ -333,7 +328,7 @@ class Activity extends DbObject
         $this->saved = $saved;
         $this->released = $released;
         $this->archived = $archived;
-        $this->participants = new ArrayCollection;
+        $this->participations = new ArrayCollection;
         $this->stages = new ArrayCollection;
         $this->decisions = new ArrayCollection;
         $this->projectResults = new ArrayCollection;
@@ -343,20 +338,9 @@ class Activity extends DbObject
         $this->resultTeams = new ArrayCollection;
         $this->rankingTeams = new ArrayCollection;
         $this->historicalRankingTeams = new ArrayCollection;
-        $this->createdBy = $createdBy;
-        $this->act_gEndDate = new DateTime('1990-01-01');
-        //TODO Set la date et autres dans les controlleurs
-        foreach ($this->stages as $stage) {
-            if ($stage->getGEnddate() > $this->act_gEnddate) {
-                $this->act_gEnddate = $stage->getGEnddate();
-            }
-        }
-        $this->act_gStartDate = new DateTime('2099-01-01');
-        foreach ($this->stages as $stage) {
-            if ($stage->getStartdate() <  $this->act_gStartDate) {
-                $this->act_gStartDate = $stage->getStartDate();
-            }
-        }
+        $this->mails = new ArrayCollection;
+        $this->updates = new ArrayCollection;
+        $this->userMasters = new ArrayCollection();
     }
 
     public function getComplete(): ?bool
@@ -401,7 +385,7 @@ class Activity extends DbObject
         return $this->name;
     }
 
-    public function setName(string $name): self
+    public function setName(?string $name): self
     {
         $this->name = $name;
 
@@ -416,25 +400,6 @@ class Activity extends DbObject
     public function setVisibility(string $visibility): self
     {
         $this->visibility = $visibility;
-
-        return $this;
-    }
-
-    public function getStartdate(): ?DateTimeInterface
-    {
-        return $this->startdate;
-    }
-
-    public function setStartdate(DateTimeInterface $startdate): self
-    {
-        $this->startdate = $startdate;
-
-        return $this;
-    }
-
-    public function setEnddate(DateTimeInterface $enddate): self
-    {
-        $this->enddate = $enddate;
 
         return $this;
     }
@@ -459,7 +424,28 @@ class Activity extends DbObject
     public function setStatus(int $status): self
     {
         $this->status = $status;
+        return $this;
+    }
 
+    /*public function getProgress(): ?int
+    {
+        return $this->progress;
+    }*/
+
+    public function getProgress(){
+        $minValue = 99;
+        foreach($this->stages as $key => $stage){
+            if($stage->getProgress() < $minValue){
+                $minValue = $stage->getProgress();
+            }
+        }
+        return $minValue;
+    }
+
+    
+    public function setProgress(int $progress): self
+    {
+        $this->progress = $progress;
         return $this;
     }
 
@@ -500,19 +486,11 @@ class Activity extends DbObject
     }
 
     /**
-     * @return mixed
+     * @return Stage[]|ArrayCollection
      */
     public function getStages()
     {
         return $this->stages;
-    }
-
-    /**
-     * @param mixed $stages
-     */
-    public function setStages($stages): void
-    {
-        $this->stages = $stages;
     }
 
     /**
@@ -676,35 +654,11 @@ class Activity extends DbObject
     }
 
     /**
-     * @return ActivityUser[]|ArrayCollection
+     * @return ArrayCollection|Participation[]
      */
-    public function getParticipants()
+    public function getParticipations()
     {
-        return $this->participants;
-    }
-
-    /**
-     * @param ActivityUser[]|ArrayCollection $participants
-     */
-    public function setParticipants($participants): void
-    {
-        $this->participants = $participants;
-    }
-
-    /**
-     * @return float
-     */
-    public function getProgress(): float
-    {
-        return $this->progress;
-    }
-
-    /**
-     * @param float $progress
-     */
-    public function setProgress(float $progress): void
-    {
-        $this->progress = $progress;
+        return $this->participations;
     }
 
     /**
@@ -771,10 +725,8 @@ class Activity extends DbObject
         $this->res_benefit_eff = $res_benefit_eff;
     }
 
-    /**
-     * @param DateTime $inserted
-     */
-    public function setInserted(DateTime $inserted): void
+
+    public function setInserted(?DateTimeInterface $inserted): void
     {
         $this->inserted = $inserted;
     }
@@ -893,18 +845,6 @@ class Activity extends DbObject
         $this->archived = $archived;
     }
 
-    public function getMasterUser(): ?User
-    {
-        return $this->masterUser;
-    }
-
-    public function setMasterUser(?User $master_usr): self
-    {
-        $this->masterUser = $master_usr;
-
-        return $this;
-    }
-
     public function getDiffCriteria(): ?bool
     {
         return $this->diffCriteria;
@@ -940,7 +880,8 @@ class Activity extends DbObject
 
         return $this;
     }
-    public function getStartdateDay(): int
+
+    public function getStartdate(): DateTime
     {
         $startDate = new DateTime('2099-01-01');
         foreach ($this->stages as $stage) {
@@ -948,33 +889,46 @@ class Activity extends DbObject
                 $startDate = $stage->getStartDate();
             }
         }
-        $year=$startDate->format('Y');
-        $month=$startDate->format('m');
-        $day=$startDate->format('d');
-        return (int) date("z",mktime("12","00","00",(int)$month,(int)$day,(int)$year));
+        return $startDate;
     }
-    public function getPeriod(): void
+
+    public function getStartdateU(): int
+    {
+        $startDate = new DateTime('2099-01-01');
+        foreach ($this->stages as $stage) {
+            if ($stage->getStartdate() < $startDate) {
+                $startDate = $stage->getStartDate();
+            }
+        }
+        return $startDate->format('U');
+    }
+    public function getPeriod()
     {
 
         $startDate = new DateTime('2099-01-01');
         $enddate = new DateTime('2000-01-01');
 
         foreach ($this->stages as $stage) {
+            if(!$stage->getEnddate()){
+                return null;
+            } else {
+                $stageEndDate = $stage->getEnddate();
+            }
+
             if ($stage->getStartdate() < $startDate) {
                 $startDate = $stage->getStartDate();
             }
-            if ($stage->getEnddate() > $enddate) {
-                $enddate = $stage->getEnddate();
+            if ($stageEndDate > $enddate) {
+                $enddate = $stageEndDate;
             }
         }
 
-        $diff = $startDate->diff($enddate)->format("%a");
-        echo $diff;
-
-
+        $sD = $startDate->format("U");
+        $sE = $enddate->format("U");
+        return $sE - $sD;
     }
 
-    public function getEnddate()
+    public function getEnddate(): DateTime
     {
         $endDate = new DateTime('2000-01-01');
         foreach ($this->getStages() as $stage) {
@@ -985,7 +939,7 @@ class Activity extends DbObject
         return $endDate;
     }
     /**
-     * @return Collection|Stage[]
+     * @return ArrayCollection|Stage[]
      */
     public function getActiveStages()
     {
@@ -1001,20 +955,21 @@ class Activity extends DbObject
 
     /**
      * @param User $u
-     * @return Collection|Stage[]
+     * @return ArrayCollection|Stage[]
      */
     public function getUserActiveGradableStages(User $u)
     {
         // We retrieve all stages where current user can grade
         return $this->getActiveStages()->filter(static function(Stage $s) use ($u){
-            $participations = $s->getUniqueIntParticipations();
-            return $participations && $participations->exists(static function(int $i, ActivityUser $p) use ($s, $u){
-                    return ($p->getUser() == $u) && ($s->getUniqueGradableParticipations()->count() > 0);
+            $s->currentUser = $u;
+            $participations = $s->getIntParticipants();
+            return $participations && $participations->exists(static function(int $i, Participation $p) use ($s, $u){
+                    return ($p->getUser() == $u) && ($s->getGradableParticipants()->count() > 0);
                 });
         });
     }
     /**
-     * @return Collection|Stage[]
+     * @return ArrayCollection|Stage[]
      */
     public function getActiveGradableStages()
     {
@@ -1035,18 +990,18 @@ class Activity extends DbObject
         });
     }
     /**
-     * @return Collection|Stage[]
+     * @return ArrayCollection|Stage[]
      */
     public function getOCompletedStages()
     {
         $stages = $this->stages;
         return $stages->filter(static function (Stage $stage) {
-            return $stage->getStatus() >= STAGE::STAGE_COMPLETED;
+            return $stage->getStatus() >= STAGE::STATUS_COMPLETED;
         });
     }
 
     /**
-     * @return Collection|Stage[]
+     * @return ArrayCollection|Stage[]
      */
     public function getPCompletedStages()
     {
@@ -1162,8 +1117,8 @@ class Activity extends DbObject
 
     public function hasParticipant(User $u)
     {
-        return $this->participants->exists(
-            static function (int $i, ActivityUser $p) use ($u) { return $p->getUser() == $u; }
+        return $this->participations->exists(
+            static function (int $i, Participation $p) use ($u) { return $p->getUser() == $u; }
         );
     }
 
@@ -1203,7 +1158,7 @@ class Activity extends DbObject
                     return false;
                 }
 
-                return $survey->getParticipants()->exists(static function (int $i, ActivityUser $p) use ($u) {
+                return $survey->getParticipants()->exists(static function (int $i, Participation $p) use ($u) {
                     if($p->getUser() === $u){
                         return $p->getStatus() == 2 || $p->getStatus() == 1;
                     }
@@ -1223,7 +1178,7 @@ class Activity extends DbObject
                     return false;
                 }
 
-                return $survey->getParticipants()->exists(function (int $i,ActivityUser $p) use ($u) {
+                return $survey->getParticipants()->exists(function (int $i,Participation $p) use ($u) {
                     if($p->getUser() === $u){
                         if($p->getStatus()!=2){
                             return false;
@@ -1296,7 +1251,7 @@ class Activity extends DbObject
         $department = $u->getDepartment();
         $departmentUsers = $department ? $department->getUsers() : [];
 
-        foreach ($this->participants as $p) {
+        foreach ($this->participations as $p) {
             if ($p->getType() != self::STATUS_FUTURE) {
                 if (in_array($p->getDirectUser(), $subordinates)) {
                     return true;
@@ -1317,8 +1272,8 @@ class Activity extends DbObject
             return $canSeeResults;
         }
 
-        return $canSeeResults && $this->participants->exists(
-                static function (int $i, ActivityUser $p) use ($u) { return $p->getUser() == $u && $p->isLeader(); }
+        return $canSeeResults && $this->participations->exists(
+                static function (int $i, Participation $p) use ($u) { return $p->getUser() == $u && $p->isLeader(); }
             );
     }
 
@@ -1345,7 +1300,7 @@ class Activity extends DbObject
         return $actIndependantUniqueParticipatingClients;
     }
 
-    public function addStage(Stage $stage): Activity
+    public function addStage(Stage $stage): self
     {
         $this->stages->add($stage);
         $stage->setActivity($this);
@@ -1355,6 +1310,19 @@ class Activity extends DbObject
     public function removeStage(Stage $stage): Activity
     {
         $this->stages->removeElement($stage);
+        return $this;
+    }
+
+    public function addParticipation(Participation $participation): self
+    {
+        $this->participations->add($participation);
+        $participation->setActivity($this);
+        return $this;
+    }
+
+    public function removeParticipation(Participation $participation): Activity
+    {
+        $this->participations->removeElement($participation);
         return $this;
     }
 
@@ -1389,7 +1357,7 @@ class Activity extends DbObject
 
 
     /**
-     * @return ArrayCollection
+     * @return ArrayCollection|Stage[]
      */
     public function getActiveModifiableStages()
     {
@@ -1405,6 +1373,198 @@ class Activity extends DbObject
             }
         }
         return $activeStages;
+    }
+
+    public function addActiveModifiableStage(Stage $stage)
+    {
+        if (!$stage->getActivity()) {
+            $this->stages->add($stage);
+            $stage->setActivity($this);
+        }
+        return $this;
+    }
+
+    public function removeActiveModifiableStage(Stage $stage)
+    {
+        $this->stages->removeElement($stage);
+        return $this;
+    }
+
+
+    /**
+     * @return Collection|Stage[]
+     */
+    public function getSortedStagesPerPeriod(){
+        
+        $array = $this->stages->getValues();
+        usort($array, function($first, $second)  {
+            return ($first->getEnddate()->getTimestamp() - $first->getStartdate()->getTimestamp() >= $second->getEnddate()->getTimestamp() - $second->getStartdate()->getTimestamp()) ? 1 : -1;
+        });
+        $orderedStages = new ArrayCollection($array);
+        return $orderedStages;
+    }
+
+
+    /**
+    * @return ArrayCollection|Event[]
+    */
+    public function getEvents()
+    {
+        return $this->events;
+    }
+
+    public function addEvent(Event $event): Activity
+    {
+        $this->events->add($event);
+        $event->setActivity($this);
+        return $this;
+    }
+
+    public function removeEvent(Event $event): Activity
+    {
+        $this->events->removeElement($event);
+        return $this;
+    }
+
+    public function addParticipant(Participation $participation): Activity
+    {
+        foreach($this->stages as $stage){
+            if (count($stage->getCriteria()) !== 0) {
+                foreach ($stage->criteria as $criterion) {
+                    $criterion->addParticipation($participation);
+                    $participation->setCriterion($criterion)->setStage($stage)->setActivity($this);
+                }
+            } else {            
+                $stage->addParticipation($participation);
+            }
+        }
+        return $this;
+    }
+
+    public function removeParticipant(Participation $participation): Activity
+    {
+        $participantUser = $participation->getUser();
+        $participantTeam = $participation->getTeam();
+        $participantExtUser = $participation->getExternalUser();
+        foreach ($this->participations as $theParticipant) {
+            if ($participantUser == $theParticipant->getUser() || ($participantTeam && $participantTeam == $theParticipant->getTeam()) || ($participantExtUser && $participantExtUser == $theParticipant->getExternalUser())) {
+                $this->removeParticipation($theParticipant);
+            }
+        }
+        return $this;
+    }
+
+    /**
+    * @return ArrayCollection|Mail[]
+    */
+    public function getMails()
+    {
+        return $this->mails;
+    }
+
+    public function addMail(Mail $mail): Activity
+    {
+        $this->mails->add($mail);
+        $mail->setActivity($this);
+        return $this;
+    }
+
+    public function removeMail(Mail $mail): Activity
+    {
+        $this->mails->removeElement($mail);
+        return $this;
+    }
+
+    /**
+    * @return ArrayCollection|ElementUpdate[]
+    */
+    public function getUpdates()
+    {
+        return $this->updates;
+    }
+
+    public function addUpdate(ElementUpdate $update): Activity
+    {
+        $this->updates->add($update);
+        $update->setActivity($this);
+        return $this;
+    }
+
+    public function removeUpdate(ElementUpdate $update): Activity
+    {
+        $this->updates->removeElement($update);
+        return $this;
+    }
+
+    /**
+    * @return ArrayCollection|UserMaster[]
+    */
+    public function getUserMasters()
+    {
+        return $this->userMasters;
+    }
+
+    public function addUserMaster(UserMaster $userMaster): self
+    {
+        $this->userMasters->add($userMaster);
+        $userMaster->setActivity($this);
+        return $this;
+    }
+
+    public function removeUserMaster(UserMaster $userMaster): self
+    {
+        $this->userMasters->removeElement($userMaster);
+        return $this;
+    }
+
+    /**
+    * @return ArrayCollection|Organization[]
+    */
+    public function getInvolvedOrganizations()
+    {
+        $allOrganizations = [];
+        foreach($this->stages as $stage){
+            $stageOrganizations = $stage->getParticipations()->map(fn(Participation $p) => $p->getUser()->getOrganization());
+            foreach($stageOrganizations as $stageOrganization){
+                $allOrganizations[] = $stageOrganization;
+            }
+        }
+        $allUniqueOrganizations = array_unique($allOrganizations);       
+        return $allUniqueOrganizations;
+    }
+
+    /**
+    * @return ArrayCollection|Organization[]
+    */
+    public function getInvolvedClientOrganizations()
+    {
+        $userClientOrganizations = $this->currentUser->getOrganization()->getClients()->map(fn(Client $c) => $c->getClientOrganization());
+        $clientOrganizations = new ArrayCollection();
+        foreach($this->stages as $stage){
+            $stageOrganizations = $stage->getParticipations()->map(fn(Participation $p) => $p->getUser()->getOrganization());
+            foreach($stageOrganizations as $stageOrganization){
+                if(!$clientOrganizations->contains($stageOrganization) && $userClientOrganizations->contains($stageOrganization)){
+                    $clientOrganizations->add($stageOrganization);
+                }
+            }
+        }       
+        return $clientOrganizations;
+    }
+
+    /**
+    * @return ArrayCollection|User[]
+    */
+    public function getRequesters()
+    {   
+        $requesters = new ArrayCollection();
+        foreach($this->getActiveStages() as $activeStage){
+            foreach($activeStage->getRequesters() as $requester){
+                if(!$requesters->contains($requester)){
+                    $requesters->add($requester);
+                }
+            }
+        }
+        return $requesters;
     }
 
 }

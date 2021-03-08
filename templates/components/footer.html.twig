@@ -1,0 +1,56 @@
+<footer>
+    <div id="linkFooter">
+        <div style="width:85%;margin:auto;">
+            <div class="row footer-row flex-center" style="margin-bottom:0">
+                <div class="col s12 m3 no-margin">
+                    <ul class="flex-center " style="justify-content: space-around;flex-direction:column">
+                        <li>
+                            <img src="{{ asset('lib/img/logo_dd_l.png') }}" alt="" style="width:140px">
+                        </li>
+                        {#<p class="grey-text text-lighten-4">ZZYZX Road</p>#}
+                        <li class="grey-text text-lighten-4">38, route d'Esch</li>
+                        <li class="grey-text text-lighten-4">L-1470 Luxembourg</li>
+                    </ul>
+                </div>
+                <div class="col s12 m6">
+                    <ul class="flex-center links-zone">
+                        <li class="linkedin">
+                            <a href="https://www.linkedin.com/company/dealdrive-client-operations-interactive-dualsided-dashboard" target="_blank">
+                                <img src="{{ asset('lib/img/linkedin-icon-white.png') }}">
+                            </a>
+                        </li>
+                        <li>
+                            <a href="http://www.made-in-luxembourg.lu/" target="_blank">
+                                <img src="{{ asset('lib/img/made_in_white.png') }}" style="width:67px">
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col s12 m3 white-text">
+                    <ul class="brand-tc-zone">
+                        <li style="margin-bottom:5px">
+                            <span>{{ 'powered_by'|trans }}</span>
+                            <i class="fa fa-road"></i>
+                            <span>ZZYZX Rd</span>
+                        </li>                        
+                        <li>
+                            <a href="{{ path('terms_conditions') }}" class="white-text">{% trans %}footer.tc{% endtrans %}</a>
+                        </li>        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+{% if not validatedCookieBanner %}
+    <div class="cookies-banner">
+        <div class="flex-center"> 
+        <div class="c-flex">
+            <span>{{'footer.cookies_banner_msg'|trans}}</span>
+            <a class="strong black-text" href="{{ url('cookie_policy') }}">{{'learn_more'|trans|capitalize}}</a>
+        </div>
+        <div class="btn">Ok</div>
+        </div>
+    </div>
+{% endif %}

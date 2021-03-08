@@ -1,6 +1,6 @@
 {% extends "layout.html.twig" %}
 
-{% if not isRoot %}
+{% if global.route == "manageIProcesses" %}
   {% set nbFields = 4 %}
   {% set collectionForm = form.parentValidatedInstitutionProcesses %}
   {% set elmtType = 'iprocess' %}
@@ -9,9 +9,6 @@
   {% set collectionForm = form.parentValidatedProcesses %}
   {% set elmtType = 'process' %}
 {% endif %}
-
-{% set orgId = app.request_stack.currentrequest.get('orgId') %}
-
 
 {% block title %}
   {% trans %}
@@ -25,13 +22,15 @@
     var upaurl = "{{ url('createUserProcessActivity',{inpId : 0}) }}";
     var cpurl = "{{ url('createProcessRequest',{orgId : 0}) }}";
     var dpurl = "{{ url('rejectProcessRequest') }}";
-    var vpurl = "{{ url('validateProcessRequest',{elmtType: currentuser.role == 4 ? 'process' : 'iprocess'}) }}";
-    var ipurl = "{{ url('getAllProcessesFromInstitution',{orgId : 0}) }}";
-    var orgId = "{{ currentuser.orgId }}";
-    const durl = "{{ url('deleteProcess',{orgId: orgId, elmtType : currentuser.role == 4 ? 'process' : 'iprocess'}) }}";
+    var vpurl = "{{ global.route =='manageIProcesses' ? url('validateIProcess',{elmtId: 0}) : url('validateProcess',{elmtId: 0}) }}";
+    var vrurl = "{{ global.route =='manageIProcesses' ? url('validateProcessRequest',{entity: global.route == 'manageIProcesses' ? 'iprocess' : 'process'}) }}";
+    var ipurl = "{{ global.route =='manageIProcesses' ? url('getIProcesses') : url('getProcesses') }}";
+    var purl = "{{ url('getProcesses') }}";
+    var orgId = "{{ currentuser.organization.id }}";
+    const durl = "{{ url('deleteProcess',{orgId: " + orgId + ", entity : global.route == 'manageIProcesses' ? 'iprocess' : 'process'}) }}";
 
     async function onAddProcessClick(selectId) {
-        const url = ipurl;
+        const url = purl;
         $concernedProcessSelect = (selectId  == -1) ? $('#requestNewProcess select') :  $('select.family-select').eq(selectId);
         $('.red-text').remove();
         const response = await fetch(url);
@@ -54,14 +53,15 @@
         $concernedProcessSelect.material_select();
     }
 
-    async function onAddParentClick(_institutionId, selectId) {
+    async function onAddParentClick(selectId) {
         const $this = $(this);
-        const url = ipurl.replace(0, _institutionId);
-        institutionId = _institutionId;
-        $concernedParentSelect =  (selectId  == -1) ? $('#validateProcess select') : $('select.parent-select').eq(selectId);
-        $initVal =  (selectId  == -1) ? $(event.target).data('pid') : $concernedParentSelect.val();
+        const url = ipurl;
+
+        $concernedParentSelect = (selectId  == -1) ? $('#validateProcess select') : $('select.parent-select').eq(selectId);
+        $initVal = (selectId  == -1) ? $(event.target).data('pid') : $concernedParentSelect.val();
         $('.red-text').remove();
-        const response = await fetch(url);
+        const $params = {selfId: $concernedParentSelect.closest('.element').find('[href="#deleteElement"]').data('eid') }
+        const response = await fetch(url, {method: 'POST', body: JSON.stringify($params)});
         const json = await response.json();
         newOptions = [];
         $.each(json.processes, function(key, process){
@@ -74,7 +74,7 @@
             })
         })
 
-        newOptions.unshift('<option value>({% trans %}processes.no_parent_heading{% endtrans %})</option>');
+        newOptions.unshift('<option value>({% trans %}processes.no_parent{% endtrans %})</option>');
         
         $concernedParentSelect.empty();
         $concernedParentSelect.html(newOptions.join(''));
@@ -145,9 +145,7 @@
         {% endtrans %}</h4>
     </div>
 
-    {% set k = -1 %}
-
-    <ul class="processes" data-prototype="{% filter escape %}{% include 'prototype_process.twig' with { 'item': collectionForm.vars.prototype, 'elmtType': elmtType, 'isRoot': isRoot, 'nbFields': nbFields } %}{% endfilter %}" style="margin-top:50px">
+    <ul class="processes" data-prototype="{% apply escape %}{% include 'prototype_process.twig' with { 'item': collectionForm.vars.prototype, 'elmtType': elmtType, 'isRoot': isRoot, 'nbFields': nbFields } %}{% endapply %}" style="margin-top:50px">
 
       {% if currentuser.organization.processes|length > 0 %}
         {% set pendingProcesses = currentuser.organization.pendingProcesses %}
@@ -184,263 +182,21 @@
               {% endif %}
             </a>
 
-            <a class="btn waves-green flex-center modal-trigger validate-btn" href="#validateProcess" style="margin-left: auto;" data-id="{{ pendingProcess.id }}" data-pid="{{ pendingProcess.parent ? pendingProcess.parent.id : 0 }}" data-type="{{pendingProcess.process is defined ? 'i' : 'p'}}" onclick="onAddParentClick('{{currentuser.role == 4 ? 0 : currentuser.orgId}}','-1')">
+            <a class="btn waves-green flex-center modal-trigger validate-btn" href="#validateProcess" style="margin-left: auto;" data-id="{{ pendingProcess.id }}" data-pid="{{ pendingProcess.parent ? pendingProcess.parent.id : 0 }}" data-type="{{pendingProcess.process is defined ? 'i' : 'p'}}" onclick="onAddParentClick('-1')">
               {{'pending_validation'|trans}}
               <i class="fa fa-gavel" style="margin-left: 5px;"></i>
             </a>
           </div>
         </li>
       {% endfor %}
-      
-      
+
+      {% set k = 0 %}
       {% for key, process in collectionForm %}
-
+        {% include "components/process__item.html.twig" with {entity: entity, process: process, k: k, order: 1} %}
         {% set k = k + 1 %}
-        <li class="element">
-          <div class="process-row flex-center-sb">
-            <div class="element-data element-name" style="font-size: 17px;">
-              {% if elmtType != 'process' and process.vars.data.process is not null %}
-                <div class="element-data element-process tooltipped" data-position="top" data-tooltip="{{ process.vars.data.process.name }}" data-delay="50" style="font-size: 17px">
-                  {{ process.vars.data.process.name|first|capitalize }}
-                </div>
-              {% else %}
-                <div class="element-data element-process tooltipped" data-position="top" data-tooltip="{% trans %}processes.unrelated{% endtrans %}" data-delay="50" style="font-size: 17px">
-                  ?
-                </div>
-              {% endif %}
-              
-              <span {% if not process.vars.data.gradable %}class="grey-text"{% endif %}>{{ process.vars.data.name }}</span>
-      
-              {% if not process.vars.data.gradable %}
-                <i class="material-icons tooltipped grey-text" style="margin-left: 5px;" data-position="top" data-tooltip="{% trans %}processes.non_gradable{% endtrans %}" data-delay="50">speaker_notes_off</i>
-              {% endif %}
-              </div>
-              <div class="input-field element-input" style="display: none;">
-                {{ form_widget(process.name) }}
-              </div>
-              <div class="element-input" style="display: none;">
-                {{ form_widget(process.gradable) }}
-                {{ form_label(process.gradable) }}
-              </div>
-              {% if not isRoot %}
-                <div class="element-input input-name input-field" style="display: none;">
-                  {{ form_widget(process.process) }}
-                  {{ form_label(process.process) }}
-                  <a class="modal-trigger" href="#requestNewProcess" onclick="onAddProcessClick('-1')"><i class="fas fa-plus"></i>{{ 'processes.request_btn'|trans }}</a>
-                </div>
-
-                <div class="element-data element-master-user" style="font-size: 17px">
-                  {% if process.vars.data.masterUser == null %}
-                    <em>({% trans %}processes.no_master_user{% endtrans %})</em>
-                  {% else %}
-                    {{ process.vars.data.masterUser.fullname }}
-                  {% endif %}
-                </div>
-                <div class="element-input input-field" style="display: none;">
-                  {{ form_widget(process.masterUser) }}
-                  {{ form_label(process.masterUser) }}
-                </div>
-              {% endif %}
-              <div class="element-input input-field" style="display: none;">
-                {{ form_widget(process.parent) }}
-                {{ form_label(process.parent) }}
-              </div>
-
-              
-              <div class="">
-                <ul class="flex-center">
-                  <li style="margin-left:auto;margin-right:10px">
-                    <a class="modify waves-effect waves-light btn-flat tooltipped" data-position="top" data-tooltip="{% trans %}processes.update{% endtrans %}" data-delay="50" onclick="onAddParentClick('{{ currentuser.orgId }}','{{k}}');onAddProcessClick('{{k}}')">
-                      <i class="fa fa-pencil-alt"></i>
-                    </a>
-                  </li>
-                  {% if process.vars.data.gradable %}
-                    <li style="margin-right:10px"> 
-                      <a class="validate waves-effect waves-light {% if process.vars.data.stages|length > 0 %}btn lime darken-3{% else %}btn-flat lime-text text-darken-3{% endif %} tooltipped" href="{{ url('manageActivityElement',{elmtType: elmtType, elmtId: process.vars.data.id}) }}" data-position="top" data-tooltip="{% trans %}processes.followup_settings{% endtrans %}" style="padding:0px 14px;display:flex;justify-content:center;width:75px">
-                        <i class="fa fa-users-cog"></i>
-                      </a>
-                    </li>
-                  {% endif %}
-                  <li>
-                    <a href="#deleteElement" class="waves-effect waves-light accent-4 btn-flat modal-trigger tooltipped" data-eid="{{ process.vars.data.id }}" data-position="top" data-tooltip="{% trans %}processes.delete_btn{% endtrans %}">
-                      <i class="fa fa-trash"></i>
-                    </a>
-                  </li>
-                </ul>
-              </div>
-          </div>
-
-          {% for child in process.validatedChildren %}
-
-          {% set k = k + 1 %}
-            <div class="process-row flex-center-sb child">
-              <div class="element-data element-name" style="font-size: 17px;">
-                {% if elmtType != 'process' and child.vars.data.process is not null %}
-                  <div class="element-data element-process tooltipped" data-position="top" data-tooltip="{{ child.vars.data.process.name }}" data-delay="50" style="font-size: 17px">
-                    {{ child.vars.data.process.name|first|capitalize }}
-                  </div>
-                {% else %}
-                  <div class="element-data element-process tooltipped" data-position="top" data-tooltip="{% trans %}processes.unrelated{% endtrans %}" data-delay="50" style="font-size: 17px">
-                    ?
-                  </div>
-                {% endif %}
-                <span {% if not child.vars.data.gradable %}class="grey-text"{% endif %}>{{ child.vars.data.name }}</span>
-                {% if child.vars.data.approvable is defined and child.vars.data.approvable %}
-                  <a class="btn-flat was-green flex-center">
-                    {{'pending_validation'|trans}}
-                    <i class="fa fa-gavel" style="margin-left: 5px;"></i>
-                  </a>
-                {% endif %}
-                {% if not child.vars.data.gradable %}
-                  <i class="material-icons tooltipped grey-text" style="margin-left: 5px;" data-position="top" data-tooltip="{% trans %}processes.non_gradable{% endtrans %}" data-delay="50">speaker_notes_off</i>
-                {% endif %}
-              </div>
-              <div class="input-field element-input " style="display: none;">
-                {{ form_widget(child.name) }}
-              </div>
-              <div class="element-input " style="display: none;">
-                {{ form_widget(child.gradable) }}
-                {{ form_label(child.gradable) }}
-              </div>
-              {% if not isRoot %}
-                <div class="element-data element-master-user" style="font-size: 17px">
-                  {% if child.vars.data.masterUser == null %}
-                    <em>({% trans %}processes.no_master_user{% endtrans %})</em>
-                  {% else %}
-                    {{ child.vars.data.masterUser.fullname }}
-                  {% endif %}
-                </div>
-                <div class="element-input input-field" style="display: none;">
-                  {{ form_widget(child.process) }}
-                  {{ form_label(child.process) }}
-                  <a class="modal-trigger" href="#requestNewProcess" onclick="onAddProcessClick('-1')"><i class="fas fa-plus"></i>{{ 'processes.request_btn'|trans }}</a>
-                </div>
-                <div class="element-input input-field" style="display: none;">
-                  {{ form_widget(child.masterUser) }}
-                  {{ form_label(child.masterUser) }}
-                </div>
-
-              {% endif %}
-              <div class="element-input input-field" style="display: none;">
-                {{ form_widget(child.parent) }}
-                {{ form_label(child.parent) }}
-              </div>
-
-              <div class="">
-                <ul class="flex-center">
-                  <li style="margin-left:auto;margin-right:10px">
-                    <a class="modify waves-effect waves-light btn-flat tooltipped" data-position="top" data-tooltip="{% trans %}processes.update{% endtrans %}" data-delay="50" onclick="onAddParentClick('{{ currentuser.orgId }}','{{k}}');onAddProcessClick('{{k}}')">
-                      <i class="fa fa-pencil-alt"></i>
-                    </a>
-                  </li>
-                  {% if child.vars.data.gradable %}  
-                    <li style="margin-right:10px">
-                      <a class="validate waves-effect waves-light {% if child.vars.data.stages|length > 0 %}btn lime darken-3{% else %}btn-flat lime-text text-darken-3{% endif %} tooltipped" href="{{ url('manageActivityElement',{elmtType: elmtType, elmtId: child.vars.data.id}) }}" data-position="top" data-tooltip="{% trans %}processes.followup_settings{% endtrans %}" style="padding:0px 14px;display:flex;justify-content:center;width:75px">
-                        <i class="fa fa-users-cog"></i>
-                      </a>
-                    </li>
-                  {% endif %}
-                  <li>
-                    <a href="#deleteElement" class="waves-effect waves-light accent-4 btn-flat modal-trigger tooltipped" data-eid="{{ child.vars.data.id }}" data-position="top" data-tooltip="{% trans %}processes.delete_btn{% endtrans %}">
-                      <i class="fa fa-trash"></i>
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            {% for subchild in child.validatedChildren %}
-
-              {% set k = k + 1 %}
-              <div class="process-row flex-center-sb subchild">
-                <div class="element-data element-name" style="font-size: 17px;">
-                  {% if elmtType != 'process' and subchild.vars.data.process is not null %}
-                    <div class="element-data element-process tooltipped" data-position="top" data-tooltip="{{ subchild.vars.data.process.name }}" data-delay="50" style="font-size: 17px">
-                      {{ subchild.vars.data.process.name|first|capitalize }}
-                    </div>
-                  {% else %}
-                    <div class="element-data element-process tooltipped" data-position="top" data-tooltip="{% trans %}processes.unrelated{% endtrans %}" data-delay="50" style="font-size: 17px">
-                      ?
-                    </div>
-                  {% endif %}
-                  <span {% if not subchild.vars.data.gradable %}class="grey-text"{% endif %}>{{ subchild.vars.data.name }}</span>
-                  {% if child.vars.data.approvable %}
-                    <a class="btn-flat was-green flex-center">
-                      {{'pending_validation'|trans}}
-                      <i class="fa fa-gavel" style="margin-left: 5px;"></i>
-                    </a>
-                  {% endif %}
-                  {% if not subchild.vars.data.gradable %}
-                    <i class="material-icons tooltipped grey-text" style="margin-left: 5px;" data-position="top" data-tooltip="{% trans %}processes.non_gradable{% endtrans %}" data-delay="50">speaker_notes_off</i>
-                  {% endif %}
-                </div>
-                <div class="input-field element-input" style="display: none;">
-                  {{ form_widget(subchild.name) }}
-                </div>
-                <div class="element-input" style="display: none;">
-                  {{ form_widget(subchild.gradable) }}
-                  {{ form_label(subchild.gradable) }}
-                </div>
-                {% if not isRoot %}
-                  <div class="element-data element-master-user" style="font-size: 17px">
-                    {% if subchild.vars.data.masterUser == null %}
-                      <em>
-                        <em>({% trans %}processes.no_master_user{% endtrans %})</em>
-                      </em>
-                    {% else %}
-                      {{ subchild.vars.data.masterUser.fullname }}
-                    {% endif %}
-                  </div>
-
-                  <div class="element-input input-field" style="display: none;">
-                    {{ form_widget(subchild.process) }}
-                    {{ form_label(subchild.process) }}
-                    <div>
-                      <a class="modal-trigger" href="#requestNewProcess" onclick="onAddProcessClick('-1')"><i class="fas fa-plus"></i>{{'processes.request_btn'|trans}}</a>
-                    </div>
-                  </div>
-                  <div class="element-input input-field" style="display: none;">
-                    {{ form_widget(subchild.masterUser) }}
-                    {{ form_label(subchild.masterUser) }}
-                  </div>
-                {% endif %}
-                <div class="element-input input-field" style="display: none;">
-                  {{ form_widget(subchild.parent) }}
-                  {{ form_label(subchild.parent) }}
-                </div>
-
-                <div class="">
-                  <ul class="flex-center">
-                    <li style="margin-left:auto;margin-right:10px">
-                      <a class="modify waves-effect waves-light btn-flat tooltipped" data-position="top" data-tooltip="{% trans %}processes.update{% endtrans %}" data-delay="50" onclick="onAddParentClick('{{ currentuser.orgId }}','{{k}}');onAddProcessClick('{{k}}')">
-                        <i class="fa fa-pencil-alt"></i>
-                      </a>
-                    </li>
-                    {% if subchild.vars.data.gradable %}
-                      <li style="margin-right:10px">
-                        <a class="validate waves-effect waves-light {% if subchild.vars.data.stages|length > 0 %}btn lime darken-3{% else %}btn-flat lime-text text-darken-3{% endif %} tooltipped" href="{{ url('manageActivityElement',{elmtType: elmtType, elmtId: subchild.vars.data.id}) }}" data-position="top" data-tooltip="{% trans %}processes.followup_settings{% endtrans %}" style="padding:0px 14px;display:flex;justify-content:center;width:75px">
-                          <i class="fa fa-users-cog"></i>
-                          {#}
-                          {% if subchild.vars.data.stages|length > 0 %}
-                            <span style="margin-left:3px">{{ subchild.vars.data.stages.first.criteria|length }}</span>
-                          {% endif %}
-                          #}
-                        </a>
-                      </li>
-                    {% endif %}
-                    <li>
-                      <a href="#deleteElement" class="waves-effect waves-light accent-4 btn-flat modal-trigger tooltipped" data-eid="{{ subchild.vars.data.id }}" data-position="top" data-tooltip="{% trans %}processes.delete_btn{% endtrans %}">
-                        <i class="fa fa-trash"></i>
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            {% endfor %}
-          {% endfor %}
-        {% endfor %}
-      </li>
+      {% endfor %}
     </ul>
+
     <a class="btn waves-effect waves-light insert-btn">
       <i class="fa fa-plus-circle"></i>
       <span>{% trans %}processes.add_button{% endtrans %}</span>
@@ -532,7 +288,6 @@
 </div></div>{% endblock %}
 
 {% block javascripts %}
-  <script src="{{ asset('js/login.js') }}"></script>
   <script src="{{ asset('js/processes.js') }}"></script>
   {#<script src="{{ asset('js/institutions.js') }}"></script>#}
   <script>

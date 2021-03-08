@@ -1,0 +1,217 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}
+    {{'pricing.page_title'|trans}}
+{% endblock %}
+
+{% block mobile_title %}
+    {{'pricing.page_title'|trans}}
+{% endblock %}
+
+{% block pagename %}
+    {{'pricing.page_title'|trans}}
+{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="{{ asset('css/footer.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/nouislider.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/pricing_table.css') }}">
+  <style>
+      .period-year{
+          display: none;
+      }
+
+      .content {
+        text-align: center;
+        margin-bottom: auto;
+        margin-top: auto;
+      }
+
+      .cta-table-bottom{
+        width: 80%;
+        margin-left:auto;
+        margin-right: auto;
+      }
+
+      .free-plan-icon{
+        color: green;
+      }
+
+      .premium-plan-icon{
+        color: darkblue;
+      }
+
+      .enterprise-plan-icon{
+        color: darkgoldenrod;
+      }
+
+      .pricing-notes{
+        width:80%;
+        margin:auto;
+      }
+      .noUi-connect {
+          background: #55318e;
+      }
+
+      @media screen and (min-width: 601px) {
+        thead th:first-of-type, tr td:first-of-type, .cta-table-bottom span{
+          padding-left: 2rem;
+        }
+
+        .feature-title{
+          left: 2rem;
+        }
+
+        .free-month{
+          position: absolute;
+          top: -4rem;
+          transform: rotateZ(45deg);
+          font-size: 69px;
+          left: 2.2rem;
+          display: none;
+        }
+        .free-month-logo-content{
+            background-color: white;
+            border-radius: 50%;
+            font-family: 'Poppins';
+            position: absolute;
+            left: 0.2rem;
+            top: 0.2rem;
+            transform: rotateZ(-45deg);
+            width: 3rem;
+            height: 3rem;
+            padding: 0.6rem;
+        }
+        .free-month-number{
+            font-size: 44px;
+            color: #ff9300;
+            transform: rotateX(50deg);
+            position: absolute;
+        }
+        .free-month-promotion{
+            font-size: 24px;
+            color: #ff9300;
+            position: absolute;
+            left: 4rem;
+            text-align: left;
+        }
+
+      }
+
+      @media screen and (max-width: 600px){
+        
+        .cta-table-bottom{
+          flex-direction:column;
+        }
+
+        .free-month{
+          position: absolute;
+          top: -4rem;
+          transform: rotateZ(-45deg);
+          font-size: 69px;
+          left: -2.2rem;
+          display: none;
+        }
+
+        .free-month-logo-content{
+            background-color: white;
+            border-radius: 50%;
+            font-family: 'Poppins';
+            position: absolute;
+            left: 0.2rem;
+            top: 0.2rem;
+            transform: rotateZ(45deg);
+            width: 3rem;
+            height: 3rem;
+            padding: 0.6rem;
+        }
+
+        .free-month-number{
+            font-size: 44px;
+            color: #ff9300;
+            left:-13.5rem;
+            transform: rotateX(50deg);
+            position: absolute;
+            background-color: white;
+            border: 7px solid darkblue;
+            border-right: none;
+            border-bottom-left-radius: 10px;
+            border-top-left-radius: 10px;
+            padding: 11px 8px;
+            padding-right: 16px;
+        }
+
+        .free-month-promotion{
+            font-size: 24px;
+            width:167px;
+            color: #ff9300;
+            position: absolute;
+            left: -10rem;
+            text-align: left;
+            background-color: white;
+            border: 5px solid darkblue;
+            border-right: none;
+            border-left: none;
+            border-radius: 4px;
+            padding: 9px 0;
+        }
+       
+      }
+
+       
+
+  </style>
+
+{% endblock %}
+
+{% block content %}
+    <main>
+      <section>
+        <h4 class="center">{{'pricing.header_title'|trans|raw}}</h4>
+      </section>
+
+      <section class="pricing-table-section">
+          {% include "components/pricing_table.html.twig" with {isDiscountMsgSagByDove: true, planDetailsHidden: false} %}
+          <ul class="cta-table-bottom flex-center-sb">
+            <span class="dd-text strong">{{'pricing.start_now'|trans}}</span>
+            <a class="btn waves-effect waves-light" href="{{ path('signup')}}">{{ 'pricing.trial_21_days_cta'|trans }}</a>
+          </ul>
+      </section>
+
+      <div class="pricing-notes">
+        <h6 class="dd-text">{{ 'pricing.subscriptions'|trans }}</h6>
+        <p class="no-margin">
+          <sup class="dd-text">1</sup>
+          <span>{{'pricing.note_1'|trans|raw}}</span>
+        </p>
+      </div>
+    </main>
+
+    {% include "components/footer.html.twig" with {validatedCookieBanner: validatedCookieBanner} %}
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('js/nouislider.js') }}"></script>
+    <script src="{{ asset('js/base.js') }}"></script>
+    <script src="{{ asset('js/pricing_manage.js') }}"></script>
+    <script type="text/javascript">
+
+      noUiSlider.create($('.user-slider')[0], {
+          start: [1],
+          connect: [true, false],
+          /*
+          range: {
+              'min': [1,1],
+              '30%': [10,1],
+              '50%': [50,10],
+              '75%': [250,50],
+              'max': [1000]
+          }*/
+          range: {
+              'min': 1,
+              'max': 50,
+          },
+          step: 1
+    })
+    </script>
+{% endblock %}
